@@ -55,7 +55,7 @@ func TestNextToken(t *testing.T) {
 		{token.CLASS, "class"},
 		{token.CONSTANT, "Person"},
 		{token.LBRACE, "{"},
-		{token.METHOD, "def"},
+		{token.DEF, "def"},
 		{token.IDENT, "add"},
 		{token.LPAREN, "("},
 		{token.IDENT, "x"},

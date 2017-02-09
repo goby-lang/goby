@@ -69,6 +69,38 @@ func (ls *LetStatement) String() string {
 	return out.String()
 }
 
+type DefStatement struct {
+	Token          token.Token
+	Name           *Identifier
+	Parameters     []*Identifier
+	BlockStatement *BlockStatement
+}
+
+func (ds *DefStatement) statementNode() {}
+func (ds *DefStatement) TokenLiteral() string {
+	return ds.Token.Literal
+}
+func (ds *DefStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("fn")
+	out.WriteString("(")
+
+	for i, param := range ds.Parameters {
+		out.WriteString(param.String())
+		if i != len(ds.Parameters)-1 {
+			out.WriteString(", ")
+		}
+	}
+
+	out.WriteString(") ")
+	out.WriteString("{ ")
+	out.WriteString(ds.BlockStatement.String())
+	out.WriteString(" }")
+
+	return out.String()
+}
+
 type Identifier struct {
 	Token token.Token
 	Value string
@@ -269,37 +301,6 @@ func (bs *BlockStatement) String() string {
 	for _, stmt := range bs.Statements {
 		out.WriteString(stmt.String())
 	}
-
-	return out.String()
-}
-
-type MethodExpression struct {
-	Token          token.Token
-	Parameters     []*Identifier
-	BlockStatement *BlockStatement
-}
-
-func (me *MethodExpression) expressionNode() {}
-func (me *MethodExpression) TokenLiteral() string {
-	return me.Token.Literal
-}
-func (me *MethodExpression) String() string {
-	var out bytes.Buffer
-
-	out.WriteString("fn")
-	out.WriteString("(")
-
-	for i, param := range me.Parameters {
-		out.WriteString(param.String())
-		if i != len(me.Parameters)-1 {
-			out.WriteString(", ")
-		}
-	}
-
-	out.WriteString(") ")
-	out.WriteString("{ ")
-	out.WriteString(me.BlockStatement.String())
-	out.WriteString(" }")
 
 	return out.String()
 }
