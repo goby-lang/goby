@@ -2,7 +2,6 @@ package ast
 
 import (
 	"bytes"
-	"github.com/st0012/monkey/ast"
 	"github.com/st0012/rooby/token"
 	"strings"
 )
@@ -307,8 +306,7 @@ func (bs *BlockStatement) String() string {
 
 type CallExpression struct {
 	Token     token.Token
-	Receiver  Expression // Person.new.greet (another call expression) or p.greet (identifier)
-	Name      *ast.Identifier
+	Method    *Identifier
 	Arguments []Expression
 }
 
@@ -319,9 +317,7 @@ func (ce *CallExpression) TokenLiteral() string {
 func (ce *CallExpression) String() string {
 	var out bytes.Buffer
 
-	out.WriteString(ce.Receiver.String())
-	out.WriteString(".")
-	out.WriteString(ce.Name.String())
+	out.WriteString(ce.Method.String())
 
 	var args = []string{}
 	for _, arg := range ce.Arguments {

@@ -464,47 +464,31 @@ func TestMethodParameterParsing(t *testing.T) {
 	}
 }
 
-//func TestCallExpression(t *testing.T) {
-//	input := `add(1, 2 * 3, 4 + 5, fn(x, y) { return x + y; });`
-//
-//	l := lexer.New(input)
-//	p := New(l)
-//	program := p.ParseProgram()
-//	checkParserErrors(t, p)
-//
-//	stmt := program.Statements[0].(*ast.ExpressionStatement)
-//	callExpression := stmt.Expression.(*ast.CallExpression)
-//
-//	if !testIdentifier(t, callExpression.Function, "add") {
-//		return
-//	}
-//
-//	if len(callExpression.Arguments) != 4 {
-//		t.Fatalf("expect %d arguments. got=%d", 4, len(callExpression.Arguments))
-//	}
-//
-//	testIntegerLiteral(t, callExpression.Arguments[0], 1)
-//	testInfixExpression(t, callExpression.Arguments[1], 2, "*", 3)
-//	testInfixExpression(t, callExpression.Arguments[2], 4, "+", 5)
-//
-//	// test function arguments
-//	function, ok := callExpression.Arguments[3].(*ast.FunctionExpression)
-//
-//	if !ok {
-//		t.Errorf("expect fouth argument to be a function expression. got=%T", callExpression.Arguments[3])
-//	}
-//
-//	testIdentifier(t, function.Parameters[0], "x")
-//	testIdentifier(t, function.Parameters[1], "y")
-//
-//	returnStmt, ok := function.BlockStatement.Statements[0].(*ast.ReturnStatement)
-//
-//	if !ok {
-//		t.Errorf("expect function expression's body to be an ReturnStatement. got=%T", function.BlockStatement.Statements[0])
-//	}
-//
-//	testInfixExpression(t, returnStmt.ReturnValue, "x", "+", "y")
-//}
+func TestCallExpression(t *testing.T) {
+	input := `
+		add(1, 2 * 3, 4 + 5);
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	callExpression := stmt.Expression.(*ast.CallExpression)
+
+	if !testIdentifier(t, callExpression.Method, "add") {
+		return
+	}
+
+	if len(callExpression.Arguments) != 3 {
+		t.Fatalf("expect %d arguments. got=%d", 3, len(callExpression.Arguments))
+	}
+
+	testIntegerLiteral(t, callExpression.Arguments[0], 1)
+	testInfixExpression(t, callExpression.Arguments[1], 2, "*", 3)
+	testInfixExpression(t, callExpression.Arguments[2], 4, "+", 5)
+}
 
 func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 	if s.TokenLiteral() != "let" {

@@ -153,53 +153,35 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	return ie
 }
 
-//func (p *Parser) parseFunctionExpression() ast.Expression {
-//	fe := &ast.FunctionExpression{Token: p.curToken}
-//
-//	if !p.expectPeek(token.LPAREN) {
-//		return nil
-//	}
-//
-//	fe.Parameters = p.parseParameters()
-//
-//	if !p.expectPeek(token.LBRACE) {
-//		return nil
-//	}
-//
-//	fe.BlockStatement = p.parseBlockStatement()
-//
-//	return fe
-//}
+func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
+	exp := &ast.CallExpression{Token: p.curToken, Method: function.(*ast.Identifier)}
+	exp.Arguments = p.parseCallArguments()
+	return exp
+}
 
-//func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
-//	exp := &ast.CallExpression{Token: p.curToken, Function: function}
-//	exp.Arguments = p.parseCallArguments()
-//	return exp
-//}
+func (p *Parser) parseCallArguments() []ast.Expression {
+	args := []ast.Expression{}
 
-//func (p *Parser) parseCallArguments() []ast.Expression {
-//	args := []ast.Expression{}
-//
-//	if p.peekTokenIs(token.RPAREN) {
-//		p.nextToken() // ')'
-//		return args
-//	}
-//
-//	p.nextToken() // start of first expression
-//	args = append(args, p.parseExpression(LOWEST))
-//
-//	for p.peekTokenIs(token.COMMA) {
-//		p.nextToken() // ","
-//		p.nextToken() // start of next expression
-//		args = append(args, p.parseExpression(LOWEST))
-//	}
-//
-//	if !p.expectPeek(token.RPAREN) {
-//		return nil
-//	}
-//
-//	return args
-//}
+	if p.peekTokenIs(token.RPAREN) {
+		p.nextToken() // ')'
+		return args
+	}
+
+	p.nextToken() // start of first expression
+	args = append(args, p.parseExpression(LOWEST))
+
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken() // ","
+		p.nextToken() // start of next expression
+		args = append(args, p.parseExpression(LOWEST))
+	}
+
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+
+	return args
+}
 
 func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	// curToken is {

@@ -58,6 +58,6 @@ func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
 }
 
 func (p *Parser) noPrefixParseFnError(t token.TokenType) {
-	msg := fmt.Sprintf("no prefix function for %s.", t)
+	msg := fmt.Sprintf("no prefix function for %s", t)
 	p.errors = append(p.errors, msg)
 }
