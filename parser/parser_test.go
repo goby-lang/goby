@@ -6,6 +6,7 @@ import (
 	//"github.com/st0012/rooby/token"
 	"github.com/st0012/rooby/ast"
 	"testing"
+	"github.com/st0012/rooby/token"
 )
 
 func TestLetStatement(t *testing.T) {
@@ -410,28 +411,31 @@ func TestIfExpression(t *testing.T) {
 	}
 }
 
-//func TestFunctionExpression(t *testing.T) {
-//	input := `fn(x, y) { x + y };`
-//
-//	l := lexer.New(input)
-//	p := New(l)
-//	program := p.ParseProgram()
-//	checkParserErrors(t, p)
-//
-//	stmt := program.Statements[0].(*ast.ExpressionStatement)
-//	expression := stmt.Expression.(*ast.FunctionExpression)
-//
-//	if expression.Token.Type != token.FUCTION {
-//		t.Fatalf("expect function expression's token to be 'FUNCTION'. got=%T", expression.Token.Type)
-//	}
-//
-//	testLiteralExpression(t, expression.Parameters[0], "x")
-//	testLiteralExpression(t, expression.Parameters[1], "y")
-//
-//	expressionStmt := expression.BlockStatement.Statements[0].(*ast.ExpressionStatement)
-//
-//	testInfixExpression(t, expressionStmt.Expression, "x", "+", "y")
-//}
+func TestDefStatement(t *testing.T) {
+	input := `
+		def add(x, y) {
+			x + y
+		}
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt := program.Statements[0].(*ast.DefStatement)
+
+	if stmt.Token.Type != token.DEF {
+		t.Fatalf("expect DefStatement's token to be 'DEF'. got=%T", stmt.Token.Type)
+	}
+
+	testLiteralExpression(t, stmt.Parameters[0], "x")
+	testLiteralExpression(t, stmt.Parameters[1], "y")
+
+	expressionStmt := stmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
+
+	testInfixExpression(t, expressionStmt.Expression, "x", "+", "y")
+}
 
 func TestMethodParameterParsing(t *testing.T) {
 	tests := []struct {
