@@ -2,8 +2,8 @@ package parser
 
 import (
 	"fmt"
-	"github.com/st0012/monkey/ast"
-	"github.com/st0012/monkey/token"
+	"github.com/st0012/rooby/ast"
+	"github.com/st0012/rooby/token"
 	"strconv"
 )
 
@@ -57,6 +57,10 @@ func (p *Parser) parseExpression(precendence int) ast.Expression {
 
 func (p *Parser) parseIdentifier() ast.Expression {
 	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+}
+
+func (p *Parser) parseConstant() ast.Expression {
+	return &ast.Constant{Token: p.curToken, Value: p.curToken.Literal}
 }
 
 func (p *Parser) parseIntegerLiteral() ast.Expression {
@@ -149,80 +153,80 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	return ie
 }
 
-func (p *Parser) parseFunctionExpression() ast.Expression {
-	fe := &ast.FunctionExpression{Token: p.curToken}
+//func (p *Parser) parseFunctionExpression() ast.Expression {
+//	fe := &ast.FunctionExpression{Token: p.curToken}
+//
+//	if !p.expectPeek(token.LPAREN) {
+//		return nil
+//	}
+//
+//	fe.Parameters = p.parseParameters()
+//
+//	if !p.expectPeek(token.LBRACE) {
+//		return nil
+//	}
+//
+//	fe.BlockStatement = p.parseBlockStatement()
+//
+//	return fe
+//}
 
-	if !p.expectPeek(token.LPAREN) {
-		return nil
-	}
+//func (p *Parser) parseParameters() []*ast.Identifier {
+//	identifiers := []*ast.Identifier{}
+//
+//	if p.peekTokenIs(token.RPAREN) {
+//		p.nextToken()
+//		return identifiers
+//	} // empty params
+//
+//	p.nextToken()
+//
+//	ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+//	identifiers = append(identifiers, ident)
+//
+//	for p.peekTokenIs(token.COMMA) {
+//		p.nextToken()
+//		p.nextToken()
+//		identifier := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+//		identifiers = append(identifiers, identifier)
+//	}
+//
+//	if !p.expectPeek(token.RPAREN) {
+//		return nil
+//	}
+//
+//	return identifiers
+//}
 
-	fe.Parameters = p.parseParameters()
+//func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
+//	exp := &ast.CallExpression{Token: p.curToken, Function: function}
+//	exp.Arguments = p.parseCallArguments()
+//	return exp
+//}
 
-	if !p.expectPeek(token.LBRACE) {
-		return nil
-	}
-
-	fe.BlockStatement = p.parseBlockStatement()
-
-	return fe
-}
-
-func (p *Parser) parseParameters() []*ast.Identifier {
-	identifiers := []*ast.Identifier{}
-
-	if p.peekTokenIs(token.RPAREN) {
-		p.nextToken()
-		return identifiers
-	} // empty params
-
-	p.nextToken()
-
-	ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-	identifiers = append(identifiers, ident)
-
-	for p.peekTokenIs(token.COMMA) {
-		p.nextToken()
-		p.nextToken()
-		identifier := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-		identifiers = append(identifiers, identifier)
-	}
-
-	if !p.expectPeek(token.RPAREN) {
-		return nil
-	}
-
-	return identifiers
-}
-
-func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
-	exp := &ast.CallExpression{Token: p.curToken, Function: function}
-	exp.Arguments = p.parseCallArguments()
-	return exp
-}
-
-func (p *Parser) parseCallArguments() []ast.Expression {
-	args := []ast.Expression{}
-
-	if p.peekTokenIs(token.RPAREN) {
-		p.nextToken() // ')'
-		return args
-	}
-
-	p.nextToken() // start of first expression
-	args = append(args, p.parseExpression(LOWEST))
-
-	for p.peekTokenIs(token.COMMA) {
-		p.nextToken() // ","
-		p.nextToken() // start of next expression
-		args = append(args, p.parseExpression(LOWEST))
-	}
-
-	if !p.expectPeek(token.RPAREN) {
-		return nil
-	}
-
-	return args
-}
+//func (p *Parser) parseCallArguments() []ast.Expression {
+//	args := []ast.Expression{}
+//
+//	if p.peekTokenIs(token.RPAREN) {
+//		p.nextToken() // ')'
+//		return args
+//	}
+//
+//	p.nextToken() // start of first expression
+//	args = append(args, p.parseExpression(LOWEST))
+//
+//	for p.peekTokenIs(token.COMMA) {
+//		p.nextToken() // ","
+//		p.nextToken() // start of next expression
+//		args = append(args, p.parseExpression(LOWEST))
+//	}
+//
+//	if !p.expectPeek(token.RPAREN) {
+//		return nil
+//	}
+//
+//	return args
+//}
 
 func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	// curToken is {

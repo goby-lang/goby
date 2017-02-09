@@ -1,9 +1,9 @@
 package parser
 
 import (
-	"github.com/st0012/monkey/ast"
-	"github.com/st0012/monkey/lexer"
-	"github.com/st0012/monkey/token"
+	"github.com/st0012/rooby/ast"
+	"github.com/st0012/rooby/lexer"
+	"github.com/st0012/rooby/token"
 )
 
 type Parser struct {
@@ -29,6 +29,7 @@ func New(l *lexer.Lexer) *Parser {
 
 	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
+	p.registerPrefix(token.CONSTANT, p.parseConstant)
 	p.registerPrefix(token.INT, p.parseIntegerLiteral)
 	p.registerPrefix(token.STRING, p.parseStringLiteral)
 	p.registerPrefix(token.TRUE, p.parseBooleanLiteral)
@@ -37,7 +38,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.BANG, p.parsePrefixExpression)
 	p.registerPrefix(token.LPAREN, p.parseGroupedExpression)
 	p.registerPrefix(token.IF, p.parseIfExpression)
-	p.registerPrefix(token.FUCTION, p.parseFunctionExpression)
+	//p.registerPrefix(token.METHOD, p.parseFunctionExpression)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
@@ -49,7 +50,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.NOT_EQ, p.parseInfixExpression)
 	p.registerInfix(token.LT, p.parseInfixExpression)
 	p.registerInfix(token.GT, p.parseInfixExpression)
-	p.registerInfix(token.LPAREN, p.parseCallExpression)
+	//p.registerInfix(token.LPAREN, p.parseCallExpression)
 
 	return p
 }
