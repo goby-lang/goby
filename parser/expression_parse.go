@@ -171,33 +171,6 @@ func (p *Parser) parseIfExpression() ast.Expression {
 //	return fe
 //}
 
-//func (p *Parser) parseParameters() []*ast.Identifier {
-//	identifiers := []*ast.Identifier{}
-//
-//	if p.peekTokenIs(token.RPAREN) {
-//		p.nextToken()
-//		return identifiers
-//	} // empty params
-//
-//	p.nextToken()
-//
-//	ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-//	identifiers = append(identifiers, ident)
-//
-//	for p.peekTokenIs(token.COMMA) {
-//		p.nextToken()
-//		p.nextToken()
-//		identifier := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-//		identifiers = append(identifiers, identifier)
-//	}
-//
-//	if !p.expectPeek(token.RPAREN) {
-//		return nil
-//	}
-//
-//	return identifiers
-//}
-
 //func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 //	exp := &ast.CallExpression{Token: p.curToken, Function: function}
 //	exp.Arguments = p.parseCallArguments()
