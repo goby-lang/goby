@@ -100,6 +100,7 @@ type Method struct {
 	Name       *ast.Identifier
 	Parameters []*ast.Identifier
 	Body       *ast.BlockStatement
+	Env        *Environment
 }
 
 func (m *Method) Type() ObjectType {
