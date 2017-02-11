@@ -34,8 +34,12 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return val
 		}
 		return env.Set(node.Name.Value, val)
+	case *ast.ClassStatement:
+		return evalClass(node, env)
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
+	case *ast.DefStatement:
+		return evalDefStatement(node, env)
 
 	// Expressions
 	case *ast.IfExpression:
@@ -113,6 +117,7 @@ func evalBlockStatements(stmts []ast.Statement, env *object.Environment) object.
 	var result object.Object
 
 	for _, statement := range stmts {
+
 		result = Eval(statement, env)
 
 		if result != nil {
@@ -247,6 +252,20 @@ func evalIfExpression(exp *ast.IfExpression, env *object.Environment) object.Obj
 	}
 }
 
+func evalClass(exp *ast.ClassStatement, env *object.Environment) object.Object {
+	class := &object.Class{Name: exp.Name}
+	classEnv := object.NewClosedEnvironment(env)
+	Eval(exp.Body, classEnv)
+	class.Body = classEnv
+	return class
+}
+
+func evalDefStatement(exp *ast.DefStatement, env *object.Environment) object.Object {
+	method := &object.Method{Name: exp.Name.Value, Parameters: exp.Parameters, Body: exp.BlockStatement, Env: env}
+	env.Set("_method_"+method.Name, method)
+	return method
+}
+
 //func applyFunction(fn object.Object, args []object.Object) object.Object {
 //	switch fn := fn.(type) {
 //	case *object.Function:
@@ -281,16 +300,16 @@ func evalIfExpression(exp *ast.IfExpression, env *object.Environment) object.Obj
 //	return args
 //}
 
-//func extendFunctionEnv(function *object.Function, args []object.Object) *object.Environment {
-//	e := object.NewClosedEnvironment(function.Env)
-//
-//	for i, arg := range args {
-//		argName := function.Parameters[i].Value
-//		e.Set(argName, arg)
-//	}
-//
-//	return e
-//}
+func extendMethodEnv(method *object.Method, args []object.Object) *object.Environment {
+	e := object.NewClosedEnvironment(method.Env)
+
+	for i, arg := range args {
+		argName := method.Parameters[i].Value
+		e.Set(argName, arg)
+	}
+
+	return e
+}
 
 func newError(format string, args ...interface{}) *object.Error {
 	return &object.Error{Message: fmt.Sprintf(format, args...)}

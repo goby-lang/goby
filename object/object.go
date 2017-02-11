@@ -96,8 +96,7 @@ func (e *Error) Inspect() string {
 }
 
 type Method struct {
-	Class      Class
-	Name       *ast.Identifier
+	Name       string
 	Parameters []*ast.Identifier
 	Body       *ast.BlockStatement
 	Env        *Environment
@@ -115,21 +114,19 @@ func (m *Method) Inspect() string {
 		params = append(params, p.String())
 	}
 
-	out.WriteString(m.Class.Inspect())
-	out.WriteString("#")
-	out.WriteString(m.Name.Value)
+	out.WriteString(m.Name)
 	out.WriteString("(")
 	out.WriteString(strings.Join(params, ", "))
 	out.WriteString(") {\n")
 	out.WriteString(m.Body.String())
-	out.WriteString("\n}")
+	out.WriteString("\n}\n")
 
 	return out.String()
 }
 
 type Class struct {
-	Name    string
-	Methods []Method
+	Name *ast.Constant
+	Body *Environment
 }
 
 func (c *Class) Type() ObjectType {
@@ -137,5 +134,5 @@ func (c *Class) Type() ObjectType {
 }
 
 func (c *Class) Inspect() string {
-	return "<Class:" + c.Name + ">"
+	return "<Class:" + c.Name.Value + ">"
 }

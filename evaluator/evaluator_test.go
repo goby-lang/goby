@@ -51,7 +51,7 @@ func TestLetStatement(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(t, tt.input)
 		testIntegerObject(t, evaluated, tt.expectedValue)
 	}
 }
@@ -108,7 +108,7 @@ func TestErrorHandling(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(t, tt.input)
 
 		errObj, ok := evaluated.(*object.Error)
 		if !ok {
@@ -146,7 +146,7 @@ func TestReturnStatements(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(t, tt.input)
 		testIntegerObject(t, evaluated, tt.expected)
 	}
 }
@@ -184,7 +184,7 @@ func TestEvalIfExpression(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(t, tt.input)
 
 		switch tt.expected.(type) {
 		case int64:
@@ -195,6 +195,68 @@ func TestEvalIfExpression(t *testing.T) {
 			testNullObject(t, evaluated)
 		}
 
+	}
+}
+
+func TestClassStatement(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`class Foo {}`, "Foo"},
+		{
+			`class Foo {
+				def bar() {
+					x;
+				}
+			}`, "Foo"},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		testClassObject(t, evaluated, tt.expected)
+	}
+}
+
+func TestDefStatement(t *testing.T) {
+	input := `
+		class Foo {
+			def bar(x, y) {
+				x + y;
+			}
+
+			def foo(y) {
+				y;
+			}
+		}
+	`
+
+	evaluated := testEval(t, input)
+	class := evaluated.(*object.Class)
+
+	expectedMethods := []struct {
+		name   string
+		params []string
+	}{
+		{name: "foo", params: []string{"y"}},
+		{name: "bar", params: []string{"x", "y"}},
+	}
+
+	for _, expectedMethod := range expectedMethods {
+		methodObj, ok := class.Body.Get("_method_" + expectedMethod.name)
+		if !ok {
+			t.Errorf("expect class %s to have method %s.", class.Name, expectedMethod.name)
+		}
+
+		method := methodObj.(*object.Method)
+		if method.Name != expectedMethod.name {
+			t.Errorf("expect method's name to be %s. got=%s", expectedMethod.name, method.Name)
+		}
+		for i, expectedParam := range expectedMethod.params {
+			if method.Parameters[i].Value != expectedParam {
+				t.Errorf("expect method %s's parameters to have %s. got=%s", expectedMethod.name, expectedParam, method.Parameters[i].Value)
+			}
+		}
 	}
 }
 
@@ -221,7 +283,7 @@ func TestEvalInfixIntegerExpression(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(t, tt.input)
 		testIntegerObject(t, evaluated, tt.expected)
 	}
 }
@@ -240,7 +302,7 @@ func TestEvalInfixStringExpression(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(t, tt.input)
 		switch tt.expected.(type) {
 		case bool:
 			testBooleanObject(t, evaluated, tt.expected.(bool))
@@ -277,7 +339,7 @@ func TestEvalInfixBooleanExpression(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(t, tt.input)
 		testBooleanObject(t, evaluated, tt.expected)
 	}
 }
@@ -296,7 +358,7 @@ func TestEvalBangPrefixExpression(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(t, tt.input)
 		testBooleanObject(t, evaluated, tt.expected)
 	}
 }
@@ -313,7 +375,7 @@ func TestEvalMinusPrefixExpression(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(t, tt.input)
 		testIntegerObject(t, evaluated, tt.expected)
 	}
 }
@@ -328,7 +390,7 @@ func TestEvalIntegerExpression(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(t, tt.input)
 		testIntegerObject(t, evaluated, tt.expected)
 	}
 }
@@ -343,7 +405,7 @@ func TestEvalStringExpression(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(t, tt.input)
 		testStringObject(t, evaluated, tt.expected)
 	}
 }
@@ -358,15 +420,16 @@ func TestEvalBooleanExpression(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(t, tt.input)
 		testBooleanObject(t, evaluated, tt.expected)
 	}
 }
 
-func testEval(input string) object.Object {
+func testEval(t *testing.T, input string) object.Object {
 	l := lexer.New(input)
 	p := parser.New(l)
 	program := p.ParseProgram()
+	checkParserErrors(t, p)
 
 	return Eval(program, object.NewEnvironment())
 }
@@ -413,6 +476,20 @@ func testStringObject(t *testing.T, obj object.Object, expected string) bool {
 	return true
 }
 
+func testClassObject(t *testing.T, obj object.Object, expected string) bool {
+	result, ok := obj.(*object.Class)
+	if !ok {
+		t.Errorf("object is not a Class. got=%T (%+v", obj, obj)
+		return false
+	}
+
+	if result.Name.Value != expected {
+		t.Errorf("expect Class's name to be %s. got=%s", expected, result.Name.Value)
+	}
+
+	return true
+}
+
 func testNullObject(t *testing.T, obj object.Object) bool {
 	if obj != NULL {
 		t.Errorf("object is not NULL. got=%T (%+v)", obj, obj)
@@ -420,4 +497,17 @@ func testNullObject(t *testing.T, obj object.Object) bool {
 	}
 
 	return true
+}
+
+func checkParserErrors(t *testing.T, p *parser.Parser) {
+	errors := p.Errors()
+	if len(errors) == 0 {
+		return
+	}
+
+	t.Errorf("parser has %d errors", len(errors))
+	for _, msg := range errors {
+		t.Errorf("parser error: %q", msg)
+	}
+	t.FailNow()
 }
