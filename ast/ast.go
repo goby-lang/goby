@@ -305,6 +305,7 @@ func (bs *BlockStatement) String() string {
 }
 
 type CallExpression struct {
+	Receiver  Expression
 	Token     token.Token
 	Method    *Identifier
 	Arguments []Expression
@@ -317,6 +318,8 @@ func (ce *CallExpression) TokenLiteral() string {
 func (ce *CallExpression) String() string {
 	var out bytes.Buffer
 
+	out.WriteString(ce.Receiver.String())
+	out.WriteString(".")
 	out.WriteString(ce.Method.String())
 
 	var args = []string{}

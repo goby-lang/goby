@@ -16,7 +16,7 @@ var precedence = map[token.TokenType]int{
 	token.MINUS:    SUM,
 	token.SLASH:    PRODUCT,
 	token.ASTERISK: PRODUCT,
-	token.LPAREN:   CALL,
+	token.DOT:   	CALL,
 }
 
 const (
@@ -153,8 +153,19 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	return ie
 }
 
-func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
-	exp := &ast.CallExpression{Token: p.curToken, Method: function.(*ast.Identifier)}
+func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
+	exp := &ast.CallExpression{Token: p.curToken, Receiver: receiver}
+
+	if !p.expectPeek(token.IDENT) {
+		return nil
+	}
+
+	exp.Method = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+
 	exp.Arguments = p.parseCallArguments()
 	return exp
 }

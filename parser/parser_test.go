@@ -71,6 +71,38 @@ func TestReturnStatements(t *testing.T) {
 
 }
 
+func TestMethodChainExpression(t *testing.T) {
+	input := `
+		Person.new(a, b).bar(c).add(d);
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+
+	firstCall :=  stmt.Expression.(*ast.CallExpression)
+
+	testIdentifier(t, firstCall.Method, "add")
+	testIdentifier(t, firstCall.Arguments[0], "d")
+
+	secondCall := firstCall.Receiver.(*ast.CallExpression)
+
+	testIdentifier(t, secondCall.Method, "bar")
+	testIdentifier(t, secondCall.Arguments[0], "c")
+
+	thirdCall := secondCall.Receiver.(*ast.CallExpression)
+
+	testIdentifier(t, thirdCall.Method, "new")
+	testIdentifier(t, thirdCall.Arguments[0], "a")
+	testIdentifier(t, thirdCall.Arguments[1], "b")
+
+	originalReceiver := thirdCall.Receiver.(*ast.Constant)
+	testConstant(t, originalReceiver, "Person")
+}
+
 func TestIdentifierExpression(t *testing.T) {
 	input := `foobar;`
 
@@ -332,16 +364,16 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 			"(!(true == true))",
 		},
 		{
-			"a + add(b * c) + d",
-			"((a + add((b * c))) + d)",
+			"a + n.add(b * c) + d",
+			"((a + n.add((b * c))) + d)",
 		},
 		{
-			"add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))",
-			"add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))",
+			"n.add(a, b, 1, 2 * 3, 4 + 5, m.add(6, 7 * 8))",
+			"n.add(a, b, 1, (2 * 3), (4 + 5), m.add(6, (7 * 8)))",
 		},
 		{
-			"add(a + b + c * d / f + g)",
-			"add((((a + b) + ((c * d) / f)) + g))",
+			"n.add(a + b + c * d / f + g)",
+			"n.add((((a + b) + ((c * d) / f)) + g))",
 		},
 	}
 
@@ -466,7 +498,7 @@ func TestMethodParameterParsing(t *testing.T) {
 
 func TestCallExpression(t *testing.T) {
 	input := `
-		add(1, 2 * 3, 4 + 5);
+		p.add(1, 2 * 3, 4 + 5);
 	`
 
 	l := lexer.New(input)
@@ -476,6 +508,10 @@ func TestCallExpression(t *testing.T) {
 
 	stmt := program.Statements[0].(*ast.ExpressionStatement)
 	callExpression := stmt.Expression.(*ast.CallExpression)
+
+	if !testIdentifier(t, callExpression.Receiver, "p") {
+		return
+	}
 
 	if !testIdentifier(t, callExpression.Method, "add") {
 		return
