@@ -2,11 +2,10 @@ package parser
 
 import (
 	"fmt"
-	"github.com/st0012/rooby/lexer"
-	//"github.com/st0012/rooby/token"
 	"github.com/st0012/rooby/ast"
-	"testing"
+	"github.com/st0012/rooby/lexer"
 	"github.com/st0012/rooby/token"
+	"testing"
 )
 
 func TestLetStatement(t *testing.T) {
@@ -71,6 +70,44 @@ func TestReturnStatements(t *testing.T) {
 
 }
 
+func TestClassStatement(t *testing.T) {
+	input := `
+	class Foo {
+		def bar(x, y) {
+			x + y;
+		}
+	}
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt := program.Statements[0].(*ast.ClassStatement)
+
+	if stmt.Token.Type != token.CLASS {
+		t.Fatalf("expect token to be CLASS. got=%T", stmt.Token)
+	}
+
+	testConstant(t, stmt.Name, "Foo")
+
+	defStmt := stmt.Body.Statements[0].(*ast.DefStatement)
+
+	testIdentifier(t, defStmt.Name, "bar")
+	testIdentifier(t, defStmt.Parameters[0], "x")
+	testIdentifier(t, defStmt.Parameters[1], "y")
+
+	body, ok := defStmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Errorf("expect body should be an expression statement. got=t", body)
+	}
+
+	if !testInfixExpression(t, body.Expression, "x", "+", "y") {
+		return
+	}
+}
+
 func TestMethodChainExpression(t *testing.T) {
 	input := `
 		Person.new(a, b).bar(c).add(d);
@@ -83,7 +120,7 @@ func TestMethodChainExpression(t *testing.T) {
 
 	stmt := program.Statements[0].(*ast.ExpressionStatement)
 
-	firstCall :=  stmt.Expression.(*ast.CallExpression)
+	firstCall := stmt.Expression.(*ast.CallExpression)
 
 	testIdentifier(t, firstCall.Method, "add")
 	testIdentifier(t, firstCall.Arguments[0], "d")

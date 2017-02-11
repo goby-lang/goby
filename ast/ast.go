@@ -82,7 +82,8 @@ func (ds *DefStatement) TokenLiteral() string {
 func (ds *DefStatement) String() string {
 	var out bytes.Buffer
 
-	out.WriteString("fn")
+	out.WriteString("def ")
+	out.WriteString(ds.Name.Value)
 	out.WriteString("(")
 
 	for i, param := range ds.Parameters {
@@ -93,9 +94,31 @@ func (ds *DefStatement) String() string {
 	}
 
 	out.WriteString(") ")
-	out.WriteString("{ ")
+	out.WriteString("{\n")
 	out.WriteString(ds.BlockStatement.String())
-	out.WriteString(" }")
+	out.WriteString("\n}")
+
+	return out.String()
+}
+
+type ClassStatement struct {
+	Token token.Token
+	Name  *Constant
+	Body  *BlockStatement
+}
+
+func (cs *ClassStatement) statementNode() {}
+func (cs *ClassStatement) TokenLiteral() string {
+	return cs.Token.Literal
+}
+func (cs *ClassStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("class ")
+	out.WriteString(cs.Name.Value)
+	out.WriteString(" {\n")
+	out.WriteString(cs.Body.String())
+	out.WriteString("\n}")
 
 	return out.String()
 }

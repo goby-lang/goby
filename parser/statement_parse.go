@@ -12,13 +12,15 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.RETURN:
 		return p.parseReturnStatement()
 	case token.DEF:
-		return p.parseMethodStatement()
+		return p.parseDefMethodStatement()
+	case token.CLASS:
+		return p.parseClassStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
 }
 
-func (p *Parser) parseMethodStatement() *ast.DefStatement {
+func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 	stmt := &ast.DefStatement{Token: p.curToken}
 
 	if !p.expectPeek(token.IDENT) {
@@ -38,6 +40,24 @@ func (p *Parser) parseMethodStatement() *ast.DefStatement {
 	}
 
 	stmt.BlockStatement = p.parseBlockStatement()
+
+	return stmt
+}
+
+func (p *Parser) parseClassStatement() *ast.ClassStatement {
+	stmt := &ast.ClassStatement{Token: p.curToken}
+
+	if !p.expectPeek(token.CONSTANT) {
+		return nil
+	}
+
+	stmt.Name = &ast.Constant{Token: p.curToken, Value: p.curToken.Literal}
+
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	stmt.Body = p.parseBlockStatement()
 
 	return stmt
 }
