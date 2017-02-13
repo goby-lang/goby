@@ -210,6 +210,11 @@ func TestClassStatement(t *testing.T) {
 					x;
 				}
 			}`, "Foo"},
+		{
+			`class Bar {}
+			class Foo {}
+			Bar
+			`, "Bar"},
 	}
 
 	for _, tt := range tests {

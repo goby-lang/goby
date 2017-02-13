@@ -38,6 +38,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalClass(node, env)
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
+	case *ast.Constant:
+		return evalConstant(node, env)
 	case *ast.DefStatement:
 		return evalDefStatement(node, env)
 
@@ -94,6 +96,14 @@ func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object
 	}
 
 	return newError("identifier not found: %s", node.Value)
+}
+
+func evalConstant(node *ast.Constant, env *object.Environment) object.Object {
+	if val, ok := env.Get(node.Value); ok {
+		return val
+	}
+
+	return newError("constant not found: %s", node.Value)
 }
 
 func evalProgram(stmts []ast.Statement, env *object.Environment) object.Object {
@@ -257,6 +267,7 @@ func evalClass(exp *ast.ClassStatement, env *object.Environment) object.Object {
 	classEnv := object.NewClosedEnvironment(env)
 	Eval(exp.Body, classEnv)
 	class.Body = classEnv
+	env.Set("Class", class)
 	return class
 }
 
