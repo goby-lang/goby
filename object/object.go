@@ -18,6 +18,7 @@ const (
 	ERROR_OBJ        = "ERROR"
 	METHOD_OBJ       = "METHOD"
 	CLASS_OBJ        = "CLASS"
+	BASE_OBJECT_OBJ   = "BASE_OBJECT"
 )
 
 type Object interface {
@@ -135,4 +136,15 @@ func (c *Class) Type() ObjectType {
 
 func (c *Class) Inspect() string {
 	return "<Class:" + c.Name.Value + ">"
+}
+
+type BaseObject struct {
+	Class *Class
+}
+func (bo *BaseObject) Type() ObjectType {
+	return BASE_OBJECT_OBJ
+}
+
+func (bo *BaseObject) Inspect() string {
+	return "<Instance of: " + bo.Class.Name.Value + ">"
 }

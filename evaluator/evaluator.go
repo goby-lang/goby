@@ -267,7 +267,7 @@ func evalClass(exp *ast.ClassStatement, env *object.Environment) object.Object {
 	classEnv := object.NewClosedEnvironment(env)
 	Eval(exp.Body, classEnv)
 	class.Body = classEnv
-	env.Set("Class", class)
+	env.Set(class.Name.Value, class)
 	return class
 }
 
