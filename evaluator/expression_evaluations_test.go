@@ -1,18 +1,35 @@
 package evaluator
 
 import (
-	"fmt"
+	"github.com/st0012/rooby/object"
 	"testing"
 )
 
 func TestEvalCallExpression(t *testing.T) {
 	input := `
-		class Foo {}
-		Foo.new;
+		class Foo {
+			def add(x, y) {
+				x + y
+			}
+		}
+		Foo.new().add(10, 11)
 	`
 
 	evaluated := testEval(t, input)
-	fmt.Print(evaluated)
+
+	if isError(evaluated) {
+		t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
+	}
+
+	result, ok := evaluated.(*object.Integer)
+
+	if !ok {
+		t.Errorf("expect result to be an integer. got=%T", evaluated)
+	}
+
+	if result.Value != 21 {
+		t.Errorf("expect result to be 21. got=%d", result.Value)
+	}
 }
 
 func TestEvalInfixIntegerExpression(t *testing.T) {

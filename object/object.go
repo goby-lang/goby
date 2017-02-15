@@ -10,15 +10,16 @@ import (
 type ObjectType string
 
 const (
-	INTEGER_OBJ      = "INTEGER"
-	STRING_OBJ       = "STRING"
-	BOOLEAN_OBJ      = "BOOLEAN"
-	NULL_OBJ         = "NULL"
-	RETURN_VALUE_OBJ = "RETURN_VALUE"
-	ERROR_OBJ        = "ERROR"
-	METHOD_OBJ       = "METHOD"
-	CLASS_OBJ        = "CLASS"
-	BASE_OBJECT_OBJ  = "BASE_OBJECT"
+	INTEGER_OBJ         = "INTEGER"
+	STRING_OBJ          = "STRING"
+	BOOLEAN_OBJ         = "BOOLEAN"
+	NULL_OBJ            = "NULL"
+	RETURN_VALUE_OBJ    = "RETURN_VALUE"
+	ERROR_OBJ           = "ERROR"
+	METHOD_OBJ          = "METHOD"
+	CLASS_OBJ           = "CLASS"
+	BASE_OBJECT_OBJ     = "BASE_OBJECT"
+	BUILD_IN_METHOD_OBJ = "BUILD_IN_METHOD"
 )
 
 type Object interface {
@@ -148,4 +149,17 @@ func (bo *BaseObject) Type() ObjectType {
 
 func (bo *BaseObject) Inspect() string {
 	return "<Instance of: " + bo.Class.Name.Value + ">"
+}
+
+type BuiltInMethod struct {
+	Fn  func(args ...Object) Object
+	Des string
+}
+
+func (bim *BuiltInMethod) Type() ObjectType {
+	return BUILD_IN_METHOD_OBJ
+}
+
+func (bim *BuiltInMethod) Inspect() string {
+	return bim.Des
 }

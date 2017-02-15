@@ -259,6 +259,11 @@ func evalClass(exp *ast.ClassStatement, env *object.Environment) object.Object {
 	class := &object.Class{Name: exp.Name}
 	classEnv := object.NewClosedEnvironment(env)
 	Eval(exp.Body, classEnv)
+
+	for method_name, method := range builtins(class) {
+		classEnv.Set(method_name, method)
+	}
+
 	class.Body = classEnv
 	env.Set(class.Name.Value, class)
 	return class
@@ -273,39 +278,57 @@ func evalDefStatement(exp *ast.DefStatement, env *object.Environment) object.Obj
 func applyFunction(receiver object.Object, method_name string, args []object.Object) object.Object {
 	switch receiver := receiver.(type) {
 	case *object.Class:
-		method, ok := receiver.Body.Get(method_name)
-		if !ok {
-			return &object.Error{Message: fmt.Sprintf("undefined method %s for class %s", method_name, receiver.Inspect())}
-		}
-		m := method.(*object.Method)
-
-		if len(m.Parameters) != len(args) {
-			return newError("wrong arguments: expect=%d, got=%d", len(m.Parameters), len(args))
-		}
-
-		methodEnv := extendMethodEnv(m, args)
-		evaluated := Eval(m.Body, methodEnv)
+		evaluated := evalClassMethod(receiver, method_name, args)
 
 		return unwrapReturnValue(evaluated)
 	case *object.BaseObject:
-		method, ok := receiver.Class.Body.Get("_method_" + method_name)
-		if !ok {
-			return &object.Error{Message: fmt.Sprintf("undefined method %s for object %s", method_name, receiver.Inspect())}
-		}
-		m := method.(*object.Method)
 
+		evaluated := evalInstanceMethod(receiver, method_name, args)
+		return unwrapReturnValue(evaluated)
+	default:
+		return newError("not a valid receiver: %s", receiver.Type())
+	}
+}
+
+func evalClassMethod(receiver object.Object, method_name string, args []object.Object) object.Object {
+	method, ok := receiver.(*object.Class).Body.Get(method_name)
+	if !ok {
+		return &object.Error{Message: fmt.Sprintf("undefined method %s for class %s", method_name, receiver.Inspect())}
+	}
+
+	switch m := method.(type) {
+	case *object.Method:
 		if len(m.Parameters) != len(args) {
 			return newError("wrong arguments: expect=%d, got=%d", len(m.Parameters), len(args))
 		}
 
 		methodEnv := extendMethodEnv(m, args)
-		evaluated := Eval(m.Body, methodEnv)
-
-		return unwrapReturnValue(evaluated)
+		return Eval(m.Body, methodEnv)
+	case *object.BuiltInMethod:
+		return m.Fn(args...)
 	default:
-		return newError("not a valid receiver: %s", receiver.Type())
-
+		return newError("unknown method type")
 	}
+
+}
+
+func evalInstanceMethod(receiver object.Object, method_name string, args []object.Object) object.Object {
+	method, ok := receiver.(*object.BaseObject).Class.Body.Get("_method_" + method_name)
+	if !ok {
+		return &object.Error{Message: fmt.Sprintf("undefined method %s for class %s", method_name, receiver.Inspect())}
+	}
+	switch m := method.(type) {
+	case *object.Method:
+		if len(m.Parameters) != len(args) {
+			return newError("wrong arguments: expect=%d, got=%d", len(m.Parameters), len(args))
+		}
+
+		methodEnv := extendMethodEnv(m, args)
+		return Eval(m.Body, methodEnv)
+	default:
+		return newError("unknown method type")
+	}
+
 }
 
 func evalArgs(exps []ast.Expression, env *object.Environment) []object.Object {
