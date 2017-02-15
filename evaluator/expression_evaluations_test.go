@@ -1,6 +1,19 @@
 package evaluator
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
+
+func TestEvalCallExpression(t *testing.T) {
+	input := `
+		class Foo {}
+		Foo.new;
+	`
+
+	evaluated := testEval(t, input)
+	fmt.Print(evaluated)
+}
 
 func TestEvalInfixIntegerExpression(t *testing.T) {
 	tests := []struct {

@@ -18,7 +18,7 @@ const (
 	ERROR_OBJ        = "ERROR"
 	METHOD_OBJ       = "METHOD"
 	CLASS_OBJ        = "CLASS"
-	BASE_OBJECT_OBJ   = "BASE_OBJECT"
+	BASE_OBJECT_OBJ  = "BASE_OBJECT"
 )
 
 type Object interface {
@@ -141,6 +141,7 @@ func (c *Class) Inspect() string {
 type BaseObject struct {
 	Class *Class
 }
+
 func (bo *BaseObject) Type() ObjectType {
 	return BASE_OBJECT_OBJ
 }

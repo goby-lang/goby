@@ -46,17 +46,10 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	// Expressions
 	case *ast.IfExpression:
 		return evalIfExpression(node, env)
-	//case *ast.DefStatement:
-	//	return &object.Method{Parameters: node.Parameters, Body: node.BlockStatement, Env: env}
-	//case *ast.CallExpression:
-	//	function := Eval(node.Method, env)
-	//	if isError(function) {
-	//		return function
-	//	}
-	//
-	//	args := evalArgs(node.Arguments, env)
-	//
-	//	return applyFunction(function, args)
+	case *ast.CallExpression:
+		receiver := Eval(node.Receiver, env)
+		args := evalArgs(node.Arguments, env)
+		return applyFunction(receiver, node.Method.Value, args)
 
 	case *ast.PrefixExpression:
 		val := Eval(node.Right, env)
@@ -277,39 +270,57 @@ func evalDefStatement(exp *ast.DefStatement, env *object.Environment) object.Obj
 	return method
 }
 
-//func applyFunction(fn object.Object, args []object.Object) object.Object {
-//	switch fn := fn.(type) {
-//	case *object.Function:
-//
-//		if len(fn.Parameters) != len(args) {
-//			return newError("wrong arguments: expect=%d, got=%d", len(fn.Parameters), len(args))
-//		}
-//
-//		extendedEnv := extendFunctionEnv(fn, args)
-//		evaluated := Eval(fn.Body, extendedEnv)
-//		return unwrapReturnValue(evaluated)
-//
-//	case *object.BuiltInFunction:
-//		return fn.Fn(args...)
-//
-//	default:
-//		return newError("not a function: %s", fn.Type())
-//	}
-//}
-//
-//func evalArgs(exps []ast.Expression, env *object.Environment) []object.Object {
-//	args := []object.Object{}
-//
-//	for _, exp := range exps {
-//		arg := Eval(exp, env)
-//		args = append(args, arg)
-//		if isError(arg) {
-//			return []object.Object{arg}
-//		}
-//	}
-//
-//	return args
-//}
+func applyFunction(receiver object.Object, method_name string, args []object.Object) object.Object {
+	switch receiver := receiver.(type) {
+	case *object.Class:
+		method, ok := receiver.Body.Get(method_name)
+		if !ok {
+			return &object.Error{Message: fmt.Sprintf("undefined method %s for class %s", method_name, receiver.Inspect())}
+		}
+		m := method.(*object.Method)
+
+		if len(m.Parameters) != len(args) {
+			return newError("wrong arguments: expect=%d, got=%d", len(m.Parameters), len(args))
+		}
+
+		methodEnv := extendMethodEnv(m, args)
+		evaluated := Eval(m.Body, methodEnv)
+
+		return unwrapReturnValue(evaluated)
+	case *object.BaseObject:
+		method, ok := receiver.Class.Body.Get("_method_" + method_name)
+		if !ok {
+			return &object.Error{Message: fmt.Sprintf("undefined method %s for object %s", method_name, receiver.Inspect())}
+		}
+		m := method.(*object.Method)
+
+		if len(m.Parameters) != len(args) {
+			return newError("wrong arguments: expect=%d, got=%d", len(m.Parameters), len(args))
+		}
+
+		methodEnv := extendMethodEnv(m, args)
+		evaluated := Eval(m.Body, methodEnv)
+
+		return unwrapReturnValue(evaluated)
+	default:
+		return newError("not a valid receiver: %s", receiver.Type())
+
+	}
+}
+
+func evalArgs(exps []ast.Expression, env *object.Environment) []object.Object {
+	args := []object.Object{}
+
+	for _, exp := range exps {
+		arg := Eval(exp, env)
+		args = append(args, arg)
+		if isError(arg) {
+			return []object.Object{arg}
+		}
+	}
+
+	return args
+}
 
 func extendMethodEnv(method *object.Method, args []object.Object) *object.Environment {
 	e := object.NewClosedEnvironment(method.Env)
@@ -333,10 +344,10 @@ func isError(obj object.Object) bool {
 	return false
 }
 
-//func unwrapReturnValue(obj object.Object) object.Object {
-//	if returnValue, ok := obj.(*object.ReturnValue); ok {
-//		return returnValue.Value
-//	}
-//
-//	return obj
-//}
+func unwrapReturnValue(obj object.Object) object.Object {
+	if returnValue, ok := obj.(*object.ReturnValue); ok {
+		return returnValue.Value
+	}
+
+	return obj
+}

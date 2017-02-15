@@ -162,10 +162,6 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 
 	exp.Method = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 
-	if !p.expectPeek(token.LPAREN) {
-		return nil
-	}
-
 	exp.Arguments = p.parseCallArguments()
 	return exp
 }
@@ -173,7 +169,16 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 func (p *Parser) parseCallArguments() []ast.Expression {
 	args := []ast.Expression{}
 
-	if p.peekTokenIs(token.RPAREN) || p.peekTokenIs(token.DOT) {
+	if p.peekTokenIs(token.DOT) || p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+		return nil
+	}
+
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+
+	if p.peekTokenIs(token.RPAREN) {
 		p.nextToken() // ')'
 		return args
 	}
