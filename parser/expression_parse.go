@@ -173,7 +173,7 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 func (p *Parser) parseCallArguments() []ast.Expression {
 	args := []ast.Expression{}
 
-	if p.peekTokenIs(token.RPAREN) {
+	if p.peekTokenIs(token.RPAREN) || p.peekTokenIs(token.DOT) {
 		p.nextToken() // ')'
 		return args
 	}
