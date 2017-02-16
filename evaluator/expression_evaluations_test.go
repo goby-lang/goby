@@ -12,7 +12,7 @@ func TestEvalCallExpression(t *testing.T) {
 				x + y
 			}
 		}
-		Foo.new().add(10, 11)
+		Foo.new.add(10, 11)
 	`
 
 	evaluated := testEval(t, input)

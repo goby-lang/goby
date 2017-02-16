@@ -170,8 +170,7 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 	args := []ast.Expression{}
 
 	if p.peekTokenIs(token.DOT) || p.peekTokenIs(token.SEMICOLON) {
-		p.nextToken()
-		return nil
+		return args
 	}
 
 	if !p.expectPeek(token.LPAREN) {
