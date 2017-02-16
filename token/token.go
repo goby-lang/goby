@@ -11,10 +11,11 @@ const (
 	ILLEGAL = "ILLEGAL"
 	EOF     = "EOF"
 
-	CONSTANT = "CONSTANT"
-	IDENT    = "IDENT"
-	INT      = "INT"
-	STRING   = "STRING"
+	CONSTANT          = "CONSTANT"
+	IDENT             = "IDENT"
+	INSTANCE_VARIABLE = "INSTANCE_VAR"
+	INT               = "INT"
+	STRING            = "STRING"
 
 	ASSIGN   = "="
 	PLUS     = "+"

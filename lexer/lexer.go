@@ -82,6 +82,14 @@ func (l *Lexer) NextToken() token.Token {
 			}
 
 			return tok
+		} else if isInstanceVariable(l.ch) {
+			if isLetter(l.peekChar()) {
+				tok.Literal = l.readInstanceVariable()
+				tok.Type = token.INSTANCE_VARIABLE
+				return tok
+			}
+
+			return newToken(token.ILLEGAL, l.ch)
 		} else if isDigit(l.ch) {
 			tok.Literal = l.readNumber()
 			tok.Type = token.INT
@@ -120,6 +128,14 @@ func (l *Lexer) readIdentifier() string {
 func (l *Lexer) readConstant() string {
 	position := l.position
 	for isLetter(l.ch) {
+		l.readChar()
+	}
+	return l.input[position:l.position]
+}
+
+func (l *Lexer) readInstanceVariable() string {
+	position := l.position
+	for isLetter(l.ch) || isInstanceVariable(l.ch) {
 		l.readChar()
 	}
 	return l.input[position:l.position]
@@ -165,6 +181,10 @@ func isDigit(ch byte) bool {
 
 func isLetter(ch byte) bool {
 	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
+}
+
+func isInstanceVariable(ch byte) bool {
+	return ch == '@'
 }
 
 func newToken(tokenType token.TokenType, ch byte) token.Token {
