@@ -12,8 +12,11 @@ func testEval(t *testing.T, input string) object.Object {
 	p := parser.New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
+	env := object.NewEnvironment()
+	mainObj := &object.Main{Env: env}
+	scope := &object.Scope{Self: mainObj, Env: env}
 
-	return Eval(program, object.NewEnvironment())
+	return Eval(program, scope)
 }
 
 func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {

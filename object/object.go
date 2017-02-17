@@ -20,6 +20,7 @@ const (
 	CLASS_OBJ           = "CLASS"
 	BASE_OBJECT_OBJ     = "BASE_OBJECT"
 	BUILD_IN_METHOD_OBJ = "BUILD_IN_METHOD"
+	MAIN_OBJ            = "MAIN_OBJECT"
 )
 
 type Object interface {
@@ -101,7 +102,7 @@ type Method struct {
 	Name       string
 	Parameters []*ast.Identifier
 	Body       *ast.BlockStatement
-	Env        *Environment
+	Scope      *Scope
 }
 
 func (m *Method) Type() ObjectType {
@@ -127,8 +128,10 @@ func (m *Method) Inspect() string {
 }
 
 type Class struct {
-	Name *ast.Constant
-	Body *Environment
+	Name            *ast.Constant
+	Scope           *Scope
+	InstanceMethods *Environment
+	ClassMethods    *Environment
 }
 
 func (c *Class) Type() ObjectType {
@@ -140,7 +143,8 @@ func (c *Class) Inspect() string {
 }
 
 type BaseObject struct {
-	Class *Class
+	Class             *Class
+	InstanceVariables *Environment
 }
 
 func (bo *BaseObject) Type() ObjectType {
@@ -149,6 +153,18 @@ func (bo *BaseObject) Type() ObjectType {
 
 func (bo *BaseObject) Inspect() string {
 	return "<Instance of: " + bo.Class.Name.Value + ">"
+}
+
+type Main struct {
+	Env *Environment
+}
+
+func (m *Main) Type() ObjectType {
+	return MAIN_OBJ
+}
+
+func (m *Main) Inspect() string {
+	return "Main Object"
 }
 
 type BuiltInMethod struct {
@@ -162,4 +178,9 @@ func (bim *BuiltInMethod) Type() ObjectType {
 
 func (bim *BuiltInMethod) Inspect() string {
 	return bim.Des
+}
+
+type Scope struct {
+	Env  *Environment
+	Self Object
 }

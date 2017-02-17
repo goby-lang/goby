@@ -107,43 +107,44 @@ func evalStringInfixExpression(left object.Object, operator string, right object
 	}
 }
 
-func evalIfExpression(exp *ast.IfExpression, env *object.Environment) object.Object {
-	condition := Eval(exp.Condition, env)
+func evalIfExpression(exp *ast.IfExpression, scope *object.Scope) object.Object {
+	condition := Eval(exp.Condition, scope)
 	if isError(condition) {
 		return condition
 	}
 
 	if condition.Type() == object.INTEGER_OBJ || condition.(*object.Boolean).Value {
-		return Eval(exp.Consequence, env)
+		return Eval(exp.Consequence, scope)
 	} else {
 		if exp.Alternative != nil {
-			return Eval(exp.Alternative, env)
+			return Eval(exp.Alternative, scope)
 		} else {
 			return NULL
 		}
 	}
 }
 
-func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object {
-	if val, ok := env.Get(node.Value); ok {
+func evalIdentifier(node *ast.Identifier, scope *object.Scope) object.Object {
+	if val, ok := scope.Env.Get(node.Value); ok {
 		return val
 	}
 
 	return newError("identifier not found: %s", node.Value)
 }
 
-func evalConstant(node *ast.Constant, env *object.Environment) object.Object {
-	if val, ok := env.Get(node.Value); ok {
+func evalConstant(node *ast.Constant, scope *object.Scope) object.Object {
+	if val, ok := scope.Env.Get(node.Value); ok {
 		return val
 	}
 
-	return newError("constant not found: %s", node.Value)
+	return newError("constant %s not found in: %s", node.Value, scope.Self.Inspect())
 }
 
-func evalInstanceVariable(node *ast.InstanceVariable, env *object.Environment) object.Object {
-	if val, ok := env.Get(node.Value); ok {
+func evalInstanceVariable(node *ast.InstanceVariable, scope *object.Scope) object.Object {
+	instance := scope.Self.(*object.BaseObject)
+	if val, ok := instance.InstanceVariables.Get(node.Value); ok {
 		return val
 	}
 
-	return newError("instance variable not found: %s", node.Value)
+	return newError("instance variable %s not found in: %s", node.Value, instance.Inspect())
 }

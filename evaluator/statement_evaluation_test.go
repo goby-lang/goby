@@ -15,7 +15,6 @@ func TestLetStatement(t *testing.T) {
 		{"let a = 5; let b = a; b;", 5},
 		{"let a = 5; let b = a; let c = a + b + 5; c;", 15},
 		{"let a = 5; let b = 10; let c = if (a > b) { 100; } else { 50; }", 50},
-		{"let @foo = 100; @foo", 100},
 		{"let Bar = 100; Bar", 100},
 	}
 
@@ -104,7 +103,7 @@ func TestDefStatement(t *testing.T) {
 	}
 
 	for _, expectedMethod := range expectedMethods {
-		methodObj, ok := class.Body.Get("_method_" + expectedMethod.name)
+		methodObj, ok := class.InstanceMethods.Get(expectedMethod.name)
 		if !ok {
 			t.Errorf("expect class %s to have method %s.", class.Name, expectedMethod.name)
 		}
