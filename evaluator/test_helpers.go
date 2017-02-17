@@ -1,10 +1,10 @@
 package evaluator
 
 import (
-	"testing"
+	"github.com/st0012/rooby/lexer"
 	"github.com/st0012/rooby/object"
 	"github.com/st0012/rooby/parser"
-	"github.com/st0012/rooby/lexer"
+	"testing"
 )
 
 func testEval(t *testing.T, input string) object.Object {

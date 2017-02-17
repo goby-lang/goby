@@ -35,7 +35,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 		return env.Set(node.Name.TokenLiteral(), val)
 	case *ast.ClassStatement:
-		return evalClass(node, env)
+		return evalClassStatement(node, env)
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
 	case *ast.Constant:
@@ -51,7 +51,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.CallExpression:
 		receiver := Eval(node.Receiver, env)
 		args := evalArgs(node.Arguments, env)
-		return applyFunction(receiver, node.Method.Value, args)
+		return sendMethodCall(receiver, node.Method.Value, args)
 
 	case *ast.PrefixExpression:
 		val := Eval(node.Right, env)
@@ -85,29 +85,6 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	return nil
 }
 
-func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object {
-	if val, ok := env.Get(node.Value); ok {
-		return val
-	}
-
-	return newError("identifier not found: %s", node.Value)
-}
-
-func evalConstant(node *ast.Constant, env *object.Environment) object.Object {
-	if val, ok := env.Get(node.Value); ok {
-		return val
-	}
-
-	return newError("constant not found: %s", node.Value)
-}
-func evalInstanceVariable(node *ast.InstanceVariable, env *object.Environment) object.Object {
-	if val, ok := env.Get(node.Value); ok {
-		return val
-	}
-
-	return newError("constant not found: %s", node.Value)
-}
-
 func evalProgram(stmts []ast.Statement, env *object.Environment) object.Object {
 	var result object.Object
 
@@ -125,166 +102,7 @@ func evalProgram(stmts []ast.Statement, env *object.Environment) object.Object {
 	return result
 }
 
-func evalBlockStatements(stmts []ast.Statement, env *object.Environment) object.Object {
-	var result object.Object
-
-	for _, statement := range stmts {
-
-		result = Eval(statement, env)
-
-		if result != nil {
-			switch result := result.(type) {
-			case *object.ReturnValue:
-				return result
-			case *object.Error:
-				return result
-			}
-		}
-	}
-
-	return result
-}
-
-func evalPrefixExpression(operator string, right object.Object) object.Object {
-	switch operator {
-	case "!":
-		return evalBangPrefixExpression(right)
-	case "-":
-		return evalMinusPrefixExpression(right)
-	}
-	return newError("unknown operator: %s%s", operator, right.Type())
-}
-
-func evalBangPrefixExpression(right object.Object) *object.Boolean {
-	switch right {
-	case FALSE:
-		return TRUE
-	case NULL:
-		return TRUE
-	default:
-		return FALSE
-	}
-}
-
-func evalMinusPrefixExpression(right object.Object) object.Object {
-	if right.Type() != object.INTEGER_OBJ {
-		return newError("unknown operator: %s%s", "-", right.Type())
-	}
-	value := right.(*object.Integer).Value
-	return &object.Integer{Value: -value}
-}
-
-func evalInfixExpression(left object.Object, operator string, right object.Object) object.Object {
-	switch {
-	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
-		return evalIntegerInfixExpression(left, operator, right)
-	case left.Type() == object.BOOLEAN_OBJ && right.Type() == object.BOOLEAN_OBJ:
-		return evalBooleanInfixExpression(left, operator, right)
-	case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
-		return evalStringInfixExpression(left, operator, right)
-	default:
-		return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
-	}
-}
-
-func evalIntegerInfixExpression(left object.Object, operator string, right object.Object) object.Object {
-	leftValue := left.(*object.Integer).Value
-	rightValue := right.(*object.Integer).Value
-
-	switch operator {
-	case "+":
-		return &object.Integer{Value: leftValue + rightValue}
-	case "-":
-		return &object.Integer{Value: leftValue - rightValue}
-	case "*":
-		return &object.Integer{Value: leftValue * rightValue}
-	case "/":
-		return &object.Integer{Value: leftValue / rightValue}
-	case ">":
-		return &object.Boolean{Value: leftValue > rightValue}
-	case "<":
-		return &object.Boolean{Value: leftValue < rightValue}
-	case "==":
-		return &object.Boolean{Value: leftValue == rightValue}
-	case "!=":
-		return &object.Boolean{Value: leftValue != rightValue}
-	default:
-		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
-	}
-}
-
-func evalBooleanInfixExpression(left object.Object, operator string, right object.Object) object.Object {
-	leftValue := left.(*object.Boolean).Value
-	rightValue := right.(*object.Boolean).Value
-	switch operator {
-	case "==":
-		return &object.Boolean{Value: leftValue == rightValue}
-	case "!=":
-		return &object.Boolean{Value: leftValue != rightValue}
-	default:
-		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
-	}
-
-}
-
-func evalStringInfixExpression(left object.Object, operator string, right object.Object) object.Object {
-	leftValue := left.(*object.String).Value
-	rightValue := right.(*object.String).Value
-
-	switch operator {
-	case "+":
-		return &object.String{Value: leftValue + rightValue}
-	case ">":
-		return &object.Boolean{Value: leftValue > rightValue}
-	case "<":
-		return &object.Boolean{Value: leftValue < rightValue}
-	case "==":
-		return &object.Boolean{Value: leftValue == rightValue}
-	case "!=":
-		return &object.Boolean{Value: leftValue != rightValue}
-	default:
-		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
-	}
-}
-
-func evalIfExpression(exp *ast.IfExpression, env *object.Environment) object.Object {
-	condition := Eval(exp.Condition, env)
-	if isError(condition) {
-		return condition
-	}
-
-	if condition.Type() == object.INTEGER_OBJ || condition.(*object.Boolean).Value {
-		return Eval(exp.Consequence, env)
-	} else {
-		if exp.Alternative != nil {
-			return Eval(exp.Alternative, env)
-		} else {
-			return NULL
-		}
-	}
-}
-
-func evalClass(exp *ast.ClassStatement, env *object.Environment) object.Object {
-	class := &object.Class{Name: exp.Name}
-	classEnv := object.NewClosedEnvironment(env)
-	Eval(exp.Body, classEnv)
-
-	for method_name, method := range builtins(class) {
-		classEnv.Set(method_name, method)
-	}
-
-	class.Body = classEnv
-	env.Set(class.Name.Value, class)
-	return class
-}
-
-func evalDefStatement(exp *ast.DefStatement, env *object.Environment) object.Object {
-	method := &object.Method{Name: exp.Name.Value, Parameters: exp.Parameters, Body: exp.BlockStatement, Env: env}
-	env.Set("_method_"+method.Name, method)
-	return method
-}
-
-func applyFunction(receiver object.Object, method_name string, args []object.Object) object.Object {
+func sendMethodCall(receiver object.Object, method_name string, args []object.Object) object.Object {
 	switch receiver := receiver.(type) {
 	case *object.Class:
 		evaluated := evalClassMethod(receiver, method_name, args)
