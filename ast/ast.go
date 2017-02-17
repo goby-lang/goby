@@ -330,3 +330,15 @@ func (ce *CallExpression) String() string {
 
 	return out.String()
 }
+
+type SelfExpression struct {
+	Token token.Token
+}
+
+func (se *SelfExpression) expressionNode() {}
+func (se *SelfExpression) TokenLiteral() string {
+	return se.Token.Literal
+}
+func (se *SelfExpression) String() string {
+	return "self"
+}

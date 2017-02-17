@@ -278,3 +278,38 @@ func TestCallExpression(t *testing.T) {
 	testInfixExpression(t, callExpression.Arguments[1], 2, "*", 3)
 	testInfixExpression(t, callExpression.Arguments[2], 4, "+", 5)
 }
+
+func TestSelfCallExpression(t *testing.T) {
+	input := `
+		self.add(1, 2 * 3, 4 + 5);
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	callExpression := stmt.Expression.(*ast.CallExpression)
+
+	self, ok := callExpression.Receiver.(*ast.SelfExpression)
+	if !ok {
+		t.Fatalf("expect receiver to be SelfExpression. got=%T", callExpression.Receiver)
+	}
+
+	if self.TokenLiteral() != "self" {
+		t.Fatalf("expect SelfExpression's token literal to be 'self'. got=%s", self.TokenLiteral())
+	}
+
+	if !testIdentifier(t, callExpression.Method, "add") {
+		return
+	}
+
+	if len(callExpression.Arguments) != 3 {
+		t.Fatalf("expect %d arguments. got=%d", 3, len(callExpression.Arguments))
+	}
+
+	testIntegerLiteral(t, callExpression.Arguments[0], 1)
+	testInfixExpression(t, callExpression.Arguments[1], 2, "*", 3)
+	testInfixExpression(t, callExpression.Arguments[2], 4, "+", 5)
+}

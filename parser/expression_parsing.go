@@ -55,6 +55,10 @@ func (p *Parser) parseExpression(precendence int) ast.Expression {
 	return leftExp
 }
 
+func (p *Parser) parseSelfExpression() ast.Expression {
+	return &ast.SelfExpression{Token: p.curToken}
+}
+
 func (p *Parser) parseIdentifier() ast.Expression {
 	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 }
