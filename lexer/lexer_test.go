@@ -11,6 +11,9 @@ func TestNextToken(t *testing.T) {
 	let ten = 10;
 
 	class Person {
+		def initialize(a) {
+			let @a = a;
+		}
 	 	def add(x, y) {
 			x + y;
 		}
@@ -55,6 +58,18 @@ func TestNextToken(t *testing.T) {
 		{token.CLASS, "class"},
 		{token.CONSTANT, "Person"},
 		{token.LBRACE, "{"},
+		{token.DEF, "def"},
+		{token.IDENT, "initialize"},
+		{token.LPAREN, "("},
+		{token.IDENT, "a"},
+		{token.RPAREN, ")"},
+		{token.LBRACE, "{"},
+		{token.LET, "let"},
+		{token.INSTANCE_VARIABLE, "@a"},
+		{token.ASSIGN, "="},
+		{token.IDENT, "a"},
+		{token.SEMICOLON, ";"},
+		{token.RBRACE, "}"},
 		{token.DEF, "def"},
 		{token.IDENT, "add"},
 		{token.LPAREN, "("},

@@ -5,17 +5,6 @@ import (
 	"testing"
 )
 
-//func TestClosures(t *testing.T) {
-//	input := `
-//let newAdder = fn(x) {
-//  fn(y) { x + y };
-//};
-//
-//let addTwo = newAdder(2);
-//addTwo(2);`
-//	testIntegerObject(t, testEval(input), 4)
-//}
-
 func TestLetStatement(t *testing.T) {
 	tests := []struct {
 		input         string
@@ -26,6 +15,7 @@ func TestLetStatement(t *testing.T) {
 		{"let a = 5; let b = a; b;", 5},
 		{"let a = 5; let b = a; let c = a + b + 5; c;", 15},
 		{"let a = 5; let b = 10; let c = if (a > b) { 100; } else { 50; }", 50},
+		{"let Bar = 100; Bar", 100},
 	}
 
 	for _, tt := range tests {
@@ -113,7 +103,7 @@ func TestDefStatement(t *testing.T) {
 	}
 
 	for _, expectedMethod := range expectedMethods {
-		methodObj, ok := class.Body.Get("_method_" + expectedMethod.name)
+		methodObj, ok := class.InstanceMethods.Get(expectedMethod.name)
 		if !ok {
 			t.Errorf("expect class %s to have method %s.", class.Name, expectedMethod.name)
 		}

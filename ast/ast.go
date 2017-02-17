@@ -45,7 +45,7 @@ func (p *Program) String() string {
 
 type LetStatement struct {
 	Token token.Token
-	Name  *Identifier
+	Name  Variable
 	Value Expression
 }
 
@@ -83,7 +83,7 @@ func (ds *DefStatement) String() string {
 	var out bytes.Buffer
 
 	out.WriteString("def ")
-	out.WriteString(ds.Name.Value)
+	out.WriteString(ds.Name.TokenLiteral())
 	out.WriteString("(")
 
 	for i, param := range ds.Parameters {
@@ -115,38 +115,12 @@ func (cs *ClassStatement) String() string {
 	var out bytes.Buffer
 
 	out.WriteString("class ")
-	out.WriteString(cs.Name.Value)
+	out.WriteString(cs.Name.TokenLiteral())
 	out.WriteString(" {\n")
 	out.WriteString(cs.Body.String())
 	out.WriteString("\n}")
 
 	return out.String()
-}
-
-type Identifier struct {
-	Token token.Token
-	Value string
-}
-
-func (i *Identifier) expressionNode() {}
-func (i *Identifier) TokenLiteral() string {
-	return i.Token.Literal
-}
-func (i *Identifier) String() string {
-	return i.Value
-}
-
-type Constant struct {
-	Token token.Token
-	Value string
-}
-
-func (c *Constant) expressionNode() {}
-func (c *Constant) TokenLiteral() string {
-	return c.Token.Literal
-}
-func (c *Constant) String() string {
-	return c.Value
 }
 
 type ReturnStatement struct {

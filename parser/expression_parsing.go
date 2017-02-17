@@ -63,6 +63,10 @@ func (p *Parser) parseConstant() ast.Expression {
 	return &ast.Constant{Token: p.curToken, Value: p.curToken.Literal}
 }
 
+func (p *Parser) parseInstanceVariable() ast.Expression {
+	return &ast.InstanceVariable{Token: p.curToken, Value: p.curToken.Literal}
+}
+
 func (p *Parser) parseIntegerLiteral() ast.Expression {
 	lit := &ast.IntegerLiteral{Token: p.curToken}
 

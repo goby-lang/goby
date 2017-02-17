@@ -11,7 +11,7 @@ func builtins(c *object.Class) map[string]*object.BuiltInMethod {
 
 	bis["new"] = &object.BuiltInMethod{
 		Fn: func(args ...object.Object) object.Object {
-			return &object.BaseObject{Class: c}
+			return &object.BaseObject{Class: c, InstanceVariables: object.NewEnvironment()}
 		},
 		Des: "Initialize class's instance",
 	}

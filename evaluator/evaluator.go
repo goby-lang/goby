@@ -12,58 +12,56 @@ var (
 	NULL  = &object.Null{}
 )
 
-func Eval(node ast.Node, env *object.Environment) object.Object {
+func Eval(node ast.Node, scope *object.Scope) object.Object {
 	switch node := node.(type) {
 
 	// Statements
 	case *ast.Program:
-		return evalProgram(node.Statements, env)
+		return evalProgram(node.Statements, scope)
 	case *ast.ExpressionStatement:
-		return Eval(node.Expression, env)
+		return Eval(node.Expression, scope)
 	case *ast.BlockStatement:
-		return evalBlockStatements(node.Statements, env)
+		return evalBlockStatements(node.Statements, scope)
 	case *ast.ReturnStatement:
-		val := Eval(node.ReturnValue, env)
+		val := Eval(node.ReturnValue, scope)
 		if isError(val) {
 			return val
 		}
 		return &object.ReturnValue{Value: val}
 	case *ast.LetStatement:
-		val := Eval(node.Value, env)
-		if isError(val) {
-			return val
-		}
-		return env.Set(node.Name.Value, val)
+		return evalLetStatement(node, scope)
 	case *ast.ClassStatement:
-		return evalClass(node, env)
+		return evalClassStatement(node, scope)
 	case *ast.Identifier:
-		return evalIdentifier(node, env)
+		return evalIdentifier(node, scope)
 	case *ast.Constant:
-		return evalConstant(node, env)
+		return evalConstant(node, scope)
+	case *ast.InstanceVariable:
+		return evalInstanceVariable(node, scope)
 	case *ast.DefStatement:
-		return evalDefStatement(node, env)
+		return evalDefStatement(node, scope)
 
 	// Expressions
 	case *ast.IfExpression:
-		return evalIfExpression(node, env)
+		return evalIfExpression(node, scope)
 	case *ast.CallExpression:
-		receiver := Eval(node.Receiver, env)
-		args := evalArgs(node.Arguments, env)
-		return applyFunction(receiver, node.Method.Value, args)
+		receiver := Eval(node.Receiver, scope)
+		args := evalArgs(node.Arguments, scope)
+		return sendMethodCall(receiver, node.Method.Value, args)
 
 	case *ast.PrefixExpression:
-		val := Eval(node.Right, env)
+		val := Eval(node.Right, scope)
 		if isError(val) {
 			return val
 		}
 		return evalPrefixExpression(node.Operator, val)
 	case *ast.InfixExpression:
-		valLeft := Eval(node.Left, env)
+		valLeft := Eval(node.Left, scope)
 		if isError(valLeft) {
 			return valLeft
 		}
 
-		valRight := Eval(node.Right, env)
+		valRight := Eval(node.Right, scope)
 		if isError(valRight) {
 			return valRight
 		}
@@ -83,27 +81,11 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	return nil
 }
 
-func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object {
-	if val, ok := env.Get(node.Value); ok {
-		return val
-	}
-
-	return newError("identifier not found: %s", node.Value)
-}
-
-func evalConstant(node *ast.Constant, env *object.Environment) object.Object {
-	if val, ok := env.Get(node.Value); ok {
-		return val
-	}
-
-	return newError("constant not found: %s", node.Value)
-}
-
-func evalProgram(stmts []ast.Statement, env *object.Environment) object.Object {
+func evalProgram(stmts []ast.Statement, scope *object.Scope) object.Object {
 	var result object.Object
 
 	for _, statement := range stmts {
-		result = Eval(statement, env)
+		result = Eval(statement, scope)
 
 		switch result := result.(type) {
 		case *object.ReturnValue:
@@ -116,182 +98,23 @@ func evalProgram(stmts []ast.Statement, env *object.Environment) object.Object {
 	return result
 }
 
-func evalBlockStatements(stmts []ast.Statement, env *object.Environment) object.Object {
-	var result object.Object
-
-	for _, statement := range stmts {
-
-		result = Eval(statement, env)
-
-		if result != nil {
-			switch result := result.(type) {
-			case *object.ReturnValue:
-				return result
-			case *object.Error:
-				return result
-			}
-		}
-	}
-
-	return result
-}
-
-func evalPrefixExpression(operator string, right object.Object) object.Object {
-	switch operator {
-	case "!":
-		return evalBangPrefixExpression(right)
-	case "-":
-		return evalMinusPrefixExpression(right)
-	}
-	return newError("unknown operator: %s%s", operator, right.Type())
-}
-
-func evalBangPrefixExpression(right object.Object) *object.Boolean {
-	switch right {
-	case FALSE:
-		return TRUE
-	case NULL:
-		return TRUE
-	default:
-		return FALSE
-	}
-}
-
-func evalMinusPrefixExpression(right object.Object) object.Object {
-	if right.Type() != object.INTEGER_OBJ {
-		return newError("unknown operator: %s%s", "-", right.Type())
-	}
-	value := right.(*object.Integer).Value
-	return &object.Integer{Value: -value}
-}
-
-func evalInfixExpression(left object.Object, operator string, right object.Object) object.Object {
-	switch {
-	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
-		return evalIntegerInfixExpression(left, operator, right)
-	case left.Type() == object.BOOLEAN_OBJ && right.Type() == object.BOOLEAN_OBJ:
-		return evalBooleanInfixExpression(left, operator, right)
-	case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
-		return evalStringInfixExpression(left, operator, right)
-	default:
-		return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
-	}
-}
-
-func evalIntegerInfixExpression(left object.Object, operator string, right object.Object) object.Object {
-	leftValue := left.(*object.Integer).Value
-	rightValue := right.(*object.Integer).Value
-
-	switch operator {
-	case "+":
-		return &object.Integer{Value: leftValue + rightValue}
-	case "-":
-		return &object.Integer{Value: leftValue - rightValue}
-	case "*":
-		return &object.Integer{Value: leftValue * rightValue}
-	case "/":
-		return &object.Integer{Value: leftValue / rightValue}
-	case ">":
-		return &object.Boolean{Value: leftValue > rightValue}
-	case "<":
-		return &object.Boolean{Value: leftValue < rightValue}
-	case "==":
-		return &object.Boolean{Value: leftValue == rightValue}
-	case "!=":
-		return &object.Boolean{Value: leftValue != rightValue}
-	default:
-		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
-	}
-}
-
-func evalBooleanInfixExpression(left object.Object, operator string, right object.Object) object.Object {
-	leftValue := left.(*object.Boolean).Value
-	rightValue := right.(*object.Boolean).Value
-	switch operator {
-	case "==":
-		return &object.Boolean{Value: leftValue == rightValue}
-	case "!=":
-		return &object.Boolean{Value: leftValue != rightValue}
-	default:
-		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
-	}
-
-}
-
-func evalStringInfixExpression(left object.Object, operator string, right object.Object) object.Object {
-	leftValue := left.(*object.String).Value
-	rightValue := right.(*object.String).Value
-
-	switch operator {
-	case "+":
-		return &object.String{Value: leftValue + rightValue}
-	case ">":
-		return &object.Boolean{Value: leftValue > rightValue}
-	case "<":
-		return &object.Boolean{Value: leftValue < rightValue}
-	case "==":
-		return &object.Boolean{Value: leftValue == rightValue}
-	case "!=":
-		return &object.Boolean{Value: leftValue != rightValue}
-	default:
-		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
-	}
-}
-
-func evalIfExpression(exp *ast.IfExpression, env *object.Environment) object.Object {
-	condition := Eval(exp.Condition, env)
-	if isError(condition) {
-		return condition
-	}
-
-	if condition.Type() == object.INTEGER_OBJ || condition.(*object.Boolean).Value {
-		return Eval(exp.Consequence, env)
-	} else {
-		if exp.Alternative != nil {
-			return Eval(exp.Alternative, env)
-		} else {
-			return NULL
-		}
-	}
-}
-
-func evalClass(exp *ast.ClassStatement, env *object.Environment) object.Object {
-	class := &object.Class{Name: exp.Name}
-	classEnv := object.NewClosedEnvironment(env)
-	Eval(exp.Body, classEnv)
-
-	for method_name, method := range builtins(class) {
-		classEnv.Set(method_name, method)
-	}
-
-	class.Body = classEnv
-	env.Set(class.Name.Value, class)
-	return class
-}
-
-func evalDefStatement(exp *ast.DefStatement, env *object.Environment) object.Object {
-	method := &object.Method{Name: exp.Name.Value, Parameters: exp.Parameters, Body: exp.BlockStatement, Env: env}
-	env.Set("_method_"+method.Name, method)
-	return method
-}
-
-func applyFunction(receiver object.Object, method_name string, args []object.Object) object.Object {
+func sendMethodCall(receiver object.Object, method_name string, args []object.Object) object.Object {
 	switch receiver := receiver.(type) {
 	case *object.Class:
 		evaluated := evalClassMethod(receiver, method_name, args)
 
 		return unwrapReturnValue(evaluated)
 	case *object.BaseObject:
-
 		evaluated := evalInstanceMethod(receiver, method_name, args)
+
 		return unwrapReturnValue(evaluated)
 	default:
-		return newError("not a valid receiver: %s", receiver.Type())
+		return newError("not a valid receiver: %s", receiver.Inspect())
 	}
 }
 
-func evalClassMethod(receiver object.Object, method_name string, args []object.Object) object.Object {
-	method, ok := receiver.(*object.Class).Body.Get(method_name)
+func evalClassMethod(receiver *object.Class, method_name string, args []object.Object) object.Object {
+	method, ok := receiver.ClassMethods.Get(method_name)
 	if !ok {
 		return &object.Error{Message: fmt.Sprintf("undefined method %s for class %s", method_name, receiver.Inspect())}
 	}
@@ -303,7 +126,8 @@ func evalClassMethod(receiver object.Object, method_name string, args []object.O
 		}
 
 		methodEnv := extendMethodEnv(m, args)
-		return Eval(m.Body, methodEnv)
+		scope := &object.Scope{Self: receiver, Env: methodEnv}
+		return Eval(m.Body, scope)
 	case *object.BuiltInMethod:
 		return m.Fn(args...)
 	default:
@@ -312,10 +136,10 @@ func evalClassMethod(receiver object.Object, method_name string, args []object.O
 
 }
 
-func evalInstanceMethod(receiver object.Object, method_name string, args []object.Object) object.Object {
-	method, ok := receiver.(*object.BaseObject).Class.Body.Get("_method_" + method_name)
+func evalInstanceMethod(receiver *object.BaseObject, method_name string, args []object.Object) object.Object {
+	method, ok := receiver.Class.InstanceMethods.Get(method_name)
 	if !ok {
-		return &object.Error{Message: fmt.Sprintf("undefined method %s for class %s", method_name, receiver.Inspect())}
+		return &object.Error{Message: fmt.Sprintf("undefined instance method %s for class %s", method_name, receiver.Class.Inspect())}
 	}
 	switch m := method.(type) {
 	case *object.Method:
@@ -324,18 +148,19 @@ func evalInstanceMethod(receiver object.Object, method_name string, args []objec
 		}
 
 		methodEnv := extendMethodEnv(m, args)
-		return Eval(m.Body, methodEnv)
+		scope := &object.Scope{Self: receiver, Env: methodEnv}
+		return Eval(m.Body, scope)
 	default:
 		return newError("unknown method type")
 	}
 
 }
 
-func evalArgs(exps []ast.Expression, env *object.Environment) []object.Object {
+func evalArgs(exps []ast.Expression, scope *object.Scope) []object.Object {
 	args := []object.Object{}
 
 	for _, exp := range exps {
-		arg := Eval(exp, env)
+		arg := Eval(exp, scope)
 		args = append(args, arg)
 		if isError(arg) {
 			return []object.Object{arg}
@@ -346,7 +171,7 @@ func evalArgs(exps []ast.Expression, env *object.Environment) []object.Object {
 }
 
 func extendMethodEnv(method *object.Method, args []object.Object) *object.Environment {
-	e := object.NewClosedEnvironment(method.Env)
+	e := object.NewClosedEnvironment(method.Scope.Env)
 
 	for i, arg := range args {
 		argName := method.Parameters[i].Value
