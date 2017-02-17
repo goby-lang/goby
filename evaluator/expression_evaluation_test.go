@@ -21,6 +21,13 @@ func TestSelfExpression(t *testing.T) {
 
 			Bar.new.whoami;
 		`, object.BASE_OBJECT_OBJ},
+		{
+			`
+			class Foo {
+				self;
+			}
+			`,
+			object.CLASS_OBJ},
 	}
 
 	for _, tt := range tests {
