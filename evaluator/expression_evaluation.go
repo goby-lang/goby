@@ -145,5 +145,5 @@ func evalInstanceVariable(node *ast.InstanceVariable, env *object.Environment) o
 		return val
 	}
 
-	return newError("constant not found: %s", node.Value)
+	return newError("instance variable not found: %s", node.Value)
 }
