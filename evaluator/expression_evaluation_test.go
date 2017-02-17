@@ -17,10 +17,26 @@ func TestEvalInstanceVariable(t *testing.T) {
 			}
 		}
 
-		let f = Foo.new;
-		f.set(10);
-		f.get;
+		class Bar {
+			def set(x) {
+				let @x = x;
+			}
 
+			def get() {
+				@x
+			}
+		}
+
+		let f1 = Foo.new;
+		f1.set(10);
+
+		let f2 = Foo.new;
+		f2.set(21);
+
+		let b = Bar.new;
+		b.set(9)
+
+		f2.get() + f1.get() + b.get();
 	`
 
 	evaluated := testEval(t, input)
@@ -35,8 +51,8 @@ func TestEvalInstanceVariable(t *testing.T) {
 		t.Errorf("expect result to be an integer. got=%T", evaluated)
 	}
 
-	if result.Value != 10 {
-		t.Fatalf("expect result to be 10. got=%d", result.Value)
+	if result.Value != 40 {
+		t.Fatalf("expect result to be 40. got=%d", result.Value)
 	}
 }
 

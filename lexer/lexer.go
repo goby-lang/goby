@@ -119,7 +119,7 @@ func (l *Lexer) readNumber() string {
 
 func (l *Lexer) readIdentifier() string {
 	position := l.position
-	for isLetter(l.ch) {
+	for isLetter(l.ch) || isDigit(l.ch) {
 		l.readChar()
 	}
 	return l.input[position:l.position]
@@ -127,7 +127,7 @@ func (l *Lexer) readIdentifier() string {
 
 func (l *Lexer) readConstant() string {
 	position := l.position
-	for isLetter(l.ch) {
+	for isLetter(l.ch)|| isDigit(l.ch) {
 		l.readChar()
 	}
 	return l.input[position:l.position]
@@ -135,7 +135,7 @@ func (l *Lexer) readConstant() string {
 
 func (l *Lexer) readInstanceVariable() string {
 	position := l.position
-	for isLetter(l.ch) || isInstanceVariable(l.ch) {
+	for isLetter(l.ch) || isInstanceVariable(l.ch) || isDigit(l.ch) {
 		l.readChar()
 	}
 	return l.input[position:l.position]
