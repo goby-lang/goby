@@ -15,6 +15,10 @@ func TestEvalInstanceVariable(t *testing.T) {
 			def get() {
 				@x
 			}
+
+			def double_get() {
+				get() * 2;
+			}
 		}
 
 		class Bar {

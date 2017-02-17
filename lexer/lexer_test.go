@@ -17,6 +17,10 @@ func TestNextToken(t *testing.T) {
 	 	def add(x, y) {
 			x + y;
 		}
+
+		def ten() {
+			self.add(1, 9);
+		}
 	}
 
 	let p = Person.new;
@@ -58,6 +62,7 @@ func TestNextToken(t *testing.T) {
 		{token.CLASS, "class"},
 		{token.CONSTANT, "Person"},
 		{token.LBRACE, "{"},
+
 		{token.DEF, "def"},
 		{token.IDENT, "initialize"},
 		{token.LPAREN, "("},
@@ -70,6 +75,7 @@ func TestNextToken(t *testing.T) {
 		{token.IDENT, "a"},
 		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},
+
 		{token.DEF, "def"},
 		{token.IDENT, "add"},
 		{token.LPAREN, "("},
@@ -81,6 +87,22 @@ func TestNextToken(t *testing.T) {
 		{token.IDENT, "x"},
 		{token.PLUS, "+"},
 		{token.IDENT, "y"},
+		{token.SEMICOLON, ";"},
+		{token.RBRACE, "}"},
+
+		{token.DEF, "def"},
+		{token.IDENT, "ten"},
+		{token.LPAREN, "("},
+		{token.RPAREN, ")"},
+		{token.LBRACE, "{"},
+		{token.SELF, "self"},
+		{token.DOT, "."},
+		{token.IDENT, "add"},
+		{token.LPAREN, "("},
+		{token.INT, "1"},
+		{token.COMMA, ","},
+		{token.INT, "9"},
+		{token.RPAREN, ")"},
 		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},
 		{token.RBRACE, "}"},
