@@ -5,6 +5,37 @@ import (
 	"testing"
 )
 
+func TestSelfExpression(t *testing.T) {
+	tests := []struct {
+		input        string
+		expected_obj string
+	}{
+		{`self`, object.MAIN_OBJ},
+		{
+			`
+			class Bar {
+				def whoami() {
+					self
+				}
+			}
+
+			Bar.new.whoami;
+		`, object.BASE_OBJECT_OBJ},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
+		}
+
+		if string(evaluated.Type()) != tt.expected_obj {
+			t.Fatalf("expect self to return %s. got=%s", string(tt.expected_obj), evaluated.Type())
+		}
+	}
+}
+
 func TestEvalInstanceVariable(t *testing.T) {
 	input := `
 		class Foo {
@@ -17,7 +48,7 @@ func TestEvalInstanceVariable(t *testing.T) {
 			}
 
 			def double_get() {
-				get() * 2;
+				self.get() * 2;
 			}
 		}
 
@@ -35,12 +66,12 @@ func TestEvalInstanceVariable(t *testing.T) {
 		f1.set(10);
 
 		let f2 = Foo.new;
-		f2.set(21);
+		f2.set(20);
 
 		let b = Bar.new;
-		b.set(9)
+		b.set(10)
 
-		f2.get() + f1.get() + b.get();
+		f2.double_get() + f1.get() + b.get();
 	`
 
 	evaluated := testEval(t, input)
@@ -55,8 +86,8 @@ func TestEvalInstanceVariable(t *testing.T) {
 		t.Errorf("expect result to be an integer. got=%T", evaluated)
 	}
 
-	if result.Value != 40 {
-		t.Fatalf("expect result to be 40. got=%d", result.Value)
+	if result.Value != 60 {
+		t.Fatalf("expect result to be 60. got=%d", result.Value)
 	}
 }
 

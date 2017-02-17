@@ -67,6 +67,8 @@ func Eval(node ast.Node, scope *object.Scope) object.Object {
 		}
 
 		return evalInfixExpression(valLeft, node.Operator, valRight)
+	case *ast.SelfExpression:
+		return scope.Self
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
 	case *ast.StringLiteral:
