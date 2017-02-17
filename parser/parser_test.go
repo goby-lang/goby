@@ -27,12 +27,100 @@ func TestLetStatement(t *testing.T) {
 		checkParserErrors(t, p)
 
 		if program == nil {
-			t.Fatalf("ParseProgram() returned nil")
+			t.Fatal("ParseProgram() returned nil")
 		}
 
 		if !testLetStatement(t, program.Statements[0], tt.expectedIdentifier) {
 			return
 		}
+	}
+}
+
+func TestConstantAssignment(t *testing.T) {
+	input := `
+	let Foo = 5;
+	Foo;
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	// First statement
+	letStmt, ok := program.Statements[0].(*ast.LetStatement)
+	if !ok {
+		t.Fatalf("expect first statement to be LetStatement. got=%T", program.Statements[0])
+	}
+
+	variableName, ok := letStmt.Name.(*ast.Constant)
+	if !ok {
+		t.Fatalf("expect statement's name to be a constant. got=%T (%s)", letStmt.Name, letStmt.Name.String())
+	}
+
+	if variableName.Value != "Foo" {
+		t.Fatalf("expect variable's name to be %s. got=%s", "Foo", variableName.Value)
+	}
+
+	// Second statement
+
+	expStmt, ok := program.Statements[1].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("expect second statement to be ExpressionStatement. got=%T", program.Statements[1])
+	}
+
+	variable, ok := expStmt.Expression.(*ast.Constant)
+	if !ok {
+		t.Fatalf("expect expression to be a constant. got=%T", expStmt.Expression)
+	}
+
+	if variable.Value != "Foo" {
+		t.Fatalf("expect variable's name to be %s. got=%s", "Foo", variable.Value)
+	}
+}
+
+func TestInstanceVariableAssignment(t *testing.T) {
+	input := `
+	let @foo = 5;
+	@foo;
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	// First statement
+	letStmt, ok := program.Statements[0].(*ast.LetStatement)
+	if !ok {
+		t.Fatalf("expect first statement to be LetStatement. got=%T", program.Statements[0])
+	}
+
+	variableName, ok := letStmt.Name.(*ast.InstanceVariable)
+	if !ok {
+		t.Fatalf("expect statement's name to be an instance variable. got=%T (%s)", letStmt.Name, letStmt.Name.String())
+	}
+
+	if variableName.Value != "@foo" {
+		t.Fatalf("expect variable's name to be %s. got=%s", "@foo", variableName.Value)
+	}
+
+	// Second statement
+
+	expStmt, ok := program.Statements[1].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("expect second statement to be ExpressionStatement. got=%T", program.Statements[1])
+	}
+
+	variable, ok := expStmt.Expression.(*ast.InstanceVariable)
+	if !ok {
+		t.Fatalf("expect expression to be an instance variable. got=%T", expStmt.Expression)
+	}
+
+	if variable.Value != "@foo" {
+		t.Fatalf("expect variable's name to be %s. got=%s", "@foo", variable.Value)
 	}
 }
 
@@ -100,7 +188,7 @@ func TestClassStatement(t *testing.T) {
 
 	body, ok := defStmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
 	if !ok {
-		t.Errorf("expect body should be an expression statement. got=t", body)
+		t.Errorf("expect body should be an expression statement. got=%T", body)
 	}
 
 	if !testInfixExpression(t, body.Expression, "x", "+", "y") {
@@ -462,7 +550,7 @@ func TestIfExpression(t *testing.T) {
 	consequence, ok := exp.Consequence.Statements[0].(*ast.ExpressionStatement)
 
 	if !ok {
-		t.Errorf("expect consequence should be an expression statement. got=t", exp.Consequence.Statements[0])
+		t.Errorf("expect consequence should be an expression statement. got=%T", exp.Consequence.Statements[0])
 	}
 
 	if !testInfixExpression(t, consequence.Expression, "x", "+", 5) {
@@ -472,7 +560,7 @@ func TestIfExpression(t *testing.T) {
 	alternative, ok := exp.Alternative.Statements[0].(*ast.ExpressionStatement)
 
 	if !ok {
-		t.Errorf("expect alternative should be an expression statement. got=t", exp.Alternative.Statements[0])
+		t.Errorf("expect alternative should be an expression statement. got=%T", exp.Alternative.Statements[0])
 	}
 
 	if !testInfixExpression(t, alternative.Expression, "y", "+", 4) {
@@ -677,7 +765,7 @@ func testInfixExpression(
 ) bool {
 	opExp, ok := exp.(*ast.InfixExpression)
 	if !ok {
-		t.Errorf("exp is not ast.OperatorExpression. got=%T", exp, exp)
+		t.Errorf("exp is not %T. got=%T", exp, exp)
 		return false
 	}
 

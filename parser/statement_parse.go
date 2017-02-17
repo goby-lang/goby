@@ -92,11 +92,21 @@ func (p *Parser) parseParameters() []*ast.Identifier {
 func (p *Parser) parseLetStatement() *ast.LetStatement {
 	stmt := &ast.LetStatement{Token: p.curToken}
 
-	if !p.expectPeek(token.IDENT) {
+	if !p.peekTokenIs(token.IDENT) && !p.peekTokenIs(token.INSTANCE_VARIABLE) && !p.peekTokenIs(token.CONSTANT) {
+		p.peekError(p.peekToken.Type)
 		return nil
 	}
 
-	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	p.nextToken()
+
+	switch p.curToken.Type {
+	case token.IDENT:
+		stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	case token.CONSTANT:
+		stmt.Name = &ast.Constant{Token: p.curToken, Value: p.curToken.Literal}
+	case token.INSTANCE_VARIABLE:
+		stmt.Name = &ast.InstanceVariable{Token: p.curToken, Value: p.curToken.Literal}
+	}
 
 	if !p.expectPeek(token.ASSIGN) {
 		return nil
