@@ -33,13 +33,15 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		if isError(val) {
 			return val
 		}
-		return env.Set(node.Name.Value, val)
+		return env.Set(node.Name.TokenLiteral(), val)
 	case *ast.ClassStatement:
 		return evalClass(node, env)
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
 	case *ast.Constant:
 		return evalConstant(node, env)
+	case *ast.InstanceVariable:
+		return evalInstanceVariable(node, env)
 	case *ast.DefStatement:
 		return evalDefStatement(node, env)
 
@@ -92,6 +94,13 @@ func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object
 }
 
 func evalConstant(node *ast.Constant, env *object.Environment) object.Object {
+	if val, ok := env.Get(node.Value); ok {
+		return val
+	}
+
+	return newError("constant not found: %s", node.Value)
+}
+func evalInstanceVariable(node *ast.InstanceVariable, env *object.Environment) object.Object {
 	if val, ok := env.Get(node.Value); ok {
 		return val
 	}
