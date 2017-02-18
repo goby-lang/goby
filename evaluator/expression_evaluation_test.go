@@ -102,6 +102,49 @@ func TestEvalInstanceVariable(t *testing.T) {
 
 func TestEvalInstanceMethodCall(t *testing.T) {
 	input := `
+
+		class Bar {
+			def set(x) {
+				let @x = x;
+			}
+		}
+
+		class Foo < Bar {
+			def add(x, y) {
+				x + y
+			}
+		}
+
+		class FooBar < Foo {
+			def get() {
+				@x
+			}
+		}
+
+		let fb = FooBar.new;
+		fb.set(100);
+		fb.add(10, fb.get());
+	`
+
+	evaluated := testEval(t, input)
+
+	if isError(evaluated) {
+		t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
+	}
+
+	result, ok := evaluated.(*object.Integer)
+
+	if !ok {
+		t.Errorf("expect result to be an integer. got=%T", evaluated)
+	}
+
+	if result.Value != 110 {
+		t.Errorf("expect result to be 110. got=%d", result.Value)
+	}
+}
+
+func TestEvalClassInheritance(t *testing.T) {
+	input := `
 		class Foo {
 			def add(x, y) {
 				x + y
