@@ -102,9 +102,10 @@ func (ds *DefStatement) String() string {
 }
 
 type ClassStatement struct {
-	Token token.Token
-	Name  *Constant
-	Body  *BlockStatement
+	Token      token.Token
+	Name       *Constant
+	Body       *BlockStatement
+	SuperClass *Constant
 }
 
 func (cs *ClassStatement) statementNode() {}
