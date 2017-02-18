@@ -24,8 +24,10 @@ func TestSelfExpression(t *testing.T) {
 		{
 			`
 			class Foo {
-				self;
+				let Self = self;
 			}
+
+			Self;
 			`,
 			object.CLASS_OBJ},
 	}
