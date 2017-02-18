@@ -117,8 +117,13 @@ func sendMethodCall(receiver object.Object, method_name string, args []object.Ob
 
 func evalClassMethod(receiver *object.Class, method_name string, args []object.Object) object.Object {
 	method, ok := receiver.ClassMethods.Get(method_name)
+
 	if !ok {
-		return &object.Error{Message: fmt.Sprintf("undefined method %s for class %s", method_name, receiver.Inspect())}
+		if receiver.SuperClass == nil {
+			return &object.Error{Message: fmt.Sprintf("undefined method %s for class %s", method_name, receiver.Inspect())}
+		} else {
+			method = evalClassMethod(receiver.SuperClass, method_name, args)
+		}
 	}
 
 	switch m := method.(type) {
@@ -143,7 +148,6 @@ func evalInstanceMethod(receiver *object.BaseObject, method_name string, args []
 	method, ok := class.InstanceMethods.Get(method_name)
 
 	if !ok {
-
 		for class != nil {
 			method, ok = class.InstanceMethods.Get(method_name)
 
