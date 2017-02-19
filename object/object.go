@@ -132,6 +132,7 @@ type Class struct {
 	Scope           *Scope
 	InstanceMethods *Environment
 	ClassMethods    *Environment
+	SuperClass      *Class
 }
 
 func (c *Class) Type() ObjectType {

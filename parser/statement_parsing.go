@@ -53,6 +53,13 @@ func (p *Parser) parseClassStatement() *ast.ClassStatement {
 
 	stmt.Name = &ast.Constant{Token: p.curToken, Value: p.curToken.Literal}
 
+	// See if there is any inheritance
+	if p.peekTokenIs(token.LT) {
+		p.nextToken() // <
+		p.nextToken() // Inherited class like 'Bar'
+		stmt.SuperClass = &ast.Constant{Token: p.curToken, Value: p.curToken.Literal}
+	}
+
 	if !p.expectPeek(token.LBRACE) {
 		return nil
 	}

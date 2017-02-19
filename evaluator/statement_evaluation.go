@@ -61,12 +61,25 @@ func evalBlockStatements(stmts []ast.Statement, scope *object.Scope) object.Obje
 }
 
 func evalClassStatement(exp *ast.ClassStatement, scope *object.Scope) object.Object {
-	class := &object.Class{Name: exp.Name, Scope: scope, ClassMethods: object.NewEnvironment(), InstanceMethods: object.NewEnvironment()}
+	class := &object.Class{Name: exp.Name, Scope: scope, ClassMethods: object.NewEnvironment(), InstanceMethods: object.NewEnvironment(), SuperClass: nil}
 
+	// Evaluate superclass
+	if exp.SuperClass != nil {
+		constant := evalConstant(exp.SuperClass, scope)
+		inheritedClass, ok := constant.(*object.Class)
+
+		if !ok {
+			newError("Constant %s is not a class. got=%T", exp.SuperClass.Value, constant)
+		}
+
+		class.SuperClass = inheritedClass
+	}
+
+	// Create scope for this class
 	classEnv := object.NewClosedEnvironment(scope.Env)
 	classScope := &object.Scope{Env: classEnv, Self: class}
 
-	Eval(exp.Body, classScope)
+	Eval(exp.Body, classScope) // Eval class's content
 
 	// Class's built in methods like `new`
 	for method_name, method := range builtins(class) {

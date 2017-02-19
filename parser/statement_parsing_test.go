@@ -195,6 +195,45 @@ func TestClassStatement(t *testing.T) {
 	}
 }
 
+func TestClassStatementWithInheritance(t *testing.T) {
+	input := `
+	class Foo < Bar {
+		def bar(x, y) {
+			x + y;
+		}
+	}
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt := program.Statements[0].(*ast.ClassStatement)
+
+	if stmt.Token.Type != token.CLASS {
+		t.Fatalf("expect token to be CLASS. got=%T", stmt.Token)
+	}
+
+	testConstant(t, stmt.Name, "Foo")
+	testConstant(t, stmt.SuperClass, "Bar")
+
+	defStmt := stmt.Body.Statements[0].(*ast.DefStatement)
+
+	testIdentifier(t, defStmt.Name, "bar")
+	testIdentifier(t, defStmt.Parameters[0], "x")
+	testIdentifier(t, defStmt.Parameters[1], "y")
+
+	body, ok := defStmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Errorf("expect body should be an expression statement. got=%T", body)
+	}
+
+	if !testInfixExpression(t, body.Expression, "x", "+", "y") {
+		return
+	}
+}
+
 func TestDefStatement(t *testing.T) {
 	input := `
 		def add(x, y) {

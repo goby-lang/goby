@@ -117,8 +117,13 @@ func sendMethodCall(receiver object.Object, method_name string, args []object.Ob
 
 func evalClassMethod(receiver *object.Class, method_name string, args []object.Object) object.Object {
 	method, ok := receiver.ClassMethods.Get(method_name)
+
 	if !ok {
-		return &object.Error{Message: fmt.Sprintf("undefined method %s for class %s", method_name, receiver.Inspect())}
+		if receiver.SuperClass == nil {
+			return &object.Error{Message: fmt.Sprintf("undefined method %s for class %s", method_name, receiver.Inspect())}
+		} else {
+			method = evalClassMethod(receiver.SuperClass, method_name, args)
+		}
 	}
 
 	switch m := method.(type) {
@@ -139,10 +144,28 @@ func evalClassMethod(receiver *object.Class, method_name string, args []object.O
 }
 
 func evalInstanceMethod(receiver *object.BaseObject, method_name string, args []object.Object) object.Object {
-	method, ok := receiver.Class.InstanceMethods.Get(method_name)
+	class := receiver.Class
+	method, ok := class.InstanceMethods.Get(method_name)
+
 	if !ok {
-		return &object.Error{Message: fmt.Sprintf("undefined instance method %s for class %s", method_name, receiver.Class.Inspect())}
+		for class != nil {
+			method, ok = class.InstanceMethods.Get(method_name)
+
+			if !ok {
+				// search superclass's superclass
+				class = class.SuperClass
+
+				// but if no more superclasses, return an error.
+				if class == nil {
+					return &object.Error{Message: fmt.Sprintf("undefined instance method %s for class %s", method_name, receiver.Class.Inspect())}
+				}
+			} else {
+				// stop looping
+				class = nil
+			}
+		}
 	}
+
 	switch m := method.(type) {
 	case *object.Method:
 		if len(m.Parameters) != len(args) {
