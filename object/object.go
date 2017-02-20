@@ -68,20 +68,15 @@ func (m *Method) Inspect() string {
 	return out.String()
 }
 
-type Class struct {
-	Name            *ast.Constant
-	Scope           *Scope
-	InstanceMethods *Environment
-	ClassMethods    *Environment
-	SuperClass      *Class
-}
+func (m *Method) ExtendEnv(args []Object) *Environment {
+	e := NewClosedEnvironment(m.Scope.Env)
 
-func (c *Class) Type() ObjectType {
-	return CLASS_OBJ
-}
+	for i, arg := range args {
+		argName := m.Parameters[i].Value
+		e.Set(argName, arg)
+	}
 
-func (c *Class) Inspect() string {
-	return "<Class:" + c.Name.Value + ">"
+	return e
 }
 
 type Main struct {

@@ -116,15 +116,7 @@ func sendMethodCall(receiver object.Object, method_name string, args []object.Ob
 }
 
 func evalClassMethod(receiver *object.Class, method_name string, args []object.Object) object.Object {
-	method, ok := receiver.ClassMethods.Get(method_name)
-
-	if !ok {
-		if receiver.SuperClass == nil {
-			return &object.Error{Message: fmt.Sprintf("undefined method %s for class %s", method_name, receiver.Inspect())}
-		} else {
-			method = evalClassMethod(receiver.SuperClass, method_name, args)
-		}
-	}
+	method := receiver.LookupClassMethod(method_name, args)
 
 	switch m := method.(type) {
 	case *object.Method:
@@ -132,7 +124,7 @@ func evalClassMethod(receiver *object.Class, method_name string, args []object.O
 			return newError("wrong arguments: expect=%d, got=%d", len(m.Parameters), len(args))
 		}
 
-		methodEnv := extendMethodEnv(m, args)
+		methodEnv := m.ExtendEnv(args)
 		scope := &object.Scope{Self: receiver, Env: methodEnv}
 		return Eval(m.Body, scope)
 	case *object.BuiltInMethod:
@@ -144,27 +136,7 @@ func evalClassMethod(receiver *object.Class, method_name string, args []object.O
 }
 
 func evalInstanceMethod(receiver *object.BaseObject, method_name string, args []object.Object) object.Object {
-	class := receiver.Class
-	method, ok := class.InstanceMethods.Get(method_name)
-
-	if !ok {
-		for class != nil {
-			method, ok = class.InstanceMethods.Get(method_name)
-
-			if !ok {
-				// search superclass's superclass
-				class = class.SuperClass
-
-				// but if no more superclasses, return an error.
-				if class == nil {
-					return &object.Error{Message: fmt.Sprintf("undefined instance method %s for class %s", method_name, receiver.Class.Inspect())}
-				}
-			} else {
-				// stop looping
-				class = nil
-			}
-		}
-	}
+	method := receiver.Class.LookUpInstanceMethod(method_name, args)
 
 	switch m := method.(type) {
 	case *object.Method:
@@ -172,13 +144,12 @@ func evalInstanceMethod(receiver *object.BaseObject, method_name string, args []
 			return newError("wrong arguments: expect=%d, got=%d", len(m.Parameters), len(args))
 		}
 
-		methodEnv := extendMethodEnv(m, args)
+		methodEnv := m.ExtendEnv(args)
 		scope := &object.Scope{Self: receiver, Env: methodEnv}
 		return Eval(m.Body, scope)
 	default:
 		return newError("unknown method type")
 	}
-
 }
 
 func evalArgs(exps []ast.Expression, scope *object.Scope) []object.Object {
@@ -193,17 +164,6 @@ func evalArgs(exps []ast.Expression, scope *object.Scope) []object.Object {
 	}
 
 	return args
-}
-
-func extendMethodEnv(method *object.Method, args []object.Object) *object.Environment {
-	e := object.NewClosedEnvironment(method.Scope.Env)
-
-	for i, arg := range args {
-		argName := method.Parameters[i].Value
-		e.Set(argName, arg)
-	}
-
-	return e
 }
 
 func newError(format string, args ...interface{}) *object.Error {
