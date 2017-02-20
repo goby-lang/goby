@@ -1,9 +1,11 @@
 package parser
 
 import (
+	"fmt"
 	"github.com/st0012/rooby/ast"
 	"github.com/st0012/rooby/lexer"
 	"github.com/st0012/rooby/token"
+	"strings"
 )
 
 type Parser struct {
@@ -73,4 +75,13 @@ func (p *Parser) ParseProgram() *ast.Program {
 
 func (p *Parser) Errors() []string {
 	return p.errors
+}
+
+func (p *Parser) CheckErrors() {
+	errors := p.Errors()
+	if len(errors) == 0 {
+		return
+	}
+
+	fmt.Errorf(strings.Join(errors, "\n"))
 }

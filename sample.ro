@@ -1,0 +1,11 @@
+class Foo {
+    def initialize(x) {
+        let @x = x;
+    }
+
+    def x() {
+        @x
+    }
+}
+
+Foo.new(100).x;
