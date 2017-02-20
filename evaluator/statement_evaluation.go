@@ -82,7 +82,7 @@ func evalClassStatement(exp *ast.ClassStatement, scope *object.Scope) object.Obj
 	Eval(exp.Body, classScope) // Eval class's content
 
 	// Class's built in methods like `new`
-	for method_name, method := range builtins(class) {
+	for method_name, method := range builtinClassMethods(class) {
 		class.ClassMethods.Set(method_name, method)
 	}
 

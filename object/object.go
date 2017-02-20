@@ -143,19 +143,6 @@ func (c *Class) Inspect() string {
 	return "<Class:" + c.Name.Value + ">"
 }
 
-type BaseObject struct {
-	Class             *Class
-	InstanceVariables *Environment
-}
-
-func (bo *BaseObject) Type() ObjectType {
-	return BASE_OBJECT_OBJ
-}
-
-func (bo *BaseObject) Inspect() string {
-	return "<Instance of: " + bo.Class.Name.Value + ">"
-}
-
 type Main struct {
 	Env *Environment
 }

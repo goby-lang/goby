@@ -143,6 +143,40 @@ func TestEvalInstanceMethodCall(t *testing.T) {
 	}
 }
 
+func TestEvalCustomInitializeMethod(t *testing.T) {
+	input := `
+		class Foo {
+			def initialize(x, y) {
+				let @x = x;
+				let @y = y;
+			}
+
+			def bar() {
+				@x + @y;
+			}
+		}
+
+		let f = Foo.new(10, 20);
+		f.bar;
+	`
+
+	evaluated := testEval(t, input)
+
+	if isError(evaluated) {
+		t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
+	}
+
+	result, ok := evaluated.(*object.Integer)
+
+	if !ok {
+		t.Errorf("expect result to be an integer. got=%T", evaluated)
+	}
+
+	if result.Value != 30 {
+		t.Errorf("expect result to be 30. got=%d", result.Value)
+	}
+}
+
 func TestEvalClassInheritance(t *testing.T) {
 	input := `
 		class Foo {
