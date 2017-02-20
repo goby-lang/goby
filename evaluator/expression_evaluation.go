@@ -17,12 +17,12 @@ func evalPrefixExpression(operator string, right object.Object) object.Object {
 
 func evalBangPrefixExpression(right object.Object) *object.Boolean {
 	switch right {
-	case FALSE:
-		return TRUE
-	case NULL:
-		return TRUE
+	case object.FALSE:
+		return object.TRUE
+	case object.NULL:
+		return object.TRUE
 	default:
-		return FALSE
+		return object.FALSE
 	}
 }
 
@@ -119,7 +119,7 @@ func evalIfExpression(exp *ast.IfExpression, scope *object.Scope) object.Object 
 		if exp.Alternative != nil {
 			return Eval(exp.Alternative, scope)
 		} else {
-			return NULL
+			return object.NULL
 		}
 	}
 }

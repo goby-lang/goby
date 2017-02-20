@@ -6,12 +6,6 @@ import (
 	"github.com/st0012/rooby/object"
 )
 
-var (
-	TRUE  = &object.Boolean{Value: true}
-	FALSE = &object.Boolean{Value: false}
-	NULL  = &object.Null{}
-)
-
 func Eval(node ast.Node, scope *object.Scope) object.Object {
 	switch node := node.(type) {
 
@@ -75,9 +69,9 @@ func Eval(node ast.Node, scope *object.Scope) object.Object {
 		return &object.String{Value: node.Value}
 	case *ast.Boolean:
 		if node.Value {
-			return TRUE
+			return object.TRUE
 		}
-		return FALSE
+		return object.FALSE
 	}
 
 	return nil

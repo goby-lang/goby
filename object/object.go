@@ -6,6 +6,13 @@ import (
 	"strings"
 )
 
+
+var (
+	TRUE  = &Boolean{Value: true}
+	FALSE = &Boolean{Value: false}
+	NULL  = &Null{}
+)
+
 type ObjectType string
 
 const (
@@ -77,18 +84,6 @@ func (m *Method) ExtendEnv(args []Object) *Environment {
 	}
 
 	return e
-}
-
-type Main struct {
-	Env *Environment
-}
-
-func (m *Main) Type() ObjectType {
-	return MAIN_OBJ
-}
-
-func (m *Main) Inspect() string {
-	return "Main Object"
 }
 
 type BuiltInMethod struct {
