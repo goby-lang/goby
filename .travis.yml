@@ -6,3 +6,9 @@ go:
   - 1.7.x
   - master
 
+notifications:
+  email:
+    recipients:
+      - stan001212@gmail.com
+    on_failure: change
+    on_success: never

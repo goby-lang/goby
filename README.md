@@ -1,5 +1,7 @@
 # rooby
 
+[![Build Status](https://travis-ci.org/st0012/rooby.svg?branch=master)](https://travis-ci.org/st0012/rooby)
+
 Rooby is a new object oriented language written in Go.
 
 ##  Sample snippet.
