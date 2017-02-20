@@ -104,9 +104,23 @@ func sendMethodCall(receiver object.Object, method_name string, args []object.Ob
 		evaluated := evalInstanceMethod(receiver, method_name, args)
 
 		return unwrapReturnValue(evaluated)
+	case *object.Main:
+		evaluated := evalGlobalMethod(receiver, method_name, args)
+
+		return unwrapReturnValue(evaluated)
 	default:
 		return newError("not a valid receiver: %s", receiver.Inspect())
 	}
+}
+
+func evalGlobalMethod(receiver *object.Main, method_name string, args []object.Object) object.Object {
+	method, ok := receiver.Env.Get(method_name)
+
+	if !ok {
+		return newError("Unknown method %s for main object", method_name)
+	}
+
+	return method.(*object.BuiltInMethod).Fn(args...)
 }
 
 func evalClassMethod(receiver *object.Class, method_name string, args []object.Object) object.Object {

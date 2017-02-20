@@ -8,4 +8,4 @@ class Foo {
     }
 }
 
-Foo.new(100).x;
+self.puts(Foo.new(100).x);

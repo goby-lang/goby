@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/st0012/rooby/evaluator"
 	"github.com/st0012/rooby/lexer"
 	"github.com/st0012/rooby/object"
@@ -22,12 +21,9 @@ func main() {
 	program := p.ParseProgram()
 	p.CheckErrors()
 
-	env := object.NewEnvironment()
-	mainObj := &object.Main{Env: env}
-	scope := &object.Scope{Self: mainObj, Env: env}
-	result := evaluator.Eval(program, scope).Inspect()
-
-	fmt.Print(result)
+	mainObj := object.InitializeMainObject()
+	scope := &object.Scope{Self: mainObj, Env: mainObj.Env}
+	evaluator.Eval(program, scope).Inspect()
 }
 
 func check(e error) {
