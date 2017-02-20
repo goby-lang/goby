@@ -33,8 +33,8 @@ f2.get() + f1.get() + b.get(); #=> 40
 
 ## TODO
 
-1. Customize initialization method
-2. Inheritance
+1. ~~Customize initialization method~~
+2. ~~Inheritance~~
 3. REPL
 4. Advanced data structues (Array/Hash)
 5. Execution command
