@@ -3,6 +3,7 @@ package object
 type BaseObject struct {
 	Class             *Class
 	InstanceVariables *Environment
+	Scope             *Scope
 }
 
 func (bo *BaseObject) Type() ObjectType {

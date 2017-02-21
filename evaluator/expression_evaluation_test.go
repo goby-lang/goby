@@ -10,7 +10,7 @@ func TestSelfExpression(t *testing.T) {
 		input        string
 		expected_obj string
 	}{
-		{`self`, object.MAIN_OBJ},
+		{`self`, object.BASE_OBJECT_OBJ},
 		{
 			`
 			class Bar {
@@ -25,9 +25,13 @@ func TestSelfExpression(t *testing.T) {
 			`
 			class Foo {
 				let Self = self;
+
+				def get_self() {
+					Self
+				}
 			}
 
-			Self;
+			Foo.new.get_self;
 			`,
 			object.CLASS_OBJ},
 	}

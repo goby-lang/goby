@@ -2,8 +2,10 @@ class Foo {
     def initialize(x) {
         let @x = x;
     }
+    self.puts(22223);
 
     def x() {
+        self.puts(123);
         @x
     }
 }

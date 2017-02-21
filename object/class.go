@@ -11,6 +11,7 @@ type Class struct {
 	InstanceMethods *Environment
 	ClassMethods    *Environment
 	SuperClass      *Class
+	Class           *Class
 }
 
 func (c *Class) Type() ObjectType {
@@ -39,6 +40,7 @@ func (c *Class) LookUpInstanceMethod(method_name string, args []Object) Object {
 	method, ok := c.InstanceMethods.Get(method_name)
 
 	if !ok {
+
 		for c != nil {
 			method, ok = c.InstanceMethods.Get(method_name)
 

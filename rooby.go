@@ -22,8 +22,7 @@ func main() {
 	p.CheckErrors()
 
 	mainObj := object.InitializeMainObject()
-	scope := &object.Scope{Self: mainObj, Env: mainObj.Env}
-	evaluator.Eval(program, scope).Inspect()
+	evaluator.Eval(program, mainObj.Scope)
 }
 
 func check(e error) {
