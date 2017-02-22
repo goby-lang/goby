@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/st0012/rooby/evaluator"
+	"github.com/st0012/rooby/initialize"
 	"github.com/st0012/rooby/lexer"
-	"github.com/st0012/rooby/object"
 	"github.com/st0012/rooby/parser"
 	"io/ioutil"
 	"os"
@@ -21,7 +21,7 @@ func main() {
 	program := p.ParseProgram()
 	p.CheckErrors()
 
-	mainObj := object.InitializeMainObject()
+	mainObj := initialize.InitializeMainObject()
 	evaluator.Eval(program, mainObj.Scope)
 }
 

@@ -27,7 +27,7 @@ func (c *Class) LookupClassMethod(method_name string, args []Object) Object {
 
 	if !ok {
 		if c.SuperClass == nil {
-			return &Error{Message: fmt.Sprintf("undefined method %s for class %s", method_name, c.Inspect())}
+			method = c.Class.LookupClassMethod(method_name, args)
 		} else {
 			method = c.SuperClass.LookupClassMethod(method_name, args)
 		}

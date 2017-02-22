@@ -2,6 +2,7 @@ package evaluator
 
 import (
 	"github.com/st0012/rooby/ast"
+	"github.com/st0012/rooby/initialize"
 	"github.com/st0012/rooby/object"
 )
 
@@ -54,7 +55,7 @@ func evalBlockStatements(stmts []ast.Statement, scope *object.Scope) object.Obje
 }
 
 func evalClassStatement(exp *ast.ClassStatement, scope *object.Scope) object.Object {
-	class := &object.Class{Name: exp.Name, Scope: scope, ClassMethods: object.NewEnvironment(), InstanceMethods: object.NewEnvironment(), SuperClass: object.ObjectClass, Class: object.ObjectClass}
+	class := initialize.InitializeClass(exp.Name, scope)
 
 	// Evaluate superclass
 	if exp.SuperClass != nil {
@@ -65,19 +66,11 @@ func evalClassStatement(exp *ast.ClassStatement, scope *object.Scope) object.Obj
 			newError("Constant %s is not a class. got=%T", exp.SuperClass.Value, constant)
 		}
 
+		inheritedClass.SuperClass = class.SuperClass
 		class.SuperClass = inheritedClass
 	}
 
-	// Create scope for this class
-	classEnv := object.NewClosedEnvironment(scope.Env)
-	classScope := &object.Scope{Env: classEnv, Self: class}
-
-	Eval(exp.Body, classScope) // Eval class's content
-
-	// Class's built in methods like `new`
-	for method_name, method := range builtinClassMethods(class) {
-		class.ClassMethods.Set(method_name, method)
-	}
+	Eval(exp.Body, class.Scope) // Eval class's content
 
 	scope.Env.Set(class.Name.Value, class)
 	return class
