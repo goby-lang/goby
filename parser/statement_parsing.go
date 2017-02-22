@@ -23,11 +23,30 @@ func (p *Parser) parseStatement() ast.Statement {
 func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 	stmt := &ast.DefStatement{Token: p.curToken}
 
-	if !p.expectPeek(token.IDENT) {
+	p.nextToken()
+
+	switch p.curToken.Type {
+	case token.IDENT:
+		if p.peekTokenIs(token.DOT) {
+			stmt.Receiver = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+			p.nextToken() // .
+			if !p.expectPeek(token.IDENT) {
+				return nil
+			}
+			stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+		} else {
+			stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+		}
+	case token.SELF:
+		stmt.Receiver = &ast.SelfExpression{Token: p.curToken}
+		p.nextToken() // .
+		if !p.expectPeek(token.IDENT) {
+			return nil
+		}
+		stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	default:
 		return nil
 	}
-
-	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 
 	if !p.expectPeek(token.LPAREN) {
 		return nil

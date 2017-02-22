@@ -36,12 +36,6 @@ var BuiltinClassMethods = map[string]*object.BuiltInMethod{
 	},
 }
 
-func InitializeInstance(c *object.Class) *object.BaseObject {
-	instance := &object.BaseObject{Class: c, InstanceVariables: object.NewEnvironment()}
-
-	return instance
-}
-
 func InitializeMainObject() *object.BaseObject {
 	obj := &object.BaseObject{Class: ObjectClass, InstanceVariables: object.NewEnvironment()}
 	scope := &object.Scope{Self: obj, Env: object.NewEnvironment()}
@@ -81,4 +75,10 @@ func InitializeClass(name *ast.Constant, scope *object.Scope) *object.Class {
 	class.Scope = classScope
 
 	return class
+}
+
+func InitializeInstance(c *object.Class) *object.BaseObject {
+	instance := &object.BaseObject{Class: c, InstanceVariables: object.NewEnvironment()}
+
+	return instance
 }

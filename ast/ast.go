@@ -71,6 +71,7 @@ func (ls *LetStatement) String() string {
 type DefStatement struct {
 	Token          token.Token
 	Name           *Identifier
+	Receiver       Expression
 	Parameters     []*Identifier
 	BlockStatement *BlockStatement
 }

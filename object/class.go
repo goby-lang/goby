@@ -33,6 +33,10 @@ func (c *Class) LookupClassMethod(method_name string, args []Object) Object {
 		}
 	}
 
+	if method == nil {
+		return &Error{Message: fmt.Sprintf("%s's class method %s is nil.", c.Inspect(), method_name)}
+	}
+
 	return method
 }
 
@@ -57,6 +61,10 @@ func (c *Class) LookUpInstanceMethod(method_name string, args []Object) Object {
 				c = nil
 			}
 		}
+	}
+
+	if method == nil {
+		return &Error{Message: fmt.Sprintf("%s's instance method %s is nil.", c.Inspect(), method_name)}
 	}
 
 	return method

@@ -132,6 +132,8 @@ func evalClassMethod(receiver *object.Class, method_name string, args []object.O
 			return instance
 		}
 		return m.Fn(args...)
+	case *object.Error:
+		return m
 	default:
 		return newError("unknown method type. method name: %s (%T)", method_name, m)
 	}
