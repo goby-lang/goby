@@ -97,11 +97,11 @@ func evalProgram(stmts []ast.Statement, scope *object.Scope) object.Object {
 func sendMethodCall(receiver object.Object, method_name string, args []object.Object) object.Object {
 	switch receiver := receiver.(type) {
 	case *object.Class:
-		evaluated := EvalClassMethod(receiver, method_name, args)
+		evaluated := evalClassMethod(receiver, method_name, args)
 
 		return unwrapReturnValue(evaluated)
 	case *object.BaseObject:
-		evaluated := EvalInstanceMethod(receiver, method_name, args)
+		evaluated := evalInstanceMethod(receiver, method_name, args)
 
 		return unwrapReturnValue(evaluated)
 	default:
@@ -109,7 +109,7 @@ func sendMethodCall(receiver object.Object, method_name string, args []object.Ob
 	}
 }
 
-func EvalClassMethod(receiver *object.Class, method_name string, args []object.Object) object.Object {
+func evalClassMethod(receiver *object.Class, method_name string, args []object.Object) object.Object {
 	method := receiver.LookupClassMethod(method_name, args)
 	switch m := method.(type) {
 	case *object.Method:
@@ -126,7 +126,7 @@ func EvalClassMethod(receiver *object.Class, method_name string, args []object.O
 		if method_name == "new" {
 			instance := m.Fn(args...).(*object.BaseObject)
 			if instance.RespondTo("initialize") {
-				EvalInstanceMethod(instance, "initialize", args[1:])
+				evalInstanceMethod(instance, "initialize", args[1:])
 			}
 
 			return instance
@@ -138,7 +138,7 @@ func EvalClassMethod(receiver *object.Class, method_name string, args []object.O
 
 }
 
-func EvalInstanceMethod(receiver *object.BaseObject, method_name string, args []object.Object) object.Object {
+func evalInstanceMethod(receiver *object.BaseObject, method_name string, args []object.Object) object.Object {
 	method := receiver.Class.LookUpInstanceMethod(method_name, args)
 
 	switch m := method.(type) {
