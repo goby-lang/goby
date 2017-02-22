@@ -33,11 +33,12 @@ f2.get() + f1.get() + b.get(); #=> 40
 
 ## TODO
 
-1. ~~Customize initialization method~~
-2. ~~Inheritance~~
-3. REPL
-4. Advanced data structues (Array/Hash)
-5. Execution command
-6. Basic IO
-7. More documentation
-8. Primitive type class
+- ~~Customize initialization method~~
+- ~~Inheritance~~
+- Definable class methods
+- REPL(Hard to be done)
+- Advanced data structues (Array/Hash)
+- ~~Execution command~~
+- Basic IO
+- More documentation
+- Primitive type class
