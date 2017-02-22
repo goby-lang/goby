@@ -5,6 +5,7 @@ import (
 	"github.com/st0012/rooby/object"
 	"github.com/st0012/rooby/parser"
 	"testing"
+	"github.com/st0012/rooby/initialize"
 )
 
 func testEval(t *testing.T, input string) object.Object {
@@ -12,9 +13,9 @@ func testEval(t *testing.T, input string) object.Object {
 	p := parser.New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
-	env := object.NewEnvironment()
-	mainObj := &object.Main{Env: env}
-	scope := &object.Scope{Self: mainObj, Env: env}
+
+	mainObj := initialize.InitializeMainObject()
+	scope := &object.Scope{Self: mainObj, Env: object.NewEnvironment()}
 
 	return Eval(program, scope)
 }

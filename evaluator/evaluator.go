@@ -104,28 +104,13 @@ func sendMethodCall(receiver object.Object, method_name string, args []object.Ob
 		evaluated := evalInstanceMethod(receiver, method_name, args)
 
 		return unwrapReturnValue(evaluated)
-	case *object.Main:
-		evaluated := evalGlobalMethod(receiver, method_name, args)
-
-		return unwrapReturnValue(evaluated)
 	default:
 		return newError("not a valid receiver: %s", receiver.Inspect())
 	}
 }
 
-func evalGlobalMethod(receiver *object.Main, method_name string, args []object.Object) object.Object {
-	method, ok := receiver.Env.Get(method_name)
-
-	if !ok {
-		return newError("Unknown method %s for main object", method_name)
-	}
-
-	return method.(*object.BuiltInMethod).Fn(args...)
-}
-
 func evalClassMethod(receiver *object.Class, method_name string, args []object.Object) object.Object {
 	method := receiver.LookupClassMethod(method_name, args)
-
 	switch m := method.(type) {
 	case *object.Method:
 		if len(m.Parameters) != len(args) {
@@ -136,9 +121,19 @@ func evalClassMethod(receiver *object.Class, method_name string, args []object.O
 		scope := &object.Scope{Self: receiver, Env: methodEnv}
 		return Eval(m.Body, scope)
 	case *object.BuiltInMethod:
+		args := append([]object.Object{receiver}, args...)
+
+		if method_name == "new" {
+			instance := m.Fn(args...).(*object.BaseObject)
+			if instance.RespondTo("initialize") {
+				evalInstanceMethod(instance, "initialize", args[1:])
+			}
+
+			return instance
+		}
 		return m.Fn(args...)
 	default:
-		return newError("unknown method type")
+		return newError("unknown method type. method name: %s (%T)", method_name, m)
 	}
 
 }
@@ -155,6 +150,9 @@ func evalInstanceMethod(receiver *object.BaseObject, method_name string, args []
 		methodEnv := m.ExtendEnv(args)
 		scope := &object.Scope{Self: receiver, Env: methodEnv}
 		return Eval(m.Body, scope)
+	case *object.BuiltInMethod:
+		args := append([]object.Object{receiver}, args...)
+		return m.Fn(args...)
 	default:
 		return newError("unknown method type")
 	}

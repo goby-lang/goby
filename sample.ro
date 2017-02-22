@@ -2,10 +2,12 @@ class Foo {
     def initialize(x) {
         let @x = x;
     }
+    self.puts(self);
 
     def x() {
+        self.puts(self);
         @x
     }
 }
 
-self.puts(Foo.new(100).x);
+self.puts(self);
