@@ -8,7 +8,7 @@ Rooby is a new object oriented language written in Go.
 ```
 class Foo {
   def set(x) {
-    let @x = x;
+    @x = x;
   }
   def get() {
     @x
@@ -16,17 +16,17 @@ class Foo {
 }
 class Bar {
   def set(x) {
-    let @x = x;
+    @x = x;
   }
   def get() {
     @x
   }
 }
-let f1 = Foo.new;
+f1 = Foo.new;
 f1.set(10);
-let f2 = Foo.new;
+f2 = Foo.new;
 f2.set(21);
-let b = Bar.new;
+b = Bar.new;
 b.set(9)
 f2.get() + f1.get() + b.get(); #=> 40
 ```
