@@ -1,19 +1,21 @@
 package lexer
 
-import "github.com/st0012/rooby/token"
+import (
+	"github.com/st0012/rooby/token"
+)
 
 type Lexer struct {
 	input        string
 	position     int
 	readPosition int
 	ch           byte
+	line 	     int
 }
 
 func New(input string) *Lexer {
 	l := &Lexer{input: input}
 	l.readChar()
 	return l
-
 }
 
 func (l *Lexer) NextToken() token.Token {
@@ -25,60 +27,64 @@ func (l *Lexer) NextToken() token.Token {
 	case '"', byte('\''):
 		tok.Literal = l.readString(l.ch)
 		tok.Type = token.STRING
+		tok.Line = l.line
 		return tok
 	case '=':
 		if l.peekChar() == '=' {
 			current_byte := l.ch
 			l.readChar()
-			tok = token.Token{Type: token.EQ, Literal: string(current_byte) + string(l.ch)}
+			tok = token.Token{Type: token.EQ, Literal: string(current_byte) + string(l.ch), Line: l.line}
 		} else {
-			tok = newToken(token.ASSIGN, l.ch)
+			tok = newToken(token.ASSIGN, l.ch, l.line)
 		}
 	case '-':
-		tok = newToken(token.MINUS, l.ch)
+		tok = newToken(token.MINUS, l.ch, l.line)
 	case '!':
 		if l.peekChar() == '=' {
 			current_byte := l.ch
 			l.readChar()
-			tok = token.Token{Type: token.NOT_EQ, Literal: string(current_byte) + string(l.ch)}
+			tok = token.Token{Type: token.NOT_EQ, Literal: string(current_byte) + string(l.ch), Line: l.line}
 		} else {
-			tok = newToken(token.BANG, l.ch)
+			tok = newToken(token.BANG, l.ch, l.line)
 		}
 	case '/':
-		tok = newToken(token.SLASH, l.ch)
+		tok = newToken(token.SLASH, l.ch, l.line)
 	case '*':
-		tok = newToken(token.ASTERISK, l.ch)
+		tok = newToken(token.ASTERISK, l.ch, l.line)
 	case '<':
-		tok = newToken(token.LT, l.ch)
+		tok = newToken(token.LT, l.ch, l.line)
 	case '>':
-		tok = newToken(token.GT, l.ch)
+		tok = newToken(token.GT, l.ch, l.line)
 	case ';':
-		tok = newToken(token.SEMICOLON, l.ch)
+		tok = newToken(token.SEMICOLON, l.ch, l.line)
 	case '(':
-		tok = newToken(token.LPAREN, l.ch)
+		tok = newToken(token.LPAREN, l.ch, l.line)
 	case ')':
-		tok = newToken(token.RPAREN, l.ch)
+		tok = newToken(token.RPAREN, l.ch, l.line)
 	case ',':
-		tok = newToken(token.COMMA, l.ch)
+		tok = newToken(token.COMMA, l.ch, l.line)
 	case '+':
-		tok = newToken(token.PLUS, l.ch)
+		tok = newToken(token.PLUS, l.ch, l.line)
 	case '{':
-		tok = newToken(token.LBRACE, l.ch)
+		tok = newToken(token.LBRACE, l.ch, l.line)
 	case '}':
-		tok = newToken(token.RBRACE, l.ch)
+		tok = newToken(token.RBRACE, l.ch, l.line)
 	case '.':
-		tok = newToken(token.DOT, l.ch)
+		tok = newToken(token.DOT, l.ch, l.line)
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF
+		tok.Line = l.line
 	default:
 		if isLetter(l.ch) {
 			if 'A' <= l.ch && l.ch <= 'Z' {
 				tok.Literal = l.readConstant()
 				tok.Type = token.CONSTANT
+				tok.Line = l.line
 			} else {
 				tok.Literal = l.readIdentifier()
 				tok.Type = token.LookupIdent(tok.Literal)
+				tok.Line = l.line
 			}
 
 			return tok
@@ -86,16 +92,18 @@ func (l *Lexer) NextToken() token.Token {
 			if isLetter(l.peekChar()) {
 				tok.Literal = l.readInstanceVariable()
 				tok.Type = token.INSTANCE_VARIABLE
+				tok.Line = l.line
 				return tok
 			}
 
-			return newToken(token.ILLEGAL, l.ch)
+			return newToken(token.ILLEGAL, l.ch, l.line)
 		} else if isDigit(l.ch) {
 			tok.Literal = l.readNumber()
 			tok.Type = token.INT
+			tok.Line = l.line
 			return tok
 		} else {
-			tok = newToken(token.ILLEGAL, l.ch)
+			tok = newToken(token.ILLEGAL, l.ch, l.line)
 		}
 	}
 
@@ -104,7 +112,10 @@ func (l *Lexer) NextToken() token.Token {
 }
 
 func (l *Lexer) skipWhitespace() {
-	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
+	for l.ch == ' ' || l.ch == '\t' || l.ch == '\r' || l.ch == '\n' {
+		if l.ch == '\n' {
+			l.line += 1
+		}
 		l.readChar()
 	}
 }
@@ -187,6 +198,6 @@ func isInstanceVariable(ch byte) bool {
 	return ch == '@'
 }
 
-func newToken(tokenType token.TokenType, ch byte) token.Token {
-	return token.Token{Type: tokenType, Literal: string(ch)}
+func newToken(tokenType token.TokenType, ch byte, line int) token.Token {
+	return token.Token{Type: tokenType, Literal: string(ch), Line: line}
 }
