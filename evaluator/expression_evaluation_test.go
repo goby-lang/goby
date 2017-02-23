@@ -5,6 +5,84 @@ import (
 	"testing"
 )
 
+func TestClassMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{
+			`
+			class Bar {
+				def self.foo() {
+					10
+				}
+			}
+			Bar.foo;
+			`,
+			10,
+		},
+		{
+			`
+			class Foo {
+				def self.foo() {
+					10
+				}
+			}
+
+			class Bar < Foo {}
+			Bar.foo;
+			`,
+			10,
+		},
+		{
+			`
+			class Foo {
+				def self.foo() {
+					10
+				}
+			}
+
+			class Bar < Foo {
+				def self.foo() {
+					100
+				}
+			}
+			Bar.foo;
+			`,
+			100,
+		},
+		{
+			`
+			class Bar {
+				def self.foo() {
+					self.bar();
+				}
+
+				def self.bar() {
+					100
+				}
+
+				def bar() {
+					1000
+				}
+			}
+			Bar.foo();
+			`,
+			100,
+		},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
+		}
+
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
 func TestSelfExpression(t *testing.T) {
 	tests := []struct {
 		input        string

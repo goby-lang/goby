@@ -84,6 +84,13 @@ func evalDefStatement(exp *ast.DefStatement, scope *object.Scope) object.Object 
 	}
 
 	method := &object.Method{Name: exp.Name.Value, Parameters: exp.Parameters, Body: exp.BlockStatement, Scope: scope}
-	class.InstanceMethods.Set(method.Name, method)
+
+	switch exp.Receiver.(type) {
+	case nil:
+		class.InstanceMethods.Set(method.Name, method)
+	case *ast.SelfExpression:
+		class.ClassMethods.Set(method.Name, method)
+	}
+
 	return method
 }
