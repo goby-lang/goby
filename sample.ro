@@ -1,13 +1,28 @@
-class Foo {
-    def initialize(x) {
-        @x = x;
+class User {
+    def initialize(name, age) {
+        @name = name;
+        @age = age;
     }
-    self.puts(self);
 
-    def x() {
-        self.puts(self);
-        @x
+    def name {
+        @name
+    }
+
+    def age {
+        @age
+    }
+
+    def say_hi(user) {
+        @name + " says hi to " + user.name
+    }
+
+    def self.sum_age(user1, user2) {
+        user1.age() + user2.age()
     }
 }
 
-self.puts(self);
+stan = User.new("Stan", 22);
+john = User.new("John", 40);
+
+self.puts(User.sum_age(stan, john));
+self.puts(stan.say_hi(john));
