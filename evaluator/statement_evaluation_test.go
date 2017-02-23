@@ -5,17 +5,17 @@ import (
 	"testing"
 )
 
-func TestLetStatement(t *testing.T) {
+func TestAssignStatementEvaluation(t *testing.T) {
 	tests := []struct {
 		input         string
 		expectedValue int64
 	}{
-		{"let a = 5; a;", 5},
-		{"let a = 5 * 5; a;", 25},
-		{"let a = 5; let b = a; b;", 5},
-		{"let a = 5; let b = a; let c = a + b + 5; c;", 15},
-		{"let a = 5; let b = 10; let c = if (a > b) { 100; } else { 50; }", 50},
-		{"let Bar = 100; Bar", 100},
+		{"a = 5; a;", 5},
+		{"a = 5 * 5; a;", 25},
+		{"a = 5; b = a; b;", 5},
+		{"a = 5; b = a; c = a + b + 5; c;", 15},
+		{"a = 5; b = 10; c = if (a > b) { 100; } else { 50; }", 50},
+		{"Bar = 100; Bar", 100},
 	}
 
 	for _, tt := range tests {
@@ -24,7 +24,7 @@ func TestLetStatement(t *testing.T) {
 	}
 }
 
-func TestReturnStatements(t *testing.T) {
+func TestReturnStatementEvaluation(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected int64
@@ -165,10 +165,6 @@ func TestErrorHandling(t *testing.T) {
 			"foobar",
 			"identifier not found: foobar",
 		},
-		//{
-		//	"let add = fn(x, y) { x + y; }; add(1, 2, 3);",
-		//	"wrong arguments: expect=2, got=3",
-		//},
 	}
 
 	for _, tt := range tests {

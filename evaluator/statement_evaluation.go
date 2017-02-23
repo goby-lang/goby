@@ -6,7 +6,7 @@ import (
 	"github.com/st0012/rooby/object"
 )
 
-func evalLetStatement(stmt *ast.LetStatement, scope *object.Scope) object.Object {
+func evalAssignStatement(stmt *ast.AssignStatement, scope *object.Scope) object.Object {
 	value := Eval(stmt.Value, scope)
 
 	if isError(value) {
