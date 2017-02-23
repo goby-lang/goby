@@ -7,12 +7,12 @@ import (
 
 func TestNextToken(t *testing.T) {
 	input := `
-	let five = 5;
-	let ten = 10;
+	five = 5;
+	ten = 10;
 
 	class Person {
 		def initialize(a) {
-			let @a = a;
+			@a = a;
 		}
 
 	 	def add(x, y) {
@@ -24,8 +24,8 @@ func TestNextToken(t *testing.T) {
 		}
 	}
 
-	let p = Person.new;
-	let result = p.add(five, ten);
+	p = Person.new;
+	result = p.add(five, ten);
 
 	!-/*5;
 	5 < 10 >5;
@@ -49,12 +49,10 @@ func TestNextToken(t *testing.T) {
 		expectedLiteral string
 		expectedLine    int
 	}{
-		{token.LET, "let", 1},
 		{token.IDENT, "five", 1},
 		{token.ASSIGN, "=", 1},
 		{token.INT, "5", 1},
 		{token.SEMICOLON, ";", 1},
-		{token.LET, "let", 2},
 		{token.IDENT, "ten", 2},
 		{token.ASSIGN, "=", 2},
 		{token.INT, "10", 2},
@@ -70,7 +68,6 @@ func TestNextToken(t *testing.T) {
 		{token.IDENT, "a", 5},
 		{token.RPAREN, ")", 5},
 		{token.LBRACE, "{", 5},
-		{token.LET, "let", 6},
 		{token.INSTANCE_VARIABLE, "@a", 6},
 		{token.ASSIGN, "=", 6},
 		{token.IDENT, "a", 6},
@@ -108,14 +105,12 @@ func TestNextToken(t *testing.T) {
 		{token.RBRACE, "}", 15},
 		{token.RBRACE, "}", 16},
 
-		{token.LET, "let", 18},
 		{token.IDENT, "p", 18},
 		{token.ASSIGN, "=", 18},
 		{token.CONSTANT, "Person", 18},
 		{token.DOT, ".", 18},
 		{token.IDENT, "new", 18},
 		{token.SEMICOLON, ";", 18},
-		{token.LET, "let", 19},
 		{token.IDENT, "result", 19},
 		{token.ASSIGN, "=", 19},
 		{token.IDENT, "p", 19},

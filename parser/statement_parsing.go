@@ -7,8 +7,12 @@ import (
 
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
-	case token.LET:
-		return p.parseLetStatement()
+	case token.INSTANCE_VARIABLE, token.IDENT, token.CONSTANT:
+		if p.peekTokenIs(token.ASSIGN) {
+			return p.parseAssignStatement()
+		} else {
+			return p.parseExpressionStatement()
+		}
 	case token.RETURN:
 		return p.parseReturnStatement()
 	case token.DEF:
@@ -48,11 +52,16 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 		return nil
 	}
 
-	if !p.expectPeek(token.LPAREN) {
-		return nil
-	}
+	// def foo {}
+	if p.peekTokenIs(token.LBRACE) {
+		stmt.Parameters = []*ast.Identifier{}
+	} else {
+		if !p.expectPeek(token.LPAREN) {
+			return nil
+		}
 
-	stmt.Parameters = p.parseParameters()
+		stmt.Parameters = p.parseParameters()
+	}
 
 	if !p.expectPeek(token.LBRACE) {
 		return nil
@@ -115,15 +124,8 @@ func (p *Parser) parseParameters() []*ast.Identifier {
 	return identifiers
 }
 
-func (p *Parser) parseLetStatement() *ast.LetStatement {
-	stmt := &ast.LetStatement{Token: p.curToken}
-
-	if !p.peekTokenIs(token.IDENT) && !p.peekTokenIs(token.INSTANCE_VARIABLE) && !p.peekTokenIs(token.CONSTANT) {
-		p.peekError(p.peekToken.Type)
-		return nil
-	}
-
-	p.nextToken()
+func (p *Parser) parseAssignStatement() *ast.AssignStatement {
+	stmt := &ast.AssignStatement{Token: p.curToken}
 
 	switch p.curToken.Type {
 	case token.IDENT:

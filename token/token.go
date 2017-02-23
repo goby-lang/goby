@@ -41,7 +41,6 @@ const (
 	NOT_EQ = "!="
 
 	CLASS  = "CLASS"
-	LET    = "LET"
 	TRUE   = "TRUE"
 	FALSE  = "FALSE"
 	IF     = "IF"
@@ -54,7 +53,6 @@ const (
 var keyworkds = map[string]TokenType{
 	"class":  CLASS,
 	"def":    DEF,
-	"let":    LET,
 	"true":   TRUE,
 	"false":  FALSE,
 	"if":     IF,

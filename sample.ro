@@ -1,6 +1,6 @@
 class Foo {
     def initialize(x) {
-        let @x = x;
+        @x = x;
     }
     self.puts(self);
 

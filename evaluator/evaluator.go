@@ -22,8 +22,8 @@ func Eval(node ast.Node, scope *object.Scope) object.Object {
 			return val
 		}
 		return &object.ReturnValue{Value: val}
-	case *ast.LetStatement:
-		return evalLetStatement(node, scope)
+	case *ast.AssignStatement:
+		return evalAssignStatement(node, scope)
 	case *ast.ClassStatement:
 		return evalClassStatement(node, scope)
 	case *ast.Identifier:

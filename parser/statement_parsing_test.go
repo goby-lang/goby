@@ -7,15 +7,17 @@ import (
 	"testing"
 )
 
-func TestLetStatement(t *testing.T) {
+func TestAssignStatement(t *testing.T) {
 	tests := []struct {
 		input              string
 		expectedIdentifier string
 		expectedValue      interface{}
 	}{
-		{"let x = 5;", "x", 5},
-		{"let y = true;", "y", true},
-		{"let foobar = y;", "foobar", "y"},
+		{"x = 5;", "x", 5},
+		{"y = true;", "y", true},
+		{"foobar = y;", "foobar", "y"},
+		{"@foobar = y;", "@foobar", "y"},
+		{"Foo = '123';", "Foo", 10},
 	}
 
 	for _, tt := range tests {
@@ -29,15 +31,13 @@ func TestLetStatement(t *testing.T) {
 			t.Fatal("ParseProgram() returned nil")
 		}
 
-		if !testLetStatement(t, program.Statements[0], tt.expectedIdentifier) {
-			return
-		}
+		testAssignStatement(t, program.Statements[0], tt.expectedIdentifier, tt.expectedValue)
 	}
 }
 
 func TestConstantAssignment(t *testing.T) {
 	input := `
-	let Foo = 5;
+	Foo = 5;
 	Foo;
 	`
 
@@ -48,19 +48,7 @@ func TestConstantAssignment(t *testing.T) {
 	checkParserErrors(t, p)
 
 	// First statement
-	letStmt, ok := program.Statements[0].(*ast.LetStatement)
-	if !ok {
-		t.Fatalf("expect first statement to be LetStatement. got=%T", program.Statements[0])
-	}
-
-	variableName, ok := letStmt.Name.(*ast.Constant)
-	if !ok {
-		t.Fatalf("expect statement's name to be a constant. got=%T (%s)", letStmt.Name, letStmt.Name.String())
-	}
-
-	if variableName.Value != "Foo" {
-		t.Fatalf("expect variable's name to be %s. got=%s", "Foo", variableName.Value)
-	}
+	testAssignStatement(t, program.Statements[0], "Foo", 5)
 
 	// Second statement
 
@@ -81,7 +69,7 @@ func TestConstantAssignment(t *testing.T) {
 
 func TestInstanceVariableAssignment(t *testing.T) {
 	input := `
-	let @foo = 5;
+	@foo = 5;
 	@foo;
 	`
 
@@ -92,22 +80,9 @@ func TestInstanceVariableAssignment(t *testing.T) {
 	checkParserErrors(t, p)
 
 	// First statement
-	letStmt, ok := program.Statements[0].(*ast.LetStatement)
-	if !ok {
-		t.Fatalf("expect first statement to be LetStatement. got=%T", program.Statements[0])
-	}
-
-	variableName, ok := letStmt.Name.(*ast.InstanceVariable)
-	if !ok {
-		t.Fatalf("expect statement's name to be an instance variable. got=%T (%s)", letStmt.Name, letStmt.Name.String())
-	}
-
-	if variableName.Value != "@foo" {
-		t.Fatalf("expect variable's name to be %s. got=%s", "@foo", variableName.Value)
-	}
+	testAssignStatement(t, program.Statements[0], "@foo", 5)
 
 	// Second statement
-
 	expStmt, ok := program.Statements[1].(*ast.ExpressionStatement)
 	if !ok {
 		t.Fatalf("expect second statement to be ExpressionStatement. got=%T", program.Statements[1])
@@ -239,6 +214,10 @@ func TestDefStatement(t *testing.T) {
 		def add(x, y) {
 			x + y
 		}
+
+		def foo {
+			123;
+		}
 	`
 
 	l := lexer.New(input)
@@ -246,16 +225,29 @@ func TestDefStatement(t *testing.T) {
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
-	stmt := program.Statements[0].(*ast.DefStatement)
+	firstStmt := program.Statements[0].(*ast.DefStatement)
 
-	if stmt.Token.Type != token.DEF {
-		t.Fatalf("expect DefStatement's token to be 'DEF'. got=%T", stmt.Token.Type)
+	if firstStmt.Token.Type != token.DEF {
+		t.Fatalf("expect DefStatement's token to be 'DEF'. got=%T", firstStmt.Token.Type)
 	}
 
-	testLiteralExpression(t, stmt.Parameters[0], "x")
-	testLiteralExpression(t, stmt.Parameters[1], "y")
+	testLiteralExpression(t, firstStmt.Parameters[0], "x")
+	testLiteralExpression(t, firstStmt.Parameters[1], "y")
 
-	expressionStmt := stmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
+	firstExpressionStmt := firstStmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
 
-	testInfixExpression(t, expressionStmt.Expression, "x", "+", "y")
+	testInfixExpression(t, firstExpressionStmt.Expression, "x", "+", "y")
+
+	secondStmt := program.Statements[1].(*ast.DefStatement)
+
+	if secondStmt.Token.Type != token.DEF {
+		t.Fatalf("expect DefStatement's token to be 'DEF'. got=%T", secondStmt.Token.Type)
+	}
+
+	if len(secondStmt.Parameters) != 0 {
+		t.Fatalf("expect second method definition not having any parameters")
+	}
+
+	secondExpressionStmt := secondStmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
+	testIntegerLiteral(t, secondExpressionStmt.Expression, 123)
 }

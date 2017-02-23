@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestClassMethod(t *testing.T) {
+func TestClassMethodEvaluation(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected int64
@@ -13,7 +13,7 @@ func TestClassMethod(t *testing.T) {
 		{
 			`
 			class Bar {
-				def self.foo() {
+				def self.foo {
 					10
 				}
 			}
@@ -24,7 +24,7 @@ func TestClassMethod(t *testing.T) {
 		{
 			`
 			class Foo {
-				def self.foo() {
+				def self.foo {
 					10
 				}
 			}
@@ -37,13 +37,13 @@ func TestClassMethod(t *testing.T) {
 		{
 			`
 			class Foo {
-				def self.foo() {
+				def self.foo {
 					10
 				}
 			}
 
 			class Bar < Foo {
-				def self.foo() {
+				def self.foo {
 					100
 				}
 			}
@@ -54,15 +54,15 @@ func TestClassMethod(t *testing.T) {
 		{
 			`
 			class Bar {
-				def self.foo() {
+				def self.foo {
 					self.bar();
 				}
 
-				def self.bar() {
+				def self.bar {
 					100
 				}
 
-				def bar() {
+				def bar {
 					1000
 				}
 			}
@@ -83,7 +83,7 @@ func TestClassMethod(t *testing.T) {
 	}
 }
 
-func TestSelfExpression(t *testing.T) {
+func TestSelfExpressionEvaluation(t *testing.T) {
 	tests := []struct {
 		input        string
 		expected_obj string
@@ -92,7 +92,7 @@ func TestSelfExpression(t *testing.T) {
 		{
 			`
 			class Bar {
-				def whoami() {
+				def whoami {
 					self
 				}
 			}
@@ -102,9 +102,9 @@ func TestSelfExpression(t *testing.T) {
 		{
 			`
 			class Foo {
-				let Self = self;
+				Self = self;
 
-				def get_self() {
+				def get_self {
 					Self
 				}
 			}
@@ -131,35 +131,35 @@ func TestEvalInstanceVariable(t *testing.T) {
 	input := `
 		class Foo {
 			def set(x) {
-				let @x = x;
+				@x = x;
 			}
 
-			def get() {
+			def get {
 				@x
 			}
 
-			def double_get() {
+			def double_get {
 				self.get() * 2;
 			}
 		}
 
 		class Bar {
 			def set(x) {
-				let @x = x;
+				@x = x;
 			}
 
-			def get() {
+			def get {
 				@x
 			}
 		}
 
-		let f1 = Foo.new;
+		f1 = Foo.new;
 		f1.set(10);
 
-		let f2 = Foo.new;
+		f2 = Foo.new;
 		f2.set(20);
 
-		let b = Bar.new;
+		b = Bar.new;
 		b.set(10)
 
 		f2.double_get() + f1.get() + b.get();
@@ -187,7 +187,7 @@ func TestEvalInstanceMethodCall(t *testing.T) {
 
 		class Bar {
 			def set(x) {
-				let @x = x;
+				@x = x;
 			}
 		}
 
@@ -198,12 +198,12 @@ func TestEvalInstanceMethodCall(t *testing.T) {
 		}
 
 		class FooBar < Foo {
-			def get() {
+			def get {
 				@x
 			}
 		}
 
-		let fb = FooBar.new;
+		fb = FooBar.new;
 		fb.set(100);
 		fb.add(10, fb.get());
 	`
@@ -229,16 +229,16 @@ func TestEvalCustomInitializeMethod(t *testing.T) {
 	input := `
 		class Foo {
 			def initialize(x, y) {
-				let @x = x;
-				let @y = y;
+				@x = x;
+				@y = y;
 			}
 
-			def bar() {
+			def bar {
 				@x + @y;
 			}
 		}
 
-		let f = Foo.new(10, 20);
+		f = Foo.new(10, 20);
 		f.bar;
 	`
 
