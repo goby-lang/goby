@@ -239,6 +239,10 @@ func TestDefStatement(t *testing.T) {
 		def add(x, y) {
 			x + y
 		}
+
+		def foo {
+			123;
+		}
 	`
 
 	l := lexer.New(input)
@@ -246,16 +250,29 @@ func TestDefStatement(t *testing.T) {
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
-	stmt := program.Statements[0].(*ast.DefStatement)
+	firstStmt := program.Statements[0].(*ast.DefStatement)
 
-	if stmt.Token.Type != token.DEF {
-		t.Fatalf("expect DefStatement's token to be 'DEF'. got=%T", stmt.Token.Type)
+	if firstStmt.Token.Type != token.DEF {
+		t.Fatalf("expect DefStatement's token to be 'DEF'. got=%T", firstStmt.Token.Type)
 	}
 
-	testLiteralExpression(t, stmt.Parameters[0], "x")
-	testLiteralExpression(t, stmt.Parameters[1], "y")
+	testLiteralExpression(t, firstStmt.Parameters[0], "x")
+	testLiteralExpression(t, firstStmt.Parameters[1], "y")
 
-	expressionStmt := stmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
+	firstExpressionStmt := firstStmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
 
-	testInfixExpression(t, expressionStmt.Expression, "x", "+", "y")
+	testInfixExpression(t, firstExpressionStmt.Expression, "x", "+", "y")
+
+	secondStmt := program.Statements[1].(*ast.DefStatement)
+
+	if secondStmt.Token.Type != token.DEF {
+		t.Fatalf("expect DefStatement's token to be 'DEF'. got=%T", secondStmt.Token.Type)
+	}
+
+	if len(secondStmt.Parameters) != 0 {
+		t.Fatalf("expect second method definition not having any parameters")
+	}
+
+	secondExpressionStmt := secondStmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
+	testIntegerLiteral(t, secondExpressionStmt.Expression, 123)
 }

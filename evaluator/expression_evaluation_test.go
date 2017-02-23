@@ -13,7 +13,7 @@ func TestClassMethod(t *testing.T) {
 		{
 			`
 			class Bar {
-				def self.foo() {
+				def self.foo {
 					10
 				}
 			}
@@ -24,7 +24,7 @@ func TestClassMethod(t *testing.T) {
 		{
 			`
 			class Foo {
-				def self.foo() {
+				def self.foo {
 					10
 				}
 			}
@@ -37,13 +37,13 @@ func TestClassMethod(t *testing.T) {
 		{
 			`
 			class Foo {
-				def self.foo() {
+				def self.foo {
 					10
 				}
 			}
 
 			class Bar < Foo {
-				def self.foo() {
+				def self.foo {
 					100
 				}
 			}
@@ -54,15 +54,15 @@ func TestClassMethod(t *testing.T) {
 		{
 			`
 			class Bar {
-				def self.foo() {
+				def self.foo {
 					self.bar();
 				}
 
-				def self.bar() {
+				def self.bar {
 					100
 				}
 
-				def bar() {
+				def bar {
 					1000
 				}
 			}
@@ -92,7 +92,7 @@ func TestSelfExpression(t *testing.T) {
 		{
 			`
 			class Bar {
-				def whoami() {
+				def whoami {
 					self
 				}
 			}
@@ -104,7 +104,7 @@ func TestSelfExpression(t *testing.T) {
 			class Foo {
 				let Self = self;
 
-				def get_self() {
+				def get_self {
 					Self
 				}
 			}
@@ -134,11 +134,11 @@ func TestEvalInstanceVariable(t *testing.T) {
 				let @x = x;
 			}
 
-			def get() {
+			def get {
 				@x
 			}
 
-			def double_get() {
+			def double_get {
 				self.get() * 2;
 			}
 		}
@@ -148,7 +148,7 @@ func TestEvalInstanceVariable(t *testing.T) {
 				let @x = x;
 			}
 
-			def get() {
+			def get {
 				@x
 			}
 		}
@@ -198,7 +198,7 @@ func TestEvalInstanceMethodCall(t *testing.T) {
 		}
 
 		class FooBar < Foo {
-			def get() {
+			def get {
 				@x
 			}
 		}
@@ -233,7 +233,7 @@ func TestEvalCustomInitializeMethod(t *testing.T) {
 				let @y = y;
 			}
 
-			def bar() {
+			def bar {
 				@x + @y;
 			}
 		}

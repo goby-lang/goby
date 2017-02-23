@@ -61,7 +61,7 @@ func TestClassStatement(t *testing.T) {
 		{`class Foo {}`, "Foo"},
 		{
 			`class Foo {
-				def bar() {
+				def bar {
 					x;
 				}
 			}`, "Foo"},

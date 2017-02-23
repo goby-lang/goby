@@ -48,11 +48,16 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 		return nil
 	}
 
-	if !p.expectPeek(token.LPAREN) {
-		return nil
-	}
+	// def foo {}
+	if p.peekTokenIs(token.LBRACE) {
+		stmt.Parameters = []*ast.Identifier{}
+	} else {
+		if !p.expectPeek(token.LPAREN) {
+			return nil
+		}
 
-	stmt.Parameters = p.parseParameters()
+		stmt.Parameters = p.parseParameters()
+	}
 
 	if !p.expectPeek(token.LBRACE) {
 		return nil
