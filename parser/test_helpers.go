@@ -1,26 +1,30 @@
 package parser
 
 import (
-	"testing"
-	"github.com/st0012/rooby/ast"
 	"fmt"
+	"github.com/st0012/rooby/ast"
+	"testing"
 )
 
-func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
-	if s.TokenLiteral() != "let" {
-		t.Errorf("s.TokenLiteral not 'let. got=%q", s.TokenLiteral())
-		return false
-	}
-
-	letStmt, ok := s.(*ast.LetStatement)
+func testAssignStatement(t *testing.T, s ast.Statement, name string, value interface{}) bool {
+	as, ok := s.(*ast.AssignStatement)
 	if !ok {
-		t.Errorf("s not *ast.LetStatement. got=%T", s)
+		t.Errorf("s not *ast.AssignStatement. got=%T", s)
 		return false
 	}
 
-	if letStmt.Name.TokenLiteral() != name {
-		t.Errorf("s.Name not '%s'. got=%s", name, letStmt.Name)
+	if as.Name.TokenLiteral() != name {
+		t.Errorf("s.Name not '%s'. got=%s", name, as.Name)
 		return false
+	}
+
+	switch v := value.(type) {
+	case int64:
+		testIntegerLiteral(t, as.Value, v)
+	case string:
+		testIdentifier(t, as.Value, v)
+	case bool:
+		testBoolLiteral(t, as.Value, v)
 	}
 
 	return true
@@ -57,16 +61,16 @@ func testIntegerLiteral(t *testing.T, exp ast.Expression, value int64) bool {
 }
 
 func testStringLiteral(t *testing.T, exp ast.Expression, value string) bool {
-	il, ok := exp.(*ast.StringLiteral)
+	sl, ok := exp.(*ast.StringLiteral)
 	if !ok {
 		t.Errorf("expect exp to be StringLiteral. got=%T", exp)
 	}
-	if il.Value != value {
-		t.Errorf("il.Value is not %s. got=%s", value, il.Value)
+	if sl.Value != value {
+		t.Errorf("il.Value is not %s. got=%s", value, sl.Value)
 		return false
 	}
-	if il.TokenLiteral() != value {
-		t.Errorf("il.TokenLiteral not %s. got=%s", value, il.TokenLiteral())
+	if sl.TokenLiteral() != value {
+		t.Errorf("il.TokenLiteral not %s. got=%s", value, sl.TokenLiteral())
 		return false
 	}
 
@@ -112,11 +116,11 @@ func testConstant(t *testing.T, exp ast.Expression, value string) bool {
 }
 
 func testInfixExpression(
-t *testing.T,
-exp ast.Expression,
-left interface{},
-operator string,
-right interface{},
+	t *testing.T,
+	exp ast.Expression,
+	left interface{},
+	operator string,
+	right interface{},
 ) bool {
 	opExp, ok := exp.(*ast.InfixExpression)
 	if !ok {
@@ -158,9 +162,9 @@ func testBoolLiteral(t *testing.T, exp ast.Expression, v bool) bool {
 }
 
 func testLiteralExpression(
-t *testing.T,
-exp ast.Expression,
-expcted interface{},
+	t *testing.T,
+	exp ast.Expression,
+	expcted interface{},
 ) bool {
 	switch v := expcted.(type) {
 	case int:
