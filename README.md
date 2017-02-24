@@ -8,7 +8,7 @@ Rooby is a new object oriented language written in Go.
 ```ruby
 class Foo {
   def set(x) {
-    @x = x;
+    @x = x
   }
   def get {
     @x
@@ -16,26 +16,26 @@ class Foo {
 }
 class Bar {
   def set(x) {
-    @x = x;
+    @x = x
   }
   def get {
     @x
   }
 }
-f1 = Foo.new;
-f1.set(10);
-f2 = Foo.new;
-f2.set(21);
-b = Bar.new;
+f1 = Foo.new
+f1.set(10)
+f2 = Foo.new
+f2.set(21)
+b = Bar.new
 b.set(9)
-f2.get + f1.get + b.get; #=> 40
+f2.get + f1.get + b.get #=> 40
 ```
 
 ```ruby
 class User {
   def initialize(name, age) {
-      @name = name;
-      @age = age;
+      @name = name
+      @age = age
   }
 
   def name {
@@ -55,10 +55,29 @@ class User {
   }
 }
 
-stan = User.new("Stan", 22);
-john = User.new("John", 40);
-puts(User.sum_age(stan, john)); #=> 62
-stan.say_hi(john); #=> Stan says hi to John
+stan = User.new("Stan", 22)
+john = User.new("John", 40)
+puts(User.sum_age(stan, john)) #=> 62
+stan.say_hi(john) #=> Stan says hi to John
+```
+
+```ruby
+class JobPosition {
+  def initialize(name) {
+    @name = name
+  }
+
+  def name {
+    @name
+  }
+    
+  def self.engineer {
+    new("Engineer")
+  }
+}
+
+job = JobPosition.engineer
+puts(job.name) #=> "Engineer"
 ```
 
 ## TODO

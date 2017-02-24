@@ -1,0 +1,16 @@
+class JobPosition {
+    def initialize(name) {
+        @name = name
+    }
+
+    def name {
+        @name
+    }
+
+    def self.engineer {
+        new("Engineer")
+    }
+}
+
+job = JobPosition.engineer
+puts(job.name)
