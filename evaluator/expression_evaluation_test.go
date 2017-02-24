@@ -13,36 +13,36 @@ func TestMethodCallWithoutSelf(t *testing.T) {
 		{
 			`class Foo {
 				def set_x(x) {
-					@x = x;
+					@x = x
 				}
 
 				def foo {
 					set_x(10)
-					a = 10;
-					@x + a;
+					a = 10
+					@x + a
 				}
 			}
 
-			f = Foo.new;
-			f.foo;
+			f = Foo.new
+			f.foo
 			`,
 			20,
 		},
 		{
 			`class Foo {
 				def set_x(x) {
-					@x = x;
+					@x = x
 				}
 
 				def foo {
-					set_x(10 + 10 * 100);
-					a = 10;
-					@x + a;
+					set_x(10 + 10 * 100)
+					a = 10
+					@x + a
 				}
 			}
 
-			f = Foo.new;
-			f.foo;
+			f = Foo.new
+			f.foo
 			`,
 			1020,
 		},
@@ -54,12 +54,12 @@ func TestMethodCallWithoutSelf(t *testing.T) {
 
 				def foo {
 					bar = 100
-					10 + bar;
+					10 + bar
 				}
 			}
 
-			f = Foo.new;
-			f.foo;
+			f = Foo.new
+			f.foo
 			`,
 			110,
 		},
@@ -70,12 +70,12 @@ func TestMethodCallWithoutSelf(t *testing.T) {
 				}
 
 				def foo {
-					a = 10;
-					bar() + a;
+					a = 10
+					bar + a
 				}
 			}
 
-			Foo.new.foo;
+			Foo.new.foo
 			`,
 			20,
 		},
@@ -86,12 +86,12 @@ func TestMethodCallWithoutSelf(t *testing.T) {
 				}
 
 				def self.foo {
-					a = 10;
-					bar() + a;
+					a = 10
+					bar + a
 				}
 			}
 
-			Foo.foo;
+			Foo.foo
 			`,
 			20,
 		},
@@ -106,12 +106,12 @@ func TestMethodCallWithoutSelf(t *testing.T) {
 				}
 
 				def foo {
-					a = 10;
-					bar() + a;
+					a = 10
+					bar + a
 				}
 			}
 
-			Foo.new.foo;
+			Foo.new.foo
 			`,
 			110,
 		},
@@ -170,7 +170,7 @@ func TestClassMethodEvaluation(t *testing.T) {
 					100
 				}
 			}
-			Bar.foo;
+			Bar.foo
 			`,
 			100,
 		},
@@ -178,7 +178,7 @@ func TestClassMethodEvaluation(t *testing.T) {
 			`
 			class Bar {
 				def self.foo {
-					self.bar();
+					bar
 				}
 
 				def self.bar {
@@ -189,7 +189,7 @@ func TestClassMethodEvaluation(t *testing.T) {
 					1000
 				}
 			}
-			Bar.foo();
+			Bar.foo
 			`,
 			100,
 		},

@@ -125,11 +125,41 @@ func evalIfExpression(exp *ast.IfExpression, scope *object.Scope) object.Object 
 }
 
 func evalIdentifier(node *ast.Identifier, scope *object.Scope) object.Object {
+	// check if it's a variable
 	if val, ok := scope.Env.Get(node.Value); ok {
 		return val
 	}
 
-	return newError("identifier not found: %s", node.Value)
+	// check if it's a method
+	receiver := scope.Self
+	method_name := node.Value
+	args := []object.Object{}
+
+	error := newError("undefined local variable or method `%s' for %s", method_name, receiver.Inspect())
+
+	switch receiver := receiver.(type) {
+	case *object.Class:
+		method := receiver.LookupClassMethod(method_name, args)
+
+		if method == nil {
+			return error
+		} else {
+			evaluated := evalClassMethod(receiver, method_name, args)
+			return unwrapReturnValue(evaluated)
+		}
+	case *object.BaseObject:
+		method := receiver.Class.LookUpInstanceMethod(method_name, args)
+
+		if method == nil {
+			return error
+		} else {
+			evaluated := evalInstanceMethod(receiver, method_name, args)
+			return unwrapReturnValue(evaluated)
+
+		}
+	}
+
+	return error
 }
 
 func evalConstant(node *ast.Constant, scope *object.Scope) object.Object {

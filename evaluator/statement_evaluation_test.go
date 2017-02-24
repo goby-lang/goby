@@ -163,7 +163,7 @@ func TestErrorHandling(t *testing.T) {
 		},
 		{
 			"foobar",
-			"identifier not found: foobar",
+			"undefined local variable or method `foobar' for <Instance of: Object>",
 		},
 	}
 

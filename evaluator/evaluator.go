@@ -155,8 +155,10 @@ func evalInstanceMethod(receiver *object.BaseObject, method_name string, args []
 	case *object.BuiltInMethod:
 		args := append([]object.Object{receiver}, args...)
 		return m.Fn(args...)
+	case *object.Error:
+		return m
 	default:
-		return newError("unknown method type")
+		return newError("unknown method type. method name: %s (%T)", method_name, m)
 	}
 }
 

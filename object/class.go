@@ -1,7 +1,6 @@
 package object
 
 import (
-	"fmt"
 	"github.com/st0012/rooby/ast"
 )
 
@@ -33,10 +32,6 @@ func (c *Class) LookupClassMethod(method_name string, args []Object) Object {
 		}
 	}
 
-	if method == nil {
-		return &Error{Message: fmt.Sprintf("%s's class method %s is nil.", c.Inspect(), method_name)}
-	}
-
 	return method
 }
 
@@ -54,17 +49,13 @@ func (c *Class) LookUpInstanceMethod(method_name string, args []Object) Object {
 
 				// but if no more superclasses, return an error.
 				if c == nil {
-					return &Error{Message: fmt.Sprintf("undefined instance method %s for class %s", method_name, c.Inspect())}
+					return nil
 				}
 			} else {
 				// stop looping
 				c = nil
 			}
 		}
-	}
-
-	if method == nil {
-		return &Error{Message: fmt.Sprintf("%s's instance method %s is nil.", c.Inspect(), method_name)}
 	}
 
 	return method
