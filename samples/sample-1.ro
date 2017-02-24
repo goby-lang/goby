@@ -1,0 +1,23 @@
+class Foo {
+  def set(x) {
+    @x = x;
+  }
+  def get {
+    @x
+  }
+}
+class Bar {
+  def set(x) {
+    @x = x;
+  }
+  def get {
+    @x
+  }
+}
+f1 = Foo.new
+f1.set(10)
+f2 = Foo.new
+f2.set(21)
+b = Bar.new
+b.set(9)
+puts(f2.get + f1.get + b.get)
