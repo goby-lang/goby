@@ -86,11 +86,11 @@ puts(job.name) #=> "Engineer"
 - ~~Inheritance~~
 - ~~Definable class methods~~
 - ~~Execution command~~
-- Makefile
-- Improve built in method's self implementation 
+- ~~Improve built in method's self implementation~~ 
 - Improve syntax
     - ~~method call without self~~
-    - remove semicolon
+    - ~~remove semicolon~~
+- Makefile
 - for loop support
 - Comment support
 - Advanced data structures (Array/Hash)
