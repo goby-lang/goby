@@ -14,21 +14,17 @@ class Foo {
     @x
   }
 }
-class Bar {
-  def set(x) {
-    @x = x
-  }
-  def get {
-    @x
-  }
-}
-f1 = Foo.new
-f1.set(10)
-f2 = Foo.new
-f2.set(21)
-b = Bar.new
-b.set(9)
-f2.get + f1.get + b.get #=> 40
+class Bar < Foo {}
+class Baz < Foo {}
+
+bar = Bar.new
+baz = Baz.new
+foo = Foo.new
+bar.set(10)
+baz.set(1)
+foo.set(5)
+
+puts(bar.get + baz.get + foo.get) #=> 16
 ```
 
 ```ruby
