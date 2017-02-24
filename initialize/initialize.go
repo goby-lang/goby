@@ -13,12 +13,14 @@ var (
 
 var BuiltinGlobalMethods = map[string]*object.BuiltInMethod{
 	"puts": &object.BuiltInMethod{
-		Fn: func(args ...object.Object) object.Object {
-			for _, arg := range args[1:] {
-				fmt.Println(arg.Inspect())
-			}
+		Fn: func(receiver object.Object) object.BuiltinMethodBody {
+			return func(args ...object.Object) object.Object {
+				for _, arg := range args {
+					fmt.Println(arg.Inspect())
+				}
 
-			return object.NULL
+				return object.NULL
+			}
 		},
 		Des:  "Print arguments",
 		Name: "puts",
@@ -27,11 +29,13 @@ var BuiltinGlobalMethods = map[string]*object.BuiltInMethod{
 
 var BuiltinClassMethods = map[string]*object.BuiltInMethod{
 	"new": &object.BuiltInMethod{
-		Fn: func(args ...object.Object) object.Object {
-			self := args[0].(*object.Class)
-			instance := InitializeInstance(self)
+		Fn: func(receiver object.Object) object.BuiltinMethodBody {
+			return func(args ...object.Object) object.Object {
+				class := receiver.(*object.Class)
+				instance := InitializeInstance(class)
 
-			return instance
+				return instance
+			}
 		},
 		Des:  "Initialize class's instance",
 		Name: "new",

@@ -116,25 +116,25 @@ func evalClassMethod(receiver *object.Class, method object.Object, args []object
 	case *object.Method:
 		return evalMethodObject(receiver, m, args)
 	case *object.BuiltInMethod:
-		args := append([]object.Object{receiver}, args...)
+		methodBody := m.Fn(receiver)
 
 		if m.Name == "new" {
-			instance := m.Fn(args...).(*object.BaseObject)
+			instance := methodBody(args...).(*object.BaseObject)
 
 			if instance.RespondTo("initialize") {
 				initMethod := receiver.LookUpInstanceMethod("initialize")
-				evalInstanceMethod(instance, initMethod, args[1:])
+				evalInstanceMethod(instance, initMethod, args)
 			}
 
 			return instance
 		}
-		return m.Fn(args...)
+
+		return methodBody(args...)
 	case *object.Error:
 		return m
 	default:
 		return newError("unknown method type: %T)", m)
 	}
-
 }
 
 func evalInstanceMethod(receiver *object.BaseObject, method object.Object, args []object.Object) object.Object {
@@ -142,8 +142,8 @@ func evalInstanceMethod(receiver *object.BaseObject, method object.Object, args 
 	case *object.Method:
 		return evalMethodObject(receiver, m, args)
 	case *object.BuiltInMethod:
-		args := append([]object.Object{receiver}, args...)
-		return m.Fn(args...)
+		methodBody := m.Fn(receiver)
+		return methodBody(args...)
 	case *object.Error:
 		return m
 	default:

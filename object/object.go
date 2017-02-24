@@ -85,8 +85,10 @@ func (m *Method) ExtendEnv(args []Object) *Environment {
 	return e
 }
 
+type BuiltinMethodBody func(...Object) Object
+
 type BuiltInMethod struct {
-	Fn   func(args ...Object) Object
+	Fn   func(receiver Object) BuiltinMethodBody
 	Des  string
 	Name string
 }
