@@ -163,7 +163,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 }
 
 func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
-	if p.curTokenIs(token.LPAREN) { // foo(x)
+	if p.curTokenIs(token.LPAREN) { // call expression doesn't have a receiver foo(x) || foo()
 		// receiver is self
 		selfTok := token.Token{Type: token.SELF, Literal: "self", Line: p.curToken.Line}
 		self := &ast.SelfExpression{Token: selfTok}
@@ -174,7 +174,7 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 		exp.Arguments = p.parseCallArguments()
 		return exp
 
-	} else { // p.foo
+	} else { // call expression has a receiver like: p.foo
 		exp := &ast.CallExpression{Token: p.curToken, Receiver: receiver}
 
 		// check if method name is identifier
@@ -184,12 +184,11 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 
 		exp.Method = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 
-		if p.peekTokenIs(token.DOT) || p.peekTokenIs(token.SEMICOLON) { // p.foo.bar; || p.foo;
-			exp.Arguments = []ast.Expression{}
-		} else if !p.expectPeek(token.LPAREN) {
-			return nil
-		} else {
+		if p.peekTokenIs(token.LPAREN) { // p.foo.bar; || p.foo; || p.foo + 123
+			p.nextToken()
 			exp.Arguments = p.parseCallArguments()
+		} else {
+			exp.Arguments = []ast.Expression{}
 		}
 
 		return exp

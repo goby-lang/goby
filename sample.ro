@@ -13,16 +13,15 @@ class User {
     }
 
     def say_hi(user) {
-        @name + " says hi to " + user.name
+        puts(@name + " says hi to " + user.name)
     }
 
     def self.sum_age(user1, user2) {
-        user1.age() + user2.age()
+        user1.age + user2.age
     }
 }
 
 stan = User.new("Stan", 22);
 john = User.new("John", 40);
-
-self.puts(User.sum_age(stan, john));
-self.puts(stan.say_hi(john));
+puts(User.sum_age(stan, john));
+stan.say_hi(john);
