@@ -21,21 +21,21 @@ func (c *Class) Inspect() string {
 	return "<Class:" + c.Name.Value + ">"
 }
 
-func (c *Class) LookupClassMethod(method_name string, args []Object) Object {
+func (c *Class) LookupClassMethod(method_name string) Object {
 	method, ok := c.ClassMethods.Get(method_name)
 
 	if !ok {
 		if c.SuperClass == nil {
-			method = c.Class.LookupClassMethod(method_name, args)
+			method = c.Class.LookupClassMethod(method_name)
 		} else {
-			method = c.SuperClass.LookupClassMethod(method_name, args)
+			method = c.SuperClass.LookupClassMethod(method_name)
 		}
 	}
 
 	return method
 }
 
-func (c *Class) LookUpInstanceMethod(method_name string, args []Object) Object {
+func (c *Class) LookUpInstanceMethod(method_name string) Object {
 	method, ok := c.InstanceMethods.Get(method_name)
 
 	if !ok {
@@ -47,7 +47,6 @@ func (c *Class) LookUpInstanceMethod(method_name string, args []Object) Object {
 				// search superclass's superclass
 				c = c.SuperClass
 
-				// but if no more superclasses, return an error.
 				if c == nil {
 					return nil
 				}

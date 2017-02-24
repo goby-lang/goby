@@ -139,21 +139,21 @@ func evalIdentifier(node *ast.Identifier, scope *object.Scope) object.Object {
 
 	switch receiver := receiver.(type) {
 	case *object.Class:
-		method := receiver.LookupClassMethod(method_name, args)
+		method := receiver.LookupClassMethod(method_name)
 
 		if method == nil {
 			return error
 		} else {
-			evaluated := evalClassMethod(receiver, method_name, args)
+			evaluated := evalClassMethod(receiver, method, args)
 			return unwrapReturnValue(evaluated)
 		}
 	case *object.BaseObject:
-		method := receiver.Class.LookUpInstanceMethod(method_name, args)
+		method := receiver.Class.LookUpInstanceMethod(method_name)
 
 		if method == nil {
 			return error
 		} else {
-			evaluated := evalInstanceMethod(receiver, method_name, args)
+			evaluated := evalInstanceMethod(receiver, method, args)
 			return unwrapReturnValue(evaluated)
 
 		}

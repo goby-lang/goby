@@ -97,11 +97,13 @@ func evalProgram(stmts []ast.Statement, scope *object.Scope) object.Object {
 func sendMethodCall(receiver object.Object, method_name string, args []object.Object) object.Object {
 	switch receiver := receiver.(type) {
 	case *object.Class:
-		evaluated := evalClassMethod(receiver, method_name, args)
+		method := receiver.LookupClassMethod(method_name)
+		evaluated := evalClassMethod(receiver, method, args)
 
 		return unwrapReturnValue(evaluated)
 	case *object.BaseObject:
-		evaluated := evalInstanceMethod(receiver, method_name, args)
+		method := receiver.Class.LookUpInstanceMethod(method_name)
+		evaluated := evalInstanceMethod(receiver, method, args)
 
 		return unwrapReturnValue(evaluated)
 	default:
@@ -109,24 +111,19 @@ func sendMethodCall(receiver object.Object, method_name string, args []object.Ob
 	}
 }
 
-func evalClassMethod(receiver *object.Class, method_name string, args []object.Object) object.Object {
-	method := receiver.LookupClassMethod(method_name, args)
+func evalClassMethod(receiver *object.Class, method object.Object, args []object.Object) object.Object {
 	switch m := method.(type) {
 	case *object.Method:
-		if len(m.Parameters) != len(args) {
-			return newError("wrong arguments: expect=%d, got=%d", len(m.Parameters), len(args))
-		}
-
-		methodEnv := m.ExtendEnv(args)
-		scope := &object.Scope{Self: receiver, Env: methodEnv}
-		return Eval(m.Body, scope)
+		return evalMethodObject(receiver, m, args)
 	case *object.BuiltInMethod:
 		args := append([]object.Object{receiver}, args...)
 
-		if method_name == "new" {
+		if m.Name == "new" {
 			instance := m.Fn(args...).(*object.BaseObject)
+
 			if instance.RespondTo("initialize") {
-				evalInstanceMethod(instance, "initialize", args[1:])
+				initMethod := receiver.LookUpInstanceMethod("initialize")
+				evalInstanceMethod(instance, initMethod, args[1:])
 			}
 
 			return instance
@@ -135,30 +132,22 @@ func evalClassMethod(receiver *object.Class, method_name string, args []object.O
 	case *object.Error:
 		return m
 	default:
-		return newError("unknown method type. method name: %s (%T)", method_name, m)
+		return newError("unknown method type: %T)", m)
 	}
 
 }
 
-func evalInstanceMethod(receiver *object.BaseObject, method_name string, args []object.Object) object.Object {
-	method := receiver.Class.LookUpInstanceMethod(method_name, args)
-
+func evalInstanceMethod(receiver *object.BaseObject, method object.Object, args []object.Object) object.Object {
 	switch m := method.(type) {
 	case *object.Method:
-		if len(m.Parameters) != len(args) {
-			return newError("wrong arguments: expect=%d, got=%d", len(m.Parameters), len(args))
-		}
-
-		methodEnv := m.ExtendEnv(args)
-		scope := &object.Scope{Self: receiver, Env: methodEnv}
-		return Eval(m.Body, scope)
+		return evalMethodObject(receiver, m, args)
 	case *object.BuiltInMethod:
 		args := append([]object.Object{receiver}, args...)
 		return m.Fn(args...)
 	case *object.Error:
 		return m
 	default:
-		return newError("unknown method type. method name: %s (%T)", method_name, m)
+		return newError("unknown method type: %T)", m)
 	}
 }
 
@@ -174,6 +163,16 @@ func evalArgs(exps []ast.Expression, scope *object.Scope) []object.Object {
 	}
 
 	return args
+}
+
+func evalMethodObject(receiver object.Object, m *object.Method, args []object.Object) object.Object {
+	if len(m.Parameters) != len(args) {
+		return newError("wrong arguments: expect=%d, got=%d", len(m.Parameters), len(args))
+	}
+
+	methodEnv := m.ExtendEnv(args)
+	scope := &object.Scope{Self: receiver, Env: methodEnv}
+	return Eval(m.Body, scope)
 }
 
 func newError(format string, args ...interface{}) *object.Error {

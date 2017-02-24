@@ -6,7 +6,6 @@ import (
 	"strings"
 )
 
-
 var (
 	TRUE  = &Boolean{Value: true}
 	FALSE = &Boolean{Value: false}
@@ -87,8 +86,9 @@ func (m *Method) ExtendEnv(args []Object) *Environment {
 }
 
 type BuiltInMethod struct {
-	Fn  func(args ...Object) Object
-	Des string
+	Fn   func(args ...Object) Object
+	Des  string
+	Name string
 }
 
 func (bim *BuiltInMethod) Type() ObjectType {
