@@ -47,11 +47,11 @@ class User {
     }
 
     def say_hi(user) {
-        puts(@name + " says hi to " + user.name())
+        puts(@name + " says hi to " + user.name)
     }
 
     def self.sum_age(user1, user2) {
-        user1.age() + user2.age()
+        user1.age + user2.age
     }
 }
 
@@ -68,10 +68,12 @@ stan.say_hi(john); #=> Stan says hi to John
 - ~~Definable class methods~~
 - ~~Execution command~~
 - Makefile
+- Improve built in method's self implementation 
 - Improve syntax
-    - method call without self
+    - ~~method call without self~~
     - remove semicolon
 - for loop support
+- Comment support
 - Advanced data structures (Array/Hash)
 - Basic IO
 - More documentation
