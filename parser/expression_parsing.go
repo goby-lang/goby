@@ -17,6 +17,7 @@ var precedence = map[token.TokenType]int{
 	token.SLASH:    PRODUCT,
 	token.ASTERISK: PRODUCT,
 	token.DOT:      CALL,
+	token.LPAREN:   CALL,
 }
 
 const (
@@ -162,28 +163,40 @@ func (p *Parser) parseIfExpression() ast.Expression {
 }
 
 func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
-	exp := &ast.CallExpression{Token: p.curToken, Receiver: receiver}
+	if p.curTokenIs(token.LPAREN) { // call expression doesn't have a receiver foo(x) || foo()
+		// receiver is self
+		selfTok := token.Token{Type: token.SELF, Literal: "self", Line: p.curToken.Line}
+		self := &ast.SelfExpression{Token: selfTok}
 
-	if !p.expectPeek(token.IDENT) {
-		return nil
+		// current token is identifier (method name)
+		exp := &ast.CallExpression{Token: p.curToken, Receiver: self, Method: receiver.(*ast.Identifier)}
+
+		exp.Arguments = p.parseCallArguments()
+		return exp
+
+	} else { // call expression has a receiver like: p.foo
+		exp := &ast.CallExpression{Token: p.curToken, Receiver: receiver}
+
+		// check if method name is identifier
+		if !p.expectPeek(token.IDENT) {
+			return nil
+		}
+
+		exp.Method = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+		if p.peekTokenIs(token.LPAREN) { // p.foo.bar; || p.foo; || p.foo + 123
+			p.nextToken()
+			exp.Arguments = p.parseCallArguments()
+		} else {
+			exp.Arguments = []ast.Expression{}
+		}
+
+		return exp
 	}
-
-	exp.Method = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-
-	exp.Arguments = p.parseCallArguments()
-	return exp
 }
 
 func (p *Parser) parseCallArguments() []ast.Expression {
 	args := []ast.Expression{}
-
-	if p.peekTokenIs(token.DOT) || p.peekTokenIs(token.SEMICOLON) {
-		return args
-	}
-
-	if !p.expectPeek(token.LPAREN) {
-		return nil
-	}
 
 	if p.peekTokenIs(token.RPAREN) {
 		p.nextToken() // ')'

@@ -5,6 +5,129 @@ import (
 	"testing"
 )
 
+func TestMethodCallWithoutSelf(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{
+			`class Foo {
+				def set_x(x) {
+					@x = x;
+				}
+
+				def foo {
+					set_x(10)
+					a = 10;
+					@x + a;
+				}
+			}
+
+			f = Foo.new;
+			f.foo;
+			`,
+			20,
+		},
+		{
+			`class Foo {
+				def set_x(x) {
+					@x = x;
+				}
+
+				def foo {
+					set_x(10 + 10 * 100);
+					a = 10;
+					@x + a;
+				}
+			}
+
+			f = Foo.new;
+			f.foo;
+			`,
+			1020,
+		},
+		{
+			`class Foo {
+				def bar {
+					10
+				}
+
+				def foo {
+					bar = 100
+					10 + bar;
+				}
+			}
+
+			f = Foo.new;
+			f.foo;
+			`,
+			110,
+		},
+		{
+			`class Foo {
+				def bar {
+					10
+				}
+
+				def foo {
+					a = 10;
+					bar() + a;
+				}
+			}
+
+			Foo.new.foo;
+			`,
+			20,
+		},
+		{
+			`class Foo {
+				def self.bar {
+					10
+				}
+
+				def self.foo {
+					a = 10;
+					bar() + a;
+				}
+			}
+
+			Foo.foo;
+			`,
+			20,
+		},
+		{
+			`class Foo {
+				def bar {
+					100
+				}
+
+				def self.bar {
+					10
+				}
+
+				def foo {
+					a = 10;
+					bar() + a;
+				}
+			}
+
+			Foo.new.foo;
+			`,
+			110,
+		},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
+		}
+
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
 func TestClassMethodEvaluation(t *testing.T) {
 	tests := []struct {
 		input    string
