@@ -117,19 +117,18 @@ func evalClassMethod(receiver *object.Class, method object.Object, args []object
 		return evalMethodObject(receiver, m, args)
 	case *object.BuiltInMethod:
 		methodBody := m.Fn(receiver)
+		evaluated := methodBody(args...)
 
 		if m.Name == "new" {
-			instance := methodBody(args...).(*object.BaseObject)
-
-			if instance.RespondTo("initialize") {
-				initMethod := receiver.LookupInstanceMethod("initialize")
-				evalInstanceMethod(instance, initMethod, args)
+			instance := evaluated.(*object.BaseObject)
+			if instance.InitializeMethod != nil {
+				evalInstanceMethod(instance, instance.InitializeMethod, args)
 			}
 
 			return instance
 		}
 
-		return methodBody(args...)
+		return evaluated
 	case *object.Error:
 		return m
 	default:

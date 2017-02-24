@@ -131,7 +131,7 @@ func TestMethodCallWithoutSelf(t *testing.T) {
 func TestClassMethodEvaluation(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected int64
+		expected interface{}
 	}{
 		{
 			`
@@ -193,6 +193,26 @@ func TestClassMethodEvaluation(t *testing.T) {
 			`,
 			100,
 		},
+		{
+			`
+			class JobPosition {
+				def initialize(name) {
+					@name = name
+				}
+
+				def self.engineer {
+					new("Engineer")
+				}
+
+				def name {
+					@name
+				}
+			}
+			job = JobPosition.engineer
+			job.name
+			`,
+			"Engineer",
+		},
 	}
 
 	for _, tt := range tests {
@@ -202,7 +222,12 @@ func TestClassMethodEvaluation(t *testing.T) {
 			t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
 		}
 
-		testIntegerObject(t, evaluated, tt.expected)
+		switch expected := tt.expected.(type) {
+		case int64:
+			testIntegerObject(t, evaluated, expected)
+		case string:
+			testStringObject(t, evaluated, expected)
+		}
 	}
 }
 

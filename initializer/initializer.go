@@ -33,6 +33,11 @@ var BuiltinClassMethods = map[string]*object.BuiltInMethod{
 			return func(args ...object.Object) object.Object {
 				class := receiver.(*object.Class)
 				instance := InitializeInstance(class)
+				initMethod := class.LookupInstanceMethod("initialize")
+
+				if initMethod != nil {
+					instance.InitializeMethod = initMethod.(*object.Method)
+				}
 
 				return instance
 			}

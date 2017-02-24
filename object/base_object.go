@@ -4,6 +4,7 @@ type BaseObject struct {
 	Class             *Class
 	InstanceVariables *Environment
 	Scope             *Scope
+	InitializeMethod  *Method
 }
 
 func (bo *BaseObject) Type() ObjectType {
