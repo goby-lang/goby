@@ -148,7 +148,7 @@ func evalIdentifier(node *ast.Identifier, scope *object.Scope) object.Object {
 			return unwrapReturnValue(evaluated)
 		}
 	case *object.BaseObject:
-		method := receiver.Class.LookUpInstanceMethod(method_name)
+		method := receiver.Class.LookupInstanceMethod(method_name)
 
 		if method == nil {
 			return error

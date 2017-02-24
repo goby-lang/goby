@@ -25,7 +25,6 @@ const (
 	CLASS_OBJ           = "CLASS"
 	BASE_OBJECT_OBJ     = "BASE_OBJECT"
 	BUILD_IN_METHOD_OBJ = "BUILD_IN_METHOD"
-	MAIN_OBJ            = "MAIN_OBJECT"
 )
 
 type Object interface {

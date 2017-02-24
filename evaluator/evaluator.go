@@ -102,7 +102,7 @@ func sendMethodCall(receiver object.Object, method_name string, args []object.Ob
 
 		return unwrapReturnValue(evaluated)
 	case *object.BaseObject:
-		method := receiver.Class.LookUpInstanceMethod(method_name)
+		method := receiver.Class.LookupInstanceMethod(method_name)
 		evaluated := evalInstanceMethod(receiver, method, args)
 
 		return unwrapReturnValue(evaluated)
@@ -122,7 +122,7 @@ func evalClassMethod(receiver *object.Class, method object.Object, args []object
 			instance := methodBody(args...).(*object.BaseObject)
 
 			if instance.RespondTo("initialize") {
-				initMethod := receiver.LookUpInstanceMethod("initialize")
+				initMethod := receiver.LookupInstanceMethod("initialize")
 				evalInstanceMethod(instance, initMethod, args)
 			}
 

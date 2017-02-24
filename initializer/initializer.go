@@ -1,4 +1,4 @@
-package initialize
+package initializer
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ var (
 )
 
 var BuiltinGlobalMethods = map[string]*object.BuiltInMethod{
-	"puts": &object.BuiltInMethod{
+	"puts": {
 		Fn: func(receiver object.Object) object.BuiltinMethodBody {
 			return func(args ...object.Object) object.Object {
 				for _, arg := range args {
@@ -28,7 +28,7 @@ var BuiltinGlobalMethods = map[string]*object.BuiltInMethod{
 }
 
 var BuiltinClassMethods = map[string]*object.BuiltInMethod{
-	"new": &object.BuiltInMethod{
+	"new": {
 		Fn: func(receiver object.Object) object.BuiltinMethodBody {
 			return func(args ...object.Object) object.Object {
 				class := receiver.(*object.Class)

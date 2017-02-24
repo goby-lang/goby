@@ -35,7 +35,7 @@ func (c *Class) LookupClassMethod(method_name string) Object {
 	return method
 }
 
-func (c *Class) LookUpInstanceMethod(method_name string) Object {
+func (c *Class) LookupInstanceMethod(method_name string) Object {
 	method, ok := c.InstanceMethods.Get(method_name)
 
 	if !ok {
