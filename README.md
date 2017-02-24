@@ -5,7 +5,7 @@
 Rooby is a new object oriented language written in Go.
 
 ##  Sample snippet.
-```
+```ruby
 class Foo {
   def set(x) {
     @x = x;
@@ -28,31 +28,31 @@ f2 = Foo.new;
 f2.set(21);
 b = Bar.new;
 b.set(9)
-f2.get() + f1.get() + b.get(); #=> 40
+f2.get + f1.get + b.get; #=> 40
 ```
 
-```
+```ruby
 class User {
-    def initialize(name, age) {
-        @name = name;
-        @age = age;
-    }
+  def initialize(name, age) {
+      @name = name;
+      @age = age;
+  }
 
-    def name {
-        @name
-    }
+  def name {
+      @name
+  }
 
-    def age {
-        @age
-    }
+  def age {
+      @age
+  }
 
-    def say_hi(user) {
-        puts(@name + " says hi to " + user.name)
-    }
+  def say_hi(user) {
+      puts(@name + " says hi to " + user.name)
+  }
 
-    def self.sum_age(user1, user2) {
-        user1.age + user2.age
-    }
+  def self.sum_age(user1, user2) {
+      user1.age + user2.age
+  }
 }
 
 stan = User.new("Stan", 22);
