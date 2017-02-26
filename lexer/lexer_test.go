@@ -42,6 +42,9 @@ func TestNextToken(t *testing.T) {
 	10 == 10;
 
 	10 != 9;
+
+	# This is comment.
+	# And I should be ignored.
 	`
 
 	tests := []struct {
@@ -170,7 +173,10 @@ func TestNextToken(t *testing.T) {
 		{token.INT, "9", 35},
 		{token.SEMICOLON, ";", 35},
 
-		{token.EOF, "", 36},
+		{token.COMMENT, "# This is comment.", 37},
+		{token.COMMENT, "# And I should be ignored.", 38},
+
+		{token.EOF, "", 39},
 	}
 
 	l := New(input)
