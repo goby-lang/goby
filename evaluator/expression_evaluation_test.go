@@ -5,6 +5,34 @@ import (
 	"testing"
 )
 
+func TestPrimitiveType(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			`100.class.name
+			`,
+			"Integer",
+		},
+		{
+			`"123".class.name
+			`,
+			"String",
+		},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
+		}
+
+		testStringObject(t, evaluated, tt.expected)
+	}
+}
+
 func TestMethodCallWithoutSelf(t *testing.T) {
 	tests := []struct {
 		input    string

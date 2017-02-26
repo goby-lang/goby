@@ -31,14 +31,13 @@ var BuiltinGlobalMethods = map[string]*object.BuiltInMethod{
 		Fn: func(receiver object.Object) object.BuiltinMethodBody {
 			return func(args ...object.Object) object.Object {
 				switch r := receiver.(type) {
-				case *object.RObject:
-					return r.Class
-				case *object.RClass:
-					return r.Class
+				case object.BaseObject:
+					return r.ReturnClass()
+				case object.Class:
+					return r.ReturnClass()
+				default:
+					return &object.Error{Message: fmt.Sprint("Can't call class on %T", r)}
 				}
-
-				fmt.Print(receiver.Inspect())
-				return receiver
 			}
 		},
 		Des:  "return receiver's class",
@@ -67,7 +66,7 @@ var BuiltinClassMethods = map[string]*object.BuiltInMethod{
 	"name": {
 		Fn: func(receiver object.Object) object.BuiltinMethodBody {
 			return func(args ...object.Object) object.Object {
-				name := receiver.(*object.RClass).Name
+				name := receiver.(object.Class).ReturnName()
 				nameString := &object.StringObject{Value: name.Value}
 				return nameString
 			}

@@ -7,6 +7,8 @@ import (
 type Class interface {
 	LookupClassMethod(string) Object
 	LookupInstanceMethod(string) Object
+	ReturnClass() Class
+	ReturnName() *ast.Constant
 	Object
 }
 
@@ -46,4 +48,12 @@ func (c *BaseClass) LookupInstanceMethod(method_name string) Object {
 	}
 
 	return method
+}
+
+func (c *BaseClass) ReturnClass() Class {
+	return c.Class
+}
+
+func (c *BaseClass) ReturnName() *ast.Constant {
+	return c.Name
 }
