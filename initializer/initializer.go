@@ -90,7 +90,7 @@ func InitializeObjectClass() *object.RClass {
 		globalMethods.Set(key, value)
 	}
 
-	class := &object.RClass{Name: name, Class: ClassClass, Methods: globalMethods}
+	class := &object.RClass{BaseClass: object.BaseClass{Name: name, Class: ClassClass, Methods: globalMethods}}
 
 	return class
 }
@@ -103,13 +103,13 @@ func InitializeClassClass() *object.RClass {
 	}
 
 	name := &ast.Constant{Value: "Class"}
-	class := &object.RClass{Name: name, Methods: methods}
+	class := &object.RClass{BaseClass: object.BaseClass{Name: name, Methods: methods}}
 
 	return class
 }
 
 func InitializeClass(name *ast.Constant, scope *object.Scope) *object.RClass {
-	class := &object.RClass{Name: name, Methods: object.NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}
+	class := &object.RClass{BaseClass: object.BaseClass{Name: name, Methods: object.NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}}
 	classScope := &object.Scope{Self: class, Env: object.NewClosedEnvironment(scope.Env)}
 	class.Scope = classScope
 

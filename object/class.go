@@ -4,27 +4,37 @@ import (
 	"github.com/st0012/rooby/ast"
 )
 
+type Class interface {
+	LookupClassMethod(string) Object
+	LookupInstanceMethod(string) Object
+	Object
+}
+
 type RClass struct {
+	Scope *Scope
+	BaseClass
+}
+
+type BaseClass struct {
 	Name       *ast.Constant
-	Scope      *Scope
 	Methods    *Environment
 	SuperClass *RClass
 	Class      *RClass
 }
 
-func (c *RClass) Type() ObjectType {
+func (c *BaseClass) Type() ObjectType {
 	return CLASS_OBJ
 }
 
-func (c *RClass) Inspect() string {
+func (c *BaseClass) Inspect() string {
 	return "<Class:" + c.Name.Value + ">"
 }
 
-func (c *RClass) LookupClassMethod(method_name string) Object {
+func (c *BaseClass) LookupClassMethod(method_name string) Object {
 	return c.Class.LookupInstanceMethod(method_name)
 }
 
-func (c *RClass) LookupInstanceMethod(method_name string) Object {
+func (c *BaseClass) LookupInstanceMethod(method_name string) Object {
 	method, ok := c.Methods.Get(method_name)
 
 	if !ok {
