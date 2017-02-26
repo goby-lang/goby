@@ -103,7 +103,7 @@ func TestDefStatement(t *testing.T) {
 	}
 
 	for _, expectedMethod := range expectedMethods {
-		methodObj, ok := class.InstanceMethods.Get(expectedMethod.name)
+		methodObj, ok := class.Methods.Get(expectedMethod.name)
 		if !ok {
 			t.Errorf("expect class %s to have method %s.", class.Name, expectedMethod.name)
 		}

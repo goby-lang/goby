@@ -66,7 +66,7 @@ var BuiltinClassMethods = map[string]*object.BuiltInMethod{
 		Fn: func(receiver object.Object) object.BuiltinMethodBody {
 			return func(args ...object.Object) object.Object {
 				name := receiver.(*object.Class).Name
-				nameString := &object.String{Value:name.Value}
+				nameString := &object.String{Value: name.Value}
 				return nameString
 			}
 		},
@@ -84,32 +84,32 @@ func InitializeMainObject() *object.BaseObject {
 
 func InitializeObjectClass() *object.Class {
 	name := &ast.Constant{Value: "Object"}
-	class := &object.Class{Name: name, Class: ClassClass, SuperClass: ClassClass, InstanceMethods: object.NewEnvironment(), ClassMethods: object.NewEnvironment()}
+	globalMethods := object.NewEnvironment()
+
+	for key, value := range BuiltinGlobalMethods {
+		globalMethods.Set(key, value)
+	}
+
+	class := &object.Class{Name: name, Class: ClassClass, Methods: globalMethods}
 
 	return class
 }
 
 func InitializeClassClass() *object.Class {
-	instanceMethods := object.NewEnvironment()
-	classMethods := object.NewEnvironment()
-
-	for key, value := range BuiltinGlobalMethods {
-		instanceMethods.Set(key, value)
-		classMethods.Set(key, value)
-	}
+	methods := object.NewEnvironment()
 
 	for key, value := range BuiltinClassMethods {
-		classMethods.Set(key, value)
+		methods.Set(key, value)
 	}
 
 	name := &ast.Constant{Value: "Class"}
-	class := &object.Class{Name: name, InstanceMethods: instanceMethods, ClassMethods: classMethods}
+	class := &object.Class{Name: name, Methods: methods}
 
 	return class
 }
 
 func InitializeClass(name *ast.Constant, scope *object.Scope) *object.Class {
-	class := &object.Class{Name: name, ClassMethods: object.NewEnvironment(), InstanceMethods: ClassClass.InstanceMethods, Class: ClassClass, SuperClass: ClassClass}
+	class := &object.Class{Name: name, Methods: object.NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}
 	classScope := &object.Scope{Self: class, Env: object.NewClosedEnvironment(scope.Env)}
 	class.Scope = classScope
 

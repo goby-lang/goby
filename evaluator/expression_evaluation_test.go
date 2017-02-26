@@ -146,6 +146,19 @@ func TestClassMethodEvaluation(t *testing.T) {
 		},
 		{
 			`
+			class Bar {
+				def self.foo {
+					10
+				}
+			}
+			class Foo < Bar {}
+			class FooBar < Foo {}
+			FooBar.foo
+			`,
+			10,
+		},
+		{
+			`
 			class Foo {
 				def self.foo {
 					10

@@ -5,12 +5,11 @@ import (
 )
 
 type Class struct {
-	Name            *ast.Constant
-	Scope           *Scope
-	InstanceMethods *Environment
-	ClassMethods    *Environment
-	SuperClass      *Class
-	Class           *Class
+	Name       *ast.Constant
+	Scope      *Scope
+	Methods    *Environment
+	SuperClass *Class
+	Class      *Class
 }
 
 func (c *Class) Type() ObjectType {
@@ -22,45 +21,17 @@ func (c *Class) Inspect() string {
 }
 
 func (c *Class) LookupClassMethod(method_name string) Object {
-	method, ok := c.ClassMethods.Get(method_name)
-
-	if !ok {
-		// c is ClassClass
-		if c.Class == c || c.SuperClass == c {
-			return nil
-		}
-
-		if c.SuperClass != nil {
-			return c.SuperClass.LookupClassMethod(method_name)
-		} else if c.Class != nil {
-			return c.Class.LookupClassMethod(method_name)
-		} else {
-			return nil
-		}
-	}
-
-	return method
+	return c.Class.LookupInstanceMethod(method_name)
 }
 
 func (c *Class) LookupInstanceMethod(method_name string) Object {
-	method, ok := c.InstanceMethods.Get(method_name)
+	method, ok := c.Methods.Get(method_name)
 
 	if !ok {
-
-		for c != nil {
-			method, ok = c.InstanceMethods.Get(method_name)
-
-			if !ok {
-				// search superclass's superclass
-				c = c.SuperClass
-
-				if c == nil {
-					return nil
-				}
-			} else {
-				// stop looping
-				c = nil
-			}
+		if c.SuperClass != nil {
+			return c.SuperClass.LookupInstanceMethod(method_name)
+		} else {
+			return nil
 		}
 	}
 

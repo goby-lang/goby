@@ -59,14 +59,13 @@ func evalClassStatement(exp *ast.ClassStatement, scope *object.Scope) object.Obj
 
 	// Evaluate superclass
 	if exp.SuperClass != nil {
+
 		constant := evalConstant(exp.SuperClass, scope)
 		inheritedClass, ok := constant.(*object.Class)
-
 		if !ok {
 			newError("Constant %s is not a class. got=%T", exp.SuperClass.Value, constant)
 		}
 
-		inheritedClass.SuperClass = class.SuperClass
 		class.SuperClass = inheritedClass
 	}
 
@@ -87,9 +86,9 @@ func evalDefStatement(exp *ast.DefStatement, scope *object.Scope) object.Object 
 
 	switch exp.Receiver.(type) {
 	case nil:
-		class.InstanceMethods.Set(method.Name, method)
+		class.Methods.Set(method.Name, method)
 	case *ast.SelfExpression:
-		class.ClassMethods.Set(method.Name, method)
+		class.Class.Methods.Set(method.Name, method)
 	}
 
 	return method
