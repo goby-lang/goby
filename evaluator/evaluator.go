@@ -70,9 +70,9 @@ func Eval(node ast.Node, scope *object.Scope) object.Object {
 		return &object.StringObject{Value: node.Value, Class: initializer.StringClass}
 	case *ast.Boolean:
 		if node.Value {
-			return object.TRUE
+			return initializer.TRUE
 		}
-		return object.FALSE
+		return initializer.FALSE
 	}
 
 	return nil

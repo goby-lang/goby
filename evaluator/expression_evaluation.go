@@ -16,14 +16,14 @@ func evalPrefixExpression(operator string, right object.Object) object.Object {
 	return newError("unknown operator: %s%s", operator, right.Type())
 }
 
-func evalBangPrefixExpression(right object.Object) *object.Boolean {
+func evalBangPrefixExpression(right object.Object) *object.BooleanObject {
 	switch right {
-	case object.FALSE:
-		return object.TRUE
-	case object.NULL:
-		return object.TRUE
+	case initializer.FALSE:
+		return initializer.TRUE
+	case initializer.NULL:
+		return initializer.TRUE
 	default:
-		return object.FALSE
+		return initializer.FALSE
 	}
 }
 
@@ -62,26 +62,34 @@ func evalIntegerInfixExpression(left object.Object, operator string, right objec
 	case "/":
 		return &object.IntegerObject{Value: leftValue / rightValue, Class: initializer.IntegerClass}
 	case ">":
-		return &object.Boolean{Value: leftValue > rightValue}
+		return &object.BooleanObject{Value: leftValue > rightValue, Class: initializer.BooleanClass}
 	case "<":
-		return &object.Boolean{Value: leftValue < rightValue}
+		return &object.BooleanObject{Value: leftValue < rightValue, Class: initializer.BooleanClass}
 	case "==":
-		return &object.Boolean{Value: leftValue == rightValue}
+		return &object.BooleanObject{Value: leftValue == rightValue, Class: initializer.BooleanClass}
 	case "!=":
-		return &object.Boolean{Value: leftValue != rightValue}
+		return &object.BooleanObject{Value: leftValue != rightValue, Class: initializer.BooleanClass}
 	default:
 		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
 }
 
 func evalBooleanInfixExpression(left object.Object, operator string, right object.Object) object.Object {
-	leftValue := left.(*object.Boolean).Value
-	rightValue := right.(*object.Boolean).Value
+	leftValue := left.(*object.BooleanObject).Value
+	rightValue := right.(*object.BooleanObject).Value
 	switch operator {
 	case "==":
-		return &object.Boolean{Value: leftValue == rightValue}
+		if leftValue == rightValue {
+			return initializer.TRUE
+		}
+
+		return initializer.FALSE
 	case "!=":
-		return &object.Boolean{Value: leftValue != rightValue}
+		if leftValue != rightValue {
+			return initializer.TRUE
+		}
+
+		return initializer.FALSE
 	default:
 		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
@@ -96,13 +104,29 @@ func evalStringInfixExpression(left object.Object, operator string, right object
 	case "+":
 		return &object.StringObject{Value: leftValue + rightValue, Class: initializer.StringClass}
 	case ">":
-		return &object.Boolean{Value: leftValue > rightValue}
+		if leftValue > rightValue {
+			return initializer.TRUE
+		}
+
+		return initializer.FALSE
 	case "<":
-		return &object.Boolean{Value: leftValue < rightValue}
+		if leftValue < rightValue {
+			return initializer.TRUE
+		}
+
+		return initializer.FALSE
 	case "==":
-		return &object.Boolean{Value: leftValue == rightValue}
+		if leftValue == rightValue {
+			return initializer.TRUE
+		}
+
+		return initializer.FALSE
 	case "!=":
-		return &object.Boolean{Value: leftValue != rightValue}
+		if leftValue != rightValue {
+			return initializer.TRUE
+		}
+
+		return initializer.FALSE
 	default:
 		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
@@ -114,13 +138,13 @@ func evalIfExpression(exp *ast.IfExpression, scope *object.Scope) object.Object 
 		return condition
 	}
 
-	if condition.Type() == object.INTEGER_OBJ || condition.(*object.Boolean).Value {
+	if condition.Type() == object.INTEGER_OBJ || condition.(*object.BooleanObject).Value {
 		return Eval(exp.Consequence, scope)
 	} else {
 		if exp.Alternative != nil {
 			return Eval(exp.Alternative, scope)
 		} else {
-			return object.NULL
+			return initializer.NULL
 		}
 	}
 }

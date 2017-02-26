@@ -22,7 +22,7 @@ func testEval(t *testing.T, input string) object.Object {
 }
 
 func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
-	result, ok := obj.(*object.Boolean)
+	result, ok := obj.(*object.BooleanObject)
 	if !ok {
 		t.Errorf("object is not Boolean. got=%T (%+v)", obj, obj)
 		return false
@@ -78,7 +78,7 @@ func testClassObject(t *testing.T, obj object.Object, expected string) bool {
 }
 
 func testNullObject(t *testing.T, obj object.Object) bool {
-	if obj != object.NULL {
+	if obj != initializer.NULL {
 		t.Errorf("object is not NULL. got=%T (%+v)", obj, obj)
 		return false
 	}

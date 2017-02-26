@@ -20,6 +20,18 @@ func TestPrimitiveType(t *testing.T) {
 			`,
 			"String",
 		},
+		{
+			`true.class.name
+			`,
+			"Boolean",
+		},
+		{
+			`
+			# returns null
+			puts(123).class.name
+			`,
+			"Null",
+		},
 	}
 
 	for _, tt := range tests {

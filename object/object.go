@@ -6,12 +6,6 @@ import (
 	"strings"
 )
 
-var (
-	TRUE  = &Boolean{Value: true}
-	FALSE = &Boolean{Value: false}
-	NULL  = &Null{}
-)
-
 type ObjectType string
 
 const (

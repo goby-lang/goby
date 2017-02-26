@@ -11,6 +11,12 @@ var (
 	ClassClass   = initializeClassClass()
 	StringClass  = initializeStringClass()
 	IntegerClass = initializeIntegerClass()
+	BooleanClass = initializeBooleanClass()
+	NullClass    = initializeNullClass()
+
+	TRUE  = &object.BooleanObject{Value: true, Class: BooleanClass}
+	FALSE = &object.BooleanObject{Value: false, Class: BooleanClass}
+	NULL  = &object.Null{Class: NullClass}
 )
 
 var BuiltinGlobalMethods = map[string]*object.BuiltInMethod{
@@ -21,7 +27,7 @@ var BuiltinGlobalMethods = map[string]*object.BuiltInMethod{
 					fmt.Println(arg.Inspect())
 				}
 
-				return object.NULL
+				return NULL
 			}
 		},
 		Des:  "Print arguments",
@@ -92,7 +98,7 @@ func initializeObjectClass() *object.RClass {
 	}
 
 	class := &object.RClass{BaseClass: &object.BaseClass{Name: name, Class: ClassClass, Methods: globalMethods}}
-
+	NullClass.SuperClass = class
 	return class
 }
 
@@ -134,4 +140,15 @@ func initializeStringClass() *object.StringClass {
 
 func initializeIntegerClass() *object.IntegerClass {
 	return &object.IntegerClass{BaseClass: initializeBaseClass("Integer")}
+}
+
+func initializeBooleanClass() *object.BooleanClass {
+	return &object.BooleanClass{BaseClass: initializeBaseClass("Boolean")}
+}
+
+func initializeNullClass() *object.NullClass {
+	n := &ast.Constant{Value: "Null"}
+	baseClass := &object.BaseClass{Name: n, Methods: object.NewEnvironment(), Class: ClassClass}
+	nc := &object.NullClass{BaseClass: baseClass}
+	return nc
 }
