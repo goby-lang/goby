@@ -8,6 +8,11 @@ import (
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.INSTANCE_VARIABLE, token.IDENT, token.CONSTANT:
+		if p.curToken.Literal == "class" {
+			p.curToken.Type = token.CLASS
+			return p.parseStatement()
+		}
+
 		if p.peekTokenIs(token.ASSIGN) {
 			return p.parseAssignStatement()
 		} else {

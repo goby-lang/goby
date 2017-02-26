@@ -61,7 +61,8 @@ func TestNextToken(t *testing.T) {
 		{token.INT, "10", 2},
 		{token.SEMICOLON, ";", 2},
 
-		{token.CLASS, "class", 4},
+		// class is default to be ident
+		{token.IDENT, "class", 4},
 		{token.CONSTANT, "Person", 4},
 		{token.LBRACE, "{", 4},
 
