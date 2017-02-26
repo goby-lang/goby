@@ -2,6 +2,7 @@ package evaluator
 
 import (
 	"github.com/st0012/rooby/ast"
+	"github.com/st0012/rooby/initializer"
 	"github.com/st0012/rooby/object"
 )
 
@@ -30,8 +31,8 @@ func evalMinusPrefixExpression(right object.Object) object.Object {
 	if right.Type() != object.INTEGER_OBJ {
 		return newError("unknown operator: %s%s", "-", right.Type())
 	}
-	value := right.(*object.Integer).Value
-	return &object.Integer{Value: -value}
+	value := right.(*object.IntegerObject).Value
+	return &object.IntegerObject{Value: -value, Class: initializer.IntegerClass}
 }
 
 func evalInfixExpression(left object.Object, operator string, right object.Object) object.Object {
@@ -48,18 +49,18 @@ func evalInfixExpression(left object.Object, operator string, right object.Objec
 }
 
 func evalIntegerInfixExpression(left object.Object, operator string, right object.Object) object.Object {
-	leftValue := left.(*object.Integer).Value
-	rightValue := right.(*object.Integer).Value
+	leftValue := left.(*object.IntegerObject).Value
+	rightValue := right.(*object.IntegerObject).Value
 
 	switch operator {
 	case "+":
-		return &object.Integer{Value: leftValue + rightValue}
+		return &object.IntegerObject{Value: leftValue + rightValue, Class: initializer.IntegerClass}
 	case "-":
-		return &object.Integer{Value: leftValue - rightValue}
+		return &object.IntegerObject{Value: leftValue - rightValue, Class: initializer.IntegerClass}
 	case "*":
-		return &object.Integer{Value: leftValue * rightValue}
+		return &object.IntegerObject{Value: leftValue * rightValue, Class: initializer.IntegerClass}
 	case "/":
-		return &object.Integer{Value: leftValue / rightValue}
+		return &object.IntegerObject{Value: leftValue / rightValue, Class: initializer.IntegerClass}
 	case ">":
 		return &object.Boolean{Value: leftValue > rightValue}
 	case "<":
@@ -88,12 +89,12 @@ func evalBooleanInfixExpression(left object.Object, operator string, right objec
 }
 
 func evalStringInfixExpression(left object.Object, operator string, right object.Object) object.Object {
-	leftValue := left.(*object.String).Value
-	rightValue := right.(*object.String).Value
+	leftValue := left.(*object.StringObject).Value
+	rightValue := right.(*object.StringObject).Value
 
 	switch operator {
 	case "+":
-		return &object.String{Value: leftValue + rightValue}
+		return &object.StringObject{Value: leftValue + rightValue, Class: initializer.StringClass}
 	case ">":
 		return &object.Boolean{Value: leftValue > rightValue}
 	case "<":

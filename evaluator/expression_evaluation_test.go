@@ -362,7 +362,7 @@ func TestEvalInstanceVariable(t *testing.T) {
 		t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
 	}
 
-	result, ok := evaluated.(*object.Integer)
+	result, ok := evaluated.(*object.IntegerObject)
 
 	if !ok {
 		t.Errorf("expect result to be an integer. got=%T", evaluated)
@@ -405,7 +405,7 @@ func TestEvalInstanceMethodCall(t *testing.T) {
 		t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
 	}
 
-	result, ok := evaluated.(*object.Integer)
+	result, ok := evaluated.(*object.IntegerObject)
 
 	if !ok {
 		t.Errorf("expect result to be an integer. got=%T", evaluated)
@@ -439,7 +439,7 @@ func TestEvalCustomInitializeMethod(t *testing.T) {
 		t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
 	}
 
-	result, ok := evaluated.(*object.Integer)
+	result, ok := evaluated.(*object.IntegerObject)
 
 	if !ok {
 		t.Errorf("expect result to be an integer. got=%T", evaluated)
@@ -466,7 +466,7 @@ func TestEvalClassInheritance(t *testing.T) {
 		t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
 	}
 
-	result, ok := evaluated.(*object.Integer)
+	result, ok := evaluated.(*object.IntegerObject)
 
 	if !ok {
 		t.Errorf("expect result to be an integer. got=%T", evaluated)
