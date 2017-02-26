@@ -95,14 +95,26 @@ func evalProgram(stmts []ast.Statement, scope *object.Scope) object.Object {
 }
 
 func sendMethodCall(receiver object.Object, method_name string, args []object.Object) object.Object {
+	error := newError("undefined method `%s' for %s", method_name, receiver.Inspect())
+
 	switch receiver := receiver.(type) {
 	case *object.Class:
 		method := receiver.LookupClassMethod(method_name)
+
+		if method == nil {
+			return error
+		}
+
 		evaluated := evalClassMethod(receiver, method, args)
 
 		return unwrapReturnValue(evaluated)
 	case *object.BaseObject:
 		method := receiver.Class.LookupInstanceMethod(method_name)
+
+		if method == nil {
+			return error
+		}
+
 		evaluated := evalInstanceMethod(receiver, method, args)
 
 		return unwrapReturnValue(evaluated)
@@ -132,7 +144,7 @@ func evalClassMethod(receiver *object.Class, method object.Object, args []object
 	case *object.Error:
 		return m
 	default:
-		return newError("unknown method type: %T)", m)
+		return newError("unknown class method type: %T)", m)
 	}
 }
 
@@ -146,7 +158,7 @@ func evalInstanceMethod(receiver *object.BaseObject, method object.Object, args 
 	case *object.Error:
 		return m
 	default:
-		return newError("unknown method type: %T)", m)
+		return newError("unknown instance method type: %T)", m)
 	}
 }
 

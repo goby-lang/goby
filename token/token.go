@@ -52,7 +52,6 @@ const (
 )
 
 var keyworkds = map[string]TokenType{
-	"class":  CLASS,
 	"def":    DEF,
 	"true":   TRUE,
 	"false":  FALSE,

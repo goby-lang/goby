@@ -195,6 +195,7 @@ func TestClassMethodEvaluation(t *testing.T) {
 		},
 		{
 			`
+			# Test class method call inside class method.
 			class JobPosition {
 				def initialize(name) {
 					@name = name
@@ -212,6 +213,13 @@ func TestClassMethodEvaluation(t *testing.T) {
 			job.name
 			`,
 			"Engineer",
+		},
+		{
+			`
+			class Foo {}
+			Foo.new.class.name
+			`,
+			"Foo",
 		},
 	}
 
@@ -260,6 +268,28 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 			Foo.new.get_self;
 			`,
 			object.CLASS_OBJ},
+		{
+			`
+			class Foo {
+				def class {
+					Foo
+				}
+			}
+
+			Foo.new.class
+			`,
+			object.CLASS_OBJ},
+		{
+			`
+			class Foo {
+				def class_name {
+					self.class.name
+				}
+			}
+
+			Foo.new.class_name
+			`,
+			object.STRING_OBJ},
 	}
 
 	for _, tt := range tests {

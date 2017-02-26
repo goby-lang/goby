@@ -25,6 +25,23 @@ var BuiltinGlobalMethods = map[string]*object.BuiltInMethod{
 		Des:  "Print arguments",
 		Name: "puts",
 	},
+	"class": {
+		Fn: func(receiver object.Object) object.BuiltinMethodBody {
+			return func(args ...object.Object) object.Object {
+				switch r := receiver.(type) {
+				case *object.BaseObject:
+					return r.Class
+				case *object.Class:
+					return r.Class
+				}
+
+				fmt.Print(receiver.Inspect())
+				return receiver
+			}
+		},
+		Des:  "return receiver's class",
+		Name: "class",
+	},
 }
 
 var BuiltinClassMethods = map[string]*object.BuiltInMethod{
@@ -44,6 +61,17 @@ var BuiltinClassMethods = map[string]*object.BuiltInMethod{
 		},
 		Des:  "Initialize class's instance",
 		Name: "new",
+	},
+	"name": {
+		Fn: func(receiver object.Object) object.BuiltinMethodBody {
+			return func(args ...object.Object) object.Object {
+				name := receiver.(*object.Class).Name
+				nameString := &object.String{Value:name.Value}
+				return nameString
+			}
+		},
+		Des:  "return self's name",
+		Name: "name",
 	},
 }
 

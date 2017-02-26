@@ -25,10 +25,17 @@ func (c *Class) LookupClassMethod(method_name string) Object {
 	method, ok := c.ClassMethods.Get(method_name)
 
 	if !ok {
-		if c.SuperClass == nil {
-			method = c.Class.LookupClassMethod(method_name)
+		// c is ClassClass
+		if c.Class == c || c.SuperClass == c {
+			return nil
+		}
+
+		if c.SuperClass != nil {
+			return c.SuperClass.LookupClassMethod(method_name)
+		} else if c.Class != nil {
+			return c.Class.LookupClassMethod(method_name)
 		} else {
-			method = c.SuperClass.LookupClassMethod(method_name)
+			return nil
 		}
 	}
 
