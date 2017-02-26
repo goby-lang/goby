@@ -161,3 +161,28 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 		}
 	}
 }
+
+func TestIgnoreComments(t *testing.T) {
+	input := `
+		# This is comment.
+		# Ignore me!
+		p.add(1, 2 * 3, 4 + 5);
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("expect parser to ignore comment")
+	}
+
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	_, ok := stmt.Expression.(*ast.CallExpression)
+
+	if !ok {
+		t.Fatalf("expect parser to ignore comment and return only call expression")
+	}
+
+}

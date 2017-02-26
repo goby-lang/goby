@@ -19,6 +19,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseDefMethodStatement()
 	case token.CLASS:
 		return p.parseClassStatement()
+	case token.COMMENT:
+		return nil
 	default:
 		return p.parseExpressionStatement()
 	}
