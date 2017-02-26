@@ -1,5 +1,10 @@
 package object
 
+type BaseObject interface {
+	ReturnClass() Class
+	Object
+}
+
 type RObject struct {
 	Class             *RClass
 	InstanceVariables *Environment
@@ -7,10 +12,14 @@ type RObject struct {
 	InitializeMethod  *Method
 }
 
-func (bo *RObject) Type() ObjectType {
+func (ro *RObject) Type() ObjectType {
 	return BASE_OBJECT_OBJ
 }
 
-func (bo *RObject) Inspect() string {
-	return "<Instance of: " + bo.Class.Name.Value + ">"
+func (ro *RObject) Inspect() string {
+	return "<Instance of: " + ro.Class.Name.Value + ">"
+}
+
+func (ro *RObject) ReturnClass() Class {
+	return ro.Class
 }
