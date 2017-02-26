@@ -7,8 +7,10 @@ import (
 )
 
 var (
-	ObjectClass = InitializeObjectClass()
-	ClassClass  = InitializeClassClass()
+	ObjectClass  = initializeObjectClass()
+	ClassClass   = initializeClassClass()
+	StringClass  = initializeStringClass()
+	IntegerClass = initializeIntegerClass()
 )
 
 var BuiltinGlobalMethods = map[string]*object.BuiltInMethod{
@@ -66,7 +68,7 @@ var BuiltinClassMethods = map[string]*object.BuiltInMethod{
 		Fn: func(receiver object.Object) object.BuiltinMethodBody {
 			return func(args ...object.Object) object.Object {
 				name := receiver.(*object.RClass).Name
-				nameString := &object.String{Value: name.Value}
+				nameString := &object.StringObject{Value: name.Value}
 				return nameString
 			}
 		},
@@ -82,7 +84,7 @@ func InitializeMainObject() *object.RObject {
 	return obj
 }
 
-func InitializeObjectClass() *object.RClass {
+func initializeObjectClass() *object.RClass {
 	name := &ast.Constant{Value: "Object"}
 	globalMethods := object.NewEnvironment()
 
@@ -90,12 +92,12 @@ func InitializeObjectClass() *object.RClass {
 		globalMethods.Set(key, value)
 	}
 
-	class := &object.RClass{BaseClass: object.BaseClass{Name: name, Class: ClassClass, Methods: globalMethods}}
+	class := &object.RClass{BaseClass: &object.BaseClass{Name: name, Class: ClassClass, Methods: globalMethods}}
 
 	return class
 }
 
-func InitializeClassClass() *object.RClass {
+func initializeClassClass() *object.RClass {
 	methods := object.NewEnvironment()
 
 	for key, value := range BuiltinClassMethods {
@@ -103,13 +105,13 @@ func InitializeClassClass() *object.RClass {
 	}
 
 	name := &ast.Constant{Value: "Class"}
-	class := &object.RClass{BaseClass: object.BaseClass{Name: name, Methods: methods}}
+	class := &object.RClass{BaseClass: &object.BaseClass{Name: name, Methods: methods}}
 
 	return class
 }
 
 func InitializeClass(name *ast.Constant, scope *object.Scope) *object.RClass {
-	class := &object.RClass{BaseClass: object.BaseClass{Name: name, Methods: object.NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}}
+	class := &object.RClass{BaseClass: &object.BaseClass{Name: name, Methods: object.NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}}
 	classScope := &object.Scope{Self: class, Env: object.NewClosedEnvironment(scope.Env)}
 	class.Scope = classScope
 
@@ -120,4 +122,17 @@ func InitializeInstance(c *object.RClass) *object.RObject {
 	instance := &object.RObject{Class: c, InstanceVariables: object.NewEnvironment()}
 
 	return instance
+}
+
+func initializeBaseClass(name string) *object.BaseClass {
+	n := &ast.Constant{Value: name}
+	return &object.BaseClass{Name: n, Methods: object.NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}
+}
+
+func initializeStringClass() *object.StringClass {
+	return &object.StringClass{BaseClass: initializeBaseClass("String")}
+}
+
+func initializeIntegerClass() *object.IntegerClass {
+	return &object.IntegerClass{BaseClass: initializeBaseClass("Integer")}
 }

@@ -12,7 +12,7 @@ type Class interface {
 
 type RClass struct {
 	Scope *Scope
-	BaseClass
+	*BaseClass
 }
 
 type BaseClass struct {
