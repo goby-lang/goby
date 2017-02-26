@@ -92,7 +92,7 @@ func TestDefStatement(t *testing.T) {
 	`
 
 	evaluated := testEval(t, input)
-	class := evaluated.(*object.Class)
+	class := evaluated.(*object.RClass)
 
 	expectedMethods := []struct {
 		name   string

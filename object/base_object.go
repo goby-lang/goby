@@ -1,16 +1,16 @@
 package object
 
-type BaseObject struct {
-	Class             *Class
+type RObject struct {
+	Class             *RClass
 	InstanceVariables *Environment
 	Scope             *Scope
 	InitializeMethod  *Method
 }
 
-func (bo *BaseObject) Type() ObjectType {
+func (bo *RObject) Type() ObjectType {
 	return BASE_OBJECT_OBJ
 }
 
-func (bo *BaseObject) Inspect() string {
+func (bo *RObject) Inspect() string {
 	return "<Instance of: " + bo.Class.Name.Value + ">"
 }

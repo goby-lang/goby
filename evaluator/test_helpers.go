@@ -64,7 +64,7 @@ func testStringObject(t *testing.T, obj object.Object, expected string) bool {
 }
 
 func testClassObject(t *testing.T, obj object.Object, expected string) bool {
-	result, ok := obj.(*object.Class)
+	result, ok := obj.(*object.RClass)
 	if !ok {
 		t.Errorf("object is not a Class. got=%T (%+v", obj, obj)
 		return false

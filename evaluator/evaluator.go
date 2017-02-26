@@ -98,7 +98,7 @@ func sendMethodCall(receiver object.Object, method_name string, args []object.Ob
 	error := newError("undefined method `%s' for %s", method_name, receiver.Inspect())
 
 	switch receiver := receiver.(type) {
-	case *object.Class:
+	case *object.RClass:
 		method := receiver.LookupClassMethod(method_name)
 
 		if method == nil {
@@ -108,7 +108,7 @@ func sendMethodCall(receiver object.Object, method_name string, args []object.Ob
 		evaluated := evalClassMethod(receiver, method, args)
 
 		return unwrapReturnValue(evaluated)
-	case *object.BaseObject:
+	case *object.RObject:
 		method := receiver.Class.LookupInstanceMethod(method_name)
 
 		if method == nil {
@@ -123,7 +123,7 @@ func sendMethodCall(receiver object.Object, method_name string, args []object.Ob
 	}
 }
 
-func evalClassMethod(receiver *object.Class, method object.Object, args []object.Object) object.Object {
+func evalClassMethod(receiver *object.RClass, method object.Object, args []object.Object) object.Object {
 	switch m := method.(type) {
 	case *object.Method:
 		return evalMethodObject(receiver, m, args)
@@ -132,7 +132,7 @@ func evalClassMethod(receiver *object.Class, method object.Object, args []object
 		evaluated := methodBody(args...)
 
 		if m.Name == "new" {
-			instance := evaluated.(*object.BaseObject)
+			instance := evaluated.(*object.RObject)
 			if instance.InitializeMethod != nil {
 				evalInstanceMethod(instance, instance.InitializeMethod, args)
 			}
@@ -148,7 +148,7 @@ func evalClassMethod(receiver *object.Class, method object.Object, args []object
 	}
 }
 
-func evalInstanceMethod(receiver *object.BaseObject, method object.Object, args []object.Object) object.Object {
+func evalInstanceMethod(receiver *object.RObject, method object.Object, args []object.Object) object.Object {
 	switch m := method.(type) {
 	case *object.Method:
 		return evalMethodObject(receiver, m, args)

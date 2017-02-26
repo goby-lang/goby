@@ -138,7 +138,7 @@ func evalIdentifier(node *ast.Identifier, scope *object.Scope) object.Object {
 	error := newError("undefined local variable or method `%s' for %s", method_name, receiver.Inspect())
 
 	switch receiver := receiver.(type) {
-	case *object.Class:
+	case *object.RClass:
 		method := receiver.LookupClassMethod(method_name)
 
 		if method == nil {
@@ -147,7 +147,7 @@ func evalIdentifier(node *ast.Identifier, scope *object.Scope) object.Object {
 			evaluated := evalClassMethod(receiver, method, args)
 			return unwrapReturnValue(evaluated)
 		}
-	case *object.BaseObject:
+	case *object.RObject:
 		method := receiver.Class.LookupInstanceMethod(method_name)
 
 		if method == nil {
@@ -171,7 +171,7 @@ func evalConstant(node *ast.Constant, scope *object.Scope) object.Object {
 }
 
 func evalInstanceVariable(node *ast.InstanceVariable, scope *object.Scope) object.Object {
-	instance := scope.Self.(*object.BaseObject)
+	instance := scope.Self.(*object.RObject)
 	if val, ok := instance.InstanceVariables.Get(node.Value); ok {
 		return val
 	}
