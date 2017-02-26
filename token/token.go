@@ -5,7 +5,7 @@ type TokenType string
 type Token struct {
 	Type    TokenType
 	Literal string
-	Line 	int
+	Line    int
 }
 
 const (
@@ -17,6 +17,7 @@ const (
 	INSTANCE_VARIABLE = "INSTANCE_VAR"
 	INT               = "INT"
 	STRING            = "STRING"
+	COMMENT           = "COMMENT"
 
 	ASSIGN   = "="
 	PLUS     = "+"

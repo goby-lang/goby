@@ -9,7 +9,7 @@ type Lexer struct {
 	position     int
 	readPosition int
 	ch           byte
-	line 	     int
+	line         int
 }
 
 func New(input string) *Lexer {
@@ -71,6 +71,11 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.RBRACE, l.ch, l.line)
 	case '.':
 		tok = newToken(token.DOT, l.ch, l.line)
+	case '#':
+		tok.Literal = l.absorbComment()
+		tok.Type = token.COMMENT
+		tok.Line = l.line
+		return tok
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF
@@ -138,7 +143,7 @@ func (l *Lexer) readIdentifier() string {
 
 func (l *Lexer) readConstant() string {
 	position := l.position
-	for isLetter(l.ch)|| isDigit(l.ch) {
+	for isLetter(l.ch) || isDigit(l.ch) {
 		l.readChar()
 	}
 	return l.input[position:l.position]
@@ -163,6 +168,15 @@ func (l *Lexer) readString(ch byte) string {
 	l.readChar()                           // currently at string's last letter
 	result := l.input[position:l.position] // get full string
 	l.readChar()                           // move to string's later quote
+	return result
+}
+
+func (l *Lexer) absorbComment() string {
+	p := l.position
+	for l.ch != '\n' {
+		l.readChar()
+	}
+	result := l.input[p:l.position]
 	return result
 }
 
