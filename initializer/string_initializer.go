@@ -151,3 +151,19 @@ func initializeStringClass() *object.StringClass {
 	StringClass = sc
 	return sc
 }
+
+var (
+	stringTable = make(map[string]*object.StringObject)
+)
+
+func InitializeString(value string) *object.StringObject {
+	addr, ok := stringTable[value]
+
+	if !ok {
+		s := &object.StringObject{Value: value, Class: StringClass}
+		stringTable[value] = s
+		return s
+	}
+
+	return addr
+}

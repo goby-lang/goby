@@ -65,9 +65,9 @@ func Eval(node ast.Node, scope *object.Scope) object.Object {
 	case *ast.SelfExpression:
 		return scope.Self
 	case *ast.IntegerLiteral:
-		return &object.IntegerObject{Value: node.Value, Class: initializer.IntegerClass}
+		return initializer.InitilaizeInteger(node.Value)
 	case *ast.StringLiteral:
-		return &object.StringObject{Value: node.Value, Class: initializer.StringClass}
+		return initializer.InitializeString(node.Value)
 	case *ast.Boolean:
 		if node.Value {
 			return initializer.TRUE

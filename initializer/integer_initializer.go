@@ -217,3 +217,19 @@ func initializeIntegerClass() *object.IntegerClass {
 	IntegerClass = ic
 	return ic
 }
+
+var (
+	integerTable = make(map[int64]*object.IntegerObject)
+)
+
+func InitilaizeInteger(value int64) *object.IntegerObject {
+	addr, ok := integerTable[value]
+
+	if !ok {
+		i := &object.IntegerObject{Value: value, Class: IntegerClass}
+		integerTable[value] = i
+		return i
+	}
+
+	return addr
+}
