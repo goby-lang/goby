@@ -30,7 +30,6 @@ var builtinStringMethods = map[string]*object.BuiltInMethod{
 				return &object.StringObject{Value: leftValue + rightValue, Class: StringClass}
 			}
 		},
-		Des:  "Add two strings",
 		Name: "+",
 	},
 	">": {
@@ -57,7 +56,6 @@ var builtinStringMethods = map[string]*object.BuiltInMethod{
 				return FALSE
 			}
 		},
-		Des:  "Compare two strings",
 		Name: ">",
 	},
 	"<": {
@@ -84,7 +82,6 @@ var builtinStringMethods = map[string]*object.BuiltInMethod{
 				return FALSE
 			}
 		},
-		Des:  "Compare two strings",
 		Name: "<",
 	},
 	"==": {
@@ -112,7 +109,6 @@ var builtinStringMethods = map[string]*object.BuiltInMethod{
 				return FALSE
 			}
 		},
-		Des:  "Compare two strings",
 		Name: "==",
 	},
 	"!=": {
@@ -140,7 +136,6 @@ var builtinStringMethods = map[string]*object.BuiltInMethod{
 				return FALSE
 			}
 		},
-		Des:  "Compare two strings",
 		Name: "!=",
 	},
 }

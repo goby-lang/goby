@@ -82,7 +82,6 @@ type BuiltinMethodBody func(...Object) Object
 
 type BuiltInMethod struct {
 	Fn   func(receiver Object) BuiltinMethodBody
-	Des  string
 	Name string
 }
 
@@ -91,7 +90,7 @@ func (bim *BuiltInMethod) Type() ObjectType {
 }
 
 func (bim *BuiltInMethod) Inspect() string {
-	return bim.Des
+	return bim.Name
 }
 
 type Scope struct {

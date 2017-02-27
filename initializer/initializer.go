@@ -23,7 +23,6 @@ var BuiltinGlobalMethods = map[string]*object.BuiltInMethod{
 				return NULL
 			}
 		},
-		Des:  "Print arguments",
 		Name: "puts",
 	},
 	"class": {
@@ -39,7 +38,6 @@ var BuiltinGlobalMethods = map[string]*object.BuiltInMethod{
 				}
 			}
 		},
-		Des:  "return receiver's class",
 		Name: "class",
 	},
 }
@@ -59,7 +57,6 @@ var BuiltinClassMethods = map[string]*object.BuiltInMethod{
 				return instance
 			}
 		},
-		Des:  "Initialize class's instance",
 		Name: "new",
 	},
 	"name": {
@@ -70,7 +67,6 @@ var BuiltinClassMethods = map[string]*object.BuiltInMethod{
 				return nameString
 			}
 		},
-		Des:  "return self's name",
 		Name: "name",
 	},
 }

@@ -39,7 +39,6 @@ var builtinBooleanMethods = map[string]*object.BuiltInMethod{
 				return FALSE
 			}
 		},
-		Des:  "Equal",
 		Name: "==",
 	},
 	"!=": {
@@ -67,7 +66,6 @@ var builtinBooleanMethods = map[string]*object.BuiltInMethod{
 				return FALSE
 			}
 		},
-		Des:  "Not equal",
 		Name: "!=",
 	},
 }

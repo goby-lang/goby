@@ -30,7 +30,6 @@ var builtinIntegerMethods = map[string]*object.BuiltInMethod{
 				return &object.IntegerObject{Value: leftValue + rightValue, Class: IntegerClass}
 			}
 		},
-		Des:  "Addition",
 		Name: "+",
 	},
 	"-": {
@@ -53,7 +52,6 @@ var builtinIntegerMethods = map[string]*object.BuiltInMethod{
 				return &object.IntegerObject{Value: leftValue - rightValue, Class: IntegerClass}
 			}
 		},
-		Des:  "Subtraction",
 		Name: "-",
 	},
 	"*": {
@@ -76,7 +74,6 @@ var builtinIntegerMethods = map[string]*object.BuiltInMethod{
 				return &object.IntegerObject{Value: leftValue * rightValue, Class: IntegerClass}
 			}
 		},
-		Des:  "Multiplication",
 		Name: "*",
 	},
 	"/": {
@@ -99,7 +96,6 @@ var builtinIntegerMethods = map[string]*object.BuiltInMethod{
 				return &object.IntegerObject{Value: leftValue / rightValue, Class: IntegerClass}
 			}
 		},
-		Des:  "Division",
 		Name: "/",
 	},
 	">": {
@@ -126,7 +122,6 @@ var builtinIntegerMethods = map[string]*object.BuiltInMethod{
 				return FALSE
 			}
 		},
-		Des:  "Compare two integers",
 		Name: ">",
 	},
 	"<": {
@@ -153,7 +148,6 @@ var builtinIntegerMethods = map[string]*object.BuiltInMethod{
 				return FALSE
 			}
 		},
-		Des:  "Compare two integers",
 		Name: "<",
 	},
 	"==": {
@@ -181,7 +175,6 @@ var builtinIntegerMethods = map[string]*object.BuiltInMethod{
 				return FALSE
 			}
 		},
-		Des:  "Compare two integers",
 		Name: "==",
 	},
 	"!=": {
@@ -209,7 +202,6 @@ var builtinIntegerMethods = map[string]*object.BuiltInMethod{
 				return FALSE
 			}
 		},
-		Des:  "Compare two integers",
 		Name: "!=",
 	},
 }
