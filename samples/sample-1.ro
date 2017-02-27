@@ -16,4 +16,4 @@ bar.set(10)
 baz.set(1)
 foo.set(5)
 
-puts(bar.get + baz.get + foo.get)
+puts(bar.get + baz.get + foo.get) #=> 16

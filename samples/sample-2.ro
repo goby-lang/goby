@@ -23,5 +23,5 @@ class User {
 
 stan = User.new("Stan", 22)
 john = User.new("John", 40)
-puts(User.sum_age(stan, john))
-stan.say_hi(john)
+puts(User.sum_age(stan, john)) #=> 62
+stan.say_hi(john) #=> Stan says hi to John

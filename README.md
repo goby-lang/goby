@@ -93,9 +93,9 @@ puts(true.class.name) #=> Boolean
 - Improve syntax
     - ~~method call without self~~
     - ~~remove semicolon~~
-- Makefile
+- ~~Makefile~~
 - for loop support
-- Comment support
+- ~~Comment support~~
 - Advanced data structures (Array/Hash)
 - Basic IO
 - More documentation
