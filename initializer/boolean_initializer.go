@@ -1,9 +1,6 @@
 package initializer
 
-import (
-	"github.com/st0012/rooby/ast"
-	"github.com/st0012/rooby/object"
-)
+import "github.com/st0012/rooby/object"
 
 var (
 	BooleanClass *object.BooleanClass
@@ -77,8 +74,7 @@ func initializeBooleanClass() *object.BooleanClass {
 		methods.Set(m.Name, m)
 	}
 
-	n := &ast.Constant{Value: "Boolean"}
-	bc := &object.BaseClass{Name: n, Methods: methods, Class: ClassClass, SuperClass: ObjectClass}
+	bc := &object.BaseClass{Name: "Boolean", Methods: methods, Class: ClassClass, SuperClass: ObjectClass}
 	b := &object.BooleanClass{BaseClass: bc}
 	BooleanClass = b
 
@@ -88,8 +84,7 @@ func initializeBooleanClass() *object.BooleanClass {
 }
 
 func initializeNullClass() *object.NullClass {
-	n := &ast.Constant{Value: "Null"}
-	baseClass := &object.BaseClass{Name: n, Methods: object.NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}
+	baseClass := &object.BaseClass{Name: "Null", Methods: object.NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}
 	nc := &object.NullClass{BaseClass: baseClass}
 	NULL = &object.Null{Class: nc}
 	return nc

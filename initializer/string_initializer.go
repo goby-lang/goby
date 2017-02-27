@@ -1,7 +1,6 @@
 package initializer
 
 import (
-	"github.com/st0012/rooby/ast"
 	"github.com/st0012/rooby/object"
 )
 
@@ -147,8 +146,7 @@ func initializeStringClass() *object.StringClass {
 		methods.Set(m.Name, m)
 	}
 
-	n := &ast.Constant{Value: "String"}
-	bc := &object.BaseClass{Name: n, Methods: methods, Class: ClassClass, SuperClass: ObjectClass}
+	bc := &object.BaseClass{Name: "String", Methods: methods, Class: ClassClass, SuperClass: ObjectClass}
 	sc := &object.StringClass{BaseClass: bc}
 	StringClass = sc
 	return sc

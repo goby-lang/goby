@@ -17,7 +17,7 @@ func (ro *RObject) Type() ObjectType {
 }
 
 func (ro *RObject) Inspect() string {
-	return "<Instance of: " + ro.Class.Name.Value + ">"
+	return "<Instance of: " + ro.Class.Name + ">"
 }
 
 func (ro *RObject) ReturnClass() Class {

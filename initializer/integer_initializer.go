@@ -1,7 +1,6 @@
 package initializer
 
 import (
-	"github.com/st0012/rooby/ast"
 	"github.com/st0012/rooby/object"
 )
 
@@ -213,8 +212,7 @@ func initializeIntegerClass() *object.IntegerClass {
 		methods.Set(m.Name, m)
 	}
 
-	n := &ast.Constant{Value: "Integer"}
-	bc := &object.BaseClass{Name: n, Methods: methods, Class: ClassClass, SuperClass: ObjectClass}
+	bc := &object.BaseClass{Name: "Integer", Methods: methods, Class: ClassClass, SuperClass: ObjectClass}
 	ic := &object.IntegerClass{BaseClass: bc}
 	IntegerClass = ic
 	return ic

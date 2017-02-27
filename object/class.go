@@ -1,14 +1,10 @@
 package object
 
-import (
-	"github.com/st0012/rooby/ast"
-)
-
 type Class interface {
 	LookupClassMethod(string) Object
 	LookupInstanceMethod(string) Object
 	ReturnClass() Class
-	ReturnName() *ast.Constant
+	ReturnName() string
 	Object
 }
 
@@ -18,7 +14,7 @@ type RClass struct {
 }
 
 type BaseClass struct {
-	Name       *ast.Constant
+	Name       string
 	Methods    *Environment
 	SuperClass *RClass
 	Class      *RClass
@@ -29,7 +25,7 @@ func (c *BaseClass) Type() ObjectType {
 }
 
 func (c *BaseClass) Inspect() string {
-	return "<Class:" + c.Name.Value + ">"
+	return "<Class:" + c.Name + ">"
 }
 
 func (c *BaseClass) LookupClassMethod(method_name string) Object {
@@ -54,6 +50,6 @@ func (c *BaseClass) ReturnClass() Class {
 	return c.Class
 }
 
-func (c *BaseClass) ReturnName() *ast.Constant {
+func (c *BaseClass) ReturnName() string {
 	return c.Name
 }

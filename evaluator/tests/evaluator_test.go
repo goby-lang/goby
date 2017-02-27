@@ -1,10 +1,10 @@
 package evaluator_test
 
 import (
+	"github.com/st0012/rooby/evaluator"
 	"github.com/st0012/rooby/lexer"
 	"github.com/st0012/rooby/object"
 	"github.com/st0012/rooby/parser"
-	"github.com/st0012/rooby/evaluator"
 	"testing"
 
 	"github.com/st0012/rooby/initializer"
@@ -72,8 +72,8 @@ func testClassObject(t *testing.T, obj object.Object, expected string) bool {
 		return false
 	}
 
-	if result.Name.Value != expected {
-		t.Errorf("expect Class's name to be %s. got=%s", expected, result.Name.Value)
+	if result.Name != expected {
+		t.Errorf("expect Class's name to be %s. got=%s", expected, result.Name)
 	}
 
 	return true

@@ -55,7 +55,7 @@ func evalBlockStatements(stmts []ast.Statement, scope *object.Scope) object.Obje
 }
 
 func evalClassStatement(exp *ast.ClassStatement, scope *object.Scope) object.Object {
-	class := initializer.InitializeClass(exp.Name, scope)
+	class := initializer.InitializeClass(exp.Name.Value, scope)
 
 	// Evaluate superclass
 	if exp.SuperClass != nil {
@@ -71,7 +71,7 @@ func evalClassStatement(exp *ast.ClassStatement, scope *object.Scope) object.Obj
 
 	Eval(exp.Body, class.Scope) // Eval class's content
 
-	scope.Env.Set(class.Name.Value, class)
+	scope.Env.Set(class.Name, class)
 	return class
 }
 

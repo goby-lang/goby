@@ -3,10 +3,9 @@ package initializer
 import (
 	"fmt"
 	"github.com/st0012/rooby/object"
-	"github.com/st0012/rooby/ast"
 )
 
-var(
+var (
 	ObjectClass *object.RClass
 	ClassClass  *object.RClass
 )
@@ -62,7 +61,7 @@ var BuiltinClassMethods = []*object.BuiltInMethod{
 		Fn: func(receiver object.Object) object.BuiltinMethodBody {
 			return func(args ...object.Object) object.Object {
 				name := receiver.(object.Class).ReturnName()
-				nameString := &object.StringObject{Value: name.Value}
+				nameString := &object.StringObject{Value: name}
 				return nameString
 			}
 		},
@@ -70,16 +69,14 @@ var BuiltinClassMethods = []*object.BuiltInMethod{
 	},
 }
 
-
 func initializeObjectClass() *object.RClass {
-	name := &ast.Constant{Value: "Object"}
 	globalMethods := object.NewEnvironment()
 
 	for _, m := range BuiltinGlobalMethods {
 		globalMethods.Set(m.Name, m)
 	}
 
-	class := &object.RClass{BaseClass: &object.BaseClass{Name: name, Class: ClassClass, Methods: globalMethods}}
+	class := &object.RClass{BaseClass: &object.BaseClass{Name: "Object", Class: ClassClass, Methods: globalMethods}}
 	ObjectClass = class
 	return class
 }
@@ -91,8 +88,7 @@ func initializeClassClass() *object.RClass {
 		methods.Set(m.Name, m)
 	}
 
-	name := &ast.Constant{Value: "Class"}
-	class := &object.RClass{BaseClass: &object.BaseClass{Name: name, Methods: methods}}
+	class := &object.RClass{BaseClass: &object.BaseClass{Name: "Class", Methods: methods}}
 	ClassClass = class
 	return class
 }
