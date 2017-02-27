@@ -1,10 +1,11 @@
-package parser
+package parser_test
 
 import (
 	"github.com/st0012/rooby/ast"
 	"github.com/st0012/rooby/lexer"
 	"github.com/st0012/rooby/token"
 	"testing"
+	"github.com/st0012/rooby/parser"
 )
 
 func TestAssignStatement(t *testing.T) {
@@ -22,7 +23,7 @@ func TestAssignStatement(t *testing.T) {
 
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
-		p := New(l)
+		p := parser.New(l)
 
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
@@ -42,7 +43,7 @@ func TestConstantAssignment(t *testing.T) {
 	`
 
 	l := lexer.New(input)
-	p := New(l)
+	p := parser.New(l)
 
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
@@ -74,7 +75,7 @@ func TestInstanceVariableAssignment(t *testing.T) {
 	`
 
 	l := lexer.New(input)
-	p := New(l)
+	p := parser.New(l)
 
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
@@ -110,7 +111,7 @@ func TestReturnStatements(t *testing.T) {
 
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
-		p := New(l)
+		p := parser.New(l)
 
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
@@ -142,7 +143,7 @@ func TestClassStatement(t *testing.T) {
 	`
 
 	l := lexer.New(input)
-	p := New(l)
+	p := parser.New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -180,7 +181,7 @@ func TestClassStatementWithInheritance(t *testing.T) {
 	`
 
 	l := lexer.New(input)
-	p := New(l)
+	p := parser.New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -221,7 +222,7 @@ func TestDefStatement(t *testing.T) {
 	`
 
 	l := lexer.New(input)
-	p := New(l)
+	p := parser.New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 

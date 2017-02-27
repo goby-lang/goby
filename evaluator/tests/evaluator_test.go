@@ -1,9 +1,10 @@
-package evaluator
+package evaluator_test
 
 import (
 	"github.com/st0012/rooby/lexer"
 	"github.com/st0012/rooby/object"
 	"github.com/st0012/rooby/parser"
+	"github.com/st0012/rooby/evaluator"
 	"testing"
 
 	"github.com/st0012/rooby/initializer"
@@ -19,7 +20,7 @@ func testEval(t *testing.T, input string) object.Object {
 	mainObj := initializer.InitializeMainObject()
 	scope := &object.Scope{Self: mainObj, Env: object.NewEnvironment()}
 
-	return Eval(program, scope)
+	return evaluator.Eval(program, scope)
 }
 
 func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
@@ -98,4 +99,11 @@ func checkParserErrors(t *testing.T, p *parser.Parser) {
 		t.Errorf("parser error: %q", msg)
 	}
 	t.FailNow()
+}
+
+func isError(obj object.Object) bool {
+	if obj != nil {
+		return obj.Type() == object.ERROR_OBJ
+	}
+	return false
 }

@@ -1,10 +1,193 @@
-package parser
+package parser_test
 
 import (
-	"fmt"
 	"github.com/st0012/rooby/ast"
+	"github.com/st0012/rooby/lexer"
+	"github.com/st0012/rooby/parser"
 	"testing"
+	"fmt"
 )
+
+func TestMethodChainExpression(t *testing.T) {
+	input := `
+		Person.new(a, b).bar(c).add(d);
+	`
+
+	l := lexer.New(input)
+	p := parser.New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+
+	firstCall := stmt.Expression.(*ast.CallExpression)
+
+	testIdentifier(t, firstCall.Method, "add")
+	testIdentifier(t, firstCall.Arguments[0], "d")
+
+	secondCall := firstCall.Receiver.(*ast.CallExpression)
+
+	testIdentifier(t, secondCall.Method, "bar")
+	testIdentifier(t, secondCall.Arguments[0], "c")
+
+	thirdCall := secondCall.Receiver.(*ast.CallExpression)
+
+	testIdentifier(t, thirdCall.Method, "new")
+	testIdentifier(t, thirdCall.Arguments[0], "a")
+	testIdentifier(t, thirdCall.Arguments[1], "b")
+
+	originalReceiver := thirdCall.Receiver.(*ast.Constant)
+	testConstant(t, originalReceiver, "Person")
+}
+
+func TestOperatorPrecedenceParsing(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			"-a * b",
+			"((-a) * b)",
+		},
+		{
+			"!-a",
+			"(!(-a))",
+		},
+		{
+			"a + b + c",
+			"((a + b) + c)",
+		},
+		{
+			"a + b - c",
+			"((a + b) - c)",
+		},
+		{
+			"a * b * c",
+			"((a * b) * c)",
+		},
+		{
+			"a * b / c",
+			"((a * b) / c)",
+		},
+		{
+			"a + b / c",
+			"(a + (b / c))",
+		},
+		{
+			"a + b * c + d / e - f",
+			"(((a + (b * c)) + (d / e)) - f)",
+		},
+		{
+			"3 + 4; -5 * 5",
+			"(3 + 4)((-5) * 5)",
+		},
+		{
+			"5 > 4 == 3 < 4",
+			"((5 > 4) == (3 < 4))",
+		},
+		{
+			"5 < 4 != 3 > 4",
+			"((5 < 4) != (3 > 4))",
+		},
+		{
+			"3 + 4 * 5 == 3 * 1 + 4 * 5",
+			"((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))",
+		},
+		{
+			"3 + 4 * 5 == 3 * 1 + 4 * 5",
+			"((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))",
+		},
+		{
+			"true",
+			"true",
+		},
+		{
+			"false",
+			"false",
+		},
+		{
+			"3 > 5 == false",
+			"((3 > 5) == false)",
+		},
+		{
+			"3 < 5 == true",
+			"((3 < 5) == true)",
+		},
+		{
+			"1 + (2 + 3) + 4",
+			"((1 + (2 + 3)) + 4)",
+		},
+		{
+			"(5 + 5) * 2",
+			"((5 + 5) * 2)",
+		},
+		{
+			"2 / (5 + 5)",
+			"(2 / (5 + 5))",
+		},
+		{
+			"(5 + 5) * 2 * (5 + 5)",
+			"(((5 + 5) * 2) * (5 + 5))",
+		},
+		{
+			"-(5 + 5)",
+			"(-(5 + 5))",
+		},
+		{
+			"!(true == true)",
+			"(!(true == true))",
+		},
+		{
+			"a + n.add(b * c) + d",
+			"((a + n.add((b * c))) + d)",
+		},
+		{
+			"n.add(a, b, 1, 2 * 3, 4 + 5, m.add(6, 7 * 8))",
+			"n.add(a, b, 1, (2 * 3), (4 + 5), m.add(6, (7 * 8)))",
+		},
+		{
+			"n.add(a + b + c * d / f + g)",
+			"n.add((((a + b) + ((c * d) / f)) + g))",
+		},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := parser.New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		actual := program.String()
+		if actual != tt.expected {
+			t.Errorf("expcted=%q, got=%q", tt.expected, actual)
+		}
+	}
+}
+
+func TestIgnoreComments(t *testing.T) {
+	input := `
+		# This is comment.
+		# Ignore me!
+		p.add(1, 2 * 3, 4 + 5);
+	`
+
+	l := lexer.New(input)
+	p := parser.New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("expect parser to ignore comment")
+	}
+
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	_, ok := stmt.Expression.(*ast.CallExpression)
+
+	if !ok {
+		t.Fatalf("expect parser to ignore comment and return only call expression")
+	}
+
+}
 
 func testAssignStatement(t *testing.T, s ast.Statement, name string, value interface{}) bool {
 	as, ok := s.(*ast.AssignStatement)
@@ -30,7 +213,7 @@ func testAssignStatement(t *testing.T, s ast.Statement, name string, value inter
 	return true
 }
 
-func checkParserErrors(t *testing.T, p *Parser) {
+func checkParserErrors(t *testing.T, p *parser.Parser) {
 	errors := p.Errors()
 	if len(errors) == 0 {
 		return
@@ -116,11 +299,11 @@ func testConstant(t *testing.T, exp ast.Expression, value string) bool {
 }
 
 func testInfixExpression(
-	t *testing.T,
-	exp ast.Expression,
-	left interface{},
-	operator string,
-	right interface{},
+t *testing.T,
+exp ast.Expression,
+left interface{},
+operator string,
+right interface{},
 ) bool {
 	opExp, ok := exp.(*ast.InfixExpression)
 	if !ok {
@@ -162,9 +345,9 @@ func testBoolLiteral(t *testing.T, exp ast.Expression, v bool) bool {
 }
 
 func testLiteralExpression(
-	t *testing.T,
-	exp ast.Expression,
-	expcted interface{},
+t *testing.T,
+exp ast.Expression,
+expcted interface{},
 ) bool {
 	switch v := expcted.(type) {
 	case int:
