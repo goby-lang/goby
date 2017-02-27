@@ -10,7 +10,7 @@ var (
 
 	TRUE  *object.BooleanObject
 	FALSE *object.BooleanObject
-	NULL  = &object.Null{Class: NullClass}
+	NULL  *object.Null
 )
 
 var builtinBooleanMethods = []*object.BuiltInMethod{
@@ -85,4 +85,12 @@ func initializeBooleanClass() *object.BooleanClass {
 	TRUE = &object.BooleanObject{Value: true, Class: BooleanClass}
 	FALSE = &object.BooleanObject{Value: false, Class: BooleanClass}
 	return b
+}
+
+func initializeNullClass() *object.NullClass {
+	n := &ast.Constant{Value: "Null"}
+	baseClass := &object.BaseClass{Name: n, Methods: object.NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}
+	nc := &object.NullClass{BaseClass: baseClass}
+	NULL = &object.Null{Class: nc}
+	return nc
 }
