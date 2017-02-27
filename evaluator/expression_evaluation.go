@@ -49,29 +49,13 @@ func evalInfixExpression(left object.Object, operator string, right object.Objec
 }
 
 func evalIntegerInfixExpression(left object.Object, operator string, right object.Object) object.Object {
-	leftValue := left.(*object.IntegerObject).Value
-	rightValue := right.(*object.IntegerObject).Value
+	result := sendMethodCall(left, operator, []object.Object{right})
 
-	switch operator {
-	case "+":
-		return &object.IntegerObject{Value: leftValue + rightValue, Class: initializer.IntegerClass}
-	case "-":
-		return &object.IntegerObject{Value: leftValue - rightValue, Class: initializer.IntegerClass}
-	case "*":
-		return &object.IntegerObject{Value: leftValue * rightValue, Class: initializer.IntegerClass}
-	case "/":
-		return &object.IntegerObject{Value: leftValue / rightValue, Class: initializer.IntegerClass}
-	case ">":
-		return &object.BooleanObject{Value: leftValue > rightValue, Class: initializer.BooleanClass}
-	case "<":
-		return &object.BooleanObject{Value: leftValue < rightValue, Class: initializer.BooleanClass}
-	case "==":
-		return &object.BooleanObject{Value: leftValue == rightValue, Class: initializer.BooleanClass}
-	case "!=":
-		return &object.BooleanObject{Value: leftValue != rightValue, Class: initializer.BooleanClass}
-	default:
-		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+	if err, ok := result.(*object.Error); ok {
+		return err
 	}
+
+	return result
 }
 
 func evalBooleanInfixExpression(left object.Object, operator string, right object.Object) object.Object {

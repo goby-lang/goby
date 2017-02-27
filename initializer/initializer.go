@@ -9,7 +9,6 @@ import (
 var (
 	ObjectClass  = initializeObjectClass()
 	ClassClass   = initializeClassClass()
-	IntegerClass = initializeIntegerClass()
 	BooleanClass = initializeBooleanClass()
 	NullClass    = initializeNullClass()
 
@@ -83,6 +82,7 @@ var BuiltinClassMethods = map[string]*object.BuiltInMethod{
 
 func InitializeProgram() {
 	initializeStringClass()
+	initializeIntegerClass()
 }
 
 func InitializeMainObject() *object.RObject {
@@ -135,10 +135,6 @@ func InitializeInstance(c *object.RClass) *object.RObject {
 func initializeBaseClass(name string) *object.BaseClass {
 	n := &ast.Constant{Value: name}
 	return &object.BaseClass{Name: n, Methods: object.NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}
-}
-
-func initializeIntegerClass() *object.IntegerClass {
-	return &object.IntegerClass{BaseClass: initializeBaseClass("Integer")}
 }
 
 func initializeBooleanClass() *object.BooleanClass {
