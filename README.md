@@ -94,8 +94,8 @@ puts(job.name) #=> "Engineer"
 - More documentation
     - Samples
     - Feature list
-- Primitive type class
-    - String
-    - Integer
-    - Boolean
+- ~~Primitive type class~~
+    - ~~String~~
+    - ~~Integer~~
+    - ~~Boolean~~
 - REPL(Hard to be done)
