@@ -76,6 +76,13 @@ job = JobPosition.engineer
 puts(job.name) #=> "Engineer"
 ```
 
+
+```ruby
+puts("123".class.name) #=> String
+puts(123.class.name) #=> Integer
+puts(true.class.name) #=> Boolean
+```
+
 ## TODO
 
 - ~~Customize initialization method~~
@@ -94,8 +101,8 @@ puts(job.name) #=> "Engineer"
 - More documentation
     - Samples
     - Feature list
-- Primitive type class
-    - String
-    - Integer
-    - Boolean
+- ~~Primitive type class~~
+    - ~~String~~
+    - ~~Integer~~
+    - ~~Boolean~~
 - REPL(Hard to be done)

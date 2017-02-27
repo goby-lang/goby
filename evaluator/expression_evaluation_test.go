@@ -5,6 +5,46 @@ import (
 	"testing"
 )
 
+func TestPrimitiveType(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			`100.class.name
+			`,
+			"Integer",
+		},
+		{
+			`"123".class.name
+			`,
+			"String",
+		},
+		{
+			`true.class.name
+			`,
+			"Boolean",
+		},
+		{
+			`
+			# returns null
+			puts(123).class.name
+			`,
+			"Null",
+		},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
+		}
+
+		testStringObject(t, evaluated, tt.expected)
+	}
+}
+
 func TestMethodCallWithoutSelf(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -362,7 +402,7 @@ func TestEvalInstanceVariable(t *testing.T) {
 		t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
 	}
 
-	result, ok := evaluated.(*object.Integer)
+	result, ok := evaluated.(*object.IntegerObject)
 
 	if !ok {
 		t.Errorf("expect result to be an integer. got=%T", evaluated)
@@ -405,7 +445,7 @@ func TestEvalInstanceMethodCall(t *testing.T) {
 		t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
 	}
 
-	result, ok := evaluated.(*object.Integer)
+	result, ok := evaluated.(*object.IntegerObject)
 
 	if !ok {
 		t.Errorf("expect result to be an integer. got=%T", evaluated)
@@ -439,7 +479,7 @@ func TestEvalCustomInitializeMethod(t *testing.T) {
 		t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
 	}
 
-	result, ok := evaluated.(*object.Integer)
+	result, ok := evaluated.(*object.IntegerObject)
 
 	if !ok {
 		t.Errorf("expect result to be an integer. got=%T", evaluated)
@@ -466,7 +506,7 @@ func TestEvalClassInheritance(t *testing.T) {
 		t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
 	}
 
-	result, ok := evaluated.(*object.Integer)
+	result, ok := evaluated.(*object.IntegerObject)
 
 	if !ok {
 		t.Errorf("expect result to be an integer. got=%T", evaluated)
@@ -474,34 +514,6 @@ func TestEvalClassInheritance(t *testing.T) {
 
 	if result.Value != 21 {
 		t.Errorf("expect result to be 21. got=%d", result.Value)
-	}
-}
-
-func TestEvalInfixIntegerExpression(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected int64
-	}{
-		{"5", 5},
-		{"10", 10},
-		{"-5", -5},
-		{"-10", -10},
-		{"5 + 5 + 5 + 5 - 10", 10},
-		{"2 * 2 * 2 * 2 * 2", 32},
-		{"-50 + 100 + -50", 0},
-		{"5 * 2 + 10", 20},
-		{"5 + 2 * 10", 25},
-		{"20 + 2 * -10", 0},
-		{"50 / 2 * 2 + 10", 60},
-		{"2 * (5 + 10)", 30},
-		{"3 * 3 * 3 + 10", 37},
-		{"3 * (3 * 3) + 10", 37},
-		{"(5 + 10 * 2 + 15 / 3) * 2 + -10", 50},
-	}
-
-	for _, tt := range tests {
-		evaluated := testEval(t, tt.input)
-		testIntegerObject(t, evaluated, tt.expected)
 	}
 }
 
@@ -552,77 +564,6 @@ func TestEvalIfExpression(t *testing.T) {
 	}
 }
 
-func TestEvalBooleanExpression(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected bool
-	}{
-		{"true", true},
-		{"false", false},
-	}
-
-	for _, tt := range tests {
-		evaluated := testEval(t, tt.input)
-		testBooleanObject(t, evaluated, tt.expected)
-	}
-}
-
-func TestEvalInfixStringExpression(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{`"Stan " + "Lo"`, "Stan Lo"},
-		{`"Dog" + "&" + "Cat"`, "Dog&Cat"},
-		{`"Dog" == "Dog"`, true},
-		{`"1234" > "123"`, true},
-		{`"1234" < "123"`, false},
-		{`"1234" != "123"`, true},
-	}
-
-	for _, tt := range tests {
-		evaluated := testEval(t, tt.input)
-		switch tt.expected.(type) {
-		case bool:
-			testBooleanObject(t, evaluated, tt.expected.(bool))
-		case string:
-			testStringObject(t, evaluated, tt.expected.(string))
-		}
-	}
-}
-
-func TestEvalInfixBooleanExpression(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected bool
-	}{
-		{"true", true},
-		{"false", false},
-		{"1 < 2", true},
-		{"1 > 2", false},
-		{"1 < 1", false},
-		{"1 > 1", false},
-		{"1 == 1", true},
-		{"1 != 1", false},
-		{"1 == 2", false},
-		{"1 != 2", true},
-		{"true == true", true},
-		{"false == false", true},
-		{"true == false", false},
-		{"true != false", true},
-		{"false != true", true},
-		{"(1 < 2) == true", true},
-		{"(1 < 2) == false", false},
-		{"(1 > 2) == true", false},
-		{"(1 > 2) == false", true},
-	}
-
-	for _, tt := range tests {
-		evaluated := testEval(t, tt.input)
-		testBooleanObject(t, evaluated, tt.expected)
-	}
-}
-
 func TestEvalBangPrefixExpression(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -656,35 +597,5 @@ func TestEvalMinusPrefixExpression(t *testing.T) {
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
 		testIntegerObject(t, evaluated, tt.expected)
-	}
-}
-
-func TestEvalIntegerExpression(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected int64
-	}{
-		{"5", 5},
-		{"10", 10},
-	}
-
-	for _, tt := range tests {
-		evaluated := testEval(t, tt.input)
-		testIntegerObject(t, evaluated, tt.expected)
-	}
-}
-
-func TestEvalStringExpression(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected string
-	}{
-		{`"st0012"`, "st0012"},
-		{`'Monkey'`, "Monkey"},
-	}
-
-	for _, tt := range tests {
-		evaluated := testEval(t, tt.input)
-		testStringObject(t, evaluated, tt.expected)
 	}
 }

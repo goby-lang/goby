@@ -20,9 +20,9 @@ func evalAssignStatement(stmt *ast.AssignStatement, scope *object.Scope) object.
 		return scope.Env.Set(variableName.Value, value)
 	case *ast.InstanceVariable:
 		switch ivScope := scope.Self.(type) {
-		case *object.BaseObject:
+		case *object.RObject:
 			return ivScope.InstanceVariables.Set(variableName.Value, value)
-		case *object.Class:
+		case *object.RClass:
 			return newError("Can not define instance variable %s in a class.", variableName.Value)
 		default:
 			return newError("Can not define instance variable %s in %T", ivScope)
@@ -61,7 +61,7 @@ func evalClassStatement(exp *ast.ClassStatement, scope *object.Scope) object.Obj
 	if exp.SuperClass != nil {
 
 		constant := evalConstant(exp.SuperClass, scope)
-		inheritedClass, ok := constant.(*object.Class)
+		inheritedClass, ok := constant.(*object.RClass)
 		if !ok {
 			newError("Constant %s is not a class. got=%T", exp.SuperClass.Value, constant)
 		}
@@ -76,7 +76,7 @@ func evalClassStatement(exp *ast.ClassStatement, scope *object.Scope) object.Obj
 }
 
 func evalDefStatement(exp *ast.DefStatement, scope *object.Scope) object.Object {
-	class, ok := scope.Self.(*object.Class)
+	class, ok := scope.Self.(*object.RClass)
 	// scope must be a class for now.
 	if !ok {
 		return newError("Method %s must be defined inside a Class. got=%T", exp.Name.Value, scope.Self)

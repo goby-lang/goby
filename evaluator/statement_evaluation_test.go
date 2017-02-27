@@ -92,7 +92,7 @@ func TestDefStatement(t *testing.T) {
 	`
 
 	evaluated := testEval(t, input)
-	class := evaluated.(*object.Class)
+	class := evaluated.(*object.RClass)
 
 	expectedMethods := []struct {
 		name   string
@@ -127,11 +127,11 @@ func TestErrorHandling(t *testing.T) {
 	}{
 		{
 			"5 + true;",
-			"type mismatch: INTEGER + BOOLEAN",
+			"expect argument to be Integer type",
 		},
 		{
 			"5 + true; 5;",
-			"type mismatch: INTEGER + BOOLEAN",
+			"expect argument to be Integer type",
 		},
 		{
 			"-true;",
@@ -139,15 +139,15 @@ func TestErrorHandling(t *testing.T) {
 		},
 		{
 			"true + false;",
-			"unknown operator: BOOLEAN + BOOLEAN",
+			"undefined method `+' for true",
 		},
 		{
 			"5; true + false; 5",
-			"unknown operator: BOOLEAN + BOOLEAN",
+			"undefined method `+' for true",
 		},
 		{
 			"if (10 > 1) { true + false; }",
-			"unknown operator: BOOLEAN + BOOLEAN",
+			"undefined method `+' for true",
 		},
 		{
 			`
@@ -159,7 +159,7 @@ func TestErrorHandling(t *testing.T) {
 	      return 1;
 	    }
 	    `,
-			"unknown operator: BOOLEAN + BOOLEAN",
+			"undefined method `+' for true",
 		},
 		{
 			"foobar",

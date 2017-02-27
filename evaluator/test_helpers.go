@@ -15,6 +15,7 @@ func testEval(t *testing.T, input string) object.Object {
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
+	initializer.InitializeProgram()
 	mainObj := initializer.InitializeMainObject()
 	scope := &object.Scope{Self: mainObj, Env: object.NewEnvironment()}
 
@@ -22,7 +23,7 @@ func testEval(t *testing.T, input string) object.Object {
 }
 
 func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
-	result, ok := obj.(*object.Boolean)
+	result, ok := obj.(*object.BooleanObject)
 	if !ok {
 		t.Errorf("object is not Boolean. got=%T (%+v)", obj, obj)
 		return false
@@ -36,7 +37,7 @@ func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
 }
 
 func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {
-	result, ok := obj.(*object.Integer)
+	result, ok := obj.(*object.IntegerObject)
 	if !ok {
 		t.Errorf("object is not Integer. got=%T (%+v)", obj, obj)
 		return false
@@ -50,7 +51,7 @@ func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {
 }
 
 func testStringObject(t *testing.T, obj object.Object, expected string) bool {
-	result, ok := obj.(*object.String)
+	result, ok := obj.(*object.StringObject)
 	if !ok {
 		t.Errorf("object is not a String. got=%T (%+v)", obj, obj)
 		return false
@@ -64,7 +65,7 @@ func testStringObject(t *testing.T, obj object.Object, expected string) bool {
 }
 
 func testClassObject(t *testing.T, obj object.Object, expected string) bool {
-	result, ok := obj.(*object.Class)
+	result, ok := obj.(*object.RClass)
 	if !ok {
 		t.Errorf("object is not a Class. got=%T (%+v", obj, obj)
 		return false
@@ -78,7 +79,7 @@ func testClassObject(t *testing.T, obj object.Object, expected string) bool {
 }
 
 func testNullObject(t *testing.T, obj object.Object) bool {
-	if obj != object.NULL {
+	if obj != initializer.NULL {
 		t.Errorf("object is not NULL. got=%T (%+v)", obj, obj)
 		return false
 	}
