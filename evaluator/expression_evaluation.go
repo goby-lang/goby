@@ -36,39 +36,6 @@ func evalMinusPrefixExpression(right object.Object) object.Object {
 }
 
 func evalInfixExpression(left object.Object, operator string, right object.Object) object.Object {
-	switch {
-	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
-		return evalIntegerInfixExpression(left, operator, right)
-	case left.Type() == object.BOOLEAN_OBJ && right.Type() == object.BOOLEAN_OBJ:
-		return evalBooleanInfixExpression(left, operator, right)
-	case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
-		return evalStringInfixExpression(left, operator, right)
-	default:
-		return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
-	}
-}
-
-func evalIntegerInfixExpression(left object.Object, operator string, right object.Object) object.Object {
-	result := sendMethodCall(left, operator, []object.Object{right})
-
-	if err, ok := result.(*object.Error); ok {
-		return err
-	}
-
-	return result
-}
-
-func evalBooleanInfixExpression(left object.Object, operator string, right object.Object) object.Object {
-	result := sendMethodCall(left, operator, []object.Object{right})
-
-	if err, ok := result.(*object.Error); ok {
-		return err
-	}
-
-	return result
-}
-
-func evalStringInfixExpression(left object.Object, operator string, right object.Object) object.Object {
 	result := sendMethodCall(left, operator, []object.Object{right})
 
 	if err, ok := result.(*object.Error); ok {

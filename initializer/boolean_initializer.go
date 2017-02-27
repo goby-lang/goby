@@ -24,7 +24,13 @@ var builtinBooleanMethods = map[string]*object.BuiltInMethod{
 				}
 
 				leftValue := receiver.(*object.BooleanObject).Value
-				rightValue := args[0].(*object.BooleanObject).Value
+				right, ok := args[0].(*object.BooleanObject)
+
+				if !ok {
+					return wrongTypeError(BooleanClass)
+				}
+
+				rightValue := right.Value
 
 				if leftValue == rightValue {
 					return TRUE
@@ -46,7 +52,13 @@ var builtinBooleanMethods = map[string]*object.BuiltInMethod{
 				}
 
 				leftValue := receiver.(*object.BooleanObject).Value
-				rightValue := args[0].(*object.BooleanObject).Value
+				right, ok := args[0].(*object.BooleanObject)
+
+				if !ok {
+					return wrongTypeError(BooleanClass)
+				}
+
+				rightValue := right.Value
 
 				if leftValue != rightValue {
 					return TRUE

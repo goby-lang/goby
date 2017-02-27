@@ -7,9 +7,9 @@ import (
 )
 
 var (
-	ObjectClass  = initializeObjectClass()
-	ClassClass   = initializeClassClass()
-	NullClass    = initializeNullClass()
+	ObjectClass = initializeObjectClass()
+	ClassClass  = initializeClassClass()
+	NullClass   = initializeNullClass()
 )
 
 var BuiltinGlobalMethods = map[string]*object.BuiltInMethod{
@@ -141,4 +141,8 @@ func checkArgumentLen(args []object.Object, class object.Class, method_name stri
 	}
 
 	return nil
+}
+
+func wrongTypeError(c object.Class) *object.Error {
+	return &object.Error{Message: fmt.Sprintf("expect argument to be %s type", c.ReturnName().Value)}
 }

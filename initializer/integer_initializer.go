@@ -20,7 +20,13 @@ var builtinIntegerMethods = map[string]*object.BuiltInMethod{
 				}
 
 				leftValue := receiver.(*object.IntegerObject).Value
-				rightValue := args[0].(*object.IntegerObject).Value
+				right, ok := args[0].(*object.IntegerObject)
+
+				if !ok {
+					return wrongTypeError(IntegerClass)
+				}
+
+				rightValue := right.Value
 				return &object.IntegerObject{Value: leftValue + rightValue, Class: IntegerClass}
 			}
 		},
@@ -37,7 +43,13 @@ var builtinIntegerMethods = map[string]*object.BuiltInMethod{
 				}
 
 				leftValue := receiver.(*object.IntegerObject).Value
-				rightValue := args[0].(*object.IntegerObject).Value
+				right, ok := args[0].(*object.IntegerObject)
+
+				if !ok {
+					return wrongTypeError(IntegerClass)
+				}
+
+				rightValue := right.Value
 				return &object.IntegerObject{Value: leftValue - rightValue, Class: IntegerClass}
 			}
 		},
@@ -54,7 +66,13 @@ var builtinIntegerMethods = map[string]*object.BuiltInMethod{
 				}
 
 				leftValue := receiver.(*object.IntegerObject).Value
-				rightValue := args[0].(*object.IntegerObject).Value
+				right, ok := args[0].(*object.IntegerObject)
+
+				if !ok {
+					return wrongTypeError(IntegerClass)
+				}
+
+				rightValue := right.Value
 				return &object.IntegerObject{Value: leftValue * rightValue, Class: IntegerClass}
 			}
 		},
@@ -71,7 +89,13 @@ var builtinIntegerMethods = map[string]*object.BuiltInMethod{
 				}
 
 				leftValue := receiver.(*object.IntegerObject).Value
-				rightValue := args[0].(*object.IntegerObject).Value
+				right, ok := args[0].(*object.IntegerObject)
+
+				if !ok {
+					return wrongTypeError(IntegerClass)
+				}
+
+				rightValue := right.Value
 				return &object.IntegerObject{Value: leftValue / rightValue, Class: IntegerClass}
 			}
 		},
@@ -87,7 +111,13 @@ var builtinIntegerMethods = map[string]*object.BuiltInMethod{
 				}
 
 				leftValue := receiver.(*object.IntegerObject).Value
-				rightValue := args[0].(*object.IntegerObject).Value
+				right, ok := args[0].(*object.IntegerObject)
+
+				if !ok {
+					return wrongTypeError(IntegerClass)
+				}
+
+				rightValue := right.Value
 
 				if leftValue > rightValue {
 					return TRUE
@@ -108,7 +138,13 @@ var builtinIntegerMethods = map[string]*object.BuiltInMethod{
 				}
 
 				leftValue := receiver.(*object.IntegerObject).Value
-				rightValue := args[0].(*object.IntegerObject).Value
+				right, ok := args[0].(*object.IntegerObject)
+
+				if !ok {
+					return wrongTypeError(IntegerClass)
+				}
+
+				rightValue := right.Value
 
 				if leftValue < rightValue {
 					return TRUE
@@ -130,7 +166,13 @@ var builtinIntegerMethods = map[string]*object.BuiltInMethod{
 				}
 
 				leftValue := receiver.(*object.IntegerObject).Value
-				rightValue := args[0].(*object.IntegerObject).Value
+				right, ok := args[0].(*object.IntegerObject)
+
+				if !ok {
+					return wrongTypeError(IntegerClass)
+				}
+
+				rightValue := right.Value
 
 				if leftValue == rightValue {
 					return TRUE
@@ -152,7 +194,13 @@ var builtinIntegerMethods = map[string]*object.BuiltInMethod{
 				}
 
 				leftValue := receiver.(*object.IntegerObject).Value
-				rightValue := args[0].(*object.IntegerObject).Value
+				right, ok := args[0].(*object.IntegerObject)
+
+				if !ok {
+					return wrongTypeError(IntegerClass)
+				}
+
+				rightValue := right.Value
 
 				if leftValue != rightValue {
 					return TRUE

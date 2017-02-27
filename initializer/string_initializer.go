@@ -20,7 +20,13 @@ var builtinStringMethods = map[string]*object.BuiltInMethod{
 				}
 
 				leftValue := receiver.(*object.StringObject).Value
-				rightValue := args[0].(*object.StringObject).Value
+				right, ok := args[0].(*object.StringObject)
+
+				if !ok {
+					return wrongTypeError(StringClass)
+				}
+
+				rightValue := right.Value
 				return &object.StringObject{Value: leftValue + rightValue, Class: StringClass}
 			}
 		},
@@ -36,7 +42,13 @@ var builtinStringMethods = map[string]*object.BuiltInMethod{
 				}
 
 				leftValue := receiver.(*object.StringObject).Value
-				rightValue := args[0].(*object.StringObject).Value
+				right, ok := args[0].(*object.StringObject)
+
+				if !ok {
+					return wrongTypeError(StringClass)
+				}
+
+				rightValue := right.Value
 
 				if leftValue > rightValue {
 					return TRUE
@@ -57,7 +69,13 @@ var builtinStringMethods = map[string]*object.BuiltInMethod{
 				}
 
 				leftValue := receiver.(*object.StringObject).Value
-				rightValue := args[0].(*object.StringObject).Value
+				right, ok := args[0].(*object.StringObject)
+
+				if !ok {
+					return wrongTypeError(StringClass)
+				}
+
+				rightValue := right.Value
 
 				if leftValue < rightValue {
 					return TRUE
@@ -79,7 +97,13 @@ var builtinStringMethods = map[string]*object.BuiltInMethod{
 				}
 
 				leftValue := receiver.(*object.StringObject).Value
-				rightValue := args[0].(*object.StringObject).Value
+				right, ok := args[0].(*object.StringObject)
+
+				if !ok {
+					return wrongTypeError(StringClass)
+				}
+
+				rightValue := right.Value
 
 				if leftValue == rightValue {
 					return TRUE
@@ -101,7 +125,13 @@ var builtinStringMethods = map[string]*object.BuiltInMethod{
 				}
 
 				leftValue := receiver.(*object.StringObject).Value
-				rightValue := args[0].(*object.StringObject).Value
+				right, ok := args[0].(*object.StringObject)
+
+				if !ok {
+					return wrongTypeError(StringClass)
+				}
+
+				rightValue := right.Value
 
 				if leftValue != rightValue {
 					return TRUE
