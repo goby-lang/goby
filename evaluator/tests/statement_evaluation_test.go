@@ -5,6 +5,26 @@ import (
 	"testing"
 )
 
+func TestComment(t *testing.T) {
+	input := `
+	# Comment
+	class Foo {
+		# Comment
+		def one {
+			# Comment
+			1 # Comment
+			# Comment
+		}
+		# Comment
+	}
+	# Comment
+	Foo.new.one #=> Comment
+	# Comment`
+
+	evaluated := testEval(t, input)
+	testIntegerObject(t, evaluated, 1)
+}
+
 func TestAssignStatementEvaluation(t *testing.T) {
 	tests := []struct {
 		input         string

@@ -173,7 +173,7 @@ func (l *Lexer) readString(ch byte) string {
 
 func (l *Lexer) absorbComment() string {
 	p := l.position
-	for l.ch != '\n' {
+	for l.ch != '\n' && l.ch != 0 {
 		l.readChar()
 	}
 	result := l.input[p:l.position]
