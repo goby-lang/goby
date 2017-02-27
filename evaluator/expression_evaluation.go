@@ -59,25 +59,13 @@ func evalIntegerInfixExpression(left object.Object, operator string, right objec
 }
 
 func evalBooleanInfixExpression(left object.Object, operator string, right object.Object) object.Object {
-	leftValue := left.(*object.BooleanObject).Value
-	rightValue := right.(*object.BooleanObject).Value
-	switch operator {
-	case "==":
-		if leftValue == rightValue {
-			return initializer.TRUE
-		}
+	result := sendMethodCall(left, operator, []object.Object{right})
 
-		return initializer.FALSE
-	case "!=":
-		if leftValue != rightValue {
-			return initializer.TRUE
-		}
-
-		return initializer.FALSE
-	default:
-		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+	if err, ok := result.(*object.Error); ok {
+		return err
 	}
 
+	return result
 }
 
 func evalStringInfixExpression(left object.Object, operator string, right object.Object) object.Object {

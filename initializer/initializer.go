@@ -9,12 +9,7 @@ import (
 var (
 	ObjectClass  = initializeObjectClass()
 	ClassClass   = initializeClassClass()
-	BooleanClass = initializeBooleanClass()
 	NullClass    = initializeNullClass()
-
-	TRUE  = &object.BooleanObject{Value: true, Class: BooleanClass}
-	FALSE = &object.BooleanObject{Value: false, Class: BooleanClass}
-	NULL  = &object.Null{Class: NullClass}
 )
 
 var BuiltinGlobalMethods = map[string]*object.BuiltInMethod{
@@ -83,6 +78,7 @@ var BuiltinClassMethods = map[string]*object.BuiltInMethod{
 func InitializeProgram() {
 	initializeStringClass()
 	initializeIntegerClass()
+	initializeBooleanClass()
 }
 
 func InitializeMainObject() *object.RObject {
@@ -130,15 +126,6 @@ func InitializeInstance(c *object.RClass) *object.RObject {
 	instance := &object.RObject{Class: c, InstanceVariables: object.NewEnvironment()}
 
 	return instance
-}
-
-func initializeBaseClass(name string) *object.BaseClass {
-	n := &ast.Constant{Value: name}
-	return &object.BaseClass{Name: n, Methods: object.NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}
-}
-
-func initializeBooleanClass() *object.BooleanClass {
-	return &object.BooleanClass{BaseClass: initializeBaseClass("Boolean")}
 }
 
 func initializeNullClass() *object.NullClass {
