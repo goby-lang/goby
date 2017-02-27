@@ -12,8 +12,8 @@ var (
 	NullClass   = initializeNullClass()
 )
 
-var BuiltinGlobalMethods = map[string]*object.BuiltInMethod{
-	"puts": {
+var BuiltinGlobalMethods = []*object.BuiltInMethod{
+	{
 		Fn: func(receiver object.Object) object.BuiltinMethodBody {
 			return func(args ...object.Object) object.Object {
 				for _, arg := range args {
@@ -25,7 +25,7 @@ var BuiltinGlobalMethods = map[string]*object.BuiltInMethod{
 		},
 		Name: "puts",
 	},
-	"class": {
+	{
 		Fn: func(receiver object.Object) object.BuiltinMethodBody {
 			return func(args ...object.Object) object.Object {
 				switch r := receiver.(type) {
@@ -42,8 +42,8 @@ var BuiltinGlobalMethods = map[string]*object.BuiltInMethod{
 	},
 }
 
-var BuiltinClassMethods = map[string]*object.BuiltInMethod{
-	"new": {
+var BuiltinClassMethods = []*object.BuiltInMethod{
+	{
 		Fn: func(receiver object.Object) object.BuiltinMethodBody {
 			return func(args ...object.Object) object.Object {
 				class := receiver.(*object.RClass)
@@ -59,7 +59,7 @@ var BuiltinClassMethods = map[string]*object.BuiltInMethod{
 		},
 		Name: "new",
 	},
-	"name": {
+	{
 		Fn: func(receiver object.Object) object.BuiltinMethodBody {
 			return func(args ...object.Object) object.Object {
 				name := receiver.(object.Class).ReturnName()
@@ -88,8 +88,8 @@ func initializeObjectClass() *object.RClass {
 	name := &ast.Constant{Value: "Object"}
 	globalMethods := object.NewEnvironment()
 
-	for key, value := range BuiltinGlobalMethods {
-		globalMethods.Set(key, value)
+	for _, m := range BuiltinGlobalMethods {
+		globalMethods.Set(m.Name, m)
 	}
 
 	class := &object.RClass{BaseClass: &object.BaseClass{Name: name, Class: ClassClass, Methods: globalMethods}}
@@ -100,8 +100,8 @@ func initializeObjectClass() *object.RClass {
 func initializeClassClass() *object.RClass {
 	methods := object.NewEnvironment()
 
-	for key, value := range BuiltinClassMethods {
-		methods.Set(key, value)
+	for _, m := range BuiltinClassMethods {
+		methods.Set(m.Name, m)
 	}
 
 	name := &ast.Constant{Value: "Class"}

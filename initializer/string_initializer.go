@@ -9,8 +9,8 @@ var (
 	StringClass *object.StringClass
 )
 
-var builtinStringMethods = map[string]*object.BuiltInMethod{
-	"+": {
+var builtinStringMethods = []*object.BuiltInMethod{
+	{
 		Fn: func(receiver object.Object) object.BuiltinMethodBody {
 			return func(args ...object.Object) object.Object {
 				err := checkArgumentLen(args, StringClass, "+")
@@ -32,7 +32,7 @@ var builtinStringMethods = map[string]*object.BuiltInMethod{
 		},
 		Name: "+",
 	},
-	">": {
+	{
 		Fn: func(receiver object.Object) object.BuiltinMethodBody {
 			return func(args ...object.Object) object.Object {
 				err := checkArgumentLen(args, StringClass, ">")
@@ -58,7 +58,7 @@ var builtinStringMethods = map[string]*object.BuiltInMethod{
 		},
 		Name: ">",
 	},
-	"<": {
+	{
 		Fn: func(receiver object.Object) object.BuiltinMethodBody {
 			return func(args ...object.Object) object.Object {
 				err := checkArgumentLen(args, StringClass, "<")
@@ -84,7 +84,7 @@ var builtinStringMethods = map[string]*object.BuiltInMethod{
 		},
 		Name: "<",
 	},
-	"==": {
+	{
 		Fn: func(receiver object.Object) object.BuiltinMethodBody {
 			return func(args ...object.Object) object.Object {
 				err := checkArgumentLen(args, StringClass, "==")
@@ -111,7 +111,7 @@ var builtinStringMethods = map[string]*object.BuiltInMethod{
 		},
 		Name: "==",
 	},
-	"!=": {
+	{
 		Fn: func(receiver object.Object) object.BuiltinMethodBody {
 			return func(args ...object.Object) object.Object {
 				err := checkArgumentLen(args, StringClass, "!=")
@@ -143,8 +143,8 @@ var builtinStringMethods = map[string]*object.BuiltInMethod{
 func initializeStringClass() *object.StringClass {
 	methods := object.NewEnvironment()
 
-	for name, method := range builtinStringMethods {
-		methods.Set(name, method)
+	for _, m := range builtinStringMethods {
+		methods.Set(m.Name, m)
 	}
 
 	n := &ast.Constant{Value: "String"}

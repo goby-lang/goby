@@ -13,8 +13,8 @@ var (
 	NULL  = &object.Null{Class: NullClass}
 )
 
-var builtinBooleanMethods = map[string]*object.BuiltInMethod{
-	"==": {
+var builtinBooleanMethods = []*object.BuiltInMethod{
+	{
 		Fn: func(receiver object.Object) object.BuiltinMethodBody {
 			return func(args ...object.Object) object.Object {
 				err := checkArgumentLen(args, BooleanClass, "==")
@@ -41,7 +41,7 @@ var builtinBooleanMethods = map[string]*object.BuiltInMethod{
 		},
 		Name: "==",
 	},
-	"!=": {
+	{
 		Fn: func(receiver object.Object) object.BuiltinMethodBody {
 			return func(args ...object.Object) object.Object {
 				err := checkArgumentLen(args, BooleanClass, "!=")
@@ -73,8 +73,8 @@ var builtinBooleanMethods = map[string]*object.BuiltInMethod{
 func initializeBooleanClass() *object.BooleanClass {
 	methods := object.NewEnvironment()
 
-	for name, method := range builtinBooleanMethods {
-		methods.Set(name, method)
+	for _, m := range builtinBooleanMethods {
+		methods.Set(m.Name, m)
 	}
 
 	n := &ast.Constant{Value: "Boolean"}
