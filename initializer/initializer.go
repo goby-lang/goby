@@ -9,7 +9,6 @@ import (
 var (
 	ObjectClass  = initializeObjectClass()
 	ClassClass   = initializeClassClass()
-	StringClass  = initializeStringClass()
 	IntegerClass = initializeIntegerClass()
 	BooleanClass = initializeBooleanClass()
 	NullClass    = initializeNullClass()
@@ -82,6 +81,10 @@ var BuiltinClassMethods = map[string]*object.BuiltInMethod{
 	},
 }
 
+func InitializeProgram() {
+	initializeStringClass()
+}
+
 func InitializeMainObject() *object.RObject {
 	obj := &object.RObject{Class: ObjectClass, InstanceVariables: object.NewEnvironment()}
 	scope := &object.Scope{Self: obj, Env: object.NewEnvironment()}
@@ -134,10 +137,6 @@ func initializeBaseClass(name string) *object.BaseClass {
 	return &object.BaseClass{Name: n, Methods: object.NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}
 }
 
-func initializeStringClass() *object.StringClass {
-	return &object.StringClass{BaseClass: initializeBaseClass("String")}
-}
-
 func initializeIntegerClass() *object.IntegerClass {
 	return &object.IntegerClass{BaseClass: initializeBaseClass("Integer")}
 }
@@ -151,4 +150,12 @@ func initializeNullClass() *object.NullClass {
 	baseClass := &object.BaseClass{Name: n, Methods: object.NewEnvironment(), Class: ClassClass}
 	nc := &object.NullClass{BaseClass: baseClass}
 	return nc
+}
+
+func checkArgumentLen(args []object.Object, class object.Class, method_name string) *object.Error {
+	if len(args) > 1 {
+		return &object.Error{Message: fmt.Sprintf("Too many arguments for %s#%s", class.ReturnName().Value, method_name)}
+	}
+
+	return nil
 }
