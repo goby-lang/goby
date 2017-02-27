@@ -21,6 +21,7 @@ func main() {
 	program := p.ParseProgram()
 	p.CheckErrors()
 
+	initializer.InitializeProgram()
 	mainObj := initializer.InitializeMainObject()
 	evaluator.Eval(program, mainObj.Scope)
 }
