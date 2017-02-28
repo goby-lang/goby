@@ -1,8 +1,24 @@
-# rooby
+# Rooby
 
 [![Build Status](https://travis-ci.org/st0012/rooby.svg?branch=master)](https://travis-ci.org/st0012/rooby)
 
 Rooby is a new object oriented language written in Go.
+
+## Install
+
+```
+$ git clone git@github.com:st0012/rooby.git
+$ cd rooby
+$ make install
+```
+
+## Try it!
+```
+$ rooby ./samples/sample-1.ro
+$ rooby ./samples/sample-2.ro
+$ rooby ./samples/sample-3.ro
+$ rooby ./samples/sample-4.ro
+```
 
 ##  Sample snippet.
 ```ruby
