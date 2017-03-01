@@ -6,10 +6,13 @@ Rooby is a new object oriented language written in Go.
 
 ## Install
 
+1. You must have Golang installed
+2. You must have set $GOPATH
+3. Add your $GOPATH/bin into $PATH
+4. Run following command 
+
 ```
-$ git clone git@github.com:st0012/rooby.git
-$ cd rooby
-$ make install
+$ go get github.com/st0012/Rooby
 ```
 
 ## Try it!
@@ -110,15 +113,16 @@ puts(true.class.name) #=> Boolean
     - ~~method call without self~~
     - ~~remove semicolon~~
 - ~~Makefile~~
-- for loop support
 - ~~Comment support~~
-- Advanced data structures (Array/Hash)
-- Basic IO
-- More documentation
-    - Samples
-    - Feature list
 - ~~Primitive type class~~
     - ~~String~~
     - ~~Integer~~
     - ~~Boolean~~
+- Advanced data structures (Array/Hash)
+- for loop support
+- Allow monkey patching
+- Basic IO
+- More documentation
+    - Samples
+    - Feature list
 - REPL(Hard to be done)
