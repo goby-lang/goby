@@ -1,9 +1,9 @@
 package parser_test
 
 import (
-	"github.com/st0012/rooby/ast"
-	"github.com/st0012/rooby/lexer"
-	"github.com/st0012/rooby/parser"
+	"github.com/st0012/Rooby/ast"
+	"github.com/st0012/Rooby/lexer"
+	"github.com/st0012/Rooby/parser"
 	"testing"
 	"fmt"
 )

@@ -2,7 +2,7 @@ package ast
 
 import (
 	"bytes"
-	"github.com/st0012/rooby/token"
+	"github.com/st0012/Rooby/token"
 	"strings"
 )
 

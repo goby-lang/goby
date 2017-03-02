@@ -1,9 +1,9 @@
 package evaluator
 
 import (
-	"github.com/st0012/rooby/ast"
-	"github.com/st0012/rooby/initializer"
-	"github.com/st0012/rooby/object"
+	"github.com/st0012/Rooby/ast"
+	"github.com/st0012/Rooby/initializer"
+	"github.com/st0012/Rooby/object"
 )
 
 func evalAssignStatement(stmt *ast.AssignStatement, scope *object.Scope) object.Object {

@@ -2,7 +2,7 @@ package object
 
 import (
 	"bytes"
-	"github.com/st0012/rooby/ast"
+	"github.com/st0012/Rooby/ast"
 	"strings"
 )
 

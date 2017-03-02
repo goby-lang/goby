@@ -1,6 +1,6 @@
 package initializer
 
-import "github.com/st0012/rooby/object"
+import "github.com/st0012/Rooby/object"
 
 var (
 	BooleanClass *object.BooleanClass

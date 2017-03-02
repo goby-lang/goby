@@ -1,7 +1,7 @@
 package evaluator_test
 
 import (
-	"github.com/st0012/rooby/object"
+	"github.com/st0012/Rooby/object"
 	"testing"
 )
 

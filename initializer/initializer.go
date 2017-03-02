@@ -2,7 +2,7 @@ package initializer
 
 import (
 	"fmt"
-	"github.com/st0012/rooby/object"
+	"github.com/st0012/Rooby/object"
 )
 
 func InitializeProgram() {

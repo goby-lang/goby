@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/st0012/rooby/evaluator"
-	"github.com/st0012/rooby/initializer"
-	"github.com/st0012/rooby/lexer"
-	"github.com/st0012/rooby/parser"
+	"github.com/st0012/Rooby/evaluator"
+	"github.com/st0012/Rooby/initializer"
+	"github.com/st0012/Rooby/lexer"
+	"github.com/st0012/Rooby/parser"
 	"io/ioutil"
 	"os"
 )

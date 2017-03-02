@@ -1,8 +1,8 @@
 package parser
 
 import (
-	"github.com/st0012/rooby/ast"
-	"github.com/st0012/rooby/token"
+	"github.com/st0012/Rooby/ast"
+	"github.com/st0012/Rooby/token"
 )
 
 func (p *Parser) parseStatement() ast.Statement {

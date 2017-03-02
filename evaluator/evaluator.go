@@ -2,9 +2,9 @@ package evaluator
 
 import (
 	"fmt"
-	"github.com/st0012/rooby/ast"
-	"github.com/st0012/rooby/initializer"
-	"github.com/st0012/rooby/object"
+	"github.com/st0012/Rooby/ast"
+	"github.com/st0012/Rooby/initializer"
+	"github.com/st0012/Rooby/object"
 )
 
 func Eval(node ast.Node, scope *object.Scope) object.Object {
