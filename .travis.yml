@@ -6,6 +6,11 @@ go:
   - 1.7.x
   - master
 
+before_install:
+  - go get github.com/mattn/goveralls
+script:
+  - $HOME/gopath/bin/goveralls -service=travis-ci
+
 notifications:
   email:
     recipients:
