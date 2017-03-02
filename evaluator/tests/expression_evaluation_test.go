@@ -16,12 +16,27 @@ func TestPrimitiveType(t *testing.T) {
 			"Integer",
 		},
 		{
+			`Integer.name
+			`,
+			"Integer",
+		},
+		{
 			`"123".class.name
 			`,
 			"String",
 		},
 		{
+			`String.name
+			`,
+			"String",
+		},
+		{
 			`true.class.name
+			`,
+			"Boolean",
+		},
+		{
+			`Boolean.name
 			`,
 			"Boolean",
 		},

@@ -13,13 +13,23 @@ func init() {
 	initializeStringClass()
 	initializeIntegerClass()
 	initializeBooleanClass()
+	initializeMainObject()
 }
 
-func InitializeMainObject() *object.RObject {
+var MainObj *object.RObject
+
+func initializeMainObject() {
+	builtInClasses := []object.Class{StringClass, BooleanClass, IntegerClass}
+
 	obj := &object.RObject{Class: ObjectClass, InstanceVariables: object.NewEnvironment()}
 	scope := &object.Scope{Self: obj, Env: object.NewEnvironment()}
+
+	for _, class := range builtInClasses {
+		scope.Env.Set(class.ReturnName(), class)
+	}
+
 	obj.Scope = scope
-	return obj
+	MainObj = obj
 }
 
 func InitializeClass(name string, scope *object.Scope) *object.RClass {

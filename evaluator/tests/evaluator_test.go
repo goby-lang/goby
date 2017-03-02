@@ -16,7 +16,7 @@ func testEval(t *testing.T, input string) object.Object {
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
-	mainObj := initializer.InitializeMainObject()
+	mainObj := initializer.MainObj
 	return evaluator.Eval(program, mainObj.Scope)
 }
 
