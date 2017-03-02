@@ -5,7 +5,7 @@ import (
 	"github.com/st0012/rooby/object"
 )
 
-func init() {
+func InitializeProgram() {
 	// Initialize order matters
 	initializeClassClass()
 	initializeObjectClass()
