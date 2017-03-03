@@ -45,6 +45,9 @@ func TestNextToken(t *testing.T) {
 
 	# This is comment.
 	# And I should be ignored.
+
+	[1, 2, 3, 4, 5]
+	["test", "test"]
 	`
 
 	tests := []struct {
@@ -177,7 +180,25 @@ func TestNextToken(t *testing.T) {
 		{token.COMMENT, "# This is comment.", 37},
 		{token.COMMENT, "# And I should be ignored.", 38},
 
-		{token.EOF, "", 39},
+		{token.LBRACKET, "[", 40},
+		{token.INT, "1", 40},
+		{token.COMMA, ",", 40},
+		{token.INT, "2", 40},
+		{token.COMMA, ",", 40},
+		{token.INT, "3", 40},
+		{token.COMMA, ",", 40},
+		{token.INT, "4", 40},
+		{token.COMMA, ",", 40},
+		{token.INT, "5", 40},
+		{token.RBRACKET, "]", 40},
+
+		{token.LBRACKET, "[", 41},
+		{token.STRING, "test", 41},
+		{token.COMMA, ",", 41},
+		{token.STRING, "test", 41},
+		{token.RBRACKET, "]", 41},
+
+		{token.EOF, "", 42},
 	}
 
 	l := New(input)
