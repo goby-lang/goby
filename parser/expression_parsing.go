@@ -109,6 +109,37 @@ func (p *Parser) parseBooleanLiteral() ast.Expression {
 	return lit
 }
 
+func (p *Parser) parseArrayExpression() ast.Expression {
+	arr := &ast.ArrayExpression{Token: p.curToken}
+	arr.Elements = p.parseArrayElements()
+
+	return arr
+}
+
+func (p *Parser) parseArrayElements() []ast.Expression {
+	elems := []ast.Expression{}
+
+	if p.peekTokenIs(token.RBRACKET) {
+		p.nextToken() // ']'
+		return elems
+	}
+
+	p.nextToken() // start of first expression
+	elems = append(elems, p.parseExpression(LOWEST))
+
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken() // ","
+		p.nextToken() // start of next expression
+		elems = append(elems, p.parseExpression(LOWEST))
+	}
+
+	if !p.expectPeek(token.RBRACKET) {
+		return nil
+	}
+
+	return elems
+}
+
 func (p *Parser) parsePrefixExpression() ast.Expression {
 	pe := &ast.PrefixExpression{
 		Token:    p.curToken,

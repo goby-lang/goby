@@ -195,6 +195,36 @@ func (sl *StringLiteral) String() string {
 	return out.String()
 }
 
+type ArrayExpression struct {
+	Token    token.Token
+	Elements []Expression
+}
+
+func (ae *ArrayExpression) expressionNode() {}
+func (ae *ArrayExpression) TokenLiteral() string {
+	return ae.Token.Literal
+}
+func (ae *ArrayExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("[")
+
+	if len(ae.Elements) == 0 {
+		out.WriteString("]")
+		return out.String()
+	}
+
+	out.WriteString(ae.Elements[0].String())
+
+	for _, elem := range ae.Elements[1:] {
+		out.WriteString(", ")
+		out.WriteString(elem.String())
+	}
+
+	out.WriteString("]")
+	return out.String()
+}
+
 type PrefixExpression struct {
 	Token    token.Token
 	Operator string

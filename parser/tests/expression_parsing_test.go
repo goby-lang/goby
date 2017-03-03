@@ -3,9 +3,44 @@ package parser_test
 import (
 	"github.com/st0012/Rooby/ast"
 	"github.com/st0012/Rooby/lexer"
-	"testing"
 	"github.com/st0012/Rooby/parser"
+	"testing"
+	"fmt"
 )
+
+func TestArrayExpression(t *testing.T) {
+	tests := []struct {
+		input            string
+		expectedElements []int64
+	}{
+		{`[]`, []int64{}},
+		{`[1]`, []int64{1}},
+		{`[1,2,4,5]`, []int64{1, 2, 4, 5}},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := parser.New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("program has not enough statments. expect 1, got=%d", len(program.Statements))
+		}
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+
+		if !ok {
+			t.Fatalf("program.Statments[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+		}
+
+		arr, ok := stmt.Expression.(*ast.ArrayExpression)
+
+		fmt.Print(arr.String())
+		for i, elem := range arr.Elements {
+			testIntegerLiteral(t, elem, tt.expectedElements[i])
+		}
+	}
+}
 
 func TestIdentifierExpression(t *testing.T) {
 	input := `foobar;`
