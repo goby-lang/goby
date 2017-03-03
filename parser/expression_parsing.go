@@ -16,6 +16,7 @@ var precedence = map[token.TokenType]int{
 	token.MINUS:    SUM,
 	token.SLASH:    PRODUCT,
 	token.ASTERISK: PRODUCT,
+	token.LBRACKET: INDEX,
 	token.DOT:      CALL,
 	token.LPAREN:   CALL,
 }
@@ -28,6 +29,7 @@ const (
 	SUM
 	PRODUCT
 	PREFIX
+	INDEX
 	CALL
 )
 
@@ -112,8 +114,26 @@ func (p *Parser) parseBooleanLiteral() ast.Expression {
 func (p *Parser) parseArrayExpression() ast.Expression {
 	arr := &ast.ArrayExpression{Token: p.curToken}
 	arr.Elements = p.parseArrayElements()
-
 	return arr
+}
+
+func (p *Parser) parseArrayIndexExpression(left ast.Expression) ast.Expression {
+	m := &ast.Identifier{Value: "[]"}
+	callExpression := &ast.CallExpression{Receiver: left, Method: m, Token: p.curToken}
+
+	if p.peekTokenIs(token.RBRACKET) {
+		return nil
+	}
+
+	p.nextToken()
+
+	callExpression.Arguments = []ast.Expression{p.parseExpression(LOWEST)}
+
+	if !p.expectPeek(token.RBRACKET) {
+		return nil
+	}
+
+	return callExpression
 }
 
 func (p *Parser) parseArrayElements() []ast.Expression {
