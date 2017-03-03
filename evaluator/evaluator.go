@@ -80,7 +80,7 @@ func Eval(node ast.Node, scope *object.Scope) object.Object {
 			elements = append(elements, Eval(exp, scope))
 		}
 
-		arr := &object.ArrayObject{Elements: elements}
+		arr := initializer.InitializeArray(elements)
 		return arr
 	}
 
