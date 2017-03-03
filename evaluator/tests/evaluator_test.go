@@ -21,48 +21,6 @@ func testEval(t *testing.T, input string) object.Object {
 	return evaluator.Eval(program, mainObj.Scope)
 }
 
-func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
-	result, ok := obj.(*object.BooleanObject)
-	if !ok {
-		t.Errorf("object is not Boolean. got=%T (%+v)", obj, obj)
-		return false
-	}
-	if result.Value != expected {
-		t.Errorf("object has wrong value. expect=%d, got=%d", expected, result.Value)
-		return false
-	}
-
-	return true
-}
-
-func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {
-	result, ok := obj.(*object.IntegerObject)
-	if !ok {
-		t.Errorf("object is not Integer. got=%T (%+v)", obj, obj)
-		return false
-	}
-	if result.Value != expected {
-		t.Errorf("object has wrong value. expect=%d, got=%d", expected, result.Value)
-		return false
-	}
-
-	return true
-}
-
-func testStringObject(t *testing.T, obj object.Object, expected string) bool {
-	result, ok := obj.(*object.StringObject)
-	if !ok {
-		t.Errorf("object is not a String. got=%T (%+v)", obj, obj)
-		return false
-	}
-	if result.Value != expected {
-		t.Errorf("object has wrong value. expect=%s, got=%s", expected, result.Value)
-		return false
-	}
-
-	return true
-}
-
 func testClassObject(t *testing.T, obj object.Object, expected string) bool {
 	result, ok := obj.(*object.RClass)
 	if !ok {

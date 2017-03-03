@@ -1,6 +1,9 @@
 package evaluator_test
 
-import "testing"
+import (
+	"testing"
+	"github.com/st0012/Rooby/object"
+)
 
 func TestEvalBooleanExpression(t *testing.T) {
 	tests := []struct {
@@ -47,4 +50,19 @@ func TestEvalInfixBooleanExpression(t *testing.T) {
 		evaluated := testEval(t, tt.input)
 		testBooleanObject(t, evaluated, tt.expected)
 	}
+}
+
+
+func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
+	result, ok := obj.(*object.BooleanObject)
+	if !ok {
+		t.Errorf("object is not Boolean. got=%T (%+v)", obj, obj)
+		return false
+	}
+	if result.Value != expected {
+		t.Errorf("object has wrong value. expect=%d, got=%d", expected, result.Value)
+		return false
+	}
+
+	return true
 }

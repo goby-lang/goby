@@ -10,6 +10,7 @@ type ObjectType string
 
 const (
 	INTEGER_OBJ         = "INTEGER"
+	ARRAY_OBJ           = "ARRAY"
 	STRING_OBJ          = "STRING"
 	BOOLEAN_OBJ         = "BOOLEAN"
 	NULL_OBJ            = "NULL"
