@@ -133,6 +133,16 @@ func (p *Parser) parseArrayIndexExpression(left ast.Expression) ast.Expression {
 		return nil
 	}
 
+	// Assign value to index
+	if p.peekTokenIs(token.ASSIGN) {
+		p.nextToken()
+		p.nextToken()
+		m = &ast.Identifier{Value: "[]="}
+		assignValue := p.parseExpression(LOWEST)
+		callExpression.Method = m
+		callExpression.Arguments = append(callExpression.Arguments, assignValue)
+	}
+
 	return callExpression
 }
 

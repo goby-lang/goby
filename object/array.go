@@ -10,7 +10,7 @@ type ArrayClass struct {
 }
 
 type ArrayObject struct {
-	Class *ArrayClass
+	Class    *ArrayClass
 	Elements []Object
 }
 
@@ -26,6 +26,7 @@ func (a *ArrayObject) Inspect() string {
 		elements = append(elements, e.Inspect())
 	}
 
+	out.WriteString("Array:")
 	out.WriteString("[")
 	out.WriteString(strings.Join(elements, ", "))
 	out.WriteString("]")

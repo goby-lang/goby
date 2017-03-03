@@ -10,19 +10,15 @@ var builtinArrayMethods = []*object.BuiltInMethod{
 	{
 		Fn: func(receiver object.Object) object.BuiltinMethodBody {
 			return func(args ...object.Object) object.Object {
-				if len(args) < 1 {
-					return newError("Too few arguments. expected 1, got=%d", len(args))
-				}
-
-				if len(args) > 1 {
-					return newError("Too many arguments. expected 1, got=%d", len(args))
+				if len(args) != 1 {
+					return newError("Expect 1 arguments. got=%d", len(args))
 				}
 
 				i := args[0]
 				index, ok := i.(*object.IntegerObject)
 
 				if !ok {
-					return newError("Expect argument to be Integer. got=%T", i)
+					return newError("Expect index argument to be Integer. got=%T", i)
 				}
 
 				arr := receiver.(*object.ArrayObject)
@@ -40,6 +36,42 @@ var builtinArrayMethods = []*object.BuiltInMethod{
 			}
 		},
 		Name: "[]",
+	},
+	{
+		Fn: func(receiver object.Object) object.BuiltinMethodBody {
+			return func(args ...object.Object) object.Object {
+				// First arg is index
+				// Second arg is assigned value
+				if len(args) != 2 {
+					return newError("Expect 2 arguments. got=%d", len(args))
+				}
+
+				i := args[0]
+				index, ok := i.(*object.IntegerObject)
+				indexValue := int(index.Value)
+
+				if !ok {
+					return newError("Expect index argument to be Integer. got=%T", i)
+				}
+
+				arr := receiver.(*object.ArrayObject)
+
+				// Expand the array
+				if len(arr.Elements) < (indexValue + 1) {
+					newArr := make([]object.Object, indexValue+1)
+					copy(newArr, arr.Elements)
+					for i, _ := range newArr[len(arr.Elements):] {
+						newArr[i] = NULL
+					}
+					arr.Elements = newArr
+				}
+
+				arr.Elements[indexValue] = args[1]
+
+				return arr.Elements[indexValue]
+			}
+		},
+		Name: "[]=",
 	},
 }
 

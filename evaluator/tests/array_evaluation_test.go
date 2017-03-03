@@ -1,8 +1,8 @@
 package evaluator_test
 
 import (
-	"testing"
 	"github.com/st0012/Rooby/object"
+	"testing"
 )
 
 func TestEvalArrayExpression(t *testing.T) {
@@ -23,10 +23,13 @@ func TestEvalArrayExpression(t *testing.T) {
 }
 
 func TestEvalArrayIndex(t *testing.T) {
-	tests := []struct{
-		input string
+	tests := []struct {
+		input    string
 		expected interface{}
 	}{
+		{`
+			[][1]
+		`, nil},
 		{`
 			[1, 2, 10, 5][2]
 		`, int64(10)},
@@ -34,8 +37,30 @@ func TestEvalArrayIndex(t *testing.T) {
 			[1, "a", 10, 5][1]
 		`, "a"},
 		{`
-			[][1]
+			a = [1, "a", 10, 5]
+			a[0]
+		`, 1},
+		{`
+			a = [1, "a", 10, 5]
+			a[2] = a[1]
+			a[2]
+
+		`, "a"},
+		{`
+			a = []
+			a[10] = 100
+			a[10]
+		`, 100},
+		{`
+			a = []
+			a[10] = 100
+			a[0]
 		`, nil},
+		{`
+			a = [1, 2 ,3 ,5 , 10]
+			a[0] = a[1] + a[2] + a[3] * a[4]
+			a[0]
+		`, 100},
 	}
 
 	for _, tt := range tests {
@@ -52,7 +77,8 @@ func TestEvalArrayIndex(t *testing.T) {
 			_, ok := evaluated.(*object.Null)
 
 			if !ok {
-				t.Fatalf("expect input: \"%s\"'s result should be Null. got=%T", tt.input, evaluated)
+
+				t.Fatalf("expect input: \"%s\"'s result should be Null. got=%T(%s)", tt.input, evaluated, evaluated.Inspect())
 			}
 		}
 	}
