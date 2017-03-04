@@ -42,6 +42,8 @@ func (a *ArrayObject) Length() int {
 	return len(a.Elements)
 }
 
-//func (a *ArrayObject) Pop() int {
-//	return
-//}
+func (a *ArrayObject) Pop() Object {
+	value := a.Elements[len(a.Elements)-1]
+	a.Elements = a.Elements[:len(a.Elements)-1]
+	return value
+}

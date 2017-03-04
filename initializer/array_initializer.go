@@ -87,6 +87,19 @@ var builtinArrayMethods = []*object.BuiltInMethod{
 		},
 		Name: "length",
 	},
+	{
+		Fn: func(receiver object.Object) object.BuiltinMethodBody {
+			return func(args ...object.Object) object.Object {
+				if len(args) != 0 {
+					return newError("Expect 0 argument. got=%d", len(args))
+				}
+
+				arr := receiver.(*object.ArrayObject)
+				return arr.Pop()
+			}
+		},
+		Name: "pop",
+	},
 }
 
 func initializeArrayClass() *object.ArrayClass {
