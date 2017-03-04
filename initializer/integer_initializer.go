@@ -219,10 +219,10 @@ func initializeIntegerClass() *object.IntegerClass {
 }
 
 var (
-	integerTable = make(map[int64]*object.IntegerObject)
+	integerTable = make(map[int]*object.IntegerObject)
 )
 
-func InitilaizeInteger(value int64) *object.IntegerObject {
+func InitilaizeInteger(value int) *object.IntegerObject {
 	addr, ok := integerTable[value]
 
 	if !ok {

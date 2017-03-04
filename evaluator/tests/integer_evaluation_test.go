@@ -8,7 +8,7 @@ import (
 func TestEvalInfixIntegerExpression(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected int64
+		expected int
 	}{
 		{"5", 5},
 		{"10", 10},
@@ -36,7 +36,7 @@ func TestEvalInfixIntegerExpression(t *testing.T) {
 func TestEvalIntegerExpression(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected int64
+		expected int
 	}{
 		{"5", 5},
 		{"10", 10},
@@ -48,7 +48,7 @@ func TestEvalIntegerExpression(t *testing.T) {
 	}
 }
 
-func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {
+func testIntegerObject(t *testing.T, obj object.Object, expected int) bool {
 	result, ok := obj.(*object.IntegerObject)
 	if !ok {
 		t.Errorf("object is not Integer. got=%T (%+v)", obj, obj)

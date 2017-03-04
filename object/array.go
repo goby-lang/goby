@@ -37,3 +37,11 @@ func (a *ArrayObject) Inspect() string {
 func (a *ArrayObject) ReturnClass() Class {
 	return a.Class
 }
+
+func (a *ArrayObject) Length() int {
+	return len(a.Elements)
+}
+
+//func (a *ArrayObject) Pop() int {
+//	return
+//}

@@ -60,14 +60,14 @@ func TestEvalArrayIndex(t *testing.T) {
 			a = [1, 2 ,3 ,5 , 10]
 			a[0] = a[1] + a[2] + a[3] * a[4]
 			a[0]
-		`, 100},
+		`, 55},
 	}
 
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
 
 		switch expected := tt.expected.(type) {
-		case int64:
+		case int:
 			testIntegerObject(t, evaluated, expected)
 		case string:
 			testStringObject(t, evaluated, expected)

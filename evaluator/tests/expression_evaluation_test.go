@@ -63,7 +63,7 @@ func TestPrimitiveType(t *testing.T) {
 func TestMethodCallWithoutSelf(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected int64
+		expected int
 	}{
 		{
 			`class Foo {
@@ -299,7 +299,7 @@ func TestClassMethodEvaluation(t *testing.T) {
 		}
 
 		switch expected := tt.expected.(type) {
-		case int64:
+		case int:
 			testIntegerObject(t, evaluated, expected)
 		case string:
 			testStringObject(t, evaluated, expected)
@@ -569,7 +569,7 @@ func TestEvalIfExpression(t *testing.T) {
 
 		switch tt.expected.(type) {
 		case int64:
-			testIntegerObject(t, evaluated, tt.expected.(int64))
+			testIntegerObject(t, evaluated, tt.expected.(int))
 		case bool:
 			testBooleanObject(t, evaluated, tt.expected.(bool))
 		case nil:
@@ -601,7 +601,7 @@ func TestEvalBangPrefixExpression(t *testing.T) {
 func TestEvalMinusPrefixExpression(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected int64
+		expected int
 	}{
 		{"-5", -5},
 		{"-10", -10},

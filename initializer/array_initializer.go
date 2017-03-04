@@ -48,7 +48,7 @@ var builtinArrayMethods = []*object.BuiltInMethod{
 
 				i := args[0]
 				index, ok := i.(*object.IntegerObject)
-				indexValue := int(index.Value)
+				indexValue := index.Value
 
 				if !ok {
 					return newError("Expect index argument to be Integer. got=%T", i)
@@ -72,6 +72,20 @@ var builtinArrayMethods = []*object.BuiltInMethod{
 			}
 		},
 		Name: "[]=",
+
+	},
+	{
+		Fn: func(receiver object.Object) object.BuiltinMethodBody {
+			return func(args ...object.Object) object.Object {
+				if len(args) != 0 {
+					return newError("Expect 0 argument. got=%d", len(args))
+				}
+
+				arr := receiver.(*object.ArrayObject)
+				return InitilaizeInteger(arr.Length())
+			}
+		},
+		Name: "length",
 	},
 }
 

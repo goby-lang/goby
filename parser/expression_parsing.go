@@ -84,7 +84,7 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 		return nil
 	}
 
-	lit.Value = value
+	lit.Value = int(value)
 
 	return lit
 }

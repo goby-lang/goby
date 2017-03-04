@@ -166,7 +166,7 @@ func (es *ExpressionStatement) String() string {
 
 type IntegerLiteral struct {
 	Token token.Token
-	Value int64
+	Value int
 }
 
 func (il *IntegerLiteral) expressionNode() {}

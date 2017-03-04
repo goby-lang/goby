@@ -28,7 +28,7 @@ func TestComment(t *testing.T) {
 func TestAssignStatementEvaluation(t *testing.T) {
 	tests := []struct {
 		input         string
-		expectedValue int64
+		expectedValue int
 	}{
 		{"a = 5; a;", 5},
 		{"a = 5 * 5; a;", 25},
@@ -47,7 +47,7 @@ func TestAssignStatementEvaluation(t *testing.T) {
 func TestReturnStatementEvaluation(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected int64
+		expected int
 	}{
 		{"return 10;", 10},
 		{"return 10; 9;", 10},
