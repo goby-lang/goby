@@ -10,11 +10,11 @@ import (
 func TestArrayExpression(t *testing.T) {
 	tests := []struct {
 		input            string
-		expectedElements []int64
+		expectedElements []int
 	}{
-		{`[]`, []int64{}},
-		{`[1]`, []int64{1}},
-		{`[1,2,4,5]`, []int64{1, 2, 4, 5}},
+		{`[]`, []int{}},
+		{`[1]`, []int{1}},
+		{`[1,2,4,5]`, []int{1, 2, 4, 5}},
 	}
 
 	for _, tt := range tests {
@@ -72,7 +72,7 @@ func TestArrayIndexExpression(t *testing.T) {
 
 		switch expected := tt.expectedIndex.(type) {
 		case int:
-			testIntegerLiteral(t, arrIndex.Arguments[0], int64(expected))
+			testIntegerLiteral(t, arrIndex.Arguments[0], expected)
 		case string:
 			testIdentifier(t, arrIndex.Arguments[0], expected)
 		}
@@ -216,9 +216,9 @@ func TestParsingPrefixExpression(t *testing.T) {
 func TestParsingInfixExpression(t *testing.T) {
 	infixTests := []struct {
 		input      string
-		leftValue  int64
+		leftValue  int
 		operator   string
-		rightValue int64
+		rightValue int
 	}{
 		{"4 + 1;", 4, "+", 1},
 		{"3 - 2;", 3, "-", 2},
