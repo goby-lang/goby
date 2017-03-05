@@ -1,6 +1,8 @@
 package initializer
 
-import "github.com/st0012/Rooby/object"
+import (
+	"github.com/st0012/Rooby/object"
+)
 
 var (
 	ArrayClass *object.ArrayClass
@@ -99,6 +101,15 @@ var builtinArrayMethods = []*object.BuiltInMethod{
 			}
 		},
 		Name: "pop",
+	},
+	{
+		Fn: func(receiver object.Object) object.BuiltinMethodBody {
+			return func(args ...object.Object) object.Object {
+				arr := receiver.(*object.ArrayObject)
+				return arr.Push(args)
+			}
+		},
+		Name: "push",
 	},
 }
 

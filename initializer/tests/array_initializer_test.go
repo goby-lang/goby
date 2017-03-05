@@ -32,6 +32,25 @@ func TestPopMethod(t *testing.T) {
 	}
 }
 
+func TestPushMethod(t *testing.T) {
+	array := generateArray(5)
+	m := getBuiltInMethod(t, array, "push")
+
+	six := initializer.InitilaizeInteger(6)
+	seven := initializer.InitilaizeInteger(7)
+	m(six, seven)
+
+	if array.Length() != 7 {
+		t.Fatalf("Expect array's length to be 7(5 + 2). got=%d", array.Length())
+	}
+
+	last := array.Elements[array.Length() - 1].(*object.IntegerObject).Value
+
+	if int(last) != 7 {
+		t.Fatalf("Expect last object to be 7. got=%d", last)
+	}
+}
+
 func generateArray(length int) *object.ArrayObject {
 	var elements []object.Object
 	for i := 1; i <= length; i++ {

@@ -47,3 +47,8 @@ func (a *ArrayObject) Pop() Object {
 	a.Elements = a.Elements[:len(a.Elements)-1]
 	return value
 }
+
+func (a *ArrayObject) Push(objs []Object) *ArrayObject {
+	a.Elements = append(a.Elements, objs...)
+	return a
+}
