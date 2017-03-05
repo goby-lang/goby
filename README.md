@@ -102,6 +102,37 @@ puts(123.class.name) #=> Integer
 puts(true.class.name) #=> Boolean
 ```
 
+#### Build a stack using Rooby
+
+```ruby
+class Stack {
+  def initialize {
+    @data = []
+  }
+    
+  def push(x) {
+    @data.push(x)
+  }
+    
+  def pop {
+    @data.pop
+  }
+    
+  def top {
+    @data[@data.length - 1]
+  }
+}
+
+s = Stack.new
+s.push(1)
+s.push(2)
+s.push(3)
+s.push(4)
+s.push(10)
+puts(s.pop) #=> 10
+puts(s.top) #=> 4
+```
+
 ## TODO
 
 - ~~Customize initialization method~~

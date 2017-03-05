@@ -203,7 +203,7 @@ func testAssignStatement(t *testing.T, s ast.Statement, name string, value inter
 
 	switch v := value.(type) {
 	case int64:
-		testIntegerLiteral(t, as.Value, v)
+		testIntegerLiteral(t, as.Value, int(v))
 	case string:
 		testIdentifier(t, as.Value, v)
 	case bool:
@@ -226,7 +226,7 @@ func checkParserErrors(t *testing.T, p *parser.Parser) {
 	t.FailNow()
 }
 
-func testIntegerLiteral(t *testing.T, exp ast.Expression, value int64) bool {
+func testIntegerLiteral(t *testing.T, exp ast.Expression, value int) bool {
 	il, ok := exp.(*ast.IntegerLiteral)
 	if !ok {
 		t.Errorf("expect exp to be IntegerLiteral. got=%T", exp)
@@ -351,9 +351,9 @@ expcted interface{},
 ) bool {
 	switch v := expcted.(type) {
 	case int:
-		return testIntegerLiteral(t, exp, int64(v))
-	case int64:
 		return testIntegerLiteral(t, exp, v)
+	case int64:
+		return testIntegerLiteral(t, exp, int(v))
 	case string:
 		return testIdentifier(t, exp, v)
 	case bool:

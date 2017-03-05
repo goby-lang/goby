@@ -3,9 +3,81 @@ package parser_test
 import (
 	"github.com/st0012/Rooby/ast"
 	"github.com/st0012/Rooby/lexer"
-	"testing"
 	"github.com/st0012/Rooby/parser"
+	"testing"
 )
+
+func TestArrayExpression(t *testing.T) {
+	tests := []struct {
+		input            string
+		expectedElements []int
+	}{
+		{`[]`, []int{}},
+		{`[1]`, []int{1}},
+		{`[1,2,4,5]`, []int{1, 2, 4, 5}},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := parser.New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("program has not enough statments. expect 1, got=%d", len(program.Statements))
+		}
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+
+		if !ok {
+			t.Fatalf("program.Statments[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+		}
+
+		arr, ok := stmt.Expression.(*ast.ArrayExpression)
+
+		for i, elem := range arr.Elements {
+			testIntegerLiteral(t, elem, tt.expectedElements[i])
+		}
+	}
+}
+
+func TestArrayIndexExpression(t *testing.T) {
+	tests := []struct {
+		input         string
+		expectedIndex interface{}
+	}{
+		{`[][1]`, 1},
+		{`[1][0]`, 0},
+		{`[1,2,4,5][3]`, 3},
+		{`[1,2,4,5][foo]`, "foo"},
+		{`test[bar]`, "bar"},
+		{`test[1]`, 1},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := parser.New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("program has not enough statments. expect 1, got=%d", len(program.Statements))
+		}
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+
+		if !ok {
+			t.Fatalf("program.Statments[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+		}
+
+		arrIndex, ok := stmt.Expression.(*ast.CallExpression)
+
+		switch expected := tt.expectedIndex.(type) {
+		case int:
+			testIntegerLiteral(t, arrIndex.Arguments[0], expected)
+		case string:
+			testIdentifier(t, arrIndex.Arguments[0], expected)
+		}
+	}
+}
 
 func TestIdentifierExpression(t *testing.T) {
 	input := `foobar;`
@@ -144,9 +216,9 @@ func TestParsingPrefixExpression(t *testing.T) {
 func TestParsingInfixExpression(t *testing.T) {
 	infixTests := []struct {
 		input      string
-		leftValue  int64
+		leftValue  int
 		operator   string
-		rightValue int64
+		rightValue int
 	}{
 		{"4 + 1;", 4, "+", 1},
 		{"3 - 2;", 3, "-", 2},

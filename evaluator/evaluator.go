@@ -73,6 +73,15 @@ func Eval(node ast.Node, scope *object.Scope) object.Object {
 			return initializer.TRUE
 		}
 		return initializer.FALSE
+	case *ast.ArrayExpression:
+		elements := []object.Object{}
+
+		for _, exp := range node.Elements {
+			elements = append(elements, Eval(exp, scope))
+		}
+
+		arr := initializer.InitializeArray(elements)
+		return arr
 	}
 
 	return nil

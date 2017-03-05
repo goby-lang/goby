@@ -13,6 +13,7 @@ func InitializeProgram() {
 	initializeStringClass()
 	initializeIntegerClass()
 	initializeBooleanClass()
+	initializeArrayClass()
 	initializeMainObject()
 }
 
@@ -56,4 +57,8 @@ func checkArgumentLen(args []object.Object, class object.Class, method_name stri
 
 func wrongTypeError(c object.Class) *object.Error {
 	return &object.Error{Message: fmt.Sprintf("expect argument to be %s type", c.ReturnName())}
+}
+
+func newError(format string, args ...interface{}) *object.Error {
+	return &object.Error{Message: fmt.Sprintf(format, args...)}
 }

@@ -166,7 +166,7 @@ func (es *ExpressionStatement) String() string {
 
 type IntegerLiteral struct {
 	Token token.Token
-	Value int64
+	Value int
 }
 
 func (il *IntegerLiteral) expressionNode() {}
@@ -192,6 +192,36 @@ func (sl *StringLiteral) String() string {
 	out.WriteString("\"")
 	out.WriteString(sl.Token.Literal)
 	out.WriteString("\"")
+	return out.String()
+}
+
+type ArrayExpression struct {
+	Token    token.Token
+	Elements []Expression
+}
+
+func (ae *ArrayExpression) expressionNode() {}
+func (ae *ArrayExpression) TokenLiteral() string {
+	return ae.Token.Literal
+}
+func (ae *ArrayExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("[")
+
+	if len(ae.Elements) == 0 {
+		out.WriteString("]")
+		return out.String()
+	}
+
+	out.WriteString(ae.Elements[0].String())
+
+	for _, elem := range ae.Elements[1:] {
+		out.WriteString(", ")
+		out.WriteString(elem.String())
+	}
+
+	out.WriteString("]")
 	return out.String()
 }
 

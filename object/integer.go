@@ -8,7 +8,7 @@ type IntegerClass struct {
 
 type IntegerObject struct {
 	Class *IntegerClass
-	Value int64
+	Value int
 }
 
 func (i *IntegerObject) Type() ObjectType {

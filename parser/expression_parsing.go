@@ -16,6 +16,7 @@ var precedence = map[token.TokenType]int{
 	token.MINUS:    SUM,
 	token.SLASH:    PRODUCT,
 	token.ASTERISK: PRODUCT,
+	token.LBRACKET: INDEX,
 	token.DOT:      CALL,
 	token.LPAREN:   CALL,
 }
@@ -28,6 +29,7 @@ const (
 	SUM
 	PRODUCT
 	PREFIX
+	INDEX
 	CALL
 )
 
@@ -82,7 +84,7 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 		return nil
 	}
 
-	lit.Value = value
+	lit.Value = int(value)
 
 	return lit
 }
@@ -107,6 +109,65 @@ func (p *Parser) parseBooleanLiteral() ast.Expression {
 	lit.Value = value
 
 	return lit
+}
+
+func (p *Parser) parseArrayExpression() ast.Expression {
+	arr := &ast.ArrayExpression{Token: p.curToken}
+	arr.Elements = p.parseArrayElements()
+	return arr
+}
+
+func (p *Parser) parseArrayIndexExpression(left ast.Expression) ast.Expression {
+	m := &ast.Identifier{Value: "[]"}
+	callExpression := &ast.CallExpression{Receiver: left, Method: m, Token: p.curToken}
+
+	if p.peekTokenIs(token.RBRACKET) {
+		return nil
+	}
+
+	p.nextToken()
+
+	callExpression.Arguments = []ast.Expression{p.parseExpression(LOWEST)}
+
+	if !p.expectPeek(token.RBRACKET) {
+		return nil
+	}
+
+	// Assign value to index
+	if p.peekTokenIs(token.ASSIGN) {
+		p.nextToken()
+		p.nextToken()
+		m = &ast.Identifier{Value: "[]="}
+		assignValue := p.parseExpression(LOWEST)
+		callExpression.Method = m
+		callExpression.Arguments = append(callExpression.Arguments, assignValue)
+	}
+
+	return callExpression
+}
+
+func (p *Parser) parseArrayElements() []ast.Expression {
+	elems := []ast.Expression{}
+
+	if p.peekTokenIs(token.RBRACKET) {
+		p.nextToken() // ']'
+		return elems
+	}
+
+	p.nextToken() // start of first expression
+	elems = append(elems, p.parseExpression(LOWEST))
+
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken() // ","
+		p.nextToken() // start of next expression
+		elems = append(elems, p.parseExpression(LOWEST))
+	}
+
+	if !p.expectPeek(token.RBRACKET) {
+		return nil
+	}
+
+	return elems
 }
 
 func (p *Parser) parsePrefixExpression() ast.Expression {

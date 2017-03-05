@@ -1,11 +1,14 @@
 package evaluator_test
 
-import "testing"
+import (
+	"github.com/st0012/Rooby/object"
+	"testing"
+)
 
 func TestEvalInfixIntegerExpression(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected int64
+		expected int
 	}{
 		{"5", 5},
 		{"10", 10},
@@ -33,7 +36,7 @@ func TestEvalInfixIntegerExpression(t *testing.T) {
 func TestEvalIntegerExpression(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected int64
+		expected int
 	}{
 		{"5", 5},
 		{"10", 10},
@@ -43,4 +46,18 @@ func TestEvalIntegerExpression(t *testing.T) {
 		evaluated := testEval(t, tt.input)
 		testIntegerObject(t, evaluated, tt.expected)
 	}
+}
+
+func testIntegerObject(t *testing.T, obj object.Object, expected int) bool {
+	result, ok := obj.(*object.IntegerObject)
+	if !ok {
+		t.Errorf("object is not Integer. got=%T (%+v)", obj, obj)
+		return false
+	}
+	if result.Value != expected {
+		t.Errorf("object has wrong value. expect=%d, got=%d", expected, result.Value)
+		return false
+	}
+
+	return true
 }
