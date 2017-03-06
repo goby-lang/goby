@@ -149,7 +149,7 @@ puts(s.top) #=> 4
     - ~~String~~
     - ~~Integer~~
     - ~~Boolean~~
-- Advanced data structures (Array/Hash)
+- ~~Advanced data structures (Array/Hash)~~
 - for loop support
 - Allow monkey patching
 - Basic IO
