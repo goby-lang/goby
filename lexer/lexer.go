@@ -75,6 +75,8 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.RBRACKET, l.ch, l.line)
 	case '.':
 		tok = newToken(token.DOT, l.ch, l.line)
+	case ':':
+		tok = newToken(token.COLON, l.ch, l.line)
 	case '#':
 		tok.Literal = l.absorbComment()
 		tok.Type = token.COMMENT
