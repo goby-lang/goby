@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/st0012/Rooby/token"
 	"strings"
+	"fmt"
 )
 
 type Node interface {
@@ -222,6 +223,30 @@ func (ae *ArrayExpression) String() string {
 	}
 
 	out.WriteString("]")
+	return out.String()
+}
+
+type HashExpression struct {
+	Token token.Token
+	Data map[string]Expression
+}
+
+func (he *HashExpression) expressionNode() {}
+func (he *HashExpression) TokenLiteral() string {
+	return he.Token.Literal
+}
+func (he *HashExpression) String() string {
+	var out bytes.Buffer
+	var pairs []string
+
+	for key, value := range he.Data {
+		pairs = append(pairs, fmt.Sprintf("%s: %s", key, value.String()))
+	}
+
+	out.WriteString("{ ")
+	out.WriteString(strings.Join(pairs, ", "))
+	out.WriteString(" }")
+
 	return out.String()
 }
 

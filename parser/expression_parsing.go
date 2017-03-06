@@ -111,6 +111,55 @@ func (p *Parser) parseBooleanLiteral() ast.Expression {
 	return lit
 }
 
+func (p *Parser) parseHashExpression() ast.Expression {
+	hash := &ast.HashExpression{Token: p.curToken}
+	hash.Data = p.parseHashPairs()
+	return hash
+}
+
+func (p *Parser) parseHashPairs() map[string]ast.Expression {
+	pairs := map[string]ast.Expression{}
+
+	if p.peekTokenIs(token.RBRACE) {
+		p.nextToken() // '}'
+		return pairs
+	}
+
+	p.parseHashPair(pairs)
+
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken()
+		p.nextToken()
+
+		p.parseHashPair(pairs)
+	}
+
+	if !p.expectPeek(token.RBRACE) {
+		return nil
+	}
+
+	return pairs
+}
+
+func (p *Parser) parseHashPair(pairs map[string]ast.Expression) {
+	var key string
+	var value ast.Expression
+
+	if !p.expectPeek(token.IDENT) {
+		return
+	}
+
+	key = p.parseIdentifier().(*ast.Identifier).Value
+
+	if !p.expectPeek(token.COLON) {
+		return
+	}
+
+	p.nextToken()
+	value = p.parseExpression(LOWEST)
+	pairs[key] = value
+}
+
 func (p *Parser) parseArrayExpression() ast.Expression {
 	arr := &ast.ArrayExpression{Token: p.curToken}
 	arr.Elements = p.parseArrayElements()
