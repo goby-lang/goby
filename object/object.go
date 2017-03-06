@@ -11,6 +11,7 @@ type ObjectType string
 const (
 	INTEGER_OBJ         = "INTEGER"
 	ARRAY_OBJ           = "ARRAY"
+	HASH_OBJ            = "HASH"
 	STRING_OBJ          = "STRING"
 	BOOLEAN_OBJ         = "BOOLEAN"
 	NULL_OBJ            = "NULL"
