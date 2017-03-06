@@ -1,0 +1,13 @@
+class Foo {
+    def bar {
+        10
+    }
+}
+
+h = {}
+a = [1, 2, 3]
+f = Foo.new
+h["foo"] = f
+h["array"] = a
+
+puts(h["foo"].bar + h["array"][2]) #=> 13

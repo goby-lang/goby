@@ -14,6 +14,7 @@ func InitializeProgram() {
 	initializeIntegerClass()
 	initializeBooleanClass()
 	initializeArrayClass()
+	initializeHashClass()
 	initializeMainObject()
 }
 

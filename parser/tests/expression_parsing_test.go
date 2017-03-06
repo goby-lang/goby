@@ -7,6 +7,94 @@ import (
 	"testing"
 )
 
+func TestHashExpression(t *testing.T) {
+	tests := []struct {
+		input            string
+		expectedElements map[string]int
+	}{
+		{`{}`, map[string]int{}},
+		{
+			`{ test: 123 }`,
+			map[string]int{
+				"test": 123,
+			},
+		},
+		{
+
+			`{ another_string: 456 }`,
+			map[string]int{
+				"another_string": 456,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := parser.New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("program has not enough statments. expect 1, got=%d", len(program.Statements))
+		}
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+
+		if !ok {
+			t.Fatalf("program.Statments[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+		}
+
+		hash, ok := stmt.Expression.(*ast.HashExpression)
+
+		for key, _ := range hash.Data {
+			testIntegerLiteral(t, hash.Data[key], tt.expectedElements[key])
+		}
+	}
+}
+
+func TestHashAccessExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`{}["123"]`, "123"},
+		{`{ test: 1 }["test"]`, "test"},
+		{`{ foo: "123" }["foo"]`, "foo"},
+		{`{ bar: true }["bar"]`, "bar"},
+		{`{ bar: true }[var]`, "var"},
+	}
+
+	for i, tt := range tests {
+		l := lexer.New(tt.input)
+		p := parser.New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("program has not enough statments. expect 1, got=%d", len(program.Statements))
+		}
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+
+		if !ok {
+			t.Fatalf("program.Statments[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+		}
+
+		hashAccess, ok := stmt.Expression.(*ast.CallExpression)
+
+		_, ok = hashAccess.Receiver.(*ast.HashExpression)
+
+		if !ok {
+			t.Fatalf("expect method call's receiver to be a hash. got=%T", hashAccess.Receiver)
+		}
+
+		if i < 4 {
+			testStringLiteral(t, hashAccess.Arguments[0], tt.expected)
+		} else {
+			testIdentifier(t, hashAccess.Arguments[0], tt.expected)
+		}
+
+	}
+}
+
 func TestArrayExpression(t *testing.T) {
 	tests := []struct {
 		input            string
