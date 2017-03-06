@@ -82,6 +82,15 @@ func Eval(node ast.Node, scope *object.Scope) object.Object {
 
 		arr := initializer.InitializeArray(elements)
 		return arr
+	case *ast.HashExpression:
+		pairs := map[string]object.Object{}
+
+		for key, value := range node.Data {
+			pairs[key] = Eval(value, scope)
+		}
+
+		hash := initializer.InitializeHash(pairs)
+		return hash
 	}
 
 	return nil

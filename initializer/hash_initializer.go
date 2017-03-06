@@ -17,7 +17,7 @@ var builtinHashMethods = []*object.BuiltInMethod{
 				}
 
 				i := args[0]
-				key, ok := i.(*object.StringClass)
+				key, ok := i.(*object.StringObject)
 
 				if !ok {
 					return newError("Expect index argument to be String. got=%T", i)
@@ -29,7 +29,7 @@ var builtinHashMethods = []*object.BuiltInMethod{
 					return NULL
 				}
 
-				value, ok := hash.Pairs[key]
+				value, ok := hash.Pairs[key.Value]
 
 				if !ok {
 					return NULL
@@ -52,14 +52,13 @@ var builtinHashMethods = []*object.BuiltInMethod{
 
 				k := args[0]
 				key, ok := k.(*object.StringObject)
-				keyValue := key.Value
 
 				if !ok {
 					return newError("Expect index argument to be String. got=%T", k)
 				}
 
 				hash := receiver.(*object.HashObject)
-				hash.Pairs[key] = args[1]
+				hash.Pairs[key.Value] = args[1]
 
 				return args[1]
 			}

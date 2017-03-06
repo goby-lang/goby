@@ -129,7 +129,6 @@ func (p *Parser) parseHashPairs() map[string]ast.Expression {
 
 	for p.peekTokenIs(token.COMMA) {
 		p.nextToken()
-		p.nextToken()
 
 		p.parseHashPair(pairs)
 	}
