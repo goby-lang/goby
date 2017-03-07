@@ -151,7 +151,8 @@ puts(s.top) #=> 4
     - ~~Boolean~~
 - ~~Advanced data structures (Array/Hash)~~
 - for loop support
-- Allow monkey patching
+- Package management
+- Allow monkey patching(?)
 - Basic IO
 - More documentation
     - Samples
