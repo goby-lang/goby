@@ -203,6 +203,32 @@ var builtinIntegerMethods = []*object.BuiltInMethod{
 		},
 		Name: "!=",
 	},
+	{
+		Fn: func(receiver object.Object) object.BuiltinMethodBody {
+			return func(args ...object.Object) object.Object {
+				if len(args) > 0 {
+					return &object.Error{Message: "Too many arguments for Integer#++"}
+				}
+
+				int := receiver.(*object.IntegerObject)
+				return InitilaizeInteger(int.Value + 1)
+			}
+		},
+		Name: "++",
+	},
+	{
+		Fn: func(receiver object.Object) object.BuiltinMethodBody {
+			return func(args ...object.Object) object.Object {
+				if len(args) > 0 {
+					return &object.Error{Message: "Too many arguments for Integer#--"}
+				}
+
+				int := receiver.(*object.IntegerObject)
+				return InitilaizeInteger(int.Value - 1)
+			}
+		},
+		Name: "--",
+	},
 }
 
 func initializeIntegerClass() *object.IntegerClass {

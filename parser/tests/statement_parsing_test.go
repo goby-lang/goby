@@ -3,9 +3,9 @@ package parser_test
 import (
 	"github.com/st0012/Rooby/ast"
 	"github.com/st0012/Rooby/lexer"
+	"github.com/st0012/Rooby/parser"
 	"github.com/st0012/Rooby/token"
 	"testing"
-	"github.com/st0012/Rooby/parser"
 )
 
 func TestAssignStatement(t *testing.T) {

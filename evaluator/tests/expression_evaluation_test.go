@@ -579,6 +579,34 @@ func TestEvalIfExpression(t *testing.T) {
 	}
 }
 
+func TestEvalPostfix(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{"1++", 2},
+		{"10--", 9},
+		{"0--", -1},
+		{"-5++", -4},
+		{`
+		a = 10
+		a ++
+		`, 11},
+		{`
+		a = 10
+		a --
+		`, 9},
+		{`
+		(1 + 2 * 3)++
+		`, 8},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
 func TestEvalBangPrefixExpression(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -605,8 +633,8 @@ func TestEvalMinusPrefixExpression(t *testing.T) {
 	}{
 		{"-5", -5},
 		{"-10", -10},
-		{"--10", 10},
-		{"--5", 5},
+		{"-(-10)", 10},
+		{"-(-5)", 5},
 	}
 
 	for _, tt := range tests {

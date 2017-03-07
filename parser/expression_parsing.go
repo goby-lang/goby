@@ -14,6 +14,8 @@ var precedence = map[token.TokenType]int{
 	token.GT:       LESSGREATER,
 	token.PLUS:     SUM,
 	token.MINUS:    SUM,
+	token.INCR:     SUM,
+	token.DECR:     SUM,
 	token.SLASH:    PRODUCT,
 	token.ASTERISK: PRODUCT,
 	token.LBRACKET: INDEX,
@@ -109,6 +111,12 @@ func (p *Parser) parseBooleanLiteral() ast.Expression {
 	lit.Value = value
 
 	return lit
+}
+
+func (p *Parser) parsePostfixExpression(receiver ast.Expression) ast.Expression {
+	m := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	arguments := []ast.Expression{}
+	return &ast.CallExpression{Token: p.curToken, Receiver: receiver, Method: m, Arguments: arguments}
 }
 
 func (p *Parser) parseHashExpression() ast.Expression {

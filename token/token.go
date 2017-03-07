@@ -26,6 +26,8 @@ const (
 	ASTERISK = "*"
 	SLASH    = "/"
 	DOT      = "."
+	INCR     = "++"
+	DECR     = "--"
 
 	LT = "<"
 	GT = ">"

@@ -38,6 +38,14 @@ func (l *Lexer) NextToken() token.Token {
 			tok = newToken(token.ASSIGN, l.ch, l.line)
 		}
 	case '-':
+		if l.peekChar() == '-' {
+			tok.Literal = "--"
+			tok.Line = l.line
+			tok.Type = token.DECR
+			l.readChar()
+			l.readChar()
+			return tok
+		}
 		tok = newToken(token.MINUS, l.ch, l.line)
 	case '!':
 		if l.peekChar() == '=' {
@@ -64,6 +72,14 @@ func (l *Lexer) NextToken() token.Token {
 	case ',':
 		tok = newToken(token.COMMA, l.ch, l.line)
 	case '+':
+		if l.peekChar() == '+' {
+			tok.Literal = "++"
+			tok.Line = l.line
+			tok.Type = token.INCR
+			l.readChar()
+			l.readChar()
+			return tok
+		}
 		tok = newToken(token.PLUS, l.ch, l.line)
 	case '{':
 		tok = newToken(token.LBRACE, l.ch, l.line)
