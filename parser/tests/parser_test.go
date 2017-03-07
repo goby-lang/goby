@@ -1,11 +1,11 @@
 package parser_test
 
 import (
+	"fmt"
 	"github.com/st0012/Rooby/ast"
 	"github.com/st0012/Rooby/lexer"
 	"github.com/st0012/Rooby/parser"
 	"testing"
-	"fmt"
 )
 
 func TestMethodChainExpression(t *testing.T) {
@@ -299,11 +299,11 @@ func testConstant(t *testing.T, exp ast.Expression, value string) bool {
 }
 
 func testInfixExpression(
-t *testing.T,
-exp ast.Expression,
-left interface{},
-operator string,
-right interface{},
+	t *testing.T,
+	exp ast.Expression,
+	left interface{},
+	operator string,
+	right interface{},
 ) bool {
 	opExp, ok := exp.(*ast.InfixExpression)
 	if !ok {
@@ -345,9 +345,9 @@ func testBoolLiteral(t *testing.T, exp ast.Expression, v bool) bool {
 }
 
 func testLiteralExpression(
-t *testing.T,
-exp ast.Expression,
-expcted interface{},
+	t *testing.T,
+	exp ast.Expression,
+	expcted interface{},
 ) bool {
 	switch v := expcted.(type) {
 	case int:

@@ -301,6 +301,49 @@ func TestParsingPrefixExpression(t *testing.T) {
 	}
 }
 
+func TestParsingPostfixExpression(t *testing.T) {
+	tests := []struct {
+		input            string
+		operator         string
+		expectedReceiver interface{}
+	}{
+		{"1++", "++", 1},
+		{"2--", "--", 2},
+		{"foo++", "++", "foo"},
+		{"bar--", "--", "bar"},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := parser.New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("expect %d statements. got=%d", 1, len(program.Statements))
+		}
+
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+		if !ok {
+			t.Fatalf("statement is not ast.Expression. got=%T", program.Statements[0])
+		}
+
+		exp, ok := stmt.Expression.(*ast.CallExpression)
+		if !ok {
+			t.Fatalf("expression is not a CallExpression. got=%T", stmt.Expression)
+		}
+		if exp.Method.Value != tt.operator {
+			t.Fatalf("expression's operator is not %s. got=%s", tt.operator, exp.Method.Value)
+		}
+		switch r := tt.expectedReceiver.(type) {
+		case int:
+			testIntegerLiteral(t, exp.Receiver, r)
+		case string:
+			testIdentifier(t, exp.Receiver, r)
+		}
+	}
+}
+
 func TestParsingInfixExpression(t *testing.T) {
 	infixTests := []struct {
 		input      string
