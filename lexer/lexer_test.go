@@ -10,19 +10,19 @@ func TestNextToken(t *testing.T) {
 	five = 5;
 	ten = 10;
 
-	class Person {
-		def initialize(a) {
-			@a = a;
-		}
+	class Person
+	  def initialize(a)
+	    @a = a;
+	  end
 
-	 	def add(x, y) {
-			x + y;
-		}
+	  def add(x, y)
+	    x + y;
+	  end
 
-		def ten() {
-			self.add(1, 9);
-		}
-	}
+	  def ten()
+	    self.add(1, 9);
+	  end
+	end
 
 	p = Person.new;
 	result = p.add(five, ten);
@@ -30,11 +30,11 @@ func TestNextToken(t *testing.T) {
 	!-/*5;
 	5 < 10 >5;
 
-	if (5 < 10) {
-		return true;
-	} else {
-		return false;
-	}
+	if 5 < 10
+	  return true;
+	else
+	  return false;
+	end
 
 	"string1";
 	'string2';
@@ -72,19 +72,17 @@ func TestNextToken(t *testing.T) {
 		// class is default to be ident
 		{token.IDENT, "class", 4},
 		{token.CONSTANT, "Person", 4},
-		{token.LBRACE, "{", 4},
 
 		{token.DEF, "def", 5},
 		{token.IDENT, "initialize", 5},
 		{token.LPAREN, "(", 5},
 		{token.IDENT, "a", 5},
 		{token.RPAREN, ")", 5},
-		{token.LBRACE, "{", 5},
 		{token.INSTANCE_VARIABLE, "@a", 6},
 		{token.ASSIGN, "=", 6},
 		{token.IDENT, "a", 6},
 		{token.SEMICOLON, ";", 6},
-		{token.RBRACE, "}", 7},
+		{token.END, "end", 7},
 
 		{token.DEF, "def", 9},
 		{token.IDENT, "add", 9},
@@ -93,18 +91,16 @@ func TestNextToken(t *testing.T) {
 		{token.COMMA, ",", 9},
 		{token.IDENT, "y", 9},
 		{token.RPAREN, ")", 9},
-		{token.LBRACE, "{", 9},
 		{token.IDENT, "x", 10},
 		{token.PLUS, "+", 10},
 		{token.IDENT, "y", 10},
 		{token.SEMICOLON, ";", 10},
-		{token.RBRACE, "}", 11},
+		{token.END, "end", 11},
 
 		{token.DEF, "def", 13},
 		{token.IDENT, "ten", 13},
 		{token.LPAREN, "(", 13},
 		{token.RPAREN, ")", 13},
-		{token.LBRACE, "{", 13},
 		{token.SELF, "self", 14},
 		{token.DOT, ".", 14},
 		{token.IDENT, "add", 14},
@@ -114,8 +110,8 @@ func TestNextToken(t *testing.T) {
 		{token.INT, "9", 14},
 		{token.RPAREN, ")", 14},
 		{token.SEMICOLON, ";", 14},
-		{token.RBRACE, "}", 15},
-		{token.RBRACE, "}", 16},
+		{token.END, "end", 15},
+		{token.END, "end", 16},
 
 		{token.IDENT, "p", 18},
 		{token.ASSIGN, "=", 18},
@@ -150,22 +146,17 @@ func TestNextToken(t *testing.T) {
 		{token.SEMICOLON, ";", 22},
 
 		{token.IF, "if", 24},
-		{token.LPAREN, "(", 24},
 		{token.INT, "5", 24},
 		{token.LT, "<", 24},
 		{token.INT, "10", 24},
-		{token.RPAREN, ")", 24},
-		{token.LBRACE, "{", 24},
 		{token.RETURN, "return", 25},
 		{token.TRUE, "true", 25},
 		{token.SEMICOLON, ";", 25},
-		{token.RBRACE, "}", 26},
 		{token.ELSE, "else", 26},
-		{token.LBRACE, "{", 26},
 		{token.RETURN, "return", 27},
 		{token.FALSE, "false", 27},
 		{token.SEMICOLON, ";", 27},
-		{token.RBRACE, "}", 28},
+		{token.END, "end", 28},
 
 		{token.STRING, "string1", 30},
 		{token.SEMICOLON, ";", 30},
