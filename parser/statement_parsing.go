@@ -59,19 +59,15 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 		return nil
 	}
 
-	// def foo {}
-	if p.peekTokenIs(token.LBRACE) {
-		stmt.Parameters = []*ast.Identifier{}
-	} else {
+	// def foo
+	if p.peekTokenAtSameLine() { // def foo(), next token is ( and at same line
 		if !p.expectPeek(token.LPAREN) {
 			return nil
 		}
 
 		stmt.Parameters = p.parseParameters()
-	}
-
-	if !p.expectPeek(token.LBRACE) {
-		return nil
+	} else {
+		stmt.Parameters = []*ast.Identifier{}
 	}
 
 	stmt.BlockStatement = p.parseBlockStatement()
@@ -93,10 +89,6 @@ func (p *Parser) parseClassStatement() *ast.ClassStatement {
 		p.nextToken() // <
 		p.nextToken() // Inherited class like 'Bar'
 		stmt.SuperClass = &ast.Constant{Token: p.curToken, Value: p.curToken.Literal}
-	}
-
-	if !p.expectPeek(token.LBRACE) {
-		return nil
 	}
 
 	stmt.Body = p.parseBlockStatement()
@@ -181,4 +173,22 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	}
 
 	return stmt
+}
+
+func (p *Parser) parseBlockStatement() *ast.BlockStatement {
+	// curToken is {
+	bs := &ast.BlockStatement{Token: p.curToken}
+	bs.Statements = []ast.Statement{}
+
+	p.nextToken()
+
+	for !p.curTokenIs(token.END) && !p.curTokenIs(token.ELSE) {
+		stmt := p.parseStatement()
+		if stmt != nil {
+			bs.Statements = append(bs.Statements, stmt)
+		}
+		p.nextToken()
+	}
+
+	return bs
 }
