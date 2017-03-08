@@ -1,8 +1,8 @@
 package evaluator_test
 
 import (
-	"testing"
 	"github.com/st0012/Rooby/object"
+	"testing"
 )
 
 func TestEvalBooleanExpression(t *testing.T) {
@@ -51,7 +51,6 @@ func TestEvalInfixBooleanExpression(t *testing.T) {
 		testBooleanObject(t, evaluated, tt.expected)
 	}
 }
-
 
 func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
 	result, ok := obj.(*object.BooleanObject)

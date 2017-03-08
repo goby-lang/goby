@@ -202,3 +202,34 @@ func TestErrorHandling(t *testing.T) {
 		}
 	}
 }
+
+func TestWhileStatement(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{
+			`
+		i = 10
+		while i > 0 do
+		  i--
+		end
+		i
+		`, 0},
+		{
+			`
+		a = [1, 2, 3, 4, 5]
+		i = 0
+		while i < a.length do
+		  a[i]++
+		  i++
+		end
+		a[4]
+		`, 6},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}

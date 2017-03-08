@@ -252,3 +252,32 @@ func TestDefStatement(t *testing.T) {
 	secondExpressionStmt := secondStmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
 	testIntegerLiteral(t, secondExpressionStmt.Expression, 123)
 }
+
+func TestWhileStatement(t *testing.T) {
+	input := `
+	while i < 10 do
+	  puts(i)
+	  i++
+	end
+	`
+
+	l := lexer.New(input)
+	p := parser.New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	whileStatement := program.Statements[0].(*ast.WhileStatement)
+
+	testInfixExpression(t, whileStatement.Condition, "i", "<", 10)
+
+	block := whileStatement.Body
+	firstStmt := block.Statements[0].(*ast.ExpressionStatement)
+	firstCall := firstStmt.Expression.(*ast.CallExpression)
+	testMethodName(t, firstCall, "puts")
+	testIdentifier(t, firstCall.Arguments[0], "i")
+
+	secondStmt := block.Statements[1].(*ast.ExpressionStatement)
+	secondCall := secondStmt.Expression.(*ast.CallExpression)
+	testIdentifier(t, secondCall.Receiver, "i")
+	testMethodName(t, secondCall, "++")
+}

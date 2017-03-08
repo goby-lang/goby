@@ -93,3 +93,16 @@ func evalDefStatement(exp *ast.DefStatement, scope *object.Scope) object.Object 
 
 	return method
 }
+
+func evalWhileStatement(exp *ast.WhileStatement, scope *object.Scope) object.Object {
+	condition := exp.Condition
+
+	con := Eval(condition, scope)
+
+	for con != initializer.FALSE && con != initializer.NULL {
+		Eval(exp.Body, scope)
+		con = Eval(condition, scope)
+	}
+
+	return nil
+}
