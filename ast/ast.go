@@ -400,3 +400,25 @@ func (se *SelfExpression) TokenLiteral() string {
 func (se *SelfExpression) String() string {
 	return "self"
 }
+
+type WhileStatement struct {
+	Token     token.Token
+	Condition Expression
+	Body      *BlockStatement
+}
+
+func (ws *WhileStatement) statementNode() {}
+func (ws *WhileStatement) TokenLiteral() string {
+	return ws.Token.Literal
+}
+func (ws *WhileStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("while ")
+	out.WriteString(ws.Condition.String())
+	out.WriteString(" do\n")
+	out.WriteString(ws.Body.String())
+	out.WriteString("\nend")
+
+	return out.String()
+}

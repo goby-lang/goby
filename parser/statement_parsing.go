@@ -26,6 +26,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseClassStatement()
 	case token.COMMENT:
 		return nil
+	case token.WHILE:
+		return p.parseWhileStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -191,4 +193,19 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	}
 
 	return bs
+}
+
+func (p *Parser) parseWhileStatement() *ast.WhileStatement {
+	ws := &ast.WhileStatement{Token: p.curToken}
+
+	p.nextToken()
+	ws.Condition = p.parseExpression(LOWEST)
+
+	if !p.expectPeek(token.DO) {
+		return nil
+	}
+
+	ws.Body = p.parseBlockStatement()
+
+	return ws
 }
