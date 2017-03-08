@@ -464,7 +464,7 @@ func TestMethodParameterParsing(t *testing.T) {
 
 func TestCallExpression(t *testing.T) {
 	input := `
-		p.add(1, 2 * 3, 4 + 5);
+		p.add(1, 2 * 3, 4 + 5)
 	`
 
 	l := lexer.New(input)
@@ -521,4 +521,31 @@ func TestSelfCallExpression(t *testing.T) {
 	testIntegerLiteral(t, callExpression.Arguments[0], 1)
 	testInfixExpression(t, callExpression.Arguments[1], 2, "*", 3)
 	testInfixExpression(t, callExpression.Arguments[2], 4, "+", 5)
+}
+
+func TestCallExpressionWithBlock(t *testing.T) {
+	input := `
+	[1, 2, 3, 4].each do |i|
+	  puts(i)
+	end
+	`
+	l := lexer.New(input)
+	p := parser.New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	callExpression := stmt.Expression.(*ast.CallExpression)
+
+	receiver := callExpression.Receiver
+	if _, ok := receiver.(*ast.ArrayExpression); !ok {
+		t.Fatalf("Expect receiver to be an Array. got=%T", receiver)
+	}
+
+	testMethodName(t, callExpression, "each")
+	testIdentifier(t, callExpression.BlockArguments[0], "i")
+
+	block := callExpression.Block
+	exp := block.Statements[0].(*ast.ExpressionStatement).Expression
+	testMethodName(t, exp, "puts")
 }

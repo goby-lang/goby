@@ -277,21 +277,21 @@ func (p *Parser) parseIfExpression() ast.Expression {
 }
 
 func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
+	var exp *ast.CallExpression
+
 	if p.curTokenIs(token.LPAREN) { // call expression doesn't have a receiver foo(x) || foo()
+		// method name is receiver, for example 'foo' of foo(x)
+		m := receiver.(*ast.Identifier).Value
 		// receiver is self
 		selfTok := token.Token{Type: token.SELF, Literal: "self", Line: p.curToken.Line}
 		self := &ast.SelfExpression{Token: selfTok}
-		m := receiver.(*ast.Identifier).Value
 		receiver = self
 
 		// current token is identifier (method name)
-		exp := &ast.CallExpression{Token: p.curToken, Receiver: receiver, Method: m}
-
+		exp = &ast.CallExpression{Token: p.curToken, Receiver: receiver, Method: m}
 		exp.Arguments = p.parseCallArguments()
-		return exp
-
 	} else { // call expression has a receiver like: p.foo
-		exp := &ast.CallExpression{Token: p.curToken, Receiver: receiver}
+		exp = &ast.CallExpression{Token: p.curToken, Receiver: receiver}
 
 		// check if method name is identifier
 		if !p.expectPeek(token.IDENT) {
@@ -306,9 +306,36 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 		} else {
 			exp.Arguments = []ast.Expression{}
 		}
-
-		return exp
 	}
+
+	// Parse block
+	if p.peekTokenIs(token.DO) {
+		p.nextToken()
+
+		// Parse block arguments
+		if p.peekTokenIs(token.BAR) {
+			var args []ast.Expression
+
+			p.nextToken()
+			p.nextToken()
+			args = append(args, p.parseExpression(LOWEST))
+			for p.peekTokenIs(token.COMMA) {
+				p.nextToken() // ","
+				p.nextToken() // start of next expression
+				args = append(args, p.parseExpression(LOWEST))
+			}
+
+			if !p.expectPeek(token.BAR) {
+				return nil
+			}
+
+			exp.BlockArguments = args
+		}
+
+		exp.Block = p.parseBlockStatement()
+	}
+
+	return exp
 }
 
 func (p *Parser) parseCallArguments() []ast.Expression {
