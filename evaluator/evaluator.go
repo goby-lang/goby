@@ -35,6 +35,8 @@ func Eval(node ast.Node, scope *object.Scope) object.Object {
 		return evalInstanceVariable(node, scope)
 	case *ast.DefStatement:
 		return evalDefStatement(node, scope)
+	case *ast.WhileStatement:
+		return evalWhileStatement(node, scope)
 
 	// Expressions
 	case *ast.IfExpression:
@@ -128,6 +130,10 @@ func sendMethodCall(receiver object.Object, method_name string, args []object.Ob
 
 		return unwrapReturnValue(evaluated)
 	case object.BaseObject:
+		if _, ok := receiver.(*object.Error); ok {
+			return receiver
+		}
+
 		method := receiver.ReturnClass().LookupInstanceMethod(method_name)
 
 		if method == nil {
