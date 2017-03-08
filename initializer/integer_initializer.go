@@ -211,7 +211,8 @@ var builtinIntegerMethods = []*object.BuiltInMethod{
 				}
 
 				int := receiver.(*object.IntegerObject)
-				return InitilaizeInteger(int.Value + 1)
+				int.Value += 1
+				return int
 			}
 		},
 		Name: "++",
@@ -224,7 +225,8 @@ var builtinIntegerMethods = []*object.BuiltInMethod{
 				}
 
 				int := receiver.(*object.IntegerObject)
-				return InitilaizeInteger(int.Value - 1)
+				int.Value -= 1
+				return int
 			}
 		},
 		Name: "--",
@@ -249,13 +251,5 @@ var (
 )
 
 func InitilaizeInteger(value int) *object.IntegerObject {
-	addr, ok := integerTable[value]
-
-	if !ok {
-		i := &object.IntegerObject{Value: value, Class: IntegerClass}
-		integerTable[value] = i
-		return i
-	}
-
-	return addr
+	return &object.IntegerObject{Value: value, Class: IntegerClass}
 }
