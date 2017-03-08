@@ -22,17 +22,17 @@ func TestMethodChainExpression(t *testing.T) {
 
 	firstCall := stmt.Expression.(*ast.CallExpression)
 
-	testIdentifier(t, firstCall.Method, "add")
+	testMethodName(t, firstCall, "add")
 	testIdentifier(t, firstCall.Arguments[0], "d")
 
 	secondCall := firstCall.Receiver.(*ast.CallExpression)
 
-	testIdentifier(t, secondCall.Method, "bar")
+	testMethodName(t, secondCall, "bar")
 	testIdentifier(t, secondCall.Arguments[0], "c")
 
 	thirdCall := secondCall.Receiver.(*ast.CallExpression)
 
-	testIdentifier(t, thirdCall.Method, "new")
+	testMethodName(t, thirdCall, "new")
 	testIdentifier(t, thirdCall.Arguments[0], "a")
 	testIdentifier(t, thirdCall.Arguments[1], "b")
 
@@ -296,6 +296,18 @@ func testConstant(t *testing.T, exp ast.Expression, value string) bool {
 	}
 
 	return true
+}
+
+func testMethodName(t *testing.T, exp ast.Expression, value string) {
+	callExp, ok := exp.(*ast.CallExpression)
+
+	if !ok {
+		t.Errorf("expect exp to be a CallExpression. got=%T", exp)
+	}
+
+	if callExp.Method != value {
+		t.Error("expect method name to be %s. got=%s", value, callExp.Method)
+	}
 }
 
 func testInfixExpression(

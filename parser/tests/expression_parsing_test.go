@@ -332,8 +332,8 @@ func TestParsingPostfixExpression(t *testing.T) {
 		if !ok {
 			t.Fatalf("expression is not a CallExpression. got=%T", stmt.Expression)
 		}
-		if exp.Method.Value != tt.operator {
-			t.Fatalf("expression's operator is not %s. got=%s", tt.operator, exp.Method.Value)
+		if exp.Method != tt.operator {
+			t.Fatalf("expression's operator is not %s. got=%s", tt.operator, exp.Method)
 		}
 		switch r := tt.expectedReceiver.(type) {
 		case int:
@@ -479,9 +479,7 @@ func TestCallExpression(t *testing.T) {
 		return
 	}
 
-	if !testIdentifier(t, callExpression.Method, "add") {
-		return
-	}
+	testMethodName(t, callExpression, "add")
 
 	if len(callExpression.Arguments) != 3 {
 		t.Fatalf("expect %d arguments. got=%d", 3, len(callExpression.Arguments))
@@ -514,9 +512,7 @@ func TestSelfCallExpression(t *testing.T) {
 		t.Fatalf("expect SelfExpression's token literal to be 'self'. got=%s", self.TokenLiteral())
 	}
 
-	if !testIdentifier(t, callExpression.Method, "add") {
-		return
-	}
+	testMethodName(t, callExpression, "add")
 
 	if len(callExpression.Arguments) != 3 {
 		t.Fatalf("expect %d arguments. got=%d", 3, len(callExpression.Arguments))

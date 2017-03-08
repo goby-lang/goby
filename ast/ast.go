@@ -362,7 +362,7 @@ func (bs *BlockStatement) String() string {
 type CallExpression struct {
 	Receiver  Expression
 	Token     token.Token
-	Method    *Identifier
+	Method    string
 	Arguments []Expression
 }
 
@@ -375,7 +375,7 @@ func (ce *CallExpression) String() string {
 
 	out.WriteString(ce.Receiver.String())
 	out.WriteString(".")
-	out.WriteString(ce.Method.String())
+	out.WriteString(ce.Method)
 
 	var args = []string{}
 	for _, arg := range ce.Arguments {

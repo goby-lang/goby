@@ -42,7 +42,7 @@ func Eval(node ast.Node, scope *object.Scope) object.Object {
 	case *ast.CallExpression:
 		receiver := Eval(node.Receiver, scope)
 		args := evalArgs(node.Arguments, scope)
-		return sendMethodCall(receiver, node.Method.Value, args)
+		return sendMethodCall(receiver, node.Method, args)
 
 	case *ast.PrefixExpression:
 		val := Eval(node.Right, scope)

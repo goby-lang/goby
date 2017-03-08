@@ -114,9 +114,8 @@ func (p *Parser) parseBooleanLiteral() ast.Expression {
 }
 
 func (p *Parser) parsePostfixExpression(receiver ast.Expression) ast.Expression {
-	m := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 	arguments := []ast.Expression{}
-	return &ast.CallExpression{Token: p.curToken, Receiver: receiver, Method: m, Arguments: arguments}
+	return &ast.CallExpression{Token: p.curToken, Receiver: receiver, Method: p.curToken.Literal, Arguments: arguments}
 }
 
 func (p *Parser) parseHashExpression() ast.Expression {
@@ -174,8 +173,7 @@ func (p *Parser) parseArrayExpression() ast.Expression {
 }
 
 func (p *Parser) parseArrayIndexExpression(left ast.Expression) ast.Expression {
-	m := &ast.Identifier{Value: "[]"}
-	callExpression := &ast.CallExpression{Receiver: left, Method: m, Token: p.curToken}
+	callExpression := &ast.CallExpression{Receiver: left, Method: "[]", Token: p.curToken}
 
 	if p.peekTokenIs(token.RBRACKET) {
 		return nil
@@ -193,9 +191,8 @@ func (p *Parser) parseArrayIndexExpression(left ast.Expression) ast.Expression {
 	if p.peekTokenIs(token.ASSIGN) {
 		p.nextToken()
 		p.nextToken()
-		m = &ast.Identifier{Value: "[]="}
 		assignValue := p.parseExpression(LOWEST)
-		callExpression.Method = m
+		callExpression.Method = "[]="
 		callExpression.Arguments = append(callExpression.Arguments, assignValue)
 	}
 
@@ -284,9 +281,11 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 		// receiver is self
 		selfTok := token.Token{Type: token.SELF, Literal: "self", Line: p.curToken.Line}
 		self := &ast.SelfExpression{Token: selfTok}
+		m := receiver.(*ast.Identifier).Value
+		receiver = self
 
 		// current token is identifier (method name)
-		exp := &ast.CallExpression{Token: p.curToken, Receiver: self, Method: receiver.(*ast.Identifier)}
+		exp := &ast.CallExpression{Token: p.curToken, Receiver: receiver, Method: m}
 
 		exp.Arguments = p.parseCallArguments()
 		return exp
@@ -299,7 +298,7 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 			return nil
 		}
 
-		exp.Method = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+		exp.Method = p.curToken.Literal
 
 		if p.peekTokenIs(token.LPAREN) { // p.foo.bar; || p.foo; || p.foo + 123
 			p.nextToken()
