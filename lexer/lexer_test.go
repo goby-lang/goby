@@ -53,6 +53,11 @@ func TestNextToken(t *testing.T) {
 
 	a++
 	b--
+
+	while i < 10 do
+	  puts(i)
+	  i++
+	end
 	`
 
 	tests := []struct {
@@ -205,7 +210,20 @@ func TestNextToken(t *testing.T) {
 		{token.IDENT, "b", 46},
 		{token.DECR, "--", 46},
 
-		{token.EOF, "", 47},
+		{token.WHILE, "while", 48},
+		{token.IDENT, "i", 48},
+		{token.LT, "<", 48},
+		{token.INT, "10", 48},
+		{token.DO, "do", 48},
+		{token.IDENT, "puts", 49},
+		{token.LPAREN, "(", 49},
+		{token.IDENT, "i", 49},
+		{token.RPAREN, ")", 49},
+		{token.IDENT, "i", 50},
+		{token.INCR, "++", 50},
+		{token.END, "end", 51},
+
+		{token.EOF, "", 52},
 	}
 
 	l := New(input)
