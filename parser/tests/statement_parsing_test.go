@@ -135,11 +135,11 @@ func TestReturnStatements(t *testing.T) {
 
 func TestClassStatement(t *testing.T) {
 	input := `
-	class Foo {
-		def bar(x, y) {
-			x + y;
-		}
-	}
+	class Foo
+	  def bar(x, y)
+	    x + y
+	  end
+	end
 	`
 
 	l := lexer.New(input)
@@ -173,11 +173,11 @@ func TestClassStatement(t *testing.T) {
 
 func TestClassStatementWithInheritance(t *testing.T) {
 	input := `
-	class Foo < Bar {
-		def bar(x, y) {
-			x + y;
-		}
-	}
+	class Foo < Bar
+	  def bar(x, y)
+	    x + y;
+	  end
+	end
 	`
 
 	l := lexer.New(input)
@@ -212,13 +212,13 @@ func TestClassStatementWithInheritance(t *testing.T) {
 
 func TestDefStatement(t *testing.T) {
 	input := `
-		def add(x, y) {
-			x + y
-		}
+	def add(x, y)
+	  x + y
+	end
 
-		def foo {
-			123;
-		}
+	def foo
+	  123;
+	end
 	`
 
 	l := lexer.New(input)

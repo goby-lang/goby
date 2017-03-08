@@ -374,7 +374,13 @@ func TestParsingInfixExpression(t *testing.T) {
 }
 
 func TestIfExpression(t *testing.T) {
-	input := `if (x < y) { x + 5 } else { y + 4 };`
+	input := `
+	if x < y
+	  x + 5
+	else
+	  y + 4
+	end
+	`
 
 	l := lexer.New(input)
 	p := parser.New(l)
@@ -431,9 +437,12 @@ func TestMethodParameterParsing(t *testing.T) {
 		input          string
 		expectedParams []string
 	}{
-		{input: "def add(x, y) {}", expectedParams: []string{"x", "y"}},
-		{input: "def print(x) {}", expectedParams: []string{"x"}},
-		{input: "def test(x, y, z) {}", expectedParams: []string{"x", "y", "z"}},
+		{input: "def add(x, y); end", expectedParams: []string{"x", "y"}},
+		{input: `
+		def print(x)
+		end
+		`, expectedParams: []string{"x"}},
+		{input: "def test(x, y, z); end", expectedParams: []string{"x", "y", "z"}},
 	}
 
 	for _, tt := range tests {
