@@ -1,25 +1,25 @@
-class User {
-  def initialize(name, age) {
+class User
+  def initialize(name, age)
       @name = name
       @age = age
-  }
+  end
 
-  def name {
+  def name
       @name
-  }
+  end
 
-  def age {
+  def age
       @age
-  }
+  end
 
-  def say_hi(user) {
+  def say_hi(user)
       puts(@name + " says hi to " + user.name)
-  }
+  end
 
-  def self.sum_age(user1, user2) {
+  def self.sum_age(user1, user2)
       user1.age + user2.age
-  }
-}
+  end
+end
 
 stan = User.new("Stan", 22)
 john = User.new("John", 40)

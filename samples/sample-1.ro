@@ -1,13 +1,13 @@
-class Foo {
-  def set(x) {
+class Foo
+  def set(x)
     @x = x
-  }
-  def get {
+  end
+  def get
     @x
-  }
-}
-class Bar < Foo {}
-class Baz < Foo {}
+  end
+end
+class Bar < Foo; end
+class Baz < Foo; end
 
 bar = Bar.new
 baz = Baz.new

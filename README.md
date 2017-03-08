@@ -25,16 +25,16 @@ $ rooby ./samples/sample-4.ro
 
 ##  Sample snippet.
 ```ruby
-class Foo {
-  def set(x) {
+class Foo
+  def set(x)
     @x = x
-  }
-  def get {
+  end
+  def get
     @x
-  }
-}
-class Bar < Foo {}
-class Baz < Foo {}
+  end
+end
+class Bar < Foo; end
+class Baz < Foo; end
 
 bar = Bar.new
 baz = Baz.new
@@ -47,28 +47,28 @@ puts(bar.get + baz.get + foo.get) #=> 16
 ```
 
 ```ruby
-class User {
-  def initialize(name, age) {
-      @name = name
-      @age = age
-  }
+class User
+  def initialize(name, age)
+    @name = name
+    @age = age
+  end
 
-  def name {
-      @name
-  }
+  def name
+    @name
+  end
 
-  def age {
-      @age
-  }
+  def age
+    @age
+  end
 
-  def say_hi(user) {
-      puts(@name + " says hi to " + user.name)
-  }
+  def say_hi(user)
+    puts(@name + " says hi to " + user.name)
+  end
 
-  def self.sum_age(user1, user2) {
-      user1.age + user2.age
-  }
-}
+  def self.sum_age(user1, user2)
+    user1.age + user2.age
+  end
+end
 
 stan = User.new("Stan", 22)
 john = User.new("John", 40)
@@ -77,19 +77,19 @@ stan.say_hi(john) #=> Stan says hi to John
 ```
 
 ```ruby
-class JobPosition {
-  def initialize(name) {
+class JobPosition
+  def initialize(name)
     @name = name
-  }
+  end
 
-  def name {
+  def name
     @name
-  }
+  end
     
-  def self.engineer {
+  def self.engineer
     new("Engineer")
-  }
-}
+  end
+end
 
 job = JobPosition.engineer
 puts(job.name) #=> "Engineer"
@@ -105,23 +105,23 @@ puts(true.class.name) #=> Boolean
 #### Build a stack using Rooby
 
 ```ruby
-class Stack {
-  def initialize {
+class Stack
+  def initialize
     @data = []
-  }
+  end
     
-  def push(x) {
+  def push(x)
     @data.push(x)
-  }
+  end
     
-  def pop {
+  def pop
     @data.pop
-  }
+  end
     
-  def top {
+  def top
     @data[@data.length - 1]
-  }
-}
+  end
+end
 
 s = Stack.new
 s.push(1)
