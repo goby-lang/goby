@@ -61,3 +61,7 @@ func (p *Parser) noPrefixParseFnError(t token.TokenType) {
 	msg := fmt.Sprintf("no prefix function for %s. Line: %d", t, p.curToken.Line)
 	p.errors = append(p.errors, msg)
 }
+
+func (p *Parser) peekTokenAtSameLine() bool {
+	return p.curToken.Line == p.peekToken.Line
+}

@@ -66,17 +66,18 @@ func TestMethodCallWithoutSelf(t *testing.T) {
 		expected int
 	}{
 		{
-			`class Foo {
-				def set_x(x) {
-					@x = x
-				}
+			`
+			class Foo
+			  def set_x(x)
+			    @x = x
+			  end
 
-				def foo {
-					set_x(10)
-					a = 10
-					@x + a
-				}
-			}
+			  def foo
+			    set_x(10)
+			    a = 10
+			    @x + a
+			  end
+			end
 
 			f = Foo.new
 			f.foo
@@ -84,17 +85,18 @@ func TestMethodCallWithoutSelf(t *testing.T) {
 			20,
 		},
 		{
-			`class Foo {
-				def set_x(x) {
-					@x = x
-				}
+			`
+			class Foo
+			  def set_x(x)
+			    @x = x
+			  end
 
-				def foo {
-					set_x(10 + 10 * 100)
-					a = 10
-					@x + a
-				}
-			}
+			  def foo
+			    set_x(10 + 10 * 100)
+			    a = 10
+			    @x + a
+			  end
+			end
 
 			f = Foo.new
 			f.foo
@@ -102,16 +104,16 @@ func TestMethodCallWithoutSelf(t *testing.T) {
 			1020,
 		},
 		{
-			`class Foo {
-				def bar {
+			`class Foo
+				def bar
 					10
-				}
+				end
 
-				def foo {
+				def foo
 					bar = 100
 					10 + bar
-				}
-			}
+				end
+			end
 
 			f = Foo.new
 			f.foo
@@ -119,52 +121,52 @@ func TestMethodCallWithoutSelf(t *testing.T) {
 			110,
 		},
 		{
-			`class Foo {
-				def bar {
+			`class Foo
+				def bar
 					10
-				}
+				end
 
-				def foo {
+				def foo
 					a = 10
 					bar + a
-				}
-			}
+				end
+			end
 
 			Foo.new.foo
 			`,
 			20,
 		},
 		{
-			`class Foo {
-				def self.bar {
+			`class Foo
+				def self.bar
 					10
-				}
+				end
 
-				def self.foo {
+				def self.foo
 					a = 10
 					bar + a
-				}
-			}
+				end
+			end
 
 			Foo.foo
 			`,
 			20,
 		},
 		{
-			`class Foo {
-				def bar {
+			`class Foo
+				def bar
 					100
-				}
+				end
 
-				def self.bar {
+				def self.bar
 					10
-				}
+				end
 
-				def foo {
+				def foo
 					a = 10
 					bar + a
-				}
-			}
+				end
+			end
 
 			Foo.new.foo
 			`,
@@ -190,73 +192,73 @@ func TestClassMethodEvaluation(t *testing.T) {
 	}{
 		{
 			`
-			class Bar {
-				def self.foo {
+			class Bar
+				def self.foo
 					10
-				}
-			}
+				end
+			end
 			Bar.foo;
 			`,
 			10,
 		},
 		{
 			`
-			class Bar {
-				def self.foo {
+			class Bar
+				def self.foo
 					10
-				}
-			}
-			class Foo < Bar {}
-			class FooBar < Foo {}
+				end
+			end
+			class Foo < Bar; end
+			class FooBar < Foo; end
 			FooBar.foo
 			`,
 			10,
 		},
 		{
 			`
-			class Foo {
-				def self.foo {
+			class Foo
+				def self.foo
 					10
-				}
-			}
+				end
+			end
 
-			class Bar < Foo {}
-			Bar.foo;
+			class Bar < Foo; end
+			Bar.foo
 			`,
 			10,
 		},
 		{
 			`
-			class Foo {
-				def self.foo {
+			class Foo
+				def self.foo
 					10
-				}
-			}
+				end
+			end
 
-			class Bar < Foo {
-				def self.foo {
+			class Bar < Foo
+				def self.foo
 					100
-				}
-			}
+				end
+			end
 			Bar.foo
 			`,
 			100,
 		},
 		{
 			`
-			class Bar {
-				def self.foo {
+			class Bar
+				def self.foo
 					bar
-				}
+				end
 
-				def self.bar {
+				def self.bar
 					100
-				}
+				end
 
-				def bar {
+				def bar
 					1000
-				}
-			}
+				end
+			end
 			Bar.foo
 			`,
 			100,
@@ -264,19 +266,19 @@ func TestClassMethodEvaluation(t *testing.T) {
 		{
 			`
 			# Test class method call inside class method.
-			class JobPosition {
-				def initialize(name) {
+			class JobPosition
+				def initialize(name)
 					@name = name
-				}
+				end
 
-				def self.engineer {
+				def self.engineer
 					new("Engineer")
-				}
+				end
 
-				def name {
+				def name
 					@name
-				}
-			}
+				end
+			end
 			job = JobPosition.engineer
 			job.name
 			`,
@@ -284,7 +286,7 @@ func TestClassMethodEvaluation(t *testing.T) {
 		},
 		{
 			`
-			class Foo {}
+			class Foo; end
 			Foo.new.class.name
 			`,
 			"Foo",
@@ -315,45 +317,45 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 		{`self`, object.BASE_OBJECT_OBJ},
 		{
 			`
-			class Bar {
-				def whoami {
+			class Bar
+				def whoami
 					self
-				}
-			}
+				end
+			end
 
 			Bar.new.whoami;
 		`, object.BASE_OBJECT_OBJ},
 		{
 			`
-			class Foo {
-				Self = self;
+			class Foo
+				Self = self
 
-				def get_self {
+				def get_self
 					Self
-				}
-			}
+				end
+			end
 
 			Foo.new.get_self;
 			`,
 			object.CLASS_OBJ},
 		{
 			`
-			class Foo {
-				def class {
+			class Foo
+				def class
 					Foo
-				}
-			}
+				end
+			end
 
 			Foo.new.class
 			`,
 			object.CLASS_OBJ},
 		{
 			`
-			class Foo {
-				def class_name {
+			class Foo
+				def class_name
 					self.class.name
-				}
-			}
+				end
+			end
 
 			Foo.new.class_name
 			`,
@@ -375,40 +377,40 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 
 func TestEvalInstanceVariable(t *testing.T) {
 	input := `
-		class Foo {
-			def set(x) {
+		class Foo
+			def set(x)
 				@x = x;
-			}
+			end
 
-			def get {
+			def get
 				@x
-			}
+			end
 
-			def double_get {
+			def double_get
 				self.get() * 2;
-			}
-		}
+			end
+		end
 
-		class Bar {
-			def set(x) {
+		class Bar
+			def set(x)
 				@x = x;
-			}
+			end
 
-			def get {
+			def get
 				@x
-			}
-		}
+			end
+		end
 
-		f1 = Foo.new;
-		f1.set(10);
+		f1 = Foo.new
+		f1.set(10)
 
-		f2 = Foo.new;
-		f2.set(20);
+		f2 = Foo.new
+		f2.set(20)
 
-		b = Bar.new;
+		b = Bar.new
 		b.set(10)
 
-		f2.double_get() + f1.get() + b.get();
+		f2.double_get() + f1.get() + b.get()
 	`
 
 	evaluated := testEval(t, input)
@@ -431,27 +433,27 @@ func TestEvalInstanceVariable(t *testing.T) {
 func TestEvalInstanceMethodCall(t *testing.T) {
 	input := `
 
-		class Bar {
-			def set(x) {
-				@x = x;
-			}
-		}
+		class Bar
+			def set(x)
+				@x = x
+			end
+		end
 
-		class Foo < Bar {
-			def add(x, y) {
+		class Foo < Bar
+			def add(x, y)
 				x + y
-			}
-		}
+			end
+		end
 
-		class FooBar < Foo {
-			def get {
+		class FooBar < Foo
+			def get
 				@x
-			}
-		}
+			end
+		end
 
-		fb = FooBar.new;
-		fb.set(100);
-		fb.add(10, fb.get());
+		fb = FooBar.new
+		fb.set(100)
+		fb.add(10, fb.get)
 	`
 
 	evaluated := testEval(t, input)
@@ -473,19 +475,19 @@ func TestEvalInstanceMethodCall(t *testing.T) {
 
 func TestEvalCustomInitializeMethod(t *testing.T) {
 	input := `
-		class Foo {
-			def initialize(x, y) {
-				@x = x;
-				@y = y;
-			}
+		class Foo
+			def initialize(x, y)
+				@x = x
+				@y = y
+			end
 
-			def bar {
-				@x + @y;
-			}
-		}
+			def bar
+				@x + @y
+			end
+		end
 
-		f = Foo.new(10, 20);
-		f.bar;
+		f = Foo.new(10, 20)
+		f.bar
 	`
 
 	evaluated := testEval(t, input)
@@ -507,11 +509,11 @@ func TestEvalCustomInitializeMethod(t *testing.T) {
 
 func TestEvalClassInheritance(t *testing.T) {
 	input := `
-		class Foo {
-			def add(x, y) {
+		class Foo
+			def add(x, y)
 				x + y
-			}
-		}
+			end
+		end
 		Foo.new.add(10, 11)
 	`
 
@@ -538,30 +540,32 @@ func TestEvalIfExpression(t *testing.T) {
 		expected interface{}
 	}{
 		{
-			`if (10 > 5) {
+			`
+			if 10 > 5
 				100
-			} else {
+			else
 				-10
-			}
+			end
 			`,
 			100,
 		},
 		{
-			`if (5 != 5) {
+			`
+			if 5 != 5
 				false
-			} else {
+			else
 				true
-			}
+			end
 			`,
 			true,
 		},
-		{"if (true) { 10 }", 10},
-		{"if (false) { 10 }", nil},
-		{"if (1) { 10 }", 10},
-		{"if (1 < 2) { 10 }", 10},
-		{"if (1 > 2) { 10 }", nil},
-		{"if (1 > 2) { 10 } else { 20 }", 20},
-		{"if (1 < 2) { 10 } else { 20 }", 10},
+		{"if true; 10 end", 10},
+		{"if false; 10 end", nil},
+		{"if 1; 10; end", 10},
+		{"if 1 < 2; 10 end", 10},
+		{"if 1 > 2; 10 end", nil},
+		{"if 1 > 2; 10 else 20 end", 20},
+		{"if 1 < 2; 10 else 20 end", 10},
 	}
 
 	for _, tt := range tests {

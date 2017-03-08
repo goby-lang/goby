@@ -44,6 +44,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.SELF, p.parseSelfExpression)
 	p.registerPrefix(token.LBRACKET, p.parseArrayExpression)
 	p.registerPrefix(token.LBRACE, p.parseHashExpression)
+	p.registerPrefix(token.SEMICOLON, p.parseSemicolon)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
@@ -76,6 +77,10 @@ func (p *Parser) ParseProgram() *ast.Program {
 	}
 
 	return program
+}
+
+func (p *Parser) parseSemicolon() ast.Expression {
+	return nil
 }
 
 func (p *Parser) Errors() []string {

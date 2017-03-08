@@ -54,6 +54,7 @@ const (
 	RETURN = "RETURN"
 	DEF    = "DEF"
 	SELF   = "SELF"
+	END    = "END"
 )
 
 var keyworkds = map[string]TokenType{
@@ -64,6 +65,7 @@ var keyworkds = map[string]TokenType{
 	"else":   ELSE,
 	"return": RETURN,
 	"self":   SELF,
+	"end":    END,
 }
 
 func LookupIdent(ident string) TokenType {

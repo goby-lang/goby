@@ -8,15 +8,15 @@ import (
 func TestComment(t *testing.T) {
 	input := `
 	# Comment
-	class Foo {
+	class Foo
 		# Comment
-		def one {
+		def one
 			# Comment
 			1 # Comment
 			# Comment
-		}
+		end
 		# Comment
-	}
+	end
 	# Comment
 	Foo.new.one #=> Comment
 	# Comment`
@@ -34,7 +34,7 @@ func TestAssignStatementEvaluation(t *testing.T) {
 		{"a = 5 * 5; a;", 25},
 		{"a = 5; b = a; b;", 5},
 		{"a = 5; b = a; c = a + b + 5; c;", 15},
-		{"a = 5; b = 10; c = if (a > b) { 100; } else { 50; }", 50},
+		{"a = 5; b = 10; c = if a > b; 100 else 50 end", 50},
 		{"Bar = 100; Bar", 100},
 	}
 
@@ -55,13 +55,13 @@ func TestReturnStatementEvaluation(t *testing.T) {
 		{"9; return 2 * 5; 9;", 10},
 		{
 			`
-    if (10 > 1) {
-      if (10 > 1) {
-	return 10;
-      }
+    if 10 > 1
+      if 10 > 1
+	return 10
+      end
 
-      return 1;
-    }
+      return 1
+    end
     `,
 			10,
 		},
@@ -78,16 +78,17 @@ func TestClassStatement(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{`class Foo {}`, "Foo"},
+		{`class Foo; end`, "Foo"},
 		{
-			`class Foo {
-				def bar {
+			`
+			class Foo
+				def bar
 					x;
-				}
-			}`, "Foo"},
+				end
+			end`, "Foo"},
 		{
-			`class Bar {}
-			class Foo {}
+			`class Bar; end
+			class Foo; end
 			Bar
 			`, "Bar"},
 	}
@@ -100,15 +101,15 @@ func TestClassStatement(t *testing.T) {
 
 func TestDefStatement(t *testing.T) {
 	input := `
-		class Foo {
-			def bar(x, y) {
-				x + y;
-			}
+		class Foo
+			def bar(x, y)
+				x + y
+			end
 
-			def foo(y) {
-				y;
-			}
-		}
+			def foo(y)
+				y
+			end
+		end
 	`
 
 	evaluated := testEval(t, input)
@@ -166,18 +167,18 @@ func TestErrorHandling(t *testing.T) {
 			"undefined method `+' for true",
 		},
 		{
-			"if (10 > 1) { true + false; }",
+			"if 10 > 1; true + false end",
 			"undefined method `+' for true",
 		},
 		{
 			`
-	    if (10 > 1) {
-	      if (10 > 1) {
-		return true + false;
-	      }
+	    if 10 > 1
+	      if 10 > 1
+		true + false
+	      end
 
-	      return 1;
-	    }
+	      1
+	    end
 	    `,
 			"undefined method `+' for true",
 		},

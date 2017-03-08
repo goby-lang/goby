@@ -1,20 +1,20 @@
-class Stack {
-    def initialize {
+class Stack
+    def initialize
         @data = []
-    }
+    end
 
-    def push(x) {
+    def push(x)
         @data.push(x)
-    }
+    end
 
-    def pop {
+    def pop
         @data.pop
-    }
+    end
 
-    def top {
+    def top
         @data[@data.length - 1]
-    }
-}
+    end
+end
 
 s = Stack.new
 s.push(1)

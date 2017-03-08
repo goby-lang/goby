@@ -1,8 +1,8 @@
-class Foo {
-    def bar {
+class Foo
+    def bar
         10
-    }
-}
+    end
+end
 
 h = {}
 a = [1, 2, 3]
