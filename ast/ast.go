@@ -360,10 +360,12 @@ func (bs *BlockStatement) String() string {
 }
 
 type CallExpression struct {
-	Receiver  Expression
-	Token     token.Token
-	Method    string
-	Arguments []Expression
+	Receiver       Expression
+	Token          token.Token
+	Method         string
+	Arguments      []Expression
+	Block          *BlockStatement
+	BlockArguments []Expression
 }
 
 func (ce *CallExpression) expressionNode() {}
@@ -385,6 +387,24 @@ func (ce *CallExpression) String() string {
 	out.WriteString("(")
 	out.WriteString(strings.Join(args, ", "))
 	out.WriteString(")")
+
+	if ce.Block != nil {
+		var blockArgs []string
+		out.WriteString(" do")
+
+		if len(ce.BlockArguments) > 0 {
+			for _, arg := range ce.BlockArguments {
+				blockArgs = append(blockArgs, arg.String())
+			}
+			out.WriteString(" |")
+			out.WriteString(strings.Join(blockArgs, ", "))
+			out.WriteString("|")
+		}
+
+		out.WriteString("\n")
+		out.WriteString(ce.Block.String())
+		out.WriteString("\nend")
+	}
 
 	return out.String()
 }
