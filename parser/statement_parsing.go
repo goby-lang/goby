@@ -200,11 +200,6 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 
 	p.nextToken()
 	ws.Condition = p.parseExpression(LOWEST)
-
-	if !p.expectPeek(token.DO) {
-		return nil
-	}
-
 	ws.Body = p.parseBlockStatement()
 
 	return ws

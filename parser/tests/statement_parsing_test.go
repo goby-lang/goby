@@ -255,7 +255,7 @@ func TestDefStatement(t *testing.T) {
 
 func TestWhileStatement(t *testing.T) {
 	input := `
-	while i < 10 do
+	while i < a.length
 	  puts(i)
 	  i++
 	end
@@ -268,8 +268,27 @@ func TestWhileStatement(t *testing.T) {
 
 	whileStatement := program.Statements[0].(*ast.WhileStatement)
 
-	testInfixExpression(t, whileStatement.Condition, "i", "<", 10)
+	infix := whileStatement.Condition.(*ast.InfixExpression)
 
+	testIdentifier(t, infix.Left, "i")
+
+	if infix.Operator != "<" {
+		t.Fatalf("Expect condition's infix operator to be '<'. got=%s", infix.Operator)
+	}
+
+	callExp, ok := infix.Right.(*ast.CallExpression)
+
+	if !ok {
+		t.Fatalf("Expect infix's right to be a CallExpression. got=%T", infix.Right)
+	}
+
+	testMethodName(t, callExp, "length")
+
+	if callExp.Block != nil {
+		t.Fatalf("Condition expression shouldn't have block")
+	}
+
+	// Test block
 	block := whileStatement.Body
 	firstStmt := block.Statements[0].(*ast.ExpressionStatement)
 	firstCall := firstStmt.Expression.(*ast.CallExpression)

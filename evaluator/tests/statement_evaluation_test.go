@@ -211,7 +211,7 @@ func TestWhileStatement(t *testing.T) {
 		{
 			`
 		i = 10
-		while i > 0 do
+		while i > 0
 		  i--
 		end
 		i
@@ -220,7 +220,7 @@ func TestWhileStatement(t *testing.T) {
 			`
 		a = [1, 2, 3, 4, 5]
 		i = 0
-		while i < a.length do
+		while i < a.length
 		  a[i]++
 		  i++
 		end
