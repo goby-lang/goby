@@ -28,6 +28,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return nil
 	case token.WHILE:
 		return p.parseWhileStatement()
+	case token.YIELD:
+		return p.parseYieldStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -203,4 +205,15 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 	ws.Body = p.parseBlockStatement()
 
 	return ws
+}
+
+func (p *Parser) parseYieldStatement() *ast.YieldStatement {
+	ys := &ast.YieldStatement{Token: p.curToken}
+
+	p.nextToken()
+	if p.curTokenIs(token.LPAREN) {
+		ys.Arguments = p.parseCallArguments()
+	}
+
+	return ys
 }

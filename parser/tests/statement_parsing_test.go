@@ -228,10 +228,6 @@ func TestDefStatement(t *testing.T) {
 
 	firstStmt := program.Statements[0].(*ast.DefStatement)
 
-	if firstStmt.Token.Type != token.DEF {
-		t.Fatalf("expect DefStatement's token to be 'DEF'. got=%T", firstStmt.Token.Type)
-	}
-
 	testLiteralExpression(t, firstStmt.Parameters[0], "x")
 	testLiteralExpression(t, firstStmt.Parameters[1], "y")
 
@@ -251,6 +247,30 @@ func TestDefStatement(t *testing.T) {
 
 	secondExpressionStmt := secondStmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
 	testIntegerLiteral(t, secondExpressionStmt.Expression, 123)
+}
+
+func TestDefStatementWithYield(t *testing.T) {
+	input := `
+	def foo
+	  yield(1, 2, bar)
+	end
+	`
+	l := lexer.New(input)
+	p := parser.New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt := program.Statements[0].(*ast.DefStatement)
+	block := stmt.BlockStatement
+	yield, ok := block.Statements[0].(*ast.YieldStatement)
+
+	if !ok {
+		t.Fatalf("Expect method's body is an YieldStatement. got=%T", block.Statements[0])
+	}
+
+	testIntegerLiteral(t, yield.Arguments[0], 1)
+	testIntegerLiteral(t, yield.Arguments[1], 2)
+	testIdentifier(t, yield.Arguments[2], "bar")
 }
 
 func TestWhileStatement(t *testing.T) {

@@ -442,3 +442,28 @@ func (ws *WhileStatement) String() string {
 
 	return out.String()
 }
+
+type YieldStatement struct {
+	Token     token.Token
+	Arguments []Expression
+}
+
+func (ys *YieldStatement) statementNode() {}
+func (ys *YieldStatement) TokenLiteral() string {
+	return ys.Token.Literal
+}
+func (ys *YieldStatement) String() string {
+	var out bytes.Buffer
+	var args []string
+
+	for _, arg := range ys.Arguments {
+		args = append(args, arg.String())
+	}
+
+	out.WriteString(ys.TokenLiteral())
+	out.WriteString("(")
+	out.WriteString(strings.Join(args, ", "))
+	out.WriteString(")")
+
+	return out.String()
+}
