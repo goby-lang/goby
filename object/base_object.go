@@ -23,3 +23,9 @@ func (ro *RObject) Inspect() string {
 func (ro *RObject) ReturnClass() Class {
 	return ro.Class
 }
+
+func InitializeInstance(c *RClass) *RObject {
+	instance := &RObject{Class: c, InstanceVariables: NewEnvironment()}
+
+	return instance
+}

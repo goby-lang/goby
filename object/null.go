@@ -23,3 +23,9 @@ func (n *Null) Inspect() string {
 func (n *Null) ReturnClass() Class {
 	return n.Class
 }
+
+func initNull() {
+	baseClass := &BaseClass{Name: "Null", Methods: NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}
+	nc := &NullClass{BaseClass: baseClass}
+	NULL = &Null{Class: nc}
+}

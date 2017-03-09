@@ -2,9 +2,12 @@ package object
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/st0012/Rooby/ast"
 	"strings"
 )
+
+var MainObj *RObject
 
 type ObjectType string
 
@@ -22,6 +25,29 @@ const (
 	BASE_OBJECT_OBJ     = "BASE_OBJECT"
 	BUILD_IN_METHOD_OBJ = "BUILD_IN_METHOD"
 )
+
+func init() {
+	initTopLevelClasses()
+	initNull()
+	initBool()
+	initInteger()
+	initString()
+	initMainObj()
+}
+
+func initMainObj() {
+	builtInClasses := []Class{StringClass, BooleanClass, IntegerClass}
+
+	obj := &RObject{Class: ObjectClass, InstanceVariables: NewEnvironment()}
+	scope := &Scope{Self: obj, Env: NewEnvironment()}
+
+	for _, class := range builtInClasses {
+		scope.Env.Set(class.ReturnName(), class)
+	}
+
+	obj.Scope = scope
+	MainObj = obj
+}
 
 type Object interface {
 	Type() ObjectType
@@ -98,4 +124,20 @@ func (bim *BuiltInMethod) Inspect() string {
 type Scope struct {
 	Env  *Environment
 	Self Object
+}
+
+func newError(format string, args ...interface{}) *Error {
+	return &Error{Message: fmt.Sprintf(format, args...)}
+}
+
+func checkArgumentLen(args []Object, class Class, method_name string) *Error {
+	if len(args) > 1 {
+		return &Error{Message: fmt.Sprintf("Too many arguments for %s#%s", class.ReturnName(), method_name)}
+	}
+
+	return nil
+}
+
+func wrongTypeError(c Class) *Error {
+	return &Error{Message: fmt.Sprintf("expect argument to be %s type", c.ReturnName())}
 }

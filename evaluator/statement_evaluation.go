@@ -2,7 +2,6 @@ package evaluator
 
 import (
 	"github.com/st0012/Rooby/ast"
-	"github.com/st0012/Rooby/initializer"
 	"github.com/st0012/Rooby/object"
 )
 
@@ -55,7 +54,7 @@ func evalBlockStatements(stmts []ast.Statement, scope *object.Scope) object.Obje
 }
 
 func evalClassStatement(exp *ast.ClassStatement, scope *object.Scope) object.Object {
-	class := initializer.InitializeClass(exp.Name.Value, scope)
+	class := object.InitializeClass(exp.Name.Value, scope)
 
 	// Evaluate superclass
 	if exp.SuperClass != nil {

@@ -32,3 +32,240 @@ func (i *IntegerObject) ReturnClass() Class {
 func InitilaizeInteger(value int) *IntegerObject {
 	return &IntegerObject{Value: value, Class: IntegerClass}
 }
+
+var builtinIntegerMethods = []*BuiltInMethod{
+	{
+		Fn: func(receiver Object) BuiltinMethodBody {
+			return func(args ...Object) Object {
+				err := checkArgumentLen(args, IntegerClass, "+")
+
+				if err != nil {
+					return err
+				}
+
+				leftValue := receiver.(*IntegerObject).Value
+				right, ok := args[0].(*IntegerObject)
+
+				if !ok {
+					return wrongTypeError(IntegerClass)
+				}
+
+				rightValue := right.Value
+				return &IntegerObject{Value: leftValue + rightValue, Class: IntegerClass}
+			}
+		},
+		Name: "+",
+	},
+	{
+		Fn: func(receiver Object) BuiltinMethodBody {
+			return func(args ...Object) Object {
+				err := checkArgumentLen(args, IntegerClass, "-")
+
+				if err != nil {
+					return err
+				}
+
+				leftValue := receiver.(*IntegerObject).Value
+				right, ok := args[0].(*IntegerObject)
+
+				if !ok {
+					return wrongTypeError(IntegerClass)
+				}
+
+				rightValue := right.Value
+				return &IntegerObject{Value: leftValue - rightValue, Class: IntegerClass}
+			}
+		},
+		Name: "-",
+	},
+	{
+		Fn: func(receiver Object) BuiltinMethodBody {
+			return func(args ...Object) Object {
+				err := checkArgumentLen(args, IntegerClass, "+")
+
+				if err != nil {
+					return err
+				}
+
+				leftValue := receiver.(*IntegerObject).Value
+				right, ok := args[0].(*IntegerObject)
+
+				if !ok {
+					return wrongTypeError(IntegerClass)
+				}
+
+				rightValue := right.Value
+				return &IntegerObject{Value: leftValue * rightValue, Class: IntegerClass}
+			}
+		},
+		Name: "*",
+	},
+	{
+		Fn: func(receiver Object) BuiltinMethodBody {
+			return func(args ...Object) Object {
+				err := checkArgumentLen(args, IntegerClass, "+")
+
+				if err != nil {
+					return err
+				}
+
+				leftValue := receiver.(*IntegerObject).Value
+				right, ok := args[0].(*IntegerObject)
+
+				if !ok {
+					return wrongTypeError(IntegerClass)
+				}
+
+				rightValue := right.Value
+				return &IntegerObject{Value: leftValue / rightValue, Class: IntegerClass}
+			}
+		},
+		Name: "/",
+	},
+	{
+		Fn: func(receiver Object) BuiltinMethodBody {
+			return func(args ...Object) Object {
+				err := checkArgumentLen(args, IntegerClass, ">")
+				if err != nil {
+					return err
+				}
+
+				leftValue := receiver.(*IntegerObject).Value
+				right, ok := args[0].(*IntegerObject)
+
+				if !ok {
+					return wrongTypeError(IntegerClass)
+				}
+
+				rightValue := right.Value
+
+				if leftValue > rightValue {
+					return TRUE
+				}
+
+				return FALSE
+			}
+		},
+		Name: ">",
+	},
+	{
+		Fn: func(receiver Object) BuiltinMethodBody {
+			return func(args ...Object) Object {
+				err := checkArgumentLen(args, IntegerClass, "<")
+				if err != nil {
+					return err
+				}
+
+				leftValue := receiver.(*IntegerObject).Value
+				right, ok := args[0].(*IntegerObject)
+
+				if !ok {
+					return wrongTypeError(IntegerClass)
+				}
+
+				rightValue := right.Value
+
+				if leftValue < rightValue {
+					return TRUE
+				}
+
+				return FALSE
+			}
+		},
+		Name: "<",
+	},
+	{
+		Fn: func(receiver Object) BuiltinMethodBody {
+			return func(args ...Object) Object {
+				err := checkArgumentLen(args, IntegerClass, "==")
+
+				if err != nil {
+					return err
+				}
+
+				leftValue := receiver.(*IntegerObject).Value
+				right, ok := args[0].(*IntegerObject)
+
+				if !ok {
+					return wrongTypeError(IntegerClass)
+				}
+
+				rightValue := right.Value
+
+				if leftValue == rightValue {
+					return TRUE
+				}
+
+				return FALSE
+			}
+		},
+		Name: "==",
+	},
+	{
+		Fn: func(receiver Object) BuiltinMethodBody {
+			return func(args ...Object) Object {
+				err := checkArgumentLen(args, IntegerClass, "!=")
+
+				if err != nil {
+					return err
+				}
+
+				leftValue := receiver.(*IntegerObject).Value
+				right, ok := args[0].(*IntegerObject)
+
+				if !ok {
+					return wrongTypeError(IntegerClass)
+				}
+
+				rightValue := right.Value
+
+				if leftValue != rightValue {
+					return TRUE
+				}
+
+				return FALSE
+			}
+		},
+		Name: "!=",
+	},
+	{
+		Fn: func(receiver Object) BuiltinMethodBody {
+			return func(args ...Object) Object {
+				if len(args) > 0 {
+					return &Error{Message: "Too many arguments for Integer#++"}
+				}
+
+				int := receiver.(*IntegerObject)
+				int.Value += 1
+				return int
+			}
+		},
+		Name: "++",
+	},
+	{
+		Fn: func(receiver Object) BuiltinMethodBody {
+			return func(args ...Object) Object {
+				if len(args) > 0 {
+					return &Error{Message: "Too many arguments for Integer#--"}
+				}
+
+				int := receiver.(*IntegerObject)
+				int.Value -= 1
+				return int
+			}
+		},
+		Name: "--",
+	},
+}
+
+func initInteger() {
+	methods := NewEnvironment()
+
+	for _, m := range builtinIntegerMethods {
+		methods.Set(m.Name, m)
+	}
+
+	bc := &BaseClass{Name: "Integer", Methods: methods, Class: ClassClass, SuperClass: ObjectClass}
+	ic := &RInteger{BaseClass: bc}
+	IntegerClass = ic
+}

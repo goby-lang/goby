@@ -1,16 +1,19 @@
-package initializer_test
+package object
 
 import (
-	"github.com/st0012/Rooby/object"
 	"testing"
 )
+
+func init() {
+
+}
 
 func TestLengthMethod(t *testing.T) {
 	expected := 5
 	array := generateArray(expected)
 	m := getBuiltInMethod(t, array, "length")
 
-	result := m().(*object.IntegerObject).Value
+	result := m().(*IntegerObject).Value
 
 	if int(result) != expected {
 		t.Fatalf("Expect length method returns array's length: %d. got=%d", expected, result)
@@ -20,10 +23,10 @@ func TestLengthMethod(t *testing.T) {
 func TestPopMethod(t *testing.T) {
 	array := generateArray(5)
 	m := getBuiltInMethod(t, array, "pop")
-	last := m().(*object.IntegerObject).Value
+	last := m().(*IntegerObject).Value
 
 	if int(last) != 5 {
-		t.Fatalf("Expect pop to return array's last object. got=%d", last)
+		t.Fatalf("Expect pop to return array's last  got=%d", last)
 	}
 
 	if array.Length() != 4 {
@@ -35,26 +38,26 @@ func TestPushMethod(t *testing.T) {
 	array := generateArray(5)
 	m := getBuiltInMethod(t, array, "push")
 
-	six := object.InitilaizeInteger(6)
-	seven := object.InitilaizeInteger(7)
+	six := InitilaizeInteger(6)
+	seven := InitilaizeInteger(7)
 	m(six, seven)
 
 	if array.Length() != 7 {
 		t.Fatalf("Expect array's length to be 7(5 + 2). got=%d", array.Length())
 	}
 
-	last := array.Elements[array.Length()-1].(*object.IntegerObject).Value
+	last := array.Elements[array.Length()-1].(*IntegerObject).Value
 
 	if int(last) != 7 {
 		t.Fatalf("Expect last object to be 7. got=%d", last)
 	}
 }
 
-func generateArray(length int) *object.ArrayObject {
-	var elements []object.Object
+func generateArray(length int) *ArrayObject {
+	var elements []Object
 	for i := 1; i <= length; i++ {
-		int := object.InitilaizeInteger(i)
+		int := InitilaizeInteger(i)
 		elements = append(elements, int)
 	}
-	return object.InitializeArray(elements)
+	return InitializeArray(elements)
 }
