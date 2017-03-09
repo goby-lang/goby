@@ -1,4 +1,4 @@
-package object
+package evaluator
 
 func NewEnvironment() *Environment {
 	s := make(map[string]Object)
@@ -16,9 +16,23 @@ type Environment struct {
 	outer *Environment
 }
 
+type Scope struct {
+	Env  *Environment
+	Self Object
+}
+
 func (e *Environment) GetCurrent(name string) (Object, bool) {
 	obj, ok := e.store[name]
 	return obj, ok
+}
+
+func (e *Environment) GetValueLocation(name string) (*Environment, bool) {
+	env := e
+	_, ok := e.store[name]
+	if !ok && e.outer != nil {
+		env, ok = e.outer.GetValueLocation(name)
+	}
+	return env, ok
 }
 
 func (e *Environment) Get(name string) (Object, bool) {

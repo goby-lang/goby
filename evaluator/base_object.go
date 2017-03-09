@@ -1,4 +1,4 @@
-package object
+package evaluator
 
 type BaseObject interface {
 	ReturnClass() Class
@@ -22,4 +22,10 @@ func (ro *RObject) Inspect() string {
 
 func (ro *RObject) ReturnClass() Class {
 	return ro.Class
+}
+
+func InitializeInstance(c *RClass) *RObject {
+	instance := &RObject{Class: c, InstanceVariables: NewEnvironment()}
+
+	return instance
 }

@@ -3,26 +3,22 @@ package evaluator_test
 import (
 	"github.com/st0012/Rooby/evaluator"
 	"github.com/st0012/Rooby/lexer"
-	"github.com/st0012/Rooby/object"
 	"github.com/st0012/Rooby/parser"
 	"testing"
-
-	"github.com/st0012/Rooby/initializer"
 )
 
-func testEval(t *testing.T, input string) object.Object {
+func testEval(t *testing.T, input string) evaluator.Object {
 	l := lexer.New(input)
 	p := parser.New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
-	initializer.InitializeProgram()
-	mainObj := initializer.MainObj
+	mainObj := evaluator.MainObj
 	return evaluator.Eval(program, mainObj.Scope)
 }
 
-func testClassObject(t *testing.T, obj object.Object, expected string) bool {
-	result, ok := obj.(*object.RClass)
+func testClassObject(t *testing.T, obj evaluator.Object, expected string) bool {
+	result, ok := obj.(*evaluator.RClass)
 	if !ok {
 		t.Errorf("object is not a Class. got=%T (%+v", obj, obj)
 		return false
@@ -35,8 +31,8 @@ func testClassObject(t *testing.T, obj object.Object, expected string) bool {
 	return true
 }
 
-func testNullObject(t *testing.T, obj object.Object) bool {
-	if obj != initializer.NULL {
+func testNullObject(t *testing.T, obj evaluator.Object) bool {
+	if obj != evaluator.NULL {
 		t.Errorf("object is not NULL. got=%T (%+v)", obj, obj)
 		return false
 	}
@@ -57,9 +53,9 @@ func checkParserErrors(t *testing.T, p *parser.Parser) {
 	t.FailNow()
 }
 
-func isError(obj object.Object) bool {
+func isError(obj evaluator.Object) bool {
 	if obj != nil {
-		return obj.Type() == object.ERROR_OBJ
+		return obj.Type() == evaluator.ERROR_OBJ
 	}
 	return false
 }

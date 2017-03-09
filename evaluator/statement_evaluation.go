@@ -2,27 +2,30 @@ package evaluator
 
 import (
 	"github.com/st0012/Rooby/ast"
-	"github.com/st0012/Rooby/initializer"
-	"github.com/st0012/Rooby/object"
 )
 
-func evalAssignStatement(stmt *ast.AssignStatement, scope *object.Scope) object.Object {
+func evalAssignStatement(stmt *ast.AssignStatement, scope *Scope) Object {
 	value := Eval(stmt.Value, scope)
 
 	if isError(value) {
 		return value
 	}
 
+	varName := stmt.Name.ReturnValue()
+	env, ok := scope.Env.GetValueLocation(varName)
+
+	if ok {
+		env.Set(varName, value)
+	}
+
 	switch variableName := stmt.Name.(type) {
-	case *ast.Identifier:
-		return scope.Env.Set(variableName.Value, value)
-	case *ast.Constant:
-		return scope.Env.Set(variableName.Value, value)
+	case *ast.Identifier, *ast.Constant:
+		return scope.Env.Set(varName, value)
 	case *ast.InstanceVariable:
 		switch ivScope := scope.Self.(type) {
-		case *object.RObject:
-			return ivScope.InstanceVariables.Set(variableName.Value, value)
-		case *object.RClass:
+		case *RObject:
+			return ivScope.InstanceVariables.Set(varName, value)
+		case *RClass:
 			return newError("Can not define instance variable %s in a class.", variableName.Value)
 		default:
 			return newError("Can not define instance variable %s in %T", ivScope)
@@ -34,8 +37,8 @@ func evalAssignStatement(stmt *ast.AssignStatement, scope *object.Scope) object.
 	return newError("Can not define variable %s in %s", stmt.Name.String(), scope.Self.Inspect())
 }
 
-func evalBlockStatements(stmts []ast.Statement, scope *object.Scope) object.Object {
-	var result object.Object
+func evalBlockStatements(stmts []ast.Statement, scope *Scope) Object {
+	var result Object
 
 	for _, statement := range stmts {
 
@@ -43,9 +46,9 @@ func evalBlockStatements(stmts []ast.Statement, scope *object.Scope) object.Obje
 
 		if result != nil {
 			switch result := result.(type) {
-			case *object.ReturnValue:
+			case *ReturnValue:
 				return result
-			case *object.Error:
+			case *Error:
 				return result
 			}
 		}
@@ -54,14 +57,14 @@ func evalBlockStatements(stmts []ast.Statement, scope *object.Scope) object.Obje
 	return result
 }
 
-func evalClassStatement(exp *ast.ClassStatement, scope *object.Scope) object.Object {
-	class := initializer.InitializeClass(exp.Name.Value, scope)
+func evalClassStatement(exp *ast.ClassStatement, scope *Scope) Object {
+	class := InitializeClass(exp.Name.Value, scope)
 
 	// Evaluate superclass
 	if exp.SuperClass != nil {
 
 		constant := evalConstant(exp.SuperClass, scope)
-		inheritedClass, ok := constant.(*object.RClass)
+		inheritedClass, ok := constant.(*RClass)
 		if !ok {
 			newError("Constant %s is not a class. got=%T", exp.SuperClass.Value, constant)
 		}
@@ -75,14 +78,14 @@ func evalClassStatement(exp *ast.ClassStatement, scope *object.Scope) object.Obj
 	return class
 }
 
-func evalDefStatement(exp *ast.DefStatement, scope *object.Scope) object.Object {
-	class, ok := scope.Self.(*object.RClass)
+func evalDefStatement(exp *ast.DefStatement, scope *Scope) Object {
+	class, ok := scope.Self.(*RClass)
 	// scope must be a class for now.
 	if !ok {
 		return newError("Method %s must be defined inside a Class. got=%T", exp.Name.Value, scope.Self)
 	}
 
-	method := &object.Method{Name: exp.Name.Value, Parameters: exp.Parameters, Body: exp.BlockStatement, Scope: scope}
+	method := &Method{Name: exp.Name.Value, Parameters: exp.Parameters, Body: exp.BlockStatement, Scope: scope}
 
 	switch exp.Receiver.(type) {
 	case nil:
@@ -94,12 +97,12 @@ func evalDefStatement(exp *ast.DefStatement, scope *object.Scope) object.Object 
 	return method
 }
 
-func evalWhileStatement(exp *ast.WhileStatement, scope *object.Scope) object.Object {
+func evalWhileStatement(exp *ast.WhileStatement, scope *Scope) Object {
 	condition := exp.Condition
 
 	con := Eval(condition, scope)
 
-	for con != initializer.FALSE && con != initializer.NULL {
+	for con != FALSE && con != NULL {
 		Eval(exp.Body, scope)
 		con = Eval(condition, scope)
 	}
@@ -107,11 +110,11 @@ func evalWhileStatement(exp *ast.WhileStatement, scope *object.Scope) object.Obj
 	return nil
 }
 
-func evalYieldStatement(node *ast.YieldStatement, scope *object.Scope) object.Object {
+func evalYieldStatement(node *ast.YieldStatement, scope *Scope) Object {
 	block, ok := scope.Env.GetCurrent("block")
 	if ok {
-		b := block.(*object.Method)
-		var args []object.Object
+		b := block.(*Method)
+		var args []Object
 
 		for _, arg := range node.Arguments {
 			args = append(args, Eval(arg, scope))

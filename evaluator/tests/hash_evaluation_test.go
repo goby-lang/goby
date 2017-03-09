@@ -1,7 +1,7 @@
 package evaluator_test
 
 import (
-	"github.com/st0012/Rooby/object"
+	"github.com/st0012/Rooby/evaluator"
 	"testing"
 )
 
@@ -12,7 +12,7 @@ func TestEvalHashExpression(t *testing.T) {
 
 	evaluated := testEval(t, input)
 
-	h, ok := evaluated.(*object.HashObject)
+	h, ok := evaluated.(*evaluator.HashObject)
 	if !ok {
 		t.Fatalf("Expect evaluated value to be a hash. got=%T", evaluated)
 	}
@@ -81,7 +81,7 @@ func TestEvalHashAccess(t *testing.T) {
 		case bool:
 			testBooleanObject(t, evaluated, expected)
 		case nil:
-			_, ok := evaluated.(*object.Null)
+			_, ok := evaluated.(*evaluator.Null)
 
 			if !ok {
 

@@ -1,44 +1,10 @@
-package object
+package evaluator
 
 import (
 	"bytes"
 	"github.com/st0012/Rooby/ast"
 	"strings"
 )
-
-type ObjectType string
-
-const (
-	INTEGER_OBJ         = "INTEGER"
-	ARRAY_OBJ           = "ARRAY"
-	HASH_OBJ            = "HASH"
-	STRING_OBJ          = "STRING"
-	BOOLEAN_OBJ         = "BOOLEAN"
-	NULL_OBJ            = "NULL"
-	RETURN_VALUE_OBJ    = "RETURN_VALUE"
-	ERROR_OBJ           = "ERROR"
-	METHOD_OBJ          = "METHOD"
-	CLASS_OBJ           = "CLASS"
-	BASE_OBJECT_OBJ     = "BASE_OBJECT"
-	BUILD_IN_METHOD_OBJ = "BUILD_IN_METHOD"
-)
-
-type Object interface {
-	Type() ObjectType
-	Inspect() string
-}
-
-type ReturnValue struct {
-	Value Object
-}
-
-func (r *ReturnValue) Type() ObjectType {
-	return RETURN_VALUE_OBJ
-}
-
-func (r *ReturnValue) Inspect() string {
-	return r.Value.Inspect()
-}
 
 type Method struct {
 	Name       string
@@ -80,7 +46,7 @@ func (m *Method) ExtendEnv(args []Object) *Environment {
 	return e
 }
 
-type BuiltinMethodBody func(...Object) Object
+type BuiltinMethodBody func([]Object, *Method) Object
 
 type BuiltInMethod struct {
 	Fn   func(receiver Object) BuiltinMethodBody
@@ -93,9 +59,4 @@ func (bim *BuiltInMethod) Type() ObjectType {
 
 func (bim *BuiltInMethod) Inspect() string {
 	return bim.Name
-}
-
-type Scope struct {
-	Env  *Environment
-	Self Object
 }

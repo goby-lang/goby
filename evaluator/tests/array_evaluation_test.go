@@ -1,7 +1,7 @@
 package evaluator_test
 
 import (
-	"github.com/st0012/Rooby/object"
+	"github.com/st0012/Rooby/evaluator"
 	"testing"
 )
 
@@ -12,7 +12,7 @@ func TestEvalArrayExpression(t *testing.T) {
 
 	evaluated := testEval(t, input)
 
-	arr, ok := evaluated.(*object.ArrayObject)
+	arr, ok := evaluated.(*evaluator.ArrayObject)
 	if !ok {
 		t.Fatalf("Expect evaluated value to be an array. got=%T", evaluated)
 	}
@@ -74,12 +74,35 @@ func TestEvalArrayIndex(t *testing.T) {
 		case bool:
 			testBooleanObject(t, evaluated, expected)
 		case nil:
-			_, ok := evaluated.(*object.Null)
+			_, ok := evaluated.(*evaluator.Null)
 
 			if !ok {
 
 				t.Fatalf("expect input: \"%s\"'s result should be Null. got=%T(%s)", tt.input, evaluated, evaluated.Inspect())
 			}
 		}
+	}
+}
+
+func TestEachMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{`
+		sum = 0
+		puts(self)
+		[1, 2, 3, 4, 5].each do |i|
+		  puts(self)
+		  puts(sum)
+		  sum = sum + i
+		end
+		sum
+		`, 15},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		testIntegerObject(t, evaluated, tt.expected)
 	}
 }
