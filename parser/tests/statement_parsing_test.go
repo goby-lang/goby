@@ -253,6 +253,7 @@ func TestDefStatementWithYield(t *testing.T) {
 	input := `
 	def foo
 	  yield(1, 2, bar)
+	  yield
 	end
 	`
 	l := lexer.New(input)
@@ -262,15 +263,21 @@ func TestDefStatementWithYield(t *testing.T) {
 
 	stmt := program.Statements[0].(*ast.DefStatement)
 	block := stmt.BlockStatement
-	yield, ok := block.Statements[0].(*ast.YieldStatement)
+	firstYield, ok := block.Statements[0].(*ast.YieldStatement)
 
 	if !ok {
 		t.Fatalf("Expect method's body is an YieldStatement. got=%T", block.Statements[0])
 	}
 
-	testIntegerLiteral(t, yield.Arguments[0], 1)
-	testIntegerLiteral(t, yield.Arguments[1], 2)
-	testIdentifier(t, yield.Arguments[2], "bar")
+	testIntegerLiteral(t, firstYield.Arguments[0], 1)
+	testIntegerLiteral(t, firstYield.Arguments[1], 2)
+	testIdentifier(t, firstYield.Arguments[2], "bar")
+
+	_, ok = block.Statements[1].(*ast.YieldStatement)
+
+	if !ok {
+		t.Fatalf("Expect method's body is an YieldStatement. got=%T", block.Statements[1])
+	}
 }
 
 func TestWhileStatement(t *testing.T) {

@@ -210,8 +210,8 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 func (p *Parser) parseYieldStatement() *ast.YieldStatement {
 	ys := &ast.YieldStatement{Token: p.curToken}
 
-	p.nextToken()
-	if p.curTokenIs(token.LPAREN) {
+	if p.peekTokenIs(token.LPAREN) {
+		p.nextToken()
 		ys.Arguments = p.parseCallArguments()
 	}
 
