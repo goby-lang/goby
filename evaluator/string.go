@@ -1,4 +1,4 @@
-package object
+package evaluator
 
 var (
 	StringClass *RString

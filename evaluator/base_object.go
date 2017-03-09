@@ -1,4 +1,4 @@
-package object
+package evaluator
 
 type BaseObject interface {
 	ReturnClass() Class

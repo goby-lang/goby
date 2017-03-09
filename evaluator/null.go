@@ -1,4 +1,4 @@
-package object
+package evaluator
 
 var (
 	NULL *Null

@@ -1,4 +1,4 @@
-package object
+package evaluator
 
 type ErrorClass struct {
 	*BaseClass

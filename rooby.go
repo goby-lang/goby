@@ -6,7 +6,6 @@ import (
 	"github.com/st0012/Rooby/parser"
 	"io/ioutil"
 	"os"
-	"github.com/st0012/Rooby/object"
 )
 
 func main() {
@@ -21,8 +20,7 @@ func main() {
 	program := p.ParseProgram()
 	p.CheckErrors()
 
-	mainObj := object.MainObj
-	evaluator.Eval(program, mainObj.Scope)
+	evaluator.Eval(program, evaluator.MainObj.Scope)
 }
 
 func check(e error) {

@@ -2,10 +2,9 @@ package evaluator
 
 import (
 	"github.com/st0012/Rooby/ast"
-	"github.com/st0012/Rooby/object"
 )
 
-func evalPrefixExpression(operator string, right object.Object) object.Object {
+func evalPrefixExpression(operator string, right Object) Object {
 	switch operator {
 	case "!":
 		return evalBangPrefixExpression(right)
@@ -15,53 +14,53 @@ func evalPrefixExpression(operator string, right object.Object) object.Object {
 	return newError("unknown operator: %s%s", operator, right.Type())
 }
 
-func evalBangPrefixExpression(right object.Object) *object.BooleanObject {
+func evalBangPrefixExpression(right Object) *BooleanObject {
 	switch right {
-	case object.FALSE:
-		return object.TRUE
-	case object.NULL:
-		return object.TRUE
+	case FALSE:
+		return TRUE
+	case NULL:
+		return TRUE
 	default:
-		return object.FALSE
+		return FALSE
 	}
 }
 
-func evalMinusPrefixExpression(right object.Object) object.Object {
-	if right.Type() != object.INTEGER_OBJ {
+func evalMinusPrefixExpression(right Object) Object {
+	if right.Type() != INTEGER_OBJ {
 		return newError("unknown operator: %s%s", "-", right.Type())
 	}
-	value := right.(*object.IntegerObject).Value
-	return &object.IntegerObject{Value: -value, Class: object.IntegerClass}
+	value := right.(*IntegerObject).Value
+	return &IntegerObject{Value: -value, Class: IntegerClass}
 }
 
-func evalInfixExpression(left object.Object, operator string, right object.Object) object.Object {
-	result := sendMethodCall(left, operator, []object.Object{right}, nil)
+func evalInfixExpression(left Object, operator string, right Object) Object {
+	result := sendMethodCall(left, operator, []Object{right}, nil)
 
-	if err, ok := result.(*object.Error); ok {
+	if err, ok := result.(*Error); ok {
 		return err
 	}
 
 	return result
 }
 
-func evalIfExpression(exp *ast.IfExpression, scope *object.Scope) object.Object {
+func evalIfExpression(exp *ast.IfExpression, scope *Scope) Object {
 	condition := Eval(exp.Condition, scope)
 	if isError(condition) {
 		return condition
 	}
 
-	if condition.Type() == object.INTEGER_OBJ || condition.(*object.BooleanObject).Value {
+	if condition.Type() == INTEGER_OBJ || condition.(*BooleanObject).Value {
 		return Eval(exp.Consequence, scope)
 	} else {
 		if exp.Alternative != nil {
 			return Eval(exp.Alternative, scope)
 		} else {
-			return object.NULL
+			return NULL
 		}
 	}
 }
 
-func evalIdentifier(node *ast.Identifier, scope *object.Scope) object.Object {
+func evalIdentifier(node *ast.Identifier, scope *Scope) Object {
 	// check if it's a variable
 	if val, ok := scope.Env.Get(node.Value); ok {
 		return val
@@ -70,12 +69,12 @@ func evalIdentifier(node *ast.Identifier, scope *object.Scope) object.Object {
 	// check if it's a method
 	receiver := scope.Self
 	method_name := node.Value
-	args := []object.Object{}
+	args := []Object{}
 
 	error := newError("undefined local variable or method `%s' for %s", method_name, receiver.Inspect())
 
 	switch receiver := receiver.(type) {
-	case *object.RClass:
+	case *RClass:
 		method := receiver.LookupClassMethod(method_name)
 
 		if method == nil {
@@ -84,7 +83,7 @@ func evalIdentifier(node *ast.Identifier, scope *object.Scope) object.Object {
 			evaluated := evalClassMethod(receiver, method, args, nil)
 			return unwrapReturnValue(evaluated)
 		}
-	case *object.RObject:
+	case *RObject:
 		method := receiver.Class.LookupInstanceMethod(method_name)
 
 		if method == nil {
@@ -99,7 +98,7 @@ func evalIdentifier(node *ast.Identifier, scope *object.Scope) object.Object {
 	return error
 }
 
-func evalConstant(node *ast.Constant, scope *object.Scope) object.Object {
+func evalConstant(node *ast.Constant, scope *Scope) Object {
 	if val, ok := scope.Env.Get(node.Value); ok {
 		return val
 	}
@@ -107,8 +106,8 @@ func evalConstant(node *ast.Constant, scope *object.Scope) object.Object {
 	return newError("constant %s not found in: %s", node.Value, scope.Self.Inspect())
 }
 
-func evalInstanceVariable(node *ast.InstanceVariable, scope *object.Scope) object.Object {
-	instance := scope.Self.(*object.RObject)
+func evalInstanceVariable(node *ast.InstanceVariable, scope *Scope) Object {
+	instance := scope.Self.(*RObject)
 	if val, ok := instance.InstanceVariables.Get(node.Value); ok {
 		return val
 	}

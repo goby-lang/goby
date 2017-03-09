@@ -1,7 +1,7 @@
 package evaluator_test
 
 import (
-	"github.com/st0012/Rooby/object"
+	"github.com/st0012/Rooby/evaluator"
 	"testing"
 )
 
@@ -53,7 +53,7 @@ func TestPrimitiveType(t *testing.T) {
 		evaluated := testEval(t, tt.input)
 
 		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
+			t.Fatalf("got Error: %s", evaluated.(*evaluator.Error).Message)
 		}
 
 		testStringObject(t, evaluated, tt.expected)
@@ -178,7 +178,7 @@ func TestMethodCallWithoutSelf(t *testing.T) {
 		evaluated := testEval(t, tt.input)
 
 		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
+			t.Fatalf("got Error: %s", evaluated.(*evaluator.Error).Message)
 		}
 
 		testIntegerObject(t, evaluated, tt.expected)
@@ -297,7 +297,7 @@ func TestClassMethodEvaluation(t *testing.T) {
 		evaluated := testEval(t, tt.input)
 
 		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
+			t.Fatalf("got Error: %s", evaluated.(*evaluator.Error).Message)
 		}
 
 		switch expected := tt.expected.(type) {
@@ -314,7 +314,7 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 		input        string
 		expected_obj string
 	}{
-		{`self`, object.BASE_OBJECT_OBJ},
+		{`self`, evaluator.BASE_OBJECT_OBJ},
 		{
 			`
 			class Bar
@@ -324,7 +324,7 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 			end
 
 			Bar.new.whoami;
-		`, object.BASE_OBJECT_OBJ},
+		`, evaluator.BASE_OBJECT_OBJ},
 		{
 			`
 			class Foo
@@ -337,7 +337,7 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 
 			Foo.new.get_self;
 			`,
-			object.CLASS_OBJ},
+			evaluator.CLASS_OBJ},
 		{
 			`
 			class Foo
@@ -348,7 +348,7 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 
 			Foo.new.class
 			`,
-			object.CLASS_OBJ},
+			evaluator.CLASS_OBJ},
 		{
 			`
 			class Foo
@@ -359,14 +359,14 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 
 			Foo.new.class_name
 			`,
-			object.STRING_OBJ},
+			evaluator.STRING_OBJ},
 	}
 
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
 
 		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
+			t.Fatalf("got Error: %s", evaluated.(*evaluator.Error).Message)
 		}
 
 		if string(evaluated.Type()) != tt.expected_obj {
@@ -416,10 +416,10 @@ func TestEvalInstanceVariable(t *testing.T) {
 	evaluated := testEval(t, input)
 
 	if isError(evaluated) {
-		t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
+		t.Fatalf("got Error: %s", evaluated.(*evaluator.Error).Message)
 	}
 
-	result, ok := evaluated.(*object.IntegerObject)
+	result, ok := evaluated.(*evaluator.IntegerObject)
 
 	if !ok {
 		t.Errorf("expect result to be an integer. got=%T", evaluated)
@@ -459,10 +459,10 @@ func TestEvalInstanceMethodCall(t *testing.T) {
 	evaluated := testEval(t, input)
 
 	if isError(evaluated) {
-		t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
+		t.Fatalf("got Error: %s", evaluated.(*evaluator.Error).Message)
 	}
 
-	result, ok := evaluated.(*object.IntegerObject)
+	result, ok := evaluated.(*evaluator.IntegerObject)
 
 	if !ok {
 		t.Errorf("expect result to be an integer. got=%T", evaluated)
@@ -493,10 +493,10 @@ func TestEvalCustomInitializeMethod(t *testing.T) {
 	evaluated := testEval(t, input)
 
 	if isError(evaluated) {
-		t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
+		t.Fatalf("got Error: %s", evaluated.(*evaluator.Error).Message)
 	}
 
-	result, ok := evaluated.(*object.IntegerObject)
+	result, ok := evaluated.(*evaluator.IntegerObject)
 
 	if !ok {
 		t.Errorf("expect result to be an integer. got=%T", evaluated)
@@ -520,10 +520,10 @@ func TestEvalClassInheritance(t *testing.T) {
 	evaluated := testEval(t, input)
 
 	if isError(evaluated) {
-		t.Fatalf("got Error: %s", evaluated.(*object.Error).Message)
+		t.Fatalf("got Error: %s", evaluated.(*evaluator.Error).Message)
 	}
 
-	result, ok := evaluated.(*object.IntegerObject)
+	result, ok := evaluated.(*evaluator.IntegerObject)
 
 	if !ok {
 		t.Errorf("expect result to be an integer. got=%T", evaluated)

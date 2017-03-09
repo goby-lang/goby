@@ -1,4 +1,4 @@
-package object
+package evaluator
 
 func NewEnvironment() *Environment {
 	s := make(map[string]Object)

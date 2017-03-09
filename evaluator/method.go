@@ -1,9 +1,9 @@
-package object
+package evaluator
 
 import (
 	"bytes"
-	"strings"
 	"github.com/st0012/Rooby/ast"
+	"strings"
 )
 
 type Method struct {
@@ -60,4 +60,3 @@ func (bim *BuiltInMethod) Type() ObjectType {
 func (bim *BuiltInMethod) Inspect() string {
 	return bim.Name
 }
-

@@ -1,4 +1,4 @@
-package object
+package evaluator
 
 import (
 	"fmt"
@@ -61,10 +61,6 @@ func (r *ReturnValue) Type() ObjectType {
 
 func (r *ReturnValue) Inspect() string {
 	return r.Value.Inspect()
-}
-
-func newError(format string, args ...interface{}) *Error {
-	return &Error{Message: fmt.Sprintf(format, args...)}
 }
 
 func checkArgumentLen(args []Object, class Class, method_name string) *Error {

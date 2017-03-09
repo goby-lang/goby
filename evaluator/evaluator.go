@@ -3,10 +3,9 @@ package evaluator
 import (
 	"fmt"
 	"github.com/st0012/Rooby/ast"
-	"github.com/st0012/Rooby/object"
 )
 
-func Eval(node ast.Node, scope *object.Scope) object.Object {
+func Eval(node ast.Node, scope *Scope) Object {
 	switch node := node.(type) {
 
 	// Statements
@@ -21,7 +20,7 @@ func Eval(node ast.Node, scope *object.Scope) object.Object {
 		if isError(val) {
 			return val
 		}
-		return &object.ReturnValue{Value: val}
+		return &ReturnValue{Value: val}
 	case *ast.AssignStatement:
 		return evalAssignStatement(node, scope)
 	case *ast.ClassStatement:
@@ -44,12 +43,12 @@ func Eval(node ast.Node, scope *object.Scope) object.Object {
 	case *ast.IfExpression:
 		return evalIfExpression(node, scope)
 	case *ast.CallExpression:
-		var block *object.Method
+		var block *Method
 		receiver := Eval(node.Receiver, scope)
 		args := evalArgs(node.Arguments, scope)
 
 		if node.Block != nil {
-			block = &object.Method{Body: node.Block, Parameters: node.BlockArguments, Scope: scope}
+			block = &Method{Body: node.Block, Parameters: node.BlockArguments, Scope: scope}
 		}
 
 		return sendMethodCall(receiver, node.Method, args, block)
@@ -75,47 +74,47 @@ func Eval(node ast.Node, scope *object.Scope) object.Object {
 	case *ast.SelfExpression:
 		return scope.Self
 	case *ast.IntegerLiteral:
-		return object.InitilaizeInteger(node.Value)
+		return InitilaizeInteger(node.Value)
 	case *ast.StringLiteral:
-		return object.InitializeString(node.Value)
+		return InitializeString(node.Value)
 	case *ast.Boolean:
 		if node.Value {
-			return object.TRUE
+			return TRUE
 		}
-		return object.FALSE
+		return FALSE
 	case *ast.ArrayExpression:
-		elements := []object.Object{}
+		elements := []Object{}
 
 		for _, exp := range node.Elements {
 			elements = append(elements, Eval(exp, scope))
 		}
 
-		arr := object.InitializeArray(elements)
+		arr := InitializeArray(elements)
 		return arr
 	case *ast.HashExpression:
-		pairs := map[string]object.Object{}
+		pairs := map[string]Object{}
 
 		for key, value := range node.Data {
 			pairs[key] = Eval(value, scope)
 		}
 
-		hash := object.InitializeHash(pairs)
+		hash := InitializeHash(pairs)
 		return hash
 	}
 
 	return nil
 }
 
-func evalProgram(stmts []ast.Statement, scope *object.Scope) object.Object {
-	var result object.Object
+func evalProgram(stmts []ast.Statement, scope *Scope) Object {
+	var result Object
 
 	for _, statement := range stmts {
 		result = Eval(statement, scope)
 
 		switch result := result.(type) {
-		case *object.ReturnValue:
+		case *ReturnValue:
 			return result.Value
-		case *object.Error:
+		case *Error:
 			return result
 		}
 	}
@@ -123,11 +122,11 @@ func evalProgram(stmts []ast.Statement, scope *object.Scope) object.Object {
 	return result
 }
 
-func sendMethodCall(receiver object.Object, method_name string, args []object.Object, block *object.Method) object.Object {
+func sendMethodCall(receiver Object, method_name string, args []Object, block *Method) Object {
 	error := newError("undefined method `%s' for %s", method_name, receiver.Inspect())
 
 	switch receiver := receiver.(type) {
-	case object.Class:
+	case Class:
 		method := receiver.LookupClassMethod(method_name)
 
 		if method == nil {
@@ -137,8 +136,8 @@ func sendMethodCall(receiver object.Object, method_name string, args []object.Ob
 		evaluated := evalClassMethod(receiver, method, args, block)
 
 		return unwrapReturnValue(evaluated)
-	case object.BaseObject:
-		if _, ok := receiver.(*object.Error); ok {
+	case BaseObject:
+		if _, ok := receiver.(*Error); ok {
 			return receiver
 		}
 
@@ -151,23 +150,23 @@ func sendMethodCall(receiver object.Object, method_name string, args []object.Ob
 		evaluated := evalInstanceMethod(receiver, method, args, block)
 
 		return unwrapReturnValue(evaluated)
-	case *object.Error:
+	case *Error:
 		return receiver
 	default:
 		return newError("not a valid receiver: %s", receiver.Inspect())
 	}
 }
 
-func evalClassMethod(receiver object.Class, method object.Object, args []object.Object, block *object.Method) object.Object {
+func evalClassMethod(receiver Class, method Object, args []Object, block *Method) Object {
 	switch m := method.(type) {
-	case *object.Method:
+	case *Method:
 		return evalMethodObject(receiver, m, args, block)
-	case *object.BuiltInMethod:
+	case *BuiltInMethod:
 		methodBody := m.Fn(receiver)
 		evaluated := methodBody(args...)
 
 		if m.Name == "new" {
-			instance := evaluated.(*object.RObject)
+			instance := evaluated.(*RObject)
 			if instance.InitializeMethod != nil {
 				evalInstanceMethod(instance, instance.InitializeMethod, args, block)
 			}
@@ -176,42 +175,42 @@ func evalClassMethod(receiver object.Class, method object.Object, args []object.
 		}
 
 		return evaluated
-	case *object.Error:
+	case *Error:
 		return m
 	default:
 		return newError("unknown class method type: %T)", m)
 	}
 }
 
-func evalInstanceMethod(receiver object.BaseObject, method object.Object, args []object.Object, block *object.Method) object.Object {
+func evalInstanceMethod(receiver BaseObject, method Object, args []Object, block *Method) Object {
 	switch m := method.(type) {
-	case *object.Method:
+	case *Method:
 		return evalMethodObject(receiver, m, args, block)
-	case *object.BuiltInMethod:
+	case *BuiltInMethod:
 		methodBody := m.Fn(receiver)
 		return methodBody(args...)
-	case *object.Error:
+	case *Error:
 		return m
 	default:
 		return newError("unknown instance method type: %T)", m)
 	}
 }
 
-func evalArgs(exps []ast.Expression, scope *object.Scope) []object.Object {
-	args := []object.Object{}
+func evalArgs(exps []ast.Expression, scope *Scope) []Object {
+	args := []Object{}
 
 	for _, exp := range exps {
 		arg := Eval(exp, scope)
 		args = append(args, arg)
 		if isError(arg) {
-			return []object.Object{arg}
+			return []Object{arg}
 		}
 	}
 
 	return args
 }
 
-func evalMethodObject(receiver object.Object, m *object.Method, args []object.Object, block *object.Method) object.Object {
+func evalMethodObject(receiver Object, m *Method, args []Object, block *Method) Object {
 	if len(m.Parameters) != len(args) {
 		return newError("wrong arguments: expect=%d, got=%d", len(m.Parameters), len(args))
 	}
@@ -220,23 +219,23 @@ func evalMethodObject(receiver object.Object, m *object.Method, args []object.Ob
 	if block != nil {
 		methodEnv.Set("block", block)
 	}
-	scope := &object.Scope{Self: receiver, Env: methodEnv}
+	scope := &Scope{Self: receiver, Env: methodEnv}
 	return Eval(m.Body, scope)
 }
 
-func newError(format string, args ...interface{}) *object.Error {
-	return &object.Error{Message: fmt.Sprintf(format, args...)}
+func newError(format string, args ...interface{}) *Error {
+	return &Error{Message: fmt.Sprintf(format, args...)}
 }
 
-func isError(obj object.Object) bool {
+func isError(obj Object) bool {
 	if obj != nil {
-		return obj.Type() == object.ERROR_OBJ
+		return obj.Type() == ERROR_OBJ
 	}
 	return false
 }
 
-func unwrapReturnValue(obj object.Object) object.Object {
-	if returnValue, ok := obj.(*object.ReturnValue); ok {
+func unwrapReturnValue(obj Object) Object {
+	if returnValue, ok := obj.(*ReturnValue); ok {
 		return returnValue.Value
 	}
 

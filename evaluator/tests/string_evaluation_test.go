@@ -1,7 +1,7 @@
 package evaluator_test
 
 import (
-	"github.com/st0012/Rooby/object"
+	"github.com/st0012/Rooby/evaluator"
 	"testing"
 )
 
@@ -44,8 +44,8 @@ func TestEvalInfixStringExpression(t *testing.T) {
 	}
 }
 
-func testStringObject(t *testing.T, obj object.Object, expected string) bool {
-	result, ok := obj.(*object.StringObject)
+func testStringObject(t *testing.T, obj evaluator.Object, expected string) bool {
+	result, ok := obj.(*evaluator.StringObject)
 	if !ok {
 		t.Errorf("object is not a String. got=%T (%+v)", obj, obj)
 		return false
