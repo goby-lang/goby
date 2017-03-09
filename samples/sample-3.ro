@@ -7,10 +7,20 @@ class JobPosition
     @name
   end
 
+  def salary=(salary)
+    @salary = salary
+  end
+
+  def salary
+    @salary
+  end
+
   def self.engineer
     new("Engineer")
   end
 end
 
 job = JobPosition.engineer
+job.salary = 1000
 puts(job.name) #=> "Engineer"
+puts(job.salary) #=> 1000

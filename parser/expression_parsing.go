@@ -300,12 +300,20 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 
 		exp.Method = p.curToken.Literal
 
-		if p.peekTokenIs(token.LPAREN) { // p.foo.bar; || p.foo; || p.foo + 123
+		if p.peekTokenIs(token.LPAREN) {
 			p.nextToken()
 			exp.Arguments = p.parseCallArguments()
-		} else {
+		} else { // p.foo.bar; || p.foo; || p.foo + 123
 			exp.Arguments = []ast.Expression{}
 		}
+	}
+
+	// Setter method call like: p.foo = x
+	if p.peekTokenIs(token.ASSIGN) {
+		exp.Method = exp.Method + "="
+		p.nextToken()
+		p.nextToken()
+		exp.Arguments = append(exp.Arguments, p.parseExpression(LOWEST))
 	}
 
 	// Parse block

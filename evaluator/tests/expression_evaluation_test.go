@@ -87,6 +87,24 @@ func TestMethodCallWithoutSelf(t *testing.T) {
 		{
 			`
 			class Foo
+			  def bar=(x)
+			    @bar = x
+			  end
+
+			  def bar
+			    @bar
+			  end
+			end
+
+			f = Foo.new
+			f.bar = 10
+			f.bar
+			`,
+			10,
+		},
+		{
+			`
+			class Foo
 			  def set_x(x)
 			    @x = x
 			  end

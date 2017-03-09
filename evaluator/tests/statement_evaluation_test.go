@@ -109,6 +109,9 @@ func TestDefStatement(t *testing.T) {
 			def foo(y)
 				y
 			end
+
+			def baz=(x)
+			end
 		end
 	`
 
@@ -121,6 +124,7 @@ func TestDefStatement(t *testing.T) {
 	}{
 		{name: "foo", params: []string{"y"}},
 		{name: "bar", params: []string{"x", "y"}},
+		{name: "baz=", params: []string{"x"}},
 	}
 
 	for _, expectedMethod := range expectedMethods {

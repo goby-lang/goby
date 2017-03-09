@@ -63,6 +63,11 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 		return nil
 	}
 
+	// Setter method def foo=()
+	if p.peekTokenIs(token.ASSIGN) {
+		stmt.Name.Value = stmt.Name.Value + "="
+		p.nextToken()
+	}
 	// def foo
 	if p.peekTokenAtSameLine() { // def foo(), next token is ( and at same line
 		if !p.expectPeek(token.LPAREN) {
