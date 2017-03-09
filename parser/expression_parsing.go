@@ -310,33 +310,37 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 
 	// Parse block
 	if p.peekTokenIs(token.DO) {
-		p.parseBlockArgument(exp)
+		p.parseBlockParameters(exp)
 	}
 
 	return exp
 }
 
-func (p *Parser) parseBlockArgument(exp *ast.CallExpression) {
+func (p *Parser) parseBlockParameters(exp *ast.CallExpression) {
 	p.nextToken()
 
 	// Parse block arguments
 	if p.peekTokenIs(token.BAR) {
-		var args []ast.Expression
+		var params []*ast.Identifier
 
 		p.nextToken()
 		p.nextToken()
-		args = append(args, p.parseExpression(LOWEST))
+
+		param := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+		params = append(params, param)
+
 		for p.peekTokenIs(token.COMMA) {
-			p.nextToken() // ","
-			p.nextToken() // start of next expression
-			args = append(args, p.parseExpression(LOWEST))
+			p.nextToken()
+			p.nextToken()
+			param := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+			params = append(params, param)
 		}
 
 		if !p.expectPeek(token.BAR) {
 			return
 		}
 
-		exp.BlockArguments = args
+		exp.BlockArguments = params
 	}
 
 	exp.Block = p.parseBlockStatement()

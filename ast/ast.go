@@ -365,7 +365,7 @@ type CallExpression struct {
 	Method         string
 	Arguments      []Expression
 	Block          *BlockStatement
-	BlockArguments []Expression
+	BlockArguments []*Identifier
 }
 
 func (ce *CallExpression) expressionNode() {}
