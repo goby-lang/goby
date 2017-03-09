@@ -310,32 +310,36 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 
 	// Parse block
 	if p.peekTokenIs(token.DO) {
-		p.nextToken()
-
-		// Parse block arguments
-		if p.peekTokenIs(token.BAR) {
-			var args []ast.Expression
-
-			p.nextToken()
-			p.nextToken()
-			args = append(args, p.parseExpression(LOWEST))
-			for p.peekTokenIs(token.COMMA) {
-				p.nextToken() // ","
-				p.nextToken() // start of next expression
-				args = append(args, p.parseExpression(LOWEST))
-			}
-
-			if !p.expectPeek(token.BAR) {
-				return nil
-			}
-
-			exp.BlockArguments = args
-		}
-
-		exp.Block = p.parseBlockStatement()
+		p.parseBlockArgument(exp)
 	}
 
 	return exp
+}
+
+func (p *Parser) parseBlockArgument(exp *ast.CallExpression) {
+	p.nextToken()
+
+	// Parse block arguments
+	if p.peekTokenIs(token.BAR) {
+		var args []ast.Expression
+
+		p.nextToken()
+		p.nextToken()
+		args = append(args, p.parseExpression(LOWEST))
+		for p.peekTokenIs(token.COMMA) {
+			p.nextToken() // ","
+			p.nextToken() // start of next expression
+			args = append(args, p.parseExpression(LOWEST))
+		}
+
+		if !p.expectPeek(token.BAR) {
+			return
+		}
+
+		exp.BlockArguments = args
+	}
+
+	exp.Block = p.parseBlockStatement()
 }
 
 func (p *Parser) parseCallArguments() []ast.Expression {
