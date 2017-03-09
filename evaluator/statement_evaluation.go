@@ -106,3 +106,18 @@ func evalWhileStatement(exp *ast.WhileStatement, scope *object.Scope) object.Obj
 
 	return nil
 }
+
+func evalYieldStatement(node *ast.YieldStatement, scope *object.Scope) object.Object {
+	block, ok := scope.Env.GetCurrent("block")
+	if ok {
+		b := block.(*object.Method)
+		var args []object.Object
+
+		for _, arg := range node.Arguments {
+			args = append(args, Eval(arg, scope))
+		}
+		return evalMethodObject(scope.Self, b, args, nil)
+	}
+
+	return newError("Yield without a block")
+}

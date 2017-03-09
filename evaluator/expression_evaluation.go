@@ -36,7 +36,7 @@ func evalMinusPrefixExpression(right object.Object) object.Object {
 }
 
 func evalInfixExpression(left object.Object, operator string, right object.Object) object.Object {
-	result := sendMethodCall(left, operator, []object.Object{right})
+	result := sendMethodCall(left, operator, []object.Object{right}, nil)
 
 	if err, ok := result.(*object.Error); ok {
 		return err
@@ -82,7 +82,7 @@ func evalIdentifier(node *ast.Identifier, scope *object.Scope) object.Object {
 		if method == nil {
 			return error
 		} else {
-			evaluated := evalClassMethod(receiver, method, args)
+			evaluated := evalClassMethod(receiver, method, args, nil)
 			return unwrapReturnValue(evaluated)
 		}
 	case *object.RObject:
@@ -91,7 +91,7 @@ func evalIdentifier(node *ast.Identifier, scope *object.Scope) object.Object {
 		if method == nil {
 			return error
 		} else {
-			evaluated := evalInstanceMethod(receiver, method, args)
+			evaluated := evalInstanceMethod(receiver, method, args, nil)
 			return unwrapReturnValue(evaluated)
 
 		}

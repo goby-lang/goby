@@ -37,14 +37,23 @@ func Eval(node ast.Node, scope *object.Scope) object.Object {
 		return evalDefStatement(node, scope)
 	case *ast.WhileStatement:
 		return evalWhileStatement(node, scope)
+	case *ast.YieldStatement:
+		// Only retrieve current scope's block.
+		return evalYieldStatement(node, scope)
 
 	// Expressions
 	case *ast.IfExpression:
 		return evalIfExpression(node, scope)
 	case *ast.CallExpression:
+		var block *object.Method
 		receiver := Eval(node.Receiver, scope)
 		args := evalArgs(node.Arguments, scope)
-		return sendMethodCall(receiver, node.Method, args)
+
+		if node.Block != nil {
+			block = &object.Method{Body: node.Block, Parameters: node.BlockArguments, Scope: scope}
+		}
+
+		return sendMethodCall(receiver, node.Method, args, block)
 
 	case *ast.PrefixExpression:
 		val := Eval(node.Right, scope)
@@ -115,7 +124,7 @@ func evalProgram(stmts []ast.Statement, scope *object.Scope) object.Object {
 	return result
 }
 
-func sendMethodCall(receiver object.Object, method_name string, args []object.Object) object.Object {
+func sendMethodCall(receiver object.Object, method_name string, args []object.Object, block *object.Method) object.Object {
 	error := newError("undefined method `%s' for %s", method_name, receiver.Inspect())
 
 	switch receiver := receiver.(type) {
@@ -126,7 +135,7 @@ func sendMethodCall(receiver object.Object, method_name string, args []object.Ob
 			return error
 		}
 
-		evaluated := evalClassMethod(receiver, method, args)
+		evaluated := evalClassMethod(receiver, method, args, block)
 
 		return unwrapReturnValue(evaluated)
 	case object.BaseObject:
@@ -140,7 +149,7 @@ func sendMethodCall(receiver object.Object, method_name string, args []object.Ob
 			return error
 		}
 
-		evaluated := evalInstanceMethod(receiver, method, args)
+		evaluated := evalInstanceMethod(receiver, method, args, block)
 
 		return unwrapReturnValue(evaluated)
 	case *object.Error:
@@ -150,10 +159,10 @@ func sendMethodCall(receiver object.Object, method_name string, args []object.Ob
 	}
 }
 
-func evalClassMethod(receiver object.Class, method object.Object, args []object.Object) object.Object {
+func evalClassMethod(receiver object.Class, method object.Object, args []object.Object, block *object.Method) object.Object {
 	switch m := method.(type) {
 	case *object.Method:
-		return evalMethodObject(receiver, m, args)
+		return evalMethodObject(receiver, m, args, block)
 	case *object.BuiltInMethod:
 		methodBody := m.Fn(receiver)
 		evaluated := methodBody(args...)
@@ -161,7 +170,7 @@ func evalClassMethod(receiver object.Class, method object.Object, args []object.
 		if m.Name == "new" {
 			instance := evaluated.(*object.RObject)
 			if instance.InitializeMethod != nil {
-				evalInstanceMethod(instance, instance.InitializeMethod, args)
+				evalInstanceMethod(instance, instance.InitializeMethod, args, block)
 			}
 
 			return instance
@@ -175,10 +184,10 @@ func evalClassMethod(receiver object.Class, method object.Object, args []object.
 	}
 }
 
-func evalInstanceMethod(receiver object.BaseObject, method object.Object, args []object.Object) object.Object {
+func evalInstanceMethod(receiver object.BaseObject, method object.Object, args []object.Object, block *object.Method) object.Object {
 	switch m := method.(type) {
 	case *object.Method:
-		return evalMethodObject(receiver, m, args)
+		return evalMethodObject(receiver, m, args, block)
 	case *object.BuiltInMethod:
 		methodBody := m.Fn(receiver)
 		return methodBody(args...)
@@ -203,12 +212,15 @@ func evalArgs(exps []ast.Expression, scope *object.Scope) []object.Object {
 	return args
 }
 
-func evalMethodObject(receiver object.Object, m *object.Method, args []object.Object) object.Object {
+func evalMethodObject(receiver object.Object, m *object.Method, args []object.Object, block *object.Method) object.Object {
 	if len(m.Parameters) != len(args) {
 		return newError("wrong arguments: expect=%d, got=%d", len(m.Parameters), len(args))
 	}
 
 	methodEnv := m.ExtendEnv(args)
+	if block != nil {
+		methodEnv.Set("block", block)
+	}
 	scope := &object.Scope{Self: receiver, Env: methodEnv}
 	return Eval(m.Body, scope)
 }
