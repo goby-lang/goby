@@ -16,6 +16,11 @@ type Environment struct {
 	outer *Environment
 }
 
+type Scope struct {
+	Env  *Environment
+	Self Object
+}
+
 func (e *Environment) GetCurrent(name string) (Object, bool) {
 	obj, ok := e.store[name]
 	return obj, ok
