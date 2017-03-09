@@ -83,3 +83,26 @@ func TestEvalArrayIndex(t *testing.T) {
 		}
 	}
 }
+
+func TestEachMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{`
+		sum = 0
+		puts(self)
+		[1, 2, 3, 4, 5].each do |i|
+		  puts(self)
+		  puts(sum)
+		  sum = sum + i
+		end
+		sum
+		`, 15},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}

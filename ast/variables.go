@@ -4,6 +4,7 @@ import "github.com/st0012/Rooby/token"
 
 type Variable interface {
 	variableNode()
+	ReturnValue() string
 	Node
 }
 
@@ -13,6 +14,9 @@ type Identifier struct {
 }
 
 func (i *Identifier) variableNode() {}
+func (i *Identifier) ReturnValue() string {
+	return i.Value
+}
 func (i *Identifier) expressionNode() {}
 func (i *Identifier) TokenLiteral() string {
 	return i.Token.Literal
@@ -21,12 +25,16 @@ func (i *Identifier) String() string {
 	return i.Value
 }
 
+
 type InstanceVariable struct {
 	Token token.Token
 	Value string
 }
 
 func (iv *InstanceVariable) variableNode() {}
+func (iv *InstanceVariable) ReturnValue() string {
+	return iv.Value
+}
 func (iv *InstanceVariable) expressionNode() {}
 func (iv *InstanceVariable) TokenLiteral() string {
 	return iv.Token.Literal
@@ -41,6 +49,9 @@ type Constant struct {
 }
 
 func (c *Constant) variableNode() {}
+func (c *Constant) ReturnValue() string {
+	return c.Value
+}
 func (c *Constant) expressionNode() {}
 func (c *Constant) TokenLiteral() string {
 	return c.Token.Literal

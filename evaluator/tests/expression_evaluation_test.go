@@ -708,6 +708,20 @@ func TestMethodCallWithBlockArgument(t *testing.T) {
 		end
 
 		`, 0},
+		{`
+		class Foo
+		  def bar
+		    yield
+		  end
+		end
+
+		i = 10
+		Foo.new.bar do
+		  i = 3 + i
+		end
+		i
+
+		`, 13},
 	}
 
 	for _, tt := range tests {

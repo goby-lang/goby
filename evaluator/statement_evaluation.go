@@ -11,15 +11,20 @@ func evalAssignStatement(stmt *ast.AssignStatement, scope *Scope) Object {
 		return value
 	}
 
+	varName := stmt.Name.ReturnValue()
+	env, ok := scope.Env.GetValueLocation(varName)
+
+	if ok {
+		env.Set(varName, value)
+	}
+
 	switch variableName := stmt.Name.(type) {
-	case *ast.Identifier:
-		return scope.Env.Set(variableName.Value, value)
-	case *ast.Constant:
-		return scope.Env.Set(variableName.Value, value)
+	case *ast.Identifier, *ast.Constant:
+		return scope.Env.Set(varName, value)
 	case *ast.InstanceVariable:
 		switch ivScope := scope.Self.(type) {
 		case *RObject:
-			return ivScope.InstanceVariables.Set(variableName.Value, value)
+			return ivScope.InstanceVariables.Set(varName, value)
 		case *RClass:
 			return newError("Can not define instance variable %s in a class.", variableName.Value)
 		default:
