@@ -1,13 +1,19 @@
 package object
 
-import "fmt"
+import (
+	"fmt"
+)
 
-type IntegerClass struct {
+var (
+	IntegerClass *RInteger
+)
+
+type RInteger struct {
 	*BaseClass
 }
 
 type IntegerObject struct {
-	Class *IntegerClass
+	Class *RInteger
 	Value int
 }
 
@@ -21,4 +27,8 @@ func (i *IntegerObject) Inspect() string {
 
 func (i *IntegerObject) ReturnClass() Class {
 	return i.Class
+}
+
+func InitilaizeInteger(value int) *IntegerObject {
+	return &IntegerObject{Value: value, Class: IntegerClass}
 }

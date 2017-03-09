@@ -99,7 +99,7 @@ func evalWhileStatement(exp *ast.WhileStatement, scope *object.Scope) object.Obj
 
 	con := Eval(condition, scope)
 
-	for con != initializer.FALSE && con != initializer.NULL {
+	for con != object.FALSE && con != object.NULL {
 		Eval(exp.Body, scope)
 		con = Eval(condition, scope)
 	}

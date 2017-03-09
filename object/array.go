@@ -5,12 +5,16 @@ import (
 	"strings"
 )
 
-type ArrayClass struct {
+var (
+	ArrayClass *RArray
+)
+
+type RArray struct {
 	*BaseClass
 }
 
 type ArrayObject struct {
-	Class    *ArrayClass
+	Class    *RArray
 	Elements []Object
 }
 
@@ -51,4 +55,8 @@ func (a *ArrayObject) Pop() Object {
 func (a *ArrayObject) Push(objs []Object) *ArrayObject {
 	a.Elements = append(a.Elements, objs...)
 	return a
+}
+
+func InitializeArray(elements []Object) *ArrayObject {
+	return &ArrayObject{Elements: elements, Class: ArrayClass}
 }

@@ -6,12 +6,16 @@ import (
 	"strings"
 )
 
-type HashClass struct {
+var (
+	HashClass *RHash
+)
+
+type RHash struct {
 	*BaseClass
 }
 
 type HashObject struct {
-	Class *HashClass
+	Class *RHash
 	Pairs map[string]Object
 }
 
@@ -40,4 +44,8 @@ func (h *HashObject) ReturnClass() Class {
 
 func (h *HashObject) Length() int {
 	return len(h.Pairs)
+}
+
+func InitializeHash(pairs map[string]Object) *HashObject {
+	return &HashObject{Pairs: pairs, Class: HashClass}
 }

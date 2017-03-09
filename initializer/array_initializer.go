@@ -4,10 +4,6 @@ import (
 	"github.com/st0012/Rooby/object"
 )
 
-var (
-	ArrayClass *object.ArrayClass
-)
-
 var builtinArrayMethods = []*object.BuiltInMethod{
 	{
 		Fn: func(receiver object.Object) object.BuiltinMethodBody {
@@ -26,7 +22,7 @@ var builtinArrayMethods = []*object.BuiltInMethod{
 				arr := receiver.(*object.ArrayObject)
 
 				if len(arr.Elements) == 0 {
-					return NULL
+					return object.NULL
 				}
 
 				if int(index.Value) >= len(arr.Elements) {
@@ -63,7 +59,7 @@ var builtinArrayMethods = []*object.BuiltInMethod{
 					newArr := make([]object.Object, indexValue+1)
 					copy(newArr, arr.Elements)
 					for i, _ := range newArr[len(arr.Elements):] {
-						newArr[i] = NULL
+						newArr[i] = object.NULL
 					}
 					arr.Elements = newArr
 				}
@@ -74,7 +70,6 @@ var builtinArrayMethods = []*object.BuiltInMethod{
 			}
 		},
 		Name: "[]=",
-
 	},
 	{
 		Fn: func(receiver object.Object) object.BuiltinMethodBody {
@@ -84,7 +79,7 @@ var builtinArrayMethods = []*object.BuiltInMethod{
 				}
 
 				arr := receiver.(*object.ArrayObject)
-				return InitilaizeInteger(arr.Length())
+				return object.InitilaizeInteger(arr.Length())
 			}
 		},
 		Name: "length",
@@ -113,7 +108,7 @@ var builtinArrayMethods = []*object.BuiltInMethod{
 	},
 }
 
-func initializeArrayClass() *object.ArrayClass {
+func initializeArrayClass() *object.RArray {
 	methods := object.NewEnvironment()
 
 	for _, m := range builtinArrayMethods {
@@ -121,11 +116,7 @@ func initializeArrayClass() *object.ArrayClass {
 	}
 
 	bc := &object.BaseClass{Name: "Array", Methods: methods, Class: ClassClass, SuperClass: ObjectClass}
-	ac := &object.ArrayClass{BaseClass: bc}
-	ArrayClass = ac
+	ac := &object.RArray{BaseClass: bc}
+	object.ArrayClass = ac
 	return ac
-}
-
-func InitializeArray(elements []object.Object) *object.ArrayObject {
-	return &object.ArrayObject{Elements: elements, Class: ArrayClass}
 }

@@ -21,7 +21,7 @@ func InitializeProgram() {
 var MainObj *object.RObject
 
 func initializeMainObject() {
-	builtInClasses := []object.Class{StringClass, BooleanClass, IntegerClass}
+	builtInClasses := []object.Class{object.StringClass, object.BooleanClass, object.IntegerClass}
 
 	obj := &object.RObject{Class: ObjectClass, InstanceVariables: object.NewEnvironment()}
 	scope := &object.Scope{Self: obj, Env: object.NewEnvironment()}

@@ -1,7 +1,6 @@
 package initializer_test
 
 import (
-	"github.com/st0012/Rooby/initializer"
 	"github.com/st0012/Rooby/object"
 	"testing"
 )
@@ -36,15 +35,15 @@ func TestPushMethod(t *testing.T) {
 	array := generateArray(5)
 	m := getBuiltInMethod(t, array, "push")
 
-	six := initializer.InitilaizeInteger(6)
-	seven := initializer.InitilaizeInteger(7)
+	six := object.InitilaizeInteger(6)
+	seven := object.InitilaizeInteger(7)
 	m(six, seven)
 
 	if array.Length() != 7 {
 		t.Fatalf("Expect array's length to be 7(5 + 2). got=%d", array.Length())
 	}
 
-	last := array.Elements[array.Length() - 1].(*object.IntegerObject).Value
+	last := array.Elements[array.Length()-1].(*object.IntegerObject).Value
 
 	if int(last) != 7 {
 		t.Fatalf("Expect last object to be 7. got=%d", last)
@@ -54,8 +53,8 @@ func TestPushMethod(t *testing.T) {
 func generateArray(length int) *object.ArrayObject {
 	var elements []object.Object
 	for i := 1; i <= length; i++ {
-		int := initializer.InitilaizeInteger(i)
+		int := object.InitilaizeInteger(i)
 		elements = append(elements, int)
 	}
-	return initializer.InitializeArray(elements)
+	return object.InitializeArray(elements)
 }

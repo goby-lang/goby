@@ -1,13 +1,21 @@
 package object
 
-import "fmt"
+import (
+	"fmt"
+)
 
-type BooleanClass struct {
+var (
+	BooleanClass *RBool
+	TRUE         *BooleanObject
+	FALSE        *BooleanObject
+)
+
+type RBool struct {
 	*BaseClass
 }
 
 type BooleanObject struct {
-	Class *BooleanClass
+	Class *RBool
 	Value bool
 }
 

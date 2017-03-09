@@ -2,19 +2,11 @@ package initializer
 
 import "github.com/st0012/Rooby/object"
 
-var (
-	BooleanClass *object.BooleanClass
-
-	TRUE  *object.BooleanObject
-	FALSE *object.BooleanObject
-	NULL  *object.Null
-)
-
 var builtinBooleanMethods = []*object.BuiltInMethod{
 	{
 		Fn: func(receiver object.Object) object.BuiltinMethodBody {
 			return func(args ...object.Object) object.Object {
-				err := checkArgumentLen(args, BooleanClass, "==")
+				err := checkArgumentLen(args, object.BooleanClass, "==")
 
 				if err != nil {
 					return err
@@ -24,16 +16,16 @@ var builtinBooleanMethods = []*object.BuiltInMethod{
 				right, ok := args[0].(*object.BooleanObject)
 
 				if !ok {
-					return wrongTypeError(BooleanClass)
+					return wrongTypeError(object.BooleanClass)
 				}
 
 				rightValue := right.Value
 
 				if leftValue == rightValue {
-					return TRUE
+					return object.TRUE
 				}
 
-				return FALSE
+				return object.FALSE
 			}
 		},
 		Name: "==",
@@ -41,7 +33,7 @@ var builtinBooleanMethods = []*object.BuiltInMethod{
 	{
 		Fn: func(receiver object.Object) object.BuiltinMethodBody {
 			return func(args ...object.Object) object.Object {
-				err := checkArgumentLen(args, BooleanClass, "!=")
+				err := checkArgumentLen(args, object.BooleanClass, "!=")
 
 				if err != nil {
 					return err
@@ -51,23 +43,23 @@ var builtinBooleanMethods = []*object.BuiltInMethod{
 				right, ok := args[0].(*object.BooleanObject)
 
 				if !ok {
-					return wrongTypeError(BooleanClass)
+					return wrongTypeError(object.BooleanClass)
 				}
 
 				rightValue := right.Value
 
 				if leftValue != rightValue {
-					return TRUE
+					return object.TRUE
 				}
 
-				return FALSE
+				return object.FALSE
 			}
 		},
 		Name: "!=",
 	},
 }
 
-func initializeBooleanClass() *object.BooleanClass {
+func initializeBooleanClass() *object.RBool {
 	methods := object.NewEnvironment()
 
 	for _, m := range builtinBooleanMethods {
@@ -75,17 +67,17 @@ func initializeBooleanClass() *object.BooleanClass {
 	}
 
 	bc := &object.BaseClass{Name: "Boolean", Methods: methods, Class: ClassClass, SuperClass: ObjectClass}
-	b := &object.BooleanClass{BaseClass: bc}
-	BooleanClass = b
+	b := &object.RBool{BaseClass: bc}
+	object.BooleanClass = b
 
-	TRUE = &object.BooleanObject{Value: true, Class: BooleanClass}
-	FALSE = &object.BooleanObject{Value: false, Class: BooleanClass}
+	object.TRUE = &object.BooleanObject{Value: true, Class: object.BooleanClass}
+	object.FALSE = &object.BooleanObject{Value: false, Class: object.BooleanClass}
 	return b
 }
 
 func initializeNullClass() *object.NullClass {
 	baseClass := &object.BaseClass{Name: "Null", Methods: object.NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}
 	nc := &object.NullClass{BaseClass: baseClass}
-	NULL = &object.Null{Class: nc}
+	object.NULL = &object.Null{Class: nc}
 	return nc
 }

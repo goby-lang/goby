@@ -3,7 +3,6 @@ package evaluator
 import (
 	"fmt"
 	"github.com/st0012/Rooby/ast"
-	"github.com/st0012/Rooby/initializer"
 	"github.com/st0012/Rooby/object"
 )
 
@@ -76,14 +75,14 @@ func Eval(node ast.Node, scope *object.Scope) object.Object {
 	case *ast.SelfExpression:
 		return scope.Self
 	case *ast.IntegerLiteral:
-		return initializer.InitilaizeInteger(node.Value)
+		return object.InitilaizeInteger(node.Value)
 	case *ast.StringLiteral:
-		return initializer.InitializeString(node.Value)
+		return object.InitializeString(node.Value)
 	case *ast.Boolean:
 		if node.Value {
-			return initializer.TRUE
+			return object.TRUE
 		}
-		return initializer.FALSE
+		return object.FALSE
 	case *ast.ArrayExpression:
 		elements := []object.Object{}
 
@@ -91,7 +90,7 @@ func Eval(node ast.Node, scope *object.Scope) object.Object {
 			elements = append(elements, Eval(exp, scope))
 		}
 
-		arr := initializer.InitializeArray(elements)
+		arr := object.InitializeArray(elements)
 		return arr
 	case *ast.HashExpression:
 		pairs := map[string]object.Object{}
@@ -100,7 +99,7 @@ func Eval(node ast.Node, scope *object.Scope) object.Object {
 			pairs[key] = Eval(value, scope)
 		}
 
-		hash := initializer.InitializeHash(pairs)
+		hash := object.InitializeHash(pairs)
 		return hash
 	}
 

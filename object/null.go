@@ -1,5 +1,9 @@
 package object
 
+var (
+	NULL *Null
+)
+
 type NullClass struct {
 	*BaseClass
 }

@@ -18,7 +18,7 @@ var BuiltinGlobalMethods = []*object.BuiltInMethod{
 					fmt.Println(arg.Inspect())
 				}
 
-				return NULL
+				return object.NULL
 			}
 		},
 		Name: "puts",

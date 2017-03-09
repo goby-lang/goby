@@ -2,7 +2,6 @@ package evaluator
 
 import (
 	"github.com/st0012/Rooby/ast"
-	"github.com/st0012/Rooby/initializer"
 	"github.com/st0012/Rooby/object"
 )
 
@@ -18,12 +17,12 @@ func evalPrefixExpression(operator string, right object.Object) object.Object {
 
 func evalBangPrefixExpression(right object.Object) *object.BooleanObject {
 	switch right {
-	case initializer.FALSE:
-		return initializer.TRUE
-	case initializer.NULL:
-		return initializer.TRUE
+	case object.FALSE:
+		return object.TRUE
+	case object.NULL:
+		return object.TRUE
 	default:
-		return initializer.FALSE
+		return object.FALSE
 	}
 }
 
@@ -32,7 +31,7 @@ func evalMinusPrefixExpression(right object.Object) object.Object {
 		return newError("unknown operator: %s%s", "-", right.Type())
 	}
 	value := right.(*object.IntegerObject).Value
-	return &object.IntegerObject{Value: -value, Class: initializer.IntegerClass}
+	return &object.IntegerObject{Value: -value, Class: object.IntegerClass}
 }
 
 func evalInfixExpression(left object.Object, operator string, right object.Object) object.Object {
@@ -57,7 +56,7 @@ func evalIfExpression(exp *ast.IfExpression, scope *object.Scope) object.Object 
 		if exp.Alternative != nil {
 			return Eval(exp.Alternative, scope)
 		} else {
-			return initializer.NULL
+			return object.NULL
 		}
 	}
 }
