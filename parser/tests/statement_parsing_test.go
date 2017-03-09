@@ -228,10 +228,6 @@ func TestDefStatement(t *testing.T) {
 
 	firstStmt := program.Statements[0].(*ast.DefStatement)
 
-	if firstStmt.Token.Type != token.DEF {
-		t.Fatalf("expect DefStatement's token to be 'DEF'. got=%T", firstStmt.Token.Type)
-	}
-
 	testLiteralExpression(t, firstStmt.Parameters[0], "x")
 	testLiteralExpression(t, firstStmt.Parameters[1], "y")
 
@@ -253,9 +249,40 @@ func TestDefStatement(t *testing.T) {
 	testIntegerLiteral(t, secondExpressionStmt.Expression, 123)
 }
 
+func TestDefStatementWithYield(t *testing.T) {
+	input := `
+	def foo
+	  yield(1, 2, bar)
+	  yield
+	end
+	`
+	l := lexer.New(input)
+	p := parser.New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt := program.Statements[0].(*ast.DefStatement)
+	block := stmt.BlockStatement
+	firstYield, ok := block.Statements[0].(*ast.YieldStatement)
+
+	if !ok {
+		t.Fatalf("Expect method's body is an YieldStatement. got=%T", block.Statements[0])
+	}
+
+	testIntegerLiteral(t, firstYield.Arguments[0], 1)
+	testIntegerLiteral(t, firstYield.Arguments[1], 2)
+	testIdentifier(t, firstYield.Arguments[2], "bar")
+
+	_, ok = block.Statements[1].(*ast.YieldStatement)
+
+	if !ok {
+		t.Fatalf("Expect method's body is an YieldStatement. got=%T", block.Statements[1])
+	}
+}
+
 func TestWhileStatement(t *testing.T) {
 	input := `
-	while i < 10 do
+	while i < a.length
 	  puts(i)
 	  i++
 	end
@@ -268,8 +295,27 @@ func TestWhileStatement(t *testing.T) {
 
 	whileStatement := program.Statements[0].(*ast.WhileStatement)
 
-	testInfixExpression(t, whileStatement.Condition, "i", "<", 10)
+	infix := whileStatement.Condition.(*ast.InfixExpression)
 
+	testIdentifier(t, infix.Left, "i")
+
+	if infix.Operator != "<" {
+		t.Fatalf("Expect condition's infix operator to be '<'. got=%s", infix.Operator)
+	}
+
+	callExp, ok := infix.Right.(*ast.CallExpression)
+
+	if !ok {
+		t.Fatalf("Expect infix's right to be a CallExpression. got=%T", infix.Right)
+	}
+
+	testMethodName(t, callExp, "length")
+
+	if callExp.Block != nil {
+		t.Fatalf("Condition expression shouldn't have block")
+	}
+
+	// Test block
 	block := whileStatement.Body
 	firstStmt := block.Statements[0].(*ast.ExpressionStatement)
 	firstCall := firstStmt.Expression.(*ast.CallExpression)

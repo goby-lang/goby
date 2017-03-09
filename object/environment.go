@@ -16,6 +16,11 @@ type Environment struct {
 	outer *Environment
 }
 
+func (e *Environment) GetCurrent(name string) (Object, bool) {
+	obj, ok := e.store[name]
+	return obj, ok
+}
+
 func (e *Environment) Get(name string) (Object, bool) {
 	obj, ok := e.store[name]
 	if !ok && e.outer != nil {

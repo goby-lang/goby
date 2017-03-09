@@ -35,6 +35,7 @@ const (
 	COMMA     = ","
 	SEMICOLON = ";"
 	COLON     = ":"
+	BAR       = "|"
 
 	LPAREN   = "("
 	RPAREN   = ")"
@@ -57,6 +58,7 @@ const (
 	END    = "END"
 	WHILE  = "WHILE"
 	DO     = "DO"
+	YIELD  = "YIELD"
 )
 
 var keyworkds = map[string]TokenType{
@@ -70,6 +72,7 @@ var keyworkds = map[string]TokenType{
 	"end":    END,
 	"while":  WHILE,
 	"do":     DO,
+	"yield":  YIELD,
 }
 
 func LookupIdent(ident string) TokenType {
