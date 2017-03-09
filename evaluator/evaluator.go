@@ -163,7 +163,7 @@ func evalClassMethod(receiver Class, method Object, args []Object, block *Method
 		return evalMethodObject(receiver, m, args, block)
 	case *BuiltInMethod:
 		methodBody := m.Fn(receiver)
-		evaluated := methodBody(args...)
+		evaluated := methodBody(args, block)
 
 		if m.Name == "new" {
 			instance := evaluated.(*RObject)
@@ -188,7 +188,7 @@ func evalInstanceMethod(receiver BaseObject, method Object, args []Object, block
 		return evalMethodObject(receiver, m, args, block)
 	case *BuiltInMethod:
 		methodBody := m.Fn(receiver)
-		return methodBody(args...)
+		return methodBody(args, block)
 	case *Error:
 		return m
 	default:

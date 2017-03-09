@@ -90,7 +90,7 @@ func InitializeClass(name string, scope *Scope) *RClass {
 var BuiltinGlobalMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) BuiltinMethodBody {
-			return func(args ...Object) Object {
+			return func(args []Object, block *Method) Object {
 				for _, arg := range args {
 					fmt.Println(arg.Inspect())
 				}
@@ -102,7 +102,7 @@ var BuiltinGlobalMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) BuiltinMethodBody {
-			return func(args ...Object) Object {
+			return func(args []Object, block *Method) Object {
 				switch r := receiver.(type) {
 				case BaseObject:
 					return r.ReturnClass()
@@ -120,7 +120,7 @@ var BuiltinGlobalMethods = []*BuiltInMethod{
 var BuiltinClassMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) BuiltinMethodBody {
-			return func(args ...Object) Object {
+			return func(args []Object, block *Method) Object {
 				class := receiver.(*RClass)
 				instance := InitializeInstance(class)
 				initMethod := class.LookupInstanceMethod("initialize")
@@ -136,7 +136,7 @@ var BuiltinClassMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) BuiltinMethodBody {
-			return func(args ...Object) Object {
+			return func(args []Object, block *Method) Object {
 				name := receiver.(Class).ReturnName()
 				nameString := &StringObject{Value: name}
 				return nameString
