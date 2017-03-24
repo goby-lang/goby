@@ -8,29 +8,45 @@ import (
 )
 
 type LocalTable struct {
-	store map[int]string
+	store []string
+	count int
 }
 
-func (lt *LocalTable) Get(index int) (string, bool) {
-	obj, ok := lt.store[index]
-	return obj, ok
+func (lt *LocalTable) Get(index int) string {
+	return lt.store[index]
 }
 
-func (lt *LocalTable) Set(index int, val string) string {
-	lt.store[index] = val
-	return val
+func (lt *LocalTable) Set(val string) int {
+	if len(lt.store) >= lt.count {
+		lt.store[lt.count] = val
+	} else {
+		lt.store = append(lt.store, val)
+	}
+
+	lt.count += 1
+	return lt.count
 }
 
 type Scope struct {
-	Self    *ast.Statement
-	Program *ast.Program
-	Out     *Scope
+	Self       ast.Statement
+	Program    *ast.Program
+	Out        *Scope
+	LocalTable *LocalTable
 }
 
 var instructionSet []string
 
+func newLocalTable() *LocalTable {
+	s := make([]string, 1)
+	return &LocalTable{store: s}
+}
+
+func newScope(scope *Scope, stmt ast.Statement) *Scope {
+	return &Scope{Out: scope, LocalTable: newLocalTable(), Self: stmt}
+}
+
 func GenerateByteCode(program *ast.Program) string {
-	scope := &Scope{Program: program}
+	scope := &Scope{Program: program, LocalTable: newLocalTable()}
 	compileProgram(program.Statements, scope)
 	instructions := strings.Join(instructionSet, "\n")
 	return strings.TrimSpace(removeEmptyLine(instructions))
@@ -41,7 +57,7 @@ func compileProgram(stmts []ast.Statement, scope *Scope) {
 
 	result = append(result, "<ProgramStart>")
 	for _, statement := range stmts {
-		s := &Scope{Self: &statement, Out: scope}
+		s := newScope(scope, statement)
 		result = append(result, compileStatement(statement, s))
 	}
 
@@ -54,11 +70,25 @@ func compileStatement(statement ast.Statement, scope *Scope) string {
 	case *ast.ExpressionStatement:
 		return compileExpression(stmt.Expression, scope)
 	case *ast.DefStatement:
-		compileDefStmt(stmt, scope)
+		s := newScope(scope, stmt)
+		compileDefStmt(stmt, s)
 		return ""
+	case *ast.AssignStatement:
+		s := newScope(scope, stmt)
+		return compileAssignStmt(stmt, s)
 	}
 
 	return ""
+}
+
+func compileAssignStmt(stmt *ast.AssignStatement, scope *Scope) string {
+	n := stmt.Name.ReturnValue()
+	index := scope.LocalTable.Set(n)
+	result := fmt.Sprintf(`
+%s
+setlocal %d
+`, compileExpression(stmt.Value, scope), index)
+	return result
 }
 
 func compileDefStmt(stmt *ast.DefStatement, scope *Scope) {
