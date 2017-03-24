@@ -1,11 +1,13 @@
 package main
 
 import (
-	"github.com/st0012/Rooby/evaluator"
 	"github.com/st0012/Rooby/lexer"
 	"github.com/st0012/Rooby/parser"
 	"io/ioutil"
 	"os"
+	"github.com/st0012/Rooby/code_generator"
+	"path"
+	"strings"
 )
 
 func main() {
@@ -20,7 +22,21 @@ func main() {
 	program := p.ParseProgram()
 	p.CheckErrors()
 
-	evaluator.Eval(program, evaluator.MainObj.Scope)
+	bytecodes := code_generator.GenerateByteCode(program)
+	writeByteCode(bytecodes, filepath)
+	//evaluator.Eval(program, evaluator.MainObj.Scope)
+}
+
+func writeByteCode(bytecodes string, filepath string) {
+	dir, filename := path.Split(filepath)
+	filename = strings.Split(filename, ".")[0]
+	f, err := os.Create(dir + filename + ".gbc")
+
+	if err != nil {
+		panic(err)
+	}
+
+	f.WriteString(bytecodes)
 }
 
 func check(e error) {
