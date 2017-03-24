@@ -45,7 +45,7 @@ func compileProgram(stmts []ast.Statement, scope *Scope) {
 		result = append(result, compileStatement(statement, s))
 	}
 
-	result = append(result, "<ProgramEnd>")
+	result = append(result, "leave")
 	instructionSet = append(instructionSet, strings.Join(result, "\n"))
 }
 
@@ -53,9 +53,24 @@ func compileStatement(statement ast.Statement, scope *Scope) string {
 	switch stmt := statement.(type) {
 	case *ast.ExpressionStatement:
 		return compileExpression(stmt.Expression, scope)
+	case *ast.DefStatement:
+		compileDefStmt(stmt, scope)
+		return ""
 	}
 
 	return ""
+}
+
+func compileDefStmt(stmt *ast.DefStatement, scope *Scope) {
+	var result []string
+
+	result = append(result, fmt.Sprintf("<Def:%s>", stmt.Name.Value))
+
+	for _, s := range stmt.BlockStatement.Statements {
+		result = append(result, compileStatement(s, scope))
+	}
+	result = append(result, "leave")
+	instructionSet = append(instructionSet, strings.Join(result, "\n"))
 }
 
 func compileExpression(exp ast.Expression, scope *Scope) string {
