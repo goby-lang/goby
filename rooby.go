@@ -1,11 +1,11 @@
 package main
 
 import (
+	"github.com/st0012/Rooby/code_generator"
 	"github.com/st0012/Rooby/lexer"
 	"github.com/st0012/Rooby/parser"
 	"io/ioutil"
 	"os"
-	"github.com/st0012/Rooby/code_generator"
 	"path"
 	"strings"
 )
@@ -21,8 +21,9 @@ func main() {
 	p := parser.New(l)
 	program := p.ParseProgram()
 	p.CheckErrors()
+	cg := code_generator.New(program)
 
-	bytecodes := code_generator.GenerateByteCode(program)
+	bytecodes := cg.GenerateByteCode(program)
 	writeByteCode(bytecodes, filepath)
 	//evaluator.Eval(program, evaluator.MainObj.Scope)
 }

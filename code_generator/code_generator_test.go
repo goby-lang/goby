@@ -24,13 +24,46 @@ opt_div
 leave
 `
 
+	bytecodes := compileToBytecode(input)
+	compareBytecode(t, bytecodes, expected)
+}
+
+func TestLocalVariableAccessInCurrentScope(t *testing.T) {
+	input := `
+	a = 10
+	a = 100
+	b = 5
+	(b * a + 100) / 2
+	`
+	expected := `
+<ProgramStart>
+putobject 10
+setlocal 0
+putobject 100
+setlocal 0
+putobject 5
+setlocal 1
+getlocal 1
+getlocal 0
+opt_mult
+putobject 100
+opt_plus
+putobject 2
+opt_div
+leave
+`
+
+	bytecodes := compileToBytecode(input)
+	compareBytecode(t, bytecodes, expected)
+}
+
+func compileToBytecode(input string) string {
 	l := lexer.New(input)
 	p := parser.New(l)
 	program := p.ParseProgram()
 	p.CheckErrors()
-
-	bytecodes := GenerateByteCode(program)
-	compareBytecode(t, bytecodes, expected)
+	cg := New(program)
+	return cg.GenerateByteCode(program)
 }
 
 func compareBytecode(t *testing.T, value, expected string) {
