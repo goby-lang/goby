@@ -12,7 +12,8 @@ func TestArithmeticCompilation(t *testing.T) {
 	(1 * 10 + 100) / 2
 	`
 
-	expected := `<ProgramStart>
+	expected := `
+<ProgramStart>
 0 putobject 1
 1 putobject 10
 2 opt_mult
@@ -34,7 +35,8 @@ func TestLocalVariableAccessInCurrentScope(t *testing.T) {
 	b = 5
 	(b * a + 100) / 2
 	`
-	expected := `<ProgramStart>
+	expected := `
+<ProgramStart>
 0 putobject 10
 1 setlocal 0
 2 putobject 100
@@ -61,6 +63,77 @@ func compileToBytecode(input string) string {
 	p.CheckErrors()
 	cg := New(program)
 	return cg.GenerateByteCode(program)
+}
+
+func TestConditionWithoutAlternativeCompilation(t *testing.T) {
+	input := `
+	a = 10
+	b = 5
+	if a > b
+	  c = 10
+	end
+
+	c + 1
+	`
+
+	expected := `
+<ProgramStart>
+0 putobject 10
+1 setlocal 0
+2 putobject 5
+3 setlocal 1
+4 getlocal 0
+5 getlocal 1
+6 opt_gl
+7 branchunless 11
+8 putobject 10
+9 setlocal 2
+10 getlocal 2
+11 putobject 1
+12 opt_plus
+13 leave
+`
+
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
+func TestConditionWithAlternativeCompilation(t *testing.T) {
+	input := `
+	a = 10
+	b = 5
+	if a > b
+	  c = 10
+	else
+	  c = 5
+	end
+
+	c + 1
+	`
+
+	expected := `
+<ProgramStart>
+0 putobject 10
+1 setlocal 0
+2 putobject 5
+3 setlocal 1
+4 getlocal 0
+5 getlocal 1
+6 opt_gl
+7 branchunless 11
+8 putobject 10
+9 setlocal 2
+10 jump 13
+11 putobject 5
+12 setlocal 2
+13 getlocal 2
+14 putobject 1
+15 opt_plus
+16 leave
+`
+
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
 }
 
 func compareBytecode(t *testing.T, value, expected string) {

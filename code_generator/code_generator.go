@@ -91,12 +91,10 @@ func (cg *CodeGenerator) compileAssignStmt(is *InstructionSet, stmt *ast.AssignS
 
 func (cg *CodeGenerator) compileDefStmt(stmt *ast.DefStatement, scope *Scope) {
 	scope = newScope(scope, stmt)
-	l := &Label{Name: fmt.Sprintf("Def:%s", stmt.Name.Value)}
-	is := &InstructionSet{Label: l}
+	is := &InstructionSet{Label: &Label{Name: fmt.Sprintf("Def:%s", stmt.Name.Value)}}
 
-	for _, s := range stmt.BlockStatement.Statements {
-		cg.compileStatement(is, s, scope)
-	}
+	cg.compileBlockStatement(is, stmt.BlockStatement, scope)
+
 	is.Define("leave")
 	cg.instructionSets = append(cg.instructionSets, is)
 }
@@ -111,7 +109,31 @@ func (cg *CodeGenerator) compileExpression(is *InstructionSet, exp ast.Expressio
 		is.Define("putobject", value)
 	case *ast.InfixExpression:
 		cg.compileInfixExpression(is, exp, scope)
+	case *ast.IfExpression:
+		cg.compileIfExpression(is, exp, scope)
 	}
+}
+
+func (cg *CodeGenerator) compileIfExpression(is *InstructionSet, exp *ast.IfExpression, scope *Scope) {
+	cg.compileExpression(is, exp.Condition, scope)
+
+	anchor1 := &Anchor{}
+	is.Define("branchunless", anchor1)
+
+	cg.compileBlockStatement(is, exp.Consequence, scope)
+
+	anchor1.Line = is.Count + 1
+
+	if exp.Alternative == nil {
+		return
+	}
+
+	anchor2 := &Anchor{}
+	is.Define("jump", anchor2)
+
+	cg.compileBlockStatement(is, exp.Alternative, scope)
+
+	anchor2.Line = is.Count
 }
 
 func (cg *CodeGenerator) compileInfixExpression(is *InstructionSet, node *ast.InfixExpression, scope *Scope) {
@@ -141,6 +163,12 @@ func (cg *CodeGenerator) compileInfixExpression(is *InstructionSet, node *ast.In
 		panic(fmt.Sprintf("Doesn't support %s operator", node.Operator))
 	}
 	is.Define(operation)
+}
+
+func (cg *CodeGenerator) compileBlockStatement(is *InstructionSet, stmt *ast.BlockStatement, scope *Scope) {
+	for _, s := range stmt.Statements {
+		cg.compileStatement(is, s, scope)
+	}
 }
 
 func removeEmptyLine(s string) string {
