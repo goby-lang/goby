@@ -66,7 +66,7 @@ func (cg *CodeGenerator) compileProgram(stmts []ast.Statement, scope *Scope) {
 		cg.compileStatement(is, statement, scope)
 	}
 
-	is.Define("leave")
+	cg.endInstructions(is)
 	cg.instructionSets = append(cg.instructionSets, is)
 }
 
@@ -75,6 +75,12 @@ func (cg *CodeGenerator) compileStatement(is *InstructionSet, statement ast.Stat
 	switch stmt := statement.(type) {
 	case *ast.ExpressionStatement:
 		cg.compileExpression(is, stmt.Expression, scope)
+		switch stmt.Expression.(type) {
+		case *ast.IfExpression:
+		default:
+			is.Define("pop")
+		}
+
 	case *ast.DefStatement:
 		cg.compileDefStmt(stmt, scope)
 	case *ast.AssignStatement:
@@ -95,7 +101,7 @@ func (cg *CodeGenerator) compileDefStmt(stmt *ast.DefStatement, scope *Scope) {
 
 	cg.compileBlockStatement(is, stmt.BlockStatement, scope)
 
-	is.Define("leave")
+	cg.endInstructions(is)
 	cg.instructionSets = append(cg.instructionSets, is)
 }
 
@@ -105,8 +111,11 @@ func (cg *CodeGenerator) compileExpression(is *InstructionSet, exp ast.Expressio
 		value := fmt.Sprintf("%d", scope.LocalTable.Get(exp.Value))
 		is.Define("getlocal", value)
 	case *ast.IntegerLiteral:
-		value := fmt.Sprintf("%d", exp.Value)
-		is.Define("putobject", value)
+		is.Define("putobject", fmt.Sprint(exp.Value))
+	case *ast.StringLiteral:
+		is.Define("putstring", exp.Value)
+	case *ast.Boolean:
+		is.Define("putobject", fmt.Sprint(exp.Value))
 	case *ast.InfixExpression:
 		cg.compileInfixExpression(is, exp, scope)
 	case *ast.IfExpression:
@@ -169,6 +178,15 @@ func (cg *CodeGenerator) compileBlockStatement(is *InstructionSet, stmt *ast.Blo
 	for _, s := range stmt.Statements {
 		cg.compileStatement(is, s, scope)
 	}
+}
+
+func (cg *CodeGenerator) endInstructions(is *InstructionSet) {
+	// if last instruction is pop, it should be replaced with leave
+	if is.Instructions[len(is.Instructions)-1].Action == "pop" {
+		is.Instructions = is.Instructions[:len(is.Instructions)-1]
+		is.Count -= 1
+	}
+	is.Define("leave")
 }
 
 func removeEmptyLine(s string) string {

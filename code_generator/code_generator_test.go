@@ -7,6 +7,31 @@ import (
 	"testing"
 )
 
+func TestPopRedundantValue(t *testing.T) {
+	input := `
+	a = 10
+	b = 11
+	a + b # redundant value
+	a
+	`
+
+	expected := `
+<ProgramStart>
+0 putobject 10
+1 setlocal 0
+2 putobject 11
+3 setlocal 1
+4 getlocal 0
+5 getlocal 1
+6 opt_plus
+7 pop
+8 getlocal 0
+9 leave
+`
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
 func TestArithmeticCompilation(t *testing.T) {
 	input := `
 	(1 * 10 + 100) / 2
@@ -54,15 +79,6 @@ func TestLocalVariableAccessInCurrentScope(t *testing.T) {
 
 	bytecode := compileToBytecode(input)
 	compareBytecode(t, bytecode, expected)
-}
-
-func compileToBytecode(input string) string {
-	l := lexer.New(input)
-	p := parser.New(l)
-	program := p.ParseProgram()
-	p.CheckErrors()
-	cg := New(program)
-	return cg.GenerateByteCode(program)
 }
 
 func TestConditionWithoutAlternativeCompilation(t *testing.T) {
@@ -134,6 +150,15 @@ func TestConditionWithAlternativeCompilation(t *testing.T) {
 
 	bytecode := compileToBytecode(input)
 	compareBytecode(t, bytecode, expected)
+}
+
+func compileToBytecode(input string) string {
+	l := lexer.New(input)
+	p := parser.New(l)
+	program := p.ParseProgram()
+	p.CheckErrors()
+	cg := New(program)
+	return cg.GenerateByteCode(program)
 }
 
 func compareBytecode(t *testing.T, value, expected string) {
