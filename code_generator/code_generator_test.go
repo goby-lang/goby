@@ -24,8 +24,8 @@ opt_div
 leave
 `
 
-	bytecodes := compileToBytecode(input)
-	compareBytecode(t, bytecodes, expected)
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
 }
 
 func TestLocalVariableAccessInCurrentScope(t *testing.T) {
@@ -53,8 +53,35 @@ opt_div
 leave
 `
 
-	bytecodes := compileToBytecode(input)
-	compareBytecode(t, bytecodes, expected)
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
+func TestConditionCompilation(t *testing.T) {
+	input := `
+	a = 10
+	b = 5
+	if a > b
+	  a
+	else
+	  b
+	end
+	`
+
+	expected := `
+putobject 10
+setlocal 0
+putobject 5
+setlocal 1
+getlocal 0
+getlocal 1
+opt_gl
+branchunless
+
+`
+
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
 }
 
 func compileToBytecode(input string) string {

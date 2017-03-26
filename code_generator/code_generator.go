@@ -1,6 +1,7 @@
 package code_generator
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/st0012/Rooby/ast"
 	"regexp"
@@ -34,11 +35,12 @@ type Scope struct {
 	Program    *ast.Program
 	Out        *Scope
 	LocalTable *LocalTable
+	Line       int
 }
 
 type CodeGenerator struct {
-	program        *ast.Program
-	instructionSet []string
+	program         *ast.Program
+	instructionSets []*InstructionSet
 }
 
 func New(program *ast.Program) *CodeGenerator {
@@ -48,76 +50,74 @@ func New(program *ast.Program) *CodeGenerator {
 func (cg *CodeGenerator) GenerateByteCode(program *ast.Program) string {
 	scope := &Scope{Program: program, LocalTable: newLocalTable()}
 	cg.compileProgram(program.Statements, scope)
-	instructions := strings.Join(cg.instructionSet, "\n")
-	return strings.TrimSpace(removeEmptyLine(instructions))
+	var out bytes.Buffer
+
+	for _, is := range cg.instructionSets {
+		out.WriteString(is.Compile())
+	}
+	return strings.TrimSpace(removeEmptyLine(out.String()))
 }
 
 func (cg *CodeGenerator) compileProgram(stmts []ast.Statement, scope *Scope) {
-	var result []string
+	label := &Label{Name: "ProgramStart"}
+	is := &InstructionSet{Label: label}
 
-	result = append(result, "<ProgramStart>")
 	for _, statement := range stmts {
-		result = append(result, cg.compileStatement(statement, scope))
+		cg.compileStatement(is, statement, scope)
 	}
 
-	result = append(result, "leave")
-	cg.instructionSet = append(cg.instructionSet, strings.Join(result, "\n"))
+	is.Define("leave")
+	cg.instructionSets = append(cg.instructionSets, is)
 }
 
-func (cg *CodeGenerator) compileStatement(statement ast.Statement, scope *Scope) string {
+func (cg *CodeGenerator) compileStatement(is *InstructionSet, statement ast.Statement, scope *Scope) {
+	scope.Line += 1
 	switch stmt := statement.(type) {
 	case *ast.ExpressionStatement:
-		return cg.compileExpression(stmt.Expression, scope)
+		cg.compileExpression(is, stmt.Expression, scope)
 	case *ast.DefStatement:
-		s := newScope(scope, stmt)
-		cg.compileDefStmt(stmt, s)
-		return ""
+		cg.compileDefStmt(stmt, scope)
 	case *ast.AssignStatement:
-		return cg.compileAssignStmt(stmt, scope)
+		cg.compileAssignStmt(is, stmt, scope)
 	}
-
-	return ""
 }
 
-func (cg *CodeGenerator) compileAssignStmt(stmt *ast.AssignStatement, scope *Scope) string {
+func (cg *CodeGenerator) compileAssignStmt(is *InstructionSet, stmt *ast.AssignStatement, scope *Scope) {
 	n := stmt.Name.ReturnValue()
 	index := scope.LocalTable.Set(n)
-	result := fmt.Sprintf(`
-%s
-setlocal %d
-`, cg.compileExpression(stmt.Value, scope), index)
-	return result
+	cg.compileExpression(is, stmt.Value, scope)
+	is.Define("setlocal", fmt.Sprint(index))
 }
 
 func (cg *CodeGenerator) compileDefStmt(stmt *ast.DefStatement, scope *Scope) {
-	var result []string
-
-	result = append(result, fmt.Sprintf("<Def:%s>", stmt.Name.Value))
+	scope = newScope(scope, stmt)
+	l := &Label{Name: fmt.Sprintf("Def:%s", stmt.Name.Value)}
+	is := &InstructionSet{Label: l}
 
 	for _, s := range stmt.BlockStatement.Statements {
-		result = append(result, cg.compileStatement(s, scope))
+		cg.compileStatement(is, s, scope)
 	}
-	result = append(result, "leave")
-	cg.instructionSet = append(cg.instructionSet, strings.Join(result, "\n"))
+	is.Define("leave")
+	cg.instructionSets = append(cg.instructionSets, is)
 }
 
-func (cg *CodeGenerator) compileExpression(exp ast.Expression, scope *Scope) string {
+func (cg *CodeGenerator) compileExpression(is *InstructionSet, exp ast.Expression, scope *Scope) {
 	switch exp := exp.(type) {
 	case *ast.Identifier:
-		return fmt.Sprintf(`getlocal %d`, scope.LocalTable.Get(exp.Value))
+		value := fmt.Sprintf("%d", scope.LocalTable.Get(exp.Value))
+		is.Define("getlocal", value)
 	case *ast.IntegerLiteral:
-		return fmt.Sprintf(`putobject %d`, exp.Value)
+		value := fmt.Sprintf("%d", exp.Value)
+		is.Define("putobject", value)
 	case *ast.InfixExpression:
-		return cg.compileInfixExpression(exp, scope)
+		cg.compileInfixExpression(is, exp, scope)
 	}
-
-	return ""
 }
 
-func (cg *CodeGenerator) compileInfixExpression(node *ast.InfixExpression, scope *Scope) string {
+func (cg *CodeGenerator) compileInfixExpression(is *InstructionSet, node *ast.InfixExpression, scope *Scope) {
 	var operation string
-	left := cg.compileExpression(node.Left, scope)
-	right := cg.compileExpression(node.Right, scope)
+	cg.compileExpression(is, node.Left, scope)
+	cg.compileExpression(is, node.Right, scope)
 	switch node.Operator {
 	case "+":
 		operation = "opt_plus"
@@ -127,14 +127,20 @@ func (cg *CodeGenerator) compileInfixExpression(node *ast.InfixExpression, scope
 		operation = "opt_mult"
 	case "/":
 		operation = "opt_div"
+	case "==":
+		operation = "opt_eq"
+	case "<":
+		operation = "opt_lt"
+	case "<=":
+		operation = "opt_le"
+	case ">":
+		operation = "opt_gl"
+	case ">=":
+		operation = "opt_ge"
 	default:
 		panic(fmt.Sprintf("Doesn't support %s operator", node.Operator))
 	}
-	return fmt.Sprintf(`
-%s
-%s
-%s
-`, left, right, operation)
+	is.Define(operation)
 }
 
 func removeEmptyLine(s string) string {
@@ -153,5 +159,5 @@ func newLocalTable() *LocalTable {
 }
 
 func newScope(scope *Scope, stmt ast.Statement) *Scope {
-	return &Scope{Out: scope, LocalTable: newLocalTable(), Self: stmt}
+	return &Scope{Out: scope, LocalTable: newLocalTable(), Self: stmt, Line: 0}
 }
