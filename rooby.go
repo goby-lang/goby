@@ -1,16 +1,18 @@
 package main
 
 import (
+	"flag"
+	"github.com/st0012/GVM"
 	"github.com/st0012/Rooby/code_generator"
 	"github.com/st0012/Rooby/lexer"
 	"github.com/st0012/Rooby/parser"
 	"io/ioutil"
 	"os"
-	"path"
 	"strings"
 )
 
 func main() {
+	execOptionPtr := flag.Bool("c", false, "Compile to bytecode")
 	filepath := os.Args[1]
 
 	file, err := ioutil.ReadFile(filepath)
@@ -24,14 +26,19 @@ func main() {
 	cg := code_generator.New(program)
 
 	bytecodes := cg.GenerateByteCode(program)
+
+	if *execOptionPtr {
+		gvm.Exec(bytecodes)
+		return
+	}
+
 	writeByteCode(bytecodes, filepath)
 	//evaluator.Eval(program, evaluator.MainObj.Scope)
 }
 
 func writeByteCode(bytecodes string, filepath string) {
-	dir, filename := path.Split(filepath)
-	filename = strings.Split(filename, ".")[0]
-	f, err := os.Create(dir + filename + ".gbc")
+	filepath = strings.Split(filepath, ".")[0] + ".gbc"
+	f, err := os.Create(filepath)
 
 	if err != nil {
 		panic(err)

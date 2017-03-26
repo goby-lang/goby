@@ -100,7 +100,7 @@ func TestConditionWithoutAlternativeCompilation(t *testing.T) {
 3 setlocal 1
 4 getlocal 0
 5 getlocal 1
-6 opt_gl
+6 opt_gt
 7 branchunless 11
 8 putobject 10
 9 setlocal 2
@@ -135,7 +135,7 @@ func TestConditionWithAlternativeCompilation(t *testing.T) {
 3 setlocal 1
 4 getlocal 0
 5 getlocal 1
-6 opt_gl
+6 opt_gt
 7 branchunless 11
 8 putobject 10
 9 setlocal 2

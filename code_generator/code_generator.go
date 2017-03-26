@@ -165,7 +165,7 @@ func (cg *CodeGenerator) compileInfixExpression(is *InstructionSet, node *ast.In
 	case "<=":
 		operation = "opt_le"
 	case ">":
-		operation = "opt_gl"
+		operation = "opt_gt"
 	case ">=":
 		operation = "opt_ge"
 	default:
