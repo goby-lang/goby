@@ -12,16 +12,15 @@ func TestArithmeticCompilation(t *testing.T) {
 	(1 * 10 + 100) / 2
 	`
 
-	expected := `
-<ProgramStart>
-putobject 1
-putobject 10
-opt_mult
-putobject 100
-opt_plus
-putobject 2
-opt_div
-leave
+	expected := `<ProgramStart>
+0 putobject 1
+1 putobject 10
+2 opt_mult
+3 putobject 100
+4 opt_plus
+5 putobject 2
+6 opt_div
+7 leave
 `
 
 	bytecode := compileToBytecode(input)
@@ -35,50 +34,21 @@ func TestLocalVariableAccessInCurrentScope(t *testing.T) {
 	b = 5
 	(b * a + 100) / 2
 	`
-	expected := `
-<ProgramStart>
-putobject 10
-setlocal 0
-putobject 100
-setlocal 0
-putobject 5
-setlocal 1
-getlocal 1
-getlocal 0
-opt_mult
-putobject 100
-opt_plus
-putobject 2
-opt_div
-leave
-`
-
-	bytecode := compileToBytecode(input)
-	compareBytecode(t, bytecode, expected)
-}
-
-func TestConditionCompilation(t *testing.T) {
-	input := `
-	a = 10
-	b = 5
-	if a > b
-	  a
-	else
-	  b
-	end
-	`
-
-	expected := `
-putobject 10
-setlocal 0
-putobject 5
-setlocal 1
-getlocal 0
-getlocal 1
-opt_gl
-branchunless
-
-`
+	expected := `<ProgramStart>
+0 putobject 10
+1 setlocal 0
+2 putobject 100
+3 setlocal 0
+4 putobject 5
+5 setlocal 1
+6 getlocal 1
+7 getlocal 0
+8 opt_mult
+9 putobject 100
+10 opt_plus
+11 putobject 2
+12 opt_div
+13 leave`
 
 	bytecode := compileToBytecode(input)
 	compareBytecode(t, bytecode, expected)
@@ -100,10 +70,10 @@ func compareBytecode(t *testing.T, value, expected string) {
 		t.Fatalf(`
 Bytecode compare failed
 Expect:
-%s
+"%s"
 
 Got:
-%s
+"%s"
 `, expected, value)
 	}
 }
