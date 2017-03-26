@@ -13,7 +13,11 @@ type Instruction struct {
 }
 
 func (i *Instruction) Compile() string {
-	return fmt.Sprintf("%d %s %s\n", i.Line, i.Action, strings.Join(i.Params, " "))
+	if len(i.Params) > 0 {
+		return fmt.Sprintf("%d %s %s\n", i.Line, i.Action, strings.Join(i.Params, " "))
+	}
+
+	return fmt.Sprintf("%d %s\n", i.Line, i.Action)
 }
 
 type Label struct {
