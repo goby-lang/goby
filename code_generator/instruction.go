@@ -51,6 +51,10 @@ func (is *InstructionSet) Define(action string, params ...interface{}) {
 			ps = append(ps, p)
 		case *Anchor:
 			i.Anchor = p
+		case int:
+			ps = append(ps, fmt.Sprint(p))
+		case int64:
+			ps = append(ps, fmt.Sprint(p))
 		}
 	}
 
