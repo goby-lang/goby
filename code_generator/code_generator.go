@@ -82,7 +82,11 @@ func (cg *CodeGenerator) compileStatement(is *InstructionSet, statement ast.Stat
 		}
 
 	case *ast.DefStatement:
+		is.Define("putself")
+		is.Define("putstring", stmt.Name.Value)
+		is.Define("def_method", len(stmt.Parameters))
 		cg.compileDefStmt(stmt, scope)
+		is.Define("pop")
 	case *ast.AssignStatement:
 		cg.compileAssignStmt(is, stmt, scope)
 	}
@@ -120,6 +124,14 @@ func (cg *CodeGenerator) compileExpression(is *InstructionSet, exp ast.Expressio
 		cg.compileInfixExpression(is, exp, scope)
 	case *ast.IfExpression:
 		cg.compileIfExpression(is, exp, scope)
+	case *ast.CallExpression:
+		is.Define("putself")
+
+		for _, arg := range exp.Arguments {
+			cg.compileExpression(is, arg, scope)
+		}
+
+		is.Define("send", exp.Method)
 	}
 }
 
@@ -197,6 +209,10 @@ func removeEmptyLine(s string) string {
 	s = regex.ReplaceAllString(s, "\n")
 
 	return s
+}
+
+func doubleQuoteString(s string) string {
+	return fmt.Sprintf("\"%s\"", s)
 }
 
 func newLocalTable() *LocalTable {

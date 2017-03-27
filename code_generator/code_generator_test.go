@@ -7,6 +7,36 @@ import (
 	"testing"
 )
 
+func TestBasicMethodDefineAndExecution(t *testing.T) {
+	input := `
+	def foo(x)
+	  x + 10
+	end
+
+	foo(11)
+	`
+
+	expected := `
+<Def:foo>
+0 getlocal 0
+1 putobject 10
+2 opt_plus
+3 leave
+<ProgramStart>
+0 putself
+1 putstring foo
+2 def_method 1
+3 pop
+4 putself
+5 putobject 11
+6 send foo
+7 leave
+`
+
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
 func TestPopRedundantValue(t *testing.T) {
 	input := `
 	a = 10
