@@ -30,8 +30,8 @@ Foo.new.bar
 0 putself
 1 def_class Foo
 2 getconstant Foo
-3 send new
-4 send bar
+3 send new 0
+4 send bar 0
 5 leave
 `
 	bytecode := compileToBytecode(input)
@@ -71,7 +71,7 @@ func TestBasicMethodReDefineAndExecution(t *testing.T) {
 5 def_method 1
 6 putself
 7 putobject 11
-8 send foo
+8 send foo 1
 9 leave
 `
 
@@ -100,7 +100,7 @@ func TestBasicMethodDefineAndExecution(t *testing.T) {
 2 def_method 1
 3 putself
 4 putobject 11
-5 send foo
+5 send foo 1
 6 leave
 `
 
