@@ -86,7 +86,6 @@ func (cg *CodeGenerator) compileStatement(is *InstructionSet, statement ast.Stat
 		is.Define("putstring", stmt.Name.Value)
 		is.Define("def_method", len(stmt.Parameters))
 		cg.compileDefStmt(stmt, scope)
-		is.Define("pop")
 	case *ast.AssignStatement:
 		cg.compileAssignStmt(is, stmt, scope)
 	}
