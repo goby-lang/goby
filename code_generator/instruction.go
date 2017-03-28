@@ -42,6 +42,11 @@ type InstructionSet struct {
 	Count        int
 }
 
+func (is *InstructionSet) SetLabel(name string) {
+	l := &Label{Name: name}
+	is.Label = l
+}
+
 func (is *InstructionSet) Define(action string, params ...interface{}) {
 	ps := []string{}
 	i := &Instruction{Action: action, Params: ps, Line: is.Count}
