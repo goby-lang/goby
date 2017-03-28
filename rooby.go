@@ -13,7 +13,10 @@ import (
 
 func main() {
 	execOptionPtr := flag.Bool("c", false, "Compile to bytecode")
-	filepath := os.Args[1]
+
+	flag.Parse()
+
+	filepath := flag.Arg(0)
 
 	file, err := ioutil.ReadFile(filepath)
 	check(err)
@@ -27,11 +30,10 @@ func main() {
 
 	bytecodes := cg.GenerateByteCode(program)
 
-	if *execOptionPtr {
+	if !*execOptionPtr {
 		gvm.Exec(bytecodes)
 		return
 	}
-
 	writeByteCode(bytecodes, filepath)
 	//evaluator.Eval(program, evaluator.MainObj.Scope)
 }
