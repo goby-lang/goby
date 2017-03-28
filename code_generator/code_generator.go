@@ -88,7 +88,21 @@ func (cg *CodeGenerator) compileStatement(is *InstructionSet, statement ast.Stat
 		cg.compileDefStmt(stmt, scope)
 	case *ast.AssignStatement:
 		cg.compileAssignStmt(is, stmt, scope)
+	case *ast.ClassStatement:
+		is.Define("putself")
+		is.Define("def_class", stmt.Name.Value)
+		cg.compileClassStmt(stmt, scope)
 	}
+}
+
+func (cg *CodeGenerator) compileClassStmt(stmt *ast.ClassStatement, scope *Scope) {
+	scope = newScope(scope, stmt)
+	is := &InstructionSet{}
+	is.SetLabel(fmt.Sprintf("DefClass:%s", stmt.Name.Value))
+
+	cg.compileBlockStatement(is, stmt.Body, scope)
+	is.Define("leave")
+	cg.instructionSets = append(cg.instructionSets, is)
 }
 
 func (cg *CodeGenerator) compileAssignStmt(is *InstructionSet, stmt *ast.AssignStatement, scope *Scope) {
@@ -100,10 +114,10 @@ func (cg *CodeGenerator) compileAssignStmt(is *InstructionSet, stmt *ast.AssignS
 
 func (cg *CodeGenerator) compileDefStmt(stmt *ast.DefStatement, scope *Scope) {
 	scope = newScope(scope, stmt)
-	is := &InstructionSet{Label: &Label{Name: fmt.Sprintf("Def:%s", stmt.Name.Value)}}
+	is := &InstructionSet{}
+	is.SetLabel(fmt.Sprintf("Def:%s", stmt.Name.Value))
 
 	cg.compileBlockStatement(is, stmt.BlockStatement, scope)
-
 	cg.endInstructions(is)
 	cg.instructionSets = append(cg.instructionSets, is)
 }
@@ -113,6 +127,8 @@ func (cg *CodeGenerator) compileExpression(is *InstructionSet, exp ast.Expressio
 	case *ast.Identifier:
 		value := fmt.Sprintf("%d", scope.LocalTable.Get(exp.Value))
 		is.Define("getlocal", value)
+	case *ast.Constant:
+		is.Define("getconstant", exp.Value)
 	case *ast.IntegerLiteral:
 		is.Define("putobject", fmt.Sprint(exp.Value))
 	case *ast.StringLiteral:
@@ -123,8 +139,10 @@ func (cg *CodeGenerator) compileExpression(is *InstructionSet, exp ast.Expressio
 		cg.compileInfixExpression(is, exp, scope)
 	case *ast.IfExpression:
 		cg.compileIfExpression(is, exp, scope)
-	case *ast.CallExpression:
+	case *ast.SelfExpression:
 		is.Define("putself")
+	case *ast.CallExpression:
+		cg.compileExpression(is, exp.Receiver, scope)
 
 		for _, arg := range exp.Arguments {
 			cg.compileExpression(is, arg, scope)

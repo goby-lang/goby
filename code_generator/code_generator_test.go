@@ -7,6 +7,37 @@ import (
 	"testing"
 )
 
+func TestClassDefinition(t *testing.T) {
+	input := `
+class Foo
+  def bar
+    10
+  end
+end
+
+Foo.new.bar
+`
+	expected := `
+<Def:bar>
+0 putobject 10
+1 leave
+<DefClass:Foo>
+0 putself
+1 putstring bar
+2 def_method 0
+3 leave
+<ProgramStart>
+0 putself
+1 def_class Foo
+2 getconstant Foo
+3 send new
+4 send bar
+5 leave
+`
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
 func TestBasicMethodReDefineAndExecution(t *testing.T) {
 	input := `
 	def foo(x)
