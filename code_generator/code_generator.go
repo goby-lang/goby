@@ -148,7 +148,7 @@ func (cg *CodeGenerator) compileExpression(is *InstructionSet, exp ast.Expressio
 			cg.compileExpression(is, arg, scope)
 		}
 
-		is.Define("send", exp.Method)
+		is.Define("send", exp.Method, len(exp.Arguments))
 	}
 }
 
