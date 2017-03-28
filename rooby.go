@@ -8,10 +8,16 @@ import (
 	"os"
 	"path"
 	"strings"
+	"flag"
+	"github.com/st0012/GVM"
 )
 
 func main() {
-	filepath := os.Args[1]
+	execOptionPtr := flag.Bool("c", false, "Compile to bytecode")
+
+	flag.Parse()
+
+	filepath := flag.Arg(0)
 
 	file, err := ioutil.ReadFile(filepath)
 	check(err)
@@ -24,6 +30,12 @@ func main() {
 	cg := code_generator.New(program)
 
 	bytecodes := cg.GenerateByteCode(program)
+
+	if !*execOptionPtr {
+		gvm.Exec(bytecodes)
+		return
+	}
+
 	writeByteCode(bytecodes, filepath)
 	//evaluator.Eval(program, evaluator.MainObj.Scope)
 }
