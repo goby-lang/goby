@@ -90,7 +90,13 @@ func (cg *CodeGenerator) compileStatement(is *InstructionSet, statement ast.Stat
 		cg.compileAssignStmt(is, stmt, scope)
 	case *ast.ClassStatement:
 		is.Define("putself")
-		is.Define("def_class", stmt.Name.Value)
+
+		if stmt.SuperClass != nil {
+			is.Define("def_class", stmt.Name.Value, stmt.SuperClass.Value)
+		} else {
+			is.Define("def_class", stmt.Name.Value)
+		}
+
 		cg.compileClassStmt(stmt, scope)
 	}
 }
