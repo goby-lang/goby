@@ -75,12 +75,6 @@ func (cg *CodeGenerator) compileStatement(is *InstructionSet, statement ast.Stat
 	switch stmt := statement.(type) {
 	case *ast.ExpressionStatement:
 		cg.compileExpression(is, stmt.Expression, scope)
-		switch stmt.Expression.(type) {
-		case *ast.IfExpression:
-		default:
-			is.Define("pop")
-		}
-
 	case *ast.DefStatement:
 		is.Define("putself")
 		is.Define("putstring", stmt.Name.Value)
@@ -97,6 +91,7 @@ func (cg *CodeGenerator) compileStatement(is *InstructionSet, statement ast.Stat
 			is.Define("def_class", stmt.Name.Value)
 		}
 
+		is.Define("pop")
 		cg.compileClassStmt(stmt, scope)
 	}
 }
@@ -112,10 +107,14 @@ func (cg *CodeGenerator) compileClassStmt(stmt *ast.ClassStatement, scope *Scope
 }
 
 func (cg *CodeGenerator) compileAssignStmt(is *InstructionSet, stmt *ast.AssignStatement, scope *Scope) {
-	n := stmt.Name.ReturnValue()
-	index := scope.LocalTable.Set(n)
-	cg.compileExpression(is, stmt.Value, scope)
-	is.Define("setlocal", fmt.Sprint(index))
+	switch name := stmt.Name.(type) {
+	case *ast.Identifier:
+		index := scope.LocalTable.Set(name.Value)
+		cg.compileExpression(is, stmt.Value, scope)
+		is.Define("setlocal", fmt.Sprint(index))
+	case *ast.InstanceVariable:
+		is.Define("setinstancevariable", name.Value)
+	}
 }
 
 func (cg *CodeGenerator) compileDefStmt(stmt *ast.DefStatement, scope *Scope) {
@@ -135,6 +134,8 @@ func (cg *CodeGenerator) compileExpression(is *InstructionSet, exp ast.Expressio
 		is.Define("getlocal", value)
 	case *ast.Constant:
 		is.Define("getconstant", exp.Value)
+	case *ast.InstanceVariable:
+		is.Define("getinstancevariable", exp.Value)
 	case *ast.IntegerLiteral:
 		is.Define("putobject", fmt.Sprint(exp.Value))
 	case *ast.StringLiteral:
@@ -181,32 +182,9 @@ func (cg *CodeGenerator) compileIfExpression(is *InstructionSet, exp *ast.IfExpr
 }
 
 func (cg *CodeGenerator) compileInfixExpression(is *InstructionSet, node *ast.InfixExpression, scope *Scope) {
-	var operation string
 	cg.compileExpression(is, node.Left, scope)
 	cg.compileExpression(is, node.Right, scope)
-	switch node.Operator {
-	case "+":
-		operation = "opt_plus"
-	case "-":
-		operation = "opt_minus"
-	case "*":
-		operation = "opt_mult"
-	case "/":
-		operation = "opt_div"
-	case "==":
-		operation = "opt_eq"
-	case "<":
-		operation = "opt_lt"
-	case "<=":
-		operation = "opt_le"
-	case ">":
-		operation = "opt_gl"
-	case ">=":
-		operation = "opt_ge"
-	default:
-		panic(fmt.Sprintf("Doesn't support %s operator", node.Operator))
-	}
-	is.Define(operation)
+	is.Define("send", node.Operator, "1")
 }
 
 func (cg *CodeGenerator) compileBlockStatement(is *InstructionSet, stmt *ast.BlockStatement, scope *Scope) {
@@ -216,11 +194,6 @@ func (cg *CodeGenerator) compileBlockStatement(is *InstructionSet, stmt *ast.Blo
 }
 
 func (cg *CodeGenerator) endInstructions(is *InstructionSet) {
-	// if last instruction is pop, it should be replaced with leave
-	if is.Instructions[len(is.Instructions)-1].Action == "pop" {
-		is.Instructions = is.Instructions[:len(is.Instructions)-1]
-		is.Count -= 1
-	}
 	is.Define("leave")
 }
 
