@@ -10,36 +10,38 @@ import (
 func TestClassDefinition(t *testing.T) {
 	input := `
 class Bar
-end
-
-class Foo < Bar
   def bar
     10
   end
 end
 
+class Foo < Bar
+end
+
 Foo.new.bar
 `
 	expected := `
-<DefClass:Bar>
-0 leave
 <Def:bar>
 0 putobject 10
 1 leave
-<DefClass:Foo>
+<DefClass:Bar>
 0 putself
 1 putstring bar
 2 def_method 0
 3 leave
+<DefClass:Foo>
+0 leave
 <ProgramStart>
 0 putself
 1 def_class Bar
-2 putself
-3 def_class Foo Bar
-4 getconstant Foo
-5 send new 0
-6 send bar 0
-7 leave
+2 pop
+3 putself
+4 def_class Foo Bar
+5 pop
+6 getconstant Foo
+7 send new 0
+8 send bar 0
+9 leave
 `
 	bytecode := compileToBytecode(input)
 	compareBytecode(t, bytecode, expected)
@@ -62,12 +64,12 @@ func TestBasicMethodReDefineAndExecution(t *testing.T) {
 <Def:foo>
 0 getlocal 0
 1 putobject 100
-2 opt_plus
+2 send + 1
 3 leave
 <Def:foo>
 0 getlocal 0
 1 putobject 10
-2 opt_plus
+2 send + 1
 3 leave
 <ProgramStart>
 0 putself
@@ -99,7 +101,7 @@ func TestBasicMethodDefineAndExecution(t *testing.T) {
 <Def:foo>
 0 getlocal 0
 1 putobject 10
-2 opt_plus
+2 send + 1
 3 leave
 <ProgramStart>
 0 putself
@@ -115,31 +117,6 @@ func TestBasicMethodDefineAndExecution(t *testing.T) {
 	compareBytecode(t, bytecode, expected)
 }
 
-func TestPopRedundantValue(t *testing.T) {
-	input := `
-	a = 10
-	b = 11
-	a + b # redundant value
-	a
-	`
-
-	expected := `
-<ProgramStart>
-0 putobject 10
-1 setlocal 0
-2 putobject 11
-3 setlocal 1
-4 getlocal 0
-5 getlocal 1
-6 opt_plus
-7 pop
-8 getlocal 0
-9 leave
-`
-	bytecode := compileToBytecode(input)
-	compareBytecode(t, bytecode, expected)
-}
-
 func TestArithmeticCompilation(t *testing.T) {
 	input := `
 	(1 * 10 + 100) / 2
@@ -149,11 +126,11 @@ func TestArithmeticCompilation(t *testing.T) {
 <ProgramStart>
 0 putobject 1
 1 putobject 10
-2 opt_mult
+2 send * 1
 3 putobject 100
-4 opt_plus
+4 send + 1
 5 putobject 2
-6 opt_div
+6 send / 1
 7 leave
 `
 
@@ -178,11 +155,11 @@ func TestLocalVariableAccessInCurrentScope(t *testing.T) {
 5 setlocal 1
 6 getlocal 1
 7 getlocal 0
-8 opt_mult
+8 send * 1
 9 putobject 100
-10 opt_plus
+10 send + 1
 11 putobject 2
-12 opt_div
+12 send / 1
 13 leave`
 
 	bytecode := compileToBytecode(input)
@@ -208,13 +185,13 @@ func TestConditionWithoutAlternativeCompilation(t *testing.T) {
 3 setlocal 1
 4 getlocal 0
 5 getlocal 1
-6 opt_gt
+6 send > 1
 7 branchunless 11
 8 putobject 10
 9 setlocal 2
 10 getlocal 2
 11 putobject 1
-12 opt_plus
+12 send + 1
 13 leave
 `
 
@@ -243,7 +220,7 @@ func TestConditionWithAlternativeCompilation(t *testing.T) {
 3 setlocal 1
 4 getlocal 0
 5 getlocal 1
-6 opt_gt
+6 send > 1
 7 branchunless 11
 8 putobject 10
 9 setlocal 2
@@ -252,7 +229,7 @@ func TestConditionWithAlternativeCompilation(t *testing.T) {
 12 setlocal 2
 13 getlocal 2
 14 putobject 1
-15 opt_plus
+15 send + 1
 16 leave
 `
 
