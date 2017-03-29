@@ -9,7 +9,10 @@ import (
 
 func TestClassDefinition(t *testing.T) {
 	input := `
-class Foo
+class Bar
+end
+
+class Foo < Bar
   def bar
     10
   end
@@ -18,6 +21,8 @@ end
 Foo.new.bar
 `
 	expected := `
+<DefClass:Bar>
+0 leave
 <Def:bar>
 0 putobject 10
 1 leave
@@ -28,11 +33,13 @@ Foo.new.bar
 3 leave
 <ProgramStart>
 0 putself
-1 def_class Foo
-2 getconstant Foo
-3 send new 0
-4 send bar 0
-5 leave
+1 def_class Bar
+2 putself
+3 def_class Foo Bar
+4 getconstant Foo
+5 send new 0
+6 send bar 0
+7 leave
 `
 	bytecode := compileToBytecode(input)
 	compareBytecode(t, bytecode, expected)
