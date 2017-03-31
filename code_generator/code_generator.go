@@ -14,7 +14,13 @@ type LocalTable struct {
 }
 
 func (lt *LocalTable) Get(v string) int {
-	return lt.store[v]
+	i, ok := lt.store[v]
+
+	if !ok {
+		panic(fmt.Errorf("Can't find %s in local table.", v))
+	}
+
+	return i
 }
 
 func (lt *LocalTable) Set(val string) int {
@@ -125,8 +131,13 @@ func (cg *CodeGenerator) compileAssignStmt(is *InstructionSet, stmt *ast.AssignS
 
 func (cg *CodeGenerator) compileDefStmt(stmt *ast.DefStatement, scope *Scope) {
 	scope = newScope(scope, stmt)
+
 	is := &InstructionSet{}
 	is.SetLabel(fmt.Sprintf("Def:%s", stmt.Name.Value))
+
+	for i := 0; i < len(stmt.Parameters); i++ {
+		scope.LocalTable.Set(stmt.Parameters[i].Value)
+	}
 
 	cg.compileBlockStatement(is, stmt.BlockStatement, scope)
 	cg.endInstructions(is)
@@ -157,8 +168,8 @@ func (cg *CodeGenerator) compileExpression(is *InstructionSet, exp ast.Expressio
 	case *ast.CallExpression:
 		cg.compileExpression(is, exp.Receiver, scope)
 
-		for _, arg := range exp.Arguments {
-			cg.compileExpression(is, arg, scope)
+		for i := len(exp.Arguments) - 1; i >= 0; i-- {
+			cg.compileExpression(is, exp.Arguments[i], scope)
 		}
 
 		is.Define("send", exp.Method, len(exp.Arguments))
