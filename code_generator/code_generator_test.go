@@ -23,7 +23,7 @@ Foo.bar
 1 leave
 <DefClass:Foo>
 0 putself
-1 putstring bar
+1 putstring "bar"
 2 def_singleton_method 0
 3 leave
 <ProgramStart>
@@ -58,7 +58,7 @@ Foo.new.bar
 1 leave
 <DefClass:Bar>
 0 putself
-1 putstring bar
+1 putstring "bar"
 2 def_method 0
 3 leave
 <DefClass:Foo>
@@ -105,10 +105,10 @@ func TestBasicMethodReDefineAndExecution(t *testing.T) {
 3 leave
 <ProgramStart>
 0 putself
-1 putstring foo
+1 putstring "foo"
 2 def_method 1
 3 putself
-4 putstring foo
+4 putstring "foo"
 5 def_method 1
 6 putself
 7 putobject 11
@@ -123,7 +123,8 @@ func TestBasicMethodReDefineAndExecution(t *testing.T) {
 func TestBasicMethodDefineAndExecution(t *testing.T) {
 	input := `
 	def foo(x, y)
-	  x - y
+	  z = 10
+	  x - y + z
 	end
 
 	foo(11, 1)
@@ -131,13 +132,17 @@ func TestBasicMethodDefineAndExecution(t *testing.T) {
 
 	expected := `
 <Def:foo>
-0 getlocal 0
-1 getlocal 1
-2 send - 1
-3 leave
+0 putobject 10
+1 setlocal 2
+2 getlocal 0
+3 getlocal 1
+4 send - 1
+5 getlocal 2
+6 send + 1
+7 leave
 <ProgramStart>
 0 putself
-1 putstring foo
+1 putstring "foo"
 2 def_method 2
 3 putself
 4 putobject 1
