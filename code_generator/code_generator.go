@@ -83,7 +83,7 @@ func (cg *CodeGenerator) compileStatement(is *InstructionSet, statement ast.Stat
 		cg.compileExpression(is, stmt.Expression, scope)
 	case *ast.DefStatement:
 		is.Define("putself")
-		is.Define("putstring", stmt.Name.Value)
+		is.Define("putstring", fmt.Sprintf("\"%s\"", stmt.Name.Value))
 		switch stmt.Receiver.(type) {
 		case *ast.SelfExpression:
 			is.Define("def_singleton_method", len(stmt.Parameters))
@@ -156,7 +156,7 @@ func (cg *CodeGenerator) compileExpression(is *InstructionSet, exp ast.Expressio
 	case *ast.IntegerLiteral:
 		is.Define("putobject", fmt.Sprint(exp.Value))
 	case *ast.StringLiteral:
-		is.Define("putstring", exp.Value)
+		is.Define("putstring", fmt.Sprintf("\"%s\"", exp.Value))
 	case *ast.Boolean:
 		is.Define("putobject", fmt.Sprint(exp.Value))
 	case *ast.InfixExpression:
