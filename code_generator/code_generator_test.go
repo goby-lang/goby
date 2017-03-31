@@ -122,27 +122,28 @@ func TestBasicMethodReDefineAndExecution(t *testing.T) {
 
 func TestBasicMethodDefineAndExecution(t *testing.T) {
 	input := `
-	def foo(x)
-	  x + 10
+	def foo(x, y)
+	  x - y
 	end
 
-	foo(11)
+	foo(11, 1)
 	`
 
 	expected := `
 <Def:foo>
 0 getlocal 0
-1 putobject 10
-2 send + 1
+1 getlocal 1
+2 send - 1
 3 leave
 <ProgramStart>
 0 putself
 1 putstring foo
-2 def_method 1
+2 def_method 2
 3 putself
-4 putobject 11
-5 send foo 1
-6 leave
+4 putobject 1
+5 putobject 11
+6 send foo 2
+7 leave
 `
 
 	bytecode := compileToBytecode(input)
