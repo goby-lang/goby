@@ -78,7 +78,13 @@ func (cg *CodeGenerator) compileStatement(is *InstructionSet, statement ast.Stat
 	case *ast.DefStatement:
 		is.Define("putself")
 		is.Define("putstring", stmt.Name.Value)
-		is.Define("def_method", len(stmt.Parameters))
+		switch stmt.Receiver.(type) {
+		case *ast.SelfExpression:
+			is.Define("def_singleton_method", len(stmt.Parameters))
+		case nil:
+			is.Define("def_method", len(stmt.Parameters))
+		}
+
 		cg.compileDefStmt(stmt, scope)
 	case *ast.AssignStatement:
 		cg.compileAssignStmt(is, stmt, scope)
