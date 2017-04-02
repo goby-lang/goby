@@ -7,6 +7,34 @@ import (
 	"testing"
 )
 
+func TestArrayCompilation(t *testing.T) {
+	input := `
+	a = [1, 2, "bar"]
+	a[0] = "foo"
+	c = a[0]
+`
+
+	expected := `
+<ProgramStart>
+0 putobject 1
+1 putobject 2
+2 putstring "bar"
+3 newarray 3
+4 setlocal 0
+5 getlocal 0
+6 putstring "foo"
+7 putobject 0
+8 send []= 2
+9 getlocal 0
+10 putobject 0
+11 send [] 1
+12 setlocal 1
+13 leave
+`
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
 func TestClassMethodDefinition(t *testing.T) {
 	input :=`
 class Foo
