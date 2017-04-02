@@ -164,6 +164,12 @@ func (cg *CodeGenerator) compileExpression(is *InstructionSet, exp ast.Expressio
 			cg.compileExpression(is, elem, scope)
 		}
 		is.Define("newarray", len(exp.Elements))
+	case *ast.HashExpression:
+		for key, value := range exp.Data {
+			is.Define("putstring", fmt.Sprintf("\"%s\"", key))
+			cg.compileExpression(is, value, scope)
+		}
+		is.Define("newhash", len(exp.Data)*2)
 	case *ast.InfixExpression:
 		cg.compileInfixExpression(is, exp, scope)
 	case *ast.IfExpression:
