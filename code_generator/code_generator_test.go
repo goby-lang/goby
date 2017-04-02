@@ -7,8 +7,126 @@ import (
 	"testing"
 )
 
+func TestHashCompilation(t *testing.T) {
+	input := `
+	a = { foo: 1, bar: 5 }
+	b = {}
+	b["baz"] = a["bar"] - a["foo"]
+	b["baz"] + a["bar"]
+`
+
+	expected1 := `
+<ProgramStart>
+0 putstring "foo"
+1 putobject 1
+2 putstring "bar"
+3 putobject 5
+4 newhash 4
+5 setlocal 0
+6 newhash 0
+7 setlocal 1
+8 getlocal 1
+9 getlocal 0
+10 putstring "bar"
+11 send [] 1
+12 getlocal 0
+13 putstring "foo"
+14 send [] 1
+15 send - 1
+16 putstring "baz"
+17 send []= 2
+18 getlocal 1
+19 putstring "baz"
+20 send [] 1
+21 getlocal 0
+22 putstring "bar"
+23 send [] 1
+24 send + 1
+25 leave
+`
+	expected2 := `
+<ProgramStart>
+0 putstring "bar"
+1 putobject 5
+2 putstring "foo"
+3 putobject 1
+4 newhash 4
+5 setlocal 0
+6 newhash 0
+7 setlocal 1
+8 getlocal 1
+9 getlocal 0
+10 putstring "bar"
+11 send [] 1
+12 getlocal 0
+13 putstring "foo"
+14 send [] 1
+15 send - 1
+16 putstring "baz"
+17 send []= 2
+18 getlocal 1
+19 putstring "baz"
+20 send [] 1
+21 getlocal 0
+22 putstring "bar"
+23 send [] 1
+24 send + 1
+25 leave
+`
+	bytecode := strings.TrimSpace(compileToBytecode(input))
+
+	// This is because hash stores data using map.
+	// And map's keys won't be sorted when running in for loop.
+	// So we can get 2 possible results.
+	expected1 = strings.TrimSpace(expected1)
+	expected2 = strings.TrimSpace(expected2)
+	if bytecode != expected1 && bytecode != expected2 {
+		t.Fatalf(`
+Bytecode compare failed
+Expect:
+"%s"
+
+Or:
+
+"%s"
+
+Got:
+"%s"
+`, expected1, expected2, bytecode)
+	}
+
+}
+
+func TestArrayCompilation(t *testing.T) {
+	input := `
+	a = [1, 2, "bar"]
+	a[0] = "foo"
+	c = a[0]
+`
+
+	expected := `
+<ProgramStart>
+0 putobject 1
+1 putobject 2
+2 putstring "bar"
+3 newarray 3
+4 setlocal 0
+5 getlocal 0
+6 putstring "foo"
+7 putobject 0
+8 send []= 2
+9 getlocal 0
+10 putobject 0
+11 send [] 1
+12 setlocal 1
+13 leave
+`
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
 func TestClassMethodDefinition(t *testing.T) {
-	input :=`
+	input := `
 class Foo
   def self.bar
     10

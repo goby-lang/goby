@@ -159,6 +159,17 @@ func (cg *CodeGenerator) compileExpression(is *InstructionSet, exp ast.Expressio
 		is.Define("putstring", fmt.Sprintf("\"%s\"", exp.Value))
 	case *ast.Boolean:
 		is.Define("putobject", fmt.Sprint(exp.Value))
+	case *ast.ArrayExpression:
+		for _, elem := range exp.Elements {
+			cg.compileExpression(is, elem, scope)
+		}
+		is.Define("newarray", len(exp.Elements))
+	case *ast.HashExpression:
+		for key, value := range exp.Data {
+			is.Define("putstring", fmt.Sprintf("\"%s\"", key))
+			cg.compileExpression(is, value, scope)
+		}
+		is.Define("newhash", len(exp.Data)*2)
 	case *ast.InfixExpression:
 		cg.compileInfixExpression(is, exp, scope)
 	case *ast.IfExpression:
