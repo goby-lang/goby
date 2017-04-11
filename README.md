@@ -4,7 +4,7 @@
 
 Rooby is a Ruby-like object oriented language written in Go.
 
-**I am working on virtual machine implementation, and will change this project into interpreter/compiler**
+**I am working on a [virtual machine implementation](https://github.com/st0012/GVM), and will change this project into interpreter/compiler**
 
 
 ## Features
