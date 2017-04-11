@@ -176,6 +176,11 @@ func (cg *CodeGenerator) compileExpression(is *InstructionSet, exp ast.Expressio
 		cg.compileIfExpression(is, exp, scope)
 	case *ast.SelfExpression:
 		is.Define("putself")
+	case *ast.YieldExpression:
+		is.Define("invokeblock")
+		for i := len(exp.Arguments) - 1; i >= 0; i-- {
+			cg.compileExpression(is, exp.Arguments[i], scope)
+		}
 	case *ast.CallExpression:
 		cg.compileExpression(is, exp.Receiver, scope)
 
@@ -183,8 +188,26 @@ func (cg *CodeGenerator) compileExpression(is *InstructionSet, exp ast.Expressio
 			cg.compileExpression(is, exp.Arguments[i], scope)
 		}
 
+		if exp.Block != nil {
+			cg.compileBlockArgExpression(exp, scope)
+			is.Define("send", exp.Method, len(exp.Arguments), "block")
+			return
+		}
 		is.Define("send", exp.Method, len(exp.Arguments))
 	}
+}
+
+func (cg *CodeGenerator) compileBlockArgExpression(exp *ast.CallExpression, scope *Scope) {
+	is := &InstructionSet{}
+	is.SetLabel("Block")
+
+	for i := 0; i < len(exp.BlockArguments); i++ {
+		scope.LocalTable.Set(exp.BlockArguments[i].Value)
+	}
+
+	cg.compileBlockStatement(is, exp.Block, scope)
+	cg.endInstructions(is)
+	cg.instructionSets = append(cg.instructionSets, is)
 }
 
 func (cg *CodeGenerator) compileIfExpression(is *InstructionSet, exp *ast.IfExpression, scope *Scope) {
