@@ -2,7 +2,42 @@
 
 [![Build Status](https://travis-ci.org/st0012/Rooby.svg?branch=master)](https://travis-ci.org/st0012/Rooby)
 
-Rooby is a new object oriented language written in Go.
+Rooby is a Ruby-like object oriented language written in Go.
+
+**I am working on virtual machine implementation, and will change this project into interpreter/compiler**
+
+
+## Features
+- Everything is object
+- Object & Class
+    - Top level main object
+    - Constructor
+    - Support class method
+    - Support inheritance
+    - Support instance variable
+    - Support self
+- Variables
+    - Constant
+    - Local variable
+    - Instance variable
+- Method
+    - Support evaluation with arguments
+    - Support evaluation without arguments
+    - Support evaluation with block
+- BuiltIn Data Types (All of them are classes 😀)
+    - Class
+    - Integer
+    - String
+    - Boolean
+    - nil (has this type internally but parser hasn't support yet)
+    - Hash
+    - Array
+    - **Not** support symbols. Since string is already immutable, supporting symbols is not that necessary.
+- Flow control
+    - If statement
+    - Haven't support `for` or `while` yet, but can use Array#each to do for loop
+- IO
+    - Just `puts` for now
 
 ## Install
 
@@ -132,29 +167,3 @@ s.push(10)
 puts(s.pop) #=> 10
 puts(s.top) #=> 4
 ```
-
-## TODO
-
-- ~~Customize initialization method~~
-- ~~Inheritance~~
-- ~~Definable class methods~~
-- ~~Execution command~~
-- ~~Improve built in method's self implementation~~ 
-- Improve syntax
-    - ~~method call without self~~
-    - ~~remove semicolon~~
-- ~~Makefile~~
-- ~~Comment support~~
-- ~~Primitive type class~~
-    - ~~String~~
-    - ~~Integer~~
-    - ~~Boolean~~
-- ~~Advanced data structures (Array/Hash)~~
-- for loop support
-- Package management
-- Allow monkey patching(?)
-- Basic IO
-- More documentation
-    - Samples
-    - Feature list
-- REPL(Hard to be done)
