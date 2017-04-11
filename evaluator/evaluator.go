@@ -35,11 +35,10 @@ func Eval(node ast.Node, scope *Scope) Object {
 		return evalDefStatement(node, scope)
 	case *ast.WhileStatement:
 		return evalWhileStatement(node, scope)
-	case *ast.YieldStatement:
-		// Only retrieve current scope's block.
-		return evalYieldStatement(node, scope)
 
 	// Expressions
+	case *ast.YieldExpression:
+		return evalYieldExpression(node, scope)
 	case *ast.IfExpression:
 		return evalIfExpression(node, scope)
 	case *ast.CallExpression:

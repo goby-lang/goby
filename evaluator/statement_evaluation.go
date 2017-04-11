@@ -110,7 +110,7 @@ func evalWhileStatement(exp *ast.WhileStatement, scope *Scope) Object {
 	return nil
 }
 
-func evalYieldStatement(node *ast.YieldStatement, scope *Scope) Object {
+func evalYieldExpression(node *ast.YieldExpression, scope *Scope) Object {
 	block, ok := scope.Env.GetCurrent("block")
 	if ok {
 		b := block.(*Method)

@@ -377,3 +377,14 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 
 	return args
 }
+
+func (p *Parser) parseYieldExpression() ast.Expression {
+	ye := &ast.YieldExpression{Token: p.curToken}
+
+	if p.peekTokenIs(token.LPAREN) {
+		p.nextToken()
+		ye.Arguments = p.parseCallArguments()
+	}
+
+	return ye
+}

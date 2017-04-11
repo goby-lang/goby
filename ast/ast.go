@@ -443,24 +443,24 @@ func (ws *WhileStatement) String() string {
 	return out.String()
 }
 
-type YieldStatement struct {
+type YieldExpression struct {
 	Token     token.Token
 	Arguments []Expression
 }
 
-func (ys *YieldStatement) statementNode() {}
-func (ys *YieldStatement) TokenLiteral() string {
-	return ys.Token.Literal
+func (ye *YieldExpression) expressionNode() {}
+func (ye *YieldExpression) TokenLiteral() string {
+	return ye.Token.Literal
 }
-func (ys *YieldStatement) String() string {
+func (ye *YieldExpression) String() string {
 	var out bytes.Buffer
 	var args []string
 
-	for _, arg := range ys.Arguments {
+	for _, arg := range ye.Arguments {
 		args = append(args, arg.String())
 	}
 
-	out.WriteString(ys.TokenLiteral())
+	out.WriteString(ye.TokenLiteral())
 	out.WriteString("(")
 	out.WriteString(strings.Join(args, ", "))
 	out.WriteString(")")

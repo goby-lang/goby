@@ -263,20 +263,22 @@ func TestDefStatementWithYield(t *testing.T) {
 
 	stmt := program.Statements[0].(*ast.DefStatement)
 	block := stmt.BlockStatement
-	firstYield, ok := block.Statements[0].(*ast.YieldStatement)
+	firstStmt, ok := block.Statements[0].(*ast.ExpressionStatement)
+	firstYield := firstStmt.Expression.(*ast.YieldExpression)
 
 	if !ok {
-		t.Fatalf("Expect method's body is an YieldStatement. got=%T", block.Statements[0])
+		t.Fatalf("Expect method's body is an YieldExpression. got=%T", block.Statements[0])
 	}
 
 	testIntegerLiteral(t, firstYield.Arguments[0], 1)
 	testIntegerLiteral(t, firstYield.Arguments[1], 2)
 	testIdentifier(t, firstYield.Arguments[2], "bar")
 
-	_, ok = block.Statements[1].(*ast.YieldStatement)
+	secondStmt, ok := block.Statements[1].(*ast.ExpressionStatement)
+	_, ok = secondStmt.Expression.(*ast.YieldExpression)
 
 	if !ok {
-		t.Fatalf("Expect method's body is an YieldStatement. got=%T", block.Statements[1])
+		t.Fatalf("Expect method's body is an YieldExpression. got=%T", block.Statements[1])
 	}
 }
 
