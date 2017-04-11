@@ -9,6 +9,7 @@ Rooby is a Ruby-like object oriented language written in Go.
 
 ## Features
 - Everything is object
+- Support comment
 - Object & Class
     - Top level main object
     - Constructor
@@ -166,4 +167,38 @@ s.push(4)
 s.push(10)
 puts(s.pop) #=> 10
 puts(s.top) #=> 4
+```
+
+#### Block support
+
+```ruby
+class Car
+  def initialize
+    yield(self)
+  end
+  
+  def color=(c)
+    @color = c
+  end
+  
+  def color
+    @color
+  end
+  
+  def doors=(ds)
+    @doors = ds
+  end
+  
+  def doors
+    @doors
+  end
+end
+ 
+car = Car.new do |c|
+  c.color = "Red"
+  c.doors = 4
+end
+ 
+puts("My car's color is " + car.color + " and it's got " + car.doors.to_s + " doors.")
+
 ```
