@@ -36,7 +36,8 @@ Rooby is a Ruby-like object oriented language written in Go.
     - **Not** support symbols. Since string is already immutable, supporting symbols is not that necessary.
 - Flow control
     - If statement
-    - Haven't support `for` or `while` yet, but can use Array#each to do for loop
+    - while statement
+    - Haven't support `for` yet
 - IO
     - Just `puts` for now
 
