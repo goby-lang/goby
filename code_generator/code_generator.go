@@ -177,15 +177,18 @@ func (cg *CodeGenerator) compileExpression(is *InstructionSet, exp ast.Expressio
 	case *ast.SelfExpression:
 		is.Define("putself")
 	case *ast.YieldExpression:
-		is.Define("invokeblock")
-		for i := len(exp.Arguments) - 1; i >= 0; i-- {
-			cg.compileExpression(is, exp.Arguments[i], scope)
+		is.Define("putself")
+
+		for _, arg := range exp.Arguments {
+			cg.compileExpression(is, arg, scope)
 		}
+
+		is.Define("invokeblock", len(exp.Arguments))
 	case *ast.CallExpression:
 		cg.compileExpression(is, exp.Receiver, scope)
 
-		for i := len(exp.Arguments) - 1; i >= 0; i-- {
-			cg.compileExpression(is, exp.Arguments[i], scope)
+		for _, arg := range exp.Arguments {
+			cg.compileExpression(is, arg, scope)
 		}
 
 		if exp.Block != nil {
