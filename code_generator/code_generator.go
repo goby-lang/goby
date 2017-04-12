@@ -125,6 +125,7 @@ func (cg *CodeGenerator) compileAssignStmt(is *InstructionSet, stmt *ast.AssignS
 		cg.compileExpression(is, stmt.Value, scope)
 		is.Define("setlocal", fmt.Sprint(index))
 	case *ast.InstanceVariable:
+		cg.compileExpression(is, stmt.Value, scope)
 		is.Define("setinstancevariable", name.Value)
 	}
 }
