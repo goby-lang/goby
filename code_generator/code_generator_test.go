@@ -7,6 +7,41 @@ import (
 	"testing"
 )
 
+func TestCallBlockCompilation(t *testing.T) {
+	input := `
+def foo
+  yield(20, 10)
+end
+
+self.foo do |x, y|
+  x - y
+end
+`
+	expected := `
+<Def:foo>
+0 putself
+1 putobject 20
+2 putobject 10
+3 invokeblock 2
+4 leave
+<Block>
+0 getlocal 0
+1 getlocal 1
+2 send - 1
+3 leave
+<ProgramStart>
+0 putself
+1 putstring "foo"
+2 def_method 0
+3 putself
+4 send foo 0 block
+5 leave
+`
+
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
 func TestHashCompilation(t *testing.T) {
 	input := `
 	a = { foo: 1, bar: 5 }
@@ -26,14 +61,14 @@ func TestHashCompilation(t *testing.T) {
 6 newhash 0
 7 setlocal 1
 8 getlocal 1
-9 getlocal 0
-10 putstring "bar"
-11 send [] 1
-12 getlocal 0
-13 putstring "foo"
-14 send [] 1
-15 send - 1
-16 putstring "baz"
+9 putstring "baz"
+10 getlocal 0
+11 putstring "bar"
+12 send [] 1
+13 getlocal 0
+14 putstring "foo"
+15 send [] 1
+16 send - 1
 17 send []= 2
 18 getlocal 1
 19 putstring "baz"
@@ -112,8 +147,8 @@ func TestArrayCompilation(t *testing.T) {
 3 newarray 3
 4 setlocal 0
 5 getlocal 0
-6 putstring "foo"
-7 putobject 0
+6 putobject 0
+7 putstring "foo"
 8 send []= 2
 9 getlocal 0
 10 putobject 0
@@ -263,8 +298,8 @@ func TestBasicMethodDefineAndExecution(t *testing.T) {
 1 putstring "foo"
 2 def_method 2
 3 putself
-4 putobject 1
-5 putobject 11
+4 putobject 11
+5 putobject 1
 6 send foo 2
 7 leave
 `
