@@ -25,6 +25,14 @@ func initTopLevelClasses() {
 	ObjectClass = &RClass{BaseClass: &BaseClass{Name: "Object", Class: ClassClass, Methods: globalMethods, ClassMethods: NewEnvironment()}}
 }
 
+func InitializeClass(name string) *RClass {
+	class := &RClass{BaseClass: &BaseClass{Name: name, Methods: NewEnvironment(), ClassMethods: NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}}
+	//classScope := &Scope{Self: class, Env: NewClosedEnvironment(scope.Env)}
+	//class.Scope = classScope
+
+	return class
+}
+
 type Class interface {
 	LookupClassMethod(string) Object
 	LookupInstanceMethod(string) Object
@@ -108,14 +116,6 @@ func (c *BaseClass) ReturnClass() Class {
 
 func (c *BaseClass) ReturnName() string {
 	return c.Name
-}
-
-func InitializeClass(name string) *RClass {
-	class := &RClass{BaseClass: &BaseClass{Name: name, Methods: NewEnvironment(), ClassMethods: NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}}
-	//classScope := &Scope{Self: class, Env: NewClosedEnvironment(scope.Env)}
-	//class.Scope = classScope
-
-	return class
 }
 
 var BuiltinGlobalMethods = []*BuiltInMethod{
