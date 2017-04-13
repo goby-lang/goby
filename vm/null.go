@@ -1,15 +1,16 @@
 package vm
 
 var (
+	NullClass *RNull
 	NULL *Null
 )
 
-type NullClass struct {
+type RNull struct {
 	*BaseClass
 }
 
 type Null struct {
-	Class *NullClass
+	Class *RNull
 }
 
 func (n *Null) Type() ObjectType {
@@ -26,6 +27,8 @@ func (n *Null) ReturnClass() Class {
 
 func initNull() {
 	baseClass := &BaseClass{Name: "Null", Methods: NewEnvironment(), ClassMethods: NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}
-	nc := &NullClass{BaseClass: baseClass}
-	NULL = &Null{Class: nc}
+	nc := &RNull{BaseClass: baseClass}
+	NullClass = nc
+	NULL = &Null{Class: NullClass}
+
 }
