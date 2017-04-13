@@ -57,6 +57,7 @@ const (
 	PUT_STRING            = "putstring"
 	PUT_SELF              = "putself"
 	PUT_OBJECT            = "putobject"
+	PUT_NULL              = "putnil"
 	NEW_ARRAY             = "newarray"
 	NEW_HASH              = "newhash"
 	PLUS                  = "opt_plus"
@@ -288,13 +289,26 @@ var BuiltInActions = map[OperationType]*Action{
 	BRANCH_UNLESS: {
 		Name: BRANCH_UNLESS,
 		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-			cond := vm.Stack.pop().(*BooleanObject).Value
-			if cond {
+			v := vm.Stack.pop()
+			bool, isBool := v.(*BooleanObject)
+
+			if isBool {
+				if bool.Value {
+					return
+				}
+
+				line := args[0].(*IntegerObject).Value
+				cf.PC = line
 				return
 			}
 
-			line := args[0].(*IntegerObject).Value
-			cf.PC = line
+			_, isNull := v.(*Null)
+
+			if isNull {
+				line := args[0].(*IntegerObject).Value
+				cf.PC = line
+				return
+			}
 		},
 	},
 	JUMP: {
@@ -313,6 +327,12 @@ var BuiltInActions = map[OperationType]*Action{
 		Name: PUT_STRING,
 		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
 			vm.Stack.push(args[0])
+		},
+	},
+	PUT_NULL: {
+		Name: PUT_NULL,
+		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
+			vm.Stack.push(NULL)
 		},
 	},
 	DEF_METHOD: {

@@ -234,6 +234,8 @@ func (cg *CodeGenerator) compileIfExpression(is *InstructionSet, exp *ast.IfExpr
 	anchor1.Line = is.Count + 1
 
 	if exp.Alternative == nil {
+		anchor1.Line -= 1
+		is.Define("putnil")
 		return
 	}
 
