@@ -9,10 +9,12 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	"github.com/st0012/Rooby/evaluator"
 )
 
 func main() {
-	execOptionPtr := flag.Bool("c", false, "Compile to bytecode")
+	compileOptionPtr := flag.Bool("c", false, "Compile to bytecode")
+	evalOptionPtr := flag.Bool("eval", true, "Eval program directly without using VM")
 
 	flag.Parse()
 
@@ -26,16 +28,21 @@ func main() {
 	p := parser.New(l)
 	program := p.ParseProgram()
 	p.CheckErrors()
+
+	if *evalOptionPtr && !*compileOptionPtr {
+		evaluator.Eval(program, evaluator.MainObj.Scope)
+		return
+	}
+
 	cg := code_generator.New(program)
 
 	bytecodes := cg.GenerateByteCode(program)
 
-	if !*execOptionPtr {
+	if !*compileOptionPtr {
 		gvm.Exec(bytecodes)
 		return
 	}
 	writeByteCode(bytecodes, filepath)
-	//evaluator.Eval(program, evaluator.MainObj.Scope)
 }
 
 func writeByteCode(bytecodes string, filepath string) {
