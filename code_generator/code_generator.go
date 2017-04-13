@@ -182,6 +182,9 @@ func (cg *CodeGenerator) compileExpression(is *InstructionSet, exp ast.Expressio
 		is.Define("newhash", len(exp.Data)*2)
 	case *ast.InfixExpression:
 		cg.compileInfixExpression(is, exp, scope)
+	case *ast.PrefixExpression:
+		cg.compileExpression(is, exp.Right, scope)
+		is.Define("send", exp.Operator, 0)
 	case *ast.IfExpression:
 		cg.compileIfExpression(is, exp, scope)
 	case *ast.SelfExpression:

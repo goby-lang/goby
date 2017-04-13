@@ -85,6 +85,20 @@ var builtinBooleanMethods = []*BuiltInMethod{
 		},
 		Name: "!=",
 	},
+	{
+		Fn: func(receiver Object) BuiltinMethodBody {
+			return func(args []Object, block *Method) Object {
+				rightValue := receiver.(*BooleanObject).Value
+
+				if rightValue {
+					return FALSE
+				}
+
+				return TRUE
+			}
+		},
+		Name: "!",
+	},
 }
 
 func initBool() {
