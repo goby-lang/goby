@@ -33,7 +33,8 @@ func New() *VM {
 	vm := &VM{Stack: s, CallFrameStack: cfs, SP: 0, CFP: 0}
 	s.VM = vm
 	cfs.VM = vm
-	vm.Constants = make(map[string]Object)
+
+	vm.initConstants()
 	vm.MethodISTable = &ISIndexTable{Data: make(map[string]int)}
 	vm.ClassISTable = &ISIndexTable{Data: make(map[string]int)}
 	vm.BlockList = &ISIndexTable{Data: make(map[string]int)}
@@ -47,13 +48,6 @@ func New() *VM {
 	return vm
 }
 
-func (vm *VM) execInstruction(cf *CallFrame, i *Instruction) {
-	cf.PC += 1
-	//fmt.Println(i.Inspect())
-	i.Action.Operation(vm, cf, i.Params...)
-	//fmt.Println(vm.Stack.inspect())
-}
-
 func (vm *VM) EvalCallFrame(cf *CallFrame) {
 	for cf.PC < len(cf.InstructionSet.Instructions) {
 		i := cf.InstructionSet.Instructions[cf.PC]
@@ -64,6 +58,34 @@ func (vm *VM) EvalCallFrame(cf *CallFrame) {
 func (vm *VM) Exec() {
 	cf := vm.CallFrameStack.Top()
 	vm.EvalCallFrame(cf)
+}
+
+func (vm *VM) initConstants() {
+	constants := make(map[string]Object)
+
+	builtInClasses := []Class{
+		IntegerClass,
+		StringClass,
+		BooleanClass,
+		NullClass,
+		ArrayClass,
+		HashClass,
+		ClassClass,
+		ObjectClass,
+	}
+
+	for _, c := range builtInClasses {
+		constants[c.ReturnName()] = c
+	}
+
+	vm.Constants = constants
+}
+
+func (vm *VM) execInstruction(cf *CallFrame, i *Instruction) {
+	cf.PC += 1
+	fmt.Println(i.Inspect())
+	i.Action.Operation(vm, cf, i.Params...)
+	fmt.Println(vm.Stack.inspect())
 }
 
 func (vm *VM) getBlock() (*InstructionSet, bool) {
@@ -105,7 +127,7 @@ func (vm *VM) getClassIS(name string) (*InstructionSet, bool) {
 	return is, ok
 }
 
-func (vm *VM) SetLabel(is *InstructionSet, name string) {
+func (vm *VM) setLabel(is *InstructionSet, name string) {
 	var l *Label
 	var labelName string
 	var labelType LabelType
