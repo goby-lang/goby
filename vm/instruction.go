@@ -52,6 +52,7 @@ const (
 	GET_CONSTANT          = "getconstant"
 	GET_INSTANCE_VARIABLE = "getinstancevariable"
 	SET_LOCAL             = "setlocal"
+	SET_CONSTANT          = "setconstant"
 	SET_INSTANCE_VARIABLE = "setinstancevariable"
 	PUT_STRING            = "putstring"
 	PUT_SELF              = "putself"
@@ -139,6 +140,14 @@ var BuiltInActions = map[OperationType]*Action{
 		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
 			v := vm.Stack.pop()
 			cf.insertLCL(args[0].(*IntegerObject).Value, v)
+		},
+	},
+	SET_CONSTANT: {
+		Name: SET_CONSTANT,
+		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
+			constName := args[0].(*StringObject).Value
+			v := vm.Stack.pop()
+			vm.Constants[constName] = v
 		},
 	},
 	NEW_ARRAY: {
