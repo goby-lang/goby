@@ -1,8 +1,7 @@
-package bytecode_parser
+package vm
 
 import (
 	"fmt"
-	"github.com/st0012/Rooby/vm"
 	"regexp"
 	"strconv"
 	"strings"
@@ -11,15 +10,15 @@ import (
 type Parser struct {
 	Line       int
 	LabelCount int
-	VM         *vm.VM
+	VM         *VM
 }
 
-func New() *Parser {
+func NewBytecodeParser() *Parser {
 	return &Parser{}
 }
 
-func (p *Parser) Parse(bytecodes string) []*vm.InstructionSet {
-	iss := []*vm.InstructionSet{}
+func (p *Parser) Parse(bytecodes string) []*InstructionSet {
+	iss := []*InstructionSet{}
 	bytecodes = removeEmptyLine(strings.TrimSpace(bytecodes))
 	bytecodesByLine := strings.Split(bytecodes, "\n")
 	p.parseSection(iss, bytecodesByLine)
@@ -27,8 +26,8 @@ func (p *Parser) Parse(bytecodes string) []*vm.InstructionSet {
 	return iss
 }
 
-func (p *Parser) parseSection(iss []*vm.InstructionSet, bytecodesByLine []string) {
-	is := &vm.InstructionSet{}
+func (p *Parser) parseSection(iss []*InstructionSet, bytecodesByLine []string) {
+	is := &InstructionSet{}
 	count := 0
 
 	// First line is label
@@ -48,13 +47,13 @@ func (p *Parser) parseSection(iss []*vm.InstructionSet, bytecodesByLine []string
 	iss = append(iss, is)
 }
 
-func (p *Parser) parseLabel(is *vm.InstructionSet, line string) {
+func (p *Parser) parseLabel(is *InstructionSet, line string) {
 	line = strings.Trim(line, "<")
 	line = strings.Trim(line, ">")
 	p.VM.SetLabel(is, line)
 }
 
-func (p *Parser) parseInstruction(is *vm.InstructionSet, line string) {
+func (p *Parser) parseInstruction(is *InstructionSet, line string) {
 	var params []interface{}
 	var rawParams []string
 
@@ -73,7 +72,7 @@ func (p *Parser) parseInstruction(is *vm.InstructionSet, line string) {
 	}
 
 	ln, _ := strconv.ParseInt(lineNum, 0, 64)
-	action := vm.BuiltInActions[vm.OperationType(act)]
+	action := BuiltInActions[OperationType(act)]
 
 	if action == nil {
 		panic(fmt.Sprintf("Unknown command: %s. Line: %d", act, ln))

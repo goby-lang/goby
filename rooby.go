@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"github.com/st0012/Rooby/vm"
-	"github.com/st0012/Rooby/vm/bytecode_parser"
 	"github.com/st0012/Rooby/code_generator"
 	"github.com/st0012/Rooby/lexer"
 	"github.com/st0012/Rooby/parser"
@@ -47,7 +46,7 @@ func main() {
 }
 
 func execBytecode(bytecodes string) {
-	p := bytecode_parser.New()
+	p := vm.NewBytecodeParser()
 	p.Parse(bytecodes)
 	v := vm.New()
 	p.VM = v
