@@ -93,7 +93,12 @@ var BuiltInActions = map[OperationType]*Action{
 	GET_CONSTANT: {
 		Name: GET_CONSTANT,
 		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-			constant := vm.Constants[args[0].(*StringObject).Value]
+			constName := args[0].(*StringObject).Value
+			constant, ok := vm.Constants[constName]
+
+			if !ok {
+				panic(fmt.Sprintf("Can't find constant: %s", constName))
+			}
 			vm.Stack.push(constant)
 		},
 	},
