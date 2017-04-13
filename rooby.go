@@ -2,7 +2,8 @@ package main
 
 import (
 	"flag"
-	"github.com/st0012/GVM"
+	"github.com/st0012/Rooby/vm"
+	"github.com/st0012/Rooby/vm/bytecode_parser"
 	"github.com/st0012/Rooby/code_generator"
 	"github.com/st0012/Rooby/lexer"
 	"github.com/st0012/Rooby/parser"
@@ -39,10 +40,21 @@ func main() {
 	bytecodes := cg.GenerateByteCode(program)
 
 	if !*compileOptionPtr {
-		gvm.Exec(bytecodes)
+		execBytecode(bytecodes)
 		return
 	}
 	writeByteCode(bytecodes, filepath)
+}
+
+func execBytecode(bytecodes string) {
+	p := bytecode_parser.New()
+	p.Parse(bytecodes)
+	v := vm.New()
+	p.VM = v
+	cf := vm.NewCallFrame(v.LabelTable[vm.PROGRAM]["ProgramStart"][0])
+	cf.Self = vm.MainObj
+	v.CallFrameStack.Push(cf)
+	v.Exec()
 }
 
 func writeByteCode(bytecodes string, filepath string) {
