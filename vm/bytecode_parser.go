@@ -50,7 +50,7 @@ func (p *Parser) parseSection(iss []*InstructionSet, bytecodesByLine []string) {
 func (p *Parser) parseLabel(is *InstructionSet, line string) {
 	line = strings.Trim(line, "<")
 	line = strings.Trim(line, ">")
-	p.VM.SetLabel(is, line)
+	p.VM.setLabel(is, line)
 }
 
 func (p *Parser) parseInstruction(is *InstructionSet, line string) {
