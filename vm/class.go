@@ -146,6 +146,14 @@ var BuiltinGlobalMethods = []*BuiltInMethod{
 		},
 		Name: "class",
 	},
+	{
+		Fn: func(receiver Object) BuiltinMethodBody {
+			return func(args []Object, block *Method) Object {
+				return FALSE
+			}
+		},
+		Name: "!",
+	},
 }
 
 var BuiltinClassMethods = []*BuiltInMethod{
