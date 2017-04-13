@@ -115,14 +115,16 @@ func (cg *CodeGenerator) compileClassStmt(stmt *ast.ClassStatement, scope *Scope
 }
 
 func (cg *CodeGenerator) compileAssignStmt(is *InstructionSet, stmt *ast.AssignStatement, scope *Scope) {
+	cg.compileExpression(is, stmt.Value, scope)
+
 	switch name := stmt.Name.(type) {
 	case *ast.Identifier:
 		index := scope.LocalTable.Set(name.Value)
-		cg.compileExpression(is, stmt.Value, scope)
 		is.Define("setlocal", fmt.Sprint(index))
 	case *ast.InstanceVariable:
-		cg.compileExpression(is, stmt.Value, scope)
 		is.Define("setinstancevariable", name.Value)
+	case *ast.Constant:
+		is.Define("setconstant", name.Value)
 	}
 }
 
