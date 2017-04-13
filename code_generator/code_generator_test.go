@@ -90,14 +90,14 @@ func TestHashCompilation(t *testing.T) {
 6 newhash 0
 7 setlocal 1
 8 getlocal 1
-9 getlocal 0
-10 putstring "bar"
-11 send [] 1
-12 getlocal 0
-13 putstring "foo"
-14 send [] 1
-15 send - 1
-16 putstring "baz"
+9 putstring "baz"
+10 getlocal 0
+11 putstring "bar"
+12 send [] 1
+13 getlocal 0
+14 putstring "foo"
+15 send [] 1
+16 send - 1
 17 send []= 2
 18 getlocal 1
 19 putstring "baz"
