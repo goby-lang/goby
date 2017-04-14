@@ -101,6 +101,9 @@ func (cg *CodeGenerator) compileStatement(is *InstructionSet, statement ast.Stat
 
 		is.Define("pop")
 		cg.compileClassStmt(stmt, scope)
+	case *ast.ReturnStatement:
+		cg.compileExpression(is, stmt.ReturnValue, scope)
+		cg.endInstructions(is)
 	}
 }
 
