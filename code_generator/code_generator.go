@@ -13,14 +13,10 @@ type LocalTable struct {
 	count int
 }
 
-func (lt *LocalTable) Get(v string) int {
+func (lt *LocalTable) Get(v string) (int, bool) {
 	i, ok := lt.store[v]
 
-	if !ok {
-		panic(fmt.Errorf("Can't find %s in local table.", v))
-	}
-
-	return i
+	return i, ok
 }
 
 func (lt *LocalTable) Set(val string) int {
@@ -105,6 +101,9 @@ func (cg *CodeGenerator) compileStatement(is *InstructionSet, statement ast.Stat
 
 		is.Define("pop")
 		cg.compileClassStmt(stmt, scope)
+	case *ast.ReturnStatement:
+		cg.compileExpression(is, stmt.ReturnValue, scope)
+		cg.endInstructions(is)
 	}
 }
 
@@ -119,14 +118,16 @@ func (cg *CodeGenerator) compileClassStmt(stmt *ast.ClassStatement, scope *Scope
 }
 
 func (cg *CodeGenerator) compileAssignStmt(is *InstructionSet, stmt *ast.AssignStatement, scope *Scope) {
+	cg.compileExpression(is, stmt.Value, scope)
+
 	switch name := stmt.Name.(type) {
 	case *ast.Identifier:
 		index := scope.LocalTable.Set(name.Value)
-		cg.compileExpression(is, stmt.Value, scope)
 		is.Define("setlocal", fmt.Sprint(index))
 	case *ast.InstanceVariable:
-		cg.compileExpression(is, stmt.Value, scope)
 		is.Define("setinstancevariable", name.Value)
+	case *ast.Constant:
+		is.Define("setconstant", name.Value)
 	}
 }
 
@@ -148,8 +149,19 @@ func (cg *CodeGenerator) compileDefStmt(stmt *ast.DefStatement, scope *Scope) {
 func (cg *CodeGenerator) compileExpression(is *InstructionSet, exp ast.Expression, scope *Scope) {
 	switch exp := exp.(type) {
 	case *ast.Identifier:
-		value := fmt.Sprintf("%d", scope.LocalTable.Get(exp.Value))
-		is.Define("getlocal", value)
+		index, ok := scope.LocalTable.Get(exp.Value)
+
+		// it's local variable
+		if ok {
+			value := fmt.Sprintf("%d", index)
+			is.Define("getlocal", value)
+			return
+		}
+
+		// otherwise it's a method call
+		is.Define("putself")
+		is.Define("send", exp.Value, 0)
+
 	case *ast.Constant:
 		is.Define("getconstant", exp.Value)
 	case *ast.InstanceVariable:
@@ -173,6 +185,17 @@ func (cg *CodeGenerator) compileExpression(is *InstructionSet, exp ast.Expressio
 		is.Define("newhash", len(exp.Data)*2)
 	case *ast.InfixExpression:
 		cg.compileInfixExpression(is, exp, scope)
+	case *ast.PrefixExpression:
+		switch exp.Operator {
+		case "!":
+			cg.compileExpression(is, exp.Right, scope)
+			is.Define("send", exp.Operator, 0)
+		case "-":
+			is.Define("putobject", 0)
+			cg.compileExpression(is, exp.Right, scope)
+			is.Define("send", exp.Operator, 1)
+		}
+
 	case *ast.IfExpression:
 		cg.compileIfExpression(is, exp, scope)
 	case *ast.SelfExpression:
@@ -225,6 +248,8 @@ func (cg *CodeGenerator) compileIfExpression(is *InstructionSet, exp *ast.IfExpr
 	anchor1.Line = is.Count + 1
 
 	if exp.Alternative == nil {
+		anchor1.Line -= 1
+		is.Define("putnil")
 		return
 	}
 
