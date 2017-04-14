@@ -27,3 +27,5 @@ _testmain.go
 .idea
 
 rooby
+
+*.gbc

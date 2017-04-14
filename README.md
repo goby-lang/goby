@@ -4,9 +4,17 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/st0012/Rooby)](https://goreportcard.com/report/github.com/st0012/Rooby)
 
 Rooby is a Ruby-like object oriented language written in Go.
+   
 
-**I am working on a [virtual machine implementation](https://github.com/st0012/GVM), and will change this project into interpreter/compiler**
+Here's my expectation about it:
 
+- Has Ruby-like syntax and object system.
+- Rooby program will be compiled at first place and then executed through VM. (I am still working on Rooby VM, see `vm` folder.) 
+- It's compilation and evaluation are separated, it can firstly compile your program into bytecode and execute it later. This will work like python.
+- Maybe it can gain some improvement on concurrency since it's based on Go.
+- Any special idea comes to my mind or proposed by you. 
+
+**Join me to build Rooby together!**
 
 ## Features
 - Everything is object
@@ -54,35 +62,25 @@ $ go get github.com/st0012/Rooby
 ```
 
 ## Try it!
+(See sample directory)
 ```
 $ rooby ./samples/sample-1.ro
 $ rooby ./samples/sample-2.ro
 $ rooby ./samples/sample-3.ro
 $ rooby ./samples/sample-4.ro
+$ rooby .....
 ```
+
+## Development
+
+It will be actively developed for at least a few months. Currently I'm working on building a vm that supports some basic features in Ruby (block, module...etc.).
+And I will use [github project](https://github.com/st0012/Rooby/projects) to manage Rooby's development progress, you can check what I'm doing and about to do there.
+
+## Contribute
+
+I will appreciate any feature proposal or issue report. And please contact me directly if you want to get involved. Rooby is very young so we can do a lot interesting things together.
 
 ##  Sample snippet.
-```ruby
-class Foo
-  def set(x)
-    @x = x
-  end
-  def get
-    @x
-  end
-end
-class Bar < Foo; end
-class Baz < Foo; end
-
-bar = Bar.new
-baz = Baz.new
-foo = Foo.new
-bar.set(10)
-baz.set(1)
-foo.set(5)
-
-puts(bar.get + baz.get + foo.get) #=> 16
-```
 
 ```ruby
 class User
@@ -112,32 +110,6 @@ stan = User.new("Stan", 22)
 john = User.new("John", 40)
 puts(User.sum_age(stan, john)) #=> 62
 stan.say_hi(john) #=> Stan says hi to John
-```
-
-```ruby
-class JobPosition
-  def initialize(name)
-    @name = name
-  end
-
-  def name
-    @name
-  end
-    
-  def self.engineer
-    new("Engineer")
-  end
-end
-
-job = JobPosition.engineer
-puts(job.name) #=> "Engineer"
-```
-
-
-```ruby
-puts("123".class.name) #=> String
-puts(123.class.name) #=> Integer
-puts(true.class.name) #=> Boolean
 ```
 
 #### Build a stack using Rooby

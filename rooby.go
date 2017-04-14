@@ -1,15 +1,25 @@
 package main
 
 import (
+	"flag"
+	"github.com/st0012/Rooby/code_generator"
 	"github.com/st0012/Rooby/evaluator"
 	"github.com/st0012/Rooby/lexer"
 	"github.com/st0012/Rooby/parser"
+	"github.com/st0012/Rooby/vm"
 	"io/ioutil"
 	"os"
+	"path"
+	"strings"
 )
 
 func main() {
-	filepath := os.Args[1]
+	compileOptionPtr := flag.Bool("c", false, "Compile to bytecode")
+	evalOptionPtr := flag.Bool("eval", true, "Eval program directly without using VM")
+
+	flag.Parse()
+
+	filepath := flag.Arg(0)
 
 	file, err := ioutil.ReadFile(filepath)
 	check(err)
@@ -20,7 +30,44 @@ func main() {
 	program := p.ParseProgram()
 	p.CheckErrors()
 
-	evaluator.Eval(program, evaluator.MainObj.Scope)
+	if *evalOptionPtr && !*compileOptionPtr {
+		evaluator.Eval(program, evaluator.MainObj.Scope)
+		return
+	}
+
+	cg := code_generator.New(program)
+
+	bytecodes := cg.GenerateByteCode(program)
+
+	if !*compileOptionPtr {
+		execBytecode(bytecodes)
+		return
+	}
+
+	writeByteCode(bytecodes, filepath)
+}
+
+func execBytecode(bytecodes string) {
+	p := vm.NewBytecodeParser()
+	p.Parse(bytecodes)
+	v := vm.New()
+	p.VM = v
+	cf := vm.NewCallFrame(v.LabelTable[vm.PROGRAM]["ProgramStart"][0])
+	cf.Self = vm.MainObj
+	v.CallFrameStack.Push(cf)
+	v.Exec()
+}
+
+func writeByteCode(bytecodes string, filepath string) {
+	dir, filename := path.Split(filepath)
+	filename = strings.Split(filename, ".")[0]
+	f, err := os.Create(dir + filename + ".gbc")
+
+	if err != nil {
+		panic(err)
+	}
+
+	f.WriteString(bytecodes)
 }
 
 func check(e error) {
