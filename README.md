@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/st0012/Rooby.svg?branch=master)](https://travis-ci.org/st0012/Rooby)
 [![Go Report Card](https://goreportcard.com/badge/github.com/st0012/Rooby)](https://goreportcard.com/report/github.com/st0012/Rooby)
+[![codecov](https://codecov.io/gh/st0012/Rooby/branch/master/graph/badge.svg)](https://codecov.io/gh/st0012/Rooby)
 
 Rooby is a Ruby-like object oriented language written in Go.
    
