@@ -2,12 +2,14 @@ package main
 
 import (
 	"flag"
-	"github.com/st0012/Rooby/vm"
 	"github.com/st0012/Rooby/code_generator"
+	"github.com/st0012/Rooby/evaluator"
 	"github.com/st0012/Rooby/lexer"
 	"github.com/st0012/Rooby/parser"
+	"github.com/st0012/Rooby/vm"
 	"io/ioutil"
 	"os"
+	"path"
 	"strings"
 	"github.com/st0012/Rooby/evaluator"
 )
@@ -42,6 +44,7 @@ func main() {
 		execBytecode(bytecodes)
 		return
 	}
+
 	writeByteCode(bytecodes, filepath)
 }
 
