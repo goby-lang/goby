@@ -1,7 +1,6 @@
-package evaluator_test
+package evaluator
 
 import (
-	"github.com/st0012/Rooby/evaluator"
 	"testing"
 )
 
@@ -116,7 +115,7 @@ func TestDefStatement(t *testing.T) {
 	`
 
 	evaluated := testEval(t, input)
-	class := evaluated.(*evaluator.RClass)
+	class := evaluated.(*RClass)
 
 	expectedMethods := []struct {
 		name   string
@@ -133,7 +132,7 @@ func TestDefStatement(t *testing.T) {
 			t.Errorf("expect class %s to have method %s.", class.Name, expectedMethod.name)
 		}
 
-		method := methodObj.(*evaluator.Method)
+		method := methodObj.(*Method)
 		if method.Name != expectedMethod.name {
 			t.Errorf("expect method's name to be %s. got=%s", expectedMethod.name, method.Name)
 		}
@@ -195,7 +194,7 @@ func TestErrorHandling(t *testing.T) {
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
 
-		errObj, ok := evaluated.(*evaluator.Error)
+		errObj, ok := evaluated.(*Error)
 		if !ok {
 			t.Errorf("no error object returned. got=%T(%+v)", evaluated, evaluated)
 			continue

@@ -1,24 +1,23 @@
-package evaluator_test
+package evaluator
 
 import (
-	"github.com/st0012/Rooby/evaluator"
 	"github.com/st0012/Rooby/lexer"
 	"github.com/st0012/Rooby/parser"
 	"testing"
 )
 
-func testEval(t *testing.T, input string) evaluator.Object {
+func testEval(t *testing.T, input string) Object {
 	l := lexer.New(input)
 	p := parser.New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
-	mainObj := evaluator.MainObj
-	return evaluator.Eval(program, mainObj.Scope)
+	mainObj := MainObj
+	return Eval(program, mainObj.Scope)
 }
 
-func testClassObject(t *testing.T, obj evaluator.Object, expected string) bool {
-	result, ok := obj.(*evaluator.RClass)
+func testClassObject(t *testing.T, obj Object, expected string) bool {
+	result, ok := obj.(*RClass)
 	if !ok {
 		t.Errorf("object is not a Class. got=%T (%+v", obj, obj)
 		return false
@@ -31,8 +30,8 @@ func testClassObject(t *testing.T, obj evaluator.Object, expected string) bool {
 	return true
 }
 
-func testNullObject(t *testing.T, obj evaluator.Object) bool {
-	if obj != evaluator.NULL {
+func testNullObject(t *testing.T, obj Object) bool {
+	if obj != NULL {
 		t.Errorf("object is not NULL. got=%T (%+v)", obj, obj)
 		return false
 	}
@@ -51,11 +50,4 @@ func checkParserErrors(t *testing.T, p *parser.Parser) {
 		t.Errorf("parser error: %q", msg)
 	}
 	t.FailNow()
-}
-
-func isError(obj evaluator.Object) bool {
-	if obj != nil {
-		return obj.Type() == evaluator.ERROR_OBJ
-	}
-	return false
 }

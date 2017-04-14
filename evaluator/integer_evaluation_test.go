@@ -1,7 +1,6 @@
-package evaluator_test
+package evaluator
 
 import (
-	"github.com/st0012/Rooby/evaluator"
 	"testing"
 )
 
@@ -48,8 +47,8 @@ func TestEvalIntegerExpression(t *testing.T) {
 	}
 }
 
-func testIntegerObject(t *testing.T, obj evaluator.Object, expected int) bool {
-	result, ok := obj.(*evaluator.IntegerObject)
+func testIntegerObject(t *testing.T, obj Object, expected int) bool {
+	result, ok := obj.(*IntegerObject)
 	if !ok {
 		t.Errorf("object is not Integer. got=%T (%+v)", obj, obj)
 		return false

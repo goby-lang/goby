@@ -1,7 +1,6 @@
-package evaluator_test
+package evaluator
 
 import (
-	"github.com/st0012/Rooby/evaluator"
 	"testing"
 )
 
@@ -12,7 +11,7 @@ func TestEvalArrayExpression(t *testing.T) {
 
 	evaluated := testEval(t, input)
 
-	arr, ok := evaluated.(*evaluator.ArrayObject)
+	arr, ok := evaluated.(*ArrayObject)
 	if !ok {
 		t.Fatalf("Expect evaluated value to be an array. got=%T", evaluated)
 	}
@@ -74,7 +73,7 @@ func TestEvalArrayIndex(t *testing.T) {
 		case bool:
 			testBooleanObject(t, evaluated, expected)
 		case nil:
-			_, ok := evaluated.(*evaluator.Null)
+			_, ok := evaluated.(*Null)
 
 			if !ok {
 
