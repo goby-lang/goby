@@ -470,7 +470,8 @@ var BuiltInActions = map[OperationType]*Action{
 	LEAVE: {
 		Name: LEAVE,
 		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-			vm.CallFrameStack.Pop()
+			cf = vm.CallFrameStack.Pop()
+			cf.PC = len(cf.InstructionSet.Instructions)
 		},
 	},
 }
