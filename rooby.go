@@ -11,6 +11,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"github.com/st0012/Rooby/evaluator"
 )
 
 func main() {
@@ -59,9 +60,8 @@ func execBytecode(bytecodes string) {
 }
 
 func writeByteCode(bytecodes string, filepath string) {
-	dir, filename := path.Split(filepath)
-	filename = strings.Split(filename, ".")[0]
-	f, err := os.Create(dir + filename + ".gbc")
+	filepath = strings.Split(filepath, ".")[0] + ".gbc"
+	f, err := os.Create(filepath)
 
 	if err != nil {
 		panic(err)
