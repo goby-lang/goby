@@ -7,10 +7,13 @@ go:
   - master
 
 script:
-  - go test ./... -v -cover -race
+  - ./test.sh
 
 after_script:
   - go build .
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
 
 notifications:
   email:
