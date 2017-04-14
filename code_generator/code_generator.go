@@ -183,8 +183,16 @@ func (cg *CodeGenerator) compileExpression(is *InstructionSet, exp ast.Expressio
 	case *ast.InfixExpression:
 		cg.compileInfixExpression(is, exp, scope)
 	case *ast.PrefixExpression:
-		cg.compileExpression(is, exp.Right, scope)
-		is.Define("send", exp.Operator, 0)
+		switch exp.Operator {
+		case "!":
+			cg.compileExpression(is, exp.Right, scope)
+			is.Define("send", exp.Operator, 0)
+		case "-":
+			is.Define("putobject", 0)
+			cg.compileExpression(is, exp.Right, scope)
+			is.Define("send", exp.Operator, 1)
+		}
+
 	case *ast.IfExpression:
 		cg.compileIfExpression(is, exp, scope)
 	case *ast.SelfExpression:
