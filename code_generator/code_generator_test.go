@@ -34,7 +34,7 @@ end
 1 putstring "foo"
 2 def_method 0
 3 putself
-4 send foo 0 block
+4 send foo 0 true
 5 leave
 `
 
