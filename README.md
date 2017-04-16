@@ -85,12 +85,12 @@ $ rooby --without-vm ./samples/sample-1.ro
 $ rooby -c ./samples/sample-1.ro
 ```
 
-You'll see `sample-1.rbc` in `./samples`
+You'll see `sample-1.robc` in `./samples`
 
 **Execute bytecode**
 
 ```
-$ rooby ./samples/sample-1.rbc
+$ rooby ./samples/sample-1.robc
 ```
 
 

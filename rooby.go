@@ -57,7 +57,7 @@ func main() {
 
 		writeByteCode(bytecodes, dir, filename)
 
-	case "rbc":
+	case "robc":
 		bytecodes := string(file)
 		execBytecode(bytecodes)
 	default:
@@ -67,7 +67,7 @@ func main() {
 
 
 func writeByteCode(bytecodes, dir, filename string) {
-	f, err := os.Create(dir + filename + ".rbc")
+	f, err := os.Create(dir + filename + ".robc")
 
 	if err != nil {
 		panic(err)
