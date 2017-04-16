@@ -62,6 +62,38 @@ Here's my expectation about it:
 $ go get github.com/st0012/Rooby
 ```
 
+## Usage
+
+**Execute Rooby file using VM**
+
+(might see errors on sample-6 since vm hasn't support block yet)
+``` 
+$ rooby ./samples/sample-1.ro
+#=> 16
+```
+
+**Execute Rooby file without vm, using the evaluator package (will be once vm is mature)**
+
+```
+$ rooby --without-vm ./samples/sample-1.ro
+#=> 16
+```
+
+**Compile Rooby code**
+
+```
+$ rooby -c ./samples/sample-1.ro
+```
+
+You'll see `sample-1.rbc` in `./samples`
+
+**Execute bytecode**
+
+```
+$ rooby ./samples/sample-1.rbc
+```
+
+
 ## Try it!
 (See sample directory)
 ```
