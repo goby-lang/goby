@@ -4,10 +4,10 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/st0012/Rooby)](https://goreportcard.com/report/github.com/st0012/Rooby)
 [![codecov](https://codecov.io/gh/st0012/Rooby/branch/master/graph/badge.svg)](https://codecov.io/gh/st0012/Rooby)
 
-Rooby is a Ruby-like object oriented language written in Go.
+Rooby is a Ruby-like object oriented language written in Go. You can think it as a simplified Ruby for now.
    
 
-Here's my expectation about it:
+Here's my expectation about Rooby:
 
 - Has Ruby-like syntax and object system.
 - Rooby program will be compiled at first place and then executed through VM. (I am still working on Rooby VM, see `vm` folder.) 
