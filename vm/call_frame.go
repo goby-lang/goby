@@ -1,6 +1,9 @@
 package vm
 
-import "fmt"
+import (
+	"fmt"
+	"bytes"
+)
 
 type CallFrameStack struct {
 	CallFrames []*CallFrame
@@ -56,6 +59,10 @@ func (cf *CallFrame) getLCL(index int) *Pointer {
 	return p
 }
 
+func (cf *CallFrame) inspect() string {
+	return fmt.Sprintf("Name: %s. is block: %t, lens of EP: %d", cf.InstructionSet.Label.Name, cf.IsBlock, len(cf.EP))
+}
+
 func getLCLFromEP(cf *CallFrame, index int) *Pointer {
 	var v *Pointer
 
@@ -66,6 +73,7 @@ func getLCLFromEP(cf *CallFrame, index int) *Pointer {
 	}
 
 	if cf.BlockFrame != nil {
+
 		return getLCLFromEP(cf.BlockFrame, index)
 	}
 
@@ -73,6 +81,10 @@ func getLCLFromEP(cf *CallFrame, index int) *Pointer {
 }
 
 func (cfs *CallFrameStack) Push(cf *CallFrame) {
+	if cf == nil {
+		panic("Callfame can't be nil!")
+	}
+
 	if len(cfs.CallFrames) <= cfs.VM.CFP {
 		cfs.CallFrames = append(cfs.CallFrames, cf)
 	} else {
@@ -104,10 +116,16 @@ func (cfs *CallFrameStack) Top() *CallFrame {
 	return nil
 }
 
-func (cfs *CallFrameStack) inspect() {
+func (cfs *CallFrameStack) inspect() string {
+	var out bytes.Buffer
+
 	for _, cf := range cfs.CallFrames {
-		fmt.Println(cf.InstructionSet.Label.Name)
+		if cf != nil {
+			out.WriteString(fmt.Sprintln(cf.inspect()))
+		}
 	}
+
+	return out.String()
 }
 func NewCallFrame(is *InstructionSet) *CallFrame {
 	return &CallFrame{Local: make([]*Pointer, 100), InstructionSet: is, PC: 0, LPr: 0}
