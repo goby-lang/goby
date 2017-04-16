@@ -215,9 +215,10 @@ func (cg *CodeGenerator) compileExpression(is *InstructionSet, exp ast.Expressio
 			cg.compileExpression(is, arg, scope)
 		}
 
+		fmt.Println(exp.Method)
 		if exp.Block != nil {
 			cg.compileBlockArgExpression(exp, scope)
-			is.Define("send", exp.Method, len(exp.Arguments), "block")
+			is.Define("send", exp.Method, len(exp.Arguments), "true")
 			return
 		}
 		is.Define("send", exp.Method, len(exp.Arguments))

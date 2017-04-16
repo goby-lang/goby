@@ -665,85 +665,88 @@ func TestEvalMinusPrefixExpression(t *testing.T) {
 	}
 }
 
-//func TestMethodCallWithBlockArgument(t *testing.T) {
-//	tests := []struct {
-//		input    string
-//		expected int
-//	}{
-//		{`
-//		class Foo
-//		  def bar
-//		    yield(1, 3, 5)
-//		  end
-//		end
-//
-//		Foo.new.bar do |first, second, third|
-//		  first + second * third
-//		end
-//
-//		`, 16},
-//		{`
-//		class Foo
-//		  def bar
-//		    yield
-//		  end
-//		end
-//
-//		Foo.new.bar do
-//		  3
-//		end
-//
-//		`, 3},
-//		{`
-//		class Bar
-//		  def foo
-//		    yield(10)
-//		  end
-//		end
-//
-//		class Foo
-//		  def bar
-//		    yield
-//		  end
-//		end
-//
-//		Bar.new.foo do |num|
-//		  Foo.new.bar do
-//		    3 * num
-//		  end
-//		end
-//
-//		`, 30},
-//		{`
-//		class Foo
-//		  def bar
-//		    0
-//		  end
-//		end
-//
-//		Foo.new.bar do
-//		  3
-//		end
-//
-//		`, 0},
-//		{`
-//		class Foo
-//		  def bar
-//		    yield
-//		  end
-//		end
-//
-//		i = 10
-//		Foo.new.bar do
-//		  i = 3 + i
-//		end
-//		i
-//
-//		`, 13},
-//	}
-//
-//	for _, tt := range tests {
-//		evaluated := testEval(t, tt.input)
-//		testIntegerObject(t, evaluated, tt.expected)
-//	}
-//}
+func TestMethodCallWithBlockArgument(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		//{`
+		//class Foo
+		//  def bar
+		//    yield(1, 3, 5)
+		//  end
+		//end
+		//
+		//Foo.new.bar do |first, second, third|
+		//  first + second * third
+		//end
+		//
+		//`, 16},
+		//{`
+		//class Foo
+		//  def bar
+		//    yield
+		//  end
+		//end
+		//
+		//Foo.new.bar do
+		//  3
+		//end
+		//
+		//`, 3},
+		//{`
+		//class Bar
+		//  def foo
+		//    yield(10)
+		//  end
+		//end
+		//
+		//class Foo
+		//  def bar
+		//    yield
+		//  end
+		//end
+		//
+		//Bar.new.foo do |num|
+		//  Foo.new.bar do
+		//    3 * num
+		//  end
+		//end
+		//
+		//`, 30},
+		//{`
+		//class Foo
+		//  def bar
+		//    0
+		//  end
+		//end
+		//
+		//Foo.new.bar do
+		//  3
+		//end
+		//
+		//`, 0},
+		{`
+		class Foo
+		  def bar
+		    yield
+		  end
+		end
+
+		a = 100
+		i = 10
+		b = 1000
+		Foo.new.bar do
+		  i = 3 + i
+		  puts(i)
+		end
+		i
+
+		`, 13},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}

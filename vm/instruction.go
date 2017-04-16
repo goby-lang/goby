@@ -108,7 +108,7 @@ var BuiltInActions = map[OperationType]*Action{
 		Name: GET_LOCAL,
 		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
 			i := args[0].(*IntegerObject)
-			v := cf.Local[i.Value]
+			v := cf.getLCL(i)
 
 			if v == nil {
 				panic(fmt.Sprintf("Local index: %d is nil. Callframe: %s", i.Value, cf.InstructionSet.Label.Name))
@@ -411,6 +411,14 @@ var BuiltInActions = map[OperationType]*Action{
 		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
 			methodName := args[0].(*StringObject).Value
 			argCount := args[1].(*IntegerObject).Value
+			var hasBlock bool
+
+			if len(args) > 2 {
+				hasBlock = true
+			} else {
+				hasBlock = false
+			}
+
 			argPr := vm.SP - argCount
 			receiverPr := argPr - 1
 			receiver := vm.Stack.Data[receiverPr].(BaseObject)
@@ -434,9 +442,20 @@ var BuiltInActions = map[OperationType]*Action{
 				panic(error.Message)
 			}
 
+			var blockFrame *CallFrame
+
+			if hasBlock {
+				block, _ := vm.getBlock()
+				c := NewCallFrame(block)
+				c.IsBlock = true
+				c.EP = cf.Local
+				vm.CallFrameStack.Push(c)
+				blockFrame = c
+			}
+
 			switch m := method.(type) {
 			case *Method:
-				evalMethodObject(vm, receiver, m, receiverPr, argCount, argPr)
+				evalMethodObject(vm, receiver, m, receiverPr, argCount, argPr, blockFrame)
 			case *BuiltInMethod:
 				evalBuiltInMethod(vm, receiver, m, receiverPr, argCount, argPr)
 			case *Error:
@@ -454,12 +473,17 @@ var BuiltInActions = map[OperationType]*Action{
 			receiverPr := argPr - 1
 			receiver := vm.Stack.Data[receiverPr].(BaseObject)
 
-			block, _ := vm.getBlock()
+			if cf.BlockFrame == nil {
+				panic("Can't yield without a block")
+			}
 
-			c := NewCallFrame(block)
+			c := NewCallFrame(cf.BlockFrame.InstructionSet)
+			c.BlockFrame = cf.BlockFrame
 			c.Self = receiver
-			c.ArgPr = argPr
-			copy(c.Local, cf.Local)
+
+			for i := 0; i < argCount; i++ {
+				c.insertLCL(i, vm.Stack.Data[argPr+i])
+			}
 
 			vm.CallFrameStack.Push(c)
 			vm.Exec()
@@ -490,13 +514,13 @@ func evalBuiltInMethod(vm *VM, receiver BaseObject, method *BuiltInMethod, recei
 	if method.Name == "new" && ok {
 		instance := evaluated.(*RObject)
 		if instance.InitializeMethod != nil {
-			evalMethodObject(vm, instance, instance.InitializeMethod, receiverPr, argCount, argPr)
+			evalMethodObject(vm, instance, instance.InitializeMethod, receiverPr, argCount, argPr, nil)
 		}
 	}
 	setReturnValueAndSP(vm, receiverPr, evaluated)
 }
 
-func evalMethodObject(vm *VM, receiver BaseObject, method *Method, receiverPr, argC, argPr int) {
+func evalMethodObject(vm *VM, receiver BaseObject, method *Method, receiverPr, argC, argPr int, blockFrame *CallFrame) {
 	c := NewCallFrame(method.InstructionSet)
 	c.Self = receiver
 
@@ -504,6 +528,7 @@ func evalMethodObject(vm *VM, receiver BaseObject, method *Method, receiverPr, a
 		c.insertLCL(i, vm.Stack.Data[argPr+i])
 	}
 
+	c.BlockFrame = blockFrame
 	vm.CallFrameStack.Push(c)
 	vm.Exec()
 

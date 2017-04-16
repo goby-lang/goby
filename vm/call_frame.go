@@ -1,5 +1,7 @@
 package vm
 
+import "fmt"
+
 type CallFrameStack struct {
 	CallFrames []*CallFrame
 	VM         *VM
@@ -8,10 +10,12 @@ type CallFrameStack struct {
 type CallFrame struct {
 	InstructionSet *InstructionSet
 	PC             int
+	EP 	       []Object
 	Self           BaseObject
 	Local          []Object
 	LPr            int
-	ArgPr          int
+	IsBlock        bool
+	BlockFrame *CallFrame
 }
 
 func (cf *CallFrame) insertLCL(i int, value Object) {
@@ -26,8 +30,36 @@ func (cf *CallFrame) insertLCL(i int, value Object) {
 }
 
 func (cf *CallFrame) getLCL(index *IntegerObject) Object {
+	var v Object
 
-	return cf.Local[index.Value]
+	v = cf.Local[index.Value]
+
+	for v == nil {
+		if cf.BlockFrame != nil {
+			v = getLCLFromEP(cf.BlockFrame, index.Value)
+		} else {
+			panic("Can't find local")
+		}
+	}
+
+	fmt.Printf("Local = %d\n", v)
+	return v
+}
+
+func getLCLFromEP(cf *CallFrame, index int) Object {
+	var v Object
+
+	v = cf.EP[index]
+
+	if v != nil {
+		return v
+	}
+
+	if cf.BlockFrame != nil {
+		return getLCLFromEP(cf.BlockFrame, index)
+	}
+
+	return nil
 }
 
 func (cfs *CallFrameStack) Push(cf *CallFrame) {
@@ -62,6 +94,11 @@ func (cfs *CallFrameStack) Top() *CallFrame {
 	return nil
 }
 
+func (cfs *CallFrameStack) inspect() {
+	for _, cf := range cfs.CallFrames {
+		fmt.Println(cf.InstructionSet.Label.Name)
+	}
+}
 func NewCallFrame(is *InstructionSet) *CallFrame {
 	return &CallFrame{Local: make([]Object, 100), InstructionSet: is, PC: 0, LPr: 0}
 }
