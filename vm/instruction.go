@@ -108,7 +108,7 @@ var BuiltInActions = map[OperationType]*Action{
 		Name: GET_LOCAL,
 		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
 			i := args[0].(*IntegerObject)
-			p := cf.getLCL(i)
+			p := cf.getLCL(i.Value)
 
 			if p == nil {
 				panic(fmt.Sprintf("Local index: %d is nil. Callframe: %s", i.Value, cf.InstructionSet.Label.Name))
@@ -460,7 +460,7 @@ var BuiltInActions = map[OperationType]*Action{
 			case *Method:
 				evalMethodObject(vm, receiver, m, receiverPr, argCount, argPr, blockFrame)
 			case *BuiltInMethod:
-				evalBuiltInMethod(vm, receiver, m, receiverPr, argCount, argPr)
+				evalBuiltInMethod(vm, receiver, m, receiverPr, argCount, argPr, blockFrame)
 			case *Error:
 				panic(m.Inspect())
 			default:
@@ -503,7 +503,7 @@ var BuiltInActions = map[OperationType]*Action{
 	},
 }
 
-func evalBuiltInMethod(vm *VM, receiver BaseObject, method *BuiltInMethod, receiverPr, argCount, argPr int) {
+func evalBuiltInMethod(vm *VM, receiver BaseObject, method *BuiltInMethod, receiverPr, argCount, argPr int, blockFrame *CallFrame) {
 	methodBody := method.Fn(receiver)
 	args := []Object{}
 
@@ -517,7 +517,7 @@ func evalBuiltInMethod(vm *VM, receiver BaseObject, method *BuiltInMethod, recei
 	if method.Name == "new" && ok {
 		instance := evaluated.(*RObject)
 		if instance.InitializeMethod != nil {
-			evalMethodObject(vm, instance, instance.InitializeMethod, receiverPr, argCount, argPr, nil)
+			evalMethodObject(vm, instance, instance.InitializeMethod, receiverPr, argCount, argPr, blockFrame)
 		}
 	}
 	setReturnValueAndSP(vm, receiverPr, &Pointer{evaluated})

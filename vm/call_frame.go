@@ -20,30 +20,36 @@ type CallFrame struct {
 
 func (cf *CallFrame) insertLCL(i int, value Object) {
 	index := i
+	existedLCL := cf.getLCL(i)
+
+	if existedLCL != nil {
+		existedLCL.Target = value
+		return
+	}
+
 	cf.Local = append(cf.Local, nil)
 	copy(cf.Local[index:], cf.Local[index:])
-
-	if cf.Local[index] == nil {
-		cf.Local[index] = &Pointer{Target: value}
-	} else {
-		cf.Local[index].Target = value
-	}
+	cf.Local[index] = &Pointer{Target: value}
 
 	if index >= cf.LPr {
 		cf.LPr = index + 1
 	}
 }
 
-func (cf *CallFrame) getLCL(index *IntegerObject) *Pointer {
+func (cf *CallFrame) getLCL(index int) *Pointer {
 	var p *Pointer
 
-	p = cf.Local[index.Value]
+	p = cf.Local[index]
 
 	for p == nil {
 		if cf.BlockFrame != nil {
-			p = getLCLFromEP(cf.BlockFrame, index.Value)
+			p = getLCLFromEP(cf.BlockFrame, index)
+
+			if p == nil {
+				return nil
+			}
 		} else {
-			panic("Can't find local")
+			return nil
 		}
 	}
 

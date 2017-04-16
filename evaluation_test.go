@@ -726,6 +726,42 @@ func TestMethodCallWithBlockArgument(t *testing.T) {
 		end
 
 		`, 0},
+		{`
+		class Foo
+		  def bar
+		    yield
+		  end
+		end
+
+		i = 10
+		Foo.new.bar do
+		  i = 3 + i
+		end
+		i
+
+		`, 13},
+		{`
+class Car
+  def initialize
+    yield(self)
+  end
+
+  def doors=(ds)
+    @doors = ds
+  end
+
+  def doors
+    @doors
+  end
+end
+
+car = Car.new do |c|
+  c.doors = 4
+end
+
+car.doors
+		`,
+		4},
 		//{`
 		//class Foo
 		//  def bar
@@ -733,13 +769,21 @@ func TestMethodCallWithBlockArgument(t *testing.T) {
 		//  end
 		//end
 		//
+		//a = 100
 		//i = 10
-		//Foo.new.bar do
-		//  i = 3 + i
+		//b = 1000
+		//
+		//f = Foo.new
+		//
+		//f.bar do
+		//  i = 3 * a
+		//  f.bar do
+		//    i = 3 + i
+		//  end
 		//end
 		//i
 		//
-		//`, 13},
+		//`, 303},
 	}
 
 	for _, tt := range tests {
