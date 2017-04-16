@@ -2,6 +2,8 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"github.com/st0012/Rooby/ast"
 	"github.com/st0012/Rooby/code_generator"
 	"github.com/st0012/Rooby/evaluator"
 	"github.com/st0012/Rooby/lexer"
@@ -15,52 +17,56 @@ import (
 
 func main() {
 	compileOptionPtr := flag.Bool("c", false, "Compile to bytecode")
-	evalOptionPtr := flag.Bool("eval", true, "Eval program directly without using VM")
+	evalOptionPtr := flag.Bool("without-vm", false, "Eval program directly without using VM")
 
 	flag.Parse()
 
 	filepath := flag.Arg(0)
 
+	var fileExt string
+	dir, filename := path.Split(filepath)
+	splitedFN := strings.Split(filename, ".")
+
+	if len(splitedFN) <= 1 {
+		fmt.Printf("Only support eval/compile single file now.")
+		return
+	}
+
+	filename = splitedFN[0]
+	fileExt = splitedFN[1]
+
 	file, err := ioutil.ReadFile(filepath)
 	check(err)
-	input := string(file)
 
-	l := lexer.New(input)
-	p := parser.New(l)
-	program := p.ParseProgram()
-	p.CheckErrors()
+	switch fileExt {
+	case "ro":
+		program := buildAST(file)
 
-	if *evalOptionPtr && !*compileOptionPtr {
-		evaluator.Eval(program, evaluator.MainObj.Scope)
-		return
-	}
+		if *evalOptionPtr && !*compileOptionPtr {
+			evaluator.Eval(program, evaluator.MainObj.Scope)
+			return
+		}
 
-	cg := code_generator.New(program)
+		cg := code_generator.New(program)
+		bytecodes := cg.GenerateByteCode(program)
 
-	bytecodes := cg.GenerateByteCode(program)
+		if !*compileOptionPtr {
+			execBytecode(bytecodes)
+			return
+		}
 
-	if !*compileOptionPtr {
+		writeByteCode(bytecodes, dir, filename)
+
+	case "rbc":
+		bytecodes := string(file)
 		execBytecode(bytecodes)
-		return
+	default:
+		fmt.Printf("Unknown file extension: %s", fileExt)
 	}
-
-	writeByteCode(bytecodes, filepath)
 }
 
-func execBytecode(bytecodes string) {
-	p := vm.NewBytecodeParser()
-	p.Parse(bytecodes)
-	v := vm.New()
-	p.VM = v
-	cf := vm.NewCallFrame(v.LabelTable[vm.PROGRAM]["ProgramStart"][0])
-	cf.Self = vm.MainObj
-	v.CallFrameStack.Push(cf)
-	v.Exec()
-}
 
-func writeByteCode(bytecodes string, filepath string) {
-	dir, filename := path.Split(filepath)
-	filename = strings.Split(filename, ".")[0]
+func writeByteCode(bytecodes, dir, filename string) {
 	f, err := os.Create(dir + filename + ".gbc")
 
 	if err != nil {
@@ -68,6 +74,27 @@ func writeByteCode(bytecodes string, filepath string) {
 	}
 
 	f.WriteString(bytecodes)
+}
+
+func execBytecode(bytecodes string) {
+	p := vm.NewBytecodeParser()
+	v := vm.New()
+	p.VM = v
+	p.Parse(bytecodes)
+	cf := vm.NewCallFrame(v.LabelTable[vm.PROGRAM]["ProgramStart"][0])
+	cf.Self = vm.MainObj
+	v.CallFrameStack.Push(cf)
+	v.Exec()
+}
+
+func buildAST(file []byte) *ast.Program {
+	input := string(file)
+	l := lexer.New(input)
+	p := parser.New(l)
+	program := p.ParseProgram()
+	p.CheckErrors()
+
+	return program
 }
 
 func check(e error) {
