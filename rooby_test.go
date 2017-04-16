@@ -30,7 +30,7 @@ func testExec(bytecodes string) vm.Object {
 	v.CallFrameStack.Push(cf)
 	v.Exec()
 
-	return v.Stack.Top()
+	return v.Stack.Top().Target
 }
 
 func testClassObject(t *testing.T, obj vm.Object, expected string) bool {

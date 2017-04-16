@@ -51,6 +51,10 @@ type Object interface {
 	Inspect() string
 }
 
+type Pointer struct {
+	Target Object
+}
+
 type ReturnValue struct {
 	Value Object
 }

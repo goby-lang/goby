@@ -11,7 +11,7 @@ type VM struct {
 	Stack          *Stack
 	SP             int
 	CFP            int
-	Constants      map[string]Object
+	Constants      map[string]*Pointer
 	LabelTable     map[LabelType]map[string][]*InstructionSet
 	MethodISTable  *ISIndexTable
 	ClassISTable   *ISIndexTable
@@ -23,7 +23,7 @@ type ISIndexTable struct {
 }
 
 type Stack struct {
-	Data []Object
+	Data []*Pointer
 	VM   *VM
 }
 
@@ -61,7 +61,7 @@ func (vm *VM) Exec() {
 }
 
 func (vm *VM) initConstants() {
-	constants := make(map[string]Object)
+	constants := make(map[string]*Pointer)
 
 	builtInClasses := []Class{
 		IntegerClass,
@@ -75,7 +75,8 @@ func (vm *VM) initConstants() {
 	}
 
 	for _, c := range builtInClasses {
-		constants[c.ReturnName()] = c
+		p := &Pointer{Target: c}
+		constants[c.ReturnName()] = p
 	}
 
 	vm.Constants = constants
@@ -83,9 +84,9 @@ func (vm *VM) initConstants() {
 
 func (vm *VM) execInstruction(cf *CallFrame, i *Instruction) {
 	cf.PC += 1
-	//fmt.Println(i.Inspect())
+	fmt.Println(i.Inspect())
 	i.Action.Operation(vm, cf, i.Params...)
-	//fmt.Println(vm.Stack.inspect())
+	fmt.Println(vm.Stack.inspect())
 }
 
 func (vm *VM) getBlock() (*InstructionSet, bool) {
@@ -149,7 +150,7 @@ func (vm *VM) setLabel(is *InstructionSet, name string) {
 	vm.LabelTable[labelType][labelName] = append(vm.LabelTable[labelType][labelName], is)
 }
 
-func (s *Stack) push(v Object) {
+func (s *Stack) push(v *Pointer) {
 	if len(s.Data) <= s.VM.SP {
 		s.Data = append(s.Data, v)
 	} else {
@@ -159,7 +160,7 @@ func (s *Stack) push(v Object) {
 	s.VM.SP += 1
 }
 
-func (s *Stack) pop() Object {
+func (s *Stack) pop() *Pointer {
 	if len(s.Data) < 1 {
 		panic("Nothing to pop!")
 	}
@@ -171,7 +172,7 @@ func (s *Stack) pop() Object {
 	return v
 }
 
-func (s *Stack) Top() Object {
+func (s *Stack) Top() *Pointer {
 
 	if s.VM.SP > 0 {
 		return s.Data[s.VM.SP-1]
@@ -184,8 +185,9 @@ func (s *Stack) inspect() string {
 	var out bytes.Buffer
 	datas := []string{}
 
-	for i, o := range s.Data {
-		if o != nil {
+	for i, p := range s.Data {
+		if p != nil {
+			o := p.Target
 			if i == s.VM.SP {
 				datas = append(datas, fmt.Sprintf("%s (%T) %d <----", o.Inspect(), o, i))
 			} else {

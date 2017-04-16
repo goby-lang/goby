@@ -10,44 +10,48 @@ type CallFrameStack struct {
 type CallFrame struct {
 	InstructionSet *InstructionSet
 	PC             int
-	EP 	       []Object
+	EP             []*Pointer
 	Self           BaseObject
-	Local          []Object
+	Local          []*Pointer
 	LPr            int
 	IsBlock        bool
-	BlockFrame *CallFrame
+	BlockFrame     *CallFrame
 }
 
 func (cf *CallFrame) insertLCL(i int, value Object) {
 	index := i
 	cf.Local = append(cf.Local, nil)
 	copy(cf.Local[index:], cf.Local[index:])
-	cf.Local[index] = value
+
+	if cf.Local[index] == nil {
+		cf.Local[index] = &Pointer{Target: value}
+	} else {
+		cf.Local[index].Target = value
+	}
 
 	if index >= cf.LPr {
 		cf.LPr = index + 1
 	}
 }
 
-func (cf *CallFrame) getLCL(index *IntegerObject) Object {
-	var v Object
+func (cf *CallFrame) getLCL(index *IntegerObject) *Pointer {
+	var p *Pointer
 
-	v = cf.Local[index.Value]
+	p = cf.Local[index.Value]
 
-	for v == nil {
+	for p == nil {
 		if cf.BlockFrame != nil {
-			v = getLCLFromEP(cf.BlockFrame, index.Value)
+			p = getLCLFromEP(cf.BlockFrame, index.Value)
 		} else {
 			panic("Can't find local")
 		}
 	}
 
-	fmt.Printf("Local = %d\n", v)
-	return v
+	return p
 }
 
-func getLCLFromEP(cf *CallFrame, index int) Object {
-	var v Object
+func getLCLFromEP(cf *CallFrame, index int) *Pointer {
+	var v *Pointer
 
 	v = cf.EP[index]
 
@@ -100,5 +104,5 @@ func (cfs *CallFrameStack) inspect() {
 	}
 }
 func NewCallFrame(is *InstructionSet) *CallFrame {
-	return &CallFrame{Local: make([]Object, 100), InstructionSet: is, PC: 0, LPr: 0}
+	return &CallFrame{Local: make([]*Pointer, 100), InstructionSet: is, PC: 0, LPr: 0}
 }
