@@ -67,7 +67,7 @@ func main() {
 
 
 func writeByteCode(bytecodes, dir, filename string) {
-	f, err := os.Create(dir + filename + ".gbc")
+	f, err := os.Create(dir + filename + ".rbc")
 
 	if err != nil {
 		panic(err)
