@@ -84,21 +84,23 @@ func (vm *VM) initConstants() {
 
 func (vm *VM) execInstruction(cf *CallFrame, i *Instruction) {
 	cf.PC += 1
-	fmt.Println(i.Inspect())
+	fmt.Print(i.Inspect())
 	i.Action.Operation(vm, cf, i.Params...)
-	fmt.Println(vm.Stack.inspect())
+	//fmt.Println(vm.CallFrameStack.inspect())
+	//fmt.Println(vm.Stack.inspect())
 }
 
-func (vm *VM) getBlock() (*InstructionSet, bool) {
-	iss, ok := vm.LabelTable[BLOCK]["Block"]
+func (vm *VM) getBlock(name string) (*InstructionSet, bool) {
+	// The "name" here is actually an index from label
+	// for example <Block:1>'s name is "1"
+	iss, ok := vm.LabelTable[BLOCK][name]
 
 	if !ok {
 		return nil, false
 	}
 
-	is := iss[vm.MethodISTable.Data["Block"]]
+	is := iss[0]
 
-	vm.MethodISTable.Data["Block"] += 1
 	return is, ok
 }
 
@@ -137,9 +139,6 @@ func (vm *VM) setLabel(is *InstructionSet, name string) {
 		labelName = name
 		labelType = PROGRAM
 
-	} else if name == "Block" {
-		labelName = name
-		labelType = BLOCK
 	} else {
 		labelName = strings.Split(name, ":")[1]
 		labelType = labelTypes[strings.Split(name, ":")[0]]

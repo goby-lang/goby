@@ -1,8 +1,8 @@
 package vm
 
 import (
-	"fmt"
 	"bytes"
+	"fmt"
 )
 
 type CallFrameStack struct {

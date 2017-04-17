@@ -7,6 +7,74 @@ import (
 	"testing"
 )
 
+func TestNestedBlockCompilation(t *testing.T) {
+	input := `
+class Foo
+  def bar
+    yield
+  end
+end
+
+a = 100
+i = 10
+b = 1000
+
+f = Foo.new
+
+f.bar do
+  i = 3 * a
+  f.bar do
+    i = 3 + i
+  end
+end
+i
+`
+	expected := `
+<Def:bar>
+0 putself
+1 invokeblock 0
+2 leave
+<DefClass:Foo>
+0 putself
+1 putstring "bar"
+2 def_method 0
+3 leave
+<Block:1>
+0 putobject 3
+1 getlocal 1
+2 send + 1
+3 setlocal 1
+4 leave
+<Block:0>
+0 putobject 3
+1 getlocal 0
+2 send * 1
+3 setlocal 1
+4 getlocal 3
+5 send bar 0 block:1
+6 leave
+<ProgramStart>
+0 putself
+1 def_class Foo
+2 pop
+3 putobject 100
+4 setlocal 0
+5 putobject 10
+6 setlocal 1
+7 putobject 1000
+8 setlocal 2
+9 getconstant Foo
+10 send new 0
+11 setlocal 3
+12 getlocal 3
+13 send bar 0 block:0
+14 getlocal 1
+15 leave
+`
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
 func TestCallBlockCompilation(t *testing.T) {
 	input := `
 def foo
@@ -24,7 +92,7 @@ end
 2 putobject 10
 3 invokeblock 2
 4 leave
-<Block>
+<Block:0>
 0 getlocal 0
 1 getlocal 1
 2 send - 1
@@ -34,7 +102,7 @@ end
 1 putstring "foo"
 2 def_method 0
 3 putself
-4 send foo 0 true
+4 send foo 0 block:0
 5 leave
 `
 

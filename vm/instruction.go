@@ -414,10 +414,13 @@ var BuiltInActions = map[OperationType]*Action{
 		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
 			methodName := args[0].(*StringObject).Value
 			argCount := args[1].(*IntegerObject).Value
+			var blockName string
 			var hasBlock bool
 
 			if len(args) > 2 {
 				hasBlock = true
+				blockFlag := args[2].(*StringObject).Value
+				blockName = strings.Split(blockFlag, ":")[1]
 			} else {
 				hasBlock = false
 			}
@@ -448,7 +451,12 @@ var BuiltInActions = map[OperationType]*Action{
 			var blockFrame *CallFrame
 
 			if hasBlock {
-				block, _ := vm.getBlock()
+				block, ok := vm.getBlock(blockName)
+
+				if !ok {
+					panic(fmt.Sprintf("Can't find block %s", blockName))
+				}
+
 				c := NewCallFrame(block)
 				c.IsBlock = true
 				c.EP = cf.Local

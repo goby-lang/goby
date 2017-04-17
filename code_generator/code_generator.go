@@ -43,6 +43,7 @@ type Scope struct {
 type CodeGenerator struct {
 	program         *ast.Program
 	instructionSets []*InstructionSet
+	blockCounter    int
 }
 
 func New(program *ast.Program) *CodeGenerator {
@@ -215,19 +216,20 @@ func (cg *CodeGenerator) compileExpression(is *InstructionSet, exp ast.Expressio
 			cg.compileExpression(is, arg, scope)
 		}
 
-		fmt.Println(exp.Method)
 		if exp.Block != nil {
-			cg.compileBlockArgExpression(exp, scope)
-			is.Define("send", exp.Method, len(exp.Arguments), "true")
+			blockIndex := cg.blockCounter
+			cg.blockCounter += 1
+			cg.compileBlockArgExpression(blockIndex, exp, scope)
+			is.Define("send", exp.Method, len(exp.Arguments), fmt.Sprintf("block:%d", blockIndex))
 			return
 		}
 		is.Define("send", exp.Method, len(exp.Arguments))
 	}
 }
 
-func (cg *CodeGenerator) compileBlockArgExpression(exp *ast.CallExpression, scope *Scope) {
+func (cg *CodeGenerator) compileBlockArgExpression(index int, exp *ast.CallExpression, scope *Scope) {
 	is := &InstructionSet{}
-	is.SetLabel("Block")
+	is.SetLabel(fmt.Sprintf("Block:%d", index))
 
 	for i := 0; i < len(exp.BlockArguments); i++ {
 		scope.LocalTable.Set(exp.BlockArguments[i].Value)
