@@ -762,28 +762,41 @@ end
 car.doors
 		`,
 		4},
-		//{`
-		//class Foo
-		//  def bar
-		//    yield
-		//  end
-		//end
-		//
-		//a = 100
-		//i = 10
-		//b = 1000
-		//
-		//f = Foo.new
-		//
-		//f.bar do
-		//  i = 3 * a
-		//  f.bar do
-		//    i = 3 + i
-		//  end
-		//end
-		//i
-		//
-		//`, 303},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
+func TestMethodCallWithNestedBlock(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{`
+		class Foo
+		  def bar
+		    yield
+		  end
+		end
+
+		a = 100
+		i = 10
+		b = 1000
+
+		f = Foo.new
+
+		f.bar do
+		  i = 3 * a
+		  f.bar do
+		    i = 3 + i
+		  end
+		end
+		i
+
+		`, 303},
 	}
 
 	for _, tt := range tests {

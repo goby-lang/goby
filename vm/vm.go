@@ -84,7 +84,7 @@ func (vm *VM) initConstants() {
 
 func (vm *VM) execInstruction(cf *CallFrame, i *Instruction) {
 	cf.PC += 1
-	fmt.Print(i.Inspect())
+	//fmt.Print(i.Inspect())
 	i.Action.Operation(vm, cf, i.Params...)
 	//fmt.Println(vm.CallFrameStack.inspect())
 	//fmt.Println(vm.Stack.inspect())

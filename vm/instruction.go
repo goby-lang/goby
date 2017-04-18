@@ -459,7 +459,7 @@ var BuiltInActions = map[OperationType]*Action{
 
 				c := NewCallFrame(block)
 				c.IsBlock = true
-				c.EP = cf.Local
+				c.EP = cf
 				vm.CallFrameStack.Push(c)
 				blockFrame = c
 			}
@@ -490,6 +490,7 @@ var BuiltInActions = map[OperationType]*Action{
 
 			c := NewCallFrame(cf.BlockFrame.InstructionSet)
 			c.BlockFrame = cf.BlockFrame
+			c.EP = cf.BlockFrame.EP
 			c.Self = receiver
 
 			for i := 0; i < argCount; i++ {

@@ -13,7 +13,7 @@ type CallFrameStack struct {
 type CallFrame struct {
 	InstructionSet *InstructionSet
 	PC             int
-	EP             []*Pointer
+	EP             *CallFrame
 	Self           BaseObject
 	Local          []*Pointer
 	LPr            int
@@ -60,21 +60,27 @@ func (cf *CallFrame) getLCL(index int) *Pointer {
 }
 
 func (cf *CallFrame) inspect() string {
-	return fmt.Sprintf("Name: %s. is block: %t, lens of EP: %d", cf.InstructionSet.Label.Name, cf.IsBlock, len(cf.EP))
+	if cf.EP != nil {
+		return fmt.Sprintf("Name: %s. is block: %t. EP: %d", cf.InstructionSet.Label.Name, cf.IsBlock, len(cf.EP.Local))
+	}
+	return fmt.Sprintf("Name: %s. is block: %t", cf.InstructionSet.Label.Name, cf.IsBlock)
 }
 
 func getLCLFromEP(cf *CallFrame, index int) *Pointer {
 	var v *Pointer
 
-	v = cf.EP[index]
+	if cf.EP == nil {
+		return nil
+	}
+
+	v = cf.EP.Local[index]
 
 	if v != nil {
 		return v
 	}
 
-	if cf.BlockFrame != nil {
-
-		return getLCLFromEP(cf.BlockFrame, index)
+	if cf.EP != nil {
+		return getLCLFromEP(cf.EP, index)
 	}
 
 	return nil
