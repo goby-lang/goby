@@ -1,8 +1,8 @@
 package main
 
 import (
-	"testing"
 	"github.com/st0012/Rooby/vm"
+	"testing"
 )
 
 func TestPrimitiveType(t *testing.T) {
@@ -665,85 +665,181 @@ func TestEvalMinusPrefixExpression(t *testing.T) {
 	}
 }
 
-//func TestMethodCallWithBlockArgument(t *testing.T) {
-//	tests := []struct {
-//		input    string
-//		expected int
-//	}{
-//		{`
-//		class Foo
-//		  def bar
-//		    yield(1, 3, 5)
-//		  end
-//		end
-//
-//		Foo.new.bar do |first, second, third|
-//		  first + second * third
-//		end
-//
-//		`, 16},
-//		{`
-//		class Foo
-//		  def bar
-//		    yield
-//		  end
-//		end
-//
-//		Foo.new.bar do
-//		  3
-//		end
-//
-//		`, 3},
-//		{`
-//		class Bar
-//		  def foo
-//		    yield(10)
-//		  end
-//		end
-//
-//		class Foo
-//		  def bar
-//		    yield
-//		  end
-//		end
-//
-//		Bar.new.foo do |num|
-//		  Foo.new.bar do
-//		    3 * num
-//		  end
-//		end
-//
-//		`, 30},
-//		{`
-//		class Foo
-//		  def bar
-//		    0
-//		  end
-//		end
-//
-//		Foo.new.bar do
-//		  3
-//		end
-//
-//		`, 0},
-//		{`
-//		class Foo
-//		  def bar
-//		    yield
-//		  end
-//		end
-//
-//		i = 10
-//		Foo.new.bar do
-//		  i = 3 + i
-//		end
-//		i
-//
-//		`, 13},
-//	}
-//
-//	for _, tt := range tests {
-//		evaluated := testEval(t, tt.input)
-//		testIntegerObject(t, evaluated, tt.expected)
-//	}
-//}
+func TestMethodCallWithBlockArgument(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{`
+				class Foo
+				  def bar
+				    yield(1, 3, 5)
+				  end
+				end
+
+				Foo.new.bar do |first, second, third|
+				  first + second * third
+				end
+
+				`, 16},
+		{`
+				class Foo
+				  def bar
+				    yield
+				  end
+				end
+
+				Foo.new.bar do
+				  3
+				end
+
+				`, 3},
+		{`
+				class Bar
+				  def foo
+				    yield(10)
+				  end
+				end
+
+				class Foo
+				  def bar
+				    yield
+				  end
+				end
+
+				Bar.new.foo do |num|
+				  Foo.new.bar do
+				    3 * num
+				  end
+				end
+
+				`, 30},
+		{`
+				class Foo
+				  def bar
+				    0
+				  end
+				end
+
+				Foo.new.bar do
+				  3
+				end
+
+				`, 0},
+		{`
+				class Foo
+				  def bar
+				    yield
+				  end
+				end
+
+				i = 10
+				Foo.new.bar do
+				  i = 3 + i
+				end
+				i
+
+				`, 13},
+		{`
+		class Car
+		  def initialize
+		    yield(self)
+		  end
+
+		  def doors=(ds)
+		    @doors = ds
+		  end
+
+		  def doors
+		    @doors
+		  end
+		end
+
+		car = Car.new do |c|
+		  c.doors = 4
+		end
+
+		car.doors
+				`,
+			4},
+		{`
+		class Foo
+		  def bar(x)
+		    yield(x)
+		  end
+		end
+
+		f = Foo.new
+		x = 100
+		y = 10
+
+		f.bar(10) do |x|
+                  y = x + y
+                end
+
+		y
+		`, 20},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
+func TestMethodCallWithNestedBlock(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{`
+		class Foo
+		  def bar
+		    yield
+		  end
+		end
+
+		a = 100
+		i = 10
+		b = 1000
+
+		f = Foo.new
+
+		f.bar do
+		  i = 3 * a
+		  f.bar do
+		    i = 3 + i
+		  end
+		end
+		i
+
+		`, 303},
+		{`
+		class Foo
+		  def bar
+		    yield
+		  end
+		end
+
+		i = 10
+		a = 100
+		b = 1000
+
+		f = Foo.new
+
+		f.bar do
+		  a = 20
+		  f.bar do
+		    b = (3 + i) * a
+		  end
+		end
+		b
+
+		`, 260},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}

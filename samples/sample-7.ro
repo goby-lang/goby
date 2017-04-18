@@ -1,0 +1,19 @@
+class Foo
+  def bar
+    yield
+  end
+end
+
+a = 100
+i = 10
+b = 1000
+
+f = Foo.new
+
+f.bar do
+  i = 3 * a
+  f.bar do
+    i = 3 + i
+  end
+end
+i

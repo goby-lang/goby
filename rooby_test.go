@@ -6,6 +6,7 @@ import (
 	"github.com/st0012/Rooby/parser"
 	"testing"
 	"github.com/st0012/Rooby/vm"
+	"fmt"
 )
 
 func testEval(t *testing.T, input string) vm.Object {
@@ -15,6 +16,7 @@ func testEval(t *testing.T, input string) vm.Object {
 	checkParserErrors(t, p)
 	cg := code_generator.New(program)
 	bytecodes := cg.GenerateByteCode(program)
+	fmt.Println(bytecodes)
 	return testExec(bytecodes)
 }
 
@@ -28,7 +30,7 @@ func testExec(bytecodes string) vm.Object {
 	v.CallFrameStack.Push(cf)
 	v.Exec()
 
-	return v.Stack.Top()
+	return v.Stack.Top().Target
 }
 
 func testClassObject(t *testing.T, obj vm.Object, expected string) bool {

@@ -449,6 +449,5 @@ func testExec(bytecodes string) interface{} {
 	v.CallFrameStack.Push(cf)
 	v.Exec()
 
-	return v.Stack.Top()
+	return v.Stack.Top().Target
 }
-

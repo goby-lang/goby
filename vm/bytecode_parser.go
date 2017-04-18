@@ -59,6 +59,8 @@ func (p *Parser) parseInstruction(is *InstructionSet, line string) {
 
 	tokens := strings.Split(line, " ")
 	lineNum, act := tokens[0], tokens[1]
+	ln, _ := strconv.ParseInt(lineNum, 0, 64)
+	action := BuiltInActions[OperationType(act)]
 
 	if act == "putstring" {
 		text := strings.Split(line, "\"")[1]
@@ -69,12 +71,7 @@ func (p *Parser) parseInstruction(is *InstructionSet, line string) {
 		for _, param := range rawParams {
 			params = append(params, p.parseParam(param))
 		}
-	}
-
-	ln, _ := strconv.ParseInt(lineNum, 0, 64)
-	action := BuiltInActions[OperationType(act)]
-
-	if action == nil {
+	} else if action == nil {
 		panic(fmt.Sprintf("Unknown command: %s. Line: %d", act, ln))
 	}
 
@@ -82,12 +79,14 @@ func (p *Parser) parseInstruction(is *InstructionSet, line string) {
 }
 
 func (p *Parser) parseParam(param string) interface{} {
-	v, e := strconv.ParseInt(param, 0, 64)
+	integer, e := strconv.ParseInt(param, 0, 64)
 	if e != nil {
 		return param
 	}
 
-	return v
+	i := int(integer)
+
+	return i
 }
 
 func removeEmptyLine(s string) string {
