@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-type Operation func(vm *VM, cf *CallFrame, args ...Object)
+type Operation func(vm *VM, cf *CallFrame, args ...interface{})
 
 type Action struct {
 	Name      string
@@ -15,7 +15,7 @@ type Action struct {
 
 type Instruction struct {
 	Action *Action
-	Params []Object
+	Params []interface{}
 	Line   int
 }
 
@@ -82,20 +82,21 @@ const (
 var BuiltInActions = map[OperationType]*Action{
 	POP: {
 		Name: POP,
-		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
+		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			vm.Stack.pop()
 		},
 	},
 	PUT_OBJECT: {
 		Name: PUT_OBJECT,
-		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-			vm.Stack.push(&Pointer{Target: args[0]})
+		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+			object := initializeObject(args[0])
+			vm.Stack.push(&Pointer{Target: object})
 		},
 	},
 	GET_CONSTANT: {
 		Name: GET_CONSTANT,
-		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-			constName := args[0].(*StringObject).Value
+		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+			constName := args[0].(string)
 			constant, ok := vm.Constants[constName]
 
 			if !ok {
@@ -106,20 +107,20 @@ var BuiltInActions = map[OperationType]*Action{
 	},
 	GET_LOCAL: {
 		Name: GET_LOCAL,
-		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-			i := args[0].(*IntegerObject)
-			p := cf.getLCL(i.Value)
+		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+			i := args[0].(int)
+			p := cf.getLCL(i)
 
 			if p == nil {
-				panic(fmt.Sprintf("Local index: %d is nil. Callframe: %s", i.Value, cf.InstructionSet.Label.Name))
+				panic(fmt.Sprintf("Local index: %d is nil. Callframe: %s", i, cf.InstructionSet.Label.Name))
 			}
 			vm.Stack.push(p)
 		},
 	},
 	GET_INSTANCE_VARIABLE: {
 		Name: GET_INSTANCE_VARIABLE,
-		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-			variableName := args[0].(*StringObject).Value
+		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+			variableName := args[0].(string)
 			v, ok := cf.Self.(*RObject).InstanceVariables.Get(variableName)
 			if !ok {
 				vm.Stack.push(&Pointer{Target: NULL})
@@ -132,31 +133,31 @@ var BuiltInActions = map[OperationType]*Action{
 	},
 	SET_INSTANCE_VARIABLE: {
 		Name: SET_INSTANCE_VARIABLE,
-		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-			variableName := args[0].(*StringObject).Value
+		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+			variableName := args[0].(string)
 			p := vm.Stack.pop()
 			cf.Self.(*RObject).InstanceVariables.Set(variableName, p.Target)
 		},
 	},
 	SET_LOCAL: {
 		Name: SET_LOCAL,
-		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
+		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			v := vm.Stack.pop()
-			cf.insertLCL(args[0].(*IntegerObject).Value, v.Target)
+			cf.insertLCL(args[0].(int), v.Target)
 		},
 	},
 	SET_CONSTANT: {
 		Name: SET_CONSTANT,
-		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-			constName := args[0].(*StringObject).Value
+		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+			constName := args[0].(string)
 			v := vm.Stack.pop()
 			vm.Constants[constName] = v
 		},
 	},
 	NEW_ARRAY: {
 		Name: NEW_ARRAY,
-		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-			argCount := args[0].(*IntegerObject).Value
+		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+			argCount := args[0].(int)
 			elems := []Object{}
 
 			for i := 0; i < argCount; i++ {
@@ -170,8 +171,8 @@ var BuiltInActions = map[OperationType]*Action{
 	},
 	NEW_HASH: {
 		Name: NEW_HASH,
-		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-			argCount := args[0].(*IntegerObject).Value
+		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+			argCount := args[0].(int)
 			pairs := map[string]Object{}
 
 			for i := 0; i < argCount/2; i++ {
@@ -184,113 +185,9 @@ var BuiltInActions = map[OperationType]*Action{
 			vm.Stack.push(&Pointer{hash})
 		},
 	},
-	//PLUS: {
-	//	Name: PLUS,
-	//	Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-	//		second := vm.Stack.Top().(*IntegerObject).Value
-	//		vm.SP -= 1
-	//		first := vm.Stack.Top().(*IntegerObject).Value
-	//		vm.SP -= 1
-	//		vm.Stack.push(InitilaizeInteger(first + second))
-	//	},
-	//},
-	//MINUS: {
-	//	Name: MINUS,
-	//	Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-	//		second := vm.Stack.Top().(*IntegerObject).Value
-	//		vm.SP -= 1
-	//		first := vm.Stack.Top().(*IntegerObject).Value
-	//		vm.SP -= 1
-	//		vm.Stack.push(InitilaizeInteger(first - second))
-	//	},
-	//},
-	//MULT: {
-	//	Name: MULT,
-	//	Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-	//		second := vm.Stack.Top().(*IntegerObject).Value
-	//		vm.SP -= 1
-	//		first := vm.Stack.Top().(*IntegerObject).Value
-	//		vm.SP -= 1
-	//		vm.Stack.push(InitilaizeInteger(first * second))
-	//	},
-	//},
-	//DIV: {
-	//	Name: DIV,
-	//	Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-	//		second := vm.Stack.Top().(*IntegerObject).Value
-	//		vm.SP -= 1
-	//		first := vm.Stack.Top().(*IntegerObject).Value
-	//		vm.SP -= 1
-	//		vm.Stack.push(InitilaizeInteger(first / second))
-	//	},
-	//},
-	//GT: {
-	//	Name: GT,
-	//	Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-	//		second := vm.Stack.Top().(*IntegerObject).Value
-	//		vm.SP -= 1
-	//		first := vm.Stack.Top().(*IntegerObject).Value
-	//		vm.SP -= 1
-	//		result := first > second
-	//
-	//		if result {
-	//			vm.Stack.push(TRUE)
-	//		} else {
-	//			vm.Stack.push(FALSE)
-	//		}
-	//	},
-	//},
-	//LT: {
-	//	Name: LT,
-	//	Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-	//		second := vm.Stack.Top().(*IntegerObject).Value
-	//		vm.SP -= 1
-	//		first := vm.Stack.Top().(*IntegerObject).Value
-	//		vm.SP -= 1
-	//		result := first < second
-	//
-	//		if result {
-	//			vm.Stack.push(TRUE)
-	//		} else {
-	//			vm.Stack.push(FALSE)
-	//		}
-	//	},
-	//},
-	//GE: {
-	//	Name: GE,
-	//	Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-	//		second := vm.Stack.Top().(*IntegerObject).Value
-	//		vm.SP -= 1
-	//		first := vm.Stack.Top().(*IntegerObject).Value
-	//		vm.SP -= 1
-	//		result := first >= second
-	//
-	//		if result {
-	//			vm.Stack.push(TRUE)
-	//		} else {
-	//			vm.Stack.push(FALSE)
-	//		}
-	//	},
-	//},
-	//LE: {
-	//	Name: LE,
-	//	Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-	//		second := vm.Stack.Top().(*IntegerObject).Value
-	//		vm.SP -= 1
-	//		first := vm.Stack.Top().(*IntegerObject).Value
-	//		vm.SP -= 1
-	//		result := first <= second
-	//
-	//		if result {
-	//			vm.Stack.push(TRUE)
-	//		} else {
-	//			vm.Stack.push(FALSE)
-	//		}
-	//	},
-	//},
 	BRANCH_UNLESS: {
 		Name: BRANCH_UNLESS,
-		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
+		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			v := vm.Stack.pop()
 			bool, isBool := v.Target.(*BooleanObject)
 
@@ -299,7 +196,7 @@ var BuiltInActions = map[OperationType]*Action{
 					return
 				}
 
-				line := args[0].(*IntegerObject).Value
+				line := args[0].(int)
 				cf.PC = line
 				return
 			}
@@ -307,7 +204,7 @@ var BuiltInActions = map[OperationType]*Action{
 			_, isNull := v.Target.(*Null)
 
 			if isNull {
-				line := args[0].(*IntegerObject).Value
+				line := args[0].(int)
 				cf.PC = line
 				return
 			}
@@ -315,32 +212,33 @@ var BuiltInActions = map[OperationType]*Action{
 	},
 	JUMP: {
 		Name: JUMP,
-		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-			cf.PC = args[0].(*IntegerObject).Value
+		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+			cf.PC = args[0].(int)
 		},
 	},
 	PUT_SELF: {
 		Name: PUT_SELF,
-		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
+		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			vm.Stack.push(&Pointer{cf.Self})
 		},
 	},
 	PUT_STRING: {
 		Name: PUT_STRING,
-		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-			vm.Stack.push(&Pointer{args[0]})
+		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+			object := initializeObject(args[0])
+			vm.Stack.push(&Pointer{object})
 		},
 	},
 	PUT_NULL: {
 		Name: PUT_NULL,
-		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
+		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			vm.Stack.push(&Pointer{NULL})
 		},
 	},
 	DEF_METHOD: {
 		Name: DEF_METHOD,
-		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-			argCount := args[0].(*IntegerObject).Value
+		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+			argCount := args[0].(int)
 			methodName := vm.Stack.pop().Target.(*StringObject).Value
 			is, _ := vm.getMethodIS(methodName)
 			method := &Method{Name: methodName, Argc: argCount, InstructionSet: is}
@@ -358,8 +256,8 @@ var BuiltInActions = map[OperationType]*Action{
 	},
 	DEF_SINGLETON_METHOD: {
 		Name: DEF_SINGLETON_METHOD,
-		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-			argCount := args[0].(*IntegerObject).Value
+		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+			argCount := args[0].(int)
 			methodName := vm.Stack.pop().Target.(*StringObject).Value
 			is, _ := vm.getMethodIS(methodName)
 			method := &Method{Name: methodName, Argc: argCount, InstructionSet: is}
@@ -378,8 +276,8 @@ var BuiltInActions = map[OperationType]*Action{
 	},
 	DEF_CLASS: {
 		Name: DEF_CLASS,
-		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-			class := InitializeClass(args[0].(*StringObject).Value)
+		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+			class := InitializeClass(args[0].(string))
 			classPr := &Pointer{Target: class}
 			vm.Constants[class.Name] = classPr
 
@@ -390,7 +288,7 @@ var BuiltInActions = map[OperationType]*Action{
 			}
 
 			if len(args) >= 2 {
-				constantName := args[1].(*StringObject).Value
+				constantName := args[1].(string)
 				constant := vm.Constants[constantName]
 				inheritedClass, ok := constant.Target.(*RClass)
 				if !ok {
@@ -411,15 +309,15 @@ var BuiltInActions = map[OperationType]*Action{
 	},
 	SEND: {
 		Name: SEND,
-		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-			methodName := args[0].(*StringObject).Value
-			argCount := args[1].(*IntegerObject).Value
+		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+			methodName := args[0].(string)
+			argCount := args[1].(int)
 			var blockName string
 			var hasBlock bool
 
 			if len(args) > 2 {
 				hasBlock = true
-				blockFlag := args[2].(*StringObject).Value
+				blockFlag := args[2].(string)
 				blockName = strings.Split(blockFlag, ":")[1]
 			} else {
 				hasBlock = false
@@ -478,8 +376,8 @@ var BuiltInActions = map[OperationType]*Action{
 	},
 	INVOKE_BLOCK: {
 		Name: INVOKE_BLOCK,
-		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
-			argCount := args[0].(*IntegerObject).Value
+		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+			argCount := args[0].(int)
 			argPr := vm.SP - argCount
 			receiverPr := argPr - 1
 			receiver := vm.Stack.Data[receiverPr].Target.(BaseObject)
@@ -494,8 +392,12 @@ var BuiltInActions = map[OperationType]*Action{
 			c.Self = receiver
 
 			for i := 0; i < argCount; i++ {
-				c.insertLCL(i, vm.Stack.Data[argPr+i].Target)
+				c.Local[i] = vm.Stack.Data[argPr+i]
 			}
+
+			fmt.Println(c.inspect())
+			fmt.Println(c.Local)
+			fmt.Println(vm.Stack.Data[argPr].Target)
 
 			vm.CallFrameStack.Push(c)
 			vm.Exec()
@@ -505,7 +407,7 @@ var BuiltInActions = map[OperationType]*Action{
 	},
 	LEAVE: {
 		Name: LEAVE,
-		Operation: func(vm *VM, cf *CallFrame, args ...Object) {
+		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			cf = vm.CallFrameStack.Pop()
 			cf.PC = len(cf.InstructionSet.Instructions)
 		},
@@ -553,33 +455,7 @@ func setReturnValueAndSP(vm *VM, receiverPr int, value *Pointer) {
 }
 
 func (is *InstructionSet) Define(line int, action *Action, params ...interface{}) {
-	ps := []Object{}
-
-	for _, param := range params {
-		var p Object
-
-		switch param := param.(type) {
-		case int:
-			p = InitilaizeInteger(int(param))
-		case int64:
-			p = InitilaizeInteger(int(param))
-		case string:
-			switch param {
-			case "true":
-				p = TRUE
-			case "false":
-				p = FALSE
-			case "nil":
-				p = NULL
-			default:
-				p = InitializeString(param)
-			}
-		}
-
-		ps = append(ps, p)
-	}
-
-	i := &Instruction{Action: action, Params: ps, Line: line}
+	i := &Instruction{Action: action, Params: params, Line: line}
 	is.Instructions = append(is.Instructions, i)
 }
 
@@ -599,7 +475,29 @@ func (i *Instruction) Inspect() string {
 	var params []string
 
 	for _, param := range i.Params {
-		params = append(params, param.Inspect())
+		params = append(params, fmt.Sprint(param))
 	}
 	return fmt.Sprintf("%s: %s \n", i.Action.Name, strings.Join(params, ", "))
+}
+
+func initializeObject(value interface{}) Object {
+	switch v := value.(type) {
+	case int:
+		return InitilaizeInteger(int(v))
+	case int64:
+		return InitilaizeInteger(int(v))
+	case string:
+		switch v {
+		case "true":
+			return TRUE
+		case "false":
+			return FALSE
+		case "nil":
+			return NULL
+		default:
+			return InitializeString(v)
+		}
+	default:
+		panic(fmt.Sprintf("Unknown data type: %T", v))
+	}
 }
