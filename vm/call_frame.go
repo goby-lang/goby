@@ -21,9 +21,8 @@ type CallFrame struct {
 	BlockFrame     *CallFrame
 }
 
-func (cf *CallFrame) insertLCL(i int, value Object) {
-	index := i
-	existedLCL := cf.getLCL(i)
+func (cf *CallFrame) insertLCL(index, depth int, value Object) {
+	existedLCL := cf.getLCL(index, depth)
 
 	if existedLCL != nil {
 		existedLCL.Target = value
@@ -39,24 +38,12 @@ func (cf *CallFrame) insertLCL(i int, value Object) {
 	}
 }
 
-func (cf *CallFrame) getLCL(index int) *Pointer {
-	var p *Pointer
-
-	p = cf.Local[index]
-
-	for p == nil {
-		if cf.BlockFrame != nil {
-			p = getLCLFromEP(cf.BlockFrame, index)
-
-			if p == nil {
-				return nil
-			}
-		} else {
-			return nil
-		}
+func (cf *CallFrame) getLCL(index, depth int) *Pointer {
+	if depth == 0 {
+		return cf.Local[index]
 	}
 
-	return p
+	return cf.BlockFrame.EP.getLCL(index, depth -1)
 }
 
 func (cf *CallFrame) inspect() string {

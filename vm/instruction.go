@@ -108,11 +108,17 @@ var BuiltInActions = map[OperationType]*Action{
 	GET_LOCAL: {
 		Name: GET_LOCAL,
 		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
-			i := args[0].(int)
-			p := cf.getLCL(i)
+			index := args[0].(int)
+			depth := 0
+
+			if len(args) >= 2 {
+				depth = args[1].(int)
+			}
+
+			p := cf.getLCL(index, depth)
 
 			if p == nil {
-				panic(fmt.Sprintf("Local index: %d is nil. Callframe: %s", i, cf.InstructionSet.Label.Name))
+				panic(fmt.Sprintf("Local index: %d is nil. Callframe: %s", index, cf.InstructionSet.Label.Name))
 			}
 			vm.Stack.push(p)
 		},
@@ -143,7 +149,12 @@ var BuiltInActions = map[OperationType]*Action{
 		Name: SET_LOCAL,
 		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			v := vm.Stack.pop()
-			cf.insertLCL(args[0].(int), v.Target)
+			depth := 0
+
+			if len(args) >= 2 {
+				depth = args[1].(int)
+			}
+			cf.insertLCL(args[0].(int), depth, v.Target)
 		},
 	},
 	SET_CONSTANT: {
@@ -395,10 +406,6 @@ var BuiltInActions = map[OperationType]*Action{
 				c.Local[i] = vm.Stack.Data[argPr+i]
 			}
 
-			fmt.Println(c.inspect())
-			fmt.Println(c.Local)
-			fmt.Println(vm.Stack.Data[argPr].Target)
-
 			vm.CallFrameStack.Push(c)
 			vm.Exec()
 
@@ -439,7 +446,7 @@ func evalMethodObject(vm *VM, receiver BaseObject, method *Method, receiverPr, a
 	c.Self = receiver
 
 	for i := 0; i < argC; i++ {
-		c.insertLCL(i, vm.Stack.Data[argPr+i].Target)
+		c.insertLCL(i, 0, vm.Stack.Data[argPr+i].Target)
 	}
 
 	c.BlockFrame = blockFrame
