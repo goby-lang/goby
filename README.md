@@ -4,20 +4,22 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/st0012/Rooby)](https://goreportcard.com/report/github.com/st0012/Rooby)
 [![codecov](https://codecov.io/gh/st0012/Rooby/branch/master/graph/badge.svg)](https://codecov.io/gh/st0012/Rooby)
 
-Rooby is a Ruby-like object oriented language written in Go. You can think it as a simplified Ruby for now.
+Rooby is a Ruby-like object oriented language written in Go. You can think it as a simplified, compilable Ruby for now.
    
 
 Here's my expectation about Rooby:
 
 - Has Ruby-like syntax and object system.
-- Rooby program will be compiled at first place and then executed through VM. (I am still working on Rooby VM, see `vm` folder.) 
+- Rooby program will be compiled at first place and then executed through VM. 
 - It's compilation and evaluation are separated, it can firstly compile your program into bytecode and execute it later. This will work like python.
-- Maybe it can gain some improvement on concurrency since it's based on Go.
-- Any special idea comes to my mind or proposed by you. 
+- **Maybe** it can gain some improvement on concurrency since it's based on Go.
+- Any special idea comes to my mind or proposed by you 😄 
 
 **Join me to build Rooby together!**
 
 ## Features
+- **Can be compiled into bytecode (with `.robc` extension)**
+- **Can evaluate bytecode directly**
 - Everything is object
 - Support comment
 - Object & Class
@@ -69,13 +71,6 @@ $ go get github.com/st0012/Rooby
 (might see errors on sample-6 since vm hasn't support block yet)
 ``` 
 $ rooby ./samples/sample-1.ro
-#=> 16
-```
-
-**Execute Rooby file without vm, using the evaluator package (will be once vm is mature)**
-
-```
-$ rooby --without-vm ./samples/sample-1.ro
 #=> 16
 ```
 
