@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/st0012/Rooby/ast"
 	"github.com/st0012/Rooby/code_generator"
-	"github.com/st0012/Rooby/evaluator"
 	"github.com/st0012/Rooby/lexer"
 	"github.com/st0012/Rooby/parser"
 	"github.com/st0012/Rooby/vm"
@@ -17,7 +16,6 @@ import (
 
 func main() {
 	compileOptionPtr := flag.Bool("c", false, "Compile to bytecode")
-	evalOptionPtr := flag.Bool("without-vm", false, "Eval program directly without using VM")
 
 	flag.Parse()
 
@@ -41,11 +39,6 @@ func main() {
 	switch fileExt {
 	case "ro":
 		program := buildAST(file)
-
-		if *evalOptionPtr && !*compileOptionPtr {
-			evaluator.Eval(program, evaluator.MainObj.Scope)
-			return
-		}
 
 		cg := code_generator.New(program)
 		bytecodes := cg.GenerateByteCode(program)
