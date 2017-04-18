@@ -52,6 +52,12 @@ Here's my expectation about Rooby:
     - Haven't support `for` yet
 - IO
     - Just `puts` for now
+    
+**(You can open an issue for any feature request)** 
+    
+## TODO
+
+See [github progjects](https://github.com/st0012/Rooby/projects)
 
 ## Install
 
