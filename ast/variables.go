@@ -2,10 +2,10 @@ package ast
 
 import "github.com/st0012/Rooby/token"
 
-type Variable interface {
+type variable interface {
 	variableNode()
 	ReturnValue() string
-	Node
+	node
 }
 
 type Identifier struct {

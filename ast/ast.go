@@ -7,21 +7,22 @@ import (
 	"strings"
 )
 
-type Node interface {
+type node interface {
 	TokenLiteral() string
 	String() string
 }
 
 type Statement interface {
-	Node
+	node
 	statementNode()
 }
 
 type Expression interface {
-	Node
+	node
 	expressionNode()
 }
 
+// Program is the root node of entire AST
 type Program struct {
 	Statements []Statement
 }
@@ -29,9 +30,9 @@ type Program struct {
 func (p *Program) TokenLiteral() string {
 	if len(p.Statements) > 0 {
 		return p.Statements[0].TokenLiteral()
-	} else {
-		return ""
 	}
+
+	return ""
 }
 
 func (p *Program) String() string {
@@ -46,7 +47,7 @@ func (p *Program) String() string {
 
 type AssignStatement struct {
 	Token token.Token
-	Name  Variable
+	Name  variable
 	Value Expression
 }
 
