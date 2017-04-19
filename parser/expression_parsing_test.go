@@ -1,9 +1,8 @@
-package parser_test
+package parser
 
 import (
 	"github.com/st0012/Rooby/ast"
 	"github.com/st0012/Rooby/lexer"
-	"github.com/st0012/Rooby/parser"
 	"testing"
 )
 
@@ -30,7 +29,7 @@ func TestHashExpression(t *testing.T) {
 
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
-		p := parser.New(l)
+		p := New(l)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 
@@ -65,7 +64,7 @@ func TestHashAccessExpression(t *testing.T) {
 
 	for i, tt := range tests {
 		l := lexer.New(tt.input)
-		p := parser.New(l)
+		p := New(l)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 
@@ -107,7 +106,7 @@ func TestArrayExpression(t *testing.T) {
 
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
-		p := parser.New(l)
+		p := New(l)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 
@@ -143,7 +142,7 @@ func TestArrayIndexExpression(t *testing.T) {
 
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
-		p := parser.New(l)
+		p := New(l)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 
@@ -171,7 +170,7 @@ func TestIdentifierExpression(t *testing.T) {
 	input := `foobar;`
 
 	l := lexer.New(input)
-	p := parser.New(l)
+	p := New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -193,7 +192,7 @@ func TestConstantExpression(t *testing.T) {
 	input := `Person;`
 
 	l := lexer.New(input)
-	p := parser.New(l)
+	p := New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -215,7 +214,7 @@ func TestIntegerLiteralExpression(t *testing.T) {
 	input := `5;`
 
 	l := lexer.New(input)
-	p := parser.New(l)
+	p := New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -244,7 +243,7 @@ func TestStringLiteralExpression(t *testing.T) {
 
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
-		p := parser.New(l)
+		p := New(l)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 
@@ -275,7 +274,7 @@ func TestParsingPrefixExpression(t *testing.T) {
 
 	for _, tt := range prefixTests {
 		l := lexer.New(tt.input)
-		p := parser.New(l)
+		p := New(l)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 
@@ -315,7 +314,7 @@ func TestParsingPostfixExpression(t *testing.T) {
 
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
-		p := parser.New(l)
+		p := New(l)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 
@@ -357,7 +356,7 @@ func TestParsingInfixExpression(t *testing.T) {
 
 	for _, tt := range infixTests {
 		l := lexer.New(tt.input)
-		p := parser.New(l)
+		p := New(l)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 
@@ -383,7 +382,7 @@ func TestIfExpression(t *testing.T) {
 	`
 
 	l := lexer.New(input)
-	p := parser.New(l)
+	p := New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -447,7 +446,7 @@ func TestMethodParameterParsing(t *testing.T) {
 
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
-		p := parser.New(l)
+		p := New(l)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 		methodStatement := program.Statements[0].(*ast.DefStatement)
@@ -468,7 +467,7 @@ func TestCallExpression(t *testing.T) {
 	`
 
 	l := lexer.New(input)
-	p := parser.New(l)
+	p := New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -496,7 +495,7 @@ func TestSelfCallExpression(t *testing.T) {
 	`
 
 	l := lexer.New(input)
-	p := parser.New(l)
+	p := New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -530,7 +529,7 @@ func TestCallExpressionWithBlock(t *testing.T) {
 	end
 	`
 	l := lexer.New(input)
-	p := parser.New(l)
+	p := New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 

@@ -1,10 +1,9 @@
-package parser_test
+package parser
 
 import (
 	"fmt"
 	"github.com/st0012/Rooby/ast"
 	"github.com/st0012/Rooby/lexer"
-	"github.com/st0012/Rooby/parser"
 	"testing"
 )
 
@@ -14,7 +13,7 @@ func TestMethodChainExpression(t *testing.T) {
 	`
 
 	l := lexer.New(input)
-	p := parser.New(l)
+	p := New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -153,7 +152,7 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
-		p := parser.New(l)
+		p := New(l)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 
@@ -172,7 +171,7 @@ func TestIgnoreComments(t *testing.T) {
 	`
 
 	l := lexer.New(input)
-	p := parser.New(l)
+	p := New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -213,7 +212,7 @@ func testAssignStatement(t *testing.T, s ast.Statement, name string, value inter
 	return true
 }
 
-func checkParserErrors(t *testing.T, p *parser.Parser) {
+func checkParserErrors(t *testing.T, p *Parser) {
 	errors := p.Errors()
 	if len(errors) == 0 {
 		return
