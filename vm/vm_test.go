@@ -2,79 +2,10 @@ package vm
 
 import (
 	"testing"
+	"github.com/st0012/Rooby/code_generator"
+	"github.com/st0012/Rooby/lexer"
+	"github.com/st0012/Rooby/parser"
 )
-
-//func TestCallBlock(t *testing.T) {
-//	input := `
-//<Def:initialize>
-//0 putself
-//1 putself
-//2 invokeblock 1
-//3 leave
-//<Def:color=>
-//0 setinstancevariable @color
-//1 leave
-//<Def:color>
-//0 getinstancevariable @color
-//1 leave
-//<Def:doors=>
-//0 setinstancevariable @doors
-//1 leave
-//<Def:doors>
-//0 getinstancevariable @doors
-//1 leave
-//<DefClass:Car>
-//0 putself
-//1 putstring "initialize"
-//2 def_method 0
-//3 putself
-//4 putstring "color="
-//5 def_method 1
-//6 putself
-//7 putstring "color"
-//8 def_method 0
-//9 putself
-//10 putstring "doors="
-//11 def_method 1
-//12 putself
-//13 putstring "doors"
-//14 def_method 0
-//15 leave
-//<Block>
-//0 getlocal 1
-//1 putstring "Red"
-//2 send color= 1
-//3 getlocal 1
-//4 putobject 4
-//5 send doors= 1
-//6 leave
-//<ProgramStart>
-//0 putself
-//1 def_class Car
-//2 pop
-//3 getconstant Car
-//4 send new 0 block
-//5 setlocal 0
-//6 putstring "My car's color is "
-//7 getlocal 0
-//8 send color 0
-//9 send + 1
-//10 putstring " and it's got "
-//11 send + 1
-//12 getlocal 0
-//13 send doors 0
-//14 send to_s 0
-//15 send + 1
-//16 putstring " doors."
-//17 send + 1
-//18 leave
-//`
-//	expected := "My car's color is Red and it's got 4 doors."
-//	result := testExec(input).(*StringObject).Value
-//	if result != expected {
-//		t.Fatalf("Expect result to be %d. got=%d", expected, result)
-//	}
-//}
 
 func TestCunstomConstructorAndInstanceVariable(t *testing.T) {
 	input := `
@@ -439,7 +370,30 @@ func TestConditionWithAlternativeCompilation(t *testing.T) {
 	}
 }
 
-func testExec(bytecodes string) interface{} {
+func testEval(t *testing.T, input string) Object {
+	l := lexer.New(input)
+	p := parser.New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+	cg := code_generator.New(program)
+	bytecodes := cg.GenerateByteCode(program)
+	return testExec(bytecodes)
+}
+
+func checkParserErrors(t *testing.T, p *parser.Parser) {
+	errors := p.Errors()
+	if len(errors) == 0 {
+		return
+	}
+
+	t.Errorf("parser has %d errors", len(errors))
+	for _, msg := range errors {
+		t.Errorf("parser error: %q", msg)
+	}
+	t.FailNow()
+}
+
+func testExec(bytecodes string) Object {
 	p := NewBytecodeParser()
 	v := New()
 	p.VM = v
@@ -450,4 +404,62 @@ func testExec(bytecodes string) interface{} {
 	v.Exec()
 
 	return v.Stack.Top().Target
+}
+
+func testIntegerObject(t *testing.T, obj Object, expected int) bool {
+	result, ok := obj.(*IntegerObject)
+	if !ok {
+		t.Errorf("object is not Integer. got=%T (%+v).", obj, obj)
+		return false
+	}
+	if result.Value != expected {
+		t.Errorf("object has wrong value. expect=%d, got=%d", expected, result.Value)
+		return false
+	}
+
+	return true
+}
+
+func testNullObject(t *testing.T, obj Object) bool {
+	if obj != NULL {
+		t.Errorf("object is not NULL. got=%T (%+v)", obj, obj)
+		return false
+	}
+
+	return true
+}
+
+func testStringObject(t *testing.T, obj Object, expected string) bool {
+	result, ok := obj.(*StringObject)
+	if !ok {
+		t.Errorf("object is not a String. got=%T (%+v)", obj, obj)
+		return false
+	}
+	if result.Value != expected {
+		t.Errorf("object has wrong value. expect=%s, got=%s", expected, result.Value)
+		return false
+	}
+
+	return true
+}
+
+func testBooleanObject(t *testing.T, obj Object, expected bool) bool {
+	result, ok := obj.(*BooleanObject)
+	if !ok {
+		t.Errorf("object is not Boolean. got=%T (%+v)", obj, obj)
+		return false
+	}
+	if result.Value != expected {
+		t.Errorf("object has wrong value. expect=%d, got=%d", expected, result.Value)
+		return false
+	}
+
+	return true
+}
+
+func isError(obj Object) bool {
+	if obj != nil {
+		return obj.Type() == ERROR_OBJ
+	}
+	return false
 }

@@ -1,8 +1,7 @@
-package main
+package vm
 
 import (
 	"testing"
-	"github.com/st0012/Rooby/vm"
 )
 
 func TestEvalHashExpression(t *testing.T) {
@@ -12,7 +11,7 @@ func TestEvalHashExpression(t *testing.T) {
 
 	evaluated := testEval(t, input)
 
-	h, ok := evaluated.(*vm.HashObject)
+	h, ok := evaluated.(*HashObject)
 	if !ok {
 		t.Fatalf("Expect evaluated value to be a hash. got=%T", evaluated)
 	}
@@ -81,7 +80,7 @@ func TestEvalHashAccess(t *testing.T) {
 		case bool:
 			testBooleanObject(t, evaluated, expected)
 		case nil:
-			_, ok := evaluated.(*vm.Null)
+			_, ok := evaluated.(*Null)
 
 			if !ok {
 

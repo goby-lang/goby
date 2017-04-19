@@ -1,7 +1,6 @@
-package main
+package vm
 
 import (
-	"github.com/st0012/Rooby/vm"
 	"testing"
 )
 
@@ -53,7 +52,7 @@ func TestPrimitiveType(t *testing.T) {
 		evaluated := testEval(t, tt.input)
 
 		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*vm.Error).Message)
+			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 		}
 
 		testStringObject(t, evaluated, tt.expected)
@@ -196,7 +195,7 @@ func TestMethodCallWithoutSelf(t *testing.T) {
 		evaluated := testEval(t, tt.input)
 
 		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*vm.Error).Message)
+			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 		}
 
 		testIntegerObject(t, evaluated, tt.expected)
@@ -315,7 +314,7 @@ func TestClassMethodEvaluation(t *testing.T) {
 		evaluated := testEval(t, tt.input)
 
 		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*vm.Error).Message)
+			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 		}
 
 		switch expected := tt.expected.(type) {
@@ -332,7 +331,7 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 		input        string
 		expected_obj string
 	}{
-		{`self`, vm.BASE_OBJECT_OBJ},
+		{`self`, BASE_OBJECT_OBJ},
 		{
 			`
 			class Bar
@@ -342,7 +341,7 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 			end
 
 			Bar.new.whoami;
-		`, vm.BASE_OBJECT_OBJ},
+		`, BASE_OBJECT_OBJ},
 		{
 			`
 			class Foo
@@ -355,7 +354,7 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 
 			Foo.new.get_self;
 			`,
-			vm.CLASS_OBJ},
+			CLASS_OBJ},
 		{
 			`
 			class Foo
@@ -366,7 +365,7 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 
 			Foo.new.class
 			`,
-			vm.CLASS_OBJ},
+			CLASS_OBJ},
 		{
 			`
 			class Foo
@@ -377,14 +376,14 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 
 			Foo.new.class_name
 			`,
-			vm.STRING_OBJ},
+			STRING_OBJ},
 	}
 
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
 
 		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*vm.Error).Message)
+			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 		}
 
 		if string(evaluated.Type()) != tt.expected_obj {
@@ -434,10 +433,10 @@ func TestEvalInstanceVariable(t *testing.T) {
 	evaluated := testEval(t, input)
 
 	if isError(evaluated) {
-		t.Fatalf("got Error: %s", evaluated.(*vm.Error).Message)
+		t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 	}
 
-	result, ok := evaluated.(*vm.IntegerObject)
+	result, ok := evaluated.(*IntegerObject)
 
 	if !ok {
 		t.Errorf("expect result to be an integer. got=%T", evaluated)
@@ -477,10 +476,10 @@ func TestEvalInstanceMethodCall(t *testing.T) {
 	evaluated := testEval(t, input)
 
 	if isError(evaluated) {
-		t.Fatalf("got Error: %s", evaluated.(*vm.Error).Message)
+		t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 	}
 
-	result, ok := evaluated.(*vm.IntegerObject)
+	result, ok := evaluated.(*IntegerObject)
 
 	if !ok {
 		t.Errorf("expect result to be an integer. got=%T", evaluated)
@@ -511,10 +510,10 @@ func TestEvalCustomInitializeMethod(t *testing.T) {
 	evaluated := testEval(t, input)
 
 	if isError(evaluated) {
-		t.Fatalf("got Error: %s", evaluated.(*vm.Error).Message)
+		t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 	}
 
-	result, ok := evaluated.(*vm.IntegerObject)
+	result, ok := evaluated.(*IntegerObject)
 
 	if !ok {
 		t.Errorf("expect result to be an integer. got=%T", evaluated)
@@ -538,10 +537,10 @@ func TestEvalClassInheritance(t *testing.T) {
 	evaluated := testEval(t, input)
 
 	if isError(evaluated) {
-		t.Fatalf("got Error: %s", evaluated.(*vm.Error).Message)
+		t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 	}
 
-	result, ok := evaluated.(*vm.IntegerObject)
+	result, ok := evaluated.(*IntegerObject)
 
 	if !ok {
 		t.Errorf("expect result to be an integer. got=%T", evaluated)
