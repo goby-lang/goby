@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/st0012/Rooby.svg?branch=master)](https://travis-ci.org/st0012/Rooby)
 [![Code Climate](https://codeclimate.com/github/st0012/rooby/badges/gpa.svg)](https://codeclimate.com/github/st0012/rooby)
+[![GoDoc](https://godoc.org/github.com/st0012/Rooby/bytecode?status.svg)](https://godoc.org/github.com/st0012/Rooby/bytecode)
 [![Go Report Card](https://goreportcard.com/badge/github.com/st0012/Rooby)](https://goreportcard.com/report/github.com/st0012/Rooby)
 [![codecov](https://codecov.io/gh/st0012/Rooby/branch/master/graph/badge.svg)](https://codecov.io/gh/st0012/Rooby)
 [![Readme Score](http://readme-score-api.herokuapp.com/score.svg?url=st0012/rooby)](http://clayallsopp.github.io/readme-score?url=st0012/rooby)
