@@ -4,6 +4,7 @@ import (
 	"github.com/st0012/Rooby/token"
 )
 
+// Lexer is used for tokenizing programs
 type Lexer struct {
 	input        string
 	position     int
@@ -12,12 +13,14 @@ type Lexer struct {
 	line         int
 }
 
+// New initializes a new lexer with input string
 func New(input string) *Lexer {
 	l := &Lexer{input: input}
 	l.readChar()
 	return l
 }
 
+// NextToken makes lexer tokenize next character(s)
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 
@@ -31,9 +34,9 @@ func (l *Lexer) NextToken() token.Token {
 		return tok
 	case '=':
 		if l.peekChar() == '=' {
-			current_byte := l.ch
+			currentByte := l.ch
 			l.readChar()
-			tok = token.Token{Type: token.EQ, Literal: string(current_byte) + string(l.ch), Line: l.line}
+			tok = token.Token{Type: token.EQ, Literal: string(currentByte) + string(l.ch), Line: l.line}
 		} else {
 			tok = newToken(token.ASSIGN, l.ch, l.line)
 		}
@@ -49,9 +52,9 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.MINUS, l.ch, l.line)
 	case '!':
 		if l.peekChar() == '=' {
-			current_byte := l.ch
+			currentByte := l.ch
 			l.readChar()
-			tok = token.Token{Type: token.NOT_EQ, Literal: string(current_byte) + string(l.ch), Line: l.line}
+			tok = token.Token{Type: token.NOT_EQ, Literal: string(currentByte) + string(l.ch), Line: l.line}
 		} else {
 			tok = newToken(token.BANG, l.ch, l.line)
 		}
@@ -131,9 +134,9 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Type = token.INT
 			tok.Line = l.line
 			return tok
-		} else {
-			tok = newToken(token.ILLEGAL, l.ch, l.line)
 		}
+
+		tok = newToken(token.ILLEGAL, l.ch, l.line)
 	}
 
 	l.readChar()
@@ -143,7 +146,7 @@ func (l *Lexer) NextToken() token.Token {
 func (l *Lexer) skipWhitespace() {
 	for l.ch == ' ' || l.ch == '\t' || l.ch == '\r' || l.ch == '\n' {
 		if l.ch == '\n' {
-			l.line += 1
+			l.line++
 		}
 		l.readChar()
 	}
@@ -212,15 +215,15 @@ func (l *Lexer) readChar() {
 		l.ch = l.input[l.readPosition]
 	}
 	l.position = l.readPosition
-	l.readPosition += 1
+	l.readPosition++
 }
 
 func (l *Lexer) peekChar() byte {
 	if l.readPosition >= len(l.input) {
 		return 0
-	} else {
-		return l.input[l.readPosition]
 	}
+
+	return l.input[l.readPosition]
 	// Peek shouldn't increment positions.
 }
 
