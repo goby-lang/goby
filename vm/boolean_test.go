@@ -48,4 +48,3 @@ func TestEvalInfixBooleanExpression(t *testing.T) {
 		testBooleanObject(t, evaluated, tt.expected)
 	}
 }
-

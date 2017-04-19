@@ -1,10 +1,10 @@
 package vm
 
 import (
-	"testing"
-	"github.com/st0012/Rooby/code_generator"
+	"github.com/st0012/Rooby/bytecode"
 	"github.com/st0012/Rooby/lexer"
 	"github.com/st0012/Rooby/parser"
+	"testing"
 )
 
 func TestCunstomConstructorAndInstanceVariable(t *testing.T) {
@@ -375,8 +375,8 @@ func testEval(t *testing.T, input string) Object {
 	p := parser.New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
-	cg := code_generator.New(program)
-	bytecodes := cg.GenerateByteCode(program)
+	g := bytecode.NewGenerator(program)
+	bytecodes := g.GenerateByteCode(program)
 	return testExec(bytecodes)
 }
 
@@ -450,7 +450,7 @@ func testBooleanObject(t *testing.T, obj Object, expected bool) bool {
 		return false
 	}
 	if result.Value != expected {
-		t.Errorf("object has wrong value. expect=%d, got=%d", expected, result.Value)
+		t.Errorf("object has wrong value. expect=%b, got=%d", expected, result.Value)
 		return false
 	}
 

@@ -44,7 +44,7 @@ func TestHashExpression(t *testing.T) {
 
 		hash, ok := stmt.Expression.(*ast.HashExpression)
 
-		for key, _ := range hash.Data {
+		for key := range hash.Data {
 			testIntegerLiteral(t, hash.Data[key], tt.expectedElements[key])
 		}
 	}

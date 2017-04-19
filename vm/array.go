@@ -127,7 +127,7 @@ var builtinArrayMethods = []*BuiltInMethod{
 				if len(arr.Elements) < (indexValue + 1) {
 					newArr := make([]Object, indexValue+1)
 					copy(newArr, arr.Elements)
-					for i, _ := range newArr[len(arr.Elements):] {
+					for i := range newArr[len(arr.Elements):] {
 						newArr[i] = NULL
 					}
 					arr.Elements = newArr

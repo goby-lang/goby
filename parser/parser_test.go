@@ -305,7 +305,7 @@ func testMethodName(t *testing.T, exp ast.Expression, value string) {
 	}
 
 	if callExp.Method != value {
-		t.Error("expect method name to be %s. got=%s", value, callExp.Method)
+		t.Errorf("expect method name to be %s. got=%s", value, callExp.Method)
 	}
 }
 

@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/st0012/Rooby/ast"
-	"github.com/st0012/Rooby/code_generator"
+	"github.com/st0012/Rooby/bytecode"
 	"github.com/st0012/Rooby/lexer"
 	"github.com/st0012/Rooby/parser"
 	"github.com/st0012/Rooby/vm"
@@ -40,8 +40,8 @@ func main() {
 	case "ro":
 		program := buildAST(file)
 
-		cg := code_generator.New(program)
-		bytecodes := cg.GenerateByteCode(program)
+		g := bytecode.NewGenerator(program)
+		bytecodes := g.GenerateByteCode(program)
 
 		if !*compileOptionPtr {
 			execBytecode(bytecodes)

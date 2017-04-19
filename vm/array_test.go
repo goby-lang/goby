@@ -155,7 +155,6 @@ func TestEvalArrayIndex(t *testing.T) {
 //	}
 //}
 
-
 func generateArray(length int) *ArrayObject {
 	var elements []Object
 	for i := 1; i <= length; i++ {

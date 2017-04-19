@@ -140,7 +140,7 @@ var BuiltinGlobalMethods = []*BuiltInMethod{
 				case Class:
 					return r.ReturnClass()
 				default:
-					return &Error{Message: fmt.Sprint("Can't call class on %T", r)}
+					return &Error{Message: fmt.Sprintf("Can't call class on %T", r)}
 				}
 			}
 		},
