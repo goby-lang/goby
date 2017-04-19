@@ -43,7 +43,7 @@ func (cf *CallFrame) getLCL(index, depth int) *Pointer {
 		return cf.Local[index]
 	}
 
-	return cf.BlockFrame.EP.getLCL(index, depth -1)
+	return cf.BlockFrame.EP.getLCL(index, depth-1)
 }
 
 func (cf *CallFrame) inspect() string {

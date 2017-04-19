@@ -25,7 +25,6 @@ func (i *Identifier) String() string {
 	return i.Value
 }
 
-
 type InstanceVariable struct {
 	Token token.Token
 	Value string

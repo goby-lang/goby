@@ -35,11 +35,11 @@ func (lt *LocalTable) Set(val string) int {
 }
 
 type Scope struct {
-	Self        ast.Statement
-	Program     *ast.Program
-	Out         *Scope
-	LocalTable  *LocalTable
-	Line        int
+	Self       ast.Statement
+	Program    *ast.Program
+	Out        *Scope
+	LocalTable *LocalTable
+	Line       int
 }
 
 func (lt *LocalTable) setLCL(v string, d int) (index, depth int) {
@@ -247,7 +247,7 @@ func (cg *CodeGenerator) compileExpression(is *InstructionSet, exp ast.Expressio
 		}
 
 		if exp.Block != nil {
-			newTable := newLocalTable(table.depth+1)
+			newTable := newLocalTable(table.depth + 1)
 			newTable.upper = table
 			blockIndex := cg.blockCounter
 			cg.blockCounter += 1

@@ -1,10 +1,10 @@
 package vm
 
 import (
-	"testing"
 	"github.com/st0012/Rooby/code_generator"
 	"github.com/st0012/Rooby/lexer"
 	"github.com/st0012/Rooby/parser"
+	"testing"
 )
 
 func TestCunstomConstructorAndInstanceVariable(t *testing.T) {
