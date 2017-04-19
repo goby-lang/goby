@@ -450,7 +450,7 @@ func testBooleanObject(t *testing.T, obj Object, expected bool) bool {
 		return false
 	}
 	if result.Value != expected {
-		t.Errorf("object has wrong value. expect=%d, got=%d", expected, result.Value)
+		t.Errorf("object has wrong value. expect=%b, got=%d", expected, result.Value)
 		return false
 	}
 

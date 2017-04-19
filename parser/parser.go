@@ -94,5 +94,5 @@ func (p *Parser) CheckErrors() {
 		return
 	}
 
-	fmt.Errorf(strings.Join(errors, "\n"))
+	panic(fmt.Sprintf(strings.Join(errors, "\n")))
 }
