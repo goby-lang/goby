@@ -1,8 +1,7 @@
-package main
+package vm
 
 import (
 	"testing"
-	"github.com/st0012/Rooby/vm"
 )
 
 func TestComment(t *testing.T) {
@@ -89,7 +88,7 @@ func TestDefStatement(t *testing.T) {
 	`
 
 	evaluated := testEval(t, input)
-	class := evaluated.(*vm.RClass)
+	class := evaluated.(*RClass)
 
 	expectedMethods := []struct {
 		name   string
@@ -106,7 +105,7 @@ func TestDefStatement(t *testing.T) {
 			t.Errorf("expect class %s to have method %s.", class.Name, expectedMethod.name)
 		}
 
-		method := methodObj.(*vm.Method)
+		method := methodObj.(*Method)
 		if method.Name != expectedMethod.name {
 			t.Errorf("expect method's name to be %s. got=%s", expectedMethod.name, method.Name)
 		}

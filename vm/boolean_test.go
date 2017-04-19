@@ -1,4 +1,4 @@
-package main
+package vm
 
 import "testing"
 
@@ -48,3 +48,4 @@ func TestEvalInfixBooleanExpression(t *testing.T) {
 		testBooleanObject(t, evaluated, tt.expected)
 	}
 }
+
