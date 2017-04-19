@@ -1,5 +1,7 @@
 # Rooby
 
+[![Join the chat at https://gitter.im/Rooby-lang/Lobby](https://badges.gitter.im/Rooby-lang/Lobby.svg)](https://gitter.im/Rooby-lang/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![Build Status](https://travis-ci.org/st0012/Rooby.svg?branch=master)](https://travis-ci.org/st0012/Rooby)
 [![Code Climate](https://codeclimate.com/github/st0012/rooby/badges/gpa.svg)](https://codeclimate.com/github/st0012/rooby)
 [![GoDoc](https://godoc.org/github.com/st0012/Rooby?status.svg)](https://godoc.org/github.com/st0012/Rooby)
