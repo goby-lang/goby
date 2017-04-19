@@ -1,7 +1,7 @@
 package vm
 
 import (
-	"github.com/st0012/Rooby/code_generator"
+	"github.com/st0012/Rooby/bytecode"
 	"github.com/st0012/Rooby/lexer"
 	"github.com/st0012/Rooby/parser"
 	"testing"
@@ -375,8 +375,8 @@ func testEval(t *testing.T, input string) Object {
 	p := parser.New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
-	cg := code_generator.New(program)
-	bytecodes := cg.GenerateByteCode(program)
+	g := bytecode.NewGenerator(program)
+	bytecodes := g.GenerateByteCode(program)
 	return testExec(bytecodes)
 }
 

@@ -1,4 +1,4 @@
-package code_generator
+package bytecode
 
 import (
 	"github.com/st0012/Rooby/lexer"
@@ -564,8 +564,8 @@ func compileToBytecode(input string) string {
 	p := parser.New(l)
 	program := p.ParseProgram()
 	p.CheckErrors()
-	cg := New(program)
-	return cg.GenerateByteCode(program)
+	g := NewGenerator(program)
+	return g.GenerateByteCode(program)
 }
 
 func compareBytecode(t *testing.T, value, expected string) {
