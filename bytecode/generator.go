@@ -27,7 +27,7 @@ func (lt *localTable) set(val string) int {
 	if !ok {
 		c = lt.count
 		lt.store[val] = c
-		lt.count += 1
+		lt.count++
 		return c
 	}
 
@@ -69,18 +69,19 @@ func (lt *localTable) getLCL(v string, d int) (index, depth int, ok bool) {
 	return -1, 0, false
 }
 
+// Generator contains program's AST and will store generated instruction sets
 type Generator struct {
 	program         *ast.Program
 	instructionSets []*instructionSet
 	blockCounter    int
 }
 
-// Initialize new Generator with complete AST tree.
+// NewGenerator initializes new Generator with complete AST tree.
 func NewGenerator(program *ast.Program) *Generator {
 	return &Generator{program: program}
 }
 
-// Return compiled bytecodes
+// GenerateByteCode returns compiled bytecodes
 func (g *Generator) GenerateByteCode(program *ast.Program) string {
 	scope := &scope{program: program, localTable: newLocalTable(0)}
 	g.compileStatements(program.Statements, scope, scope.localTable)
@@ -105,7 +106,7 @@ func (g *Generator) compileStatements(stmts []ast.Statement, scope *scope, table
 }
 
 func (g *Generator) compileStatement(is *instructionSet, statement ast.Statement, scope *scope, table *localTable) {
-	scope.line += 1
+	scope.line++
 	switch stmt := statement.(type) {
 	case *ast.ExpressionStatement:
 		g.compileExpression(is, stmt.Expression, scope, table)
@@ -250,7 +251,7 @@ func (g *Generator) compileExpression(is *instructionSet, exp ast.Expression, sc
 			newTable := newLocalTable(table.depth + 1)
 			newTable.upper = table
 			blockIndex := g.blockCounter
-			g.blockCounter += 1
+			g.blockCounter++
 			g.compileBlockArgExpression(blockIndex, exp, scope, newTable)
 			is.define("send", exp.Method, len(exp.Arguments), fmt.Sprintf("block:%d", blockIndex))
 			return
@@ -283,7 +284,7 @@ func (g *Generator) compileIfExpression(is *instructionSet, exp *ast.IfExpressio
 	anchor1.line = is.Count + 1
 
 	if exp.Alternative == nil {
-		anchor1.line -= 1
+		anchor1.line--
 		is.define("putnil")
 		return
 	}

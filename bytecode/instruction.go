@@ -68,7 +68,7 @@ func (is *instructionSet) define(action string, params ...interface{}) {
 	}
 
 	is.Instructions = append(is.Instructions, i)
-	is.Count += 1
+	is.Count++
 }
 
 func (is *instructionSet) compile() string {
