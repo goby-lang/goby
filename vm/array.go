@@ -6,22 +6,26 @@ import (
 )
 
 var (
-	ArrayClass *RArray
+	arrayClass *RArray
 )
 
+// RArray is the built in array class
 type RArray struct {
 	*BaseClass
 }
 
+// ArrayObject represents array instance
 type ArrayObject struct {
 	Class    *RArray
 	Elements []Object
 }
 
+// Type returns array instance's type
 func (a *ArrayObject) Type() ObjectType {
 	return ARRAY_OBJ
 }
 
+// Inspect returns detailed info of a array include elements it contains
 func (a *ArrayObject) Inspect() string {
 	var out bytes.Buffer
 
@@ -38,27 +42,32 @@ func (a *ArrayObject) Inspect() string {
 	return out.String()
 }
 
+// ReturnClass returns current object's class, which is RArray
 func (a *ArrayObject) ReturnClass() Class {
 	return a.Class
 }
 
+// Length returns the length of array's elements
 func (a *ArrayObject) Length() int {
 	return len(a.Elements)
 }
 
+// Pop removes the last element in the array and returns it
 func (a *ArrayObject) Pop() Object {
 	value := a.Elements[len(a.Elements)-1]
 	a.Elements = a.Elements[:len(a.Elements)-1]
 	return value
 }
 
+// Push appends given object into array and returns the array object
 func (a *ArrayObject) Push(objs []Object) *ArrayObject {
 	a.Elements = append(a.Elements, objs...)
 	return a
 }
 
+// InitializeArray returns an array that contains given objects
 func InitializeArray(elements []Object) *ArrayObject {
-	return &ArrayObject{Elements: elements, Class: ArrayClass}
+	return &ArrayObject{Elements: elements, Class: arrayClass}
 }
 
 func init() {
@@ -70,7 +79,7 @@ func init() {
 
 	bc := &BaseClass{Name: "Array", Methods: methods, ClassMethods: NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}
 	ac := &RArray{BaseClass: bc}
-	ArrayClass = ac
+	arrayClass = ac
 }
 
 var builtinArrayMethods = []*BuiltInMethod{
