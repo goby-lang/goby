@@ -8,7 +8,7 @@ import (
 
 type Method struct {
 	Name           string
-	InstructionSet *InstructionSet
+	instructionSet *instructionSet
 	Argc           int
 	Parameters     []*ast.Identifier
 	Body           *ast.BlockStatement

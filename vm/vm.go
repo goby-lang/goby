@@ -12,7 +12,7 @@ type VM struct {
 	SP             int
 	CFP            int
 	Constants      map[string]*Pointer
-	LabelTable     map[LabelType]map[string][]*InstructionSet
+	LabelTable     map[labelType]map[string][]*instructionSet
 	MethodISTable  *ISIndexTable
 	ClassISTable   *ISIndexTable
 	BlockList      *ISIndexTable
@@ -38,19 +38,19 @@ func New() *VM {
 	vm.MethodISTable = &ISIndexTable{Data: make(map[string]int)}
 	vm.ClassISTable = &ISIndexTable{Data: make(map[string]int)}
 	vm.BlockList = &ISIndexTable{Data: make(map[string]int)}
-	vm.LabelTable = map[LabelType]map[string][]*InstructionSet{
-		LABEL_DEF:      make(map[string][]*InstructionSet),
-		LABEL_DEFCLASS: make(map[string][]*InstructionSet),
-		BLOCK:          make(map[string][]*InstructionSet),
-		PROGRAM:        make(map[string][]*InstructionSet),
+	vm.LabelTable = map[labelType]map[string][]*instructionSet{
+		LabelDef:      make(map[string][]*instructionSet),
+		LabelDefClass: make(map[string][]*instructionSet),
+		Block:         make(map[string][]*instructionSet),
+		Program:       make(map[string][]*instructionSet),
 	}
 
 	return vm
 }
 
 func (vm *VM) EvalCallFrame(cf *CallFrame) {
-	for cf.PC < len(cf.InstructionSet.Instructions) {
-		i := cf.InstructionSet.Instructions[cf.PC]
+	for cf.PC < len(cf.instructionSet.instructions) {
+		i := cf.instructionSet.instructions[cf.PC]
 		vm.execInstruction(cf, i)
 	}
 }
@@ -82,18 +82,18 @@ func (vm *VM) initConstants() {
 	vm.Constants = constants
 }
 
-func (vm *VM) execInstruction(cf *CallFrame, i *Instruction) {
+func (vm *VM) execInstruction(cf *CallFrame, i *instruction) {
 	cf.PC += 1
 	//fmt.Print(i.Inspect())
-	i.Action.Operation(vm, cf, i.Params...)
+	i.action.operation(vm, cf, i.Params...)
 	//fmt.Println(vm.CallFrameStack.inspect())
 	//fmt.Println(vm.Stack.inspect())
 }
 
-func (vm *VM) getBlock(name string) (*InstructionSet, bool) {
+func (vm *VM) getBlock(name string) (*instructionSet, bool) {
 	// The "name" here is actually an index from label
 	// for example <Block:1>'s name is "1"
-	iss, ok := vm.LabelTable[BLOCK][name]
+	iss, ok := vm.LabelTable[Block][name]
 
 	if !ok {
 		return nil, false
@@ -104,8 +104,8 @@ func (vm *VM) getBlock(name string) (*InstructionSet, bool) {
 	return is, ok
 }
 
-func (vm *VM) getMethodIS(name string) (*InstructionSet, bool) {
-	iss, ok := vm.LabelTable[LABEL_DEF][name]
+func (vm *VM) getMethodIS(name string) (*instructionSet, bool) {
+	iss, ok := vm.LabelTable[LabelDef][name]
 
 	if !ok {
 		return nil, false
@@ -117,8 +117,8 @@ func (vm *VM) getMethodIS(name string) (*InstructionSet, bool) {
 	return is, ok
 }
 
-func (vm *VM) getClassIS(name string) (*InstructionSet, bool) {
-	iss, ok := vm.LabelTable[LABEL_DEFCLASS][name]
+func (vm *VM) getClassIS(name string) (*instructionSet, bool) {
+	iss, ok := vm.LabelTable[LabelDefClass][name]
 
 	if !ok {
 		return nil, false
@@ -130,22 +130,22 @@ func (vm *VM) getClassIS(name string) (*InstructionSet, bool) {
 	return is, ok
 }
 
-func (vm *VM) setLabel(is *InstructionSet, name string) {
-	var l *Label
+func (vm *VM) setLabel(is *instructionSet, name string) {
+	var l *label
 	var labelName string
-	var labelType LabelType
+	var labelType labelType
 
 	if name == "ProgramStart" {
 		labelName = name
-		labelType = PROGRAM
+		labelType = Program
 
 	} else {
 		labelName = strings.Split(name, ":")[1]
 		labelType = labelTypes[strings.Split(name, ":")[0]]
 	}
 
-	l = &Label{Name: name, Type: labelType}
-	is.Label = l
+	l = &label{name: name, Type: labelType}
+	is.label = l
 	vm.LabelTable[labelType][labelName] = append(vm.LabelTable[labelType][labelName], is)
 }
 

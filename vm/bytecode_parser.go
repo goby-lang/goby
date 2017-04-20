@@ -17,8 +17,8 @@ func NewBytecodeParser() *Parser {
 	return &Parser{}
 }
 
-func (p *Parser) Parse(bytecodes string) []*InstructionSet {
-	iss := []*InstructionSet{}
+func (p *Parser) Parse(bytecodes string) []*instructionSet {
+	iss := []*instructionSet{}
 	bytecodes = removeEmptyLine(strings.TrimSpace(bytecodes))
 	bytecodesByLine := strings.Split(bytecodes, "\n")
 	p.parseSection(iss, bytecodesByLine)
@@ -26,8 +26,8 @@ func (p *Parser) Parse(bytecodes string) []*InstructionSet {
 	return iss
 }
 
-func (p *Parser) parseSection(iss []*InstructionSet, bytecodesByLine []string) {
-	is := &InstructionSet{}
+func (p *Parser) parseSection(iss []*instructionSet, bytecodesByLine []string) {
+	is := &instructionSet{}
 	count := 0
 
 	// First line is label
@@ -47,20 +47,20 @@ func (p *Parser) parseSection(iss []*InstructionSet, bytecodesByLine []string) {
 	iss = append(iss, is)
 }
 
-func (p *Parser) parseLabel(is *InstructionSet, line string) {
+func (p *Parser) parseLabel(is *instructionSet, line string) {
 	line = strings.Trim(line, "<")
 	line = strings.Trim(line, ">")
 	p.VM.setLabel(is, line)
 }
 
-func (p *Parser) parseInstruction(is *InstructionSet, line string) {
+func (p *Parser) parseInstruction(is *instructionSet, line string) {
 	var params []interface{}
 	var rawParams []string
 
 	tokens := strings.Split(line, " ")
 	lineNum, act := tokens[0], tokens[1]
 	ln, _ := strconv.ParseInt(lineNum, 0, 64)
-	action := BuiltInActions[OperationType(act)]
+	action := builtInActions[operationType(act)]
 
 	if act == "putstring" {
 		text := strings.Split(line, "\"")[1]
