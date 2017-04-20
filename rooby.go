@@ -74,7 +74,7 @@ func execBytecode(bytecodes string) {
 	v := vm.New()
 	p.VM = v
 	p.Parse(bytecodes)
-	cf := vm.NewCallFrame(v.LabelTable[vm.PROGRAM]["ProgramStart"][0])
+	cf := vm.NewCallFrame(v.LabelTable[vm.Program]["ProgramStart"][0])
 	cf.Self = vm.MainObj
 	v.CallFrameStack.Push(cf)
 	v.Exec()

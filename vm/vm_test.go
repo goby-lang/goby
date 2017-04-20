@@ -398,7 +398,7 @@ func testExec(bytecodes string) Object {
 	v := New()
 	p.VM = v
 	p.Parse(bytecodes)
-	cf := NewCallFrame(v.LabelTable[PROGRAM]["ProgramStart"][0])
+	cf := NewCallFrame(v.LabelTable[Program]["ProgramStart"][0])
 	cf.Self = MainObj
 	v.CallFrameStack.Push(cf)
 	v.Exec()

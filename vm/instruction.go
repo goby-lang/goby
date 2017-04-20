@@ -27,10 +27,10 @@ type Label struct {
 type LabelType string
 
 var labelTypes = map[string]LabelType{
-	"Def":          LABEL_DEF,
-	"DefClass":     LABEL_DEFCLASS,
-	"ProgramStart": PROGRAM,
-	"Block":        BLOCK,
+	"Def":          LabelDef,
+	"DefClass":     LabelDefClass,
+	"ProgramStart": Program,
+	"Block":        Block,
 }
 
 type InstructionSet struct {
@@ -42,59 +42,51 @@ type OperationType string
 
 const (
 	// Label types
-	LABEL_DEF      = "DefMethod"
-	LABEL_DEFCLASS = "DefClass"
-	BLOCK          = "Block"
-	PROGRAM        = "Program"
+	LabelDef      = "DefMethod"
+	LabelDefClass = "DefClass"
+	Block         = "Block"
+	Program       = "Program"
 
 	// Instruction actions
-	GET_LOCAL             = "getlocal"
-	GET_CONSTANT          = "getconstant"
-	GET_INSTANCE_VARIABLE = "getinstancevariable"
-	SET_LOCAL             = "setlocal"
-	SET_CONSTANT          = "setconstant"
-	SET_INSTANCE_VARIABLE = "setinstancevariable"
-	PUT_STRING            = "putstring"
-	PUT_SELF              = "putself"
-	PUT_OBJECT            = "putobject"
-	PUT_NULL              = "putnil"
-	NEW_ARRAY             = "newarray"
-	NEW_HASH              = "newhash"
-	PLUS                  = "opt_plus"
-	MINUS                 = "opt_minus"
-	MULT                  = "opt_mult"
-	DIV                   = "opt_div"
-	GT                    = "opt_gt"
-	GE                    = "opt_ge"
-	LT                    = "opt_lt"
-	LE                    = "opt_le"
-	BRANCH_UNLESS         = "branchunless"
-	JUMP                  = "jump"
-	DEF_METHOD            = "def_method"
-	DEF_SINGLETON_METHOD  = "def_singleton_method"
-	DEF_CLASS             = "def_class"
-	SEND                  = "send"
-	INVOKE_BLOCK          = "invokeblock"
-	POP                   = "pop"
-	LEAVE                 = "leave"
+	GetLocal            = "getlocal"
+	GetConstant         = "getconstant"
+	GetInstanceVariable = "getinstancevariable"
+	SetLocal            = "setlocal"
+	SetConstant         = "setconstant"
+	SetInstanceVariable = "setinstancevariable"
+	PutString           = "putstring"
+	PutSelf             = "putself"
+	PutObject           = "putobject"
+	PutNull             = "putnil"
+	NewArray            = "newarray"
+	NewHash             = "newhash"
+	BranchUnless        = "branchunless"
+	Jump                = "jump"
+	DefMethod           = "def_method"
+	DefSingletonMethod  = "def_singleton_method"
+	DefClass            = "def_class"
+	Send                = "send"
+	InvokeBlock         = "invokeblock"
+	Pop                 = "pop"
+	Leave               = "leave"
 )
 
 var BuiltInActions = map[OperationType]*Action{
-	POP: {
-		Name: POP,
+	Pop: {
+		Name: Pop,
 		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			vm.Stack.pop()
 		},
 	},
-	PUT_OBJECT: {
-		Name: PUT_OBJECT,
+	PutObject: {
+		Name: PutObject,
 		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			object := initializeObject(args[0])
 			vm.Stack.push(&Pointer{Target: object})
 		},
 	},
-	GET_CONSTANT: {
-		Name: GET_CONSTANT,
+	GetConstant: {
+		Name: GetConstant,
 		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			constName := args[0].(string)
 			constant, ok := vm.Constants[constName]
@@ -105,8 +97,8 @@ var BuiltInActions = map[OperationType]*Action{
 			vm.Stack.push(constant)
 		},
 	},
-	GET_LOCAL: {
-		Name: GET_LOCAL,
+	GetLocal: {
+		Name: GetLocal,
 		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			index := args[0].(int)
 			depth := 0
@@ -123,8 +115,8 @@ var BuiltInActions = map[OperationType]*Action{
 			vm.Stack.push(p)
 		},
 	},
-	GET_INSTANCE_VARIABLE: {
-		Name: GET_INSTANCE_VARIABLE,
+	GetInstanceVariable: {
+		Name: GetInstanceVariable,
 		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			variableName := args[0].(string)
 			v, ok := cf.Self.(*RObject).InstanceVariables.Get(variableName)
@@ -137,16 +129,16 @@ var BuiltInActions = map[OperationType]*Action{
 			vm.Stack.push(p)
 		},
 	},
-	SET_INSTANCE_VARIABLE: {
-		Name: SET_INSTANCE_VARIABLE,
+	SetInstanceVariable: {
+		Name: SetInstanceVariable,
 		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			variableName := args[0].(string)
 			p := vm.Stack.pop()
 			cf.Self.(*RObject).InstanceVariables.Set(variableName, p.Target)
 		},
 	},
-	SET_LOCAL: {
-		Name: SET_LOCAL,
+	SetLocal: {
+		Name: SetLocal,
 		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			v := vm.Stack.pop()
 			depth := 0
@@ -157,16 +149,16 @@ var BuiltInActions = map[OperationType]*Action{
 			cf.insertLCL(args[0].(int), depth, v.Target)
 		},
 	},
-	SET_CONSTANT: {
-		Name: SET_CONSTANT,
+	SetConstant: {
+		Name: SetConstant,
 		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			constName := args[0].(string)
 			v := vm.Stack.pop()
 			vm.Constants[constName] = v
 		},
 	},
-	NEW_ARRAY: {
-		Name: NEW_ARRAY,
+	NewArray: {
+		Name: NewArray,
 		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			elems := []Object{}
@@ -180,8 +172,8 @@ var BuiltInActions = map[OperationType]*Action{
 			vm.Stack.push(&Pointer{arr})
 		},
 	},
-	NEW_HASH: {
-		Name: NEW_HASH,
+	NewHash: {
+		Name: NewHash,
 		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			pairs := map[string]Object{}
@@ -196,8 +188,8 @@ var BuiltInActions = map[OperationType]*Action{
 			vm.Stack.push(&Pointer{hash})
 		},
 	},
-	BRANCH_UNLESS: {
-		Name: BRANCH_UNLESS,
+	BranchUnless: {
+		Name: BranchUnless,
 		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			v := vm.Stack.pop()
 			bool, isBool := v.Target.(*BooleanObject)
@@ -221,33 +213,33 @@ var BuiltInActions = map[OperationType]*Action{
 			}
 		},
 	},
-	JUMP: {
-		Name: JUMP,
+	Jump: {
+		Name: Jump,
 		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			cf.PC = args[0].(int)
 		},
 	},
-	PUT_SELF: {
-		Name: PUT_SELF,
+	PutSelf: {
+		Name: PutSelf,
 		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			vm.Stack.push(&Pointer{cf.Self})
 		},
 	},
-	PUT_STRING: {
-		Name: PUT_STRING,
+	PutString: {
+		Name: PutString,
 		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			object := initializeObject(args[0])
 			vm.Stack.push(&Pointer{object})
 		},
 	},
-	PUT_NULL: {
-		Name: PUT_NULL,
+	PutNull: {
+		Name: PutNull,
 		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			vm.Stack.push(&Pointer{NULL})
 		},
 	},
-	DEF_METHOD: {
-		Name: DEF_METHOD,
+	DefMethod: {
+		Name: DefMethod,
 		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			methodName := vm.Stack.pop().Target.(*StringObject).Value
@@ -265,8 +257,8 @@ var BuiltInActions = map[OperationType]*Action{
 			}
 		},
 	},
-	DEF_SINGLETON_METHOD: {
-		Name: DEF_SINGLETON_METHOD,
+	DefSingletonMethod: {
+		Name: DefSingletonMethod,
 		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			methodName := vm.Stack.pop().Target.(*StringObject).Value
@@ -285,8 +277,8 @@ var BuiltInActions = map[OperationType]*Action{
 			}
 		},
 	},
-	DEF_CLASS: {
-		Name: DEF_CLASS,
+	DefClass: {
+		Name: DefClass,
 		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			class := InitializeClass(args[0].(string))
 			classPr := &Pointer{Target: class}
@@ -318,8 +310,8 @@ var BuiltInActions = map[OperationType]*Action{
 			vm.Stack.push(classPr)
 		},
 	},
-	SEND: {
-		Name: SEND,
+	Send: {
+		Name: Send,
 		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			methodName := args[0].(string)
 			argCount := args[1].(int)
@@ -385,8 +377,8 @@ var BuiltInActions = map[OperationType]*Action{
 			}
 		},
 	},
-	INVOKE_BLOCK: {
-		Name: INVOKE_BLOCK,
+	InvokeBlock: {
+		Name: InvokeBlock,
 		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			argPr := vm.SP - argCount
@@ -412,8 +404,8 @@ var BuiltInActions = map[OperationType]*Action{
 			setReturnValueAndSP(vm, receiverPr, vm.Stack.Top())
 		},
 	},
-	LEAVE: {
-		Name: LEAVE,
+	Leave: {
+		Name: Leave,
 		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
 			cf = vm.CallFrameStack.Pop()
 			cf.PC = len(cf.InstructionSet.Instructions)
