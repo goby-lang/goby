@@ -33,7 +33,7 @@ func init() {
 }
 
 func initMainObj() {
-	builtInClasses := []Class{StringClass, BooleanClass, IntegerClass, ArrayClass, HashClass, NullClass, ClassClass}
+	builtInClasses := []Class{StringClass, booleanClass, IntegerClass, arrayClass, HashClass, NullClass, ClassClass}
 
 	obj := &RObject{Class: ObjectClass, InstanceVariables: NewEnvironment()}
 	scope := &Scope{Self: obj, Env: NewEnvironment()}

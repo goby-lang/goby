@@ -66,7 +66,7 @@ func (vm *VM) initConstants() {
 	builtInClasses := []Class{
 		IntegerClass,
 		StringClass,
-		BooleanClass,
+		booleanClass,
 		NullClass,
 		arrayClass,
 		HashClass,
