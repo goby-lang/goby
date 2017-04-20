@@ -5,8 +5,8 @@ import (
 )
 
 var (
-	ObjectClass *RClass
-	ClassClass  *RClass
+	objectClass *RClass
+	classClass  *RClass
 )
 
 func initTopLevelClasses() {
@@ -21,44 +21,60 @@ func initTopLevelClasses() {
 		classMethods.Set(m.Name, m)
 	}
 
-	ClassClass = &RClass{BaseClass: &BaseClass{Name: "Class", Methods: globalMethods, ClassMethods: classMethods}}
-	ObjectClass = &RClass{BaseClass: &BaseClass{Name: "Object", Class: ClassClass, Methods: globalMethods, ClassMethods: NewEnvironment()}}
+	classClass = &RClass{BaseClass: &BaseClass{Name: "Class", Methods: globalMethods, ClassMethods: classMethods}}
+	objectClass = &RClass{BaseClass: &BaseClass{Name: "Object", Class: classClass, Methods: globalMethods, ClassMethods: NewEnvironment()}}
 }
 
+// InitializeClass initializes and returns a class instance with given class name
 func InitializeClass(name string) *RClass {
-	class := &RClass{BaseClass: &BaseClass{Name: name, Methods: NewEnvironment(), ClassMethods: NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}}
+	class := &RClass{BaseClass: &BaseClass{Name: name, Methods: NewEnvironment(), ClassMethods: NewEnvironment(), Class: classClass, SuperClass: objectClass}}
 	//classScope := &Scope{Self: class, Env: NewClosedEnvironment(scope.Env)}
 	//class.Scope = classScope
 
 	return class
 }
 
+// Class is an interface that implements a class's basic functions.
+// - LookupClassMethod: search for current class's class method with given name.
+// - LookupInstanceMethod: search for current class's instance method with given name.
+// - ReturnName returns class's name
 type Class interface {
 	LookupClassMethod(string) Object
 	LookupInstanceMethod(string) Object
-	ReturnClass() Class
 	ReturnName() string
-	Object
+	BaseObject
 }
 
+// RClass represents normal (not built in) class object
 type RClass struct {
+	// Scope contains current class's scope information
 	Scope *Scope
 	*BaseClass
 }
 
+// BaseClass is a embedded struct that contains all the essential fields for a class
 type BaseClass struct {
+	// Name is the class's name
 	Name         string
+	// Methods contains its instances' methods
 	Methods      *Environment
+	// ClassMethods contains this class's methods
 	ClassMethods *Environment
+	// SuperClass points to the class it inherits
 	SuperClass   *RClass
+	// Class points to this class's class, which should be ClassClass
 	Class        *RClass
+	// Singleton is a flag marks if this class a singleton class
 	Singleton    bool
 }
 
+// Type returns class object's type
 func (c *BaseClass) Type() ObjectType {
 	return CLASS_OBJ
 }
 
+// Inspect returns the basic inspected result (which is class name) of current class
+// TODO: Singleton class's Inspect() should also mark if it's a singleton class explicitly.
 func (c *BaseClass) Inspect() string {
 	return "<Class:" + c.Name + ">"
 }
@@ -106,7 +122,7 @@ func (c *BaseClass) SetSingletonMethod(name string, method *Method) {
 	class.Singleton = true
 	class.ClassMethods.Set(name, method)
 	class.SuperClass = c.SuperClass
-	class.Class = ClassClass
+	class.Class = classClass
 	c.SuperClass = class
 }
 

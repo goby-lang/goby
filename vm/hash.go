@@ -129,7 +129,7 @@ func init() {
 		methods.Set(m.Name, m)
 	}
 
-	bc := &BaseClass{Name: "Hash", Methods: methods, ClassMethods: NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}
+	bc := &BaseClass{Name: "Hash", Methods: methods, ClassMethods: NewEnvironment(), Class: classClass, SuperClass: objectClass}
 	hc := &RHash{BaseClass: bc}
 	HashClass = hc
 }

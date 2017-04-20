@@ -117,7 +117,7 @@ func initBool() {
 		methods.Set(m.Name, m)
 	}
 
-	bc := &BaseClass{Name: "Boolean", Methods: methods, ClassMethods: NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}
+	bc := &BaseClass{Name: "Boolean", Methods: methods, ClassMethods: NewEnvironment(), Class: classClass, SuperClass: objectClass}
 	b := &RBool{BaseClass: bc}
 	booleanClass = b
 

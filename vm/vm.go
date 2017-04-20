@@ -70,8 +70,8 @@ func (vm *VM) initConstants() {
 		NullClass,
 		arrayClass,
 		HashClass,
-		ClassClass,
-		ObjectClass,
+		classClass,
+		objectClass,
 	}
 
 	for _, c := range builtInClasses {

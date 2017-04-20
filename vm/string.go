@@ -185,7 +185,7 @@ func initString() {
 		methods.Set(m.Name, m)
 	}
 
-	bc := &BaseClass{Name: "String", Methods: methods, ClassMethods: NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}
+	bc := &BaseClass{Name: "String", Methods: methods, ClassMethods: NewEnvironment(), Class: classClass, SuperClass: objectClass}
 	sc := &RString{BaseClass: bc}
 	StringClass = sc
 }
