@@ -7,16 +7,18 @@ import (
 	"strings"
 )
 
+// Parser is responsible for parsing bytecodes
 type Parser struct {
-	Line       int
-	LabelCount int
-	VM         *VM
+	line int
+	VM   *VM
 }
 
+// NewBytecodeParser initializes and returns a new bytecode parser
 func NewBytecodeParser() *Parser {
 	return &Parser{}
 }
 
+// Parse parses given bytecodes and transfer them into a sequence of instruction set.
 func (p *Parser) Parse(bytecodes string) []*instructionSet {
 	iss := []*instructionSet{}
 	bytecodes = removeEmptyLine(strings.TrimSpace(bytecodes))
@@ -26,6 +28,7 @@ func (p *Parser) Parse(bytecodes string) []*instructionSet {
 	return iss
 }
 
+// parseSection
 func (p *Parser) parseSection(iss []*instructionSet, bytecodesByLine []string) {
 	is := &instructionSet{}
 	count := 0
@@ -53,6 +56,7 @@ func (p *Parser) parseLabel(is *instructionSet, line string) {
 	p.VM.setLabel(is, line)
 }
 
+// parseInstruction transfer a line of bytecode into an instruction and append it into given instruction set.
 func (p *Parser) parseInstruction(is *instructionSet, line string) {
 	var params []interface{}
 	var rawParams []string
@@ -72,7 +76,7 @@ func (p *Parser) parseInstruction(is *instructionSet, line string) {
 			params = append(params, p.parseParam(param))
 		}
 	} else if action == nil {
-		panic(fmt.Sprintf("Unknown command: %s. Line: %d", act, ln))
+		panic(fmt.Sprintf("Unknown command: %s. line: %d", act, ln))
 	}
 
 	is.Define(int(ln), action, params...)
