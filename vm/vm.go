@@ -38,20 +38,14 @@ func New() *VM {
 	vm.MethodISTable = &ISIndexTable{Data: make(map[string]int)}
 	vm.ClassISTable = &ISIndexTable{Data: make(map[string]int)}
 	vm.BlockList = &ISIndexTable{Data: make(map[string]int)}
-	vm.LabelTable = map[labelType]map[string][]*instructionSet{
-		LabelDef:      make(map[string][]*instructionSet),
-		LabelDefClass: make(map[string][]*instructionSet),
-		Block:         make(map[string][]*instructionSet),
-		Program:       make(map[string][]*instructionSet),
-	}
 
 	return vm
 }
 
 func (vm *VM) ExecBytecodes(bytecodes string) {
-	p := &bytecodeParser{}
-	p.VM = vm
+	p := newBytecodeParser()
 	p.parseBytecode(bytecodes)
+	vm.LabelTable = p.labelTable
 	cf := NewCallFrame(vm.LabelTable[Program]["ProgramStart"][0])
 	cf.Self = MainObj
 	vm.CallFrameStack.Push(cf)
@@ -138,25 +132,6 @@ func (vm *VM) getClassIS(name string) (*instructionSet, bool) {
 
 	vm.ClassISTable.Data[name] += 1
 	return is, ok
-}
-
-func (vm *VM) setLabel(is *instructionSet, name string) {
-	var l *label
-	var labelName string
-	var labelType labelType
-
-	if name == "ProgramStart" {
-		labelName = name
-		labelType = Program
-
-	} else {
-		labelName = strings.Split(name, ":")[1]
-		labelType = labelTypes[strings.Split(name, ":")[0]]
-	}
-
-	l = &label{name: name, Type: labelType}
-	is.label = l
-	vm.LabelTable[labelType][labelName] = append(vm.LabelTable[labelType][labelName], is)
 }
 
 func (s *Stack) push(v *Pointer) {

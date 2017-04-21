@@ -9,8 +9,21 @@ import (
 
 // bytecodeParser is responsible for parsing bytecodes
 type bytecodeParser struct {
-	line int
-	VM   *VM
+	line       int
+	labelTable map[labelType]map[string][]*instructionSet
+}
+
+// newBytecodeParser initializes bytecodeParser and its label table then returns it
+func newBytecodeParser() *bytecodeParser {
+	p := &bytecodeParser{}
+	p.labelTable = map[labelType]map[string][]*instructionSet{
+		LabelDef:      make(map[string][]*instructionSet),
+		LabelDefClass: make(map[string][]*instructionSet),
+		Block:         make(map[string][]*instructionSet),
+		Program:       make(map[string][]*instructionSet),
+	}
+
+	return p
 }
 
 // parseBytecode parses given bytecodes and transfer them into a sequence of instruction set.
@@ -47,7 +60,26 @@ func (p *bytecodeParser) parseSection(iss []*instructionSet, bytecodesByLine []s
 func (p *bytecodeParser) parseLabel(is *instructionSet, line string) {
 	line = strings.Trim(line, "<")
 	line = strings.Trim(line, ">")
-	p.VM.setLabel(is, line)
+	p.setLabel(is, line)
+}
+
+func (p *bytecodeParser) setLabel(is *instructionSet, name string) {
+	var l *label
+	var labelName string
+	var labelType labelType
+
+	if name == "ProgramStart" {
+		labelName = name
+		labelType = Program
+
+	} else {
+		labelName = strings.Split(name, ":")[1]
+		labelType = labelTypes[strings.Split(name, ":")[0]]
+	}
+
+	l = &label{name: name, Type: labelType}
+	is.label = l
+	p.labelTable[labelType][labelName] = append(p.labelTable[labelType][labelName], is)
 }
 
 // parseInstruction transfer a line of bytecode into an instruction and append it into given instruction set.
