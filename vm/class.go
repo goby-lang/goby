@@ -134,6 +134,12 @@ func (c *BaseClass) ReturnName() string {
 	return c.Name
 }
 
+func (c *RClass) initializeInstance() *RObject {
+	instance := &RObject{Class: c, InstanceVariables: NewEnvironment()}
+
+	return instance
+}
+
 var BuiltinGlobalMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) BuiltinMethodBody {
@@ -177,7 +183,7 @@ var BuiltinClassMethods = []*BuiltInMethod{
 		Fn: func(receiver Object) BuiltinMethodBody {
 			return func(args []Object, block *Method) Object {
 				class := receiver.(*RClass)
-				instance := InitializeInstance(class)
+				instance := class.initializeInstance()
 				initMethod := class.LookupInstanceMethod("initialize")
 
 				if initMethod != nil {
