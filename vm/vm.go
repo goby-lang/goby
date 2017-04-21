@@ -48,6 +48,16 @@ func New() *VM {
 	return vm
 }
 
+func (vm *VM) ExecBytecodes(bytecodes string) {
+	p := &bytecodeParser{}
+	p.VM = vm
+	p.parseBytecode(bytecodes)
+	cf := NewCallFrame(vm.LabelTable[Program]["ProgramStart"][0])
+	cf.Self = MainObj
+	vm.CallFrameStack.Push(cf)
+	vm.Exec()
+}
+
 func (vm *VM) EvalCallFrame(cf *CallFrame) {
 	for cf.PC < len(cf.instructionSet.instructions) {
 		i := cf.instructionSet.instructions[cf.PC]

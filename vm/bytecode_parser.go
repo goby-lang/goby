@@ -7,19 +7,14 @@ import (
 	"strings"
 )
 
-// Parser is responsible for parsing bytecodes
-type Parser struct {
+// bytecodeParser is responsible for parsing bytecodes
+type bytecodeParser struct {
 	line int
 	VM   *VM
 }
 
-// NewBytecodeParser initializes and returns a new bytecode parser
-func NewBytecodeParser() *Parser {
-	return &Parser{}
-}
-
-// Parse parses given bytecodes and transfer them into a sequence of instruction set.
-func (p *Parser) Parse(bytecodes string) []*instructionSet {
+// parseBytecode parses given bytecodes and transfer them into a sequence of instruction set.
+func (p *bytecodeParser) parseBytecode(bytecodes string) []*instructionSet {
 	iss := []*instructionSet{}
 	bytecodes = removeEmptyLine(strings.TrimSpace(bytecodes))
 	bytecodesByLine := strings.Split(bytecodes, "\n")
@@ -28,8 +23,7 @@ func (p *Parser) Parse(bytecodes string) []*instructionSet {
 	return iss
 }
 
-// parseSection
-func (p *Parser) parseSection(iss []*instructionSet, bytecodesByLine []string) {
+func (p *bytecodeParser) parseSection(iss []*instructionSet, bytecodesByLine []string) {
 	is := &instructionSet{}
 	count := 0
 
@@ -50,14 +44,14 @@ func (p *Parser) parseSection(iss []*instructionSet, bytecodesByLine []string) {
 	iss = append(iss, is)
 }
 
-func (p *Parser) parseLabel(is *instructionSet, line string) {
+func (p *bytecodeParser) parseLabel(is *instructionSet, line string) {
 	line = strings.Trim(line, "<")
 	line = strings.Trim(line, ">")
 	p.VM.setLabel(is, line)
 }
 
 // parseInstruction transfer a line of bytecode into an instruction and append it into given instruction set.
-func (p *Parser) parseInstruction(is *instructionSet, line string) {
+func (p *bytecodeParser) parseInstruction(is *instructionSet, line string) {
 	var params []interface{}
 	var rawParams []string
 
@@ -82,7 +76,7 @@ func (p *Parser) parseInstruction(is *instructionSet, line string) {
 	is.Define(int(ln), action, params...)
 }
 
-func (p *Parser) parseParam(param string) interface{} {
+func (p *bytecodeParser) parseParam(param string) interface{} {
 	integer, e := strconv.ParseInt(param, 0, 64)
 	if e != nil {
 		return param
