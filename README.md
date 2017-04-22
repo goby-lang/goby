@@ -12,22 +12,16 @@
 Rooby is a Ruby-like object oriented language written in Go. You can think it as a simplified, compilable Ruby for now.
    
 
-Here's my expectation about Rooby:
+## Goal
 
-- Has Ruby-like syntax and object system.
-- Rooby program will be compiled at first place and then executed through VM. 
-- It's compilation and evaluation are separated, it can firstly compile your program into bytecode and execute it later. This will work like python.
-- **Maybe** it can gain some improvement on concurrency since it's based on Go.
-- Any special idea comes to my mind or proposed by you 😄 
+I want to build a language that focuses on developing micro-services. Which should be performant and easy to write. This is why Rooby has Ruby's user friendly syntax and is written in Go.
 
-**Join me to build Rooby together!**
-
-## Features
+## Supported features
 - **Can be compiled into bytecode (with `.robc` extension)**
 - **Can evaluate bytecode directly**
 - Everything is object
-- Support comment
-- Object & Class
+- Support comment 
+- Object and Class
     - Top level main object
     - Constructor
     - Support class method
@@ -41,7 +35,7 @@ Here's my expectation about Rooby:
 - Method
     - Support evaluation with arguments
     - Support evaluation without arguments
-    - Support evaluation with block
+    - Support evaluation with block (closure)
 - BuiltIn Data Types (All of them are classes 😀)
     - Class
     - Integer
@@ -50,7 +44,6 @@ Here's my expectation about Rooby:
     - nil (has this type internally but parser hasn't support yet)
     - Hash
     - Array
-    - **Not** support symbols. Since string is already immutable, supporting symbols is not that necessary.
 - Flow control
     - If statement
     - while statement
