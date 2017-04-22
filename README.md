@@ -46,7 +46,6 @@ I want to build a language that focuses on developing micro-services. Which shou
     - Array
 - Flow control
     - If statement
-    - while statement
     - Haven't support `for` yet
 - IO
     - Just `puts` for now
