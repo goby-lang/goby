@@ -201,7 +201,7 @@ var BuiltinClassMethods = []*BuiltInMethod{
 		Fn: func(receiver Object) BuiltinMethodBody {
 			return func(args []Object, block *Method) Object {
 				name := receiver.(Class).ReturnName()
-				nameString := InitializeString(name)
+				nameString := initializeString(name)
 				return nameString
 			}
 		},

@@ -264,7 +264,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				}
 
 				int := receiver.(*IntegerObject)
-				return InitializeString(fmt.Sprint(int.Value))
+				return initializeString(fmt.Sprint(int.Value))
 			}
 		},
 		Name: "to_s",

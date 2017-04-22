@@ -494,7 +494,7 @@ func initializeObject(value interface{}) Object {
 		case "nil":
 			return NULL
 		default:
-			return InitializeString(v)
+			return initializeString(v)
 		}
 	default:
 		panic(fmt.Sprintf("Unknown data type: %T", v))

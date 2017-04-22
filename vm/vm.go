@@ -70,7 +70,7 @@ func (vm *VM) initConstants() {
 
 	builtInClasses := []Class{
 		IntegerClass,
-		StringClass,
+		stringClass,
 		booleanClass,
 		NullClass,
 		arrayClass,
