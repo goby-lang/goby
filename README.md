@@ -14,7 +14,7 @@ Rooby is a Ruby-like object oriented language written in Go. You can think it as
 
 ## Goal
 
-I want to build a language that focuses on developing micro-services. Which should be performant and easy to write. This is why Rooby has Ruby's user friendly syntax and is written in Go.
+I want to build a language that focuses on developing microservices. Which should be performant and easy to write. This is why Rooby has Ruby's user friendly syntax and is written in Go.
 
 ## Supported features
 - **Can be compiled into bytecode (with `.robc` extension)**
