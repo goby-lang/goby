@@ -184,7 +184,7 @@ var builtInActions = map[operationType]*action{
 				pairs[k.Target.(*StringObject).Value] = v.Target
 			}
 
-			hash := InitializeHash(pairs)
+			hash := initializeHash(pairs)
 			vm.stack.push(&Pointer{hash})
 		},
 	},

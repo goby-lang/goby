@@ -7,13 +7,15 @@ import (
 )
 
 var (
-	HashClass *RHash
+	hashClass *RHash
 )
 
+// RHash is the class of hash objects
 type RHash struct {
 	*BaseClass
 }
 
+// HashObject represents hash instances
 type HashObject struct {
 	Class *RHash
 	Pairs map[string]Object
@@ -46,8 +48,8 @@ func (h *HashObject) Length() int {
 	return len(h.Pairs)
 }
 
-func InitializeHash(pairs map[string]Object) *HashObject {
-	return &HashObject{Pairs: pairs, Class: HashClass}
+func initializeHash(pairs map[string]Object) *HashObject {
+	return &HashObject{Pairs: pairs, Class: hashClass}
 }
 
 var builtinHashMethods = []*BuiltInMethod{
@@ -131,5 +133,5 @@ func init() {
 
 	bc := &BaseClass{Name: "Hash", Methods: methods, ClassMethods: NewEnvironment(), Class: classClass, SuperClass: objectClass}
 	hc := &RHash{BaseClass: bc}
-	HashClass = hc
+	hashClass = hc
 }

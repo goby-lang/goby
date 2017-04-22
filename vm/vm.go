@@ -74,7 +74,7 @@ func (vm *VM) initConstants() {
 		booleanClass,
 		NullClass,
 		arrayClass,
-		HashClass,
+		hashClass,
 		classClass,
 		objectClass,
 	}
