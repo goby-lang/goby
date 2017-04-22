@@ -624,6 +624,85 @@ func TestConditionWithAlternativeCompilation(t *testing.T) {
 	compareBytecode(t, bytecode, expected)
 }
 
+func TestWhileStatementWithoutMethodCallInCondition(t *testing.T) {
+	input := `
+	i = 10
+
+	while i > 0 do
+	  i = i - 1
+	end
+
+	i
+`
+	expected := `
+<ProgramStart>
+0 putobject 10
+1 setlocal 0 0
+2 jump 10
+3 putnil
+4 pop
+5 jump 10
+6 getlocal 0 0
+7 putobject 1
+8 send - 1
+9 setlocal 0 0
+10 getlocal 0 0
+11 putobject 0
+12 send > 1
+13 branchif 6
+14 putnil
+15 pop
+16 getlocal 0 0
+17 leave
+`
+
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
+func TestWhileStatementWithMethodCallInCondition(t *testing.T) {
+	input := `
+	i = 10
+	a = [1, 2, 3]
+
+	while i > a.length; do
+	  i = i - 1
+	end
+
+	i
+`
+	expected := `
+<ProgramStart>
+0 putobject 10
+1 setlocal 0 0
+2 putobject 1
+3 putobject 2
+4 putobject 3
+5 newarray 3
+6 setlocal 1 0
+7 jump 15
+8 putnil
+9 pop
+10 jump 15
+11 getlocal 0 0
+12 putobject 1
+13 send - 1
+14 setlocal 0 0
+15 getlocal 0 0
+16 getlocal 1 0
+17 send length 0
+18 send > 1
+19 branchif 11
+20 putnil
+21 pop
+22 getlocal 0 0
+23 leave
+`
+
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
 func compileToBytecode(input string) string {
 	l := lexer.New(input)
 	p := parser.New(l)
