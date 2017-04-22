@@ -60,7 +60,7 @@ func (vm *VM) ExecBytecodes(bytecodes string) {
 	// bytecodeParser generates and holds a label table during parsing
 	vm.labelTables = p.labelTable
 	cf := newCallFrame(vm.labelTables[Program]["ProgramStart"][0])
-	cf.self = MainObj
+	cf.self = mainObj
 	vm.callFrameStack.push(cf)
 	vm.start()
 }

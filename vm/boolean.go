@@ -25,8 +25,8 @@ type BooleanObject struct {
 }
 
 // Type returns boolean object's type
-func (b *BooleanObject) Type() ObjectType {
-	return BOOLEAN_OBJ
+func (b *BooleanObject) Type() objectType {
+	return booleanObj
 }
 
 // Inspect returns boolean object's value, which is either true or false.

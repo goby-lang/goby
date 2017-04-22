@@ -15,8 +15,8 @@ type StringObject struct {
 	Value string
 }
 
-func (s *StringObject) Type() ObjectType {
-	return STRING_OBJ
+func (s *StringObject) Type() objectType {
+	return stringObj
 }
 
 func (s *StringObject) Inspect() string {

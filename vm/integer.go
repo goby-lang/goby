@@ -17,8 +17,8 @@ type IntegerObject struct {
 	Value int
 }
 
-func (i *IntegerObject) Type() ObjectType {
-	return INTEGER_OBJ
+func (i *IntegerObject) Type() objectType {
+	return integerObj
 }
 
 func (i *IntegerObject) Inspect() string {

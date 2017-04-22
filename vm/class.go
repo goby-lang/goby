@@ -13,7 +13,7 @@ func initTopLevelClasses() {
 	globalMethods := NewEnvironment()
 	classMethods := NewEnvironment()
 
-	for _, m := range BuiltinGlobalMethods {
+	for _, m := range builtinGlobalMethods {
 		globalMethods.Set(m.Name, m)
 	}
 
@@ -69,8 +69,8 @@ type BaseClass struct {
 }
 
 // Type returns class object's type
-func (c *BaseClass) Type() ObjectType {
-	return CLASS_OBJ
+func (c *BaseClass) Type() objectType {
+	return classObj
 }
 
 // Inspect returns the basic inspected result (which is class name) of current class
@@ -113,6 +113,8 @@ func (c *BaseClass) LookupInstanceMethod(method_name string) Object {
 	return method
 }
 
+// SetSingletonMethod will sets method to class's singleton class
+// However, if the class doesn't have a singleton class, it will create one for it first.
 func (c *BaseClass) SetSingletonMethod(name string, method *Method) {
 	if c.SuperClass.Singleton {
 		c.SuperClass.ClassMethods.Set(name, method)
@@ -140,7 +142,7 @@ func (c *RClass) initializeInstance() *RObject {
 	return instance
 }
 
-var BuiltinGlobalMethods = []*BuiltInMethod{
+var builtinGlobalMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) BuiltinMethodBody {
 			return func(args []Object, block *Method) Object {

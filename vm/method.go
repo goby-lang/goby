@@ -15,8 +15,8 @@ type Method struct {
 	Scope          *Scope
 }
 
-func (m *Method) Type() ObjectType {
-	return METHOD_OBJ
+func (m *Method) Type() objectType {
+	return methodObj
 }
 
 func (m *Method) Inspect() string {
@@ -55,8 +55,8 @@ type BuiltInMethod struct {
 	Name string
 }
 
-func (bim *BuiltInMethod) Type() ObjectType {
-	return BUILD_IN_METHOD_OBJ
+func (bim *BuiltInMethod) Type() objectType {
+	return buildInMethodObj
 }
 
 func (bim *BuiltInMethod) Inspect() string {

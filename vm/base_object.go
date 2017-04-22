@@ -16,8 +16,8 @@ type RObject struct {
 	InitializeMethod  *Method
 }
 
-func (ro *RObject) Type() ObjectType {
-	return BASE_OBJECT_OBJ
+func (ro *RObject) Type() objectType {
+	return baseObject
 }
 
 func (ro *RObject) Inspect() string {

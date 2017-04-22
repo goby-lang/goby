@@ -19,8 +19,8 @@ type HashObject struct {
 	Pairs map[string]Object
 }
 
-func (h *HashObject) Type() ObjectType {
-	return HASH_OBJ
+func (h *HashObject) Type() objectType {
+	return hashObj
 }
 
 func (h *HashObject) Inspect() string {

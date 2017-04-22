@@ -13,8 +13,8 @@ type Null struct {
 	Class *RNull
 }
 
-func (n *Null) Type() ObjectType {
-	return NULL_OBJ
+func (n *Null) Type() objectType {
+	return nullObj
 }
 
 func (n *Null) Inspect() string {

@@ -21,8 +21,8 @@ type ArrayObject struct {
 }
 
 // Type returns array instance's type
-func (a *ArrayObject) Type() ObjectType {
-	return ARRAY_OBJ
+func (a *ArrayObject) Type() objectType {
+	return arrayObj
 }
 
 // Inspect returns detailed info of a array include elements it contains
