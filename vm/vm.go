@@ -6,62 +6,63 @@ import (
 	"strings"
 )
 
+// VM represents a stack based virtual machine.
 type VM struct {
-	CallFrameStack *CallFrameStack
-	Stack          *Stack
-	SP             int
-	CFP            int
-	Constants      map[string]*Pointer
-	LabelTable     map[labelType]map[string][]*instructionSet
-	MethodISTable  *ISIndexTable
-	ClassISTable   *ISIndexTable
-	BlockList      *ISIndexTable
+	// a stack that holds call frames
+	callFrameStack *callFrameStack
+	// call frame pointer
+	cfp int
+	// data stack
+	stack *stack
+	// stack pointer
+	sp int
+	// a map holds pointers of constants
+	constants map[string]*Pointer
+	// a map holds different types of label tables
+	labelTables map[labelType]map[string][]*instructionSet
+	// method instruction set table
+	methodISTable *isIndexTable
+	// class instruction set table
+	classISTable *isIndexTable
+	// block instruction set table
+	blockList *isIndexTable
 }
 
-type ISIndexTable struct {
+type isIndexTable struct {
 	Data map[string]int
 }
 
-type Stack struct {
+type stack struct {
 	Data []*Pointer
 	VM   *VM
 }
 
+// New initializes a vm to initialize state and returns it.
 func New() *VM {
-	s := &Stack{}
-	cfs := &CallFrameStack{CallFrames: []*CallFrame{}}
-	vm := &VM{Stack: s, CallFrameStack: cfs, SP: 0, CFP: 0}
+	s := &stack{}
+	cfs := &callFrameStack{callFrames: []*callFrame{}}
+	vm := &VM{stack: s, callFrameStack: cfs, sp: 0, cfp: 0}
 	s.VM = vm
-	cfs.VM = vm
+	cfs.vm = vm
 
 	vm.initConstants()
-	vm.MethodISTable = &ISIndexTable{Data: make(map[string]int)}
-	vm.ClassISTable = &ISIndexTable{Data: make(map[string]int)}
-	vm.BlockList = &ISIndexTable{Data: make(map[string]int)}
+	vm.methodISTable = &isIndexTable{Data: make(map[string]int)}
+	vm.classISTable = &isIndexTable{Data: make(map[string]int)}
+	vm.blockList = &isIndexTable{Data: make(map[string]int)}
 
 	return vm
 }
 
+// ExecBytecodes accepts a sequence of bytecodes and use vm to evaluate them.
 func (vm *VM) ExecBytecodes(bytecodes string) {
 	p := newBytecodeParser()
 	p.parseBytecode(bytecodes)
-	vm.LabelTable = p.labelTable
-	cf := NewCallFrame(vm.LabelTable[Program]["ProgramStart"][0])
-	cf.Self = MainObj
-	vm.CallFrameStack.Push(cf)
-	vm.Exec()
-}
-
-func (vm *VM) EvalCallFrame(cf *CallFrame) {
-	for cf.PC < len(cf.instructionSet.instructions) {
-		i := cf.instructionSet.instructions[cf.PC]
-		vm.execInstruction(cf, i)
-	}
-}
-
-func (vm *VM) Exec() {
-	cf := vm.CallFrameStack.Top()
-	vm.EvalCallFrame(cf)
+	// bytecodeParser generates and holds a label table during parsing
+	vm.labelTables = p.labelTable
+	cf := newCallFrame(vm.labelTables[Program]["ProgramStart"][0])
+	cf.self = MainObj
+	vm.callFrameStack.push(cf)
+	vm.start()
 }
 
 func (vm *VM) initConstants() {
@@ -83,21 +84,34 @@ func (vm *VM) initConstants() {
 		constants[c.ReturnName()] = p
 	}
 
-	vm.Constants = constants
+	vm.constants = constants
 }
 
-func (vm *VM) execInstruction(cf *CallFrame, i *instruction) {
-	cf.PC += 1
+func (vm *VM) evalCallFrame(cf *callFrame) {
+	for cf.pc < len(cf.instructionSet.instructions) {
+		i := cf.instructionSet.instructions[cf.pc]
+		vm.execInstruction(cf, i)
+	}
+}
+
+// Start evaluation from top most call frame
+func (vm *VM) start() {
+	cf := vm.callFrameStack.top()
+	vm.evalCallFrame(cf)
+}
+
+func (vm *VM) execInstruction(cf *callFrame, i *instruction) {
+	cf.pc++
 	//fmt.Print(i.Inspect())
 	i.action.operation(vm, cf, i.Params...)
-	//fmt.Println(vm.CallFrameStack.inspect())
-	//fmt.Println(vm.Stack.inspect())
+	//fmt.Println(vm.callFrameStack.inspect())
+	//fmt.Println(vm.stack.inspect())
 }
 
 func (vm *VM) getBlock(name string) (*instructionSet, bool) {
 	// The "name" here is actually an index from label
 	// for example <Block:1>'s name is "1"
-	iss, ok := vm.LabelTable[Block][name]
+	iss, ok := vm.labelTables[Block][name]
 
 	if !ok {
 		return nil, false
@@ -109,77 +123,77 @@ func (vm *VM) getBlock(name string) (*instructionSet, bool) {
 }
 
 func (vm *VM) getMethodIS(name string) (*instructionSet, bool) {
-	iss, ok := vm.LabelTable[LabelDef][name]
+	iss, ok := vm.labelTables[LabelDef][name]
 
 	if !ok {
 		return nil, false
 	}
 
-	is := iss[vm.MethodISTable.Data[name]]
+	is := iss[vm.methodISTable.Data[name]]
 
-	vm.MethodISTable.Data[name] += 1
+	vm.methodISTable.Data[name]++
 	return is, ok
 }
 
 func (vm *VM) getClassIS(name string) (*instructionSet, bool) {
-	iss, ok := vm.LabelTable[LabelDefClass][name]
+	iss, ok := vm.labelTables[LabelDefClass][name]
 
 	if !ok {
 		return nil, false
 	}
 
-	is := iss[vm.ClassISTable.Data[name]]
+	is := iss[vm.classISTable.Data[name]]
 
-	vm.ClassISTable.Data[name] += 1
+	vm.classISTable.Data[name]++
 	return is, ok
 }
 
-func (s *Stack) push(v *Pointer) {
-	if len(s.Data) <= s.VM.SP {
+func (s *stack) push(v *Pointer) {
+	if len(s.Data) <= s.VM.sp {
 		s.Data = append(s.Data, v)
 	} else {
-		s.Data[s.VM.SP] = v
+		s.Data[s.VM.sp] = v
 	}
 
-	s.VM.SP += 1
+	s.VM.sp++
 }
 
-func (s *Stack) pop() *Pointer {
+func (s *stack) pop() *Pointer {
 	if len(s.Data) < 1 {
 		panic("Nothing to pop!")
 	}
 
-	s.VM.SP -= 1
+	s.VM.sp--
 
-	v := s.Data[s.VM.SP]
-	s.Data[s.VM.SP] = nil
+	v := s.Data[s.VM.sp]
+	s.Data[s.VM.sp] = nil
 	return v
 }
 
-func (s *Stack) Top() *Pointer {
+func (s *stack) Top() *Pointer {
 
-	if s.VM.SP > 0 {
-		return s.Data[s.VM.SP-1]
+	if s.VM.sp > 0 {
+		return s.Data[s.VM.sp-1]
 	}
 
 	return s.Data[0]
 }
 
-func (s *Stack) inspect() string {
+func (s *stack) inspect() string {
 	var out bytes.Buffer
 	datas := []string{}
 
 	for i, p := range s.Data {
 		if p != nil {
 			o := p.Target
-			if i == s.VM.SP {
+			if i == s.VM.sp {
 				datas = append(datas, fmt.Sprintf("%s (%T) %d <----", o.Inspect(), o, i))
 			} else {
 				datas = append(datas, fmt.Sprintf("%s (%T) %d", o.Inspect(), o, i))
 			}
 
 		} else {
-			if i == s.VM.SP {
+			if i == s.VM.sp {
 				datas = append(datas, "nil <----")
 			} else {
 				datas = append(datas, "nil")

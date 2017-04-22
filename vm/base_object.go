@@ -31,4 +31,3 @@ func (ro *RObject) ReturnClass() Class {
 	}
 	return ro.Class
 }
-

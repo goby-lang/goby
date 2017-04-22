@@ -28,7 +28,7 @@ func initTopLevelClasses() {
 // InitializeClass initializes and returns a class instance with given class name
 func InitializeClass(name string) *RClass {
 	class := &RClass{BaseClass: &BaseClass{Name: name, Methods: NewEnvironment(), ClassMethods: NewEnvironment(), Class: classClass, SuperClass: objectClass}}
-	//classScope := &Scope{Self: class, Env: NewClosedEnvironment(scope.Env)}
+	//classScope := &Scope{self: class, Env: NewClosedEnvironment(scope.Env)}
 	//class.Scope = classScope
 
 	return class
@@ -55,17 +55,17 @@ type RClass struct {
 // BaseClass is a embedded struct that contains all the essential fields for a class
 type BaseClass struct {
 	// Name is the class's name
-	Name         string
+	Name string
 	// Methods contains its instances' methods
-	Methods      *Environment
+	Methods *Environment
 	// ClassMethods contains this class's methods
 	ClassMethods *Environment
 	// SuperClass points to the class it inherits
-	SuperClass   *RClass
+	SuperClass *RClass
 	// Class points to this class's class, which should be ClassClass
-	Class        *RClass
+	Class *RClass
 	// Singleton is a flag marks if this class a singleton class
-	Singleton    bool
+	Singleton bool
 }
 
 // Type returns class object's type

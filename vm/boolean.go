@@ -8,9 +8,9 @@ var (
 	booleanClass *RBool
 
 	// TRUE is shared boolean object that represents true
-	TRUE         *BooleanObject
+	TRUE *BooleanObject
 	// FALSE is shared boolean object that represents false
-	FALSE        *BooleanObject
+	FALSE *BooleanObject
 )
 
 // RBool is the built in class of Rooby's boolean objects.

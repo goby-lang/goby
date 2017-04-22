@@ -189,7 +189,7 @@ var builtinArrayMethods = []*BuiltInMethod{
 	//		return func(args []Object, block *Method) Object {
 	//			arr := receiver.(*ArrayObject)
 	//			for _, obj := range arr.Elements {
-	//				evalMethodObject(block.Scope.Self, block, []Object{obj}, nil)
+	//				evalMethodObject(block.Scope.self, block, []Object{obj}, nil)
 	//			}
 	//			return arr
 	//		}
