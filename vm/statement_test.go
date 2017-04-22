@@ -166,6 +166,35 @@ func TestModuleStatement(t *testing.T) {
 	}
 }
 
+func TestWhileStatement(t *testing.T) {
+	tests := []struct{
+		input string
+		expected int
+	}{
+		{
+			`
+			i = 10
+
+			while i > 0 do
+			  i = i + 1
+			end
+
+			i
+			`, 1},
+	}
+
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+		}
+
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
 //func TestWhileStatement(t *testing.T) {
 //	tests := []struct {
 //		input    string
