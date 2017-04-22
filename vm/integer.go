@@ -5,13 +5,15 @@ import (
 )
 
 var (
-	IntegerClass *RInteger
+	integerClass *RInteger
 )
 
+// RInteger is integer class
 type RInteger struct {
 	*BaseClass
 }
 
+// IntegerObject represents integer instances
 type IntegerObject struct {
 	Class *RInteger
 	Value int
@@ -29,15 +31,15 @@ func (i *IntegerObject) ReturnClass() Class {
 	return i.Class
 }
 
-func InitilaizeInteger(value int) *IntegerObject {
-	return &IntegerObject{Value: value, Class: IntegerClass}
+func initilaizeInteger(value int) *IntegerObject {
+	return &IntegerObject{Value: value, Class: integerClass}
 }
 
 var builtinIntegerMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) BuiltinMethodBody {
 			return func(args []Object, block *Method) Object {
-				err := checkArgumentLen(args, IntegerClass, "+")
+				err := checkArgumentLen(args, integerClass, "+")
 
 				if err != nil {
 					return err
@@ -47,11 +49,11 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				right, ok := args[0].(*IntegerObject)
 
 				if !ok {
-					return wrongTypeError(IntegerClass)
+					return wrongTypeError(integerClass)
 				}
 
 				rightValue := right.Value
-				return &IntegerObject{Value: leftValue + rightValue, Class: IntegerClass}
+				return &IntegerObject{Value: leftValue + rightValue, Class: integerClass}
 			}
 		},
 		Name: "+",
@@ -59,7 +61,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) BuiltinMethodBody {
 			return func(args []Object, block *Method) Object {
-				err := checkArgumentLen(args, IntegerClass, "-")
+				err := checkArgumentLen(args, integerClass, "-")
 
 				if err != nil {
 					return err
@@ -69,11 +71,11 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				right, ok := args[0].(*IntegerObject)
 
 				if !ok {
-					return wrongTypeError(IntegerClass)
+					return wrongTypeError(integerClass)
 				}
 
 				rightValue := right.Value
-				return &IntegerObject{Value: leftValue - rightValue, Class: IntegerClass}
+				return &IntegerObject{Value: leftValue - rightValue, Class: integerClass}
 			}
 		},
 		Name: "-",
@@ -81,7 +83,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) BuiltinMethodBody {
 			return func(args []Object, block *Method) Object {
-				err := checkArgumentLen(args, IntegerClass, "+")
+				err := checkArgumentLen(args, integerClass, "+")
 
 				if err != nil {
 					return err
@@ -91,11 +93,11 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				right, ok := args[0].(*IntegerObject)
 
 				if !ok {
-					return wrongTypeError(IntegerClass)
+					return wrongTypeError(integerClass)
 				}
 
 				rightValue := right.Value
-				return &IntegerObject{Value: leftValue * rightValue, Class: IntegerClass}
+				return &IntegerObject{Value: leftValue * rightValue, Class: integerClass}
 			}
 		},
 		Name: "*",
@@ -103,7 +105,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) BuiltinMethodBody {
 			return func(args []Object, block *Method) Object {
-				err := checkArgumentLen(args, IntegerClass, "+")
+				err := checkArgumentLen(args, integerClass, "+")
 
 				if err != nil {
 					return err
@@ -113,11 +115,11 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				right, ok := args[0].(*IntegerObject)
 
 				if !ok {
-					return wrongTypeError(IntegerClass)
+					return wrongTypeError(integerClass)
 				}
 
 				rightValue := right.Value
-				return &IntegerObject{Value: leftValue / rightValue, Class: IntegerClass}
+				return &IntegerObject{Value: leftValue / rightValue, Class: integerClass}
 			}
 		},
 		Name: "/",
@@ -125,7 +127,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) BuiltinMethodBody {
 			return func(args []Object, block *Method) Object {
-				err := checkArgumentLen(args, IntegerClass, ">")
+				err := checkArgumentLen(args, integerClass, ">")
 				if err != nil {
 					return err
 				}
@@ -134,7 +136,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				right, ok := args[0].(*IntegerObject)
 
 				if !ok {
-					return wrongTypeError(IntegerClass)
+					return wrongTypeError(integerClass)
 				}
 
 				rightValue := right.Value
@@ -151,7 +153,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) BuiltinMethodBody {
 			return func(args []Object, block *Method) Object {
-				err := checkArgumentLen(args, IntegerClass, "<")
+				err := checkArgumentLen(args, integerClass, "<")
 				if err != nil {
 					return err
 				}
@@ -160,7 +162,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				right, ok := args[0].(*IntegerObject)
 
 				if !ok {
-					return wrongTypeError(IntegerClass)
+					return wrongTypeError(integerClass)
 				}
 
 				rightValue := right.Value
@@ -177,7 +179,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) BuiltinMethodBody {
 			return func(args []Object, block *Method) Object {
-				err := checkArgumentLen(args, IntegerClass, "==")
+				err := checkArgumentLen(args, integerClass, "==")
 
 				if err != nil {
 					return err
@@ -187,7 +189,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				right, ok := args[0].(*IntegerObject)
 
 				if !ok {
-					return wrongTypeError(IntegerClass)
+					return wrongTypeError(integerClass)
 				}
 
 				rightValue := right.Value
@@ -204,7 +206,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) BuiltinMethodBody {
 			return func(args []Object, block *Method) Object {
-				err := checkArgumentLen(args, IntegerClass, "!=")
+				err := checkArgumentLen(args, integerClass, "!=")
 
 				if err != nil {
 					return err
@@ -214,7 +216,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				right, ok := args[0].(*IntegerObject)
 
 				if !ok {
-					return wrongTypeError(IntegerClass)
+					return wrongTypeError(integerClass)
 				}
 
 				rightValue := right.Value
@@ -280,5 +282,5 @@ func initInteger() {
 
 	bc := &BaseClass{Name: "Integer", Methods: methods, ClassMethods: NewEnvironment(), Class: classClass, SuperClass: objectClass}
 	ic := &RInteger{BaseClass: bc}
-	IntegerClass = ic
+	integerClass = ic
 }

@@ -157,7 +157,7 @@ var builtinArrayMethods = []*BuiltInMethod{
 				}
 
 				arr := receiver.(*ArrayObject)
-				return InitilaizeInteger(arr.Length())
+				return initilaizeInteger(arr.Length())
 			}
 		},
 		Name: "length",

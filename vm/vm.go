@@ -69,7 +69,7 @@ func (vm *VM) initConstants() {
 	constants := make(map[string]*Pointer)
 
 	builtInClasses := []Class{
-		IntegerClass,
+		integerClass,
 		stringClass,
 		booleanClass,
 		NullClass,

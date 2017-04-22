@@ -482,9 +482,9 @@ func (i *instruction) Inspect() string {
 func initializeObject(value interface{}) Object {
 	switch v := value.(type) {
 	case int:
-		return InitilaizeInteger(int(v))
+		return initilaizeInteger(int(v))
 	case int64:
-		return InitilaizeInteger(int(v))
+		return initilaizeInteger(int(v))
 	case string:
 		switch v {
 		case "true":

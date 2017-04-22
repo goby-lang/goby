@@ -117,7 +117,7 @@ var builtinHashMethods = []*BuiltInMethod{
 				}
 
 				hash := receiver.(*HashObject)
-				return InitilaizeInteger(hash.Length())
+				return initilaizeInteger(hash.Length())
 			}
 		},
 		Name: "length",
