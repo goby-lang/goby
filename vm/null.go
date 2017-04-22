@@ -1,7 +1,7 @@
 package vm
 
 var (
-	NullClass *RNull
+	nullClass *RNull
 	NULL      *Null
 )
 
@@ -34,8 +34,8 @@ func initNull() {
 
 	baseClass := &BaseClass{Name: "Null", Methods: methods, ClassMethods: NewEnvironment(), Class: classClass, SuperClass: objectClass}
 	nc := &RNull{BaseClass: baseClass}
-	NullClass = nc
-	NULL = &Null{Class: NullClass}
+	nullClass = nc
+	NULL = &Null{Class: nullClass}
 }
 
 var builtInNullMethods = []*BuiltInMethod{
