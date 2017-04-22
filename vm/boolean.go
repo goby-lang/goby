@@ -41,7 +41,7 @@ func (b *BooleanObject) ReturnClass() Class {
 
 var builtinBooleanMethods = []*BuiltInMethod{
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				err := checkArgumentLen(args, booleanClass, "==")
 
@@ -68,7 +68,7 @@ var builtinBooleanMethods = []*BuiltInMethod{
 		Name: "==",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				err := checkArgumentLen(args, booleanClass, "!=")
 
@@ -95,7 +95,7 @@ var builtinBooleanMethods = []*BuiltInMethod{
 		Name: "!=",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				rightValue := receiver.(*BooleanObject).Value
 

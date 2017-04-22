@@ -37,7 +37,7 @@ func initilaizeInteger(value int) *IntegerObject {
 
 var builtinIntegerMethods = []*BuiltInMethod{
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				err := checkArgumentLen(args, integerClass, "+")
 
@@ -59,7 +59,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		Name: "+",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				err := checkArgumentLen(args, integerClass, "-")
 
@@ -81,7 +81,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		Name: "-",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				err := checkArgumentLen(args, integerClass, "+")
 
@@ -103,7 +103,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		Name: "*",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				err := checkArgumentLen(args, integerClass, "+")
 
@@ -125,7 +125,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		Name: "/",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				err := checkArgumentLen(args, integerClass, ">")
 				if err != nil {
@@ -151,7 +151,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		Name: ">",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				err := checkArgumentLen(args, integerClass, "<")
 				if err != nil {
@@ -177,7 +177,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		Name: "<",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				err := checkArgumentLen(args, integerClass, "==")
 
@@ -204,7 +204,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		Name: "==",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				err := checkArgumentLen(args, integerClass, "!=")
 
@@ -231,7 +231,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		Name: "!=",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				if len(args) > 0 {
 					return &Error{Message: "Too many arguments for Integer#++"}
@@ -245,7 +245,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		Name: "++",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				if len(args) > 0 {
 					return &Error{Message: "Too many arguments for Integer#--"}
@@ -259,7 +259,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		Name: "--",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				if len(args) > 0 {
 					return &Error{Message: "Too many arguments for Integer#--"}

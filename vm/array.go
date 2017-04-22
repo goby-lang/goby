@@ -84,7 +84,7 @@ func init() {
 
 var builtinArrayMethods = []*BuiltInMethod{
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				if len(args) != 1 {
 					return newError("Expect 1 arguments. got=%d", len(args))
@@ -114,7 +114,7 @@ var builtinArrayMethods = []*BuiltInMethod{
 		Name: "[]",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				// First arg is index
 				// Second arg is assigned value
@@ -150,7 +150,7 @@ var builtinArrayMethods = []*BuiltInMethod{
 		Name: "[]=",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				if len(args) != 0 {
 					return newError("Expect 0 argument. got=%d", len(args))
@@ -163,7 +163,7 @@ var builtinArrayMethods = []*BuiltInMethod{
 		Name: "length",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				if len(args) != 0 {
 					return newError("Expect 0 argument. got=%d", len(args))
@@ -176,7 +176,7 @@ var builtinArrayMethods = []*BuiltInMethod{
 		Name: "pop",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				arr := receiver.(*ArrayObject)
 				return arr.Push(args)
@@ -189,7 +189,7 @@ var builtinArrayMethods = []*BuiltInMethod{
 	//		return func(args []Object, block *Method) Object {
 	//			arr := receiver.(*ArrayObject)
 	//			for _, obj := range arr.Elements {
-	//				evalMethodObject(block.Scope.self, block, []Object{obj}, nil)
+	//				evalMethodObject(block.scope.self, block, []Object{obj}, nil)
 	//			}
 	//			return arr
 	//		}

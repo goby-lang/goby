@@ -6,13 +6,14 @@ import (
 	"strings"
 )
 
+// Method represents methods defined using rooby.
 type Method struct {
 	Name           string
 	instructionSet *instructionSet
-	Argc           int
-	Parameters     []*ast.Identifier
-	Body           *ast.BlockStatement
-	Scope          *Scope
+	argc           int
+	parameters     []*ast.Identifier
+	body           *ast.BlockStatement
+	scope          *Scope
 }
 
 func (m *Method) Type() objectType {
@@ -23,7 +24,7 @@ func (m *Method) Inspect() string {
 	var out bytes.Buffer
 
 	params := []string{}
-	for _, p := range m.Parameters {
+	for _, p := range m.parameters {
 		params = append(params, p.String())
 	}
 
@@ -31,27 +32,28 @@ func (m *Method) Inspect() string {
 	out.WriteString("(")
 	out.WriteString(strings.Join(params, ", "))
 	out.WriteString(") {\n")
-	out.WriteString(m.Body.String())
+	out.WriteString(m.body.String())
 	out.WriteString("\n}\n")
 
 	return out.String()
 }
 
-func (m *Method) ExtendEnv(args []Object) *Environment {
-	e := NewClosedEnvironment(m.Scope.Env)
+func (m *Method) extendEnv(args []Object) *Environment {
+	e := NewClosedEnvironment(m.scope.Env)
 
 	for i, arg := range args {
-		argName := m.Parameters[i].Value
+		argName := m.parameters[i].Value
 		e.Set(argName, arg)
 	}
 
 	return e
 }
 
-type BuiltinMethodBody func([]Object, *Method) Object
+type builtinMethodBody func([]Object, *Method) Object
 
+// BuiltInMethod represents methods defined in go.
 type BuiltInMethod struct {
-	Fn   func(receiver Object) BuiltinMethodBody
+	Fn   func(receiver Object) builtinMethodBody
 	Name string
 }
 

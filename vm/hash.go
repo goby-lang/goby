@@ -54,7 +54,7 @@ func initializeHash(pairs map[string]Object) *HashObject {
 
 var builtinHashMethods = []*BuiltInMethod{
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				if len(args) != 1 {
 					return newError("Expect 1 arguments. got=%d", len(args))
@@ -86,7 +86,7 @@ var builtinHashMethods = []*BuiltInMethod{
 		Name: "[]",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				// First arg is index
 				// Second arg is assigned value
@@ -110,7 +110,7 @@ var builtinHashMethods = []*BuiltInMethod{
 		Name: "[]=",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				if len(args) != 0 {
 					return newError("Expect 0 argument. got=%d", len(args))

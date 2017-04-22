@@ -110,8 +110,8 @@ func TestDefStatement(t *testing.T) {
 			t.Errorf("expect method's name to be %s. got=%s", expectedMethod.name, method.Name)
 		}
 
-		if method.Argc != len(expectedMethod.params) {
-			t.Errorf("expect method %s to have %d parameters. got=%d", method.Name, len(expectedMethod.params), method.Argc)
+		if method.argc != len(expectedMethod.params) {
+			t.Errorf("expect method %s to have %d parameters. got=%d", method.Name, len(expectedMethod.params), method.argc)
 		}
 	}
 }

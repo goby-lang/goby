@@ -28,8 +28,8 @@ func initTopLevelClasses() {
 // InitializeClass initializes and returns a class instance with given class name
 func InitializeClass(name string) *RClass {
 	class := &RClass{BaseClass: &BaseClass{Name: name, Methods: NewEnvironment(), ClassMethods: NewEnvironment(), Class: classClass, SuperClass: objectClass}}
-	//classScope := &Scope{self: class, Env: NewClosedEnvironment(scope.Env)}
-	//class.Scope = classScope
+	//classScope := &scope{self: class, Env: NewClosedEnvironment(scope.Env)}
+	//class.scope = classScope
 
 	return class
 }
@@ -144,7 +144,7 @@ func (c *RClass) initializeInstance() *RObject {
 
 var builtinGlobalMethods = []*BuiltInMethod{
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				for _, arg := range args {
 					fmt.Println(arg.Inspect())
@@ -156,7 +156,7 @@ var builtinGlobalMethods = []*BuiltInMethod{
 		Name: "puts",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				switch r := receiver.(type) {
 				case BaseObject:
@@ -171,7 +171,7 @@ var builtinGlobalMethods = []*BuiltInMethod{
 		Name: "class",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				return FALSE
 			}
@@ -182,7 +182,7 @@ var builtinGlobalMethods = []*BuiltInMethod{
 
 var BuiltinClassMethods = []*BuiltInMethod{
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				class := receiver.(*RClass)
 				instance := class.initializeInstance()
@@ -198,7 +198,7 @@ var BuiltinClassMethods = []*BuiltInMethod{
 		Name: "new",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				name := receiver.(Class).ReturnName()
 				nameString := initializeString(name)
