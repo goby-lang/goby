@@ -3,7 +3,7 @@
 [![Join the chat at https://gitter.im/Rooby-lang/Lobby](https://badges.gitter.im/Rooby-lang/Lobby.svg)](https://gitter.im/Rooby-lang/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 [![Build Status](https://travis-ci.org/rooby-lang/Rooby.svg?branch=master)](https://travis-ci.org/rooby-lang/Rooby)
-[![Code Climate](https://codeclimate.com/github/rooby-lang/rooby/badges/gpa.svg)](https://codeclimate.com/github/rooby-lang/rooby)
+[![Code Climate](https://codeclimate.com/github/rooby-lang/Rooby/badges/gpa.svg)](https://codeclimate.com/github/rooby-lang/rooby)
 [![GoDoc](https://godoc.org/github.com/rooby-lang/Rooby?status.svg)](https://godoc.org/github.com/rooby-lang/Rooby)
 [![Go Report Card](https://goreportcard.com/badge/github.com/rooby-lang/Rooby)](https://goreportcard.com/report/github.com/rooby-lang/Rooby)
 [![codecov](https://codecov.io/gh/rooby-lang/Rooby/branch/master/graph/badge.svg)](https://codecov.io/gh/rooby-lang/Rooby)
