@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func getBuiltInMethod(t *testing.T, receiver BaseObject, method_name string) BuiltinMethodBody {
+func getBuiltInMethod(t *testing.T, receiver BaseObject, method_name string) builtinMethodBody {
 	m := receiver.ReturnClass().LookupInstanceMethod(method_name)
 
 	if m == nil {

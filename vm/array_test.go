@@ -38,8 +38,8 @@ func TestPushMethod(t *testing.T) {
 	array := generateArray(5)
 	m := getBuiltInMethod(t, array, "push")
 
-	six := InitilaizeInteger(6)
-	seven := InitilaizeInteger(7)
+	six := initilaizeInteger(6)
+	seven := initilaizeInteger(7)
 	m([]Object{six, seven}, nil)
 
 	if array.Length() != 7 {
@@ -158,7 +158,7 @@ func TestEvalArrayIndex(t *testing.T) {
 func generateArray(length int) *ArrayObject {
 	var elements []Object
 	for i := 1; i <= length; i++ {
-		int := InitilaizeInteger(i)
+		int := initilaizeInteger(i)
 		elements = append(elements, int)
 	}
 	return InitializeArray(elements)

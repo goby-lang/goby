@@ -394,16 +394,10 @@ func checkParserErrors(t *testing.T, p *parser.Parser) {
 }
 
 func testExec(bytecodes string) Object {
-	p := NewBytecodeParser()
 	v := New()
-	p.VM = v
-	p.Parse(bytecodes)
-	cf := NewCallFrame(v.LabelTable[PROGRAM]["ProgramStart"][0])
-	cf.Self = MainObj
-	v.CallFrameStack.Push(cf)
-	v.Exec()
+	v.ExecBytecodes(bytecodes)
 
-	return v.Stack.Top().Target
+	return v.stack.Top().Target
 }
 
 func testIntegerObject(t *testing.T, obj Object, expected int) bool {
@@ -459,7 +453,7 @@ func testBooleanObject(t *testing.T, obj Object, expected bool) bool {
 
 func isError(obj Object) bool {
 	if obj != nil {
-		return obj.Type() == ERROR_OBJ
+		return obj.Type() == errorObj
 	}
 	return false
 }

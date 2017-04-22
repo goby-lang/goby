@@ -3,20 +3,22 @@ package vm
 import "fmt"
 
 var (
-	StringClass *RString
+	stringClass *RString
 )
 
+// RString is the built in string class
 type RString struct {
 	*BaseClass
 }
 
+// StringObject represents string instances
 type StringObject struct {
 	Class *RString
 	Value string
 }
 
-func (s *StringObject) Type() ObjectType {
-	return STRING_OBJ
+func (s *StringObject) Type() objectType {
+	return stringObj
 }
 
 func (s *StringObject) Inspect() string {
@@ -35,11 +37,11 @@ var (
 	stringTable = make(map[string]*StringObject)
 )
 
-func InitializeString(value string) *StringObject {
+func initializeString(value string) *StringObject {
 	addr, ok := stringTable[value]
 
 	if !ok {
-		s := &StringObject{Value: value, Class: StringClass}
+		s := &StringObject{Value: value, Class: stringClass}
 		stringTable[value] = s
 		return s
 	}
@@ -49,9 +51,9 @@ func InitializeString(value string) *StringObject {
 
 var builtinStringMethods = []*BuiltInMethod{
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
-				err := checkArgumentLen(args, StringClass, "+")
+				err := checkArgumentLen(args, stringClass, "+")
 
 				if err != nil {
 					return err
@@ -61,19 +63,19 @@ var builtinStringMethods = []*BuiltInMethod{
 				right, ok := args[0].(*StringObject)
 
 				if !ok {
-					return wrongTypeError(StringClass)
+					return wrongTypeError(stringClass)
 				}
 
 				rightValue := right.Value
-				return &StringObject{Value: leftValue + rightValue, Class: StringClass}
+				return &StringObject{Value: leftValue + rightValue, Class: stringClass}
 			}
 		},
 		Name: "+",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
-				err := checkArgumentLen(args, StringClass, ">")
+				err := checkArgumentLen(args, stringClass, ">")
 				if err != nil {
 					return err
 				}
@@ -82,7 +84,7 @@ var builtinStringMethods = []*BuiltInMethod{
 				right, ok := args[0].(*StringObject)
 
 				if !ok {
-					return wrongTypeError(StringClass)
+					return wrongTypeError(stringClass)
 				}
 
 				rightValue := right.Value
@@ -97,9 +99,9 @@ var builtinStringMethods = []*BuiltInMethod{
 		Name: ">",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
-				err := checkArgumentLen(args, StringClass, "<")
+				err := checkArgumentLen(args, stringClass, "<")
 				if err != nil {
 					return err
 				}
@@ -108,7 +110,7 @@ var builtinStringMethods = []*BuiltInMethod{
 				right, ok := args[0].(*StringObject)
 
 				if !ok {
-					return wrongTypeError(StringClass)
+					return wrongTypeError(stringClass)
 				}
 
 				rightValue := right.Value
@@ -123,9 +125,9 @@ var builtinStringMethods = []*BuiltInMethod{
 		Name: "<",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
-				err := checkArgumentLen(args, StringClass, "==")
+				err := checkArgumentLen(args, stringClass, "==")
 
 				if err != nil {
 					return err
@@ -135,7 +137,7 @@ var builtinStringMethods = []*BuiltInMethod{
 				right, ok := args[0].(*StringObject)
 
 				if !ok {
-					return wrongTypeError(StringClass)
+					return wrongTypeError(stringClass)
 				}
 
 				rightValue := right.Value
@@ -150,9 +152,9 @@ var builtinStringMethods = []*BuiltInMethod{
 		Name: "==",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
-				err := checkArgumentLen(args, StringClass, "!=")
+				err := checkArgumentLen(args, stringClass, "!=")
 
 				if err != nil {
 					return err
@@ -162,7 +164,7 @@ var builtinStringMethods = []*BuiltInMethod{
 				right, ok := args[0].(*StringObject)
 
 				if !ok {
-					return wrongTypeError(StringClass)
+					return wrongTypeError(stringClass)
 				}
 
 				rightValue := right.Value
@@ -185,7 +187,7 @@ func initString() {
 		methods.Set(m.Name, m)
 	}
 
-	bc := &BaseClass{Name: "String", Methods: methods, ClassMethods: NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}
+	bc := &BaseClass{Name: "String", Methods: methods, ClassMethods: NewEnvironment(), Class: classClass, SuperClass: objectClass}
 	sc := &RString{BaseClass: bc}
-	StringClass = sc
+	stringClass = sc
 }

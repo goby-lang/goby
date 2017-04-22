@@ -5,15 +5,15 @@ import (
 )
 
 var (
-	ObjectClass *RClass
-	ClassClass  *RClass
+	objectClass *RClass
+	classClass  *RClass
 )
 
 func initTopLevelClasses() {
 	globalMethods := NewEnvironment()
 	classMethods := NewEnvironment()
 
-	for _, m := range BuiltinGlobalMethods {
+	for _, m := range builtinGlobalMethods {
 		globalMethods.Set(m.Name, m)
 	}
 
@@ -21,44 +21,60 @@ func initTopLevelClasses() {
 		classMethods.Set(m.Name, m)
 	}
 
-	ClassClass = &RClass{BaseClass: &BaseClass{Name: "Class", Methods: globalMethods, ClassMethods: classMethods}}
-	ObjectClass = &RClass{BaseClass: &BaseClass{Name: "Object", Class: ClassClass, Methods: globalMethods, ClassMethods: NewEnvironment()}}
+	classClass = &RClass{BaseClass: &BaseClass{Name: "Class", Methods: globalMethods, ClassMethods: classMethods}}
+	objectClass = &RClass{BaseClass: &BaseClass{Name: "Object", Class: classClass, Methods: globalMethods, ClassMethods: NewEnvironment()}}
 }
 
+// InitializeClass initializes and returns a class instance with given class name
 func InitializeClass(name string) *RClass {
-	class := &RClass{BaseClass: &BaseClass{Name: name, Methods: NewEnvironment(), ClassMethods: NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}}
-	//classScope := &Scope{Self: class, Env: NewClosedEnvironment(scope.Env)}
-	//class.Scope = classScope
+	class := &RClass{BaseClass: &BaseClass{Name: name, Methods: NewEnvironment(), ClassMethods: NewEnvironment(), Class: classClass, SuperClass: objectClass}}
+	//classScope := &scope{self: class, Env: NewClosedEnvironment(scope.Env)}
+	//class.scope = classScope
 
 	return class
 }
 
+// Class is an interface that implements a class's basic functions.
+// - LookupClassMethod: search for current class's class method with given name.
+// - LookupInstanceMethod: search for current class's instance method with given name.
+// - ReturnName returns class's name
 type Class interface {
 	LookupClassMethod(string) Object
 	LookupInstanceMethod(string) Object
-	ReturnClass() Class
 	ReturnName() string
-	Object
+	BaseObject
 }
 
+// RClass represents normal (not built in) class object
 type RClass struct {
+	// Scope contains current class's scope information
 	Scope *Scope
 	*BaseClass
 }
 
+// BaseClass is a embedded struct that contains all the essential fields for a class
 type BaseClass struct {
-	Name         string
-	Methods      *Environment
+	// Name is the class's name
+	Name string
+	// Methods contains its instances' methods
+	Methods *Environment
+	// ClassMethods contains this class's methods
 	ClassMethods *Environment
-	SuperClass   *RClass
-	Class        *RClass
-	Singleton    bool
+	// SuperClass points to the class it inherits
+	SuperClass *RClass
+	// Class points to this class's class, which should be ClassClass
+	Class *RClass
+	// Singleton is a flag marks if this class a singleton class
+	Singleton bool
 }
 
-func (c *BaseClass) Type() ObjectType {
-	return CLASS_OBJ
+// Type returns class object's type
+func (c *BaseClass) Type() objectType {
+	return classObj
 }
 
+// Inspect returns the basic inspected result (which is class name) of current class
+// TODO: Singleton class's Inspect() should also mark if it's a singleton class explicitly.
 func (c *BaseClass) Inspect() string {
 	return "<Class:" + c.Name + ">"
 }
@@ -97,6 +113,8 @@ func (c *BaseClass) LookupInstanceMethod(method_name string) Object {
 	return method
 }
 
+// SetSingletonMethod will sets method to class's singleton class
+// However, if the class doesn't have a singleton class, it will create one for it first.
 func (c *BaseClass) SetSingletonMethod(name string, method *Method) {
 	if c.SuperClass.Singleton {
 		c.SuperClass.ClassMethods.Set(name, method)
@@ -106,7 +124,7 @@ func (c *BaseClass) SetSingletonMethod(name string, method *Method) {
 	class.Singleton = true
 	class.ClassMethods.Set(name, method)
 	class.SuperClass = c.SuperClass
-	class.Class = ClassClass
+	class.Class = classClass
 	c.SuperClass = class
 }
 
@@ -118,9 +136,15 @@ func (c *BaseClass) ReturnName() string {
 	return c.Name
 }
 
-var BuiltinGlobalMethods = []*BuiltInMethod{
+func (c *RClass) initializeInstance() *RObject {
+	instance := &RObject{Class: c, InstanceVariables: NewEnvironment()}
+
+	return instance
+}
+
+var builtinGlobalMethods = []*BuiltInMethod{
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				for _, arg := range args {
 					fmt.Println(arg.Inspect())
@@ -132,7 +156,7 @@ var BuiltinGlobalMethods = []*BuiltInMethod{
 		Name: "puts",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				switch r := receiver.(type) {
 				case BaseObject:
@@ -147,7 +171,7 @@ var BuiltinGlobalMethods = []*BuiltInMethod{
 		Name: "class",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				return FALSE
 			}
@@ -158,10 +182,10 @@ var BuiltinGlobalMethods = []*BuiltInMethod{
 
 var BuiltinClassMethods = []*BuiltInMethod{
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				class := receiver.(*RClass)
-				instance := InitializeInstance(class)
+				instance := class.initializeInstance()
 				initMethod := class.LookupInstanceMethod("initialize")
 
 				if initMethod != nil {
@@ -174,10 +198,10 @@ var BuiltinClassMethods = []*BuiltInMethod{
 		Name: "new",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				name := receiver.(Class).ReturnName()
-				nameString := InitializeString(name)
+				nameString := initializeString(name)
 				return nameString
 			}
 		},

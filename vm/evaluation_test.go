@@ -331,7 +331,7 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 		input        string
 		expected_obj string
 	}{
-		{`self`, BASE_OBJECT_OBJ},
+		{`self`, baseObject},
 		{
 			`
 			class Bar
@@ -341,7 +341,7 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 			end
 
 			Bar.new.whoami;
-		`, BASE_OBJECT_OBJ},
+		`, baseObject},
 		{
 			`
 			class Foo
@@ -354,7 +354,7 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 
 			Foo.new.get_self;
 			`,
-			CLASS_OBJ},
+			classObj},
 		{
 			`
 			class Foo
@@ -365,7 +365,7 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 
 			Foo.new.class
 			`,
-			CLASS_OBJ},
+			classObj},
 		{
 			`
 			class Foo
@@ -376,7 +376,7 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 
 			Foo.new.class_name
 			`,
-			STRING_OBJ},
+			stringObj},
 	}
 
 	for _, tt := range tests {

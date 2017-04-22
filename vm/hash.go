@@ -7,20 +7,22 @@ import (
 )
 
 var (
-	HashClass *RHash
+	hashClass *RHash
 )
 
+// RHash is the class of hash objects
 type RHash struct {
 	*BaseClass
 }
 
+// HashObject represents hash instances
 type HashObject struct {
 	Class *RHash
 	Pairs map[string]Object
 }
 
-func (h *HashObject) Type() ObjectType {
-	return HASH_OBJ
+func (h *HashObject) Type() objectType {
+	return hashObj
 }
 
 func (h *HashObject) Inspect() string {
@@ -46,13 +48,13 @@ func (h *HashObject) Length() int {
 	return len(h.Pairs)
 }
 
-func InitializeHash(pairs map[string]Object) *HashObject {
-	return &HashObject{Pairs: pairs, Class: HashClass}
+func initializeHash(pairs map[string]Object) *HashObject {
+	return &HashObject{Pairs: pairs, Class: hashClass}
 }
 
 var builtinHashMethods = []*BuiltInMethod{
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				if len(args) != 1 {
 					return newError("Expect 1 arguments. got=%d", len(args))
@@ -84,7 +86,7 @@ var builtinHashMethods = []*BuiltInMethod{
 		Name: "[]",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				// First arg is index
 				// Second arg is assigned value
@@ -108,14 +110,14 @@ var builtinHashMethods = []*BuiltInMethod{
 		Name: "[]=",
 	},
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				if len(args) != 0 {
 					return newError("Expect 0 argument. got=%d", len(args))
 				}
 
 				hash := receiver.(*HashObject)
-				return InitilaizeInteger(hash.Length())
+				return initilaizeInteger(hash.Length())
 			}
 		},
 		Name: "length",
@@ -129,7 +131,7 @@ func init() {
 		methods.Set(m.Name, m)
 	}
 
-	bc := &BaseClass{Name: "Hash", Methods: methods, ClassMethods: NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}
+	bc := &BaseClass{Name: "Hash", Methods: methods, ClassMethods: NewEnvironment(), Class: classClass, SuperClass: objectClass}
 	hc := &RHash{BaseClass: bc}
-	HashClass = hc
+	hashClass = hc
 }

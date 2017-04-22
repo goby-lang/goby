@@ -4,23 +4,23 @@ import (
 	"fmt"
 )
 
-var MainObj *RObject
+var mainObj *RObject
 
-type ObjectType string
+type objectType string
 
 const (
-	INTEGER_OBJ         = "INTEGER"
-	ARRAY_OBJ           = "ARRAY"
-	HASH_OBJ            = "HASH"
-	STRING_OBJ          = "STRING"
-	BOOLEAN_OBJ         = "BOOLEAN"
-	NULL_OBJ            = "NULL"
-	RETURN_VALUE_OBJ    = "RETURN_VALUE"
-	ERROR_OBJ           = "ERROR"
-	METHOD_OBJ          = "METHOD"
-	CLASS_OBJ           = "CLASS"
-	BASE_OBJECT_OBJ     = "BASE_OBJECT"
-	BUILD_IN_METHOD_OBJ = "BUILD_IN_METHOD"
+	integerObj       = "INTEGER"
+	arrayObj         = "ARRAY"
+	hashObj          = "HASH"
+	stringObj        = "STRING"
+	booleanObj       = "BOOLEAN"
+	nullObj          = "NULL"
+	returnValueObj   = "RETURN_VALUE"
+	errorObj         = "ERROR"
+	methodObj        = "METHOD"
+	classObj         = "CLASS"
+	baseObject       = "BASE_OBJECT"
+	buildInMethodObj = "BUILD_IN_METHOD"
 )
 
 func init() {
@@ -33,9 +33,9 @@ func init() {
 }
 
 func initMainObj() {
-	builtInClasses := []Class{StringClass, BooleanClass, IntegerClass, ArrayClass, HashClass, NullClass, ClassClass}
+	builtInClasses := []Class{stringClass, booleanClass, integerClass, arrayClass, hashClass, nullClass, classClass}
 
-	obj := &RObject{Class: ObjectClass, InstanceVariables: NewEnvironment()}
+	obj := &RObject{Class: objectClass, InstanceVariables: NewEnvironment()}
 	scope := &Scope{Self: obj, Env: NewEnvironment()}
 
 	for _, class := range builtInClasses {
@@ -43,11 +43,11 @@ func initMainObj() {
 	}
 
 	obj.Scope = scope
-	MainObj = obj
+	mainObj = obj
 }
 
 type Object interface {
-	Type() ObjectType
+	Type() objectType
 	Inspect() string
 }
 
@@ -59,8 +59,8 @@ type ReturnValue struct {
 	Value Object
 }
 
-func (r *ReturnValue) Type() ObjectType {
-	return RETURN_VALUE_OBJ
+func (r *ReturnValue) Type() objectType {
+	return returnValueObj
 }
 
 func (r *ReturnValue) Inspect() string {

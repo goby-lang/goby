@@ -70,14 +70,8 @@ func writeByteCode(bytecodes, dir, filename string) {
 }
 
 func execBytecode(bytecodes string) {
-	p := vm.NewBytecodeParser()
 	v := vm.New()
-	p.VM = v
-	p.Parse(bytecodes)
-	cf := vm.NewCallFrame(v.LabelTable[vm.PROGRAM]["ProgramStart"][0])
-	cf.Self = vm.MainObj
-	v.CallFrameStack.Push(cf)
-	v.Exec()
+	v.ExecBytecodes(bytecodes)
 }
 
 func buildAST(file []byte) *ast.Program {

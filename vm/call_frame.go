@@ -5,23 +5,26 @@ import (
 	"fmt"
 )
 
-type CallFrameStack struct {
-	CallFrames []*CallFrame
-	VM         *VM
+type callFrameStack struct {
+	callFrames []*callFrame
+	vm         *VM
 }
 
-type CallFrame struct {
-	InstructionSet *InstructionSet
-	PC             int
-	EP             *CallFrame
-	Self           BaseObject
-	Local          []*Pointer
-	LPr            int
-	IsBlock        bool
-	BlockFrame     *CallFrame
+type callFrame struct {
+	instructionSet *instructionSet
+	// program counter
+	pc int
+	// environment pointer, points to the call frame we want to get locals from
+	ep         *callFrame
+	self       BaseObject
+	locals     []*Pointer
+	// local pointer
+	lPr        int
+	isBlock    bool
+	blockFrame *callFrame
 }
 
-func (cf *CallFrame) insertLCL(index, depth int, value Object) {
+func (cf *callFrame) insertLCL(index, depth int, value Object) {
 	existedLCL := cf.getLCL(index, depth)
 
 	if existedLCL != nil {
@@ -29,90 +32,70 @@ func (cf *CallFrame) insertLCL(index, depth int, value Object) {
 		return
 	}
 
-	cf.Local = append(cf.Local, nil)
-	copy(cf.Local[index:], cf.Local[index:])
-	cf.Local[index] = &Pointer{Target: value}
+	cf.locals = append(cf.locals, nil)
+	copy(cf.locals[index:], cf.locals[index:])
+	cf.locals[index] = &Pointer{Target: value}
 
-	if index >= cf.LPr {
-		cf.LPr = index + 1
+	if index >= cf.lPr {
+		cf.lPr = index + 1
 	}
 }
 
-func (cf *CallFrame) getLCL(index, depth int) *Pointer {
+func (cf *callFrame) getLCL(index, depth int) *Pointer {
 	if depth == 0 {
-		return cf.Local[index]
+		return cf.locals[index]
 	}
 
-	return cf.BlockFrame.EP.getLCL(index, depth-1)
+	return cf.blockFrame.ep.getLCL(index, depth-1)
 }
 
-func (cf *CallFrame) inspect() string {
-	if cf.EP != nil {
-		return fmt.Sprintf("Name: %s. is block: %t. EP: %d", cf.InstructionSet.Label.Name, cf.IsBlock, len(cf.EP.Local))
+func (cf *callFrame) inspect() string {
+	if cf.ep != nil {
+		return fmt.Sprintf("Name: %s. is block: %t. ep: %d", cf.instructionSet.label.name, cf.isBlock, len(cf.ep.locals))
 	}
-	return fmt.Sprintf("Name: %s. is block: %t", cf.InstructionSet.Label.Name, cf.IsBlock)
+	return fmt.Sprintf("Name: %s. is block: %t", cf.instructionSet.label.name, cf.isBlock)
 }
 
-func getLCLFromEP(cf *CallFrame, index int) *Pointer {
-	var v *Pointer
-
-	if cf.EP == nil {
-		return nil
-	}
-
-	v = cf.EP.Local[index]
-
-	if v != nil {
-		return v
-	}
-
-	if cf.EP != nil {
-		return getLCLFromEP(cf.EP, index)
-	}
-
-	return nil
-}
-
-func (cfs *CallFrameStack) Push(cf *CallFrame) {
+func (cfs *callFrameStack) push(cf *callFrame) {
 	if cf == nil {
 		panic("Callfame can't be nil!")
 	}
 
-	if len(cfs.CallFrames) <= cfs.VM.CFP {
-		cfs.CallFrames = append(cfs.CallFrames, cf)
+	if len(cfs.callFrames) <= cfs.vm.cfp {
+		cfs.callFrames = append(cfs.callFrames, cf)
 	} else {
-		cfs.CallFrames[cfs.VM.CFP] = cf
+		cfs.callFrames[cfs.vm.cfp] = cf
 	}
 
-	cfs.VM.CFP += 1
+	cfs.vm.cfp++
 }
 
-func (cfs *CallFrameStack) Pop() *CallFrame {
-	if len(cfs.CallFrames) < 1 {
+func (cfs *callFrameStack) pop() *callFrame {
+	if len(cfs.callFrames) < 1 {
 		panic("Nothing to pop!")
 	}
 
-	if cfs.VM.CFP > 0 {
-		cfs.VM.CFP -= 1
+	if cfs.vm.cfp > 0 {
+		cfs.vm.cfp--
 	}
 
-	cf := cfs.CallFrames[cfs.VM.CFP]
-	cfs.CallFrames[cfs.VM.CFP] = nil
+	cf := cfs.callFrames[cfs.vm.cfp]
+	cfs.callFrames[cfs.vm.cfp] = nil
 	return cf
 }
 
-func (cfs *CallFrameStack) Top() *CallFrame {
-	if cfs.VM.CFP > 0 {
-		return cfs.CallFrames[cfs.VM.CFP-1]
+func (cfs *callFrameStack) top() *callFrame {
+	if cfs.vm.cfp > 0 {
+		return cfs.callFrames[cfs.vm.cfp-1]
 	}
 
 	return nil
 }
 
-func (cfs *CallFrameStack) inspect() string {
+func (cfs *callFrameStack) inspect() string {
 	var out bytes.Buffer
 
-	for _, cf := range cfs.CallFrames {
+	for _, cf := range cfs.callFrames {
 		if cf != nil {
 			out.WriteString(fmt.Sprintln(cf.inspect()))
 		}
@@ -120,6 +103,7 @@ func (cfs *CallFrameStack) inspect() string {
 
 	return out.String()
 }
-func NewCallFrame(is *InstructionSet) *CallFrame {
-	return &CallFrame{Local: make([]*Pointer, 100), InstructionSet: is, PC: 0, LPr: 0}
+
+func newCallFrame(is *instructionSet) *callFrame {
+	return &callFrame{locals: make([]*Pointer, 100), instructionSet: is, pc: 0, lPr: 0}
 }

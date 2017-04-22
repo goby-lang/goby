@@ -6,108 +6,100 @@ import (
 	"strings"
 )
 
-type Operation func(vm *VM, cf *CallFrame, args ...interface{})
+type operation func(vm *VM, cf *callFrame, args ...interface{})
 
-type Action struct {
-	Name      string
-	Operation Operation
+type action struct {
+	name      string
+	operation operation
 }
 
-type Instruction struct {
-	Action *Action
+type instruction struct {
+	action *action
 	Params []interface{}
 	Line   int
 }
 
-type Label struct {
-	Name string
-	Type LabelType
+type label struct {
+	name string
+	Type labelType
 }
 
-type LabelType string
+type labelType string
 
-var labelTypes = map[string]LabelType{
-	"Def":          LABEL_DEF,
-	"DefClass":     LABEL_DEFCLASS,
-	"ProgramStart": PROGRAM,
-	"Block":        BLOCK,
+var labelTypes = map[string]labelType{
+	"Def":          LabelDef,
+	"DefClass":     LabelDefClass,
+	"ProgramStart": Program,
+	"Block":        Block,
 }
 
-type InstructionSet struct {
-	Label        *Label
-	Instructions []*Instruction
+type instructionSet struct {
+	label        *label
+	instructions []*instruction
 }
 
-type OperationType string
+type operationType string
 
 const (
-	// Label types
-	LABEL_DEF      = "DefMethod"
-	LABEL_DEFCLASS = "DefClass"
-	BLOCK          = "Block"
-	PROGRAM        = "Program"
+	// label types
+	LabelDef      = "DefMethod"
+	LabelDefClass = "DefClass"
+	Block         = "Block"
+	Program       = "Program"
 
-	// Instruction actions
-	GET_LOCAL             = "getlocal"
-	GET_CONSTANT          = "getconstant"
-	GET_INSTANCE_VARIABLE = "getinstancevariable"
-	SET_LOCAL             = "setlocal"
-	SET_CONSTANT          = "setconstant"
-	SET_INSTANCE_VARIABLE = "setinstancevariable"
-	PUT_STRING            = "putstring"
-	PUT_SELF              = "putself"
-	PUT_OBJECT            = "putobject"
-	PUT_NULL              = "putnil"
-	NEW_ARRAY             = "newarray"
-	NEW_HASH              = "newhash"
-	PLUS                  = "opt_plus"
-	MINUS                 = "opt_minus"
-	MULT                  = "opt_mult"
-	DIV                   = "opt_div"
-	GT                    = "opt_gt"
-	GE                    = "opt_ge"
-	LT                    = "opt_lt"
-	LE                    = "opt_le"
-	BRANCH_UNLESS         = "branchunless"
-	JUMP                  = "jump"
-	DEF_METHOD            = "def_method"
-	DEF_SINGLETON_METHOD  = "def_singleton_method"
-	DEF_CLASS             = "def_class"
-	SEND                  = "send"
-	INVOKE_BLOCK          = "invokeblock"
-	POP                   = "pop"
-	LEAVE                 = "leave"
+	// instruction actions
+	GetLocal            = "getlocal"
+	GetConstant         = "getconstant"
+	GetInstanceVariable = "getinstancevariable"
+	SetLocal            = "setlocal"
+	SetConstant         = "setconstant"
+	SetInstanceVariable = "setinstancevariable"
+	PutString           = "putstring"
+	PutSelf             = "putself"
+	PutObject           = "putobject"
+	PutNull             = "putnil"
+	NewArray            = "newarray"
+	NewHash             = "newhash"
+	BranchUnless        = "branchunless"
+	Jump                = "jump"
+	DefMethod           = "def_method"
+	DefSingletonMethod  = "def_singleton_method"
+	DefClass            = "def_class"
+	Send                = "send"
+	InvokeBlock         = "invokeblock"
+	Pop                 = "pop"
+	Leave               = "leave"
 )
 
-var BuiltInActions = map[OperationType]*Action{
-	POP: {
-		Name: POP,
-		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
-			vm.Stack.pop()
+var builtInActions = map[operationType]*action{
+	Pop: {
+		name: Pop,
+		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
+			vm.stack.pop()
 		},
 	},
-	PUT_OBJECT: {
-		Name: PUT_OBJECT,
-		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+	PutObject: {
+		name: PutObject,
+		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			object := initializeObject(args[0])
-			vm.Stack.push(&Pointer{Target: object})
+			vm.stack.push(&Pointer{Target: object})
 		},
 	},
-	GET_CONSTANT: {
-		Name: GET_CONSTANT,
-		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+	GetConstant: {
+		name: GetConstant,
+		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			constName := args[0].(string)
-			constant, ok := vm.Constants[constName]
+			constant, ok := vm.constants[constName]
 
 			if !ok {
 				panic(fmt.Sprintf("Can't find constant: %s", constName))
 			}
-			vm.Stack.push(constant)
+			vm.stack.push(constant)
 		},
 	},
-	GET_LOCAL: {
-		Name: GET_LOCAL,
-		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+	GetLocal: {
+		name: GetLocal,
+		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			index := args[0].(int)
 			depth := 0
 
@@ -118,37 +110,37 @@ var BuiltInActions = map[OperationType]*Action{
 			p := cf.getLCL(index, depth)
 
 			if p == nil {
-				panic(fmt.Sprintf("Local index: %d is nil. Callframe: %s", index, cf.InstructionSet.Label.Name))
+				panic(fmt.Sprintf("locals index: %d is nil. Callframe: %s", index, cf.instructionSet.label.name))
 			}
-			vm.Stack.push(p)
+			vm.stack.push(p)
 		},
 	},
-	GET_INSTANCE_VARIABLE: {
-		Name: GET_INSTANCE_VARIABLE,
-		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+	GetInstanceVariable: {
+		name: GetInstanceVariable,
+		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			variableName := args[0].(string)
-			v, ok := cf.Self.(*RObject).InstanceVariables.Get(variableName)
+			v, ok := cf.self.(*RObject).InstanceVariables.Get(variableName)
 			if !ok {
-				vm.Stack.push(&Pointer{Target: NULL})
+				vm.stack.push(&Pointer{Target: NULL})
 				return
 			}
 
 			p := &Pointer{Target: v}
-			vm.Stack.push(p)
+			vm.stack.push(p)
 		},
 	},
-	SET_INSTANCE_VARIABLE: {
-		Name: SET_INSTANCE_VARIABLE,
-		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+	SetInstanceVariable: {
+		name: SetInstanceVariable,
+		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			variableName := args[0].(string)
-			p := vm.Stack.pop()
-			cf.Self.(*RObject).InstanceVariables.Set(variableName, p.Target)
+			p := vm.stack.pop()
+			cf.self.(*RObject).InstanceVariables.Set(variableName, p.Target)
 		},
 	},
-	SET_LOCAL: {
-		Name: SET_LOCAL,
-		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
-			v := vm.Stack.pop()
+	SetLocal: {
+		name: SetLocal,
+		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
+			v := vm.stack.pop()
 			depth := 0
 
 			if len(args) >= 2 {
@@ -157,49 +149,49 @@ var BuiltInActions = map[OperationType]*Action{
 			cf.insertLCL(args[0].(int), depth, v.Target)
 		},
 	},
-	SET_CONSTANT: {
-		Name: SET_CONSTANT,
-		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+	SetConstant: {
+		name: SetConstant,
+		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			constName := args[0].(string)
-			v := vm.Stack.pop()
-			vm.Constants[constName] = v
+			v := vm.stack.pop()
+			vm.constants[constName] = v
 		},
 	},
-	NEW_ARRAY: {
-		Name: NEW_ARRAY,
-		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+	NewArray: {
+		name: NewArray,
+		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			elems := []Object{}
 
 			for i := 0; i < argCount; i++ {
-				v := vm.Stack.pop()
+				v := vm.stack.pop()
 				elems = append([]Object{v.Target}, elems...)
 			}
 
 			arr := InitializeArray(elems)
-			vm.Stack.push(&Pointer{arr})
+			vm.stack.push(&Pointer{arr})
 		},
 	},
-	NEW_HASH: {
-		Name: NEW_HASH,
-		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+	NewHash: {
+		name: NewHash,
+		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			pairs := map[string]Object{}
 
 			for i := 0; i < argCount/2; i++ {
-				v := vm.Stack.pop()
-				k := vm.Stack.pop()
+				v := vm.stack.pop()
+				k := vm.stack.pop()
 				pairs[k.Target.(*StringObject).Value] = v.Target
 			}
 
-			hash := InitializeHash(pairs)
-			vm.Stack.push(&Pointer{hash})
+			hash := initializeHash(pairs)
+			vm.stack.push(&Pointer{hash})
 		},
 	},
-	BRANCH_UNLESS: {
-		Name: BRANCH_UNLESS,
-		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
-			v := vm.Stack.pop()
+	BranchUnless: {
+		name: BranchUnless,
+		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
+			v := vm.stack.pop()
 			bool, isBool := v.Target.(*BooleanObject)
 
 			if isBool {
@@ -208,7 +200,7 @@ var BuiltInActions = map[OperationType]*Action{
 				}
 
 				line := args[0].(int)
-				cf.PC = line
+				cf.pc = line
 				return
 			}
 
@@ -216,45 +208,45 @@ var BuiltInActions = map[OperationType]*Action{
 
 			if isNull {
 				line := args[0].(int)
-				cf.PC = line
+				cf.pc = line
 				return
 			}
 		},
 	},
-	JUMP: {
-		Name: JUMP,
-		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
-			cf.PC = args[0].(int)
+	Jump: {
+		name: Jump,
+		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
+			cf.pc = args[0].(int)
 		},
 	},
-	PUT_SELF: {
-		Name: PUT_SELF,
-		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
-			vm.Stack.push(&Pointer{cf.Self})
+	PutSelf: {
+		name: PutSelf,
+		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
+			vm.stack.push(&Pointer{cf.self})
 		},
 	},
-	PUT_STRING: {
-		Name: PUT_STRING,
-		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+	PutString: {
+		name: PutString,
+		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			object := initializeObject(args[0])
-			vm.Stack.push(&Pointer{object})
+			vm.stack.push(&Pointer{object})
 		},
 	},
-	PUT_NULL: {
-		Name: PUT_NULL,
-		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
-			vm.Stack.push(&Pointer{NULL})
+	PutNull: {
+		name: PutNull,
+		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
+			vm.stack.push(&Pointer{NULL})
 		},
 	},
-	DEF_METHOD: {
-		Name: DEF_METHOD,
-		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+	DefMethod: {
+		name: DefMethod,
+		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			argCount := args[0].(int)
-			methodName := vm.Stack.pop().Target.(*StringObject).Value
+			methodName := vm.stack.pop().Target.(*StringObject).Value
 			is, _ := vm.getMethodIS(methodName)
-			method := &Method{Name: methodName, Argc: argCount, InstructionSet: is}
+			method := &Method{Name: methodName, argc: argCount, instructionSet: is}
 
-			v := vm.Stack.pop().Target
+			v := vm.stack.pop().Target
 			switch self := v.(type) {
 			case *RClass:
 				self.Methods.Set(methodName, method)
@@ -265,15 +257,15 @@ var BuiltInActions = map[OperationType]*Action{
 			}
 		},
 	},
-	DEF_SINGLETON_METHOD: {
-		Name: DEF_SINGLETON_METHOD,
-		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+	DefSingletonMethod: {
+		name: DefSingletonMethod,
+		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			argCount := args[0].(int)
-			methodName := vm.Stack.pop().Target.(*StringObject).Value
+			methodName := vm.stack.pop().Target.(*StringObject).Value
 			is, _ := vm.getMethodIS(methodName)
-			method := &Method{Name: methodName, Argc: argCount, InstructionSet: is}
+			method := &Method{Name: methodName, argc: argCount, instructionSet: is}
 
-			v := vm.Stack.pop().Target
+			v := vm.stack.pop().Target
 
 			switch self := v.(type) {
 			case *RClass:
@@ -285,12 +277,12 @@ var BuiltInActions = map[OperationType]*Action{
 			}
 		},
 	},
-	DEF_CLASS: {
-		Name: DEF_CLASS,
-		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+	DefClass: {
+		name: DefClass,
+		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			class := InitializeClass(args[0].(string))
 			classPr := &Pointer{Target: class}
-			vm.Constants[class.Name] = classPr
+			vm.constants[class.Name] = classPr
 
 			is, ok := vm.getClassIS(class.Name)
 
@@ -300,7 +292,7 @@ var BuiltInActions = map[OperationType]*Action{
 
 			if len(args) >= 2 {
 				constantName := args[1].(string)
-				constant := vm.Constants[constantName]
+				constant := vm.constants[constantName]
 				inheritedClass, ok := constant.Target.(*RClass)
 				if !ok {
 					newError("Constant %s is not a class. got=%T", constantName, constant)
@@ -309,18 +301,18 @@ var BuiltInActions = map[OperationType]*Action{
 				class.SuperClass = inheritedClass
 			}
 
-			vm.Stack.pop()
-			c := NewCallFrame(is)
-			c.Self = class
-			vm.CallFrameStack.Push(c)
-			vm.Exec()
+			vm.stack.pop()
+			c := newCallFrame(is)
+			c.self = class
+			vm.callFrameStack.push(c)
+			vm.start()
 
-			vm.Stack.push(classPr)
+			vm.stack.push(classPr)
 		},
 	},
-	SEND: {
-		Name: SEND,
-		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+	Send: {
+		name: Send,
+		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			methodName := args[0].(string)
 			argCount := args[1].(int)
 			var blockName string
@@ -334,9 +326,9 @@ var BuiltInActions = map[OperationType]*Action{
 				hasBlock = false
 			}
 
-			argPr := vm.SP - argCount
+			argPr := vm.sp - argCount
 			receiverPr := argPr - 1
-			receiver := vm.Stack.Data[receiverPr].Target.(BaseObject)
+			receiver := vm.stack.Data[receiverPr].Target.(BaseObject)
 
 			error := newError("undefined method `%s' for %s", methodName, receiver.Inspect())
 
@@ -357,7 +349,7 @@ var BuiltInActions = map[OperationType]*Action{
 				panic(error.Message)
 			}
 
-			var blockFrame *CallFrame
+			var blockFrame *callFrame
 
 			if hasBlock {
 				block, ok := vm.getBlock(blockName)
@@ -366,10 +358,10 @@ var BuiltInActions = map[OperationType]*Action{
 					panic(fmt.Sprintf("Can't find block %s", blockName))
 				}
 
-				c := NewCallFrame(block)
-				c.IsBlock = true
-				c.EP = cf
-				vm.CallFrameStack.Push(c)
+				c := newCallFrame(block)
+				c.isBlock = true
+				c.ep = cf
+				vm.callFrameStack.push(c)
 				blockFrame = c
 			}
 
@@ -385,48 +377,48 @@ var BuiltInActions = map[OperationType]*Action{
 			}
 		},
 	},
-	INVOKE_BLOCK: {
-		Name: INVOKE_BLOCK,
-		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
+	InvokeBlock: {
+		name: InvokeBlock,
+		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			argCount := args[0].(int)
-			argPr := vm.SP - argCount
+			argPr := vm.sp - argCount
 			receiverPr := argPr - 1
-			receiver := vm.Stack.Data[receiverPr].Target.(BaseObject)
+			receiver := vm.stack.Data[receiverPr].Target.(BaseObject)
 
-			if cf.BlockFrame == nil {
+			if cf.blockFrame == nil {
 				panic("Can't yield without a block")
 			}
 
-			c := NewCallFrame(cf.BlockFrame.InstructionSet)
-			c.BlockFrame = cf.BlockFrame
-			c.EP = cf.BlockFrame.EP
-			c.Self = receiver
+			c := newCallFrame(cf.blockFrame.instructionSet)
+			c.blockFrame = cf.blockFrame
+			c.ep = cf.blockFrame.ep
+			c.self = receiver
 
 			for i := 0; i < argCount; i++ {
-				c.Local[i] = vm.Stack.Data[argPr+i]
+				c.locals[i] = vm.stack.Data[argPr+i]
 			}
 
-			vm.CallFrameStack.Push(c)
-			vm.Exec()
+			vm.callFrameStack.push(c)
+			vm.start()
 
-			setReturnValueAndSP(vm, receiverPr, vm.Stack.Top())
+			setReturnValueAndSP(vm, receiverPr, vm.stack.Top())
 		},
 	},
-	LEAVE: {
-		Name: LEAVE,
-		Operation: func(vm *VM, cf *CallFrame, args ...interface{}) {
-			cf = vm.CallFrameStack.Pop()
-			cf.PC = len(cf.InstructionSet.Instructions)
+	Leave: {
+		name: Leave,
+		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
+			cf = vm.callFrameStack.pop()
+			cf.pc = len(cf.instructionSet.instructions)
 		},
 	},
 }
 
-func evalBuiltInMethod(vm *VM, receiver BaseObject, method *BuiltInMethod, receiverPr, argCount, argPr int, blockFrame *CallFrame) {
+func evalBuiltInMethod(vm *VM, receiver BaseObject, method *BuiltInMethod, receiverPr, argCount, argPr int, blockFrame *callFrame) {
 	methodBody := method.Fn(receiver)
 	args := []Object{}
 
 	for i := 0; i < argCount; i++ {
-		args = append(args, vm.Stack.Data[argPr+i].Target)
+		args = append(args, vm.stack.Data[argPr+i].Target)
 	}
 
 	evaluated := methodBody(args, nil)
@@ -441,36 +433,36 @@ func evalBuiltInMethod(vm *VM, receiver BaseObject, method *BuiltInMethod, recei
 	setReturnValueAndSP(vm, receiverPr, &Pointer{evaluated})
 }
 
-func evalMethodObject(vm *VM, receiver BaseObject, method *Method, receiverPr, argC, argPr int, blockFrame *CallFrame) {
-	c := NewCallFrame(method.InstructionSet)
-	c.Self = receiver
+func evalMethodObject(vm *VM, receiver BaseObject, method *Method, receiverPr, argC, argPr int, blockFrame *callFrame) {
+	c := newCallFrame(method.instructionSet)
+	c.self = receiver
 
 	for i := 0; i < argC; i++ {
-		c.insertLCL(i, 0, vm.Stack.Data[argPr+i].Target)
+		c.insertLCL(i, 0, vm.stack.Data[argPr+i].Target)
 	}
 
-	c.BlockFrame = blockFrame
-	vm.CallFrameStack.Push(c)
-	vm.Exec()
+	c.blockFrame = blockFrame
+	vm.callFrameStack.push(c)
+	vm.start()
 
-	setReturnValueAndSP(vm, receiverPr, vm.Stack.Top())
+	setReturnValueAndSP(vm, receiverPr, vm.stack.Top())
 }
 
 func setReturnValueAndSP(vm *VM, receiverPr int, value *Pointer) {
-	vm.Stack.Data[receiverPr] = value
-	vm.SP = receiverPr + 1
+	vm.stack.Data[receiverPr] = value
+	vm.sp = receiverPr + 1
 }
 
-func (is *InstructionSet) Define(line int, action *Action, params ...interface{}) {
-	i := &Instruction{Action: action, Params: params, Line: line}
-	is.Instructions = append(is.Instructions, i)
+func (is *instructionSet) Define(line int, a *action, params ...interface{}) {
+	i := &instruction{action: a, Params: params, Line: line}
+	is.instructions = append(is.instructions, i)
 }
 
-func (is *InstructionSet) Inspect() string {
+func (is *instructionSet) Inspect() string {
 	var out bytes.Buffer
 
-	out.WriteString(fmt.Sprintf("<%s>\n", is.Label.Name))
-	for _, i := range is.Instructions {
+	out.WriteString(fmt.Sprintf("<%s>\n", is.label.name))
+	for _, i := range is.instructions {
 		out.WriteString(i.Inspect())
 		out.WriteString("\n")
 	}
@@ -478,21 +470,21 @@ func (is *InstructionSet) Inspect() string {
 	return out.String()
 }
 
-func (i *Instruction) Inspect() string {
+func (i *instruction) Inspect() string {
 	var params []string
 
 	for _, param := range i.Params {
 		params = append(params, fmt.Sprint(param))
 	}
-	return fmt.Sprintf("%s: %s \n", i.Action.Name, strings.Join(params, ", "))
+	return fmt.Sprintf("%s: %s \n", i.action.name, strings.Join(params, ", "))
 }
 
 func initializeObject(value interface{}) Object {
 	switch v := value.(type) {
 	case int:
-		return InitilaizeInteger(int(v))
+		return initilaizeInteger(int(v))
 	case int64:
-		return InitilaizeInteger(int(v))
+		return initilaizeInteger(int(v))
 	case string:
 		switch v {
 		case "true":
@@ -502,7 +494,7 @@ func initializeObject(value interface{}) Object {
 		case "nil":
 			return NULL
 		default:
-			return InitializeString(v)
+			return initializeString(v)
 		}
 	default:
 		panic(fmt.Sprintf("Unknown data type: %T", v))

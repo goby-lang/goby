@@ -1,7 +1,7 @@
 package vm
 
 var (
-	NullClass *RNull
+	nullClass *RNull
 	NULL      *Null
 )
 
@@ -13,8 +13,8 @@ type Null struct {
 	Class *RNull
 }
 
-func (n *Null) Type() ObjectType {
-	return NULL_OBJ
+func (n *Null) Type() objectType {
+	return nullObj
 }
 
 func (n *Null) Inspect() string {
@@ -32,15 +32,15 @@ func initNull() {
 		methods.Set(m.Name, m)
 	}
 
-	baseClass := &BaseClass{Name: "Null", Methods: methods, ClassMethods: NewEnvironment(), Class: ClassClass, SuperClass: ObjectClass}
+	baseClass := &BaseClass{Name: "Null", Methods: methods, ClassMethods: NewEnvironment(), Class: classClass, SuperClass: objectClass}
 	nc := &RNull{BaseClass: baseClass}
-	NullClass = nc
-	NULL = &Null{Class: NullClass}
+	nullClass = nc
+	NULL = &Null{Class: nullClass}
 }
 
 var builtInNullMethods = []*BuiltInMethod{
 	{
-		Fn: func(receiver Object) BuiltinMethodBody {
+		Fn: func(receiver Object) builtinMethodBody {
 			return func(args []Object, block *Method) Object {
 				return TRUE
 			}
