@@ -2,12 +2,12 @@
 
 [![Join the chat at https://gitter.im/Rooby-lang/Lobby](https://badges.gitter.im/Rooby-lang/Lobby.svg)](https://gitter.im/Rooby-lang/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![Build Status](https://travis-ci.org/st0012/Rooby.svg?branch=master)](https://travis-ci.org/st0012/Rooby)
-[![Code Climate](https://codeclimate.com/github/st0012/rooby/badges/gpa.svg)](https://codeclimate.com/github/st0012/rooby)
-[![GoDoc](https://godoc.org/github.com/st0012/Rooby?status.svg)](https://godoc.org/github.com/st0012/Rooby)
-[![Go Report Card](https://goreportcard.com/badge/github.com/st0012/Rooby)](https://goreportcard.com/report/github.com/st0012/Rooby)
-[![codecov](https://codecov.io/gh/st0012/Rooby/branch/master/graph/badge.svg)](https://codecov.io/gh/st0012/Rooby)
-[![Readme Score](http://readme-score-api.herokuapp.com/score.svg?url=st0012/rooby)](http://clayallsopp.github.io/readme-score?url=st0012/rooby)
+[![Build Status](https://travis-ci.org/rooby-lang/Rooby.svg?branch=master)](https://travis-ci.org/rooby-lang/Rooby)
+[![Code Climate](https://codeclimate.com/github/rooby-lang/rooby/badges/gpa.svg)](https://codeclimate.com/github/rooby-lang/rooby)
+[![GoDoc](https://godoc.org/github.com/rooby-lang/Rooby?status.svg)](https://godoc.org/github.com/rooby-lang/Rooby)
+[![Go Report Card](https://goreportcard.com/badge/github.com/rooby-lang/Rooby)](https://goreportcard.com/report/github.com/rooby-lang/Rooby)
+[![codecov](https://codecov.io/gh/rooby-lang/Rooby/branch/master/graph/badge.svg)](https://codecov.io/gh/rooby-lang/Rooby)
+[![Readme Score](http://readme-score-api.herokuapp.com/score.svg?url=rooby-lang/rooby)](http://clayallsopp.github.io/readme-score?url=rooby-lang/rooby)
 
 Rooby is a Ruby-like object oriented language written in Go. You can think it as a simplified, compilable Ruby for now.
    
@@ -62,7 +62,7 @@ Here's my expectation about Rooby:
     
 ## TODO
 
-See [github progjects](https://github.com/st0012/Rooby/projects)
+See [github progjects](https://github.com/rooby-lang/Rooby/projects)
 
 ## Install
 
@@ -72,7 +72,7 @@ See [github progjects](https://github.com/st0012/Rooby/projects)
 4. Run following command 
 
 ```
-$ go get github.com/st0012/Rooby
+$ go get github.com/rooby-lang/Rooby
 ```
 
 ## Usage
@@ -113,7 +113,7 @@ $ rooby .....
 ## Development
 
 It will be actively developed for at least a few months. Currently I'm working on building a vm that supports some basic features in Ruby (block, module...etc.).
-And I will use [github project](https://github.com/st0012/Rooby/projects) to manage Rooby's development progress, you can check what I'm doing and about to do there.
+And I will use [github project](https://github.com/rooby-lang/Rooby/projects) to manage Rooby's development progress, you can check what I'm doing and about to do there.
 
 ## Contribute
 

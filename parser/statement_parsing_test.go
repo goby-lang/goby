@@ -1,9 +1,9 @@
 package parser
 
 import (
-	"github.com/st0012/Rooby/ast"
-	"github.com/st0012/Rooby/lexer"
-	"github.com/st0012/Rooby/token"
+	"github.com/rooby-lang/Rooby/ast"
+	"github.com/rooby-lang/Rooby/lexer"
+	"github.com/rooby-lang/Rooby/token"
 	"testing"
 )
 

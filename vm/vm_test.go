@@ -1,9 +1,9 @@
 package vm
 
 import (
-	"github.com/st0012/Rooby/bytecode"
-	"github.com/st0012/Rooby/lexer"
-	"github.com/st0012/Rooby/parser"
+	"github.com/rooby-lang/Rooby/bytecode"
+	"github.com/rooby-lang/Rooby/lexer"
+	"github.com/rooby-lang/Rooby/parser"
 	"testing"
 )
 

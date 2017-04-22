@@ -1,8 +1,8 @@
 package bytecode
 
 import (
-	"github.com/st0012/Rooby/lexer"
-	"github.com/st0012/Rooby/parser"
+	"github.com/rooby-lang/Rooby/lexer"
+	"github.com/rooby-lang/Rooby/parser"
 	"strings"
 	"testing"
 )

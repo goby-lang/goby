@@ -2,8 +2,8 @@ package parser
 
 import (
 	"fmt"
-	"github.com/st0012/Rooby/ast"
-	"github.com/st0012/Rooby/token"
+	"github.com/rooby-lang/Rooby/ast"
+	"github.com/rooby-lang/Rooby/token"
 	"strconv"
 )
 
