@@ -58,7 +58,7 @@ A lot people have questions about `rooby` since it's a new language and you may 
     
 ## TODO
 
-See [github progjects](https://github.com/rooby-lang/rooby/projects)
+See [github projects](https://github.com/rooby-lang/rooby/projects)
 
 ## Install
 
