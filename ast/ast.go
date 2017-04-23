@@ -10,6 +10,7 @@ import (
 type node interface {
 	TokenLiteral() string
 	String() string
+	Line() int
 }
 
 type Statement interface {
@@ -44,6 +45,10 @@ func (p *Program) String() string {
 
 	return out.String()
 }
+func (_ *Program) Line() int {
+	// The program always starts at line 1
+	return 1
+}
 
 type AssignStatement struct {
 	Token token.Token
@@ -67,6 +72,9 @@ func (as *AssignStatement) String() string {
 	}
 
 	return out.String()
+}
+func (as *AssignStatement)  Line() int {
+	return as.Token.Line
 }
 
 type DefStatement struct {
@@ -102,6 +110,9 @@ func (ds *DefStatement) String() string {
 
 	return out.String()
 }
+func (ds *DefStatement) Line() int {
+	return ds.Token.Line
+}
 
 type ClassStatement struct {
 	Token      token.Token
@@ -124,6 +135,9 @@ func (cs *ClassStatement) String() string {
 	out.WriteString("\n}")
 
 	return out.String()
+}
+func (cs *ClassStatement) Line() int {
+	return cs.Token.Line
 }
 
 type ReturnStatement struct {
@@ -148,6 +162,9 @@ func (rs *ReturnStatement) String() string {
 
 	return out.String()
 }
+func (rs *ReturnStatement) Line() int {
+	return rs.Token.Line
+}
 
 type ExpressionStatement struct {
 	Token      token.Token
@@ -165,6 +182,9 @@ func (es *ExpressionStatement) String() string {
 
 	return ""
 }
+func (es *ExpressionStatement) Line() int {
+	return es.Token.Line
+}
 
 type IntegerLiteral struct {
 	Token token.Token
@@ -177,6 +197,9 @@ func (il *IntegerLiteral) TokenLiteral() string {
 }
 func (il *IntegerLiteral) String() string {
 	return il.Token.Literal
+}
+func (il *IntegerLiteral) Line() int {
+	return il.Token.Line
 }
 
 type StringLiteral struct {
@@ -195,6 +218,9 @@ func (sl *StringLiteral) String() string {
 	out.WriteString(sl.Token.Literal)
 	out.WriteString("\"")
 	return out.String()
+}
+func (sl *StringLiteral) Line() int {
+	return sl.Token.Line
 }
 
 type ArrayExpression struct {
@@ -226,6 +252,9 @@ func (ae *ArrayExpression) String() string {
 	out.WriteString("]")
 	return out.String()
 }
+func (ae *ArrayExpression) Line() int {
+	return ae.Token.Line
+}
 
 type HashExpression struct {
 	Token token.Token
@@ -250,6 +279,9 @@ func (he *HashExpression) String() string {
 
 	return out.String()
 }
+func (he *HashExpression) Line() int {
+	return he.Token.Line
+}
 
 type PrefixExpression struct {
 	Token    token.Token
@@ -270,6 +302,9 @@ func (pe *PrefixExpression) String() string {
 	out.WriteString(")")
 
 	return out.String()
+}
+func (pe *PrefixExpression) Line() int {
+	return pe.Token.Line
 }
 
 type InfixExpression struct {
@@ -296,6 +331,9 @@ func (ie *InfixExpression) String() string {
 
 	return out.String()
 }
+func (ie *InfixExpression) Line() int {
+	return ie.Token.Line
+}
 
 type Boolean struct {
 	Token token.Token
@@ -308,6 +346,9 @@ func (b *Boolean) TokenLiteral() string {
 }
 func (b *Boolean) String() string {
 	return b.Token.Literal
+}
+func (b *Boolean) Line() int {
+	return b.Token.Line
 }
 
 type IfExpression struct {
@@ -340,6 +381,9 @@ func (ie *IfExpression) String() string {
 
 	return out.String()
 }
+func (ie *IfExpression) Line() int {
+	return ie.Token.Line
+}
 
 type BlockStatement struct {
 	Token      token.Token // {
@@ -358,6 +402,9 @@ func (bs *BlockStatement) String() string {
 	}
 
 	return out.String()
+}
+func (bs *BlockStatement) Line() int {
+	return bs.Token.Line
 }
 
 type CallExpression struct {
@@ -409,6 +456,9 @@ func (ce *CallExpression) String() string {
 
 	return out.String()
 }
+func (ce *CallExpression) Line() int {
+	return ce.Token.Line
+}
 
 type SelfExpression struct {
 	Token token.Token
@@ -420,6 +470,9 @@ func (se *SelfExpression) TokenLiteral() string {
 }
 func (se *SelfExpression) String() string {
 	return "self"
+}
+func (se *SelfExpression) Line() int {
+	return se.Token.Line
 }
 
 type WhileStatement struct {
@@ -442,6 +495,9 @@ func (ws *WhileStatement) String() string {
 	out.WriteString("\nend")
 
 	return out.String()
+}
+func (ws *WhileStatement) Line() int {
+	return ws.Token.Line
 }
 
 type YieldExpression struct {
@@ -467,4 +523,7 @@ func (ye *YieldExpression) String() string {
 	out.WriteString(")")
 
 	return out.String()
+}
+func (ye *YieldExpression) Line() int {
+	return ye.Token.Line
 }
