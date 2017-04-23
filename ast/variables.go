@@ -24,6 +24,9 @@ func (i *Identifier) TokenLiteral() string {
 func (i *Identifier) String() string {
 	return i.Value
 }
+func(i *Identifier) Line() int {
+	return i.Token.Line
+}
 
 type InstanceVariable struct {
 	Token token.Token
@@ -41,6 +44,9 @@ func (iv *InstanceVariable) TokenLiteral() string {
 func (iv *InstanceVariable) String() string {
 	return iv.Value
 }
+func (iv *InstanceVariable) Line() int {
+	return iv.Token.Line
+}
 
 type Constant struct {
 	Token token.Token
@@ -57,4 +63,7 @@ func (c *Constant) TokenLiteral() string {
 }
 func (c *Constant) String() string {
 	return c.Value
+}
+func (c *Constant) Line() int {
+	return c.Token.Line
 }
