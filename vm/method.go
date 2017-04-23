@@ -2,7 +2,7 @@ package vm
 
 import (
 	"bytes"
-	"github.com/rooby-lang/Rooby/ast"
+	"github.com/rooby-lang/rooby/ast"
 	"strings"
 )
 

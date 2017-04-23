@@ -2,9 +2,9 @@ package parser
 
 import (
 	"fmt"
-	"github.com/rooby-lang/Rooby/ast"
-	"github.com/rooby-lang/Rooby/lexer"
-	"github.com/rooby-lang/Rooby/token"
+	"github.com/rooby-lang/rooby/ast"
+	"github.com/rooby-lang/rooby/lexer"
+	"github.com/rooby-lang/rooby/token"
 	"strings"
 )
 

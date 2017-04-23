@@ -3,7 +3,7 @@ package bytecode
 import (
 	"bytes"
 	"fmt"
-	"github.com/rooby-lang/Rooby/ast"
+	"github.com/rooby-lang/rooby/ast"
 	"regexp"
 	"strings"
 )
