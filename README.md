@@ -1,20 +1,20 @@
-# Rooby
+# rooby
 
-[![Join the chat at https://gitter.im/Rooby-lang/Lobby](https://badges.gitter.im/Rooby-lang/Lobby.svg)](https://gitter.im/Rooby-lang/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://gitter.im/rooby-lang/Lobby](https://badges.gitter.im/rooby-lang/Lobby.svg)](https://gitter.im/rooby-lang/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![Build Status](https://travis-ci.org/rooby-lang/Rooby.svg?branch=master)](https://travis-ci.org/rooby-lang/Rooby)
-[![Code Climate](https://codeclimate.com/github/rooby-lang/Rooby/badges/gpa.svg)](https://codeclimate.com/github/rooby-lang/rooby)
-[![GoDoc](https://godoc.org/github.com/rooby-lang/Rooby?status.svg)](https://godoc.org/github.com/rooby-lang/Rooby)
-[![Go Report Card](https://goreportcard.com/badge/github.com/rooby-lang/Rooby)](https://goreportcard.com/report/github.com/rooby-lang/Rooby)
-[![codecov](https://codecov.io/gh/rooby-lang/Rooby/branch/master/graph/badge.svg)](https://codecov.io/gh/rooby-lang/Rooby)
+[![Build Status](https://travis-ci.org/rooby-lang/rooby.svg?branch=master)](https://travis-ci.org/rooby-lang/rooby)
+[![Code Climate](https://codeclimate.com/github/rooby-lang/rooby/badges/gpa.svg)](https://codeclimate.com/github/rooby-lang/rooby)
+[![GoDoc](https://godoc.org/github.com/rooby-lang/rooby?status.svg)](https://godoc.org/github.com/rooby-lang/rooby)
+[![Go Report Card](https://goreportcard.com/badge/github.com/rooby-lang/rooby)](https://goreportcard.com/report/github.com/rooby-lang/rooby)
+[![codecov](https://codecov.io/gh/rooby-lang/rooby/branch/master/graph/badge.svg)](https://codecov.io/gh/rooby-lang/rooby)
 [![Readme Score](http://readme-score-api.herokuapp.com/score.svg?url=rooby-lang/rooby)](http://clayallsopp.github.io/readme-score?url=rooby-lang/rooby)
 
-Rooby is a Ruby-like object oriented language written in Go. You can think it as a simplified, compilable Ruby for now.
+rooby is a Ruby-like object oriented language written in Go. You can think it as a simplified, compilable Ruby for now.
    
 
 ## Goal
 
-I want to build a language that focuses on developing microservices. Which should be performant and easy to write. This is why Rooby has Ruby's user friendly syntax and is written in Go.
+I want to build a language that focuses on developing microservices. Which should be performant and easy to write. This is why rooby has Ruby's user friendly syntax and is written in Go.
 
 ## Supported features
 - **Can be compiled into bytecode (with `.robc` extension)**
@@ -54,7 +54,7 @@ I want to build a language that focuses on developing microservices. Which shoul
     
 ## TODO
 
-See [github progjects](https://github.com/rooby-lang/Rooby/projects)
+See [github progjects](https://github.com/rooby-lang/rooby/projects)
 
 ## Install
 
@@ -64,12 +64,12 @@ See [github progjects](https://github.com/rooby-lang/Rooby/projects)
 4. Run following command 
 
 ```
-$ go get github.com/rooby-lang/Rooby
+$ go get github.com/rooby-lang/rooby
 ```
 
 ## Usage
 
-**Execute Rooby file using VM**
+**Execute rooby file using VM**
 
 (might see errors on sample-6 since vm hasn't support block yet)
 ``` 
@@ -77,7 +77,7 @@ $ rooby ./samples/sample-1.ro
 #=> 16
 ```
 
-**Compile Rooby code**
+**Compile rooby code**
 
 ```
 $ rooby -c ./samples/sample-1.ro
@@ -105,11 +105,11 @@ $ rooby .....
 ## Development
 
 It will be actively developed for at least a few months. Currently I'm working on building a vm that supports some basic features in Ruby (block, module...etc.).
-And I will use [github project](https://github.com/rooby-lang/Rooby/projects) to manage Rooby's development progress, you can check what I'm doing and about to do there.
+And I will use [github project](https://github.com/rooby-lang/rooby/projects) to manage rooby's development progress, you can check what I'm doing and about to do there.
 
 ## Contribute
 
-I will appreciate any feature proposal or issue report. And please contact me directly if you want to get involved. Rooby is very young so we can do a lot interesting things together.
+I will appreciate any feature proposal or issue report. And please contact me directly if you want to get involved. rooby is very young so we can do a lot interesting things together.
 
 ##  Sample snippet.
 
@@ -143,7 +143,7 @@ puts(User.sum_age(stan, john)) #=> 62
 stan.say_hi(john) #=> Stan says hi to John
 ```
 
-#### Build a stack using Rooby
+#### Build a stack using rooby
 
 ```ruby
 class Stack
