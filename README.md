@@ -16,6 +16,10 @@ rooby is a Ruby-like object oriented language written in Go. You can think it as
 
 I want to build a language that focuses on developing microservices. Which should be performant and easy to write. This is why rooby has Ruby's user friendly syntax and is written in Go.
 
+## Questions
+
+A lot people have questions about `rooby` since it's a new language and you may get confused by the way I describe it (sorry for that 😢). Here's a list of [frequently asked questions](https://github.com/rooby-lang/rooby/wiki/Frequently-asked-questions).
+
 ## Supported features
 - **Can be compiled into bytecode (with `.robc` extension)**
 - **Can evaluate bytecode directly**
