@@ -14,9 +14,11 @@ fmt-check:
 		exit 1; \
 		fi;
 
+.PHONY: build
 build:
 	go build .
 
+.PHONY: install
 install:
 	go install .
 
@@ -24,6 +26,7 @@ install:
 test:
 	./test.sh
 
+.PHONY: clean
 clean:
 	go clean .
 
