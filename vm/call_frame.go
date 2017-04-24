@@ -15,9 +15,9 @@ type callFrame struct {
 	// program counter
 	pc int
 	// environment pointer, points to the call frame we want to get locals from
-	ep         *callFrame
-	self       BaseObject
-	locals     []*Pointer
+	ep     *callFrame
+	self   BaseObject
+	locals []*Pointer
 	// local pointer
 	lPr        int
 	isBlock    bool

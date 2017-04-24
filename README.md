@@ -105,15 +105,18 @@ $ rooby ./samples/sample-3.ro
 $ rooby ./samples/sample-4.ro
 $ rooby .....
 ```
+## Development & Contribute
 
-## Development
+See the [guideline](https://github.com/rooby-lang/rooby/blob/master/CONTRIBUTING.md)
 
-It will be actively developed for at least a few months. Currently I'm working on building a vm that supports some basic features in Ruby (block, module...etc.).
-And I will use [github project](https://github.com/rooby-lang/rooby/projects) to manage rooby's development progress, you can check what I'm doing and about to do there.
+## References
 
-## Contribute
+I can't build this project with these resources, and I highly recommend you to check them out if you're interested in building your own languages
 
-I will appreciate any feature proposal or issue report. And please contact me directly if you want to get involved. rooby is very young so we can do a lot interesting things together.
+- [Write An Interpreter In Go](https://interpreterbook.com)
+- [Nand2Tetris II](https://www.coursera.org/learn/nand2tetris2/home/welcome)
+- [Ruby under a microscope](http://patshaughnessy.net/ruby-under-a-microscope)
+- [YARV's instruction table](http://www.atdot.net/yarv/insnstbl.html)
 
 ##  Sample snippet.
 
