@@ -7,7 +7,7 @@ go:
   - master
 
 script:
-  - ./test.sh
+  - make test
 
 after_script:
   - go build .
