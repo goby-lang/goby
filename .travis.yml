@@ -7,7 +7,6 @@ go:
   - master
 
 script:
-  - make fmt-check
   - make test
 
 after_script:

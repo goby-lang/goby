@@ -5,15 +5,6 @@ GOFILES := find . -name "*.go" -type f
 fmt:
 	$(GOFILES) | xargs $(GOFMT) -w
 
-.PHONY: fmt-check
-fmt-check:
-	# get all go files and run go fmt on them
-	@files=$$($(GOFILES) | xargs $(GOFMT) -l); if [ -n "$$files" ]; then \
-		echo "Please run 'make fmt' and commit the result:"; \
-		echo "$${files}"; \
-		exit 1; \
-		fi;
-
 .PHONY: build
 build:
 	go build .
