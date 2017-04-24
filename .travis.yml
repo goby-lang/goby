@@ -7,7 +7,8 @@ go:
   - master
 
 script:
-  - ./test.sh
+  - make fmt-check
+  - make test
 
 after_script:
   - go build .

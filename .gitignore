@@ -29,3 +29,4 @@ _testmain.go
 rooby
 
 *.robc
+coverage.txt
