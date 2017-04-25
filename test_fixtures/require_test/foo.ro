@@ -1,0 +1,5 @@
+class Foo
+  def self.bar
+    10
+  end
+end

@@ -65,6 +65,10 @@ func (vm *VM) ExecBytecodes(bytecodes string) {
 	vm.start()
 }
 
+func (vm *VM) GetExecResult() Object {
+	return vm.stack.Top().Target
+}
+
 func (vm *VM) initConstants() {
 	constants := make(map[string]*Pointer)
 
