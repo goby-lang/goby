@@ -198,14 +198,7 @@ var builtinArrayMethods = []*BuiltInMethod{
 				}
 
 				for _, obj := range arr.Elements {
-					c := newCallFrame(blockFrame.instructionSet)
-					c.blockFrame = blockFrame
-					c.ep = blockFrame.ep
-					c.self = blockFrame.self
-					c.locals[0] = &Pointer{obj}
-
-					vm.callFrameStack.push(c)
-					vm.start()
+					builtInMethodYield(vm, blockFrame, obj)
 				}
 				return arr
 			}
