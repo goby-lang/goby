@@ -361,6 +361,7 @@ var builtInActions = map[operationType]*action{
 				c := newCallFrame(block)
 				c.isBlock = true
 				c.ep = cf
+				c.self = cf.self
 				vm.callFrameStack.push(c)
 				blockFrame = c
 			}

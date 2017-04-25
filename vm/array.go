@@ -191,11 +191,21 @@ var builtinArrayMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-
-				argC := 1
 				arr := receiver.(*ArrayObject)
+
+				if blockFrame == nil {
+					panic("Can't yield without a block")
+				}
+
 				for _, obj := range arr.Elements {
-					evalMethodObject(block.scope.Self, block, []Object{obj}, nil)
+					c := newCallFrame(blockFrame.instructionSet)
+					c.blockFrame = blockFrame
+					c.ep = blockFrame.ep
+					c.self = blockFrame.self
+					c.locals[0] = &Pointer{obj}
+
+					vm.callFrameStack.push(c)
+					vm.start()
 				}
 				return arr
 			}
