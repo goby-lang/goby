@@ -50,13 +50,13 @@ A lot people have questions about `rooby` since it's a new language and you may 
     - Array
 - Flow control
     - If statement
-    - Haven't support `for` yet
+    - Haven't support `for` or `while` yet
 - IO
     - Just `puts` for now
     
 **(You can open an issue for any feature request)** 
     
-## TODO
+## TODO & WIP
 
 See [github projects](https://github.com/rooby-lang/rooby/projects)
 
