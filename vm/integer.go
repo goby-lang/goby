@@ -38,7 +38,8 @@ func initilaizeInteger(value int) *IntegerObject {
 var builtinIntegerMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				err := checkArgumentLen(args, integerClass, "+")
 
 				if err != nil {
@@ -60,7 +61,8 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				err := checkArgumentLen(args, integerClass, "-")
 
 				if err != nil {
@@ -82,7 +84,8 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				err := checkArgumentLen(args, integerClass, "+")
 
 				if err != nil {
@@ -104,7 +107,8 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				err := checkArgumentLen(args, integerClass, "+")
 
 				if err != nil {
@@ -126,7 +130,8 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				err := checkArgumentLen(args, integerClass, ">")
 				if err != nil {
 					return err
@@ -152,7 +157,8 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				err := checkArgumentLen(args, integerClass, "<")
 				if err != nil {
 					return err
@@ -178,7 +184,8 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				err := checkArgumentLen(args, integerClass, "==")
 
 				if err != nil {
@@ -205,7 +212,8 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				err := checkArgumentLen(args, integerClass, "!=")
 
 				if err != nil {
@@ -232,7 +240,8 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				if len(args) > 0 {
 					return &Error{Message: "Too many arguments for Integer#++"}
 				}
@@ -246,7 +255,8 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				if len(args) > 0 {
 					return &Error{Message: "Too many arguments for Integer#--"}
 				}
@@ -260,7 +270,8 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				if len(args) > 0 {
 					return &Error{Message: "Too many arguments for Integer#--"}
 				}

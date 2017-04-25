@@ -13,7 +13,7 @@ func TestLengthMethod(t *testing.T) {
 	array := generateArray(expected)
 	m := getBuiltInMethod(t, array, "length")
 
-	result := m(nil, nil).(*IntegerObject).Value
+	result := m(nil, nil, nil).(*IntegerObject).Value
 
 	if int(result) != expected {
 		t.Fatalf("Expect length method returns array's length: %d. got=%d", expected, result)
@@ -23,7 +23,7 @@ func TestLengthMethod(t *testing.T) {
 func TestPopMethod(t *testing.T) {
 	array := generateArray(5)
 	m := getBuiltInMethod(t, array, "pop")
-	last := m(nil, nil).(*IntegerObject).Value
+	last := m(nil, nil, nil).(*IntegerObject).Value
 
 	if int(last) != 5 {
 		t.Fatalf("Expect pop to return array's last  got=%d", last)
@@ -40,7 +40,7 @@ func TestPushMethod(t *testing.T) {
 
 	six := initilaizeInteger(6)
 	seven := initilaizeInteger(7)
-	m([]Object{six, seven}, nil)
+	m(nil, []Object{six, seven}, nil)
 
 	if array.Length() != 7 {
 		t.Fatalf("Expect array's length to be 7(5 + 2). got=%d", array.Length())
@@ -132,28 +132,28 @@ func TestEvalArrayIndex(t *testing.T) {
 	}
 }
 
-//func TestEachMethod(t *testing.T) {
-//	tests := []struct {
-//		input    string
-//		expected int
-//	}{
-//		{`
-//		sum = 0
-//		puts(self)
-//		[1, 2, 3, 4, 5].each do |i|
-//		  puts(self)
-//		  puts(sum)
-//		  sum = sum + i
-//		end
-//		sum
-//		`, 15},
-//	}
-//
-//	for _, tt := range tests {
-//		evaluated := testEval(t, tt.input)
-//		testIntegerObject(t, evaluated, tt.expected)
-//	}
-//}
+func TestEachMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{`
+		sum = 0
+		puts(self)
+		[1, 2, 3, 4, 5].each do |i|
+		  puts(self)
+		  puts(sum)
+		  sum = sum + i
+		end
+		sum
+		`, 15},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
 
 func generateArray(length int) *ArrayObject {
 	var elements []Object

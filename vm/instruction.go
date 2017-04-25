@@ -421,7 +421,7 @@ func evalBuiltInMethod(vm *VM, receiver BaseObject, method *BuiltInMethod, recei
 		args = append(args, vm.stack.Data[argPr+i].Target)
 	}
 
-	evaluated := methodBody(args, nil)
+	evaluated := methodBody(vm, args, blockFrame)
 
 	_, ok := receiver.(*RClass)
 	if method.Name == "new" && ok {

@@ -49,7 +49,7 @@ func (m *Method) extendEnv(args []Object) *Environment {
 	return e
 }
 
-type builtinMethodBody func([]Object, *Method) Object
+type builtinMethodBody func(*VM, []Object, *callFrame) Object
 
 // BuiltInMethod represents methods defined in go.
 type BuiltInMethod struct {
