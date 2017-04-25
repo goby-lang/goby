@@ -61,7 +61,7 @@ func TestNextToken(t *testing.T) {
 	`
 
 	tests := []struct {
-		expectedType    token.TokenType
+		expectedType    token.Type
 		expectedLiteral string
 		expectedLine    int
 	}{
@@ -83,7 +83,7 @@ func TestNextToken(t *testing.T) {
 		{token.LPAREN, "(", 5},
 		{token.IDENT, "a", 5},
 		{token.RPAREN, ")", 5},
-		{token.INSTANCE_VARIABLE, "@a", 6},
+		{token.InstanceVariable, "@a", 6},
 		{token.ASSIGN, "=", 6},
 		{token.IDENT, "a", 6},
 		{token.SEMICOLON, ";", 6},
@@ -174,7 +174,7 @@ func TestNextToken(t *testing.T) {
 		{token.SEMICOLON, ";", 33},
 
 		{token.INT, "10", 35},
-		{token.NOT_EQ, "!=", 35},
+		{token.NotEq, "!=", 35},
 		{token.INT, "9", 35},
 		{token.SEMICOLON, ";", 35},
 

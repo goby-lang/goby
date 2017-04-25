@@ -54,7 +54,7 @@ func (l *Lexer) NextToken() token.Token {
 		if l.peekChar() == '=' {
 			currentByte := l.ch
 			l.readChar()
-			tok = token.Token{Type: token.NOT_EQ, Literal: string(currentByte) + string(l.ch), Line: l.line}
+			tok = token.Token{Type: token.NotEq, Literal: string(currentByte) + string(l.ch), Line: l.line}
 		} else {
 			tok = newToken(token.BANG, l.ch, l.line)
 		}
@@ -123,7 +123,7 @@ func (l *Lexer) NextToken() token.Token {
 		} else if isInstanceVariable(l.ch) {
 			if isLetter(l.peekChar()) {
 				tok.Literal = l.readInstanceVariable()
-				tok.Type = token.INSTANCE_VARIABLE
+				tok.Type = token.InstanceVariable
 				tok.Line = l.line
 				return tok
 			}
@@ -239,6 +239,6 @@ func isInstanceVariable(ch byte) bool {
 	return ch == '@'
 }
 
-func newToken(tokenType token.TokenType, ch byte, line int) token.Token {
+func newToken(tokenType token.Type, ch byte, line int) token.Token {
 	return token.Token{Type: tokenType, Literal: string(ch), Line: line}
 }
