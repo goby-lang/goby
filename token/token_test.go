@@ -10,7 +10,7 @@ func TestLookupIdentFalse(t *testing.T) {
 }
 
 func TestLookupIdentTrue(t *testing.T) {
-	var keywords = map[string]TokenType{
+	var keywords = map[string]Type{
 		"def":    DEF,
 		"true":   TRUE,
 		"false":  FALSE,

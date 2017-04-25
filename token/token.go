@@ -1,23 +1,26 @@
 package token
 
-type TokenType string
+// Type is used to determite token type
+type Type string
 
+// Token is structure for identifying input stream of characters
 type Token struct {
-	Type    TokenType
+	Type    Type
 	Literal string
 	Line    int
 }
 
+// Literals
 const (
 	ILLEGAL = "ILLEGAL"
 	EOF     = "EOF"
 
-	CONSTANT          = "CONSTANT"
-	IDENT             = "IDENT"
-	INSTANCE_VARIABLE = "INSTANCE_VAR"
-	INT               = "INT"
-	STRING            = "STRING"
-	COMMENT           = "COMMENT"
+	CONSTANT         = "CONSTANT"
+	IDENT            = "IDENT"
+	InstanceVariable = "INSTANCE_VAR"
+	INT              = "INT"
+	STRING           = "STRING"
+	COMMENT          = "COMMENT"
 
 	ASSIGN   = "="
 	PLUS     = "+"
@@ -44,8 +47,8 @@ const (
 	LBRACKET = "["
 	RBRACKET = "]"
 
-	EQ     = "=="
-	NOT_EQ = "!="
+	EQ    = "=="
+	NotEq = "!="
 
 	CLASS  = "CLASS"
 	TRUE   = "TRUE"
@@ -61,7 +64,7 @@ const (
 	YIELD  = "YIELD"
 )
 
-var keyworkds = map[string]TokenType{
+var keywords = map[string]Type{
 	"def":    DEF,
 	"true":   TRUE,
 	"false":  FALSE,
@@ -75,8 +78,9 @@ var keyworkds = map[string]TokenType{
 	"yield":  YIELD,
 }
 
-func LookupIdent(ident string) TokenType {
-	if tok, ok := keyworkds[ident]; ok {
+// LookupIdent is used for keyword identification
+func LookupIdent(ident string) Type {
+	if tok, ok := keywords[ident]; ok {
 		return tok
 	}
 	return IDENT
