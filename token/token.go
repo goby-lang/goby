@@ -12,70 +12,70 @@ type Token struct {
 
 // Literals
 const (
-	ILLEGAL = "ILLEGAL"
+	Illegal = "ILLEGAL"
 	EOF     = "EOF"
 
-	CONSTANT         = "CONSTANT"
-	IDENT            = "IDENT"
+	Constant         = "CONSTANT"
+	Ident            = "IDENT"
 	InstanceVariable = "INSTANCE_VAR"
-	INT              = "INT"
-	STRING           = "STRING"
-	COMMENT          = "COMMENT"
+	Int              = "INT"
+	String           = "STRING"
+	Comment          = "COMMENT"
 
-	ASSIGN   = "="
-	PLUS     = "+"
-	MINUS    = "-"
-	BANG     = "!"
-	ASTERISK = "*"
-	SLASH    = "/"
-	DOT      = "."
-	INCR     = "++"
-	DECR     = "--"
+	Assign   = "="
+	Plus     = "+"
+	Minus    = "-"
+	Bang     = "!"
+	Asterisk = "*"
+	Slash    = "/"
+	Dot      = "."
+	Incr     = "++"
+	Decr     = "--"
 
 	LT = "<"
 	GT = ">"
 
-	COMMA     = ","
-	SEMICOLON = ";"
-	COLON     = ":"
-	BAR       = "|"
+	Comma     = ","
+	Semicolon = ";"
+	Colon     = ":"
+	Bar       = "|"
 
-	LPAREN   = "("
-	RPAREN   = ")"
-	LBRACE   = "{"
-	RBRACE   = "}"
-	LBRACKET = "["
-	RBRACKET = "]"
+	LParen   = "("
+	RParen   = ")"
+	LBrace   = "{"
+	RBrace   = "}"
+	LBracket = "["
+	RBracket = "]"
 
-	EQ    = "=="
+	Eq    = "=="
 	NotEq = "!="
 
-	CLASS  = "CLASS"
-	TRUE   = "TRUE"
-	FALSE  = "FALSE"
-	IF     = "IF"
-	ELSE   = "ELSE"
-	RETURN = "RETURN"
-	DEF    = "DEF"
-	SELF   = "SELF"
-	END    = "END"
-	WHILE  = "WHILE"
-	DO     = "DO"
-	YIELD  = "YIELD"
+	Class  = "CLASS"
+	True   = "TRUE"
+	False  = "FALSE"
+	If     = "IF"
+	Else   = "ELSE"
+	Return = "RETURN"
+	Def    = "DEF"
+	Self   = "SELF"
+	End    = "END"
+	While  = "WHILE"
+	Do     = "DO"
+	Yield  = "YIELD"
 )
 
 var keywords = map[string]Type{
-	"def":    DEF,
-	"true":   TRUE,
-	"false":  FALSE,
-	"if":     IF,
-	"else":   ELSE,
-	"return": RETURN,
-	"self":   SELF,
-	"end":    END,
-	"while":  WHILE,
-	"do":     DO,
-	"yield":  YIELD,
+	"def":    Def,
+	"true":   True,
+	"false":  False,
+	"if":     If,
+	"else":   Else,
+	"return": Return,
+	"self":   Self,
+	"end":    End,
+	"while":  While,
+	"do":     Do,
+	"yield":  Yield,
 }
 
 // LookupIdent is used for keyword identification
@@ -83,5 +83,5 @@ func LookupIdent(ident string) Type {
 	if tok, ok := keywords[ident]; ok {
 		return tok
 	}
-	return IDENT
+	return Ident
 }

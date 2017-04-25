@@ -148,7 +148,7 @@ func TestClassStatement(t *testing.T) {
 
 	stmt := program.Statements[0].(*ast.ClassStatement)
 
-	if stmt.Token.Type != token.CLASS {
+	if stmt.Token.Type != token.Class {
 		t.Fatalf("expect token to be CLASS. got=%T", stmt.Token)
 	}
 
@@ -186,7 +186,7 @@ func TestClassStatementWithInheritance(t *testing.T) {
 
 	stmt := program.Statements[0].(*ast.ClassStatement)
 
-	if stmt.Token.Type != token.CLASS {
+	if stmt.Token.Type != token.Class {
 		t.Fatalf("expect token to be CLASS. got=%T", stmt.Token)
 	}
 
@@ -236,7 +236,7 @@ func TestDefStatement(t *testing.T) {
 
 	secondStmt := program.Statements[1].(*ast.DefStatement)
 
-	if secondStmt.Token.Type != token.DEF {
+	if secondStmt.Token.Type != token.Def {
 		t.Fatalf("expect DefStatement's token to be 'DEF'. got=%T", secondStmt.Token.Type)
 	}
 

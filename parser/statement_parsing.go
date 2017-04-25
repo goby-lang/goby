@@ -7,27 +7,27 @@ import (
 
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
-	case token.InstanceVariable, token.IDENT, token.CONSTANT:
+	case token.InstanceVariable, token.Ident, token.Constant:
 		if p.curToken.Literal == "class" {
-			p.curToken.Type = token.CLASS
+			p.curToken.Type = token.Class
 			return p.parseStatement()
 		}
 
-		if p.peekTokenIs(token.ASSIGN) {
+		if p.peekTokenIs(token.Assign) {
 			return p.parseAssignStatement()
 		}
 
 		return p.parseExpressionStatement()
 
-	case token.RETURN:
+	case token.Return:
 		return p.parseReturnStatement()
-	case token.DEF:
+	case token.Def:
 		return p.parseDefMethodStatement()
-	case token.CLASS:
+	case token.Class:
 		return p.parseClassStatement()
-	case token.COMMENT:
+	case token.Comment:
 		return nil
-	case token.WHILE:
+	case token.While:
 		return p.parseWhileStatement()
 	default:
 		return p.parseExpressionStatement()
@@ -40,21 +40,21 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 	p.nextToken()
 
 	switch p.curToken.Type {
-	case token.IDENT:
-		if p.peekTokenIs(token.DOT) {
+	case token.Ident:
+		if p.peekTokenIs(token.Dot) {
 			stmt.Receiver = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 			p.nextToken() // .
-			if !p.expectPeek(token.IDENT) {
+			if !p.expectPeek(token.Ident) {
 				return nil
 			}
 			stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 		} else {
 			stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 		}
-	case token.SELF:
+	case token.Self:
 		stmt.Receiver = &ast.SelfExpression{Token: p.curToken}
 		p.nextToken() // .
-		if !p.expectPeek(token.IDENT) {
+		if !p.expectPeek(token.Ident) {
 			return nil
 		}
 		stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
@@ -63,13 +63,13 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 	}
 
 	// Setter method def foo=()
-	if p.peekTokenIs(token.ASSIGN) {
+	if p.peekTokenIs(token.Assign) {
 		stmt.Name.Value = stmt.Name.Value + "="
 		p.nextToken()
 	}
 	// def foo
 	if p.peekTokenAtSameLine() { // def foo(), next token is ( and at same line
-		if !p.expectPeek(token.LPAREN) {
+		if !p.expectPeek(token.LParen) {
 			return nil
 		}
 
@@ -86,7 +86,7 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 func (p *Parser) parseClassStatement() *ast.ClassStatement {
 	stmt := &ast.ClassStatement{Token: p.curToken}
 
-	if !p.expectPeek(token.CONSTANT) {
+	if !p.expectPeek(token.Constant) {
 		return nil
 	}
 
@@ -107,7 +107,7 @@ func (p *Parser) parseClassStatement() *ast.ClassStatement {
 func (p *Parser) parseParameters() []*ast.Identifier {
 	identifiers := []*ast.Identifier{}
 
-	if p.peekTokenIs(token.RPAREN) {
+	if p.peekTokenIs(token.RParen) {
 		p.nextToken()
 		return identifiers
 	} // empty params
@@ -117,14 +117,14 @@ func (p *Parser) parseParameters() []*ast.Identifier {
 	ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 	identifiers = append(identifiers, ident)
 
-	for p.peekTokenIs(token.COMMA) {
+	for p.peekTokenIs(token.Comma) {
 		p.nextToken()
 		p.nextToken()
 		identifier := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 		identifiers = append(identifiers, identifier)
 	}
 
-	if !p.expectPeek(token.RPAREN) {
+	if !p.expectPeek(token.RParen) {
 		return nil
 	}
 
@@ -135,15 +135,15 @@ func (p *Parser) parseAssignStatement() *ast.AssignStatement {
 	stmt := &ast.AssignStatement{Token: p.curToken}
 
 	switch p.curToken.Type {
-	case token.IDENT:
+	case token.Ident:
 		stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-	case token.CONSTANT:
+	case token.Constant:
 		stmt.Name = &ast.Constant{Token: p.curToken, Value: p.curToken.Literal}
 	case token.InstanceVariable:
 		stmt.Name = &ast.InstanceVariable{Token: p.curToken, Value: p.curToken.Literal}
 	}
 
-	if !p.expectPeek(token.ASSIGN) {
+	if !p.expectPeek(token.Assign) {
 		return nil
 	}
 
@@ -151,7 +151,7 @@ func (p *Parser) parseAssignStatement() *ast.AssignStatement {
 
 	stmt.Value = p.parseExpression(LOWEST)
 
-	if p.peekTokenIs(token.SEMICOLON) {
+	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
 	}
 
@@ -165,7 +165,7 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 
 	stmt.ReturnValue = p.parseExpression(LOWEST)
 
-	if p.peekTokenIs(token.SEMICOLON) {
+	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
 	}
 
@@ -176,7 +176,7 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	stmt := &ast.ExpressionStatement{Token: p.curToken}
 
 	stmt.Expression = p.parseExpression(LOWEST)
-	if p.peekTokenIs(token.SEMICOLON) {
+	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
 	}
 
@@ -190,7 +190,7 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 
 	p.nextToken()
 
-	for !p.curTokenIs(token.END) && !p.curTokenIs(token.ELSE) {
+	for !p.curTokenIs(token.End) && !p.curTokenIs(token.Else) {
 		stmt := p.parseStatement()
 		if stmt != nil {
 			bs.Statements = append(bs.Statements, stmt)
