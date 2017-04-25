@@ -7,7 +7,7 @@ import (
 
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
-	case token.INSTANCE_VARIABLE, token.IDENT, token.CONSTANT:
+	case token.InstanceVariable, token.IDENT, token.CONSTANT:
 		if p.curToken.Literal == "class" {
 			p.curToken.Type = token.CLASS
 			return p.parseStatement()
@@ -15,9 +15,10 @@ func (p *Parser) parseStatement() ast.Statement {
 
 		if p.peekTokenIs(token.ASSIGN) {
 			return p.parseAssignStatement()
-		} else {
-			return p.parseExpressionStatement()
 		}
+
+		return p.parseExpressionStatement()
+
 	case token.RETURN:
 		return p.parseReturnStatement()
 	case token.DEF:
@@ -138,7 +139,7 @@ func (p *Parser) parseAssignStatement() *ast.AssignStatement {
 		stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 	case token.CONSTANT:
 		stmt.Name = &ast.Constant{Token: p.curToken, Value: p.curToken.Literal}
-	case token.INSTANCE_VARIABLE:
+	case token.InstanceVariable:
 		stmt.Name = &ast.InstanceVariable{Token: p.curToken, Value: p.curToken.Literal}
 	}
 

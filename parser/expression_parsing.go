@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-var precedence = map[token.TokenType]int{
+var precedence = map[token.Type]int{
 	token.EQ:       EQUALS,
-	token.NOT_EQ:   EQUALS,
+	token.NotEq:    EQUALS,
 	token.LT:       LESSGREATER,
 	token.GT:       LESSGREATER,
 	token.PLUS:     SUM,
@@ -23,6 +23,7 @@ var precedence = map[token.TokenType]int{
 	token.LPAREN:   CALL,
 }
 
+// Constants for denoting precedence
 const (
 	_ int = iota
 	LOWEST

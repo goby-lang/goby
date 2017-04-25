@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// Parser represents lexical analyzer struct
 type Parser struct {
 	l      *lexer.Lexer
 	errors []string
@@ -15,10 +16,11 @@ type Parser struct {
 	curToken  token.Token
 	peekToken token.Token
 
-	prefixParseFns map[token.TokenType]prefixParseFn
-	infixParseFns  map[token.TokenType]infixParseFn
+	prefixParseFns map[token.Type]prefixParseFn
+	infixParseFns  map[token.Type]infixParseFn
 }
 
+// New initializes a parser and returns it
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
 		l:      l,
@@ -29,10 +31,10 @@ func New(l *lexer.Lexer) *Parser {
 	p.nextToken()
 	p.nextToken()
 
-	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
+	p.prefixParseFns = make(map[token.Type]prefixParseFn)
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
 	p.registerPrefix(token.CONSTANT, p.parseConstant)
-	p.registerPrefix(token.INSTANCE_VARIABLE, p.parseInstanceVariable)
+	p.registerPrefix(token.InstanceVariable, p.parseInstanceVariable)
 	p.registerPrefix(token.INT, p.parseIntegerLiteral)
 	p.registerPrefix(token.STRING, p.parseStringLiteral)
 	p.registerPrefix(token.TRUE, p.parseBooleanLiteral)
@@ -47,13 +49,13 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.SEMICOLON, p.parseSemicolon)
 	p.registerPrefix(token.YIELD, p.parseYieldExpression)
 
-	p.infixParseFns = make(map[token.TokenType]infixParseFn)
+	p.infixParseFns = make(map[token.Type]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
 	p.registerInfix(token.MINUS, p.parseInfixExpression)
 	p.registerInfix(token.SLASH, p.parseInfixExpression)
 	p.registerInfix(token.EQ, p.parseInfixExpression)
 	p.registerInfix(token.ASTERISK, p.parseInfixExpression)
-	p.registerInfix(token.NOT_EQ, p.parseInfixExpression)
+	p.registerInfix(token.NotEq, p.parseInfixExpression)
 	p.registerInfix(token.LT, p.parseInfixExpression)
 	p.registerInfix(token.GT, p.parseInfixExpression)
 	p.registerInfix(token.DOT, p.parseCallExpression)
@@ -65,6 +67,7 @@ func New(l *lexer.Lexer) *Parser {
 	return p
 }
 
+// ParseProgram update program statements and return program
 func (p *Parser) ParseProgram() *ast.Program {
 	program := &ast.Program{}
 	program.Statements = []ast.Statement{}
@@ -84,10 +87,12 @@ func (p *Parser) parseSemicolon() ast.Expression {
 	return nil
 }
 
+// Errors return parser errors
 func (p *Parser) Errors() []string {
 	return p.errors
 }
 
+// CheckErrors is checking for parser's errors existance
 func (p *Parser) CheckErrors() {
 	errors := p.Errors()
 	if len(errors) == 0 {
