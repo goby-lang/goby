@@ -41,7 +41,8 @@ func initNull() {
 var builtInNullMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				return TRUE
 			}
 		},

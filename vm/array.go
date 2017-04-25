@@ -85,7 +85,7 @@ func init() {
 var builtinArrayMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				if len(args) != 1 {
 					return newError("Expect 1 arguments. got=%d", len(args))
 				}
@@ -115,7 +115,8 @@ var builtinArrayMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				// First arg is index
 				// Second arg is assigned value
 				if len(args) != 2 {
@@ -151,7 +152,8 @@ var builtinArrayMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				if len(args) != 0 {
 					return newError("Expect 0 argument. got=%d", len(args))
 				}
@@ -164,7 +166,8 @@ var builtinArrayMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				if len(args) != 0 {
 					return newError("Expect 0 argument. got=%d", len(args))
 				}
@@ -177,23 +180,29 @@ var builtinArrayMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				arr := receiver.(*ArrayObject)
 				return arr.Push(args)
 			}
 		},
 		Name: "push",
 	},
-	//{
-	//	Fn: func(receiver Object) BuiltinMethodBody {
-	//		return func(args []Object, block *Method) Object {
-	//			arr := receiver.(*ArrayObject)
-	//			for _, obj := range arr.Elements {
-	//				evalMethodObject(block.scope.self, block, []Object{obj}, nil)
-	//			}
-	//			return arr
-	//		}
-	//	},
-	//	Name: "each",
-	//},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				arr := receiver.(*ArrayObject)
+
+				if blockFrame == nil {
+					panic("Can't yield without a block")
+				}
+
+				for _, obj := range arr.Elements {
+					builtInMethodYield(vm, blockFrame, obj)
+				}
+				return arr
+			}
+		},
+		Name: "each",
+	},
 }

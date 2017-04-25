@@ -52,7 +52,8 @@ func initializeString(value string) *StringObject {
 var builtinStringMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				err := checkArgumentLen(args, stringClass, "+")
 
 				if err != nil {
@@ -74,7 +75,8 @@ var builtinStringMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				err := checkArgumentLen(args, stringClass, ">")
 				if err != nil {
 					return err
@@ -100,7 +102,8 @@ var builtinStringMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				err := checkArgumentLen(args, stringClass, "<")
 				if err != nil {
 					return err
@@ -126,7 +129,8 @@ var builtinStringMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				err := checkArgumentLen(args, stringClass, "==")
 
 				if err != nil {
@@ -153,7 +157,8 @@ var builtinStringMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				err := checkArgumentLen(args, stringClass, "!=")
 
 				if err != nil {

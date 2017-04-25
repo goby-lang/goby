@@ -49,7 +49,7 @@ func (m *Method) extendEnv(args []Object) *Environment {
 	return e
 }
 
-type builtinMethodBody func([]Object, *Method) Object
+type builtinMethodBody func(*VM, []Object, *callFrame) Object
 
 // BuiltInMethod represents methods defined in go.
 type BuiltInMethod struct {
@@ -63,4 +63,19 @@ func (bim *BuiltInMethod) Type() objectType {
 
 func (bim *BuiltInMethod) Inspect() string {
 	return bim.Name
+}
+
+// builtInMethodYield is like invokeblock instruction for built in methods
+func builtInMethodYield(vm *VM, blockFrame *callFrame, args...Object) {
+	c := newCallFrame(blockFrame.instructionSet)
+	c.blockFrame = blockFrame
+	c.ep = blockFrame.ep
+	c.self = blockFrame.self
+
+	for i := 0; i < len(args); i ++ {
+		c.locals[0] = &Pointer{args[i]}
+	}
+
+	vm.callFrameStack.push(c)
+	vm.start()
 }
