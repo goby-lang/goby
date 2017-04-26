@@ -137,6 +137,8 @@ func (g *Generator) compileStatement(is *instructionSet, statement ast.Statement
 	case *ast.ReturnStatement:
 		g.compileExpression(is, stmt.ReturnValue, scope, table)
 		g.endInstructions(is)
+	case *ast.RequireRelativeStatement:
+		is.define("require_relative", stmt.Filepath)
 	}
 }
 
