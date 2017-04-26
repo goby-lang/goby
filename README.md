@@ -51,6 +51,8 @@ A lot people have questions about `rooby` since it's a new language and you may 
 - Flow control
     - If statement
     - Haven't support `for` or `while` yet
+- Import other files
+    - require_relative
 - IO
     - Just `puts` for now
     

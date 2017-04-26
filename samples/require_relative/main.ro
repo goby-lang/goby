@@ -1,0 +1,3 @@
+require_relative "./foo"
+
+puts(Foo.bar(5)) #=> 50
