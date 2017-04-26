@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
+	"github.com/rooby-lang/rooby/bytecode"
+	"github.com/rooby-lang/rooby/parser"
+	"github.com/rooby-lang/rooby/vm"
 	"io/ioutil"
 	"testing"
-	"github.com/rooby-lang/rooby/bytecode"
-	"github.com/rooby-lang/rooby/vm"
 )
 
 func TestRequireFile(t *testing.T) {
@@ -22,7 +24,7 @@ func execFile(filename string) vm.Object {
 		panic(err)
 	}
 
-	program := buildAST(file)
+	program := parser.BuildAST(file)
 	g := bytecode.NewGenerator(program)
 	bytecodes := g.GenerateByteCode(program)
 	v := vm.New()
