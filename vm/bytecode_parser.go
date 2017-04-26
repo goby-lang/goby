@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"github.com/rooby-lang/rooby/bytecode"
 	"github.com/rooby-lang/rooby/parser"
+	"path"
 )
 
 // bytecodeParser is responsible for parsing bytecodes
@@ -101,6 +102,8 @@ func (p *bytecodeParser) parseInstruction(is *instructionSet, line string) {
 		params = append(params, text)
 	} else if act == "require_relative" {
 		filepath := tokens[2]
+		filepath = path.Join(p.vm.fileDir, filepath)
+
 		file, err := ioutil.ReadFile(filepath + ".ro")
 
 		if err != nil {

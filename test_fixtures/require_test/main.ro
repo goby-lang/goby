@@ -1,3 +1,3 @@
-require_relative "/Users/stanlow/projects/go/src/github.com/rooby-lang/rooby/test_fixtures/require_test/foo"
+require_relative "./foo"
 
 Foo.bar

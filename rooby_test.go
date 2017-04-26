@@ -6,17 +6,26 @@ import (
 	"github.com/rooby-lang/rooby/vm"
 	"io/ioutil"
 	"testing"
+	"runtime"
+	"path"
 )
 
 func TestRequireFile(t *testing.T) {
-	filename := "require_test/main.ro"
-	result := execFile(filename)
+	filename := "main.ro"
+	fileDir := "require_test"
+	result := execFile(fileDir, filename)
 
 	testIntegerObject(t, result, 10)
 }
 
-func execFile(filename string) vm.Object {
-	filepath := "./test_fixtures/" + filename
+func execFile(fileDir, filename string) vm.Object {
+	_, currentPath, _, _ := runtime.Caller(0)
+	// dir is now project root: rooby/
+	dir, _ := path.Split(currentPath)
+	// dir is now rooby/test_fixtures/FILE_DIR
+	dir = path.Join(dir, "./test_fixtures/", fileDir)
+
+	filepath := path.Join(dir, filename)
 	file, err := ioutil.ReadFile(filepath)
 
 	if err != nil {
@@ -26,7 +35,8 @@ func execFile(filename string) vm.Object {
 	program := parser.BuildAST(file)
 	g := bytecode.NewGenerator(program)
 	bytecodes := g.GenerateByteCode(program)
-	v := vm.New()
+
+	v := vm.New(dir)
 	v.ExecBytecodes(bytecodes)
 	return v.GetExecResult()
 }

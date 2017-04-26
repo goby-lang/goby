@@ -26,6 +26,8 @@ type VM struct {
 	classISTable *isIndexTable
 	// block instruction set table
 	blockList *isIndexTable
+
+	fileDir string
 }
 
 type isIndexTable struct {
@@ -38,7 +40,7 @@ type stack struct {
 }
 
 // New initializes a vm to initialize state and returns it.
-func New() *VM {
+func New(fileDir string) *VM {
 	s := &stack{}
 	cfs := &callFrameStack{callFrames: []*callFrame{}}
 	vm := &VM{stack: s, callFrameStack: cfs, sp: 0, cfp: 0}
@@ -50,7 +52,7 @@ func New() *VM {
 	vm.classISTable = &isIndexTable{Data: make(map[string]int)}
 	vm.blockList = &isIndexTable{Data: make(map[string]int)}
 	vm.labelTables = make(map[labelType]map[string][]*instructionSet)
-
+	vm.fileDir = fileDir
 	return vm
 }
 
