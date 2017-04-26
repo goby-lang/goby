@@ -100,7 +100,7 @@ func (p *bytecodeParser) parseInstruction(is *instructionSet, line string) {
 	if act == PutString {
 		text := strings.Split(line, "\"")[1]
 		params = append(params, text)
-	} else if act == "require_relative" {
+	} else if act == RequireRelative {
 		filepath := tokens[2]
 		filepath = path.Join(p.vm.fileDir, filepath)
 

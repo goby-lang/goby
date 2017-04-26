@@ -51,7 +51,12 @@ func New(fileDir string) *VM {
 	vm.methodISTable = &isIndexTable{Data: make(map[string]int)}
 	vm.classISTable = &isIndexTable{Data: make(map[string]int)}
 	vm.blockList = &isIndexTable{Data: make(map[string]int)}
-	vm.labelTables = make(map[labelType]map[string][]*instructionSet)
+	vm.labelTables = map[labelType]map[string][]*instructionSet{
+		LabelDef:      make(map[string][]*instructionSet),
+		LabelDefClass: make(map[string][]*instructionSet),
+		Block:         make(map[string][]*instructionSet),
+		Program:       make(map[string][]*instructionSet),
+	}
 	vm.fileDir = fileDir
 	return vm
 }
@@ -62,7 +67,14 @@ func (vm *VM) ExecBytecodes(bytecodes string) {
 	p.vm = vm
 	p.parseBytecode(bytecodes)
 
-	vm.labelTables = p.labelTable
+	// Keep update label table after parsed new files.
+	// TODO: Find more efficient way to do this.
+	for labelType, table := range p.labelTable {
+		for labelName, is := range table {
+			vm.labelTables[labelType][labelName] = is
+		}
+	}
+
 	cf := newCallFrame(vm.labelTables[Program]["ProgramStart"][0])
 	cf.self = mainObj
 	vm.callFrameStack.push(cf)
