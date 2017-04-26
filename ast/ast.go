@@ -68,6 +68,7 @@ func (as *AssignStatement) String() string {
 	return out.String()
 }
 
+// RequireRelativeStatement is used to represent 'require_relative' and contains the required file's relative path
 type RequireRelativeStatement struct {
 	Token    token.Token
 	Filepath string
