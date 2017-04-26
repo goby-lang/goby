@@ -10,12 +10,12 @@ import (
 	"path"
 )
 
-func TestRequireFile(t *testing.T) {
+func TestRequireRelative(t *testing.T) {
 	filename := "main.ro"
 	fileDir := "require_test"
 	result := execFile(fileDir, filename)
 
-	testIntegerObject(t, result, 10)
+	testIntegerObject(t, result, 50)
 }
 
 func execFile(fileDir, filename string) vm.Object {
