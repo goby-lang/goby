@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// Parser represents lexical analyzer struct
 type Parser struct {
 	l      *lexer.Lexer
 	errors []string
@@ -15,10 +16,11 @@ type Parser struct {
 	curToken  token.Token
 	peekToken token.Token
 
-	prefixParseFns map[token.TokenType]prefixParseFn
-	infixParseFns  map[token.TokenType]infixParseFn
+	prefixParseFns map[token.Type]prefixParseFn
+	infixParseFns  map[token.Type]infixParseFn
 }
 
+// New initializes a parser and returns it
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
 		l:      l,
@@ -29,42 +31,43 @@ func New(l *lexer.Lexer) *Parser {
 	p.nextToken()
 	p.nextToken()
 
-	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
-	p.registerPrefix(token.IDENT, p.parseIdentifier)
-	p.registerPrefix(token.CONSTANT, p.parseConstant)
-	p.registerPrefix(token.INSTANCE_VARIABLE, p.parseInstanceVariable)
-	p.registerPrefix(token.INT, p.parseIntegerLiteral)
-	p.registerPrefix(token.STRING, p.parseStringLiteral)
-	p.registerPrefix(token.TRUE, p.parseBooleanLiteral)
-	p.registerPrefix(token.FALSE, p.parseBooleanLiteral)
-	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
-	p.registerPrefix(token.BANG, p.parsePrefixExpression)
-	p.registerPrefix(token.LPAREN, p.parseGroupedExpression)
-	p.registerPrefix(token.IF, p.parseIfExpression)
-	p.registerPrefix(token.SELF, p.parseSelfExpression)
-	p.registerPrefix(token.LBRACKET, p.parseArrayExpression)
-	p.registerPrefix(token.LBRACE, p.parseHashExpression)
-	p.registerPrefix(token.SEMICOLON, p.parseSemicolon)
-	p.registerPrefix(token.YIELD, p.parseYieldExpression)
+	p.prefixParseFns = make(map[token.Type]prefixParseFn)
+	p.registerPrefix(token.Ident, p.parseIdentifier)
+	p.registerPrefix(token.Constant, p.parseConstant)
+	p.registerPrefix(token.InstanceVariable, p.parseInstanceVariable)
+	p.registerPrefix(token.Int, p.parseIntegerLiteral)
+	p.registerPrefix(token.String, p.parseStringLiteral)
+	p.registerPrefix(token.True, p.parseBooleanLiteral)
+	p.registerPrefix(token.False, p.parseBooleanLiteral)
+	p.registerPrefix(token.Minus, p.parsePrefixExpression)
+	p.registerPrefix(token.Bang, p.parsePrefixExpression)
+	p.registerPrefix(token.LParen, p.parseGroupedExpression)
+	p.registerPrefix(token.If, p.parseIfExpression)
+	p.registerPrefix(token.Self, p.parseSelfExpression)
+	p.registerPrefix(token.LBracket, p.parseArrayExpression)
+	p.registerPrefix(token.LBrace, p.parseHashExpression)
+	p.registerPrefix(token.Semicolon, p.parseSemicolon)
+	p.registerPrefix(token.Yield, p.parseYieldExpression)
 
-	p.infixParseFns = make(map[token.TokenType]infixParseFn)
-	p.registerInfix(token.PLUS, p.parseInfixExpression)
-	p.registerInfix(token.MINUS, p.parseInfixExpression)
-	p.registerInfix(token.SLASH, p.parseInfixExpression)
-	p.registerInfix(token.EQ, p.parseInfixExpression)
-	p.registerInfix(token.ASTERISK, p.parseInfixExpression)
-	p.registerInfix(token.NOT_EQ, p.parseInfixExpression)
+	p.infixParseFns = make(map[token.Type]infixParseFn)
+	p.registerInfix(token.Plus, p.parseInfixExpression)
+	p.registerInfix(token.Minus, p.parseInfixExpression)
+	p.registerInfix(token.Slash, p.parseInfixExpression)
+	p.registerInfix(token.Eq, p.parseInfixExpression)
+	p.registerInfix(token.Asterisk, p.parseInfixExpression)
+	p.registerInfix(token.NotEq, p.parseInfixExpression)
 	p.registerInfix(token.LT, p.parseInfixExpression)
 	p.registerInfix(token.GT, p.parseInfixExpression)
-	p.registerInfix(token.DOT, p.parseCallExpression)
-	p.registerInfix(token.LPAREN, p.parseCallExpression)
-	p.registerInfix(token.LBRACKET, p.parseArrayIndexExpression)
-	p.registerInfix(token.INCR, p.parsePostfixExpression)
-	p.registerInfix(token.DECR, p.parsePostfixExpression)
+	p.registerInfix(token.Dot, p.parseCallExpression)
+	p.registerInfix(token.LParen, p.parseCallExpression)
+	p.registerInfix(token.LBracket, p.parseArrayIndexExpression)
+	p.registerInfix(token.Incr, p.parsePostfixExpression)
+	p.registerInfix(token.Decr, p.parsePostfixExpression)
 
 	return p
 }
 
+// ParseProgram update program statements and return program
 func (p *Parser) ParseProgram() *ast.Program {
 	program := &ast.Program{}
 	program.Statements = []ast.Statement{}
@@ -84,10 +87,12 @@ func (p *Parser) parseSemicolon() ast.Expression {
 	return nil
 }
 
+// Errors return parser errors
 func (p *Parser) Errors() []string {
 	return p.errors
 }
 
+// CheckErrors is checking for parser's errors existance
 func (p *Parser) CheckErrors() {
 	errors := p.Errors()
 	if len(errors) == 0 {
