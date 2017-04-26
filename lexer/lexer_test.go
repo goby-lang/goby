@@ -58,6 +58,8 @@ func TestNextToken(t *testing.T) {
 	  puts(i)
 	  i++
 	end
+
+	require_relative "foo"
 	`
 
 	tests := []struct {
@@ -223,7 +225,10 @@ func TestNextToken(t *testing.T) {
 		{token.Incr, "++", 50},
 		{token.End, "end", 51},
 
-		{token.EOF, "", 52},
+		{token.RequireRelative, "require_relative", 53},
+		{token.String, "foo", 53},
+
+		{token.EOF, "", 54},
 	}
 
 	l := New(input)

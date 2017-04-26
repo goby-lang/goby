@@ -281,6 +281,27 @@ func TestDefStatementWithYield(t *testing.T) {
 	}
 }
 
+func TestRequireRelativeStatement(t *testing.T) {
+	input := `
+	require_relative "foo"
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt, ok := program.Statements[0].(*ast.RequireRelativeStatement)
+
+	if !ok {
+		t.Fatalf("Expect stmt to be RequireRelativeStatement. got=%T", program.Statements[0])
+	}
+
+	if stmt.Filepath != "foo" {
+		t.Fatalf("Expect stmt's filepath to be \"foo\". got=%s", stmt.Filepath)
+	}
+}
+
 func TestWhileStatement(t *testing.T) {
 	input := `
 	while i < a.length
