@@ -3,9 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/rooby-lang/rooby/ast"
 	"github.com/rooby-lang/rooby/bytecode"
-	"github.com/rooby-lang/rooby/lexer"
 	"github.com/rooby-lang/rooby/parser"
 	"github.com/rooby-lang/rooby/vm"
 	"io/ioutil"
@@ -38,21 +36,20 @@ func main() {
 
 	switch fileExt {
 	case "ro":
-		program := buildAST(file)
+		program := parser.BuildAST(file)
 
 		g := bytecode.NewGenerator(program)
 		bytecodes := g.GenerateByteCode(program)
 
 		if !*compileOptionPtr {
-			execBytecode(bytecodes)
+			execBytecode(bytecodes, dir)
 			return
 		}
 
 		writeByteCode(bytecodes, dir, filename)
-
 	case "robc":
 		bytecodes := string(file)
-		execBytecode(bytecodes)
+		execBytecode(bytecodes, dir)
 	default:
 		fmt.Printf("Unknown file extension: %s", fileExt)
 	}
@@ -68,19 +65,9 @@ func writeByteCode(bytecodes, dir, filename string) {
 	f.WriteString(bytecodes)
 }
 
-func execBytecode(bytecodes string) {
-	v := vm.New()
+func execBytecode(bytecodes, fileDir string) {
+	v := vm.New(fileDir)
 	v.ExecBytecodes(bytecodes)
-}
-
-func buildAST(file []byte) *ast.Program {
-	input := string(file)
-	l := lexer.New(input)
-	p := parser.New(l)
-	program := p.ParseProgram()
-	p.CheckErrors()
-
-	return program
 }
 
 func check(e error) {

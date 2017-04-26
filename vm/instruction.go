@@ -69,6 +69,8 @@ const (
 	InvokeBlock         = "invokeblock"
 	Pop                 = "pop"
 	Leave               = "leave"
+
+	RequireRelative = "require_relative"
 )
 
 var builtInActions = map[operationType]*action{

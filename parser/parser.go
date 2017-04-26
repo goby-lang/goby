@@ -20,6 +20,17 @@ type Parser struct {
 	infixParseFns  map[token.Type]infixParseFn
 }
 
+// BuildAST tokenizes and parses given file to build AST
+func BuildAST(file []byte) *ast.Program {
+	input := string(file)
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	p.CheckErrors()
+
+	return program
+}
+
 // New initializes a parser and returns it
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{

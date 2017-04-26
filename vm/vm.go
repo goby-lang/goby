@@ -26,6 +26,8 @@ type VM struct {
 	classISTable *isIndexTable
 	// block instruction set table
 	blockList *isIndexTable
+
+	fileDir string
 }
 
 type isIndexTable struct {
@@ -38,7 +40,7 @@ type stack struct {
 }
 
 // New initializes a vm to initialize state and returns it.
-func New() *VM {
+func New(fileDir string) *VM {
 	s := &stack{}
 	cfs := &callFrameStack{callFrames: []*callFrame{}}
 	vm := &VM{stack: s, callFrameStack: cfs, sp: 0, cfp: 0}
@@ -49,20 +51,39 @@ func New() *VM {
 	vm.methodISTable = &isIndexTable{Data: make(map[string]int)}
 	vm.classISTable = &isIndexTable{Data: make(map[string]int)}
 	vm.blockList = &isIndexTable{Data: make(map[string]int)}
-
+	vm.labelTables = map[labelType]map[string][]*instructionSet{
+		LabelDef:      make(map[string][]*instructionSet),
+		LabelDefClass: make(map[string][]*instructionSet),
+		Block:         make(map[string][]*instructionSet),
+		Program:       make(map[string][]*instructionSet),
+	}
+	vm.fileDir = fileDir
 	return vm
 }
 
 // ExecBytecodes accepts a sequence of bytecodes and use vm to evaluate them.
 func (vm *VM) ExecBytecodes(bytecodes string) {
 	p := newBytecodeParser()
+	p.vm = vm
 	p.parseBytecode(bytecodes)
-	// bytecodeParser generates and holds a label table during parsing
-	vm.labelTables = p.labelTable
+
+	// Keep update label table after parsed new files.
+	// TODO: Find more efficient way to do this.
+	for labelType, table := range p.labelTable {
+		for labelName, is := range table {
+			vm.labelTables[labelType][labelName] = is
+		}
+	}
+
 	cf := newCallFrame(vm.labelTables[Program]["ProgramStart"][0])
 	cf.self = mainObj
 	vm.callFrameStack.push(cf)
 	vm.start()
+}
+
+// GetExecResult returns stack's top most value. Normally it's used in tests.
+func (vm *VM) GetExecResult() Object {
+	return vm.stack.Top().Target
 }
 
 func (vm *VM) initConstants() {

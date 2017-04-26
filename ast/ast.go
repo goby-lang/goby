@@ -55,7 +55,6 @@ func (as *AssignStatement) statementNode() {}
 func (as *AssignStatement) TokenLiteral() string {
 	return as.Token.Literal
 }
-
 func (as *AssignStatement) String() string {
 	var out bytes.Buffer
 
@@ -67,6 +66,20 @@ func (as *AssignStatement) String() string {
 	}
 
 	return out.String()
+}
+
+// RequireRelativeStatement is used to represent 'require_relative' and contains the required file's relative path
+type RequireRelativeStatement struct {
+	Token    token.Token
+	Filepath string
+}
+
+func (rrs *RequireRelativeStatement) statementNode() {}
+func (rrs *RequireRelativeStatement) TokenLiteral() string {
+	return rrs.Token.Literal
+}
+func (rrs *RequireRelativeStatement) String() string {
+	return fmt.Sprintf("require_relative \"%s\"", rrs.Filepath)
 }
 
 type DefStatement struct {

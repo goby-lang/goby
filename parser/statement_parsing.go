@@ -29,9 +29,21 @@ func (p *Parser) parseStatement() ast.Statement {
 		return nil
 	case token.While:
 		return p.parseWhileStatement()
+	case token.RequireRelative:
+		return p.parseRequireRelativeStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
+}
+
+
+func (p *Parser) parseRequireRelativeStatement() *ast.RequireRelativeStatement {
+	stmt := &ast.RequireRelativeStatement{Token: p.curToken}
+	p.nextToken()
+
+	filepath := p.curToken.Literal
+	stmt.Filepath = filepath
+	return stmt
 }
 
 func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
