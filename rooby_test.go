@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/rooby-lang/rooby/bytecode"
 	"github.com/rooby-lang/rooby/parser"
 	"github.com/rooby-lang/rooby/vm"

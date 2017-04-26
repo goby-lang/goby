@@ -49,6 +49,7 @@ func New() *VM {
 	vm.methodISTable = &isIndexTable{Data: make(map[string]int)}
 	vm.classISTable = &isIndexTable{Data: make(map[string]int)}
 	vm.blockList = &isIndexTable{Data: make(map[string]int)}
+	vm.labelTables = make(map[labelType]map[string][]*instructionSet)
 
 	return vm
 }
@@ -56,8 +57,9 @@ func New() *VM {
 // ExecBytecodes accepts a sequence of bytecodes and use vm to evaluate them.
 func (vm *VM) ExecBytecodes(bytecodes string) {
 	p := newBytecodeParser()
+	p.vm = vm
 	p.parseBytecode(bytecodes)
-	// bytecodeParser generates and holds a label table during parsing
+
 	vm.labelTables = p.labelTable
 	cf := newCallFrame(vm.labelTables[Program]["ProgramStart"][0])
 	cf.self = mainObj

@@ -5,12 +5,16 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"io/ioutil"
+	"github.com/rooby-lang/rooby/bytecode"
+	"github.com/rooby-lang/rooby/parser"
 )
 
 // bytecodeParser is responsible for parsing bytecodes
 type bytecodeParser struct {
 	line       int
 	labelTable map[labelType]map[string][]*instructionSet
+	vm *VM
 }
 
 // newBytecodeParser initializes bytecodeParser and its label table then returns it
@@ -92,9 +96,22 @@ func (p *bytecodeParser) parseInstruction(is *instructionSet, line string) {
 	ln, _ := strconv.ParseInt(lineNum, 0, 64)
 	action := builtInActions[operationType(act)]
 
-	if act == "putstring" {
+	if act == PutString {
 		text := strings.Split(line, "\"")[1]
 		params = append(params, text)
+	} else if act == "require_relative" {
+		filepath := tokens[2]
+		file, err := ioutil.ReadFile(filepath + ".ro")
+
+		if err != nil {
+			panic(err)
+		}
+
+		program := parser.BuildAST(file)
+		g := bytecode.NewGenerator(program)
+		bytecodes := g.GenerateByteCode(program)
+		p.vm.ExecBytecodes(bytecodes)
+		return
 	} else if len(tokens) > 2 {
 		rawParams = tokens[2:]
 
