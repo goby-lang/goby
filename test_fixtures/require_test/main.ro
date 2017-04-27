@@ -1,3 +1,5 @@
 require_relative "./foo"
 
-Foo.bar(5)
+Foo.baz do |hundred|
+  hundred + Foo.bar(5)
+end

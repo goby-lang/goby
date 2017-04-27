@@ -36,6 +36,7 @@ var labelTypes = map[string]labelType{
 type instructionSet struct {
 	label        *label
 	instructions []*instruction
+	file         string
 }
 
 type operationType string

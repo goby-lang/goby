@@ -16,11 +16,12 @@ type bytecodeParser struct {
 	line       int
 	labelTable map[labelType]map[string][]*instructionSet
 	vm         *VM
+	file       string
 }
 
 // newBytecodeParser initializes bytecodeParser and its label table then returns it
-func newBytecodeParser() *bytecodeParser {
-	p := &bytecodeParser{}
+func newBytecodeParser(file string) *bytecodeParser {
+	p := &bytecodeParser{file: file}
 	p.labelTable = map[labelType]map[string][]*instructionSet{
 		LabelDef:      make(map[string][]*instructionSet),
 		LabelDefClass: make(map[string][]*instructionSet),
@@ -42,7 +43,7 @@ func (p *bytecodeParser) parseBytecode(bytecodes string) []*instructionSet {
 }
 
 func (p *bytecodeParser) parseSection(iss []*instructionSet, bytecodesByLine []string) {
-	is := &instructionSet{}
+	is := &instructionSet{file: p.file}
 	count := 0
 
 	// First line is label
@@ -113,7 +114,7 @@ func (p *bytecodeParser) parseInstruction(is *instructionSet, line string) {
 		program := parser.BuildAST(file)
 		g := bytecode.NewGenerator(program)
 		bytecodes := g.GenerateByteCode(program)
-		p.vm.ExecBytecodes(bytecodes)
+		p.vm.ExecBytecodes(bytecodes, filepath)
 		return
 	} else if len(tokens) > 2 {
 		rawParams = tokens[2:]

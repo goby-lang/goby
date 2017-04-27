@@ -62,8 +62,8 @@ func New(fileDir string) *VM {
 }
 
 // ExecBytecodes accepts a sequence of bytecodes and use vm to evaluate them.
-func (vm *VM) ExecBytecodes(bytecodes string) {
-	p := newBytecodeParser()
+func (vm *VM) ExecBytecodes(bytecodes, filepath string) {
+	p := newBytecodeParser(filepath)
 	p.vm = vm
 	p.parseBytecode(bytecodes)
 
