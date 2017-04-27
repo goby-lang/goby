@@ -15,7 +15,6 @@ const (
 	stringObj        = "STRING"
 	booleanObj       = "BOOLEAN"
 	nullObj          = "NULL"
-	returnValueObj   = "RETURN_VALUE"
 	errorObj         = "ERROR"
 	methodObj        = "METHOD"
 	classObj         = "CLASS"
@@ -53,18 +52,6 @@ type Object interface {
 
 type Pointer struct {
 	Target Object
-}
-
-type ReturnValue struct {
-	Value Object
-}
-
-func (r *ReturnValue) Type() objectType {
-	return returnValueObj
-}
-
-func (r *ReturnValue) Inspect() string {
-	return r.Value.Inspect()
 }
 
 func checkArgumentLen(args []Object, class Class, method_name string) *Error {
