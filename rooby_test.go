@@ -5,9 +5,9 @@ import (
 	"github.com/rooby-lang/rooby/parser"
 	"github.com/rooby-lang/rooby/vm"
 	"io/ioutil"
-	"testing"
-	"runtime"
 	"path"
+	"runtime"
+	"testing"
 )
 
 func TestRequireRelative(t *testing.T) {
