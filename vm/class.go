@@ -68,8 +68,8 @@ type BaseClass struct {
 	Singleton bool
 }
 
-// Type returns class object's type
-func (c *BaseClass) Type() objectType {
+// objectType returns class object's type
+func (c *BaseClass) objectType() objectType {
 	return classObj
 }
 

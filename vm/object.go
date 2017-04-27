@@ -47,7 +47,7 @@ func initMainObj() {
 }
 
 type Object interface {
-	Type() objectType
+	objectType() objectType
 	Inspect() string
 }
 

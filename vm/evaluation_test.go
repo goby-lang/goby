@@ -386,8 +386,8 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 		}
 
-		if string(evaluated.Type()) != tt.expected_obj {
-			t.Fatalf("expect self to return %s. got=%s", string(tt.expected_obj), evaluated.Type())
+		if string(evaluated.objectType()) != tt.expected_obj {
+			t.Fatalf("expect self to return %s. got=%s", string(tt.expected_obj), evaluated.objectType())
 		}
 	}
 }

@@ -2,20 +2,20 @@ package vm
 
 import (
 	"fmt"
+	"github.com/rooby-lang/rooby/bytecode"
+	"github.com/rooby-lang/rooby/parser"
+	"io/ioutil"
+	"path"
 	"regexp"
 	"strconv"
 	"strings"
-	"io/ioutil"
-	"github.com/rooby-lang/rooby/bytecode"
-	"github.com/rooby-lang/rooby/parser"
-	"path"
 )
 
 // bytecodeParser is responsible for parsing bytecodes
 type bytecodeParser struct {
 	line       int
 	labelTable map[labelType]map[string][]*instructionSet
-	vm *VM
+	vm         *VM
 }
 
 // newBytecodeParser initializes bytecodeParser and its label table then returns it

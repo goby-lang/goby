@@ -16,7 +16,7 @@ type Method struct {
 	scope          *Scope
 }
 
-func (m *Method) Type() objectType {
+func (m *Method) objectType() objectType {
 	return methodObj
 }
 
@@ -57,7 +57,7 @@ type BuiltInMethod struct {
 	Name string
 }
 
-func (bim *BuiltInMethod) Type() objectType {
+func (bim *BuiltInMethod) objectType() objectType {
 	return buildInMethodObj
 }
 
@@ -66,13 +66,13 @@ func (bim *BuiltInMethod) Inspect() string {
 }
 
 // builtInMethodYield is like invokeblock instruction for built in methods
-func builtInMethodYield(vm *VM, blockFrame *callFrame, args...Object) {
+func builtInMethodYield(vm *VM, blockFrame *callFrame, args ...Object) {
 	c := newCallFrame(blockFrame.instructionSet)
 	c.blockFrame = blockFrame
 	c.ep = blockFrame.ep
 	c.self = blockFrame.self
 
-	for i := 0; i < len(args); i ++ {
+	for i := 0; i < len(args); i++ {
 		c.locals[0] = &Pointer{args[i]}
 	}
 

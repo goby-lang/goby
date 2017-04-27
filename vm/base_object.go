@@ -16,7 +16,7 @@ type RObject struct {
 	InitializeMethod  *Method
 }
 
-func (ro *RObject) Type() objectType {
+func (ro *RObject) objectType() objectType {
 	return baseObject
 }
 

@@ -17,7 +17,7 @@ type StringObject struct {
 	Value string
 }
 
-func (s *StringObject) Type() objectType {
+func (s *StringObject) objectType() objectType {
 	return stringObj
 }
 

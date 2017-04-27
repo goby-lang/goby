@@ -19,7 +19,7 @@ type IntegerObject struct {
 	Value int
 }
 
-func (i *IntegerObject) Type() objectType {
+func (i *IntegerObject) objectType() objectType {
 	return integerObj
 }
 

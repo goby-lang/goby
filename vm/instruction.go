@@ -170,7 +170,7 @@ var builtInActions = map[operationType]*action{
 				elems = append([]Object{v.Target}, elems...)
 			}
 
-			arr := InitializeArray(elems)
+			arr := initializeArray(elems)
 			vm.stack.push(&Pointer{arr})
 		},
 	},

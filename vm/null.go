@@ -13,7 +13,7 @@ type Null struct {
 	Class *RNull
 }
 
-func (n *Null) Type() objectType {
+func (n *Null) objectType() objectType {
 	return nullObj
 }
 

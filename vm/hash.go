@@ -21,7 +21,7 @@ type HashObject struct {
 	Pairs map[string]Object
 }
 
-func (h *HashObject) Type() objectType {
+func (h *HashObject) objectType() objectType {
 	return hashObj
 }
 

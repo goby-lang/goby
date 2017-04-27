@@ -453,7 +453,7 @@ func testBooleanObject(t *testing.T, obj Object, expected bool) bool {
 
 func isError(obj Object) bool {
 	if obj != nil {
-		return obj.Type() == errorObj
+		return obj.objectType() == errorObj
 	}
 	return false
 }

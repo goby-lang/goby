@@ -9,7 +9,7 @@ type Error struct {
 	Message string
 }
 
-func (e *Error) Type() objectType {
+func (e *Error) objectType() objectType {
 	return errorObj
 }
 

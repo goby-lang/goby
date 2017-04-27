@@ -24,8 +24,8 @@ type BooleanObject struct {
 	Value bool
 }
 
-// Type returns boolean object's type
-func (b *BooleanObject) Type() objectType {
+// objectType returns boolean object's type
+func (b *BooleanObject) objectType() objectType {
 	return booleanObj
 }
 
