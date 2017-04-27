@@ -25,7 +25,7 @@ func (a *ArrayObject) Type() objectType {
 	return arrayObj
 }
 
-// Inspect returns detailed info of a array include elements it contains
+// inspect returns detailed info of a array include elements it contains
 func (a *ArrayObject) Inspect() string {
 	var out bytes.Buffer
 

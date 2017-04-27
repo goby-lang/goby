@@ -123,7 +123,7 @@ func (vm *VM) start() {
 
 func (vm *VM) execInstruction(cf *callFrame, i *instruction) {
 	cf.pc++
-	//fmt.Print(i.Inspect())
+	//fmt.Print(i.inspect())
 	i.action.operation(vm, cf, i.Params...)
 	//fmt.Println(vm.callFrameStack.inspect())
 	//fmt.Println(vm.stack.inspect())

@@ -29,7 +29,7 @@ func (b *BooleanObject) Type() objectType {
 	return booleanObj
 }
 
-// Inspect returns boolean object's value, which is either true or false.
+// inspect returns boolean object's value, which is either true or false.
 func (b *BooleanObject) Inspect() string {
 	return fmt.Sprintf("%t", b.Value)
 }

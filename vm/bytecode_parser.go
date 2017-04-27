@@ -125,7 +125,7 @@ func (p *bytecodeParser) parseInstruction(is *instructionSet, line string) {
 		panic(fmt.Sprintf("Unknown command: %s. line: %d", act, ln))
 	}
 
-	is.Define(int(ln), action, params...)
+	is.define(int(ln), action, params...)
 }
 
 func (p *bytecodeParser) parseParam(param string) interface{} {

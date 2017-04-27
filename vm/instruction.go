@@ -456,24 +456,24 @@ func setReturnValueAndSP(vm *VM, receiverPr int, value *Pointer) {
 	vm.sp = receiverPr + 1
 }
 
-func (is *instructionSet) Define(line int, a *action, params ...interface{}) {
+func (is *instructionSet) define(line int, a *action, params ...interface{}) {
 	i := &instruction{action: a, Params: params, Line: line}
 	is.instructions = append(is.instructions, i)
 }
 
-func (is *instructionSet) Inspect() string {
+func (is *instructionSet) inspect() string {
 	var out bytes.Buffer
 
 	out.WriteString(fmt.Sprintf("<%s>\n", is.label.name))
 	for _, i := range is.instructions {
-		out.WriteString(i.Inspect())
+		out.WriteString(i.inspect())
 		out.WriteString("\n")
 	}
 
 	return out.String()
 }
 
-func (i *instruction) Inspect() string {
+func (i *instruction) inspect() string {
 	var params []string
 
 	for _, param := range i.Params {

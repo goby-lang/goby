@@ -73,8 +73,8 @@ func (c *BaseClass) Type() objectType {
 	return classObj
 }
 
-// Inspect returns the basic inspected result (which is class name) of current class
-// TODO: Singleton class's Inspect() should also mark if it's a singleton class explicitly.
+// inspect returns the basic inspected result (which is class name) of current class
+// TODO: Singleton class's inspect() should also mark if it's a singleton class explicitly.
 func (c *BaseClass) Inspect() string {
 	return "<Class:" + c.Name + ">"
 }
