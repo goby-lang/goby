@@ -121,7 +121,7 @@ var builtInActions = map[operationType]*action{
 		name: GetInstanceVariable,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			variableName := args[0].(string)
-			v, ok := cf.self.(*RObject).InstanceVariables.Get(variableName)
+			v, ok := cf.self.(*RObject).InstanceVariables.get(variableName)
 			if !ok {
 				vm.stack.push(&Pointer{Target: NULL})
 				return
@@ -136,7 +136,7 @@ var builtInActions = map[operationType]*action{
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			variableName := args[0].(string)
 			p := vm.stack.pop()
-			cf.self.(*RObject).InstanceVariables.Set(variableName, p.Target)
+			cf.self.(*RObject).InstanceVariables.set(variableName, p.Target)
 		},
 	},
 	SetLocal: {
@@ -251,9 +251,9 @@ var builtInActions = map[operationType]*action{
 			v := vm.stack.pop().Target
 			switch self := v.(type) {
 			case *RClass:
-				self.Methods.Set(methodName, method)
+				self.Methods.set(methodName, method)
 			case BaseObject:
-				self.returnClass().(*RClass).Methods.Set(methodName, method)
+				self.returnClass().(*RClass).Methods.set(methodName, method)
 			default:
 				panic(fmt.Sprintf("Can't define method on %T", self))
 			}

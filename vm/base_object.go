@@ -11,8 +11,8 @@ type BaseObject interface {
 // RObject represents any non built-in class's instance.
 type RObject struct {
 	Class             *RClass
-	InstanceVariables *Environment
-	Scope             *Scope
+	InstanceVariables *environment
+	Scope             *scope
 	InitializeMethod  *Method
 }
 

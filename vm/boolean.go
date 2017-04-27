@@ -114,13 +114,13 @@ var builtinBooleanMethods = []*BuiltInMethod{
 }
 
 func initBool() {
-	methods := NewEnvironment()
+	methods := newEnvironment()
 
 	for _, m := range builtinBooleanMethods {
-		methods.Set(m.Name, m)
+		methods.set(m.Name, m)
 	}
 
-	bc := &BaseClass{Name: "Boolean", Methods: methods, ClassMethods: NewEnvironment(), Class: classClass, SuperClass: objectClass}
+	bc := &BaseClass{Name: "Boolean", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, SuperClass: objectClass}
 	b := &RBool{BaseClass: bc}
 	booleanClass = b
 

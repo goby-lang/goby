@@ -10,25 +10,25 @@ var (
 )
 
 func initTopLevelClasses() {
-	globalMethods := NewEnvironment()
-	classMethods := NewEnvironment()
+	globalMethods := newEnvironment()
+	classMethods := newEnvironment()
 
 	for _, m := range builtinGlobalMethods {
-		globalMethods.Set(m.Name, m)
+		globalMethods.set(m.Name, m)
 	}
 
 	for _, m := range BuiltinClassMethods {
-		classMethods.Set(m.Name, m)
+		classMethods.set(m.Name, m)
 	}
 
 	classClass = &RClass{BaseClass: &BaseClass{Name: "Class", Methods: globalMethods, ClassMethods: classMethods}}
-	objectClass = &RClass{BaseClass: &BaseClass{Name: "Object", Class: classClass, Methods: globalMethods, ClassMethods: NewEnvironment()}}
+	objectClass = &RClass{BaseClass: &BaseClass{Name: "Object", Class: classClass, Methods: globalMethods, ClassMethods: newEnvironment()}}
 }
 
 // InitializeClass initializes and returns a class instance with given class name
 func InitializeClass(name string) *RClass {
-	class := &RClass{BaseClass: &BaseClass{Name: name, Methods: NewEnvironment(), ClassMethods: NewEnvironment(), Class: classClass, SuperClass: objectClass}}
-	//classScope := &scope{self: class, Env: NewClosedEnvironment(scope.Env)}
+	class := &RClass{BaseClass: &BaseClass{Name: name, Methods: newEnvironment(), ClassMethods: newEnvironment(), Class: classClass, SuperClass: objectClass}}
+	//classScope := &scope{self: class, Env: closedEnvironment(scope.Env)}
 	//class.scope = classScope
 
 	return class
@@ -48,7 +48,7 @@ type Class interface {
 // RClass represents normal (not built in) class object
 type RClass struct {
 	// Scope contains current class's scope information
-	Scope *Scope
+	Scope *scope
 	*BaseClass
 }
 
@@ -57,9 +57,9 @@ type BaseClass struct {
 	// Name is the class's name
 	Name string
 	// Methods contains its instances' methods
-	Methods *Environment
+	Methods *environment
 	// ClassMethods contains this class's methods
-	ClassMethods *Environment
+	ClassMethods *environment
 	// SuperClass points to the class it inherits
 	SuperClass *RClass
 	// Class points to this class's class, which should be ClassClass
@@ -80,7 +80,7 @@ func (c *BaseClass) Inspect() string {
 }
 
 func (c *BaseClass) LookupClassMethod(method_name string) Object {
-	method, ok := c.ClassMethods.Get(method_name)
+	method, ok := c.ClassMethods.get(method_name)
 
 	if !ok {
 		if c.SuperClass != nil {
@@ -97,7 +97,7 @@ func (c *BaseClass) LookupClassMethod(method_name string) Object {
 }
 
 func (c *BaseClass) LookupInstanceMethod(method_name string) Object {
-	method, ok := c.Methods.Get(method_name)
+	method, ok := c.Methods.get(method_name)
 
 	if !ok {
 		if c.SuperClass != nil {
@@ -117,12 +117,12 @@ func (c *BaseClass) LookupInstanceMethod(method_name string) Object {
 // However, if the class doesn't have a singleton class, it will create one for it first.
 func (c *BaseClass) SetSingletonMethod(name string, method *Method) {
 	if c.SuperClass.Singleton {
-		c.SuperClass.ClassMethods.Set(name, method)
+		c.SuperClass.ClassMethods.set(name, method)
 	}
 
 	class := InitializeClass(fmt.Sprintf("%s:singleton", c.Name))
 	class.Singleton = true
-	class.ClassMethods.Set(name, method)
+	class.ClassMethods.set(name, method)
 	class.SuperClass = c.SuperClass
 	class.Class = classClass
 	c.SuperClass = class
@@ -137,7 +137,7 @@ func (c *BaseClass) ReturnName() string {
 }
 
 func (c *RClass) initializeInstance() *RObject {
-	instance := &RObject{Class: c, InstanceVariables: NewEnvironment()}
+	instance := &RObject{Class: c, InstanceVariables: newEnvironment()}
 
 	return instance
 }

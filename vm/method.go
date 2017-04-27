@@ -13,7 +13,7 @@ type Method struct {
 	argc           int
 	parameters     []*ast.Identifier
 	body           *ast.BlockStatement
-	scope          *Scope
+	scope          *scope
 }
 
 func (m *Method) objectType() objectType {
@@ -38,12 +38,12 @@ func (m *Method) Inspect() string {
 	return out.String()
 }
 
-func (m *Method) extendEnv(args []Object) *Environment {
-	e := NewClosedEnvironment(m.scope.Env)
+func (m *Method) extendEnv(args []Object) *environment {
+	e := closedEnvironment(m.scope.Env)
 
 	for i, arg := range args {
 		argName := m.parameters[i].Value
-		e.Set(argName, arg)
+		e.set(argName, arg)
 	}
 
 	return e

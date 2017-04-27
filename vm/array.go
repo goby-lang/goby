@@ -71,13 +71,13 @@ func initializeArray(elements []Object) *ArrayObject {
 }
 
 func init() {
-	methods := NewEnvironment()
+	methods := newEnvironment()
 
 	for _, m := range builtinArrayMethods {
-		methods.Set(m.Name, m)
+		methods.set(m.Name, m)
 	}
 
-	bc := &BaseClass{Name: "Array", Methods: methods, ClassMethods: NewEnvironment(), Class: classClass, SuperClass: objectClass}
+	bc := &BaseClass{Name: "Array", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, SuperClass: objectClass}
 	ac := &RArray{BaseClass: bc}
 	arrayClass = ac
 }

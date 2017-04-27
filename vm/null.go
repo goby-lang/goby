@@ -26,13 +26,13 @@ func (n *Null) returnClass() Class {
 }
 
 func initNull() {
-	methods := NewEnvironment()
+	methods := newEnvironment()
 
 	for _, m := range builtInNullMethods {
-		methods.Set(m.Name, m)
+		methods.set(m.Name, m)
 	}
 
-	baseClass := &BaseClass{Name: "Null", Methods: methods, ClassMethods: NewEnvironment(), Class: classClass, SuperClass: objectClass}
+	baseClass := &BaseClass{Name: "Null", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, SuperClass: objectClass}
 	nc := &RNull{BaseClass: baseClass}
 	nullClass = nc
 	NULL = &Null{Class: nullClass}

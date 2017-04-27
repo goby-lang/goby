@@ -285,13 +285,13 @@ var builtinIntegerMethods = []*BuiltInMethod{
 }
 
 func initInteger() {
-	methods := NewEnvironment()
+	methods := newEnvironment()
 
 	for _, m := range builtinIntegerMethods {
-		methods.Set(m.Name, m)
+		methods.set(m.Name, m)
 	}
 
-	bc := &BaseClass{Name: "Integer", Methods: methods, ClassMethods: NewEnvironment(), Class: classClass, SuperClass: objectClass}
+	bc := &BaseClass{Name: "Integer", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, SuperClass: objectClass}
 	ic := &RInteger{BaseClass: bc}
 	integerClass = ic
 }

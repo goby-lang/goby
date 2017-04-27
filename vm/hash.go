@@ -128,13 +128,13 @@ var builtinHashMethods = []*BuiltInMethod{
 }
 
 func init() {
-	methods := NewEnvironment()
+	methods := newEnvironment()
 
 	for _, m := range builtinHashMethods {
-		methods.Set(m.Name, m)
+		methods.set(m.Name, m)
 	}
 
-	bc := &BaseClass{Name: "Hash", Methods: methods, ClassMethods: NewEnvironment(), Class: classClass, SuperClass: objectClass}
+	bc := &BaseClass{Name: "Hash", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, SuperClass: objectClass}
 	hc := &RHash{BaseClass: bc}
 	hashClass = hc
 }

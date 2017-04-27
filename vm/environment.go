@@ -1,49 +1,49 @@
 package vm
 
-func NewEnvironment() *Environment {
+func newEnvironment() *environment {
 	s := make(map[string]Object)
-	return &Environment{store: s, outer: nil}
+	return &environment{store: s, outer: nil}
 }
 
-func NewClosedEnvironment(outer *Environment) *Environment {
-	env := NewEnvironment()
+func closedEnvironment(outer *environment) *environment {
+	env := newEnvironment()
 	env.outer = outer
 	return env
 }
 
-type Environment struct {
+type environment struct {
 	store map[string]Object
-	outer *Environment
+	outer *environment
 }
 
-type Scope struct {
-	Env  *Environment
+type scope struct {
+	Env  *environment
 	Self Object
 }
 
-func (e *Environment) GetCurrent(name string) (Object, bool) {
+func (e *environment) getCurrent(name string) (Object, bool) {
 	obj, ok := e.store[name]
 	return obj, ok
 }
 
-func (e *Environment) GetValueLocation(name string) (*Environment, bool) {
+func (e *environment) getValueLocation(name string) (*environment, bool) {
 	env := e
 	_, ok := e.store[name]
 	if !ok && e.outer != nil {
-		env, ok = e.outer.GetValueLocation(name)
+		env, ok = e.outer.getValueLocation(name)
 	}
 	return env, ok
 }
 
-func (e *Environment) Get(name string) (Object, bool) {
+func (e *environment) get(name string) (Object, bool) {
 	obj, ok := e.store[name]
 	if !ok && e.outer != nil {
-		obj, ok = e.outer.Get(name)
+		obj, ok = e.outer.get(name)
 	}
 	return obj, ok
 }
 
-func (e *Environment) Set(name string, val Object) Object {
+func (e *environment) set(name string, val Object) Object {
 	e.store[name] = val
 	return val
 }

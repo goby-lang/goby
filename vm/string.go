@@ -186,13 +186,13 @@ var builtinStringMethods = []*BuiltInMethod{
 }
 
 func initString() {
-	methods := NewEnvironment()
+	methods := newEnvironment()
 
 	for _, m := range builtinStringMethods {
-		methods.Set(m.Name, m)
+		methods.set(m.Name, m)
 	}
 
-	bc := &BaseClass{Name: "String", Methods: methods, ClassMethods: NewEnvironment(), Class: classClass, SuperClass: objectClass}
+	bc := &BaseClass{Name: "String", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, SuperClass: objectClass}
 	sc := &RString{BaseClass: bc}
 	stringClass = sc
 }
