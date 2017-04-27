@@ -271,9 +271,9 @@ var builtInActions = map[operationType]*action{
 
 			switch self := v.(type) {
 			case *RClass:
-				self.SetSingletonMethod(methodName, method)
+				self.setSingletonMethod(methodName, method)
 			case BaseObject:
-				self.returnClass().(*RClass).SetSingletonMethod(methodName, method)
+				self.returnClass().(*RClass).setSingletonMethod(methodName, method)
 			default:
 				panic(fmt.Sprintf("Can't define singleton method on %T", self))
 			}
@@ -282,7 +282,7 @@ var builtInActions = map[operationType]*action{
 	DefClass: {
 		name: DefClass,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
-			class := InitializeClass(args[0].(string))
+			class := initializeClass(args[0].(string))
 			classPr := &Pointer{Target: class}
 			vm.constants[class.Name] = classPr
 
@@ -338,9 +338,9 @@ var builtInActions = map[operationType]*action{
 
 			switch receiver := receiver.(type) {
 			case Class:
-				method = receiver.LookupClassMethod(methodName)
+				method = receiver.lookupClassMethod(methodName)
 			case BaseObject:
-				method = receiver.returnClass().LookupInstanceMethod(methodName)
+				method = receiver.returnClass().lookupInstanceMethod(methodName)
 			case *Error:
 				panic(receiver.Inspect())
 			default:

@@ -5,7 +5,7 @@ import (
 )
 
 func getBuiltInMethod(t *testing.T, receiver BaseObject, methodName string) builtinMethodBody {
-	m := receiver.returnClass().LookupInstanceMethod(methodName)
+	m := receiver.returnClass().lookupInstanceMethod(methodName)
 
 	if m == nil {
 		t.Fatalf("Undefined built in method %s for %s", methodName, receiver.returnClass().ReturnName())

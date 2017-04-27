@@ -25,8 +25,8 @@ func initTopLevelClasses() {
 	objectClass = &RClass{BaseClass: &BaseClass{Name: "Object", Class: classClass, Methods: globalMethods, ClassMethods: newEnvironment()}}
 }
 
-// InitializeClass initializes and returns a class instance with given class name
-func InitializeClass(name string) *RClass {
+// initializeClass initializes and returns a class instance with given class name
+func initializeClass(name string) *RClass {
 	class := &RClass{BaseClass: &BaseClass{Name: name, Methods: newEnvironment(), ClassMethods: newEnvironment(), Class: classClass, SuperClass: objectClass}}
 	//classScope := &scope{self: class, Env: closedEnvironment(scope.Env)}
 	//class.scope = classScope
@@ -35,12 +35,12 @@ func InitializeClass(name string) *RClass {
 }
 
 // Class is an interface that implements a class's basic functions.
-// - LookupClassMethod: search for current class's class method with given name.
-// - LookupInstanceMethod: search for current class's instance method with given name.
+// - lookupClassMethod: search for current class's class method with given name.
+// - lookupInstanceMethod: search for current class's instance method with given name.
 // - ReturnName returns class's name
 type Class interface {
-	LookupClassMethod(string) Object
-	LookupInstanceMethod(string) Object
+	lookupClassMethod(string) Object
+	lookupInstanceMethod(string) Object
 	ReturnName() string
 	BaseObject
 }
@@ -79,15 +79,15 @@ func (c *BaseClass) Inspect() string {
 	return "<Class:" + c.Name + ">"
 }
 
-func (c *BaseClass) LookupClassMethod(methodName string) Object {
+func (c *BaseClass) lookupClassMethod(methodName string) Object {
 	method, ok := c.ClassMethods.get(methodName)
 
 	if !ok {
 		if c.SuperClass != nil {
-			return c.SuperClass.LookupClassMethod(methodName)
+			return c.SuperClass.lookupClassMethod(methodName)
 		}
 		if c.Class != nil {
-			return c.Class.LookupClassMethod(methodName)
+			return c.Class.lookupClassMethod(methodName)
 		}
 		return nil
 	}
@@ -95,16 +95,16 @@ func (c *BaseClass) LookupClassMethod(methodName string) Object {
 	return method
 }
 
-func (c *BaseClass) LookupInstanceMethod(methodName string) Object {
+func (c *BaseClass) lookupInstanceMethod(methodName string) Object {
 	method, ok := c.Methods.get(methodName)
 
 	if !ok {
 		if c.SuperClass != nil {
-			return c.SuperClass.LookupInstanceMethod(methodName)
+			return c.SuperClass.lookupInstanceMethod(methodName)
 		}
 
 		if c.Class != nil {
-			return c.Class.LookupInstanceMethod(methodName)
+			return c.Class.lookupInstanceMethod(methodName)
 		}
 
 		return nil
@@ -113,14 +113,14 @@ func (c *BaseClass) LookupInstanceMethod(methodName string) Object {
 	return method
 }
 
-// SetSingletonMethod will sets method to class's singleton class
+// setSingletonMethod will sets method to class's singleton class
 // However, if the class doesn't have a singleton class, it will create one for it first.
-func (c *BaseClass) SetSingletonMethod(name string, method *Method) {
+func (c *BaseClass) setSingletonMethod(name string, method *Method) {
 	if c.SuperClass.Singleton {
 		c.SuperClass.ClassMethods.set(name, method)
 	}
 
-	class := InitializeClass(fmt.Sprintf("%s:singleton", c.Name))
+	class := initializeClass(fmt.Sprintf("%s:singleton", c.Name))
 	class.Singleton = true
 	class.ClassMethods.set(name, method)
 	class.SuperClass = c.SuperClass
@@ -190,7 +190,7 @@ var BuiltinClassMethods = []*BuiltInMethod{
 
 				class := receiver.(*RClass)
 				instance := class.initializeInstance()
-				initMethod := class.LookupInstanceMethod("initialize")
+				initMethod := class.lookupInstanceMethod("initialize")
 
 				if initMethod != nil {
 					instance.InitializeMethod = initMethod.(*Method)
