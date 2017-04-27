@@ -397,7 +397,7 @@ func testExec(bytecodes string) Object {
 	v := New("./")
 	v.ExecBytecodes(bytecodes)
 
-	return v.stack.Top().Target
+	return v.stack.top().Target
 }
 
 func testIntegerObject(t *testing.T, obj Object, expected int) bool {

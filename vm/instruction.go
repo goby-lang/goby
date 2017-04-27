@@ -404,7 +404,7 @@ var builtInActions = map[operationType]*action{
 			vm.callFrameStack.push(c)
 			vm.start()
 
-			setReturnValueAndSP(vm, receiverPr, vm.stack.Top())
+			setReturnValueAndSP(vm, receiverPr, vm.stack.top())
 		},
 	},
 	Leave: {
@@ -448,7 +448,7 @@ func evalMethodObject(vm *VM, receiver BaseObject, method *Method, receiverPr, a
 	vm.callFrameStack.push(c)
 	vm.start()
 
-	setReturnValueAndSP(vm, receiverPr, vm.stack.Top())
+	setReturnValueAndSP(vm, receiverPr, vm.stack.top())
 }
 
 func setReturnValueAndSP(vm *VM, receiverPr int, value *Pointer) {

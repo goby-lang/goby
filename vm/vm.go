@@ -83,7 +83,7 @@ func (vm *VM) ExecBytecodes(bytecodes string) {
 
 // GetExecResult returns stack's top most value. Normally it's used in tests.
 func (vm *VM) GetExecResult() Object {
-	return vm.stack.Top().Target
+	return vm.stack.top().Target
 }
 
 func (vm *VM) initConstants() {
@@ -191,7 +191,7 @@ func (s *stack) pop() *Pointer {
 	return v
 }
 
-func (s *stack) Top() *Pointer {
+func (s *stack) top() *Pointer {
 
 	if s.VM.sp > 0 {
 		return s.Data[s.VM.sp-1]
