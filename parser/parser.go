@@ -2,10 +2,11 @@ package parser
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/rooby-lang/rooby/ast"
 	"github.com/rooby-lang/rooby/lexer"
 	"github.com/rooby-lang/rooby/token"
-	"strings"
 )
 
 // Parser represents lexical analyzer struct
@@ -103,7 +104,7 @@ func (p *Parser) Errors() []string {
 	return p.errors
 }
 
-// CheckErrors is checking for parser's errors existance
+// CheckErrors is checking for parser's errors existence
 func (p *Parser) CheckErrors() {
 	errors := p.Errors()
 	if len(errors) == 0 {

@@ -2,9 +2,10 @@ package parser
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/rooby-lang/rooby/ast"
 	"github.com/rooby-lang/rooby/token"
-	"strconv"
 )
 
 var precedence = map[token.Type]int{
@@ -41,7 +42,7 @@ type (
 	infixParseFn  func(ast.Expression) ast.Expression
 )
 
-func (p *Parser) parseExpression(precendence int) ast.Expression {
+func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFns[p.curToken.Type]
 	if prefix == nil {
 		p.noPrefixParseFnError(p.curToken.Type)
@@ -49,7 +50,7 @@ func (p *Parser) parseExpression(precendence int) ast.Expression {
 	}
 	leftExp := prefix()
 
-	for !p.peekTokenIs(token.Semicolon) && precendence < p.peekPrecedence() && p.peekTokenAtSameLine() {
+	for !p.peekTokenIs(token.Semicolon) && precedence < p.peekPrecedence() && p.peekTokenAtSameLine() {
 		infix := p.infixParseFns[p.peekToken.Type]
 		if infix == nil {
 			return leftExp
