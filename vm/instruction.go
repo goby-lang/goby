@@ -253,7 +253,7 @@ var builtInActions = map[operationType]*action{
 			case *RClass:
 				self.Methods.Set(methodName, method)
 			case BaseObject:
-				self.ReturnClass().(*RClass).Methods.Set(methodName, method)
+				self.returnClass().(*RClass).Methods.Set(methodName, method)
 			default:
 				panic(fmt.Sprintf("Can't define method on %T", self))
 			}
@@ -273,7 +273,7 @@ var builtInActions = map[operationType]*action{
 			case *RClass:
 				self.SetSingletonMethod(methodName, method)
 			case BaseObject:
-				self.ReturnClass().(*RClass).SetSingletonMethod(methodName, method)
+				self.returnClass().(*RClass).SetSingletonMethod(methodName, method)
 			default:
 				panic(fmt.Sprintf("Can't define singleton method on %T", self))
 			}
@@ -340,7 +340,7 @@ var builtInActions = map[operationType]*action{
 			case Class:
 				method = receiver.LookupClassMethod(methodName)
 			case BaseObject:
-				method = receiver.ReturnClass().LookupInstanceMethod(methodName)
+				method = receiver.returnClass().LookupInstanceMethod(methodName)
 			case *Error:
 				panic(receiver.Inspect())
 			default:

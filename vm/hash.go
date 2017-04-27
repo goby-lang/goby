@@ -40,7 +40,7 @@ func (h *HashObject) Inspect() string {
 	return out.String()
 }
 
-func (h *HashObject) ReturnClass() Class {
+func (h *HashObject) returnClass() Class {
 	return h.Class
 }
 

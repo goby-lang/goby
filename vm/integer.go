@@ -27,7 +27,7 @@ func (i *IntegerObject) Inspect() string {
 	return fmt.Sprintf("%d", i.Value)
 }
 
-func (i *IntegerObject) ReturnClass() Class {
+func (i *IntegerObject) returnClass() Class {
 	return i.Class
 }
 

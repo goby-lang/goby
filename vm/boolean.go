@@ -34,8 +34,8 @@ func (b *BooleanObject) Inspect() string {
 	return fmt.Sprintf("%t", b.Value)
 }
 
-// ReturnClass returns boolean object's class, which is RBool
-func (b *BooleanObject) ReturnClass() Class {
+// returnClass returns boolean object's class, which is RBool
+func (b *BooleanObject) returnClass() Class {
 	return b.Class
 }
 

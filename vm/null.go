@@ -21,7 +21,7 @@ func (n *Null) Inspect() string {
 	return "null"
 }
 
-func (n *Null) ReturnClass() Class {
+func (n *Null) returnClass() Class {
 	return n.Class
 }
 

@@ -128,7 +128,7 @@ func (c *BaseClass) SetSingletonMethod(name string, method *Method) {
 	c.SuperClass = class
 }
 
-func (c *BaseClass) ReturnClass() Class {
+func (c *BaseClass) returnClass() Class {
 	return c.Class
 }
 
@@ -162,9 +162,9 @@ var builtinGlobalMethods = []*BuiltInMethod{
 
 				switch r := receiver.(type) {
 				case BaseObject:
-					return r.ReturnClass()
+					return r.returnClass()
 				case Class:
-					return r.ReturnClass()
+					return r.returnClass()
 				default:
 					return &Error{Message: fmt.Sprintf("Can't call class on %T", r)}
 				}

@@ -17,6 +17,6 @@ func (e *Error) Inspect() string {
 	return "ERROR: " + e.Message
 }
 
-func (e *Error) ReturnClass() Class {
+func (e *Error) returnClass() Class {
 	return e.Class
 }

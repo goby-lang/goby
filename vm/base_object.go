@@ -4,7 +4,7 @@ import "fmt"
 
 // BaseObject is an interface that implements basic functions any object requires.
 type BaseObject interface {
-	ReturnClass() Class
+	returnClass() Class
 	Object
 }
 
@@ -24,8 +24,8 @@ func (ro *RObject) Inspect() string {
 	return "<Instance of: " + ro.Class.Name + ">"
 }
 
-// ReturnClass will return object's class
-func (ro *RObject) ReturnClass() Class {
+// returnClass will return object's class
+func (ro *RObject) returnClass() Class {
 	if ro.Class == nil {
 		panic(fmt.Sprintf("Object %s doesn't have class.", ro.Inspect()))
 	}

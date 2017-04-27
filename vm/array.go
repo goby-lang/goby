@@ -42,8 +42,8 @@ func (a *ArrayObject) Inspect() string {
 	return out.String()
 }
 
-// ReturnClass returns current object's class, which is RArray
-func (a *ArrayObject) ReturnClass() Class {
+// returnClass returns current object's class, which is RArray
+func (a *ArrayObject) returnClass() Class {
 	return a.Class
 }
 
