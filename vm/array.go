@@ -20,8 +20,8 @@ type ArrayObject struct {
 	Elements []Object
 }
 
-// Type returns array instance's type
-func (a *ArrayObject) Type() objectType {
+// objectType returns array instance's type
+func (a *ArrayObject) objectType() objectType {
 	return arrayObj
 }
 
@@ -47,26 +47,26 @@ func (a *ArrayObject) returnClass() Class {
 	return a.Class
 }
 
-// Length returns the length of array's elements
-func (a *ArrayObject) Length() int {
+// length returns the length of array's elements
+func (a *ArrayObject) length() int {
 	return len(a.Elements)
 }
 
-// Pop removes the last element in the array and returns it
-func (a *ArrayObject) Pop() Object {
+// pop removes the last element in the array and returns it
+func (a *ArrayObject) pop() Object {
 	value := a.Elements[len(a.Elements)-1]
 	a.Elements = a.Elements[:len(a.Elements)-1]
 	return value
 }
 
-// Push appends given object into array and returns the array object
-func (a *ArrayObject) Push(objs []Object) *ArrayObject {
+// push appends given object into array and returns the array object
+func (a *ArrayObject) push(objs []Object) *ArrayObject {
 	a.Elements = append(a.Elements, objs...)
 	return a
 }
 
-// InitializeArray returns an array that contains given objects
-func InitializeArray(elements []Object) *ArrayObject {
+// initializeArray returns an array that contains given objects
+func initializeArray(elements []Object) *ArrayObject {
 	return &ArrayObject{Elements: elements, Class: arrayClass}
 }
 
@@ -159,7 +159,7 @@ var builtinArrayMethods = []*BuiltInMethod{
 				}
 
 				arr := receiver.(*ArrayObject)
-				return initilaizeInteger(arr.Length())
+				return initilaizeInteger(arr.length())
 			}
 		},
 		Name: "length",
@@ -173,7 +173,7 @@ var builtinArrayMethods = []*BuiltInMethod{
 				}
 
 				arr := receiver.(*ArrayObject)
-				return arr.Pop()
+				return arr.pop()
 			}
 		},
 		Name: "pop",
@@ -183,7 +183,7 @@ var builtinArrayMethods = []*BuiltInMethod{
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
 				arr := receiver.(*ArrayObject)
-				return arr.Push(args)
+				return arr.push(args)
 			}
 		},
 		Name: "push",

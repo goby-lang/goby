@@ -29,8 +29,8 @@ func TestPopMethod(t *testing.T) {
 		t.Fatalf("Expect pop to return array's last  got=%d", last)
 	}
 
-	if array.Length() != 4 {
-		t.Fatalf("Expect pop remove last elements from array. got=%d", array.Length())
+	if array.length() != 4 {
+		t.Fatalf("Expect pop remove last elements from array. got=%d", array.length())
 	}
 }
 
@@ -42,11 +42,11 @@ func TestPushMethod(t *testing.T) {
 	seven := initilaizeInteger(7)
 	m(nil, []Object{six, seven}, nil)
 
-	if array.Length() != 7 {
-		t.Fatalf("Expect array's length to be 7(5 + 2). got=%d", array.Length())
+	if array.length() != 7 {
+		t.Fatalf("Expect array's length to be 7(5 + 2). got=%d", array.length())
 	}
 
-	last := array.Elements[array.Length()-1].(*IntegerObject).Value
+	last := array.Elements[array.length()-1].(*IntegerObject).Value
 
 	if int(last) != 7 {
 		t.Fatalf("Expect last object to be 7. got=%d", last)
@@ -161,5 +161,5 @@ func generateArray(length int) *ArrayObject {
 		int := initilaizeInteger(i)
 		elements = append(elements, int)
 	}
-	return InitializeArray(elements)
+	return initializeArray(elements)
 }
