@@ -328,8 +328,8 @@ func TestClassMethodEvaluation(t *testing.T) {
 
 func TestSelfExpressionEvaluation(t *testing.T) {
 	tests := []struct {
-		input        string
-		expected_obj string
+		input       string
+		expectedObj string
 	}{
 		{`self`, baseObject},
 		{
@@ -386,8 +386,8 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 		}
 
-		if string(evaluated.objectType()) != tt.expected_obj {
-			t.Fatalf("expect self to return %s. got=%s", string(tt.expected_obj), evaluated.objectType())
+		if string(evaluated.objectType()) != tt.expectedObj {
+			t.Fatalf("expect self to return %s. got=%s", string(tt.expectedObj), evaluated.objectType())
 		}
 	}
 }

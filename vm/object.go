@@ -54,9 +54,9 @@ type Pointer struct {
 	Target Object
 }
 
-func checkArgumentLen(args []Object, class Class, method_name string) *Error {
+func checkArgumentLen(args []Object, class Class, methodName string) *Error {
 	if len(args) > 1 {
-		return &Error{Message: fmt.Sprintf("Too many arguments for %s#%s", class.ReturnName(), method_name)}
+		return &Error{Message: fmt.Sprintf("Too many arguments for %s#%s", class.ReturnName(), methodName)}
 	}
 
 	return nil

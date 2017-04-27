@@ -79,35 +79,35 @@ func (c *BaseClass) Inspect() string {
 	return "<Class:" + c.Name + ">"
 }
 
-func (c *BaseClass) LookupClassMethod(method_name string) Object {
-	method, ok := c.ClassMethods.get(method_name)
+func (c *BaseClass) LookupClassMethod(methodName string) Object {
+	method, ok := c.ClassMethods.get(methodName)
 
 	if !ok {
 		if c.SuperClass != nil {
-			return c.SuperClass.LookupClassMethod(method_name)
-		} else {
-			if c.Class != nil {
-				return c.Class.LookupClassMethod(method_name)
-			}
-			return nil
+			return c.SuperClass.LookupClassMethod(methodName)
 		}
+		if c.Class != nil {
+			return c.Class.LookupClassMethod(methodName)
+		}
+		return nil
 	}
 
 	return method
 }
 
-func (c *BaseClass) LookupInstanceMethod(method_name string) Object {
-	method, ok := c.Methods.get(method_name)
+func (c *BaseClass) LookupInstanceMethod(methodName string) Object {
+	method, ok := c.Methods.get(methodName)
 
 	if !ok {
 		if c.SuperClass != nil {
-			return c.SuperClass.LookupInstanceMethod(method_name)
-		} else {
-			if c.Class != nil {
-				return c.Class.LookupInstanceMethod(method_name)
-			}
-			return nil
+			return c.SuperClass.LookupInstanceMethod(methodName)
 		}
+
+		if c.Class != nil {
+			return c.Class.LookupInstanceMethod(methodName)
+		}
+
+		return nil
 	}
 
 	return method

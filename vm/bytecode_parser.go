@@ -49,7 +49,7 @@ func (p *bytecodeParser) parseSection(iss []*instructionSet, bytecodesByLine []s
 	p.parseLabel(is, bytecodesByLine[0])
 
 	for _, text := range bytecodesByLine[1:] {
-		count += 1
+		count++
 		l := strings.TrimSpace(text)
 		if strings.HasPrefix(l, "<") {
 			p.parseSection(iss, bytecodesByLine[count:])

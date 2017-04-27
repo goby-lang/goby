@@ -247,7 +247,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				}
 
 				int := receiver.(*IntegerObject)
-				int.Value += 1
+				int.Value++
 				return int
 			}
 		},
@@ -262,7 +262,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				}
 
 				int := receiver.(*IntegerObject)
-				int.Value -= 1
+				int.Value--
 				return int
 			}
 		},
