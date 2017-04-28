@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+	"math"
 )
 
 var (
@@ -109,6 +110,30 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
+				err := checkArgumentLen(args, integerClass, "**")
+
+				if err != nil {
+					return err
+				}
+
+				leftValue := receiver.(*IntegerObject).Value
+				right, ok := args[0].(*IntegerObject)
+
+				if !ok {
+					return wrongTypeError(integerClass)
+				}
+
+				rightValue := right.Value
+				result := math.Pow(float64(leftValue), float64(rightValue))
+				return &IntegerObject{Value: int(result), Class: integerClass}
+			}
+		},
+		Name: "**",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				err := checkArgumentLen(args, integerClass, "+")
 
 				if err != nil {
@@ -159,6 +184,33 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
+				err := checkArgumentLen(args, integerClass, ">=")
+				if err != nil {
+					return err
+				}
+
+				leftValue := receiver.(*IntegerObject).Value
+				right, ok := args[0].(*IntegerObject)
+
+				if !ok {
+					return wrongTypeError(integerClass)
+				}
+
+				rightValue := right.Value
+
+				if leftValue >= rightValue {
+					return TRUE
+				}
+
+				return FALSE
+			}
+		},
+		Name: ">=",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				err := checkArgumentLen(args, integerClass, "<")
 				if err != nil {
 					return err
@@ -181,6 +233,62 @@ var builtinIntegerMethods = []*BuiltInMethod{
 			}
 		},
 		Name: "<",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
+				err := checkArgumentLen(args, integerClass, "<=")
+				if err != nil {
+					return err
+				}
+
+				leftValue := receiver.(*IntegerObject).Value
+				right, ok := args[0].(*IntegerObject)
+
+				if !ok {
+					return wrongTypeError(integerClass)
+				}
+
+				rightValue := right.Value
+
+				if leftValue <= rightValue {
+					return TRUE
+				}
+
+				return FALSE
+			}
+		},
+		Name: "<=",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
+				err := checkArgumentLen(args, integerClass, "<=")
+				if err != nil {
+					return err
+				}
+
+				leftValue := receiver.(*IntegerObject).Value
+				right, ok := args[0].(*IntegerObject)
+
+				if !ok {
+					return wrongTypeError(integerClass)
+				}
+
+				rightValue := right.Value
+
+				if leftValue < rightValue {
+					return initilaizeInteger(-1)
+				} else if leftValue > rightValue {
+					return initilaizeInteger(1)
+				} else {
+					return initilaizeInteger(0)
+				}
+			}
+		},
+		Name: "<=>",
 	},
 	{
 		Fn: func(receiver Object) builtinMethodBody {
