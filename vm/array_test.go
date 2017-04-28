@@ -155,6 +155,68 @@ func TestEachMethod(t *testing.T) {
 	}
 }
 
+func TestMapMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected *ArrayObject
+	}{
+		{`
+		a = [1, 2, 7]
+		a.map do |i|
+			i + 3
+		end
+		`, initializeArray([]Object{initilaizeInteger(4), initilaizeInteger(5), initilaizeInteger(10)})},
+		{`
+		a = [true, false, true, false, true ]
+		a.map do |i|
+			!i
+		end
+		`, initializeArray([]Object{FALSE, TRUE, FALSE, TRUE, FALSE})},
+		{`
+		a = ["1", "sss", "qwe"]
+		a.map do |i|
+			i + "1"
+		end
+		`, initializeArray([]Object{initializeString("11"), initializeString("sss1"), initializeString("qwe1")})},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		testArrayObject(t, evaluated, tt.expected)
+	}
+}
+
+func TestSelectMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected *ArrayObject
+	}{
+		{`
+		a = [1, 2, 3, 4, 5]
+		a.select do |i|
+			i > 3
+		end
+		`, initializeArray([]Object{initilaizeInteger(4), initilaizeInteger(5)})},
+		{`
+		a = [true, false, true, false, true ]
+		a.select do |i|
+			i
+		end
+		`, initializeArray([]Object{TRUE, TRUE, TRUE})},
+		{`
+		a = ["test", "not2", "3", "test", "5"]
+		a.select do |i|
+			i == "test"
+		end
+		`, initializeArray([]Object{initializeString("test"), initializeString("test")})},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		testArrayObject(t, evaluated, tt.expected)
+	}
+}
+
 func generateArray(length int) *ArrayObject {
 	var elements []Object
 	for i := 1; i <= length; i++ {

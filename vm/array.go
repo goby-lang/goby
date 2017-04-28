@@ -205,4 +205,46 @@ var builtinArrayMethods = []*BuiltInMethod{
 		},
 		Name: "each",
 	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				arr := receiver.(*ArrayObject)
+				var elements = make([]Object, len(arr.Elements))
+
+				if blockFrame == nil {
+					panic("Can't yield without a block")
+				}
+
+				for i, obj := range arr.Elements {
+					result := builtInMethodYield(vm, blockFrame, obj)
+					elements[i] = result.Target
+				}
+
+				return initializeArray(elements)
+			}
+		},
+		Name: "map",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				arr := receiver.(*ArrayObject)
+				var elements []Object
+
+				if blockFrame == nil {
+					panic("Can't yield without a block")
+				}
+
+				for _, obj := range arr.Elements {
+					result := builtInMethodYield(vm, blockFrame, obj)
+					if result.Target.(*BooleanObject).Value {
+						elements = append(elements, obj)
+					}
+				}
+
+				return initializeArray(elements)
+			}
+		},
+		Name: "select",
+	},
 }
