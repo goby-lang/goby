@@ -1,6 +1,9 @@
 package vm
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 var (
 	stringClass *RString
@@ -54,12 +57,6 @@ var builtinStringMethods = []*BuiltInMethod{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
-				err := checkArgumentLen(args, stringClass, "+")
-
-				if err != nil {
-					return err
-				}
-
 				leftValue := receiver.(*StringObject).Value
 				right, ok := args[0].(*StringObject)
 
@@ -77,10 +74,31 @@ var builtinStringMethods = []*BuiltInMethod{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
-				err := checkArgumentLen(args, stringClass, ">")
-				if err != nil {
-					return err
+				leftValue := receiver.(*StringObject).Value
+				right, ok := args[0].(*IntegerObject)
+
+				if !ok {
+					return wrongTypeError(stringClass)
 				}
+
+				if right.Value < 0 {
+					return newError("Second argument must be greater than or equal to 0 String#*")
+				}
+
+				var result string
+
+				for i := 0; i < right.Value; i++ {
+					result += leftValue
+				}
+
+				return &StringObject{Value: result, Class: stringClass}
+			}
+		},
+		Name: "*",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*StringObject).Value
 				right, ok := args[0].(*StringObject)
@@ -104,11 +122,6 @@ var builtinStringMethods = []*BuiltInMethod{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
-				err := checkArgumentLen(args, stringClass, "<")
-				if err != nil {
-					return err
-				}
-
 				leftValue := receiver.(*StringObject).Value
 				right, ok := args[0].(*StringObject)
 
@@ -130,12 +143,6 @@ var builtinStringMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-
-				err := checkArgumentLen(args, stringClass, "==")
-
-				if err != nil {
-					return err
-				}
 
 				leftValue := receiver.(*StringObject).Value
 				right, ok := args[0].(*StringObject)
@@ -159,11 +166,30 @@ var builtinStringMethods = []*BuiltInMethod{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
-				err := checkArgumentLen(args, stringClass, "!=")
+				leftValue := receiver.(*StringObject).Value
+				right, ok := args[0].(*StringObject)
 
-				if err != nil {
-					return err
+				if !ok {
+					return wrongTypeError(stringClass)
 				}
+
+				rightValue := right.Value
+
+				if leftValue < rightValue {
+					return initilaizeInteger(-1)
+				}
+				if leftValue > rightValue {
+					return initilaizeInteger(1)
+				}
+
+				return initilaizeInteger(0)
+			}
+		},
+		Name: "<=>",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*StringObject).Value
 				right, ok := args[0].(*StringObject)
@@ -182,6 +208,90 @@ var builtinStringMethods = []*BuiltInMethod{
 			}
 		},
 		Name: "!=",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
+				str := []byte(receiver.(*StringObject).Value)
+				start := string(str[0])
+				rest := string(str[1:])
+				result := strings.ToUpper(start) + strings.ToLower(rest)
+
+				return initializeString(result)
+			}
+		},
+		Name: "capitalize",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
+				str := receiver.(*StringObject).Value
+
+				return initializeString(strings.ToUpper(str))
+			}
+		},
+		Name: "upcase",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
+				str := receiver.(*StringObject).Value
+
+				return initializeString(strings.ToLower(str))
+			}
+		},
+		Name: "downcase",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
+				str := receiver.(*StringObject).Value
+
+				return initilaizeInteger(len(str))
+			}
+		},
+		Name: "size",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
+				str := receiver.(*StringObject).Value
+
+				return initilaizeInteger(len(str))
+			}
+		},
+		Name: "length",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
+				str := receiver.(*StringObject).Value
+				var revert string
+				for i := len(str) - 1; i >= 0; i-- {
+					revert += string(str[i])
+				}
+
+				return initializeString(revert)
+			}
+		},
+		Name: "reverse",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
+				str := receiver.(*StringObject).Value
+
+				return initializeString(str)
+			}
+		},
+		Name: "to_s",
 	},
 }
 

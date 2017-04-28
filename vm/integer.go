@@ -295,10 +295,6 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
-				if len(args) > 0 {
-					return &Error{Message: "Too many arguments for Integer#--"}
-				}
-
 				int := receiver.(*IntegerObject)
 				int.Value--
 				return int
