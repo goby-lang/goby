@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+	"math"
 )
 
 var (
@@ -40,12 +41,6 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
-				err := checkArgumentLen(args, integerClass, "+")
-
-				if err != nil {
-					return err
-				}
-
 				leftValue := receiver.(*IntegerObject).Value
 				right, ok := args[0].(*IntegerObject)
 
@@ -62,12 +57,6 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-
-				err := checkArgumentLen(args, integerClass, "-")
-
-				if err != nil {
-					return err
-				}
 
 				leftValue := receiver.(*IntegerObject).Value
 				right, ok := args[0].(*IntegerObject)
@@ -86,12 +75,6 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
-				err := checkArgumentLen(args, integerClass, "+")
-
-				if err != nil {
-					return err
-				}
-
 				leftValue := receiver.(*IntegerObject).Value
 				right, ok := args[0].(*IntegerObject)
 
@@ -109,11 +92,23 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
-				err := checkArgumentLen(args, integerClass, "+")
+				leftValue := receiver.(*IntegerObject).Value
+				right, ok := args[0].(*IntegerObject)
 
-				if err != nil {
-					return err
+				if !ok {
+					return wrongTypeError(integerClass)
 				}
+
+				rightValue := right.Value
+				result := math.Pow(float64(leftValue), float64(rightValue))
+				return &IntegerObject{Value: int(result), Class: integerClass}
+			}
+		},
+		Name: "**",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
 				right, ok := args[0].(*IntegerObject)
@@ -131,11 +126,6 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-
-				err := checkArgumentLen(args, integerClass, ">")
-				if err != nil {
-					return err
-				}
 
 				leftValue := receiver.(*IntegerObject).Value
 				right, ok := args[0].(*IntegerObject)
@@ -159,10 +149,27 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
-				err := checkArgumentLen(args, integerClass, "<")
-				if err != nil {
-					return err
+				leftValue := receiver.(*IntegerObject).Value
+				right, ok := args[0].(*IntegerObject)
+
+				if !ok {
+					return wrongTypeError(integerClass)
 				}
+
+				rightValue := right.Value
+
+				if leftValue >= rightValue {
+					return TRUE
+				}
+
+				return FALSE
+			}
+		},
+		Name: ">=",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
 				right, ok := args[0].(*IntegerObject)
@@ -186,11 +193,52 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
-				err := checkArgumentLen(args, integerClass, "==")
+				leftValue := receiver.(*IntegerObject).Value
+				right, ok := args[0].(*IntegerObject)
 
-				if err != nil {
-					return err
+				if !ok {
+					return wrongTypeError(integerClass)
 				}
+
+				rightValue := right.Value
+
+				if leftValue <= rightValue {
+					return TRUE
+				}
+
+				return FALSE
+			}
+		},
+		Name: "<=",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
+				leftValue := receiver.(*IntegerObject).Value
+				right, ok := args[0].(*IntegerObject)
+
+				if !ok {
+					return wrongTypeError(integerClass)
+				}
+
+				rightValue := right.Value
+
+				if leftValue < rightValue {
+					return initilaizeInteger(-1)
+				}
+				if leftValue > rightValue {
+					return initilaizeInteger(1)
+				}
+
+				return initilaizeInteger(0)
+			}
+		},
+		Name: "<=>",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
 				right, ok := args[0].(*IntegerObject)
@@ -214,12 +262,6 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
-				err := checkArgumentLen(args, integerClass, "!=")
-
-				if err != nil {
-					return err
-				}
-
 				leftValue := receiver.(*IntegerObject).Value
 				right, ok := args[0].(*IntegerObject)
 
@@ -241,10 +283,6 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-
-				if len(args) > 0 {
-					return &Error{Message: "Too many arguments for Integer#++"}
-				}
 
 				int := receiver.(*IntegerObject)
 				int.Value++
@@ -272,11 +310,8 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
-				if len(args) > 0 {
-					return &Error{Message: "Too many arguments for Integer#to_s"}
-				}
-
 				int := receiver.(*IntegerObject)
+
 				return initializeString(fmt.Sprint(int.Value))
 			}
 		},
@@ -285,9 +320,6 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-				if len(args) > 0 {
-					return &Error{Message: "Too many arguments for Integer#even"}
-				}
 
 				i := receiver.(*IntegerObject)
 				even := i.Value%2 == 0
@@ -304,9 +336,6 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-				if len(args) > 0 {
-					return &Error{Message: "Too many arguments for Integer#odd"}
-				}
 
 				i := receiver.(*IntegerObject)
 				odd := i.Value%2 != 0

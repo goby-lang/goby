@@ -60,6 +60,12 @@ func TestNextToken(t *testing.T) {
 	end
 
 	require_relative "foo"
+
+	10 <= 10;
+	10 >= 10;
+	a = 1 <=> 2;
+
+	8 ** 10;
 	`
 
 	tests := []struct {
@@ -228,7 +234,29 @@ func TestNextToken(t *testing.T) {
 		{token.RequireRelative, "require_relative", 53},
 		{token.String, "foo", 53},
 
-		{token.EOF, "", 54},
+		{token.Int, "10", 55},
+		{token.LTE, "<=", 55},
+		{token.Int, "10", 55},
+		{token.Semicolon, ";", 55},
+
+		{token.Int, "10", 56},
+		{token.GTE, ">=", 56},
+		{token.Int, "10", 56},
+		{token.Semicolon, ";", 56},
+
+		{token.Ident, "a", 57},
+		{token.Assign, "=", 57},
+		{token.Int, "1", 57},
+		{token.COMP, "<=>", 57},
+		{token.Int, "2", 57},
+		{token.Semicolon, ";", 57},
+
+		{token.Int, "8", 59},
+		{token.Pow, "**", 59},
+		{token.Int, "10", 59},
+		{token.Semicolon, ";", 59},
+
+		{token.EOF, "", 60},
 	}
 
 	l := New(input)
