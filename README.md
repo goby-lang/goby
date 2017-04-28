@@ -113,7 +113,7 @@ See the [guideline](https://github.com/rooby-lang/rooby/blob/master/CONTRIBUTING
 
 ## References
 
-I can't build this project with these resources, and I highly recommend you to check them out if you're interested in building your own languages
+I can't build this project without these resources, and I highly recommend you to check them out if you're interested in building your own languages
 
 - [Write An Interpreter In Go](https://interpreterbook.com)
 - [Nand2Tetris II](https://www.coursera.org/learn/nand2tetris2/home/welcome)
