@@ -58,7 +58,7 @@ func (cf *callFrame) inspect() string {
 
 func (cfs *callFrameStack) push(cf *callFrame) {
 	if cf == nil {
-		panic("Callfame can't be nil!")
+		panic("Callframe can't be nil!")
 	}
 
 	if len(cfs.callFrames) <= cfs.vm.cfp {

@@ -452,6 +452,37 @@ func testBooleanObject(t *testing.T, obj Object, expected bool) bool {
 	return true
 }
 
+func testArrayObject(t *testing.T, obj Object, expected *ArrayObject) bool {
+	result, ok := obj.(*ArrayObject)
+	if !ok {
+		t.Errorf("object is not Array. got=%T (%+v)", obj, obj)
+		return false
+	}
+
+	for i := 0; i < len(result.Elements); i++ {
+		intObj, ok := expected.Elements[i].(*IntegerObject)
+		if ok {
+			testIntegerObject(t, result.Elements[i], intObj.Value)
+			continue
+		}
+		str, ok := expected.Elements[i].(*StringObject)
+		if ok {
+			testStringObject(t, result.Elements[i], str.Value)
+			continue
+		}
+
+		b, ok := expected.Elements[i].(*BooleanObject)
+		if ok {
+			testBooleanObject(t, result.Elements[i], b.Value)
+			continue
+		}
+
+		t.Fatalf("object is wrong type %T", expected.Elements[i])
+	}
+
+	return true
+}
+
 func isError(obj Object) bool {
 	if obj != nil {
 		return obj.objectType() == errorObj

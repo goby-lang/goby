@@ -48,3 +48,13 @@ func TestEvalInfixBooleanExpression(t *testing.T) {
 		testBooleanObject(t, evaluated, tt.expected)
 	}
 }
+
+func TestInitializeBoolean(t *testing.T) {
+	if !TRUE.Value {
+		t.Errorf("expected 'true'. got=%t", TRUE.Value)
+	}
+
+	if FALSE.Value {
+		t.Errorf("expected 'false'. got=%t", FALSE.Value)
+	}
+}

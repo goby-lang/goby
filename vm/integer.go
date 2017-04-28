@@ -273,7 +273,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
 				if len(args) > 0 {
-					return &Error{Message: "Too many arguments for Integer#--"}
+					return &Error{Message: "Too many arguments for Integer#to_s"}
 				}
 
 				int := receiver.(*IntegerObject)
@@ -281,6 +281,43 @@ var builtinIntegerMethods = []*BuiltInMethod{
 			}
 		},
 		Name: "to_s",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				if len(args) > 0 {
+					return &Error{Message: "Too many arguments for Integer#even"}
+				}
+
+				i := receiver.(*IntegerObject)
+				even := i.Value%2 == 0
+
+				if even {
+					return TRUE
+				}
+
+				return FALSE
+			}
+		},
+		Name: "even",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				if len(args) > 0 {
+					return &Error{Message: "Too many arguments for Integer#odd"}
+				}
+
+				i := receiver.(*IntegerObject)
+				odd := i.Value%2 != 0
+				if odd {
+					return TRUE
+				}
+
+				return FALSE
+			}
+		},
+		Name: "odd",
 	},
 }
 

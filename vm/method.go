@@ -66,7 +66,7 @@ func (bim *BuiltInMethod) Inspect() string {
 }
 
 // builtInMethodYield is like invokeblock instruction for built in methods
-func builtInMethodYield(vm *VM, blockFrame *callFrame, args ...Object) {
+func builtInMethodYield(vm *VM, blockFrame *callFrame, args ...Object) *Pointer {
 	c := newCallFrame(blockFrame.instructionSet)
 	c.blockFrame = blockFrame
 	c.ep = blockFrame.ep
@@ -78,4 +78,6 @@ func builtInMethodYield(vm *VM, blockFrame *callFrame, args ...Object) {
 
 	vm.callFrameStack.push(c)
 	vm.start()
+
+	return vm.stack.top()
 }
