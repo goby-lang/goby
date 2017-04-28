@@ -165,19 +165,19 @@ func TestMapMethod(t *testing.T) {
 		a.map do |i|
 			i + 3
 		end
-		`, InitializeArray([]Object{initilaizeInteger(4), initilaizeInteger(5), initilaizeInteger(10)})},
+		`, initializeArray([]Object{initilaizeInteger(4), initilaizeInteger(5), initilaizeInteger(10)})},
 		{`
 		a = [true, false, true, false, true ]
 		a.map do |i|
 			!i
 		end
-		`, InitializeArray([]Object{FALSE, TRUE, FALSE, TRUE, FALSE})},
+		`, initializeArray([]Object{FALSE, TRUE, FALSE, TRUE, FALSE})},
 		{`
 		a = ["1", "sss", "qwe"]
 		a.map do |i|
 			i + "1"
 		end
-		`, InitializeArray([]Object{initializeString("11"), initializeString("sss1"), initializeString("qwe1")})},
+		`, initializeArray([]Object{initializeString("11"), initializeString("sss1"), initializeString("qwe1")})},
 	}
 
 	for _, tt := range tests {
@@ -196,19 +196,19 @@ func TestSelectMethod(t *testing.T) {
 		a.select do |i|
 			i > 3
 		end
-		`, InitializeArray([]Object{initilaizeInteger(4), initilaizeInteger(5)})},
+		`, initializeArray([]Object{initilaizeInteger(4), initilaizeInteger(5)})},
 		{`
 		a = [true, false, true, false, true ]
 		a.select do |i|
 			i
 		end
-		`, InitializeArray([]Object{TRUE, TRUE, TRUE})},
+		`, initializeArray([]Object{TRUE, TRUE, TRUE})},
 		{`
 		a = ["test", "not2", "3", "test", "5"]
 		a.select do |i|
 			i == "test"
 		end
-		`, InitializeArray([]Object{initializeString("test"), initializeString("test")})},
+		`, initializeArray([]Object{initializeString("test"), initializeString("test")})},
 	}
 
 	for _, tt := range tests {
