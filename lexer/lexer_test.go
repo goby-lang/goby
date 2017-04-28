@@ -64,6 +64,8 @@ func TestNextToken(t *testing.T) {
 	10 <= 10;
 	10 >= 10;
 	a = 1 <=> 2;
+
+	8 ** 10;
 	`
 
 	tests := []struct {
@@ -249,7 +251,12 @@ func TestNextToken(t *testing.T) {
 		{token.Int, "2", 57},
 		{token.Semicolon, ";", 57},
 
-		{token.EOF, "", 58},
+		{token.Int, "8", 59},
+		{token.Pow, "**", 59},
+		{token.Int, "10", 59},
+		{token.Semicolon, ";", 59},
+
+		{token.EOF, "", 60},
 	}
 
 	l := New(input)

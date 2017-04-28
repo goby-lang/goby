@@ -62,31 +62,27 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.Slash, l.ch, l.line)
 	case '*':
 		if l.peekChar() == '*' {
-			currentByte := l.ch
 			l.readChar()
-			tok = token.Token{Type: token.Pow, Literal: string(currentByte) + string(l.ch), Line: l.line}
+			tok = token.Token{Type: token.Pow, Literal: "**", Line: l.line}
 		} else {
 			tok = newToken(token.Asterisk, l.ch, l.line)
 		}
 	case '<':
 		if l.peekChar() == '=' {
-			currentByte := l.ch
 			l.readChar()
 			if l.peekChar() == '>' {
-				currentByteNext := l.ch
 				l.readChar()
-				tok = token.Token{Type: token.COMP, Literal: string(currentByte) + string(currentByteNext) + string(l.ch), Line: l.line}
+				tok = token.Token{Type: token.COMP, Literal: "<=>", Line: l.line}
 			} else {
-				tok = token.Token{Type: token.LTE, Literal: string(currentByte) + string(l.ch), Line: l.line}
+				tok = token.Token{Type: token.LTE, Literal: "<=", Line: l.line}
 			}
 		} else {
 			tok = newToken(token.LT, l.ch, l.line)
 		}
 	case '>':
 		if l.peekChar() == '=' {
-			currentByte := l.ch
 			l.readChar()
-			tok = token.Token{Type: token.GTE, Literal: string(currentByte) + string(l.ch), Line: l.line}
+			tok = token.Token{Type: token.GTE, Literal: ">=", Line: l.line}
 		} else {
 			tok = newToken(token.GT, l.ch, l.line)
 		}
