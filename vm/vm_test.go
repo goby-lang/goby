@@ -1,10 +1,11 @@
 package vm
 
 import (
+	"testing"
+
 	"github.com/rooby-lang/rooby/bytecode"
 	"github.com/rooby-lang/rooby/lexer"
 	"github.com/rooby-lang/rooby/parser"
-	"testing"
 )
 
 func TestCunstomConstructorAndInstanceVariable(t *testing.T) {
@@ -444,7 +445,7 @@ func testBooleanObject(t *testing.T, obj Object, expected bool) bool {
 		return false
 	}
 	if result.Value != expected {
-		t.Errorf("object has wrong value. expect=%b, got=%d", expected, result.Value)
+		t.Errorf("object has wrong value. expect=%t, got=%t", expected, result.Value)
 		return false
 	}
 
