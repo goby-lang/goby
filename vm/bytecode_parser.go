@@ -16,18 +16,18 @@ type bytecodeParser struct {
 	line       int
 	labelTable map[labelType]map[string][]*instructionSet
 	vm         *VM
-	file       string
+	filename   filename
 	blockTable map[string]*instructionSet
+	program    *instructionSet
 }
 
 // newBytecodeParser initializes bytecodeParser and its label table then returns it
-func newBytecodeParser(file string) *bytecodeParser {
-	p := &bytecodeParser{file: file}
+func newBytecodeParser(file filename) *bytecodeParser {
+	p := &bytecodeParser{filename: file}
 	p.blockTable = make(map[string]*instructionSet)
 	p.labelTable = map[labelType]map[string][]*instructionSet{
 		LabelDef:      make(map[string][]*instructionSet),
 		LabelDefClass: make(map[string][]*instructionSet),
-		Program:       make(map[string][]*instructionSet),
 	}
 
 	return p
@@ -44,7 +44,7 @@ func (p *bytecodeParser) parseBytecode(bytecodes string) []*instructionSet {
 }
 
 func (p *bytecodeParser) parseSection(iss []*instructionSet, bytecodesByLine []string) {
-	is := &instructionSet{file: p.file}
+	is := &instructionSet{filename: p.filename}
 	count := 0
 
 	// First line is label
@@ -76,9 +76,8 @@ func (p *bytecodeParser) setLabel(is *instructionSet, name string) {
 	var labelType labelType
 
 	if name == "ProgramStart" {
-		labelName = name
-		labelType = Program
-
+		p.program = is
+		return
 	} else {
 		labelName = strings.Split(name, ":")[1]
 		labelType = labelTypes[strings.Split(name, ":")[0]]
@@ -91,6 +90,7 @@ func (p *bytecodeParser) setLabel(is *instructionSet, name string) {
 		p.blockTable[labelName] = is
 		return
 	}
+
 	p.labelTable[labelType][labelName] = append(p.labelTable[labelType][labelName], is)
 }
 
