@@ -5,9 +5,9 @@ import (
 	"github.com/rooby-lang/rooby/parser"
 	"github.com/rooby-lang/rooby/vm"
 	"io/ioutil"
-	"testing"
-	"runtime"
 	"path"
+	"runtime"
+	"testing"
 )
 
 func TestRequireRelative(t *testing.T) {
@@ -15,7 +15,7 @@ func TestRequireRelative(t *testing.T) {
 	fileDir := "require_test"
 	result := execFile(fileDir, filename)
 
-	testIntegerObject(t, result, 50)
+	testIntegerObject(t, result, 160)
 }
 
 func execFile(fileDir, filename string) vm.Object {
@@ -37,7 +37,7 @@ func execFile(fileDir, filename string) vm.Object {
 	bytecodes := g.GenerateByteCode(program)
 
 	v := vm.New(dir)
-	v.ExecBytecodes(bytecodes)
+	v.ExecBytecodes(bytecodes, filepath)
 	return v.GetExecResult()
 }
 

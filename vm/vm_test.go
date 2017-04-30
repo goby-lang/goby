@@ -396,7 +396,7 @@ func checkParserErrors(t *testing.T, p *parser.Parser) {
 
 func testExec(bytecodes string) Object {
 	v := New("./")
-	v.ExecBytecodes(bytecodes)
+	v.ExecBytecodes(bytecodes, "./")
 
 	return v.stack.top().Target
 }

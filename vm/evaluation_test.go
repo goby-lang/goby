@@ -774,7 +774,7 @@ func TestMethodCallWithBlockArgument(t *testing.T) {
 
 		f.bar(10) do |x|
                   y = x + y
-                end
+		end
 
 		y
 		`, 20},

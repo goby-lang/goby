@@ -19,19 +19,27 @@ type VM struct {
 	// a map holds pointers of constants
 	constants map[string]*Pointer
 	// a map holds different types of label tables
-	labelTables map[labelType]map[string][]*instructionSet
+	isTables map[labelType]isTable
 	// method instruction set table
-	methodISTable *isIndexTable
+	methodISIndexTables map[filename]*isIndexTable
 	// class instruction set table
-	classISTable *isIndexTable
+	classISIndexTables map[filename]*isIndexTable
 	// block instruction set table
-	blockList *isIndexTable
+	blockTables map[filename]map[string]*instructionSet
 
 	fileDir string
 }
 
 type isIndexTable struct {
 	Data map[string]int
+}
+
+type isTable map[string][]*instructionSet
+
+type filename string
+
+func newISIndexTable() *isIndexTable {
+	return &isIndexTable{Data: make(map[string]int)}
 }
 
 type stack struct {
@@ -48,22 +56,25 @@ func New(fileDir string) *VM {
 	cfs.vm = vm
 
 	vm.initConstants()
-	vm.methodISTable = &isIndexTable{Data: make(map[string]int)}
-	vm.classISTable = &isIndexTable{Data: make(map[string]int)}
-	vm.blockList = &isIndexTable{Data: make(map[string]int)}
-	vm.labelTables = map[labelType]map[string][]*instructionSet{
-		LabelDef:      make(map[string][]*instructionSet),
-		LabelDefClass: make(map[string][]*instructionSet),
-		Block:         make(map[string][]*instructionSet),
-		Program:       make(map[string][]*instructionSet),
+	vm.methodISIndexTables = map[filename]*isIndexTable{
+		filename(fileDir): newISIndexTable(),
+	}
+	vm.classISIndexTables = map[filename]*isIndexTable{
+		filename(fileDir): newISIndexTable(),
+	}
+	vm.blockTables = make(map[filename]map[string]*instructionSet)
+	vm.isTables = map[labelType]isTable{
+		LabelDef:      make(isTable),
+		LabelDefClass: make(isTable),
 	}
 	vm.fileDir = fileDir
 	return vm
 }
 
 // ExecBytecodes accepts a sequence of bytecodes and use vm to evaluate them.
-func (vm *VM) ExecBytecodes(bytecodes string) {
-	p := newBytecodeParser()
+func (vm *VM) ExecBytecodes(bytecodes, fn string) {
+	filename := filename(fn)
+	p := newBytecodeParser(filename)
 	p.vm = vm
 	p.parseBytecode(bytecodes)
 
@@ -71,11 +82,15 @@ func (vm *VM) ExecBytecodes(bytecodes string) {
 	// TODO: Find more efficient way to do this.
 	for labelType, table := range p.labelTable {
 		for labelName, is := range table {
-			vm.labelTables[labelType][labelName] = is
+			vm.isTables[labelType][labelName] = is
 		}
 	}
 
-	cf := newCallFrame(vm.labelTables[Program]["ProgramStart"][0])
+	vm.blockTables[p.filename] = p.blockTable
+	vm.classISIndexTables[filename] = newISIndexTable()
+	vm.methodISIndexTables[filename] = newISIndexTable()
+
+	cf := newCallFrame(p.program)
 	cf.self = mainObj
 	vm.callFrameStack.push(cf)
 	vm.start()
@@ -129,43 +144,41 @@ func (vm *VM) execInstruction(cf *callFrame, i *instruction) {
 	//fmt.Println(vm.stack.inspect())
 }
 
-func (vm *VM) getBlock(name string) (*instructionSet, bool) {
+func (vm *VM) getBlock(name string, filename filename) (*instructionSet, bool) {
 	// The "name" here is actually an index from label
 	// for example <Block:1>'s name is "1"
-	iss, ok := vm.labelTables[Block][name]
+	is, ok := vm.blockTables[filename][name]
 
 	if !ok {
 		return nil, false
 	}
-
-	is := iss[0]
 
 	return is, ok
 }
 
-func (vm *VM) getMethodIS(name string) (*instructionSet, bool) {
-	iss, ok := vm.labelTables[LabelDef][name]
+func (vm *VM) getMethodIS(name string, filename filename) (*instructionSet, bool) {
+	iss, ok := vm.isTables[LabelDef][name]
 
 	if !ok {
 		return nil, false
 	}
 
-	is := iss[vm.methodISTable.Data[name]]
+	is := iss[vm.methodISIndexTables[filename].Data[name]]
 
-	vm.methodISTable.Data[name]++
+	vm.methodISIndexTables[filename].Data[name]++
 	return is, ok
 }
 
-func (vm *VM) getClassIS(name string) (*instructionSet, bool) {
-	iss, ok := vm.labelTables[LabelDefClass][name]
+func (vm *VM) getClassIS(name string, filename filename) (*instructionSet, bool) {
+	iss, ok := vm.isTables[LabelDefClass][name]
 
 	if !ok {
 		return nil, false
 	}
 
-	is := iss[vm.classISTable.Data[name]]
+	is := iss[vm.classISIndexTables[filename].Data[name]]
 
-	vm.classISTable.Data[name]++
+	vm.classISIndexTables[filename].Data[name]++
 	return is, ok
 }
 

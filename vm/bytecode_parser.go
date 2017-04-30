@@ -16,16 +16,18 @@ type bytecodeParser struct {
 	line       int
 	labelTable map[labelType]map[string][]*instructionSet
 	vm         *VM
+	filename   filename
+	blockTable map[string]*instructionSet
+	program    *instructionSet
 }
 
 // newBytecodeParser initializes bytecodeParser and its label table then returns it
-func newBytecodeParser() *bytecodeParser {
-	p := &bytecodeParser{}
+func newBytecodeParser(file filename) *bytecodeParser {
+	p := &bytecodeParser{filename: file}
+	p.blockTable = make(map[string]*instructionSet)
 	p.labelTable = map[labelType]map[string][]*instructionSet{
 		LabelDef:      make(map[string][]*instructionSet),
 		LabelDefClass: make(map[string][]*instructionSet),
-		Block:         make(map[string][]*instructionSet),
-		Program:       make(map[string][]*instructionSet),
 	}
 
 	return p
@@ -42,7 +44,7 @@ func (p *bytecodeParser) parseBytecode(bytecodes string) []*instructionSet {
 }
 
 func (p *bytecodeParser) parseSection(iss []*instructionSet, bytecodesByLine []string) {
-	is := &instructionSet{}
+	is := &instructionSet{filename: p.filename}
 	count := 0
 
 	// First line is label
@@ -74,9 +76,8 @@ func (p *bytecodeParser) setLabel(is *instructionSet, name string) {
 	var labelType labelType
 
 	if name == "ProgramStart" {
-		labelName = name
-		labelType = Program
-
+		p.program = is
+		return
 	} else {
 		labelName = strings.Split(name, ":")[1]
 		labelType = labelTypes[strings.Split(name, ":")[0]]
@@ -84,6 +85,12 @@ func (p *bytecodeParser) setLabel(is *instructionSet, name string) {
 
 	l = &label{name: name, Type: labelType}
 	is.label = l
+
+	if labelType == Block {
+		p.blockTable[labelName] = is
+		return
+	}
+
 	p.labelTable[labelType][labelName] = append(p.labelTable[labelType][labelName], is)
 }
 
@@ -113,7 +120,7 @@ func (p *bytecodeParser) parseInstruction(is *instructionSet, line string) {
 		program := parser.BuildAST(file)
 		g := bytecode.NewGenerator(program)
 		bytecodes := g.GenerateByteCode(program)
-		p.vm.ExecBytecodes(bytecodes)
+		p.vm.ExecBytecodes(bytecodes, filepath)
 		return
 	} else if len(tokens) > 2 {
 		rawParams = tokens[2:]
