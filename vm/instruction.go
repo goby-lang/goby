@@ -246,7 +246,7 @@ var builtInActions = map[operationType]*action{
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			methodName := vm.stack.pop().Target.(*StringObject).Value
-			is, _ := vm.getMethodIS(methodName)
+			is, _ := vm.getMethodIS(methodName, cf.instructionSet.file)
 			method := &Method{Name: methodName, argc: argCount, instructionSet: is}
 
 			v := vm.stack.pop().Target
@@ -265,7 +265,7 @@ var builtInActions = map[operationType]*action{
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			methodName := vm.stack.pop().Target.(*StringObject).Value
-			is, _ := vm.getMethodIS(methodName)
+			is, _ := vm.getMethodIS(methodName, cf.instructionSet.file)
 			method := &Method{Name: methodName, argc: argCount, instructionSet: is}
 
 			v := vm.stack.pop().Target
@@ -287,7 +287,7 @@ var builtInActions = map[operationType]*action{
 			classPr := &Pointer{Target: class}
 			vm.constants[class.Name] = classPr
 
-			is, ok := vm.getClassIS(class.Name)
+			is, ok := vm.getClassIS(class.Name, cf.instructionSet.file)
 
 			if !ok {
 				panic(fmt.Sprintf("Can't find class %s's instructions", class.Name))
@@ -355,7 +355,7 @@ var builtInActions = map[operationType]*action{
 			var blockFrame *callFrame
 
 			if hasBlock {
-				block, ok := vm.getBlock(blockName)
+				block, ok := vm.getBlock(blockName, cf.instructionSet.file)
 
 				if !ok {
 					panic(fmt.Sprintf("Can't find block %s", blockName))

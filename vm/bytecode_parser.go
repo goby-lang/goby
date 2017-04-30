@@ -17,15 +17,16 @@ type bytecodeParser struct {
 	labelTable map[labelType]map[string][]*instructionSet
 	vm         *VM
 	file       string
+	blockTable map[string]*instructionSet
 }
 
 // newBytecodeParser initializes bytecodeParser and its label table then returns it
 func newBytecodeParser(file string) *bytecodeParser {
 	p := &bytecodeParser{file: file}
+	p.blockTable = make(map[string]*instructionSet)
 	p.labelTable = map[labelType]map[string][]*instructionSet{
 		LabelDef:      make(map[string][]*instructionSet),
 		LabelDefClass: make(map[string][]*instructionSet),
-		Block:         make(map[string][]*instructionSet),
 		Program:       make(map[string][]*instructionSet),
 	}
 
@@ -85,6 +86,11 @@ func (p *bytecodeParser) setLabel(is *instructionSet, name string) {
 
 	l = &label{name: name, Type: labelType}
 	is.label = l
+
+	if labelType == Block {
+		p.blockTable[labelName] = is
+		return
+	}
 	p.labelTable[labelType][labelName] = append(p.labelTable[labelType][labelName], is)
 }
 

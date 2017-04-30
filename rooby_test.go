@@ -10,13 +10,13 @@ import (
 	"testing"
 )
 
-//func TestRequireRelative(t *testing.T) {
-//	filename := "main.ro"
-//	fileDir := "require_test"
-//	result := execFile(fileDir, filename)
-//
-//	testIntegerObject(t, result, 50)
-//}
+func TestRequireRelative(t *testing.T) {
+	filename := "main.ro"
+	fileDir := "require_test"
+	result := execFile(fileDir, filename)
+
+	testIntegerObject(t, result, 160)
+}
 
 func execFile(fileDir, filename string) vm.Object {
 	_, currentPath, _, _ := runtime.Caller(0)

@@ -21,11 +21,11 @@ type VM struct {
 	// a map holds different types of label tables
 	labelTables map[labelType]map[string][]*instructionSet
 	// method instruction set table
-	methodISTable *isIndexTable
+	methodISTable map[string]*isIndexTable
 	// class instruction set table
-	classISTable *isIndexTable
+	classISTable map[string]*isIndexTable
 	// block instruction set table
-	blockList *isIndexTable
+	blockTables map[string]map[string]*instructionSet
 
 	fileDir string
 }
@@ -48,13 +48,16 @@ func New(fileDir string) *VM {
 	cfs.vm = vm
 
 	vm.initConstants()
-	vm.methodISTable = &isIndexTable{Data: make(map[string]int)}
-	vm.classISTable = &isIndexTable{Data: make(map[string]int)}
-	vm.blockList = &isIndexTable{Data: make(map[string]int)}
+	vm.methodISTable = map[string]*isIndexTable{
+		fileDir: {Data: make(map[string]int)},
+	}
+	vm.classISTable = map[string]*isIndexTable{
+		fileDir: {Data: make(map[string]int)},
+	}
+	vm.blockTables = make(map[string]map[string]*instructionSet)
 	vm.labelTables = map[labelType]map[string][]*instructionSet{
 		LabelDef:      make(map[string][]*instructionSet),
 		LabelDefClass: make(map[string][]*instructionSet),
-		Block:         make(map[string][]*instructionSet),
 		Program:       make(map[string][]*instructionSet),
 	}
 	vm.fileDir = fileDir
@@ -74,6 +77,9 @@ func (vm *VM) ExecBytecodes(bytecodes, filepath string) {
 			vm.labelTables[labelType][labelName] = is
 		}
 	}
+	vm.blockTables[p.file] = p.blockTable
+	vm.classISTable[filepath] = &isIndexTable{Data: make(map[string]int)}
+	vm.methodISTable[filepath] = &isIndexTable{Data: make(map[string]int)}
 
 	cf := newCallFrame(vm.labelTables[Program]["ProgramStart"][0])
 	cf.self = mainObj
@@ -129,43 +135,41 @@ func (vm *VM) execInstruction(cf *callFrame, i *instruction) {
 	//fmt.Println(vm.stack.inspect())
 }
 
-func (vm *VM) getBlock(name string) (*instructionSet, bool) {
+func (vm *VM) getBlock(name, file string) (*instructionSet, bool) {
 	// The "name" here is actually an index from label
 	// for example <Block:1>'s name is "1"
-	iss, ok := vm.labelTables[Block][name]
+	is, ok := vm.blockTables[file][name]
 
 	if !ok {
 		return nil, false
 	}
 
-	is := iss[0]
-
 	return is, ok
 }
 
-func (vm *VM) getMethodIS(name string) (*instructionSet, bool) {
+func (vm *VM) getMethodIS(name, file string) (*instructionSet, bool) {
 	iss, ok := vm.labelTables[LabelDef][name]
 
 	if !ok {
 		return nil, false
 	}
 
-	is := iss[vm.methodISTable.Data[name]]
+	is := iss[vm.methodISTable[file].Data[name]]
 
-	vm.methodISTable.Data[name]++
+	vm.methodISTable[file].Data[name]++
 	return is, ok
 }
 
-func (vm *VM) getClassIS(name string) (*instructionSet, bool) {
+func (vm *VM) getClassIS(name, file string) (*instructionSet, bool) {
 	iss, ok := vm.labelTables[LabelDefClass][name]
 
 	if !ok {
 		return nil, false
 	}
 
-	is := iss[vm.classISTable.Data[name]]
+	is := iss[vm.classISTable[file].Data[name]]
 
-	vm.classISTable.Data[name]++
+	vm.classISTable[file].Data[name]++
 	return is, ok
 }
 
