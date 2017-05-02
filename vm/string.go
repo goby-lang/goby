@@ -36,6 +36,10 @@ func (s *StringObject) returnClass() Class {
 	return s.Class
 }
 
+func (s *StringObject) equal(e *StringObject) bool {
+	return s.Value == e.Value
+}
+
 var (
 	stringTable = make(map[string]*StringObject)
 )

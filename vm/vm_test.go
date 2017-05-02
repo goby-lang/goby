@@ -459,6 +459,10 @@ func testArrayObject(t *testing.T, obj Object, expected *ArrayObject) bool {
 		return false
 	}
 
+	if len(result.Elements) != len(expected.Elements) {
+		t.Fatalf("Don't equals length of array. Expect %d, got=%d", len(expected.Elements), len(result.Elements))
+	}
+
 	for i := 0; i < len(result.Elements); i++ {
 		intObj, ok := expected.Elements[i].(*IntegerObject)
 		if ok {
