@@ -65,6 +65,13 @@ func (a *ArrayObject) push(objs []Object) *ArrayObject {
 	return a
 }
 
+// shift removes the first element in the array and returns it
+func (a *ArrayObject) shift() Object {
+	value := a.Elements[0]
+	a.Elements = a.Elements[1:]
+	return value
+}
+
 // initializeArray returns an array that contains given objects
 func initializeArray(elements []Object) *ArrayObject {
 	return &ArrayObject{Elements: elements, Class: arrayClass}
@@ -191,6 +198,19 @@ var builtinArrayMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				if len(args) != 0 {
+					return newError("Expect 0 argument. got=%d", len(args))
+				}
+
+				arr := receiver.(*ArrayObject)
+				return arr.shift()
+			}
+		},
+		Name: "shift",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				arr := receiver.(*ArrayObject)
 
 				if blockFrame == nil {
@@ -304,5 +324,87 @@ var builtinArrayMethods = []*BuiltInMethod{
 			}
 		},
 		Name: "concat",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				arr := receiver.(*ArrayObject)
+				var count int
+
+				if blockFrame != nil {
+					for _, obj := range arr.Elements {
+						result := builtInMethodYield(vm, blockFrame, obj)
+						if result.Target.(*BooleanObject).Value {
+							count++
+						}
+					}
+
+					return initilaizeInteger(count)
+				}
+
+				if len(args) > 1 {
+					return newError("Expect one argument. got=%d", len(args))
+				}
+
+				if len(args) == 0 {
+					return initilaizeInteger(len(arr.Elements))
+				}
+
+				arg := args[0]
+				findInt, findIsInt := arg.(*IntegerObject)
+				findString, findIsString := arg.(*StringObject)
+				findBoolean, findIsBoolean := arg.(*BooleanObject)
+
+				for i := 0; i < len(arr.Elements); i++ {
+					elInt, isInt := arr.Elements[i].(*IntegerObject)
+					if isInt && findIsInt && elInt.Value == findInt.Value {
+						count++
+					}
+					elString, isString := arr.Elements[i].(*StringObject)
+					if isString && findIsString && elString.Value == findString.Value {
+						count++
+					}
+
+					elBoolean, isBoolean := arr.Elements[i].(*BooleanObject)
+					if isBoolean && findIsBoolean && elBoolean.Value == findBoolean.Value {
+						count++
+					}
+				}
+
+				return initilaizeInteger(count)
+			}
+		},
+		Name: "count",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
+				if len(args) > 1 {
+					return newError("Expect one argument. got=%d", len(args))
+				}
+
+				arr := receiver.(*ArrayObject)
+				rotArr := initializeArray(arr.Elements)
+
+				rotate := 1
+
+				if len(args) != 0 {
+					arg, ok := args[0].(*IntegerObject)
+					if !ok {
+						return newError("Expect index argument to be Integer. got=%T", args[0])
+					}
+					rotate = arg.Value
+				}
+
+				for i := 0; i < rotate; i++ {
+					el := rotArr.shift()
+					rotArr.push([]Object{el})
+				}
+
+				return rotArr
+			}
+		},
+		Name: "rotate",
 	},
 }

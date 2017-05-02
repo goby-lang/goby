@@ -53,6 +53,17 @@ func TestPushMethod(t *testing.T) {
 	}
 }
 
+func TestShiftMethod(t *testing.T) {
+	array := initializeArray([]Object{initilaizeInteger(1), initilaizeInteger(2), initilaizeInteger(3), initilaizeInteger(4)})
+	second := initializeArray([]Object{initilaizeInteger(2), initilaizeInteger(3), initilaizeInteger(4)})
+
+	m := getBuiltInMethod(t, array, "shift")
+	first := m(nil, nil, nil)
+
+	testArrayObject(t, array, second)
+	testIntegerObject(t, first, 1)
+}
+
 func TestEvalArrayExpression(t *testing.T) {
 	input := `
 	[1, "234", true]
@@ -296,6 +307,114 @@ func TestConcatMethod(t *testing.T) {
 		a = []
 		a.concat("a")
 		`, newError("Expect argument to be Array. got=*vm.StringObject")},
+	}
+
+	for _, tt := range testsFail {
+		evaluated := testEval(t, tt.input)
+		err, ok := evaluated.(*Error)
+		if !ok {
+			t.Errorf("Expect error. got=%T (%+v)", err, err)
+		}
+		if err.Message != tt.expected.Message {
+			t.Errorf("Expect error message \"%s\". got=\"%s\"", err.Message, tt.expected.Message)
+		}
+	}
+}
+
+func TestCountMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected *IntegerObject
+	}{
+		{`
+		a = [1, 2]
+		a.count
+		`, initilaizeInteger(2)},
+		{`
+		a = ["a", "bb", "c", "db", "bb", 2]
+		a.count("bb")
+		`, initilaizeInteger(2)},
+		{`
+		a = [true, true, true, false, true]
+		a.count(true)
+		`, initilaizeInteger(4)},
+		{`
+		a = []
+		a.count(true)
+		`, initilaizeInteger(0)},
+		{`
+		a = [1, 2, 3, 4, 5, 6, 7, 8]
+		a.count do |i|
+			i > 3
+		end
+		`, initilaizeInteger(5)},
+		{`
+		a = ["a", "bb", "c", "db", "bb"]
+		a.count do |i|
+			i.size > 1
+		end
+		`, initilaizeInteger(3)},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		testIntegerObject(t, evaluated, tt.expected.Value)
+	}
+
+	testsFail := []struct {
+		input    string
+		expected *Error
+	}{
+		{`
+		a = [1, 2]
+		a.count(3, 3)
+		`, newError("Expect one argument. got=2")},
+	}
+
+	for _, tt := range testsFail {
+		evaluated := testEval(t, tt.input)
+		err, ok := evaluated.(*Error)
+		if !ok {
+			t.Errorf("Expect error. got=%T (%+v)", err, err)
+		}
+		if err.Message != tt.expected.Message {
+			t.Errorf("Expect error message \"%s\". got=\"%s\"", err.Message, tt.expected.Message)
+		}
+	}
+}
+
+func TestRotateMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected *ArrayObject
+	}{
+		{`
+		a = [1, 2]
+		a.rotate
+		`, initializeArray([]Object{initilaizeInteger(2), initilaizeInteger(1)})},
+		{`
+		a = [1, 2, 3, 4]
+		a.rotate(2)
+		`, initializeArray([]Object{initilaizeInteger(3), initilaizeInteger(4), initilaizeInteger(1), initilaizeInteger(2)})},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		testArrayObject(t, evaluated, tt.expected)
+	}
+
+	testsFail := []struct {
+		input    string
+		expected *Error
+	}{
+		{`
+		a = [1, 2]
+		a.rotate(3, 3, 4, 5)
+		`, newError("Expect one argument. got=4")},
+		{`
+		a = [1, 2]
+		a.rotate("a")
+		`, newError("Expect index argument to be Integer. got=*vm.StringObject")},
 	}
 
 	for _, tt := range testsFail {
