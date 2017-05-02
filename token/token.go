@@ -32,6 +32,8 @@ const (
 	Dot      = "."
 	Incr     = "++"
 	Decr     = "--"
+	And      = "&&"
+	Or       = "||"
 
 	LT   = "<"
 	LTE  = "<="

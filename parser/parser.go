@@ -79,6 +79,8 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.LBracket, p.parseArrayIndexExpression)
 	p.registerInfix(token.Incr, p.parsePostfixExpression)
 	p.registerInfix(token.Decr, p.parsePostfixExpression)
+	p.registerInfix(token.And, p.parseInfixExpression)
+	p.registerInfix(token.Or, p.parseInfixExpression)
 
 	return p
 }

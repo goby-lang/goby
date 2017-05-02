@@ -16,6 +16,8 @@ var precedence = map[token.Type]int{
 	token.GT:       LESSGREATER,
 	token.GTE:      LESSGREATER,
 	token.COMP:     LESSGREATER,
+	token.And:      LESSGREATER,
+	token.Or:       LESSGREATER,
 	token.Plus:     SUM,
 	token.Minus:    SUM,
 	token.Incr:     SUM,
