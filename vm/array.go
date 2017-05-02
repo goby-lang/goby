@@ -247,4 +247,62 @@ var builtinArrayMethods = []*BuiltInMethod{
 		},
 		Name: "select",
 	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				i := args[0]
+				index, ok := i.(*IntegerObject)
+
+				if !ok {
+					return newError("Expect index argument to be Integer. got=%T", i)
+				}
+
+				arr := receiver.(*ArrayObject)
+
+				if len(arr.Elements) == 0 {
+					return NULL
+				}
+
+				if int(index.Value) >= len(arr.Elements) {
+					return newError("Index out of range")
+				}
+
+				return arr.Elements[index.Value]
+			}
+		},
+		Name: "at",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				arr := receiver.(*ArrayObject)
+				arr.Elements = []Object{}
+
+				return arr
+			}
+		},
+		Name: "clear",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				arr := receiver.(*ArrayObject)
+
+				for _, arg := range args {
+					addAr, ok := arg.(*ArrayObject)
+
+					if !ok {
+						return newError("Expect argument to be Array. got=%T", arg)
+					}
+
+					for _, el := range addAr.Elements {
+						arr.Elements = append(arr.Elements, el)
+					}
+				}
+
+				return arr
+			}
+		},
+		Name: "concat",
+	},
 }

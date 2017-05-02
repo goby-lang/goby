@@ -92,7 +92,6 @@ func TestEvalArrayIndex(t *testing.T) {
 			a = [1, "a", 10, 5]
 			a[2] = a[1]
 			a[2]
-
 		`, "a"},
 		{`
 			a = []
@@ -108,6 +107,29 @@ func TestEvalArrayIndex(t *testing.T) {
 			a = [1, 2 ,3 ,5 , 10]
 			a[0] = a[1] + a[2] + a[3] * a[4]
 			a[0]
+		`, 55},
+		{`
+			[].at(1)
+		`, nil},
+		{`
+			[1, 2, 10, 5].at(2)
+		`, int64(10)},
+		{`
+			[1, "a", 10, 5].at(1)
+		`, "a"},
+		{`
+			a = [1, "a", 10, 5]
+			a.at(0)
+		`, 1},
+		{`
+			a = [1, "a", 10, 5]
+			a[2] = a.at(1)
+			a[2]
+		`, "a"},
+		{`
+			a = [1, 2, 3, 5, 10]
+			a[0] = a.at(1) + a.at(2) + a.at(3) * a.at(4)
+			a.at(0)
 		`, 55},
 	}
 
@@ -214,6 +236,77 @@ func TestSelectMethod(t *testing.T) {
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
 		testArrayObject(t, evaluated, tt.expected)
+	}
+}
+
+func TestClearMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected *ArrayObject
+	}{
+		{`
+		a = [1, 2, 3]
+		a.clear
+		`, initializeArray([]Object{})},
+		{`
+		a = []
+		a.clear
+		`, initializeArray([]Object{})},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		testArrayObject(t, evaluated, tt.expected)
+	}
+}
+
+func TestConcatMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected *ArrayObject
+	}{
+		{`
+		a = [1, 2]
+		a.concat([3], [4])
+		`, initializeArray([]Object{initilaizeInteger(1), initilaizeInteger(2), initilaizeInteger(3), initilaizeInteger(4)})},
+		{`
+		a = []
+		a.concat([1], [2], ["a", "b"], [3], [4])
+		`, initializeArray([]Object{initilaizeInteger(1), initilaizeInteger(2), initializeString("a"), initializeString("b"), initilaizeInteger(3), initilaizeInteger(4)})},
+		{`
+		a = [1, 2]
+		a.concat()
+		`, initializeArray([]Object{initilaizeInteger(1), initilaizeInteger(2)})},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		testArrayObject(t, evaluated, tt.expected)
+	}
+
+	testsFail := []struct {
+		input    string
+		expected *Error
+	}{
+		{`
+		a = [1, 2]
+		a.concat(3)
+		`, newError("Expect argument to be Array. got=*vm.IntegerObject")},
+		{`
+		a = []
+		a.concat("a")
+		`, newError("Expect argument to be Array. got=*vm.StringObject")},
+	}
+
+	for _, tt := range testsFail {
+		evaluated := testEval(t, tt.input)
+		err, ok := evaluated.(*Error)
+		if !ok {
+			t.Errorf("Expect error. got=%T (%+v)", err, err)
+		}
+		if err.Message != tt.expected.Message {
+			t.Errorf("Expect error message \"%s\". got=\"%s\"", err.Message, tt.expected.Message)
+		}
 	}
 }
 
