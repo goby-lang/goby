@@ -211,6 +211,27 @@ func TestEachMethod(t *testing.T) {
 	}
 }
 
+func TestEachIndexMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{`
+		sum = 0
+		puts(self)
+		[2, 3, 40, 5, 22].each_index do |i|
+		  sum = sum + i
+		end
+		sum
+		`, 10},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
 func TestMapMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -443,6 +464,124 @@ func TestRotateMethodFail(t *testing.T) {
 		{`
 		a = [1, 2]
 		a.rotate("a")
+		`, newError("Expect index argument to be Integer. got=*vm.StringObject")},
+	}
+
+	for _, tt := range testsFail {
+		evaluated := testEval(t, tt.input)
+		err, ok := evaluated.(*Error)
+		if !ok {
+			t.Errorf("Expect error. got=%T (%+v)", err, err)
+		}
+		if err.Message != tt.expected.Message {
+			t.Errorf("Expect error message \"%s\". got=\"%s\"", err.Message, tt.expected.Message)
+		}
+	}
+}
+
+func TestFirstMethod(t *testing.T) {
+	testsInt := []struct {
+		input    string
+		expected *IntegerObject
+	}{
+		{`
+		a = [1, 2]
+		a.first
+		`, initilaizeInteger(1)},
+	}
+
+	for _, tt := range testsInt {
+		evaluated := testEval(t, tt.input)
+		testIntegerObject(t, evaluated, tt.expected.Value)
+	}
+
+	testsArray := []struct {
+		input    string
+		expected *ArrayObject
+	}{
+		{`
+		a = [3, 4, 5, 1, 6]
+		a.first(2)
+		`, initializeArray([]Object{initilaizeInteger(3), initilaizeInteger(4)})},
+		{`
+		a = ["a", "b", "d", "q"]
+		a.first(2)
+		`, initializeArray([]Object{initializeString("a"), initializeString("b")})},
+	}
+
+	for _, tt := range testsArray {
+		evaluated := testEval(t, tt.input)
+		testArrayObject(t, evaluated, tt.expected)
+	}
+}
+
+func TestFirstMethodFail(t *testing.T) {
+	testsFail := []struct {
+		input    string
+		expected *Error
+	}{
+		{`
+		a = [1, 2]
+		a.first("a")
+		`, newError("Expect index argument to be Integer. got=*vm.StringObject")},
+	}
+
+	for _, tt := range testsFail {
+		evaluated := testEval(t, tt.input)
+		err, ok := evaluated.(*Error)
+		if !ok {
+			t.Errorf("Expect error. got=%T (%+v)", err, err)
+		}
+		if err.Message != tt.expected.Message {
+			t.Errorf("Expect error message \"%s\". got=\"%s\"", err.Message, tt.expected.Message)
+		}
+	}
+}
+
+func TestLastMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected *StringObject
+	}{
+		{`
+		a = [1, 2, "a", 2, "b"]
+		a.last
+		`, initializeString("b")},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		testStringObject(t, evaluated, tt.expected.Value)
+	}
+
+	testsArray := []struct {
+		input    string
+		expected *ArrayObject
+	}{
+		{`
+		a = [3, 4, 5, 1, 6]
+		a.last(3)
+		`, initializeArray([]Object{initilaizeInteger(5), initilaizeInteger(1), initilaizeInteger(6)})},
+		{`
+		a = ["a", "b", "d", "q"]
+		a.last(2)
+		`, initializeArray([]Object{initializeString("d"), initializeString("q")})},
+	}
+
+	for _, tt := range testsArray {
+		evaluated := testEval(t, tt.input)
+		testArrayObject(t, evaluated, tt.expected)
+	}
+}
+
+func TestLastMethodFail(t *testing.T) {
+	testsFail := []struct {
+		input    string
+		expected *Error
+	}{
+		{`
+		a = [1, 2]
+		a.last("l")
 		`, newError("Expect index argument to be Integer. got=*vm.StringObject")},
 	}
 
