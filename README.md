@@ -45,7 +45,7 @@ A lot people have questions about `rooby` since it's a new language and you may 
     - Integer
     - String
     - Boolean
-    - nil (has this type internally but parser hasn't support yet)
+    - nil
     - Hash
     - Array
 - Flow control
