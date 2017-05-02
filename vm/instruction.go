@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
+	"github.com/rooby-lang/rooby/bytecode"
 )
 
 type operation func(vm *VM, cf *callFrame, args ...interface{})
@@ -27,10 +28,10 @@ type label struct {
 type labelType string
 
 var labelTypes = map[string]labelType{
-	"Def":          LabelDef,
-	"DefClass":     LabelDefClass,
-	"ProgramStart": Program,
-	"Block":        Block,
+	"Def":          bytecode.LabelDef,
+	"DefClass":     bytecode.LabelDefClass,
+	"ProgramStart": bytecode.Program,
+	"Block":        bytecode.Block,
 }
 
 type instructionSet struct {
@@ -41,55 +42,22 @@ type instructionSet struct {
 
 type operationType string
 
-const (
-	// label types
-	LabelDef      = "DefMethod"
-	LabelDefClass = "DefClass"
-	Block         = "Block"
-	Program       = "Program"
-
-	// instruction actions
-	GetLocal            = "getlocal"
-	GetConstant         = "getconstant"
-	GetInstanceVariable = "getinstancevariable"
-	SetLocal            = "setlocal"
-	SetConstant         = "setconstant"
-	SetInstanceVariable = "setinstancevariable"
-	PutString           = "putstring"
-	PutSelf             = "putself"
-	PutObject           = "putobject"
-	PutNull             = "putnil"
-	NewArray            = "newarray"
-	NewHash             = "newhash"
-	BranchUnless        = "branchunless"
-	Jump                = "jump"
-	DefMethod           = "def_method"
-	DefSingletonMethod  = "def_singleton_method"
-	DefClass            = "def_class"
-	Send                = "send"
-	InvokeBlock         = "invokeblock"
-	Pop                 = "pop"
-	Leave               = "leave"
-
-	RequireRelative = "require_relative"
-)
-
 var builtInActions = map[operationType]*action{
-	Pop: {
-		name: Pop,
+	bytecode.Pop: {
+		name: bytecode.Pop,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			vm.stack.pop()
 		},
 	},
-	PutObject: {
-		name: PutObject,
+	bytecode.PutObject: {
+		name: bytecode.PutObject,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			object := initializeObject(args[0])
 			vm.stack.push(&Pointer{Target: object})
 		},
 	},
-	GetConstant: {
-		name: GetConstant,
+	bytecode.GetConstant: {
+		name: bytecode.GetConstant,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			constName := args[0].(string)
 			constant, ok := vm.constants[constName]
@@ -100,8 +68,8 @@ var builtInActions = map[operationType]*action{
 			vm.stack.push(constant)
 		},
 	},
-	GetLocal: {
-		name: GetLocal,
+	bytecode.GetLocal: {
+		name: bytecode.GetLocal,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			index := args[0].(int)
 			depth := 0
@@ -118,8 +86,8 @@ var builtInActions = map[operationType]*action{
 			vm.stack.push(p)
 		},
 	},
-	GetInstanceVariable: {
-		name: GetInstanceVariable,
+	bytecode.GetInstanceVariable: {
+		name: bytecode.GetInstanceVariable,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			variableName := args[0].(string)
 			v, ok := cf.self.(*RObject).InstanceVariables.get(variableName)
@@ -132,16 +100,16 @@ var builtInActions = map[operationType]*action{
 			vm.stack.push(p)
 		},
 	},
-	SetInstanceVariable: {
-		name: SetInstanceVariable,
+	bytecode.SetInstanceVariable: {
+		name: bytecode.SetInstanceVariable,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			variableName := args[0].(string)
 			p := vm.stack.pop()
 			cf.self.(*RObject).InstanceVariables.set(variableName, p.Target)
 		},
 	},
-	SetLocal: {
-		name: SetLocal,
+	bytecode.SetLocal: {
+		name: bytecode.SetLocal,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			v := vm.stack.pop()
 			depth := 0
@@ -152,16 +120,16 @@ var builtInActions = map[operationType]*action{
 			cf.insertLCL(args[0].(int), depth, v.Target)
 		},
 	},
-	SetConstant: {
-		name: SetConstant,
+	bytecode.SetConstant: {
+		name: bytecode.SetConstant,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			constName := args[0].(string)
 			v := vm.stack.pop()
 			vm.constants[constName] = v
 		},
 	},
-	NewArray: {
-		name: NewArray,
+	bytecode.NewArray: {
+		name: bytecode.NewArray,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			elems := []Object{}
@@ -175,8 +143,8 @@ var builtInActions = map[operationType]*action{
 			vm.stack.push(&Pointer{arr})
 		},
 	},
-	NewHash: {
-		name: NewHash,
+	bytecode.NewHash: {
+		name: bytecode.NewHash,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			pairs := map[string]Object{}
@@ -191,8 +159,8 @@ var builtInActions = map[operationType]*action{
 			vm.stack.push(&Pointer{hash})
 		},
 	},
-	BranchUnless: {
-		name: BranchUnless,
+	bytecode.BranchUnless: {
+		name: bytecode.BranchUnless,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			v := vm.stack.pop()
 			bool, isBool := v.Target.(*BooleanObject)
@@ -216,33 +184,33 @@ var builtInActions = map[operationType]*action{
 			}
 		},
 	},
-	Jump: {
-		name: Jump,
+	bytecode.Jump: {
+		name: bytecode.Jump,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			cf.pc = args[0].(int)
 		},
 	},
-	PutSelf: {
-		name: PutSelf,
+	bytecode.PutSelf: {
+		name: bytecode.PutSelf,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			vm.stack.push(&Pointer{cf.self})
 		},
 	},
-	PutString: {
-		name: PutString,
+	bytecode.PutString: {
+		name: bytecode.PutString,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			object := initializeObject(args[0])
 			vm.stack.push(&Pointer{object})
 		},
 	},
-	PutNull: {
-		name: PutNull,
+	bytecode.PutNull: {
+		name: bytecode.PutNull,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			vm.stack.push(&Pointer{NULL})
 		},
 	},
-	DefMethod: {
-		name: DefMethod,
+	bytecode.DefMethod: {
+		name: bytecode.DefMethod,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			methodName := vm.stack.pop().Target.(*StringObject).Value
@@ -260,8 +228,8 @@ var builtInActions = map[operationType]*action{
 			}
 		},
 	},
-	DefSingletonMethod: {
-		name: DefSingletonMethod,
+	bytecode.DefSingletonMethod: {
+		name: bytecode.DefSingletonMethod,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			methodName := vm.stack.pop().Target.(*StringObject).Value
@@ -280,8 +248,8 @@ var builtInActions = map[operationType]*action{
 			}
 		},
 	},
-	DefClass: {
-		name: DefClass,
+	bytecode.DefClass: {
+		name: bytecode.DefClass,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			class := initializeClass(args[0].(string))
 			classPr := &Pointer{Target: class}
@@ -313,8 +281,8 @@ var builtInActions = map[operationType]*action{
 			vm.stack.push(classPr)
 		},
 	},
-	Send: {
-		name: Send,
+	bytecode.Send: {
+		name: bytecode.Send,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			methodName := args[0].(string)
 			argCount := args[1].(int)
@@ -381,8 +349,8 @@ var builtInActions = map[operationType]*action{
 			}
 		},
 	},
-	InvokeBlock: {
-		name: InvokeBlock,
+	bytecode.InvokeBlock: {
+		name: bytecode.InvokeBlock,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			argPr := vm.sp - argCount
@@ -408,8 +376,8 @@ var builtInActions = map[operationType]*action{
 			setReturnValueAndSP(vm, receiverPr, vm.stack.top())
 		},
 	},
-	Leave: {
-		name: Leave,
+	bytecode.Leave: {
+		name: bytecode.Leave,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			cf = vm.callFrameStack.pop()
 			cf.pc = len(cf.instructionSet.instructions)

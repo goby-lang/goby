@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
+	"github.com/rooby-lang/rooby/bytecode"
 )
 
 // VM represents a stack based virtual machine.
@@ -64,8 +65,8 @@ func New(fileDir string) *VM {
 	}
 	vm.blockTables = make(map[filename]map[string]*instructionSet)
 	vm.isTables = map[labelType]isTable{
-		LabelDef:      make(isTable),
-		LabelDefClass: make(isTable),
+		bytecode.LabelDef:      make(isTable),
+		bytecode.LabelDefClass: make(isTable),
 	}
 	vm.fileDir = fileDir
 	return vm
@@ -157,7 +158,7 @@ func (vm *VM) getBlock(name string, filename filename) (*instructionSet, bool) {
 }
 
 func (vm *VM) getMethodIS(name string, filename filename) (*instructionSet, bool) {
-	iss, ok := vm.isTables[LabelDef][name]
+	iss, ok := vm.isTables[bytecode.LabelDef][name]
 
 	if !ok {
 		return nil, false
@@ -170,7 +171,7 @@ func (vm *VM) getMethodIS(name string, filename filename) (*instructionSet, bool
 }
 
 func (vm *VM) getClassIS(name string, filename filename) (*instructionSet, bool) {
-	iss, ok := vm.isTables[LabelDefClass][name]
+	iss, ok := vm.isTables[bytecode.LabelDefClass][name]
 
 	if !ok {
 		return nil, false
