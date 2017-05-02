@@ -62,6 +62,27 @@ func TestShiftMethod(t *testing.T) {
 
 	testArrayObject(t, array, second)
 	testIntegerObject(t, first, 1)
+
+	testsFail := []struct {
+		input    string
+		expected *Error
+	}{
+		{`
+		a = [1, 2]
+		a.shift(3, 3, 4, 5)
+		`, newError("Expect 0 argument. got=4")},
+	}
+
+	for _, tt := range testsFail {
+		evaluated := testEval(t, tt.input)
+		err, ok := evaluated.(*Error)
+		if !ok {
+			t.Errorf("Expect error. got=%T (%+v)", err, err)
+		}
+		if err.Message != tt.expected.Message {
+			t.Errorf("Expect error message \"%s\". got=\"%s\"", err.Message, tt.expected.Message)
+		}
+	}
 }
 
 func TestEvalArrayExpression(t *testing.T) {
@@ -330,6 +351,10 @@ func TestCountMethod(t *testing.T) {
 		a = [1, 2]
 		a.count
 		`, initilaizeInteger(2)},
+		{`
+		a = [1, 2]
+		a.count(1)
+		`, initilaizeInteger(1)},
 		{`
 		a = ["a", "bb", "c", "db", "bb", 2]
 		a.count("bb")
