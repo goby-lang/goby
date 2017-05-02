@@ -32,6 +32,10 @@ func (i *IntegerObject) returnClass() Class {
 	return i.Class
 }
 
+func (i *IntegerObject) equal(e *IntegerObject) bool {
+	return i.Value == e.Value
+}
+
 func initilaizeInteger(value int) *IntegerObject {
 	return &IntegerObject{Value: value, Class: integerClass}
 }

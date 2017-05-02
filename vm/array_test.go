@@ -62,7 +62,9 @@ func TestShiftMethod(t *testing.T) {
 
 	testArrayObject(t, array, second)
 	testIntegerObject(t, first, 1)
+}
 
+func TestShiftMethodFail(t *testing.T) {
 	testsFail := []struct {
 		input    string
 		expected *Error
@@ -315,7 +317,9 @@ func TestConcatMethod(t *testing.T) {
 		evaluated := testEval(t, tt.input)
 		testArrayObject(t, evaluated, tt.expected)
 	}
+}
 
+func TestConcatMethodFail(t *testing.T) {
 	testsFail := []struct {
 		input    string
 		expected *Error
@@ -385,7 +389,9 @@ func TestCountMethod(t *testing.T) {
 		evaluated := testEval(t, tt.input)
 		testIntegerObject(t, evaluated, tt.expected.Value)
 	}
+}
 
+func TestCountMethodFail(t *testing.T) {
 	testsFail := []struct {
 		input    string
 		expected *Error
@@ -427,15 +433,13 @@ func TestRotateMethod(t *testing.T) {
 		evaluated := testEval(t, tt.input)
 		testArrayObject(t, evaluated, tt.expected)
 	}
+}
 
+func TestRotateMethodFail(t *testing.T) {
 	testsFail := []struct {
 		input    string
 		expected *Error
 	}{
-		{`
-		a = [1, 2]
-		a.rotate(3, 3, 4, 5)
-		`, newError("Expect one argument. got=4")},
 		{`
 		a = [1, 2]
 		a.rotate("a")

@@ -356,18 +356,23 @@ var builtinArrayMethods = []*BuiltInMethod{
 				findBoolean, findIsBoolean := arg.(*BooleanObject)
 
 				for i := 0; i < len(arr.Elements); i++ {
-					elInt, isInt := arr.Elements[i].(*IntegerObject)
-					if isInt && findIsInt && elInt.Value == findInt.Value {
-						count++
-					}
-					elString, isString := arr.Elements[i].(*StringObject)
-					if isString && findIsString && elString.Value == findString.Value {
-						count++
-					}
-
-					elBoolean, isBoolean := arr.Elements[i].(*BooleanObject)
-					if isBoolean && findIsBoolean && elBoolean.Value == findBoolean.Value {
-						count++
+					el := arr.Elements[i]
+					switch el.(type) {
+					case *IntegerObject:
+						elInt := el.(*IntegerObject)
+						if findIsInt && findInt.equal(elInt) {
+							count++
+						}
+					case *StringObject:
+						elString := el.(*StringObject)
+						if findIsString && findString.equal(elString) {
+							count++
+						}
+					case *BooleanObject:
+						elBoolean := el.(*BooleanObject)
+						if findIsBoolean && findBoolean.equal(elBoolean) {
+							count++
+						}
 					}
 				}
 
@@ -379,11 +384,6 @@ var builtinArrayMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-
-				if len(args) > 1 {
-					return newError("Expect one argument. got=%d", len(args))
-				}
-
 				arr := receiver.(*ArrayObject)
 				rotArr := initializeArray(arr.Elements)
 

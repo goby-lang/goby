@@ -39,6 +39,10 @@ func (b *BooleanObject) returnClass() Class {
 	return b.Class
 }
 
+func (b *BooleanObject) equal(e *BooleanObject) bool {
+	return b.Value == e.Value
+}
+
 var builtinBooleanMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) builtinMethodBody {
