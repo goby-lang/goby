@@ -3,8 +3,8 @@ package vm
 import (
 	"bytes"
 	"fmt"
-	"strings"
 	"github.com/rooby-lang/rooby/bytecode"
+	"strings"
 )
 
 type operation func(vm *VM, cf *callFrame, args ...interface{})
@@ -26,13 +26,6 @@ type label struct {
 }
 
 type labelType string
-
-var labelTypes = map[string]labelType{
-	"Def":          bytecode.LabelDef,
-	"DefClass":     bytecode.LabelDefClass,
-	"ProgramStart": bytecode.Program,
-	"Block":        bytecode.Block,
-}
 
 type instructionSet struct {
 	label        *label

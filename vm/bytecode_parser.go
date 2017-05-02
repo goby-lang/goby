@@ -72,26 +72,26 @@ func (p *bytecodeParser) parseLabel(is *instructionSet, line string) {
 
 func (p *bytecodeParser) setLabel(is *instructionSet, name string) {
 	var l *label
-	var labelName string
-	var labelType labelType
+	var ln string
+	var lt labelType
 
-	if name == "ProgramStart" {
+	if name == bytecode.Program {
 		p.program = is
 		return
 	} else {
-		labelName = strings.Split(name, ":")[1]
-		labelType = labelTypes[strings.Split(name, ":")[0]]
+		ln = strings.Split(name, ":")[1]
+		lt = labelType(strings.Split(name, ":")[0])
 	}
 
-	l = &label{name: name, Type: labelType}
+	l = &label{name: name, Type: lt}
 	is.label = l
 
-	if labelType == bytecode.Block {
-		p.blockTable[labelName] = is
+	if lt == bytecode.Block {
+		p.blockTable[ln] = is
 		return
 	}
 
-	p.labelTable[labelType][labelName] = append(p.labelTable[labelType][labelName], is)
+	p.labelTable[lt][ln] = append(p.labelTable[lt][ln], is)
 }
 
 // parseInstruction transfer a line of bytecode into an instruction and append it into given instruction set.

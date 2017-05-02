@@ -3,8 +3,8 @@ package vm
 import (
 	"bytes"
 	"fmt"
-	"strings"
 	"github.com/rooby-lang/rooby/bytecode"
+	"strings"
 )
 
 // VM represents a stack based virtual machine.
