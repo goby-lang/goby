@@ -348,6 +348,46 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		},
 		Name: "odd",
 	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				i := receiver.(*IntegerObject)
+				return initilaizeInteger(i.Value + 1)
+			}
+		},
+		Name: "next",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				i := receiver.(*IntegerObject)
+				return initilaizeInteger(i.Value - 1)
+			}
+		},
+		Name: "pred",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				n := receiver.(*IntegerObject)
+
+				if n.Value < 0 {
+					return newError("Expect paramentr to be greater 0. got=%d", n.Value)
+				}
+
+				if blockFrame == nil {
+					return newError("Can't yield without a block")
+				}
+
+				for i := 0; i < n.Value; i++ {
+					builtInMethodYield(vm, blockFrame, initilaizeInteger(i))
+				}
+
+				return n
+			}
+		},
+		Name: "times",
+	},
 }
 
 func initInteger() {
