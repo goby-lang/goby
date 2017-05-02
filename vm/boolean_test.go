@@ -49,6 +49,10 @@ func TestEvalInfixBooleanExpression(t *testing.T) {
 		{"false || true", true},
 		{"true || false", true},
 		{"false || false", false},
+		{"100 > 10 && true == false", false},
+		{"true && true == true", true},
+		{"(false || true) && (\"string\" == \"string\")", true},
+		{"((10 > 3) && (3 < 4)) || ((10 == 10) || false)", true},
 	}
 
 	for _, tt := range tests {
