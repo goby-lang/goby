@@ -8,10 +8,10 @@ import (
 
 const (
 	// label types
-	LabelDef      = "DefMethod"
+	LabelDef      = "Def"
 	LabelDefClass = "DefClass"
 	Block         = "Block"
-	Program       = "Program"
+	Program       = "ProgramStart"
 
 	// instruction actions
 	GetLocal            = "getlocal"
