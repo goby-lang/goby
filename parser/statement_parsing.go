@@ -36,7 +36,6 @@ func (p *Parser) parseStatement() ast.Statement {
 	}
 }
 
-
 func (p *Parser) parseRequireRelativeStatement() *ast.RequireRelativeStatement {
 	stmt := &ast.RequireRelativeStatement{Token: p.curToken}
 	p.nextToken()

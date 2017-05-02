@@ -323,6 +323,18 @@ func (b *BooleanExpression) String() string {
 	return b.Token.Literal
 }
 
+type NilExpression struct {
+	Token token.Token
+}
+
+func (n *NilExpression) expressionNode() {}
+func (n *NilExpression) TokenLiteral() string {
+	return n.Token.Literal
+}
+func (n *NilExpression) String() string {
+	return "Null"
+}
+
 type IfExpression struct {
 	Token       token.Token
 	Condition   Expression

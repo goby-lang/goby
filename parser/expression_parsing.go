@@ -122,6 +122,10 @@ func (p *Parser) parseBooleanLiteral() ast.Expression {
 	return lit
 }
 
+func (p *Parser) parseNilExpression() ast.Expression {
+	return &ast.NilExpression{Token: p.curToken}
+}
+
 func (p *Parser) parsePostfixExpression(receiver ast.Expression) ast.Expression {
 	arguments := []ast.Expression{}
 	return &ast.CallExpression{Token: p.curToken, Receiver: receiver, Method: p.curToken.Literal, Arguments: arguments}
