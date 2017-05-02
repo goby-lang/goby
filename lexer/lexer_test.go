@@ -66,6 +66,11 @@ func TestNextToken(t *testing.T) {
 	a = 1 <=> 2;
 
 	8 ** 10;
+
+	true && false;
+	false || true;
+
+	nil
 	`
 
 	tests := []struct {
@@ -256,7 +261,18 @@ func TestNextToken(t *testing.T) {
 		{token.Int, "10", 59},
 		{token.Semicolon, ";", 59},
 
-		{token.EOF, "", 60},
+		{token.True, "true", 61},
+		{token.And, "&&", 61},
+		{token.False, "false", 61},
+		{token.Semicolon, ";", 61},
+
+		{token.False, "false", 62},
+		{token.Or, "||", 62},
+		{token.True, "true", 62},
+		{token.Semicolon, ";", 62},
+
+		{token.Null, "nil", 64},
+		{token.EOF, "", 65},
 	}
 
 	l := New(input)

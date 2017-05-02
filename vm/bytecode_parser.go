@@ -26,8 +26,8 @@ func newBytecodeParser(file filename) *bytecodeParser {
 	p := &bytecodeParser{filename: file}
 	p.blockTable = make(map[string]*instructionSet)
 	p.labelTable = map[labelType]map[string][]*instructionSet{
-		LabelDef:      make(map[string][]*instructionSet),
-		LabelDefClass: make(map[string][]*instructionSet),
+		bytecode.LabelDef:      make(map[string][]*instructionSet),
+		bytecode.LabelDefClass: make(map[string][]*instructionSet),
 	}
 
 	return p
@@ -72,26 +72,26 @@ func (p *bytecodeParser) parseLabel(is *instructionSet, line string) {
 
 func (p *bytecodeParser) setLabel(is *instructionSet, name string) {
 	var l *label
-	var labelName string
-	var labelType labelType
+	var ln string
+	var lt labelType
 
-	if name == "ProgramStart" {
+	if name == bytecode.Program {
 		p.program = is
 		return
 	} else {
-		labelName = strings.Split(name, ":")[1]
-		labelType = labelTypes[strings.Split(name, ":")[0]]
+		ln = strings.Split(name, ":")[1]
+		lt = labelType(strings.Split(name, ":")[0])
 	}
 
-	l = &label{name: name, Type: labelType}
+	l = &label{name: name, Type: lt}
 	is.label = l
 
-	if labelType == Block {
-		p.blockTable[labelName] = is
+	if lt == bytecode.Block {
+		p.blockTable[ln] = is
 		return
 	}
 
-	p.labelTable[labelType][labelName] = append(p.labelTable[labelType][labelName], is)
+	p.labelTable[lt][ln] = append(p.labelTable[lt][ln], is)
 }
 
 // parseInstruction transfer a line of bytecode into an instruction and append it into given instruction set.
@@ -104,10 +104,10 @@ func (p *bytecodeParser) parseInstruction(is *instructionSet, line string) {
 	ln, _ := strconv.ParseInt(lineNum, 0, 64)
 	action := builtInActions[operationType(act)]
 
-	if act == PutString {
+	if act == bytecode.PutString {
 		text := strings.Split(line, "\"")[1]
 		params = append(params, text)
-	} else if act == RequireRelative {
+	} else if act == bytecode.RequireRelative {
 		filepath := tokens[2]
 		filepath = path.Join(p.vm.fileDir, filepath)
 

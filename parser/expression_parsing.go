@@ -16,6 +16,8 @@ var precedence = map[token.Type]int{
 	token.GT:       LESSGREATER,
 	token.GTE:      LESSGREATER,
 	token.COMP:     LESSGREATER,
+	token.And:      LOGIC,
+	token.Or:       LOGIC,
 	token.Plus:     SUM,
 	token.Minus:    SUM,
 	token.Incr:     SUM,
@@ -32,6 +34,7 @@ var precedence = map[token.Type]int{
 const (
 	_ int = iota
 	LOWEST
+	LOGIC
 	EQUALS
 	LESSGREATER
 	SUM
@@ -105,7 +108,7 @@ func (p *Parser) parseStringLiteral() ast.Expression {
 }
 
 func (p *Parser) parseBooleanLiteral() ast.Expression {
-	lit := &ast.Boolean{Token: p.curToken}
+	lit := &ast.BooleanExpression{Token: p.curToken}
 
 	value, err := strconv.ParseBool(lit.TokenLiteral())
 	if err != nil {
@@ -117,6 +120,10 @@ func (p *Parser) parseBooleanLiteral() ast.Expression {
 	lit.Value = value
 
 	return lit
+}
+
+func (p *Parser) parseNilExpression() ast.Expression {
+	return &ast.NilExpression{Token: p.curToken}
 }
 
 func (p *Parser) parsePostfixExpression(receiver ast.Expression) ast.Expression {

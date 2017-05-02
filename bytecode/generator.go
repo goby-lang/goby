@@ -95,7 +95,7 @@ func (g *Generator) GenerateByteCode(program *ast.Program) string {
 }
 
 func (g *Generator) compileStatements(stmts []ast.Statement, scope *scope, table *localTable) {
-	is := &instructionSet{label: &label{Name: "ProgramStart"}}
+	is := &instructionSet{label: &label{Name: Program}}
 
 	for _, statement := range stmts {
 		g.compileStatement(is, statement, scope, table)
@@ -111,44 +111,44 @@ func (g *Generator) compileStatement(is *instructionSet, statement ast.Statement
 	case *ast.ExpressionStatement:
 		g.compileExpression(is, stmt.Expression, scope, table)
 	case *ast.DefStatement:
-		is.define("putself")
-		is.define("putstring", fmt.Sprintf("\"%s\"", stmt.Name.Value))
+		is.define(PutSelf)
+		is.define(PutString, fmt.Sprintf("\"%s\"", stmt.Name.Value))
 		switch stmt.Receiver.(type) {
 		case *ast.SelfExpression:
-			is.define("def_singleton_method", len(stmt.Parameters))
+			is.define(DefSingletonMethod, len(stmt.Parameters))
 		case nil:
-			is.define("def_method", len(stmt.Parameters))
+			is.define(DefMethod, len(stmt.Parameters))
 		}
 
 		g.compileDefStmt(stmt, scope)
 	case *ast.AssignStatement:
 		g.compileAssignStmt(is, stmt, scope, table)
 	case *ast.ClassStatement:
-		is.define("putself")
+		is.define(PutSelf)
 
 		if stmt.SuperClass != nil {
-			is.define("def_class", stmt.Name.Value, stmt.SuperClass.Value)
+			is.define(DefClass, stmt.Name.Value, stmt.SuperClass.Value)
 		} else {
-			is.define("def_class", stmt.Name.Value)
+			is.define(DefClass, stmt.Name.Value)
 		}
 
-		is.define("pop")
+		is.define(Pop)
 		g.compileClassStmt(stmt, scope)
 	case *ast.ReturnStatement:
 		g.compileExpression(is, stmt.ReturnValue, scope, table)
 		g.endInstructions(is)
 	case *ast.RequireRelativeStatement:
-		is.define("require_relative", stmt.Filepath)
+		is.define(RequireRelative, stmt.Filepath)
 	}
 }
 
 func (g *Generator) compileClassStmt(stmt *ast.ClassStatement, scope *scope) {
 	scope = newScope(scope, stmt)
 	is := &instructionSet{}
-	is.setLabel(fmt.Sprintf("DefClass:%s", stmt.Name.Value))
+	is.setLabel(fmt.Sprintf("%s:%s", LabelDefClass, stmt.Name.Value))
 
 	g.compileBlockStatement(is, stmt.Body, scope, scope.localTable)
-	is.define("leave")
+	is.define(Leave)
 	g.instructionSets = append(g.instructionSets, is)
 }
 
@@ -158,11 +158,11 @@ func (g *Generator) compileAssignStmt(is *instructionSet, stmt *ast.AssignStatem
 	switch name := stmt.Name.(type) {
 	case *ast.Identifier:
 		index, depth := table.setLCL(name.Value, table.depth)
-		is.define("setlocal", index, depth)
+		is.define(SetLocal, index, depth)
 	case *ast.InstanceVariable:
-		is.define("setinstancevariable", name.Value)
+		is.define(SetInstanceVariable, name.Value)
 	case *ast.Constant:
-		is.define("setconstant", name.Value)
+		is.define(SetConstant, name.Value)
 	}
 }
 
@@ -170,7 +170,7 @@ func (g *Generator) compileDefStmt(stmt *ast.DefStatement, scope *scope) {
 	scope = newScope(scope, stmt)
 
 	is := &instructionSet{}
-	is.setLabel(fmt.Sprintf("Def:%s", stmt.Name.Value))
+	is.setLabel(fmt.Sprintf("%s:%s", LabelDef, stmt.Name.Value))
 
 	for i := 0; i < len(stmt.Parameters); i++ {
 		scope.localTable.setLCL(stmt.Parameters[i].Value, scope.localTable.depth)
@@ -188,60 +188,62 @@ func (g *Generator) compileExpression(is *instructionSet, exp ast.Expression, sc
 
 		// it's local variable
 		if ok {
-			is.define("getlocal", index, depth)
+			is.define(GetLocal, index, depth)
 			return
 		}
 
 		// otherwise it's a method call
-		is.define("putself")
-		is.define("send", exp.Value, 0)
+		is.define(PutSelf)
+		is.define(Send, exp.Value, 0)
 
 	case *ast.Constant:
-		is.define("getconstant", exp.Value)
+		is.define(GetConstant, exp.Value)
 	case *ast.InstanceVariable:
-		is.define("getinstancevariable", exp.Value)
+		is.define(GetInstanceVariable, exp.Value)
 	case *ast.IntegerLiteral:
-		is.define("putobject", fmt.Sprint(exp.Value))
+		is.define(PutObject, fmt.Sprint(exp.Value))
 	case *ast.StringLiteral:
-		is.define("putstring", fmt.Sprintf("\"%s\"", exp.Value))
-	case *ast.Boolean:
-		is.define("putobject", fmt.Sprint(exp.Value))
+		is.define(PutString, fmt.Sprintf("\"%s\"", exp.Value))
+	case *ast.BooleanExpression:
+		is.define(PutObject, fmt.Sprint(exp.Value))
+	case *ast.NilExpression:
+		is.define(PutNull)
 	case *ast.ArrayExpression:
 		for _, elem := range exp.Elements {
 			g.compileExpression(is, elem, scope, table)
 		}
-		is.define("newarray", len(exp.Elements))
+		is.define(NewArray, len(exp.Elements))
 	case *ast.HashExpression:
 		for key, value := range exp.Data {
-			is.define("putstring", fmt.Sprintf("\"%s\"", key))
+			is.define(PutString, fmt.Sprintf("\"%s\"", key))
 			g.compileExpression(is, value, scope, table)
 		}
-		is.define("newhash", len(exp.Data)*2)
+		is.define(NewHash, len(exp.Data)*2)
 	case *ast.InfixExpression:
 		g.compileInfixExpression(is, exp, scope, table)
 	case *ast.PrefixExpression:
 		switch exp.Operator {
 		case "!":
 			g.compileExpression(is, exp.Right, scope, table)
-			is.define("send", exp.Operator, 0)
+			is.define(Send, exp.Operator, 0)
 		case "-":
-			is.define("putobject", 0)
+			is.define(PutObject, 0)
 			g.compileExpression(is, exp.Right, scope, table)
-			is.define("send", exp.Operator, 1)
+			is.define(Send, exp.Operator, 1)
 		}
 
 	case *ast.IfExpression:
 		g.compileIfExpression(is, exp, scope, table)
 	case *ast.SelfExpression:
-		is.define("putself")
+		is.define(PutSelf)
 	case *ast.YieldExpression:
-		is.define("putself")
+		is.define(PutSelf)
 
 		for _, arg := range exp.Arguments {
 			g.compileExpression(is, arg, scope, table)
 		}
 
-		is.define("invokeblock", len(exp.Arguments))
+		is.define(InvokeBlock, len(exp.Arguments))
 	case *ast.CallExpression:
 		g.compileExpression(is, exp.Receiver, scope, table)
 
@@ -264,7 +266,7 @@ func (g *Generator) compileExpression(is *instructionSet, exp ast.Expression, sc
 
 func (g *Generator) compileBlockArgExpression(index int, exp *ast.CallExpression, scope *scope, table *localTable) {
 	is := &instructionSet{}
-	is.setLabel(fmt.Sprintf("Block:%d", index))
+	is.setLabel(fmt.Sprintf("%s:%d", Block, index))
 
 	for i := 0; i < len(exp.BlockArguments); i++ {
 		table.set(exp.BlockArguments[i].Value)
@@ -279,7 +281,7 @@ func (g *Generator) compileIfExpression(is *instructionSet, exp *ast.IfExpressio
 	g.compileExpression(is, exp.Condition, scope, table)
 
 	anchor1 := &anchor{}
-	is.define("branchunless", anchor1)
+	is.define(BranchUnless, anchor1)
 
 	g.compileBlockStatement(is, exp.Consequence, scope, table)
 
@@ -287,12 +289,12 @@ func (g *Generator) compileIfExpression(is *instructionSet, exp *ast.IfExpressio
 
 	if exp.Alternative == nil {
 		anchor1.line--
-		is.define("putnil")
+		is.define(PutNull)
 		return
 	}
 
 	anchor2 := &anchor{}
-	is.define("jump", anchor2)
+	is.define(Jump, anchor2)
 
 	g.compileBlockStatement(is, exp.Alternative, scope, table)
 
@@ -302,7 +304,7 @@ func (g *Generator) compileIfExpression(is *instructionSet, exp *ast.IfExpressio
 func (g *Generator) compileInfixExpression(is *instructionSet, node *ast.InfixExpression, scope *scope, table *localTable) {
 	g.compileExpression(is, node.Left, scope, table)
 	g.compileExpression(is, node.Right, scope, table)
-	is.define("send", node.Operator, "1")
+	is.define(Send, node.Operator, "1")
 }
 
 func (g *Generator) compileBlockStatement(is *instructionSet, stmt *ast.BlockStatement, scope *scope, table *localTable) {
@@ -312,7 +314,7 @@ func (g *Generator) compileBlockStatement(is *instructionSet, stmt *ast.BlockSta
 }
 
 func (g *Generator) endInstructions(is *instructionSet) {
-	is.define("leave")
+	is.define(Leave)
 }
 
 func removeEmptyLine(s string) string {

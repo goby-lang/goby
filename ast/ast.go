@@ -310,17 +310,34 @@ func (ie *InfixExpression) String() string {
 	return out.String()
 }
 
-type Boolean struct {
+type BooleanExpression struct {
 	Token token.Token
 	Value bool
 }
 
-func (b *Boolean) expressionNode() {}
-func (b *Boolean) TokenLiteral() string {
+func (b *BooleanExpression) expressionNode() {}
+func (b *BooleanExpression) TokenLiteral() string {
 	return b.Token.Literal
 }
-func (b *Boolean) String() string {
+func (b *BooleanExpression) String() string {
 	return b.Token.Literal
+}
+
+// NilExpression represents nil node
+type NilExpression struct {
+	Token token.Token
+}
+
+func (n *NilExpression) expressionNode() {}
+
+// TokenLiteral returns `nil`
+func (n *NilExpression) TokenLiteral() string {
+	return n.Token.Literal
+}
+
+// String returns `nil`
+func (n *NilExpression) String() string {
+	return "nil"
 }
 
 type IfExpression struct {

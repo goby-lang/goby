@@ -2,8 +2,7 @@ package vm
 
 import (
 	"bytes"
-	"github.com/rooby-lang/rooby/ast"
-	"strings"
+	"fmt"
 )
 
 // Method represents methods defined using rooby.
@@ -11,8 +10,6 @@ type Method struct {
 	Name           string
 	instructionSet *instructionSet
 	argc           int
-	parameters     []*ast.Identifier
-	body           *ast.BlockStatement
 	scope          *scope
 }
 
@@ -23,30 +20,10 @@ func (m *Method) objectType() objectType {
 func (m *Method) Inspect() string {
 	var out bytes.Buffer
 
-	params := []string{}
-	for _, p := range m.parameters {
-		params = append(params, p.String())
-	}
-
-	out.WriteString(m.Name)
-	out.WriteString("(")
-	out.WriteString(strings.Join(params, ", "))
-	out.WriteString(") {\n")
-	out.WriteString(m.body.String())
-	out.WriteString("\n}\n")
+	out.WriteString(fmt.Sprintf("<Method: %s (%d params)\n>", m.Name, m.argc))
+	out.WriteString(m.instructionSet.inspect())
 
 	return out.String()
-}
-
-func (m *Method) extendEnv(args []Object) *environment {
-	e := closedEnvironment(m.scope.Env)
-
-	for i, arg := range args {
-		argName := m.parameters[i].Value
-		e.set(argName, arg)
-	}
-
-	return e
 }
 
 type builtinMethodBody func(*VM, []Object, *callFrame) Object

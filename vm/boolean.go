@@ -115,6 +115,50 @@ var builtinBooleanMethods = []*BuiltInMethod{
 		},
 		Name: "!",
 	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
+				leftValue := receiver.(*BooleanObject).Value
+				right, ok := args[0].(*BooleanObject)
+
+				if !ok {
+					return wrongTypeError(booleanClass)
+				}
+
+				rightValue := right.Value
+
+				if leftValue && rightValue {
+					return TRUE
+				}
+
+				return FALSE
+			}
+		},
+		Name: "&&",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
+				leftValue := receiver.(*BooleanObject).Value
+				right, ok := args[0].(*BooleanObject)
+
+				if !ok {
+					return wrongTypeError(booleanClass)
+				}
+
+				rightValue := right.Value
+
+				if leftValue || rightValue {
+					return TRUE
+				}
+
+				return FALSE
+			}
+		},
+		Name: "||",
+	},
 }
 
 func initBool() {

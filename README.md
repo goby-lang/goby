@@ -11,6 +11,7 @@
 
 rooby is a Ruby-like object oriented language written in Go. You can think it as a simplified, compilable Ruby for now.
    
+**We're looking for contributors now, join us and make this project better!**
 
 ## Goal
 
@@ -45,7 +46,7 @@ A lot people have questions about `rooby` since it's a new language and you may 
     - Integer
     - String
     - Boolean
-    - nil (has this type internally but parser hasn't support yet)
+    - nil
     - Hash
     - Array
 - Flow control

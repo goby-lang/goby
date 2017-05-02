@@ -22,6 +22,7 @@ func TestLookupIdentTrue(t *testing.T) {
 		"while":  While,
 		"do":     Do,
 		"yield":  Yield,
+		"nil":    Null,
 	}
 
 	for name, token := range keywords {
