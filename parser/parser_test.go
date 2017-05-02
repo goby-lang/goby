@@ -337,7 +337,7 @@ func testInfixExpression(
 }
 
 func testBoolLiteral(t *testing.T, exp ast.Expression, v bool) bool {
-	bo, ok := exp.(*ast.Boolean)
+	bo, ok := exp.(*ast.BooleanExpression)
 	if !ok {
 		t.Errorf("exp is not *ast.Boolean. got=%T", exp)
 		return false

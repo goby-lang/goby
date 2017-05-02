@@ -204,7 +204,7 @@ func (g *Generator) compileExpression(is *instructionSet, exp ast.Expression, sc
 		is.define("putobject", fmt.Sprint(exp.Value))
 	case *ast.StringLiteral:
 		is.define("putstring", fmt.Sprintf("\"%s\"", exp.Value))
-	case *ast.Boolean:
+	case *ast.BooleanExpression:
 		is.define("putobject", fmt.Sprint(exp.Value))
 	case *ast.ArrayExpression:
 		for _, elem := range exp.Elements {

@@ -108,7 +108,7 @@ func (p *Parser) parseStringLiteral() ast.Expression {
 }
 
 func (p *Parser) parseBooleanLiteral() ast.Expression {
-	lit := &ast.Boolean{Token: p.curToken}
+	lit := &ast.BooleanExpression{Token: p.curToken}
 
 	value, err := strconv.ParseBool(lit.TokenLiteral())
 	if err != nil {
