@@ -206,6 +206,8 @@ func (g *Generator) compileExpression(is *instructionSet, exp ast.Expression, sc
 		is.define("putstring", fmt.Sprintf("\"%s\"", exp.Value))
 	case *ast.BooleanExpression:
 		is.define("putobject", fmt.Sprint(exp.Value))
+	case *ast.NilExpression:
+		is.define("putnil")
 	case *ast.ArrayExpression:
 		for _, elem := range exp.Elements {
 			g.compileExpression(is, elem, scope, table)
