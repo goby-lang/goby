@@ -16,6 +16,8 @@ var precedence = map[token.Type]int{
 	token.GT:       LESSGREATER,
 	token.GTE:      LESSGREATER,
 	token.COMP:     LESSGREATER,
+	token.And:      LOGIC,
+	token.Or:       LOGIC,
 	token.Plus:     SUM,
 	token.Minus:    SUM,
 	token.Incr:     SUM,
@@ -32,6 +34,7 @@ var precedence = map[token.Type]int{
 const (
 	_ int = iota
 	LOWEST
+	LOGIC
 	EQUALS
 	LESSGREATER
 	SUM

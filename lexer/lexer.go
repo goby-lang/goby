@@ -117,7 +117,17 @@ func (l *Lexer) NextToken() token.Token {
 	case ':':
 		tok = newToken(token.Colon, l.ch, l.line)
 	case '|':
-		tok = newToken(token.Bar, l.ch, l.line)
+		if l.peekChar() == '|' {
+			l.readChar()
+			tok = token.Token{Type: token.Or, Literal: "||", Line: l.line}
+		} else {
+			tok = newToken(token.Bar, l.ch, l.line)
+		}
+	case '&':
+		if l.peekChar() == '&' {
+			l.readChar()
+			tok = token.Token{Type: token.And, Literal: "&&", Line: l.line}
+		}
 	case '#':
 		tok.Literal = l.absorbComment()
 		tok.Type = token.Comment
