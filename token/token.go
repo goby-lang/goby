@@ -59,6 +59,7 @@ const (
 	Class           = "CLASS"
 	True            = "TRUE"
 	False           = "FALSE"
+	Null            = "Null"
 	If              = "IF"
 	Else            = "ELSE"
 	Return          = "RETURN"
@@ -75,6 +76,7 @@ var keywords = map[string]Type{
 	"def":              Def,
 	"true":             True,
 	"false":            False,
+	"nil":              Null,
 	"if":               If,
 	"else":             Else,
 	"return":           Return,

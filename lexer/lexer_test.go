@@ -69,6 +69,8 @@ func TestNextToken(t *testing.T) {
 
 	true && false;
 	false || true;
+
+	nil
 	`
 
 	tests := []struct {
@@ -269,7 +271,8 @@ func TestNextToken(t *testing.T) {
 		{token.True, "true", 62},
 		{token.Semicolon, ";", 62},
 
-		{token.EOF, "", 63},
+		{token.Null, "nil", 64},
+		{token.EOF, "", 65},
 	}
 
 	l := New(input)
