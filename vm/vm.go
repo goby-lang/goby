@@ -94,7 +94,7 @@ func (vm *VM) ExecBytecodes(bytecodes, fn string) {
 	cf := newCallFrame(p.program)
 	cf.self = mainObj
 	vm.callFrameStack.push(cf)
-	vm.start()
+	vm.startFromTopFrame()
 }
 
 // GetExecResult returns stack's top most value. Normally it's used in tests.
@@ -132,7 +132,7 @@ func (vm *VM) evalCallFrame(cf *callFrame) {
 }
 
 // Start evaluation from top most call frame
-func (vm *VM) start() {
+func (vm *VM) startFromTopFrame() {
 	cf := vm.callFrameStack.top()
 	vm.evalCallFrame(cf)
 }
