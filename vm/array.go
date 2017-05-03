@@ -229,6 +229,23 @@ var builtinArrayMethods = []*BuiltInMethod{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				arr := receiver.(*ArrayObject)
+
+				if blockFrame == nil {
+					panic("Can't yield without a block")
+				}
+
+				for i := range arr.Elements {
+					builtInMethodYield(vm, blockFrame, initilaizeInteger(i))
+				}
+				return arr
+			}
+		},
+		Name: "each_index",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				arr := receiver.(*ArrayObject)
 				var elements = make([]Object, len(arr.Elements))
 
 				if blockFrame == nil {
@@ -406,5 +423,44 @@ var builtinArrayMethods = []*BuiltInMethod{
 			}
 		},
 		Name: "rotate",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				arr := receiver.(*ArrayObject)
+
+				if len(args) == 0 {
+					return arr.Elements[0]
+				}
+
+				arg, ok := args[0].(*IntegerObject)
+				if !ok {
+					return newError("Expect index argument to be Integer. got=%T", args[0])
+				}
+
+				return initializeArray(arr.Elements[:arg.Value])
+			}
+		},
+		Name: "first",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				arr := receiver.(*ArrayObject)
+
+				if len(args) == 0 {
+					return arr.Elements[len(arr.Elements)-1]
+				}
+
+				arg, ok := args[0].(*IntegerObject)
+				if !ok {
+					return newError("Expect index argument to be Integer. got=%T", args[0])
+				}
+
+				l := len(arr.Elements)
+				return initializeArray(arr.Elements[l-arg.Value : l])
+			}
+		},
+		Name: "last",
 	},
 }
