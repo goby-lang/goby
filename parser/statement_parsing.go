@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"github.com/rooby-lang/rooby/ast"
 	"github.com/rooby-lang/rooby/token"
 )
@@ -9,8 +10,11 @@ func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.InstanceVariable, token.Ident, token.Constant:
 		if p.curToken.Literal == "class" {
-			p.curToken.Type = token.Class
-			return p.parseStatement()
+			return p.parseClassStatement()
+		}
+
+		if p.curToken.Literal == "module" {
+			return p.parseModuleStatement()
 		}
 
 		if p.peekTokenIs(token.Assign) {
@@ -23,8 +27,6 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseReturnStatement()
 	case token.Def:
 		return p.parseDefMethodStatement()
-	case token.Class:
-		return p.parseClassStatement()
 	case token.Comment:
 		return nil
 	case token.While:
@@ -108,6 +110,27 @@ func (p *Parser) parseClassStatement() *ast.ClassStatement {
 		p.nextToken() // <
 		p.nextToken() // Inherited class like 'Bar'
 		stmt.SuperClass = &ast.Constant{Token: p.curToken, Value: p.curToken.Literal}
+	}
+
+	stmt.Body = p.parseBlockStatement()
+
+	return stmt
+}
+
+func (p *Parser) parseModuleStatement() *ast.ModuleStatement {
+	stmt := &ast.ModuleStatement{Token: p.curToken}
+
+	if !p.expectPeek(token.Constant) {
+		return nil
+	}
+
+	stmt.Name = &ast.Constant{Token: p.curToken, Value: p.curToken.Literal}
+
+	// See if there is any inheritance
+	if p.peekTokenIs(token.LT) {
+		msg := fmt.Sprintf("Module doesn't support inheritance. Line: %d", p.curToken.Line)
+		p.errors = append(p.errors, msg)
+		return nil
 	}
 
 	stmt.Body = p.parseBlockStatement()
