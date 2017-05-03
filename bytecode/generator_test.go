@@ -341,7 +341,7 @@ Foo.bar
 	compareBytecode(t, bytecode, expected)
 }
 
-func TestClassDefinition(t *testing.T) {
+func TestClassCompilation(t *testing.T) {
 	input := `
 class Bar
   def bar
@@ -371,6 +371,52 @@ Foo.new.bar
 2 pop
 3 putself
 4 def_class class:Foo Bar
+5 pop
+6 getconstant Foo
+7 send new 0
+8 send bar 0
+9 leave
+`
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
+func TestModuleCompilation(t *testing.T) {
+	input := `
+
+
+module Bar
+  def bar
+    10
+  end
+end
+
+class Foo
+  include(Bar)
+end
+
+Foo.new.bar
+`
+	expected := `
+<Def:bar>
+0 putobject 10
+1 leave
+<DefClass:Bar>
+0 putself
+1 putstring "bar"
+2 def_method 0
+3 leave
+<DefClass:Foo>
+0 putself
+1 getconstant Bar
+2 send include 1
+3 leave
+<ProgramStart>
+0 putself
+1 def_class module:Bar
+2 pop
+3 putself
+4 def_class class:Foo
 5 pop
 6 getconstant Foo
 7 send new 0
