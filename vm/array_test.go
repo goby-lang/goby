@@ -82,7 +82,7 @@ func TestShiftMethodFail(t *testing.T) {
 			t.Errorf("Expect error. got=%T (%+v)", err, err)
 		}
 		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", err.Message, tt.expected.Message)
+			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
 		}
 	}
 }
@@ -341,7 +341,7 @@ func TestConcatMethodFail(t *testing.T) {
 			t.Errorf("Expect error. got=%T (%+v)", err, err)
 		}
 		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", err.Message, tt.expected.Message)
+			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
 		}
 	}
 }
@@ -409,7 +409,7 @@ func TestCountMethodFail(t *testing.T) {
 			t.Errorf("Expect error. got=%T (%+v)", err, err)
 		}
 		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", err.Message, tt.expected.Message)
+			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
 		}
 	}
 }
@@ -453,7 +453,7 @@ func TestRotateMethodFail(t *testing.T) {
 			t.Errorf("Expect error. got=%T (%+v)", err, err)
 		}
 		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", err.Message, tt.expected.Message)
+			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
 		}
 	}
 }
