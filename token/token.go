@@ -57,6 +57,7 @@ const (
 	NotEq = "!="
 
 	Class           = "CLASS"
+	Module          = "MODULE"
 	True            = "TRUE"
 	False           = "FALSE"
 	Null            = "Null"

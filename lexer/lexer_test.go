@@ -71,6 +71,11 @@ func TestNextToken(t *testing.T) {
 	false || true;
 
 	nil
+
+	module Foo
+	end
+
+	foo.module
 	`
 
 	tests := []struct {
@@ -272,7 +277,15 @@ func TestNextToken(t *testing.T) {
 		{token.Semicolon, ";", 62},
 
 		{token.Null, "nil", 64},
-		{token.EOF, "", 65},
+
+		{token.Ident, "module", 66},
+		{token.Constant, "Foo", 66},
+		{token.End, "end", 67},
+
+		{token.Ident, "foo", 69},
+		{token.Dot, ".", 69},
+		{token.Ident, "module", 69},
+		{token.EOF, "", 70},
 	}
 
 	l := New(input)
