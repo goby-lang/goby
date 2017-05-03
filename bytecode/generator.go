@@ -127,9 +127,9 @@ func (g *Generator) compileStatement(is *instructionSet, statement ast.Statement
 		is.define(PutSelf)
 
 		if stmt.SuperClass != nil {
-			is.define(DefClass, stmt.Name.Value, stmt.SuperClass.Value)
+			is.define(DefClass, "class:" + stmt.Name.Value, stmt.SuperClass.Value)
 		} else {
-			is.define(DefClass, stmt.Name.Value)
+			is.define(DefClass, "class:" + stmt.Name.Value)
 		}
 
 		is.define(Pop)

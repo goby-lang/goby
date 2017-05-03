@@ -74,7 +74,7 @@ i
 6 leave
 <ProgramStart>
 0 putself
-1 def_class Foo
+1 def_class class:Foo
 2 pop
 3 putobject 100
 4 setlocal 0 0
@@ -296,7 +296,7 @@ Foo.new(100, 50).bar
 6 leave
 <ProgramStart>
 0 putself
-1 def_class Foo
+1 def_class class:Foo
 2 pop
 3 getconstant Foo
 4 putobject 100
@@ -330,7 +330,7 @@ Foo.bar
 3 leave
 <ProgramStart>
 0 putself
-1 def_class Foo
+1 def_class class:Foo
 2 pop
 3 getconstant Foo
 4 send bar 0
@@ -367,10 +367,10 @@ Foo.new.bar
 0 leave
 <ProgramStart>
 0 putself
-1 def_class Bar
+1 def_class class:Bar
 2 pop
 3 putself
-4 def_class Foo Bar
+4 def_class class:Foo Bar
 5 pop
 6 getconstant Foo
 7 send new 0
