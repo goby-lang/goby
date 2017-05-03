@@ -22,6 +22,9 @@ I want to build a language that focuses on developing microservices. Which shoul
 A lot people have questions about `rooby` since it's a new language and you may get confused by the way I describe it (sorry for that 😢). Here's a list of [frequently asked questions](https://github.com/rooby-lang/rooby/wiki/Frequently-asked-questions).
 
 ## Supported features
+
+#### [API Reference](api_reference/)
+
 - **Can be compiled into bytecode (with `.robc` extension)**
 - **Can evaluate bytecode directly**
 - Everything is object
