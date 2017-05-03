@@ -269,7 +269,7 @@ var builtInActions = map[operationType]*action{
 			c := newCallFrame(is)
 			c.self = class
 			vm.callFrameStack.push(c)
-			vm.start()
+			vm.startFromTopFrame()
 
 			vm.stack.push(classPr)
 		},
@@ -364,7 +364,7 @@ var builtInActions = map[operationType]*action{
 			}
 
 			vm.callFrameStack.push(c)
-			vm.start()
+			vm.startFromTopFrame()
 
 			setReturnValueAndSP(vm, receiverPr, vm.stack.top())
 		},
@@ -408,7 +408,7 @@ func evalMethodObject(vm *VM, receiver BaseObject, method *Method, receiverPr, a
 
 	c.blockFrame = blockFrame
 	vm.callFrameStack.push(c)
-	vm.start()
+	vm.startFromTopFrame()
 
 	setReturnValueAndSP(vm, receiverPr, vm.stack.top())
 }

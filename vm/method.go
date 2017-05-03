@@ -54,7 +54,7 @@ func builtInMethodYield(vm *VM, blockFrame *callFrame, args ...Object) *Pointer 
 	}
 
 	vm.callFrameStack.push(c)
-	vm.start()
+	vm.startFromTopFrame()
 
 	return vm.stack.top()
 }
