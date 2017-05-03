@@ -57,6 +57,16 @@ func TestEvalInteger(t *testing.T) {
 		{`(3 - 1) ** (3++) / 2`, 8},
 		{`(25 / 5 + 5) * (2++)`, 30},
 		{`(25 / 5 + 5) * 2++`, 21},
+		{`2.next`, 3},
+		{`1.next`, 2},
+		{`1.pred`, 0},
+		{`0.pred`, -1},
+		{`	a = 0
+		  	3.times do
+		  		a++
+			end
+			a
+			`, 3},
 	}
 
 	for _, tt := range tests {
@@ -68,6 +78,67 @@ func TestEvalInteger(t *testing.T) {
 			testIntegerObject(t, evaluated, tt.expected.(int))
 		case string:
 			testStringObject(t, evaluated, tt.expected.(string))
+		}
+	}
+}
+
+func TestEvalIntegerFail(t *testing.T) {
+	testsFail := []struct {
+		input    string
+		expected *Error
+	}{
+		{`
+		1 + "p"
+		`, newError("expect argument to be Integer type")},
+		{`
+		1 - "m"
+		`, newError("expect argument to be Integer type")},
+		{`
+		1 * "a"
+		`, newError("expect argument to be Integer type")},
+		{`
+		1 ** "p"
+		`, newError("expect argument to be Integer type")},
+		{`
+		1 / "t"
+		`, newError("expect argument to be Integer type")},
+		{`
+		1 > "m"
+		`, newError("expect argument to be Integer type")},
+		{`
+		1 >= "m"
+		`, newError("expect argument to be Integer type")},
+		{`
+		1 < "m"
+		`, newError("expect argument to be Integer type")},
+		{`
+		1 <= "m"
+		`, newError("expect argument to be Integer type")},
+		{`
+		1 <=> "m"
+		`, newError("expect argument to be Integer type")},
+		{`
+		1 == "m"
+		`, newError("expect argument to be Integer type")},
+		{`
+		1 != "m"
+		`, newError("expect argument to be Integer type")},
+		{`
+		(-2).times
+		`, newError("Expect paramentr to be greater 0. got=-2")},
+		{`
+		2.times
+		`, newError("Can't yield without a block")},
+	}
+
+	for _, tt := range testsFail {
+		evaluated := testEval(t, tt.input)
+		err, ok := evaluated.(*Error)
+		if !ok {
+			t.Errorf("Expect error. got=%T (%+v)", err, err)
+		}
+		if err.Message != tt.expected.Message {
+			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
 		}
 	}
 }
