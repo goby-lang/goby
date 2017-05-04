@@ -70,6 +70,7 @@ type BaseClass struct {
 	Class *RClass
 	// Singleton is a flag marks if this class a singleton class
 	Singleton bool
+	isModule  bool
 }
 
 // objectType returns class object's type
@@ -195,16 +196,12 @@ var BuiltinClassMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-
+				module := args[0].(*RClass)
 				class := receiver.(*RClass)
-				instance := class.initializeInstance()
-				initMethod := class.lookupInstanceMethod("initialize")
+				module.PseudoSuperClass = class.PseudoSuperClass
+				class.PseudoSuperClass = module
 
-				if initMethod != nil {
-					instance.InitializeMethod = initMethod.(*Method)
-				}
-
-				return instance
+				return class
 			}
 		},
 		Name: "include",

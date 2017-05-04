@@ -245,8 +245,13 @@ var builtInActions = map[operationType]*action{
 		name: bytecode.DefClass,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			subject := strings.Split(args[0].(string), ":")
-			_, subjectName := subject[0], subject[1]
+			subjectType, subjectName := subject[0], subject[1]
 			class := initializeClass(subjectName)
+
+			if subjectType == "module" {
+				class.isModule = true
+			}
+
 			classPr := &Pointer{Target: class}
 			vm.constants[class.Name] = classPr
 
