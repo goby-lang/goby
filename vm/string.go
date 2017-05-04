@@ -2,7 +2,9 @@ package vm
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
+	"unicode"
 )
 
 var (
@@ -296,6 +298,36 @@ var builtinStringMethods = []*BuiltInMethod{
 			}
 		},
 		Name: "to_s",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
+				str := receiver.(*StringObject).Value
+				parsedStr, err := strconv.ParseInt(str, 10, 0)
+
+				if err == nil {
+					return initilaizeInteger(int(parsedStr))
+				}
+
+				var digits string
+				for _, char := range str {
+					if unicode.IsDigit(char) {
+						digits += string(char)
+					} else {
+						break
+					}
+				}
+
+				if len(digits) > 0 {
+					parsedStr, _ = strconv.ParseInt(digits, 10, 0)
+					return initilaizeInteger(int(parsedStr))
+				}
+
+				return initilaizeInteger(0)
+			}
+		},
+		Name: "to_i",
 	},
 }
 

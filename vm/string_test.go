@@ -56,6 +56,10 @@ func TestEvalInfixStringExpression(t *testing.T) {
 		{`" ".reverse`, " "},
 		{`"-123".reverse`, "321-"},
 		{`"string".to_s`, "string"},
+		{`"123".to_i`, 123},
+		{`"string".to_i`, 0},
+		{`"123string123".to_i`, 123},
+		{`"string123".to_i`, 0},
 		{`"More test".reverse.upcase`, "TSET EROM"},
 	}
 
