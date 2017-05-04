@@ -265,6 +265,7 @@ var builtInActions = map[operationType]*action{
 				}
 
 				class.SuperClass = inheritedClass
+				class.PseudoSuperClass = inheritedClass
 			}
 
 			vm.stack.pop()

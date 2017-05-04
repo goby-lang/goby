@@ -41,8 +41,7 @@ func TestPrimitiveType(t *testing.T) {
 		},
 		{
 			`
-			# returns null
-			puts(123).class.name
+			nil.class.name
 			`,
 			"Null",
 		},
@@ -524,7 +523,7 @@ func TestEvalCustomInitializeMethod(t *testing.T) {
 	}
 }
 
-func TestEvalClassInheritance(t *testing.T) {
+func TestEvalMethodInheritance(t *testing.T) {
 	input := `
 		class Foo
 			def add(x, y)
@@ -549,6 +548,25 @@ func TestEvalClassInheritance(t *testing.T) {
 	if result.Value != 21 {
 		t.Errorf("expect result to be 21. got=%d", result.Value)
 	}
+}
+
+func TestEvalClassInheritance(t *testing.T) {
+	input := `
+		class Bar
+		end
+
+		class Foo < Bar
+		  def self.add
+		    10
+		  end
+		end
+
+		Foo.superclass.name
+	`
+
+	evaluated := testEval(t, input)
+
+	testStringObject(t, evaluated, "Bar")
 }
 
 func TestEvalIfExpression(t *testing.T) {

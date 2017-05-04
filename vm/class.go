@@ -27,7 +27,7 @@ func initTopLevelClasses() {
 
 // initializeClass initializes and returns a class instance with given class name
 func initializeClass(name string) *RClass {
-	class := &RClass{BaseClass: &BaseClass{Name: name, Methods: newEnvironment(), ClassMethods: newEnvironment(), Class: classClass, SuperClass: objectClass}}
+	class := &RClass{BaseClass: &BaseClass{Name: name, Methods: newEnvironment(), ClassMethods: newEnvironment(), Class: classClass, SuperClass: objectClass, PseudoSuperClass: objectClass}}
 	//classScope := &scope{self: class, Env: closedEnvironment(scope.Env)}
 	//class.scope = classScope
 
@@ -42,6 +42,7 @@ type Class interface {
 	lookupClassMethod(string) Object
 	lookupInstanceMethod(string) Object
 	ReturnName() string
+	returnSuperClass() Class
 	BaseObject
 }
 
@@ -62,6 +63,9 @@ type BaseClass struct {
 	ClassMethods *environment
 	// SuperClass points to the class it inherits
 	SuperClass *RClass
+	// This is the class where we should looking for a method.
+	// It can be normal class, singleton class or a module.
+	PseudoSuperClass *RClass
 	// Class points to this class's class, which should be ClassClass
 	Class *RClass
 	// Singleton is a flag marks if this class a singleton class
@@ -83,8 +87,8 @@ func (c *BaseClass) lookupClassMethod(methodName string) Object {
 	method, ok := c.ClassMethods.get(methodName)
 
 	if !ok {
-		if c.SuperClass != nil {
-			return c.SuperClass.lookupClassMethod(methodName)
+		if c.PseudoSuperClass != nil {
+			return c.PseudoSuperClass.lookupClassMethod(methodName)
 		}
 		if c.Class != nil {
 			return c.Class.lookupClassMethod(methodName)
@@ -99,8 +103,8 @@ func (c *BaseClass) lookupInstanceMethod(methodName string) Object {
 	method, ok := c.Methods.get(methodName)
 
 	if !ok {
-		if c.SuperClass != nil {
-			return c.SuperClass.lookupInstanceMethod(methodName)
+		if c.PseudoSuperClass != nil {
+			return c.PseudoSuperClass.lookupInstanceMethod(methodName)
 		}
 
 		if c.Class != nil {
@@ -123,9 +127,9 @@ func (c *BaseClass) setSingletonMethod(name string, method *Method) {
 	class := initializeClass(fmt.Sprintf("%s:singleton", c.Name))
 	class.Singleton = true
 	class.ClassMethods.set(name, method)
-	class.SuperClass = c.SuperClass
+	class.PseudoSuperClass = c.PseudoSuperClass
 	class.Class = classClass
-	c.SuperClass = class
+	c.PseudoSuperClass = class
 }
 
 func (c *BaseClass) returnClass() Class {
@@ -134,6 +138,10 @@ func (c *BaseClass) returnClass() Class {
 
 func (c *BaseClass) ReturnName() string {
 	return c.Name
+}
+
+func (c *BaseClass) returnSuperClass() Class {
+	return c.SuperClass
 }
 
 func (c *RClass) initializeInstance() *RObject {
@@ -199,6 +207,23 @@ var BuiltinClassMethods = []*BuiltInMethod{
 				return instance
 			}
 		},
+		Name: "include",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
+				class := receiver.(*RClass)
+				instance := class.initializeInstance()
+				initMethod := class.lookupInstanceMethod("initialize")
+
+				if initMethod != nil {
+					instance.InitializeMethod = initMethod.(*Method)
+				}
+
+				return instance
+			}
+		},
 		Name: "new",
 	},
 	{
@@ -211,5 +236,14 @@ var BuiltinClassMethods = []*BuiltInMethod{
 			}
 		},
 		Name: "name",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
+				return receiver.(Class).returnSuperClass()
+			}
+		},
+		Name: "superclass",
 	},
 }
