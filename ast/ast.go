@@ -139,6 +139,32 @@ func (cs *ClassStatement) String() string {
 	return out.String()
 }
 
+// ModuleStatement represents module node in AST
+type ModuleStatement struct {
+	Token      token.Token
+	Name       *Constant
+	Body       *BlockStatement
+	SuperClass *Constant
+}
+
+func (ms *ModuleStatement) statementNode() {}
+
+// TokenLiteral returns token's literal
+func (ms *ModuleStatement) TokenLiteral() string {
+	return ms.Token.Literal
+}
+func (ms *ModuleStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("module ")
+	out.WriteString(ms.Name.TokenLiteral())
+	out.WriteString(" {\n")
+	out.WriteString(ms.Body.String())
+	out.WriteString("\n}")
+
+	return out.String()
+}
+
 type ReturnStatement struct {
 	Token       token.Token
 	ReturnValue Expression

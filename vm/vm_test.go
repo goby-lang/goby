@@ -37,7 +37,7 @@ func TestCunstomConstructorAndInstanceVariable(t *testing.T) {
 6 leave
 <ProgramStart>
 0 putself
-1 def_class Foo
+1 def_class class:Foo
 2 pop
 3 getconstant Foo
 4 putobject 100
@@ -207,10 +207,10 @@ func TestClassDefinitionWithInheritance(t *testing.T) {
 0 leave
 <ProgramStart>
 0 putself
-1 def_class Bar
+1 def_class class:Bar
 2 pop
 3 putself
-4 def_class Foo Bar
+4 def_class class:Foo Bar
 5 pop
 6 getconstant Foo
 7 send new 0
@@ -235,7 +235,7 @@ func TestClassMethodDefinition(t *testing.T) {
 3 leave
 <ProgramStart>
 0 putself
-1 def_class Foo
+1 def_class class:Foo
 2 pop
 3 getconstant Foo
 4 send bar 0
@@ -259,7 +259,7 @@ func TestClassDefinition(t *testing.T) {
 3 leave
 <ProgramStart>
 0 putself
-1 def_class Foo
+1 def_class class:Foo
 2 pop
 3 getconstant Foo
 4 send new 0

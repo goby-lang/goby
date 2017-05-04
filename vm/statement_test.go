@@ -116,6 +116,56 @@ func TestDefStatement(t *testing.T) {
 	}
 }
 
+func TestModuleStatement(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{`
+		module Bar
+		  def bar
+		    10
+		  end
+		end
+
+		class Foo
+		  include(Bar)
+		end
+
+		Foo.new.bar
+		`,
+			10},
+		{`module Foo
+			  def ten
+			    10
+			  end
+			end
+
+			class Baz
+			  def ten
+			    1
+			  end
+
+			  def five
+			    5
+			  end
+			end
+
+			class Bar < Baz
+			  include(Foo)
+			end
+
+			b = Bar.new
+			b.ten * b.five
+`, 50},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
 //func TestWhileStatement(t *testing.T) {
 //	tests := []struct {
 //		input    string

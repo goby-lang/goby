@@ -134,7 +134,7 @@ func init() {
 		methods.set(m.Name, m)
 	}
 
-	bc := &BaseClass{Name: "Hash", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, SuperClass: objectClass}
+	bc := &BaseClass{Name: "Hash", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
 	hc := &RHash{BaseClass: bc}
 	hashClass = hc
 }

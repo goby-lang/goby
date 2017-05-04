@@ -127,13 +127,19 @@ func (g *Generator) compileStatement(is *instructionSet, statement ast.Statement
 		is.define(PutSelf)
 
 		if stmt.SuperClass != nil {
-			is.define(DefClass, stmt.Name.Value, stmt.SuperClass.Value)
+			is.define(DefClass, "class:"+stmt.Name.Value, stmt.SuperClass.Value)
 		} else {
-			is.define(DefClass, stmt.Name.Value)
+			is.define(DefClass, "class:"+stmt.Name.Value)
 		}
 
 		is.define(Pop)
 		g.compileClassStmt(stmt, scope)
+	case *ast.ModuleStatement:
+		is.define(PutSelf)
+		is.define(DefClass, "module:"+stmt.Name.Value)
+
+		is.define(Pop)
+		g.compileModuleStmt(stmt, scope)
 	case *ast.ReturnStatement:
 		g.compileExpression(is, stmt.ReturnValue, scope, table)
 		g.endInstructions(is)
@@ -143,6 +149,16 @@ func (g *Generator) compileStatement(is *instructionSet, statement ast.Statement
 }
 
 func (g *Generator) compileClassStmt(stmt *ast.ClassStatement, scope *scope) {
+	scope = newScope(scope, stmt)
+	is := &instructionSet{}
+	is.setLabel(fmt.Sprintf("%s:%s", LabelDefClass, stmt.Name.Value))
+
+	g.compileBlockStatement(is, stmt.Body, scope, scope.localTable)
+	is.define(Leave)
+	g.instructionSets = append(g.instructionSets, is)
+}
+
+func (g *Generator) compileModuleStmt(stmt *ast.ModuleStatement, scope *scope) {
 	scope = newScope(scope, stmt)
 	is := &instructionSet{}
 	is.setLabel(fmt.Sprintf("%s:%s", LabelDefClass, stmt.Name.Value))

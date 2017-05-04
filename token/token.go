@@ -56,7 +56,6 @@ const (
 	Eq    = "=="
 	NotEq = "!="
 
-	Class           = "CLASS"
 	True            = "TRUE"
 	False           = "FALSE"
 	Null            = "Null"

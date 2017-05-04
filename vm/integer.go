@@ -405,7 +405,7 @@ func initInteger() {
 		methods.set(m.Name, m)
 	}
 
-	bc := &BaseClass{Name: "Integer", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, SuperClass: objectClass}
+	bc := &BaseClass{Name: "Integer", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
 	ic := &RInteger{BaseClass: bc}
 	integerClass = ic
 }

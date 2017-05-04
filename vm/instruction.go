@@ -244,7 +244,14 @@ var builtInActions = map[operationType]*action{
 	bytecode.DefClass: {
 		name: bytecode.DefClass,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
-			class := initializeClass(args[0].(string))
+			subject := strings.Split(args[0].(string), ":")
+			subjectType, subjectName := subject[0], subject[1]
+			class := initializeClass(subjectName)
+
+			if subjectType == "module" {
+				class.isModule = true
+			}
+
 			classPr := &Pointer{Target: class}
 			vm.constants[class.Name] = classPr
 
@@ -262,7 +269,8 @@ var builtInActions = map[operationType]*action{
 					newError("Constant %s is not a class. got=%T", constantName, constant)
 				}
 
-				class.SuperClass = inheritedClass
+				class.pseudoSuperClass = inheritedClass
+				class.superClass = inheritedClass
 			}
 
 			vm.stack.pop()
