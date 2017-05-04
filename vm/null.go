@@ -32,7 +32,7 @@ func initNull() {
 		methods.set(m.Name, m)
 	}
 
-	baseClass := &BaseClass{Name: "Null", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, SuperClass: objectClass}
+	baseClass := &BaseClass{Name: "Null", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass}
 	nc := &RNull{BaseClass: baseClass}
 	nullClass = nc
 	NULL = &Null{Class: nullClass}

@@ -84,7 +84,7 @@ func init() {
 		methods.set(m.Name, m)
 	}
 
-	bc := &BaseClass{Name: "Array", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, SuperClass: objectClass, PseudoSuperClass: objectClass}
+	bc := &BaseClass{Name: "Array", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
 	ac := &RArray{BaseClass: bc}
 	arrayClass = ac
 }

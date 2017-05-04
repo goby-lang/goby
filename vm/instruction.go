@@ -269,8 +269,8 @@ var builtInActions = map[operationType]*action{
 					newError("Constant %s is not a class. got=%T", constantName, constant)
 				}
 
-				class.SuperClass = inheritedClass
-				class.PseudoSuperClass = inheritedClass
+				class.pseudoSuperClass = inheritedClass
+				class.superClass = inheritedClass
 			}
 
 			vm.stack.pop()

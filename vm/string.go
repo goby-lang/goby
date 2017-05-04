@@ -338,7 +338,7 @@ func initString() {
 		methods.set(m.Name, m)
 	}
 
-	bc := &BaseClass{Name: "String", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, SuperClass: objectClass, PseudoSuperClass: objectClass}
+	bc := &BaseClass{Name: "String", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
 	sc := &RString{BaseClass: bc}
 	stringClass = sc
 }
