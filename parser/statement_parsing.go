@@ -242,7 +242,7 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 	ws.Condition = p.parseExpression(LOWEST)
 	p.nextToken()
 
-	if p.curTokenIs(token.SEMICOLON) {
+	if p.curTokenIs(token.Semicolon) {
 		p.nextToken()
 	}
 

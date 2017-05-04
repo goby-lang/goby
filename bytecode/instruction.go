@@ -27,6 +27,7 @@ const (
 	NewArray            = "newarray"
 	NewHash             = "newhash"
 	BranchUnless        = "branchunless"
+	BranchIf            = "branchif"
 	Jump                = "jump"
 	DefMethod           = "def_method"
 	DefSingletonMethod  = "def_singleton_method"
