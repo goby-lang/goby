@@ -320,10 +320,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-
-				int := receiver.(*IntegerObject)
-
-				return initilaizeInteger(int.Value)
+				return receiver
 			}
 		},
 		Name: "to_i",
