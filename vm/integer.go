@@ -321,6 +321,17 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
+				int := receiver.(*IntegerObject)
+
+				return initilaizeInteger(int.Value)
+			}
+		},
+		Name: "to_i",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				i := receiver.(*IntegerObject)
 				even := i.Value%2 == 0
 

@@ -47,6 +47,7 @@ func TestEvalInteger(t *testing.T) {
 		{`10++`, 11},
 		{`1--`, 0},
 		{`100.to_s`, "100"},
+		{`100.to_i`, 100},
 		{`1.even`, false},
 		{`2.even`, true},
 		{`1.odd`, true},
