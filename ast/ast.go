@@ -139,6 +139,7 @@ func (cs *ClassStatement) String() string {
 	return out.String()
 }
 
+// ModuleStatement represents module node in AST
 type ModuleStatement struct {
 	Token      token.Token
 	Name       *Constant
@@ -147,6 +148,8 @@ type ModuleStatement struct {
 }
 
 func (ms *ModuleStatement) statementNode() {}
+
+// TokenLiteral returns token's literal
 func (ms *ModuleStatement) TokenLiteral() string {
 	return ms.Token.Literal
 }
