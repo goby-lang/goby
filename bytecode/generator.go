@@ -145,7 +145,30 @@ func (g *Generator) compileStatement(is *instructionSet, statement ast.Statement
 		g.endInstructions(is)
 	case *ast.RequireRelativeStatement:
 		is.define(RequireRelative, stmt.Filepath)
+	case *ast.WhileStatement:
+		g.compileWhileStmt(is, stmt, scope, table)
 	}
+}
+
+func (g *Generator) compileWhileStmt(is *instructionSet, stmt *ast.WhileStatement, scope *scope, table *localTable) {
+	anchor1 := &anchor{}
+	is.define(Jump, anchor1)
+
+	is.define(PutNull)
+	is.define(Pop)
+	is.define(Jump, anchor1)
+
+	anchor2 := &anchor{is.Count}
+
+	g.compileBlockStatement(is, stmt.Body, scope, scope.localTable)
+
+	anchor1.line = is.Count
+
+	g.compileExpression(is, stmt.Condition, scope, table)
+
+	is.define(BranchIf, anchor2)
+	is.define(PutNull)
+	is.define(Pop)
 }
 
 func (g *Generator) compileClassStmt(stmt *ast.ClassStatement, scope *scope) {

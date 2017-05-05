@@ -330,7 +330,7 @@ func TestRequireRelativeStatement(t *testing.T) {
 
 func TestWhileStatement(t *testing.T) {
 	input := `
-	while i < a.length
+	while i < a.length; do
 	  puts(i)
 	  i++
 	end
