@@ -6,7 +6,6 @@ import (
 	"github.com/rooby-lang/rooby/parser"
 	"io/ioutil"
 	"path"
-	"regexp"
 	"strconv"
 	"strings"
 )
@@ -36,7 +35,7 @@ func newBytecodeParser(file filename) *bytecodeParser {
 // parseBytecode parses given bytecodes and transfer them into a sequence of instruction set.
 func (p *bytecodeParser) parseBytecode(bytecodes string) []*instructionSet {
 	iss := []*instructionSet{}
-	bytecodes = removeEmptyLine(strings.TrimSpace(bytecodes))
+	bytecodes = strings.TrimSpace(bytecodes)
 	bytecodesByLine := strings.Split(bytecodes, "\n")
 	p.parseSection(iss, bytecodesByLine)
 
@@ -144,14 +143,4 @@ func (p *bytecodeParser) parseParam(param string) interface{} {
 	i := int(integer)
 
 	return i
-}
-
-func removeEmptyLine(s string) string {
-	regex, err := regexp.Compile("\n+")
-	if err != nil {
-		panic(err)
-	}
-	s = regex.ReplaceAllString(s, "\n")
-
-	return s
 }
