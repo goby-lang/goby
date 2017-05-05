@@ -7,6 +7,7 @@
 [![GoDoc](https://godoc.org/github.com/rooby-lang/rooby?status.svg)](https://godoc.org/github.com/rooby-lang/rooby)
 [![Go Report Card](https://goreportcard.com/badge/github.com/rooby-lang/rooby)](https://goreportcard.com/report/github.com/rooby-lang/rooby)
 [![codecov](https://codecov.io/gh/rooby-lang/rooby/branch/master/graph/badge.svg)](https://codecov.io/gh/rooby-lang/rooby)
+[![BCH compliance](https://bettercodehub.com/edge/badge/rooby-lang/rooby?branch=master)](https://bettercodehub.com/)
 [![Readme Score](http://readme-score-api.herokuapp.com/score.svg?url=rooby-lang/rooby)](http://clayallsopp.github.io/readme-score?url=rooby-lang/rooby)
 
 rooby is a Ruby-like object oriented language written in Go. You can think it as a simplified, compilable Ruby for now.
