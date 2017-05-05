@@ -59,6 +59,10 @@ A lot people have questions about `rooby` since it's a new language and you may 
     - Just `puts` for now
     
 **(You can open an issue for any feature request)** 
+
+## Special syntax
+
+Currently our parser has some limitation that cause `rooby` unable to support some syntaxes. These special cases are documented in [wiki's special syntax page](https://github.com/rooby-lang/rooby/wiki/Special-syntaxes).
     
 ## TODO & WIP
 
