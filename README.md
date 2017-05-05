@@ -61,7 +61,9 @@ A lot people have questions about `rooby` since it's a new language and you may 
     
 ## TODO & WIP
 
-See [github projects](https://github.com/rooby-lang/rooby/projects)
+Checkout this [issue](https://github.com/rooby-lang/rooby/issues/72) for what we will work on before first release.
+
+Also see [github projects](https://github.com/rooby-lang/rooby/projects)
 
 ## Install
 
