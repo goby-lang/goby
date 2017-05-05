@@ -177,6 +177,23 @@ var builtInActions = map[operationType]*action{
 			}
 		},
 	},
+	bytecode.BranchIf: {
+		name: bytecode.BranchIf,
+		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
+			v := vm.stack.pop()
+			bool, isBool := v.Target.(*BooleanObject)
+
+			if isBool {
+				if !bool.Value {
+					return
+				}
+
+				line := args[0].(int)
+				cf.pc = line
+				return
+			}
+		},
+	},
 	bytecode.Jump: {
 		name: bytecode.Jump,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
