@@ -125,7 +125,7 @@ func (c *BaseClass) setSingletonMethod(name string, method *Method) {
 		c.pseudoSuperClass.ClassMethods.set(name, method)
 	}
 
-	class := initializeClass(fmt.Sprintf("%s:singleton", c.Name))
+	class := initializeClass(c.Name + "singleton")
 	class.Singleton = true
 	class.ClassMethods.set(name, method)
 	class.superClass = c.superClass
@@ -175,7 +175,7 @@ var builtinGlobalMethods = []*BuiltInMethod{
 				case Class:
 					return r.returnClass()
 				default:
-					return &Error{Message: fmt.Sprintf("Can't call class on %T", r)}
+					return &Error{Message: "Can't call class on %T" + string(r.objectType())}
 				}
 			}
 		},

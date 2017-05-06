@@ -1,7 +1,6 @@
 package vm
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -25,7 +24,7 @@ func (i *IntegerObject) objectType() objectType {
 }
 
 func (i *IntegerObject) Inspect() string {
-	return fmt.Sprintf("%d", i.Value)
+	return string(i.Value)
 }
 
 func (i *IntegerObject) returnClass() Class {
@@ -312,7 +311,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 
 				int := receiver.(*IntegerObject)
 
-				return initializeString(fmt.Sprint(int.Value))
+				return initializeString(string(int.Value))
 			}
 		},
 		Name: "to_s",
