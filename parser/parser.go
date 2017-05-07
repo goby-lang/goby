@@ -20,6 +20,9 @@ type Parser struct {
 	prefixParseFns map[token.Type]prefixParseFn
 	infixParseFns  map[token.Type]infixParseFn
 
+	// Determine if call expression should accept block argument,
+	// currently only used when parsing while statement.
+	// However, this is not a very good practice should change it in the future.
 	acceptBlock bool
 }
 
