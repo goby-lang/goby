@@ -1,0 +1,12 @@
+{
+	"ImportPath": "github.com/rooby-lang/rooby",
+	"GoVersion": "go1.8",
+	"GodepVersion": "v60",
+	"Deps": [
+		{
+			"ImportPath": "github.com/pkg/profile",
+			"Comment": "v1.2.0-9-g06b9068",
+			"Rev": "06b906832ed0e32302a942b63b6c5f8359034d26"
+		}
+	]
+}

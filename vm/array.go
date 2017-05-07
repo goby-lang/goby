@@ -94,7 +94,7 @@ var builtinArrayMethods = []*BuiltInMethod{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				if len(args) != 1 {
-					return newError("Expect 1 arguments. got=%d", len(args))
+					return &Error{Message: "Expect 1 arguments. got=%d" + string(len(args))}
 				}
 
 				i := args[0]

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/pkg/profile"
 	"github.com/rooby-lang/rooby/bytecode"
 	"github.com/rooby-lang/rooby/parser"
 	"github.com/rooby-lang/rooby/vm"
@@ -14,6 +15,7 @@ import (
 
 func main() {
 	compileOptionPtr := flag.Bool("c", false, "Compile to bytecode")
+	profileOptionPtr := flag.Bool("p", false, "Profile program execution")
 
 	flag.Parse()
 
@@ -34,6 +36,10 @@ func main() {
 
 	file, err := ioutil.ReadFile(filepath)
 	check(err)
+
+	if *profileOptionPtr {
+		defer profile.Start().Stop()
+	}
 
 	switch fileExt {
 	case "ro":

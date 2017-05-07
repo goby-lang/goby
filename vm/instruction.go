@@ -283,7 +283,7 @@ var builtInActions = map[operationType]*action{
 				constant := vm.constants[constantName]
 				inheritedClass, ok := constant.Target.(*RClass)
 				if !ok {
-					newError("Constant %s is not a class. got=%T", constantName, constant)
+					panic("Constant " + constantName + " is not a class. got=" + string(constant.Target.objectType()))
 				}
 
 				class.pseudoSuperClass = inheritedClass
@@ -319,7 +319,7 @@ var builtInActions = map[operationType]*action{
 			receiverPr := argPr - 1
 			receiver := vm.stack.Data[receiverPr].Target.(BaseObject)
 
-			error := newError("undefined method `%s' for %s", methodName, receiver.Inspect())
+			error := &Error{Message: "undefined method `" + methodName + "' for " + receiver.Inspect()}
 
 			var method Object
 
@@ -391,7 +391,8 @@ var builtInActions = map[operationType]*action{
 			vm.callFrameStack.push(c)
 			vm.startFromTopFrame()
 
-			setReturnValueAndSP(vm, receiverPr, vm.stack.top())
+			vm.stack.Data[receiverPr] = vm.stack.top()
+			vm.sp = receiverPr + 1
 		},
 	},
 	bytecode.Leave: {
@@ -420,7 +421,8 @@ func evalBuiltInMethod(vm *VM, receiver BaseObject, method *BuiltInMethod, recei
 			evalMethodObject(vm, instance, instance.InitializeMethod, receiverPr, argCount, argPr, blockFrame)
 		}
 	}
-	setReturnValueAndSP(vm, receiverPr, &Pointer{evaluated})
+	vm.stack.Data[receiverPr] = &Pointer{evaluated}
+	vm.sp = receiverPr + 1
 }
 
 func evalMethodObject(vm *VM, receiver BaseObject, method *Method, receiverPr, argC, argPr int, blockFrame *callFrame) {
@@ -435,11 +437,7 @@ func evalMethodObject(vm *VM, receiver BaseObject, method *Method, receiverPr, a
 	vm.callFrameStack.push(c)
 	vm.startFromTopFrame()
 
-	setReturnValueAndSP(vm, receiverPr, vm.stack.top())
-}
-
-func setReturnValueAndSP(vm *VM, receiverPr int, value *Pointer) {
-	vm.stack.Data[receiverPr] = value
+	vm.stack.Data[receiverPr] = vm.stack.top()
 	vm.sp = receiverPr + 1
 }
 

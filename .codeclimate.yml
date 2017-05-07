@@ -6,6 +6,9 @@ engines:
   gofmt:
     enabled: true
 
+exclude_paths:
+  - "Godeps"
+
 ratings:
   paths:
     - "**.go"
