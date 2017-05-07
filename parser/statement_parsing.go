@@ -239,7 +239,10 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 	ws := &ast.WhileStatement{Token: p.curToken}
 
 	p.nextToken()
+	// Prevent expression's method call to consume while's block as argument.
+	p.acceptBlock = false
 	ws.Condition = p.parseExpression(LOWEST)
+	p.acceptBlock = true
 	p.nextToken()
 
 	if p.curTokenIs(token.Semicolon) {

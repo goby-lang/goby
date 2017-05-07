@@ -330,7 +330,7 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 	}
 
 	// Parse block
-	if p.peekTokenIs(token.Do) {
+	if p.peekTokenIs(token.Do) && p.acceptBlock {
 		p.parseBlockParameters(exp)
 	}
 

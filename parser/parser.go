@@ -19,6 +19,8 @@ type Parser struct {
 
 	prefixParseFns map[token.Type]prefixParseFn
 	infixParseFns  map[token.Type]infixParseFn
+
+	acceptBlock bool
 }
 
 // BuildAST tokenizes and parses given file to build AST
@@ -37,6 +39,7 @@ func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
 		l:      l,
 		errors: []string{},
+		acceptBlock: true,
 	}
 
 	// Read two tokens, so curToken and peekToken are both set.
