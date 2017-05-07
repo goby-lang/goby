@@ -52,11 +52,12 @@ A lot people have questions about `rooby` since it's a new language and you may 
     - Array
 - Flow control
     - If statement
-    - Haven't support `for` or `while` yet
+    - while statement with [special syntax](https://github.com/rooby-lang/rooby/wiki/Special-syntaxes)
 - Import other files
     - require_relative
 - IO
-    - Just `puts` for now
+    - `puts`
+    - `ARGV`
     
 **(You can open an issue for any feature request)** 
 
@@ -127,6 +128,11 @@ I can't build this project without these resources, and I highly recommend you t
 - [Nand2Tetris II](https://www.coursera.org/learn/nand2tetris2/home/welcome)
 - [Ruby under a microscope](http://patshaughnessy.net/ruby-under-a-microscope)
 - [YARV's instruction table](http://www.atdot.net/yarv/insnstbl.html)
+
+## Maintainers
+
+- @st0012
+- @janczer
 
 ##  Sample snippet.
 
