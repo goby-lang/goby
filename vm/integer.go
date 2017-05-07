@@ -2,6 +2,7 @@ package vm
 
 import (
 	"math"
+	"strconv"
 )
 
 var (
@@ -24,7 +25,7 @@ func (i *IntegerObject) objectType() objectType {
 }
 
 func (i *IntegerObject) Inspect() string {
-	return string(i.Value)
+	return strconv.Itoa(i.Value)
 }
 
 func (i *IntegerObject) returnClass() Class {
@@ -311,7 +312,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 
 				int := receiver.(*IntegerObject)
 
-				return initializeString(string(int.Value))
+				return initializeString(strconv.Itoa(int.Value))
 			}
 		},
 		Name: "to_s",
