@@ -283,7 +283,7 @@ var builtInActions = map[operationType]*action{
 				constant := vm.constants[constantName]
 				inheritedClass, ok := constant.Target.(*RClass)
 				if !ok {
-					panic("Constant "+ constantName +" is not a class. got=" + string(constant.Target.objectType()))
+					panic("Constant " + constantName + " is not a class. got=" + string(constant.Target.objectType()))
 				}
 
 				class.pseudoSuperClass = inheritedClass
@@ -319,7 +319,7 @@ var builtInActions = map[operationType]*action{
 			receiverPr := argPr - 1
 			receiver := vm.stack.Data[receiverPr].Target.(BaseObject)
 
-			error := &Error{Message: "undefined method `" + methodName +"' for " + receiver.Inspect()}
+			error := &Error{Message: "undefined method `" + methodName + "' for " + receiver.Inspect()}
 
 			var method Object
 
