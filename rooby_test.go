@@ -36,7 +36,7 @@ func execFile(fileDir, filename string) vm.Object {
 	g := bytecode.NewGenerator(program)
 	bytecodes := g.GenerateByteCode(program)
 
-	v := vm.New(dir)
+	v := vm.New(dir, []string{})
 	v.ExecBytecodes(bytecodes, filepath)
 	return v.GetExecResult()
 }

@@ -29,6 +29,8 @@ type VM struct {
 	blockTables map[filename]map[string]*instructionSet
 
 	fileDir string
+
+	args []string
 }
 
 type isIndexTable struct {
@@ -49,10 +51,10 @@ type stack struct {
 }
 
 // New initializes a vm to initialize state and returns it.
-func New(fileDir string) *VM {
+func New(fileDir string, args []string) *VM {
 	s := &stack{}
 	cfs := &callFrameStack{callFrames: []*callFrame{}}
-	vm := &VM{stack: s, callFrameStack: cfs, sp: 0, cfp: 0}
+	vm := &VM{stack: s, callFrameStack: cfs, sp: 0, cfp: 0, args: args}
 	s.VM = vm
 	cfs.vm = vm
 
@@ -116,10 +118,18 @@ func (vm *VM) initConstants() {
 		objectClass,
 	}
 
+	args := []Object{}
+
+	for _, arg := range vm.args {
+		args = append(args, initializeString(arg))
+	}
+
 	for _, c := range builtInClasses {
 		p := &Pointer{Target: c}
 		constants[c.ReturnName()] = p
 	}
+
+	constants["ARGV"] = &Pointer{Target: initializeArray(args)}
 
 	vm.constants = constants
 }

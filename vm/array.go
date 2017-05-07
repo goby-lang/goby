@@ -106,12 +106,8 @@ var builtinArrayMethods = []*BuiltInMethod{
 
 				arr := receiver.(*ArrayObject)
 
-				if len(arr.Elements) == 0 {
-					return NULL
-				}
-
 				if int(index.Value) >= len(arr.Elements) {
-					return newError("Index out of range")
+					return NULL
 				}
 
 				return arr.Elements[index.Value]
