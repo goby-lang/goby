@@ -40,8 +40,8 @@ func BuildAST(file []byte) *ast.Program {
 // New initializes a parser and returns it
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
-		l:      l,
-		errors: []string{},
+		l:           l,
+		errors:      []string{},
 		acceptBlock: true,
 	}
 
