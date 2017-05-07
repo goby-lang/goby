@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/pkg/profile"
 	"github.com/rooby-lang/rooby/bytecode"
 	"github.com/rooby-lang/rooby/parser"
 	"github.com/rooby-lang/rooby/vm"
@@ -10,7 +11,6 @@ import (
 	"os"
 	"path"
 	"strings"
-	"github.com/pkg/profile"
 )
 
 func main() {
