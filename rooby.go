@@ -18,6 +18,7 @@ func main() {
 	flag.Parse()
 
 	filepath := flag.Arg(0)
+	args := flag.Args()[1:]
 
 	var fileExt string
 	dir, filename := path.Split(filepath)
@@ -42,14 +43,16 @@ func main() {
 		bytecodes := g.GenerateByteCode(program)
 
 		if !*compileOptionPtr {
-			execBytecode(bytecodes, dir, filepath)
+			v := vm.New(dir, args)
+			v.ExecBytecodes(bytecodes, filepath)
 			return
 		}
 
 		writeByteCode(bytecodes, dir, filename)
 	case "robc":
 		bytecodes := string(file)
-		execBytecode(bytecodes, dir, filepath)
+		v := vm.New(dir, args)
+		v.ExecBytecodes(bytecodes, filepath)
 	default:
 		fmt.Printf("Unknown file extension: %s", fileExt)
 	}
@@ -63,11 +66,6 @@ func writeByteCode(bytecodes, dir, filename string) {
 	}
 
 	f.WriteString(bytecodes)
-}
-
-func execBytecode(bytecodes, fileDir, filepath string) {
-	v := vm.New(fileDir)
-	v.ExecBytecodes(bytecodes, filepath)
 }
 
 func check(e error) {
