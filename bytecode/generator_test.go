@@ -665,7 +665,7 @@ func TestWhileStatementWithMethodCallInCondition(t *testing.T) {
 	i = 10
 	a = [1, 2, 3]
 
-	while i > a.length; do
+	while i > a.length do
 	  i = i - 1
 	end
 
