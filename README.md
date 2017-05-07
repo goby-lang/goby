@@ -52,18 +52,14 @@ A lot people have questions about `rooby` since it's a new language and you may 
     - Array
 - Flow control
     - If statement
-    - while statement with [special syntax](https://github.com/rooby-lang/rooby/wiki/Special-syntaxes)
+    - while statement
 - Import other files
     - require_relative
 - IO
     - `puts`
     - `ARGV`
     
-**(You can open an issue for any feature request)** 
-
-## Special syntax
-
-Currently our parser has some limitation that cause `rooby` unable to support some syntaxes. These special cases are documented in [wiki's special syntax page](https://github.com/rooby-lang/rooby/wiki/Special-syntaxes).
+**(You can open an issue for any feature request)**
     
 ## TODO & WIP
 
