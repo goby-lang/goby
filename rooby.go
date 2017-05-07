@@ -10,10 +10,12 @@ import (
 	"os"
 	"path"
 	"strings"
+	"github.com/pkg/profile"
 )
 
 func main() {
 	compileOptionPtr := flag.Bool("c", false, "Compile to bytecode")
+	profileOptionPtr := flag.Bool("p", false, "Profile program execution")
 
 	flag.Parse()
 
@@ -34,6 +36,10 @@ func main() {
 
 	file, err := ioutil.ReadFile(filepath)
 	check(err)
+
+	if *profileOptionPtr {
+		defer profile.Start().Stop()
+	}
 
 	switch fileExt {
 	case "ro":
