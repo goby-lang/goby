@@ -113,6 +113,9 @@ func TestEvalArrayIndex(t *testing.T) {
 			[][1]
 		`, nil},
 		{`
+			[1, 2, 3][100]
+		`, nil},
+		{`
 			[1, 2, 10, 5][2]
 		`, int64(10)},
 		{`
