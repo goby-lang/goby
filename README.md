@@ -129,6 +129,7 @@ I can't build this project without these resources, and I highly recommend you t
 
 - @st0012
 - @janczer
+- @adlerhsieh
 
 ##  Sample snippet.
 
