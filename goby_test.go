@@ -20,9 +20,9 @@ func TestRequireRelative(t *testing.T) {
 
 func execFile(fileDir, filename string) vm.Object {
 	_, currentPath, _, _ := runtime.Caller(0)
-	// dir is now project root: rooby/
+	// dir is now project root: goby/
 	dir, _ := path.Split(currentPath)
-	// dir is now rooby/test_fixtures/FILE_DIR
+	// dir is now goby/test_fixtures/FILE_DIR
 	dir = path.Join(dir, "./test_fixtures/", fileDir)
 
 	filepath := path.Join(dir, filename)

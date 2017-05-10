@@ -13,12 +13,12 @@ var (
 	FALSE *BooleanObject
 )
 
-// RBool is the built in class of rooby's boolean objects.
+// RBool is the built in class of goby's boolean objects.
 type RBool struct {
 	*BaseClass
 }
 
-// BooleanObject represents boolean object in rooby
+// BooleanObject represents boolean object in goby
 type BooleanObject struct {
 	Class *RBool
 	Value bool
