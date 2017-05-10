@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/rooby-lang/rooby",
+	"ImportPath": "github.com/goby-lang/goby",
 	"GoVersion": "go1.8",
 	"GodepVersion": "v60",
 	"Deps": [
