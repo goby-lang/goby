@@ -3,7 +3,7 @@ package vm
 import (
 	"bytes"
 	"fmt"
-	"github.com/rooby-lang/rooby/bytecode"
+	"github.com/goby-lang/goby/bytecode"
 	"strings"
 )
 

@@ -2,8 +2,8 @@ package vm
 
 import (
 	"fmt"
-	"github.com/rooby-lang/rooby/bytecode"
-	"github.com/rooby-lang/rooby/parser"
+	"github.com/goby-lang/goby/bytecode"
+	"github.com/goby-lang/goby/parser"
 	"io/ioutil"
 	"path"
 	"strconv"

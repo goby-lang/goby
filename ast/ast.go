@@ -3,7 +3,7 @@ package ast
 import (
 	"bytes"
 	"fmt"
-	"github.com/rooby-lang/rooby/token"
+	"github.com/goby-lang/goby/token"
 	"strings"
 )
 

@@ -3,9 +3,9 @@ package vm
 import (
 	"testing"
 
-	"github.com/rooby-lang/rooby/bytecode"
-	"github.com/rooby-lang/rooby/lexer"
-	"github.com/rooby-lang/rooby/parser"
+	"github.com/goby-lang/goby/bytecode"
+	"github.com/goby-lang/goby/lexer"
+	"github.com/goby-lang/goby/parser"
 )
 
 func TestCunstomConstructorAndInstanceVariable(t *testing.T) {

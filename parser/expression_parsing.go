@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/rooby-lang/rooby/ast"
-	"github.com/rooby-lang/rooby/token"
+	"github.com/goby-lang/goby/ast"
+	"github.com/goby-lang/goby/token"
 )
 
 var precedence = map[token.Type]int{

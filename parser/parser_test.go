@@ -2,8 +2,8 @@ package parser
 
 import (
 	"fmt"
-	"github.com/rooby-lang/rooby/ast"
-	"github.com/rooby-lang/rooby/lexer"
+	"github.com/goby-lang/goby/ast"
+	"github.com/goby-lang/goby/lexer"
 	"testing"
 )
 

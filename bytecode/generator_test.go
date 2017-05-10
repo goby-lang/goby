@@ -1,8 +1,8 @@
 package bytecode
 
 import (
-	"github.com/rooby-lang/rooby/lexer"
-	"github.com/rooby-lang/rooby/parser"
+	"github.com/goby-lang/goby/lexer"
+	"github.com/goby-lang/goby/parser"
 	"strings"
 	"testing"
 )

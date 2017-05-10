@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/rooby-lang/rooby/bytecode"
-	"github.com/rooby-lang/rooby/parser"
-	"github.com/rooby-lang/rooby/vm"
+	"github.com/goby-lang/goby/bytecode"
+	"github.com/goby-lang/goby/parser"
+	"github.com/goby-lang/goby/vm"
 	"io/ioutil"
 	"path"
 	"runtime"
