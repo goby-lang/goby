@@ -1,26 +1,26 @@
-# rooby
+# goby (rooby)
 
-[![Join the chat at https://gitter.im/rooby-lang/Lobby](https://badges.gitter.im/rooby-lang/Lobby.svg)](https://gitter.im/rooby-lang/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://gitter.im/goby-lang/Lobby](https://badges.gitter.im/goby-lang/Lobby.svg)](https://gitter.im/goby-lang/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![Build Status](https://travis-ci.org/rooby-lang/rooby.svg?branch=master)](https://travis-ci.org/rooby-lang/rooby)
-[![Code Climate](https://codeclimate.com/github/rooby-lang/rooby/badges/gpa.svg)](https://codeclimate.com/github/rooby-lang/rooby)
-[![GoDoc](https://godoc.org/github.com/rooby-lang/rooby?status.svg)](https://godoc.org/github.com/rooby-lang/rooby)
-[![Go Report Card](https://goreportcard.com/badge/github.com/rooby-lang/rooby)](https://goreportcard.com/report/github.com/rooby-lang/rooby)
-[![codecov](https://codecov.io/gh/rooby-lang/rooby/branch/master/graph/badge.svg)](https://codecov.io/gh/rooby-lang/rooby)
-[![BCH compliance](https://bettercodehub.com/edge/badge/rooby-lang/rooby?branch=master)](https://bettercodehub.com/)
-[![Readme Score](http://readme-score-api.herokuapp.com/score.svg?url=rooby-lang/rooby)](http://clayallsopp.github.io/readme-score?url=rooby-lang/rooby)
+[![Build Status](https://travis-ci.org/goby-lang/goby.svg?branch=master)](https://travis-ci.org/goby-lang/goby)
+[![Code Climate](https://codeclimate.com/github/goby-lang/goby/badges/gpa.svg)](https://codeclimate.com/github/goby-lang/goby)
+[![GoDoc](https://godoc.org/github.com/goby-lang/goby?status.svg)](https://godoc.org/github.com/goby-lang/goby)
+[![Go Report Card](https://goreportcard.com/badge/github.com/goby-lang/goby)](https://goreportcard.com/report/github.com/goby-lang/goby)
+[![codecov](https://codecov.io/gh/goby-lang/goby/branch/master/graph/badge.svg)](https://codecov.io/gh/goby-lang/goby)
+[![BCH compliance](https://bettercodehub.com/edge/badge/goby-lang/goby?branch=master)](https://bettercodehub.com/)
+[![Readme Score](http://readme-score-api.herokuapp.com/score.svg?url=goby-lang/goby)](http://clayallsopp.github.io/readme-score?url=goby-lang/goby)
 
-rooby is a Ruby-like object oriented language written in Go. You can think it as a simplified, compilable Ruby for now.
+goby is a Ruby-like object oriented language written in Go. You can think it as a simplified, compilable Ruby for now.
    
 **We're looking for contributors now, join us and make this project better!**
 
 ## Goal
 
-I want to build a language that focuses on developing microservices. Which should be performant and easy to write. This is why rooby has Ruby's user friendly syntax and is written in Go.
+I want to build a language that focuses on developing microservices. Which should be performant and easy to write. This is why goby has Ruby's user friendly syntax and is written in Go.
 
 ## Questions
 
-A lot people have questions about `rooby` since it's a new language and you may get confused by the way I describe it (sorry for that 😢). Here's a list of [frequently asked questions](https://github.com/rooby-lang/rooby/wiki/Frequently-asked-questions).
+A lot people have questions about `goby` since it's a new language and you may get confused by the way I describe it (sorry for that 😢). Here's a list of [frequently asked questions](https://github.com/goby-lang/goby/wiki/Frequently-asked-questions).
 
 ## Supported features
 - **Can be compiled into bytecode (with `.robc` extension)**
@@ -63,9 +63,9 @@ A lot people have questions about `rooby` since it's a new language and you may 
     
 ## TODO & WIP
 
-Checkout this [issue](https://github.com/rooby-lang/rooby/issues/72) for what we will work on before first release.
+Checkout this [issue](https://github.com/goby-lang/goby/issues/72) for what we will work on before first release.
 
-Also see [github projects](https://github.com/rooby-lang/rooby/projects)
+Also see [github projects](https://github.com/goby-lang/goby/projects)
 
 ## Install
 
@@ -75,23 +75,23 @@ Also see [github projects](https://github.com/rooby-lang/rooby/projects)
 4. Run following command 
 
 ```
-$ go get github.com/rooby-lang/rooby
+$ go get github.com/goby-lang/goby
 ```
 
 ## Usage
 
-**Execute rooby file using VM**
+**Execute goby file using VM**
 
 (might see errors on sample-6 since vm hasn't support block yet)
 ``` 
-$ rooby ./samples/sample-1.ro
+$ goby ./samples/sample-1.ro
 #=> 16
 ```
 
-**Compile rooby code**
+**Compile goby code**
 
 ```
-$ rooby -c ./samples/sample-1.ro
+$ goby -c ./samples/sample-1.ro
 ```
 
 You'll see `sample-1.robc` in `./samples`
@@ -99,22 +99,22 @@ You'll see `sample-1.robc` in `./samples`
 **Execute bytecode**
 
 ```
-$ rooby ./samples/sample-1.robc
+$ goby ./samples/sample-1.robc
 ```
 
 
 ## Try it!
 (See sample directory)
 ```
-$ rooby ./samples/sample-1.ro
-$ rooby ./samples/sample-2.ro
-$ rooby ./samples/sample-3.ro
-$ rooby ./samples/sample-4.ro
-$ rooby .....
+$ goby ./samples/sample-1.ro
+$ goby ./samples/sample-2.ro
+$ goby ./samples/sample-3.ro
+$ goby ./samples/sample-4.ro
+$ goby .....
 ```
 ## Development & Contribute
 
-See the [guideline](https://github.com/rooby-lang/rooby/blob/master/CONTRIBUTING.md)
+See the [guideline](https://github.com/goby-lang/goby/blob/master/CONTRIBUTING.md)
 
 ## References
 
@@ -163,7 +163,7 @@ puts(User.sum_age(stan, john)) #=> 62
 stan.say_hi(john) #=> Stan says hi to John
 ```
 
-#### Build a stack using rooby
+#### Build a stack using goby
 
 ```ruby
 class Stack
