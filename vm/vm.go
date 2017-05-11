@@ -54,6 +54,12 @@ type stack struct {
 	VM   *VM
 }
 
+type standardLibraryInitMethod func(*VM)
+
+var standardLibraris = []standardLibraryInitMethod{
+	initializeFileClass,
+}
+
 // New initializes a vm to initialize state and returns it.
 func New(fileDir string, args []string) *VM {
 	s := &stack{}
