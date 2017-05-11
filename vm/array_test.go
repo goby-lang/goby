@@ -198,10 +198,7 @@ func TestEachMethod(t *testing.T) {
 	}{
 		{`
 		sum = 0
-		puts(self)
 		[1, 2, 3, 4, 5].each do |i|
-		  puts(self)
-		  puts(sum)
 		  sum = sum + i
 		end
 		sum
@@ -221,7 +218,6 @@ func TestEachIndexMethod(t *testing.T) {
 	}{
 		{`
 		sum = 0
-		puts(self)
 		[2, 3, 40, 5, 22].each_index do |i|
 		  sum = sum + i
 		end
