@@ -464,7 +464,7 @@ func (i *instruction) inspect() string {
 	for _, param := range i.Params {
 		params = append(params, fmt.Sprint(param))
 	}
-	return fmt.Sprintf("%s: %s \n", i.action.name, strings.Join(params, ", "))
+	return fmt.Sprintf("%s: %s", i.action.name, strings.Join(params, ", "))
 }
 
 func initializeObject(value interface{}) Object {

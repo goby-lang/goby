@@ -33,6 +33,8 @@ type VM struct {
 	args []string
 }
 
+var stackTrace int
+
 type isIndexTable struct {
 	Data map[string]int
 }
@@ -149,10 +151,23 @@ func (vm *VM) startFromTopFrame() {
 
 func (vm *VM) execInstruction(cf *callFrame, i *instruction) {
 	cf.pc++
-	//fmt.Print(i.inspect())
+
+	defer func() {
+		if p := recover(); p != nil {
+			if stackTrace == 0 {
+				fmt.Printf("Internal Error: %s\n", p)
+			}
+			fmt.Printf("Instruction trace: %d. \"%s\"\n", stackTrace, i.inspect())
+			stackTrace++
+			panic(p)
+		}
+	}()
+
 	i.action.operation(vm, cf, i.Params...)
-	//fmt.Println(vm.callFrameStack.inspect())
-	//fmt.Println(vm.stack.inspect())
+}
+
+func (vm *VM) printDebugInfo(i *instruction) {
+	fmt.Println(i.inspect())
 }
 
 func (vm *VM) getBlock(name string, filename filename) (*instructionSet, bool) {
