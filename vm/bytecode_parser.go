@@ -37,6 +37,18 @@ func (p *bytecodeParser) parseBytecode(bytecodes string) []*instructionSet {
 	iss := []*instructionSet{}
 	bytecodes = strings.TrimSpace(bytecodes)
 	bytecodesByLine := strings.Split(bytecodes, "\n")
+
+	defer func() {
+		if p := recover(); p != nil {
+			switch p.(type) {
+			case errorMessage:
+				return
+			default:
+				panic(p)
+			}
+		}
+	}()
+
 	p.parseSection(iss, bytecodesByLine)
 
 	return iss
@@ -116,10 +128,18 @@ func (p *bytecodeParser) parseInstruction(is *instructionSet, line string) {
 			panic(err)
 		}
 
-		program := parser.BuildAST(file)
-		g := bytecode.NewGenerator(program)
-		bytecodes := g.GenerateByteCode(program)
-		p.vm.ExecBytecodes(bytecodes, filepath)
+		p.execRequiredFile(filepath, file)
+		return
+	} else if act == bytecode.Require {
+		libName := tokens[2]
+		initFunc, ok := standardLibraris[libName]
+
+		if !ok {
+			msg := "Can't require \"" + libName + "\""
+			p.vm.returnError(msg)
+		}
+
+		initFunc(p.vm)
 		return
 	} else if len(tokens) > 2 {
 		rawParams = tokens[2:]
@@ -143,4 +163,11 @@ func (p *bytecodeParser) parseParam(param string) interface{} {
 	i := int(integer)
 
 	return i
+}
+
+func (p *bytecodeParser) execRequiredFile(filepath string, file []byte) {
+	program := parser.BuildAST(file)
+	g := bytecode.NewGenerator(program)
+	bytecodes := g.GenerateByteCode(program)
+	p.vm.ExecBytecodes(bytecodes, filepath)
 }

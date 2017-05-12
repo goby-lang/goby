@@ -56,8 +56,8 @@ type stack struct {
 
 type standardLibraryInitMethod func(*VM)
 
-var standardLibraris = []standardLibraryInitMethod{
-	initializeFileClass,
+var standardLibraris = map[string]standardLibraryInitMethod{
+	"file": initializeFileClass,
 }
 
 // New initializes a vm to initialize state and returns it.
