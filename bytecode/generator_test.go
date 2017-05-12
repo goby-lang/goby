@@ -26,6 +26,25 @@ func TestRequireRelativeCompilation(t *testing.T) {
 	compareBytecode(t, bytecode, expected)
 }
 
+func TestRequireCompilation(t *testing.T) {
+	input := `
+	require "foo"
+
+	Foo.bar
+	`
+
+	expected := `
+<ProgramStart>
+0 require foo
+1 getconstant Foo
+2 send bar 0
+3 leave
+`
+
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
 func TestNestedBlockCompilation(t *testing.T) {
 	input := `
 class Foo

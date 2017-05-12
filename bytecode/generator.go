@@ -145,6 +145,8 @@ func (g *Generator) compileStatement(is *instructionSet, statement ast.Statement
 		g.endInstructions(is)
 	case *ast.RequireRelativeStatement:
 		is.define(RequireRelative, stmt.Filepath)
+	case *ast.RequireStatement:
+		is.define(Require, stmt.Library)
 	case *ast.WhileStatement:
 		g.compileWhileStmt(is, stmt, scope, table)
 	}
