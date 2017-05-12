@@ -328,6 +328,27 @@ func TestRequireRelativeStatement(t *testing.T) {
 	}
 }
 
+func TestRequireStatement(t *testing.T) {
+	input := `
+	require "foo"
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt, ok := program.Statements[0].(*ast.RequireStatement)
+
+	if !ok {
+		t.Fatalf("Expect stmt to be RequireStatement. got=%T", program.Statements[0])
+	}
+
+	if stmt.Library != "foo" {
+		t.Fatalf("Expect stmt's library name to be \"foo\". got=%s", stmt.Library)
+	}
+}
+
 func TestWhileStatement(t *testing.T) {
 	input := `
 	while i < a.length do
