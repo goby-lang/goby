@@ -47,6 +47,8 @@ func newISIndexTable() *isIndexTable {
 	return &isIndexTable{Data: make(map[string]int)}
 }
 
+type errorMessage string
+
 type stack struct {
 	Data []*Pointer
 	VM   *VM
@@ -94,6 +96,17 @@ func (vm *VM) ExecBytecodes(bytecodes, fn string) {
 	vm.blockTables[p.filename] = p.blockTable
 	vm.classISIndexTables[filename] = newISIndexTable()
 	vm.methodISIndexTables[filename] = newISIndexTable()
+
+	defer func() {
+		if p := recover(); p != nil {
+			switch p.(type) {
+			case errorMessage:
+				return
+			default:
+				panic(p)
+			}
+		}
+	}()
 
 	cf := newCallFrame(p.program)
 	cf.self = mainObj
@@ -272,4 +285,11 @@ func (s *stack) inspect() string {
 
 func newError(format string, args ...interface{}) *Error {
 	return &Error{Message: fmt.Sprintf(format, args...)}
+}
+
+// TODO: Use this method to replace unnecessary panics
+func (vm *VM) returnError(msg string) {
+	err := &Error{Message: msg}
+	vm.stack.push(&Pointer{err})
+	panic(errorMessage(msg))
 }

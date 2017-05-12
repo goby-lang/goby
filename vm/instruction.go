@@ -56,7 +56,8 @@ var builtInActions = map[operationType]*action{
 			constant, ok := vm.constants[constName]
 
 			if !ok {
-				panic(fmt.Sprintf("Can't find constant: %s", constName))
+				msg := "Can't find constant: " + constName
+				vm.returnError(msg)
 			}
 			vm.stack.push(constant)
 		},
