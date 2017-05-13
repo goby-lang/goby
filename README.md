@@ -65,7 +65,7 @@ A lot people have questions about `goby` since it's a new language and you may g
 
 Checkout this [issue](https://github.com/goby-lang/goby/issues/72) for what we will work on before first release.
 
-Also see [github projects](https://github.com/goby-lang/goby/projects)
+Also see [huboard](https://huboard.com/goby-lang/goby)
 
 ## Install
 
