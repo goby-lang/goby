@@ -13,7 +13,7 @@ type Null struct {
 	Class *RNull
 }
 
-func (n *Null) Type() objectType {
+func (n *Null) objectType() objectType {
 	return nullObj
 }
 
@@ -21,18 +21,18 @@ func (n *Null) Inspect() string {
 	return "null"
 }
 
-func (n *Null) ReturnClass() Class {
+func (n *Null) returnClass() Class {
 	return n.Class
 }
 
 func initNull() {
-	methods := NewEnvironment()
+	methods := newEnvironment()
 
 	for _, m := range builtInNullMethods {
-		methods.Set(m.Name, m)
+		methods.set(m.Name, m)
 	}
 
-	baseClass := &BaseClass{Name: "Null", Methods: methods, ClassMethods: NewEnvironment(), Class: classClass, SuperClass: objectClass}
+	baseClass := &BaseClass{Name: "Null", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass}
 	nc := &RNull{BaseClass: baseClass}
 	nullClass = nc
 	NULL = &Null{Class: nullClass}
@@ -41,7 +41,8 @@ func initNull() {
 var builtInNullMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				return TRUE
 			}
 		},

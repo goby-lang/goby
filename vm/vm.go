@@ -3,6 +3,7 @@ package vm
 import (
 	"bytes"
 	"fmt"
+	"github.com/goby-lang/goby/bytecode"
 	"strings"
 )
 
@@ -19,50 +20,109 @@ type VM struct {
 	// a map holds pointers of constants
 	constants map[string]*Pointer
 	// a map holds different types of label tables
-	labelTables map[labelType]map[string][]*instructionSet
+	isTables map[labelType]isTable
 	// method instruction set table
-	methodISTable *isIndexTable
+	methodISIndexTables map[filename]*isIndexTable
 	// class instruction set table
-	classISTable *isIndexTable
+	classISIndexTables map[filename]*isIndexTable
 	// block instruction set table
-	blockList *isIndexTable
+	blockTables map[filename]map[string]*instructionSet
+
+	fileDir string
+
+	args []string
 }
+
+var stackTrace int
 
 type isIndexTable struct {
 	Data map[string]int
 }
+
+type isTable map[string][]*instructionSet
+
+type filename string
+
+func newISIndexTable() *isIndexTable {
+	return &isIndexTable{Data: make(map[string]int)}
+}
+
+type errorMessage string
 
 type stack struct {
 	Data []*Pointer
 	VM   *VM
 }
 
+type standardLibraryInitMethod func(*VM)
+
+var standardLibraris = map[string]standardLibraryInitMethod{
+	"file": initializeFileClass,
+}
+
 // New initializes a vm to initialize state and returns it.
-func New() *VM {
+func New(fileDir string, args []string) *VM {
 	s := &stack{}
 	cfs := &callFrameStack{callFrames: []*callFrame{}}
-	vm := &VM{stack: s, callFrameStack: cfs, sp: 0, cfp: 0}
+	vm := &VM{stack: s, callFrameStack: cfs, sp: 0, cfp: 0, args: args}
 	s.VM = vm
 	cfs.vm = vm
 
 	vm.initConstants()
-	vm.methodISTable = &isIndexTable{Data: make(map[string]int)}
-	vm.classISTable = &isIndexTable{Data: make(map[string]int)}
-	vm.blockList = &isIndexTable{Data: make(map[string]int)}
-
+	vm.methodISIndexTables = map[filename]*isIndexTable{
+		filename(fileDir): newISIndexTable(),
+	}
+	vm.classISIndexTables = map[filename]*isIndexTable{
+		filename(fileDir): newISIndexTable(),
+	}
+	vm.blockTables = make(map[filename]map[string]*instructionSet)
+	vm.isTables = map[labelType]isTable{
+		bytecode.LabelDef:      make(isTable),
+		bytecode.LabelDefClass: make(isTable),
+	}
+	vm.fileDir = fileDir
 	return vm
 }
 
 // ExecBytecodes accepts a sequence of bytecodes and use vm to evaluate them.
-func (vm *VM) ExecBytecodes(bytecodes string) {
-	p := newBytecodeParser()
+func (vm *VM) ExecBytecodes(bytecodes, fn string) {
+	filename := filename(fn)
+	p := newBytecodeParser(filename)
+	p.vm = vm
 	p.parseBytecode(bytecodes)
-	// bytecodeParser generates and holds a label table during parsing
-	vm.labelTables = p.labelTable
-	cf := newCallFrame(vm.labelTables[Program]["ProgramStart"][0])
+
+	// Keep update label table after parsed new files.
+	// TODO: Find more efficient way to do this.
+	for labelType, table := range p.labelTable {
+		for labelName, is := range table {
+			vm.isTables[labelType][labelName] = is
+		}
+	}
+
+	vm.blockTables[p.filename] = p.blockTable
+	vm.classISIndexTables[filename] = newISIndexTable()
+	vm.methodISIndexTables[filename] = newISIndexTable()
+
+	defer func() {
+		if p := recover(); p != nil {
+			switch p.(type) {
+			case errorMessage:
+				return
+			default:
+				panic(p)
+			}
+		}
+	}()
+
+	cf := newCallFrame(p.program)
 	cf.self = mainObj
 	vm.callFrameStack.push(cf)
-	vm.start()
+	vm.startFromTopFrame()
+}
+
+// GetExecResult returns stack's top most value. Normally it's used in tests.
+func (vm *VM) GetExecResult() Object {
+	return vm.stack.top().Target
 }
 
 func (vm *VM) initConstants() {
@@ -79,10 +139,18 @@ func (vm *VM) initConstants() {
 		objectClass,
 	}
 
+	args := []Object{}
+
+	for _, arg := range vm.args {
+		args = append(args, initializeString(arg))
+	}
+
 	for _, c := range builtInClasses {
 		p := &Pointer{Target: c}
 		constants[c.ReturnName()] = p
 	}
+
+	constants["ARGV"] = &Pointer{Target: initializeArray(args)}
 
 	vm.constants = constants
 }
@@ -95,56 +163,67 @@ func (vm *VM) evalCallFrame(cf *callFrame) {
 }
 
 // Start evaluation from top most call frame
-func (vm *VM) start() {
+func (vm *VM) startFromTopFrame() {
 	cf := vm.callFrameStack.top()
 	vm.evalCallFrame(cf)
 }
 
 func (vm *VM) execInstruction(cf *callFrame, i *instruction) {
 	cf.pc++
-	//fmt.Print(i.Inspect())
+
+	defer func() {
+		if p := recover(); p != nil {
+			if stackTrace == 0 {
+				fmt.Printf("Internal Error: %s\n", p)
+			}
+			fmt.Printf("Instruction trace: %d. \"%s\"\n", stackTrace, i.inspect())
+			stackTrace++
+			panic(p)
+		}
+	}()
+
 	i.action.operation(vm, cf, i.Params...)
-	//fmt.Println(vm.callFrameStack.inspect())
-	//fmt.Println(vm.stack.inspect())
 }
 
-func (vm *VM) getBlock(name string) (*instructionSet, bool) {
+func (vm *VM) printDebugInfo(i *instruction) {
+	fmt.Println(i.inspect())
+}
+
+func (vm *VM) getBlock(name string, filename filename) (*instructionSet, bool) {
 	// The "name" here is actually an index from label
 	// for example <Block:1>'s name is "1"
-	iss, ok := vm.labelTables[Block][name]
+	is, ok := vm.blockTables[filename][name]
 
 	if !ok {
 		return nil, false
 	}
-
-	is := iss[0]
 
 	return is, ok
 }
 
-func (vm *VM) getMethodIS(name string) (*instructionSet, bool) {
-	iss, ok := vm.labelTables[LabelDef][name]
+func (vm *VM) getMethodIS(name string, filename filename) (*instructionSet, bool) {
+	iss, ok := vm.isTables[bytecode.LabelDef][name]
 
 	if !ok {
 		return nil, false
 	}
 
-	is := iss[vm.methodISTable.Data[name]]
+	is := iss[vm.methodISIndexTables[filename].Data[name]]
 
-	vm.methodISTable.Data[name]++
+	vm.methodISIndexTables[filename].Data[name]++
 	return is, ok
 }
 
-func (vm *VM) getClassIS(name string) (*instructionSet, bool) {
-	iss, ok := vm.labelTables[LabelDefClass][name]
+func (vm *VM) getClassIS(name string, filename filename) (*instructionSet, bool) {
+	iss, ok := vm.isTables[bytecode.LabelDefClass][name]
 
 	if !ok {
 		return nil, false
 	}
 
-	is := iss[vm.classISTable.Data[name]]
+	is := iss[vm.classISIndexTables[filename].Data[name]]
 
-	vm.classISTable.Data[name]++
+	vm.classISIndexTables[filename].Data[name]++
 	return is, ok
 }
 
@@ -170,7 +249,7 @@ func (s *stack) pop() *Pointer {
 	return v
 }
 
-func (s *stack) Top() *Pointer {
+func (s *stack) top() *Pointer {
 
 	if s.VM.sp > 0 {
 		return s.Data[s.VM.sp-1]
@@ -212,4 +291,11 @@ func (s *stack) inspect() string {
 
 func newError(format string, args ...interface{}) *Error {
 	return &Error{Message: fmt.Sprintf(format, args...)}
+}
+
+// TODO: Use this method to replace unnecessary panics
+func (vm *VM) returnError(msg string) {
+	err := &Error{Message: msg}
+	vm.stack.push(&Pointer{err})
+	panic(errorMessage(msg))
 }

@@ -1,0 +1,23 @@
+module Foo
+  def ten
+    10
+  end
+end
+
+class Baz
+  def ten
+    1
+  end
+
+  def five
+    5
+  end
+end
+
+class Bar < Baz
+  include(Foo)
+end
+
+b = Bar.new
+
+puts(b.ten * b.five)

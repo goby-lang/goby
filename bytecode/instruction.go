@@ -6,6 +6,41 @@ import (
 	"strings"
 )
 
+const (
+	// label types
+	LabelDef      = "Def"
+	LabelDefClass = "DefClass"
+	Block         = "Block"
+	Program       = "ProgramStart"
+
+	// instruction actions
+	GetLocal            = "getlocal"
+	GetConstant         = "getconstant"
+	GetInstanceVariable = "getinstancevariable"
+	SetLocal            = "setlocal"
+	SetConstant         = "setconstant"
+	SetInstanceVariable = "setinstancevariable"
+	PutString           = "putstring"
+	PutSelf             = "putself"
+	PutObject           = "putobject"
+	PutNull             = "putnil"
+	NewArray            = "newarray"
+	NewHash             = "newhash"
+	BranchUnless        = "branchunless"
+	BranchIf            = "branchif"
+	Jump                = "jump"
+	DefMethod           = "def_method"
+	DefSingletonMethod  = "def_singleton_method"
+	DefClass            = "def_class"
+	Send                = "send"
+	InvokeBlock         = "invokeblock"
+	Pop                 = "pop"
+	Leave               = "leave"
+
+	RequireRelative = "require_relative"
+	Require         = "require"
+)
+
 type instruction struct {
 	action string
 	params []string

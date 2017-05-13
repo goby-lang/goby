@@ -1,0 +1,13 @@
+require_relative "bar"
+
+class Foo
+  def self.bar(x)
+    Bar.foo do |ten|
+      x * ten
+    end
+  end
+
+  def self.baz
+    yield(100)
+  end
+end

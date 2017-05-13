@@ -6,6 +6,7 @@ class Foo
     @x
   end
 end
+
 class Bar < Foo; end
 class Baz < Foo; end
 

@@ -2,6 +2,10 @@ package vm
 
 import (
 	"fmt"
+	"github.com/goby-lang/goby/bytecode"
+	"github.com/goby-lang/goby/parser"
+	"io/ioutil"
+	"path"
 )
 
 var (
@@ -10,45 +14,46 @@ var (
 )
 
 func initTopLevelClasses() {
-	globalMethods := NewEnvironment()
-	classMethods := NewEnvironment()
+	globalMethods := newEnvironment()
+	classMethods := newEnvironment()
 
 	for _, m := range builtinGlobalMethods {
-		globalMethods.Set(m.Name, m)
+		globalMethods.set(m.Name, m)
 	}
 
 	for _, m := range BuiltinClassMethods {
-		classMethods.Set(m.Name, m)
+		classMethods.set(m.Name, m)
 	}
 
 	classClass = &RClass{BaseClass: &BaseClass{Name: "Class", Methods: globalMethods, ClassMethods: classMethods}}
-	objectClass = &RClass{BaseClass: &BaseClass{Name: "Object", Class: classClass, Methods: globalMethods, ClassMethods: NewEnvironment()}}
+	objectClass = &RClass{BaseClass: &BaseClass{Name: "Object", Class: classClass, Methods: globalMethods, ClassMethods: newEnvironment()}}
 }
 
-// InitializeClass initializes and returns a class instance with given class name
-func InitializeClass(name string) *RClass {
-	class := &RClass{BaseClass: &BaseClass{Name: name, Methods: NewEnvironment(), ClassMethods: NewEnvironment(), Class: classClass, SuperClass: objectClass}}
-	//classScope := &scope{self: class, Env: NewClosedEnvironment(scope.Env)}
+// initializeClass initializes and returns a class instance with given class name
+func initializeClass(name string) *RClass {
+	class := &RClass{BaseClass: &BaseClass{Name: name, Methods: newEnvironment(), ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}}
+	//classScope := &scope{self: class, Env: closedEnvironment(scope.Env)}
 	//class.scope = classScope
 
 	return class
 }
 
 // Class is an interface that implements a class's basic functions.
-// - LookupClassMethod: search for current class's class method with given name.
-// - LookupInstanceMethod: search for current class's instance method with given name.
+// - lookupClassMethod: search for current class's class method with given name.
+// - lookupInstanceMethod: search for current class's instance method with given name.
 // - ReturnName returns class's name
 type Class interface {
-	LookupClassMethod(string) Object
-	LookupInstanceMethod(string) Object
+	lookupClassMethod(string) Object
+	lookupInstanceMethod(string) Object
 	ReturnName() string
+	returnSuperClass() Class
 	BaseObject
 }
 
 // RClass represents normal (not built in) class object
 type RClass struct {
 	// Scope contains current class's scope information
-	Scope *Scope
+	Scope *scope
 	*BaseClass
 }
 
@@ -57,78 +62,82 @@ type BaseClass struct {
 	// Name is the class's name
 	Name string
 	// Methods contains its instances' methods
-	Methods *Environment
+	Methods *environment
 	// ClassMethods contains this class's methods
-	ClassMethods *Environment
-	// SuperClass points to the class it inherits
-	SuperClass *RClass
+	ClassMethods *environment
+	// pseudoSuperClass points to the class it inherits
+	pseudoSuperClass *RClass
+	// This is the class where we should looking for a method.
+	// It can be normal class, singleton class or a module.
+	superClass *RClass
 	// Class points to this class's class, which should be ClassClass
 	Class *RClass
 	// Singleton is a flag marks if this class a singleton class
 	Singleton bool
+	isModule  bool
 }
 
-// Type returns class object's type
-func (c *BaseClass) Type() objectType {
+// objectType returns class object's type
+func (c *BaseClass) objectType() objectType {
 	return classObj
 }
 
-// Inspect returns the basic inspected result (which is class name) of current class
-// TODO: Singleton class's Inspect() should also mark if it's a singleton class explicitly.
+// inspect returns the basic inspected result (which is class name) of current class
+// TODO: Singleton class's inspect() should also mark if it's a singleton class explicitly.
 func (c *BaseClass) Inspect() string {
 	return "<Class:" + c.Name + ">"
 }
 
-func (c *BaseClass) LookupClassMethod(method_name string) Object {
-	method, ok := c.ClassMethods.Get(method_name)
+func (c *BaseClass) lookupClassMethod(methodName string) Object {
+	method, ok := c.ClassMethods.get(methodName)
 
 	if !ok {
-		if c.SuperClass != nil {
-			return c.SuperClass.LookupClassMethod(method_name)
-		} else {
-			if c.Class != nil {
-				return c.Class.LookupClassMethod(method_name)
-			}
-			return nil
+		if c.superClass != nil {
+			return c.superClass.lookupClassMethod(methodName)
 		}
+		if c.Class != nil {
+			return c.Class.lookupClassMethod(methodName)
+		}
+		return nil
 	}
 
 	return method
 }
 
-func (c *BaseClass) LookupInstanceMethod(method_name string) Object {
-	method, ok := c.Methods.Get(method_name)
+func (c *BaseClass) lookupInstanceMethod(methodName string) Object {
+	method, ok := c.Methods.get(methodName)
 
 	if !ok {
-		if c.SuperClass != nil {
-			return c.SuperClass.LookupInstanceMethod(method_name)
-		} else {
-			if c.Class != nil {
-				return c.Class.LookupInstanceMethod(method_name)
-			}
-			return nil
+		if c.superClass != nil {
+			return c.superClass.lookupInstanceMethod(methodName)
 		}
+
+		if c.Class != nil {
+			return c.Class.lookupInstanceMethod(methodName)
+		}
+
+		return nil
 	}
 
 	return method
 }
 
-// SetSingletonMethod will sets method to class's singleton class
+// setSingletonMethod will sets method to class's singleton class
 // However, if the class doesn't have a singleton class, it will create one for it first.
-func (c *BaseClass) SetSingletonMethod(name string, method *Method) {
-	if c.SuperClass.Singleton {
-		c.SuperClass.ClassMethods.Set(name, method)
+func (c *BaseClass) setSingletonMethod(name string, method *Method) {
+	if c.pseudoSuperClass.Singleton {
+		c.pseudoSuperClass.ClassMethods.set(name, method)
 	}
 
-	class := InitializeClass(fmt.Sprintf("%s:singleton", c.Name))
+	class := initializeClass(c.Name + "singleton")
 	class.Singleton = true
-	class.ClassMethods.Set(name, method)
-	class.SuperClass = c.SuperClass
+	class.ClassMethods.set(name, method)
+	class.superClass = c.superClass
 	class.Class = classClass
-	c.SuperClass = class
+	c.superClass = class
 }
 
-func (c *BaseClass) ReturnClass() Class {
+func (c *BaseClass) returnClass() Class {
 	return c.Class
 }
 
@@ -136,8 +145,12 @@ func (c *BaseClass) ReturnName() string {
 	return c.Name
 }
 
+func (c *BaseClass) returnSuperClass() Class {
+	return c.pseudoSuperClass
+}
+
 func (c *RClass) initializeInstance() *RObject {
-	instance := &RObject{Class: c, InstanceVariables: NewEnvironment()}
+	instance := &RObject{Class: c, InstanceVariables: newEnvironment()}
 
 	return instance
 }
@@ -145,7 +158,45 @@ func (c *RClass) initializeInstance() *RObject {
 var builtinGlobalMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				libName := args[0].(*StringObject).Value
+				initFunc, ok := standardLibraris[libName]
+
+				if !ok {
+					msg := "Can't require \"" + libName + "\""
+					vm.returnError(msg)
+				}
+
+				initFunc(vm)
+
+				return TRUE
+			}
+		},
+		Name: "require",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				filepath := args[0].(*StringObject).Value
+				filepath = path.Join(vm.fileDir, filepath)
+
+				file, err := ioutil.ReadFile(filepath + ".ro")
+
+				if err != nil {
+					vm.returnError(err.Error())
+				}
+
+				vm.execRequiredFile(filepath, file)
+
+				return TRUE
+			}
+		},
+		Name: "require_relative",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				for _, arg := range args {
 					fmt.Println(arg.Inspect())
 				}
@@ -157,14 +208,15 @@ var builtinGlobalMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				switch r := receiver.(type) {
 				case BaseObject:
-					return r.ReturnClass()
+					return r.returnClass()
 				case Class:
-					return r.ReturnClass()
+					return r.returnClass()
 				default:
-					return &Error{Message: fmt.Sprintf("Can't call class on %T", r)}
+					return &Error{Message: "Can't call class on %T" + string(r.objectType())}
 				}
 			}
 		},
@@ -172,7 +224,8 @@ var builtinGlobalMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				return FALSE
 			}
 		},
@@ -183,10 +236,24 @@ var builtinGlobalMethods = []*BuiltInMethod{
 var BuiltinClassMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				module := args[0].(*RClass)
+				class := receiver.(*RClass)
+				module.superClass = class.superClass
+				class.superClass = module
+
+				return class
+			}
+		},
+		Name: "include",
+	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				class := receiver.(*RClass)
 				instance := class.initializeInstance()
-				initMethod := class.LookupInstanceMethod("initialize")
+				initMethod := class.lookupInstanceMethod("initialize")
 
 				if initMethod != nil {
 					instance.InitializeMethod = initMethod.(*Method)
@@ -199,7 +266,8 @@ var BuiltinClassMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				name := receiver.(Class).ReturnName()
 				nameString := initializeString(name)
 				return nameString
@@ -207,4 +275,39 @@ var BuiltinClassMethods = []*BuiltInMethod{
 		},
 		Name: "name",
 	},
+	{
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
+				return receiver.(Class).returnSuperClass()
+			}
+		},
+		Name: "superclass",
+	},
+}
+
+func (vm *VM) execRequiredFile(filepath string, file []byte) {
+	program := parser.BuildAST(file)
+	g := bytecode.NewGenerator(program)
+	bytecodes := g.GenerateByteCode(program)
+
+	oldMethodTable := isTable{}
+	oldClassTable := isTable{}
+
+	// Copy current file's instruction sets.
+	for name, is := range vm.isTables[bytecode.LabelDef] {
+		oldMethodTable[name] = is
+	}
+
+	for name, is := range vm.isTables[bytecode.LabelDefClass] {
+		oldClassTable[name] = is
+	}
+
+	// This creates new execution environments for required file, including new instruction set table.
+	// So we need to copy old instruction sets and restore them later, otherwise current program's instruction set would be overwrite.
+	vm.ExecBytecodes(bytecodes, filepath)
+
+	// Restore instruction sets.
+	vm.isTables[bytecode.LabelDef] = oldMethodTable
+	vm.isTables[bytecode.LabelDefClass] = oldClassTable
 }

@@ -26,7 +26,7 @@ _testmain.go
 
 .idea
 
-rooby
+goby
 
 *.robc
 coverage.txt

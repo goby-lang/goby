@@ -3,7 +3,7 @@ package ast
 import (
 	"bytes"
 	"fmt"
-	"github.com/rooby-lang/rooby/token"
+	"github.com/goby-lang/goby/token"
 	"strings"
 )
 
@@ -60,7 +60,6 @@ func (as *AssignStatement) statementNode() {}
 func (as *AssignStatement) TokenLiteral() string {
 	return as.Token.Literal
 }
-
 func (as *AssignStatement) String() string {
 	var out bytes.Buffer
 
@@ -75,6 +74,34 @@ func (as *AssignStatement) String() string {
 }
 func (as *AssignStatement)  Line() int {
 	return as.Token.Line
+}
+
+// RequireRelativeStatement is used to represent 'require_relative' and contains the required file's relative path
+type RequireRelativeStatement struct {
+	Token    token.Token
+	Filepath string
+}
+
+func (rrs *RequireRelativeStatement) statementNode() {}
+func (rrs *RequireRelativeStatement) TokenLiteral() string {
+	return rrs.Token.Literal
+}
+func (rrs *RequireRelativeStatement) String() string {
+	return fmt.Sprintf("require_relative \"%s\"", rrs.Filepath)
+}
+
+// RequireStatement represents library requiring action.
+type RequireStatement struct {
+	Token   token.Token
+	Library string
+}
+
+func (rs *RequireStatement) statementNode() {}
+func (rs *RequireStatement) TokenLiteral() string {
+	return rs.Token.Literal
+}
+func (rs *RequireStatement) String() string {
+	return fmt.Sprintf("require \"%s\"", rs.Library)
 }
 
 type DefStatement struct {
@@ -138,6 +165,32 @@ func (cs *ClassStatement) String() string {
 }
 func (cs *ClassStatement) Line() int {
 	return cs.Token.Line
+}
+
+// ModuleStatement represents module node in AST
+type ModuleStatement struct {
+	Token      token.Token
+	Name       *Constant
+	Body       *BlockStatement
+	SuperClass *Constant
+}
+
+func (ms *ModuleStatement) statementNode() {}
+
+// TokenLiteral returns token's literal
+func (ms *ModuleStatement) TokenLiteral() string {
+	return ms.Token.Literal
+}
+func (ms *ModuleStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("module ")
+	out.WriteString(ms.Name.TokenLiteral())
+	out.WriteString(" {\n")
+	out.WriteString(ms.Body.String())
+	out.WriteString("\n}")
+
+	return out.String()
 }
 
 type ReturnStatement struct {
@@ -335,20 +388,37 @@ func (ie *InfixExpression) Line() int {
 	return ie.Token.Line
 }
 
-type Boolean struct {
+type BooleanExpression struct {
 	Token token.Token
 	Value bool
 }
 
-func (b *Boolean) expressionNode() {}
-func (b *Boolean) TokenLiteral() string {
+func (b *BooleanExpression) expressionNode() {}
+func (b *BooleanExpression) TokenLiteral() string {
 	return b.Token.Literal
 }
-func (b *Boolean) String() string {
+func (b *BooleanExpression) String() string {
 	return b.Token.Literal
 }
 func (b *Boolean) Line() int {
 	return b.Token.Line
+}
+
+// NilExpression represents nil node
+type NilExpression struct {
+	Token token.Token
+}
+
+func (n *NilExpression) expressionNode() {}
+
+// TokenLiteral returns `nil`
+func (n *NilExpression) TokenLiteral() string {
+	return n.Token.Literal
+}
+
+// String returns `nil`
+func (n *NilExpression) String() string {
+	return "nil"
 }
 
 type IfExpression struct {

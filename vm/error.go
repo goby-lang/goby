@@ -9,7 +9,7 @@ type Error struct {
 	Message string
 }
 
-func (e *Error) Type() objectType {
+func (e *Error) objectType() objectType {
 	return errorObj
 }
 
@@ -17,6 +17,6 @@ func (e *Error) Inspect() string {
 	return "ERROR: " + e.Message
 }
 
-func (e *Error) ReturnClass() Class {
+func (e *Error) returnClass() Class {
 	return e.Class
 }

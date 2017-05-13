@@ -1,83 +1,98 @@
 package token
 
-type TokenType string
+// Type is used to determite token type
+type Type string
 
+// Token is structure for identifying input stream of characters
 type Token struct {
-	Type    TokenType
+	Type    Type
 	Literal string
 	Line    int
 }
 
+// Literals
 const (
-	ILLEGAL = "ILLEGAL"
+	Illegal = "ILLEGAL"
 	EOF     = "EOF"
 
-	CONSTANT          = "CONSTANT"
-	IDENT             = "IDENT"
-	INSTANCE_VARIABLE = "INSTANCE_VAR"
-	INT               = "INT"
-	STRING            = "STRING"
-	COMMENT           = "COMMENT"
+	Constant         = "CONSTANT"
+	Ident            = "IDENT"
+	InstanceVariable = "INSTANCE_VAR"
+	Int              = "INT"
+	String           = "STRING"
+	Comment          = "COMMENT"
 
-	ASSIGN   = "="
-	PLUS     = "+"
-	MINUS    = "-"
-	BANG     = "!"
-	ASTERISK = "*"
-	SLASH    = "/"
-	DOT      = "."
-	INCR     = "++"
-	DECR     = "--"
+	Assign   = "="
+	Plus     = "+"
+	Minus    = "-"
+	Bang     = "!"
+	Asterisk = "*"
+	Pow      = "**"
+	Slash    = "/"
+	Dot      = "."
+	Incr     = "++"
+	Decr     = "--"
+	And      = "&&"
+	Or       = "||"
 
-	LT = "<"
-	GT = ">"
+	LT   = "<"
+	LTE  = "<="
+	GT   = ">"
+	GTE  = ">="
+	COMP = "<=>"
 
-	COMMA     = ","
-	SEMICOLON = ";"
-	COLON     = ":"
-	BAR       = "|"
+	Comma     = ","
+	Semicolon = ";"
+	Colon     = ":"
+	Bar       = "|"
 
-	LPAREN   = "("
-	RPAREN   = ")"
-	LBRACE   = "{"
-	RBRACE   = "}"
-	LBRACKET = "["
-	RBRACKET = "]"
+	LParen   = "("
+	RParen   = ")"
+	LBrace   = "{"
+	RBrace   = "}"
+	LBracket = "["
+	RBracket = "]"
 
-	EQ     = "=="
-	NOT_EQ = "!="
+	Eq    = "=="
+	NotEq = "!="
 
-	CLASS  = "CLASS"
-	TRUE   = "TRUE"
-	FALSE  = "FALSE"
-	IF     = "IF"
-	ELSE   = "ELSE"
-	RETURN = "RETURN"
-	DEF    = "DEF"
-	SELF   = "SELF"
-	END    = "END"
-	WHILE  = "WHILE"
-	DO     = "DO"
-	YIELD  = "YIELD"
+	True            = "TRUE"
+	False           = "FALSE"
+	Null            = "Null"
+	If              = "IF"
+	Else            = "ELSE"
+	Return          = "RETURN"
+	Def             = "DEF"
+	Self            = "SELF"
+	End             = "END"
+	While           = "WHILE"
+	Do              = "DO"
+	Yield           = "YIELD"
+	RequireRelative = "REQUIRE_RELATIVE"
+	Require         = "REQUIRE"
 )
 
-var keyworkds = map[string]TokenType{
-	"def":    DEF,
-	"true":   TRUE,
-	"false":  FALSE,
-	"if":     IF,
-	"else":   ELSE,
-	"return": RETURN,
-	"self":   SELF,
-	"end":    END,
-	"while":  WHILE,
-	"do":     DO,
-	"yield":  YIELD,
+var keywords = map[string]Type{
+	"def":              Def,
+	"true":             True,
+	"false":            False,
+	"nil":              Null,
+	"if":               If,
+	"else":             Else,
+	"return":           Return,
+	"self":             Self,
+	"end":              End,
+	"while":            While,
+	"do":               Do,
+	"yield":            Yield,
+	"require_relative": RequireRelative,
+	"require":          Require,
 }
 
-func LookupIdent(ident string) TokenType {
-	if tok, ok := keyworkds[ident]; ok {
+// LookupIdent is used for keyword identification
+func LookupIdent(ident string) Type {
+	if tok, ok := keywords[ident]; ok {
 		return tok
 	}
-	return IDENT
+	return Ident
 }

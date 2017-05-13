@@ -16,7 +16,7 @@ type callFrame struct {
 	pc int
 	// environment pointer, points to the call frame we want to get locals from
 	ep     *callFrame
-	self   BaseObject
+	self   Object
 	locals []*Pointer
 	// local pointer
 	lPr        int
@@ -58,7 +58,7 @@ func (cf *callFrame) inspect() string {
 
 func (cfs *callFrameStack) push(cf *callFrame) {
 	if cf == nil {
-		panic("Callfame can't be nil!")
+		panic("Callframe can't be nil!")
 	}
 
 	if len(cfs.callFrames) <= cfs.vm.cfp {

@@ -1,10 +1,11 @@
 package vm
 
 import (
-	"github.com/rooby-lang/rooby/bytecode"
-	"github.com/rooby-lang/rooby/lexer"
-	"github.com/rooby-lang/rooby/parser"
 	"testing"
+
+	"github.com/goby-lang/goby/bytecode"
+	"github.com/goby-lang/goby/lexer"
+	"github.com/goby-lang/goby/parser"
 )
 
 func TestCunstomConstructorAndInstanceVariable(t *testing.T) {
@@ -36,7 +37,7 @@ func TestCunstomConstructorAndInstanceVariable(t *testing.T) {
 6 leave
 <ProgramStart>
 0 putself
-1 def_class Foo
+1 def_class class:Foo
 2 pop
 3 getconstant Foo
 4 putobject 100
@@ -206,10 +207,10 @@ func TestClassDefinitionWithInheritance(t *testing.T) {
 0 leave
 <ProgramStart>
 0 putself
-1 def_class Bar
+1 def_class class:Bar
 2 pop
 3 putself
-4 def_class Foo Bar
+4 def_class class:Foo Bar
 5 pop
 6 getconstant Foo
 7 send new 0
@@ -234,7 +235,7 @@ func TestClassMethodDefinition(t *testing.T) {
 3 leave
 <ProgramStart>
 0 putself
-1 def_class Foo
+1 def_class class:Foo
 2 pop
 3 getconstant Foo
 4 send bar 0
@@ -258,7 +259,7 @@ func TestClassDefinition(t *testing.T) {
 3 leave
 <ProgramStart>
 0 putself
-1 def_class Foo
+1 def_class class:Foo
 2 pop
 3 getconstant Foo
 4 send new 0
@@ -394,24 +395,28 @@ func checkParserErrors(t *testing.T, p *parser.Parser) {
 }
 
 func testExec(bytecodes string) Object {
-	v := New()
-	v.ExecBytecodes(bytecodes)
+	v := New("./", []string{})
+	v.ExecBytecodes(bytecodes, "./")
 
-	return v.stack.Top().Target
+	return v.stack.top().Target
 }
 
 func testIntegerObject(t *testing.T, obj Object, expected int) bool {
-	result, ok := obj.(*IntegerObject)
-	if !ok {
+	switch result := obj.(type) {
+	case *IntegerObject:
+		if result.Value != expected {
+			t.Errorf("object has wrong value. expect=%d, got=%d", expected, result.Value)
+			return false
+		}
+
+		return true
+	case *Error:
+		t.Error(result.Message)
+		return false
+	default:
 		t.Errorf("object is not Integer. got=%T (%+v).", obj, obj)
 		return false
 	}
-	if result.Value != expected {
-		t.Errorf("object has wrong value. expect=%d, got=%d", expected, result.Value)
-		return false
-	}
-
-	return true
 }
 
 func testNullObject(t *testing.T, obj Object) bool {
@@ -424,28 +429,71 @@ func testNullObject(t *testing.T, obj Object) bool {
 }
 
 func testStringObject(t *testing.T, obj Object, expected string) bool {
-	result, ok := obj.(*StringObject)
-	if !ok {
-		t.Errorf("object is not a String. got=%T (%+v)", obj, obj)
-		return false
-	}
-	if result.Value != expected {
-		t.Errorf("object has wrong value. expect=%s, got=%s", expected, result.Value)
-		return false
-	}
+	switch result := obj.(type) {
+	case *StringObject:
+		if result.Value != expected {
+			t.Errorf("object has wrong value. expect=%d, got=%d", expected, result.Value)
+			return false
+		}
 
-	return true
+		return true
+	case *Error:
+		t.Error(result.Message)
+		return false
+	default:
+		t.Errorf("object is not String. got=%T (%+v).", obj, obj)
+		return false
+	}
 }
 
 func testBooleanObject(t *testing.T, obj Object, expected bool) bool {
-	result, ok := obj.(*BooleanObject)
-	if !ok {
-		t.Errorf("object is not Boolean. got=%T (%+v)", obj, obj)
+	switch result := obj.(type) {
+	case *BooleanObject:
+		if result.Value != expected {
+			t.Errorf("object has wrong value. expect=%d, got=%d", expected, result.Value)
+			return false
+		}
+
+		return true
+	case *Error:
+		t.Error(result.Message)
+		return false
+	default:
+		t.Errorf("object is not Boolean. got=%T (%+v).", obj, obj)
 		return false
 	}
-	if result.Value != expected {
-		t.Errorf("object has wrong value. expect=%b, got=%d", expected, result.Value)
+}
+
+func testArrayObject(t *testing.T, obj Object, expected *ArrayObject) bool {
+	result, ok := obj.(*ArrayObject)
+	if !ok {
+		t.Errorf("object is not Array. got=%T (%+v)", obj, obj)
 		return false
+	}
+
+	if len(result.Elements) != len(expected.Elements) {
+		t.Fatalf("Don't equals length of array. Expect %d, got=%d", len(expected.Elements), len(result.Elements))
+	}
+
+	for i := 0; i < len(result.Elements); i++ {
+		intObj, ok := expected.Elements[i].(*IntegerObject)
+		if ok {
+			testIntegerObject(t, result.Elements[i], intObj.Value)
+			continue
+		}
+		str, ok := expected.Elements[i].(*StringObject)
+		if ok {
+			testStringObject(t, result.Elements[i], str.Value)
+			continue
+		}
+
+		b, ok := expected.Elements[i].(*BooleanObject)
+		if ok {
+			testBooleanObject(t, result.Elements[i], b.Value)
+			continue
+		}
+
+		t.Fatalf("object is wrong type %T", expected.Elements[i])
 	}
 
 	return true
@@ -453,7 +501,7 @@ func testBooleanObject(t *testing.T, obj Object, expected bool) bool {
 
 func isError(obj Object) bool {
 	if obj != nil {
-		return obj.Type() == errorObj
+		return obj.objectType() == errorObj
 	}
 	return false
 }

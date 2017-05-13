@@ -1,6 +1,6 @@
 package ast
 
-import "github.com/rooby-lang/rooby/token"
+import "github.com/goby-lang/goby/token"
 
 type variable interface {
 	variableNode()

@@ -1,10 +1,28 @@
 package parser
 
 import (
-	"github.com/rooby-lang/rooby/ast"
-	"github.com/rooby-lang/rooby/lexer"
+	"github.com/goby-lang/goby/ast"
+	"github.com/goby-lang/goby/lexer"
 	"testing"
 )
+
+func TestNilExpression(t *testing.T) {
+	input := `
+	nil
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	_, ok := stmt.Expression.(*ast.NilExpression)
+
+	if !ok {
+		t.Fatalf("Expect expression to be NilExpression. got=%T", stmt.Expression)
+	}
+}
 
 func TestHashExpression(t *testing.T) {
 	tests := []struct {

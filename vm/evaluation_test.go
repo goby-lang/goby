@@ -4,6 +4,39 @@ import (
 	"testing"
 )
 
+func TestRequireSuccess(t *testing.T) {
+	input := `
+	require "file"
+
+	File.extname("foo.rb")
+	`
+	evaluated := testEval(t, input)
+
+	if isError(evaluated) {
+		t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+	}
+
+	testStringObject(t, evaluated, ".rb")
+
+}
+
+func TestRequireFail(t *testing.T) {
+	input := `
+	require "bar"
+	`
+	expected := `Can't require "bar"`
+
+	evaluated := testEval(t, input)
+
+	if !isError(evaluated) {
+		t.Fatalf("Should return an error")
+	}
+
+	if evaluated.(*Error).Message != expected {
+		t.Fatalf("Error message should be '%s'", expected)
+	}
+}
+
 func TestPrimitiveType(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -41,8 +74,7 @@ func TestPrimitiveType(t *testing.T) {
 		},
 		{
 			`
-			# returns null
-			puts(123).class.name
+			nil.class.name
 			`,
 			"Null",
 		},
@@ -328,8 +360,8 @@ func TestClassMethodEvaluation(t *testing.T) {
 
 func TestSelfExpressionEvaluation(t *testing.T) {
 	tests := []struct {
-		input        string
-		expected_obj string
+		input       string
+		expectedObj string
 	}{
 		{`self`, baseObject},
 		{
@@ -386,8 +418,8 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 		}
 
-		if string(evaluated.Type()) != tt.expected_obj {
-			t.Fatalf("expect self to return %s. got=%s", string(tt.expected_obj), evaluated.Type())
+		if string(evaluated.objectType()) != tt.expectedObj {
+			t.Fatalf("expect self to return %s. got=%s", string(tt.expectedObj), evaluated.objectType())
 		}
 	}
 }
@@ -524,7 +556,7 @@ func TestEvalCustomInitializeMethod(t *testing.T) {
 	}
 }
 
-func TestEvalClassInheritance(t *testing.T) {
+func TestEvalMethodInheritance(t *testing.T) {
 	input := `
 		class Foo
 			def add(x, y)
@@ -549,6 +581,25 @@ func TestEvalClassInheritance(t *testing.T) {
 	if result.Value != 21 {
 		t.Errorf("expect result to be 21. got=%d", result.Value)
 	}
+}
+
+func TestEvalClassInheritance(t *testing.T) {
+	input := `
+		class Bar
+		end
+
+		class Foo < Bar
+		  def self.add
+		    10
+		  end
+		end
+
+		Foo.superclass.name
+	`
+
+	evaluated := testEval(t, input)
+
+	testStringObject(t, evaluated, "Bar")
 }
 
 func TestEvalIfExpression(t *testing.T) {
@@ -774,7 +825,7 @@ func TestMethodCallWithBlockArgument(t *testing.T) {
 
 		f.bar(10) do |x|
                   y = x + y
-                end
+		end
 
 		y
 		`, 20},

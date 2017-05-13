@@ -1,0 +1,5 @@
+class Bar
+  def self.foo
+    yield(10)
+  end
+end

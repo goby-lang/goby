@@ -2,8 +2,8 @@ package parser
 
 import (
 	"fmt"
-	"github.com/rooby-lang/rooby/ast"
-	"github.com/rooby-lang/rooby/lexer"
+	"github.com/goby-lang/goby/ast"
+	"github.com/goby-lang/goby/lexer"
 	"testing"
 )
 
@@ -337,7 +337,7 @@ func testInfixExpression(
 }
 
 func testBoolLiteral(t *testing.T, exp ast.Expression, v bool) bool {
-	bo, ok := exp.(*ast.Boolean)
+	bo, ok := exp.(*ast.BooleanExpression)
 	if !ok {
 		t.Errorf("exp is not *ast.Boolean. got=%T", exp)
 		return false

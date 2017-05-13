@@ -21,7 +21,7 @@ type HashObject struct {
 	Pairs map[string]Object
 }
 
-func (h *HashObject) Type() objectType {
+func (h *HashObject) objectType() objectType {
 	return hashObj
 }
 
@@ -40,7 +40,7 @@ func (h *HashObject) Inspect() string {
 	return out.String()
 }
 
-func (h *HashObject) ReturnClass() Class {
+func (h *HashObject) returnClass() Class {
 	return h.Class
 }
 
@@ -55,7 +55,8 @@ func initializeHash(pairs map[string]Object) *HashObject {
 var builtinHashMethods = []*BuiltInMethod{
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				if len(args) != 1 {
 					return newError("Expect 1 arguments. got=%d", len(args))
 				}
@@ -87,7 +88,8 @@ var builtinHashMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				// First arg is index
 				// Second arg is assigned value
 				if len(args) != 2 {
@@ -111,7 +113,8 @@ var builtinHashMethods = []*BuiltInMethod{
 	},
 	{
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(args []Object, block *Method) Object {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
 				if len(args) != 0 {
 					return newError("Expect 0 argument. got=%d", len(args))
 				}
@@ -125,13 +128,13 @@ var builtinHashMethods = []*BuiltInMethod{
 }
 
 func init() {
-	methods := NewEnvironment()
+	methods := newEnvironment()
 
 	for _, m := range builtinHashMethods {
-		methods.Set(m.Name, m)
+		methods.set(m.Name, m)
 	}
 
-	bc := &BaseClass{Name: "Hash", Methods: methods, ClassMethods: NewEnvironment(), Class: classClass, SuperClass: objectClass}
+	bc := &BaseClass{Name: "Hash", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
 	hc := &RHash{BaseClass: bc}
 	hashClass = hc
 }

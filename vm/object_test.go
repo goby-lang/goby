@@ -4,11 +4,11 @@ import (
 	"testing"
 )
 
-func getBuiltInMethod(t *testing.T, receiver BaseObject, method_name string) builtinMethodBody {
-	m := receiver.ReturnClass().LookupInstanceMethod(method_name)
+func getBuiltInMethod(t *testing.T, receiver BaseObject, methodName string) builtinMethodBody {
+	m := receiver.returnClass().lookupInstanceMethod(methodName)
 
 	if m == nil {
-		t.Fatalf("Undefined built in method %s for %s", method_name, receiver.ReturnClass().ReturnName())
+		t.Fatalf("Undefined built in method %s for %s", methodName, receiver.returnClass().ReturnName())
 	}
 
 	method := m.(*BuiltInMethod)
