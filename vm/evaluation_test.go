@@ -4,6 +4,39 @@ import (
 	"testing"
 )
 
+func TestRequireSuccess(t *testing.T) {
+	input := `
+	require "file"
+
+	File.extname("foo.rb")
+	`
+	evaluated := testEval(t, input)
+
+	if isError(evaluated) {
+		t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+	}
+
+	testStringObject(t, evaluated, ".rb")
+
+}
+
+func TestRequireFail(t *testing.T) {
+	input := `
+	require "bar"
+	`
+	expected := `Can't require "bar"`
+
+	evaluated := testEval(t, input)
+
+	if !isError(evaluated) {
+		t.Fatalf("Should return an error")
+	}
+
+	if evaluated.(*Error).Message != expected {
+		t.Fatalf("Error message should be '%s'", expected)
+	}
+}
+
 func TestPrimitiveType(t *testing.T) {
 	tests := []struct {
 		input    string

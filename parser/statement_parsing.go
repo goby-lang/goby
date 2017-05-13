@@ -33,6 +33,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseWhileStatement()
 	case token.RequireRelative:
 		return p.parseRequireRelativeStatement()
+	case token.Require:
+		return p.parseRequireStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -44,6 +46,15 @@ func (p *Parser) parseRequireRelativeStatement() *ast.RequireRelativeStatement {
 
 	filepath := p.curToken.Literal
 	stmt.Filepath = filepath
+	return stmt
+}
+
+func (p *Parser) parseRequireStatement() *ast.RequireStatement {
+	stmt := &ast.RequireStatement{Token: p.curToken}
+	p.nextToken()
+
+	libName := p.curToken.Literal
+	stmt.Library = libName
 	return stmt
 }
 

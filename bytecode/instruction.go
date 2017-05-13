@@ -38,6 +38,7 @@ const (
 	Leave               = "leave"
 
 	RequireRelative = "require_relative"
+	Require         = "require"
 )
 
 type instruction struct {

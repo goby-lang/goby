@@ -144,7 +144,13 @@ func (g *Generator) compileStatement(is *instructionSet, statement ast.Statement
 		g.compileExpression(is, stmt.ReturnValue, scope, table)
 		g.endInstructions(is)
 	case *ast.RequireRelativeStatement:
-		is.define(RequireRelative, stmt.Filepath)
+		is.define(PutSelf)
+		is.define(PutString, "\""+stmt.Filepath+"\"")
+		is.define(Send, RequireRelative, 1)
+	case *ast.RequireStatement:
+		is.define(PutSelf)
+		is.define(PutString, "\""+stmt.Library+"\"")
+		is.define(Send, Require, 1)
 	case *ast.WhileStatement:
 		g.compileWhileStmt(is, stmt, scope, table)
 	}
@@ -296,10 +302,10 @@ func (g *Generator) compileExpression(is *instructionSet, exp ast.Expression, sc
 			blockIndex := g.blockCounter
 			g.blockCounter++
 			g.compileBlockArgExpression(blockIndex, exp, scope, newTable)
-			is.define("send", exp.Method, len(exp.Arguments), fmt.Sprintf("block:%d", blockIndex))
+			is.define(Send, exp.Method, len(exp.Arguments), fmt.Sprintf("block:%d", blockIndex))
 			return
 		}
-		is.define("send", exp.Method, len(exp.Arguments))
+		is.define(Send, exp.Method, len(exp.Arguments))
 	}
 }
 

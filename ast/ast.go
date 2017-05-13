@@ -82,6 +82,20 @@ func (rrs *RequireRelativeStatement) String() string {
 	return fmt.Sprintf("require_relative \"%s\"", rrs.Filepath)
 }
 
+// RequireStatement represents library requiring action.
+type RequireStatement struct {
+	Token   token.Token
+	Library string
+}
+
+func (rs *RequireStatement) statementNode() {}
+func (rs *RequireStatement) TokenLiteral() string {
+	return rs.Token.Literal
+}
+func (rs *RequireStatement) String() string {
+	return fmt.Sprintf("require \"%s\"", rs.Library)
+}
+
 type DefStatement struct {
 	Token          token.Token
 	Name           *Identifier

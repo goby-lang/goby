@@ -69,6 +69,7 @@ const (
 	Do              = "DO"
 	Yield           = "YIELD"
 	RequireRelative = "REQUIRE_RELATIVE"
+	Require         = "REQUIRE"
 )
 
 var keywords = map[string]Type{
@@ -85,6 +86,7 @@ var keywords = map[string]Type{
 	"do":               Do,
 	"yield":            Yield,
 	"require_relative": RequireRelative,
+	"require":          Require,
 }
 
 // LookupIdent is used for keyword identification
