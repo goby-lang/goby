@@ -10,13 +10,15 @@
 [![BCH compliance](https://bettercodehub.com/edge/badge/goby-lang/goby?branch=master)](https://bettercodehub.com/)
 [![Readme Score](http://readme-score-api.herokuapp.com/score.svg?url=goby-lang/goby)](http://clayallsopp.github.io/readme-score?url=goby-lang/goby)
 
-goby is a Ruby-like object oriented language written in Go. You can think it as a simplified, compilable Ruby for now.
-   
-**We're looking for contributors now, join us and make this project better!**
+Goby is a Ruby-like object oriented language written in Go. And it's **not** a new Ruby implementation. Instead, it should be a language that help developer create api server or microservice efficiently.
 
-## Goal
+It will have Ruby's syntax (I'll try to support all common syntaxes) but without most of Ruby's meta-programming magic to make the VM simple. It will also have built in http library that is built upon Go's efficient http package. And I'm planning to do more optimization by using goroutine directly.
 
-I want to build a language that focuses on developing microservices. Which should be performant and easy to write. This is why goby has Ruby's user friendly syntax and is written in Go.
+**Supporting Goby by sending your first PR!**
+
+**Or by donating this project.**
+
+<a href="https://donorbox.org/help-building-goby?recurring=true" target="_blank">![](https://d1iczxrky3cnb2.cloudfront.net/button-medium-blue.png)</a>
 
 ## Questions
 
