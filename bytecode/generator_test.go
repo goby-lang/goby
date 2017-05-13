@@ -16,10 +16,12 @@ func TestRequireRelativeCompilation(t *testing.T) {
 
 	expected := `
 <ProgramStart>
-0 require_relative foo
-1 getconstant Foo
-2 send bar 0
-3 leave
+0 putself
+1 putstring "foo"
+2 send require_relative 1
+3 getconstant Foo
+4 send bar 0
+5 leave
 `
 
 	bytecode := compileToBytecode(input)
@@ -35,10 +37,12 @@ func TestRequireCompilation(t *testing.T) {
 
 	expected := `
 <ProgramStart>
-0 require foo
-1 getconstant Foo
-2 send bar 0
-3 leave
+0 putself
+1 putstring "foo"
+2 send require 1
+3 getconstant Foo
+4 send bar 0
+5 leave
 `
 
 	bytecode := compileToBytecode(input)
