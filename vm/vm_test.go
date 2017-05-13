@@ -402,17 +402,21 @@ func testExec(bytecodes string) Object {
 }
 
 func testIntegerObject(t *testing.T, obj Object, expected int) bool {
-	result, ok := obj.(*IntegerObject)
-	if !ok {
+	switch result := obj.(type) {
+	case *IntegerObject:
+		if result.Value != expected {
+			t.Errorf("object has wrong value. expect=%d, got=%d", expected, result.Value)
+			return false
+		}
+
+		return true
+	case *Error:
+		t.Error(result.Message)
+		return false
+	default:
 		t.Errorf("object is not Integer. got=%T (%+v).", obj, obj)
 		return false
 	}
-	if result.Value != expected {
-		t.Errorf("object has wrong value. expect=%d, got=%d", expected, result.Value)
-		return false
-	}
-
-	return true
 }
 
 func testNullObject(t *testing.T, obj Object) bool {
@@ -425,31 +429,39 @@ func testNullObject(t *testing.T, obj Object) bool {
 }
 
 func testStringObject(t *testing.T, obj Object, expected string) bool {
-	result, ok := obj.(*StringObject)
-	if !ok {
-		t.Errorf("object is not a String. got=%T (%+v)", obj, obj)
-		return false
-	}
-	if result.Value != expected {
-		t.Errorf("object has wrong value. expect=%s, got=%s", expected, result.Value)
-		return false
-	}
+	switch result := obj.(type) {
+	case *StringObject:
+		if result.Value != expected {
+			t.Errorf("object has wrong value. expect=%d, got=%d", expected, result.Value)
+			return false
+		}
 
-	return true
+		return true
+	case *Error:
+		t.Error(result.Message)
+		return false
+	default:
+		t.Errorf("object is not String. got=%T (%+v).", obj, obj)
+		return false
+	}
 }
 
 func testBooleanObject(t *testing.T, obj Object, expected bool) bool {
-	result, ok := obj.(*BooleanObject)
-	if !ok {
-		t.Errorf("object is not Boolean. got=%T (%+v)", obj, obj)
-		return false
-	}
-	if result.Value != expected {
-		t.Errorf("object has wrong value. expect=%t, got=%t", expected, result.Value)
-		return false
-	}
+	switch result := obj.(type) {
+	case *BooleanObject:
+		if result.Value != expected {
+			t.Errorf("object has wrong value. expect=%d, got=%d", expected, result.Value)
+			return false
+		}
 
-	return true
+		return true
+	case *Error:
+		t.Error(result.Message)
+		return false
+	default:
+		t.Errorf("object is not Boolean. got=%T (%+v).", obj, obj)
+		return false
+	}
 }
 
 func testArrayObject(t *testing.T, obj Object, expected *ArrayObject) bool {

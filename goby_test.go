@@ -42,15 +42,19 @@ func execFile(fileDir, filename string) vm.Object {
 }
 
 func testIntegerObject(t *testing.T, obj vm.Object, expected int) bool {
-	result, ok := obj.(*vm.IntegerObject)
-	if !ok {
+	switch result := obj.(type) {
+	case *vm.IntegerObject:
+		if result.Value != expected {
+			t.Errorf("object has wrong value. expect=%d, got=%d", expected, result.Value)
+			return false
+		}
+
+		return true
+	case *vm.Error:
+		t.Error(result.Message)
+		return false
+	default:
 		t.Errorf("object is not Integer. got=%T (%+v).", obj, obj)
 		return false
 	}
-	if result.Value != expected {
-		t.Errorf("object has wrong value. expect=%d, got=%d", expected, result.Value)
-		return false
-	}
-
-	return true
 }
