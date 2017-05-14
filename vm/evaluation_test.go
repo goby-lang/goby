@@ -6,7 +6,7 @@ import (
 
 func TestRequireSuccess(t *testing.T) {
 	input := `
-	require "file"
+	require("file")
 
 	File.extname("foo.rb")
 	`
@@ -22,7 +22,7 @@ func TestRequireSuccess(t *testing.T) {
 
 func TestRequireFail(t *testing.T) {
 	input := `
-	require "bar"
+	require("bar")
 	`
 	expected := `Can't require "bar"`
 

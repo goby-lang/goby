@@ -1,4 +1,4 @@
-require_relative "./foo"
+require_relative("./foo")
 
 fifty = Foo.bar(5)
 
