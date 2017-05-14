@@ -117,6 +117,7 @@ $ go get github.com/goby-lang/goby
 **Execute goby file using VM**
 
 (might see errors on sample-6 since vm hasn't support block yet)
+
 ``` 
 $ goby ./samples/sample-1.ro
 #=> 16
@@ -136,9 +137,10 @@ You'll see `sample-1.robc` in `./samples`
 $ goby ./samples/sample-1.robc
 ```
 
-
 ## Try it!
+
 (See sample directory)
+
 ```
 $ goby ./samples/sample-1.ro
 $ goby ./samples/sample-2.ro
@@ -146,13 +148,20 @@ $ goby ./samples/sample-3.ro
 $ goby ./samples/sample-4.ro
 $ goby .....
 ```
+
+## API Documentation
+
+Check out our [API Documentation](https://goby-lang.github.io/api.doc/).
+
+There is still a lot of document to add. Feel free to contribute following [this guide](https://github.com/goby-lang/api.doc#documenting-goby-code).
+
 ## Development & Contribute
 
-See the [guideline](https://github.com/goby-lang/goby/blob/master/CONTRIBUTING.md)
+See the [guideline](https://github.com/goby-lang/goby/blob/master/CONTRIBUTING.md).
 
 ## References
 
-I can't build this project without these resources, and I highly recommend you to check them out if you're interested in building your own languages
+I can't build this project without these resources, and I highly recommend you to check them out if you're interested in building your own languages:
 
 - [Write An Interpreter In Go](https://interpreterbook.com)
 - [Nand2Tetris II](https://www.coursera.org/learn/nand2tetris2/home/welcome)
