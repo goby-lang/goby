@@ -9,7 +9,7 @@ import (
 
 func TestRequireRelativeCompilation(t *testing.T) {
 	input := `
-	require_relative "foo"
+	require_relative("foo")
 
 	Foo.bar
 	`
@@ -30,7 +30,7 @@ func TestRequireRelativeCompilation(t *testing.T) {
 
 func TestRequireCompilation(t *testing.T) {
 	input := `
-	require "foo"
+	require("foo")
 
 	Foo.bar
 	`

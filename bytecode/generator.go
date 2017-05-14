@@ -143,14 +143,6 @@ func (g *Generator) compileStatement(is *instructionSet, statement ast.Statement
 	case *ast.ReturnStatement:
 		g.compileExpression(is, stmt.ReturnValue, scope, table)
 		g.endInstructions(is)
-	case *ast.RequireRelativeStatement:
-		is.define(PutSelf)
-		is.define(PutString, "\""+stmt.Filepath+"\"")
-		is.define(Send, RequireRelative, 1)
-	case *ast.RequireStatement:
-		is.define(PutSelf)
-		is.define(PutString, "\""+stmt.Library+"\"")
-		is.define(Send, Require, 1)
 	case *ast.WhileStatement:
 		g.compileWhileStmt(is, stmt, scope, table)
 	}

@@ -243,7 +243,7 @@ func TestNextToken(t *testing.T) {
 		{token.Incr, "++", 50},
 		{token.End, "end", 51},
 
-		{token.RequireRelative, "require_relative", 53},
+		{token.Ident, "require_relative", 53},
 		{token.String, "foo", 53},
 
 		{token.Int, "10", 55},
@@ -288,7 +288,7 @@ func TestNextToken(t *testing.T) {
 		{token.Dot, ".", 69},
 		{token.Ident, "module", 69},
 
-		{token.Require, "require", 71},
+		{token.Ident, "require", 71},
 		{token.String, "foo", 71},
 		{token.EOF, "", 72},
 	}

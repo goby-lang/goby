@@ -68,34 +68,6 @@ func (as *AssignStatement) String() string {
 	return out.String()
 }
 
-// RequireRelativeStatement is used to represent 'require_relative' and contains the required file's relative path
-type RequireRelativeStatement struct {
-	Token    token.Token
-	Filepath string
-}
-
-func (rrs *RequireRelativeStatement) statementNode() {}
-func (rrs *RequireRelativeStatement) TokenLiteral() string {
-	return rrs.Token.Literal
-}
-func (rrs *RequireRelativeStatement) String() string {
-	return fmt.Sprintf("require_relative \"%s\"", rrs.Filepath)
-}
-
-// RequireStatement represents library requiring action.
-type RequireStatement struct {
-	Token   token.Token
-	Library string
-}
-
-func (rs *RequireStatement) statementNode() {}
-func (rs *RequireStatement) TokenLiteral() string {
-	return rs.Token.Literal
-}
-func (rs *RequireStatement) String() string {
-	return fmt.Sprintf("require \"%s\"", rs.Library)
-}
-
 type DefStatement struct {
 	Token          token.Token
 	Name           *Identifier
