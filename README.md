@@ -62,7 +62,39 @@ A lot people have questions about `goby` since it's a new language and you may g
     - `ARGV`
     
 **(You can open an issue for any feature request)**
-    
+
+## Something different then Ruby
+
+#### Method call syntax
+For now, all method call needs to use parentheses to wrap their arguments. Including methods like `require`, `include` which we normally won't do this.
+
+It'll look like:
+
+```ruby
+require("foo")
+
+class Bar
+  include(Foo)
+end
+```
+
+There's two reason for this:
+
+##### I want to make Goby's syntax more consistent than Ruby
+In Ruby you can write most of things in many different ways, and that can cause some confusion so we need style guide(s) to tell programmers write code consistently.
+
+But in some programming languages like go, the syntax is very limited which in sometimes is very verbose, but this also makes program more easy to understand and maintain.
+
+##### This requires a parser generator
+
+Since our parser is handcrafted, supporting this feature would be hard and can easily cause bugs on some edge cases.
+
+Although we definitely will replace current parser with a parser generator, this is not our top priority now.
+
+
+**If you have any thought on this, please join our discussion in [this issue](https://github.com/goby-lang/goby/issues/84). We would love to hear some user's feedback 😁**
+
+
 ## TODO & WIP
 
 Checkout this [issue](https://github.com/goby-lang/goby/issues/72) for what we will work on before first release.
