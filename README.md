@@ -63,7 +63,7 @@ A lot people have questions about `goby` since it's a new language and you may g
     
 **(You can open an issue for any feature request)**
 
-## Something different then Ruby
+## Something different from Ruby
 
 #### Method call syntax
 For now, all method call needs to use parentheses to wrap their arguments. Including methods like `require`, `include` which we normally won't do this.
