@@ -396,7 +396,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	},
 	{
 		// Returns self - 1.
-		Name: "prev",
+		Name: "pred",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				i := receiver.(*IntegerObject)
