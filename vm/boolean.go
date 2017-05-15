@@ -45,6 +45,7 @@ func (b *BooleanObject) equal(e *BooleanObject) bool {
 
 var builtinBooleanMethods = []*BuiltInMethod{
 	{
+		Name: "==",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -70,9 +71,9 @@ var builtinBooleanMethods = []*BuiltInMethod{
 				return FALSE
 			}
 		},
-		Name: "==",
 	},
 	{
+		Name: "!=",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -98,9 +99,9 @@ var builtinBooleanMethods = []*BuiltInMethod{
 				return FALSE
 			}
 		},
-		Name: "!=",
 	},
 	{
+		Name: "!",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -113,9 +114,9 @@ var builtinBooleanMethods = []*BuiltInMethod{
 				return TRUE
 			}
 		},
-		Name: "!",
 	},
 	{
+		Name: "&&",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -135,9 +136,9 @@ var builtinBooleanMethods = []*BuiltInMethod{
 				return FALSE
 			}
 		},
-		Name: "&&",
 	},
 	{
+		Name: "||",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -157,7 +158,6 @@ var builtinBooleanMethods = []*BuiltInMethod{
 				return FALSE
 			}
 		},
-		Name: "||",
 	},
 }
 

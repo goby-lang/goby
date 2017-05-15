@@ -2,10 +2,11 @@ package vm
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/bytecode"
-	"github.com/goby-lang/goby/parser"
 	"io/ioutil"
 	"path"
+
+	"github.com/goby-lang/goby/bytecode"
+	"github.com/goby-lang/goby/parser"
 )
 
 var (
@@ -157,6 +158,7 @@ func (c *RClass) initializeInstance() *RObject {
 
 var builtinGlobalMethods = []*BuiltInMethod{
 	{
+		Name: "require",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				libName := args[0].(*StringObject).Value
@@ -172,9 +174,9 @@ var builtinGlobalMethods = []*BuiltInMethod{
 				return TRUE
 			}
 		},
-		Name: "require",
 	},
 	{
+		Name: "require_relative",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				filepath := args[0].(*StringObject).Value
@@ -191,9 +193,9 @@ var builtinGlobalMethods = []*BuiltInMethod{
 				return TRUE
 			}
 		},
-		Name: "require_relative",
 	},
 	{
+		Name: "puts",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -204,9 +206,9 @@ var builtinGlobalMethods = []*BuiltInMethod{
 				return NULL
 			}
 		},
-		Name: "puts",
 	},
 	{
+		Name: "class",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -220,21 +222,21 @@ var builtinGlobalMethods = []*BuiltInMethod{
 				}
 			}
 		},
-		Name: "class",
 	},
 	{
+		Name: "!",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
 				return FALSE
 			}
 		},
-		Name: "!",
 	},
 }
 
 var BuiltinClassMethods = []*BuiltInMethod{
 	{
+		Name: "include",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				module := args[0].(*RClass)
@@ -245,9 +247,9 @@ var BuiltinClassMethods = []*BuiltInMethod{
 				return class
 			}
 		},
-		Name: "include",
 	},
 	{
+		Name: "new",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -262,9 +264,9 @@ var BuiltinClassMethods = []*BuiltInMethod{
 				return instance
 			}
 		},
-		Name: "new",
 	},
 	{
+		Name: "name",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -273,16 +275,15 @@ var BuiltinClassMethods = []*BuiltInMethod{
 				return nameString
 			}
 		},
-		Name: "name",
 	},
 	{
+		Name: "superclass",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
 				return receiver.(Class).returnSuperClass()
 			}
 		},
-		Name: "superclass",
 	},
 }
 

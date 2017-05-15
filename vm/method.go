@@ -30,8 +30,8 @@ type builtinMethodBody func(*VM, []Object, *callFrame) Object
 
 // BuiltInMethod represents methods defined in go.
 type BuiltInMethod struct {
-	Fn   func(receiver Object) builtinMethodBody
 	Name string
+	Fn   func(receiver Object) builtinMethodBody
 }
 
 func (bim *BuiltInMethod) objectType() objectType {

@@ -14,12 +14,12 @@ func initializeFileClass(vm *VM) {
 
 var builtinFileClassMethods = []*BuiltInMethod{
 	{
+		Name: "extname",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(v *VM, args []Object, blockFrame *callFrame) Object {
 				filename := args[0].(*StringObject).Value
 				return initializeString(filepath.Ext(filename))
 			}
 		},
-		Name: "extname",
 	},
 }

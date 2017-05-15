@@ -48,6 +48,7 @@ func initilaizeInteger(value int) *IntegerObject {
 var builtinIntegerMethods = []*BuiltInMethod{
 	{
 		// Returns the sum of self and another Integer.
+		Name: "+",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -62,10 +63,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				return &IntegerObject{Value: leftValue + rightValue, Class: integerClass}
 			}
 		},
-		Name: "+",
 	},
 	{
 		// Returns the subtraction of another Integer from self.
+		Name: "-",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -80,10 +81,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				return &IntegerObject{Value: leftValue - rightValue, Class: integerClass}
 			}
 		},
-		Name: "-",
 	},
 	{
 		// Returns self multiplying another Integer.
+		Name: "*",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -98,10 +99,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				return &IntegerObject{Value: leftValue * rightValue, Class: integerClass}
 			}
 		},
-		Name: "*",
 	},
 	{
 		// Returns self squaring another Integer.
+		Name: "**",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -117,10 +118,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				return &IntegerObject{Value: int(result), Class: integerClass}
 			}
 		},
-		Name: "**",
 	},
 	{
 		// Returns self divided by another Integer.
+		Name: "/",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -135,10 +136,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				return &IntegerObject{Value: leftValue / rightValue, Class: integerClass}
 			}
 		},
-		Name: "/",
 	},
 	{
 		// Returns if self is larger than another Integer.
+		Name: ">",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -158,10 +159,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				return FALSE
 			}
 		},
-		Name: ">",
 	},
 	{
 		// Returns if self is larger than or equals to another Integer.
+		Name: ">=",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -181,10 +182,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				return FALSE
 			}
 		},
-		Name: ">=",
 	},
 	{
 		// Returns if self is smaller than another Integer.
+		Name: "<",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -204,10 +205,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				return FALSE
 			}
 		},
-		Name: "<",
 	},
 	{
 		// Returns if self is smaller than or equals to another Integer.
+		Name: "<=",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -227,10 +228,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				return FALSE
 			}
 		},
-		Name: "<=",
 	},
 	{
 		// Returns 1 if self is larger than the incoming Integer, -1 if smaller. Otherwise 0.
+		Name: "<=>",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -253,10 +254,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				return initilaizeInteger(0)
 			}
 		},
-		Name: "<=>",
 	},
 	{
 		// Returns if self is equal to another Integer.
+		Name: "==",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -276,10 +277,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				return FALSE
 			}
 		},
-		Name: "==",
 	},
 	{
 		// Returns if self is not equal to another Integer.
+		Name: "!=",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -299,10 +300,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				return FALSE
 			}
 		},
-		Name: "!=",
 	},
 	{
 		// Adds 1 to self and returns.
+		Name: "++",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -311,10 +312,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				return int
 			}
 		},
-		Name: "++",
 	},
 	{
 		// Substracts 1 from self and returns.
+		Name: "--",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -323,10 +324,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				return int
 			}
 		},
-		Name: "--",
 	},
 	{
 		// Returns a `String` representation of self.
+		Name: "to_s",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -335,19 +336,19 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				return initializeString(strconv.Itoa(int.Value))
 			}
 		},
-		Name: "to_s",
 	},
 	{
 		// Returns self.
+		Name: "to_i",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				return receiver
 			}
 		},
-		Name: "to_i",
 	},
 	{
 		// Returns if self is even.
+		Name: "even",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -361,15 +362,15 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				return FALSE
 			}
 		},
-		Name: "even",
 	},
 	{
 		// Returns if self is odd.
-		// 
+		//
 		// ```ruby
 		// 3.odd # => true
 		// 4.odd # => false
 		// ```
+		Name: "odd",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -382,30 +383,30 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				return FALSE
 			}
 		},
-		Name: "odd",
 	},
 	{
 		// Returns self + 1.
+		Name: "next",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				i := receiver.(*IntegerObject)
 				return initilaizeInteger(i.Value + 1)
 			}
 		},
-		Name: "next",
 	},
 	{
 		// Returns self - 1.
+		Name: "pred",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				i := receiver.(*IntegerObject)
 				return initilaizeInteger(i.Value - 1)
 			}
 		},
-		Name: "pred",
 	},
 	{
 		// Yields a block a number of times equals to self.
+		Name: "times",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				n := receiver.(*IntegerObject)
@@ -425,7 +426,6 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				return n
 			}
 		},
-		Name: "times",
 	},
 }
 
