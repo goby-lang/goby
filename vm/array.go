@@ -91,6 +91,7 @@ func init() {
 
 var builtinArrayMethods = []*BuiltInMethod{
 	{
+		Name: "[]",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				if len(args) != 1 {
@@ -114,9 +115,9 @@ var builtinArrayMethods = []*BuiltInMethod{
 
 			}
 		},
-		Name: "[]",
 	},
 	{
+		Name: "[]=",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -151,9 +152,9 @@ var builtinArrayMethods = []*BuiltInMethod{
 				return arr.Elements[indexValue]
 			}
 		},
-		Name: "[]=",
 	},
 	{
+		Name: "length",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -165,9 +166,9 @@ var builtinArrayMethods = []*BuiltInMethod{
 				return initilaizeInteger(arr.length())
 			}
 		},
-		Name: "length",
 	},
 	{
+		Name: "pop",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -179,9 +180,9 @@ var builtinArrayMethods = []*BuiltInMethod{
 				return arr.pop()
 			}
 		},
-		Name: "pop",
 	},
 	{
+		Name: "push",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -189,9 +190,9 @@ var builtinArrayMethods = []*BuiltInMethod{
 				return arr.push(args)
 			}
 		},
-		Name: "push",
 	},
 	{
+		Name: "shift",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				if len(args) != 0 {
@@ -202,9 +203,9 @@ var builtinArrayMethods = []*BuiltInMethod{
 				return arr.shift()
 			}
 		},
-		Name: "shift",
 	},
 	{
+		Name: "each",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				arr := receiver.(*ArrayObject)
@@ -219,9 +220,9 @@ var builtinArrayMethods = []*BuiltInMethod{
 				return arr
 			}
 		},
-		Name: "each",
 	},
 	{
+		Name: "each_index",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				arr := receiver.(*ArrayObject)
@@ -236,9 +237,9 @@ var builtinArrayMethods = []*BuiltInMethod{
 				return arr
 			}
 		},
-		Name: "each_index",
 	},
 	{
+		Name: "map",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				arr := receiver.(*ArrayObject)
@@ -256,9 +257,9 @@ var builtinArrayMethods = []*BuiltInMethod{
 				return initializeArray(elements)
 			}
 		},
-		Name: "map",
 	},
 	{
+		Name: "select",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				arr := receiver.(*ArrayObject)
@@ -278,9 +279,9 @@ var builtinArrayMethods = []*BuiltInMethod{
 				return initializeArray(elements)
 			}
 		},
-		Name: "select",
 	},
 	{
+		Name: "at",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				i := args[0]
@@ -303,9 +304,9 @@ var builtinArrayMethods = []*BuiltInMethod{
 				return arr.Elements[index.Value]
 			}
 		},
-		Name: "at",
 	},
 	{
+		Name: "clear",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				arr := receiver.(*ArrayObject)
@@ -314,9 +315,9 @@ var builtinArrayMethods = []*BuiltInMethod{
 				return arr
 			}
 		},
-		Name: "clear",
 	},
 	{
+		Name: "concat",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				arr := receiver.(*ArrayObject)
@@ -336,9 +337,9 @@ var builtinArrayMethods = []*BuiltInMethod{
 				return arr
 			}
 		},
-		Name: "concat",
 	},
 	{
+		Name: "count",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				arr := receiver.(*ArrayObject)
@@ -392,9 +393,9 @@ var builtinArrayMethods = []*BuiltInMethod{
 				return initilaizeInteger(count)
 			}
 		},
-		Name: "count",
 	},
 	{
+		Name: "rotate",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				arr := receiver.(*ArrayObject)
@@ -418,9 +419,9 @@ var builtinArrayMethods = []*BuiltInMethod{
 				return rotArr
 			}
 		},
-		Name: "rotate",
 	},
 	{
+		Name: "first",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				arr := receiver.(*ArrayObject)
@@ -437,9 +438,9 @@ var builtinArrayMethods = []*BuiltInMethod{
 				return initializeArray(arr.Elements[:arg.Value])
 			}
 		},
-		Name: "first",
 	},
 	{
+		Name: "last",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				arr := receiver.(*ArrayObject)
@@ -457,6 +458,5 @@ var builtinArrayMethods = []*BuiltInMethod{
 				return initializeArray(arr.Elements[l-arg.Value : l])
 			}
 		},
-		Name: "last",
 	},
 }

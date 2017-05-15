@@ -60,6 +60,7 @@ func initializeString(value string) *StringObject {
 
 var builtinStringMethods = []*BuiltInMethod{
 	{
+		Name: "+",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -74,9 +75,9 @@ var builtinStringMethods = []*BuiltInMethod{
 				return &StringObject{Value: leftValue + rightValue, Class: stringClass}
 			}
 		},
-		Name: "+",
 	},
 	{
+		Name: "*",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -100,9 +101,9 @@ var builtinStringMethods = []*BuiltInMethod{
 				return &StringObject{Value: result, Class: stringClass}
 			}
 		},
-		Name: "*",
 	},
 	{
+		Name: ">",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -122,9 +123,9 @@ var builtinStringMethods = []*BuiltInMethod{
 				return FALSE
 			}
 		},
-		Name: ">",
 	},
 	{
+		Name: "<",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -144,9 +145,9 @@ var builtinStringMethods = []*BuiltInMethod{
 				return FALSE
 			}
 		},
-		Name: "<",
 	},
 	{
+		Name: "==",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -166,9 +167,9 @@ var builtinStringMethods = []*BuiltInMethod{
 				return FALSE
 			}
 		},
-		Name: "==",
 	},
 	{
+		Name: "<=>",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -191,9 +192,9 @@ var builtinStringMethods = []*BuiltInMethod{
 				return initilaizeInteger(0)
 			}
 		},
-		Name: "<=>",
 	},
 	{
+		Name: "!=",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -213,9 +214,9 @@ var builtinStringMethods = []*BuiltInMethod{
 				return FALSE
 			}
 		},
-		Name: "!=",
 	},
 	{
+		Name: "capitalize",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -227,9 +228,9 @@ var builtinStringMethods = []*BuiltInMethod{
 				return initializeString(result)
 			}
 		},
-		Name: "capitalize",
 	},
 	{
+		Name: "upcase",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -238,9 +239,9 @@ var builtinStringMethods = []*BuiltInMethod{
 				return initializeString(strings.ToUpper(str))
 			}
 		},
-		Name: "upcase",
 	},
 	{
+		Name: "downcase",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -249,20 +250,9 @@ var builtinStringMethods = []*BuiltInMethod{
 				return initializeString(strings.ToLower(str))
 			}
 		},
-		Name: "downcase",
 	},
 	{
-		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-
-				str := receiver.(*StringObject).Value
-
-				return initilaizeInteger(len(str))
-			}
-		},
 		Name: "size",
-	},
-	{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -271,9 +261,20 @@ var builtinStringMethods = []*BuiltInMethod{
 				return initilaizeInteger(len(str))
 			}
 		},
-		Name: "length",
 	},
 	{
+		Name: "length",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+
+				str := receiver.(*StringObject).Value
+
+				return initilaizeInteger(len(str))
+			}
+		},
+	},
+	{
+		Name: "reverse",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -286,9 +287,9 @@ var builtinStringMethods = []*BuiltInMethod{
 				return initializeString(revert)
 			}
 		},
-		Name: "reverse",
 	},
 	{
+		Name: "to_s",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -297,9 +298,9 @@ var builtinStringMethods = []*BuiltInMethod{
 				return initializeString(str)
 			}
 		},
-		Name: "to_s",
 	},
 	{
+		Name: "to_i",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -327,7 +328,6 @@ var builtinStringMethods = []*BuiltInMethod{
 				return initilaizeInteger(0)
 			}
 		},
-		Name: "to_i",
 	},
 }
 
