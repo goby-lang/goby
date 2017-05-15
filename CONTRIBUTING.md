@@ -26,7 +26,7 @@ Open an issue with `[feature request]` prefix on title.
 
 ## How add new method to `Array` (or another Object)
 
-First of all we need to choose some method. For example `index`:
+First of all we need to choose a method. For example `index`:
 
 ```
 a = ["a", "b", "c", "d", 2] # create an array
@@ -41,14 +41,14 @@ end
 c # will be 2
 ```
 
-Second we need to add this method to [`Array`](https://github.com/rooby-lang/rooby/blob/master/vm/array.go) to `builtinArrayMethods`.
+Then we need to add this method to [`vm/array.go`](https://github.com/rooby-lang/rooby/blob/master/vm/array.go)'s `builtinArrayMethods`.
 
 ```
 {
     // receiver it's our Array a in example.
     Fn: func(receiver Object) builtinMethodBody {
-        // vm - it's pointer to VM
-        // args - it's array of arguments in "()": a.index("c") args will be:
+        // vm - it's a pointer to VM
+        // args - it's an array of arguments in "()": a.index("c") args will be:
         //
         // []Object{
         //   0: StringObject{
@@ -57,22 +57,22 @@ Second we need to add this method to [`Array`](https://github.com/rooby-lang/roo
         //   }
         // }
         //
-        // blockFrame it's our block, it will be nil if block empty.
+        // blockFrame it's our block argument, it will be nil if there's no block.
         return func(vm *VM, args []Object, blockFrame *callFrame) Object {
             arr := receiver.(*ArrayObject) // get our Array ["a", "b", "c", "d", 2]
 
-            arg = args[0] // get object what we are looking for
-            // now we need check type of object
+            arg = args[0] // get the object we are looking for
+            // now we need to check the type of object
             elInt, isInt := arg.(*IntegerObject)
             elStr, isStr := arg.(*StringObject)
 
-            // 'index' searches the same object in array, and after finding it returns index
+            // 'index' searches given object in an array, and returns it's index after finding it
             // i - index of element, o - object to compare with arg
             for i, o := range arr.Elements {
                 switch o.(type) {
                 case *IntegerObject:
                     el := o.(*IntegerObject)
-                    if isInt && el.equal(elInt) { // if object from args is IntegerObject and the same as object in array then returns IntegerObject with i
+                    if isInt && el.equal(elInt) { // if both objects are integer then returns IntegerObject with i
                         return initilaizeInteger(i)
                     }
                 case *StringObject:
@@ -90,8 +90,7 @@ Second we need to add this method to [`Array`](https://github.com/rooby-lang/roo
 }
 ```
 
-After implementation this method, we need to add tests in [`ArrayTest`](https://github.com/rooby-lang/rooby/blob/master/vm/array_test.go)
-Create new function `TestIndexMethod`:
+After implementating this method, we need to add tests in [`Array's Test`](https://github.com/rooby-lang/rooby/blob/master/vm/array_test.go) by creating a new function `TestIndexMethod`:
 
 ```
 func TestIndexMethod(t *testing.T) {
