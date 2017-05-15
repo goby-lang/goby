@@ -16,10 +16,6 @@ It will have Ruby's syntax (I'll try to support all common syntaxes) but without
 
 **Supporting Goby by sending your first PR!**
 
-**Or by donating this project.**
-
-<a href="https://donorbox.org/help-building-goby?recurring=true" target="_blank">![](https://d1iczxrky3cnb2.cloudfront.net/button-medium-blue.png)</a>
-
 ## Questions
 
 A lot people have questions about `goby` since it's a new language and you may get confused by the way I describe it (sorry for that 😢). Here's a list of [frequently asked questions](https://github.com/goby-lang/goby/wiki/Frequently-asked-questions).
