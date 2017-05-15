@@ -60,8 +60,8 @@ func TestEvalInteger(t *testing.T) {
 		{`(25 / 5 + 5) * 2++`, 21},
 		{`2.next`, 3},
 		{`1.next`, 2},
-		{`1.pred`, 0},
-		{`0.pred`, -1},
+		{`1.prev`, 0},
+		{`0.prev`, -1},
 		{`	a = 0
 		  	3.times do
 		  		a++

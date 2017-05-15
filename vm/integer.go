@@ -365,7 +365,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 	},
 	{
 		// Returns if self is odd.
-		// 
+		//
 		// ```ruby
 		// 3.odd # => true
 		// 4.odd # => false
@@ -402,7 +402,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 				return initilaizeInteger(i.Value - 1)
 			}
 		},
-		Name: "pred",
+		Name: "prev",
 	},
 	{
 		// Yields a block a number of times equals to self.
