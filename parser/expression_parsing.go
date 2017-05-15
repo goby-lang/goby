@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/rooby-lang/rooby/ast"
-	"github.com/rooby-lang/rooby/token"
+	"github.com/goby-lang/goby/ast"
+	"github.com/goby-lang/goby/token"
 )
 
 var precedence = map[token.Type]int{
@@ -330,7 +330,7 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 	}
 
 	// Parse block
-	if p.peekTokenIs(token.Do) {
+	if p.peekTokenIs(token.Do) && p.acceptBlock {
 		p.parseBlockParameters(exp)
 	}
 

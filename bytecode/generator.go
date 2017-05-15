@@ -3,7 +3,7 @@ package bytecode
 import (
 	"bytes"
 	"fmt"
-	"github.com/rooby-lang/rooby/ast"
+	"github.com/goby-lang/goby/ast"
 	"regexp"
 	"strings"
 )
@@ -127,22 +127,59 @@ func (g *Generator) compileStatement(is *instructionSet, statement ast.Statement
 		is.define(PutSelf)
 
 		if stmt.SuperClass != nil {
-			is.define(DefClass, stmt.Name.Value, stmt.SuperClass.Value)
+			is.define(DefClass, "class:"+stmt.Name.Value, stmt.SuperClass.Value)
 		} else {
-			is.define(DefClass, stmt.Name.Value)
+			is.define(DefClass, "class:"+stmt.Name.Value)
 		}
 
 		is.define(Pop)
 		g.compileClassStmt(stmt, scope)
+	case *ast.ModuleStatement:
+		is.define(PutSelf)
+		is.define(DefClass, "module:"+stmt.Name.Value)
+
+		is.define(Pop)
+		g.compileModuleStmt(stmt, scope)
 	case *ast.ReturnStatement:
 		g.compileExpression(is, stmt.ReturnValue, scope, table)
 		g.endInstructions(is)
-	case *ast.RequireRelativeStatement:
-		is.define(RequireRelative, stmt.Filepath)
+	case *ast.WhileStatement:
+		g.compileWhileStmt(is, stmt, scope, table)
 	}
 }
 
+func (g *Generator) compileWhileStmt(is *instructionSet, stmt *ast.WhileStatement, scope *scope, table *localTable) {
+	anchor1 := &anchor{}
+	is.define(Jump, anchor1)
+
+	is.define(PutNull)
+	is.define(Pop)
+	is.define(Jump, anchor1)
+
+	anchor2 := &anchor{is.Count}
+
+	g.compileBlockStatement(is, stmt.Body, scope, scope.localTable)
+
+	anchor1.line = is.Count
+
+	g.compileExpression(is, stmt.Condition, scope, table)
+
+	is.define(BranchIf, anchor2)
+	is.define(PutNull)
+	is.define(Pop)
+}
+
 func (g *Generator) compileClassStmt(stmt *ast.ClassStatement, scope *scope) {
+	scope = newScope(scope, stmt)
+	is := &instructionSet{}
+	is.setLabel(fmt.Sprintf("%s:%s", LabelDefClass, stmt.Name.Value))
+
+	g.compileBlockStatement(is, stmt.Body, scope, scope.localTable)
+	is.define(Leave)
+	g.instructionSets = append(g.instructionSets, is)
+}
+
+func (g *Generator) compileModuleStmt(stmt *ast.ModuleStatement, scope *scope) {
 	scope = newScope(scope, stmt)
 	is := &instructionSet{}
 	is.setLabel(fmt.Sprintf("%s:%s", LabelDefClass, stmt.Name.Value))
@@ -257,10 +294,10 @@ func (g *Generator) compileExpression(is *instructionSet, exp ast.Expression, sc
 			blockIndex := g.blockCounter
 			g.blockCounter++
 			g.compileBlockArgExpression(blockIndex, exp, scope, newTable)
-			is.define("send", exp.Method, len(exp.Arguments), fmt.Sprintf("block:%d", blockIndex))
+			is.define(Send, exp.Method, len(exp.Arguments), fmt.Sprintf("block:%d", blockIndex))
 			return
 		}
-		is.define("send", exp.Method, len(exp.Arguments))
+		is.define(Send, exp.Method, len(exp.Arguments))
 	}
 }
 

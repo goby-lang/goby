@@ -1,7 +1,7 @@
 package lexer
 
 import (
-	"github.com/rooby-lang/rooby/token"
+	"github.com/goby-lang/goby/token"
 )
 
 // Lexer is used for tokenizing programs

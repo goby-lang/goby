@@ -3,7 +3,7 @@ package vm
 import (
 	"bytes"
 	"fmt"
-	"github.com/rooby-lang/rooby/bytecode"
+	"github.com/goby-lang/goby/bytecode"
 	"strings"
 )
 
@@ -29,7 +29,11 @@ type VM struct {
 	blockTables map[filename]map[string]*instructionSet
 
 	fileDir string
+
+	args []string
 }
+
+var stackTrace int
 
 type isIndexTable struct {
 	Data map[string]int
@@ -43,16 +47,24 @@ func newISIndexTable() *isIndexTable {
 	return &isIndexTable{Data: make(map[string]int)}
 }
 
+type errorMessage string
+
 type stack struct {
 	Data []*Pointer
 	VM   *VM
 }
 
+type standardLibraryInitMethod func(*VM)
+
+var standardLibraris = map[string]standardLibraryInitMethod{
+	"file": initializeFileClass,
+}
+
 // New initializes a vm to initialize state and returns it.
-func New(fileDir string) *VM {
+func New(fileDir string, args []string) *VM {
 	s := &stack{}
 	cfs := &callFrameStack{callFrames: []*callFrame{}}
-	vm := &VM{stack: s, callFrameStack: cfs, sp: 0, cfp: 0}
+	vm := &VM{stack: s, callFrameStack: cfs, sp: 0, cfp: 0, args: args}
 	s.VM = vm
 	cfs.vm = vm
 
@@ -91,6 +103,17 @@ func (vm *VM) ExecBytecodes(bytecodes, fn string) {
 	vm.classISIndexTables[filename] = newISIndexTable()
 	vm.methodISIndexTables[filename] = newISIndexTable()
 
+	defer func() {
+		if p := recover(); p != nil {
+			switch p.(type) {
+			case errorMessage:
+				return
+			default:
+				panic(p)
+			}
+		}
+	}()
+
 	cf := newCallFrame(p.program)
 	cf.self = mainObj
 	vm.callFrameStack.push(cf)
@@ -116,10 +139,18 @@ func (vm *VM) initConstants() {
 		objectClass,
 	}
 
+	args := []Object{}
+
+	for _, arg := range vm.args {
+		args = append(args, initializeString(arg))
+	}
+
 	for _, c := range builtInClasses {
 		p := &Pointer{Target: c}
 		constants[c.ReturnName()] = p
 	}
+
+	constants["ARGV"] = &Pointer{Target: initializeArray(args)}
 
 	vm.constants = constants
 }
@@ -139,10 +170,23 @@ func (vm *VM) startFromTopFrame() {
 
 func (vm *VM) execInstruction(cf *callFrame, i *instruction) {
 	cf.pc++
-	//fmt.Print(i.inspect())
+
+	defer func() {
+		if p := recover(); p != nil {
+			if stackTrace == 0 {
+				fmt.Printf("Internal Error: %s\n", p)
+			}
+			fmt.Printf("Instruction trace: %d. \"%s\"\n", stackTrace, i.inspect())
+			stackTrace++
+			panic(p)
+		}
+	}()
+
 	i.action.operation(vm, cf, i.Params...)
-	//fmt.Println(vm.callFrameStack.inspect())
-	//fmt.Println(vm.stack.inspect())
+}
+
+func (vm *VM) printDebugInfo(i *instruction) {
+	fmt.Println(i.inspect())
 }
 
 func (vm *VM) getBlock(name string, filename filename) (*instructionSet, bool) {
@@ -247,4 +291,11 @@ func (s *stack) inspect() string {
 
 func newError(format string, args ...interface{}) *Error {
 	return &Error{Message: fmt.Sprintf(format, args...)}
+}
+
+// TODO: Use this method to replace unnecessary panics
+func (vm *VM) returnError(msg string) {
+	err := &Error{Message: msg}
+	vm.stack.push(&Pointer{err})
+	panic(errorMessage(msg))
 }

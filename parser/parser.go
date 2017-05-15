@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/rooby-lang/rooby/ast"
-	"github.com/rooby-lang/rooby/lexer"
-	"github.com/rooby-lang/rooby/token"
+	"github.com/goby-lang/goby/ast"
+	"github.com/goby-lang/goby/lexer"
+	"github.com/goby-lang/goby/token"
 )
 
 // Parser represents lexical analyzer struct
@@ -19,6 +19,11 @@ type Parser struct {
 
 	prefixParseFns map[token.Type]prefixParseFn
 	infixParseFns  map[token.Type]infixParseFn
+
+	// Determine if call expression should accept block argument,
+	// currently only used when parsing while statement.
+	// However, this is not a very good practice should change it in the future.
+	acceptBlock bool
 }
 
 // BuildAST tokenizes and parses given file to build AST
@@ -35,8 +40,9 @@ func BuildAST(file []byte) *ast.Program {
 // New initializes a parser and returns it
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
-		l:      l,
-		errors: []string{},
+		l:           l,
+		errors:      []string{},
+		acceptBlock: true,
 	}
 
 	// Read two tokens, so curToken and peekToken are both set.

@@ -56,36 +56,33 @@ const (
 	Eq    = "=="
 	NotEq = "!="
 
-	Class           = "CLASS"
-	True            = "TRUE"
-	False           = "FALSE"
-	Null            = "Null"
-	If              = "IF"
-	Else            = "ELSE"
-	Return          = "RETURN"
-	Def             = "DEF"
-	Self            = "SELF"
-	End             = "END"
-	While           = "WHILE"
-	Do              = "DO"
-	Yield           = "YIELD"
-	RequireRelative = "REQUIRE_RELATIVE"
+	True   = "TRUE"
+	False  = "FALSE"
+	Null   = "Null"
+	If     = "IF"
+	Else   = "ELSE"
+	Return = "RETURN"
+	Def    = "DEF"
+	Self   = "SELF"
+	End    = "END"
+	While  = "WHILE"
+	Do     = "DO"
+	Yield  = "YIELD"
 )
 
 var keywords = map[string]Type{
-	"def":              Def,
-	"true":             True,
-	"false":            False,
-	"nil":              Null,
-	"if":               If,
-	"else":             Else,
-	"return":           Return,
-	"self":             Self,
-	"end":              End,
-	"while":            While,
-	"do":               Do,
-	"yield":            Yield,
-	"require_relative": RequireRelative,
+	"def":    Def,
+	"true":   True,
+	"false":  False,
+	"nil":    Null,
+	"if":     If,
+	"else":   Else,
+	"return": Return,
+	"self":   Self,
+	"end":    End,
+	"while":  While,
+	"do":     Do,
+	"yield":  Yield,
 }
 
 // LookupIdent is used for keyword identification

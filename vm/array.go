@@ -84,7 +84,7 @@ func init() {
 		methods.set(m.Name, m)
 	}
 
-	bc := &BaseClass{Name: "Array", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, SuperClass: objectClass}
+	bc := &BaseClass{Name: "Array", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
 	ac := &RArray{BaseClass: bc}
 	arrayClass = ac
 }
@@ -94,7 +94,7 @@ var builtinArrayMethods = []*BuiltInMethod{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				if len(args) != 1 {
-					return newError("Expect 1 arguments. got=%d", len(args))
+					return &Error{Message: "Expect 1 arguments. got=%d" + string(len(args))}
 				}
 
 				i := args[0]
@@ -106,12 +106,8 @@ var builtinArrayMethods = []*BuiltInMethod{
 
 				arr := receiver.(*ArrayObject)
 
-				if len(arr.Elements) == 0 {
-					return NULL
-				}
-
 				if int(index.Value) >= len(arr.Elements) {
-					return newError("Index out of range")
+					return NULL
 				}
 
 				return arr.Elements[index.Value]

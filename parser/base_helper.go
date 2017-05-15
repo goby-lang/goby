@@ -2,7 +2,7 @@ package parser
 
 import (
 	"fmt"
-	"github.com/rooby-lang/rooby/token"
+	"github.com/goby-lang/goby/token"
 )
 
 func (p *Parser) peekPrecedence() int {

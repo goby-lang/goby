@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-// Method represents methods defined using rooby.
+// Method represents methods defined using goby.
 type Method struct {
 	Name           string
 	instructionSet *instructionSet

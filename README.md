@@ -1,25 +1,24 @@
-# rooby
+# goby (rooby)
 
 [![Join the chat at https://gitter.im/rooby-lang/Lobby](https://badges.gitter.im/rooby-lang/Lobby.svg)](https://gitter.im/rooby-lang/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![Build Status](https://travis-ci.org/rooby-lang/rooby.svg?branch=master)](https://travis-ci.org/rooby-lang/rooby)
-[![Code Climate](https://codeclimate.com/github/rooby-lang/rooby/badges/gpa.svg)](https://codeclimate.com/github/rooby-lang/rooby)
-[![GoDoc](https://godoc.org/github.com/rooby-lang/rooby?status.svg)](https://godoc.org/github.com/rooby-lang/rooby)
-[![Go Report Card](https://goreportcard.com/badge/github.com/rooby-lang/rooby)](https://goreportcard.com/report/github.com/rooby-lang/rooby)
-[![codecov](https://codecov.io/gh/rooby-lang/rooby/branch/master/graph/badge.svg)](https://codecov.io/gh/rooby-lang/rooby)
-[![Readme Score](http://readme-score-api.herokuapp.com/score.svg?url=rooby-lang/rooby)](http://clayallsopp.github.io/readme-score?url=rooby-lang/rooby)
+[![Build Status](https://travis-ci.org/goby-lang/goby.svg?branch=master)](https://travis-ci.org/goby-lang/goby)
+[![Code Climate](https://codeclimate.com/github/goby-lang/goby/badges/gpa.svg)](https://codeclimate.com/github/goby-lang/goby)
+[![GoDoc](https://godoc.org/github.com/goby-lang/goby?status.svg)](https://godoc.org/github.com/goby-lang/goby)
+[![Go Report Card](https://goreportcard.com/badge/github.com/goby-lang/goby)](https://goreportcard.com/report/github.com/goby-lang/goby)
+[![codecov](https://codecov.io/gh/goby-lang/goby/branch/master/graph/badge.svg)](https://codecov.io/gh/goby-lang/goby)
+[![BCH compliance](https://bettercodehub.com/edge/badge/goby-lang/goby?branch=master)](https://bettercodehub.com/)
+[![Readme Score](http://readme-score-api.herokuapp.com/score.svg?url=goby-lang/goby)](http://clayallsopp.github.io/readme-score?url=goby-lang/goby)
 
-rooby is a Ruby-like object oriented language written in Go. You can think it as a simplified, compilable Ruby for now.
-   
-**We're looking for contributors now, join us and make this project better!**
+Goby is a Ruby-like object oriented language written in Go. And it's **not** a new Ruby implementation. Instead, it should be a language that help developer create api server or microservice efficiently.
 
-## Goal
+It will have Ruby's syntax (I'll try to support all common syntaxes) but without most of Ruby's meta-programming magic to make the VM simple. It will also have built in http library that is built upon Go's efficient http package. And I'm planning to do more optimization by using goroutine directly.
 
-I want to build a language that focuses on developing microservices. Which should be performant and easy to write. This is why rooby has Ruby's user friendly syntax and is written in Go.
+**Supporting Goby by sending your first PR!**
 
 ## Questions
 
-A lot people have questions about `rooby` since it's a new language and you may get confused by the way I describe it (sorry for that 😢). Here's a list of [frequently asked questions](https://github.com/rooby-lang/rooby/wiki/Frequently-asked-questions).
+A lot people have questions about `goby` since it's a new language and you may get confused by the way I describe it (sorry for that 😢). Here's a list of [frequently asked questions](https://github.com/goby-lang/goby/wiki/Frequently-asked-questions).
 
 ## Supported features
 - **Can be compiled into bytecode (with `.robc` extension)**
@@ -51,17 +50,52 @@ A lot people have questions about `rooby` since it's a new language and you may 
     - Array
 - Flow control
     - If statement
-    - Haven't support `for` or `while` yet
+    - while statement
 - Import other files
     - require_relative
 - IO
-    - Just `puts` for now
+    - `puts`
+    - `ARGV`
     
-**(You can open an issue for any feature request)** 
-    
+**(You can open an issue for any feature request)**
+
+## Something different from Ruby
+
+#### Method call syntax
+For now, all method call needs to use parentheses to wrap their arguments. Including methods like `require`, `include` which we normally won't do this.
+
+It'll look like:
+
+```ruby
+require("foo")
+
+class Bar
+  include(Foo)
+end
+```
+
+There's two reason for this:
+
+##### I want to make Goby's syntax more consistent than Ruby
+In Ruby you can write most of things in many different ways, and that can cause some confusion so we need style guide(s) to tell programmers write code consistently.
+
+But in some programming languages like go, the syntax is very limited which in sometimes is very verbose, but this also makes program more easy to understand and maintain.
+
+##### This requires a parser generator
+
+Since our parser is handcrafted, supporting this feature would be hard and can easily cause bugs on some edge cases.
+
+Although we definitely will replace current parser with a parser generator, this is not our top priority now.
+
+
+**If you have any thought on this, please join our discussion in [this issue](https://github.com/goby-lang/goby/issues/84). We would love to hear some user's feedback 😁**
+
+
 ## TODO & WIP
 
-See [github projects](https://github.com/rooby-lang/rooby/projects)
+Checkout this [issue](https://github.com/goby-lang/goby/issues/72) for what we will work on before first release.
+
+Also see [huboard](https://huboard.com/goby-lang/goby)
 
 ## Install
 
@@ -71,23 +105,24 @@ See [github projects](https://github.com/rooby-lang/rooby/projects)
 4. Run following command 
 
 ```
-$ go get github.com/rooby-lang/rooby
+$ go get github.com/goby-lang/goby
 ```
 
 ## Usage
 
-**Execute rooby file using VM**
+**Execute goby file using VM**
 
 (might see errors on sample-6 since vm hasn't support block yet)
+
 ``` 
-$ rooby ./samples/sample-1.ro
+$ goby ./samples/sample-1.ro
 #=> 16
 ```
 
-**Compile rooby code**
+**Compile goby code**
 
 ```
-$ rooby -c ./samples/sample-1.ro
+$ goby -c ./samples/sample-1.ro
 ```
 
 You'll see `sample-1.robc` in `./samples`
@@ -95,31 +130,45 @@ You'll see `sample-1.robc` in `./samples`
 **Execute bytecode**
 
 ```
-$ rooby ./samples/sample-1.robc
+$ goby ./samples/sample-1.robc
 ```
-
 
 ## Try it!
+
 (See sample directory)
+
 ```
-$ rooby ./samples/sample-1.ro
-$ rooby ./samples/sample-2.ro
-$ rooby ./samples/sample-3.ro
-$ rooby ./samples/sample-4.ro
-$ rooby .....
+$ goby ./samples/sample-1.ro
+$ goby ./samples/sample-2.ro
+$ goby ./samples/sample-3.ro
+$ goby ./samples/sample-4.ro
+$ goby .....
 ```
+
+## API Documentation
+
+Check out our [API Documentation](https://goby-lang.github.io/api.doc/).
+
+There is still a lot of document to add. Feel free to contribute following [this guide](https://github.com/goby-lang/api.doc#documenting-goby-code).
+
 ## Development & Contribute
 
-See the [guideline](https://github.com/rooby-lang/rooby/blob/master/CONTRIBUTING.md)
+See the [guideline](https://github.com/goby-lang/goby/blob/master/CONTRIBUTING.md).
 
 ## References
 
-I can't build this project without these resources, and I highly recommend you to check them out if you're interested in building your own languages
+I can't build this project without these resources, and I highly recommend you to check them out if you're interested in building your own languages:
 
 - [Write An Interpreter In Go](https://interpreterbook.com)
 - [Nand2Tetris II](https://www.coursera.org/learn/nand2tetris2/home/welcome)
 - [Ruby under a microscope](http://patshaughnessy.net/ruby-under-a-microscope)
 - [YARV's instruction table](http://www.atdot.net/yarv/insnstbl.html)
+
+## Maintainers
+
+- @st0012
+- @janczer
+- @adlerhsieh
 
 ##  Sample snippet.
 
@@ -153,7 +202,7 @@ puts(User.sum_age(stan, john)) #=> 62
 stan.say_hi(john) #=> Stan says hi to John
 ```
 
-#### Build a stack using rooby
+#### Build a stack using goby
 
 ```ruby
 class Stack

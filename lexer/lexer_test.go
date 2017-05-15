@@ -1,7 +1,7 @@
 package lexer
 
 import (
-	"github.com/rooby-lang/rooby/token"
+	"github.com/goby-lang/goby/token"
 	"testing"
 )
 
@@ -71,6 +71,13 @@ func TestNextToken(t *testing.T) {
 	false || true;
 
 	nil
+
+	module Foo
+	end
+
+	foo.module
+
+	require "foo"
 	`
 
 	tests := []struct {
@@ -236,7 +243,7 @@ func TestNextToken(t *testing.T) {
 		{token.Incr, "++", 50},
 		{token.End, "end", 51},
 
-		{token.RequireRelative, "require_relative", 53},
+		{token.Ident, "require_relative", 53},
 		{token.String, "foo", 53},
 
 		{token.Int, "10", 55},
@@ -272,7 +279,18 @@ func TestNextToken(t *testing.T) {
 		{token.Semicolon, ";", 62},
 
 		{token.Null, "nil", 64},
-		{token.EOF, "", 65},
+
+		{token.Ident, "module", 66},
+		{token.Constant, "Foo", 66},
+		{token.End, "end", 67},
+
+		{token.Ident, "foo", 69},
+		{token.Dot, ".", 69},
+		{token.Ident, "module", 69},
+
+		{token.Ident, "require", 71},
+		{token.String, "foo", 71},
+		{token.EOF, "", 72},
 	}
 
 	l := New(input)

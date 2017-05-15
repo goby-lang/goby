@@ -13,12 +13,12 @@ var (
 	FALSE *BooleanObject
 )
 
-// RBool is the built in class of rooby's boolean objects.
+// RBool is the built in class of goby's boolean objects.
 type RBool struct {
 	*BaseClass
 }
 
-// BooleanObject represents boolean object in rooby
+// BooleanObject represents boolean object in goby
 type BooleanObject struct {
 	Class *RBool
 	Value bool
@@ -168,7 +168,7 @@ func initBool() {
 		methods.set(m.Name, m)
 	}
 
-	bc := &BaseClass{Name: "Boolean", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, SuperClass: objectClass}
+	bc := &BaseClass{Name: "Boolean", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
 	b := &RBool{BaseClass: bc}
 	booleanClass = b
 

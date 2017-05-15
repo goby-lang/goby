@@ -3,7 +3,7 @@ package ast
 import (
 	"bytes"
 	"fmt"
-	"github.com/rooby-lang/rooby/token"
+	"github.com/goby-lang/goby/token"
 	"strings"
 )
 
@@ -68,20 +68,6 @@ func (as *AssignStatement) String() string {
 	return out.String()
 }
 
-// RequireRelativeStatement is used to represent 'require_relative' and contains the required file's relative path
-type RequireRelativeStatement struct {
-	Token    token.Token
-	Filepath string
-}
-
-func (rrs *RequireRelativeStatement) statementNode() {}
-func (rrs *RequireRelativeStatement) TokenLiteral() string {
-	return rrs.Token.Literal
-}
-func (rrs *RequireRelativeStatement) String() string {
-	return fmt.Sprintf("require_relative \"%s\"", rrs.Filepath)
-}
-
 type DefStatement struct {
 	Token          token.Token
 	Name           *Identifier
@@ -134,6 +120,32 @@ func (cs *ClassStatement) String() string {
 	out.WriteString(cs.Name.TokenLiteral())
 	out.WriteString(" {\n")
 	out.WriteString(cs.Body.String())
+	out.WriteString("\n}")
+
+	return out.String()
+}
+
+// ModuleStatement represents module node in AST
+type ModuleStatement struct {
+	Token      token.Token
+	Name       *Constant
+	Body       *BlockStatement
+	SuperClass *Constant
+}
+
+func (ms *ModuleStatement) statementNode() {}
+
+// TokenLiteral returns token's literal
+func (ms *ModuleStatement) TokenLiteral() string {
+	return ms.Token.Literal
+}
+func (ms *ModuleStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("module ")
+	out.WriteString(ms.Name.TokenLiteral())
+	out.WriteString(" {\n")
+	out.WriteString(ms.Body.String())
 	out.WriteString("\n}")
 
 	return out.String()
