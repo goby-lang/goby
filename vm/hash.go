@@ -54,6 +54,7 @@ func initializeHash(pairs map[string]Object) *HashObject {
 
 var builtinHashMethods = []*BuiltInMethod{
 	{
+		Name: "[]",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -84,9 +85,9 @@ var builtinHashMethods = []*BuiltInMethod{
 
 			}
 		},
-		Name: "[]",
 	},
 	{
+		Name: "[]=",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -109,9 +110,9 @@ var builtinHashMethods = []*BuiltInMethod{
 				return args[1]
 			}
 		},
-		Name: "[]=",
 	},
 	{
+		Name: "length",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
@@ -123,7 +124,6 @@ var builtinHashMethods = []*BuiltInMethod{
 				return initilaizeInteger(hash.Length())
 			}
 		},
-		Name: "length",
 	},
 }
 

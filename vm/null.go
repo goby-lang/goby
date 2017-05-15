@@ -40,12 +40,12 @@ func initNull() {
 
 var builtInNullMethods = []*BuiltInMethod{
 	{
+		Name: "!",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
 				return TRUE
 			}
 		},
-		Name: "!",
 	},
 }
