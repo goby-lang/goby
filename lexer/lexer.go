@@ -115,7 +115,12 @@ func (l *Lexer) NextToken() token.Token {
 	case '.':
 		tok = newToken(token.Dot, l.ch, l.line)
 	case ':':
-		tok = newToken(token.Colon, l.ch, l.line)
+		if l.peekChar() == ':' {
+			l.readChar()
+			tok = token.Token{Type: token.ResolutionOperator, Literal: "::", Line: l.line}
+		} else {
+			tok = newToken(token.Colon, l.ch, l.line)
+		}
 	case '|':
 		if l.peekChar() == '|' {
 			l.readChar()

@@ -78,6 +78,8 @@ func TestNextToken(t *testing.T) {
 	foo.module
 
 	require "foo"
+
+	Foo::Bar
 	`
 
 	tests := []struct {
@@ -290,7 +292,11 @@ func TestNextToken(t *testing.T) {
 
 		{token.Ident, "require", 71},
 		{token.String, "foo", 71},
-		{token.EOF, "", 72},
+
+		{token.Constant, "Foo", 73},
+		{token.ResolutionOperator, "::", 73},
+		{token.Constant, "Bar", 73},
+		{token.EOF, "", 74},
 	}
 
 	l := New(input)
