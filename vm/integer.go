@@ -45,15 +45,27 @@ func initilaizeInteger(value int) *IntegerObject {
 	return &IntegerObject{Value: value, Class: integerClass}
 }
 
+func initInteger() {
+	methods := newEnvironment()
+
+	for _, m := range builtinIntegerMethods {
+		methods.set(m.Name, m)
+	}
+
+	bc := &BaseClass{Name: "Integer", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
+	ic := &RInteger{BaseClass: bc}
+	integerClass = ic
+}
+
 var builtinIntegerMethods = []*BuiltInMethod{
 	{
 		// Returns the sum of self and another Integer.
 		Name: "+",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
-				right, ok := args[0].(*IntegerObject)
+				right, ok := ma.args[0].(*IntegerObject)
 
 				if !ok {
 					return wrongTypeError(integerClass)
@@ -68,10 +80,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		// Returns the subtraction of another Integer from self.
 		Name: "-",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
-				right, ok := args[0].(*IntegerObject)
+				right, ok := ma.args[0].(*IntegerObject)
 
 				if !ok {
 					return wrongTypeError(integerClass)
@@ -86,10 +98,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		// Returns self multiplying another Integer.
 		Name: "*",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
-				right, ok := args[0].(*IntegerObject)
+				right, ok := ma.args[0].(*IntegerObject)
 
 				if !ok {
 					return wrongTypeError(integerClass)
@@ -104,10 +116,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		// Returns self squaring another Integer.
 		Name: "**",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
-				right, ok := args[0].(*IntegerObject)
+				right, ok := ma.args[0].(*IntegerObject)
 
 				if !ok {
 					return wrongTypeError(integerClass)
@@ -123,10 +135,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		// Returns self divided by another Integer.
 		Name: "/",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
-				right, ok := args[0].(*IntegerObject)
+				right, ok := ma.args[0].(*IntegerObject)
 
 				if !ok {
 					return wrongTypeError(integerClass)
@@ -141,10 +153,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		// Returns if self is larger than another Integer.
 		Name: ">",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
-				right, ok := args[0].(*IntegerObject)
+				right, ok := ma.args[0].(*IntegerObject)
 
 				if !ok {
 					return wrongTypeError(integerClass)
@@ -164,10 +176,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		// Returns if self is larger than or equals to another Integer.
 		Name: ">=",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
-				right, ok := args[0].(*IntegerObject)
+				right, ok := ma.args[0].(*IntegerObject)
 
 				if !ok {
 					return wrongTypeError(integerClass)
@@ -187,10 +199,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		// Returns if self is smaller than another Integer.
 		Name: "<",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
-				right, ok := args[0].(*IntegerObject)
+				right, ok := ma.args[0].(*IntegerObject)
 
 				if !ok {
 					return wrongTypeError(integerClass)
@@ -210,10 +222,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		// Returns if self is smaller than or equals to another Integer.
 		Name: "<=",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
-				right, ok := args[0].(*IntegerObject)
+				right, ok := ma.args[0].(*IntegerObject)
 
 				if !ok {
 					return wrongTypeError(integerClass)
@@ -233,10 +245,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		// Returns 1 if self is larger than the incoming Integer, -1 if smaller. Otherwise 0.
 		Name: "<=>",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
-				right, ok := args[0].(*IntegerObject)
+				right, ok := ma.args[0].(*IntegerObject)
 
 				if !ok {
 					return wrongTypeError(integerClass)
@@ -259,10 +271,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		// Returns if self is equal to another Integer.
 		Name: "==",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
-				right, ok := args[0].(*IntegerObject)
+				right, ok := ma.args[0].(*IntegerObject)
 
 				if !ok {
 					return wrongTypeError(integerClass)
@@ -282,10 +294,10 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		// Returns if self is not equal to another Integer.
 		Name: "!=",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
-				right, ok := args[0].(*IntegerObject)
+				right, ok := ma.args[0].(*IntegerObject)
 
 				if !ok {
 					return wrongTypeError(integerClass)
@@ -305,7 +317,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		// Adds 1 to self and returns.
 		Name: "++",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				int := receiver.(*IntegerObject)
 				int.Value++
@@ -317,7 +329,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		// Substracts 1 from self and returns.
 		Name: "--",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				int := receiver.(*IntegerObject)
 				int.Value--
@@ -329,7 +341,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		// Returns a `String` representation of self.
 		Name: "to_s",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				int := receiver.(*IntegerObject)
 
@@ -341,7 +353,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		// Returns self.
 		Name: "to_i",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 				return receiver
 			}
 		},
@@ -350,7 +362,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		// Returns if self is even.
 		Name: "even",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				i := receiver.(*IntegerObject)
 				even := i.Value%2 == 0
@@ -372,7 +384,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		// ```
 		Name: "odd",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				i := receiver.(*IntegerObject)
 				odd := i.Value%2 != 0
@@ -388,7 +400,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		// Returns self + 1.
 		Name: "next",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 				i := receiver.(*IntegerObject)
 				return initilaizeInteger(i.Value + 1)
 			}
@@ -398,7 +410,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		// Returns self - 1.
 		Name: "pred",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 				i := receiver.(*IntegerObject)
 				return initilaizeInteger(i.Value - 1)
 			}
@@ -408,35 +420,23 @@ var builtinIntegerMethods = []*BuiltInMethod{
 		// Yields a block a number of times equals to self.
 		Name: "times",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 				n := receiver.(*IntegerObject)
 
 				if n.Value < 0 {
 					return newError("Expect paramentr to be greater 0. got=%d", n.Value)
 				}
 
-				if blockFrame == nil {
+				if ma.blockFrame == nil {
 					return newError("Can't yield without a block")
 				}
 
 				for i := 0; i < n.Value; i++ {
-					builtInMethodYield(vm, blockFrame, initilaizeInteger(i))
+					builtInMethodYield(ma.vm, ma.blockFrame, initilaizeInteger(i))
 				}
 
 				return n
 			}
 		},
 	},
-}
-
-func initInteger() {
-	methods := newEnvironment()
-
-	for _, m := range builtinIntegerMethods {
-		methods.set(m.Name, m)
-	}
-
-	bc := &BaseClass{Name: "Integer", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
-	ic := &RInteger{BaseClass: bc}
-	integerClass = ic
 }

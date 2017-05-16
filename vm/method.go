@@ -13,6 +13,12 @@ type Method struct {
 	scope          *scope
 }
 
+type methodArgs struct {
+	vm         *VM
+	args       []Object
+	blockFrame *callFrame
+}
+
 func (m *Method) objectType() objectType {
 	return methodObj
 }
@@ -26,7 +32,7 @@ func (m *Method) Inspect() string {
 	return out.String()
 }
 
-type builtinMethodBody func(*VM, []Object, *callFrame) Object
+type builtinMethodBody func(methodArgs) Object
 
 // BuiltInMethod represents methods defined in go.
 type BuiltInMethod struct {

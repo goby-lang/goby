@@ -3,8 +3,9 @@ package vm
 import (
 	"bytes"
 	"fmt"
-	"github.com/goby-lang/goby/bytecode"
 	"strings"
+
+	"github.com/goby-lang/goby/bytecode"
 )
 
 type operation func(vm *VM, cf *callFrame, args ...interface{})
@@ -413,7 +414,8 @@ func evalBuiltInMethod(vm *VM, receiver BaseObject, method *BuiltInMethod, recei
 		args = append(args, vm.stack.Data[argPr+i].Target)
 	}
 
-	evaluated := methodBody(vm, args, blockFrame)
+	ma := methodArgs{vm, args, blockFrame}
+	evaluated := methodBody(ma)
 
 	_, ok := receiver.(*RClass)
 	if method.Name == "new" && ok {

@@ -58,14 +58,26 @@ func initializeString(value string) *StringObject {
 	return addr
 }
 
+func initString() {
+	methods := newEnvironment()
+
+	for _, m := range builtinStringMethods {
+		methods.set(m.Name, m)
+	}
+
+	bc := &BaseClass{Name: "String", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
+	sc := &RString{BaseClass: bc}
+	stringClass = sc
+}
+
 var builtinStringMethods = []*BuiltInMethod{
 	{
 		Name: "+",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				leftValue := receiver.(*StringObject).Value
-				right, ok := args[0].(*StringObject)
+				right, ok := ma.args[0].(*StringObject)
 
 				if !ok {
 					return wrongTypeError(stringClass)
@@ -79,10 +91,10 @@ var builtinStringMethods = []*BuiltInMethod{
 	{
 		Name: "*",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				leftValue := receiver.(*StringObject).Value
-				right, ok := args[0].(*IntegerObject)
+				right, ok := ma.args[0].(*IntegerObject)
 
 				if !ok {
 					return wrongTypeError(stringClass)
@@ -105,10 +117,10 @@ var builtinStringMethods = []*BuiltInMethod{
 	{
 		Name: ">",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				leftValue := receiver.(*StringObject).Value
-				right, ok := args[0].(*StringObject)
+				right, ok := ma.args[0].(*StringObject)
 
 				if !ok {
 					return wrongTypeError(stringClass)
@@ -127,10 +139,10 @@ var builtinStringMethods = []*BuiltInMethod{
 	{
 		Name: "<",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				leftValue := receiver.(*StringObject).Value
-				right, ok := args[0].(*StringObject)
+				right, ok := ma.args[0].(*StringObject)
 
 				if !ok {
 					return wrongTypeError(stringClass)
@@ -149,10 +161,10 @@ var builtinStringMethods = []*BuiltInMethod{
 	{
 		Name: "==",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				leftValue := receiver.(*StringObject).Value
-				right, ok := args[0].(*StringObject)
+				right, ok := ma.args[0].(*StringObject)
 
 				if !ok {
 					return wrongTypeError(stringClass)
@@ -171,10 +183,10 @@ var builtinStringMethods = []*BuiltInMethod{
 	{
 		Name: "<=>",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				leftValue := receiver.(*StringObject).Value
-				right, ok := args[0].(*StringObject)
+				right, ok := ma.args[0].(*StringObject)
 
 				if !ok {
 					return wrongTypeError(stringClass)
@@ -196,10 +208,10 @@ var builtinStringMethods = []*BuiltInMethod{
 	{
 		Name: "!=",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				leftValue := receiver.(*StringObject).Value
-				right, ok := args[0].(*StringObject)
+				right, ok := ma.args[0].(*StringObject)
 
 				if !ok {
 					return wrongTypeError(stringClass)
@@ -218,7 +230,7 @@ var builtinStringMethods = []*BuiltInMethod{
 	{
 		Name: "capitalize",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				str := []byte(receiver.(*StringObject).Value)
 				start := string(str[0])
@@ -232,7 +244,7 @@ var builtinStringMethods = []*BuiltInMethod{
 	{
 		Name: "upcase",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				str := receiver.(*StringObject).Value
 
@@ -243,7 +255,7 @@ var builtinStringMethods = []*BuiltInMethod{
 	{
 		Name: "downcase",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				str := receiver.(*StringObject).Value
 
@@ -254,7 +266,7 @@ var builtinStringMethods = []*BuiltInMethod{
 	{
 		Name: "size",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				str := receiver.(*StringObject).Value
 
@@ -265,7 +277,7 @@ var builtinStringMethods = []*BuiltInMethod{
 	{
 		Name: "length",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				str := receiver.(*StringObject).Value
 
@@ -276,7 +288,7 @@ var builtinStringMethods = []*BuiltInMethod{
 	{
 		Name: "reverse",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				str := receiver.(*StringObject).Value
 				var revert string
@@ -291,7 +303,7 @@ var builtinStringMethods = []*BuiltInMethod{
 	{
 		Name: "to_s",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				str := receiver.(*StringObject).Value
 
@@ -302,7 +314,7 @@ var builtinStringMethods = []*BuiltInMethod{
 	{
 		Name: "to_i",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				str := receiver.(*StringObject).Value
 				parsedStr, err := strconv.ParseInt(str, 10, 0)
@@ -329,16 +341,4 @@ var builtinStringMethods = []*BuiltInMethod{
 			}
 		},
 	},
-}
-
-func initString() {
-	methods := newEnvironment()
-
-	for _, m := range builtinStringMethods {
-		methods.set(m.Name, m)
-	}
-
-	bc := &BaseClass{Name: "String", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
-	sc := &RString{BaseClass: bc}
-	stringClass = sc
 }
