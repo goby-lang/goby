@@ -29,7 +29,7 @@ func (b *BooleanObject) objectType() objectType {
 	return booleanObj
 }
 
-// inspect returns boolean object's value, which is either true or false.
+// Inspect returns boolean object's value, which is either true or false.
 func (b *BooleanObject) Inspect() string {
 	return fmt.Sprintf("%t", b.Value)
 }
@@ -43,31 +43,35 @@ func (b *BooleanObject) equal(e *BooleanObject) bool {
 	return b.Value == e.Value
 }
 
+func initBool() {
+	methods := newEnvironment()
+
+	for _, m := range builtinBooleanMethods {
+		methods.set(m.Name, m)
+	}
+
+	bc := &BaseClass{Name: "Boolean", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
+	b := &RBool{BaseClass: bc}
+	booleanClass = b
+
+	TRUE = &BooleanObject{Value: true, Class: booleanClass}
+	FALSE = &BooleanObject{Value: false, Class: booleanClass}
+}
+
 var builtinBooleanMethods = []*BuiltInMethod{
 	{
 		Name: "==",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
-				err := checkArgumentLen(args, booleanClass, "==")
-
+				err := checkArgumentLen(ma.args, booleanClass, "==")
 				if err != nil {
 					return err
 				}
 
-				leftValue := receiver.(*BooleanObject).Value
-				right, ok := args[0].(*BooleanObject)
-
-				if !ok {
-					return wrongTypeError(booleanClass)
-				}
-
-				rightValue := right.Value
-
-				if leftValue == rightValue {
+				if receiver == ma.args[0] {
 					return TRUE
 				}
-
 				return FALSE
 			}
 		},
@@ -75,27 +79,16 @@ var builtinBooleanMethods = []*BuiltInMethod{
 	{
 		Name: "!=",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
-				err := checkArgumentLen(args, booleanClass, "!=")
-
+				err := checkArgumentLen(ma.args, booleanClass, "!=")
 				if err != nil {
 					return err
 				}
 
-				leftValue := receiver.(*BooleanObject).Value
-				right, ok := args[0].(*BooleanObject)
-
-				if !ok {
-					return wrongTypeError(booleanClass)
-				}
-
-				rightValue := right.Value
-
-				if leftValue != rightValue {
+				if receiver != ma.args[0] {
 					return TRUE
 				}
-
 				return FALSE
 			}
 		},
@@ -103,7 +96,7 @@ var builtinBooleanMethods = []*BuiltInMethod{
 	{
 		Name: "!",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				rightValue := receiver.(*BooleanObject).Value
 
@@ -118,10 +111,10 @@ var builtinBooleanMethods = []*BuiltInMethod{
 	{
 		Name: "&&",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				leftValue := receiver.(*BooleanObject).Value
-				right, ok := args[0].(*BooleanObject)
+				right, ok := ma.args[0].(*BooleanObject)
 
 				if !ok {
 					return wrongTypeError(booleanClass)
@@ -140,10 +133,10 @@ var builtinBooleanMethods = []*BuiltInMethod{
 	{
 		Name: "||",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				leftValue := receiver.(*BooleanObject).Value
-				right, ok := args[0].(*BooleanObject)
+				right, ok := ma.args[0].(*BooleanObject)
 
 				if !ok {
 					return wrongTypeError(booleanClass)
@@ -159,19 +152,4 @@ var builtinBooleanMethods = []*BuiltInMethod{
 			}
 		},
 	},
-}
-
-func initBool() {
-	methods := newEnvironment()
-
-	for _, m := range builtinBooleanMethods {
-		methods.set(m.Name, m)
-	}
-
-	bc := &BaseClass{Name: "Boolean", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
-	b := &RBool{BaseClass: bc}
-	booleanClass = b
-
-	TRUE = &BooleanObject{Value: true, Class: booleanClass}
-	FALSE = &BooleanObject{Value: false, Class: booleanClass}
 }
