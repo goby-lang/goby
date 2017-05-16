@@ -29,7 +29,7 @@ func (b *BooleanObject) objectType() objectType {
 	return booleanObj
 }
 
-// inspect returns boolean object's value, which is either true or false.
+// Inspect returns boolean object's value, which is either true or false.
 func (b *BooleanObject) Inspect() string {
 	return fmt.Sprintf("%t", b.Value)
 }
@@ -50,24 +50,13 @@ var builtinBooleanMethods = []*BuiltInMethod{
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
 				err := checkArgumentLen(args, booleanClass, "==")
-
 				if err != nil {
 					return err
 				}
 
-				leftValue := receiver.(*BooleanObject).Value
-				right, ok := args[0].(*BooleanObject)
-
-				if !ok {
-					return wrongTypeError(booleanClass)
-				}
-
-				rightValue := right.Value
-
-				if leftValue == rightValue {
+				if receiver == args[0] {
 					return TRUE
 				}
-
 				return FALSE
 			}
 		},
@@ -78,24 +67,13 @@ var builtinBooleanMethods = []*BuiltInMethod{
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
 				err := checkArgumentLen(args, booleanClass, "!=")
-
 				if err != nil {
 					return err
 				}
 
-				leftValue := receiver.(*BooleanObject).Value
-				right, ok := args[0].(*BooleanObject)
-
-				if !ok {
-					return wrongTypeError(booleanClass)
-				}
-
-				rightValue := right.Value
-
-				if leftValue != rightValue {
+				if receiver != args[0] {
 					return TRUE
 				}
-
 				return FALSE
 			}
 		},
