@@ -60,17 +60,27 @@ var builtInActions = map[operationType]*action{
 			constName := args[0].(string)
 			top := vm.stack.top()
 
-			if top == nil {
+			if top == nil || top.Target.objectType() != classObj {
 				hasNamespace = false
 			} else {
 				namespace, hasNamespace = top.Target.(Class)
-				fmt.Println(top.Target.Inspect())
-				fmt.Println(hasNamespace)
 			}
 
 			if hasNamespace {
-				constant, ok = namespace.getConstants()[constName]
-				vm.stack.pop()
+				if namespace != cf.self {
+					vm.stack.pop()
+				}
+				constant = namespace.lookupConstant(constName)
+
+				if constant == nil {
+					constant, ok = vm.constants[constName]
+				}
+			} else if scope, inClass := cf.self.(Class); inClass {
+				constant = scope.lookupConstant(constName)
+
+				if constant == nil {
+					constant, ok = vm.constants[constName]
+				}
 			} else {
 				constant, ok = vm.constants[constName]
 			}
@@ -139,6 +149,14 @@ var builtInActions = map[operationType]*action{
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			constName := args[0].(string)
 			v := vm.stack.pop()
+
+			c, ok := cf.self.(*BaseClass)
+
+			if ok {
+				c.constants[constName] = v
+				return
+			}
+
 			vm.constants[constName] = v
 		},
 	},
@@ -292,10 +310,11 @@ var builtInActions = map[operationType]*action{
 
 			classPr := &Pointer{Target: class}
 
-			namespace, inNamespace := cf.self.(Class)
+			namespace, inNamespace := cf.self.(*BaseClass)
 
 			if inNamespace {
-				namespace.getConstants()[class.Name] = classPr
+				namespace.constants[class.Name] = classPr
+				class.scope = namespace
 			} else {
 				vm.constants[class.Name] = classPr
 			}

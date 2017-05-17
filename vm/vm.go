@@ -182,6 +182,7 @@ func (vm *VM) execInstruction(cf *callFrame, i *instruction) {
 		}
 	}()
 
+	//fmt.Println(i.inspect())
 	i.action.operation(vm, cf, i.Params...)
 }
 
@@ -250,6 +251,10 @@ func (s *stack) pop() *Pointer {
 }
 
 func (s *stack) top() *Pointer {
+
+	if len(s.Data) == 0 {
+		return nil
+	}
 
 	if s.VM.sp > 0 {
 		return s.Data[s.VM.sp-1]

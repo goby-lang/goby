@@ -46,6 +46,70 @@ func TestNamespace(t *testing.T) {
 
 		Foo.new.bar + Foo::Bar.new.bar
 		`, 110},
+		{`
+		class Foo
+		  def bar
+		    100
+		  end
+		end
+
+		module Baz
+		  class Bar
+		    def bar
+		      Foo.new.bar
+		    end
+		  end
+		end
+
+		Baz::Bar.new.bar
+		`, 100},
+		{`
+		module Baz
+		  class Foo
+		    def bar
+		      100
+		    end
+		  end
+
+		  class Bar
+		    def bar
+		      Foo.new.bar
+		    end
+		  end
+		end
+
+		Baz::Bar.new.bar
+		`, 100},
+		{`
+		module Baz
+		  class Bar
+		    def bar
+		      Foo.new.bar
+		    end
+
+		    class Foo
+		      def bar
+			100
+		      end
+		    end
+		  end
+		end
+
+		Baz::Bar.new.bar
+		`, 100},
+		{`
+		module Baz
+		  class Bar
+		    class Foo
+		      def bar
+			100
+		      end
+		    end
+		  end
+		end
+
+		Baz::Bar::Foo.new.bar
+		`, 100},
 		//{`
 		//module Foo
 		//  class Bar
@@ -72,7 +136,7 @@ func TestNamespace(t *testing.T) {
 		evaluated := testEval(t, tt.input)
 
 		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+			t.Fatalf("got Error: %s.\n Input %s", evaluated.(*Error).Message, tt.input)
 		}
 
 		testIntegerObject(t, evaluated, tt.expected)
