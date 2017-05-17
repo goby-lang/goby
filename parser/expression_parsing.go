@@ -9,25 +9,26 @@ import (
 )
 
 var precedence = map[token.Type]int{
-	token.Eq:       EQUALS,
-	token.NotEq:    EQUALS,
-	token.LT:       LESSGREATER,
-	token.LTE:      LESSGREATER,
-	token.GT:       LESSGREATER,
-	token.GTE:      LESSGREATER,
-	token.COMP:     LESSGREATER,
-	token.And:      LOGIC,
-	token.Or:       LOGIC,
-	token.Plus:     SUM,
-	token.Minus:    SUM,
-	token.Incr:     SUM,
-	token.Decr:     SUM,
-	token.Slash:    PRODUCT,
-	token.Asterisk: PRODUCT,
-	token.Pow:      PRODUCT,
-	token.LBracket: INDEX,
-	token.Dot:      CALL,
-	token.LParen:   CALL,
+	token.Eq:                 EQUALS,
+	token.NotEq:              EQUALS,
+	token.LT:                 LESSGREATER,
+	token.LTE:                LESSGREATER,
+	token.GT:                 LESSGREATER,
+	token.GTE:                LESSGREATER,
+	token.COMP:               LESSGREATER,
+	token.And:                LOGIC,
+	token.Or:                 LOGIC,
+	token.Plus:               SUM,
+	token.Minus:              SUM,
+	token.Incr:               SUM,
+	token.Decr:               SUM,
+	token.Slash:              PRODUCT,
+	token.Asterisk:           PRODUCT,
+	token.Pow:                PRODUCT,
+	token.LBracket:           INDEX,
+	token.Dot:                CALL,
+	token.LParen:             CALL,
+	token.ResolutionOperator: CALL,
 }
 
 // Constants for denoting precedence
@@ -78,7 +79,14 @@ func (p *Parser) parseIdentifier() ast.Expression {
 }
 
 func (p *Parser) parseConstant() ast.Expression {
-	return &ast.Constant{Token: p.curToken, Value: p.curToken.Literal}
+	c := &ast.Constant{Token: p.curToken, Value: p.curToken.Literal}
+
+	if p.peekTokenIs(token.ResolutionOperator) {
+		p.nextToken()
+		return p.parseInfixExpression(c)
+	}
+
+	return c
 }
 
 func (p *Parser) parseInstanceVariable() ast.Expression {

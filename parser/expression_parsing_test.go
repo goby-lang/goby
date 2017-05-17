@@ -24,6 +24,44 @@ func TestNilExpression(t *testing.T) {
 	}
 }
 
+func TestNamespaceConstant(t *testing.T) {
+	input := `
+	Foo::Bar
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	exp := stmt.Expression.(*ast.InfixExpression)
+
+	if exp.Operator != "::" {
+		t.Fatalf("Expect infix operator to be resolution operator. got=%s", exp.Operator)
+	}
+
+	namespace, ok := exp.Left.(*ast.Constant)
+
+	if !ok {
+		t.Fatalf("Expect left side of resolution operator is a constant. got=%T", exp.Left)
+
+		if namespace.Value != "Foo" {
+			t.Fatalf("Expect namespace to be %s. got=%s", "Foo", namespace.Value)
+		}
+	}
+
+	constant, ok := exp.Right.(*ast.Constant)
+
+	if !ok {
+		t.Fatalf("Expect right side of resolution operator is a constant. got=%T", exp.Right)
+
+		if namespace.Value != "Bar" {
+			t.Fatalf("Expect namespace to be %s. got=%s", "Bar", constant.Value)
+		}
+	}
+}
+
 func TestHashExpression(t *testing.T) {
 	tests := []struct {
 		input            string
