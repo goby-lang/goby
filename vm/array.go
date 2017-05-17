@@ -79,7 +79,7 @@ func initializeArray(elements []Object) *ArrayObject {
 	return &ArrayObject{Elements: elements, Class: arrayClass}
 }
 
-func init() {
+func initArray() {
 	methods := newEnvironment()
 
 	for _, m := range builtinArrayMethods {
@@ -104,12 +104,12 @@ var builtinArrayMethods = []*BuiltInMethod{
 		// ```
 		Name: "[]",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-				if len(args) != 1 {
-					return &Error{Message: "Expect 1 arguments. got=%d" + string(len(args))}
+			return func(ma methodArgs) Object {
+				if len(ma.args) != 1 {
+					return &Error{Message: "Expect 1 arguments. got=%d" + string(len(ma.args))}
 				}
 
-				i := args[0]
+				i := ma.args[0]
 				index, ok := i.(*IntegerObject)
 
 				if !ok {
@@ -140,15 +140,15 @@ var builtinArrayMethods = []*BuiltInMethod{
 		// ```
 		Name: "[]=",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				// First arg is index
 				// Second arg is assigned value
-				if len(args) != 2 {
-					return newError("Expect 2 arguments. got=%d", len(args))
+				if len(ma.args) != 2 {
+					return newError("Expect 2 arguments. got=%d", len(ma.args))
 				}
 
-				i := args[0]
+				i := ma.args[0]
 				index, ok := i.(*IntegerObject)
 				indexValue := index.Value
 
@@ -168,7 +168,7 @@ var builtinArrayMethods = []*BuiltInMethod{
 					arr.Elements = newArr
 				}
 
-				arr.Elements[indexValue] = args[1]
+				arr.Elements[indexValue] = ma.args[1]
 
 				return arr.Elements[indexValue]
 			}
@@ -182,10 +182,10 @@ var builtinArrayMethods = []*BuiltInMethod{
 		// ```
 		Name: "length",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
-				if len(args) != 0 {
-					return newError("Expect 0 argument. got=%d", len(args))
+				if len(ma.args) != 0 {
+					return newError("Expect 0 argument. got=%d", len(ma.args))
 				}
 
 				arr := receiver.(*ArrayObject)
@@ -203,10 +203,10 @@ var builtinArrayMethods = []*BuiltInMethod{
 		// ```
 		Name: "pop",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
-				if len(args) != 0 {
-					return newError("Expect 0 argument. got=%d", len(args))
+				if len(ma.args) != 0 {
+					return newError("Expect 0 argument. got=%d", len(ma.args))
 				}
 
 				arr := receiver.(*ArrayObject)
@@ -223,10 +223,10 @@ var builtinArrayMethods = []*BuiltInMethod{
 		// ```
 		Name: "push",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				arr := receiver.(*ArrayObject)
-				return arr.push(args)
+				return arr.push(ma.args)
 			}
 		},
 	},
@@ -240,9 +240,9 @@ var builtinArrayMethods = []*BuiltInMethod{
 		// ```
 		Name: "shift",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-				if len(args) != 0 {
-					return newError("Expect 0 argument. got=%d", len(args))
+			return func(ma methodArgs) Object {
+				if len(ma.args) != 0 {
+					return newError("Expect 0 argument. got=%d", len(ma.args))
 				}
 
 				arr := receiver.(*ArrayObject)
@@ -265,15 +265,15 @@ var builtinArrayMethods = []*BuiltInMethod{
 		// ```
 		Name: "each",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 				arr := receiver.(*ArrayObject)
 
-				if blockFrame == nil {
+				if ma.blockFrame == nil {
 					panic("Can't yield without a block")
 				}
 
 				for _, obj := range arr.Elements {
-					builtInMethodYield(vm, blockFrame, obj)
+					builtInMethodYield(ma.vm, ma.blockFrame, obj)
 				}
 				return arr
 			}
@@ -282,15 +282,15 @@ var builtinArrayMethods = []*BuiltInMethod{
 	{
 		Name: "each_index",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 				arr := receiver.(*ArrayObject)
 
-				if blockFrame == nil {
+				if ma.blockFrame == nil {
 					panic("Can't yield without a block")
 				}
 
 				for i := range arr.Elements {
-					builtInMethodYield(vm, blockFrame, initilaizeInteger(i))
+					builtInMethodYield(ma.vm, ma.blockFrame, initilaizeInteger(i))
 				}
 				return arr
 			}
@@ -309,16 +309,16 @@ var builtinArrayMethods = []*BuiltInMethod{
 		// ```
 		Name: "map",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 				arr := receiver.(*ArrayObject)
 				var elements = make([]Object, len(arr.Elements))
 
-				if blockFrame == nil {
+				if ma.blockFrame == nil {
 					panic("Can't yield without a block")
 				}
 
 				for i, obj := range arr.Elements {
-					result := builtInMethodYield(vm, blockFrame, obj)
+					result := builtInMethodYield(ma.vm, ma.blockFrame, obj)
 					elements[i] = result.Target
 				}
 
@@ -340,16 +340,16 @@ var builtinArrayMethods = []*BuiltInMethod{
 		// ```
 		Name: "select",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 				arr := receiver.(*ArrayObject)
 				var elements []Object
 
-				if blockFrame == nil {
+				if ma.blockFrame == nil {
 					panic("Can't yield without a block")
 				}
 
 				for _, obj := range arr.Elements {
-					result := builtInMethodYield(vm, blockFrame, obj)
+					result := builtInMethodYield(ma.vm, ma.blockFrame, obj)
 					if result.Target.(*BooleanObject).Value {
 						elements = append(elements, obj)
 					}
@@ -370,8 +370,8 @@ var builtinArrayMethods = []*BuiltInMethod{
 		// ```
 		Name: "at",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-				i := args[0]
+			return func(ma methodArgs) Object {
+				i := ma.args[0]
 				index, ok := i.(*IntegerObject)
 
 				if !ok {
@@ -402,7 +402,7 @@ var builtinArrayMethods = []*BuiltInMethod{
 		// ```
 		Name: "clear",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 				arr := receiver.(*ArrayObject)
 				arr.Elements = []Object{}
 
@@ -420,10 +420,10 @@ var builtinArrayMethods = []*BuiltInMethod{
 		// ```
 		Name: "concat",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 				arr := receiver.(*ArrayObject)
 
-				for _, arg := range args {
+				for _, arg := range ma.args {
 					addAr, ok := arg.(*ArrayObject)
 
 					if !ok {
@@ -453,13 +453,13 @@ var builtinArrayMethods = []*BuiltInMethod{
 		// ```
 		Name: "count",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 				arr := receiver.(*ArrayObject)
 				var count int
 
-				if blockFrame != nil {
+				if ma.blockFrame != nil {
 					for _, obj := range arr.Elements {
-						result := builtInMethodYield(vm, blockFrame, obj)
+						result := builtInMethodYield(ma.vm, ma.blockFrame, obj)
 						if result.Target.(*BooleanObject).Value {
 							count++
 						}
@@ -468,15 +468,15 @@ var builtinArrayMethods = []*BuiltInMethod{
 					return initilaizeInteger(count)
 				}
 
-				if len(args) > 1 {
-					return newError("Expect one argument. got=%d", len(args))
+				if len(ma.args) > 1 {
+					return newError("Expect one argument. got=%d", len(ma.args))
 				}
 
-				if len(args) == 0 {
+				if len(ma.args) == 0 {
 					return initilaizeInteger(len(arr.Elements))
 				}
 
-				arg := args[0]
+				arg := ma.args[0]
 				findInt, findIsInt := arg.(*IntegerObject)
 				findString, findIsString := arg.(*StringObject)
 				findBoolean, findIsBoolean := arg.(*BooleanObject)
@@ -519,16 +519,16 @@ var builtinArrayMethods = []*BuiltInMethod{
 		// ```
 		Name: "rotate",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 				arr := receiver.(*ArrayObject)
 				rotArr := initializeArray(arr.Elements)
 
 				rotate := 1
 
-				if len(args) != 0 {
-					arg, ok := args[0].(*IntegerObject)
+				if len(ma.args) != 0 {
+					arg, ok := ma.args[0].(*IntegerObject)
 					if !ok {
-						return newError("Expect index argument to be Integer. got=%T", args[0])
+						return newError("Expect index argument to be Integer. got=%T", ma.args[0])
 					}
 					rotate = arg.Value
 				}
@@ -546,16 +546,16 @@ var builtinArrayMethods = []*BuiltInMethod{
 		// Returns the first element of the array.
 		Name: "first",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 				arr := receiver.(*ArrayObject)
 
-				if len(args) == 0 {
+				if len(ma.args) == 0 {
 					return arr.Elements[0]
 				}
 
-				arg, ok := args[0].(*IntegerObject)
+				arg, ok := ma.args[0].(*IntegerObject)
 				if !ok {
-					return newError("Expect index argument to be Integer. got=%T", args[0])
+					return newError("Expect index argument to be Integer. got=%T", ma.args[0])
 				}
 
 				return initializeArray(arr.Elements[:arg.Value])
@@ -566,16 +566,16 @@ var builtinArrayMethods = []*BuiltInMethod{
 		// Returns the last element of the array.
 		Name: "last",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 				arr := receiver.(*ArrayObject)
 
-				if len(args) == 0 {
+				if len(ma.args) == 0 {
 					return arr.Elements[len(arr.Elements)-1]
 				}
 
-				arg, ok := args[0].(*IntegerObject)
+				arg, ok := ma.args[0].(*IntegerObject)
 				if !ok {
-					return newError("Expect index argument to be Integer. got=%T", args[0])
+					return newError("Expect index argument to be Integer. got=%T", ma.args[0])
 				}
 
 				l := len(arr.Elements)
