@@ -160,16 +160,16 @@ var builtinGlobalMethods = []*BuiltInMethod{
 	{
 		Name: "require",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-				libName := args[0].(*StringObject).Value
+			return func(ma methodArgs) Object {
+				libName := ma.args[0].(*StringObject).Value
 				initFunc, ok := standardLibraris[libName]
 
 				if !ok {
 					msg := "Can't require \"" + libName + "\""
-					vm.returnError(msg)
+					ma.vm.returnError(msg)
 				}
 
-				initFunc(vm)
+				initFunc(ma.vm)
 
 				return TRUE
 			}
@@ -178,17 +178,17 @@ var builtinGlobalMethods = []*BuiltInMethod{
 	{
 		Name: "require_relative",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-				filepath := args[0].(*StringObject).Value
-				filepath = path.Join(vm.fileDir, filepath)
+			return func(ma methodArgs) Object {
+				filepath := ma.args[0].(*StringObject).Value
+				filepath = path.Join(ma.vm.fileDir, filepath)
 
 				file, err := ioutil.ReadFile(filepath + ".ro")
 
 				if err != nil {
-					vm.returnError(err.Error())
+					ma.vm.returnError(err.Error())
 				}
 
-				vm.execRequiredFile(filepath, file)
+				ma.vm.execRequiredFile(filepath, file)
 
 				return TRUE
 			}
@@ -197,9 +197,9 @@ var builtinGlobalMethods = []*BuiltInMethod{
 	{
 		Name: "puts",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
-				for _, arg := range args {
+				for _, arg := range ma.args {
 					fmt.Println(arg.Inspect())
 				}
 
@@ -210,7 +210,7 @@ var builtinGlobalMethods = []*BuiltInMethod{
 	{
 		Name: "class",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				switch r := receiver.(type) {
 				case BaseObject:
@@ -226,7 +226,7 @@ var builtinGlobalMethods = []*BuiltInMethod{
 	{
 		Name: "!",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				return FALSE
 			}
@@ -238,8 +238,8 @@ var BuiltinClassMethods = []*BuiltInMethod{
 	{
 		Name: "include",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-				module := args[0].(*RClass)
+			return func(ma methodArgs) Object {
+				module := ma.args[0].(*RClass)
 				class := receiver.(*RClass)
 				module.superClass = class.superClass
 				class.superClass = module
@@ -251,7 +251,7 @@ var BuiltinClassMethods = []*BuiltInMethod{
 	{
 		Name: "new",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				class := receiver.(*RClass)
 				instance := class.initializeInstance()
@@ -268,7 +268,7 @@ var BuiltinClassMethods = []*BuiltInMethod{
 	{
 		Name: "name",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				name := receiver.(Class).ReturnName()
 				nameString := initializeString(name)
@@ -279,7 +279,7 @@ var BuiltinClassMethods = []*BuiltInMethod{
 	{
 		Name: "superclass",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				return receiver.(Class).returnSuperClass()
 			}

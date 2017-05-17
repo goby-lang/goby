@@ -52,17 +52,29 @@ func initializeHash(pairs map[string]Object) *HashObject {
 	return &HashObject{Pairs: pairs, Class: hashClass}
 }
 
+func initHash() {
+	methods := newEnvironment()
+
+	for _, m := range builtinHashMethods {
+		methods.set(m.Name, m)
+	}
+
+	bc := &BaseClass{Name: "Hash", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
+	hc := &RHash{BaseClass: bc}
+	hashClass = hc
+}
+
 var builtinHashMethods = []*BuiltInMethod{
 	{
 		Name: "[]",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
-				if len(args) != 1 {
-					return newError("Expect 1 arguments. got=%d", len(args))
+				if len(ma.args) != 1 {
+					return newError("Expect 1 arguments. got=%d", len(ma.args))
 				}
 
-				i := args[0]
+				i := ma.args[0]
 				key, ok := i.(*StringObject)
 
 				if !ok {
@@ -89,15 +101,15 @@ var builtinHashMethods = []*BuiltInMethod{
 	{
 		Name: "[]=",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
 				// First arg is index
 				// Second arg is assigned value
-				if len(args) != 2 {
-					return newError("Expect 2 arguments. got=%d", len(args))
+				if len(ma.args) != 2 {
+					return newError("Expect 2 arguments. got=%d", len(ma.args))
 				}
 
-				k := args[0]
+				k := ma.args[0]
 				key, ok := k.(*StringObject)
 
 				if !ok {
@@ -105,19 +117,19 @@ var builtinHashMethods = []*BuiltInMethod{
 				}
 
 				hash := receiver.(*HashObject)
-				hash.Pairs[key.Value] = args[1]
+				hash.Pairs[key.Value] = ma.args[1]
 
-				return args[1]
+				return ma.args[1]
 			}
 		},
 	},
 	{
 		Name: "length",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(ma methodArgs) Object {
 
-				if len(args) != 0 {
-					return newError("Expect 0 argument. got=%d", len(args))
+				if len(ma.args) != 0 {
+					return newError("Expect 0 argument. got=%d", len(ma.args))
 				}
 
 				hash := receiver.(*HashObject)
@@ -125,16 +137,4 @@ var builtinHashMethods = []*BuiltInMethod{
 			}
 		},
 	},
-}
-
-func init() {
-	methods := newEnvironment()
-
-	for _, m := range builtinHashMethods {
-		methods.set(m.Name, m)
-	}
-
-	bc := &BaseClass{Name: "Hash", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
-	hc := &RHash{BaseClass: bc}
-	hashClass = hc
 }

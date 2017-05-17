@@ -13,7 +13,7 @@ func TestLengthMethod(t *testing.T) {
 	array := generateArray(expected)
 	m := getBuiltInMethod(t, array, "length")
 
-	result := m(nil, nil, nil).(*IntegerObject).Value
+	result := m(methodArgs{nil, nil, nil}).(*IntegerObject).Value
 
 	if int(result) != expected {
 		t.Fatalf("Expect length method returns array's length: %d. got=%d", expected, result)
@@ -23,7 +23,7 @@ func TestLengthMethod(t *testing.T) {
 func TestPopMethod(t *testing.T) {
 	array := generateArray(5)
 	m := getBuiltInMethod(t, array, "pop")
-	last := m(nil, nil, nil).(*IntegerObject).Value
+	last := m(methodArgs{nil, nil, nil}).(*IntegerObject).Value
 
 	if int(last) != 5 {
 		t.Fatalf("Expect pop to return array's last  got=%d", last)
@@ -40,7 +40,7 @@ func TestPushMethod(t *testing.T) {
 
 	six := initilaizeInteger(6)
 	seven := initilaizeInteger(7)
-	m(nil, []Object{six, seven}, nil)
+	m(methodArgs{nil, []Object{six, seven}, nil})
 
 	if array.length() != 7 {
 		t.Fatalf("Expect array's length to be 7(5 + 2). got=%d", array.length())
@@ -58,7 +58,7 @@ func TestShiftMethod(t *testing.T) {
 	second := initializeArray([]Object{initilaizeInteger(2), initilaizeInteger(3), initilaizeInteger(4)})
 
 	m := getBuiltInMethod(t, array, "shift")
-	first := m(nil, nil, nil)
+	first := m(methodArgs{nil, nil, nil})
 
 	testArrayObject(t, array, second)
 	testIntegerObject(t, first, 1)
