@@ -436,12 +436,13 @@ Foo.new.bar
 1 def_class class:Bar
 2 pop
 3 putself
-4 def_class class:Foo Bar
-5 pop
-6 getconstant Foo
-7 send new 0
-8 send bar 0
-9 leave
+4 getconstant Bar
+5 def_class class:Foo Bar
+6 pop
+7 getconstant Foo
+8 send new 0
+9 send bar 0
+10 leave
 `
 	bytecode := compileToBytecode(input)
 	compareBytecode(t, bytecode, expected)

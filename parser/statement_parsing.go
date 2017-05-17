@@ -98,7 +98,14 @@ func (p *Parser) parseClassStatement() *ast.ClassStatement {
 	if p.peekTokenIs(token.LT) {
 		p.nextToken() // <
 		p.nextToken() // Inherited class like 'Bar'
-		stmt.SuperClass = &ast.Constant{Token: p.curToken, Value: p.curToken.Literal}
+		stmt.SuperClass = p.parseExpression(LOWEST)
+
+		switch exp := stmt.SuperClass.(type) {
+		case *ast.InfixExpression:
+			stmt.SuperClassName = exp.Right.(*ast.Constant).Value
+		case *ast.Constant:
+			stmt.SuperClassName = exp.Value
+		}
 	}
 
 	stmt.Body = p.parseBlockStatement()
