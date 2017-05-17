@@ -52,44 +52,8 @@ var builtInActions = map[operationType]*action{
 	bytecode.GetConstant: {
 		name: bytecode.GetConstant,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
-			var constant *Pointer
-			var namespace Class
-			var hasNamespace bool
-			var ok bool
-
-			constName := args[0].(string)
-			top := vm.stack.top()
-
-			if top == nil || top.Target.objectType() != classObj {
-				hasNamespace = false
-			} else {
-				namespace, hasNamespace = top.Target.(Class)
-			}
-
-			if hasNamespace {
-				if namespace != cf.self {
-					vm.stack.pop()
-				}
-				constant = namespace.lookupConstant(constName)
-
-				if constant == nil {
-					constant, ok = vm.constants[constName]
-				}
-			} else if scope, inClass := cf.self.(Class); inClass {
-				constant = scope.lookupConstant(constName)
-
-				if constant == nil {
-					constant, ok = vm.constants[constName]
-				}
-			} else {
-				constant, ok = vm.constants[constName]
-			}
-
-			if !ok {
-				msg := "Can't find constant: " + constName
-				vm.returnError(msg)
-			}
-			vm.stack.push(constant)
+			c := vm.lookupConstant(cf, args[0].(string))
+			vm.stack.push(c)
 		},
 	},
 	bytecode.GetLocal: {
@@ -327,7 +291,7 @@ var builtInActions = map[operationType]*action{
 
 			if len(args) >= 2 {
 				constantName := args[1].(string)
-				constant := vm.constants[constantName]
+				constant := vm.lookupConstant(cf, constantName)
 				inheritedClass, ok := constant.Target.(*RClass)
 				if !ok {
 					panic("Constant " + constantName + " is not a class. got=" + string(constant.Target.objectType()))

@@ -228,6 +228,47 @@ func (vm *VM) getClassIS(name string, filename filename) (*instructionSet, bool)
 	return is, ok
 }
 
+func (vm *VM) lookupConstant(cf *callFrame, constName string) *Pointer {
+	var constant *Pointer
+	var namespace Class
+	var hasNamespace bool
+	var ok bool
+
+	top := vm.stack.top()
+
+	if top == nil || top.Target.objectType() != classObj {
+		hasNamespace = false
+	} else {
+		namespace, hasNamespace = top.Target.(Class)
+	}
+
+	if hasNamespace {
+		if namespace != cf.self {
+			vm.stack.pop()
+		}
+		constant = namespace.lookupConstant(constName)
+
+		if constant == nil {
+			constant, ok = vm.constants[constName]
+		}
+	} else if scope, inClass := cf.self.(Class); inClass {
+		constant = scope.lookupConstant(constName)
+
+		if constant == nil {
+			constant, ok = vm.constants[constName]
+		}
+	} else {
+		constant, ok = vm.constants[constName]
+	}
+
+	if !ok {
+		msg := "Can't find constant: " + constName
+		vm.returnError(msg)
+	}
+
+	return constant
+}
+
 func (s *stack) push(v *Pointer) {
 	if len(s.Data) <= s.VM.sp {
 		s.Data = append(s.Data, v)
