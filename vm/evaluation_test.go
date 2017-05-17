@@ -5,8 +5,8 @@ import (
 )
 
 func TestNamespace(t *testing.T) {
-	tests := []struct{
-		input string
+	tests := []struct {
+		input    string
 		expected int
 	}{
 		{`
@@ -46,26 +46,26 @@ func TestNamespace(t *testing.T) {
 
 		Foo.new.bar + Foo::Bar.new.bar
 		`, 110},
-		{`
-		module Foo
-		  class Bar
-		    def bar
-		      10
-		    end
-		  end
-		end
-
-		module Baz
-		  class Bar < Foo::Bar
-		    def foo
-		      100
-		    end
-		  end
-		end
-
-		b = Baz::Bar.new
-		b.foo + b.bar
-		`, 110},
+		//{`
+		//module Foo
+		//  class Bar
+		//    def bar
+		//      10
+		//    end
+		//  end
+		//end
+		//
+		//module Baz
+		//  class Bar < Foo::Bar
+		//    def foo
+		//      100
+		//    end
+		//  end
+		//end
+		//
+		//b = Baz::Bar.new
+		//b.foo + b.bar
+		//`, 110},
 	}
 
 	for _, tt := range tests {

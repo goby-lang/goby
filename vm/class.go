@@ -32,9 +32,17 @@ func initTopLevelClasses() {
 
 // initializeClass initializes and returns a class instance with given class name
 func initializeClass(name string) *RClass {
-	class := &RClass{BaseClass: &BaseClass{Name: name, Methods: newEnvironment(), ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}}
-	//classScope := &scope{self: class, Env: closedEnvironment(scope.Env)}
-	//class.scope = classScope
+	class := &RClass{
+		BaseClass: &BaseClass{
+			Name:             name,
+			Methods:          newEnvironment(),
+			ClassMethods:     newEnvironment(),
+			Class:            classClass,
+			pseudoSuperClass: objectClass,
+			superClass:       objectClass,
+			constants:        make(map[string]*Pointer),
+		},
+	}
 
 	return class
 }
@@ -48,6 +56,7 @@ type Class interface {
 	lookupInstanceMethod(string) Object
 	ReturnName() string
 	returnSuperClass() Class
+	getConstants() map[string]*Pointer
 	BaseObject
 }
 
@@ -76,6 +85,7 @@ type BaseClass struct {
 	// Singleton is a flag marks if this class a singleton class
 	Singleton bool
 	isModule  bool
+	constants map[string]*Pointer
 }
 
 // objectType returns class object's type
@@ -148,6 +158,10 @@ func (c *BaseClass) ReturnName() string {
 
 func (c *BaseClass) returnSuperClass() Class {
 	return c.pseudoSuperClass
+}
+
+func (c *BaseClass) getConstants() map[string]*Pointer {
+	return c.constants
 }
 
 func (c *RClass) initializeInstance() *RObject {

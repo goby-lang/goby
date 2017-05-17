@@ -52,8 +52,28 @@ var builtInActions = map[operationType]*action{
 	bytecode.GetConstant: {
 		name: bytecode.GetConstant,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
+			var constant *Pointer
+			var namespace Class
+			var hasNamespace bool
+			var ok bool
+
 			constName := args[0].(string)
-			constant, ok := vm.constants[constName]
+			top := vm.stack.top()
+
+			if top == nil {
+				hasNamespace = false
+			} else {
+				namespace, hasNamespace = top.Target.(Class)
+				fmt.Println(top.Target.Inspect())
+				fmt.Println(hasNamespace)
+			}
+
+			if hasNamespace {
+				constant, ok = namespace.getConstants()[constName]
+				vm.stack.pop()
+			} else {
+				constant, ok = vm.constants[constName]
+			}
 
 			if !ok {
 				msg := "Can't find constant: " + constName
@@ -271,7 +291,14 @@ var builtInActions = map[operationType]*action{
 			}
 
 			classPr := &Pointer{Target: class}
-			vm.constants[class.Name] = classPr
+
+			namespace, inNamespace := cf.self.(Class)
+
+			if inNamespace {
+				namespace.getConstants()[class.Name] = classPr
+			} else {
+				vm.constants[class.Name] = classPr
+			}
 
 			is, ok := vm.getClassIS(class.Name, cf.instructionSet.filename)
 
