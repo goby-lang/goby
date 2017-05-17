@@ -341,7 +341,10 @@ func (g *Generator) compileIfExpression(is *instructionSet, exp *ast.IfExpressio
 func (g *Generator) compileInfixExpression(is *instructionSet, node *ast.InfixExpression, scope *scope, table *localTable) {
 	g.compileExpression(is, node.Left, scope, table)
 	g.compileExpression(is, node.Right, scope, table)
-	is.define(Send, node.Operator, "1")
+
+	if node.Operator != "::" {
+		is.define(Send, node.Operator, "1")
+	}
 }
 
 func (g *Generator) compileBlockStatement(is *instructionSet, stmt *ast.BlockStatement, scope *scope, table *localTable) {
