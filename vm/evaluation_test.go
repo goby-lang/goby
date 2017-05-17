@@ -4,6 +4,81 @@ import (
 	"testing"
 )
 
+func TestNamespace(t *testing.T) {
+	tests := []struct{
+		input string
+		expected int
+	}{
+		{`
+		module Foo
+		  class Bar
+		    def bar
+		      10
+		    end
+		  end
+		end
+
+		Foo::Bar.new.bar
+		`, 10},
+		{`
+		class Foo
+		  class Bar
+		    def bar
+		      10
+		    end
+		  end
+		end
+
+		Foo::Bar.new.bar
+		`, 10},
+		{`
+		class Foo
+		  def bar
+		    100
+		  end
+
+		  class Bar
+		    def bar
+		      10
+		    end
+		  end
+		end
+
+		Foo.new.bar + Foo::Bar.new.bar
+		`, 110},
+		{`
+		module Foo
+		  class Bar
+		    def bar
+		      10
+		    end
+		  end
+		end
+
+		module Baz
+		  class Bar < Foo::Bar
+		    def foo
+		      100
+		    end
+		  end
+		end
+
+		b = Baz::Bar.new
+		b.foo + b.bar
+		`, 110},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+		}
+
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
 func TestRequireSuccess(t *testing.T) {
 	input := `
 	require("file")
