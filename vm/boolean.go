@@ -18,7 +18,8 @@ type RBool struct {
 	*BaseClass
 }
 
-// BooleanObject represents boolean object in goby
+// BooleanObject represents boolean object in goby.
+// It includes `true` and `FALSE` which represents logically true and false value.
 type BooleanObject struct {
 	Class *RBool
 	Value bool
@@ -45,6 +46,7 @@ func (b *BooleanObject) equal(e *BooleanObject) bool {
 
 var builtinBooleanMethods = []*BuiltInMethod{
 	{
+		// Returns true if the receiver equals to the argument.
 		Name: "==",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -62,6 +64,7 @@ var builtinBooleanMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Returns true if the receiver is not equals to the argument.
 		Name: "!=",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -79,6 +82,12 @@ var builtinBooleanMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Reverse the receiver.
+		//
+		// ```ruby
+		// !true  # => false
+		// !false # => true
+		// ```
 		Name: "!",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -94,6 +103,12 @@ var builtinBooleanMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Returns true if both the receiver and the argument are true.
+		//
+		// ```ruby
+		// 3 > 2 && 5 > 3  # => true
+		// 3 > 2 && 5 > 10 # => false
+		// ```
 		Name: "&&",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -116,6 +131,13 @@ var builtinBooleanMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Returns true either if the receiver or argument is true.
+		//
+		// ```ruby
+		// 3 > 2 || 5 > 3  # => true
+		// 3 > 2 || 5 > 10 # => true
+		// 2 > 3 || 5 > 10 # => false
+		// ```
 		Name: "||",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {

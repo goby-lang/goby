@@ -14,7 +14,9 @@ type RArray struct {
 	*BaseClass
 }
 
-// ArrayObject represents array instance
+// ArrayObject represents instance from Array class.
+// An array is a collection of different objects that are ordered and indexed.
+// Elements in an array can belong to any class.
 type ArrayObject struct {
 	Class    *RArray
 	Elements []Object
@@ -25,7 +27,7 @@ func (a *ArrayObject) objectType() objectType {
 	return arrayObj
 }
 
-// inspect returns detailed info of a array include elements it contains
+// Inspect returns detailed info of a array include elements it contains
 func (a *ArrayObject) Inspect() string {
 	var out bytes.Buffer
 
@@ -91,6 +93,15 @@ func init() {
 
 var builtinArrayMethods = []*BuiltInMethod{
 	{
+		// Retrieves an object in an array using Integer index.
+		// The index starts from 0. It returns `null` if the given index is bigger than its size.
+		//
+		// ```ruby
+		// a = [1, 2, 3, "a", "b", "c"]
+		// a[0]  # => 1
+		// a[3]  # => "a"
+		// a[10] # => null
+		// ```
 		Name: "[]",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -117,6 +128,16 @@ var builtinArrayMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Assigns value to an array. It requires an index and a value as argument.
+		// The array will expand if the assigned index is bigger than its size.
+		// Returns the assigned value.
+		//
+		// ```ruby
+		// a = []
+		// a[0] = 10  # => 10
+		// a[3] = 20  # => 20
+		// a          # => [10, null, null, 20]
+		// ```
 		Name: "[]=",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -154,6 +175,11 @@ var builtinArrayMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Returns the length of the array.
+		//
+		// ```ruby
+		// [1, 2, 3].length # => 3
+		// ```
 		Name: "length",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -168,6 +194,13 @@ var builtinArrayMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Removes the last element in the array and returns it.
+		//
+		// ```ruby
+		// a = [1, 2, 3]
+		// a.pop # => 3
+		// a     # => [1, 2]
+		// ```
 		Name: "pop",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -182,6 +215,12 @@ var builtinArrayMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Appends the given object to the array and returns the array.
+		//
+		// ```ruby
+		// a = [1, 2, 3]
+		// a.push(4) # => [1, 2, 3, 4]
+		// ```
 		Name: "push",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -192,6 +231,13 @@ var builtinArrayMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Removes the first element in the array and returns it.
+		//
+		// ```ruby
+		// a = [1, 2, 3]
+		// a.shift # => 1
+		// a       # => [2, 3]
+		// ```
 		Name: "shift",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -205,6 +251,18 @@ var builtinArrayMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Loop through each element with the given block.
+		//
+		// ```ruby
+		// a = ["a", "b", "c"]
+		//
+		// a.each do |e|
+		//   puts(e + e)
+		// end
+		// # => "aa"
+		// # => "bb"
+		// # => "cc"
+		// ```
 		Name: "each",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -239,6 +297,16 @@ var builtinArrayMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Loop through each element with the given block. Return a new array with each yield element.
+		//
+		// ```ruby
+		// a = ["a", "b", "c"]
+		//
+		// a.map do |e|
+		//   e + e
+		// end
+		// # => ["aa", "bb", "cc"]
+		// ```
 		Name: "map",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -259,6 +327,17 @@ var builtinArrayMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Loop through each element with the given block.
+		// Return a new array with each element that returns true from yield.
+		//
+		// ```ruby
+		// a = [1, 2, 3, 4, 5]
+		//
+		// a.select do |e|
+		//   e + 1 > 3
+		// end
+		// # => [3, 4, 5]
+		// ```
 		Name: "select",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -281,6 +360,14 @@ var builtinArrayMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Retrieves an object in an array using the index argument.
+		// It raises an error if index out of range.
+		//
+		// ```ruby
+		// a = [1, 2, 3]
+		// a.at(0)  # => 1
+		// a.at(10) # => Error
+		// ```
 		Name: "at",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -306,6 +393,13 @@ var builtinArrayMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Removes all elements in the array and returns an empty array.
+		//
+		// ```ruby
+		// a = [1, 2, 3]
+		// a.clear # => []
+		// a       # => []
+		// ```
 		Name: "clear",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -317,6 +411,13 @@ var builtinArrayMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Appends any number of argument to the array.
+		//
+		// ```ruby
+		// a = [1, 2, 3]
+		// a.concat(4, 5, 6)
+		// a # => [1, 2, 3, 4, 5, 6]
+		// ```
 		Name: "concat",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -339,6 +440,17 @@ var builtinArrayMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Loop through each element with the given block.
+		// Return the sum of elements that return true from yield.
+		//
+		// ```ruby
+		// a = [1, 2, 3, 4, 5]
+		//
+		// a.count do |e|
+		//   e * 2 > 3
+		// end
+		// # => 4
+		// ```
 		Name: "count",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -395,6 +507,16 @@ var builtinArrayMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Returns a new array by putting the desired element as the first element.
+		// Use integer index as an argument to retrieve the element.
+		//
+		// ```ruby
+		// a = ["a", "b", "c", "d"]
+		//
+		// a.rotate    # => ["b", "c", "d", "a"]
+		// a.rotate(2) # => ["c", "d", "a", "b"]
+		// a.rotate(3) # => ["d", "a", "b", "c"]
+		// ```
 		Name: "rotate",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -421,6 +543,7 @@ var builtinArrayMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Returns the first element of the array.
 		Name: "first",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -440,6 +563,7 @@ var builtinArrayMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Returns the last element of the array.
 		Name: "last",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
