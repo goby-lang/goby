@@ -11,23 +11,23 @@ func TestNamespacedClass(t *testing.T) {
 	input := `
 	module Foo
 	  class Bar
-	    def bar
+	    class Baz
 	      10
 	    end
 	  end
 	end
 
-	Foo::Bar.new.bar
+	Foo::Bar::Baz.new.bar
 	`
 
 	expected := `
-<Def:bar>
+<DefClass:Baz>
 0 putobject 10
 1 leave
 <DefClass:Bar>
 0 putself
-1 putstring "bar"
-2 def_method 0
+1 def_class class:Baz
+2 pop
 3 leave
 <DefClass:Foo>
 0 putself
@@ -40,10 +40,11 @@ func TestNamespacedClass(t *testing.T) {
 2 pop
 3 getconstant Foo
 4 getconstant Bar
-5 send new 0
-6 send bar 0
-7 leave
-	`
+5 getconstant Baz
+6 send new 0
+7 send bar 0
+8 leave
+`
 
 	bytecode := compileToBytecode(input)
 	compareBytecode(t, bytecode, expected)
