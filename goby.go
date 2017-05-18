@@ -79,7 +79,7 @@ func extractFileInfo(filepath string) (dir, filename, fileExt string) {
 }
 
 func writeByteCode(bytecodes, dir, filename string) {
-	f, err := os.Create(dir + filename + ".robc")
+	f, err := os.Create(dir + filename + ".gbbc")
 
 	if err != nil {
 		panic(err)

@@ -25,7 +25,7 @@ It will have Ruby's syntax (I'll try to support all common syntaxes) but without
 A lot people have questions about `goby` since it's a new language and you may get confused by the way I describe it (sorry for that 😢). Here's a list of [frequently asked questions](https://github.com/goby-lang/goby/wiki/Frequently-asked-questions).
 
 ## Supported features
-- **Can be compiled into bytecode (with `.robc` extension)**
+- **Can be compiled into bytecode (with `.gbbc` extension)**
 - **Can evaluate bytecode directly**
 - Everything is object
 - Support comment 
@@ -129,12 +129,12 @@ $ goby ./samples/sample-1.gb
 $ goby -c ./samples/sample-1.gb
 ```
 
-You'll see `sample-1.robc` in `./samples`
+You'll see `sample-1.gbbc` in `./samples`
 
 **Execute bytecode**
 
 ```
-$ goby ./samples/sample-1.robc
+$ goby ./samples/sample-1.gbbc
 ```
 
 ## Try it!
