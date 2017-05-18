@@ -154,6 +154,12 @@ func TestNamespace(t *testing.T) {
 
 		Object::Foo.bar
 		`, 10},
+
+		{`
+		Foo = 10
+
+		Object::Foo
+		`, 10},
 	}
 
 	for _, tt := range tests {

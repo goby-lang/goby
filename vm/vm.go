@@ -189,16 +189,16 @@ func (vm *VM) printDebugInfo(i *instruction) {
 	fmt.Println(i.inspect())
 }
 
-func (vm *VM) getBlock(name string, filename filename) (*instructionSet, bool) {
+func (vm *VM) getBlock(name string, filename filename) *instructionSet {
 	// The "name" here is actually an index from label
 	// for example <Block:1>'s name is "1"
 	is, ok := vm.blockTables[filename][name]
 
 	if !ok {
-		return nil, false
+		panic(fmt.Sprintf("Can't find block %s", name))
 	}
 
-	return is, ok
+	return is
 }
 
 func (vm *VM) getMethodIS(name string, filename filename) (*instructionSet, bool) {
@@ -214,17 +214,17 @@ func (vm *VM) getMethodIS(name string, filename filename) (*instructionSet, bool
 	return is, ok
 }
 
-func (vm *VM) getClassIS(name string, filename filename) (*instructionSet, bool) {
+func (vm *VM) getClassIS(name string, filename filename) *instructionSet {
 	iss, ok := vm.isTables[bytecode.LabelDefClass][name]
 
 	if !ok {
-		return nil, false
+		panic(fmt.Sprintf("Can't find class %s's instructions", name))
 	}
 
 	is := iss[vm.classISIndexTables[filename].Data[name]]
 
 	vm.classISIndexTables[filename].Data[name]++
-	return is, ok
+	return is
 }
 
 func (vm *VM) lookupConstant(cf *callFrame, constName string) *Pointer {

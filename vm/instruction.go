@@ -269,11 +269,7 @@ var builtInActions = map[operationType]*action{
 			class := initializeClass(subjectName, subjectType == "module")
 			classPr := cf.storeConstant(class.Name, class)
 
-			is, ok := vm.getClassIS(class.Name, cf.instructionSet.filename)
-
-			if !ok {
-				panic(fmt.Sprintf("Can't find class %s's instructions", class.Name))
-			}
+			is := vm.getClassIS(class.Name, cf.instructionSet.filename)
 
 			if len(args) >= 2 {
 				superClassName := args[1].(string)
@@ -339,16 +335,13 @@ var builtInActions = map[operationType]*action{
 			var blockFrame *callFrame
 
 			if hasBlock {
-				block, ok := vm.getBlock(blockName, cf.instructionSet.filename)
-
-				if !ok {
-					panic(fmt.Sprintf("Can't find block %s", blockName))
-				}
+				block := vm.getBlock(blockName, cf.instructionSet.filename)
 
 				c := newCallFrame(block)
 				c.isBlock = true
 				c.ep = cf
 				c.self = cf.self
+
 				vm.callFrameStack.push(c)
 				blockFrame = c
 			}
