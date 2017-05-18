@@ -145,6 +145,15 @@ func TestNamespace(t *testing.T) {
 
 		A::B::C::D.new.e
 		`, 10},
+		{`
+		class Foo
+		  def self.bar
+		    10
+		  end
+		end
+
+		Object::Foo.bar
+		`, 10},
 	}
 
 	for _, tt := range tests {

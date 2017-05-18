@@ -121,14 +121,7 @@ var builtInActions = map[operationType]*action{
 			constName := args[0].(string)
 			v := vm.stack.pop()
 
-			c, ok := cf.self.(*BaseClass)
-
-			if ok {
-				c.constants[constName] = v
-				return
-			}
-
-			vm.constants[constName] = v
+			cf.storeConstant(constName, v)
 		},
 	},
 	bytecode.NewArray: {
@@ -273,22 +266,8 @@ var builtInActions = map[operationType]*action{
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			subject := strings.Split(args[0].(string), ":")
 			subjectType, subjectName := subject[0], subject[1]
-			class := initializeClass(subjectName)
-
-			if subjectType == "module" {
-				class.isModule = true
-			}
-
-			classPr := &Pointer{Target: class}
-
-			namespace, inNamespace := cf.self.(*RClass)
-
-			if inNamespace {
-				namespace.constants[class.Name] = classPr
-				class.scope = namespace
-			} else {
-				vm.constants[class.Name] = classPr
-			}
+			class := initializeClass(subjectName, subjectType == "module")
+			classPr := cf.storeConstant(class.Name, class)
 
 			is, ok := vm.getClassIS(class.Name, cf.instructionSet.filename)
 

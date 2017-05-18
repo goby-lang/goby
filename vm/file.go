@@ -3,7 +3,7 @@ package vm
 import "path/filepath"
 
 func initializeFileClass(vm *VM) {
-	class := initializeClass("File")
+	class := initializeClass("File", false)
 
 	for _, m := range builtinFileClassMethods {
 		class.ClassMethods.set(m.Name, m)

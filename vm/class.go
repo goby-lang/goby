@@ -26,12 +26,28 @@ func initTopLevelClasses() {
 		classMethods.set(m.Name, m)
 	}
 
-	classClass = &RClass{BaseClass: &BaseClass{Name: "Class", Methods: globalMethods, ClassMethods: classMethods}}
-	objectClass = &RClass{BaseClass: &BaseClass{Name: "Object", Class: classClass, Methods: globalMethods, ClassMethods: newEnvironment()}}
+	classClass = &RClass{
+		BaseClass: &BaseClass{
+			Name:         "Class",
+			Methods:      globalMethods,
+			ClassMethods: classMethods,
+			constants:    make(map[string]*Pointer),
+		},
+	}
+
+	objectClass = &RClass{
+		BaseClass: &BaseClass{
+			Name:         "Object",
+			Class:        classClass,
+			Methods:      globalMethods,
+			ClassMethods: newEnvironment(),
+			constants:    make(map[string]*Pointer),
+		},
+	}
 }
 
 // initializeClass initializes and returns a class instance with given class name
-func initializeClass(name string) *RClass {
+func initializeClass(name string, isModule bool) *RClass {
 	class := &RClass{
 		BaseClass: &BaseClass{
 			Name:             name,
@@ -41,6 +57,7 @@ func initializeClass(name string) *RClass {
 			pseudoSuperClass: objectClass,
 			superClass:       objectClass,
 			constants:        make(map[string]*Pointer),
+			isModule:         isModule,
 		},
 	}
 
@@ -162,7 +179,7 @@ func (c *BaseClass) setSingletonMethod(name string, method *Method) {
 		c.pseudoSuperClass.ClassMethods.set(name, method)
 	}
 
-	class := initializeClass(c.Name + "singleton")
+	class := initializeClass(c.Name+"singleton", false)
 	class.Singleton = true
 	class.ClassMethods.set(name, method)
 	class.superClass = c.superClass
