@@ -41,6 +41,31 @@ func (cf *callFrame) insertLCL(index, depth int, value Object) {
 	}
 }
 
+func (cf *callFrame) storeConstant(constName string, constant interface{}) *Pointer {
+	var ptr *Pointer
+
+	switch c := constant.(type) {
+	case *RClass:
+		ptr = &Pointer{Target: c}
+	case *Pointer:
+		ptr = c
+	}
+
+	switch scope := cf.self.(type) {
+	case *RClass:
+		scope.constants[constName] = ptr
+
+		if class, ok := ptr.Target.(*RClass); ok {
+			class.scope = scope
+		}
+	case BaseObject:
+		c := cf.self.(BaseObject).returnClass()
+		c.(*RClass).constants[constName] = ptr
+	}
+
+	return ptr
+}
+
 func (cf *callFrame) getLCL(index, depth int) *Pointer {
 	if depth == 0 {
 		return cf.locals[index]

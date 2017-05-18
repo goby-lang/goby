@@ -88,6 +88,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.Decr, p.parsePostfixExpression)
 	p.registerInfix(token.And, p.parseInfixExpression)
 	p.registerInfix(token.Or, p.parseInfixExpression)
+	p.registerInfix(token.ResolutionOperator, p.parseInfixExpression)
 
 	return p
 }

@@ -26,15 +26,40 @@ func initTopLevelClasses() {
 		classMethods.set(m.Name, m)
 	}
 
-	classClass = &RClass{BaseClass: &BaseClass{Name: "Class", Methods: globalMethods, ClassMethods: classMethods}}
-	objectClass = &RClass{BaseClass: &BaseClass{Name: "Object", Class: classClass, Methods: globalMethods, ClassMethods: newEnvironment()}}
+	classClass = &RClass{
+		BaseClass: &BaseClass{
+			Name:         "Class",
+			Methods:      globalMethods,
+			ClassMethods: classMethods,
+			constants:    make(map[string]*Pointer),
+		},
+	}
+
+	objectClass = &RClass{
+		BaseClass: &BaseClass{
+			Name:         "Object",
+			Class:        classClass,
+			Methods:      globalMethods,
+			ClassMethods: newEnvironment(),
+			constants:    make(map[string]*Pointer),
+		},
+	}
 }
 
 // initializeClass initializes and returns a class instance with given class name
-func initializeClass(name string) *RClass {
-	class := &RClass{BaseClass: &BaseClass{Name: name, Methods: newEnvironment(), ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}}
-	//classScope := &scope{self: class, Env: closedEnvironment(scope.Env)}
-	//class.scope = classScope
+func initializeClass(name string, isModule bool) *RClass {
+	class := &RClass{
+		BaseClass: &BaseClass{
+			Name:             name,
+			Methods:          newEnvironment(),
+			ClassMethods:     newEnvironment(),
+			Class:            classClass,
+			pseudoSuperClass: objectClass,
+			superClass:       objectClass,
+			constants:        make(map[string]*Pointer),
+			isModule:         isModule,
+		},
+	}
 
 	return class
 }
@@ -46,6 +71,7 @@ func initializeClass(name string) *RClass {
 type Class interface {
 	lookupClassMethod(string) Object
 	lookupInstanceMethod(string) Object
+	lookupConstant(string, bool) *Pointer
 	ReturnName() string
 	returnSuperClass() Class
 	BaseObject
@@ -76,6 +102,8 @@ type BaseClass struct {
 	// Singleton is a flag marks if this class a singleton class
 	Singleton bool
 	isModule  bool
+	constants map[string]*Pointer
+	scope     Class
 }
 
 // objectType returns class object's type
@@ -86,6 +114,9 @@ func (c *BaseClass) objectType() objectType {
 // inspect returns the basic inspected result (which is class name) of current class
 // TODO: Singleton class's inspect() should also mark if it's a singleton class explicitly.
 func (c *BaseClass) Inspect() string {
+	if c.isModule {
+		return "<Module:" + c.Name + ">"
+	}
 	return "<Class:" + c.Name + ">"
 }
 
@@ -123,6 +154,24 @@ func (c *BaseClass) lookupInstanceMethod(methodName string) Object {
 	return method
 }
 
+func (c *BaseClass) lookupConstant(constName string, findInScope bool) *Pointer {
+	constant, ok := c.constants[constName]
+
+	if !ok {
+		if findInScope && c.scope != nil {
+			return c.scope.lookupConstant(constName, true)
+		}
+
+		if c.superClass != nil {
+			return c.superClass.lookupConstant(constName, false)
+		}
+
+		return nil
+	}
+
+	return constant
+}
+
 // setSingletonMethod will sets method to class's singleton class
 // However, if the class doesn't have a singleton class, it will create one for it first.
 func (c *BaseClass) setSingletonMethod(name string, method *Method) {
@@ -130,7 +179,7 @@ func (c *BaseClass) setSingletonMethod(name string, method *Method) {
 		c.pseudoSuperClass.ClassMethods.set(name, method)
 	}
 
-	class := initializeClass(c.Name + "singleton")
+	class := initializeClass(c.Name+"singleton", false)
 	class.Singleton = true
 	class.ClassMethods.set(name, method)
 	class.superClass = c.superClass
@@ -148,6 +197,10 @@ func (c *BaseClass) ReturnName() string {
 
 func (c *BaseClass) returnSuperClass() Class {
 	return c.pseudoSuperClass
+}
+
+func (c *BaseClass) getConstants() map[string]*Pointer {
+	return c.constants
 }
 
 func (c *RClass) initializeInstance() *RObject {

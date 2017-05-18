@@ -53,13 +53,14 @@ var builtInActions = map[operationType]*action{
 		name: bytecode.GetConstant,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			constName := args[0].(string)
-			constant, ok := vm.constants[constName]
+			c := vm.lookupConstant(cf, constName)
 
-			if !ok {
+			if c == nil {
 				msg := "Can't find constant: " + constName
 				vm.returnError(msg)
 			}
-			vm.stack.push(constant)
+
+			vm.stack.push(c)
 		},
 	},
 	bytecode.GetLocal: {
@@ -119,7 +120,8 @@ var builtInActions = map[operationType]*action{
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			constName := args[0].(string)
 			v := vm.stack.pop()
-			vm.constants[constName] = v
+
+			cf.storeConstant(constName, v)
 		},
 	},
 	bytecode.NewArray: {
@@ -264,27 +266,18 @@ var builtInActions = map[operationType]*action{
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			subject := strings.Split(args[0].(string), ":")
 			subjectType, subjectName := subject[0], subject[1]
-			class := initializeClass(subjectName)
+			class := initializeClass(subjectName, subjectType == "module")
+			classPr := cf.storeConstant(class.Name, class)
 
-			if subjectType == "module" {
-				class.isModule = true
-			}
-
-			classPr := &Pointer{Target: class}
-			vm.constants[class.Name] = classPr
-
-			is, ok := vm.getClassIS(class.Name, cf.instructionSet.filename)
-
-			if !ok {
-				panic(fmt.Sprintf("Can't find class %s's instructions", class.Name))
-			}
+			is := vm.getClassIS(class.Name, cf.instructionSet.filename)
 
 			if len(args) >= 2 {
-				constantName := args[1].(string)
-				constant := vm.constants[constantName]
-				inheritedClass, ok := constant.Target.(*RClass)
+				superClassName := args[1].(string)
+				superClass := vm.lookupConstant(cf, superClassName)
+				inheritedClass, ok := superClass.Target.(*RClass)
+
 				if !ok {
-					panic("Constant " + constantName + " is not a class. got=" + string(constant.Target.objectType()))
+					panic("Constant " + superClassName + " is not a class. got=" + string(superClass.Target.objectType()))
 				}
 
 				class.pseudoSuperClass = inheritedClass
@@ -342,16 +335,13 @@ var builtInActions = map[operationType]*action{
 			var blockFrame *callFrame
 
 			if hasBlock {
-				block, ok := vm.getBlock(blockName, cf.instructionSet.filename)
-
-				if !ok {
-					panic(fmt.Sprintf("Can't find block %s", blockName))
-				}
+				block := vm.getBlock(blockName, cf.instructionSet.filename)
 
 				c := newCallFrame(block)
 				c.isBlock = true
 				c.ep = cf
 				c.self = cf.self
+
 				vm.callFrameStack.push(c)
 				blockFrame = c
 			}

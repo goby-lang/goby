@@ -7,6 +7,49 @@ import (
 	"testing"
 )
 
+func TestNamespacedClass(t *testing.T) {
+	input := `
+	module Foo
+	  class Bar
+	    class Baz
+	      10
+	    end
+	  end
+	end
+
+	Foo::Bar::Baz.new.bar
+	`
+
+	expected := `
+<DefClass:Baz>
+0 putobject 10
+1 leave
+<DefClass:Bar>
+0 putself
+1 def_class class:Baz
+2 pop
+3 leave
+<DefClass:Foo>
+0 putself
+1 def_class class:Bar
+2 pop
+3 leave
+<ProgramStart>
+0 putself
+1 def_class module:Foo
+2 pop
+3 getconstant Foo
+4 getconstant Bar
+5 getconstant Baz
+6 send new 0
+7 send bar 0
+8 leave
+`
+
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
 func TestRequireRelativeCompilation(t *testing.T) {
 	input := `
 	require_relative("foo")
@@ -393,12 +436,13 @@ Foo.new.bar
 1 def_class class:Bar
 2 pop
 3 putself
-4 def_class class:Foo Bar
-5 pop
-6 getconstant Foo
-7 send new 0
-8 send bar 0
-9 leave
+4 getconstant Bar
+5 def_class class:Foo Bar
+6 pop
+7 getconstant Foo
+8 send new 0
+9 send bar 0
+10 leave
 `
 	bytecode := compileToBytecode(input)
 	compareBytecode(t, bytecode, expected)

@@ -68,6 +68,8 @@ const (
 	While  = "WHILE"
 	Do     = "DO"
 	Yield  = "YIELD"
+
+	ResolutionOperator = "::"
 )
 
 var keywords = map[string]Type{

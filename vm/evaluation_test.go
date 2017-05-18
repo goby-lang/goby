@@ -4,6 +4,175 @@ import (
 	"testing"
 )
 
+func TestNamespace(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{`
+		module Foo
+		  class Bar
+		    def bar
+		      10
+		    end
+		  end
+		end
+
+		Foo::Bar.new.bar
+		`, 10},
+		{`
+		class Foo
+		  class Bar
+		    def bar
+		      10
+		    end
+		  end
+		end
+
+		Foo::Bar.new.bar
+		`, 10},
+		{`
+		class Foo
+		  def bar
+		    100
+		  end
+
+		  class Bar
+		    def bar
+		      10
+		    end
+		  end
+		end
+
+		Foo.new.bar + Foo::Bar.new.bar
+		`, 110},
+		{`
+		class Foo
+		  def bar
+		    100
+		  end
+		end
+
+		module Baz
+		  class Bar
+		    def bar
+		      Foo.new.bar
+		    end
+		  end
+		end
+
+		Baz::Bar.new.bar
+		`, 100},
+		{`
+		module Baz
+		  class Bar
+		    class Foo
+		      def bar
+			100
+		      end
+		    end
+		  end
+		end
+
+		Baz::Bar::Foo.new.bar
+		`, 100},
+		{`
+		module Baz
+		  class Foo
+		    def bar
+		      100
+		    end
+		  end
+
+		  class Bar
+		    def bar
+		      Foo.new.bar
+		    end
+		  end
+		end
+
+		Baz::Bar.new.bar
+		`, 100},
+		{`
+		module Baz
+		  class Bar
+		    def bar
+		      Foo.new.bar
+		    end
+
+		    class Foo
+		      def bar
+			100
+		      end
+		    end
+		  end
+		end
+
+		Baz::Bar.new.bar
+		`, 100},
+		{`
+		module Foo
+		  class Bar
+		    def bar
+		      10
+		    end
+		  end
+		end
+
+		module Baz
+		  class Bar < Foo::Bar
+		    def foo
+		      100
+		    end
+		  end
+		end
+
+		b = Baz::Bar.new
+		b.foo + b.bar
+		`, 110},
+		{`
+		module A
+		  class B
+		    class C
+		      class D
+		        def e
+		          10
+		        end
+		      end
+		    end
+		  end
+		end
+
+		A::B::C::D.new.e
+		`, 10},
+		{`
+		class Foo
+		  def self.bar
+		    10
+		  end
+		end
+
+		Object::Foo.bar
+		`, 10},
+
+		{`
+		Foo = 10
+
+		Object::Foo
+		`, 10},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s.\n Input %s", evaluated.(*Error).Message, tt.input)
+		}
+
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
 func TestRequireSuccess(t *testing.T) {
 	input := `
 	require("file")

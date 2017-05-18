@@ -127,7 +127,8 @@ func (g *Generator) compileStatement(is *instructionSet, statement ast.Statement
 		is.define(PutSelf)
 
 		if stmt.SuperClass != nil {
-			is.define(DefClass, "class:"+stmt.Name.Value, stmt.SuperClass.Value)
+			g.compileExpression(is, stmt.SuperClass, scope, table)
+			is.define(DefClass, "class:"+stmt.Name.Value, stmt.SuperClassName)
 		} else {
 			is.define(DefClass, "class:"+stmt.Name.Value)
 		}
@@ -341,7 +342,10 @@ func (g *Generator) compileIfExpression(is *instructionSet, exp *ast.IfExpressio
 func (g *Generator) compileInfixExpression(is *instructionSet, node *ast.InfixExpression, scope *scope, table *localTable) {
 	g.compileExpression(is, node.Left, scope, table)
 	g.compileExpression(is, node.Right, scope, table)
-	is.define(Send, node.Operator, "1")
+
+	if node.Operator != "::" {
+		is.define(Send, node.Operator, "1")
+	}
 }
 
 func (g *Generator) compileBlockStatement(is *instructionSet, stmt *ast.BlockStatement, scope *scope, table *localTable) {

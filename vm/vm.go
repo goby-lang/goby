@@ -189,16 +189,16 @@ func (vm *VM) printDebugInfo(i *instruction) {
 	fmt.Println(i.inspect())
 }
 
-func (vm *VM) getBlock(name string, filename filename) (*instructionSet, bool) {
+func (vm *VM) getBlock(name string, filename filename) *instructionSet {
 	// The "name" here is actually an index from label
 	// for example <Block:1>'s name is "1"
 	is, ok := vm.blockTables[filename][name]
 
 	if !ok {
-		return nil, false
+		panic(fmt.Sprintf("Can't find block %s", name))
 	}
 
-	return is, ok
+	return is
 }
 
 func (vm *VM) getMethodIS(name string, filename filename) (*instructionSet, bool) {
@@ -214,17 +214,61 @@ func (vm *VM) getMethodIS(name string, filename filename) (*instructionSet, bool
 	return is, ok
 }
 
-func (vm *VM) getClassIS(name string, filename filename) (*instructionSet, bool) {
+func (vm *VM) getClassIS(name string, filename filename) *instructionSet {
 	iss, ok := vm.isTables[bytecode.LabelDefClass][name]
 
 	if !ok {
-		return nil, false
+		panic(fmt.Sprintf("Can't find class %s's instructions", name))
 	}
 
 	is := iss[vm.classISIndexTables[filename].Data[name]]
 
 	vm.classISIndexTables[filename].Data[name]++
-	return is, ok
+	return is
+}
+
+func (vm *VM) lookupConstant(cf *callFrame, constName string) *Pointer {
+	var constant *Pointer
+	var namespace Class
+	var hasNamespace bool
+
+	top := vm.stack.top()
+
+	if top == nil || top.Target.objectType() != classObj {
+		hasNamespace = false
+	} else {
+		namespace, hasNamespace = top.Target.(Class)
+	}
+
+	if hasNamespace {
+		if namespace != cf.self {
+			vm.stack.pop()
+		}
+
+		constant = namespace.lookupConstant(constName, true)
+
+		if constant != nil {
+			return constant
+		}
+	}
+
+	switch s := cf.self.(type) {
+	case Class:
+		constant = s.lookupConstant(constName, true)
+		if constant != nil {
+			return constant
+		}
+	case BaseObject:
+		c := s.returnClass()
+
+		constant = c.lookupConstant(constName, true)
+		if constant != nil {
+			return constant
+		}
+	}
+
+	constant = vm.constants[constName]
+	return constant
 }
 
 func (s *stack) push(v *Pointer) {
@@ -250,6 +294,10 @@ func (s *stack) pop() *Pointer {
 }
 
 func (s *stack) top() *Pointer {
+
+	if len(s.Data) == 0 {
+		return nil
+	}
 
 	if s.VM.sp > 0 {
 		return s.Data[s.VM.sp-1]
