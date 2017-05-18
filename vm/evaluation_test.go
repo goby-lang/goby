@@ -130,6 +130,21 @@ func TestNamespace(t *testing.T) {
 		b = Baz::Bar.new
 		b.foo + b.bar
 		`, 110},
+		{`
+		module A
+		  class B
+		    class C
+		      class D
+		        def e
+		          10
+		        end
+		      end
+		    end
+		  end
+		end
+
+		A::B::C::D.new.e
+		`, 10},
 	}
 
 	for _, tt := range tests {
