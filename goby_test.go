@@ -11,7 +11,7 @@ import (
 )
 
 func TestRequireRelative(t *testing.T) {
-	filename := "main.ro"
+	filename := "main.gb"
 	fileDir := "require_test"
 	result := execFile(fileDir, filename)
 

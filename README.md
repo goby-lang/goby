@@ -119,14 +119,14 @@ $ go get github.com/goby-lang/goby
 (might see errors on sample-6 since vm hasn't support block yet)
 
 ``` 
-$ goby ./samples/sample-1.ro
+$ goby ./samples/sample-1.gb
 #=> 16
 ```
 
 **Compile goby code**
 
 ```
-$ goby -c ./samples/sample-1.ro
+$ goby -c ./samples/sample-1.gb
 ```
 
 You'll see `sample-1.robc` in `./samples`
@@ -142,10 +142,10 @@ $ goby ./samples/sample-1.robc
 (See sample directory)
 
 ```
-$ goby ./samples/sample-1.ro
-$ goby ./samples/sample-2.ro
-$ goby ./samples/sample-3.ro
-$ goby ./samples/sample-4.ro
+$ goby ./samples/sample-1.gb
+$ goby ./samples/sample-2.gb
+$ goby ./samples/sample-3.gb
+$ goby ./samples/sample-4.gb
 $ goby .....
 ```
 
