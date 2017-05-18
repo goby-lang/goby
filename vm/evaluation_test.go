@@ -65,6 +65,19 @@ func TestNamespace(t *testing.T) {
 		`, 100},
 		{`
 		module Baz
+		  class Bar
+		    class Foo
+		      def bar
+			100
+		      end
+		    end
+		  end
+		end
+
+		Baz::Bar::Foo.new.bar
+		`, 100},
+		{`
+		module Baz
 		  class Foo
 		    def bar
 		      100
@@ -98,38 +111,25 @@ func TestNamespace(t *testing.T) {
 		Baz::Bar.new.bar
 		`, 100},
 		{`
-		module Baz
+		module Foo
 		  class Bar
-		    class Foo
-		      def bar
-			100
-		      end
+		    def bar
+		      10
 		    end
 		  end
 		end
 
-		Baz::Bar::Foo.new.bar
-		`, 100},
-		//{`
-		//module Foo
-		//  class Bar
-		//    def bar
-		//      10
-		//    end
-		//  end
-		//end
-		//
-		//module Baz
-		//  class Bar < Foo::Bar
-		//    def foo
-		//      100
-		//    end
-		//  end
-		//end
-		//
-		//b = Baz::Bar.new
-		//b.foo + b.bar
-		//`, 110},
+		module Baz
+		  class Bar < Foo::Bar
+		    def foo
+		      100
+		    end
+		  end
+		end
+
+		b = Baz::Bar.new
+		b.foo + b.bar
+		`, 110},
 	}
 
 	for _, tt := range tests {

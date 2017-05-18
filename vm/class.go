@@ -54,7 +54,7 @@ func initializeClass(name string) *RClass {
 type Class interface {
 	lookupClassMethod(string) Object
 	lookupInstanceMethod(string) Object
-	lookupConstant(string) *Pointer
+	lookupConstant(string, bool) *Pointer
 	ReturnName() string
 	returnSuperClass() Class
 	BaseObject
@@ -97,6 +97,9 @@ func (c *BaseClass) objectType() objectType {
 // inspect returns the basic inspected result (which is class name) of current class
 // TODO: Singleton class's inspect() should also mark if it's a singleton class explicitly.
 func (c *BaseClass) Inspect() string {
+	if c.isModule {
+		return "<Module:" + c.Name + ">"
+	}
 	return "<Class:" + c.Name + ">"
 }
 
@@ -134,16 +137,16 @@ func (c *BaseClass) lookupInstanceMethod(methodName string) Object {
 	return method
 }
 
-func (c *BaseClass) lookupConstant(constName string) *Pointer {
+func (c *BaseClass) lookupConstant(constName string, findInScope bool) *Pointer {
 	constant, ok := c.constants[constName]
 
 	if !ok {
-		if c.superClass != nil {
-			return c.superClass.lookupConstant(constName)
+		if findInScope && c.scope != nil {
+			return c.scope.lookupConstant(constName, true)
 		}
 
-		if c.Class != nil {
-			return c.Class.lookupConstant(constName)
+		if c.superClass != nil {
+			return c.superClass.lookupConstant(constName, false)
 		}
 
 		return nil

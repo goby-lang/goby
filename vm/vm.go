@@ -182,7 +182,6 @@ func (vm *VM) execInstruction(cf *callFrame, i *instruction) {
 		}
 	}()
 
-	//fmt.Println(i.inspect())
 	i.action.operation(vm, cf, i.Params...)
 }
 
@@ -232,7 +231,6 @@ func (vm *VM) lookupConstant(cf *callFrame, constName string) *Pointer {
 	var constant *Pointer
 	var namespace Class
 	var hasNamespace bool
-	var ok bool
 
 	top := vm.stack.top()
 
@@ -246,26 +244,30 @@ func (vm *VM) lookupConstant(cf *callFrame, constName string) *Pointer {
 		if namespace != cf.self {
 			vm.stack.pop()
 		}
-		constant = namespace.lookupConstant(constName)
 
-		if constant == nil {
-			constant, ok = vm.constants[constName]
-		}
-	} else if scope, inClass := cf.self.(Class); inClass {
-		constant = scope.lookupConstant(constName)
+		constant = namespace.lookupConstant(constName, true)
 
-		if constant == nil {
-			constant, ok = vm.constants[constName]
+		if constant != nil {
+			return constant
 		}
-	} else {
-		constant, ok = vm.constants[constName]
 	}
 
-	if !ok {
-		msg := "Can't find constant: " + constName
-		vm.returnError(msg)
+	switch s := cf.self.(type) {
+	case Class:
+		constant = s.lookupConstant(constName, true)
+		if constant != nil {
+			return constant
+		}
+	case BaseObject:
+		c := s.returnClass()
+
+		constant = c.lookupConstant(constName, true)
+		if constant != nil {
+			return constant
+		}
 	}
 
+	constant = vm.constants[constName]
 	return constant
 }
 

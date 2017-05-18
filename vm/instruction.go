@@ -52,7 +52,14 @@ var builtInActions = map[operationType]*action{
 	bytecode.GetConstant: {
 		name: bytecode.GetConstant,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
-			c := vm.lookupConstant(cf, args[0].(string))
+			constName := args[0].(string)
+			c := vm.lookupConstant(cf, constName)
+
+			if c == nil {
+				msg := "Can't find constant: " + constName
+				vm.returnError(msg)
+			}
+
 			vm.stack.push(c)
 		},
 	},
@@ -274,7 +281,7 @@ var builtInActions = map[operationType]*action{
 
 			classPr := &Pointer{Target: class}
 
-			namespace, inNamespace := cf.self.(*BaseClass)
+			namespace, inNamespace := cf.self.(*RClass)
 
 			if inNamespace {
 				namespace.constants[class.Name] = classPr
@@ -290,11 +297,12 @@ var builtInActions = map[operationType]*action{
 			}
 
 			if len(args) >= 2 {
-				constantName := args[1].(string)
-				constant := vm.lookupConstant(cf, constantName)
-				inheritedClass, ok := constant.Target.(*RClass)
+				superClassName := args[1].(string)
+				superClass := vm.lookupConstant(cf, superClassName)
+				inheritedClass, ok := superClass.Target.(*RClass)
+
 				if !ok {
-					panic("Constant " + constantName + " is not a class. got=" + string(constant.Target.objectType()))
+					panic("Constant " + superClassName + " is not a class. got=" + string(superClass.Target.objectType()))
 				}
 
 				class.pseudoSuperClass = inheritedClass
