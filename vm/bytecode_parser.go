@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/goby-lang/goby/bytecode"
 	"github.com/goby-lang/goby/parser"
-	"io/ioutil"
-	"path"
 	"strconv"
 	"strings"
 )
@@ -118,29 +116,6 @@ func (p *bytecodeParser) parseInstruction(is *instructionSet, line string) {
 	if act == bytecode.PutString {
 		text := strings.Split(line, "\"")[1]
 		params = append(params, text)
-	} else if act == bytecode.RequireRelative {
-		filepath := tokens[2]
-		filepath = path.Join(p.vm.fileDir, filepath)
-
-		file, err := ioutil.ReadFile(filepath + ".gb")
-
-		if err != nil {
-			panic(err)
-		}
-
-		p.execRequiredFile(filepath, file)
-		return
-	} else if act == bytecode.Require {
-		libName := tokens[2]
-		initFunc, ok := standardLibraries[libName]
-
-		if !ok {
-			msg := "Can't require \"" + libName + "\""
-			p.vm.returnError(msg)
-		}
-
-		initFunc(p.vm)
-		return
 	} else if len(tokens) > 2 {
 		rawParams = tokens[2:]
 

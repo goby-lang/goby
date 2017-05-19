@@ -36,9 +36,6 @@ const (
 	InvokeBlock         = "invokeblock"
 	Pop                 = "pop"
 	Leave               = "leave"
-
-	RequireRelative = "require_relative"
-	Require         = "require"
 )
 
 type instruction struct {
