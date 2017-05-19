@@ -122,7 +122,7 @@ func (p *bytecodeParser) parseInstruction(is *instructionSet, line string) {
 		filepath := tokens[2]
 		filepath = path.Join(p.vm.fileDir, filepath)
 
-		file, err := ioutil.ReadFile(filepath + ".ro")
+		file, err := ioutil.ReadFile(filepath + ".gb")
 
 		if err != nil {
 			panic(err)

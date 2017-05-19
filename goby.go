@@ -32,7 +32,7 @@ func main() {
 	file := readFile(filepath)
 
 	switch fileExt {
-	case "ro":
+	case "gb":
 		program := parser.BuildAST(file)
 
 		g := bytecode.NewGenerator(program)
@@ -45,7 +45,7 @@ func main() {
 		}
 
 		writeByteCode(bytecodes, dir, filename)
-	case "robc":
+	case "gbbc":
 		bytecodes := string(file)
 		v := vm.New(dir, args)
 		v.ExecBytecodes(bytecodes, filepath)
@@ -79,7 +79,7 @@ func extractFileInfo(filepath string) (dir, filename, fileExt string) {
 }
 
 func writeByteCode(bytecodes, dir, filename string) {
-	f, err := os.Create(dir + filename + ".robc")
+	f, err := os.Create(dir + filename + ".gbbc")
 
 	if err != nil {
 		panic(err)

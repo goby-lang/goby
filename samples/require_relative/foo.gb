@@ -1,4 +1,4 @@
-require_relative "bar"
+require_relative("bar")
 
 class Foo
   def self.bar(x)

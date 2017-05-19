@@ -235,7 +235,7 @@ var builtinGlobalMethods = []*BuiltInMethod{
 				filepath := args[0].(*StringObject).Value
 				filepath = path.Join(vm.fileDir, filepath)
 
-				file, err := ioutil.ReadFile(filepath + ".ro")
+				file, err := ioutil.ReadFile(filepath + ".gb")
 
 				if err != nil {
 					vm.returnError(err.Error())
