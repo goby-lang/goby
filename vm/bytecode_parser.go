@@ -132,7 +132,7 @@ func (p *bytecodeParser) parseInstruction(is *instructionSet, line string) {
 		return
 	} else if act == bytecode.Require {
 		libName := tokens[2]
-		initFunc, ok := standardLibraris[libName]
+		initFunc, ok := standardLibraries[libName]
 
 		if !ok {
 			msg := "Can't require \"" + libName + "\""
