@@ -111,7 +111,7 @@ func (c *BaseClass) objectType() objectType {
 	return classObj
 }
 
-// inspect returns the basic inspected result (which is class name) of current class
+// Inspect returns the basic inspected result (which is class name) of current class
 // TODO: Singleton class's inspect() should also mark if it's a singleton class explicitly.
 func (c *BaseClass) Inspect() string {
 	if c.isModule {
@@ -191,6 +191,7 @@ func (c *BaseClass) returnClass() Class {
 	return c.Class
 }
 
+// ReturnName returns the name of the class
 func (c *BaseClass) ReturnName() string {
 	return c.Name
 }
@@ -287,6 +288,7 @@ var builtinGlobalMethods = []*BuiltInMethod{
 	},
 }
 
+// BuiltinClassMethods is a collection of class methods used by Class
 var BuiltinClassMethods = []*BuiltInMethod{
 	{
 		Name: "include",
