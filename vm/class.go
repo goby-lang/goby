@@ -215,7 +215,7 @@ var builtinGlobalMethods = []*BuiltInMethod{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				libName := args[0].(*StringObject).Value
-				initFunc, ok := standardLibraris[libName]
+				initFunc, ok := standardLibraries[libName]
 
 				if !ok {
 					msg := "Can't require \"" + libName + "\""

@@ -56,7 +56,7 @@ type stack struct {
 
 type standardLibraryInitMethod func(*VM)
 
-var standardLibraris = map[string]standardLibraryInitMethod{
+var standardLibraries = map[string]standardLibraryInitMethod{
 	"file": initializeFileClass,
 }
 
