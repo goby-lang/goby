@@ -14,11 +14,15 @@ Goby is a Ruby-like object oriented language written in Go. And it's **not** a n
 
 It will have Ruby's syntax (I'll try to support all common syntaxes) but without most of Ruby's meta-programming magic to make the VM simple. It will also have built in http library that is built upon Go's efficient http package. And I'm planning to do more optimization by using goroutine directly.
 
+
+
 **Supporting Goby by sending your first PR!**
 
 **Or support by donation**
 
 [![Support via Gratipay](https://cdn.rawgit.com/gratipay/gratipay-badge/2.3.0/dist/gratipay.svg)](https://gratipay.com/goby/)
+
+(**We'll release first beta version in August, please checkout this [issue](https://github.com/goby-lang/goby/issues/72) for what features `goby` will support.**)
 
 ## Questions
 
@@ -32,10 +36,12 @@ A lot people have questions about `goby` since it's a new language and you may g
 - Object and Class
     - Top level main object
     - Constructor
-    - Support class method
+    - Support class methods
     - Support inheritance
     - Support instance variable
-    - Support self
+    - Support `self`
+- Module
+- Namespace
 - Variables
     - Constant
     - Local variable
@@ -94,13 +100,6 @@ Although we definitely will replace current parser with a parser generator, this
 
 **If you have any thought on this, please join our discussion in [this issue](https://github.com/goby-lang/goby/issues/84). We would love to hear some user's feedback 😁**
 
-
-## TODO & WIP
-
-Checkout this [issue](https://github.com/goby-lang/goby/issues/72) for what we will work on before first release.
-
-Also see [huboard](https://huboard.com/goby-lang/goby)
-
 ## Install
 
 1. You must have Golang installed
@@ -139,13 +138,11 @@ $ goby ./samples/sample-1.gbbc
 
 ## Try it!
 
-(See sample directory)
+See [sample directory](https://github.com/goby-lang/goby/tree/master/samples) for sample code snippets
 
 ```
 $ goby ./samples/sample-1.gb
 $ goby ./samples/sample-2.gb
-$ goby ./samples/sample-3.gb
-$ goby ./samples/sample-4.gb
 $ goby .....
 ```
 
@@ -158,6 +155,13 @@ There is still a lot of document to add. Feel free to contribute following [this
 ## Development & Contribute
 
 See the [guideline](https://github.com/goby-lang/goby/blob/master/CONTRIBUTING.md).
+
+#### TODO & WIP
+
+Checkout this [issue](https://github.com/goby-lang/goby/issues/72) for what we will work on before first release.
+
+Also see [huboard](https://huboard.com/goby-lang/goby)
+
 
 ## References
 
@@ -173,100 +177,3 @@ I can't build this project without these resources, and I highly recommend you t
 - @st0012
 - @janczer
 - @adlerhsieh
-
-##  Sample snippet.
-
-```ruby
-class User
-  def initialize(name, age)
-    @name = name
-    @age = age
-  end
-
-  def name
-    @name
-  end
-
-  def age
-    @age
-  end
-
-  def say_hi(user)
-    puts(@name + " says hi to " + user.name)
-  end
-
-  def self.sum_age(user1, user2)
-    user1.age + user2.age
-  end
-end
-
-stan = User.new("Stan", 22)
-john = User.new("John", 40)
-puts(User.sum_age(stan, john)) #=> 62
-stan.say_hi(john) #=> Stan says hi to John
-```
-
-#### Build a stack using goby
-
-```ruby
-class Stack
-  def initialize
-    @data = []
-  end
-    
-  def push(x)
-    @data.push(x)
-  end
-    
-  def pop
-    @data.pop
-  end
-    
-  def top
-    @data[@data.length - 1]
-  end
-end
-
-s = Stack.new
-s.push(1)
-s.push(2)
-s.push(3)
-s.push(4)
-s.push(10)
-puts(s.pop) #=> 10
-puts(s.top) #=> 4
-```
-
-#### Block support
-
-```ruby
-class Car
-  def initialize
-    yield(self)
-  end
-  
-  def color=(c)
-    @color = c
-  end
-  
-  def color
-    @color
-  end
-  
-  def doors=(ds)
-    @doors = ds
-  end
-  
-  def doors
-    @doors
-  end
-end
- 
-car = Car.new do |c|
-  c.color = "Red"
-  c.doors = 4
-end
- 
-puts("My car's color is " + car.color + " and it's got " + car.doors.to_s + " doors.")
-
-```
