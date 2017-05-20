@@ -3,21 +3,25 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/pkg/profile"
 	"github.com/goby-lang/goby/bytecode"
 	"github.com/goby-lang/goby/parser"
 	"github.com/goby-lang/goby/vm"
+	"github.com/pkg/profile"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
-	"strings"
-	"log"
 	"path/filepath"
+	"strings"
 )
+
+// Version stores current Goby version
+const Version string = "0.0.1"
 
 func main() {
 	compileOptionPtr := flag.Bool("c", false, "Compile to bytecode")
 	profileOptionPtr := flag.Bool("p", false, "Profile program execution")
+	versionOptionPtr := flag.Bool("v", false, "Show current Goby version")
 
 	flag.Parse()
 
@@ -25,7 +29,18 @@ func main() {
 		defer profile.Start().Stop()
 	}
 
+	if *versionOptionPtr {
+		fmt.Println(Version)
+		os.Exit(0)
+	}
+
 	filepath := flag.Arg(0)
+
+	if filepath == "" {
+		flag.Usage()
+		os.Exit(0)
+	}
+
 	args := flag.Args()[1:]
 
 	dir, filename, fileExt := extractFileInfo(filepath)
