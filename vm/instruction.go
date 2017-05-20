@@ -75,9 +75,10 @@ var builtInActions = map[operationType]*action{
 
 			p := cf.getLCL(index, depth)
 
-			if p == nil {
-				panic(fmt.Sprintf("locals index: %d is nil. Callframe: %s", index, cf.instructionSet.label.name))
-			}
+			//if p == nil {
+			//	vm.returnError(fmt.Sprintf("locals index: %d is nil. Callframe: %s", index, cf.instructionSet.label.name))
+			//}
+
 			vm.stack.push(p)
 		},
 	},
@@ -237,7 +238,7 @@ var builtInActions = map[operationType]*action{
 			case BaseObject:
 				self.returnClass().(*RClass).Methods.set(methodName, method)
 			default:
-				panic(fmt.Sprintf("Can't define method on %T", self))
+				vm.returnError(fmt.Sprintf("Can't define method on %T", self))
 			}
 		},
 	},
@@ -257,7 +258,7 @@ var builtInActions = map[operationType]*action{
 			case BaseObject:
 				self.returnClass().(*RClass).setSingletonMethod(methodName, method)
 			default:
-				panic(fmt.Sprintf("Can't define singleton method on %T", self))
+				vm.returnError(fmt.Sprintf("Can't define singleton method on %T", self))
 			}
 		},
 	},
@@ -277,7 +278,7 @@ var builtInActions = map[operationType]*action{
 				inheritedClass, ok := superClass.Target.(*RClass)
 
 				if !ok {
-					panic("Constant " + superClassName + " is not a class. got=" + string(superClass.Target.objectType()))
+					vm.returnError("Constant " + superClassName + " is not a class. got=" + string(superClass.Target.objectType()))
 				}
 
 				class.pseudoSuperClass = inheritedClass
@@ -323,13 +324,13 @@ var builtInActions = map[operationType]*action{
 			case BaseObject:
 				method = receiver.returnClass().lookupInstanceMethod(methodName)
 			case *Error:
-				panic(receiver.Inspect())
+				vm.returnError(receiver.Inspect())
 			default:
-				panic(fmt.Sprintf("not a valid receiver: %s", receiver.Inspect()))
+				vm.returnError("not a valid receiver: %s" + receiver.Inspect())
 			}
 
 			if method == nil {
-				panic(error.Message)
+				vm.returnError(error.Message)
 			}
 
 			var blockFrame *callFrame
@@ -352,9 +353,9 @@ var builtInActions = map[operationType]*action{
 			case *BuiltInMethod:
 				evalBuiltInMethod(vm, receiver, m, receiverPr, argCount, argPr, blockFrame)
 			case *Error:
-				panic(m.Inspect())
+				vm.returnError(m.Inspect())
 			default:
-				panic(fmt.Sprintf("unknown instance method type: %T", m))
+				vm.returnError(fmt.Sprintf("unknown instance method type: %T", m))
 			}
 		},
 	},
@@ -367,7 +368,7 @@ var builtInActions = map[operationType]*action{
 			receiver := vm.stack.Data[receiverPr].Target.(BaseObject)
 
 			if cf.blockFrame == nil {
-				panic("Can't yield without a block")
+				vm.returnError("Can't yield without a block")
 			}
 
 			c := newCallFrame(cf.blockFrame.instructionSet)

@@ -79,8 +79,6 @@ type Class interface {
 
 // RClass represents normal (not built in) class object
 type RClass struct {
-	// Scope contains current class's scope information
-	Scope *scope
 	*BaseClass
 }
 

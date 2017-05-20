@@ -10,7 +10,6 @@ type Method struct {
 	Name           string
 	instructionSet *instructionSet
 	argc           int
-	scope          *scope
 }
 
 func (m *Method) objectType() objectType {
