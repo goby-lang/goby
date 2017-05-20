@@ -35,6 +35,12 @@ func main() {
 	}
 
 	filepath := flag.Arg(0)
+
+	if filepath == "" {
+		flag.Usage()
+		os.Exit(0)
+	}
+
 	args := flag.Args()[1:]
 
 	dir, filename, fileExt := extractFileInfo(filepath)
