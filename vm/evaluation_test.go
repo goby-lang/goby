@@ -247,6 +247,12 @@ func TestPrimitiveType(t *testing.T) {
 			`,
 			"Null",
 		},
+		{
+			`
+			Integer.name
+			`,
+			"Integer",
+		},
 	}
 
 	for _, tt := range tests {

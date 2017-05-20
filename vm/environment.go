@@ -5,20 +5,9 @@ func newEnvironment() *environment {
 	return &environment{store: s, outer: nil}
 }
 
-func closedEnvironment(outer *environment) *environment {
-	env := newEnvironment()
-	env.outer = outer
-	return env
-}
-
 type environment struct {
 	store map[string]Object
 	outer *environment
-}
-
-type scope struct {
-	Env  *environment
-	Self Object
 }
 
 func (e *environment) getCurrent(name string) (Object, bool) {

@@ -32,16 +32,8 @@ func init() {
 }
 
 func initMainObj() {
-	builtInClasses := []Class{stringClass, booleanClass, integerClass, arrayClass, hashClass, nullClass, classClass}
-
 	obj := &RObject{Class: objectClass, InstanceVariables: newEnvironment()}
-	scope := &scope{Self: obj, Env: newEnvironment()}
 
-	for _, class := range builtInClasses {
-		scope.Env.set(class.ReturnName(), class)
-	}
-
-	obj.Scope = scope
 	mainObj = obj
 }
 

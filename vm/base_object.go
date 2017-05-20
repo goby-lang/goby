@@ -12,7 +12,6 @@ type BaseObject interface {
 type RObject struct {
 	Class             *RClass
 	InstanceVariables *environment
-	Scope             *scope
 	InitializeMethod  *Method
 }
 
