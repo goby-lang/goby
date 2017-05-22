@@ -20,6 +20,8 @@ It will have Ruby's syntax (I'll try to support all common syntaxes) but without
 
 **Or support by donation**
 
+[![](https://img.shields.io/gratipay/user/st0012.svg)](https://img.shields.io/gratipay/user/st0012.svg)
+
 [![Support via Gratipay](https://cdn.rawgit.com/gratipay/gratipay-badge/2.3.0/dist/gratipay.svg)](https://gratipay.com/goby/)
 
 (**We'll release first beta version in August, please checkout this [issue](https://github.com/goby-lang/goby/issues/72) for what features `goby` will support.**)
