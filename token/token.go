@@ -66,6 +66,7 @@ const (
 	Self   = "SELF"
 	End    = "END"
 	While  = "WHILE"
+	Next   = "NEXT"
 	Do     = "DO"
 	Yield  = "YIELD"
 
@@ -83,6 +84,7 @@ var keywords = map[string]Type{
 	"self":   Self,
 	"end":    End,
 	"while":  While,
+	"next":   Next,
 	"do":     Do,
 	"yield":  Yield,
 }

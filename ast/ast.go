@@ -487,6 +487,18 @@ func (ws *WhileStatement) String() string {
 	return out.String()
 }
 
+type NextStatement struct {
+	Token token.Token
+}
+
+func (ns *NextStatement) statementNode() {}
+func (ns *NextStatement) TokenLiteral() string {
+	return ns.Token.Literal
+}
+func (ns *NextStatement) String() string {
+	return "next"
+}
+
 type YieldExpression struct {
 	Token     token.Token
 	Arguments []Expression
