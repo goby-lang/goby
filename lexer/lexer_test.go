@@ -80,6 +80,8 @@ func TestNextToken(t *testing.T) {
 	require "foo"
 
 	Foo::Bar
+
+	next;
 	`
 
 	tests := []struct {
@@ -296,7 +298,9 @@ func TestNextToken(t *testing.T) {
 		{token.Constant, "Foo", 73},
 		{token.ResolutionOperator, "::", 73},
 		{token.Constant, "Bar", 73},
-		{token.EOF, "", 74},
+
+		{token.Next, "next", 75},
+		{token.Semicolon, ";", 75},
 	}
 
 	l := New(input)

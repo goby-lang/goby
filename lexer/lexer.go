@@ -148,6 +148,10 @@ func (l *Lexer) NextToken() token.Token {
 				tok.Literal = l.readConstant()
 				tok.Type = token.Constant
 				tok.Line = l.line
+			} else if l.prevChar() == '.' {
+				tok.Literal = l.readIdentifier()
+				tok.Type = token.Ident
+				tok.Line = l.line
 			} else {
 				tok.Literal = l.readIdentifier()
 				tok.Type = token.LookupIdent(tok.Literal)
@@ -260,6 +264,14 @@ func (l *Lexer) peekChar() byte {
 
 	return l.input[l.readPosition]
 	// Peek shouldn't increment positions.
+}
+
+func (l *Lexer) prevChar() byte {
+	if l.position-1 > 0 {
+		return l.input[l.position-1]
+	}
+
+	return 0
 }
 
 func isDigit(ch byte) bool {
