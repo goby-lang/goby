@@ -58,6 +58,7 @@ type standardLibraryInitMethod func(*VM)
 
 var standardLibraries = map[string]standardLibraryInitMethod{
 	"file": initializeFileClass,
+	"net/http": initializeHTTPClass,
 }
 
 // New initializes a vm to initialize state and returns it.

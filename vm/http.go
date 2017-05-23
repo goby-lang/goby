@@ -1,0 +1,50 @@
+package vm
+
+import (
+	"net/http"
+	"strings"
+	"io/ioutil"
+)
+
+func initializeHTTPClass(vm *VM) {
+	net := initializeClass("Net", true)
+	http := initializeClass("HTTP", false)
+	net.constants[http.Name] = &Pointer{http}
+
+	for _, m := range builtinHTTPClassMethods {
+		http.ClassMethods.set(m.Name, m)
+	}
+
+	vm.constants["Net"] = &Pointer{Target: net}
+}
+
+var builtinHTTPClassMethods = []*BuiltInMethod{
+	{
+		Name: "get",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(v *VM, args []Object, blockFrame *callFrame) Object {
+				domain := args[0].(*StringObject).Value
+				path := args[0].(*StringObject).Value
+
+				if !strings.HasPrefix(path, "/") {
+					path = "/" + path
+				}
+
+				resp, err := http.Get(domain + path)
+
+				if err != nil {
+					v.returnError(err.Error())
+				}
+
+				content, err := ioutil.ReadAll(resp.Body)
+				resp.Body.Close()
+
+				if err != nil {
+					v.returnError(err.Error())
+				}
+
+				return initializeString(string(content))
+			}
+		},
+	},
+}
