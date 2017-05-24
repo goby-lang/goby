@@ -58,7 +58,7 @@ func initializeString(value string) *StringObject {
 	return addr
 }
 
-var builtinStringMethods = []*BuiltInMethod{
+var builtinStringInstanceMethods = []*BuiltInMethod{
 	{
 		Name: "+",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -334,7 +334,7 @@ var builtinStringMethods = []*BuiltInMethod{
 func initString() {
 	methods := newEnvironment()
 
-	for _, m := range builtinStringMethods {
+	for _, m := range builtinStringInstanceMethods {
 		methods.set(m.Name, m)
 	}
 

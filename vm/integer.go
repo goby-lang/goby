@@ -45,7 +45,7 @@ func initilaizeInteger(value int) *IntegerObject {
 	return &IntegerObject{Value: value, Class: integerClass}
 }
 
-var builtinIntegerMethods = []*BuiltInMethod{
+var builtinIntegerInstanceMethods = []*BuiltInMethod{
 	{
 		// Returns the sum of self and another Integer.
 		Name: "+",
@@ -432,7 +432,7 @@ var builtinIntegerMethods = []*BuiltInMethod{
 func initInteger() {
 	methods := newEnvironment()
 
-	for _, m := range builtinIntegerMethods {
+	for _, m := range builtinIntegerInstanceMethods {
 		methods.set(m.Name, m)
 	}
 

@@ -44,7 +44,7 @@ func (b *BooleanObject) equal(e *BooleanObject) bool {
 	return b.Value == e.Value
 }
 
-var builtinBooleanMethods = []*BuiltInMethod{
+var builtinBooleanInstanceMethods = []*BuiltInMethod{
 	{
 		// Returns true if the receiver equals to the argument.
 		Name: "==",
@@ -164,7 +164,7 @@ var builtinBooleanMethods = []*BuiltInMethod{
 func initBool() {
 	methods := newEnvironment()
 
-	for _, m := range builtinBooleanMethods {
+	for _, m := range builtinBooleanInstanceMethods {
 		methods.set(m.Name, m)
 	}
 
