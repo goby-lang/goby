@@ -128,7 +128,7 @@ var builtinFileClassMethods = []*BuiltInMethod{
 		// Returns array of path and file.
 		//
 		// ```ruby
-		// File.split("/home/goby/.settings) # => ["/home/goby/", ".settings"]
+		// File.split("/home/goby/.settings") # => ["/home/goby/", ".settings"]
 		// ```
 		// @param filepath [String]
 		// @return [Array]

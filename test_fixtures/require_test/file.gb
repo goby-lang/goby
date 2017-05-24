@@ -1,6 +1,0 @@
-require("file")
-
-puts(File.extname("loop.gb"))
-
-puts(File.size("../../goby"))
-
