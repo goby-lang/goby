@@ -172,7 +172,7 @@ var builtInActions = map[operationType]*action{
 				return
 			}
 
-			_, isNull := v.Target.(*Null)
+			_, isNull := v.Target.(*NullObject)
 
 			if isNull {
 				line := args[0].(int)
