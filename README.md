@@ -158,6 +158,8 @@ There is still a lot of document to add. Feel free to contribute following [this
 
 See the [guideline](https://github.com/goby-lang/goby/blob/master/CONTRIBUTING.md).
 
+**Note**: Before sending PR, you should perform `make test` on the root directory of the project to perform all tests (`go test` works only against goby.go file and will be incomplete for the test).
+
 #### TODO & WIP
 
 Checkout this [issue](https://github.com/goby-lang/goby/issues/72) for what we will work on before first release.
