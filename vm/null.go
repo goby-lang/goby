@@ -28,7 +28,7 @@ func (n *Null) returnClass() Class {
 func initNull() {
 	methods := newEnvironment()
 
-	for _, m := range builtInNullMethods {
+	for _, m := range builtInNullInstanceMethods {
 		methods.set(m.Name, m)
 	}
 
@@ -38,7 +38,7 @@ func initNull() {
 	NULL = &Null{Class: nullClass}
 }
 
-var builtInNullMethods = []*BuiltInMethod{
+var builtInNullInstanceMethods = []*BuiltInMethod{
 	{
 		Name: "!",
 		Fn: func(receiver Object) builtinMethodBody {
