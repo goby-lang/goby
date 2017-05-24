@@ -1,8 +1,6 @@
 package vm
 
 import (
-	"io/ioutil"
-	"os"
 	"testing"
 )
 
@@ -27,65 +25,63 @@ func TestEaxtnameMethod(t *testing.T) {
 	}
 }
 
-func TestSizeMethod(t *testing.T) {
-	//creat in tmp file with size
-	err := ioutil.WriteFile("/tmp/testSize", []byte("test\nadd some data\n"), 0644)
-	if err != nil {
-		panic(err)
-	}
-	fileStat, err := os.Stat("/tmp/testSize")
-	if err != nil {
-		panic(err)
-	}
-
-	defer os.Remove("/tmp/testSize")
-
-	//check it
+func TestBasenameMethod(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected int
+		expected string
 	}{
 		{`
 		require("file")
-		File.size("/tmp/testSize")
-		`, int(fileStat.Size())},
+		File.basename("/home/goby/plugin/test.gb")
+		`, "test.gb"},
 	}
 
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testIntegerObject(t, evaluated, tt.expected)
+		testStringObject(t, evaluated, tt.expected)
 	}
 }
 
-func TestChmodMethod(t *testing.T) {
-	//creat in tmp file with size
-	err := ioutil.WriteFile("/tmp/testChmod", []byte("test\nadd some data\n"), 0644)
-	if err != nil {
-		panic(err)
-	}
-
-	defer os.Remove("/tmp/testSize")
-
+func TestSplitMethod(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected int
+		expected *ArrayObject
 	}{
 		{`
 		require("file")
-		File.chmod(0755, "/tmp/testChmod")
-		`, 1},
+		File.split("/home/goby/plugin/test.gb")
+		`, initializeArray([]Object{initializeString("/home/goby/plugin/"), initializeString("test.gb")})},
 	}
 
 	for _, tt := range tests {
-		testEval(t, tt.input)
+		evaluated := testEval(t, tt.input)
+		testArrayObject(t, evaluated, tt.expected)
 	}
-
-	fileStat, err := os.Stat("/tmp/testChmod")
-	if err != nil {
-		panic(err)
-	}
-	if fileStat.Mode() != 0755 {
-		t.Errorf("Filemod incorect expected %o got=%o", 0755, fileStat.Mode())
-	}
-
 }
+
+func TestJoinMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`
+		require("file")
+		File.join("test1", "test2", "test3")
+		`, "test1/test2/test3"},
+		{`
+		require("file")
+		File.join("goby", "plugin")
+		`, "goby/plugin"},
+		{`
+		require("file")
+		File.join("plugin")
+		`, "plugin"},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		testStringObject(t, evaluated, tt.expected)
+	}
+}
+
+//@TODO add test for size and chmod form a847c8b41f29657b380c1731ec36a660dbf49bc4
