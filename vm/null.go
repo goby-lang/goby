@@ -2,13 +2,16 @@ package vm
 
 var (
 	nullClass *RNull
-	NULL      *NullObject
+	// NULL represents Goby's null objects.
+	NULL *NullObject
 )
 
+// RNull is the built in class of Goby's null objects.
 type RNull struct {
 	*BaseClass
 }
 
+// NullObject represnts the null value in Goby.
 type NullObject struct {
 	Class *RNull
 }
@@ -17,6 +20,7 @@ func (n *NullObject) objectType() objectType {
 	return nullObj
 }
 
+// Inspect returns the name of NullObject
 func (n *NullObject) Inspect() string {
 	return "null"
 }
