@@ -80,7 +80,7 @@ func TestEvalHashAccess(t *testing.T) {
 		case bool:
 			testBooleanObject(t, evaluated, expected)
 		case nil:
-			_, ok := evaluated.(*Null)
+			_, ok := evaluated.(*NullObject)
 
 			if !ok {
 
