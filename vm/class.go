@@ -22,7 +22,7 @@ func initTopLevelClasses() {
 		globalMethods.set(m.Name, m)
 	}
 
-	for _, m := range BuiltinClassMethods {
+	for _, m := range builtinClassClassMethods {
 		classMethods.set(m.Name, m)
 	}
 
@@ -65,6 +65,7 @@ func initializeClass(name string, isModule bool) *RClass {
 }
 
 // Class is an interface that implements a class's basic functions.
+//
 // - lookupClassMethod: search for current class's class method with given name.
 // - lookupInstanceMethod: search for current class's instance method with given name.
 // - ReturnName returns class's name
@@ -287,7 +288,7 @@ var builtinGlobalMethods = []*BuiltInMethod{
 }
 
 // BuiltinClassMethods is a collection of class methods used by Class
-var BuiltinClassMethods = []*BuiltInMethod{
+var builtinClassClassMethods = []*BuiltInMethod{
 	{
 		Name: "include",
 		Fn: func(receiver Object) builtinMethodBody {

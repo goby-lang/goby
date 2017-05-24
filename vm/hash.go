@@ -52,7 +52,7 @@ func initializeHash(pairs map[string]Object) *HashObject {
 	return &HashObject{Pairs: pairs, Class: hashClass}
 }
 
-var builtinHashMethods = []*BuiltInMethod{
+var builtinHashInstanceMethods = []*BuiltInMethod{
 	{
 		Name: "[]",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -130,7 +130,7 @@ var builtinHashMethods = []*BuiltInMethod{
 func init() {
 	methods := newEnvironment()
 
-	for _, m := range builtinHashMethods {
+	for _, m := range builtinHashInstanceMethods {
 		methods.set(m.Name, m)
 	}
 
