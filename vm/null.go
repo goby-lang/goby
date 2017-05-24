@@ -2,26 +2,30 @@ package vm
 
 var (
 	nullClass *RNull
-	NULL      *Null
+	// NULL represents Goby's null objects.
+	NULL *NullObject
 )
 
+// RNull is the built in class of Goby's null objects.
 type RNull struct {
 	*BaseClass
 }
 
-type Null struct {
+// NullObject represnts the null value in Goby.
+type NullObject struct {
 	Class *RNull
 }
 
-func (n *Null) objectType() objectType {
+func (n *NullObject) objectType() objectType {
 	return nullObj
 }
 
-func (n *Null) Inspect() string {
+// Inspect returns the name of NullObject
+func (n *NullObject) Inspect() string {
 	return "null"
 }
 
-func (n *Null) returnClass() Class {
+func (n *NullObject) returnClass() Class {
 	return n.Class
 }
 
@@ -35,7 +39,7 @@ func initNull() {
 	baseClass := &BaseClass{Name: "Null", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass}
 	nc := &RNull{BaseClass: baseClass}
 	nullClass = nc
-	NULL = &Null{Class: nullClass}
+	NULL = &NullObject{Class: nullClass}
 }
 
 var builtInNullInstanceMethods = []*BuiltInMethod{
