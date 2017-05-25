@@ -27,6 +27,15 @@ func TestFileExtname(t *testing.T) {
 	testStringObject(t, result, ".gb")
 }
 
+func TestFileSize(t *testing.T) {
+	filename := "size.gb"
+	fileDir := "file_test"
+
+	result := execFile(fileDir, filename)
+
+	testIntegerObject(t, result, 51)
+}
+
 func TestFileJoin(t *testing.T) {
 	filename := "join.gb"
 	fileDir := "file_test"
@@ -76,7 +85,7 @@ func execFile(fileDir, filename string) vm.Object {
 	g := bytecode.NewGenerator(program)
 	bytecodes := g.GenerateByteCode(program)
 
-	v := vm.New(dir, []string{})
+	v := vm.New(dir+"/", []string{})
 	v.ExecBytecodes(bytecodes, filepath)
 	return v.GetExecResult()
 }
