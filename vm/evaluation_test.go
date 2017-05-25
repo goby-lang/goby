@@ -4,6 +4,63 @@ import (
 	"testing"
 )
 
+func TestAttrReaderAndWriter(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{`
+		class Foo
+		  attr_reader("bar")
+
+		  def set_bar(bar)
+		    @bar = bar
+		  end
+		end
+
+		f = Foo.new
+		f.set_bar(10)
+		f.bar
+
+		`, 10},
+		{`
+		class Foo
+		  attr_writer("bar")
+
+		  def bar
+		    @bar
+		  end
+		end
+
+		f = Foo.new
+		f.bar = 10
+		f.bar
+
+		`, 10},
+		{`
+		class Foo
+		  attr_writer("bar")
+		  attr_reader("bar")
+		end
+
+		f = Foo.new
+		f.bar = 10
+		f.bar
+
+		`, 10},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s.\n Input %s", evaluated.(*Error).Message, tt.input)
+		}
+
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
 func TestNamespace(t *testing.T) {
 	tests := []struct {
 		input    string
