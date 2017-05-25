@@ -290,6 +290,74 @@ var builtinGlobalMethods = []*BuiltInMethod{
 // BuiltinClassMethods is a collection of class methods used by Class
 var builtinClassClassMethods = []*BuiltInMethod{
 	{
+		Name: "attr_reader",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				r := receiver.(*RClass)
+
+				for _, attr := range args {
+					attrName := attr.(*StringObject).Value
+					m := &BuiltInMethod{
+						Name: attrName,
+						Fn: func(receiver Object) builtinMethodBody {
+							return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+								v, _ := receiver.(*RObject).InstanceVariables.get("@" + attrName)
+								return v
+							}
+						},
+					}
+
+					r.Methods.set(attrName, m)
+				}
+
+				return r
+			}
+		},
+	},
+	{
+		Name: "attr_writer",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				r := receiver.(*RClass)
+
+				for _, attr := range args {
+					attrName := attr.(*StringObject).Value
+					m := &BuiltInMethod{
+						Name: attrName + "=",
+						Fn: func(receiver Object) builtinMethodBody {
+							return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+								v := receiver.(*RObject).InstanceVariables.set("@"+attrName, args[0])
+								return v
+							}
+						},
+					}
+
+					r.Methods.set(attrName+"=", m)
+				}
+
+				return r
+			}
+		},
+	},
+	{
+		Name: "attr_accessor",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				r := receiver.(*RClass)
+
+				attrReader := r.lookupClassMethod("attr_reader")
+				attrWriter := r.lookupClassMethod("attr_writer")
+				readFn := attrReader.(*BuiltInMethod).Fn(receiver)
+				writeFn := attrWriter.(*BuiltInMethod).Fn(receiver)
+
+				readFn(vm, args, blockFrame)
+				writeFn(vm, args, blockFrame)
+
+				return r
+			}
+		},
+	},
+	{
 		Name: "include",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
