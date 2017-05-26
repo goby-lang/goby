@@ -32,12 +32,12 @@ var builtinURIClassMethods = []*BuiltInMethod{
 				}
 
 				uriAttrs := map[string]Object{
-					"@host": initializeString(u.Host),
-					"@path": initializeString(u.Path),
-					"@port": initializeString(u.Port()),
-					"@query": initializeString(u.RawQuery),
-					"@scheme": initializeString(u.Scheme),
-					"@user": NULL,
+					"@host":     initializeString(u.Host),
+					"@path":     initializeString(u.Path),
+					"@port":     initializeString(u.Port()),
+					"@query":    initializeString(u.RawQuery),
+					"@scheme":   initializeString(u.Scheme),
+					"@user":     NULL,
 					"@password": NULL,
 				}
 
@@ -66,6 +66,5 @@ var builtinURIClassMethods = []*BuiltInMethod{
 				return i
 			}
 		},
-
 	},
 }

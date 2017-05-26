@@ -1,9 +1,9 @@
 package vm
 
 import (
+	"io/ioutil"
 	"net/http"
 	"strings"
-	"io/ioutil"
 )
 
 func initializeHTTPClass(vm *VM) {
