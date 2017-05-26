@@ -180,6 +180,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethod{
 		// ```ruby
 		// [1, 2, 3].length # => 3
 		// ```
+		// @return [Integer]
 		Name: "length",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {

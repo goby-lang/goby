@@ -48,6 +48,11 @@ func initilaizeInteger(value int) *IntegerObject {
 var builtinIntegerInstanceMethods = []*BuiltInMethod{
 	{
 		// Returns the sum of self and another Integer.
+		//
+		// ```Ruby
+		// 1 + 2 # => 3
+		// ```
+		// @return [Integer]
 		Name: "+",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -66,6 +71,11 @@ var builtinIntegerInstanceMethods = []*BuiltInMethod{
 	},
 	{
 		// Returns the subtraction of another Integer from self.
+		//
+		// ```Ruby
+		// 1 - 1 # => 0
+		// ```
+		// @return [Integer]
 		Name: "-",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -84,6 +94,11 @@ var builtinIntegerInstanceMethods = []*BuiltInMethod{
 	},
 	{
 		// Returns self multiplying another Integer.
+		//
+		// ```Ruby
+		// 2 * 10 # => 20
+		// ```
+		// @return [Integer]
 		Name: "*",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -102,6 +117,11 @@ var builtinIntegerInstanceMethods = []*BuiltInMethod{
 	},
 	{
 		// Returns self squaring another Integer.
+		//
+		// ```Ruby
+		// 2 ** 8 # => 256
+		// ```
+		// @return [Integer]
 		Name: "**",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -121,6 +141,11 @@ var builtinIntegerInstanceMethods = []*BuiltInMethod{
 	},
 	{
 		// Returns self divided by another Integer.
+		//
+		// ```Ruby
+		// 6 / 3 # => 2
+		// ```
+		// @return [Integer]
 		Name: "/",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -139,6 +164,12 @@ var builtinIntegerInstanceMethods = []*BuiltInMethod{
 	},
 	{
 		// Returns if self is larger than another Integer.
+		//
+		// ```Ruby
+		// 10 > -1 # => true
+		// 3 > 3 # => false
+		// ```
+		// @return [Boolean]
 		Name: ">",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -162,6 +193,12 @@ var builtinIntegerInstanceMethods = []*BuiltInMethod{
 	},
 	{
 		// Returns if self is larger than or equals to another Integer.
+		//
+		// ```Ruby
+		// 2 >= 1 # => true
+		// 1 >= 1 # => true
+		// ```
+		// @return [Boolean]
 		Name: ">=",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -185,6 +222,12 @@ var builtinIntegerInstanceMethods = []*BuiltInMethod{
 	},
 	{
 		// Returns if self is smaller than another Integer.
+		//
+		// ```Ruby
+		// 1 < 3 # => true
+		// 1 < 1 # => false
+		// ```
+		// @return [Boolean]
 		Name: "<",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -208,6 +251,12 @@ var builtinIntegerInstanceMethods = []*BuiltInMethod{
 	},
 	{
 		// Returns if self is smaller than or equals to another Integer.
+		//
+		// ```Ruby
+		// 1 <= 3 # => true
+		// 1 <= 1 # => true
+		// ```
+		// @return [Boolean]
 		Name: "<=",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -231,6 +280,13 @@ var builtinIntegerInstanceMethods = []*BuiltInMethod{
 	},
 	{
 		// Returns 1 if self is larger than the incoming Integer, -1 if smaller. Otherwise 0.
+		//
+		// ```Ruby
+		// 1 <=> 3 # => -1
+		// 1 <=> 1 # => 0
+		// 3 <=> 1 # => 1
+		// ```
+		// @return [Integer]
 		Name: "<=>",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -257,6 +313,12 @@ var builtinIntegerInstanceMethods = []*BuiltInMethod{
 	},
 	{
 		// Returns if self is equal to another Integer.
+		//
+		// ```Ruby
+		// 1 == 3 # => false
+		// 1 == 1 # => true
+		// ```
+		// @return [Boolean]
 		Name: "==",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -280,6 +342,12 @@ var builtinIntegerInstanceMethods = []*BuiltInMethod{
 	},
 	{
 		// Returns if self is not equal to another Integer.
+		//
+		// ```Ruby
+		// 1 != 3 # => true
+		// 1 != 1 # => false
+		// ```
+		// @return [Boolean]
 		Name: "!=",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -303,6 +371,11 @@ var builtinIntegerInstanceMethods = []*BuiltInMethod{
 	},
 	{
 		// Adds 1 to self and returns.
+		//
+		// ```Ruby
+		// 1++ # => 2
+		// ```
+		// @return [Integer]
 		Name: "++",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -315,6 +388,11 @@ var builtinIntegerInstanceMethods = []*BuiltInMethod{
 	},
 	{
 		// Substracts 1 from self and returns.
+		//
+		// ```Ruby
+		// 0-- # => -1
+		// ```
+		// @return [Integer]
 		Name: "--",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -327,6 +405,11 @@ var builtinIntegerInstanceMethods = []*BuiltInMethod{
 	},
 	{
 		// Returns a `String` representation of self.
+		//
+		// ```Ruby
+		// 100.to_s # => "100"
+		// ```
+		// @return [String]
 		Name: "to_s",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -339,6 +422,11 @@ var builtinIntegerInstanceMethods = []*BuiltInMethod{
 	},
 	{
 		// Returns self.
+		//
+		// ```Ruby
+		// 100.to_i # => 100
+		// ```
+		// @return [Integer]
 		Name: "to_i",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -348,6 +436,12 @@ var builtinIntegerInstanceMethods = []*BuiltInMethod{
 	},
 	{
 		// Returns if self is even.
+		//
+		// ```Ruby
+		// 1.even # => false
+		// 2.even # => true
+		// ```
+		// @return [Boolean]
 		Name: "even",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -370,6 +464,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethod{
 		// 3.odd # => true
 		// 4.odd # => false
 		// ```
+		// @return [Boolean]
 		Name: "odd",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -386,6 +481,11 @@ var builtinIntegerInstanceMethods = []*BuiltInMethod{
 	},
 	{
 		// Returns self + 1.
+		//
+		// ```ruby
+		// 100.next # => 101
+		// ```
+		// @return [Integer]
 		Name: "next",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -396,6 +496,11 @@ var builtinIntegerInstanceMethods = []*BuiltInMethod{
 	},
 	{
 		// Returns self - 1.
+		//
+		// ```ruby
+		// 40.pred # => 39
+		// ```
+		// @return [Integer]
 		Name: "pred",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -406,6 +511,14 @@ var builtinIntegerInstanceMethods = []*BuiltInMethod{
 	},
 	{
 		// Yields a block a number of times equals to self.
+		//
+		// ```Ruby
+		// a = 0
+		// 3.times do
+		//    a++
+		// end
+		// a # => 3
+		// ```
 		Name: "times",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
