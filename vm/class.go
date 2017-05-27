@@ -209,6 +209,40 @@ func (c *RClass) initializeInstance() *RObject {
 	return instance
 }
 
+func (c *RClass) setAttrWriter(args []Object) {
+	for _, attr := range args {
+		attrName := attr.(*StringObject).Value
+		m := &BuiltInMethod{
+			Name: attrName + "=",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+					v := receiver.(*RObject).InstanceVariables.set("@"+attrName, args[0])
+					return v
+				}
+			},
+		}
+
+		c.Methods.set(attrName+"=", m)
+	}
+}
+
+func (c *RClass) setAttrReader(args []Object) {
+	for _, attr := range args {
+		attrName := attr.(*StringObject).Value
+		m := &BuiltInMethod{
+			Name: attrName,
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+					v, _ := receiver.(*RObject).InstanceVariables.get("@" + attrName)
+					return v
+				}
+			},
+		}
+
+		c.Methods.set(attrName, m)
+	}
+}
+
 var builtinGlobalMethods = []*BuiltInMethod{
 	{
 		Name: "require",
@@ -294,21 +328,7 @@ var builtinClassClassMethods = []*BuiltInMethod{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				r := receiver.(*RClass)
-
-				for _, attr := range args {
-					attrName := attr.(*StringObject).Value
-					m := &BuiltInMethod{
-						Name: attrName,
-						Fn: func(receiver Object) builtinMethodBody {
-							return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-								v, _ := receiver.(*RObject).InstanceVariables.get("@" + attrName)
-								return v
-							}
-						},
-					}
-
-					r.Methods.set(attrName, m)
-				}
+				r.setAttrReader(args)
 
 				return r
 			}
@@ -319,21 +339,7 @@ var builtinClassClassMethods = []*BuiltInMethod{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				r := receiver.(*RClass)
-
-				for _, attr := range args {
-					attrName := attr.(*StringObject).Value
-					m := &BuiltInMethod{
-						Name: attrName + "=",
-						Fn: func(receiver Object) builtinMethodBody {
-							return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-								v := receiver.(*RObject).InstanceVariables.set("@"+attrName, args[0])
-								return v
-							}
-						},
-					}
-
-					r.Methods.set(attrName+"=", m)
-				}
+				r.setAttrWriter(args)
 
 				return r
 			}
