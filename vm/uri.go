@@ -36,6 +36,15 @@ func initializeURIClass(vm *VM) {
 
 var builtinURIClassMethods = []*BuiltInMethod{
 	{
+		// Returns a Net::HTTP or Net::HTTPS's instance (depends on the url scheme).
+		//
+		// ```ruby
+		// u = URI.parse("https://example.com")
+		// u.scheme # => "https"
+		// u.host # => "example.com"
+		// u.port # => 80
+		// u.path # => "/"
+		// ```
 		Name: "parse",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(v *VM, args []Object, blockFrame *callFrame) Object {
