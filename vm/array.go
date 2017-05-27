@@ -270,7 +270,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethod{
 				arr := receiver.(*ArrayObject)
 
 				if blockFrame == nil {
-					panic("Can't yield without a block")
+					vm.returnError("Can't yield without a block")
 				}
 
 				for _, obj := range arr.Elements {
@@ -287,7 +287,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethod{
 				arr := receiver.(*ArrayObject)
 
 				if blockFrame == nil {
-					panic("Can't yield without a block")
+					vm.returnError("Can't yield without a block")
 				}
 
 				for i := range arr.Elements {
@@ -315,7 +315,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethod{
 				var elements = make([]Object, len(arr.Elements))
 
 				if blockFrame == nil {
-					panic("Can't yield without a block")
+					vm.returnError("Can't yield without a block")
 				}
 
 				for i, obj := range arr.Elements {
@@ -346,7 +346,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethod{
 				var elements []Object
 
 				if blockFrame == nil {
-					panic("Can't yield without a block")
+					vm.returnError("Can't yield without a block")
 				}
 
 				for _, obj := range arr.Elements {
