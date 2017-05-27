@@ -31,6 +31,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return nil
 	case token.While:
 		return p.parseWhileStatement()
+	case token.Next:
+		return p.parseNextStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -248,4 +250,16 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 	ws.Body = p.parseBlockStatement()
 
 	return ws
+}
+
+func (p *Parser) parseNextStatement() *ast.NextStatement {
+	ns := &ast.NextStatement{Token: p.curToken}
+
+	p.nextToken()
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+	}
+
+	return ns
 }

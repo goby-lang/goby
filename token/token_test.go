@@ -20,6 +20,7 @@ func TestLookupIdentTrue(t *testing.T) {
 		"self":   Self,
 		"end":    End,
 		"while":  While,
+		"next":   Next,
 		"do":     Do,
 		"yield":  Yield,
 		"nil":    Null,

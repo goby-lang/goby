@@ -487,6 +487,21 @@ func (ws *WhileStatement) String() string {
 	return out.String()
 }
 
+// `next` keyword for skip loop once
+type NextStatement struct {
+	Token token.Token
+}
+
+func (ns *NextStatement) statementNode() {}
+
+// returns `next
+func (ns *NextStatement) TokenLiteral() string {
+	return ns.Token.Literal
+}
+func (ns *NextStatement) String() string {
+	return "next"
+}
+
 type YieldExpression struct {
 	Token     token.Token
 	Arguments []Expression

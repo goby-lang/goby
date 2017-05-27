@@ -146,6 +146,8 @@ func (g *Generator) compileStatement(is *instructionSet, statement ast.Statement
 		g.endInstructions(is)
 	case *ast.WhileStatement:
 		g.compileWhileStmt(is, stmt, scope, table)
+	case *ast.NextStatement:
+		g.compileNextStmt(is, stmt, scope, table)
 	}
 }
 
@@ -159,7 +161,8 @@ func (g *Generator) compileWhileStmt(is *instructionSet, stmt *ast.WhileStatemen
 
 	anchor2 := &anchor{is.Count}
 
-	g.compileBlockStatement(is, stmt.Body, scope, scope.localTable)
+	innerScope := newScope(scope, stmt)
+	g.compileBlockStatement(is, stmt.Body, innerScope, scope.localTable)
 
 	anchor1.line = is.Count
 
@@ -168,6 +171,14 @@ func (g *Generator) compileWhileStmt(is *instructionSet, stmt *ast.WhileStatemen
 	is.define(BranchIf, anchor2)
 	is.define(PutNull)
 	is.define(Pop)
+}
+
+func (g *Generator) compileNextStmt(is *instructionSet, stmt *ast.NextStatement, scope *scope, table *localTable) {
+	anchor1 := &anchor{scope.line}
+
+	is.define(PutNull)
+	is.define(Pop)
+	is.define(Jump, anchor1)
 }
 
 func (g *Generator) compileClassStmt(stmt *ast.ClassStatement, scope *scope) {

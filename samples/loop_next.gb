@@ -1,0 +1,10 @@
+i = 0
+while i < 10 do
+    i = i + 1
+    if i == 5
+      next;
+    end
+    puts(i)
+end
+
+puts(i)
