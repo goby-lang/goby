@@ -47,6 +47,12 @@ func (b *BooleanObject) equal(e *BooleanObject) bool {
 var builtinBooleanInstanceMethods = []*BuiltInMethod{
 	{
 		// Returns true if the receiver equals to the argument.
+		//
+		// ```Ruby
+		// 1 == 1 # => true
+		// 100 == 33 # => false
+		// ```
+		// @return [Boolean]
 		Name: "==",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -65,6 +71,12 @@ var builtinBooleanInstanceMethods = []*BuiltInMethod{
 	},
 	{
 		// Returns true if the receiver is not equals to the argument.
+		//
+		// ```Ruby
+		// 4 != 2 # => true
+		// 45 != 45 # => false
+		// ```
+		// @return [Boolean]
 		Name: "!=",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -88,6 +100,7 @@ var builtinBooleanInstanceMethods = []*BuiltInMethod{
 		// !true  # => false
 		// !false # => true
 		// ```
+		// @return [Boolean]
 		Name: "!",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -109,6 +122,7 @@ var builtinBooleanInstanceMethods = []*BuiltInMethod{
 		// 3 > 2 && 5 > 3  # => true
 		// 3 > 2 && 5 > 10 # => false
 		// ```
+		// @return [Boolean]
 		Name: "&&",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -138,6 +152,7 @@ var builtinBooleanInstanceMethods = []*BuiltInMethod{
 		// 3 > 2 || 5 > 10 # => true
 		// 2 > 3 || 5 > 10 # => false
 		// ```
+		// @return [Boolean]
 		Name: "||",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {

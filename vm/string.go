@@ -60,6 +60,12 @@ func initializeString(value string) *StringObject {
 
 var builtinStringInstanceMethods = []*BuiltInMethod{
 	{
+		// Returns the concatineted of self and another String
+		//
+		// ```Ruby
+		// "first" + "-second" # => "first-second"
+		// ```
+		// @return [String]
 		Name: "+",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -77,6 +83,12 @@ var builtinStringInstanceMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Returns self multiplying another Integer
+		//
+		// ```Ruby
+		// "string " * 2 # => "string string string "
+		// ```
+		// @return [String]
 		Name: "*",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -103,6 +115,12 @@ var builtinStringInstanceMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Returns a Boolean if first string greater than second string
+		//
+		// ```Ruby
+		// "a" < "b" # => true
+		// ```
+		// @return [Boolean]
 		Name: ">",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -125,6 +143,12 @@ var builtinStringInstanceMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Returns a Boolean if first string less than second string
+		//
+		// ```Ruby
+		// "a" < "b" # => true
+		// ```
+		// @return [Boolean]
 		Name: "<",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -147,6 +171,13 @@ var builtinStringInstanceMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Returns a Boolean of compared two strings
+		//
+		// ```Ruby
+		// "first" == "second" # => false
+		// "two" == "two" # => true
+		// ```
+		// @return [Boolean]
 		Name: "==",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -169,6 +200,15 @@ var builtinStringInstanceMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Returns a Integer. If first string is less than second string returns -1, if equal to returns 0, if greater returns 1
+		//
+		//
+		// ```Ruby
+		// "abc" <=> "abcd" # => -1
+		// "abc" <=> "abc" # => 0
+		// "abcd" <=> "abc" # => 1
+		// ```
+		// @return [Integer]
 		Name: "<=>",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -194,6 +234,13 @@ var builtinStringInstanceMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Returns a Boolean of compared two strings
+		//
+		// ```Ruby
+		// "first" != "second" # => true
+		// "two" != "two" # => false
+		// ```
+		// @return [Boolean]
 		Name: "!=",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -216,6 +263,13 @@ var builtinStringInstanceMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Return a new String with the first character converted to uppercase but the rest of string converted to lowercase.
+		//
+		// ```Ruby
+		// "test".capitalize # => "Test"
+		// "tEST".capitalize # => "Test"
+		// ```
+		// @return [String]
 		Name: "capitalize",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -230,6 +284,12 @@ var builtinStringInstanceMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Returns a new String with all characters is upcase
+		//
+		// ```Ruby
+		// "very big".upcase # => "VERY BIG"
+		// ```
+		// @return [String]
 		Name: "upcase",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -241,6 +301,12 @@ var builtinStringInstanceMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Returns a new String with all characters is lowercase
+		//
+		// ```Ruby
+		// "erROR".downcase # => "error"
+		// ```
+		// @return [String]
 		Name: "downcase",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -252,6 +318,13 @@ var builtinStringInstanceMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Returns the character length of self
+		//
+		// ```Ruby
+		// "zero".size # => 4
+		// "".size # => 0
+		// ```
+		// @return [Integer]
 		Name: "size",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -263,6 +336,13 @@ var builtinStringInstanceMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Returns the character length of self
+		//
+		// ```Ruby
+		// "zero".size # => 4
+		// "".size # => 0
+		// ```
+		// @return [Integer]
 		Name: "length",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -274,6 +354,12 @@ var builtinStringInstanceMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Returns a new String with reverse order of self
+		//
+		// ```Ruby
+		// "reverse".reverse # => "esrever"
+		// ```
+		// @return [String]
 		Name: "reverse",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -289,6 +375,12 @@ var builtinStringInstanceMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Returns a new String with self value
+		//
+		// ```Ruby
+		// "string".to_s # => "string"
+		// ```
+		// @return [String]
 		Name: "to_s",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -300,6 +392,14 @@ var builtinStringInstanceMethods = []*BuiltInMethod{
 		},
 	},
 	{
+		// Returns the result of converting self to Integer
+		//
+		// ```Ruby
+		// "123".to_i # => 123
+		// "3d print".to_i # => 3
+		// "some text".to_i # => 0
+		// ```
+		// @return [Integer]
 		Name: "to_i",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
