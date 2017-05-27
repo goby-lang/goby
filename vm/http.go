@@ -23,8 +23,13 @@ var builtinHTTPClassMethods = []*BuiltInMethod{
 		Name: "get",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(v *VM, args []Object, blockFrame *callFrame) Object {
+				var path string
+
 				domain := args[0].(*StringObject).Value
-				path := args[0].(*StringObject).Value
+
+				if len(args) > 1 {
+					path = args[1].(*StringObject).Value
+				}
 
 				if !strings.HasPrefix(path, "/") {
 					path = "/" + path
