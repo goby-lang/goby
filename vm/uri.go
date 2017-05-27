@@ -2,18 +2,34 @@ package vm
 
 import (
 	"net/url"
+	"strconv"
 )
 
 func initializeURIClass(vm *VM) {
 	uri := initializeClass("URI", true)
 	http := initializeClass("HTTP", false)
 	https := initializeClass("HTTPS", false)
+	https.superClass = http
+	https.pseudoSuperClass = http
 	uri.constants[http.Name] = &Pointer{http}
 	uri.constants[https.Name] = &Pointer{https}
 
 	for _, m := range builtinURIClassMethods {
 		uri.ClassMethods.set(m.Name, m)
 	}
+
+	attrs := []Object{
+		initializeString("host"),
+		initializeString("path"),
+		initializeString("port"),
+		initializeString("query"),
+		initializeString("scheme"),
+		initializeString("user"),
+		initializeString("password"),
+	}
+
+	http.setAttrReader(attrs)
+	http.setAttrWriter(attrs)
 
 	vm.constants["URI"] = &Pointer{Target: uri}
 }
@@ -32,21 +48,55 @@ var builtinURIClassMethods = []*BuiltInMethod{
 				}
 
 				uriAttrs := map[string]Object{
-					"@host":     initializeString(u.Host),
-					"@path":     initializeString(u.Path),
-					"@port":     initializeString(u.Port()),
-					"@query":    initializeString(u.RawQuery),
-					"@scheme":   initializeString(u.Scheme),
 					"@user":     NULL,
 					"@password": NULL,
+					"@query":    NULL,
+					"@path":     initializeString("/"),
 				}
 
-				if len(u.User.Username()) != 0 {
-					uriAttrs["@user"] = initializeString(u.User.Username())
+				// Scheme
+				uriAttrs["@scheme"] = initializeString(u.Scheme)
+
+				// Host
+				uriAttrs["@host"] = initializeString(u.Host)
+
+				// Port
+				if len(u.Port()) == 0 {
+					switch u.Scheme {
+					case "http":
+						uriAttrs["@port"] = initilaizeInteger(80)
+					case "https":
+						uriAttrs["@port"] = initilaizeInteger(443)
+					}
+				} else {
+					p, err := strconv.ParseInt(u.Port(), 0, 64)
+
+					if err != nil {
+						v.returnError(err.Error())
+					}
+
+					uriAttrs["@port"] = initilaizeInteger(int(p))
 				}
 
-				if p, ok := u.User.Password(); ok {
-					uriAttrs["@password"] = initializeString(p)
+				// Path
+				if len(u.Path) != 0 {
+					uriAttrs["@path"] = initializeString(u.Path)
+				}
+
+				// Query
+				if len(u.RawQuery) != 0 {
+					uriAttrs["@query"] = initializeString(u.RawQuery)
+				}
+
+				// User
+				if u.User != nil {
+					if len(u.User.Username()) != 0 {
+						uriAttrs["@user"] = initializeString(u.User.Username())
+					}
+
+					if p, ok := u.User.Password(); ok {
+						uriAttrs["@password"] = initializeString(p)
+					}
 				}
 
 				var c *RClass
