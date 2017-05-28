@@ -1,11 +1,31 @@
 package vm
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/goby-lang/goby/bytecode"
-	"strings"
 )
+
+var stackTrace int
+
+type isIndexTable struct {
+	Data map[string]int
+}
+
+func newISIndexTable() *isIndexTable {
+	return &isIndexTable{Data: make(map[string]int)}
+}
+
+type isTable map[string][]*instructionSet
+
+type filename string
+
+type errorMessage string
+
+var standardLibraries = map[string]func(*VM){
+	"file":     initializeFileClass,
+	"net/http": initializeHTTPClass,
+	"uri":      initializeURIClass,
+}
 
 // VM represents a stack based virtual machine.
 type VM struct {
@@ -31,35 +51,6 @@ type VM struct {
 	fileDir string
 
 	args []string
-}
-
-var stackTrace int
-
-type isIndexTable struct {
-	Data map[string]int
-}
-
-type isTable map[string][]*instructionSet
-
-type filename string
-
-func newISIndexTable() *isIndexTable {
-	return &isIndexTable{Data: make(map[string]int)}
-}
-
-type errorMessage string
-
-type stack struct {
-	Data []*Pointer
-	VM   *VM
-}
-
-type standardLibraryInitMethod func(*VM)
-
-var standardLibraries = map[string]standardLibraryInitMethod{
-	"file":     initializeFileClass,
-	"net/http": initializeHTTPClass,
-	"uri":      initializeURIClass,
 }
 
 // New initializes a vm to initialize state and returns it.
@@ -273,79 +264,13 @@ func (vm *VM) lookupConstant(cf *callFrame, constName string) *Pointer {
 	return constant
 }
 
-func (s *stack) push(v *Pointer) {
-	if len(s.Data) <= s.VM.sp {
-		s.Data = append(s.Data, v)
-	} else {
-		s.Data[s.VM.sp] = v
-	}
-
-	s.VM.sp++
-}
-
-func (s *stack) pop() *Pointer {
-	if len(s.Data) < 1 {
-		panic("Nothing to pop!")
-	}
-
-	s.VM.sp--
-
-	v := s.Data[s.VM.sp]
-	s.Data[s.VM.sp] = nil
-	return v
-}
-
-func (s *stack) top() *Pointer {
-
-	if len(s.Data) == 0 {
-		return nil
-	}
-
-	if s.VM.sp > 0 {
-		return s.Data[s.VM.sp-1]
-	}
-
-	return s.Data[0]
-}
-
-func (s *stack) inspect() string {
-	var out bytes.Buffer
-	datas := []string{}
-
-	for i, p := range s.Data {
-		if p != nil {
-			o := p.Target
-			if i == s.VM.sp {
-				datas = append(datas, fmt.Sprintf("%s (%T) %d <----", o.Inspect(), o, i))
-			} else {
-				datas = append(datas, fmt.Sprintf("%s (%T) %d", o.Inspect(), o, i))
-			}
-
-		} else {
-			if i == s.VM.sp {
-				datas = append(datas, "nil <----")
-			} else {
-				datas = append(datas, "nil")
-			}
-
-		}
-
-	}
-
-	out.WriteString("-----------\n")
-	out.WriteString(strings.Join(datas, "\n"))
-	out.WriteString("\n---------\n")
-
-	return out.String()
-}
-
-func newError(format string, args ...interface{}) *Error {
-	return &Error{Message: fmt.Sprintf(format, args...)}
-}
-
 // TODO: Use this method to replace unnecessary panics
 func (vm *VM) returnError(msg string) {
 	err := &Error{Message: msg}
 	vm.stack.push(&Pointer{err})
 	panic(errorMessage(msg))
+}
+
+func newError(format string, args ...interface{}) *Error {
+	return &Error{Message: fmt.Sprintf(format, args...)}
 }
