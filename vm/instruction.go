@@ -9,6 +9,15 @@ import (
 
 type operation func(vm *VM, cf *callFrame, args ...interface{})
 
+type operationType string
+
+type label struct {
+	name string
+	Type labelType
+}
+
+type labelType string
+
 type action struct {
 	name      string
 	operation operation
@@ -20,12 +29,14 @@ type instruction struct {
 	Line   int
 }
 
-type label struct {
-	name string
-	Type labelType
-}
+func (i *instruction) inspect() string {
+	var params []string
 
-type labelType string
+	for _, param := range i.Params {
+		params = append(params, fmt.Sprint(param))
+	}
+	return fmt.Sprintf("%s: %s", i.action.name, strings.Join(params, ", "))
+}
 
 type instructionSet struct {
 	label        *label
@@ -33,7 +44,22 @@ type instructionSet struct {
 	filename     filename
 }
 
-type operationType string
+func (is *instructionSet) define(line int, a *action, params ...interface{}) {
+	i := &instruction{action: a, Params: params, Line: line}
+	is.instructions = append(is.instructions, i)
+}
+
+func (is *instructionSet) inspect() string {
+	var out bytes.Buffer
+
+	out.WriteString(fmt.Sprintf("<%s>\n", is.label.name))
+	for _, i := range is.instructions {
+		out.WriteString(i.inspect())
+		out.WriteString("\n")
+	}
+
+	return out.String()
+}
 
 var builtInActions = map[operationType]*action{
 	bytecode.Pop: {
@@ -320,13 +346,13 @@ var builtInActions = map[operationType]*action{
 				vm.returnError("undefined method `" + methodName + "' for " + receiver.Inspect())
 			}
 
-			blockFrame := retrieveBlock(vm, cf, args)
+			blockFrame := vm.retrieveBlock(cf, args)
 
 			switch m := method.(type) {
 			case *Method:
-				evalMethodObject(vm, receiver, m, receiverPr, argCount, argPr, blockFrame)
+				vm.evalMethodObject(receiver, m, receiverPr, argCount, argPr, blockFrame)
 			case *BuiltInMethod:
-				evalBuiltInMethod(vm, receiver, m, receiverPr, argCount, argPr, blockFrame)
+				vm.evalBuiltInMethod(receiver, m, receiverPr, argCount, argPr, blockFrame)
 			case *Error:
 				vm.returnError(m.Inspect())
 			default:
@@ -371,7 +397,7 @@ var builtInActions = map[operationType]*action{
 	},
 }
 
-func retrieveBlock(vm *VM, cf *callFrame, args []interface{}) (blockFrame *callFrame) {
+func (vm *VM) retrieveBlock(cf *callFrame, args []interface{}) (blockFrame *callFrame) {
 	var blockName string
 	var hasBlock bool
 
@@ -398,7 +424,7 @@ func retrieveBlock(vm *VM, cf *callFrame, args []interface{}) (blockFrame *callF
 	return
 }
 
-func evalBuiltInMethod(vm *VM, receiver BaseObject, method *BuiltInMethod, receiverPr, argCount, argPr int, blockFrame *callFrame) {
+func (vm *VM) evalBuiltInMethod(receiver BaseObject, method *BuiltInMethod, receiverPr, argCount, argPr int, blockFrame *callFrame) {
 	methodBody := method.Fn(receiver)
 	args := []Object{}
 
@@ -412,14 +438,14 @@ func evalBuiltInMethod(vm *VM, receiver BaseObject, method *BuiltInMethod, recei
 	if method.Name == "new" && ok {
 		instance := evaluated.(*RObject)
 		if instance.InitializeMethod != nil {
-			evalMethodObject(vm, instance, instance.InitializeMethod, receiverPr, argCount, argPr, blockFrame)
+			vm.evalMethodObject(instance, instance.InitializeMethod, receiverPr, argCount, argPr, blockFrame)
 		}
 	}
 	vm.stack.Data[receiverPr] = &Pointer{evaluated}
 	vm.sp = receiverPr + 1
 }
 
-func evalMethodObject(vm *VM, receiver BaseObject, method *Method, receiverPr, argC, argPr int, blockFrame *callFrame) {
+func (vm *VM) evalMethodObject(receiver BaseObject, method *Method, receiverPr, argC, argPr int, blockFrame *callFrame) {
 	c := newCallFrame(method.instructionSet)
 	c.self = receiver
 
@@ -433,32 +459,6 @@ func evalMethodObject(vm *VM, receiver BaseObject, method *Method, receiverPr, a
 
 	vm.stack.Data[receiverPr] = vm.stack.top()
 	vm.sp = receiverPr + 1
-}
-
-func (is *instructionSet) define(line int, a *action, params ...interface{}) {
-	i := &instruction{action: a, Params: params, Line: line}
-	is.instructions = append(is.instructions, i)
-}
-
-func (is *instructionSet) inspect() string {
-	var out bytes.Buffer
-
-	out.WriteString(fmt.Sprintf("<%s>\n", is.label.name))
-	for _, i := range is.instructions {
-		out.WriteString(i.inspect())
-		out.WriteString("\n")
-	}
-
-	return out.String()
-}
-
-func (i *instruction) inspect() string {
-	var params []string
-
-	for _, param := range i.Params {
-		params = append(params, fmt.Sprint(param))
-	}
-	return fmt.Sprintf("%s: %s", i.action.name, strings.Join(params, ", "))
 }
 
 func initializeObject(value interface{}) Object {
