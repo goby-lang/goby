@@ -297,55 +297,30 @@ var builtInActions = map[operationType]*action{
 	bytecode.Send: {
 		name: bytecode.Send,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
+			var method Object
+
 			methodName := args[0].(string)
 			argCount := args[1].(int)
-			var blockName string
-			var hasBlock bool
-
-			if len(args) > 2 {
-				hasBlock = true
-				blockFlag := args[2].(string)
-				blockName = strings.Split(blockFlag, ":")[1]
-			} else {
-				hasBlock = false
-			}
-
 			argPr := vm.sp - argCount
 			receiverPr := argPr - 1
 			receiver := vm.stack.Data[receiverPr].Target.(BaseObject)
 
-			error := &Error{Message: "undefined method `" + methodName + "' for " + receiver.Inspect()}
-
-			var method Object
-
-			switch receiver := receiver.(type) {
+			switch r := receiver.(type) {
 			case Class:
-				method = receiver.lookupClassMethod(methodName)
+				method = r.lookupClassMethod(methodName)
 			case BaseObject:
-				method = receiver.returnClass().lookupInstanceMethod(methodName)
+				method = r.returnClass().lookupInstanceMethod(methodName)
 			case *Error:
-				vm.returnError(receiver.Inspect())
+				vm.returnError(r.Inspect())
 			default:
-				vm.returnError("not a valid receiver: %s" + receiver.Inspect())
+				vm.returnError("not a valid receiver: %s" + r.Inspect())
 			}
 
 			if method == nil {
-				vm.returnError(error.Message)
+				vm.returnError("undefined method `" + methodName + "' for " + receiver.Inspect())
 			}
 
-			var blockFrame *callFrame
-
-			if hasBlock {
-				block := vm.getBlock(blockName, cf.instructionSet.filename)
-
-				c := newCallFrame(block)
-				c.isBlock = true
-				c.ep = cf
-				c.self = cf.self
-
-				vm.callFrameStack.push(c)
-				blockFrame = c
-			}
+			blockFrame := retrieveBlock(vm, cf, args)
 
 			switch m := method.(type) {
 			case *Method:
@@ -394,6 +369,33 @@ var builtInActions = map[operationType]*action{
 			cf.pc = len(cf.instructionSet.instructions)
 		},
 	},
+}
+
+func retrieveBlock(vm *VM, cf *callFrame, args []interface{}) (blockFrame *callFrame) {
+	var blockName string
+	var hasBlock bool
+
+	if len(args) > 2 {
+		hasBlock = true
+		blockFlag := args[2].(string)
+		blockName = strings.Split(blockFlag, ":")[1]
+	} else {
+		hasBlock = false
+	}
+
+	if hasBlock {
+		block := vm.getBlock(blockName, cf.instructionSet.filename)
+
+		c := newCallFrame(block)
+		c.isBlock = true
+		c.ep = cf
+		c.self = cf.self
+
+		vm.callFrameStack.push(c)
+		blockFrame = c
+	}
+
+	return
 }
 
 func evalBuiltInMethod(vm *VM, receiver BaseObject, method *BuiltInMethod, receiverPr, argCount, argPr int, blockFrame *callFrame) {
