@@ -20,6 +20,7 @@ func initializeHTTPClass(vm *VM) {
 
 var builtinHTTPClassMethods = []*BuiltInMethod{
 	{
+		// Sends a GET request to the target and returns the HTTP response as a string.
 		Name: "get",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(v *VM, args []Object, blockFrame *callFrame) Object {
