@@ -221,6 +221,12 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	p.nextToken()
 
 	for !p.curTokenIs(token.End) && !p.curTokenIs(token.Else) {
+
+		if p.curTokenIs(token.EOF) {
+			p.errors = append(p.errors, syntaxError("end", "EOF"))
+			return bs
+		}
+
 		stmt := p.parseStatement()
 		if stmt != nil {
 			bs.Statements = append(bs.Statements, stmt)
@@ -248,4 +254,8 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 	ws.Body = p.parseBlockStatement()
 
 	return ws
+}
+
+func syntaxError(expecting string, unexpected string) string {
+	return "Syntax error: Expecting '" + expecting + "', unexpected '" + unexpected + "'"
 }
