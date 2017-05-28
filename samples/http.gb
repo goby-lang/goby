@@ -1,0 +1,4 @@
+require("net/http")
+
+puts(Net::HTTP.get("http://google.com"))
+
