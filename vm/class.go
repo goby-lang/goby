@@ -351,13 +351,8 @@ var builtinClassClassMethods = []*BuiltInMethod{
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 				r := receiver.(*RClass)
 
-				attrReader := r.lookupClassMethod("attr_reader")
-				attrWriter := r.lookupClassMethod("attr_writer")
-				readFn := attrReader.(*BuiltInMethod).Fn(receiver)
-				writeFn := attrWriter.(*BuiltInMethod).Fn(receiver)
-
-				readFn(vm, args, blockFrame)
-				writeFn(vm, args, blockFrame)
+				r.setAttrWriter(args)
+				r.setAttrReader(args)
 
 				return r
 			}
