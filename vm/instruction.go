@@ -255,16 +255,14 @@ var builtInActions = map[operationType]*action{
 			argCount := args[0].(int)
 			methodName := vm.stack.pop().Target.(*StringObject).Value
 			is, _ := vm.getMethodIS(methodName, cf.instructionSet.filename)
-			method := &Method{Name: methodName, argc: argCount, instructionSet: is}
+			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, class: methodClass}
 
 			v := vm.stack.pop().Target
 			switch self := v.(type) {
 			case *RClass:
 				self.Methods.set(methodName, method)
-			case BaseObject:
-				self.returnClass().(*RClass).Methods.set(methodName, method)
 			default:
-				vm.returnError(fmt.Sprintf("Can't define method on %T", self))
+				self.returnClass().(*RClass).Methods.set(methodName, method)
 			}
 		},
 	},
@@ -274,17 +272,15 @@ var builtInActions = map[operationType]*action{
 			argCount := args[0].(int)
 			methodName := vm.stack.pop().Target.(*StringObject).Value
 			is, _ := vm.getMethodIS(methodName, cf.instructionSet.filename)
-			method := &Method{Name: methodName, argc: argCount, instructionSet: is}
+			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, class: methodClass}
 
 			v := vm.stack.pop().Target
 
 			switch self := v.(type) {
 			case *RClass:
 				self.setSingletonMethod(methodName, method)
-			case BaseObject:
-				self.returnClass().(*RClass).setSingletonMethod(methodName, method)
 			default:
-				vm.returnError(fmt.Sprintf("Can't define singleton method on %T", self))
+				self.returnClass().(*RClass).setSingletonMethod(methodName, method)
 			}
 		},
 	},
@@ -329,17 +325,13 @@ var builtInActions = map[operationType]*action{
 			argCount := args[1].(int)
 			argPr := vm.sp - argCount
 			receiverPr := argPr - 1
-			receiver := vm.stack.Data[receiverPr].Target.(BaseObject)
+			receiver := vm.stack.Data[receiverPr].Target
 
 			switch r := receiver.(type) {
 			case Class:
 				method = r.lookupClassMethod(methodName)
-			case BaseObject:
-				method = r.returnClass().lookupInstanceMethod(methodName)
-			case *Error:
-				vm.returnError(r.Inspect())
 			default:
-				vm.returnError("not a valid receiver: %s" + r.Inspect())
+				method = r.returnClass().lookupInstanceMethod(methodName)
 			}
 
 			if method == nil {
@@ -349,9 +341,9 @@ var builtInActions = map[operationType]*action{
 			blockFrame := vm.retrieveBlock(cf, args)
 
 			switch m := method.(type) {
-			case *Method:
+			case *MethodObject:
 				vm.evalMethodObject(receiver, m, receiverPr, argCount, argPr, blockFrame)
-			case *BuiltInMethod:
+			case *BuiltInMethodObject:
 				vm.evalBuiltInMethod(receiver, m, receiverPr, argCount, argPr, blockFrame)
 			case *Error:
 				vm.returnError(m.Inspect())
@@ -366,7 +358,7 @@ var builtInActions = map[operationType]*action{
 			argCount := args[0].(int)
 			argPr := vm.sp - argCount
 			receiverPr := argPr - 1
-			receiver := vm.stack.Data[receiverPr].Target.(BaseObject)
+			receiver := vm.stack.Data[receiverPr].Target
 
 			if cf.blockFrame == nil {
 				vm.returnError("Can't yield without a block")
@@ -424,7 +416,7 @@ func (vm *VM) retrieveBlock(cf *callFrame, args []interface{}) (blockFrame *call
 	return
 }
 
-func (vm *VM) evalBuiltInMethod(receiver BaseObject, method *BuiltInMethod, receiverPr, argCount, argPr int, blockFrame *callFrame) {
+func (vm *VM) evalBuiltInMethod(receiver Object, method *BuiltInMethodObject, receiverPr, argCount, argPr int, blockFrame *callFrame) {
 	methodBody := method.Fn(receiver)
 	args := []Object{}
 
@@ -445,7 +437,7 @@ func (vm *VM) evalBuiltInMethod(receiver BaseObject, method *BuiltInMethod, rece
 	vm.sp = receiverPr + 1
 }
 
-func (vm *VM) evalMethodObject(receiver BaseObject, method *Method, receiverPr, argC, argPr int, blockFrame *callFrame) {
+func (vm *VM) evalMethodObject(receiver Object, method *MethodObject, receiverPr, argC, argPr int, blockFrame *callFrame) {
 	c := newCallFrame(method.instructionSet)
 	c.self = receiver
 

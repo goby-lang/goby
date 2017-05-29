@@ -15,35 +15,26 @@ var (
 )
 
 func initTopLevelClasses() {
-	globalMethods := newEnvironment()
-	classMethods := newEnvironment()
-
-	for _, m := range builtinGlobalMethods {
-		globalMethods.set(m.Name, m)
-	}
-
-	for _, m := range builtinClassClassMethods {
-		classMethods.set(m.Name, m)
-	}
-
 	classClass = &RClass{
 		BaseClass: &BaseClass{
-			Name:         "Class",
-			Methods:      globalMethods,
-			ClassMethods: classMethods,
-			constants:    make(map[string]*Pointer),
+			Name:      "Class",
+			constants: make(map[string]*Pointer),
 		},
 	}
+
+	classClass.setBuiltInMethods(builtinGlobalMethods, false)
+	classClass.setBuiltInMethods(builtinClassClassMethods, true)
 
 	objectClass = &RClass{
 		BaseClass: &BaseClass{
 			Name:         "Object",
 			Class:        classClass,
-			Methods:      globalMethods,
 			ClassMethods: newEnvironment(),
 			constants:    make(map[string]*Pointer),
 		},
 	}
+
+	objectClass.setBuiltInMethods(builtinGlobalMethods, false)
 }
 
 // initializeClass initializes and returns a class instance with given class name
@@ -75,7 +66,7 @@ type Class interface {
 	lookupConstant(string, bool) *Pointer
 	ReturnName() string
 	returnSuperClass() Class
-	BaseObject
+	Object
 }
 
 // RClass represents normal (not built in) class object
@@ -117,6 +108,22 @@ func (c *BaseClass) Inspect() string {
 		return "<Module:" + c.Name + ">"
 	}
 	return "<Class:" + c.Name + ">"
+}
+
+func (c *BaseClass) setBuiltInMethods(methodList []*BuiltInMethodObject, classMethods bool) {
+	methods := newEnvironment()
+
+	for _, m := range methodList {
+		methods.set(m.Name, m)
+		m.class = methodClass
+	}
+
+	if classMethods {
+		c.ClassMethods = methods
+		return
+	}
+
+	c.Methods = methods
 }
 
 func (c *BaseClass) lookupClassMethod(methodName string) Object {
@@ -173,7 +180,7 @@ func (c *BaseClass) lookupConstant(constName string, findInScope bool) *Pointer 
 
 // setSingletonMethod will sets method to class's singleton class
 // However, if the class doesn't have a singleton class, it will create one for it first.
-func (c *BaseClass) setSingletonMethod(name string, method *Method) {
+func (c *BaseClass) setSingletonMethod(name string, method *MethodObject) {
 	if c.pseudoSuperClass.Singleton {
 		c.pseudoSuperClass.ClassMethods.set(name, method)
 	}
@@ -212,7 +219,7 @@ func (c *RClass) initializeInstance() *RObject {
 func (c *RClass) setAttrWriter(args []Object) {
 	for _, attr := range args {
 		attrName := attr.(*StringObject).Value
-		m := &BuiltInMethod{
+		m := &BuiltInMethodObject{
 			Name: attrName + "=",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -229,7 +236,7 @@ func (c *RClass) setAttrWriter(args []Object) {
 func (c *RClass) setAttrReader(args []Object) {
 	for _, attr := range args {
 		attrName := attr.(*StringObject).Value
-		m := &BuiltInMethod{
+		m := &BuiltInMethodObject{
 			Name: attrName,
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -243,7 +250,7 @@ func (c *RClass) setAttrReader(args []Object) {
 	}
 }
 
-var builtinGlobalMethods = []*BuiltInMethod{
+var builtinGlobalMethods = []*BuiltInMethodObject{
 	{
 		Name: "require",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -300,9 +307,7 @@ var builtinGlobalMethods = []*BuiltInMethod{
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
 				switch r := receiver.(type) {
-				case BaseObject:
-					return r.returnClass()
-				case Class:
+				case Object:
 					return r.returnClass()
 				default:
 					return &Error{Message: "Can't call class on %T" + string(r.objectType())}
@@ -322,7 +327,7 @@ var builtinGlobalMethods = []*BuiltInMethod{
 }
 
 // BuiltinClassMethods is a collection of class methods used by Class
-var builtinClassClassMethods = []*BuiltInMethod{
+var builtinClassClassMethods = []*BuiltInMethodObject{
 	{
 		Name: "attr_reader",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -381,7 +386,7 @@ var builtinClassClassMethods = []*BuiltInMethod{
 				initMethod := class.lookupInstanceMethod("initialize")
 
 				if initMethod != nil {
-					instance.InitializeMethod = initMethod.(*Method)
+					instance.InitializeMethod = initMethod.(*MethodObject)
 				}
 
 				return instance

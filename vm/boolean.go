@@ -44,7 +44,7 @@ func (b *BooleanObject) equal(e *BooleanObject) bool {
 	return b.Value == e.Value
 }
 
-var builtinBooleanInstanceMethods = []*BuiltInMethod{
+var builtinBooleanInstanceMethods = []*BuiltInMethodObject{
 	{
 		// Returns true if the receiver equals to the argument.
 		//
@@ -177,14 +177,9 @@ var builtinBooleanInstanceMethods = []*BuiltInMethod{
 }
 
 func initBool() {
-	methods := newEnvironment()
-
-	for _, m := range builtinBooleanInstanceMethods {
-		methods.set(m.Name, m)
-	}
-
-	bc := &BaseClass{Name: "Boolean", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
+	bc := &BaseClass{Name: "Boolean", ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
 	b := &RBool{BaseClass: bc}
+	b.setBuiltInMethods(builtinBooleanInstanceMethods, false)
 	booleanClass = b
 
 	TRUE = &BooleanObject{Value: true, Class: booleanClass}

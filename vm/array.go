@@ -80,18 +80,13 @@ func initializeArray(elements []Object) *ArrayObject {
 }
 
 func init() {
-	methods := newEnvironment()
-
-	for _, m := range builtinArrayInstanceMethods {
-		methods.set(m.Name, m)
-	}
-
-	bc := &BaseClass{Name: "Array", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
+	bc := &BaseClass{Name: "Array", ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
 	ac := &RArray{BaseClass: bc}
+	ac.setBuiltInMethods(builtinArrayInstanceMethods, false)
 	arrayClass = ac
 }
 
-var builtinArrayInstanceMethods = []*BuiltInMethod{
+var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 	{
 		// Retrieves an object in an array using Integer index.
 		// The index starts from 0. It returns `null` if the given index is bigger than its size.

@@ -130,6 +130,7 @@ func (vm *VM) initConstants() {
 		hashClass,
 		classClass,
 		objectClass,
+		methodClass,
 	}
 
 	args := []Object{}
@@ -251,7 +252,7 @@ func (vm *VM) lookupConstant(cf *callFrame, constName string) *Pointer {
 		if constant != nil {
 			return constant
 		}
-	case BaseObject:
+	default:
 		c := s.returnClass()
 
 		constant = c.lookupConstant(constName, true)

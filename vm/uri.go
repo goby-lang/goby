@@ -13,10 +13,7 @@ func initializeURIClass(vm *VM) {
 	https.pseudoSuperClass = http
 	uri.constants[http.Name] = &Pointer{http}
 	uri.constants[https.Name] = &Pointer{https}
-
-	for _, m := range builtinURIClassMethods {
-		uri.ClassMethods.set(m.Name, m)
-	}
+	uri.setBuiltInMethods(builtinURIClassMethods, true)
 
 	attrs := []Object{
 		initializeString("host"),
@@ -34,7 +31,7 @@ func initializeURIClass(vm *VM) {
 	vm.constants["URI"] = &Pointer{Target: uri}
 }
 
-var builtinURIClassMethods = []*BuiltInMethod{
+var builtinURIClassMethods = []*BuiltInMethodObject{
 	{
 		// Returns a Net::HTTP or Net::HTTPS's instance (depends on the url scheme).
 		//

@@ -58,7 +58,7 @@ func initializeString(value string) *StringObject {
 	return addr
 }
 
-var builtinStringInstanceMethods = []*BuiltInMethod{
+var builtinStringInstanceMethods = []*BuiltInMethodObject{
 	{
 		// Returns the concatineted of self and another String
 		//
@@ -432,13 +432,8 @@ var builtinStringInstanceMethods = []*BuiltInMethod{
 }
 
 func initString() {
-	methods := newEnvironment()
-
-	for _, m := range builtinStringInstanceMethods {
-		methods.set(m.Name, m)
-	}
-
-	bc := &BaseClass{Name: "String", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
+	bc := &BaseClass{Name: "String", ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
 	sc := &RString{BaseClass: bc}
+	sc.setBuiltInMethods(builtinStringInstanceMethods, false)
 	stringClass = sc
 }

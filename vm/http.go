@@ -9,16 +9,12 @@ import (
 func initializeHTTPClass(vm *VM) {
 	net := initializeClass("Net", true)
 	http := initializeClass("HTTP", false)
+	http.setBuiltInMethods(builtinHTTPClassMethods, true)
 	net.constants[http.Name] = &Pointer{http}
-
-	for _, m := range builtinHTTPClassMethods {
-		http.ClassMethods.set(m.Name, m)
-	}
-
 	vm.constants["Net"] = &Pointer{Target: net}
 }
 
-var builtinHTTPClassMethods = []*BuiltInMethod{
+var builtinHTTPClassMethods = []*BuiltInMethodObject{
 	{
 		// Sends a GET request to the target and returns the HTTP response as a string.
 		Name: "get",

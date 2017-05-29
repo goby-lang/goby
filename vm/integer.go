@@ -45,7 +45,7 @@ func initilaizeInteger(value int) *IntegerObject {
 	return &IntegerObject{Value: value, Class: integerClass}
 }
 
-var builtinIntegerInstanceMethods = []*BuiltInMethod{
+var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 	{
 		// Returns the sum of self and another Integer.
 		//
@@ -543,13 +543,8 @@ var builtinIntegerInstanceMethods = []*BuiltInMethod{
 }
 
 func initInteger() {
-	methods := newEnvironment()
-
-	for _, m := range builtinIntegerInstanceMethods {
-		methods.set(m.Name, m)
-	}
-
-	bc := &BaseClass{Name: "Integer", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
+	bc := &BaseClass{Name: "Integer", ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
 	ic := &RInteger{BaseClass: bc}
+	ic.setBuiltInMethods(builtinIntegerInstanceMethods, false)
 	integerClass = ic
 }

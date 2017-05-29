@@ -105,7 +105,7 @@ func TestDefStatement(t *testing.T) {
 			t.Errorf("expect class %s to have method %s.", class.Name, expectedMethod.name)
 		}
 
-		method := methodObj.(*Method)
+		method := methodObj.(*MethodObject)
 		if method.Name != expectedMethod.name {
 			t.Errorf("expect method's name to be %s. got=%s", expectedMethod.name, method.Name)
 		}
