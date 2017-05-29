@@ -58,7 +58,7 @@ func initializeString(value string) *StringObject {
 	return addr
 }
 
-var builtinStringInstanceMethods = []*BuiltInMethod{
+var builtinStringInstanceMethods = []*BuiltInMethodObject{
 	{
 		// Returns the concatineted of self and another String
 		//

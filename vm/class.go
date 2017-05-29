@@ -173,7 +173,7 @@ func (c *BaseClass) lookupConstant(constName string, findInScope bool) *Pointer 
 
 // setSingletonMethod will sets method to class's singleton class
 // However, if the class doesn't have a singleton class, it will create one for it first.
-func (c *BaseClass) setSingletonMethod(name string, method *Method) {
+func (c *BaseClass) setSingletonMethod(name string, method *MethodObject) {
 	if c.pseudoSuperClass.Singleton {
 		c.pseudoSuperClass.ClassMethods.set(name, method)
 	}
@@ -212,7 +212,7 @@ func (c *RClass) initializeInstance() *RObject {
 func (c *RClass) setAttrWriter(args []Object) {
 	for _, attr := range args {
 		attrName := attr.(*StringObject).Value
-		m := &BuiltInMethod{
+		m := &BuiltInMethodObject{
 			Name: attrName + "=",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -229,7 +229,7 @@ func (c *RClass) setAttrWriter(args []Object) {
 func (c *RClass) setAttrReader(args []Object) {
 	for _, attr := range args {
 		attrName := attr.(*StringObject).Value
-		m := &BuiltInMethod{
+		m := &BuiltInMethodObject{
 			Name: attrName,
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(vm *VM, args []Object, blockFrame *callFrame) Object {
@@ -243,7 +243,7 @@ func (c *RClass) setAttrReader(args []Object) {
 	}
 }
 
-var builtinGlobalMethods = []*BuiltInMethod{
+var builtinGlobalMethods = []*BuiltInMethodObject{
 	{
 		Name: "require",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -322,7 +322,7 @@ var builtinGlobalMethods = []*BuiltInMethod{
 }
 
 // BuiltinClassMethods is a collection of class methods used by Class
-var builtinClassClassMethods = []*BuiltInMethod{
+var builtinClassClassMethods = []*BuiltInMethodObject{
 	{
 		Name: "attr_reader",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -381,7 +381,7 @@ var builtinClassClassMethods = []*BuiltInMethod{
 				initMethod := class.lookupInstanceMethod("initialize")
 
 				if initMethod != nil {
-					instance.InitializeMethod = initMethod.(*Method)
+					instance.InitializeMethod = initMethod.(*MethodObject)
 				}
 
 				return instance

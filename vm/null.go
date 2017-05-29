@@ -42,7 +42,7 @@ func initNull() {
 	NULL = &NullObject{Class: nullClass}
 }
 
-var builtInNullInstanceMethods = []*BuiltInMethod{
+var builtInNullInstanceMethods = []*BuiltInMethodObject{
 	{
 		Name: "!",
 		Fn: func(receiver Object) builtinMethodBody {

@@ -11,6 +11,6 @@ func getBuiltInMethod(t *testing.T, receiver BaseObject, methodName string) buil
 		t.Fatalf("Undefined built in method %s for %s", methodName, receiver.returnClass().ReturnName())
 	}
 
-	method := m.(*BuiltInMethod)
+	method := m.(*BuiltInMethodObject)
 	return method.Fn(receiver)
 }

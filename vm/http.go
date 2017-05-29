@@ -18,7 +18,7 @@ func initializeHTTPClass(vm *VM) {
 	vm.constants["Net"] = &Pointer{Target: net}
 }
 
-var builtinHTTPClassMethods = []*BuiltInMethod{
+var builtinHTTPClassMethods = []*BuiltInMethodObject{
 	{
 		// Sends a GET request to the target and returns the HTTP response as a string.
 		Name: "get",

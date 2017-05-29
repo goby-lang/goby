@@ -44,7 +44,7 @@ func (b *BooleanObject) equal(e *BooleanObject) bool {
 	return b.Value == e.Value
 }
 
-var builtinBooleanInstanceMethods = []*BuiltInMethod{
+var builtinBooleanInstanceMethods = []*BuiltInMethodObject{
 	{
 		// Returns true if the receiver equals to the argument.
 		//

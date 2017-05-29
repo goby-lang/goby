@@ -91,7 +91,7 @@ func init() {
 	arrayClass = ac
 }
 
-var builtinArrayInstanceMethods = []*BuiltInMethod{
+var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 	{
 		// Retrieves an object in an array using Integer index.
 		// The index starts from 0. It returns `null` if the given index is bigger than its size.

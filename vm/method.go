@@ -5,18 +5,23 @@ import (
 	"fmt"
 )
 
-// Method represents methods defined using goby.
-type Method struct {
+type RMethod struct {
+	*BaseClass
+}
+
+// MethodObject represents methods defined using goby.
+type MethodObject struct {
+	class          *RMethod
 	Name           string
 	instructionSet *instructionSet
 	argc           int
 }
 
-func (m *Method) objectType() objectType {
+func (m *MethodObject) objectType() objectType {
 	return methodObj
 }
 
-func (m *Method) Inspect() string {
+func (m *MethodObject) Inspect() string {
 	var out bytes.Buffer
 
 	out.WriteString(fmt.Sprintf("<Method: %s (%d params)\n>", m.Name, m.argc))
@@ -25,20 +30,29 @@ func (m *Method) Inspect() string {
 	return out.String()
 }
 
-type builtinMethodBody func(*VM, []Object, *callFrame) Object
-
-// BuiltInMethod represents methods defined in go.
-type BuiltInMethod struct {
-	Name string
-	Fn   func(receiver Object) builtinMethodBody
+func (m *MethodObject) returnClass() Class {
+	return m.class
 }
 
-func (bim *BuiltInMethod) objectType() objectType {
+type builtinMethodBody func(*VM, []Object, *callFrame) Object
+
+// BuiltInMethodObject represents methods defined in go.
+type BuiltInMethodObject struct {
+	class *RMethod
+	Name  string
+	Fn    func(receiver Object) builtinMethodBody
+}
+
+func (bim *BuiltInMethodObject) objectType() objectType {
 	return buildInMethodObj
 }
 
-func (bim *BuiltInMethod) Inspect() string {
+func (bim *BuiltInMethodObject) Inspect() string {
 	return bim.Name
+}
+
+func (bim *BuiltInMethodObject) returnClass() Class {
+	return bim.class
 }
 
 // builtInMethodYield is like invokeblock instruction for built in methods

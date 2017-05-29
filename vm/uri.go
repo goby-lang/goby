@@ -34,7 +34,7 @@ func initializeURIClass(vm *VM) {
 	vm.constants["URI"] = &Pointer{Target: uri}
 }
 
-var builtinURIClassMethods = []*BuiltInMethod{
+var builtinURIClassMethods = []*BuiltInMethodObject{
 	{
 		// Returns a Net::HTTP or Net::HTTPS's instance (depends on the url scheme).
 		//

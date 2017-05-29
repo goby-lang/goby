@@ -12,7 +12,7 @@ type BaseObject interface {
 type RObject struct {
 	Class             *RClass
 	InstanceVariables *environment
-	InitializeMethod  *Method
+	InitializeMethod  *MethodObject
 }
 
 func (ro *RObject) objectType() objectType {

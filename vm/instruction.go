@@ -255,7 +255,7 @@ var builtInActions = map[operationType]*action{
 			argCount := args[0].(int)
 			methodName := vm.stack.pop().Target.(*StringObject).Value
 			is, _ := vm.getMethodIS(methodName, cf.instructionSet.filename)
-			method := &Method{Name: methodName, argc: argCount, instructionSet: is}
+			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is}
 
 			v := vm.stack.pop().Target
 			switch self := v.(type) {
@@ -274,7 +274,7 @@ var builtInActions = map[operationType]*action{
 			argCount := args[0].(int)
 			methodName := vm.stack.pop().Target.(*StringObject).Value
 			is, _ := vm.getMethodIS(methodName, cf.instructionSet.filename)
-			method := &Method{Name: methodName, argc: argCount, instructionSet: is}
+			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is}
 
 			v := vm.stack.pop().Target
 
@@ -349,9 +349,9 @@ var builtInActions = map[operationType]*action{
 			blockFrame := vm.retrieveBlock(cf, args)
 
 			switch m := method.(type) {
-			case *Method:
+			case *MethodObject:
 				vm.evalMethodObject(receiver, m, receiverPr, argCount, argPr, blockFrame)
-			case *BuiltInMethod:
+			case *BuiltInMethodObject:
 				vm.evalBuiltInMethod(receiver, m, receiverPr, argCount, argPr, blockFrame)
 			case *Error:
 				vm.returnError(m.Inspect())
@@ -424,7 +424,7 @@ func (vm *VM) retrieveBlock(cf *callFrame, args []interface{}) (blockFrame *call
 	return
 }
 
-func (vm *VM) evalBuiltInMethod(receiver BaseObject, method *BuiltInMethod, receiverPr, argCount, argPr int, blockFrame *callFrame) {
+func (vm *VM) evalBuiltInMethod(receiver BaseObject, method *BuiltInMethodObject, receiverPr, argCount, argPr int, blockFrame *callFrame) {
 	methodBody := method.Fn(receiver)
 	args := []Object{}
 
@@ -445,7 +445,7 @@ func (vm *VM) evalBuiltInMethod(receiver BaseObject, method *BuiltInMethod, rece
 	vm.sp = receiverPr + 1
 }
 
-func (vm *VM) evalMethodObject(receiver BaseObject, method *Method, receiverPr, argC, argPr int, blockFrame *callFrame) {
+func (vm *VM) evalMethodObject(receiver BaseObject, method *MethodObject, receiverPr, argC, argPr int, blockFrame *callFrame) {
 	c := newCallFrame(method.instructionSet)
 	c.self = receiver
 

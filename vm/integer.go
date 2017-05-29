@@ -45,7 +45,7 @@ func initilaizeInteger(value int) *IntegerObject {
 	return &IntegerObject{Value: value, Class: integerClass}
 }
 
-var builtinIntegerInstanceMethods = []*BuiltInMethod{
+var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 	{
 		// Returns the sum of self and another Integer.
 		//

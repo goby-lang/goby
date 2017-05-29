@@ -16,7 +16,7 @@ func initializeFileClass(vm *VM) {
 	vm.constants["File"] = &Pointer{Target: class}
 }
 
-var builtinFileClassMethods = []*BuiltInMethod{
+var builtinFileClassMethods = []*BuiltInMethodObject{
 	{
 		// Returns extension part of file.
 		//
