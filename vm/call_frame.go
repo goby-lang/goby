@@ -58,8 +58,8 @@ func (cf *callFrame) storeConstant(constName string, constant interface{}) *Poin
 		if class, ok := ptr.Target.(*RClass); ok {
 			class.scope = scope
 		}
-	case BaseObject:
-		c := cf.self.(BaseObject).returnClass()
+	case Object:
+		c := cf.self.(Object).returnClass()
 		c.(*RClass).constants[constName] = ptr
 	}
 

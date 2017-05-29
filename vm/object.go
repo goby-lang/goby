@@ -38,12 +38,36 @@ func initMainObj() {
 }
 
 type Object interface {
+	returnClass() Class
 	objectType() objectType
 	Inspect() string
 }
 
 type Pointer struct {
 	Target Object
+}
+
+// RObject represents any non built-in class's instance.
+type RObject struct {
+	Class             *RClass
+	InstanceVariables *environment
+	InitializeMethod  *MethodObject
+}
+
+func (ro *RObject) objectType() objectType {
+	return baseObject
+}
+
+func (ro *RObject) Inspect() string {
+	return "<Instance of: " + ro.Class.Name + ">"
+}
+
+// returnClass will return object's class
+func (ro *RObject) returnClass() Class {
+	if ro.Class == nil {
+		panic(fmt.Sprintf("Object %s doesn't have class.", ro.Inspect()))
+	}
+	return ro.Class
 }
 
 func checkArgumentLen(args []Object, class Class, methodName string) *Error {

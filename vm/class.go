@@ -66,7 +66,7 @@ type Class interface {
 	lookupConstant(string, bool) *Pointer
 	ReturnName() string
 	returnSuperClass() Class
-	BaseObject
+	Object
 }
 
 // RClass represents normal (not built in) class object
@@ -307,9 +307,7 @@ var builtinGlobalMethods = []*BuiltInMethodObject{
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
 
 				switch r := receiver.(type) {
-				case BaseObject:
-					return r.returnClass()
-				case Class:
+				case Object:
 					return r.returnClass()
 				default:
 					return &Error{Message: "Can't call class on %T" + string(r.objectType())}

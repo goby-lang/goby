@@ -261,7 +261,7 @@ var builtInActions = map[operationType]*action{
 			switch self := v.(type) {
 			case *RClass:
 				self.Methods.set(methodName, method)
-			case BaseObject:
+			case Object:
 				self.returnClass().(*RClass).Methods.set(methodName, method)
 			default:
 				vm.returnError(fmt.Sprintf("Can't define method on %T", self))
@@ -281,7 +281,7 @@ var builtInActions = map[operationType]*action{
 			switch self := v.(type) {
 			case *RClass:
 				self.setSingletonMethod(methodName, method)
-			case BaseObject:
+			case Object:
 				self.returnClass().(*RClass).setSingletonMethod(methodName, method)
 			default:
 				vm.returnError(fmt.Sprintf("Can't define singleton method on %T", self))
@@ -329,13 +329,13 @@ var builtInActions = map[operationType]*action{
 			argCount := args[1].(int)
 			argPr := vm.sp - argCount
 			receiverPr := argPr - 1
-			receiver := vm.stack.Data[receiverPr].Target.(BaseObject)
+			receiver := vm.stack.Data[receiverPr].Target
 
 			switch r := receiver.(type) {
 			case Class:
 				method = r.lookupClassMethod(methodName)
-			case BaseObject:
-				method = r.returnClass().lookupInstanceMethod(methodName)
+			case Object:
+				method = receiver.returnClass().lookupInstanceMethod(methodName)
 			case *Error:
 				vm.returnError(r.Inspect())
 			default:
@@ -366,7 +366,7 @@ var builtInActions = map[operationType]*action{
 			argCount := args[0].(int)
 			argPr := vm.sp - argCount
 			receiverPr := argPr - 1
-			receiver := vm.stack.Data[receiverPr].Target.(BaseObject)
+			receiver := vm.stack.Data[receiverPr].Target
 
 			if cf.blockFrame == nil {
 				vm.returnError("Can't yield without a block")
@@ -424,7 +424,7 @@ func (vm *VM) retrieveBlock(cf *callFrame, args []interface{}) (blockFrame *call
 	return
 }
 
-func (vm *VM) evalBuiltInMethod(receiver BaseObject, method *BuiltInMethodObject, receiverPr, argCount, argPr int, blockFrame *callFrame) {
+func (vm *VM) evalBuiltInMethod(receiver Object, method *BuiltInMethodObject, receiverPr, argCount, argPr int, blockFrame *callFrame) {
 	methodBody := method.Fn(receiver)
 	args := []Object{}
 
@@ -445,7 +445,7 @@ func (vm *VM) evalBuiltInMethod(receiver BaseObject, method *BuiltInMethodObject
 	vm.sp = receiverPr + 1
 }
 
-func (vm *VM) evalMethodObject(receiver BaseObject, method *MethodObject, receiverPr, argC, argPr int, blockFrame *callFrame) {
+func (vm *VM) evalMethodObject(receiver Object, method *MethodObject, receiverPr, argC, argPr int, blockFrame *callFrame) {
 	c := newCallFrame(method.instructionSet)
 	c.self = receiver
 

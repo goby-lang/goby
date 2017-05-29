@@ -252,7 +252,7 @@ func (vm *VM) lookupConstant(cf *callFrame, constName string) *Pointer {
 		if constant != nil {
 			return constant
 		}
-	case BaseObject:
+	case Object:
 		c := s.returnClass()
 
 		constant = c.lookupConstant(constName, true)
