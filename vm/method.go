@@ -15,6 +15,7 @@ func init() {
 	methodClass = mc
 }
 
+// RMethod represents all method's class. Currently has no methods.
 type RMethod struct {
 	*BaseClass
 }
@@ -31,6 +32,7 @@ func (m *MethodObject) objectType() objectType {
 	return methodObj
 }
 
+// Inspect returns method's name, params count and instruction set.
 func (m *MethodObject) Inspect() string {
 	var out bytes.Buffer
 
@@ -57,6 +59,7 @@ func (bim *BuiltInMethodObject) objectType() objectType {
 	return buildInMethodObj
 }
 
+// Inspect just returns built in method's name.
 func (bim *BuiltInMethodObject) Inspect() string {
 	return bim.Name
 }

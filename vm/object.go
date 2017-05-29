@@ -37,12 +37,14 @@ func initMainObj() {
 	mainObj = obj
 }
 
+// Object represents all objects in Goby, including Array, Integer or even Method and Error.
 type Object interface {
 	returnClass() Class
 	objectType() objectType
 	Inspect() string
 }
 
+// Pointer is used to point to an object. Variables should hold pointer instead of holding a object directly.
 type Pointer struct {
 	Target Object
 }
@@ -58,6 +60,7 @@ func (ro *RObject) objectType() objectType {
 	return baseObject
 }
 
+// Inspect tells which class it belongs to.
 func (ro *RObject) Inspect() string {
 	return "<Instance of: " + ro.Class.Name + ">"
 }
