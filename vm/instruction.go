@@ -255,7 +255,7 @@ var builtInActions = map[operationType]*action{
 			argCount := args[0].(int)
 			methodName := vm.stack.pop().Target.(*StringObject).Value
 			is, _ := vm.getMethodIS(methodName, cf.instructionSet.filename)
-			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is}
+			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, class: methodClass}
 
 			v := vm.stack.pop().Target
 			switch self := v.(type) {
@@ -274,7 +274,7 @@ var builtInActions = map[operationType]*action{
 			argCount := args[0].(int)
 			methodName := vm.stack.pop().Target.(*StringObject).Value
 			is, _ := vm.getMethodIS(methodName, cf.instructionSet.filename)
-			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is}
+			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, class: methodClass}
 
 			v := vm.stack.pop().Target
 

@@ -5,6 +5,16 @@ import (
 	"fmt"
 )
 
+var methodClass *RMethod
+
+func init() {
+	methods := newEnvironment()
+
+	bc := &BaseClass{Name: "Method", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
+	mc := &RMethod{BaseClass: bc}
+	methodClass = mc
+}
+
 type RMethod struct {
 	*BaseClass
 }

@@ -130,6 +130,7 @@ func (vm *VM) initConstants() {
 		hashClass,
 		classClass,
 		objectClass,
+		methodClass,
 	}
 
 	args := []Object{}
