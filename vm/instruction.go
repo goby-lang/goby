@@ -9,6 +9,15 @@ import (
 
 type operation func(vm *VM, cf *callFrame, args ...interface{})
 
+type operationType string
+
+type label struct {
+	name string
+	Type labelType
+}
+
+type labelType string
+
 type action struct {
 	name      string
 	operation operation
@@ -20,12 +29,14 @@ type instruction struct {
 	Line   int
 }
 
-type label struct {
-	name string
-	Type labelType
-}
+func (i *instruction) inspect() string {
+	var params []string
 
-type labelType string
+	for _, param := range i.Params {
+		params = append(params, fmt.Sprint(param))
+	}
+	return fmt.Sprintf("%s: %s", i.action.name, strings.Join(params, ", "))
+}
 
 type instructionSet struct {
 	label        *label
@@ -33,7 +44,22 @@ type instructionSet struct {
 	filename     filename
 }
 
-type operationType string
+func (is *instructionSet) define(line int, a *action, params ...interface{}) {
+	i := &instruction{action: a, Params: params, Line: line}
+	is.instructions = append(is.instructions, i)
+}
+
+func (is *instructionSet) inspect() string {
+	var out bytes.Buffer
+
+	out.WriteString(fmt.Sprintf("<%s>\n", is.label.name))
+	for _, i := range is.instructions {
+		out.WriteString(i.inspect())
+		out.WriteString("\n")
+	}
+
+	return out.String()
+}
 
 var builtInActions = map[operationType]*action{
 	bytecode.Pop: {
@@ -297,61 +323,36 @@ var builtInActions = map[operationType]*action{
 	bytecode.Send: {
 		name: bytecode.Send,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
+			var method Object
+
 			methodName := args[0].(string)
 			argCount := args[1].(int)
-			var blockName string
-			var hasBlock bool
-
-			if len(args) > 2 {
-				hasBlock = true
-				blockFlag := args[2].(string)
-				blockName = strings.Split(blockFlag, ":")[1]
-			} else {
-				hasBlock = false
-			}
-
 			argPr := vm.sp - argCount
 			receiverPr := argPr - 1
 			receiver := vm.stack.Data[receiverPr].Target.(BaseObject)
 
-			error := &Error{Message: "undefined method `" + methodName + "' for " + receiver.Inspect()}
-
-			var method Object
-
-			switch receiver := receiver.(type) {
+			switch r := receiver.(type) {
 			case Class:
-				method = receiver.lookupClassMethod(methodName)
+				method = r.lookupClassMethod(methodName)
 			case BaseObject:
-				method = receiver.returnClass().lookupInstanceMethod(methodName)
+				method = r.returnClass().lookupInstanceMethod(methodName)
 			case *Error:
-				vm.returnError(receiver.Inspect())
+				vm.returnError(r.Inspect())
 			default:
-				vm.returnError("not a valid receiver: %s" + receiver.Inspect())
+				vm.returnError("not a valid receiver: %s" + r.Inspect())
 			}
 
 			if method == nil {
-				vm.returnError(error.Message)
+				vm.returnError("undefined method `" + methodName + "' for " + receiver.Inspect())
 			}
 
-			var blockFrame *callFrame
-
-			if hasBlock {
-				block := vm.getBlock(blockName, cf.instructionSet.filename)
-
-				c := newCallFrame(block)
-				c.isBlock = true
-				c.ep = cf
-				c.self = cf.self
-
-				vm.callFrameStack.push(c)
-				blockFrame = c
-			}
+			blockFrame := vm.retrieveBlock(cf, args)
 
 			switch m := method.(type) {
 			case *Method:
-				evalMethodObject(vm, receiver, m, receiverPr, argCount, argPr, blockFrame)
+				vm.evalMethodObject(receiver, m, receiverPr, argCount, argPr, blockFrame)
 			case *BuiltInMethod:
-				evalBuiltInMethod(vm, receiver, m, receiverPr, argCount, argPr, blockFrame)
+				vm.evalBuiltInMethod(receiver, m, receiverPr, argCount, argPr, blockFrame)
 			case *Error:
 				vm.returnError(m.Inspect())
 			default:
@@ -396,7 +397,34 @@ var builtInActions = map[operationType]*action{
 	},
 }
 
-func evalBuiltInMethod(vm *VM, receiver BaseObject, method *BuiltInMethod, receiverPr, argCount, argPr int, blockFrame *callFrame) {
+func (vm *VM) retrieveBlock(cf *callFrame, args []interface{}) (blockFrame *callFrame) {
+	var blockName string
+	var hasBlock bool
+
+	if len(args) > 2 {
+		hasBlock = true
+		blockFlag := args[2].(string)
+		blockName = strings.Split(blockFlag, ":")[1]
+	} else {
+		hasBlock = false
+	}
+
+	if hasBlock {
+		block := vm.getBlock(blockName, cf.instructionSet.filename)
+
+		c := newCallFrame(block)
+		c.isBlock = true
+		c.ep = cf
+		c.self = cf.self
+
+		vm.callFrameStack.push(c)
+		blockFrame = c
+	}
+
+	return
+}
+
+func (vm *VM) evalBuiltInMethod(receiver BaseObject, method *BuiltInMethod, receiverPr, argCount, argPr int, blockFrame *callFrame) {
 	methodBody := method.Fn(receiver)
 	args := []Object{}
 
@@ -410,14 +438,14 @@ func evalBuiltInMethod(vm *VM, receiver BaseObject, method *BuiltInMethod, recei
 	if method.Name == "new" && ok {
 		instance := evaluated.(*RObject)
 		if instance.InitializeMethod != nil {
-			evalMethodObject(vm, instance, instance.InitializeMethod, receiverPr, argCount, argPr, blockFrame)
+			vm.evalMethodObject(instance, instance.InitializeMethod, receiverPr, argCount, argPr, blockFrame)
 		}
 	}
 	vm.stack.Data[receiverPr] = &Pointer{evaluated}
 	vm.sp = receiverPr + 1
 }
 
-func evalMethodObject(vm *VM, receiver BaseObject, method *Method, receiverPr, argC, argPr int, blockFrame *callFrame) {
+func (vm *VM) evalMethodObject(receiver BaseObject, method *Method, receiverPr, argC, argPr int, blockFrame *callFrame) {
 	c := newCallFrame(method.instructionSet)
 	c.self = receiver
 
@@ -431,32 +459,6 @@ func evalMethodObject(vm *VM, receiver BaseObject, method *Method, receiverPr, a
 
 	vm.stack.Data[receiverPr] = vm.stack.top()
 	vm.sp = receiverPr + 1
-}
-
-func (is *instructionSet) define(line int, a *action, params ...interface{}) {
-	i := &instruction{action: a, Params: params, Line: line}
-	is.instructions = append(is.instructions, i)
-}
-
-func (is *instructionSet) inspect() string {
-	var out bytes.Buffer
-
-	out.WriteString(fmt.Sprintf("<%s>\n", is.label.name))
-	for _, i := range is.instructions {
-		out.WriteString(i.inspect())
-		out.WriteString("\n")
-	}
-
-	return out.String()
-}
-
-func (i *instruction) inspect() string {
-	var params []string
-
-	for _, param := range i.Params {
-		params = append(params, fmt.Sprint(param))
-	}
-	return fmt.Sprintf("%s: %s", i.action.name, strings.Join(params, ", "))
 }
 
 func initializeObject(value interface{}) Object {
