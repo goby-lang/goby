@@ -8,11 +8,7 @@ import (
 
 func initializeFileClass(vm *VM) {
 	class := initializeClass("File", false)
-
-	for _, m := range builtinFileClassMethods {
-		class.ClassMethods.set(m.Name, m)
-	}
-
+	class.setBuiltInMethods(builtinFileClassMethods, true)
 	vm.constants["File"] = &Pointer{Target: class}
 }
 

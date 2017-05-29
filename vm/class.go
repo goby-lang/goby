@@ -15,35 +15,26 @@ var (
 )
 
 func initTopLevelClasses() {
-	globalMethods := newEnvironment()
-	classMethods := newEnvironment()
-
-	for _, m := range builtinGlobalMethods {
-		globalMethods.set(m.Name, m)
-	}
-
-	for _, m := range builtinClassClassMethods {
-		classMethods.set(m.Name, m)
-	}
-
 	classClass = &RClass{
 		BaseClass: &BaseClass{
-			Name:         "Class",
-			Methods:      globalMethods,
-			ClassMethods: classMethods,
-			constants:    make(map[string]*Pointer),
+			Name:      "Class",
+			constants: make(map[string]*Pointer),
 		},
 	}
+
+	classClass.setBuiltInMethods(builtinGlobalMethods, false)
+	classClass.setBuiltInMethods(builtinClassClassMethods, true)
 
 	objectClass = &RClass{
 		BaseClass: &BaseClass{
 			Name:         "Object",
 			Class:        classClass,
-			Methods:      globalMethods,
 			ClassMethods: newEnvironment(),
 			constants:    make(map[string]*Pointer),
 		},
 	}
+
+	objectClass.setBuiltInMethods(builtinGlobalMethods, false)
 }
 
 // initializeClass initializes and returns a class instance with given class name
@@ -117,6 +108,22 @@ func (c *BaseClass) Inspect() string {
 		return "<Module:" + c.Name + ">"
 	}
 	return "<Class:" + c.Name + ">"
+}
+
+func (c *BaseClass) setBuiltInMethods(methodList []*BuiltInMethodObject, classMethods bool) {
+	methods := newEnvironment()
+
+	for _, m := range methodList {
+		methods.set(m.Name, m)
+		m.class = methodClass
+	}
+
+	if classMethods {
+		c.ClassMethods = methods
+		return
+	}
+
+	c.Methods = methods
 }
 
 func (c *BaseClass) lookupClassMethod(methodName string) Object {

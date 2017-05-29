@@ -13,10 +13,7 @@ func initializeURIClass(vm *VM) {
 	https.pseudoSuperClass = http
 	uri.constants[http.Name] = &Pointer{http}
 	uri.constants[https.Name] = &Pointer{https}
-
-	for _, m := range builtinURIClassMethods {
-		uri.ClassMethods.set(m.Name, m)
-	}
+	uri.setBuiltInMethods(builtinURIClassMethods, true)
 
 	attrs := []Object{
 		initializeString("host"),

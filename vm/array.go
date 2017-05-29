@@ -80,14 +80,9 @@ func initializeArray(elements []Object) *ArrayObject {
 }
 
 func init() {
-	methods := newEnvironment()
-
-	for _, m := range builtinArrayInstanceMethods {
-		methods.set(m.Name, m)
-	}
-
-	bc := &BaseClass{Name: "Array", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
+	bc := &BaseClass{Name: "Array", ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
 	ac := &RArray{BaseClass: bc}
+	ac.setBuiltInMethods(builtinArrayInstanceMethods, false)
 	arrayClass = ac
 }
 

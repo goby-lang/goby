@@ -30,14 +30,9 @@ func (n *NullObject) returnClass() Class {
 }
 
 func initNull() {
-	methods := newEnvironment()
-
-	for _, m := range builtInNullInstanceMethods {
-		methods.set(m.Name, m)
-	}
-
-	baseClass := &BaseClass{Name: "Null", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass}
+	baseClass := &BaseClass{Name: "Null", ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass}
 	nc := &RNull{BaseClass: baseClass}
+	nc.setBuiltInMethods(builtInNullInstanceMethods, false)
 	nullClass = nc
 	NULL = &NullObject{Class: nullClass}
 }
