@@ -66,6 +66,7 @@ type Class interface {
 	lookupConstant(string, bool) *Pointer
 	ReturnName() string
 	returnSuperClass() Class
+	setSingletonMethod(string, *MethodObject)
 	Object
 }
 

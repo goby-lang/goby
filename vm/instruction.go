@@ -280,7 +280,7 @@ var builtInActions = map[operationType]*action{
 			case *RClass:
 				self.setSingletonMethod(methodName, method)
 			default:
-				self.returnClass().(*RClass).setSingletonMethod(methodName, method)
+				self.returnClass().setSingletonMethod(methodName, method)
 			}
 		},
 	},
