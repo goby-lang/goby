@@ -261,10 +261,8 @@ var builtInActions = map[operationType]*action{
 			switch self := v.(type) {
 			case *RClass:
 				self.Methods.set(methodName, method)
-			case Object:
-				self.returnClass().(*RClass).Methods.set(methodName, method)
 			default:
-				vm.returnError(fmt.Sprintf("Can't define method on %T", self))
+				self.returnClass().(*RClass).Methods.set(methodName, method)
 			}
 		},
 	},
@@ -281,10 +279,8 @@ var builtInActions = map[operationType]*action{
 			switch self := v.(type) {
 			case *RClass:
 				self.setSingletonMethod(methodName, method)
-			case Object:
-				self.returnClass().(*RClass).setSingletonMethod(methodName, method)
 			default:
-				vm.returnError(fmt.Sprintf("Can't define singleton method on %T", self))
+				self.returnClass().(*RClass).setSingletonMethod(methodName, method)
 			}
 		},
 	},
@@ -334,12 +330,8 @@ var builtInActions = map[operationType]*action{
 			switch r := receiver.(type) {
 			case Class:
 				method = r.lookupClassMethod(methodName)
-			case Object:
-				method = receiver.returnClass().lookupInstanceMethod(methodName)
-			case *Error:
-				vm.returnError(r.Inspect())
 			default:
-				vm.returnError("not a valid receiver: %s" + r.Inspect())
+				method = r.returnClass().lookupInstanceMethod(methodName)
 			}
 
 			if method == nil {
