@@ -7,11 +7,10 @@ import (
 )
 
 func initializeHTTPClass(vm *VM) {
-	net := initializeClass("Net", true)
+	net := vm.loadConstant("Net", true)
 	http := initializeClass("HTTP", false)
 	http.setBuiltInMethods(builtinHTTPClassMethods, true)
 	net.constants[http.Name] = &Pointer{http}
-	vm.constants["Net"] = &Pointer{Target: net}
 }
 
 var builtinHTTPClassMethods = []*BuiltInMethodObject{

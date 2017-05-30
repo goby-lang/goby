@@ -1,0 +1,9 @@
+require("net/simple_server")
+
+server = Net::SimpleServer.new("3000")
+
+server.mount("/path") do
+  "!!!!!!!!!!!!!!!"
+end
+
+server.start
