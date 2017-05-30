@@ -14,7 +14,8 @@ after_success:
   - bash <(curl -s https://codecov.io/bash)
 
 notifications:
-  slack: goby-lang:Ler5Uge2Vlx3O8Yt2OFcKg5W
+  slack:
+      - goby-lang:Ler5Uge2Vlx3O8Yt2OFcKg5W
     on_success: change
     on_failure: always
     on_start: never
