@@ -432,7 +432,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 }
 
 func initString() {
-	bc := &BaseClass{Name: "String", ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
+	bc := &BaseClass{Name: "String", Methods: newEnvironment(), ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
 	sc := &RString{BaseClass: bc}
 	sc.setBuiltInMethods(builtinStringInstanceMethods, false)
 	stringClass = sc

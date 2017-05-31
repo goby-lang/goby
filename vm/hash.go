@@ -128,7 +128,7 @@ var builtinHashInstanceMethods = []*BuiltInMethodObject{
 }
 
 func init() {
-	bc := &BaseClass{Name: "Hash", ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
+	bc := &BaseClass{Name: "Hash", ClassMethods: newEnvironment(), Methods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
 	hc := &RHash{BaseClass: bc}
 	hc.setBuiltInMethods(builtinHashInstanceMethods, false)
 	hashClass = hc

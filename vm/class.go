@@ -17,8 +17,10 @@ var (
 func initTopLevelClasses() {
 	classClass = &RClass{
 		BaseClass: &BaseClass{
-			Name:      "Class",
-			constants: make(map[string]*Pointer),
+			Name:         "Class",
+			Methods:      newEnvironment(),
+			ClassMethods: newEnvironment(),
+			constants:    make(map[string]*Pointer),
 		},
 	}
 
@@ -30,6 +32,7 @@ func initTopLevelClasses() {
 			Name:         "Object",
 			Class:        classClass,
 			ClassMethods: newEnvironment(),
+			Methods:      newEnvironment(),
 			constants:    make(map[string]*Pointer),
 		},
 	}
@@ -112,19 +115,17 @@ func (c *BaseClass) Inspect() string {
 }
 
 func (c *BaseClass) setBuiltInMethods(methodList []*BuiltInMethodObject, classMethods bool) {
-	methods := newEnvironment()
-
 	for _, m := range methodList {
-		methods.set(m.Name, m)
+		c.Methods.set(m.Name, m)
 		m.class = methodClass
 	}
 
 	if classMethods {
-		c.ClassMethods = methods
-		return
+		for _, m := range methodList {
+			c.ClassMethods.set(m.Name, m)
+			m.class = methodClass
+		}
 	}
-
-	c.Methods = methods
 }
 
 func (c *BaseClass) lookupClassMethod(methodName string) Object {
