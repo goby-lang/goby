@@ -38,6 +38,10 @@ func (hc httpClass) initializeRequestClass() *RClass {
 
 	requestClass.setAttrAccessor(attrs)
 
+	builtinHTTPRequestInstanceMethods := []*BuiltInMethodObject{}
+
+	requestClass.setBuiltInMethods(builtinHTTPRequestInstanceMethods, false)
+
 	httpRequestClass = requestClass
 	return requestClass
 }
