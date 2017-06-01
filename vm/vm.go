@@ -292,7 +292,7 @@ func (vm *VM) builtInMethodYield(blockFrame *callFrame, args ...Object) *Pointer
 	c.self = blockFrame.self
 
 	for i := 0; i < len(args); i++ {
-		c.locals[0] = &Pointer{args[i]}
+		c.insertLCL(i, 0, args[i])
 	}
 
 	vm.callFrameStack.push(c)

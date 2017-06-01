@@ -2,9 +2,14 @@ require("net/simple_server")
 
 server = Net::SimpleServer.new("3000")
 
-server.mount("/path") do |req|
-  puts(req.path)
-  "!!!!!!!!!!!!!!!"
+server.mount("/") do |req, res|
+  res.body = "Hello World"
+  res.status = 200
+end
+
+server.mount("/not_found") do |req, res|
+  res.body = "Not Found"
+  res.status = 404
 end
 
 server.start

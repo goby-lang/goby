@@ -55,16 +55,17 @@ var builtinSimpleServerInstanceMethods = []*BuiltInMethodObject{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(v *VM, args []Object, blockFrame *callFrame) Object {
 				path := args[0].(*StringObject).Value
-				req := httpRequestClass.initializeInstance()
-				res := httpResponseClass.initializeInstance()
 
 				http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+					req := httpRequestClass.initializeInstance()
+					res := httpResponseClass.initializeInstance()
+
 					req.InstanceVariables.set("@method", initializeString(r.Method))
 					req.InstanceVariables.set("@body", initializeString(""))
 					req.InstanceVariables.set("@path", initializeString(r.URL.Path))
 					req.InstanceVariables.set("@url", initializeString(r.URL.RequestURI()))
 
-					builtInMethodYield(v, blockFrame, req, res)
+					v.builtInMethodYield(blockFrame, req, res)
 
 					w.Header().Set("Content-Type", "text/plain; charset=utf-8") // normal header
 
