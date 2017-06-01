@@ -25,11 +25,6 @@ type BooleanObject struct {
 	Value bool
 }
 
-// objectType returns boolean object's type
-func (b *BooleanObject) objectType() objectType {
-	return booleanObj
-}
-
 // Inspect returns boolean object's value, which is either true or false.
 func (b *BooleanObject) Inspect() string {
 	return fmt.Sprintf("%t", b.Value)

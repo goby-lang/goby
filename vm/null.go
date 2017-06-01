@@ -16,10 +16,6 @@ type NullObject struct {
 	Class *RNull
 }
 
-func (n *NullObject) objectType() objectType {
-	return nullObj
-}
-
 // Inspect returns the name of NullObject
 func (n *NullObject) Inspect() string {
 	return "null"

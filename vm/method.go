@@ -28,10 +28,6 @@ type MethodObject struct {
 	argc           int
 }
 
-func (m *MethodObject) objectType() objectType {
-	return methodObj
-}
-
 // Inspect returns method's name, params count and instruction set.
 func (m *MethodObject) Inspect() string {
 	var out bytes.Buffer
@@ -53,10 +49,6 @@ type BuiltInMethodObject struct {
 	class *RMethod
 	Name  string
 	Fn    func(receiver Object) builtinMethodBody
-}
-
-func (bim *BuiltInMethodObject) objectType() objectType {
-	return buildInMethodObj
 }
 
 // Inspect just returns built in method's name.

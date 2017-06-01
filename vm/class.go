@@ -100,11 +100,6 @@ type BaseClass struct {
 	scope     Class
 }
 
-// objectType returns class object's type
-func (c *BaseClass) objectType() objectType {
-	return classObj
-}
-
 // Inspect returns the basic inspected result (which is class name) of current class
 // TODO: Singleton class's inspect() should also mark if it's a singleton class explicitly.
 func (c *BaseClass) Inspect() string {
@@ -338,7 +333,7 @@ var builtinGlobalMethods = []*BuiltInMethodObject{
 				case Object:
 					return r.returnClass()
 				default:
-					return &Error{Message: "Can't call class on %T" + string(r.objectType())}
+					return &Error{Message: "Can't call class on %T" + string(r.returnClass().ReturnName())}
 				}
 			}
 		},

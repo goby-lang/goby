@@ -22,11 +22,6 @@ type ArrayObject struct {
 	Elements []Object
 }
 
-// objectType returns array instance's type
-func (a *ArrayObject) objectType() objectType {
-	return arrayObj
-}
-
 // Inspect returns detailed info of a array include elements it contains
 func (a *ArrayObject) Inspect() string {
 	var out bytes.Buffer

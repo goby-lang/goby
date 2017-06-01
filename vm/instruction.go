@@ -300,7 +300,7 @@ var builtInActions = map[operationType]*action{
 				inheritedClass, ok := superClass.Target.(*RClass)
 
 				if !ok {
-					vm.returnError("Constant " + superClassName + " is not a class. got=" + string(superClass.Target.objectType()))
+					vm.returnError("Constant " + superClassName + " is not a class. got=" + string(superClass.Target.returnClass().ReturnName()))
 				}
 
 				class.pseudoSuperClass = inheritedClass

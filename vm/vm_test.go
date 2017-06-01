@@ -501,7 +501,8 @@ func testArrayObject(t *testing.T, obj Object, expected *ArrayObject) bool {
 
 func isError(obj Object) bool {
 	if obj != nil {
-		return obj.objectType() == errorObj
+		_, ok := obj.(*Error)
+		return ok
 	}
 	return false
 }

@@ -25,10 +25,6 @@ type IntegerObject struct {
 	Value int
 }
 
-func (i *IntegerObject) objectType() objectType {
-	return integerObj
-}
-
 func (i *IntegerObject) Inspect() string {
 	return strconv.Itoa(i.Value)
 }

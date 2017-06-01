@@ -247,7 +247,7 @@ func (vm *VM) lookupConstant(cf *callFrame, constName string) *Pointer {
 
 	top := vm.stack.top()
 
-	if top == nil || top.Target.objectType() != classObj {
+	if top == nil {
 		hasNamespace = false
 	} else {
 		namespace, hasNamespace = top.Target.(Class)
