@@ -80,6 +80,8 @@ func TestNextToken(t *testing.T) {
 	require "foo"
 
 	Foo::Bar
+
+	Person.class
 	`
 
 	tests := []struct {
@@ -282,12 +284,12 @@ func TestNextToken(t *testing.T) {
 
 		{token.Null, "nil", 64},
 
-		{token.Ident, "module", 66},
+		{token.Module, "module", 66},
 		{token.Constant, "Foo", 66},
 		{token.End, "end", 67},
 
 		{token.Ident, "foo", 69},
-		{token.Dot, ".", 70},
+		{token.Dot, ".", 69},
 		{token.Ident, "module", 69},
 
 		{token.Ident, "require", 71},
@@ -296,7 +298,11 @@ func TestNextToken(t *testing.T) {
 		{token.Constant, "Foo", 73},
 		{token.ResolutionOperator, "::", 73},
 		{token.Constant, "Bar", 73},
-		{token.EOF, "", 74},
+
+		{token.Constant, "Person", 75},
+		{token.Dot, ".", 75},
+		{token.Ident, "class", 75},
+		{token.EOF, "", 77},
 	}
 
 	l := New(input)
@@ -305,14 +311,14 @@ func TestNextToken(t *testing.T) {
 		tok := l.NextToken()
 
 		if tok.Type != tt.expectedType {
-			t.Fatalf("tests[%d] - tokentype wrong. exprected=%q, got=%q", i, tt.expectedType, tok.Type)
+			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q", i, tt.expectedType, tok.Type)
 		}
 		if tok.Literal != tt.expectedLiteral {
-			t.Fatalf("tests[%d] - literal wrong. exprected=%q, got=%q", i, tt.expectedLiteral, tok.Literal)
+			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q", i, tt.expectedLiteral, tok.Literal)
 
 		}
 		if tok.Line != tt.expectedLine {
-			t.Fatalf("tests[%d] - line number wrong. exprected=%d, got=%d", i, tt.expectedLine, tok.Line)
+			t.Fatalf("tests[%d] - line number wrong. expected=%d, got=%d", i, tt.expectedLine, tok.Line)
 		}
 	}
 }

@@ -170,7 +170,11 @@ func (l *Lexer) NextToken() token.Token {
 				tok.Line = l.line
 			} else {
 				tok.Literal = l.readIdentifier()
-				tok.Type = token.LookupIdent(tok.Literal)
+				if l.FSM.Is("initial") {
+					tok.Type = token.LookupIdent(tok.Literal)
+				}else{
+					tok.Type = token.Ident
+				}
 				tok.Line = l.line
 
 			}
