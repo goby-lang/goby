@@ -325,8 +325,6 @@ var builtInActions = map[operationType]*action{
 				vm.evalBuiltInMethod(receiver, m, receiverPr, argCount, argPr, blockFrame)
 			case *Error:
 				vm.returnError(m.Inspect())
-			default:
-				vm.returnError(fmt.Sprintf("unknown instance method type: %T", m))
 			}
 		},
 	},
@@ -435,20 +433,16 @@ func initializeObject(value interface{}) Object {
 	switch v := value.(type) {
 	case int:
 		return initilaizeInteger(int(v))
-	case int64:
-		return initilaizeInteger(int(v))
 	case string:
 		switch v {
 		case "true":
 			return TRUE
 		case "false":
 			return FALSE
-		case "nil":
-			return NULL
 		default:
 			return initializeString(v)
 		}
-	default:
-		panic(fmt.Sprintf("Unknown data type: %T", v))
 	}
+
+	return newError(fmt.Sprintf("Unknow data type %T", value))
 }
