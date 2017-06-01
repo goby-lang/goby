@@ -302,7 +302,7 @@ func TestNextToken(t *testing.T) {
 		{token.Constant, "Person", 75},
 		{token.Dot, ".", 75},
 		{token.Ident, "class", 75},
-		{token.EOF, "", 77},
+		{token.EOF, "", 76},
 	}
 
 	l := New(input)

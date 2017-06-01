@@ -8,7 +8,7 @@ import (
 
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
-	case token.InstanceVariable, token.Ident, token.Constant, token.Class:
+	case token.InstanceVariable, token.Ident, token.Constant, token.Class, token.Module:
 		if p.curToken.Literal == "class" {
 			return p.parseClassStatement()
 		}
