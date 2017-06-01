@@ -203,10 +203,6 @@ func (c *BaseClass) returnSuperClass() Class {
 	return c.pseudoSuperClass
 }
 
-func (c *BaseClass) getConstants() map[string]*Pointer {
-	return c.constants
-}
-
 func (c *RClass) initializeInstance() *RObject {
 	instance := &RObject{Class: c, InstanceVariables: newEnvironment()}
 
@@ -296,8 +292,10 @@ var builtinGlobalMethods = []*BuiltInMethodObject{
 		Name: "require_relative",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				callerDir := path.Dir(vm.currentFilePath())
 				filepath := args[0].(*StringObject).Value
-				filepath = path.Join(vm.fileDir, filepath)
+
+				filepath = path.Join(callerDir, filepath)
 
 				file, err := ioutil.ReadFile(filepath + ".gb")
 

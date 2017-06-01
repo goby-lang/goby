@@ -2,6 +2,21 @@ package vm
 
 import "testing"
 
+func TestRequireRelative(t *testing.T) {
+	input := `
+	require_relative("../test_fixtures/require_test/foo")
+
+	fifty = Foo.bar(5)
+
+	Foo.baz do |hundred|
+	  hundred + fifty + Bar.baz
+	end
+	`
+
+	evaluated := testEval(t, input)
+	testIntegerObject(t, evaluated, 160)
+}
+
 func TestDefSingletonMethtod(t *testing.T) {
 	tests := []struct {
 		input    string

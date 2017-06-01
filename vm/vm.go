@@ -180,6 +180,10 @@ func (vm *VM) execInstruction(cf *callFrame, i *instruction) {
 	i.action.operation(vm, cf, i.Params...)
 }
 
+func (vm *VM) currentFilePath() string {
+	return string(vm.callFrameStack.top().instructionSet.filename)
+}
+
 func (vm *VM) printDebugInfo(i *instruction) {
 	fmt.Println(i.inspect())
 }
