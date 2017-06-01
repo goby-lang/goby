@@ -287,7 +287,7 @@ func TestNextToken(t *testing.T) {
 		{token.End, "end", 67},
 
 		{token.Ident, "foo", 69},
-		{token.Dot, ".", 69},
+		{token.Dot, ".", 70},
 		{token.Ident, "module", 69},
 
 		{token.Ident, "require", 71},
@@ -306,7 +306,6 @@ func TestNextToken(t *testing.T) {
 
 		if tok.Type != tt.expectedType {
 			t.Fatalf("tests[%d] - tokentype wrong. exprected=%q, got=%q", i, tt.expectedType, tok.Type)
-
 		}
 		if tok.Literal != tt.expectedLiteral {
 			t.Fatalf("tests[%d] - literal wrong. exprected=%q, got=%q", i, tt.expectedLiteral, tok.Literal)
@@ -314,7 +313,6 @@ func TestNextToken(t *testing.T) {
 		}
 		if tok.Line != tt.expectedLine {
 			t.Fatalf("tests[%d] - line number wrong. exprected=%d, got=%d", i, tt.expectedLine, tok.Line)
-
 		}
 	}
 }
