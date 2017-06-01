@@ -84,4 +84,15 @@ func TestJoinMethod(t *testing.T) {
 	}
 }
 
-//@TODO add test for size and chmod form a847c8b41f29657b380c1731ec36a660dbf49bc4
+func TestSizeMethod(t *testing.T) {
+	input := `
+	require("file")
+
+	File.size("../test_fixtures/file_test/size.gb")
+	`
+
+	evaluated := testEval(t, input)
+	testIntegerObject(t, evaluated, 22)
+}
+
+//@TODO add test for chmod form a847c8b41f29657b380c1731ec36a660dbf49bc4
