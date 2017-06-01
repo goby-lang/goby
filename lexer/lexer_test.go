@@ -97,7 +97,7 @@ func TestNextToken(t *testing.T) {
 		{token.Semicolon, ";", 2},
 
 		// class is default to be ident
-		{token.Ident, "class", 4},
+		{token.Class, "class", 4},
 		{token.Constant, "Person", 4},
 
 		{token.Def, "def", 5},
