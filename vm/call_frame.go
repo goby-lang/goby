@@ -1,10 +1,5 @@
 package vm
 
-import (
-	"bytes"
-	"fmt"
-)
-
 type callFrameStack struct {
 	callFrames []*callFrame
 	vm         *VM
@@ -74,13 +69,6 @@ func (cf *callFrame) getLCL(index, depth int) *Pointer {
 	return cf.blockFrame.ep.getLCL(index, depth-1)
 }
 
-func (cf *callFrame) inspect() string {
-	if cf.ep != nil {
-		return fmt.Sprintf("Name: %s. is block: %t. ep: %d", cf.instructionSet.label.name, cf.isBlock, len(cf.ep.locals))
-	}
-	return fmt.Sprintf("Name: %s. is block: %t", cf.instructionSet.label.name, cf.isBlock)
-}
-
 func (cfs *callFrameStack) push(cf *callFrame) {
 	if cf == nil {
 		panic("Callframe can't be nil!")
@@ -115,18 +103,6 @@ func (cfs *callFrameStack) top() *callFrame {
 	}
 
 	return nil
-}
-
-func (cfs *callFrameStack) inspect() string {
-	var out bytes.Buffer
-
-	for _, cf := range cfs.callFrames {
-		if cf != nil {
-			out.WriteString(fmt.Sprintln(cf.inspect()))
-		}
-	}
-
-	return out.String()
 }
 
 func newCallFrame(is *instructionSet) *callFrame {

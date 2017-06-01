@@ -1,7 +1,6 @@
 package vm
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/goby-lang/goby/bytecode"
 	"strings"
@@ -29,15 +28,6 @@ type instruction struct {
 	Line   int
 }
 
-func (i *instruction) inspect() string {
-	var params []string
-
-	for _, param := range i.Params {
-		params = append(params, fmt.Sprint(param))
-	}
-	return fmt.Sprintf("%s: %s", i.action.name, strings.Join(params, ", "))
-}
-
 type instructionSet struct {
 	label        *label
 	instructions []*instruction
@@ -47,18 +37,6 @@ type instructionSet struct {
 func (is *instructionSet) define(line int, a *action, params ...interface{}) {
 	i := &instruction{action: a, Params: params, Line: line}
 	is.instructions = append(is.instructions, i)
-}
-
-func (is *instructionSet) inspect() string {
-	var out bytes.Buffer
-
-	out.WriteString(fmt.Sprintf("<%s>\n", is.label.name))
-	for _, i := range is.instructions {
-		out.WriteString(i.inspect())
-		out.WriteString("\n")
-	}
-
-	return out.String()
 }
 
 var builtInActions = map[operationType]*action{
