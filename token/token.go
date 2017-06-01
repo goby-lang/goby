@@ -69,7 +69,7 @@ const (
 	Do     = "DO"
 	Yield  = "YIELD"
 	Class  = "CLASS"
-	Module  = "MODULE"
+	Module = "MODULE"
 
 	ResolutionOperator = "::"
 )
@@ -88,7 +88,7 @@ var keywords = map[string]Type{
 	"do":     Do,
 	"yield":  Yield,
 	"class":  Class,
-	"module":  Module,
+	"module": Module,
 }
 
 // LookupIdent is used for keyword identification
