@@ -224,31 +224,11 @@ func (c *RClass) setAttrWriter(args interface{}) {
 	case []Object:
 		for _, attr := range args {
 			attrName := attr.(*StringObject).Value
-			m := &BuiltInMethodObject{
-				Name: attrName + "=",
-				Fn: func(receiver Object) builtinMethodBody {
-					return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-						v := receiver.(*RObject).InstanceVariables.set("@"+attrName, args[0])
-						return v
-					}
-				},
-			}
-
-			c.Methods.set(attrName+"=", m)
+			c.Methods.set(attrName+"=", generateAttrWriteMethod(attrName))
 		}
 	case []string:
 		for _, attrName := range args {
-			m := &BuiltInMethodObject{
-				Name: attrName + "=",
-				Fn: func(receiver Object) builtinMethodBody {
-					return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-						v := receiver.(*RObject).InstanceVariables.set("@"+attrName, args[0])
-						return v
-					}
-				},
-			}
-
-			c.Methods.set(attrName+"=", m)
+			c.Methods.set(attrName+"=", generateAttrWriteMethod(attrName))
 		}
 	}
 
@@ -259,34 +239,38 @@ func (c *RClass) setAttrReader(args interface{}) {
 	case []Object:
 		for _, attr := range args {
 			attrName := attr.(*StringObject).Value
-			m := &BuiltInMethodObject{
-				Name: attrName,
-				Fn: func(receiver Object) builtinMethodBody {
-					return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-						v, _ := receiver.(*RObject).InstanceVariables.get("@" + attrName)
-						return v
-					}
-				},
-			}
-
-			c.Methods.set(attrName, m)
+			c.Methods.set(attrName, generateAttrReadMethod(attrName))
 		}
 	case []string:
 		for _, attrName := range args {
-			m := &BuiltInMethodObject{
-				Name: attrName,
-				Fn: func(receiver Object) builtinMethodBody {
-					return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-						v, _ := receiver.(*RObject).InstanceVariables.get("@" + attrName)
-						return v
-					}
-				},
-			}
-
-			c.Methods.set(attrName, m)
+			c.Methods.set(attrName, generateAttrReadMethod(attrName))
 		}
 	}
 
+}
+
+func generateAttrWriteMethod(attrName string) *BuiltInMethodObject {
+	return &BuiltInMethodObject{
+		Name: attrName + "=",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				v := receiver.(*RObject).InstanceVariables.set("@"+attrName, args[0])
+				return v
+			}
+		},
+	}
+}
+
+func generateAttrReadMethod(attrName string) *BuiltInMethodObject {
+	return &BuiltInMethodObject{
+		Name: attrName,
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				v, _ := receiver.(*RObject).InstanceVariables.get("@" + attrName)
+				return v
+			}
+		},
+	}
 }
 
 func (c *RClass) setAttrAccessor(args interface{}) {
