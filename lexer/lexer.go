@@ -23,10 +23,9 @@ func New(input string) *Lexer {
 		"initial",
 		fsm.Events{
 			{Name: "method", Src: []string{"initial"}, Dst: "method"},
-			{Name: "initialize", Src: []string{"method","initial"}, Dst: "initial"},
+			{Name: "initialize", Src: []string{"method", "initial"}, Dst: "initial"},
 		},
-		fsm.Callbacks{
-		},
+		fsm.Callbacks{},
 	)
 	return l
 }
@@ -126,10 +125,10 @@ func (l *Lexer) NextToken() token.Token {
 	case '.':
 		tok = newToken(token.Dot, l.ch, l.line)
 		l.FSM.Event("method")
-		 //err := l.FSM.Event("method")
-		 //if err != nil {
-		 //    fmt.Println(err)
-		 //}
+		//err := l.FSM.Event("method")
+		//if err != nil {
+		//    fmt.Println(err)
+		//}
 	case ':':
 		if l.peekChar() == ':' {
 			l.readChar()
@@ -168,7 +167,7 @@ func (l *Lexer) NextToken() token.Token {
 				tok.Literal = l.readIdentifier()
 				if l.FSM.Is("initial") {
 					tok.Type = token.LookupIdent(tok.Literal)
-				}else{
+				} else {
 					tok.Type = token.Ident
 					//tok.Type = token.LookupIdent(tok.Literal)
 				}
