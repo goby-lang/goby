@@ -125,10 +125,6 @@ func (l *Lexer) NextToken() token.Token {
 	case '.':
 		tok = newToken(token.Dot, l.ch, l.line)
 		l.FSM.Event("method")
-		//err := l.FSM.Event("method")
-		//if err != nil {
-		//    fmt.Println(err)
-		//}
 	case ':':
 		if l.peekChar() == ':' {
 			l.readChar()
@@ -174,10 +170,6 @@ func (l *Lexer) NextToken() token.Token {
 				tok.Line = l.line
 			}
 			l.FSM.Event("initialize")
-			//err := l.FSM.Event("initialize")
-			//if err != nil {
-			//	fmt.Println(err)
-			//}
 			return tok
 		} else if isInstanceVariable(l.ch) {
 			if isLetter(l.peekChar()) {
