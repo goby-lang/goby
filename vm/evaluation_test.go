@@ -273,20 +273,20 @@ func TestClassMethodEvaluation(t *testing.T) {
 
 func TestSelfExpressionEvaluation(t *testing.T) {
 	tests := []struct {
-		input       string
-		expectedObj string
+		input    string
+		expected string
 	}{
-		{`self`, baseObject},
+		{`self.class.name`, "Object"},
 		{
 			`
 			class Bar
 				def whoami
-					self
+					"Instance of " + self.class.name
 				end
 			end
 
-			Bar.new.whoami;
-		`, baseObject},
+			Bar.new.whoami
+		`, "Instance of Bar"},
 		{
 			`
 			class Foo
@@ -297,9 +297,9 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 				end
 			end
 
-			Foo.new.get_self;
+			Foo.new.get_self.name
 			`,
-			classObj},
+			"Foo"},
 		{
 			`
 			class Foo
@@ -308,9 +308,9 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 				end
 			end
 
-			Foo.new.class
+			Foo.new.class.name
 			`,
-			classObj},
+			"Foo"},
 		{
 			`
 			class Foo
@@ -321,7 +321,7 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 
 			Foo.new.class_name
 			`,
-			stringObj},
+			"Foo"},
 	}
 
 	for _, tt := range tests {
@@ -331,9 +331,7 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 		}
 
-		if string(evaluated.objectType()) != tt.expectedObj {
-			t.Fatalf("expect self to return %s. got=%s", string(tt.expectedObj), evaluated.objectType())
-		}
+		testStringObject(t, evaluated, tt.expected)
 	}
 }
 
