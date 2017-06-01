@@ -2,6 +2,42 @@ package vm
 
 import "testing"
 
+func TestDefSingletonMethtod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{`
+		class Foo
+		  def self.bar
+		    10
+		  end
+		end
+
+		Foo.bar
+		`, 10},
+		{`
+		module Foo
+		  def self.bar
+		    10
+		  end
+		end
+
+		Foo.bar
+		`, 10},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s.\n Input %s", evaluated.(*Error).Message, tt.input)
+		}
+
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
 func TestAttrReaderAndWriter(t *testing.T) {
 	tests := []struct {
 		input    string

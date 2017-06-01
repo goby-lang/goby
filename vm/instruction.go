@@ -257,9 +257,14 @@ var builtInActions = map[operationType]*action{
 			switch self := v.(type) {
 			case *RClass:
 				self.setSingletonMethod(methodName, method)
-			default:
-				self.returnClass().setSingletonMethod(methodName, method)
 			}
+			// TODO: Support something like:
+			// ```
+			// f = Foo.new
+			// def f.bar
+			//   10
+			// end
+			// ```
 		},
 	},
 	bytecode.DefClass: {
