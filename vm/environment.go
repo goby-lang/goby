@@ -10,20 +10,6 @@ type environment struct {
 	outer *environment
 }
 
-func (e *environment) getCurrent(name string) (Object, bool) {
-	obj, ok := e.store[name]
-	return obj, ok
-}
-
-func (e *environment) getValueLocation(name string) (*environment, bool) {
-	env := e
-	_, ok := e.store[name]
-	if !ok && e.outer != nil {
-		env, ok = e.outer.getValueLocation(name)
-	}
-	return env, ok
-}
-
 func (e *environment) get(name string) (Object, bool) {
 	obj, ok := e.store[name]
 	if !ok && e.outer != nil {

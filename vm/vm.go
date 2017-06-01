@@ -180,6 +180,10 @@ func (vm *VM) execInstruction(cf *callFrame, i *instruction) {
 	i.action.operation(vm, cf, i.Params...)
 }
 
+func (vm *VM) currentFilePath() string {
+	return string(vm.callFrameStack.top().instructionSet.filename)
+}
+
 func (vm *VM) printDebugInfo(i *instruction) {
 	fmt.Println(i.inspect())
 }
@@ -247,7 +251,7 @@ func (vm *VM) lookupConstant(cf *callFrame, constName string) *Pointer {
 
 	top := vm.stack.top()
 
-	if top == nil || top.Target.objectType() != classObj {
+	if top == nil {
 		hasNamespace = false
 	} else {
 		namespace, hasNamespace = top.Target.(Class)

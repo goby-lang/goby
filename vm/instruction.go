@@ -1,7 +1,6 @@
 package vm
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/goby-lang/goby/bytecode"
 	"strings"
@@ -29,15 +28,6 @@ type instruction struct {
 	Line   int
 }
 
-func (i *instruction) inspect() string {
-	var params []string
-
-	for _, param := range i.Params {
-		params = append(params, fmt.Sprint(param))
-	}
-	return fmt.Sprintf("%s: %s", i.action.name, strings.Join(params, ", "))
-}
-
 type instructionSet struct {
 	label        *label
 	instructions []*instruction
@@ -47,18 +37,6 @@ type instructionSet struct {
 func (is *instructionSet) define(line int, a *action, params ...interface{}) {
 	i := &instruction{action: a, Params: params, Line: line}
 	is.instructions = append(is.instructions, i)
-}
-
-func (is *instructionSet) inspect() string {
-	var out bytes.Buffer
-
-	out.WriteString(fmt.Sprintf("<%s>\n", is.label.name))
-	for _, i := range is.instructions {
-		out.WriteString(i.inspect())
-		out.WriteString("\n")
-	}
-
-	return out.String()
 }
 
 var builtInActions = map[operationType]*action{
@@ -279,9 +257,14 @@ var builtInActions = map[operationType]*action{
 			switch self := v.(type) {
 			case *RClass:
 				self.setSingletonMethod(methodName, method)
-			default:
-				self.returnClass().setSingletonMethod(methodName, method)
 			}
+			// TODO: Support something like:
+			// ```
+			// f = Foo.new
+			// def f.bar
+			//   10
+			// end
+			// ```
 		},
 	},
 	bytecode.DefClass: {
@@ -300,7 +283,7 @@ var builtInActions = map[operationType]*action{
 				inheritedClass, ok := superClass.Target.(*RClass)
 
 				if !ok {
-					vm.returnError("Constant " + superClassName + " is not a class. got=" + string(superClass.Target.objectType()))
+					vm.returnError("Constant " + superClassName + " is not a class. got=" + string(superClass.Target.returnClass().ReturnName()))
 				}
 
 				class.pseudoSuperClass = inheritedClass
@@ -347,8 +330,6 @@ var builtInActions = map[operationType]*action{
 				vm.evalBuiltInMethod(receiver, m, receiverPr, argCount, argPr, blockFrame)
 			case *Error:
 				vm.returnError(m.Inspect())
-			default:
-				vm.returnError(fmt.Sprintf("unknown instance method type: %T", m))
 			}
 		},
 	},
@@ -457,20 +438,16 @@ func initializeObject(value interface{}) Object {
 	switch v := value.(type) {
 	case int:
 		return initilaizeInteger(int(v))
-	case int64:
-		return initilaizeInteger(int(v))
 	case string:
 		switch v {
 		case "true":
 			return TRUE
 		case "false":
 			return FALSE
-		case "nil":
-			return NULL
 		default:
 			return initializeString(v)
 		}
-	default:
-		panic(fmt.Sprintf("Unknown data type: %T", v))
 	}
+
+	return newError(fmt.Sprintf("Unknow data type %T", value))
 }

@@ -1,11 +1,5 @@
 package vm
 
-import (
-	"bytes"
-	"fmt"
-	"strings"
-)
-
 type stack struct {
 	Data []*Pointer
 	VM   *VM
@@ -44,35 +38,4 @@ func (s *stack) top() *Pointer {
 	}
 
 	return s.Data[0]
-}
-
-func (s *stack) inspect() string {
-	var out bytes.Buffer
-	datas := []string{}
-
-	for i, p := range s.Data {
-		if p != nil {
-			o := p.Target
-			if i == s.VM.sp {
-				datas = append(datas, fmt.Sprintf("%s (%T) %d <----", o.Inspect(), o, i))
-			} else {
-				datas = append(datas, fmt.Sprintf("%s (%T) %d", o.Inspect(), o, i))
-			}
-
-		} else {
-			if i == s.VM.sp {
-				datas = append(datas, "nil <----")
-			} else {
-				datas = append(datas, "nil")
-			}
-
-		}
-
-	}
-
-	out.WriteString("-----------\n")
-	out.WriteString(strings.Join(datas, "\n"))
-	out.WriteString("\n---------\n")
-
-	return out.String()
 }

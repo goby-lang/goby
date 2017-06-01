@@ -499,9 +499,27 @@ func testArrayObject(t *testing.T, obj Object, expected *ArrayObject) bool {
 	return true
 }
 
+func checkExpected(t *testing.T, evaluated Object, expected interface{}) {
+	switch expected := expected.(type) {
+	case int:
+		testIntegerObject(t, evaluated, expected)
+	case string:
+		testStringObject(t, evaluated, expected)
+	case bool:
+		testBooleanObject(t, evaluated, expected)
+	case nil:
+		_, ok := evaluated.(*NullObject)
+
+		if !ok {
+			t.Fatalf("expect result should be Null. got=%T", evaluated)
+		}
+	}
+}
+
 func isError(obj Object) bool {
 	if obj != nil {
-		return obj.objectType() == errorObj
+		_, ok := obj.(*Error)
+		return ok
 	}
 	return false
 }

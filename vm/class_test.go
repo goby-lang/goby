@@ -2,6 +2,57 @@ package vm
 
 import "testing"
 
+func TestRequireRelative(t *testing.T) {
+	input := `
+	require_relative("../test_fixtures/require_test/foo")
+
+	fifty = Foo.bar(5)
+
+	Foo.baz do |hundred|
+	  hundred + fifty + Bar.baz
+	end
+	`
+
+	evaluated := testEval(t, input)
+	testIntegerObject(t, evaluated, 160)
+}
+
+func TestDefSingletonMethtod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{`
+		class Foo
+		  def self.bar
+		    10
+		  end
+		end
+
+		Foo.bar
+		`, 10},
+		{`
+		module Foo
+		  def self.bar
+		    10
+		  end
+		end
+
+		Foo.bar
+		`, 10},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s.\n Input %s", evaluated.(*Error).Message, tt.input)
+		}
+
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
 func TestAttrReaderAndWriter(t *testing.T) {
 	tests := []struct {
 		input    string

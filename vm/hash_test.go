@@ -4,6 +4,25 @@ import (
 	"testing"
 )
 
+func TestHashLength(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		{ a: 1, b: 2 }.length
+		`, 2},
+		{`
+		{}.length
+		`, 0},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		checkExpected(t, evaluated, tt.expected)
+	}
+}
+
 func TestEvalHashExpression(t *testing.T) {
 	input := `
 	{ foo: 123, bar: "test", baz: true }
@@ -71,21 +90,6 @@ func TestEvalHashAccess(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
-
-		switch expected := tt.expected.(type) {
-		case int:
-			testIntegerObject(t, evaluated, expected)
-		case string:
-			testStringObject(t, evaluated, expected)
-		case bool:
-			testBooleanObject(t, evaluated, expected)
-		case nil:
-			_, ok := evaluated.(*NullObject)
-
-			if !ok {
-
-				t.Fatalf("expect input: \"%s\"'s result should be Null. got=%T(%s)", tt.input, evaluated, evaluated.Inspect())
-			}
-		}
+		checkExpected(t, evaluated, tt.expected)
 	}
 }

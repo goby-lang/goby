@@ -273,20 +273,20 @@ func TestClassMethodEvaluation(t *testing.T) {
 
 func TestSelfExpressionEvaluation(t *testing.T) {
 	tests := []struct {
-		input       string
-		expectedObj string
+		input    string
+		expected string
 	}{
-		{`self`, baseObject},
+		{`self.class.name`, "Object"},
 		{
 			`
 			class Bar
 				def whoami
-					self
+					"Instance of " + self.class.name
 				end
 			end
 
-			Bar.new.whoami;
-		`, baseObject},
+			Bar.new.whoami
+		`, "Instance of Bar"},
 		{
 			`
 			class Foo
@@ -297,9 +297,9 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 				end
 			end
 
-			Foo.new.get_self;
+			Foo.new.get_self.name
 			`,
-			classObj},
+			"Foo"},
 		{
 			`
 			class Foo
@@ -308,9 +308,9 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 				end
 			end
 
-			Foo.new.class
+			Foo.new.class.name
 			`,
-			classObj},
+			"Foo"},
 		{
 			`
 			class Foo
@@ -321,7 +321,7 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 
 			Foo.new.class_name
 			`,
-			stringObj},
+			"Foo"},
 	}
 
 	for _, tt := range tests {
@@ -331,14 +331,16 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 		}
 
-		if string(evaluated.objectType()) != tt.expectedObj {
-			t.Fatalf("expect self to return %s. got=%s", string(tt.expectedObj), evaluated.objectType())
-		}
+		testStringObject(t, evaluated, tt.expected)
 	}
 }
 
 func TestEvalInstanceVariable(t *testing.T) {
-	input := `
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
 		class Foo
 			def set(x)
 				@x = x;
@@ -373,22 +375,33 @@ func TestEvalInstanceVariable(t *testing.T) {
 		b.set(10)
 
 		f2.double_get() + f1.get() + b.get()
-	`
+	`, 60},
+		{`
+		class Foo
+		  attr_reader("bar")
+		end
 
-	evaluated := testEval(t, input)
+		Foo.new.bar
+		`, nil},
+		{`
+		class Foo
+		  def bar
+		    @x
+		  end
+		end
 
-	if isError(evaluated) {
-		t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+		Foo.new.bar
+		`, nil},
 	}
 
-	result, ok := evaluated.(*IntegerObject)
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
 
-	if !ok {
-		t.Errorf("expect result to be an integer. got=%T", evaluated)
-	}
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+		}
 
-	if result.Value != 60 {
-		t.Fatalf("expect result to be 60. got=%d", result.Value)
+		checkExpected(t, evaluated, tt.expected)
 	}
 }
 
@@ -513,6 +526,7 @@ func TestEvalIfExpression(t *testing.T) {
 		{"if 1 > 2; 10 end", nil},
 		{"if 1 > 2; 10 else 20 end", 20},
 		{"if 1 < 2; 10 else 20 end", 10},
+		{"if nil; 10 else 20 end", 20},
 	}
 
 	for _, tt := range tests {

@@ -1,0 +1,2 @@
+ignore:
+  - "**/inspection_methods.go"

@@ -6,22 +6,6 @@ import (
 
 var mainObj *RObject
 
-type objectType string
-
-const (
-	integerObj       = "INTEGER"
-	arrayObj         = "ARRAY"
-	hashObj          = "HASH"
-	stringObj        = "STRING"
-	booleanObj       = "BOOLEAN"
-	nullObj          = "NULL"
-	errorObj         = "ERROR"
-	methodObj        = "METHOD"
-	classObj         = "CLASS"
-	baseObject       = "BASE_OBJECT"
-	buildInMethodObj = "BUILD_IN_METHOD"
-)
-
 func init() {
 	initTopLevelClasses()
 	initNull()
@@ -40,7 +24,6 @@ func initMainObj() {
 // Object represents all objects in Goby, including Array, Integer or even Method and Error.
 type Object interface {
 	returnClass() Class
-	objectType() objectType
 	Inspect() string
 }
 
@@ -58,10 +41,6 @@ type RObject struct {
 	Class             *RClass
 	InstanceVariables *environment
 	InitializeMethod  *MethodObject
-}
-
-func (ro *RObject) objectType() objectType {
-	return baseObject
 }
 
 // Inspect tells which class it belongs to.

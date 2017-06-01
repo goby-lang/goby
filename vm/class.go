@@ -100,11 +100,6 @@ type BaseClass struct {
 	scope     Class
 }
 
-// objectType returns class object's type
-func (c *BaseClass) objectType() objectType {
-	return classObj
-}
-
 // Inspect returns the basic inspected result (which is class name) of current class
 // TODO: Singleton class's inspect() should also mark if it's a singleton class explicitly.
 func (c *BaseClass) Inspect() string {
@@ -208,10 +203,6 @@ func (c *BaseClass) returnSuperClass() Class {
 	return c.pseudoSuperClass
 }
 
-func (c *BaseClass) getConstants() map[string]*Pointer {
-	return c.constants
-}
-
 func (c *RClass) initializeInstance() *RObject {
 	instance := &RObject{Class: c, InstanceVariables: newEnvironment()}
 
@@ -266,8 +257,13 @@ func generateAttrReadMethod(attrName string) *BuiltInMethodObject {
 		Name: attrName,
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-				v, _ := receiver.(*RObject).InstanceVariables.get("@" + attrName)
-				return v
+				v, ok := receiver.(*RObject).InstanceVariables.get("@" + attrName)
+
+				if ok {
+					return v
+				}
+
+				return NULL
 			}
 		},
 	}
@@ -301,8 +297,10 @@ var builtinGlobalMethods = []*BuiltInMethodObject{
 		Name: "require_relative",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+				callerDir := path.Dir(vm.currentFilePath())
 				filepath := args[0].(*StringObject).Value
-				filepath = path.Join(vm.fileDir, filepath)
+
+				filepath = path.Join(callerDir, filepath)
 
 				file, err := ioutil.ReadFile(filepath + ".gb")
 
@@ -338,7 +336,7 @@ var builtinGlobalMethods = []*BuiltInMethodObject{
 				case Object:
 					return r.returnClass()
 				default:
-					return &Error{Message: "Can't call class on %T" + string(r.objectType())}
+					return &Error{Message: "Can't call class on %T" + string(r.returnClass().ReturnName())}
 				}
 			}
 		},

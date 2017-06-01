@@ -1,3 +1,0 @@
-require("file")
-
-File.basename("/home/goby/test.gb")

@@ -22,10 +22,6 @@ type StringObject struct {
 	Value string
 }
 
-func (s *StringObject) objectType() objectType {
-	return stringObj
-}
-
 func (s *StringObject) Inspect() string {
 	return s.Value
 }

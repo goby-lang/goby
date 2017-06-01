@@ -21,10 +21,6 @@ type HashObject struct {
 	Pairs map[string]Object
 }
 
-func (h *HashObject) objectType() objectType {
-	return hashObj
-}
-
 func (h *HashObject) Inspect() string {
 	var out bytes.Buffer
 	var pairs []string

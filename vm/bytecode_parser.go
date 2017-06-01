@@ -3,7 +3,6 @@ package vm
 import (
 	"fmt"
 	"github.com/goby-lang/goby/bytecode"
-	"github.com/goby-lang/goby/parser"
 	"strconv"
 	"strings"
 )
@@ -138,11 +137,4 @@ func (p *bytecodeParser) parseParam(param string) interface{} {
 	i := int(integer)
 
 	return i
-}
-
-func (p *bytecodeParser) execRequiredFile(filepath string, file []byte) {
-	program := parser.BuildAST(file)
-	g := bytecode.NewGenerator(program)
-	bytecodes := g.GenerateByteCode(program)
-	p.vm.ExecBytecodes(bytecodes, filepath)
 }
