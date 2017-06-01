@@ -284,6 +284,23 @@ func (vm *VM) lookupConstant(cf *callFrame, constName string) *Pointer {
 	return constant
 }
 
+// builtInMethodYield is like invokeblock instruction for built in methods
+func (vm *VM) builtInMethodYield(blockFrame *callFrame, args ...Object) *Pointer {
+	c := newCallFrame(blockFrame.instructionSet)
+	c.blockFrame = blockFrame
+	c.ep = blockFrame.ep
+	c.self = blockFrame.self
+
+	for i := 0; i < len(args); i++ {
+		c.locals[0] = &Pointer{args[i]}
+	}
+
+	vm.callFrameStack.push(c)
+	vm.startFromTopFrame()
+
+	return vm.stack.top()
+}
+
 // TODO: Use this method to replace unnecessary panics
 func (vm *VM) returnError(msg string) {
 	err := &Error{Message: msg}

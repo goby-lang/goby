@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -55,15 +56,34 @@ var builtinSimpleServerInstanceMethods = []*BuiltInMethodObject{
 			return func(v *VM, args []Object, blockFrame *callFrame) Object {
 				path := args[0].(*StringObject).Value
 				req := httpRequestClass.initializeInstance()
+				res := httpResponseClass.initializeInstance()
 
 				http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 					req.InstanceVariables.set("@method", initializeString(r.Method))
 					req.InstanceVariables.set("@body", initializeString(""))
 					req.InstanceVariables.set("@path", initializeString(r.URL.Path))
 					req.InstanceVariables.set("@url", initializeString(r.URL.RequestURI()))
-					// args here should be request and response, which haven't been implemented yet.
-					string := builtInMethodYield(v, blockFrame, req).Target.(*StringObject)
-					fmt.Fprint(w, string.Value)
+
+					builtInMethodYield(v, blockFrame, req, res)
+
+					w.Header().Set("Content-Type", "text/plain; charset=utf-8") // normal header
+
+					resStatus, ok := res.InstanceVariables.get("@status")
+
+					if ok {
+						w.WriteHeader(resStatus.(*IntegerObject).Value)
+					} else {
+						w.WriteHeader(http.StatusOK)
+					}
+
+					resBody, ok := res.InstanceVariables.get("@body")
+
+					if !ok {
+						io.WriteString(w, "")
+						return
+					}
+
+					io.WriteString(w, resBody.(*StringObject).Value)
 				})
 
 				return receiver

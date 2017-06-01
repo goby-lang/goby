@@ -47,9 +47,26 @@ func (hc httpClass) initializeRequestClass() *RClass {
 }
 
 func (hc httpClass) initializeResponseClass() *RClass {
-	response := initializeClass("Response", false)
-	hc.constants["Response"] = &Pointer{response}
-	return response
+	responseClass := initializeClass("Response", false)
+	hc.constants["Response"] = &Pointer{responseClass}
+
+	attrs := []string{
+		"body",
+		"status",
+		"header",
+		"http_version",
+		"request_http_version",
+		"request",
+	}
+
+	responseClass.setAttrAccessor(attrs)
+
+	builtinHTTPResponseInstanceMethods := []*BuiltInMethodObject{}
+
+	responseClass.setBuiltInMethods(builtinHTTPResponseInstanceMethods, false)
+
+	httpResponseClass = responseClass
+	return responseClass
 }
 
 var builtinHTTPClassMethods = []*BuiltInMethodObject{
