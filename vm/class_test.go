@@ -67,7 +67,6 @@ func TestAttrReaderAndWriter(t *testing.T) {
 		f.bar + f.foo
 
 		`, 110},
-
 	}
 
 	for _, tt := range tests {
