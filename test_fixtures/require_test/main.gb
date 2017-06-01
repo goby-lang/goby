@@ -1,7 +1,0 @@
-require_relative("./foo")
-
-fifty = Foo.bar(5)
-
-Foo.baz do |hundred|
-  hundred + fifty + Bar.baz
-end
