@@ -7,6 +7,22 @@ import (
 	"testing"
 )
 
+func TestHTTPResponse(t *testing.T) {
+	script := `
+	require("net/http")
+
+	res = Net::HTTP::Response.new
+
+	res.body = "test"
+	res.status = 200
+
+	res.body
+	`
+
+	evaluated := testEval(t, script)
+	testStringObject(t, evaluated, "test")
+}
+
 func TestNormalGet(t *testing.T) {
 	expected := "Hello, client"
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

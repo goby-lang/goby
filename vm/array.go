@@ -269,7 +269,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 				}
 
 				for _, obj := range arr.Elements {
-					builtInMethodYield(vm, blockFrame, obj)
+					vm.builtInMethodYield(blockFrame, obj)
 				}
 				return arr
 			}
@@ -286,7 +286,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 				}
 
 				for i := range arr.Elements {
-					builtInMethodYield(vm, blockFrame, initilaizeInteger(i))
+					vm.builtInMethodYield(blockFrame, initilaizeInteger(i))
 				}
 				return arr
 			}
@@ -314,7 +314,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 				}
 
 				for i, obj := range arr.Elements {
-					result := builtInMethodYield(vm, blockFrame, obj)
+					result := vm.builtInMethodYield(blockFrame, obj)
 					elements[i] = result.Target
 				}
 
@@ -345,7 +345,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 				}
 
 				for _, obj := range arr.Elements {
-					result := builtInMethodYield(vm, blockFrame, obj)
+					result := vm.builtInMethodYield(blockFrame, obj)
 					if result.Target.(*BooleanObject).Value {
 						elements = append(elements, obj)
 					}
@@ -455,7 +455,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 
 				if blockFrame != nil {
 					for _, obj := range arr.Elements {
-						result := builtInMethodYield(vm, blockFrame, obj)
+						result := vm.builtInMethodYield(blockFrame, obj)
 						if result.Target.(*BooleanObject).Value {
 							count++
 						}

@@ -49,6 +49,10 @@ type Pointer struct {
 	Target Object
 }
 
+func (p *Pointer) returnClass() *RClass {
+	return p.Target.(*RClass)
+}
+
 // RObject represents any non built-in class's instance.
 type RObject struct {
 	Class             *RClass

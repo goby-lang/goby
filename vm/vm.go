@@ -22,9 +22,10 @@ type filename string
 type errorMessage string
 
 var standardLibraries = map[string]func(*VM){
-	"file":     initializeFileClass,
-	"net/http": initializeHTTPClass,
-	"uri":      initializeURIClass,
+	"file":              initializeFileClass,
+	"net/http":          initializeHTTPClass,
+	"net/simple_server": initializeSimpleServerClass,
+	"uri":               initializeURIClass,
 }
 
 // VM represents a stack based virtual machine.
@@ -221,6 +222,24 @@ func (vm *VM) getClassIS(name string, filename filename) *instructionSet {
 	return is
 }
 
+func (vm *VM) loadConstant(name string, isModule bool) *RClass {
+	var c *RClass
+	var ptr *Pointer
+
+	if vm != nil {
+		ptr = vm.constants[name]
+	}
+
+	if ptr == nil {
+		c = initializeClass(name, isModule)
+		vm.constants[name] = &Pointer{Target: c}
+	} else {
+		c = ptr.Target.(*RClass)
+	}
+
+	return c
+}
+
 func (vm *VM) lookupConstant(cf *callFrame, constName string) *Pointer {
 	var constant *Pointer
 	var namespace Class
@@ -263,6 +282,23 @@ func (vm *VM) lookupConstant(cf *callFrame, constName string) *Pointer {
 
 	constant = vm.constants[constName]
 	return constant
+}
+
+// builtInMethodYield is like invokeblock instruction for built in methods
+func (vm *VM) builtInMethodYield(blockFrame *callFrame, args ...Object) *Pointer {
+	c := newCallFrame(blockFrame.instructionSet)
+	c.blockFrame = blockFrame
+	c.ep = blockFrame.ep
+	c.self = blockFrame.self
+
+	for i := 0; i < len(args); i++ {
+		c.insertLCL(i, 0, args[i])
+	}
+
+	vm.callFrameStack.push(c)
+	vm.startFromTopFrame()
+
+	return vm.stack.top()
 }
 
 // TODO: Use this method to replace unnecessary panics

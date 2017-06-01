@@ -6,12 +6,67 @@ import (
 	"strings"
 )
 
+type httpClass struct {
+	*RClass
+}
+
+var (
+	httpRequestClass  *RClass
+	httpResponseClass *RClass
+)
+
 func initializeHTTPClass(vm *VM) {
-	net := initializeClass("Net", true)
-	http := initializeClass("HTTP", false)
+	net := vm.loadConstant("Net", true)
+	http := httpClass{initializeClass("HTTP", false)}
 	http.setBuiltInMethods(builtinHTTPClassMethods, true)
+	http.initializeRequestClass()
+	http.initializeResponseClass()
+
 	net.constants[http.Name] = &Pointer{http}
-	vm.constants["Net"] = &Pointer{Target: net}
+}
+
+func (hc httpClass) initializeRequestClass() *RClass {
+	requestClass := initializeClass("Request", false)
+	hc.constants["Request"] = &Pointer{requestClass}
+
+	attrs := []string{
+		"body",
+		"method",
+		"path",
+		"url",
+	}
+
+	requestClass.setAttrAccessor(attrs)
+
+	builtinHTTPRequestInstanceMethods := []*BuiltInMethodObject{}
+
+	requestClass.setBuiltInMethods(builtinHTTPRequestInstanceMethods, false)
+
+	httpRequestClass = requestClass
+	return requestClass
+}
+
+func (hc httpClass) initializeResponseClass() *RClass {
+	responseClass := initializeClass("Response", false)
+	hc.constants["Response"] = &Pointer{responseClass}
+
+	attrs := []string{
+		"body",
+		"status",
+		"header",
+		"http_version",
+		"request_http_version",
+		"request",
+	}
+
+	responseClass.setAttrAccessor(attrs)
+
+	builtinHTTPResponseInstanceMethods := []*BuiltInMethodObject{}
+
+	responseClass.setBuiltInMethods(builtinHTTPResponseInstanceMethods, false)
+
+	httpResponseClass = responseClass
+	return responseClass
 }
 
 var builtinHTTPClassMethods = []*BuiltInMethodObject{
