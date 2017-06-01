@@ -336,7 +336,11 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 }
 
 func TestEvalInstanceVariable(t *testing.T) {
-	input := `
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
 		class Foo
 			def set(x)
 				@x = x;
@@ -371,22 +375,33 @@ func TestEvalInstanceVariable(t *testing.T) {
 		b.set(10)
 
 		f2.double_get() + f1.get() + b.get()
-	`
+	`, 60},
+		{`
+		class Foo
+		  attr_reader("bar")
+		end
 
-	evaluated := testEval(t, input)
+		Foo.new.bar
+		`, nil},
+		{`
+		class Foo
+		  def bar
+		    @x
+		  end
+		end
 
-	if isError(evaluated) {
-		t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+		Foo.new.bar
+		`, nil},
 	}
 
-	result, ok := evaluated.(*IntegerObject)
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
 
-	if !ok {
-		t.Errorf("expect result to be an integer. got=%T", evaluated)
-	}
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+		}
 
-	if result.Value != 60 {
-		t.Fatalf("expect result to be 60. got=%d", result.Value)
+		checkExpected(t, evaluated, tt.expected)
 	}
 }
 

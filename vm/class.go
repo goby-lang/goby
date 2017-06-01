@@ -257,8 +257,13 @@ func generateAttrReadMethod(attrName string) *BuiltInMethodObject {
 		Name: attrName,
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-				v, _ := receiver.(*RObject).InstanceVariables.get("@" + attrName)
-				return v
+				v, ok := receiver.(*RObject).InstanceVariables.get("@" + attrName)
+
+				if ok {
+					return v
+				}
+
+				return NULL
 			}
 		},
 	}

@@ -511,7 +511,7 @@ func checkExpected(t *testing.T, evaluated Object, expected interface{}) {
 		_, ok := evaluated.(*NullObject)
 
 		if !ok {
-			t.Fatalf("expect result should be Null. got=%T(%s)", evaluated, evaluated.Inspect())
+			t.Fatalf("expect result should be Null. got=%T", evaluated)
 		}
 	}
 }
