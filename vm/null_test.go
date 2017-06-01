@@ -11,3 +11,13 @@ func TestEvalNil(t *testing.T) {
 		t.Fatalf("Expect result to be Null. got=%T", evaluated)
 	}
 }
+
+func TestBangPrefix(t *testing.T) {
+	input := `
+	a = nil
+	!a
+	`
+
+	evaluated := testEval(t, input)
+	testBooleanObject(t, evaluated, true)
+}
