@@ -56,6 +56,18 @@ func TestAttrReaderAndWriter(t *testing.T) {
 		f.bar
 
 		`, 10},
+		{`
+		class Foo
+		  attr_accessor("foo", "bar")
+		end
+
+		f = Foo.new
+		f.bar = 10
+		f.foo = 100
+		f.bar + f.foo
+
+		`, 110},
+
 	}
 
 	for _, tt := range tests {
