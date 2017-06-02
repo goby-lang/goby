@@ -171,7 +171,7 @@ func (vm *VM) execInstruction(cf *callFrame, i *instruction) {
 			if stackTrace == 0 {
 				fmt.Printf("Internal Error: %s\n", p)
 			}
-			fmt.Printf("Instruction trace: %d. \"%s\"\n", stackTrace, i.inspect())
+			// fmt.Printf("Instruction trace: %d. \"%s\"\n", stackTrace, i.inspect())
 			stackTrace++
 			panic(p)
 		}
