@@ -57,38 +57,50 @@ var builtinSimpleServerInstanceMethods = []*BuiltInMethodObject{
 				path := args[0].(*StringObject).Value
 
 				http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
-					req := httpRequestClass.initializeInstance()
+					req := initRequest(r)
 					res := httpResponseClass.initializeInstance()
-
-					req.InstanceVariables.set("@method", initializeString(r.Method))
-					req.InstanceVariables.set("@body", initializeString(""))
-					req.InstanceVariables.set("@path", initializeString(r.URL.Path))
-					req.InstanceVariables.set("@url", initializeString(r.URL.RequestURI()))
 
 					v.builtInMethodYield(blockFrame, req, res)
 
-					w.Header().Set("Content-Type", "text/plain; charset=utf-8") // normal header
-
-					resStatus, ok := res.InstanceVariables.get("@status")
-
-					if ok {
-						w.WriteHeader(resStatus.(*IntegerObject).Value)
-					} else {
-						w.WriteHeader(http.StatusOK)
-					}
-
-					resBody, ok := res.InstanceVariables.get("@body")
-
-					if !ok {
-						io.WriteString(w, "")
-						return
-					}
-
-					io.WriteString(w, resBody.(*StringObject).Value)
+					setupResponse(w, req, res)
 				})
 
 				return receiver
 			}
 		},
 	},
+}
+
+func initRequest(r *http.Request) *RObject {
+	req := httpRequestClass.initializeInstance()
+
+	req.InstanceVariables.set("@method", initializeString(r.Method))
+	req.InstanceVariables.set("@body", initializeString(""))
+	req.InstanceVariables.set("@path", initializeString(r.URL.Path))
+	req.InstanceVariables.set("@url", initializeString(r.URL.RequestURI()))
+
+	return req
+}
+
+func setupResponse(w http.ResponseWriter, req, res *RObject) {
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8") // normal header
+
+	resStatus, ok := res.InstanceVariables.get("@status")
+
+	if ok {
+		w.WriteHeader(resStatus.(*IntegerObject).Value)
+	} else {
+		w.WriteHeader(http.StatusOK)
+	}
+
+	resBody, ok := res.InstanceVariables.get("@body")
+
+	if !ok {
+		io.WriteString(w, "")
+		return
+	}
+
+	res.InstanceVariables.set("@request", req)
+
+	io.WriteString(w, resBody.(*StringObject).Value)
 }
