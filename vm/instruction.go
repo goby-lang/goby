@@ -318,7 +318,7 @@ var builtInActions = map[operationType]*action{
 			}
 
 			if method == nil {
-				vm.returnError("undefined method `" + methodName + "' for " + receiver.Inspect())
+				vm.returnError("Undefined method `" + methodName + "' for " + receiver.Inspect())
 			}
 
 			blockFrame := vm.retrieveBlock(cf, args)
