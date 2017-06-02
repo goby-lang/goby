@@ -3,8 +3,14 @@ package vm
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 )
+
+type response struct {
+	status int
+	body   string
+}
 
 func initializeSimpleServerClass(vm *VM) {
 	initializeHTTPClass(vm)
@@ -45,7 +51,7 @@ var builtinSimpleServerInstanceMethods = []*BuiltInMethodObject{
 				}
 
 				fmt.Println("Start listening on port: " + port)
-				http.ListenAndServe(":"+port, nil)
+				log.Fatal(http.ListenAndServe(":"+port, nil))
 				return receiver
 			}
 		},
@@ -62,7 +68,7 @@ var builtinSimpleServerInstanceMethods = []*BuiltInMethodObject{
 
 					v.builtInMethodYield(blockFrame, req, res)
 
-					setupResponse(w, req, res)
+					setupResponse(w, r, res)
 				})
 
 				return receiver
@@ -82,25 +88,26 @@ func initRequest(r *http.Request) *RObject {
 	return req
 }
 
-func setupResponse(w http.ResponseWriter, req, res *RObject) {
+func setupResponse(w http.ResponseWriter, req *http.Request, res *RObject) {
+	r := &response{}
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8") // normal header
 
 	resStatus, ok := res.InstanceVariables.get("@status")
 
 	if ok {
-		w.WriteHeader(resStatus.(*IntegerObject).Value)
+		r.status = resStatus.(*IntegerObject).Value
 	} else {
-		w.WriteHeader(http.StatusOK)
+		r.status = http.StatusOK
 	}
 
 	resBody, ok := res.InstanceVariables.get("@body")
 
 	if !ok {
-		io.WriteString(w, "")
-		return
+		r.body = ""
+	} else {
+		r.body = resBody.(*StringObject).Value
 	}
 
-	res.InstanceVariables.set("@request", req)
-
 	io.WriteString(w, resBody.(*StringObject).Value)
+	fmt.Printf("%s %s %s %d\n", req.Method, req.URL.Path, req.Proto, r.status)
 }

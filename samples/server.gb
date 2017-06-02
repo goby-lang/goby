@@ -3,7 +3,7 @@ require("net/simple_server")
 server = Net::SimpleServer.new("3000")
 
 server.mount("/") do |req, res|
-  res.body = "Hello World"
+  res.body = req.method + " Hello World"
   res.status = 200
 end
 
