@@ -17,12 +17,7 @@ func (p *Parser) parseStatement() ast.Statement {
 			return p.parseModuleStatement()
 		}
 
-		if p.peekTokenIs(token.Assign) {
-			return p.parseAssignStatement()
-		}
-
 		return p.parseExpressionStatement()
-
 	case token.Return:
 		return p.parseReturnStatement()
 	case token.Def:
@@ -159,33 +154,6 @@ func (p *Parser) parseParameters() []*ast.Identifier {
 	}
 
 	return identifiers
-}
-
-func (p *Parser) parseAssignStatement() *ast.AssignStatement {
-	stmt := &ast.AssignStatement{Token: p.curToken}
-
-	switch p.curToken.Type {
-	case token.Ident:
-		stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-	case token.Constant:
-		stmt.Name = &ast.Constant{Token: p.curToken, Value: p.curToken.Literal}
-	case token.InstanceVariable:
-		stmt.Name = &ast.InstanceVariable{Token: p.curToken, Value: p.curToken.Literal}
-	}
-
-	if !p.expectPeek(token.Assign) {
-		return nil
-	}
-
-	p.nextToken()
-
-	stmt.Value = p.parseExpression(LOWEST)
-
-	if p.peekTokenIs(token.Semicolon) {
-		p.nextToken()
-	}
-
-	return stmt
 }
 
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {

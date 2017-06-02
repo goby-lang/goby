@@ -22,6 +22,7 @@ var precedence = map[token.Type]int{
 	token.Minus:              SUM,
 	token.Incr:               SUM,
 	token.Decr:               SUM,
+	token.Assign:             ASSIGN,
 	token.Slash:              PRODUCT,
 	token.Asterisk:           PRODUCT,
 	token.Pow:                PRODUCT,
@@ -38,6 +39,7 @@ const (
 	LOGIC
 	EQUALS
 	LESSGREATER
+	ASSIGN
 	SUM
 	PRODUCT
 	PREFIX
