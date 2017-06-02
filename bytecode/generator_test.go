@@ -597,6 +597,7 @@ func TestLocalVariableAccessInCurrentScope(t *testing.T) {
 	a = 100
 	b = 5
 	(b * a + 100) / 2
+	foo # This should be a method lookup
 	`
 	expected := `
 <ProgramStart>
@@ -613,7 +614,9 @@ func TestLocalVariableAccessInCurrentScope(t *testing.T) {
 10 send + 1
 11 putobject 2
 12 send / 1
-13 leave`
+13 putself
+14 send foo 0
+15 leave`
 
 	bytecode := compileToBytecode(input)
 	compareBytecode(t, bytecode, expected)
@@ -764,6 +767,51 @@ func TestWhileStatementWithMethodCallInCondition(t *testing.T) {
 21 pop
 22 getlocal 0 0
 23 leave
+`
+
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
+func TestConstantCompilation(t *testing.T) {
+	input := `
+	Foo = 10
+	Bar = Foo
+	Foo + Bar
+	`
+
+	expected := `
+<ProgramStart>
+0 putobject 10
+1 setconstant Foo
+2 getconstant Foo
+3 setconstant Bar
+4 getconstant Foo
+5 getconstant Bar
+6 send + 1
+7 leave
+`
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
+func TestBooleanCompilation(t *testing.T) {
+	input := `
+	a = true
+	b = false
+	!a == b
+`
+	expected := `
+<ProgramStart>
+0 putobject true
+1 setlocal 0 0
+2 putobject false
+3 setlocal 1 0
+4 getlocal 0 0
+5 send ! 0
+6 getlocal 1 0
+7 send == 1
+8 leave
 `
 
 	bytecode := compileToBytecode(input)
