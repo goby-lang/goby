@@ -45,29 +45,6 @@ func (p *Program) String() string {
 	return out.String()
 }
 
-type AssignStatement struct {
-	Token token.Token
-	Name  variable
-	Value Expression
-}
-
-func (as *AssignStatement) statementNode() {}
-func (as *AssignStatement) TokenLiteral() string {
-	return as.Token.Literal
-}
-func (as *AssignStatement) String() string {
-	var out bytes.Buffer
-
-	out.WriteString(as.Name.String())
-	out.WriteString(" = ")
-
-	if as.Value != nil {
-		out.WriteString(as.Value.String())
-	}
-
-	return out.String()
-}
-
 type DefStatement struct {
 	Token          token.Token
 	Name           *Identifier

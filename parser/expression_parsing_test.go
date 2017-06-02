@@ -604,3 +604,107 @@ func TestCallExpressionWithBlock(t *testing.T) {
 	exp := block.Statements[0].(*ast.ExpressionStatement).Expression
 	testMethodName(t, exp, "puts")
 }
+
+func TestAssignInfixExpressionWithLiteralValue(t *testing.T) {
+	tests := []struct {
+		input              string
+		expectedIdentifier string
+		expectedValue      interface{}
+		variableMatchFunc  func(*testing.T, ast.Expression, string) bool
+	}{
+		{"x = 5;", "x", 5, testIdentifier},
+		{"y = true;", "y", true, testIdentifier},
+
+		{"Foo = '123'", "Foo", "123", testConstant},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if program == nil {
+			t.Fatal("ParseProgram() returned nil")
+		}
+
+		testAssignExpression(t, program.Statements[0].(*ast.ExpressionStatement).Expression, tt.expectedIdentifier, tt.variableMatchFunc, tt.expectedValue)
+	}
+}
+
+func TestAssignIndexExpressionWithVariableValue(t *testing.T) {
+	tests := []struct {
+		input              string
+		expectedIdentifier string
+		expectedValue      string
+		variableMatchFunc  func(*testing.T, ast.Expression, string) bool
+		valueMatchFunc     func(*testing.T, ast.Expression, string) bool
+	}{
+		{"x = y", "x", "y", testIdentifier, testIdentifier},
+		{"@foo = y", "@foo", "y", testInstanceVariable, testIdentifier},
+		{"y = @foo", "y", "@foo", testIdentifier, testInstanceVariable},
+		{"Foo = @bar", "Foo", "@bar", testConstant, testInstanceVariable},
+		{"@bar = Foo", "@bar", "Foo", testInstanceVariable, testConstant},
+		{"@bar = @foo", "@bar", "@foo", testInstanceVariable, testInstanceVariable},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if program == nil {
+			t.Fatal("ParseProgram() returned nil")
+		}
+
+		stmt := program.Statements[0].(*ast.ExpressionStatement)
+		exp := stmt.Expression
+		infixExp, ok := exp.(*ast.InfixExpression)
+
+		if !ok {
+			t.Fatalf("exp is not InfixExpression. got=%T", exp)
+		}
+
+		if !tt.variableMatchFunc(t, infixExp.Left, tt.expectedIdentifier) {
+			return
+		}
+
+		if infixExp.Operator != "=" {
+			t.Errorf("infixExp's operator is not =. got=%q", infixExp.Operator)
+			return
+		}
+
+		if !tt.valueMatchFunc(t, infixExp.Right, tt.expectedValue) {
+			return
+		}
+	}
+}
+
+func testAssignExpression(t *testing.T, exp ast.Expression, expectedIdentifier string, variableMatchFunction func(*testing.T, ast.Expression, string) bool, expected interface{}) {
+	infixExp, ok := exp.(*ast.InfixExpression)
+
+	if !ok {
+		t.Fatalf("exp is not InfixExpression. got=%T", exp)
+	}
+
+	if !variableMatchFunction(t, infixExp.Left, expectedIdentifier) {
+		return
+	}
+
+	if infixExp.Operator != "=" {
+		t.Errorf("infixExp's operator is not =. got=%q", infixExp.Operator)
+		return
+	}
+
+	switch expected := expected.(type) {
+	case int:
+		testIntegerLiteral(t, infixExp.Right, expected)
+	case string:
+		testStringLiteral(t, infixExp.Right, expected)
+	case bool:
+		testBoolLiteral(t, infixExp.Right, expected)
+	}
+}

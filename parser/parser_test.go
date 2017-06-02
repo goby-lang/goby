@@ -188,30 +188,6 @@ func TestIgnoreComments(t *testing.T) {
 
 }
 
-func testAssignStatement(t *testing.T, s ast.Statement, name string, value interface{}) bool {
-	as, ok := s.(*ast.AssignStatement)
-	if !ok {
-		t.Errorf("s not *ast.AssignStatement. got=%T", s)
-		return false
-	}
-
-	if as.Name.TokenLiteral() != name {
-		t.Errorf("s.Name not '%s'. got=%s", name, as.Name)
-		return false
-	}
-
-	switch v := value.(type) {
-	case int64:
-		testIntegerLiteral(t, as.Value, int(v))
-	case string:
-		testIdentifier(t, as.Value, v)
-	case bool:
-		testBoolLiteral(t, as.Value, v)
-	}
-
-	return true
-}
-
 func checkParserErrors(t *testing.T, p *Parser) {
 	errors := p.Errors()
 	if len(errors) == 0 {
@@ -291,6 +267,25 @@ func testConstant(t *testing.T, exp ast.Expression, value string) bool {
 
 	if constant.TokenLiteral() != value {
 		t.Errorf("constant.TokenLiteral not %s. got=%s", value, constant.TokenLiteral())
+		return false
+	}
+
+	return true
+}
+
+func testInstanceVariable(t *testing.T, exp ast.Expression, value string) bool {
+	instVar, ok := exp.(*ast.InstanceVariable)
+	if !ok {
+		t.Errorf("exp not *ast.InstanceVariable. got=%T", exp)
+		return false
+	}
+	if instVar.Value != value {
+		t.Errorf("instVar.Value not %s. got=%s", value, instVar.Value)
+		return false
+	}
+
+	if instVar.TokenLiteral() != value {
+		t.Errorf("instVar.TokenLiteral not %s. got=%s", value, instVar.TokenLiteral())
 		return false
 	}
 
