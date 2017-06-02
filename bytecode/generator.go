@@ -121,8 +121,6 @@ func (g *Generator) compileStatement(is *instructionSet, statement ast.Statement
 		}
 
 		g.compileDefStmt(stmt, scope)
-	case *ast.AssignStatement:
-		g.compileAssignStmt(is, stmt, scope, table)
 	case *ast.ClassStatement:
 		is.define(PutSelf)
 
@@ -190,20 +188,6 @@ func (g *Generator) compileModuleStmt(stmt *ast.ModuleStatement, scope *scope) {
 	g.instructionSets = append(g.instructionSets, is)
 }
 
-func (g *Generator) compileAssignStmt(is *instructionSet, stmt *ast.AssignStatement, scope *scope, table *localTable) {
-	g.compileExpression(is, stmt.Value, scope, table)
-
-	switch name := stmt.Name.(type) {
-	case *ast.Identifier:
-		index, depth := table.setLCL(name.Value, table.depth)
-		is.define(SetLocal, index, depth)
-	case *ast.InstanceVariable:
-		is.define(SetInstanceVariable, name.Value)
-	case *ast.Constant:
-		is.define(SetConstant, name.Value)
-	}
-}
-
 func (g *Generator) compileDefStmt(stmt *ast.DefStatement, scope *scope) {
 	scope = newScope(scope, stmt)
 
@@ -258,6 +242,10 @@ func (g *Generator) compileExpression(is *instructionSet, exp ast.Expression, sc
 		}
 		is.define(NewHash, len(exp.Data)*2)
 	case *ast.InfixExpression:
+		if exp.Operator == "=" {
+			g.compileAssignExpression(is, exp, scope, table)
+			return
+		}
 		g.compileInfixExpression(is, exp, scope, table)
 	case *ast.PrefixExpression:
 		switch exp.Operator {
@@ -299,6 +287,20 @@ func (g *Generator) compileExpression(is *instructionSet, exp ast.Expression, sc
 			return
 		}
 		is.define(Send, exp.Method, len(exp.Arguments))
+	}
+}
+
+func (g *Generator) compileAssignExpression(is *instructionSet, exp *ast.InfixExpression, scope *scope, table *localTable) {
+	g.compileExpression(is, exp.Right, scope, table)
+
+	switch name := exp.Left.(type) {
+	case *ast.Identifier:
+		index, depth := table.setLCL(name.Value, table.depth)
+		is.define(SetLocal, index, depth)
+	case *ast.InstanceVariable:
+		is.define(SetInstanceVariable, name.Value)
+	case *ast.Constant:
+		is.define(SetConstant, name.Value)
 	}
 }
 
