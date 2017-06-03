@@ -2,14 +2,23 @@ package vm
 
 import (
 	"fmt"
+	"github.com/fatih/structs"
 	"io"
 	"log"
 	"net/http"
+	"strings"
 )
 
 type response struct {
 	status int
 	body   string
+}
+
+type request struct {
+	Method string
+	Body   string
+	URL    string
+	Path   string
 }
 
 func initializeSimpleServerClass(vm *VM) {
@@ -77,15 +86,23 @@ var builtinSimpleServerInstanceMethods = []*BuiltInMethodObject{
 	},
 }
 
-func initRequest(r *http.Request) *RObject {
-	req := httpRequestClass.initializeInstance()
+func initRequest(req *http.Request) *RObject {
+	r := request{}
+	reqObj := httpRequestClass.initializeInstance()
 
-	req.InstanceVariables.set("@method", initializeString(r.Method))
-	req.InstanceVariables.set("@body", initializeString(""))
-	req.InstanceVariables.set("@path", initializeString(r.URL.Path))
-	req.InstanceVariables.set("@url", initializeString(r.URL.RequestURI()))
+	r.Method = req.Method
+	r.Body = ""
+	r.Path = req.URL.Path
+	r.URL = req.Host + req.RequestURI
 
-	return req
+	m := structs.Map(r)
+
+	for k, v := range m {
+		varName := "@" + strings.ToLower(k)
+		reqObj.InstanceVariables.set(varName, initObject(v))
+	}
+
+	return reqObj
 }
 
 func setupResponse(w http.ResponseWriter, req *http.Request, res *RObject) {
@@ -108,6 +125,23 @@ func setupResponse(w http.ResponseWriter, req *http.Request, res *RObject) {
 		r.body = resBody.(*StringObject).Value
 	}
 
-	io.WriteString(w, resBody.(*StringObject).Value)
+	io.WriteString(w, r.body)
 	fmt.Printf("%s %s %s %d\n", req.Method, req.URL.Path, req.Proto, r.status)
+}
+
+func initObject(v interface{}) Object {
+	switch v := v.(type) {
+	case string:
+		return initializeString(v)
+	case int:
+		return initilaizeInteger(v)
+	case bool:
+		if v {
+			return TRUE
+		}
+
+		return FALSE
+	default:
+		panic("Can't init object")
+	}
 }
