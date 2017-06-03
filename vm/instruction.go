@@ -49,7 +49,7 @@ var builtInActions = map[operationType]*action{
 	bytecode.PutObject: {
 		name: bytecode.PutObject,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
-			object := initializeObject(args[0])
+			object := initializeObjectFromInstruction(args[0])
 			vm.stack.push(&Pointer{Target: object})
 		},
 	},
@@ -217,7 +217,7 @@ var builtInActions = map[operationType]*action{
 	bytecode.PutString: {
 		name: bytecode.PutString,
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
-			object := initializeObject(args[0])
+			object := initializeObjectFromInstruction(args[0])
 			vm.stack.push(&Pointer{object})
 		},
 	},
@@ -434,7 +434,7 @@ func (vm *VM) evalMethodObject(receiver Object, method *MethodObject, receiverPr
 	vm.sp = receiverPr + 1
 }
 
-func initializeObject(value interface{}) Object {
+func initializeObjectFromInstruction(value interface{}) Object {
 	switch v := value.(type) {
 	case int:
 		return initilaizeInteger(int(v))
