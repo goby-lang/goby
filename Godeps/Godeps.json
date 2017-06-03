@@ -1,12 +1,16 @@
 {
 	"ImportPath": "github.com/goby-lang/goby",
 	"GoVersion": "go1.8",
-	"GodepVersion": "v60",
+	"GodepVersion": "v79",
 	"Deps": [
 		{
 			"ImportPath": "github.com/fatih/structs",
 			"Comment": "v1.0-2-g74a29b9",
 			"Rev": "74a29b9fac7397d933f47e33eba94d2d83a464a2"
+		},
+		{
+			"ImportPath": "github.com/looplab/fsm",
+			"Rev": "bcc3636384ce80a109a6039432b30ff5b82476ee"
 		},
 		{
 			"ImportPath": "github.com/pkg/profile",
