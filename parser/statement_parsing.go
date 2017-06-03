@@ -8,14 +8,7 @@ import (
 
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
-	case token.InstanceVariable, token.Ident, token.Constant, token.Class, token.Module:
-		if p.curToken.Literal == "class" {
-			return p.parseClassStatement()
-		}
-
-		if p.curToken.Literal == "module" {
-			return p.parseModuleStatement()
-		}
+	case token.InstanceVariable, token.Ident, token.Constant:
 
 		return p.parseExpressionStatement()
 	case token.Return:
@@ -26,6 +19,10 @@ func (p *Parser) parseStatement() ast.Statement {
 		return nil
 	case token.While:
 		return p.parseWhileStatement()
+	case token.Class:
+		return p.parseClassStatement()
+	case token.Module:
+		return p.parseModuleStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
