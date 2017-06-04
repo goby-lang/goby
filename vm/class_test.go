@@ -426,3 +426,26 @@ func TestEvalCustomConstructor(t *testing.T) {
 		t.Errorf("expect result to be 30. got=%d", result.Value)
 	}
 }
+
+func TestClassInheritModule(t *testing.T) {
+	input := `
+module Foo
+end
+
+class Bar < Foo
+end
+
+a = Bar.new()
+	`
+	expected := `Module inheritance is not supported: Foo`
+
+	evaluated := testEval(t, input)
+
+	if !isError(evaluated) {
+		t.Fatalf("Should return an error when a class inherits a module")
+	}
+
+	if evaluated.(*Error).Message != expected {
+		t.Fatalf("Error message should be '%s'\n result %s", expected, evaluated)
+	}
+}
