@@ -3,6 +3,11 @@ package vm
 import (
 	"fmt"
 	"github.com/goby-lang/goby/bytecode"
+	"github.com/goby-lang/goby/parser"
+	"io/ioutil"
+	"path"
+	"path/filepath"
+	"runtime"
 )
 
 var stackTrace int
@@ -48,10 +53,12 @@ type VM struct {
 	classISIndexTables map[filename]*isIndexTable
 	// block instruction set table
 	blockTables map[filename]map[string]*instructionSet
-
+	// fileDir indicates executed file's directory
 	fileDir string
-
+	// args are command line arguments
 	args []string
+	// basepath is current file's absolute path, which is PATH_TO_PROJECT/vm
+	basepath string
 }
 
 // New initializes a vm to initialize state and returns it.
@@ -75,6 +82,9 @@ func New(fileDir string, args []string) *VM {
 		bytecode.LabelDefClass: make(isTable),
 	}
 	vm.fileDir = fileDir
+
+	_, b, _, _ := runtime.Caller(0)
+	vm.basepath = filepath.Dir(b)
 	return vm
 }
 
@@ -301,6 +311,43 @@ func (vm *VM) builtInMethodYield(blockFrame *callFrame, args ...Object) *Pointer
 	vm.startFromTopFrame()
 
 	return vm.stack.top()
+}
+
+func (vm *VM) execGobyLib(libName string) {
+	libPath := path.Join(vm.basepath, "../lib", libName)
+	file, err := ioutil.ReadFile(libPath)
+
+	if err != nil {
+		vm.returnError(err.Error())
+	}
+
+	vm.execRequiredFile(libPath, file)
+}
+
+func (vm *VM) execRequiredFile(filepath string, file []byte) {
+	program := parser.BuildAST(file)
+	g := bytecode.NewGenerator(program)
+	bytecodes := g.GenerateByteCode(program)
+
+	oldMethodTable := isTable{}
+	oldClassTable := isTable{}
+
+	// Copy current file's instruction sets.
+	for name, is := range vm.isTables[bytecode.LabelDef] {
+		oldMethodTable[name] = is
+	}
+
+	for name, is := range vm.isTables[bytecode.LabelDefClass] {
+		oldClassTable[name] = is
+	}
+
+	// This creates new execution environments for required file, including new instruction set table.
+	// So we need to copy old instruction sets and restore them later, otherwise current program's instruction set would be overwrite.
+	vm.ExecBytecodes(bytecodes, filepath)
+
+	// Restore instruction sets.
+	vm.isTables[bytecode.LabelDef] = oldMethodTable
+	vm.isTables[bytecode.LabelDefClass] = oldClassTable
 }
 
 // TODO: Use this method to replace unnecessary panics
