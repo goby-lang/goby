@@ -82,6 +82,12 @@ func TestNextToken(t *testing.T) {
 	Foo::Bar
 
 	Person.class
+
+	class Foo
+	  def class
+	    Foo
+	  end
+	end
 	`
 
 	tests := []struct {
@@ -302,9 +308,16 @@ func TestNextToken(t *testing.T) {
 		{token.Constant, "Person", 75},
 		{token.Dot, ".", 75},
 		{token.Ident, "class", 75},
-		{token.EOF, "", 76},
-	}
 
+		{token.Class, "class", 77},
+		{token.Constant, "Foo", 77},
+		{token.Def, "def", 78},
+		{token.Ident, "class", 78},
+		{token.Constant, "Foo", 79},
+		{token.End, "end", 80},
+		{token.End, "end", 81},
+		{token.EOF, "", 82},
+	}
 	l := New(input)
 
 	for i, tt := range tests {

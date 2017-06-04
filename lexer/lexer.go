@@ -159,17 +159,29 @@ func (l *Lexer) NextToken() token.Token {
 				tok.Literal = l.readConstant()
 				tok.Type = token.Constant
 				tok.Line = l.line
+				l.FSM.Event("initialize")
 			} else {
 				tok.Literal = l.readIdentifier()
-				if l.FSM.Is("initial") {
-					tok.Type = token.LookupIdent(tok.Literal)
-				} else {
+				if l.FSM.Is("method") {
 					tok.Type = token.Ident
-					//tok.Type = token.LookupIdent(tok.Literal)
+
+					if tok.Literal == "self" {
+						tok.Type = token.LookupIdent(tok.Literal)
+					}
+					l.FSM.Event("initialize")
+
+				} else if l.FSM.Is("initial") {
+					tok.Type = token.LookupIdent(tok.Literal)
+					if tok.Type == token.Def {
+						l.FSM.Event("method")
+					} else {
+						l.FSM.Event("initialize")
+					}
+
 				}
 				tok.Line = l.line
 			}
-			l.FSM.Event("initialize")
+
 			return tok
 		} else if isInstanceVariable(l.ch) {
 			if isLetter(l.peekChar()) {
