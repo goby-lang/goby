@@ -2,9 +2,24 @@ package vm
 
 import (
 	"fmt"
+	"github.com/fatih/structs"
 	"io"
+	"log"
 	"net/http"
+	"strings"
 )
+
+type response struct {
+	status int
+	body   string
+}
+
+type request struct {
+	Method string
+	Body   string
+	URL    string
+	Path   string
+}
 
 func initializeSimpleServerClass(vm *VM) {
 	initializeHTTPClass(vm)
@@ -45,7 +60,7 @@ var builtinSimpleServerInstanceMethods = []*BuiltInMethodObject{
 				}
 
 				fmt.Println("Start listening on port: " + port)
-				http.ListenAndServe(":"+port, nil)
+				log.Fatal(http.ListenAndServe(":"+port, nil))
 				return receiver
 			}
 		},
@@ -57,38 +72,76 @@ var builtinSimpleServerInstanceMethods = []*BuiltInMethodObject{
 				path := args[0].(*StringObject).Value
 
 				http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
-					req := httpRequestClass.initializeInstance()
+					req := initRequest(r)
 					res := httpResponseClass.initializeInstance()
-
-					req.InstanceVariables.set("@method", initializeString(r.Method))
-					req.InstanceVariables.set("@body", initializeString(""))
-					req.InstanceVariables.set("@path", initializeString(r.URL.Path))
-					req.InstanceVariables.set("@url", initializeString(r.URL.RequestURI()))
 
 					v.builtInMethodYield(blockFrame, req, res)
 
-					w.Header().Set("Content-Type", "text/plain; charset=utf-8") // normal header
-
-					resStatus, ok := res.InstanceVariables.get("@status")
-
-					if ok {
-						w.WriteHeader(resStatus.(*IntegerObject).Value)
-					} else {
-						w.WriteHeader(http.StatusOK)
-					}
-
-					resBody, ok := res.InstanceVariables.get("@body")
-
-					if !ok {
-						io.WriteString(w, "")
-						return
-					}
-
-					io.WriteString(w, resBody.(*StringObject).Value)
+					setupResponse(w, r, res)
 				})
 
 				return receiver
 			}
 		},
 	},
+}
+
+func initRequest(req *http.Request) *RObject {
+	r := request{}
+	reqObj := httpRequestClass.initializeInstance()
+
+	r.Method = req.Method
+	r.Body = ""
+	r.Path = req.URL.Path
+	r.URL = req.Host + req.RequestURI
+
+	m := structs.Map(r)
+
+	for k, v := range m {
+		varName := "@" + strings.ToLower(k)
+		reqObj.InstanceVariables.set(varName, initObject(v))
+	}
+
+	return reqObj
+}
+
+func setupResponse(w http.ResponseWriter, req *http.Request, res *RObject) {
+	r := &response{}
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8") // normal header
+
+	resStatus, ok := res.InstanceVariables.get("@status")
+
+	if ok {
+		r.status = resStatus.(*IntegerObject).Value
+	} else {
+		r.status = http.StatusOK
+	}
+
+	resBody, ok := res.InstanceVariables.get("@body")
+
+	if !ok {
+		r.body = ""
+	} else {
+		r.body = resBody.(*StringObject).Value
+	}
+
+	io.WriteString(w, r.body)
+	fmt.Printf("%s %s %s %d\n", req.Method, req.URL.Path, req.Proto, r.status)
+}
+
+func initObject(v interface{}) Object {
+	switch v := v.(type) {
+	case string:
+		return initializeString(v)
+	case int:
+		return initilaizeInteger(v)
+	case bool:
+		if v {
+			return TRUE
+		}
+
+		return FALSE
+	default:
+		panic("Can't init object")
+	}
 }
