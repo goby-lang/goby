@@ -87,6 +87,9 @@ func TestNextToken(t *testing.T) {
 	  def class
 	    Foo
 	  end
+	  def self.bar
+       	    10
+   	  end
 	end
 	`
 
@@ -315,8 +318,14 @@ func TestNextToken(t *testing.T) {
 		{token.Ident, "class", 78},
 		{token.Constant, "Foo", 79},
 		{token.End, "end", 80},
-		{token.End, "end", 81},
-		{token.EOF, "", 82},
+		{token.Def, "def", 81},
+		{token.Self, "self", 81},
+		{token.Dot, ".", 81},
+		{token.Ident, "bar", 81},
+		{token.Int, "10", 82},
+		{token.End, "end", 83},
+		{token.End, "end", 84},
+		{token.EOF, "", 85},
 	}
 	l := New(input)
 
