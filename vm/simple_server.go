@@ -25,25 +25,10 @@ func initializeSimpleServerClass(vm *VM) {
 	initializeHTTPClass(vm)
 	net := vm.loadConstant("Net", true)
 	simpleServer := initializeClass("SimpleServer", false)
-	simpleServer.setBuiltInMethods(builtinSimpleServerClassMethods, true)
 	simpleServer.setBuiltInMethods(builtinSimpleServerInstanceMethods, false)
 	net.constants[simpleServer.Name] = &Pointer{simpleServer}
 
 	vm.execGobyLib("net/simple_server.gb")
-}
-
-var builtinSimpleServerClassMethods = []*BuiltInMethodObject{
-	{
-		Name: "new",
-		Fn: func(receiver Object) builtinMethodBody {
-			return func(v *VM, args []Object, blockFrame *callFrame) Object {
-				serverClass := objectClass.constants["Net"].returnClass().constants["SimpleServer"].returnClass()
-				server := serverClass.initializeInstance()
-				server.InstanceVariables.set("@port", args[0])
-				return server
-			}
-		},
-	},
 }
 
 var builtinSimpleServerInstanceMethods = []*BuiltInMethodObject{

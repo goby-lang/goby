@@ -1,0 +1,9 @@
+module Net
+  class SimpleServer
+    attr_reader("port")
+
+    def initialize(port)
+      @port = port
+    end
+  end
+end
