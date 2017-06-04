@@ -404,8 +404,12 @@ var builtinClassClassMethods = []*BuiltInMethodObject{
 		Name: "new",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
-
 				class := receiver.(*RClass)
+
+				if class.pseudoSuperClass.isModule {
+					vm.returnError("Module inheritance is not supported: " + class.pseudoSuperClass.Name)
+				}
+
 				instance := class.initializeInstance()
 				initMethod := class.lookupInstanceMethod("initialize")
 
