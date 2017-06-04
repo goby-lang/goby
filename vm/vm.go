@@ -120,6 +120,7 @@ func (vm *VM) GetExecResult() Object {
 }
 
 func (vm *VM) initConstants() {
+	vm.constants = make(map[string]*Pointer)
 	constants := make(map[string]*Pointer)
 
 	builtInClasses := []Class{
@@ -130,7 +131,6 @@ func (vm *VM) initConstants() {
 		arrayClass,
 		hashClass,
 		classClass,
-		objectClass,
 		methodClass,
 	}
 
@@ -146,8 +146,8 @@ func (vm *VM) initConstants() {
 	}
 
 	constants["ARGV"] = &Pointer{Target: initializeArray(args)}
-
-	vm.constants = constants
+	objectClass.constants = constants
+	vm.constants["Object"] = &Pointer{objectClass}
 }
 
 func (vm *VM) evalCallFrame(cf *callFrame) {
@@ -230,13 +230,11 @@ func (vm *VM) loadConstant(name string, isModule bool) *RClass {
 	var c *RClass
 	var ptr *Pointer
 
-	if vm != nil {
-		ptr = vm.constants[name]
-	}
+	ptr = objectClass.constants[name]
 
 	if ptr == nil {
 		c = initializeClass(name, isModule)
-		vm.constants[name] = &Pointer{Target: c}
+		objectClass.constants[name] = &Pointer{Target: c}
 	} else {
 		c = ptr.Target.(*RClass)
 	}

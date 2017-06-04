@@ -54,11 +54,31 @@ func (cf *callFrame) storeConstant(constName string, constant interface{}) *Poin
 			class.scope = scope
 		}
 	default:
-		c := cf.self.returnClass()
-		c.(*RClass).constants[constName] = ptr
+		c := cf.self.returnClass().(*RClass)
+		c.constants[constName] = ptr
 	}
 
 	return ptr
+}
+
+func (cf *callFrame) lookupConstant(constName string) (*Pointer, bool) {
+	switch scope := cf.self.(type) {
+	case *RClass:
+		p, ok := scope.constants[constName]
+
+		if ok {
+			return p, true
+		}
+	default:
+		c := cf.self.returnClass().(*RClass)
+		p, ok := c.constants[constName]
+
+		if ok {
+			return p, true
+		}
+	}
+
+	return nil, false
 }
 
 func (cf *callFrame) getLCL(index, depth int) *Pointer {
