@@ -1,18 +1,18 @@
 package vm
 
 type stack struct {
-	Data []*Pointer
-	VM   *VM
+	Data   []*Pointer
+	thread *thread
 }
 
 func (s *stack) push(v *Pointer) {
-	if len(s.Data) <= s.VM.sp {
+	if len(s.Data) <= s.thread.sp {
 		s.Data = append(s.Data, v)
 	} else {
-		s.Data[s.VM.sp] = v
+		s.Data[s.thread.sp] = v
 	}
 
-	s.VM.sp++
+	s.thread.sp++
 }
 
 func (s *stack) pop() *Pointer {
@@ -20,10 +20,10 @@ func (s *stack) pop() *Pointer {
 		panic("Nothing to pop!")
 	}
 
-	s.VM.sp--
+	s.thread.sp--
 
-	v := s.Data[s.VM.sp]
-	s.Data[s.VM.sp] = nil
+	v := s.Data[s.thread.sp]
+	s.Data[s.thread.sp] = nil
 	return v
 }
 
@@ -33,8 +33,8 @@ func (s *stack) top() *Pointer {
 		return nil
 	}
 
-	if s.VM.sp > 0 {
-		return s.Data[s.VM.sp-1]
+	if s.thread.sp > 0 {
+		return s.Data[s.thread.sp-1]
 	}
 
 	return s.Data[0]

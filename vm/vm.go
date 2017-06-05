@@ -59,9 +59,11 @@ func New(fileDir string, args []string) *VM {
 	s := &stack{}
 	cfs := &callFrameStack{callFrames: []*callFrame{}}
 	thread := &thread{stack: s, callFrameStack: cfs, sp: 0, cfp: 0}
+	s.thread = thread
+	cfs.thread = thread
+
 	vm := &VM{mainThread: thread, args: args}
-	s.VM = vm
-	cfs.vm = vm
+	thread.vm = vm
 
 	vm.initConstants()
 	vm.methodISIndexTables = map[filename]*isIndexTable{
