@@ -132,6 +132,8 @@ func (vm *VM) initConstants() {
 		classClass,
 		objectClass,
 		methodClass,
+		UndefinedMethodErrorClass,
+		ArgumentErrorClass,
 	}
 
 	args := []Object{}

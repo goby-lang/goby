@@ -12,6 +12,7 @@ func init() {
 	initBool()
 	initInteger()
 	initString()
+	initErrors()
 	initMainObj()
 }
 

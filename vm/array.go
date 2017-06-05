@@ -448,6 +448,11 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 				arr := receiver.(*ArrayObject)
 				var count int
 
+				if len(args) > 1 {
+					// return newError("Expect one argument. got=%d", len(args))
+					return initializeArgumentError("Expect one argument. got=%d", len(args))
+				}
+
 				if blockFrame != nil {
 					for _, obj := range arr.Elements {
 						result := vm.builtInMethodYield(blockFrame, obj)
