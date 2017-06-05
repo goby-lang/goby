@@ -56,6 +56,22 @@ func (t *thread) execInstruction(cf *callFrame, i *instruction) {
 	i.action.operation(t, cf, i.Params...)
 }
 
+func (t *thread) builtInMethodYield(blockFrame *callFrame, args ...Object) *Pointer {
+	c := newCallFrame(blockFrame.instructionSet)
+	c.blockFrame = blockFrame
+	c.ep = blockFrame.ep
+	c.self = blockFrame.self
+
+	for i := 0; i < len(args); i++ {
+		c.insertLCL(i, 0, args[i])
+	}
+
+	t.callFrameStack.push(c)
+	t.startFromTopFrame()
+
+	return t.stack.top()
+}
+
 // TODO: Use this method to replace unnecessary panics
 func (t *thread) returnError(msg string) {
 	err := &Error{Message: msg}

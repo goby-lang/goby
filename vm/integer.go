@@ -529,7 +529,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 				}
 
 				for i := 0; i < n.Value; i++ {
-					vm.builtInMethodYield(blockFrame, initilaizeInteger(i))
+					t.builtInMethodYield(blockFrame, initilaizeInteger(i))
 				}
 
 				return n

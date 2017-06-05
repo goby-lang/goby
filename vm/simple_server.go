@@ -80,7 +80,7 @@ var builtinSimpleServerInstanceMethods = []*BuiltInMethodObject{
 					req := initRequest(r)
 					res := httpResponseClass.initializeInstance()
 
-					v.builtInMethodYield(blockFrame, req, res)
+					t.builtInMethodYield(blockFrame, req, res)
 
 					setupResponse(w, r, res)
 				})

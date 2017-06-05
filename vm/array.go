@@ -260,11 +260,11 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 				arr := receiver.(*ArrayObject)
 
 				if blockFrame == nil {
-					vm.returnError("Can't yield without a block")
+					t.returnError("Can't yield without a block")
 				}
 
 				for _, obj := range arr.Elements {
-					vm.builtInMethodYield(blockFrame, obj)
+					t.builtInMethodYield(blockFrame, obj)
 				}
 				return arr
 			}
@@ -277,11 +277,11 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 				arr := receiver.(*ArrayObject)
 
 				if blockFrame == nil {
-					vm.returnError("Can't yield without a block")
+					t.returnError("Can't yield without a block")
 				}
 
 				for i := range arr.Elements {
-					vm.builtInMethodYield(blockFrame, initilaizeInteger(i))
+					t.builtInMethodYield(blockFrame, initilaizeInteger(i))
 				}
 				return arr
 			}
@@ -305,11 +305,11 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 				var elements = make([]Object, len(arr.Elements))
 
 				if blockFrame == nil {
-					vm.returnError("Can't yield without a block")
+					t.returnError("Can't yield without a block")
 				}
 
 				for i, obj := range arr.Elements {
-					result := vm.builtInMethodYield(blockFrame, obj)
+					result := t.builtInMethodYield(blockFrame, obj)
 					elements[i] = result.Target
 				}
 
@@ -336,11 +336,11 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 				var elements []Object
 
 				if blockFrame == nil {
-					vm.returnError("Can't yield without a block")
+					t.returnError("Can't yield without a block")
 				}
 
 				for _, obj := range arr.Elements {
-					result := vm.builtInMethodYield(blockFrame, obj)
+					result := t.builtInMethodYield(blockFrame, obj)
 					if result.Target.(*BooleanObject).Value {
 						elements = append(elements, obj)
 					}
@@ -450,7 +450,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 
 				if blockFrame != nil {
 					for _, obj := range arr.Elements {
-						result := vm.builtInMethodYield(blockFrame, obj)
+						result := t.builtInMethodYield(blockFrame, obj)
 						if result.Target.(*BooleanObject).Value {
 							count++
 						}

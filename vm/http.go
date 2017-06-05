@@ -90,14 +90,14 @@ var builtinHTTPClassMethods = []*BuiltInMethodObject{
 				resp, err := http.Get(domain + path)
 
 				if err != nil {
-					v.returnError(err.Error())
+					t.returnError(err.Error())
 				}
 
 				content, err := ioutil.ReadAll(resp.Body)
 				resp.Body.Close()
 
 				if err != nil {
-					v.returnError(err.Error())
+					t.returnError(err.Error())
 				}
 
 				return initializeString(string(content))
