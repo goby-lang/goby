@@ -144,6 +144,8 @@ func (vm *VM) initConstants() {
 		hashClass,
 		classClass,
 		methodClass,
+		UndefinedMethodErrorClass,
+		ArgumentErrorClass,
 	}
 
 	args := []Object{}
