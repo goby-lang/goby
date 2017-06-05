@@ -281,10 +281,10 @@ var builtinGlobalMethods = []*BuiltInMethodObject{
 
 				if !ok {
 					msg := "Can't require \"" + libName + "\""
-					vm.returnError(msg)
+					t.returnError(msg)
 				}
 
-				initFunc(vm)
+				initFunc(t.vm)
 
 				return TRUE
 			}
@@ -294,7 +294,7 @@ var builtinGlobalMethods = []*BuiltInMethodObject{
 		Name: "require_relative",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
-				callerDir := path.Dir(vm.currentFilePath())
+				callerDir := path.Dir(t.vm.currentFilePath())
 				filepath := args[0].(*StringObject).Value
 
 				filepath = path.Join(callerDir, filepath)
@@ -302,10 +302,10 @@ var builtinGlobalMethods = []*BuiltInMethodObject{
 				file, err := ioutil.ReadFile(filepath + ".gb")
 
 				if err != nil {
-					vm.returnError(err.Error())
+					t.returnError(err.Error())
 				}
 
-				vm.execRequiredFile(filepath, file)
+				t.vm.execRequiredFile(filepath, file)
 
 				return TRUE
 			}
@@ -404,7 +404,7 @@ var builtinClassClassMethods = []*BuiltInMethodObject{
 				class := receiver.(*RClass)
 
 				if class.pseudoSuperClass.isModule {
-					vm.returnError("Module inheritance is not supported: " + class.pseudoSuperClass.Name)
+					t.returnError("Module inheritance is not supported: " + class.pseudoSuperClass.Name)
 				}
 
 				instance := class.initializeInstance()
