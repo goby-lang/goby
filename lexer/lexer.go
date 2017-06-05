@@ -32,7 +32,6 @@ func New(input string) *Lexer {
 
 // NextToken makes lexer tokenize next character(s)
 func (l *Lexer) NextToken() token.Token {
-	//fmt.Println(l.FSM.Is("initial") , l.line)
 
 	var tok token.Token
 	l.skipWhitespace()
