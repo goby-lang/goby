@@ -81,7 +81,7 @@ func New(fileDir string, args []string) *VM {
 
 	p, _ := filepath.Abs("../")
 
-	if !strings.HasSuffix(p,"goby") {
+	if !strings.HasSuffix(p, "goby") {
 		vm.projectRoot = path.Join(p, "goby")
 	} else {
 		vm.projectRoot = p
