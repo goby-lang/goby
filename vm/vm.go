@@ -81,6 +81,7 @@ func New(fileDir string, args []string) *VM {
 
 	_, b, _, _ := runtime.Caller(0)
 	vm.basepath = filepath.Dir(b)
+	fmt.Println(vm.basepath)
 	return vm
 }
 
