@@ -76,4 +76,5 @@ func (t *thread) builtInMethodYield(blockFrame *callFrame, args ...Object) *Poin
 func (t *thread) returnError(msg string) {
 	err := &Error{Message: msg}
 	t.stack.push(&Pointer{err})
+	panic(errorMessage(msg))
 }

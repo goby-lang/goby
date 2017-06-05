@@ -267,29 +267,12 @@ func (vm *VM) lookupConstant(cf *callFrame, constName string) *Pointer {
 	return constant
 }
 
-// builtInMethodYield is like invokeblock instruction for built in methods
-func (vm *VM) builtInMethodYield(blockFrame *callFrame, args ...Object) *Pointer {
-	c := newCallFrame(blockFrame.instructionSet)
-	c.blockFrame = blockFrame
-	c.ep = blockFrame.ep
-	c.self = blockFrame.self
-
-	for i := 0; i < len(args); i++ {
-		c.insertLCL(i, 0, args[i])
-	}
-
-	vm.mainThread.callFrameStack.push(c)
-	vm.startFromTopFrame()
-
-	return vm.mainThread.stack.top()
-}
-
 func (vm *VM) execGobyLib(libName string) {
 	libPath := path.Join(vm.basepath, "../lib", libName)
 	file, err := ioutil.ReadFile(libPath)
 
 	if err != nil {
-		vm.returnError(err.Error())
+		vm.mainThread.returnError(err.Error())
 	}
 
 	vm.execRequiredFile(libPath, file)
@@ -319,12 +302,6 @@ func (vm *VM) execRequiredFile(filepath string, file []byte) {
 	// Restore instruction sets.
 	vm.isTables[bytecode.LabelDef] = oldMethodTable
 	vm.isTables[bytecode.LabelDefClass] = oldClassTable
-}
-
-// TODO: Use this method to replace unnecessary panics
-func (vm *VM) returnError(msg string) {
-	vm.mainThread.returnError(msg)
-	panic(errorMessage(msg))
 }
 
 func newError(format string, args ...interface{}) *Error {
