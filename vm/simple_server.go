@@ -37,7 +37,7 @@ var builtinSimpleServerInstanceMethods = []*BuiltInMethodObject{
 	{
 		Name: "start",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(v *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				var port string
 
 				portVar, ok := receiver.(*RObject).InstanceVariables.get("@port")
@@ -73,7 +73,7 @@ var builtinSimpleServerInstanceMethods = []*BuiltInMethodObject{
 	{
 		Name: "mount",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(v *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				path := args[0].(*StringObject).Value
 
 				http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {

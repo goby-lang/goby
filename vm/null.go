@@ -37,7 +37,7 @@ var builtInNullInstanceMethods = []*BuiltInMethodObject{
 	{
 		Name: "!",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				return TRUE
 			}

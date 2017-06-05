@@ -44,7 +44,7 @@ var builtinURIClassMethods = []*BuiltInMethodObject{
 		// ```
 		Name: "parse",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(v *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				uri := args[0].(*StringObject).Value
 				uriModule := v.constants["URI"].Target.(*RClass)
 				u, err := url.Parse(uri)

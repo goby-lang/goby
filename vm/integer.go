@@ -51,7 +51,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		// @return [Integer]
 		Name: "+",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
 				right, ok := args[0].(*IntegerObject)
@@ -74,7 +74,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		// @return [Integer]
 		Name: "-",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
 				right, ok := args[0].(*IntegerObject)
@@ -97,7 +97,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		// @return [Integer]
 		Name: "*",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
 				right, ok := args[0].(*IntegerObject)
@@ -120,7 +120,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		// @return [Integer]
 		Name: "**",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
 				right, ok := args[0].(*IntegerObject)
@@ -144,7 +144,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		// @return [Integer]
 		Name: "/",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
 				right, ok := args[0].(*IntegerObject)
@@ -168,7 +168,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		// @return [Boolean]
 		Name: ">",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
 				right, ok := args[0].(*IntegerObject)
@@ -197,7 +197,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		// @return [Boolean]
 		Name: ">=",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
 				right, ok := args[0].(*IntegerObject)
@@ -226,7 +226,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		// @return [Boolean]
 		Name: "<",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
 				right, ok := args[0].(*IntegerObject)
@@ -255,7 +255,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		// @return [Boolean]
 		Name: "<=",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
 				right, ok := args[0].(*IntegerObject)
@@ -285,7 +285,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		// @return [Integer]
 		Name: "<=>",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
 				right, ok := args[0].(*IntegerObject)
@@ -317,7 +317,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		// @return [Boolean]
 		Name: "==",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
 				right, ok := args[0].(*IntegerObject)
@@ -346,7 +346,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		// @return [Boolean]
 		Name: "!=",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*IntegerObject).Value
 				right, ok := args[0].(*IntegerObject)
@@ -374,7 +374,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		// @return [Integer]
 		Name: "++",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				int := receiver.(*IntegerObject)
 				int.Value++
@@ -391,7 +391,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		// @return [Integer]
 		Name: "--",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				int := receiver.(*IntegerObject)
 				int.Value--
@@ -408,7 +408,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		// @return [String]
 		Name: "to_s",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				int := receiver.(*IntegerObject)
 
@@ -425,7 +425,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		// @return [Integer]
 		Name: "to_i",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				return receiver
 			}
 		},
@@ -440,7 +440,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		// @return [Boolean]
 		Name: "even",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				i := receiver.(*IntegerObject)
 				even := i.Value%2 == 0
@@ -463,7 +463,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		// @return [Boolean]
 		Name: "odd",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				i := receiver.(*IntegerObject)
 				odd := i.Value%2 != 0
@@ -484,7 +484,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		// @return [Integer]
 		Name: "next",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				i := receiver.(*IntegerObject)
 				return initilaizeInteger(i.Value + 1)
 			}
@@ -499,7 +499,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		// @return [Integer]
 		Name: "pred",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				i := receiver.(*IntegerObject)
 				return initilaizeInteger(i.Value - 1)
 			}
@@ -517,7 +517,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		// ```
 		Name: "times",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				n := receiver.(*IntegerObject)
 
 				if n.Value < 0 {

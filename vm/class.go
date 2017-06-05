@@ -241,7 +241,7 @@ func generateAttrWriteMethod(attrName string) *BuiltInMethodObject {
 	return &BuiltInMethodObject{
 		Name: attrName + "=",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				v := receiver.(*RObject).InstanceVariables.set("@"+attrName, args[0])
 				return v
 			}
@@ -253,7 +253,7 @@ func generateAttrReadMethod(attrName string) *BuiltInMethodObject {
 	return &BuiltInMethodObject{
 		Name: attrName,
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				v, ok := receiver.(*RObject).InstanceVariables.get("@" + attrName)
 
 				if ok {
@@ -275,7 +275,7 @@ var builtinGlobalMethods = []*BuiltInMethodObject{
 	{
 		Name: "require",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				libName := args[0].(*StringObject).Value
 				initFunc, ok := standardLibraries[libName]
 
@@ -293,7 +293,7 @@ var builtinGlobalMethods = []*BuiltInMethodObject{
 	{
 		Name: "require_relative",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				callerDir := path.Dir(vm.currentFilePath())
 				filepath := args[0].(*StringObject).Value
 
@@ -314,7 +314,7 @@ var builtinGlobalMethods = []*BuiltInMethodObject{
 	{
 		Name: "puts",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				for _, arg := range args {
 					fmt.Println(arg.Inspect())
@@ -327,7 +327,7 @@ var builtinGlobalMethods = []*BuiltInMethodObject{
 	{
 		Name: "class",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				switch r := receiver.(type) {
 				case Object:
@@ -341,7 +341,7 @@ var builtinGlobalMethods = []*BuiltInMethodObject{
 	{
 		Name: "!",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				return FALSE
 			}
@@ -354,7 +354,7 @@ var builtinClassClassMethods = []*BuiltInMethodObject{
 	{
 		Name: "attr_reader",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				r := receiver.(*RClass)
 				r.setAttrReader(args)
 
@@ -365,7 +365,7 @@ var builtinClassClassMethods = []*BuiltInMethodObject{
 	{
 		Name: "attr_writer",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				r := receiver.(*RClass)
 				r.setAttrWriter(args)
 
@@ -376,7 +376,7 @@ var builtinClassClassMethods = []*BuiltInMethodObject{
 	{
 		Name: "attr_accessor",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				r := receiver.(*RClass)
 				r.setAttrAccessor(args)
 
@@ -387,7 +387,7 @@ var builtinClassClassMethods = []*BuiltInMethodObject{
 	{
 		Name: "include",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				module := args[0].(*RClass)
 				class := receiver.(*RClass)
 				module.superClass = class.superClass
@@ -400,7 +400,7 @@ var builtinClassClassMethods = []*BuiltInMethodObject{
 	{
 		Name: "new",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				class := receiver.(*RClass)
 
 				if class.pseudoSuperClass.isModule {
@@ -421,7 +421,7 @@ var builtinClassClassMethods = []*BuiltInMethodObject{
 	{
 		Name: "name",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				name := receiver.(Class).ReturnName()
 				nameString := initializeString(name)
@@ -432,7 +432,7 @@ var builtinClassClassMethods = []*BuiltInMethodObject{
 	{
 		Name: "superclass",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				return receiver.(Class).returnSuperClass()
 			}

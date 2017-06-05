@@ -64,7 +64,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// @return [String]
 		Name: "+",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*StringObject).Value
 				right, ok := args[0].(*StringObject)
@@ -87,7 +87,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// @return [String]
 		Name: "*",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*StringObject).Value
 				right, ok := args[0].(*IntegerObject)
@@ -119,7 +119,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// @return [Boolean]
 		Name: ">",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*StringObject).Value
 				right, ok := args[0].(*StringObject)
@@ -147,7 +147,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// @return [Boolean]
 		Name: "<",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*StringObject).Value
 				right, ok := args[0].(*StringObject)
@@ -176,7 +176,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// @return [Boolean]
 		Name: "==",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*StringObject).Value
 				right, ok := args[0].(*StringObject)
@@ -207,7 +207,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// @return [Integer]
 		Name: "<=>",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*StringObject).Value
 				right, ok := args[0].(*StringObject)
@@ -239,7 +239,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// @return [Boolean]
 		Name: "!=",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*StringObject).Value
 				right, ok := args[0].(*StringObject)
@@ -268,7 +268,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// @return [String]
 		Name: "capitalize",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				str := []byte(receiver.(*StringObject).Value)
 				start := string(str[0])
@@ -288,7 +288,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// @return [String]
 		Name: "upcase",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				str := receiver.(*StringObject).Value
 
@@ -305,7 +305,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// @return [String]
 		Name: "downcase",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				str := receiver.(*StringObject).Value
 
@@ -323,7 +323,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// @return [Integer]
 		Name: "size",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				str := receiver.(*StringObject).Value
 
@@ -341,7 +341,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// @return [Integer]
 		Name: "length",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				str := receiver.(*StringObject).Value
 
@@ -358,7 +358,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// @return [String]
 		Name: "reverse",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				str := receiver.(*StringObject).Value
 				var revert string
@@ -379,7 +379,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// @return [String]
 		Name: "to_s",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				str := receiver.(*StringObject).Value
 
@@ -398,7 +398,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// @return [Integer]
 		Name: "to_i",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				str := receiver.(*StringObject).Value
 				parsedStr, err := strconv.ParseInt(str, 10, 0)
