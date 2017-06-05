@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"path"
 	"path/filepath"
-	"runtime"
+	"strings"
 )
 
 var stackTrace int
@@ -50,8 +50,8 @@ type VM struct {
 	fileDir string
 	// args are command line arguments
 	args []string
-	// basepath is current file's absolute path, which is PATH_TO_PROJECT/vm
-	basepath string
+	// projectRoot is goby root's absolute path, which is $GOROOT/src/github.com/goby-lang/goby
+	projectRoot string
 }
 
 // New initializes a vm to initialize state and returns it.
@@ -79,9 +79,14 @@ func New(fileDir string, args []string) *VM {
 	}
 	vm.fileDir = fileDir
 
-	_, b, _, _ := runtime.Caller(0)
-	vm.basepath = filepath.Dir(b)
-	fmt.Println(vm.basepath)
+	p, _ := filepath.Abs("../")
+
+	if !strings.HasSuffix(p,"goby") {
+		vm.projectRoot = path.Join(p, "goby")
+	} else {
+		vm.projectRoot = p
+	}
+
 	return vm
 }
 
@@ -269,7 +274,7 @@ func (vm *VM) lookupConstant(cf *callFrame, constName string) *Pointer {
 }
 
 func (vm *VM) execGobyLib(libName string) {
-	libPath := path.Join(vm.basepath, "../lib", libName)
+	libPath := path.Join(vm.projectRoot, "lib", libName)
 	file, err := ioutil.ReadFile(libPath)
 
 	if err != nil {
