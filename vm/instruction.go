@@ -272,31 +272,36 @@ var builtInActions = map[operationType]*action{
 		operation: func(vm *VM, cf *callFrame, args ...interface{}) {
 			subject := strings.Split(args[0].(string), ":")
 			subjectType, subjectName := subject[0], subject[1]
-			class := initializeClass(subjectName, subjectType == "module")
-			classPr := cf.storeConstant(class.Name, class)
 
-			is := vm.getClassIS(class.Name, cf.instructionSet.filename)
+			classPtr, ok := cf.lookupConstant(subjectName)
 
-			if len(args) >= 2 {
-				superClassName := args[1].(string)
-				superClass := vm.lookupConstant(cf, superClassName)
-				inheritedClass, ok := superClass.Target.(*RClass)
+			if !ok {
+				class := initializeClass(subjectName, subjectType == "module")
+				classPtr = cf.storeConstant(class.Name, class)
 
-				if !ok {
-					vm.returnError("Constant " + superClassName + " is not a class. got=" + string(superClass.Target.returnClass().ReturnName()))
+				if len(args) >= 2 {
+					superClassName := args[1].(string)
+					superClass := vm.lookupConstant(cf, superClassName)
+					inheritedClass, ok := superClass.Target.(*RClass)
+
+					if !ok {
+						vm.returnError("Constant " + superClassName + " is not a class. got=" + string(superClass.Target.returnClass().ReturnName()))
+					}
+
+					class.pseudoSuperClass = inheritedClass
+					class.superClass = inheritedClass
 				}
-
-				class.pseudoSuperClass = inheritedClass
-				class.superClass = inheritedClass
 			}
+
+			is := vm.getClassIS(subjectName, cf.instructionSet.filename)
 
 			vm.stack.pop()
 			c := newCallFrame(is)
-			c.self = class
+			c.self = classPtr.Target
 			vm.callFrameStack.push(c)
 			vm.startFromTopFrame()
 
-			vm.stack.push(classPr)
+			vm.stack.push(classPtr)
 		},
 	},
 	bytecode.Send: {

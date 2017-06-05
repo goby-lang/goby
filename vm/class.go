@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path"
-
-	"github.com/goby-lang/goby/bytecode"
-	"github.com/goby-lang/goby/parser"
 )
 
 var (
@@ -441,30 +438,4 @@ var builtinClassClassMethods = []*BuiltInMethodObject{
 			}
 		},
 	},
-}
-
-func (vm *VM) execRequiredFile(filepath string, file []byte) {
-	program := parser.BuildAST(file)
-	g := bytecode.NewGenerator(program)
-	bytecodes := g.GenerateByteCode(program)
-
-	oldMethodTable := isTable{}
-	oldClassTable := isTable{}
-
-	// Copy current file's instruction sets.
-	for name, is := range vm.isTables[bytecode.LabelDef] {
-		oldMethodTable[name] = is
-	}
-
-	for name, is := range vm.isTables[bytecode.LabelDefClass] {
-		oldClassTable[name] = is
-	}
-
-	// This creates new execution environments for required file, including new instruction set table.
-	// So we need to copy old instruction sets and restore them later, otherwise current program's instruction set would be overwrite.
-	vm.ExecBytecodes(bytecodes, filepath)
-
-	// Restore instruction sets.
-	vm.isTables[bytecode.LabelDef] = oldMethodTable
-	vm.isTables[bytecode.LabelDefClass] = oldClassTable
 }

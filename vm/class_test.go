@@ -2,6 +2,21 @@ package vm
 
 import "testing"
 
+func TestMonkeyPatchBuiltInClass(t *testing.T) {
+	input := `
+	class String
+	  def buz
+	    "buz"
+	  end
+	end
+
+	"123".buz
+	`
+
+	evaluated := testEval(t, input)
+	checkExpected(t, evaluated, "buz")
+}
+
 func TestRequireRelative(t *testing.T) {
 	input := `
 	require_relative("../test_fixtures/require_test/foo")
