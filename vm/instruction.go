@@ -2,8 +2,9 @@ package vm
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/bytecode"
 	"strings"
+
+	"github.com/goby-lang/goby/bytecode"
 )
 
 type operation func(t *thread, cf *callFrame, args ...interface{})
@@ -323,7 +324,8 @@ var builtInActions = map[operationType]*action{
 			}
 
 			if method == nil {
-				t.returnError("undefined method `" + methodName + "' for " + receiver.Inspect())
+				t.UndefinedMethodError(methodName, receiver.Inspect())
+				return
 			}
 
 			blockFrame := t.retrieveBlock(cf, args)

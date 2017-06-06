@@ -1,9 +1,11 @@
 package vm
 
-import (
-  "testing"
-)
+import "testing"
 
 func TestUndefinedMethod(t *testing.T) {
-  expectError(t, "Undefined method", "a")
+	evaluated := testEval(t, "a")
+	obj, ok := evaluated.(*UndefinedMethodErrorObject)
+	if !ok {
+		t.Errorf("Expect UndefinedMethodError. got=%T (%+v)", obj, obj)
+	}
 }

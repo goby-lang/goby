@@ -1,7 +1,6 @@
 package vm
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/goby-lang/goby/bytecode"
@@ -523,15 +522,4 @@ func isError(obj Object) bool {
 		return ok
 	}
 	return false
-}
-
-func expectError(t *testing.T, errorType string, input string) {
-	evaluated := testEval(t, input)
-	if isError(evaluated) {
-		if !strings.Contains(evaluated.(*Error).Message, errorType) {
-			t.Fatalf("Expecting error message to include '%v'. got='%v' from='%v'", errorType, evaluated.(*Error).Message, input)
-		}
-	} else {
-		t.Fatalf("Expecting error, but no error in code execution. from='%v'", input)
-	}
 }
