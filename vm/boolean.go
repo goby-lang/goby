@@ -50,7 +50,7 @@ var builtinBooleanInstanceMethods = []*BuiltInMethodObject{
 		// @return [Boolean]
 		Name: "==",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				err := checkArgumentLen(args, booleanClass, "==")
 				if err != nil {
@@ -74,7 +74,7 @@ var builtinBooleanInstanceMethods = []*BuiltInMethodObject{
 		// @return [Boolean]
 		Name: "!=",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				err := checkArgumentLen(args, booleanClass, "!=")
 				if err != nil {
@@ -98,7 +98,7 @@ var builtinBooleanInstanceMethods = []*BuiltInMethodObject{
 		// @return [Boolean]
 		Name: "!",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				rightValue := receiver.(*BooleanObject).Value
 
@@ -120,7 +120,7 @@ var builtinBooleanInstanceMethods = []*BuiltInMethodObject{
 		// @return [Boolean]
 		Name: "&&",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*BooleanObject).Value
 				right, ok := args[0].(*BooleanObject)
@@ -150,7 +150,7 @@ var builtinBooleanInstanceMethods = []*BuiltInMethodObject{
 		// @return [Boolean]
 		Name: "||",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				leftValue := receiver.(*BooleanObject).Value
 				right, ok := args[0].(*BooleanObject)

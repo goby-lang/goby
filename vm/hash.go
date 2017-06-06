@@ -52,7 +52,7 @@ var builtinHashInstanceMethods = []*BuiltInMethodObject{
 	{
 		Name: "[]",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				if len(args) != 1 {
 					return newError("Expect 1 arguments. got=%d", len(args))
@@ -85,7 +85,7 @@ var builtinHashInstanceMethods = []*BuiltInMethodObject{
 	{
 		Name: "[]=",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				// First arg is index
 				// Second arg is assigned value
@@ -110,7 +110,7 @@ var builtinHashInstanceMethods = []*BuiltInMethodObject{
 	{
 		Name: "length",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				if len(args) != 0 {
 					return newError("Expect 0 argument. got=%d", len(args))

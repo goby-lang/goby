@@ -35,14 +35,7 @@ var standardLibraries = map[string]func(*VM){
 
 // VM represents a stack based virtual machine.
 type VM struct {
-	// a stack that holds call frames
-	callFrameStack *callFrameStack
-	// call frame pointer
-	cfp int
-	// data stack
-	stack *stack
-	// stack pointer
-	sp int
+	mainThread *thread
 	// a map holds pointers of constants
 	constants map[string]*Pointer
 	// a map holds different types of label tables
@@ -65,9 +58,12 @@ type VM struct {
 func New(fileDir string, args []string) *VM {
 	s := &stack{}
 	cfs := &callFrameStack{callFrames: []*callFrame{}}
-	vm := &VM{stack: s, callFrameStack: cfs, sp: 0, cfp: 0, args: args}
-	s.VM = vm
-	cfs.vm = vm
+	thread := &thread{stack: s, callFrameStack: cfs, sp: 0, cfp: 0}
+	s.thread = thread
+	cfs.thread = thread
+
+	vm := &VM{mainThread: thread, args: args}
+	thread.vm = vm
 
 	vm.initConstants()
 	vm.methodISIndexTables = map[filename]*isIndexTable{
@@ -120,13 +116,13 @@ func (vm *VM) ExecBytecodes(bytecodes, fn string) {
 
 	cf := newCallFrame(p.program)
 	cf.self = mainObj
-	vm.callFrameStack.push(cf)
+	vm.mainThread.callFrameStack.push(cf)
 	vm.startFromTopFrame()
 }
 
 // GetExecResult returns stack's top most value. Normally it's used in tests.
 func (vm *VM) GetExecResult() Object {
-	return vm.stack.top().Target
+	return vm.mainThread.stack.top().Target
 }
 
 func (vm *VM) initConstants() {
@@ -160,38 +156,13 @@ func (vm *VM) initConstants() {
 	vm.constants["Object"] = &Pointer{objectClass}
 }
 
-func (vm *VM) evalCallFrame(cf *callFrame) {
-	for cf.pc < len(cf.instructionSet.instructions) {
-		i := cf.instructionSet.instructions[cf.pc]
-		vm.execInstruction(cf, i)
-	}
-}
-
 // Start evaluation from top most call frame
 func (vm *VM) startFromTopFrame() {
-	cf := vm.callFrameStack.top()
-	vm.evalCallFrame(cf)
-}
-
-func (vm *VM) execInstruction(cf *callFrame, i *instruction) {
-	cf.pc++
-
-	defer func() {
-		if p := recover(); p != nil {
-			if stackTrace == 0 {
-				fmt.Printf("Internal Error: %s\n", p)
-			}
-			fmt.Printf("Instruction trace: %d. \"%s\"\n", stackTrace, i.inspect())
-			stackTrace++
-			panic(p)
-		}
-	}()
-
-	i.action.operation(vm, cf, i.Params...)
+	vm.mainThread.startFromTopFrame()
 }
 
 func (vm *VM) currentFilePath() string {
-	return string(vm.callFrameStack.top().instructionSet.filename)
+	return string(vm.mainThread.callFrameStack.top().instructionSet.filename)
 }
 
 func (vm *VM) printDebugInfo(i *instruction) {
@@ -257,7 +228,7 @@ func (vm *VM) lookupConstant(cf *callFrame, constName string) *Pointer {
 	var namespace Class
 	var hasNamespace bool
 
-	top := vm.stack.top()
+	top := vm.mainThread.stack.top()
 
 	if top == nil {
 		hasNamespace = false
@@ -267,7 +238,7 @@ func (vm *VM) lookupConstant(cf *callFrame, constName string) *Pointer {
 
 	if hasNamespace {
 		if namespace != cf.self {
-			vm.stack.pop()
+			vm.mainThread.stack.pop()
 		}
 
 		constant = namespace.lookupConstant(constName, true)
@@ -296,29 +267,12 @@ func (vm *VM) lookupConstant(cf *callFrame, constName string) *Pointer {
 	return constant
 }
 
-// builtInMethodYield is like invokeblock instruction for built in methods
-func (vm *VM) builtInMethodYield(blockFrame *callFrame, args ...Object) *Pointer {
-	c := newCallFrame(blockFrame.instructionSet)
-	c.blockFrame = blockFrame
-	c.ep = blockFrame.ep
-	c.self = blockFrame.self
-
-	for i := 0; i < len(args); i++ {
-		c.insertLCL(i, 0, args[i])
-	}
-
-	vm.callFrameStack.push(c)
-	vm.startFromTopFrame()
-
-	return vm.stack.top()
-}
-
 func (vm *VM) execGobyLib(libName string) {
 	libPath := path.Join(vm.basepath, "../lib", libName)
 	file, err := ioutil.ReadFile(libPath)
 
 	if err != nil {
-		vm.returnError(err.Error())
+		vm.mainThread.returnError(err.Error())
 	}
 
 	vm.execRequiredFile(libPath, file)
@@ -348,13 +302,6 @@ func (vm *VM) execRequiredFile(filepath string, file []byte) {
 	// Restore instruction sets.
 	vm.isTables[bytecode.LabelDef] = oldMethodTable
 	vm.isTables[bytecode.LabelDefClass] = oldClassTable
-}
-
-// TODO: Use this method to replace unnecessary panics
-func (vm *VM) returnError(msg string) {
-	err := &Error{Message: msg}
-	vm.stack.push(&Pointer{err})
-	panic(errorMessage(msg))
 }
 
 func newError(format string, args ...interface{}) *Error {

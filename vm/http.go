@@ -74,7 +74,7 @@ var builtinHTTPClassMethods = []*BuiltInMethodObject{
 		// Sends a GET request to the target and returns the HTTP response as a string.
 		Name: "get",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(v *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				var path string
 
 				domain := args[0].(*StringObject).Value
@@ -90,14 +90,14 @@ var builtinHTTPClassMethods = []*BuiltInMethodObject{
 				resp, err := http.Get(domain + path)
 
 				if err != nil {
-					v.returnError(err.Error())
+					t.returnError(err.Error())
 				}
 
 				content, err := ioutil.ReadAll(resp.Body)
 				resp.Body.Close()
 
 				if err != nil {
-					v.returnError(err.Error())
+					t.returnError(err.Error())
 				}
 
 				return initializeString(string(content))

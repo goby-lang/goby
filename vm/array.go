@@ -94,7 +94,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 		// ```
 		Name: "[]",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				if len(args) != 1 {
 					return &Error{Message: "Expect 1 arguments. got=%d" + string(len(args))}
 				}
@@ -130,7 +130,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 		// ```
 		Name: "[]=",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				// First arg is index
 				// Second arg is assigned value
@@ -173,7 +173,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 		// @return [Integer]
 		Name: "length",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				if len(args) != 0 {
 					return newError("Expect 0 argument. got=%d", len(args))
@@ -194,7 +194,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 		// ```
 		Name: "pop",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				if len(args) != 0 {
 					return newError("Expect 0 argument. got=%d", len(args))
@@ -214,7 +214,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 		// ```
 		Name: "push",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				arr := receiver.(*ArrayObject)
 				return arr.push(args)
@@ -231,7 +231,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 		// ```
 		Name: "shift",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				if len(args) != 0 {
 					return newError("Expect 0 argument. got=%d", len(args))
 				}
@@ -256,15 +256,15 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 		// ```
 		Name: "each",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				arr := receiver.(*ArrayObject)
 
 				if blockFrame == nil {
-					vm.returnError("Can't yield without a block")
+					t.returnError("Can't yield without a block")
 				}
 
 				for _, obj := range arr.Elements {
-					vm.builtInMethodYield(blockFrame, obj)
+					t.builtInMethodYield(blockFrame, obj)
 				}
 				return arr
 			}
@@ -273,15 +273,15 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 	{
 		Name: "each_index",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				arr := receiver.(*ArrayObject)
 
 				if blockFrame == nil {
-					vm.returnError("Can't yield without a block")
+					t.returnError("Can't yield without a block")
 				}
 
 				for i := range arr.Elements {
-					vm.builtInMethodYield(blockFrame, initilaizeInteger(i))
+					t.builtInMethodYield(blockFrame, initilaizeInteger(i))
 				}
 				return arr
 			}
@@ -300,16 +300,16 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 		// ```
 		Name: "map",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				arr := receiver.(*ArrayObject)
 				var elements = make([]Object, len(arr.Elements))
 
 				if blockFrame == nil {
-					vm.returnError("Can't yield without a block")
+					t.returnError("Can't yield without a block")
 				}
 
 				for i, obj := range arr.Elements {
-					result := vm.builtInMethodYield(blockFrame, obj)
+					result := t.builtInMethodYield(blockFrame, obj)
 					elements[i] = result.Target
 				}
 
@@ -331,16 +331,16 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 		// ```
 		Name: "select",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				arr := receiver.(*ArrayObject)
 				var elements []Object
 
 				if blockFrame == nil {
-					vm.returnError("Can't yield without a block")
+					t.returnError("Can't yield without a block")
 				}
 
 				for _, obj := range arr.Elements {
-					result := vm.builtInMethodYield(blockFrame, obj)
+					result := t.builtInMethodYield(blockFrame, obj)
 					if result.Target.(*BooleanObject).Value {
 						elements = append(elements, obj)
 					}
@@ -361,7 +361,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 		// ```
 		Name: "at",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				i := args[0]
 				index, ok := i.(*IntegerObject)
 
@@ -393,7 +393,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 		// ```
 		Name: "clear",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				arr := receiver.(*ArrayObject)
 				arr.Elements = []Object{}
 
@@ -411,7 +411,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 		// ```
 		Name: "concat",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				arr := receiver.(*ArrayObject)
 
 				for _, arg := range args {
@@ -444,13 +444,13 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 		// ```
 		Name: "count",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				arr := receiver.(*ArrayObject)
 				var count int
 
 				if blockFrame != nil {
 					for _, obj := range arr.Elements {
-						result := vm.builtInMethodYield(blockFrame, obj)
+						result := t.builtInMethodYield(blockFrame, obj)
 						if result.Target.(*BooleanObject).Value {
 							count++
 						}
@@ -510,7 +510,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 		// ```
 		Name: "rotate",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				arr := receiver.(*ArrayObject)
 				rotArr := initializeArray(arr.Elements)
 
@@ -537,7 +537,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 		// Returns the first element of the array.
 		Name: "first",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				arr := receiver.(*ArrayObject)
 
 				if len(args) == 0 {
@@ -557,7 +557,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 		// Returns the last element of the array.
 		Name: "last",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				arr := receiver.(*ArrayObject)
 
 				if len(args) == 0 {

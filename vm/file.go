@@ -23,7 +23,7 @@ var builtinFileClassMethods = []*BuiltInMethodObject{
 		// @return [String]
 		Name: "extname",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(v *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				filename := args[0].(*StringObject).Value
 				return initializeString(filepath.Ext(filename))
 			}
@@ -41,17 +41,17 @@ var builtinFileClassMethods = []*BuiltInMethodObject{
 		// @return [Integer]
 		Name: "chmod",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(v *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				filemod := args[0].(*IntegerObject).Value
 				for i := 1; i < len(args); i++ {
 					filename := args[i].(*StringObject).Value
 					if !filepath.IsAbs(filename) {
-						filename = v.fileDir + filename
+						filename = t.vm.fileDir + filename
 					}
 
 					err := os.Chmod(filename, os.FileMode(uint32(filemod)))
 					if err != nil {
-						v.returnError(err.Error())
+						t.returnError(err.Error())
 					}
 				}
 
@@ -69,10 +69,10 @@ var builtinFileClassMethods = []*BuiltInMethodObject{
 		// @return [Integer]
 		Name: "size",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				filename := args[0].(*StringObject).Value
 				if !filepath.IsAbs(filename) {
-					filename = vm.fileDir + filename
+					filename = t.vm.fileDir + filename
 				}
 
 				fileStats, err := os.Stat(filename)
@@ -94,7 +94,7 @@ var builtinFileClassMethods = []*BuiltInMethodObject{
 		// @return [String]
 		Name: "basename",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				filename := args[0].(*StringObject).Value
 				return initializeString(filepath.Base(filename))
 			}
@@ -109,7 +109,7 @@ var builtinFileClassMethods = []*BuiltInMethodObject{
 		// @return [String]
 		Name: "join",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				var elements []string
 				for i := 0; i < len(args); i++ {
 					next := args[i].(*StringObject).Value
@@ -130,7 +130,7 @@ var builtinFileClassMethods = []*BuiltInMethodObject{
 		// @return [Array]
 		Name: "split",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(vm *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				filename := args[0].(*StringObject).Value
 				dir, file := filepath.Split(filename)
 

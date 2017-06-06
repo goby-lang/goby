@@ -2,7 +2,7 @@ package vm
 
 type callFrameStack struct {
 	callFrames []*callFrame
-	vm         *VM
+	thread     *thread
 }
 
 type callFrame struct {
@@ -94,13 +94,13 @@ func (cfs *callFrameStack) push(cf *callFrame) {
 		panic("Callframe can't be nil!")
 	}
 
-	if len(cfs.callFrames) <= cfs.vm.cfp {
+	if len(cfs.callFrames) <= cfs.thread.cfp {
 		cfs.callFrames = append(cfs.callFrames, cf)
 	} else {
-		cfs.callFrames[cfs.vm.cfp] = cf
+		cfs.callFrames[cfs.thread.cfp] = cf
 	}
 
-	cfs.vm.cfp++
+	cfs.thread.cfp++
 }
 
 func (cfs *callFrameStack) pop() *callFrame {
@@ -108,18 +108,18 @@ func (cfs *callFrameStack) pop() *callFrame {
 		panic("Nothing to pop!")
 	}
 
-	if cfs.vm.cfp > 0 {
-		cfs.vm.cfp--
+	if cfs.thread.cfp > 0 {
+		cfs.thread.cfp--
 	}
 
-	cf := cfs.callFrames[cfs.vm.cfp]
-	cfs.callFrames[cfs.vm.cfp] = nil
+	cf := cfs.callFrames[cfs.thread.cfp]
+	cfs.callFrames[cfs.thread.cfp] = nil
 	return cf
 }
 
 func (cfs *callFrameStack) top() *callFrame {
-	if cfs.vm.cfp > 0 {
-		return cfs.callFrames[cfs.vm.cfp-1]
+	if cfs.thread.cfp > 0 {
+		return cfs.callFrames[cfs.thread.cfp-1]
 	}
 
 	return nil

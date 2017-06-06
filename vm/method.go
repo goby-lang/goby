@@ -42,7 +42,7 @@ func (m *MethodObject) returnClass() Class {
 	return m.class
 }
 
-type builtinMethodBody func(*VM, []Object, *callFrame) Object
+type builtinMethodBody func(*thread, []Object, *callFrame) Object
 
 // BuiltInMethodObject represents methods defined in go.
 type BuiltInMethodObject struct {

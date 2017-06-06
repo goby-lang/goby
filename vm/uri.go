@@ -44,13 +44,13 @@ var builtinURIClassMethods = []*BuiltInMethodObject{
 		// ```
 		Name: "parse",
 		Fn: func(receiver Object) builtinMethodBody {
-			return func(v *VM, args []Object, blockFrame *callFrame) Object {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				uri := args[0].(*StringObject).Value
-				uriModule := v.constants["URI"].Target.(*RClass)
+				uriModule := t.vm.constants["URI"].Target.(*RClass)
 				u, err := url.Parse(uri)
 
 				if err != nil {
-					v.returnError(err.Error())
+					t.returnError(err.Error())
 				}
 
 				uriAttrs := map[string]Object{
@@ -78,7 +78,7 @@ var builtinURIClassMethods = []*BuiltInMethodObject{
 					p, err := strconv.ParseInt(u.Port(), 0, 64)
 
 					if err != nil {
-						v.returnError(err.Error())
+						t.returnError(err.Error())
 					}
 
 					uriAttrs["@port"] = initilaizeInteger(int(p))
