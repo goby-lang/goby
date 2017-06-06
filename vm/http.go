@@ -6,10 +6,6 @@ import (
 	"strings"
 )
 
-type httpClass struct {
-	*RClass
-}
-
 var (
 	httpRequestClass  *RClass
 	httpResponseClass *RClass
@@ -17,27 +13,21 @@ var (
 
 func initializeHTTPClass(vm *VM) {
 	net := vm.loadConstant("Net", true)
-	http := httpClass{initializeClass("HTTP", false)}
+	http := initializeClass("HTTP", false)
 	http.setBuiltInMethods(builtinHTTPClassMethods, true)
-	http.initializeRequestClass()
-	http.initializeResponseClass()
+	initializeRequestClass(http)
+	initializeResponseClass(http)
 
 	net.constants[http.Name] = &Pointer{http}
+
+	// Use Goby code to extend request and response classes.
+	vm.execGobyLib("net/http/response.gb")
+	vm.execGobyLib("net/http/request.gb")
 }
 
-func (hc httpClass) initializeRequestClass() *RClass {
+func initializeRequestClass(hc *RClass) *RClass {
 	requestClass := initializeClass("Request", false)
 	hc.constants["Request"] = &Pointer{requestClass}
-
-	attrs := []string{
-		"body",
-		"method",
-		"path",
-		"url",
-	}
-
-	requestClass.setAttrAccessor(attrs)
-
 	builtinHTTPRequestInstanceMethods := []*BuiltInMethodObject{}
 
 	requestClass.setBuiltInMethods(builtinHTTPRequestInstanceMethods, false)
@@ -46,21 +36,9 @@ func (hc httpClass) initializeRequestClass() *RClass {
 	return requestClass
 }
 
-func (hc httpClass) initializeResponseClass() *RClass {
+func initializeResponseClass(hc *RClass) *RClass {
 	responseClass := initializeClass("Response", false)
 	hc.constants["Response"] = &Pointer{responseClass}
-
-	attrs := []string{
-		"body",
-		"status",
-		"header",
-		"http_version",
-		"request_http_version",
-		"request",
-	}
-
-	responseClass.setAttrAccessor(attrs)
-
 	builtinHTTPResponseInstanceMethods := []*BuiltInMethodObject{}
 
 	responseClass.setBuiltInMethods(builtinHTTPResponseInstanceMethods, false)

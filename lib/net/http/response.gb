@@ -1,0 +1,7 @@
+module Net
+  class HTTP
+    class Response
+      attr_accessor("body", "status", "header", "http_version", "request_http_version", "request")
+    end
+  end
+end
