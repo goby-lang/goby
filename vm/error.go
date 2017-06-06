@@ -9,6 +9,8 @@ var (
 	UndefinedMethodErrorClass *RClass
 	// ArgumentErrorClass ...
 	ArgumentErrorClass *RClass
+	// TypeErrorClass ...
+	TypeErrorClass *RClass
 )
 
 func initErrors() {
@@ -16,6 +18,8 @@ func initErrors() {
 	UndefinedMethodErrorClass = &RClass{BaseClass: bc}
 	bc = createBaseClass("ArgumentError")
 	ArgumentErrorClass = &RClass{BaseClass: bc}
+	bc = createBaseClass("TypeError")
+	TypeErrorClass = &RClass{BaseClass: bc}
 }
 
 // Error ...
@@ -48,6 +52,10 @@ func (e *UndefinedMethodErrorObject) returnClass() Class {
 	return e.Class
 }
 
+func initializeUndefinedMethodError(format string, args ...interface{}) *UndefinedMethodErrorObject {
+	return &UndefinedMethodErrorObject{Class: UndefinedMethodErrorClass, Message: fmt.Sprintf(format, args...)}
+}
+
 // ArgumentErrorObject ...
 type ArgumentErrorObject struct {
 	Class   *RClass
@@ -67,6 +75,21 @@ func initializeArgumentError(format string, args ...interface{}) *ArgumentErrorO
 	return &ArgumentErrorObject{Class: ArgumentErrorClass, Message: fmt.Sprintf(format, args...)}
 }
 
-func initializeUndefinedMethodError(format string, args ...interface{}) *UndefinedMethodErrorObject {
-	return &UndefinedMethodErrorObject{Class: UndefinedMethodErrorClass, Message: fmt.Sprintf(format, args...)}
+// TypeErrorObject ...
+type TypeErrorObject struct {
+	Class   *RClass
+	Message string
+}
+
+// Inspect ...
+func (e *TypeErrorObject) Inspect() string {
+	return "TypeError: " + e.Message
+}
+
+func (e *TypeErrorObject) returnClass() Class {
+	return e.Class
+}
+
+func initializeTypeError(format string, args ...interface{}) *TypeErrorObject {
+	return &TypeErrorObject{Class: TypeErrorClass, Message: fmt.Sprintf(format, args...)}
 }
