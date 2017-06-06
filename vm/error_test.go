@@ -2,10 +2,26 @@ package vm
 
 import "testing"
 
-func TestUndefinedMethod(t *testing.T) {
+func TestUndefinedMethodError(t *testing.T) {
 	evaluated := testEval(t, "a")
-	obj, ok := evaluated.(*UndefinedMethodErrorObject)
+	_, ok := evaluated.(*UndefinedMethodErrorObject)
 	if !ok {
-		t.Errorf("Expect UndefinedMethodError. got=%T (%+v)", obj, obj)
+		t.Errorf("Expect UndefinedMethodError. got=%T (%+v)", evaluated, evaluated)
 	}
 }
+
+func TestArgumentError(t *testing.T) {
+	evaluated := testEval(t, "[].count(5,4,3)")
+	_, ok := evaluated.(*ArgumentErrorObject)
+	if !ok {
+		t.Errorf("Expect ArgumentError. got=%T (%+v)", evaluated, evaluated)
+	}
+}
+
+// func TestTypeError(t *testing.T) {
+// 	evaluated := testEval(t, "10 * \"foo\"")
+// 	_, ok := evaluated.(*TypeErrorObject)
+// 	if !ok {
+// 		t.Errorf("Expect TypeError. got=%T (%+v)", evaluated, evaluated)
+// 	}
+// }
