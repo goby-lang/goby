@@ -2,6 +2,7 @@ package lexer
 
 import (
 	"github.com/goby-lang/goby/token"
+	"github.com/looplab/fsm"
 )
 
 // Lexer is used for tokenizing programs
@@ -11,21 +12,29 @@ type Lexer struct {
 	readPosition int
 	ch           byte
 	line         int
+	FSM          *fsm.FSM
 }
 
 // New initializes a new lexer with input string
 func New(input string) *Lexer {
 	l := &Lexer{input: input}
 	l.readChar()
+	l.FSM = fsm.NewFSM(
+		"initial",
+		fsm.Events{
+			{Name: "method", Src: []string{"initial"}, Dst: "method"},
+			{Name: "initialize", Src: []string{"method", "initial"}, Dst: "initial"},
+		},
+		fsm.Callbacks{},
+	)
 	return l
 }
 
 // NextToken makes lexer tokenize next character(s)
 func (l *Lexer) NextToken() token.Token {
+
 	var tok token.Token
-
 	l.skipWhitespace()
-
 	switch l.ch {
 	case '"', byte('\''):
 		tok.Literal = l.readString(l.ch)
@@ -114,6 +123,7 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.RBracket, l.ch, l.line)
 	case '.':
 		tok = newToken(token.Dot, l.ch, l.line)
+		l.FSM.Event("method")
 	case ':':
 		if l.peekChar() == ':' {
 			l.readChar()
@@ -148,12 +158,27 @@ func (l *Lexer) NextToken() token.Token {
 				tok.Literal = l.readConstant()
 				tok.Type = token.Constant
 				tok.Line = l.line
+				l.FSM.Event("initialize")
 			} else {
 				tok.Literal = l.readIdentifier()
-				tok.Type = token.LookupIdent(tok.Literal)
+				if l.FSM.Is("method") {
+					if tok.Literal == "self" {
+						tok.Type = token.LookupIdent(tok.Literal)
+					} else {
+						tok.Type = token.Ident
+					}
+					l.FSM.Event("initialize")
+
+				} else if l.FSM.Is("initial") {
+					tok.Type = token.LookupIdent(tok.Literal)
+					if tok.Literal == "def" {
+						l.FSM.Event("method")
+					} else {
+						l.FSM.Event("initialize")
+					}
+				}
 				tok.Line = l.line
 			}
-
 			return tok
 		} else if isInstanceVariable(l.ch) {
 			if isLetter(l.peekChar()) {

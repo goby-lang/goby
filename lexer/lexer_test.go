@@ -80,6 +80,17 @@ func TestNextToken(t *testing.T) {
 	require "foo"
 
 	Foo::Bar
+
+	Person.class
+
+	class Foo
+	  def class
+	    Foo
+	  end
+	  def self.bar
+       	    10
+   	  end
+	end
 	`
 
 	tests := []struct {
@@ -97,7 +108,7 @@ func TestNextToken(t *testing.T) {
 		{token.Semicolon, ";", 2},
 
 		// class is default to be ident
-		{token.Ident, "class", 4},
+		{token.Class, "class", 4},
 		{token.Constant, "Person", 4},
 
 		{token.Def, "def", 5},
@@ -282,7 +293,7 @@ func TestNextToken(t *testing.T) {
 
 		{token.Null, "nil", 64},
 
-		{token.Ident, "module", 66},
+		{token.Module, "module", 66},
 		{token.Constant, "Foo", 66},
 		{token.End, "end", 67},
 
@@ -296,25 +307,40 @@ func TestNextToken(t *testing.T) {
 		{token.Constant, "Foo", 73},
 		{token.ResolutionOperator, "::", 73},
 		{token.Constant, "Bar", 73},
-		{token.EOF, "", 74},
-	}
 
+		{token.Constant, "Person", 75},
+		{token.Dot, ".", 75},
+		{token.Ident, "class", 75},
+
+		{token.Class, "class", 77},
+		{token.Constant, "Foo", 77},
+		{token.Def, "def", 78},
+		{token.Ident, "class", 78},
+		{token.Constant, "Foo", 79},
+		{token.End, "end", 80},
+		{token.Def, "def", 81},
+		{token.Self, "self", 81},
+		{token.Dot, ".", 81},
+		{token.Ident, "bar", 81},
+		{token.Int, "10", 82},
+		{token.End, "end", 83},
+		{token.End, "end", 84},
+		{token.EOF, "", 85},
+	}
 	l := New(input)
 
 	for i, tt := range tests {
 		tok := l.NextToken()
 
 		if tok.Type != tt.expectedType {
-			t.Fatalf("tests[%d] - tokentype wrong. exprected=%q, got=%q", i, tt.expectedType, tok.Type)
-
+			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q", i, tt.expectedType, tok.Type)
 		}
 		if tok.Literal != tt.expectedLiteral {
-			t.Fatalf("tests[%d] - literal wrong. exprected=%q, got=%q", i, tt.expectedLiteral, tok.Literal)
+			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q", i, tt.expectedLiteral, tok.Literal)
 
 		}
 		if tok.Line != tt.expectedLine {
-			t.Fatalf("tests[%d] - line number wrong. exprected=%d, got=%d", i, tt.expectedLine, tok.Line)
-
+			t.Fatalf("tests[%d] - line number wrong. expected=%d, got=%d", i, tt.expectedLine, tok.Line)
 		}
 	}
 }

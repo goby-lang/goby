@@ -68,6 +68,8 @@ const (
 	While  = "WHILE"
 	Do     = "DO"
 	Yield  = "YIELD"
+	Class  = "CLASS"
+	Module = "MODULE"
 
 	ResolutionOperator = "::"
 )
@@ -85,6 +87,8 @@ var keywords = map[string]Type{
 	"while":  While,
 	"do":     Do,
 	"yield":  Yield,
+	"class":  Class,
+	"module": Module,
 }
 
 // LookupIdent is used for keyword identification
