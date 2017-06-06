@@ -1,68 +1,72 @@
 package vm
 
 import (
-  "fmt"
+	"fmt"
 )
 
 var (
-  // UndefinedMethodErrorClass ...
-  UndefinedMethodErrorClass *RError
-  // ArgumentErrorClass ...
-  ArgumentErrorClass *RError
+	// UndefinedMethodErrorClass ...
+	UndefinedMethodErrorClass *RClass
+	// ArgumentErrorClass ...
+	ArgumentErrorClass *RClass
 )
 
 func initErrors() {
-  bc := &BaseClass{Name: "UndefinedMethodError", Methods: newEnvironment(), ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
-  UndefinedMethodErrorClass = &RError{BaseClass: bc}
-  bc = &BaseClass{Name: "ArgumentError", Methods: newEnvironment(), ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
-  ArgumentErrorClass = &RError{BaseClass: bc}
-}
-
-// RError ...
-type RError struct {
-  *BaseClass
+	bc := createBaseClass("UndefinedMethodError")
+	UndefinedMethodErrorClass = &RClass{BaseClass: bc}
+	bc = createBaseClass("ArgumentError")
+	ArgumentErrorClass = &RClass{BaseClass: bc}
 }
 
 // Error ...
 type Error struct {
-  Class   *RError
-  Message string
+	Class   *RClass
+	Message string
 }
 
 // Inspect ...
 func (e *Error) Inspect() string {
-  return "ERROR: " + e.Message
+	return "ERROR: " + e.Message
 }
 
 func (e *Error) returnClass() Class {
-  return e.Class
+	return e.Class
 }
 
 // UndefinedMethodErrorObject ...
 type UndefinedMethodErrorObject struct {
-  Class *RError
-  // *BaseClass
-  // *Error
-  Message string
+	Class   *RClass
+	Message string
+}
+
+// Inspect ...
+func (e *UndefinedMethodErrorObject) Inspect() string {
+	return "ArgumentError: " + e.Message
+}
+
+func (e *UndefinedMethodErrorObject) returnClass() Class {
+	return e.Class
 }
 
 // ArgumentErrorObject ...
 type ArgumentErrorObject struct {
-  Class *RError
-  // *BaseClass
-  // *Error
-  Message string
+	Class   *RClass
+	Message string
 }
 
 // Inspect ...
 func (e *ArgumentErrorObject) Inspect() string {
-  return "ArgumentError: " + e.Message
+	return "ArgumentError: " + e.Message
 }
 
 func (e *ArgumentErrorObject) returnClass() Class {
-  return e.Class
+	return e.Class
 }
 
 func initializeArgumentError(format string, args ...interface{}) *ArgumentErrorObject {
-  return &ArgumentErrorObject{Class: ArgumentErrorClass, Message: fmt.Sprintf(format, args...)}
+	return &ArgumentErrorObject{Class: ArgumentErrorClass, Message: fmt.Sprintf(format, args...)}
+}
+
+func initializeUndefinedMethodError(format string, args ...interface{}) *UndefinedMethodErrorObject {
+	return &UndefinedMethodErrorObject{Class: UndefinedMethodErrorClass, Message: fmt.Sprintf(format, args...)}
 }

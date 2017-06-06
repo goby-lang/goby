@@ -154,6 +154,17 @@ func (c *BaseClass) lookupInstanceMethod(methodName string) Object {
 	return method
 }
 
+func createBaseClass(className string) *BaseClass {
+	return &BaseClass{
+		Name:             className,
+		Methods:          newEnvironment(),
+		ClassMethods:     newEnvironment(),
+		Class:            classClass,
+		pseudoSuperClass: objectClass,
+		superClass:       objectClass,
+	}
+}
+
 func (c *BaseClass) lookupConstant(constName string, findInScope bool) *Pointer {
 	constant, ok := c.constants[constName]
 
