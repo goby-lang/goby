@@ -202,6 +202,44 @@ func TestMethodCall(t *testing.T) {
 	}
 }
 
+func TestMethodCallWithoutParens(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{
+			`
+			class Foo
+			  def set_x(x)
+			    @x = x
+			  end
+
+			  def foo
+			    set_x(10)
+			    a = 10
+			    @x + a
+			  end
+			end
+
+			f = Foo.new
+			f.foo
+			`,
+			20,
+		},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+		}
+
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
+
 func TestClassMethodEvaluation(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -325,6 +363,8 @@ func TestClassMethodEvaluation(t *testing.T) {
 		}
 	}
 }
+
+
 
 func TestSelfExpressionEvaluation(t *testing.T) {
 	tests := []struct {

@@ -314,7 +314,18 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 		// current token is identifier (method name)
 		exp = &ast.CallExpression{Token: p.curToken, Receiver: receiver, Method: m}
 		exp.Arguments = p.parseCallArguments()
-	} else { // call expression has a receiver like: p.foo
+	} else if p.curTokenIs(token.Ident){
+		m := receiver.(*ast.Identifier).Value
+		// receiver is self
+		selfTok := token.Token{Type: token.Self, Literal: "self", Line: p.curToken.Line}
+		self := &ast.SelfExpression{Token: selfTok}
+		receiver = self
+
+		// current token is identifier (method name)
+		exp = &ast.CallExpression{Token: p.curToken, Receiver: receiver, Method: m}
+		exp.Arguments = p.parseCallArgumentsWithoutParens()
+
+	}else if p.curTokenIs(token.Dot) { // call expression has a receiver like: p.foo
 		exp = &ast.CallExpression{Token: p.curToken, Receiver: receiver}
 
 		// check if method name is identifier
@@ -401,6 +412,31 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 
 	return args
 }
+
+func (p *Parser) parseCallArgumentsWithoutParens() []ast.Expression {
+	args := []ast.Expression{}
+
+	if p.peekTokenIs(token.RParen) {
+		p.nextToken() // ')'
+		return args
+	}
+
+	p.nextToken() // start of first expression
+	args = append(args, p.parseExpression(LOWEST))
+
+	for p.peekTokenIs(token.Comma) {
+		p.nextToken() // ","
+		p.nextToken() // start of next expression
+		args = append(args, p.parseExpression(LOWEST))
+	}
+
+	if !p.expectPeek(token.RParen) {
+		return nil
+	}
+
+	return args
+}
+
 
 func (p *Parser) parseYieldExpression() ast.Expression {
 	ye := &ast.YieldExpression{Token: p.curToken}
