@@ -56,14 +56,8 @@ type VM struct {
 
 // New initializes a vm to initialize state and returns it.
 func New(fileDir string, args []string) *VM {
-	s := &stack{}
-	cfs := &callFrameStack{callFrames: []*callFrame{}}
-	thread := &thread{stack: s, callFrameStack: cfs, sp: 0, cfp: 0}
-	s.thread = thread
-	cfs.thread = thread
-
-	vm := &VM{mainThread: thread, args: args}
-	thread.vm = vm
+	vm := &VM{args: args}
+	vm.mainThread = vm.newThread()
 
 	vm.initConstants()
 	vm.methodISIndexTables = map[filename]*isIndexTable{
@@ -88,6 +82,16 @@ func New(fileDir string, args []string) *VM {
 	}
 
 	return vm
+}
+
+func (vm *VM) newThread() *thread {
+	s := &stack{}
+	cfs := &callFrameStack{callFrames: []*callFrame{}}
+	t := &thread{stack: s, callFrameStack: cfs, sp: 0, cfp: 0}
+	s.thread = t
+	cfs.thread = t
+	t.vm = vm
+	return t
 }
 
 // ExecBytecodes accepts a sequence of bytecodes and use vm to evaluate them.

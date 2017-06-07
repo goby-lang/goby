@@ -1,7 +1,6 @@
 package vm
 
 import (
-	"fmt"
 	"github.com/fatih/structs"
 	"io"
 	"log"
@@ -77,11 +76,12 @@ var builtinSimpleServerInstanceMethods = []*BuiltInMethodObject{
 				path := args[0].(*StringObject).Value
 
 				http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
-					req := initRequest(r)
+					// Go creates one goroutine per request, so we also need to create a new Goby thread for every request.
+					thread := t.vm.newThread()
 					res := httpResponseClass.initializeInstance()
-
-					t.builtInMethodYield(blockFrame, req, res)
-
+					req := initRequest(r)
+					thread.builtInMethodYield(blockFrame, req, res)
+					thread = nil
 					setupResponse(w, r, res)
 				})
 
@@ -131,7 +131,7 @@ func setupResponse(w http.ResponseWriter, req *http.Request, res *RObject) {
 	}
 
 	io.WriteString(w, r.body)
-	fmt.Printf("%s %s %s %d\n", req.Method, req.URL.Path, req.Proto, r.status)
+	log.Printf("%s %s %s %d\n", req.Method, req.URL.Path, req.Proto, r.status)
 }
 
 func initObject(v interface{}) Object {

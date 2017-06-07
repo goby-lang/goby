@@ -1,0 +1,14 @@
+# Please install Taurus first
+# Then run `bzt bzt.yml
+# See https://gettaurus.org/docs/ConfigSyntax/ for more setting options
+execution:
+  - concurrency: 50
+    throughput: 10 # requests per second
+    ramp-up: 10s
+    hold-for: 1m
+    scenario:
+      requests:
+      - http://localhost:3000/
+
+settings:
+  artifacts-dir: /tmp/%Y-%m-%d_%H-%M-%S

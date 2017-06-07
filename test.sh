@@ -17,6 +17,6 @@ done
 go install .
 goby test_fixtures/server.gb & PID=$!
 
-sleep 2
+ab -n 1000 -c 100 http://localhost:3000/
 
 kill $PID
