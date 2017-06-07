@@ -8,7 +8,6 @@ import (
 	"os"
 	"os/signal"
 	"strings"
-	"time"
 )
 
 type response struct {
@@ -77,12 +76,8 @@ var builtinSimpleServerInstanceMethods = []*BuiltInMethodObject{
 				path := args[0].(*StringObject).Value
 
 				http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+					// Go creates one goroutine per request, so we also need to create a new Goby thread for every request.
 					thread := t.vm.newThread()
-					if t.vm.threadCount%100 == 0 {
-						log.Println("-------------------Start Sleeping-------------------------")
-						time.Sleep(100 * time.Millisecond)
-						log.Println("###################Stop Sleeping########################")
-					}
 					res := httpResponseClass.initializeInstance()
 					req := initRequest(r)
 					thread.builtInMethodYield(blockFrame, req, res)
