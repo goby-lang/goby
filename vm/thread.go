@@ -78,3 +78,8 @@ func (t *thread) returnError(msg string) {
 	t.stack.push(&Pointer{err})
 	panic(errorMessage(msg))
 }
+
+func (t *thread) UndefinedMethodError(methodName string, receiver string) {
+	err := initializeUndefinedMethodError("Undefined Method '", methodName, "' for", receiver)
+	t.stack.push(&Pointer{err})
+}

@@ -2,12 +2,13 @@ package vm
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/bytecode"
-	"github.com/goby-lang/goby/parser"
 	"io/ioutil"
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/goby-lang/goby/bytecode"
+	"github.com/goby-lang/goby/parser"
 )
 
 var stackTrace int
@@ -148,6 +149,8 @@ func (vm *VM) initConstants() {
 		hashClass,
 		classClass,
 		methodClass,
+		UndefinedMethodErrorClass,
+		ArgumentErrorClass,
 	}
 
 	args := []Object{}
