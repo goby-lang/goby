@@ -2,6 +2,14 @@ package vm
 
 import "testing"
 
+func TestCreateBaseClass(t *testing.T) {
+	className := "Integer"
+	c := createBaseClass(className)
+	if c.Name != className {
+		t.Fatalf("Expect createBaseClass(\"%v\") to return a %v class", className, className)
+	}
+}
+
 func TestMonkeyPatchBuiltInClass(t *testing.T) {
 	input := `
 	class String
