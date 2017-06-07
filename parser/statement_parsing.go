@@ -34,7 +34,7 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 	stmt := &ast.DefStatement{Token: p.curToken}
 
 	p.nextToken()
-
+	fmt.Println("curToken", p.curToken.Literal, ",  Type ",  p.curToken.Type)
 	switch p.curToken.Type {
 	case token.Ident:
 		if p.peekTokenIs(token.Dot) {
@@ -45,7 +45,10 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 			}
 			stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 		} else {
+
 			stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+			fmt.Println("stmt.Name ", stmt.Name)
+
 		}
 	case token.Self:
 		stmt.Receiver = &ast.SelfExpression{Token: p.curToken}
@@ -64,17 +67,22 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 		p.nextToken()
 	}
 	// def foo
-	if p.peekTokenAtSameLine() && !p.peekTokenIs(token.Comment) { // def foo(), next token is ( and at same line
 
-		if !p.expectPeek(token.LParen) {
-			return nil
+	if p.peekTokenAtSameLine() { // def foo(), next token is ( and at same line
+		if p.peekTokenIs(token.LParen) {
+			if !p.expectPeek(token.LParen) {
+				return nil
+			}
+			stmt.Parameters = p.parseParameters()
+		} else if  p.peekTokenIs(token.Ident) {
+
+			stmt.Parameters = p.parseParametersNoParen()
 		}
-
-		stmt.Parameters = p.parseParameters()
-
+		
 	} else {
 		stmt.Parameters = []*ast.Identifier{}
 	}
+
 
 	stmt.BlockStatement = p.parseBlockStatement()
 
@@ -131,6 +139,8 @@ func (p *Parser) parseModuleStatement() *ast.ModuleStatement {
 }
 
 func (p *Parser) parseParameters() []*ast.Identifier {
+	fmt.Println("______parseParameters")
+
 	identifiers := []*ast.Identifier{}
 
 	if p.peekTokenIs(token.RParen) {
@@ -139,9 +149,9 @@ func (p *Parser) parseParameters() []*ast.Identifier {
 	} // empty params
 
 	p.nextToken()
-
 	ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 	identifiers = append(identifiers, ident)
+	//fmt.Println("ident=> ", ident)
 
 	for p.peekTokenIs(token.Comma) {
 		p.nextToken()
@@ -153,6 +163,33 @@ func (p *Parser) parseParameters() []*ast.Identifier {
 	if !p.expectPeek(token.RParen) {
 		return nil
 	}
+
+	return identifiers
+}
+
+func (p *Parser) parseParametersNoParen() []*ast.Identifier {
+	fmt.Println("______parseParametersNoParen")
+	identifiers := []*ast.Identifier{}
+
+	p.nextToken()
+
+	ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	//fmt.Println("ident=> ", ident)
+	identifiers = append(identifiers, ident)
+
+	for p.peekTokenIs(token.Comma) {
+		p.nextToken()
+		p.nextToken()
+		identifier := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+		identifiers = append(identifiers, identifier)
+	}
+
+	//if !p.expectPeek(token.RParen) {
+	//	return nil
+	//}
+	//p.nextToken()
+	//p.nextToken()
+
 
 	return identifiers
 }
@@ -183,6 +220,8 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 }
 
 func (p *Parser) parseBlockStatement() *ast.BlockStatement {
+	fmt.Println("_____Here??")
+
 	// curToken is {
 	bs := &ast.BlockStatement{Token: p.curToken}
 	bs.Statements = []ast.Statement{}
@@ -195,6 +234,7 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 			p.errors = append(p.errors, syntaxError("end", "EOF"))
 			return bs
 		}
+		fmt.Println("curToke=>",p.curToken.Literal)
 
 		stmt := p.parseStatement()
 		if stmt != nil {
