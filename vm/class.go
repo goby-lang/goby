@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path"
+	"time"
 )
 
 var (
@@ -344,6 +345,17 @@ var builtinGlobalMethods = []*BuiltInMethodObject{
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				return FALSE
+			}
+		},
+	},
+	{
+		Name: "sleep",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				int := args[0].(*IntegerObject)
+				seconds := int.Value
+				time.Sleep(time.Duration(seconds) * time.Second)
+				return int
 			}
 		},
 	},
