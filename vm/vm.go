@@ -52,8 +52,6 @@ type VM struct {
 	args []string
 	// projectRoot is goby root's absolute path, which is $GOROOT/src/github.com/goby-lang/goby
 	projectRoot string
-
-	threadCount int
 }
 
 // New initializes a vm to initialize state and returns it.
@@ -93,7 +91,6 @@ func (vm *VM) newThread() *thread {
 	s.thread = t
 	cfs.thread = t
 	t.vm = vm
-	vm.threadCount++
 	return t
 }
 
