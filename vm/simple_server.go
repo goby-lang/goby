@@ -78,9 +78,9 @@ var builtinSimpleServerInstanceMethods = []*BuiltInMethodObject{
 
 				http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 					thread := t.vm.newThread()
-					if t.vm.threadCount % 100 == 0 {
+					if t.vm.threadCount%100 == 0 {
 						log.Println("-------------------Start Sleeping-------------------------")
-						time.Sleep(10 * time.Second)
+						time.Sleep(100 * time.Millisecond)
 						log.Println("###################Stop Sleeping########################")
 					}
 					res := httpResponseClass.initializeInstance()

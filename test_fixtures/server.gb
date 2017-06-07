@@ -7,9 +7,4 @@ server.mount("/") do |req, res|
   res.status = 200
 end
 
-server.mount("/not_found") do |req, res|
-  res.body = "Not Found"
-  res.status = 404
-end
-
 server.start
