@@ -126,7 +126,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 				right, ok := args[0].(*IntegerObject)
 
 				if !ok {
-					return wrongTypeError(integerClass)
+					return initializeTypeError("Expect Integer type. got=%T (%+v)")
 				}
 
 				rightValue := right.Value
