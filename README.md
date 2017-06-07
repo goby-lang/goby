@@ -16,7 +16,7 @@ It will have Ruby's syntax (I'll try to support all common syntaxes) but without
 
 **Supporting Goby by sending your first PR! See [contribution guideline](https://github.com/goby-lang/goby/blob/master/CONTRIBUTING.md)**
 
-**Or support us by [donation](https://opencollective.com/goby)**
+**Or support us by [donation](https://opencollective.com/goby) (I quit my job to develop `Goby` in full-time, so financial support are needed 😢)**
 
 
 (**We'll release first beta version in August, please checkout this [issue](https://github.com/goby-lang/goby/issues/72) for what features `Goby` will support.**)
