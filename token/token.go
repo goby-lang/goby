@@ -34,6 +34,7 @@ const (
 	Decr     = "--"
 	And      = "&&"
 	Or       = "||"
+	Modulo   = "%"
 
 	LT   = "<"
 	LTE  = "<="

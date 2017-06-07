@@ -22,6 +22,7 @@ var precedence = map[token.Type]int{
 	token.Minus:              SUM,
 	token.Incr:               SUM,
 	token.Decr:               SUM,
+	token.Modulo:             SUM,
 	token.Assign:             ASSIGN,
 	token.Slash:              PRODUCT,
 	token.Asterisk:           PRODUCT,

@@ -66,6 +66,29 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		},
 	},
 	{
+		// Divides left hand operand by right hand operand and returns remainder.
+		//
+		// ```Ruby
+		// 5 % 2 # => 1
+		// ```
+		// @return [Integer]
+		Name: "%",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+				leftValue := receiver.(*IntegerObject).Value
+				right, ok := args[0].(*IntegerObject)
+
+				if !ok {
+					return wrongTypeError(integerClass)
+				}
+
+				rightValue := right.Value
+				return &IntegerObject{Value: leftValue % rightValue, Class: integerClass}
+			}
+		},
+	},
+	{
 		// Returns the subtraction of another Integer from self.
 		//
 		// ```Ruby

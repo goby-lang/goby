@@ -143,6 +143,8 @@ func (l *Lexer) NextToken() token.Token {
 			l.readChar()
 			tok = token.Token{Type: token.And, Literal: "&&", Line: l.line}
 		}
+	case '%':
+		tok = newToken(token.Modulo, l.ch, l.line)
 	case '#':
 		tok.Literal = l.absorbComment()
 		tok.Type = token.Comment
