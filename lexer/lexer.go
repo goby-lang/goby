@@ -248,6 +248,13 @@ func (l *Lexer) readInstanceVariable() string {
 
 func (l *Lexer) readString(ch byte) string {
 	l.readChar()
+
+	// Strings like "" or ''
+	if l.ch == ch {
+		l.readChar()
+		return ""
+	}
+
 	position := l.position // currently at string's first letter
 
 	for l.peekChar() != ch {

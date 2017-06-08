@@ -93,6 +93,9 @@ func TestNextToken(t *testing.T) {
 	end
 
 	10 % 5
+
+	""
+	''
 	`
 
 	tests := []struct {
@@ -331,7 +334,10 @@ func TestNextToken(t *testing.T) {
 		{token.Int, "10", 86},
 		{token.Modulo, "%", 86},
 		{token.Int, "5", 86},
-		{token.EOF, "", 87},
+
+		{token.String, "", 88},
+		{token.String, "", 89},
+		{token.EOF, "", 90},
 	}
 	l := New(input)
 
