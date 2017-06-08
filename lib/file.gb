@@ -1,0 +1,7 @@
+class File
+  def self.open(filename, mode, perm)
+    file = new(filename, mode, perm)
+    yield(file)
+    file.close
+  end
+end
