@@ -4,6 +4,35 @@ import (
 	"testing"
 )
 
+func TestFileDeletion(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		require("file")
+
+		File.open("/tmp/out1.txt", "w", 0755)
+		File.open("/tmp/out2.txt", "w", 0755)
+		File.open("/tmp/out3.txt", "w", 0755)
+
+		File.delete("/tmp/out1.txt", "/tmp/out2.txt", "/tmp/out3.txt")
+		`, 3},
+		{`
+		require("file")
+
+		File.open("/tmp/out.txt", "w", 0755)
+		File.delete("/tmp/out.txt")
+		File.exist("/tmp/out.txt")
+		`, false},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		checkExpected(t, evaluated, tt.expected)
+	}
+}
+
 func TestFileWrite(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -34,6 +63,12 @@ func TestFileWrite(t *testing.T) {
 		File.open("/tmp/out.txt", "w", 0755)
 		File.new("/tmp/out.txt").size
 		`, 0},
+		{`
+		require("file")
+
+		File.open("/tmp/out.txt", "w", 0755)
+		File.exist("/tmp/out.txt")
+		`, true},
 	}
 
 	for _, tt := range tests {

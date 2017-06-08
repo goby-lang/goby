@@ -103,6 +103,24 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
+			Name: "delete",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					for _, arg := range args {
+						filename := arg.(*StringObject).Value
+						err := os.Remove(filename)
+
+						if err != nil {
+							t.returnError(err.Error())
+							return nil
+						}
+					}
+
+					return initilaizeInteger(len(args))
+				}
+			},
+		},
+		{
 			// Returns extension part of file.
 			//
 			// ```ruby
@@ -227,6 +245,21 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 					fileObject := initializeString(file)
 
 					return initializeArray([]Object{dirObject, fileObject})
+				}
+			},
+		},
+		{
+			Name: "exist",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					filename := args[0].(*StringObject).Value
+					_, err := os.Stat(filename)
+
+					if err != nil {
+						return FALSE
+					}
+
+					return TRUE
 				}
 			},
 		},
