@@ -1,11 +1,11 @@
 package vm
 
 import (
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 	"syscall"
-	"io/ioutil"
 )
 
 var fileClass *RClass
@@ -42,7 +42,7 @@ var fileModeTable = map[string]int{
 }
 
 // Only initialize file related methods after it's being required.
-func builtinFileClassMethods() []*BuiltInMethodObject{
+func builtinFileClassMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 		{
 			// Finds the file with given filename and initializes a file object with it.
@@ -74,6 +74,10 @@ func builtinFileClassMethods() []*BuiltInMethodObject{
 
 							if !ok {
 								t.returnError("Unknown file mode: " + m)
+							}
+
+							if md == syscall.O_RDWR || md == syscall.O_WRONLY {
+								os.Create(fn)
 							}
 
 							mode = md
@@ -231,7 +235,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject{
 }
 
 // Only initialize file related methods after it's being required.
-func builtinFileInstanceMethods() []*BuiltInMethodObject{
+func builtinFileInstanceMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 		{
 			Name: "name",
@@ -241,7 +245,6 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject{
 					return initializeString(name)
 				}
 			},
-
 		},
 		{
 			// Returns size of file in bytes.
@@ -276,6 +279,22 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject{
 					}
 
 					return initializeString(string(data))
+				}
+			},
+		},
+		{
+			Name: "write",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					file := receiver.(*FileObject).File
+					data := args[0].(*StringObject).Value
+					length, err := file.Write([]byte(data))
+
+					if err != nil {
+						t.returnError(err.Error())
+					}
+
+					return initilaizeInteger(length)
 				}
 			},
 		},

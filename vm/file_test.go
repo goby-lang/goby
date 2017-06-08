@@ -4,10 +4,48 @@ import (
 	"testing"
 )
 
+func TestFileWrite(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		require("file")
+
+		l = 0
+		File.open("/tmp/out.txt", "w", 0755) do |f|
+		  l = f.write("12345")
+		end
+
+		l
+		`, 5},
+		{`
+		require("file")
+
+		File.open("/tmp/out.txt", "w", 0755) do |f|
+		  f.write("Goby is awesome!!!")
+		end
+
+		File.new("/tmp/out.txt").read
+		`, "Goby is awesome!!!"},
+		{`
+		require("file")
+
+		File.open("/tmp/out.txt", "w", 0755)
+		File.new("/tmp/out.txt").size
+		`, 0},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		checkExpected(t, evaluated, tt.expected)
+	}
+}
+
 // TODO: Add failed tests
 func TestFileObject(t *testing.T) {
-	tests := []struct{
-		input string
+	tests := []struct {
+		input    string
 		expected interface{}
 	}{
 		{`
