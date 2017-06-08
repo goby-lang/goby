@@ -23,6 +23,7 @@ func initTopLevelClasses() {
 	}
 
 	classClass.setBuiltInMethods(builtinGlobalMethods, false)
+	classClass.setBuiltInMethods(builtinGlobalMethods, true)
 	classClass.setBuiltInMethods(builtinClassClassMethods, true)
 
 	objectClass = &RClass{

@@ -74,7 +74,7 @@ func initializeArray(elements []Object) *ArrayObject {
 	return &ArrayObject{Elements: elements, Class: arrayClass}
 }
 
-func init() {
+func initArray() {
 	bc := &BaseClass{Name: "Array", ClassMethods: newEnvironment(), Methods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
 	ac := &RArray{BaseClass: bc}
 	ac.setBuiltInMethods(builtinArrayInstanceMethods, false)

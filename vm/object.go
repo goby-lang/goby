@@ -12,6 +12,8 @@ func init() {
 	initBool()
 	initInteger()
 	initString()
+	initArray()
+	initHash()
 	initMainObj()
 }
 
