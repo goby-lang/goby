@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
+	"io/ioutil"
 )
 
 var fileClass *RClass
@@ -259,6 +260,21 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject{
 					}
 
 					return initilaizeInteger(int(fileStats.Size()))
+				}
+			},
+		},
+		{
+			Name: "read",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					file := receiver.(*FileObject).File
+					data, err := ioutil.ReadFile(file.Name())
+
+					if err != nil {
+						t.returnError(err.Error())
+					}
+
+					return initializeString(string(data))
 				}
 			},
 		},

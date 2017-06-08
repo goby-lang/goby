@@ -28,6 +28,12 @@ func TestFileObject(t *testing.T) {
 		f = File.new("../test_fixtures/file_test/size.gb")
 		f.close
 		`, nil},
+		{`
+		require("file")
+
+		f = File.new("../test_fixtures/file_test/size.gb")
+		f.read
+		`, "this file's size is\n22"},
 	}
 
 	for _, tt := range tests {
