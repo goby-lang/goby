@@ -19,6 +19,7 @@ func initializeFileClass(vm *VM) {
 	vm.execGobyLib("file.gb")
 }
 
+// FileObject is a special type that contains file pointer so we can keep track on target file.
 type FileObject struct {
 	Class *RClass
 	File  *os.File
