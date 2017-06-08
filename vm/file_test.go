@@ -4,7 +4,39 @@ import (
 	"testing"
 )
 
-func TestEaxtnameMethod(t *testing.T) {
+// TODO: Add failed tests
+func TestFileObject(t *testing.T) {
+	tests := []struct{
+		input string
+		expected interface{}
+	}{
+		{`
+		require("file")
+
+		f = File.new("../test_fixtures/file_test/size.gb")
+		f.name
+		`, "../test_fixtures/file_test/size.gb"},
+		{`
+		require("file")
+
+		f = File.new("../test_fixtures/file_test/size.gb")
+		f.size
+		`, 22},
+		{`
+		require("file")
+
+		f = File.new("../test_fixtures/file_test/size.gb")
+		f.close
+		`, nil},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		checkExpected(t, evaluated, tt.expected)
+	}
+}
+
+func TestExtnameMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected string

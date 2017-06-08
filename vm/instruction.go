@@ -415,8 +415,8 @@ func (t *thread) evalBuiltInMethod(receiver Object, method *BuiltInMethodObject,
 
 	_, ok := receiver.(*RClass)
 	if method.Name == "new" && ok {
-		instance := evaluated.(*RObject)
-		if instance.InitializeMethod != nil {
+		instance, ok  := evaluated.(*RObject)
+		if ok && instance.InitializeMethod != nil {
 			t.evalMethodObject(instance, instance.InitializeMethod, receiverPr, argCount, argPr, blockFrame)
 		}
 	}

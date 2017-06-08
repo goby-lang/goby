@@ -12,6 +12,7 @@ var fileClass *RClass
 func initializeFileClass(vm *VM) {
 	class := initializeClass("File", false)
 	class.setBuiltInMethods(builtinFileClassMethods(), true)
+	class.setBuiltInMethods(builtinFileInstanceMethods(), false)
 	vm.constants["File"] = &Pointer{Target: class}
 	fileClass = class
 }
@@ -220,6 +221,55 @@ func builtinFileClassMethods() []*BuiltInMethodObject{
 					fileObject := initializeString(file)
 
 					return initializeArray([]Object{dirObject, fileObject})
+				}
+			},
+		},
+	}
+
+}
+
+// Only initialize file related methods after it's being required.
+func builtinFileInstanceMethods() []*BuiltInMethodObject{
+	return []*BuiltInMethodObject{
+		{
+			Name: "name",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					name := receiver.(*FileObject).File.Name()
+					return initializeString(name)
+				}
+			},
+
+		},
+		{
+			// Returns size of file in bytes.
+			//
+			// ```ruby
+			// File.new("loop.gb").size # => 321123
+			// ```
+			// @return [Integer]
+			Name: "size",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					file := receiver.(*FileObject).File
+
+					fileStats, err := os.Stat(file.Name())
+					if err != nil {
+						panic(err)
+					}
+
+					return initilaizeInteger(int(fileStats.Size()))
+				}
+			},
+		},
+		{
+			Name: "close",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					file := receiver.(*FileObject).File
+					file.Close()
+
+					return NULL
 				}
 			},
 		},
