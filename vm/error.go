@@ -46,23 +46,9 @@ func (e *Error) returnClass() Class {
 	return e.Class
 }
 
-func initializeUndefinedMethodError(format string, args ...interface{}) *Error {
+func initializeError(errorType *RClass, format string, args ...interface{}) *Error {
 	return &Error{
-		Class:   UndefinedMethodErrorClass,
-		Message: fmt.Sprintf(UndefinedMethodError+": "+format, args...),
-	}
-}
-
-func initializeArgumentError(format string, args ...interface{}) *Error {
-	return &Error{
-		Class:   ArgumentErrorClass,
-		Message: fmt.Sprintf(ArgumentError+": "+format, args...),
-	}
-}
-
-func initializeTypeError(format string, args ...interface{}) *Error {
-	return &Error{
-		Class:   TypeErrorClass,
-		Message: fmt.Sprintf(TypeError+": "+format, args...),
+		Class:   errorType,
+		Message: fmt.Sprintf(errorType.Name+": "+format, args...),
 	}
 }

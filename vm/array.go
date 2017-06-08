@@ -449,7 +449,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 				var count int
 
 				if len(args) > 1 {
-					return initializeArgumentError("Expect 1 argument, got=%v", len(args))
+					return initializeError(ArgumentErrorClass, "Expect 1 argument, got=%v", len(args))
 				}
 
 				if blockFrame != nil {

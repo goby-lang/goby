@@ -95,6 +95,6 @@ func (t *thread) returnError(msg string) {
 }
 
 func (t *thread) UndefinedMethodError(methodName string, receiver Object) {
-	err := initializeUndefinedMethodError("Undefined Method '%+v' for %+v", methodName, receiver.Inspect())
+	err := initializeError(UndefinedMethodErrorClass, "Undefined Method '%+v' for %+v", methodName, receiver.Inspect())
 	t.stack.push(&Pointer{err})
 }
