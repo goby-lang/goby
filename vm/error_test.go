@@ -4,32 +4,33 @@ import "testing"
 
 func TestUndefinedMethodError(t *testing.T) {
 	evaluated := testEval(t, "a")
-	_, ok := evaluated.(*UndefinedMethodErrorObject)
+	err, ok := evaluated.(*Error)
 	if !ok {
-		t.Errorf("Expect UndefinedMethodError. got=%T (%+v)", evaluated, evaluated)
+		t.Errorf("Expect Error. got=%T (%+v)", evaluated, evaluated)
 	}
-}
-
-func TestUndefinedMethodErrorStopsProgram(t *testing.T) {
-	evaluated := testEval(t, `a; 1 + 1`)
-	_, ok := evaluated.(*UndefinedMethodErrorObject)
-	if !ok {
-		t.Errorf("Expect UndefinedMethodError. got=%T (%+v)", evaluated, evaluated)
+	if err.Class.ReturnName() != UndefinedMethodError {
+		t.Errorf("Expect %s. got=%T (%+v)", UndefinedMethodError, evaluated, evaluated)
 	}
 }
 
 func TestArgumentError(t *testing.T) {
 	evaluated := testEval(t, "[].count(5,4,3)")
-	_, ok := evaluated.(*ArgumentErrorObject)
+	err, ok := evaluated.(*Error)
 	if !ok {
-		t.Errorf("Expect ArgumentError. got=%T (%+v)", evaluated, evaluated)
+		t.Errorf("Expect Error. got=%T (%+v)", evaluated, evaluated)
+	}
+	if err.Class.ReturnName() != ArgumentError {
+		t.Errorf("Expect %s. got=%T (%+v)", ArgumentError, evaluated, evaluated)
 	}
 }
 
 func TestTypeError(t *testing.T) {
 	evaluated := testEval(t, "10 * \"foo\"")
-	_, ok := evaluated.(*TypeErrorObject)
+	err, ok := evaluated.(*Error)
 	if !ok {
-		t.Errorf("Expect TypeError. got=%T (%+v)", evaluated, evaluated)
+		t.Errorf("Expect Error. got=%T (%+v)", evaluated, evaluated)
+	}
+	if err.Class.ReturnName() != TypeError {
+		t.Errorf("Expect %s. got=%T (%+v)", TypeError, evaluated, evaluated)
 	}
 }

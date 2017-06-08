@@ -47,8 +47,7 @@ func (t *thread) hasError() (string, bool) {
 	var hasError bool
 	var msg string
 	if t.stack.top() != nil {
-		switch err := t.stack.top().Target.(type) {
-		case *UndefinedMethodErrorObject:
+		if err, ok := t.stack.top().Target.(*Error); ok {
 			hasError = true
 			msg = err.Message
 		}

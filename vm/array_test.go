@@ -425,13 +425,13 @@ func TestCountMethodFail(t *testing.T) {
 	for _, tt := range testsFail {
 		evaluated := testEval(t, tt.input)
 
-		err, ok := evaluated.(*ArgumentErrorObject)
+		err, ok := evaluated.(*Error)
 		if !ok {
 			t.Errorf("Expect ArgumentError. got=%T (%+v)", err, err)
 		}
 
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
+		if err.Class.ReturnName() != ArgumentError {
+			t.Errorf("Expect \"%s\". got=\"%s\"", ArgumentError, err.Class.ReturnName())
 		}
 	}
 }

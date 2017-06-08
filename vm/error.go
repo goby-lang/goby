@@ -13,12 +13,21 @@ var (
 	TypeErrorClass *RClass
 )
 
-func initErrors() {
-	bc := createBaseClass("UndefinedMethodError")
+const (
+	// UndefinedMethodError describes the error type in string
+	UndefinedMethodError = "UndefinedMethodError"
+	// ArgumentError describes the error type in string
+	ArgumentError = "ArgumentError"
+	// TypeError describes the error type in string
+	TypeError = "TypeError"
+)
+
+func init() {
+	bc := createBaseClass(UndefinedMethodError)
 	UndefinedMethodErrorClass = &RClass{BaseClass: bc}
-	bc = createBaseClass("ArgumentError")
+	bc = createBaseClass(ArgumentError)
 	ArgumentErrorClass = &RClass{BaseClass: bc}
-	bc = createBaseClass("TypeError")
+	bc = createBaseClass(TypeError)
 	TypeErrorClass = &RClass{BaseClass: bc}
 }
 
@@ -37,59 +46,23 @@ func (e *Error) returnClass() Class {
 	return e.Class
 }
 
-// UndefinedMethodErrorObject ...
-type UndefinedMethodErrorObject struct {
-	Class   *RClass
-	Message string
+func initializeUndefinedMethodError(format string, args ...interface{}) *Error {
+	return &Error{
+		Class:   UndefinedMethodErrorClass,
+		Message: fmt.Sprintf(UndefinedMethodError+": "+format, args...),
+	}
 }
 
-// Inspect ...
-func (e *UndefinedMethodErrorObject) Inspect() string {
-	return "ArgumentError: " + e.Message
+func initializeArgumentError(format string, args ...interface{}) *Error {
+	return &Error{
+		Class:   ArgumentErrorClass,
+		Message: fmt.Sprintf(ArgumentError+": "+format, args...),
+	}
 }
 
-func (e *UndefinedMethodErrorObject) returnClass() Class {
-	return e.Class
-}
-
-func initializeUndefinedMethodError(format string, args ...interface{}) *UndefinedMethodErrorObject {
-	return &UndefinedMethodErrorObject{Class: UndefinedMethodErrorClass, Message: fmt.Sprintf(format, args...)}
-}
-
-// ArgumentErrorObject ...
-type ArgumentErrorObject struct {
-	Class   *RClass
-	Message string
-}
-
-// Inspect ...
-func (e *ArgumentErrorObject) Inspect() string {
-	return "ArgumentError: " + e.Message
-}
-
-func (e *ArgumentErrorObject) returnClass() Class {
-	return e.Class
-}
-
-func initializeArgumentError(format string, args ...interface{}) *ArgumentErrorObject {
-	return &ArgumentErrorObject{Class: ArgumentErrorClass, Message: fmt.Sprintf(format, args...)}
-}
-
-// TypeErrorObject ...
-type TypeErrorObject struct {
-	Class   *RClass
-	Message string
-}
-
-// Inspect ...
-func (e *TypeErrorObject) Inspect() string {
-	return "TypeError: " + e.Message
-}
-
-func (e *TypeErrorObject) returnClass() Class {
-	return e.Class
-}
-
-func initializeTypeError(format string, args ...interface{}) *TypeErrorObject {
-	return &TypeErrorObject{Class: TypeErrorClass, Message: fmt.Sprintf(format, args...)}
+func initializeTypeError(format string, args ...interface{}) *Error {
+	return &Error{
+		Class:   TypeErrorClass,
+		Message: fmt.Sprintf(TypeError+": "+format, args...),
+	}
 }
