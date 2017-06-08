@@ -323,7 +323,8 @@ var builtInActions = map[operationType]*action{
 			}
 
 			if method == nil {
-				t.returnError("undefined method `" + methodName + "' for " + receiver.Inspect())
+				t.UndefinedMethodError(methodName, receiver)
+				return
 			}
 
 			blockFrame := t.retrieveBlock(cf, args)

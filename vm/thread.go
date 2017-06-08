@@ -36,7 +36,23 @@ func (t *thread) evalCallFrame(cf *callFrame) {
 	for cf.pc < len(cf.instructionSet.instructions) {
 		i := cf.instructionSet.instructions[cf.pc]
 		t.execInstruction(cf, i)
+		if msg, yes := t.hasError(); yes {
+			fmt.Println(msg)
+			return
+		}
 	}
+}
+
+func (t *thread) hasError() (string, bool) {
+	var hasError bool
+	var msg string
+	if t.stack.top() != nil {
+		if err, ok := t.stack.top().Target.(*Error); ok {
+			hasError = true
+			msg = err.Message
+		}
+	}
+	return msg, hasError
 }
 
 func (t *thread) execInstruction(cf *callFrame, i *instruction) {
@@ -47,7 +63,6 @@ func (t *thread) execInstruction(cf *callFrame, i *instruction) {
 			if stackTrace == 0 {
 				fmt.Printf("Internal Error: %s\n", p)
 			}
-			fmt.Printf("Instruction trace: %d. \"%s\"\n", stackTrace, i.inspect())
 			stackTrace++
 			panic(p)
 		}
@@ -77,4 +92,9 @@ func (t *thread) returnError(msg string) {
 	err := &Error{Message: msg}
 	t.stack.push(&Pointer{err})
 	panic(errorMessage(msg))
+}
+
+func (t *thread) UndefinedMethodError(methodName string, receiver Object) {
+	err := initializeError(UndefinedMethodErrorClass, "Undefined Method '%+v' for %+v", methodName, receiver.Inspect())
+	t.stack.push(&Pointer{err})
 }

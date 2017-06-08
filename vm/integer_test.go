@@ -98,9 +98,6 @@ func TestEvalIntegerFail(t *testing.T) {
 		1 - "m"
 		`, newError("expect argument to be Integer type")},
 		{`
-		1 * "a"
-		`, newError("expect argument to be Integer type")},
-		{`
 		1 ** "p"
 		`, newError("expect argument to be Integer type")},
 		{`

@@ -273,6 +273,17 @@ func (c *RClass) setAttrAccessor(args interface{}) {
 	c.setAttrWriter(args)
 }
 
+func createBaseClass(className string) *BaseClass {
+	return &BaseClass{
+		Name:             className,
+		Methods:          newEnvironment(),
+		ClassMethods:     newEnvironment(),
+		Class:            classClass,
+		pseudoSuperClass: objectClass,
+		superClass:       objectClass,
+	}
+}
+
 var builtinGlobalMethods = []*BuiltInMethodObject{
 	{
 		Name: "require",
