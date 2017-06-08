@@ -4,15 +4,95 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 )
+
+var fileClass *RClass
 
 func initializeFileClass(vm *VM) {
 	class := initializeClass("File", false)
 	class.setBuiltInMethods(builtinFileClassMethods, true)
 	vm.constants["File"] = &Pointer{Target: class}
+	fileClass = class
+}
+
+type FileObject struct {
+	Class *RClass
+	File  *os.File
+}
+
+// Inspect returns detailed infoof a array include elements it contains
+func (f *FileObject) Inspect() string {
+	return "<File: " + f.File.Name() + ">"
+}
+
+// returnClass returns current object's class, which is RArray
+func (f *FileObject) returnClass() Class {
+	return f.Class
+}
+
+var fileModeTable = map[string]int{
+	"r":  syscall.O_RDONLY,
+	"r+": syscall.O_RDWR,
+	"w":  syscall.O_WRONLY,
+	"w+": syscall.O_RDWR,
 }
 
 var builtinFileClassMethods = []*BuiltInMethodObject{
+	{
+		// Finds the file with given filename and initializes a file object with it.
+		//
+		// ```ruby
+		// File.new("./samples/server.gb")
+		// ```
+		// @param filename [String]
+		// @return [File]
+		Name: "new",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				var fn string
+				var mode int
+				var perm os.FileMode
+
+				if len(args) < 1 {
+					return newError("Expect at least a filename to open file")
+				}
+
+				if len(args) >= 1 {
+					fn = args[0].(*StringObject).Value
+					mode = syscall.O_RDONLY
+					perm = os.FileMode(0755)
+
+					if len(args) >= 2 {
+						m := args[1].(*StringObject).Value
+						md, ok := fileModeTable[m]
+
+						if !ok {
+							t.returnError("Unknown file mode: " + m)
+						}
+
+						mode = md
+						perm = os.FileMode(0755)
+
+						if len(args) == 3 {
+							p := args[2].(*IntegerObject).Value
+							perm = os.FileMode(p)
+						}
+					}
+				}
+
+				f, err := os.OpenFile(fn, mode, perm)
+
+				if err != nil {
+					t.returnError(err.Error())
+				}
+
+				fileObj := &FileObject{File: f, Class: fileClass}
+
+				return fileObj
+			}
+		},
+	},
 	{
 		// Returns extension part of file.
 		//
