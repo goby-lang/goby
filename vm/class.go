@@ -371,6 +371,20 @@ var builtinGlobalMethods = []*BuiltInMethodObject{
 			}
 		},
 	},
+	{
+		Name: "block_given",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				cf := t.callFrameStack.top()
+
+				if cf.blockFrame == nil {
+					return FALSE
+				}
+
+				return TRUE
+			}
+		},
+	},
 }
 
 // BuiltinClassMethods is a collection of class methods used by Class
