@@ -23,6 +23,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseClassStatement()
 	case token.Module:
 		return p.parseModuleStatement()
+	case token.Next:
+		return &ast.NextStatement{Token: p.curToken}
 	default:
 		return p.parseExpressionStatement()
 	}
