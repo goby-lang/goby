@@ -59,14 +59,14 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		p.noPrefixParseFnError(p.curToken.Type)
 		return nil
 	}
-	leftExp := prefix()
-	fmt.Println("precedence=> ", precedence)
 
+	leftExp := prefix()
 
 	for !p.peekTokenIs(token.Semicolon) && precedence < p.peekPrecedence() && p.peekTokenAtSameLine() {
 
 		infix := p.infixParseFns[p.peekToken.Type]
 		if p.peekTokenIs(token.Int) && precedence == 0 {
+			// method call without paren case
 			infix = p.parseCallExpression
 		}
 
@@ -322,9 +322,7 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 		// current token is identifier (method name)
 		exp = &ast.CallExpression{Token: p.curToken, Receiver: receiver, Method: m}
 		exp.Arguments = p.parseCallArguments()
-	} else if p.curTokenIs(token.Ident)||p.curTokenIs(token.Int) {
-
-		fmt.Println("Good")
+	} else if p.curTokenIs(token.Ident) || p.curTokenIs(token.Int) {
 
 		m := receiver.(*ast.Identifier).Value
 		// receiver is self
@@ -441,7 +439,7 @@ func (p *Parser) parseCallArgumentsWithoutParens() []ast.Expression {
 		args = append(args, p.parseExpression(LOWEST))
 	}
 
-	if p.peekTokenAtSameLine(){
+	if p.peekTokenAtSameLine() {
 		return nil
 	}
 	return args

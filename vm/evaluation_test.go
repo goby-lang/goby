@@ -847,25 +847,25 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		input    string
 		expected int
 	}{
-		//{
-		//	`
-		//	class Foo
-		//	  def set_x x0
-		//	    @x = x0
-		//	  end
-		//
-		//	  def foo
-		//	    set_x 10
-		//	    a = 10
-		//	    @x + a
-		//	  end
-		//	end
-		//
-		//	f = Foo.new
-		//	f.foo
-		//	`,
-		//	20,
-		//},
+		{
+			`
+			class Foo
+			  def set_x x0
+			    @x = x0
+			  end
+
+			  def foo
+			    set_x 10
+			    a = 10
+			    @x + a
+			  end
+			end
+
+			f = Foo.new
+			f.foo
+			`,
+			20,
+		},
 		{
 			`
 			class Foo
@@ -885,6 +885,58 @@ func TestMethodCallWithoutParens(t *testing.T) {
 			f.foo
 			`,
 			31,
+		},
+		{
+			`
+			class Foo
+			  def set_x x1, x2, x3
+			    @x1 = x1
+			    @x2 = x2
+			  end
+
+			  def set_y y1, y2, y3
+			    @y3 = y3
+			    @y1 = y1
+			  end
+
+			  def foo
+			    set_x 15,17
+			    set_y 3,4,5
+			    set_x (10,11)
+			    @x1 + @x2 + @y3
+			  end
+			end
+
+			f = Foo.new
+			f.foo
+			`,
+			26,
+		},
+		{
+			`
+			class Foo
+			  def set_x x1
+			    @x1 = x1
+			  end
+
+			  def set_y y1, y2, y3
+			    @y3 = y3
+			    @y1 = y1
+			    @y2 = y2
+			  end
+
+			  def foo
+			    set_x 10,20
+			    set_y 1,2,3
+			    set_y 3,4,5
+			    @x1 + @y1 + @y2 + @y3
+			  end
+			end
+
+			f = Foo.new
+			f.foo
+			`,
+			22,
 		},
 	}
 
