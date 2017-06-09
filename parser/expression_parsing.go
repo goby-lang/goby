@@ -65,8 +65,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	for !p.peekTokenIs(token.Semicolon) && precedence < p.peekPrecedence() && p.peekTokenAtSameLine() {
 
 		infix := p.infixParseFns[p.peekToken.Type]
-		if p.peekTokenIs(token.Int) && precedence == 0 {
-			// method call without paren case
+		if (p.peekTokenIs(token.Int) || p.peekTokenIs(token.Ident) || p.peekTokenIs(token.InstanceVariable)) && precedence == 0 { // method call without paren case
 			infix = p.parseCallExpression
 		}
 
@@ -310,8 +309,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 	var exp *ast.CallExpression
 
-	if p.curTokenIs(token.LParen) { // call expression doesn't have a receiver foo(x) || foo()
-		// method name is receiver, for example 'foo' of foo(x)
+	if p.curTokenIs(token.LParen) || p.curTokenIs(token.Ident) || p.curTokenIs(token.Int) || p.curTokenIs(token.InstanceVariable) {
 
 		m := receiver.(*ast.Identifier).Value
 		// receiver is self
@@ -321,18 +319,13 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 
 		// current token is identifier (method name)
 		exp = &ast.CallExpression{Token: p.curToken, Receiver: receiver, Method: m}
-		exp.Arguments = p.parseCallArguments()
-	} else if p.curTokenIs(token.Ident) || p.curTokenIs(token.Int) {
 
-		m := receiver.(*ast.Identifier).Value
-		// receiver is self
-		selfTok := token.Token{Type: token.Self, Literal: "self", Line: p.curToken.Line}
-		self := &ast.SelfExpression{Token: selfTok}
-		receiver = self
+		if p.curTokenIs(token.LParen) {
+			exp.Arguments = p.parseCallArguments()
 
-		// current token is identifier (method name)
-		exp = &ast.CallExpression{Token: p.curToken, Receiver: receiver, Method: m}
-		exp.Arguments = p.parseCallArgumentsWithoutParens()
+		} else {
+			exp.Arguments = p.parseCallArgumentsWithoutParens()
+		}
 
 	} else if p.curTokenIs(token.Dot) { // call expression has a receiver like: p.foo
 
