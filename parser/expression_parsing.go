@@ -60,14 +60,17 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		return nil
 	}
 	leftExp := prefix()
-	fmt.Println("Token: ",p.curToken.Literal, "  ",p.curToken.Type,"PeekToken: ",p.peekToken.Literal)
+	fmt.Println("precedence=> ", precedence)
+
 
 	for !p.peekTokenIs(token.Semicolon) && precedence < p.peekPrecedence() && p.peekTokenAtSameLine() {
-		//fmt.Println("Finally^^")
 
 		infix := p.infixParseFns[p.peekToken.Type]
+		if p.peekTokenIs(token.Int) && precedence == 0 {
+			infix = p.parseCallExpression
+		}
+
 		if infix == nil {
-			//fmt.Println("QQ")
 			return leftExp
 		}
 		p.nextToken()
@@ -306,11 +309,9 @@ func (p *Parser) parseIfExpression() ast.Expression {
 
 func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 	var exp *ast.CallExpression
-	fmt.Println("where are u??^^")
 
 	if p.curTokenIs(token.LParen) { // call expression doesn't have a receiver foo(x) || foo()
 		// method name is receiver, for example 'foo' of foo(x)
-		fmt.Println("curTokenIs(token.LParen) ")
 
 		m := receiver.(*ast.Identifier).Value
 		// receiver is self
@@ -322,7 +323,8 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 		exp = &ast.CallExpression{Token: p.curToken, Receiver: receiver, Method: m}
 		exp.Arguments = p.parseCallArguments()
 	} else if p.curTokenIs(token.Ident)||p.curTokenIs(token.Int) {
-		fmt.Println("curTokenIs(here) ")
+
+		fmt.Println("Good")
 
 		m := receiver.(*ast.Identifier).Value
 		// receiver is self
@@ -424,7 +426,6 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 }
 
 func (p *Parser) parseCallArgumentsWithoutParens() []ast.Expression {
-	fmt.Println("%%%%%")
 	args := []ast.Expression{}
 
 	if p.peekTokenIs(token.RParen) {
@@ -432,19 +433,14 @@ func (p *Parser) parseCallArgumentsWithoutParens() []ast.Expression {
 		return args
 	}
 
-	//p.nextToken() // start of first expression
 	args = append(args, p.parseExpression(LOWEST))
-	fmt.Println("PeekToken: ",p.peekToken.Literal)
-
 
 	for p.peekTokenIs(token.Comma) {
-		fmt.Println("again")
-
 		p.nextToken() // ","
 		p.nextToken() // start of next expression
 		args = append(args, p.parseExpression(LOWEST))
 	}
-	
+
 	if p.peekTokenAtSameLine(){
 		return nil
 	}

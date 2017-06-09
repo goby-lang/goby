@@ -855,7 +855,7 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		//	  end
 		//
 		//	  def foo
-		//	    set_x(10)
+		//	    set_x 10
 		//	    a = 10
 		//	    @x + a
 		//	  end
@@ -875,7 +875,7 @@ func TestMethodCallWithoutParens(t *testing.T) {
 			  end
 
 			  def foo
-			    set_x 10,11,12
+			    set_x 10,11
 			    a = 10
 			    @x + a +@y
 			  end

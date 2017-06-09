@@ -199,8 +199,11 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	stmt := &ast.ExpressionStatement{Token: p.curToken}
 
-	stmt.Expression = p.parseExpression(0)
-	//fmt.Println("L=> ", 0)
+	precedence := 1
+	if p.curTokenIs(token.Ident){
+		precedence = 0
+	}
+	stmt.Expression = p.parseExpression(precedence)
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
 	}
@@ -222,7 +225,7 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 			p.errors = append(p.errors, syntaxError("end", "EOF"))
 			return bs
 		}
-
+		//fmt.Println("parseStatement, Token:", p.curToken.Type)
 		stmt := p.parseStatement()
 		if stmt != nil {
 			bs.Statements = append(bs.Statements, stmt)
