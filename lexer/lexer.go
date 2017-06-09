@@ -259,6 +259,10 @@ func (l *Lexer) readString(ch byte) string {
 
 	for l.peekChar() != ch {
 		l.readChar()
+
+		if l.peekChar() == 0 {
+			panic("Unterminated string meets end of file")
+		}
 	}
 
 	l.readChar()                           // currently at string's last letter
