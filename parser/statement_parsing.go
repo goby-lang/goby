@@ -75,6 +75,7 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 
 		} else if  p.peekTokenIs(token.Ident) {
 
+
 			stmt.Parameters = p.parseParametersNoParen()
 		}
 
@@ -198,7 +199,8 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	stmt := &ast.ExpressionStatement{Token: p.curToken}
 
-	stmt.Expression = p.parseExpression(LOWEST)
+	stmt.Expression = p.parseExpression(0)
+	//fmt.Println("L=> ", 0)
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
 	}
