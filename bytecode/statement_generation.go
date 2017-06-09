@@ -55,6 +55,8 @@ func (g *Generator) compileStatement(is *instructionSet, statement ast.Statement
 		g.endInstructions(is)
 	case *ast.WhileStatement:
 		g.compileWhileStmt(is, stmt, scope, table)
+	case *ast.NextStatement:
+		g.compileNextStatement(is, scope)
 	}
 }
 
@@ -68,6 +70,7 @@ func (g *Generator) compileWhileStmt(is *instructionSet, stmt *ast.WhileStatemen
 
 	anchor2 := &anchor{is.Count}
 
+	scope.anchor = anchor1
 	g.compileCodeBlock(is, stmt.Body, scope, scope.localTable)
 
 	anchor1.line = is.Count
@@ -77,6 +80,10 @@ func (g *Generator) compileWhileStmt(is *instructionSet, stmt *ast.WhileStatemen
 	is.define(BranchIf, anchor2)
 	is.define(PutNull)
 	is.define(Pop)
+}
+
+func (g *Generator) compileNextStatement(is *instructionSet, scope *scope) {
+	is.define(Jump, scope.anchor)
 }
 
 func (g *Generator) compileClassStmt(stmt *ast.ClassStatement, scope *scope) {

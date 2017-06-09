@@ -13,6 +13,7 @@ type scope struct {
 	out        *scope
 	localTable *localTable
 	line       int
+	anchor     *anchor
 }
 
 func newScope(s *scope, stmt ast.Statement) *scope {
