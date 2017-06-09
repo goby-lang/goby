@@ -63,6 +63,7 @@ const (
 	If     = "IF"
 	Else   = "ELSE"
 	Return = "RETURN"
+	Next   = "NEXT"
 	Def    = "DEF"
 	Self   = "SELF"
 	End    = "END"
@@ -88,6 +89,7 @@ var keywords = map[string]Type{
 	"while":  While,
 	"do":     Do,
 	"yield":  Yield,
+	"next":   Next,
 	"class":  Class,
 	"module": Module,
 }

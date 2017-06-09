@@ -7,6 +7,57 @@ import (
 	"testing"
 )
 
+func TestNextStatement(t *testing.T) {
+	input := `
+	x = 0
+	y = 0
+
+	while x < 10 do
+	  x = x + 1
+	  if x == 5
+	    next
+	  end
+	  y = y + 1
+	end
+	`
+
+	expected := `
+<ProgramStart>
+0 putobject 0
+1 setlocal 0 0
+2 putobject 0
+3 setlocal 1 0
+4 jump 22
+5 putnil
+6 pop
+7 jump 22
+8 getlocal 0 0
+9 putobject 1
+10 send + 1
+11 setlocal 0 0
+12 getlocal 0 0
+13 putobject 5
+14 send == 1
+15 branchunless 17
+16 jump 22
+17 putnil
+18 getlocal 1 0
+19 putobject 1
+20 send + 1
+21 setlocal 1 0
+22 getlocal 0 0
+23 putobject 10
+24 send < 1
+25 branchif 8
+26 putnil
+27 pop
+28 leave
+`
+
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
 func TestNamespacedClass(t *testing.T) {
 	input := `
 	module Foo

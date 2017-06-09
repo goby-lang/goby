@@ -4,6 +4,53 @@ import (
 	"testing"
 )
 
+func TestNextStatement(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		x = 0
+		y = 0
+
+		while x < 10 do
+		  x = x + 1
+		  if x == 5
+		    next
+		  end
+		  y = y + 1
+		end
+
+		x + y
+		`, 19},
+		{`
+		x = 0
+		y = 0
+		i = 0
+
+		while x < 10 do
+		  x = x + 1
+		  while y < 5 do
+		    y = y + 1
+
+		    if y == 3
+		      next
+		    end
+
+		    i = i + x * y
+		  end
+		end
+
+		i
+		`, 12},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		checkExpected(t, evaluated, tt.expected)
+	}
+}
+
 func TestMethodCallWithoutSelf(t *testing.T) {
 	tests := []struct {
 		input    string
