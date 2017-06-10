@@ -306,12 +306,12 @@ var builtinCommonInstanceMethods = []*BuiltInMethodObject{
 		// Loads the given Goby library name without extension (mainly for modules), returning `true` if successful and `false` if the feature is already loaded.
 		//
 		// Currently, only the following embedded Goby libraries are targeted:
-		//-	"file"
-		//- "net/http"
-		//- "net/simple_server"
-		//- "uri"
+		// - "file"
+		// - "net/http"
+		// - "net/simple_server"
+		// - "uri"
 		//
-		//```
+		//```ruby
 		//require("file")
 		//File.extname("foo.rb")
 		//```
@@ -338,9 +338,11 @@ var builtinCommonInstanceMethods = []*BuiltInMethodObject{
 		},
 	},
 	{
-		// Loads the Goby library from the given local path plus name without extension (mainly for modules) from the current directory, returning `true` if successful and `false` if the feature is already loaded.
+		// Loads the Goby library (mainly for modules) from the given local path plus name
+		// without extension from the current directory, returning `true` if successful,
+		// and `false` if the feature is already loaded.
 		//
-		//```
+		//```ruby
 		//require_relative("../test_fixtures/require_test/foo")
 		//fifty = Foo.bar(5)
 		//```
@@ -368,7 +370,7 @@ var builtinCommonInstanceMethods = []*BuiltInMethodObject{
 		},
 	},
 	{
-		// Puts string literals or objects into stdout with a tailing linefeed, converting into String if needed.
+		// Puts string literals or objects into stdout with a tailing line feed, converting into String if needed.
 		//
 		//```ruby
 		//puts("foo", "bar")
@@ -383,7 +385,7 @@ var builtinCommonInstanceMethods = []*BuiltInMethodObject{
 		// TODO: interpolation is needed to be implemented.
 		//
 		// @param *args [Class] String literals, or other objects that can be converted into String.
-		// @return nil [Null]
+		// @return [Null]
 		Name: "puts",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -409,7 +411,7 @@ var builtinCommonInstanceMethods = []*BuiltInMethodObject{
 		//```
 		//
 		// @params object [Object] Receiver (required)
-		// @return class [Class] The class of the receiver
+		// @return [Class] The class of the receiver
 		Name: "class",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -432,7 +434,7 @@ var builtinCommonInstanceMethods = []*BuiltInMethodObject{
 		//```
 		//
 		// @params object [Object] object that return boolean value to invert
-		// @return bool [Object] Inverted boolean value
+		// @return [Object] Inverted boolean value
 		Name: "!",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -452,7 +454,7 @@ var builtinCommonInstanceMethods = []*BuiltInMethodObject{
 		//```
 		//
 		// @params sec [Integer] time to wait in sec
-		// @return sec [Integer] actual time slept in sec
+		// @return [Boolean] actual time slept in sec
 		Name: "sleep",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -525,7 +527,7 @@ var builtinClassClassMethods = []*BuiltInMethodObject{
 		// ```
 		//
 		// @param *args [String] One or more quoted method names for 'getter'
-		// @return nil [Null]
+		// @return [Null]
 		Name: "attr_reader",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -560,7 +562,7 @@ var builtinClassClassMethods = []*BuiltInMethodObject{
 		//```
 		//
 		// @param *args [String] One or more quoted method names for 'setter'
-		// @return nil [Null]
+		// @return [Null]
 		Name: "attr_writer",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -600,7 +602,7 @@ var builtinClassClassMethods = []*BuiltInMethodObject{
 		//```
 		//
 		// @param *args [String] One or more quoted method names for 'getter/getter'
-		// @return nil [Null]
+		// @return [Null]
 		Name: "attr_accessor",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -612,7 +614,7 @@ var builtinClassClassMethods = []*BuiltInMethodObject{
 		},
 	},
 	{
-		// Includes a module for mix-in, which inherits only methods and constants from the module.
+		// Includes a module for mixin, which inherits only methods and constants from the module.
 		// The included module is inserted into the path of the inheritance tree, between the class and the superclass so that the methods of the module is prioritized to superclasses.
 		//
 		// The order of `include` affects: the modules that included later are prioritized. If the same module is included twice or more, the rests are ignored.
@@ -662,7 +664,7 @@ var builtinClassClassMethods = []*BuiltInMethodObject{
 		//```
 		//
 		// @param module [Class] Module name to include
-		// @return nil [Null]
+		// @return [Null]
 		Name: "include",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -749,11 +751,11 @@ var builtinClassClassMethods = []*BuiltInMethodObject{
 		//
 		// **Note**: the following is not supported:
 		//
-		//- Class class
+		// - Class class
 		//
-		//- Object class
+		// - Object class
 		//
-		//- instance objects or object literals
+		// - instance objects or object literals
 		//
 		//```ruby
 		//puts("string".superclass) # => error
