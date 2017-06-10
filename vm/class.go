@@ -418,7 +418,7 @@ var builtinCommonInstanceMethods = []*BuiltInMethodObject{
 		// puts("123".class.name)  # => String
 		// ```
 		//
-		// @params object [Object] Receiver (required)
+		// @param object [Object] Receiver (required)
 		// @return [Class] The class of the receiver
 		Name: "class",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -441,7 +441,7 @@ var builtinCommonInstanceMethods = []*BuiltInMethodObject{
 		// !false # => true
 		// ```
 		//
-		// @params object [Object] object that return boolean value to invert
+		// @param object [Object] object that return boolean value to invert
 		// @return [Object] Inverted boolean value
 		Name: "!",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -461,7 +461,7 @@ var builtinCommonInstanceMethods = []*BuiltInMethodObject{
 		// puts(a)     # => 2
 		// ```
 		//
-		// @params sec [Integer] time to wait in sec
+		// @param sec [Integer] time to wait in sec
 		// @return [Integer] actual time slept in sec
 		Name: "sleep",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -492,7 +492,7 @@ var builtinCommonInstanceMethods = []*BuiltInMethodObject{
 		// end
 		// ```
 		//
-		// @params n/a []
+		// @param n/a []
 		// @return [Boolean] true/false
 		Name: "block_given",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -612,7 +612,7 @@ var builtinClassClassMethods = []*BuiltInMethodObject{
 		// end
 		// ```
 		//
-		// @param *args [String] One or more quoted method names for 'getter/getter'
+		// @param *args [String] One or more quoted method names for 'getter/setter'
 		// @return [Null]
 		Name: "attr_accessor",
 		Fn: func(receiver Object) builtinMethodBody {

@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+	"sync"
 )
 
 var (
@@ -40,6 +41,7 @@ func (s *StringObject) equal(e *StringObject) bool {
 
 var (
 	stringTable = make(map[string]*StringObject)
+	mutex = &sync.Mutex{}
 )
 
 func initializeString(value string) *StringObject {
@@ -47,7 +49,11 @@ func initializeString(value string) *StringObject {
 
 	if !ok {
 		s := &StringObject{Value: value, Class: stringClass}
+
+		mutex.Lock()
 		stringTable[value] = s
+		mutex.Unlock()
+
 		return s
 	}
 
