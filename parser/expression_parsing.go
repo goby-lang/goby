@@ -8,6 +8,15 @@ import (
 	"github.com/goby-lang/goby/token"
 )
 
+var argument = map[token.Type]bool{
+	token.Int:              true,
+	token.String:           true,
+	token.True:             true,
+	token.False:            true,
+	token.InstanceVariable: true,
+	token.Ident:            true,
+}
+
 var precedence = map[token.Type]int{
 	token.Eq:                 EQUALS,
 	token.NotEq:              EQUALS,
@@ -65,7 +74,8 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	for !p.peekTokenIs(token.Semicolon) && precedence < p.peekPrecedence() && p.peekTokenAtSameLine() {
 
 		infix := p.infixParseFns[p.peekToken.Type]
-		if (p.peekTokenIs(token.Int) || p.peekTokenIs(token.Ident) || p.peekTokenIs(token.InstanceVariable)) && precedence == 0 { // method call without paren case
+
+		if  argument[p.peekToken.Type] && precedence == 0 { // method call without paren case
 			infix = p.parseCallExpression
 		}
 
