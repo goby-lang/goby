@@ -22,8 +22,8 @@ func initTopLevelClasses() {
 		},
 	}
 
-	classClass.setBuiltInMethods(builtinGlobalMethods, false)
-	classClass.setBuiltInMethods(builtinGlobalMethods, true)
+	classClass.setBuiltInMethods(builtinCommonInstanceMethods, false)
+	classClass.setBuiltInMethods(builtinCommonInstanceMethods, true)
 	classClass.setBuiltInMethods(builtinClassClassMethods, true)
 
 	objectClass = &RClass{
@@ -36,7 +36,7 @@ func initTopLevelClasses() {
 		},
 	}
 
-	objectClass.setBuiltInMethods(builtinGlobalMethods, false)
+	objectClass.setBuiltInMethods(builtinCommonInstanceMethods, false)
 }
 
 // initializeClass initializes and returns a class instance with given class name
@@ -284,7 +284,8 @@ func createBaseClass(className string) *BaseClass {
 	}
 }
 
-var builtinGlobalMethods = []*BuiltInMethodObject{
+// builtinCommonInstanceMethods is a collection of common instance methods used by Class
+var builtinCommonInstanceMethods = []*BuiltInMethodObject{
 	{
 		Name: "require",
 		Fn: func(receiver Object) builtinMethodBody {
