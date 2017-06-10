@@ -42,7 +42,8 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 			if !p.expectPeek(token.Ident) {
 				return nil
 			}
-			stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+			stmt.Name =
+				&ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 		} else {
 
 			stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
@@ -68,9 +69,7 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 
 	if p.peekTokenAtSameLine() { // def foo(), next token is ( and at same line
 		if p.peekTokenIs(token.LParen) {
-			if !p.expectPeek(token.LParen) {
-				return nil
-			}
+			p.nextToken()
 			stmt.Parameters = p.parseParameters()
 
 		} else if  p.peekTokenIs(token.Ident) {
