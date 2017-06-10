@@ -47,7 +47,7 @@ func main() {
 	file := readFile(filepath)
 
 	switch fileExt {
-	case "gb":
+	case "gb", "rb":
 		program := parser.BuildAST(file)
 
 		g := bytecode.NewGenerator(program)
