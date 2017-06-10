@@ -18,7 +18,7 @@ type NullObject struct {
 
 // Inspect returns the name of NullObject
 func (n *NullObject) Inspect() string {
-	return "null"
+	return ""
 }
 
 func (n *NullObject) returnClass() Class {
