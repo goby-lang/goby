@@ -71,19 +71,22 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 
 	leftExp := prefix()
 
-	for !p.peekTokenIs(token.Semicolon) && precedence < p.peekPrecedence() && p.peekTokenAtSameLine() {
+	if argument[p.peekToken.Type] && precedence == 0 {
 
-		infix := p.infixParseFns[p.peekToken.Type]
-
-		if  argument[p.peekToken.Type] && precedence == 0 { // method call without paren case
-			infix = p.parseCallExpression
-		}
-
-		if infix == nil {
-			return leftExp
-		}
+		infix := p.parseCallExpression
 		p.nextToken()
 		leftExp = infix(leftExp)
+
+	} else {
+		for !p.peekTokenIs(token.Semicolon) && precedence < p.peekPrecedence() && p.peekTokenAtSameLine() {
+
+			infix := p.infixParseFns[p.peekToken.Type]
+			if infix == nil {
+				return leftExp
+			}
+			p.nextToken()
+			leftExp = infix(leftExp)
+		}
 	}
 
 	return leftExp
@@ -319,7 +322,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 	var exp *ast.CallExpression
 
-	if p.curTokenIs(token.LParen) || p.curTokenIs(token.Ident) || p.curTokenIs(token.Int) || p.curTokenIs(token.InstanceVariable) {
+	if p.curTokenIs(token.LParen) || argument[p.curToken.Type] {
 
 		m := receiver.(*ast.Identifier).Value
 		// receiver is self
