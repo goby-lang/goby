@@ -61,7 +61,7 @@ It will have Ruby's syntax (I'll try to support all common syntaxes) but without
     - String
     - Boolean
     - nil
-    - Hash
+    - Hash (with built in `to_json` method)
     - Array
 - Flow control
     - If statement
