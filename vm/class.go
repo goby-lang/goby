@@ -315,11 +315,8 @@ var builtinCommonInstanceMethods = []*BuiltInMethodObject{
 		// Currently, only the following embedded Goby libraries are targeted:
 		//
 		// - "file"
-		//
 		// - "net/http"
-		//
 		// - "net/simple_server"
-		//
 		// - "uri"
 		//
 		// ```ruby
