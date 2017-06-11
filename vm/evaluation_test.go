@@ -59,11 +59,11 @@ func TestMethodCallWithoutSelf(t *testing.T) {
 		{
 			`
 			class Foo
-			  def set_x(x)
+			  def set_x(x) # Set x
 			    @x = x
 			  end
 
-			  def foo
+			  def foo # Set x and plus a
 			    set_x(10)
 			    a = 10
 			    @x + a

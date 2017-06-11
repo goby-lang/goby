@@ -64,12 +64,14 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 		p.nextToken()
 	}
 	// def foo
-	if p.peekTokenAtSameLine() { // def foo(), next token is ( and at same line
+	if p.peekTokenAtSameLine() && !p.peekTokenIs(token.Comment) { // def foo(), next token is ( and at same line
+
 		if !p.expectPeek(token.LParen) {
 			return nil
 		}
 
 		stmt.Parameters = p.parseParameters()
+
 	} else {
 		stmt.Parameters = []*ast.Identifier{}
 	}

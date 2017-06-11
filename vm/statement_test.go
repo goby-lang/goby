@@ -9,12 +9,16 @@ func TestComment(t *testing.T) {
 	# Comment
 	class Foo
 		# Comment
-		def one
+		def one # Comment
 			# Comment
 			1 # Comment
 			# Comment
 		end
 		# Comment
+
+		def bar(x) # Comment
+		  123
+		end  # Comment
 	end
 	# Comment
 	Foo.new.one #=> Comment

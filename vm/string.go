@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"unicode"
 	"sync"
+	"unicode"
 )
 
 var (
@@ -41,7 +41,7 @@ func (s *StringObject) equal(e *StringObject) bool {
 
 var (
 	stringTable = make(map[string]*StringObject)
-	mutex = &sync.Mutex{}
+	mutex       = &sync.Mutex{}
 )
 
 func initializeString(value string) *StringObject {

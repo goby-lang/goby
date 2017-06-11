@@ -3,8 +3,8 @@ package vm
 import "testing"
 
 func TestUndefinedMethodError(t *testing.T) {
-	tests := []struct{
-		input string
+	tests := []struct {
+		input    string
 		errorMsg string
 	}{
 		{`a`, "UndefinedMethodError: Undefined Method 'a' for <Instance of: Object>"},
