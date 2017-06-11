@@ -98,7 +98,7 @@ func (p *Parser) parseClassStatement() *ast.ClassStatement {
 	if p.peekTokenIs(token.LT) {
 		p.nextToken() // <
 		p.nextToken() // Inherited class like 'Bar'
-		stmt.SuperClass = p.parseExpression(LOWEST)
+		stmt.SuperClass = p.parseExpression(NORMAL)
 
 		switch exp := stmt.SuperClass.(type) {
 		case *ast.InfixExpression:
@@ -184,7 +184,7 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 
 	p.nextToken()
 
-	stmt.ReturnValue = p.parseExpression(LOWEST)
+	stmt.ReturnValue = p.parseExpression(NORMAL)
 
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
@@ -198,9 +198,9 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 
 	if p.curTokenIs(token.Ident) {
 		// I use precedence to identify call_without_parens case, this is not an appropriate way but it work in current situation
-		stmt.Expression = p.parseExpression(FIRST)
-	} else {
 		stmt.Expression = p.parseExpression(LOWEST)
+	} else {
+		stmt.Expression = p.parseExpression(NORMAL)
 	}
 
 	if p.peekTokenIs(token.Semicolon) {
@@ -240,7 +240,7 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 	p.nextToken()
 	// Prevent expression's method call to consume while's block as argument.
 	p.acceptBlock = false
-	ws.Condition = p.parseExpression(LOWEST)
+	ws.Condition = p.parseExpression(NORMAL)
 	p.acceptBlock = true
 	p.nextToken()
 
