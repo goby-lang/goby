@@ -1,0 +1,2 @@
+h = { a: 1, b: [1, "2", [4, 5, nil], { foo: "bar" }]}.to_json
+puts(h) #=> {"a":1,"b":[1, "2", [4, 5, null], {"foo":"bar"}]}
