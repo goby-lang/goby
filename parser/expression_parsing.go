@@ -8,13 +8,15 @@ import (
 	"github.com/goby-lang/goby/token"
 )
 
-var argument = map[token.Type]bool{
+var arguments = map[token.Type]bool{
 	token.Int:              true,
 	token.String:           true,
 	token.True:             true,
 	token.False:            true,
+	token.Null:             true,
 	token.InstanceVariable: true,
 	token.Ident:            true,
+	token.Constant:         true,
 }
 
 var precedence = map[token.Type]int{
@@ -73,7 +75,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	leftExp := prefix()
 	// I use precedence "LOWEST" to identify call_without_parens case, this is not an appropriate way but it work in current situation
 
-	if argument[p.peekToken.Type] && precedence == LOWEST {
+	if arguments[p.peekToken.Type] && precedence == LOWEST {
 		infix := p.parseCallExpression
 		p.nextToken()
 		leftExp = infix(leftExp)
@@ -324,7 +326,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 	var exp *ast.CallExpression
 
-	if p.curTokenIs(token.LParen) || argument[p.curToken.Type] {
+	if p.curTokenIs(token.LParen) || arguments[p.curToken.Type] {
 
 		m := receiver.(*ast.Identifier).Value
 		// receiver is self
@@ -360,7 +362,7 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 
 			exp.Arguments = []ast.Expression{}
 
-		} else if argument[p.peekToken.Type] && p.peekTokenAtSameLine() { //p.foo x, y, z || p.foo x
+		} else if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { //p.foo x, y, z || p.foo x
 			p.nextToken()
 			exp.Arguments = p.parseCallArgumentsWithoutParensDot()
 		}
