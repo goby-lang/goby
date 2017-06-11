@@ -10,7 +10,7 @@ func (p *Parser) peekPrecedence() int {
 		return p
 	}
 
-	return LOWEST
+	return NORMAL
 }
 
 func (p *Parser) curPrecedence() int {
@@ -18,7 +18,7 @@ func (p *Parser) curPrecedence() int {
 		return p
 	}
 
-	return LOWEST
+	return NORMAL
 }
 
 func (p *Parser) nextToken() {

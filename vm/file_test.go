@@ -10,7 +10,7 @@ func TestFileDeletion(t *testing.T) {
 		expected interface{}
 	}{
 		{`
-		require("file")
+		require "file"
 
 		File.open("/tmp/out1.txt", "w", 0755)
 		File.open("/tmp/out2.txt", "w", 0755)
@@ -19,7 +19,7 @@ func TestFileDeletion(t *testing.T) {
 		File.delete("/tmp/out1.txt", "/tmp/out2.txt", "/tmp/out3.txt")
 		`, 3},
 		{`
-		require("file")
+		require "file"
 
 		File.open("/tmp/out.txt", "w", 0755)
 		File.delete("/tmp/out.txt")
@@ -39,7 +39,7 @@ func TestFileWrite(t *testing.T) {
 		expected interface{}
 	}{
 		{`
-		require("file")
+		require "file"
 
 		l = 0
 		File.open("/tmp/out.txt", "w", 0755) do |f|
@@ -49,7 +49,7 @@ func TestFileWrite(t *testing.T) {
 		l
 		`, 5},
 		{`
-		require("file")
+		require "file"
 
 		File.open("/tmp/out.txt", "w", 0755) do |f|
 		  f.write("Goby is awesome!!!")
@@ -58,13 +58,13 @@ func TestFileWrite(t *testing.T) {
 		File.new("/tmp/out.txt").read
 		`, "Goby is awesome!!!"},
 		{`
-		require("file")
+		require "file"
 
 		File.open("/tmp/out.txt", "w", 0755)
 		File.new("/tmp/out.txt").size
 		`, 0},
 		{`
-		require("file")
+		require "file"
 
 		File.open("/tmp/out.txt", "w", 0755)
 		File.exist("/tmp/out.txt")
@@ -84,31 +84,31 @@ func TestFileObject(t *testing.T) {
 		expected interface{}
 	}{
 		{`
-		require("file")
+		require "file"
 
 		f = File.new("../test_fixtures/file_test/size.gb")
 		f.name
 		`, "../test_fixtures/file_test/size.gb"},
 		{`
-		require("file")
+		require "file"
 
 		f = File.new("../test_fixtures/file_test/size.gb")
 		f.size
 		`, 22},
 		{`
-		require("file")
+		require "file"
 
 		f = File.new("../test_fixtures/file_test/size.gb")
 		f.close
 		`, nil},
 		{`
-		require("file")
+		require "file"
 
 		f = File.new("../test_fixtures/file_test/size.gb")
 		f.read
 		`, "this file's size is\n22"},
 		{`
-		require("file")
+		require "file"
 
 		file = ""
 		File.open("../test_fixtures/file_test/size.gb", "r", 0755) do |f|
@@ -130,11 +130,11 @@ func TestExtnameMethod(t *testing.T) {
 		expected string
 	}{
 		{`
-		require("file")
+		require "file"
 		File.extname("loop.gb")
 		`, ".gb"},
 		{`
-		require("file")
+		require "file"
 		File.extname("text.txt")
 		`, ".txt"},
 	}
@@ -151,7 +151,7 @@ func TestBasenameMethod(t *testing.T) {
 		expected string
 	}{
 		{`
-		require("file")
+		require "file"
 		File.basename("/home/goby/plugin/test.gb")
 		`, "test.gb"},
 	}
@@ -168,7 +168,7 @@ func TestSplitMethod(t *testing.T) {
 		expected *ArrayObject
 	}{
 		{`
-		require("file")
+		require "file"
 		File.split("/home/goby/plugin/test.gb")
 		`, initializeArray([]Object{initializeString("/home/goby/plugin/"), initializeString("test.gb")})},
 	}
@@ -185,15 +185,15 @@ func TestJoinMethod(t *testing.T) {
 		expected string
 	}{
 		{`
-		require("file")
+		require "file"
 		File.join("test1", "test2", "test3")
 		`, "test1/test2/test3"},
 		{`
-		require("file")
+		require "file"
 		File.join("goby", "plugin")
 		`, "goby/plugin"},
 		{`
-		require("file")
+		require "file"
 		File.join("plugin")
 		`, "plugin"},
 	}
@@ -206,7 +206,7 @@ func TestJoinMethod(t *testing.T) {
 
 func TestSizeMethod(t *testing.T) {
 	input := `
-	require("file")
+	require "file"
 
 	File.size("../test_fixtures/file_test/size.gb")
 	`

@@ -133,7 +133,7 @@ func TestModuleStatement(t *testing.T) {
 		end
 
 		class Foo
-		  include(Bar)
+		  include Bar
 		end
 
 		Foo.new.bar
@@ -156,7 +156,7 @@ func TestModuleStatement(t *testing.T) {
 			end
 
 			class Bar < Baz
-			  include(Foo)
+			  include Foo
 			end
 
 			b = Bar.new

@@ -15,7 +15,7 @@ class Baz
 end
 
 class Bar < Baz
-  include(Foo)
+  include Foo
 end
 
 b = Bar.new

@@ -8,23 +8,25 @@ import (
 	"github.com/goby-lang/goby/token"
 )
 
-var argument = map[token.Type]bool{
+var arguments = map[token.Type]bool{
 	token.Int:              true,
 	token.String:           true,
 	token.True:             true,
 	token.False:            true,
+	token.Null:             true,
 	token.InstanceVariable: true,
 	token.Ident:            true,
+	token.Constant:         true,
 }
 
 var precedence = map[token.Type]int{
 	token.Eq:                 EQUALS,
 	token.NotEq:              EQUALS,
-	token.LT:                 LESSGREATER,
-	token.LTE:                LESSGREATER,
-	token.GT:                 LESSGREATER,
-	token.GTE:                LESSGREATER,
-	token.COMP:               LESSGREATER,
+	token.LT:                 COMPARE,
+	token.LTE:                COMPARE,
+	token.GT:                 COMPARE,
+	token.GTE:                COMPARE,
+	token.COMP:               COMPARE,
 	token.And:                LOGIC,
 	token.Or:                 LOGIC,
 	token.Plus:               SUM,
@@ -45,11 +47,11 @@ var precedence = map[token.Type]int{
 // Constants for denoting precedence
 const (
 	_ int = iota
-	FIRST
 	LOWEST
+	NORMAL
 	LOGIC
 	EQUALS
-	LESSGREATER
+	COMPARE
 	ASSIGN
 	SUM
 	PRODUCT
@@ -71,9 +73,9 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	}
 
 	leftExp := prefix()
-	// I use precedence "FIRST" to identify call_without_parens case, this is not an appropriate way but it work in current situation
+	// I use precedence "LOWEST" to identify call_without_parens case, this is not an appropriate way but it work in current situation
 
-	if argument[p.peekToken.Type] && precedence == FIRST {
+	if arguments[p.peekToken.Type] && precedence == LOWEST {
 		infix := p.parseCallExpression
 		p.nextToken()
 		leftExp = infix(leftExp)
@@ -207,7 +209,7 @@ func (p *Parser) parseHashPair(pairs map[string]ast.Expression) {
 	}
 
 	p.nextToken()
-	value = p.parseExpression(LOWEST)
+	value = p.parseExpression(NORMAL)
 	pairs[key] = value
 }
 
@@ -226,7 +228,7 @@ func (p *Parser) parseArrayIndexExpression(left ast.Expression) ast.Expression {
 
 	p.nextToken()
 
-	callExpression.Arguments = []ast.Expression{p.parseExpression(LOWEST)}
+	callExpression.Arguments = []ast.Expression{p.parseExpression(NORMAL)}
 
 	if !p.expectPeek(token.RBracket) {
 		return nil
@@ -236,7 +238,7 @@ func (p *Parser) parseArrayIndexExpression(left ast.Expression) ast.Expression {
 	if p.peekTokenIs(token.Assign) {
 		p.nextToken()
 		p.nextToken()
-		assignValue := p.parseExpression(LOWEST)
+		assignValue := p.parseExpression(NORMAL)
 		callExpression.Method = "[]="
 		callExpression.Arguments = append(callExpression.Arguments, assignValue)
 	}
@@ -253,12 +255,12 @@ func (p *Parser) parseArrayElements() []ast.Expression {
 	}
 
 	p.nextToken() // start of first expression
-	elems = append(elems, p.parseExpression(LOWEST))
+	elems = append(elems, p.parseExpression(NORMAL))
 
 	for p.peekTokenIs(token.Comma) {
 		p.nextToken() // ","
 		p.nextToken() // start of next expression
-		elems = append(elems, p.parseExpression(LOWEST))
+		elems = append(elems, p.parseExpression(NORMAL))
 	}
 
 	if !p.expectPeek(token.RBracket) {
@@ -298,7 +300,7 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 func (p *Parser) parseGroupedExpression() ast.Expression {
 	p.nextToken()
 
-	exp := p.parseExpression(LOWEST)
+	exp := p.parseExpression(NORMAL)
 
 	if !p.expectPeek(token.RParen) {
 		return nil
@@ -310,7 +312,7 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 func (p *Parser) parseIfExpression() ast.Expression {
 	ie := &ast.IfExpression{Token: p.curToken}
 	p.nextToken()
-	ie.Condition = p.parseExpression(LOWEST)
+	ie.Condition = p.parseExpression(NORMAL)
 	ie.Consequence = p.parseBlockStatement()
 
 	// curToken is now ELSE or RBRACE
@@ -324,7 +326,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 	var exp *ast.CallExpression
 
-	if p.curTokenIs(token.LParen) || argument[p.curToken.Type] {
+	if p.curTokenIs(token.LParen) || arguments[p.curToken.Type] {
 
 		m := receiver.(*ast.Identifier).Value
 		// receiver is self
@@ -360,7 +362,7 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 
 			exp.Arguments = []ast.Expression{}
 
-		} else if argument[p.peekToken.Type] && p.peekTokenAtSameLine() { //p.foo x, y, z || p.foo x
+		} else if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { //p.foo x, y, z || p.foo x
 			p.nextToken()
 			exp.Arguments = p.parseCallArgumentsWithoutParensDot()
 		}
@@ -371,7 +373,7 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 		exp.Method = exp.Method + "="
 		p.nextToken()
 		p.nextToken()
-		exp.Arguments = append(exp.Arguments, p.parseExpression(LOWEST))
+		exp.Arguments = append(exp.Arguments, p.parseExpression(NORMAL))
 	}
 
 	// Parse block
@@ -421,12 +423,12 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 	}
 
 	p.nextToken() // start of first expression
-	args = append(args, p.parseExpression(LOWEST))
+	args = append(args, p.parseExpression(NORMAL))
 
 	for p.peekTokenIs(token.Comma) {
 		p.nextToken() // ","
 		p.nextToken() // start of next expression
-		args = append(args, p.parseExpression(LOWEST))
+		args = append(args, p.parseExpression(NORMAL))
 	}
 
 	if !p.expectPeek(token.RParen) {
@@ -439,12 +441,12 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 func (p *Parser) parseCallArgumentsWithoutParensDot() []ast.Expression {
 	args := []ast.Expression{}
 
-	args = append(args, p.parseExpression(LOWEST))
+	args = append(args, p.parseExpression(NORMAL))
 
 	for p.peekTokenIs(token.Comma) {
 		p.nextToken() // ","
 		p.nextToken() // start of next expression
-		args = append(args, p.parseExpression(LOWEST))
+		args = append(args, p.parseExpression(NORMAL))
 	}
 
 	if p.peekTokenAtSameLine() {
@@ -456,12 +458,12 @@ func (p *Parser) parseCallArgumentsWithoutParensDot() []ast.Expression {
 func (p *Parser) parseCallArgumentsWithoutParens() []ast.Expression {
 	args := []ast.Expression{}
 
-	args = append(args, p.parseExpression(LOWEST))
+	args = append(args, p.parseExpression(NORMAL))
 
 	for p.peekTokenIs(token.Comma) {
 		p.nextToken() // ","
 		p.nextToken() // start of next expression
-		args = append(args, p.parseExpression(LOWEST))
+		args = append(args, p.parseExpression(NORMAL))
 	}
 
 	if p.peekTokenAtSameLine() {
