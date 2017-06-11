@@ -1,8 +1,152 @@
 package vm
 
 import (
+	"encoding/json"
+	"reflect"
 	"testing"
 )
+
+func TestHashToJSONWithArray(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		{ a: 1, b: [1, "2", true]}.to_json
+		`, struct {
+			A int           `json:"a"`
+			B []interface{} `json:"b"`
+		}{
+			A: 1,
+			B: []interface{}{1, "2", true},
+		}},
+		{`
+		{ a: 1, b: [1, "2", [4, 5, nil], { foo: "bar" }]}.to_json
+		`, struct {
+			A int           `json:"a"`
+			B []interface{} `json:"b"`
+		}{
+			A: 1,
+			B: []interface{}{
+				1, "2", []interface{}{4, 5, nil}, struct {
+					Foo string `json:"foo"`
+				}{
+					"bar",
+				},
+			},
+		}},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		compareJSONResult(t, evaluated, tt.expected)
+	}
+}
+
+func TestHashToJSONWithNestedHash(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		{ a: 1, b: { c: 2 }}.to_json
+		`, struct {
+			A int `json:"a"`
+			B struct {
+				C int `json:"c"`
+			} `json:"b"`
+		}{
+			1,
+			struct {
+				C int `json:"c"`
+			}{C: 2},
+		}},
+		{`
+		{ a: 1, b: { c: 2, d: { e: "foo" }}}.to_json
+		`, struct {
+			A int `json:"a"`
+			B struct {
+				C int `json:"c"`
+				D struct {
+					E string `json:"e"`
+				} `json:"d"`
+			} `json:"b"`
+		}{
+			1,
+			struct {
+				C int `json:"c"`
+				D struct {
+					E string `json:"e"`
+				} `json:"d"`
+			}{C: 2, D: struct {
+				E string `json:"e"`
+			}{E: "foo"}},
+		}},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		compareJSONResult(t, evaluated, tt.expected)
+	}
+}
+
+func TestHashToJSONWithBasicTypes(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		{}.to_json
+		`, struct{}{}},
+		{`
+		{ a: 1, b: 2 }.to_json
+		`, struct {
+			A int `json:"a"`
+			B int `json:"b"`
+		}{
+			1,
+			2,
+		}},
+		{`
+		{ foo: "bar", b: 2 }.to_json
+		`, struct {
+			Foo string `json:"foo"`
+			B   int    `json:"b"`
+		}{
+			"bar",
+			2,
+		}},
+		{`
+		{ foo: "bar", b: 2, boolean: true }.to_json
+		`, struct {
+			Foo     string `json:"foo"`
+			B       int    `json:"b"`
+			Boolean bool   `json:"boolean"`
+		}{
+			"bar",
+			2,
+			true,
+		}},
+		{`
+		{ foo: "bar", b: 2, boolean: true, nothing: nil }.to_json
+		`, struct {
+			Foo     string      `json:"foo"`
+			B       int         `json:"b"`
+			Boolean bool        `json:"boolean"`
+			Nothing interface{} `json:"nothing"`
+		}{
+			"bar",
+			2,
+			true,
+			nil,
+		}},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		compareJSONResult(t, evaluated, tt.expected)
+	}
+}
 
 func TestHashLength(t *testing.T) {
 	tests := []struct {
@@ -78,6 +222,15 @@ func TestEvalHashAccess(t *testing.T) {
 		`, 100},
 		{`
 			h = {}
+			h["foo"] = { bar: 100 }
+			h["foo"]["bar"]
+		`, 100},
+		{`
+			h = { foo: { bar: [1, 2, 3] }}
+			h["foo"]["bar"][0] + h["foo"]["bar"][1]
+		`, 3},
+		{`
+			h = {}
 			h["foo"] = 100
 			h["bar"]
 		`, nil},
@@ -91,5 +244,37 @@ func TestEvalHashAccess(t *testing.T) {
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
 		checkExpected(t, evaluated, tt.expected)
+	}
+}
+
+func JSONBytesEqual(a, b []byte) (bool, error) {
+	var j, j2 interface{}
+	if err := json.Unmarshal(a, &j); err != nil {
+		return false, err
+	}
+	if err := json.Unmarshal(b, &j2); err != nil {
+		return false, err
+	}
+	return reflect.DeepEqual(j2, j), nil
+}
+
+// We can't compare string directly because the key/value's order might change and we can't control it.
+func compareJSONResult(t *testing.T, evaluated Object, exp interface{}) {
+	expected, err := json.Marshal(exp)
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	s := evaluated.(*StringObject).Value
+
+	r, err := JSONBytesEqual([]byte(s), expected)
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if !r {
+		t.Fatalf("Expect json:\n%s \n\n got: %s", string(expected), s)
 	}
 }

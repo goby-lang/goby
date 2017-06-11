@@ -21,6 +21,10 @@ func (n *NullObject) Inspect() string {
 	return ""
 }
 
+func (n *NullObject) toJSON() string {
+	return "null"
+}
+
 func (n *NullObject) returnClass() Class {
 	return n.Class
 }

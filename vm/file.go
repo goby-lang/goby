@@ -30,6 +30,10 @@ func (f *FileObject) Inspect() string {
 	return "<File: " + f.File.Name() + ">"
 }
 
+func (f *FileObject) toJSON() string {
+	return f.Inspect()
+}
+
 // returnClass returns current object's class, which is RArray
 func (f *FileObject) returnClass() Class {
 	return f.Class

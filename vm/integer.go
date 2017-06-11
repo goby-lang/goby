@@ -29,6 +29,10 @@ func (i *IntegerObject) Inspect() string {
 	return strconv.Itoa(i.Value)
 }
 
+func (i *IntegerObject) toJSON() string {
+	return i.Inspect()
+}
+
 func (i *IntegerObject) returnClass() Class {
 	return i.Class
 }
