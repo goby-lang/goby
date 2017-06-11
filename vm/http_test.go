@@ -9,7 +9,7 @@ import (
 
 func TestHTTPResponse(t *testing.T) {
 	script := `
-	require("net/http")
+	require "net/http"
 
 	res = Net::HTTP::Response.new
 
@@ -32,7 +32,7 @@ func TestNormalGet(t *testing.T) {
 	defer ts.Close()
 
 	testScript := fmt.Sprintf(`
-require("net/http")
+require "net/http"
 
 Net::HTTP.get("%s")
 `, ts.URL)
@@ -55,7 +55,7 @@ func TestNormalGetWithPath(t *testing.T) {
 	defer ts.Close()
 
 	testScript := fmt.Sprintf(`
-require("net/http")
+require "net/http"
 
 Net::HTTP.get("%s", "path")
 `, ts.URL)
