@@ -964,6 +964,28 @@ func TestMethodCallWithoutParens(t *testing.T) {
 			`,
 			27,
 		},
+		{
+			`
+			class Foo
+			  attr_reader("x", "y")
+
+			  def set_x x1, x2, x3
+			    @x = x1 + x2 + x3
+			  end
+
+			  def set_y y1, y2, y3
+			    @y = y1 + y2 + y3
+			    #set_x 1,2,3
+			  end
+			end
+
+			f = Foo.new
+			f.set_x (1,2,3)
+			f.set_y 4,5,6
+			f.x + f.y
+			`,
+			21,
+		},
 	}
 
 	for _, tt := range tests {

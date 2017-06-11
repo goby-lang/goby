@@ -72,9 +72,7 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 			p.nextToken()
 			stmt.Parameters = p.parseParameters()
 
-		} else if  p.peekTokenIs(token.Ident) {
-
-
+		} else if p.peekTokenIs(token.Ident) {// def foo x, next token is x and at same line
 			stmt.Parameters = p.parseParametersNoParen()
 		}
 
@@ -198,11 +196,13 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	stmt := &ast.ExpressionStatement{Token: p.curToken}
 
-	precedence := 1
 	if p.curTokenIs(token.Ident) {
-		precedence = 0
+		// I use precedence to identify call_without_parens case, this is not an appropriate way but it work in current situation
+		stmt.Expression = p.parseExpression(FIRST)
+	} else {
+		stmt.Expression = p.parseExpression(LOWEST)
 	}
-	stmt.Expression = p.parseExpression(precedence)
+
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
 	}
