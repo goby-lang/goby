@@ -63,7 +63,8 @@ func TestNamespacedClass(t *testing.T) {
 	module Foo
 	  class Bar
 	    class Baz
-	      10
+	      def bar
+	      end
 	    end
 	  end
 	end
@@ -72,9 +73,14 @@ func TestNamespacedClass(t *testing.T) {
 	`
 
 	expected := `
-<DefClass:Baz>
-0 putobject 10
+<Def:bar>
+0 putnil
 1 leave
+<DefClass:Baz>
+0 putself
+1 putstring "bar"
+2 def_method 0
+3 leave
 <DefClass:Bar>
 0 putself
 1 def_class class:Baz

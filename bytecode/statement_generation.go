@@ -116,7 +116,12 @@ func (g *Generator) compileDefStmt(stmt *ast.DefStatement, scope *scope) {
 		scope.localTable.setLCL(stmt.Parameters[i].Value, scope.localTable.depth)
 	}
 
-	g.compileCodeBlock(is, stmt.BlockStatement, scope, scope.localTable)
+	if len(stmt.BlockStatement.Statements) == 0 {
+		is.define(PutNull)
+	} else {
+		g.compileCodeBlock(is, stmt.BlockStatement, scope, scope.localTable)
+	}
+
 	g.endInstructions(is)
 	g.instructionSets = append(g.instructionSets, is)
 }

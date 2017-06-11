@@ -51,10 +51,10 @@ func TestNextStatement(t *testing.T) {
 	}
 }
 
-func TestMethodCallWithoutSelf(t *testing.T) {
+func TestMethodCall(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected int
+		expected interface{}
 	}{
 		{
 			`
@@ -181,6 +181,14 @@ func TestMethodCallWithoutSelf(t *testing.T) {
 			`,
 			110,
 		},
+		{`
+		class Foo
+		  def bar
+		  end
+		end
+
+		Foo.new.bar
+		`, nil},
 	}
 
 	for _, tt := range tests {
@@ -190,7 +198,7 @@ func TestMethodCallWithoutSelf(t *testing.T) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 		}
 
-		testIntegerObject(t, evaluated, tt.expected)
+		checkExpected(t, evaluated, tt.expected)
 	}
 }
 
