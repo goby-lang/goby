@@ -6,6 +6,43 @@ import (
 	"testing"
 )
 
+func TestHashToJSONWithArray(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		{ a: 1, b: [1, "2", true]}.to_json
+		`, struct {
+			A int           `json:"a"`
+			B []interface{} `json:"b"`
+		}{
+			A: 1,
+			B: []interface{}{1, "2", true},
+		}},
+		{`
+		{ a: 1, b: [1, "2", [4, 5, nil], { foo: "bar" }]}.to_json
+		`, struct {
+			A int           `json:"a"`
+			B []interface{} `json:"b"`
+		}{
+			A: 1,
+			B: []interface{}{
+				1, "2", []interface{}{4, 5, nil}, struct {
+					Foo string `json:"foo"`
+				}{
+					"bar",
+				},
+			},
+		}},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		compareJSONResult(t, evaluated, tt.expected)
+	}
+}
+
 func TestHashToJSONWithNestedHash(t *testing.T) {
 	tests := []struct {
 		input    string
