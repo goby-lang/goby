@@ -66,6 +66,8 @@ func generateJson(t *thread, key string, v Object) string {
 		value = v.Inspect()
 	case *NullObject:
 		value = "null"
+	case *HashObject:
+		value = v.generateJSON(t)
 	default:
 		t.returnError(fmt.Sprintf("Can't convert %T object into json.", v))
 	}
@@ -74,24 +76,28 @@ func generateJson(t *thread, key string, v Object) string {
 	return out.String()
 }
 
+func (h *HashObject) generateJSON(t *thread) string {
+	var out bytes.Buffer
+	var values []string
+	pairs := h.Pairs
+	out.WriteString("{")
+
+	for key, value := range pairs {
+		values = append(values, generateJson(t, key, value))
+	}
+
+	out.WriteString(strings.Join(values, ","))
+	out.WriteString("}")
+	return out.String()
+}
+
 var builtinHashInstanceMethods = []*BuiltInMethodObject{
 	{
 		Name: "to_json",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
-				var out bytes.Buffer
-				var values []string
-
-				pairs := receiver.(*HashObject).Pairs
-				out.WriteString("{")
-
-				for key, value := range pairs {
-					values = append(values, generateJson(t, key, value))
-				}
-
-				out.WriteString(strings.Join(values, ","))
-				out.WriteString("}")
-				return initializeString(out.String())
+				r := receiver.(*HashObject)
+				return initializeString(r.generateJSON(t))
 			}
 		},
 	},

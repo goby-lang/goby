@@ -6,7 +6,54 @@ import (
 	"testing"
 )
 
-func TestHashToJSON(t *testing.T) {
+func TestHashToJSONWithNestedHash(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		{ a: 1, b: { c: 2 }}.to_json
+		`, struct {
+			A int `json:"a"`
+			B struct {
+				C int `json:"c"`
+			} `json:"b"`
+		}{
+			1,
+			struct {
+				C int `json:"c"`
+			}{C: 2},
+		}},
+		{`
+		{ a: 1, b: { c: 2, d: { e: "foo" }}}.to_json
+		`, struct {
+			A int `json:"a"`
+			B struct {
+				C int `json:"c"`
+				D struct {
+					E string `json:"e"`
+				} `json:"d"`
+			} `json:"b"`
+		}{
+			1,
+			struct {
+				C int `json:"c"`
+				D struct {
+					E string `json:"e"`
+				} `json:"d"`
+			}{C: 2, D: struct {
+				E string `json:"e"`
+			}{E: "foo"}},
+		}},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		compareJSONResult(t, evaluated, tt.expected)
+	}
+}
+
+func TestHashToJSONWithBasicTypes(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -46,9 +93,9 @@ func TestHashToJSON(t *testing.T) {
 		{`
 		{ foo: "bar", b: 2, boolean: true, nothing: nil }.to_json
 		`, struct {
-			Foo     string `json:"foo"`
-			B       int    `json:"b"`
-			Boolean bool   `json:"boolean"`
+			Foo     string      `json:"foo"`
+			B       int         `json:"b"`
+			Boolean bool        `json:"boolean"`
 			Nothing interface{} `json:"nothing"`
 		}{
 			"bar",
@@ -138,6 +185,15 @@ func TestEvalHashAccess(t *testing.T) {
 		`, 100},
 		{`
 			h = {}
+			h["foo"] = { bar: 100 }
+			h["foo"]["bar"]
+		`, 100},
+		{`
+			h = { foo: { bar: [1, 2, 3] }}
+			h["foo"]["bar"][0] + h["foo"]["bar"][1]
+		`, 3},
+		{`
+			h = {}
 			h["foo"] = 100
 			h["bar"]
 		`, nil},
@@ -165,6 +221,7 @@ func JSONBytesEqual(a, b []byte) (bool, error) {
 	return reflect.DeepEqual(j2, j), nil
 }
 
+// We can't compare string directly because the key/value's order might change and we can't control it.
 func compareJSONResult(t *testing.T, evaluated Object, exp interface{}) {
 	expected, err := json.Marshal(exp)
 
