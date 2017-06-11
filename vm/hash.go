@@ -48,7 +48,47 @@ func initializeHash(pairs map[string]Object) *HashObject {
 	return &HashObject{Pairs: pairs, Class: hashClass}
 }
 
+func generateJson(key string, v Object) string {
+	var data string
+	var value string
+	var out bytes.Buffer
+
+	out.WriteString(data)
+	out.WriteString("\"" + key + "\"")
+	out.WriteString(":")
+
+	switch v := v.(type) {
+	case *StringObject:
+		value = "\"" + v.Value + "\""
+	case *IntegerObject:
+		value = v.Inspect()
+	}
+	out.WriteString(value)
+
+	return out.String()
+}
+
 var builtinHashInstanceMethods = []*BuiltInMethodObject{
+	{
+		Name: "to_json",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				var out bytes.Buffer
+				var values []string
+
+				pairs := receiver.(*HashObject).Pairs
+				out.WriteString("{")
+
+				for key, value := range pairs {
+					values = append(values, generateJson(key, value))
+				}
+
+				out.WriteString(strings.Join(values, ","))
+				out.WriteString("}")
+				return initializeString(out.String())
+			}
+		},
+	},
 	{
 		Name: "[]",
 		Fn: func(receiver Object) builtinMethodBody {
