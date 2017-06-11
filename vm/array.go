@@ -39,6 +39,20 @@ func (a *ArrayObject) Inspect() string {
 	return out.String()
 }
 
+func (a *ArrayObject) toJSON() string {
+	var out bytes.Buffer
+	elements := []string{}
+	for _, e := range a.Elements {
+		elements = append(elements, e.toJSON())
+	}
+
+	out.WriteString("[")
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteString("]")
+
+	return out.String()
+}
+
 // returnClass returns current object's class, which is RArray
 func (a *ArrayObject) returnClass() Class {
 	return a.Class

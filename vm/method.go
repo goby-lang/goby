@@ -38,6 +38,10 @@ func (m *MethodObject) Inspect() string {
 	return out.String()
 }
 
+func (m *MethodObject) toJSON() string {
+	return m.Inspect()
+}
+
 func (m *MethodObject) returnClass() Class {
 	return m.class
 }
@@ -53,7 +57,11 @@ type BuiltInMethodObject struct {
 
 // Inspect just returns built in method's name.
 func (bim *BuiltInMethodObject) Inspect() string {
-	return bim.Name
+	return "<BuiltInMethod: " + bim.Name + ">"
+}
+
+func (bim *BuiltInMethodObject) toJSON() string {
+	return bim.Inspect()
 }
 
 func (bim *BuiltInMethodObject) returnClass() Class {

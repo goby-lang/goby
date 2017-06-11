@@ -108,6 +108,10 @@ func (c *BaseClass) Inspect() string {
 	return "<Class:" + c.Name + ">"
 }
 
+func (c *BaseClass) toJSON() string {
+	return c.Inspect()
+}
+
 func (c *BaseClass) setBuiltInMethods(methodList []*BuiltInMethodObject, classMethods bool) {
 	for _, m := range methodList {
 		c.Methods.set(m.Name, m)

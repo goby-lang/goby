@@ -30,6 +30,10 @@ func (b *BooleanObject) Inspect() string {
 	return fmt.Sprintf("%t", b.Value)
 }
 
+func (b *BooleanObject) toJSON() string {
+	return b.Inspect()
+}
+
 // returnClass returns boolean object's class, which is RBool
 func (b *BooleanObject) returnClass() Class {
 	return b.Class

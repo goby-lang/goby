@@ -42,6 +42,10 @@ func (e *Error) Inspect() string {
 	return "ERROR: " + e.Message
 }
 
+func (e *Error) toJSON() string {
+	return e.Inspect()
+}
+
 func (e *Error) returnClass() Class {
 	return e.Class
 }

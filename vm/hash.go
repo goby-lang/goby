@@ -48,42 +48,26 @@ func initializeHash(pairs map[string]Object) *HashObject {
 	return &HashObject{Pairs: pairs, Class: hashClass}
 }
 
-func generateJSONFromPair(t *thread, key string, v Object) string {
+func generateJSONFromPair(key string, v Object) string {
 	var data string
-	var value string
 	var out bytes.Buffer
 
 	out.WriteString(data)
 	out.WriteString("\"" + key + "\"")
 	out.WriteString(":")
-
-	switch v := v.(type) {
-	case *StringObject:
-		value = "\"" + v.Value + "\""
-	case *IntegerObject:
-		value = v.Inspect()
-	case *BooleanObject:
-		value = v.Inspect()
-	case *NullObject:
-		value = "null"
-	case *HashObject:
-		value = v.generateJSON(t)
-	default:
-		t.returnError(fmt.Sprintf("Can't convert %T object into json.", v))
-	}
-	out.WriteString(value)
+	out.WriteString(v.toJSON())
 
 	return out.String()
 }
 
-func (h *HashObject) generateJSON(t *thread) string {
+func (h *HashObject) toJSON() string {
 	var out bytes.Buffer
 	var values []string
 	pairs := h.Pairs
 	out.WriteString("{")
 
 	for key, value := range pairs {
-		values = append(values, generateJSONFromPair(t, key, value))
+		values = append(values, generateJSONFromPair(key, value))
 	}
 
 	out.WriteString(strings.Join(values, ","))
@@ -97,7 +81,7 @@ var builtinHashInstanceMethods = []*BuiltInMethodObject{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				r := receiver.(*HashObject)
-				return initializeString(r.generateJSON(t))
+				return initializeString(r.toJSON())
 			}
 		},
 	},

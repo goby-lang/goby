@@ -27,6 +27,7 @@ func initMainObj() {
 type Object interface {
 	returnClass() Class
 	Inspect() string
+	toJSON() string
 }
 
 // Pointer is used to point to an object. Variables should hold pointer instead of holding a object directly.
@@ -48,6 +49,10 @@ type RObject struct {
 // Inspect tells which class it belongs to.
 func (ro *RObject) Inspect() string {
 	return "<Instance of: " + ro.Class.Name + ">"
+}
+
+func (ro *RObject) toJSON() string {
+	return ro.Inspect()
 }
 
 // returnClass will return object's class
