@@ -2,8 +2,8 @@ package vm
 
 import (
 	"encoding/json"
-	"testing"
 	"reflect"
+	"testing"
 )
 
 func TestHashToJSON(t *testing.T) {
@@ -12,13 +12,49 @@ func TestHashToJSON(t *testing.T) {
 		expected interface{}
 	}{
 		{`
+		{}.to_json
+		`, struct{}{}},
+		{`
 		{ a: 1, b: 2 }.to_json
 		`, struct {
 			A int `json:"a"`
 			B int `json:"b"`
 		}{
-			A: 1,
-			B: 2,
+			1,
+			2,
+		}},
+		{`
+		{ foo: "bar", b: 2 }.to_json
+		`, struct {
+			Foo string `json:"foo"`
+			B   int    `json:"b"`
+		}{
+			"bar",
+			2,
+		}},
+		{`
+		{ foo: "bar", b: 2, boolean: true }.to_json
+		`, struct {
+			Foo     string `json:"foo"`
+			B       int    `json:"b"`
+			Boolean bool   `json:"boolean"`
+		}{
+			"bar",
+			2,
+			true,
+		}},
+		{`
+		{ foo: "bar", b: 2, boolean: true, nothing: nil }.to_json
+		`, struct {
+			Foo     string `json:"foo"`
+			B       int    `json:"b"`
+			Boolean bool   `json:"boolean"`
+			Nothing interface{} `json:"nothing"`
+		}{
+			"bar",
+			2,
+			true,
+			nil,
 		}},
 	}
 
