@@ -48,7 +48,7 @@ func initializeHash(pairs map[string]Object) *HashObject {
 	return &HashObject{Pairs: pairs, Class: hashClass}
 }
 
-func generateJson(t *thread, key string, v Object) string {
+func generateJSONFromPair(t *thread, key string, v Object) string {
 	var data string
 	var value string
 	var out bytes.Buffer
@@ -83,7 +83,7 @@ func (h *HashObject) generateJSON(t *thread) string {
 	out.WriteString("{")
 
 	for key, value := range pairs {
-		values = append(values, generateJson(t, key, value))
+		values = append(values, generateJSONFromPair(t, key, value))
 	}
 
 	out.WriteString(strings.Join(values, ","))
