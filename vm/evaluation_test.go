@@ -841,3 +841,174 @@ func TestMethodCallWithNestedBlock(t *testing.T) {
 		testIntegerObject(t, evaluated, tt.expected)
 	}
 }
+
+func TestMethodCallWithoutParens(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{
+			`
+			class Foo
+			  def set_x x0
+			    @x = x0
+			  end
+
+			  def foo
+			    set_x 10
+			    a = 10
+			    @x + a
+			  end
+			end
+
+			f = Foo.new
+			f.foo
+			`,
+			20,
+		},
+		{
+			`
+			class Foo
+			  def set_x x1, x2, x3
+			    @x = x1
+			    @y = x2
+			  end
+
+			  def foo
+			    set_x 10,11
+			    a = 10
+			    @x + a +@y
+			  end
+			end
+
+			f = Foo.new
+			f.foo
+			`,
+			31,
+		},
+		{
+			`
+			class Foo
+			  def set_x x1, x2, x3
+			    @x1 = x1
+			    @x2 = x2
+			  end
+
+			  def set_y y1, y2, y3
+			    @y3 = y3
+			    @y1 = y1
+			  end
+
+			  def foo
+			    set_x 15,17
+			    set_y 3,4,5
+			    set_x (10,11)
+			    @x1 + @x2 + @y3
+			  end
+			end
+
+			f = Foo.new
+			f.foo
+			`,
+			26,
+		},
+		{
+			`
+			class Foo
+			  attr_reader("x", "y")
+
+			  def set_x x1
+			    @x1 = x1
+			  end
+
+			  def set_y y1, y2, y3
+			    @y = y1 + y2 + y3
+			  end
+
+			  def foo
+			    set_x 10
+			    set_y 1,2,3
+			    set_y 3,4,5
+			    @x1 + @y
+			  end
+			end
+
+			f = Foo.new
+			f.foo
+			`,
+			22,
+		},
+		{
+			`
+
+			class Foo
+   			  attr_reader("y")
+
+			  def set_y y1, y2, y3
+			    @y = y1 + y2 + y3
+			  end
+
+			end
+
+			f = Foo.new
+			f.set_y 3,4,5
+
+			f.y
+			`,
+			12,
+		},
+		{
+			`
+			class Foo
+			  attr_reader("x", "y")
+
+			  def set_x x1
+			    @x = x1
+			  end
+
+			  def set_y y1, y2, y3
+			    @y = y1 + y2 + y3
+			  end
+			end
+
+			f = Foo.new
+			f.set_x 1
+			f.set_y 4,5,6
+			f.x + f.y
+			`,
+			16,
+		},
+
+		{
+			`
+			class Foo
+			  attr_reader("x", "y")
+
+			  def set_x x1, x2, x3
+			    @x = x1 + x2 + x3
+			  end
+
+			  def set_y y1, y2, y3
+			    @y = y1 + y2 + y3
+			  end
+			end
+
+			f = Foo.new
+			f.set_x 1,2,3
+			f.set_y 4,5,6
+			f.x + f.y
+			`,
+			21,
+		},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+		}
+
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}

@@ -8,6 +8,15 @@ import (
 	"github.com/goby-lang/goby/token"
 )
 
+var argument = map[token.Type]bool{
+	token.Int:              true,
+	token.String:           true,
+	token.True:             true,
+	token.False:            true,
+	token.InstanceVariable: true,
+	token.Ident:            true,
+}
+
 var precedence = map[token.Type]int{
 	token.Eq:                 EQUALS,
 	token.NotEq:              EQUALS,
@@ -36,6 +45,7 @@ var precedence = map[token.Type]int{
 // Constants for denoting precedence
 const (
 	_ int = iota
+	FIRST
 	LOWEST
 	LOGIC
 	EQUALS
@@ -59,15 +69,26 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		p.noPrefixParseFnError(p.curToken.Type)
 		return nil
 	}
-	leftExp := prefix()
 
-	for !p.peekTokenIs(token.Semicolon) && precedence < p.peekPrecedence() && p.peekTokenAtSameLine() {
-		infix := p.infixParseFns[p.peekToken.Type]
-		if infix == nil {
-			return leftExp
-		}
+	leftExp := prefix()
+	// I use precedence "FIRST" to identify call_without_parens case, this is not an appropriate way but it work in current situation
+
+	if argument[p.peekToken.Type] && precedence == FIRST {
+		infix := p.parseCallExpression
 		p.nextToken()
 		leftExp = infix(leftExp)
+
+	} else {
+
+		for !p.peekTokenIs(token.Semicolon) && precedence < p.peekPrecedence() && p.peekTokenAtSameLine() {
+
+			infix := p.infixParseFns[p.peekToken.Type]
+			if infix == nil {
+				return leftExp
+			}
+			p.nextToken()
+			leftExp = infix(leftExp)
+		}
 	}
 
 	return leftExp
@@ -303,8 +324,8 @@ func (p *Parser) parseIfExpression() ast.Expression {
 func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 	var exp *ast.CallExpression
 
-	if p.curTokenIs(token.LParen) { // call expression doesn't have a receiver foo(x) || foo()
-		// method name is receiver, for example 'foo' of foo(x)
+	if p.curTokenIs(token.LParen) || argument[p.curToken.Type] {
+
 		m := receiver.(*ast.Identifier).Value
 		// receiver is self
 		selfTok := token.Token{Type: token.Self, Literal: "self", Line: p.curToken.Line}
@@ -313,8 +334,16 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 
 		// current token is identifier (method name)
 		exp = &ast.CallExpression{Token: p.curToken, Receiver: receiver, Method: m}
-		exp.Arguments = p.parseCallArguments()
-	} else { // call expression has a receiver like: p.foo
+
+		if p.curTokenIs(token.LParen) { // foo(x,y,x) || foo(x)
+			exp.Arguments = p.parseCallArguments()
+
+		} else { // foo x,y,z ||  foo x
+			exp.Arguments = p.parseCallArgumentsWithoutParens()
+		}
+
+	} else if p.curTokenIs(token.Dot) { // call expression has a receiver like: p.foo
+
 		exp = &ast.CallExpression{Token: p.curToken, Receiver: receiver}
 
 		// check if method name is identifier
@@ -327,8 +356,13 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 		if p.peekTokenIs(token.LParen) {
 			p.nextToken()
 			exp.Arguments = p.parseCallArguments()
-		} else { // p.foo.bar; || p.foo; || p.foo + 123
+		} else if p.peekTokenIs(token.Dot) { // p.foo.bar; || p.foo; || p.foo + 123
+
 			exp.Arguments = []ast.Expression{}
+
+		} else if argument[p.peekToken.Type] && p.peekTokenAtSameLine() { //p.foo x, y, z || p.foo x
+			p.nextToken()
+			exp.Arguments = p.parseCallArgumentsWithoutParensDot()
 		}
 	}
 
@@ -399,6 +433,40 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 		return nil
 	}
 
+	return args
+}
+
+func (p *Parser) parseCallArgumentsWithoutParensDot() []ast.Expression {
+	args := []ast.Expression{}
+
+	args = append(args, p.parseExpression(LOWEST))
+
+	for p.peekTokenIs(token.Comma) {
+		p.nextToken() // ","
+		p.nextToken() // start of next expression
+		args = append(args, p.parseExpression(LOWEST))
+	}
+
+	if p.peekTokenAtSameLine() {
+		return nil
+	}
+	return args
+}
+
+func (p *Parser) parseCallArgumentsWithoutParens() []ast.Expression {
+	args := []ast.Expression{}
+
+	args = append(args, p.parseExpression(LOWEST))
+
+	for p.peekTokenIs(token.Comma) {
+		p.nextToken() // ","
+		p.nextToken() // start of next expression
+		args = append(args, p.parseExpression(LOWEST))
+	}
+
+	if p.peekTokenAtSameLine() {
+		return nil
+	}
 	return args
 }
 
