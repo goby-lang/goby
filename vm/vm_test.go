@@ -432,7 +432,7 @@ func testStringObject(t *testing.T, obj Object, expected string) bool {
 	switch result := obj.(type) {
 	case *StringObject:
 		if result.Value != expected {
-			t.Errorf("object has wrong value. expect=%d, got=%d", expected, result.Value)
+			t.Errorf("object has wrong value. expect=%s, got=%s", expected, result.Value)
 			return false
 		}
 

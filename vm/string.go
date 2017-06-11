@@ -45,19 +45,23 @@ var (
 )
 
 func initializeString(value string) *StringObject {
-	addr, ok := stringTable[value]
+	if len(value) < 50 {
+		addr, ok := stringTable[value]
 
-	if !ok {
-		s := &StringObject{Value: value, Class: stringClass}
+		if !ok {
+			s := &StringObject{Value: value, Class: stringClass}
 
-		mutex.Lock()
-		stringTable[value] = s
-		mutex.Unlock()
+			mutex.Lock()
+			stringTable[value] = s
+			mutex.Unlock()
 
-		return s
+			return s
+		}
+
+		return addr
 	}
 
-	return addr
+	return &StringObject{Value: value, Class: stringClass}
 }
 
 var builtinStringInstanceMethods = []*BuiltInMethodObject{
