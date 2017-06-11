@@ -1,4 +1,4 @@
-require("file")
+require "file"
 
 puts(File.extname("test.gb"))
 puts(File.split("/home/goby/test.sh"))
