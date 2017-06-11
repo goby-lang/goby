@@ -72,7 +72,7 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 			p.nextToken()
 			stmt.Parameters = p.parseParameters()
 
-		} else if p.peekTokenIs(token.Ident) {// def foo x, next token is x and at same line
+		} else if p.peekTokenIs(token.Ident) { // def foo x, next token is x and at same line
 			stmt.Parameters = p.parseParametersNoParen()
 		}
 
