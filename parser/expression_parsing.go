@@ -71,6 +71,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	}
 
 	leftExp := prefix()
+	// I use precedence "FIRST" to identify call_without_parens case, this is not an appropriate way but it work in current situation
 
 	if argument[p.peekToken.Type] && precedence == FIRST {
 		infix := p.parseCallExpression
@@ -334,10 +335,10 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 		// current token is identifier (method name)
 		exp = &ast.CallExpression{Token: p.curToken, Receiver: receiver, Method: m}
 
-		if p.curTokenIs(token.LParen) {
+		if p.curTokenIs(token.LParen) { // foo(x,y,x) || foo(x)
 			exp.Arguments = p.parseCallArguments()
 
-		} else {
+		} else { // foo x,y,z ||  foo x
 			exp.Arguments = p.parseCallArgumentsWithoutParens()
 		}
 
