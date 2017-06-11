@@ -71,16 +71,13 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	}
 
 	leftExp := prefix()
-	fmt.Println("=>",p.curToken.Literal,"  Type: ",p.curToken.Type, "P: ",precedence,"Pe: " ,p.peekPrecedence(), "peek",p.peekToken.Type)
 
 	if argument[p.peekToken.Type] && precedence == FIRST {
-		fmt.Println("FIRST")
 		infix := p.parseCallExpression
 		p.nextToken()
 		leftExp = infix(leftExp)
 
 	} else {
-		fmt.Println("A")
 
 		for !p.peekTokenIs(token.Semicolon) && precedence < p.peekPrecedence() && p.peekTokenAtSameLine() {
 
@@ -92,7 +89,6 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 			leftExp = infix(leftExp)
 		}
 	}
-	fmt.Println("B")
 
 	return leftExp
 }
@@ -359,18 +355,15 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 		if p.peekTokenIs(token.LParen) {
 			p.nextToken()
 			exp.Arguments = p.parseCallArguments()
-		}  else if p.peekTokenIs(token.Dot){ // p.foo.bar; || p.foo; || p.foo + 123
+		} else if p.peekTokenIs(token.Dot) { // p.foo.bar; || p.foo; || p.foo + 123
 
 			exp.Arguments = []ast.Expression{}
 
-		} else if argument[p.peekToken.Type] && p.peekTokenAtSameLine()  {
+		} else if argument[p.peekToken.Type] && p.peekTokenAtSameLine() { //p.foo x, y, z || p.foo x
 			p.nextToken()
-			//token.Ident not allow so check peekTokenAtSameLine
 			exp.Arguments = p.parseCallArgumentsWithoutParensDot()
-
 		}
 	}
-
 
 	// Setter method call like: p.foo = x
 	if p.peekTokenIs(token.Assign) {
@@ -445,12 +438,7 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 func (p *Parser) parseCallArgumentsWithoutParensDot() []ast.Expression {
 	args := []ast.Expression{}
 
-	//if !p.peekTokenAtSameLine() {
-	//	//p.nextToken() // ')'
-	//	return args
-	//}
-
-	args = append(args, p.parseExpression(FIRST))
+	args = append(args, p.parseExpression(LOWEST))
 
 	for p.peekTokenIs(token.Comma) {
 		p.nextToken() // ","
@@ -463,7 +451,6 @@ func (p *Parser) parseCallArgumentsWithoutParensDot() []ast.Expression {
 	}
 	return args
 }
-
 
 func (p *Parser) parseCallArgumentsWithoutParens() []ast.Expression {
 	args := []ast.Expression{}

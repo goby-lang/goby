@@ -915,21 +915,21 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		{
 			`
 			class Foo
+			  attr_reader("x", "y")
+
 			  def set_x x1
 			    @x1 = x1
 			  end
 
 			  def set_y y1, y2, y3
-			    @y3 = y3
-			    @y1 = y1
-			    @y2 = y2
+			    @y = y1 + y2 + y3
 			  end
 
 			  def foo
-			    set_x 10,20
+			    set_x 10
 			    set_y 1,2,3
 			    set_y 3,4,5
-			    @x1 + @y1 + @y2 + @y3
+			    @x1 + @y
 			  end
 			end
 
@@ -940,30 +940,45 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		},
 		{
 			`
+
 			class Foo
+   			  attr_reader("y")
+
+			  def set_y y1, y2, y3
+			    @y = y1 + y2 + y3
+			  end
+
+			end
+
+			f = Foo.new
+			f.set_y 3,4,5
+
+			f.y
+			`,
+			12,
+		},
+		{
+			`
+			class Foo
+			  attr_reader("x", "y")
+
 			  def set_x x1
-			    @x1 = x1
+			    @x = x1
 			  end
 
 			  def set_y y1, y2, y3
-			    @y3 = y3
-			    @y1 = y1
-			    @y2 = y2
-			  end
-
-			  def foo
-			    b = 3
-			    set_x 10
-			    set_y b,4,@x1
-			    @x1 + @y1 + @y2 + @y3
+			    @y = y1 + y2 + y3
 			  end
 			end
 
 			f = Foo.new
-			f.foo
+			f.set_x 1
+			f.set_y 4,5,6
+			f.x + f.y
 			`,
-			27,
+			16,
 		},
+
 		{
 			`
 			class Foo
@@ -975,12 +990,11 @@ func TestMethodCallWithoutParens(t *testing.T) {
 
 			  def set_y y1, y2, y3
 			    @y = y1 + y2 + y3
-			    #set_x 1,2,3
 			  end
 			end
 
 			f = Foo.new
-			f.set_x (1,2,3)
+			f.set_x 1,2,3
 			f.set_y 4,5,6
 			f.x + f.y
 			`,
