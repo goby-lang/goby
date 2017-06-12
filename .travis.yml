@@ -12,6 +12,9 @@ script:
 after_script:
   - go build .
 
+env:
+  - "GOBY_ROOT=$HOME/gopath/src/github.com/goby-lang/goby"
+
 after_success:
   - bash <(curl -s https://codecov.io/bash)
 
