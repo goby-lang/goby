@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"path/filepath"
 )
 
 type response struct {
@@ -38,13 +39,25 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					var port string
+					var serveStatic bool
+					server := receiver.(*RObject)
 
-					portVar, ok := receiver.(*RObject).InstanceVariables.get("@port")
+					portVar, ok := server.InstanceVariables.get("@port")
 
 					if !ok {
 						port = "8080"
 					} else {
 						port = portVar.(*StringObject).Value
+					}
+
+					fileRoot, serveStatic := server.InstanceVariables.get("@file_root")
+
+					if serveStatic {
+						fr := fileRoot.(*StringObject).Value
+						currentDir, _ := os.Getwd()
+						fp := filepath.Join(currentDir, fr)
+						fs := http.FileServer(http.Dir(fp))
+						http.Handle("/", fs)
 					}
 
 					log.Println("SimpleServer start listening on port: " + port)
