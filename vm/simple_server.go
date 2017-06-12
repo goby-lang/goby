@@ -1,7 +1,7 @@
 package vm
 
 import (
-	"github.com/fatih/structs"
+	"github.com/goby-lang/goby/Godeps/_workspace/src/github.com/fatih/structs"
 	"github.com/goby-lang/goby/Godeps/_workspace/src/github.com/gorilla/mux"
 	"io"
 	"log"
