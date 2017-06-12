@@ -2,10 +2,12 @@
 	"ImportPath": "github.com/goby-lang/goby",
 	"GoVersion": "go1.8",
 	"GodepVersion": "v60",
-	"Packages": [
-		"github.com/gorilla/mux"
-	],
 	"Deps": [
+		{
+			"ImportPath": "github.com/fatih/structs",
+			"Comment": "v1.0-2-g74a29b9",
+			"Rev": "74a29b9fac7397d933f47e33eba94d2d83a464a2"
+		},
 		{
 			"ImportPath": "github.com/gorilla/context",
 			"Rev": "215affda49addc4c8ef7e2534915df2c8c35c6cd"
@@ -13,6 +15,15 @@
 		{
 			"ImportPath": "github.com/gorilla/mux",
 			"Rev": "e444e69cbd2e2e3e0749a2f3c717cec491552bbf"
+		},
+		{
+			"ImportPath": "github.com/looplab/fsm",
+			"Rev": "bcc3636384ce80a109a6039432b30ff5b82476ee"
+		},
+		{
+			"ImportPath": "github.com/pkg/profile",
+			"Comment": "v1.2.0-9-g06b9068",
+			"Rev": "06b906832ed0e32302a942b63b6c5f8359034d26"
 		}
 	]
 }
