@@ -26,69 +26,70 @@ func initializeSimpleServerClass(vm *VM) {
 	initializeHTTPClass(vm)
 	net := vm.loadConstant("Net", true)
 	simpleServer := initializeClass("SimpleServer", false)
-	simpleServer.setBuiltInMethods(builtinSimpleServerInstanceMethods, false)
+	simpleServer.setBuiltInMethods(builtinSimpleServerInstanceMethods(), false)
 	net.constants[simpleServer.Name] = &Pointer{simpleServer}
 
 	vm.execGobyLib("net/simple_server.gb")
 }
 
-var builtinSimpleServerInstanceMethods = []*BuiltInMethodObject{
-	{
-		Name: "start",
-		Fn: func(receiver Object) builtinMethodBody {
-			return func(t *thread, args []Object, blockFrame *callFrame) Object {
-				var port string
+func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
+	return []*BuiltInMethodObject{
+		{Name: "start",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					var port string
 
-				portVar, ok := receiver.(*RObject).InstanceVariables.get("@port")
+					portVar, ok := receiver.(*RObject).InstanceVariables.get("@port")
 
-				if !ok {
-					port = "8080"
-				} else {
-					port = portVar.(*StringObject).Value
-				}
-
-				log.Println("SimpleServer start listening on port: " + port)
-
-				c := make(chan os.Signal, 1)
-				signal.Notify(c, os.Interrupt)
-
-				go func() {
-					for range c {
-						log.Println("SimpleServer gracefully stopped")
-						os.Exit(0)
+					if !ok {
+						port = "8080"
+					} else {
+						port = portVar.(*StringObject).Value
 					}
-				}()
 
-				err := http.ListenAndServe(":"+port, nil)
+					log.Println("SimpleServer start listening on port: " + port)
 
-				if err != http.ErrServerClosed { // HL
-					log.Fatalf("listen: %s\n", err)
+					c := make(chan os.Signal, 1)
+					signal.Notify(c, os.Interrupt)
+
+					go func() {
+						for range c {
+							log.Println("SimpleServer gracefully stopped")
+							os.Exit(0)
+						}
+					}()
+
+					err := http.ListenAndServe(":"+port, nil)
+
+					if err != http.ErrServerClosed { // HL
+						log.Fatalf("listen: %s\n", err)
+					}
+
+					return receiver
 				}
-
-				return receiver
-			}
+			},
 		},
-	},
-	{
-		Name: "mount",
-		Fn: func(receiver Object) builtinMethodBody {
-			return func(t *thread, args []Object, blockFrame *callFrame) Object {
-				path := args[0].(*StringObject).Value
+		{
+			Name: "mount",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					path := args[0].(*StringObject).Value
 
-				http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
-					// Go creates one goroutine per request, so we also need to create a new Goby thread for every request.
-					thread := t.vm.newThread()
-					res := httpResponseClass.initializeInstance()
-					req := initRequest(r)
-					thread.builtInMethodYield(blockFrame, req, res)
-					thread = nil
-					setupResponse(w, r, res)
-				})
+					http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+						// Go creates one goroutine per request, so we also need to create a new Goby thread for every request.
+						thread := t.vm.newThread()
+						res := httpResponseClass.initializeInstance()
+						req := initRequest(r)
+						thread.builtInMethodYield(blockFrame, req, res)
+						thread = nil
+						setupResponse(w, r, res)
+					})
 
-				return receiver
-			}
+					return receiver
+				}
+			},
 		},
-	},
+	}
 }
 
 func initRequest(req *http.Request) *RObject {
