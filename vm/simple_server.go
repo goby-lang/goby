@@ -7,13 +7,15 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strings"
 	"path/filepath"
+	"strings"
+	"github.com/goby-lang/goby/Godeps/_workspace/src/github.com/julienschmidt/httprouter"
 )
 
 type response struct {
-	status int
-	body   string
+	status      int
+	body        string
+	contentType string
 }
 
 type request struct {
@@ -34,6 +36,8 @@ func initializeSimpleServerClass(vm *VM) {
 }
 
 func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
+	router := httprouter.New()
+
 	return []*BuiltInMethodObject{
 		{Name: "start",
 			Fn: func(receiver Object) builtinMethodBody {
@@ -87,7 +91,6 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					path := args[0].(*StringObject).Value
-
 					http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 						// Go creates one goroutine per request, so we also need to create a new Goby thread for every request.
 						thread := t.vm.newThread()
@@ -126,7 +129,6 @@ func initRequest(req *http.Request) *RObject {
 
 func setupResponse(w http.ResponseWriter, req *http.Request, res *RObject) {
 	r := &response{}
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8") // normal header
 
 	resStatus, ok := res.InstanceVariables.get("@status")
 
@@ -143,6 +145,16 @@ func setupResponse(w http.ResponseWriter, req *http.Request, res *RObject) {
 	} else {
 		r.body = resBody.(*StringObject).Value
 	}
+
+	contentType, ok := res.InstanceVariables.get("@content_type")
+
+	if !ok {
+		r.contentType = "text/plain; charset=utf-8"
+	} else {
+		r.contentType = contentType.Inspect()
+	}
+
+	w.Header().Set("Content-Type", r.contentType) // normal header
 
 	io.WriteString(w, r.body)
 	log.Printf("%s %s %s %d\n", req.Method, req.URL.Path, req.Proto, r.status)
