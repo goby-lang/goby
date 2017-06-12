@@ -5,9 +5,8 @@ import (
 	"github.com/goby-lang/goby/bytecode"
 	"github.com/goby-lang/goby/parser"
 	"io/ioutil"
-	"path"
+	"os"
 	"path/filepath"
-	"strings"
 )
 
 var stackTrace int
@@ -72,14 +71,7 @@ func New(fileDir string, args []string) *VM {
 		bytecode.LabelDefClass: make(isTable),
 	}
 	vm.fileDir = fileDir
-
-	p, _ := filepath.Abs("../")
-
-	if !strings.HasSuffix(p, "goby") {
-		vm.projectRoot = path.Join(p, "goby")
-	} else {
-		vm.projectRoot = p
-	}
+	vm.projectRoot = os.Getenv("GOBY_ROOT")
 
 	return vm
 }
@@ -278,7 +270,7 @@ func (vm *VM) lookupConstant(cf *callFrame, constName string) *Pointer {
 }
 
 func (vm *VM) execGobyLib(libName string) {
-	libPath := path.Join(vm.projectRoot, "lib", libName)
+	libPath := filepath.Join(vm.projectRoot, "lib", libName)
 	file, err := ioutil.ReadFile(libPath)
 
 	if err != nil {
