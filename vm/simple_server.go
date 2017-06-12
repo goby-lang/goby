@@ -2,6 +2,7 @@ package vm
 
 import (
 	"github.com/fatih/structs"
+	"github.com/goby-lang/goby/Godeps/_workspace/src/github.com/gorilla/mux"
 	"io"
 	"log"
 	"net/http"
@@ -9,7 +10,6 @@ import (
 	"os/signal"
 	"path/filepath"
 	"strings"
-	"github.com/goby-lang/goby/Godeps/_workspace/src/github.com/julienschmidt/httprouter"
 )
 
 type response struct {
@@ -36,7 +36,7 @@ func initializeSimpleServerClass(vm *VM) {
 }
 
 func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
-	router := httprouter.New()
+	router := mux.NewRouter()
 
 	return []*BuiltInMethodObject{
 		{Name: "start",
@@ -76,6 +76,9 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 						}
 					}()
 
+					router.PathPrefix("/").Handler(http.FileServer(http.Dir(t.vm.fileDir)))
+					http.Handle("/", router)
+
 					err := http.ListenAndServe(":"+port, nil)
 
 					if err != http.ErrServerClosed { // HL
@@ -91,7 +94,8 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					path := args[0].(*StringObject).Value
-					http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+
+					router.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 						// Go creates one goroutine per request, so we also need to create a new Goby thread for every request.
 						thread := t.vm.newThread()
 						res := httpResponseClass.initializeInstance()

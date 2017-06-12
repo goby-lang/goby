@@ -8,9 +8,7 @@ import (
 	"github.com/goby-lang/goby/vm"
 	"github.com/pkg/profile"
 	"io/ioutil"
-	"log"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 )
@@ -69,27 +67,12 @@ func main() {
 	}
 }
 
-func sourcePath() string {
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return dir
-}
-
-func extractFileInfo(filepath string) (dir, filename, fileExt string) {
-	dir, filename = path.Split(filepath)
-	splitedFN := strings.Split(filename, ".")
-
-	if len(splitedFN) <= 1 {
-		fmt.Printf("Only support eval/compile single file now.")
-		return
-	}
-
-	filename = splitedFN[0]
-	fileExt = splitedFN[1]
+func extractFileInfo(fp string) (dir, filename, fileExt string) {
+	dir, filename = filepath.Split(fp)
+	dir, _ = filepath.Abs(dir)
+	fileExt = filepath.Ext(fp)
+	splited := strings.Split(filename, ".")
+	filename, fileExt = splited[0], splited[1]
 	return
 }
 
