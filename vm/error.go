@@ -11,6 +11,8 @@ var (
 	ArgumentErrorClass *RClass
 	// TypeErrorClass ...
 	TypeErrorClass *RClass
+	// UnsupportedMethodClass
+	UnsupportedMethodClass *RClass
 )
 
 const (
@@ -20,15 +22,19 @@ const (
 	ArgumentError = "ArgumentError"
 	// TypeError describes the error type in string
 	TypeError = "TypeError"
+	// UnsupportedMethodError describes the error type in string
+	UnsupportedMethodError = "UnsupportedMethodError"
 )
 
-func init() {
+func initErrorClasses() {
 	bc := createBaseClass(UndefinedMethodError)
 	UndefinedMethodErrorClass = &RClass{BaseClass: bc}
 	bc = createBaseClass(ArgumentError)
 	ArgumentErrorClass = &RClass{BaseClass: bc}
 	bc = createBaseClass(TypeError)
 	TypeErrorClass = &RClass{BaseClass: bc}
+	bc = createBaseClass(UnsupportedMethodError)
+	UnsupportedMethodClass = &RClass{BaseClass: bc}
 }
 
 // Error ...

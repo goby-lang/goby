@@ -14,6 +14,7 @@ func init() {
 	initString()
 	initArray()
 	initHash()
+	initErrorClasses()
 	initMainObj()
 }
 

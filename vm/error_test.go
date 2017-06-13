@@ -51,6 +51,37 @@ func TestUndefinedMethodError(t *testing.T) {
 	}
 }
 
+func TestUnsupportedMethodError(t *testing.T) {
+	tests := []struct {
+		input    string
+		errorMsg string
+	}{
+		{`String.new`, "UnsupportedMethodError: Unsupported Method #new for <Class:String>"},
+		{`Integer.new`, "UnsupportedMethodError: Unsupported Method #new for <Class:Integer>"},
+		{`Hash.new`, "UnsupportedMethodError: Unsupported Method #new for <Class:Hash>"},
+		{`Array.new`, "UnsupportedMethodError: Unsupported Method #new for <Class:Array>"},
+		{`Boolean.new`, "UnsupportedMethodError: Unsupported Method #new for <Class:Boolean>"},
+		{`Null.new`, "UnsupportedMethodError: Unsupported Method #new for <Class:Null>"},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		err, ok := evaluated.(*Error)
+
+		if !ok {
+			t.Errorf("Expect Error. got=%T (%+v)", evaluated, evaluated)
+		}
+
+		if err.Class.Name != UnsupportedMethodError {
+			t.Errorf("Expect error to be %s. got=%s", UnsupportedMethodError, err.Class.Name)
+		}
+
+		if err.Message != tt.errorMsg {
+			t.Errorf("Expected error message: %s\nGot: %s\n", tt.errorMsg, err.Message)
+		}
+	}
+}
+
 func TestArgumentError(t *testing.T) {
 	evaluated := testEval(t, "[].count(5,4,3)")
 	err, ok := evaluated.(*Error)

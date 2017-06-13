@@ -725,7 +725,11 @@ var builtinClassClassMethods = []*BuiltInMethodObject{
 		Name: "new",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
-				class := receiver.(*RClass)
+				class, ok := receiver.(*RClass)
+
+				if !ok {
+					return t.UnsupportedMethodError("#new", receiver)
+				}
 
 				if class.pseudoSuperClass.isModule {
 					t.returnError("Module inheritance is not supported: " + class.pseudoSuperClass.Name)

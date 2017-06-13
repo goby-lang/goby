@@ -98,3 +98,7 @@ func (t *thread) UndefinedMethodError(methodName string, receiver Object) {
 	err := initializeError(UndefinedMethodErrorClass, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
 	t.stack.push(&Pointer{err})
 }
+
+func (t *thread) UnsupportedMethodError(methodName string, receiver Object) *Error {
+	return initializeError(UnsupportedMethodClass, "Unsupported Method %s for %+v", methodName, receiver.toString())
+}
