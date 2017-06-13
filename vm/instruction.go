@@ -79,9 +79,10 @@ var builtInActions = map[operationType]*action{
 
 			p := cf.getLCL(index, depth)
 
-			//if p == nil {
-			//	t.returnError(fmt.Sprintf("locals index: %d is nil. Callframe: %s", index, cf.instructionSet.label.name))
-			//}
+			if p == nil {
+				t.stack.push(&Pointer{NULL})
+				return
+			}
 
 			t.stack.push(p)
 		},

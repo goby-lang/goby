@@ -20,7 +20,13 @@ func (s *stack) pop() *Pointer {
 		panic("Nothing to pop!")
 	}
 
-	s.thread.sp--
+	if s.thread.sp < 0 {
+		panic("SP is not normal!")
+	}
+
+	if s.thread.sp > 0 {
+		s.thread.sp--
+	}
 
 	v := s.Data[s.thread.sp]
 	s.Data[s.thread.sp] = nil
