@@ -98,6 +98,11 @@ func TestNextToken(t *testing.T) {
 	''
 
 	next
+	:apple
+	{ test: "abc" }
+	{ test: :abc }
+	{ test: 50 }
+	{ test: abc }
 	`
 
 	tests := []struct {
@@ -341,7 +346,33 @@ func TestNextToken(t *testing.T) {
 		{token.String, "", 89},
 
 		{token.Next, "next", 91},
-		{token.EOF, "", 92},
+		{token.String, "apple", 92},
+
+		{token.LBrace, "{", 93},
+		{token.Ident, "test", 93},
+		{token.Colon, ":", 93},
+		{token.String, "abc", 93},
+		{token.RBrace, "}", 93},
+
+		{token.LBrace, "{", 94},
+		{token.Ident, "test", 94},
+		{token.Colon, ":", 94},
+		{token.String, "abc", 94},
+		{token.RBrace, "}", 94},
+
+		{token.LBrace, "{", 95},
+		{token.Ident, "test", 95},
+		{token.Colon, ":", 95},
+		{token.Int, "50", 95},
+		{token.RBrace, "}", 95},
+
+		{token.LBrace, "{", 96},
+		{token.Ident, "test", 96},
+		{token.Colon, ":", 96},
+		{token.Ident, "abc", 96},
+		{token.RBrace, "}", 96},
+
+		{token.EOF, "", 97},
 	}
 	l := New(input)
 
@@ -356,7 +387,7 @@ func TestNextToken(t *testing.T) {
 
 		}
 		if tok.Line != tt.expectedLine {
-			t.Fatalf("tests[%d] - line number wrong. expected=%d, got=%d", i, tt.expectedLine, tok.Line)
+			t.Fatalf("tests[%d] - line number wrong. expected=%d, got=%d got=%q", i, tt.expectedLine, tok.Line,  tok.Literal)
 		}
 	}
 }

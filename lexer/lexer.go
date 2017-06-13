@@ -128,7 +128,13 @@ func (l *Lexer) NextToken() token.Token {
 		if l.peekChar() == ':' {
 			l.readChar()
 			tok = token.Token{Type: token.ResolutionOperator, Literal: "::", Line: l.line}
+		} else if isLetter(l.peekChar()) {
+			tok.Literal = l.readSymbol()
+			tok.Type = token.String
+			tok.Line = l.line
+			return tok
 		} else {
+
 			tok = newToken(token.Colon, l.ch, l.line)
 		}
 	case '|':
@@ -268,6 +274,25 @@ func (l *Lexer) readString(ch byte) string {
 	l.readChar()                           // currently at string's last letter
 	result := l.input[position:l.position] // get full string
 	l.readChar()                           // move to string's later quote
+	return result
+}
+
+
+func (l *Lexer) readSymbol() string {
+	l.readChar()
+
+	position := l.position // currently at string's first letter
+
+	for !(l.peekChar() == ' ' || l.peekChar() == '\n' || l.peekChar() == '\r' || l.peekChar() == '\t') {
+		l.readChar()
+
+		if l.peekChar() == 0 {
+			panic("Unterminated string meets end of file")
+		}
+	}
+
+	l.readChar()                           // currently at string's last letter
+	result := l.input[position:l.position] // get full string
 	return result
 }
 
