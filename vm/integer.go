@@ -25,12 +25,12 @@ type IntegerObject struct {
 	Value int
 }
 
-func (i *IntegerObject) Inspect() string {
+func (i *IntegerObject) toString() string {
 	return strconv.Itoa(i.Value)
 }
 
 func (i *IntegerObject) toJSON() string {
-	return i.Inspect()
+	return i.toString()
 }
 
 func (i *IntegerObject) returnClass() Class {

@@ -185,7 +185,7 @@ func TestEvalArrayIndex(t *testing.T) {
 
 			if !ok {
 
-				t.Fatalf("expect input: \"%s\"'s result should be Null. got=%T(%s)", tt.input, evaluated, evaluated.Inspect())
+				t.Fatalf("expect input: \"%s\"'s result should be Null. got=%T(%s)", tt.input, evaluated, evaluated.toString())
 			}
 		}
 	}

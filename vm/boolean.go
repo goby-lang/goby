@@ -25,13 +25,13 @@ type BooleanObject struct {
 	Value bool
 }
 
-// Inspect returns boolean object's value, which is either true or false.
-func (b *BooleanObject) Inspect() string {
+// toString returns boolean object's value, which is either true or false.
+func (b *BooleanObject) toString() string {
 	return fmt.Sprintf("%t", b.Value)
 }
 
 func (b *BooleanObject) toJSON() string {
-	return b.Inspect()
+	return b.toString()
 }
 
 // returnClass returns boolean object's class, which is RBool

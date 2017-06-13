@@ -336,7 +336,7 @@ var builtInActions = map[operationType]*action{
 			case *BuiltInMethodObject:
 				t.evalBuiltInMethod(receiver, m, receiverPr, argCount, argPr, blockFrame)
 			case *Error:
-				t.returnError(m.Inspect())
+				t.returnError(m.toString())
 			}
 		},
 	},

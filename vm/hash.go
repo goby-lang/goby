@@ -21,12 +21,12 @@ type HashObject struct {
 	Pairs map[string]Object
 }
 
-func (h *HashObject) Inspect() string {
+func (h *HashObject) toString() string {
 	var out bytes.Buffer
 	var pairs []string
 
 	for key, value := range h.Pairs {
-		pairs = append(pairs, fmt.Sprintf("%s: %s", key, value.Inspect()))
+		pairs = append(pairs, fmt.Sprintf("%s: %s", key, value.toString()))
 	}
 
 	out.WriteString("{ ")

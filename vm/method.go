@@ -28,8 +28,8 @@ type MethodObject struct {
 	argc           int
 }
 
-// Inspect returns method's name, params count and instruction set.
-func (m *MethodObject) Inspect() string {
+// toString returns method's name, params count and instruction set.
+func (m *MethodObject) toString() string {
 	var out bytes.Buffer
 
 	out.WriteString(fmt.Sprintf("<Method: %s (%d params)\n>", m.Name, m.argc))
@@ -39,7 +39,7 @@ func (m *MethodObject) Inspect() string {
 }
 
 func (m *MethodObject) toJSON() string {
-	return m.Inspect()
+	return m.toString()
 }
 
 func (m *MethodObject) returnClass() Class {
@@ -55,13 +55,13 @@ type BuiltInMethodObject struct {
 	Fn    func(receiver Object) builtinMethodBody
 }
 
-// Inspect just returns built in method's name.
-func (bim *BuiltInMethodObject) Inspect() string {
+// toString just returns built in method's name.
+func (bim *BuiltInMethodObject) toString() string {
 	return "<BuiltInMethod: " + bim.Name + ">"
 }
 
 func (bim *BuiltInMethodObject) toJSON() string {
-	return bim.Inspect()
+	return bim.toString()
 }
 
 func (bim *BuiltInMethodObject) returnClass() Class {

@@ -25,13 +25,13 @@ type FileObject struct {
 	File  *os.File
 }
 
-// Inspect returns detailed infoof a array include elements it contains
-func (f *FileObject) Inspect() string {
+// toString returns detailed infoof a array include elements it contains
+func (f *FileObject) toString() string {
 	return "<File: " + f.File.Name() + ">"
 }
 
 func (f *FileObject) toJSON() string {
-	return f.Inspect()
+	return f.toString()
 }
 
 // returnClass returns current object's class, which is RArray

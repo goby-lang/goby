@@ -26,7 +26,7 @@ func initMainObj() {
 // Object represents all objects in Goby, including Array, Integer or even Method and Error.
 type Object interface {
 	returnClass() Class
-	Inspect() string
+	toString() string
 	toJSON() string
 }
 
@@ -46,19 +46,19 @@ type RObject struct {
 	InitializeMethod  *MethodObject
 }
 
-// Inspect tells which class it belongs to.
-func (ro *RObject) Inspect() string {
+// toString tells which class it belongs to.
+func (ro *RObject) toString() string {
 	return "<Instance of: " + ro.Class.Name + ">"
 }
 
 func (ro *RObject) toJSON() string {
-	return ro.Inspect()
+	return ro.toString()
 }
 
 // returnClass will return object's class
 func (ro *RObject) returnClass() Class {
 	if ro.Class == nil {
-		panic(fmt.Sprintf("Object %s doesn't have class.", ro.Inspect()))
+		panic(fmt.Sprintf("Object %s doesn't have class.", ro.toString()))
 	}
 	return ro.Class
 }

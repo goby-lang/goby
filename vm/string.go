@@ -23,7 +23,7 @@ type StringObject struct {
 	Value string
 }
 
-func (s *StringObject) Inspect() string {
+func (s *StringObject) toString() string {
 	return s.Value
 }
 
@@ -33,7 +33,7 @@ func (s *StringObject) toJSON() string {
 
 func (s *StringObject) returnClass() Class {
 	if s.Class == nil {
-		panic(fmt.Sprintf("String %s doesn't have class.", s.Inspect()))
+		panic(fmt.Sprintf("String %s doesn't have class.", s.toString()))
 	}
 
 	return s.Class

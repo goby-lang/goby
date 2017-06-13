@@ -117,9 +117,9 @@ type BaseClass struct {
 	scope     Class
 }
 
-// Inspect returns the basic inspected result (which is class name) of current class
+// toString returns the basic inspected result (which is class name) of current class
 // TODO: Singleton class's inspect() should also mark if it's a singleton class explicitly.
-func (c *BaseClass) Inspect() string {
+func (c *BaseClass) toString() string {
 	if c.isModule {
 		return "<Module:" + c.Name + ">"
 	}
@@ -127,7 +127,7 @@ func (c *BaseClass) Inspect() string {
 }
 
 func (c *BaseClass) toJSON() string {
-	return c.Inspect()
+	return c.toString()
 }
 
 func (c *BaseClass) setBuiltInMethods(methodList []*BuiltInMethodObject, classMethods bool) {
@@ -400,7 +400,7 @@ var builtinCommonInstanceMethods = []*BuiltInMethodObject{
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				for _, arg := range args {
-					fmt.Println(arg.Inspect())
+					fmt.Println(arg.toString())
 				}
 
 				return NULL

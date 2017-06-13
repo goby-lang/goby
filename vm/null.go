@@ -16,8 +16,8 @@ type NullObject struct {
 	Class *RNull
 }
 
-// Inspect returns the name of NullObject
-func (n *NullObject) Inspect() string {
+// toString returns the name of NullObject
+func (n *NullObject) toString() string {
 	return ""
 }
 

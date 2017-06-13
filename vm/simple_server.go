@@ -155,7 +155,7 @@ func setupResponse(w http.ResponseWriter, req *http.Request, res *RObject) {
 	if !ok {
 		r.contentType = "text/plain; charset=utf-8"
 	} else {
-		r.contentType = contentType.Inspect()
+		r.contentType = contentType.toString()
 	}
 
 	w.Header().Set("Content-Type", r.contentType) // normal header

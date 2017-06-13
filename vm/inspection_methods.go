@@ -54,9 +54,9 @@ func (s *stack) inspect() string {
 		if p != nil {
 			o := p.Target
 			if i == s.thread.sp {
-				datas = append(datas, fmt.Sprintf("%s (%T) %d <----", o.Inspect(), o, i))
+				datas = append(datas, fmt.Sprintf("%s (%T) %d <----", o.toString(), o, i))
 			} else {
-				datas = append(datas, fmt.Sprintf("%s (%T) %d", o.Inspect(), o, i))
+				datas = append(datas, fmt.Sprintf("%s (%T) %d", o.toString(), o, i))
 			}
 
 		} else {

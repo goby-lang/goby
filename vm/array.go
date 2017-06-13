@@ -22,13 +22,13 @@ type ArrayObject struct {
 	Elements []Object
 }
 
-// Inspect returns detailed info of a array include elements it contains
-func (a *ArrayObject) Inspect() string {
+// toString returns detailed info of a array include elements it contains
+func (a *ArrayObject) toString() string {
 	var out bytes.Buffer
 
 	elements := []string{}
 	for _, e := range a.Elements {
-		elements = append(elements, e.Inspect())
+		elements = append(elements, e.toString())
 	}
 
 	out.WriteString("Array:")

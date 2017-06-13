@@ -37,13 +37,13 @@ type Error struct {
 	Message string
 }
 
-// Inspect ...
-func (e *Error) Inspect() string {
+// toString ...
+func (e *Error) toString() string {
 	return "ERROR: " + e.Message
 }
 
 func (e *Error) toJSON() string {
-	return e.Inspect()
+	return e.toString()
 }
 
 func (e *Error) returnClass() Class {
