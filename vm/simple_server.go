@@ -94,21 +94,24 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					path := args[0].(*StringObject).Value
-
-					router.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
-						// Go creates one goroutine per request, so we also need to create a new Goby thread for every request.
-						thread := t.vm.newThread()
-						res := httpResponseClass.initializeInstance()
-						req := initRequest(r)
-						thread.builtInMethodYield(blockFrame, req, res)
-						thread = nil
-						setupResponse(w, r, res)
-					})
+					router.HandleFunc(path, newHandler(t, blockFrame))
 
 					return receiver
 				}
 			},
 		},
+	}
+}
+
+func newHandler(t *thread, blockFrame *callFrame) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Go creates one goroutine per request, so we also need to create a new Goby thread for every request.
+		thread := t.vm.newThread()
+		res := httpResponseClass.initializeInstance()
+		req := initRequest(r)
+		thread.builtInMethodYield(blockFrame, req, res)
+		thread = nil
+		setupResponse(w, r, res)
 	}
 }
 
