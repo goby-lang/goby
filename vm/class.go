@@ -475,6 +475,17 @@ var builtinCommonInstanceMethods = []*BuiltInMethodObject{
 		},
 	},
 	{
+		// Returns object's string representation.
+		// @param n/a []
+		// @return [String] Object's string representation.
+		Name: "to_s",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return initializeString(receiver.toString())
+			}
+		},
+	},
+	{
 		// Returns true if a block is given in the current context and `yield` is ready to call.
 		//
 		// **Note:** The method name does not end with '?' because the sign is unavalable in Goby for now.
