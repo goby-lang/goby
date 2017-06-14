@@ -4,6 +4,7 @@ import (
 	"github.com/goby-lang/goby/Godeps/_workspace/src/github.com/fatih/structs"
 	"github.com/goby-lang/goby/Godeps/_workspace/src/github.com/gorilla/mux"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -23,6 +24,7 @@ type request struct {
 	Body   string
 	URL    string
 	Path   string
+	Host   string
 }
 
 func initializeSimpleServerClass(vm *VM) {
@@ -108,21 +110,29 @@ func newHandler(t *thread, blockFrame *callFrame) func(http.ResponseWriter, *htt
 		// Go creates one goroutine per request, so we also need to create a new Goby thread for every request.
 		thread := t.vm.newThread()
 		res := httpResponseClass.initializeInstance()
-		req := initRequest(r)
+		req := initRequest(w, r)
 		thread.builtInMethodYield(blockFrame, req, res)
 		thread = nil
 		setupResponse(w, r, res)
 	}
 }
 
-func initRequest(req *http.Request) *RObject {
+func initRequest(w http.ResponseWriter, req *http.Request) *RObject {
 	r := request{}
 	reqObj := httpRequestClass.initializeInstance()
 
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		log.Printf("Error reading body: %v", err)
+		http.Error(w, "can't read body", http.StatusBadRequest)
+		return reqObj
+	}
+
 	r.Method = req.Method
-	r.Body = ""
+	r.Body = string(body)
 	r.Path = req.URL.Path
-	r.URL = req.Host + req.RequestURI
+	r.URL = req.RequestURI
+	r.Host = req.Host
 
 	m := structs.Map(r)
 
