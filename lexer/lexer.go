@@ -129,6 +129,7 @@ func (l *Lexer) NextToken() token.Token {
 		l.FSM.Event("method")
 	case ':':
 		if l.FSM.Is("nosymbol") {
+			//e.g. {test: abc} || {test: :abc} || {test: 50}
 
 			tok = newToken(token.Colon, l.ch, l.line)
 

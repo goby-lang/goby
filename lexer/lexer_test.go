@@ -394,7 +394,7 @@ func TestNextToken(t *testing.T) {
 
 		}
 		if tok.Line != tt.expectedLine {
-			t.Fatalf("tests[%d] - line number wrong. expected=%d, got=%d got=%q", i, tt.expectedLine, tok.Line, tok.Literal)
+			t.Fatalf("tests[%d] - line number wrong. expected=%d, got=%d", i, tt.expectedLine, tok.Line)
 		}
 	}
 }
