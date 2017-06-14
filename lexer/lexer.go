@@ -3,7 +3,6 @@ package lexer
 import (
 	"github.com/goby-lang/goby/token"
 	"github.com/looplab/fsm"
-	"fmt"
 )
 
 // Lexer is used for tokenizing programs
@@ -25,7 +24,7 @@ func New(input string) *Lexer {
 		fsm.Events{
 			{Name: "nosymbol", Src: []string{"initial"}, Dst: "nosymbol"},
 			{Name: "method", Src: []string{"initial"}, Dst: "method"},
-			{Name: "initialize", Src: []string{"method", "initial","nosymbol"}, Dst: "initial"},
+			{Name: "initialize", Src: []string{"method", "initial", "nosymbol"}, Dst: "initial"},
 		},
 		fsm.Callbacks{},
 	)
@@ -36,8 +35,9 @@ func New(input string) *Lexer {
 func (l *Lexer) NextToken() token.Token {
 
 	var tok token.Token
-	l.skipWhitespace()
 	l.resetNosymbol()
+
+	l.skipWhitespace()
 	switch l.ch {
 	case '"', byte('\''):
 		tok.Literal = l.readString(l.ch)
@@ -128,15 +128,16 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.Dot, l.ch, l.line)
 		l.FSM.Event("method")
 	case ':':
-		if l.FSM.Is("nosymbol"){
+		if l.FSM.Is("nosymbol") {
+
 			tok = newToken(token.Colon, l.ch, l.line)
 
 		} else {
-			if  l.peekChar() == ':'{
+			if l.peekChar() == ':' {
 				l.readChar()
 				tok = token.Token{Type: token.ResolutionOperator, Literal: "::", Line: l.line}
 
-			} else if isLetter(l.peekChar()){
+			} else if isLetter(l.peekChar()) {
 				tok.Literal = l.readSymbol()
 				tok.Type = token.String
 				tok.Line = l.line
@@ -144,24 +145,8 @@ func (l *Lexer) NextToken() token.Token {
 
 			} else {
 				tok = newToken(token.Colon, l.ch, l.line)
-
-
 			}
 		}
-
-		//if l.peekChar() == ':' {
-		//	l.readChar()
-		//	tok = token.Token{Type: token.ResolutionOperator, Literal: "::", Line: l.line}
-		//} else if isLetter(l.peekChar()) && l.FSM.Is("initial") {
-		//	//fmt.Println("a=>",l.FSM.Current())
-		//	tok.Literal = l.readSymbol()
-		//	tok.Type = token.String
-		//	tok.Line = l.line
-		//	return tok
-		//} else {
-		//	//fmt.Println("b=>",l.FSM.Current())
-		//	tok = newToken(token.Colon, l.ch, l.line)
-		//}
 	case '|':
 		if l.peekChar() == '|' {
 			l.readChar()
@@ -213,7 +198,6 @@ func (l *Lexer) NextToken() token.Token {
 				tok.Line = l.line
 			}
 			if tok.Type == token.Ident {
-				fmt.Println("=>",l.FSM.Current())
 				l.FSM.Event("nosymbol")
 			}
 			return tok
@@ -250,12 +234,9 @@ func (l *Lexer) skipWhitespace() {
 }
 
 func (l *Lexer) resetNosymbol() {
-	//if l.ch != ':' &&
-	fmt.Println("resetNosymbol=>",l.FSM.Current())
 
-	if !l.FSM.Is("method") && l.ch != ':'
-	{
-			l.FSM.Event("initialize")
+	if !l.FSM.Is("method") && l.ch != ':' {
+		l.FSM.Event("initialize")
 
 	}
 
@@ -318,13 +299,12 @@ func (l *Lexer) readString(ch byte) string {
 	return result
 }
 
-
 func (l *Lexer) readSymbol() string {
 	l.readChar()
 
 	position := l.position // currently at string's first letter
 
-	for !(l.peekChar() == ' ' || l.peekChar() == '\n' || l.peekChar() == '\r' || l.peekChar() == '\t'|| l.peekChar() == ',') {
+	for !(l.peekChar() == ' ' || l.peekChar() == '\n' || l.peekChar() == '\r' || l.peekChar() == '\t' || l.peekChar() == ',') {
 		l.readChar()
 
 		if l.peekChar() == 0 {
