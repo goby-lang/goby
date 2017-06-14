@@ -99,11 +99,11 @@ func TestNextToken(t *testing.T) {
 
 	next
 	:apple
-	{ test: "abc" }
+	{ test:"abc" }
 	{ test: :abc }
-	{ test: 50 }
+	{ test:50 }
 	{ test: abc }
-	{ test: abc }
+	{ test:abc }
 	`
 
 	tests := []struct {
@@ -394,7 +394,7 @@ func TestNextToken(t *testing.T) {
 
 		}
 		if tok.Line != tt.expectedLine {
-			t.Fatalf("tests[%d] - line number wrong. expected=%d, got=%d got=%q", i, tt.expectedLine, tok.Line,  tok.Literal)
+			t.Fatalf("tests[%d] - line number wrong. expected=%d, got=%d got=%q", i, tt.expectedLine, tok.Line, tok.Literal)
 		}
 	}
 }
