@@ -989,7 +989,7 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		{
 			`
 			class Foo
-			  attr_reader("x", "y")
+			  attr_reader :x, :y
 
 			  def set_x x1, x2, x3
 			    @x = x1 + x2 + x3
