@@ -253,7 +253,8 @@ func (l *Lexer) resetNosymbol() {
 	//if l.ch != ':' &&
 	fmt.Println("resetNosymbol=>",l.FSM.Current())
 
-	if !l.FSM.Is("method")  {
+	if !l.FSM.Is("method") && l.ch != ':'
+	{
 			l.FSM.Event("initialize")
 
 	}
