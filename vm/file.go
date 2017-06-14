@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 	"syscall"
 )
 
@@ -158,7 +157,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 					for i := 1; i < len(args); i++ {
 						filename := args[i].(*StringObject).Value
 						if !filepath.IsAbs(filename) {
-							filename = t.vm.fileDir + filename
+							filename = filepath.Join(t.vm.fileDir, filename)
 						}
 
 						err := os.Chmod(filename, os.FileMode(uint32(filemod)))
@@ -184,7 +183,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					filename := args[0].(*StringObject).Value
 					if !filepath.IsAbs(filename) {
-						filename = t.vm.fileDir + filename
+						filename = filepath.Join(t.vm.fileDir, filename)
 					}
 
 					fileStats, err := os.Stat(filename)
@@ -228,7 +227,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 						elements = append(elements, next)
 					}
 
-					return initializeString(strings.Join(elements, string(filepath.Separator)))
+					return initializeString(filepath.Join(elements...))
 				}
 			},
 		},
