@@ -64,6 +64,22 @@ func (ro *RObject) returnClass() Class {
 	return ro.Class
 }
 
+func (ro *RObject) instanceVariableGet(name string) (Object, bool) {
+	v, ok := ro.InstanceVariables.get(name)
+
+	if !ok {
+		return NULL, false
+	}
+
+	return v, true
+}
+
+func (ro *RObject) instanceVariableSet(name string, value Object) Object {
+	ro.InstanceVariables.set(name, value)
+
+	return value
+}
+
 func checkArgumentLen(args []Object, class Class, methodName string) *Error {
 	if len(args) > 1 {
 		return &Error{Message: fmt.Sprintf("Too many arguments for %s#%s", class.ReturnName(), methodName)}

@@ -147,7 +147,7 @@ func initRequest(w http.ResponseWriter, req *http.Request) *RObject {
 func setupResponse(w http.ResponseWriter, req *http.Request, res *RObject) {
 	r := &response{}
 
-	resStatus, ok := res.InstanceVariables.get("@status")
+	resStatus, ok := res.instanceVariableGet("@status")
 
 	if ok {
 		r.status = resStatus.(*IntegerObject).Value
@@ -155,7 +155,7 @@ func setupResponse(w http.ResponseWriter, req *http.Request, res *RObject) {
 		r.status = http.StatusOK
 	}
 
-	resBody, ok := res.InstanceVariables.get("@body")
+	resBody, ok := res.instanceVariableGet("@body")
 
 	if !ok {
 		r.body = ""
@@ -163,7 +163,7 @@ func setupResponse(w http.ResponseWriter, req *http.Request, res *RObject) {
 		r.body = resBody.(*StringObject).Value
 	}
 
-	contentType, ok := res.InstanceVariables.get("@content_type")
+	contentType, ok := res.instanceVariableGet("@content_type")
 
 	if !ok {
 		r.contentType = "text/plain; charset=utf-8"
@@ -171,6 +171,7 @@ func setupResponse(w http.ResponseWriter, req *http.Request, res *RObject) {
 		r.contentType = contentType.toString()
 	}
 
+	w.WriteHeader(r.status)
 	w.Header().Set("Content-Type", r.contentType) // normal header
 
 	io.WriteString(w, r.body)
