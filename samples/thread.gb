@@ -1,0 +1,19 @@
+def f(from)
+  i = 0
+  while i < 3 do
+    puts(from + ": " + i.to_s)
+    i++
+  end
+end
+
+f("direct")
+
+thread do
+  f("thread")
+end
+
+thread do
+  puts("going")
+end
+
+sleep(2) # This is to prevent main program finished before goroutine.
