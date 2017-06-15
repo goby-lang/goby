@@ -25,6 +25,28 @@ func TestServerInitialization(t *testing.T) {
 	}
 }
 
+func TestSetupResponseDefaultValue(t *testing.T) {
+	reader := strings.NewReader("")
+	recorder := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "https://google.com/path", reader)
+
+	res := httpResponseClass.initializeInstance()
+
+	setupResponse(recorder, req, res)
+
+	if recorder.Code != 200 {
+		t.Fatalf("Expect response code to be 200. got=%d", recorder.Code)
+	}
+
+	if recorder.HeaderMap.Get("Content-Type") != "text/plain; charset=utf-8" {
+		t.Fatalf("Expect content type to be \"text/plain; charset=utf-8\". got=%s", recorder.HeaderMap.Get("Content-Type"))
+	}
+
+	if recorder.Body.String() != "" {
+		t.Fatalf("Expect response body to be empty. got=%s", recorder.Body.String())
+	}
+}
+
 func TestInitRequest(t *testing.T) {
 	reader := strings.NewReader("Hello World")
 	r := initRequest(httptest.NewRecorder(), httptest.NewRequest("GET", "https://google.com/path", reader))
