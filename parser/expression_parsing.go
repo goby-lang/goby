@@ -66,30 +66,39 @@ type (
 )
 
 func (p *Parser) parseExpression(precedence int) ast.Expression {
-	prefix := p.prefixParseFns[p.curToken.Type]
-	if prefix == nil {
+	parseFn := p.prefixParseFns[p.curToken.Type]
+	if parseFn == nil {
 		p.noPrefixParseFnError(p.curToken.Type)
 		return nil
 	}
 
-	leftExp := prefix()
+	leftExp := parseFn()
+
+    // For method call without self and parens like
+	//
+	// foo do |bar|
+	//   #dosomething
+	// end
+
+	if p.peekTokenIs(token.Do) && precedence == LOWEST {
+		infixFn := p.parseCallExpression
+		return infixFn(leftExp)
+	}
+
 	// I use precedence "LOWEST" to identify call_without_parens case, this is not an appropriate way but it work in current situation
-
-	if arguments[p.peekToken.Type] && precedence == LOWEST {
-		infix := p.parseCallExpression
+	if (arguments[p.peekToken.Type] && precedence == LOWEST) {
+		infixFn := p.parseCallExpression
 		p.nextToken()
-		leftExp = infix(leftExp)
-
+		leftExp = infixFn(leftExp)
 	} else {
-
 		for !p.peekTokenIs(token.Semicolon) && precedence < p.peekPrecedence() && p.peekTokenAtSameLine() {
 
-			infix := p.infixParseFns[p.peekToken.Type]
-			if infix == nil {
+			infixFn := p.infixParseFns[p.peekToken.Type]
+			if infixFn == nil {
 				return leftExp
 			}
 			p.nextToken()
-			leftExp = infix(leftExp)
+			leftExp = infixFn(leftExp)
 		}
 	}
 
@@ -326,10 +335,10 @@ func (p *Parser) parseIfExpression() ast.Expression {
 func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 	var exp *ast.CallExpression
 
-	if p.curTokenIs(token.LParen) || arguments[p.curToken.Type] {
-
+	if p.curTokenIs(token.LParen) || arguments[p.curToken.Type] { // foo(x) || foo x
+		// receiver arg is actually the method name
 		m := receiver.(*ast.Identifier).Value
-		// receiver is self
+		// real receiver is self
 		selfTok := token.Token{Type: token.Self, Literal: "self", Line: p.curToken.Line}
 		self := &ast.SelfExpression{Token: selfTok}
 		receiver = self
@@ -337,10 +346,10 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 		// current token is identifier (method name)
 		exp = &ast.CallExpression{Token: p.curToken, Receiver: receiver, Method: m}
 
-		if p.curTokenIs(token.LParen) { // foo(x,y,x) || foo(x)
+		if p.curTokenIs(token.LParen) { // foo(x)
 			exp.Arguments = p.parseCallArguments()
 
-		} else { // foo x,y,z ||  foo x
+		} else { // foo x
 			exp.Arguments = p.parseCallArgumentsWithoutParens()
 		}
 
