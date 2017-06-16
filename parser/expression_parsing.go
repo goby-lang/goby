@@ -74,7 +74,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 
 	leftExp := parseFn()
 
-    // For method call without self and parens like
+	// For method call without self and parens like
 	//
 	// foo do |bar|
 	//   #dosomething
@@ -86,7 +86,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	}
 
 	// I use precedence "LOWEST" to identify call_without_parens case, this is not an appropriate way but it work in current situation
-	if (arguments[p.peekToken.Type] && precedence == LOWEST) {
+	if arguments[p.peekToken.Type] && precedence == LOWEST {
 		infixFn := p.parseCallExpression
 		p.nextToken()
 		leftExp = infixFn(leftExp)
@@ -364,14 +364,12 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 
 		exp.Method = p.curToken.Literal
 
-		if p.peekTokenIs(token.LParen) {
+		if p.peekTokenIs(token.LParen) { // p.foo(x)
 			p.nextToken()
 			exp.Arguments = p.parseCallArguments()
 		} else if p.peekTokenIs(token.Dot) { // p.foo.bar; || p.foo; || p.foo + 123
-
 			exp.Arguments = []ast.Expression{}
-
-		} else if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { //p.foo x, y, z || p.foo x
+		} else if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { // p.foo x, y, z || p.foo x
 			p.nextToken()
 			exp.Arguments = p.parseCallArgumentsWithoutParensDot()
 		}
@@ -487,6 +485,11 @@ func (p *Parser) parseYieldExpression() ast.Expression {
 	if p.peekTokenIs(token.LParen) {
 		p.nextToken()
 		ye.Arguments = p.parseCallArguments()
+	}
+
+	if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { // yield 123
+		p.nextToken()
+		ye.Arguments = p.parseCallArgumentsWithoutParensDot()
 	}
 
 	return ye
