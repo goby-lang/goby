@@ -1007,6 +1007,35 @@ func TestMethodCallWithoutParens(t *testing.T) {
 			`,
 			21,
 		},
+		{
+			`
+			class Foo
+			  def bar
+			    yield 10
+			  end
+			end
+
+			i = 0
+			Foo.new.bar do |ten|
+			  i = ten
+			end
+			i
+			`, 10,
+		},
+		{
+			`
+
+		    def bar
+			  yield(10)
+		    end
+
+			i = 0
+			bar do |ten|
+			  i = ten
+			end
+			i
+			`, 10,
+		},
 	}
 
 	for _, tt := range tests {
