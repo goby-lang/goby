@@ -70,12 +70,8 @@ var builtInActions = map[operationType]*action{
 	bytecode.GetLocal: {
 		name: bytecode.GetLocal,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
-			index := args[0].(int)
-			depth := 0
-
-			if len(args) >= 2 {
-				depth = args[1].(int)
-			}
+			depth := args[0].(int)
+			index := args[1].(int)
 
 			p := cf.getLCL(index, depth)
 
@@ -113,12 +109,10 @@ var builtInActions = map[operationType]*action{
 		name: bytecode.SetLocal,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
 			v := t.stack.pop()
-			depth := 0
+			depth := args[0].(int)
+			index := args[1].(int)
 
-			if len(args) >= 2 {
-				depth = args[1].(int)
-			}
-			cf.insertLCL(args[0].(int), depth, v.Target)
+			cf.insertLCL(index, depth, v.Target)
 		},
 	},
 	bytecode.SetConstant: {

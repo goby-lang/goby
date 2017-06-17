@@ -31,7 +31,7 @@ func (lt *localTable) setLCL(v string, d int) (index, depth int) {
 
 	if !ok {
 		index = lt.set(v)
-		depth = lt.depth
+		depth = 0
 		return index, depth
 	}
 

@@ -12,7 +12,7 @@ func (g *Generator) compileExpression(is *instructionSet, exp ast.Expression, sc
 
 		// it's local variable
 		if ok {
-			is.define(GetLocal, index, depth)
+			is.define(GetLocal, depth, index)
 			return
 		}
 
@@ -98,7 +98,7 @@ func (g *Generator) compileAssignExpression(is *instructionSet, exp *ast.InfixEx
 	switch name := exp.Left.(type) {
 	case *ast.Identifier:
 		index, depth := table.setLCL(name.Value, table.depth)
-		is.define(SetLocal, index, depth)
+		is.define(SetLocal, depth, index)
 	case *ast.InstanceVariable:
 		is.define(SetInstanceVariable, name.Value)
 	case *ast.Constant:
