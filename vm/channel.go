@@ -4,10 +4,36 @@ import (
 	"fmt"
 )
 
-var channelClass *RClass
+var (
+	channelClass   *RClass
+)
+
+var containerMap = map[int]Object{}
+var containerCount = 0
+
+// storeObj store objects into the container map
+// and update containerCount at the same time
+func storeObj(obj Object) int {
+	mutex.Lock()
+	containerMap[containerCount] = obj
+	i := containerCount
+
+	// containerCount here can be considered as deliveries' id
+	// And this id will be unused once the delivery is completed (which will be really quick)
+	// So we can assume that if we reach 1000th delivery,
+	// previous deliveries are all completed and they don't need their id anymore.
+	if containerCount > 1000 {
+		containerCount = 0
+	} else {
+		containerCount += 1
+	}
+
+	mutex.Unlock()
+	return i
+}
 
 type ChannelObject struct {
-	Id int
+	Id    int
 	Class *RClass
 	Chan  chan int
 }
@@ -20,7 +46,6 @@ func initializeChannelClass() {
 	channelClass = class
 }
 
-// toString returns detailed infoof a array include elements it contains
 func (co *ChannelObject) toString() string {
 	return fmt.Sprintf("<Channel: %d>", co.Id)
 }
@@ -29,7 +54,6 @@ func (co *ChannelObject) toJSON() string {
 	return co.toString()
 }
 
-// returnClass returns current object's class, which is RArray
 func (co *ChannelObject) returnClass() Class {
 	return co.Class
 }
@@ -53,12 +77,13 @@ func builtinChannelInstanceMethods() []*BuiltInMethodObject {
 			Name: "deliver",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					num := args[0].(*IntegerObject).Value
+					id := storeObj(args[0])
+
 					c := receiver.(*ChannelObject)
 
-					c.Chan <- num
+					c.Chan <- id
 
-					return c
+					return args[0]
 				}
 			},
 		},
@@ -70,7 +95,10 @@ func builtinChannelInstanceMethods() []*BuiltInMethodObject {
 
 					num := <-c.Chan
 
-					return initilaizeInteger(num)
+					mutex.Lock()
+
+					defer mutex.Unlock()
+					return containerMap[num]
 				}
 			},
 		},
