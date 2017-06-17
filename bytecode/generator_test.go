@@ -26,7 +26,7 @@ func TestNextStatement(t *testing.T) {
 0 putobject 0
 1 setlocal 0 0
 2 putobject 0
-3 setlocal 1 0
+3 setlocal 0 1
 4 jump 22
 5 putnil
 6 pop
@@ -41,10 +41,10 @@ func TestNextStatement(t *testing.T) {
 15 branchunless 17
 16 jump 22
 17 putnil
-18 getlocal 1 0
+18 getlocal 0 1
 19 putobject 1
 20 send + 1
-21 setlocal 1 0
+21 setlocal 0 1
 22 getlocal 0 0
 23 putobject 10
 24 send < 1
@@ -183,16 +183,16 @@ i
 3 leave
 <Block:1>
 0 putobject 3
-1 getlocal 1 2
+1 getlocal 2 1
 2 send + 1
-3 setlocal 1 2
+3 setlocal 2 1
 4 leave
 <Block:0>
 0 putobject 3
-1 getlocal 0 1
+1 getlocal 1 0
 2 send * 1
 3 setlocal 1 1
-4 getlocal 3 1
+4 getlocal 1 3
 5 send bar 0 block:1
 6 leave
 <ProgramStart>
@@ -202,15 +202,15 @@ i
 3 putobject 100
 4 setlocal 0 0
 5 putobject 10
-6 setlocal 1 0
+6 setlocal 0 1
 7 putobject 1000
-8 setlocal 2 0
+8 setlocal 0 2
 9 getconstant Foo
 10 send new 0
-11 setlocal 3 0
-12 getlocal 3 0
+11 setlocal 0 3
+12 getlocal 0 3
 13 send bar 0 block:0
-14 getlocal 1 0
+14 getlocal 0 1
 15 leave
 `
 	bytecode := compileToBytecode(input)
@@ -219,36 +219,31 @@ i
 
 func TestCallBlockCompilation(t *testing.T) {
 	input := `
-def foo
-  yield(20, 10)
-end
+	c = Channel.new
 
-x = 100
+	thread do
+	  s = "123"
+	  c.deliver(s)
+	end
 
-self.foo do |x, y|
-  x - y
-end
+	c.receive
 `
 	expected := `
-<Def:foo>
-0 putself
-1 putobject 20
-2 putobject 10
-3 invokeblock 2
-4 leave
 <Block:0>
-0 getlocal 0 0
-1 getlocal 1 0
-2 send - 1
-3 leave
+0 putstring "123"
+1 setlocal 0 0
+2 getlocal 1 0
+3 getlocal 0 0
+4 send deliver 1
+5 leave
 <ProgramStart>
-0 putself
-1 putstring "foo"
-2 def_method 0
-3 putobject 100
-4 setlocal 0 0
-5 putself
-6 send foo 0 block:0
+0 getconstant Channel
+1 send new 0
+2 setlocal 0 0
+3 putself
+4 send thread 0 block:0
+5 getlocal 0 0
+6 send receive 0
 7 leave
 `
 
@@ -273,8 +268,8 @@ func TestHashCompilation(t *testing.T) {
 4 newhash 4
 5 setlocal 0 0
 6 newhash 0
-7 setlocal 1 0
-8 getlocal 1 0
+7 setlocal 0 1
+8 getlocal 0 1
 9 putstring "baz"
 10 getlocal 0 0
 11 putstring "bar"
@@ -284,7 +279,7 @@ func TestHashCompilation(t *testing.T) {
 15 send [] 1
 16 send - 1
 17 send []= 2
-18 getlocal 1 0
+18 getlocal 0 1
 19 putstring "baz"
 20 send [] 1
 21 getlocal 0 0
@@ -302,8 +297,8 @@ func TestHashCompilation(t *testing.T) {
 4 newhash 4
 5 setlocal 0 0
 6 newhash 0
-7 setlocal 1 0
-8 getlocal 1 0
+7 setlocal 0 1
+8 getlocal 0 1
 9 putstring "baz"
 10 getlocal 0 0
 11 putstring "bar"
@@ -313,7 +308,7 @@ func TestHashCompilation(t *testing.T) {
 15 send [] 1
 16 send - 1
 17 send []= 2
-18 getlocal 1 0
+18 getlocal 0 1
 19 putstring "baz"
 20 send [] 1
 21 getlocal 0 0
@@ -367,7 +362,7 @@ func TestArrayCompilation(t *testing.T) {
 9 getlocal 0 0
 10 putobject 0
 11 send [] 1
-12 setlocal 1 0
+12 setlocal 0 1
 13 leave
 `
 	bytecode := compileToBytecode(input)
@@ -395,10 +390,10 @@ Foo.new(100, 50).bar
 <Def:initialize>
 0 getlocal 0 0
 1 setinstancevariable @x
-2 getlocal 1 0
+2 getlocal 0 1
 3 setinstancevariable @y
 4 getlocal 0 0
-5 getlocal 1 0
+5 getlocal 0 1
 6 send - 1
 7 setinstancevariable @z
 8 leave
@@ -605,11 +600,11 @@ func TestBasicMethodDefineAndExecution(t *testing.T) {
 	expected := `
 <Def:foo>
 0 putobject 10
-1 setlocal 2 0
+1 setlocal 0 2
 2 getlocal 0 0
-3 getlocal 1 0
+3 getlocal 0 1
 4 send - 1
-5 getlocal 2 0
+5 getlocal 0 2
 6 send + 1
 7 leave
 <ProgramStart>
@@ -663,8 +658,8 @@ func TestLocalVariableAccessInCurrentScope(t *testing.T) {
 2 putobject 100
 3 setlocal 0 0
 4 putobject 5
-5 setlocal 1 0
-6 getlocal 1 0
+5 setlocal 0 1
+6 getlocal 0 1
 7 getlocal 0 0
 8 send * 1
 9 putobject 100
@@ -695,15 +690,15 @@ func TestConditionWithoutAlternativeCompilation(t *testing.T) {
 0 putobject 10
 1 setlocal 0 0
 2 putobject 5
-3 setlocal 1 0
+3 setlocal 0 1
 4 getlocal 0 0
-5 getlocal 1 0
+5 getlocal 0 1
 6 send > 1
 7 branchunless 10
 8 putobject 10
-9 setlocal 2 0
+9 setlocal 0 2
 10 putnil
-11 getlocal 2 0
+11 getlocal 0 2
 12 putobject 1
 13 send + 1
 14 leave
@@ -731,17 +726,17 @@ func TestConditionWithAlternativeCompilation(t *testing.T) {
 0 putobject 10
 1 setlocal 0 0
 2 putobject 5
-3 setlocal 1 0
+3 setlocal 0 1
 4 getlocal 0 0
-5 getlocal 1 0
+5 getlocal 0 1
 6 send > 1
 7 branchunless 11
 8 putobject 10
-9 setlocal 2 0
+9 setlocal 0 2
 10 jump 13
 11 putobject 5
-12 setlocal 2 0
-13 getlocal 2 0
+12 setlocal 0 2
+13 getlocal 0 2
 14 putobject 1
 15 send + 1
 16 leave
@@ -806,7 +801,7 @@ func TestWhileStatementWithMethodCallInCondition(t *testing.T) {
 3 putobject 2
 4 putobject 3
 5 newarray 3
-6 setlocal 1 0
+6 setlocal 0 1
 7 jump 15
 8 putnil
 9 pop
@@ -816,7 +811,7 @@ func TestWhileStatementWithMethodCallInCondition(t *testing.T) {
 13 send - 1
 14 setlocal 0 0
 15 getlocal 0 0
-16 getlocal 1 0
+16 getlocal 0 1
 17 send length 0
 18 send > 1
 19 branchif 11
@@ -863,10 +858,10 @@ func TestBooleanCompilation(t *testing.T) {
 0 putobject true
 1 setlocal 0 0
 2 putobject false
-3 setlocal 1 0
+3 setlocal 0 1
 4 getlocal 0 0
 5 send ! 0
-6 getlocal 1 0
+6 getlocal 0 1
 7 send == 1
 8 leave
 `
