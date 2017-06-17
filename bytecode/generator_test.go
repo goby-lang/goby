@@ -219,31 +219,42 @@ i
 
 func TestCallBlockCompilation(t *testing.T) {
 	input := `
-	c = Channel.new
+x = 1
 
-	thread do
-	  s = "123"
-	  c.deliver(s)
-	end
+foo do
+  puts(x)
+  y = 1
+  puts(y)
+  x = 2
+  puts(x)
+end
 
-	c.receive
+puts(x)
 `
 	expected := `
 <Block:0>
-0 putstring "123"
-1 setlocal 0 0
-2 getlocal 1 0
-3 getlocal 0 0
-4 send deliver 1
-5 leave
+0 putself
+1 getlocal 1 0
+2 send puts 1
+3 putobject 1
+4 setlocal 0 0
+5 putself
+6 getlocal 0 0
+7 send puts 1
+8 putobject 2
+9 setlocal 1 0
+10 putself
+11 getlocal 1 0
+12 send puts 1
+13 leave
 <ProgramStart>
-0 getconstant Channel
-1 send new 0
-2 setlocal 0 0
-3 putself
-4 send thread 0 block:0
+0 putobject 1
+1 setlocal 0 0
+2 putself
+3 send foo 0 block:0
+4 putself
 5 getlocal 0 0
-6 send receive 0
+6 send puts 1
 7 leave
 `
 
