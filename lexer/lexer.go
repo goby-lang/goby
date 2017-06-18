@@ -23,8 +23,9 @@ func New(input string) *Lexer {
 		"initial",
 		/*
 			Initial state is default state
-			Nosymbol state support we identify tok ':' is symbol or json
-			Method state support we identify tok 'class' is kind of keyword or Ident
+			Nosymbol state helps us identify tok ':' is for symbol or hash value
+			Method state helps us identify 'class' literal is a keyword or an identifier
+			Reference: https://github.com/looplab/fsm
 		*/
 		fsm.Events{
 			{Name: "nosymbol", Src: []string{"initial"}, Dst: "nosymbol"},
