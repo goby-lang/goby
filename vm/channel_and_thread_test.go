@@ -112,7 +112,6 @@ func TestObjectDeliveryBetweenThread(t *testing.T) {
 		`, 500600},
 		{`
 		c = Channel.new
-		c2 = Channel.new
 
 		1001.times do |i| # i start from 0 to 1000
 		  thread do
