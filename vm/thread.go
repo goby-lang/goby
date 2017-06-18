@@ -1,6 +1,9 @@
 package vm
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type thread struct {
 	// a stack that holds call frames
@@ -85,6 +88,70 @@ func (t *thread) builtInMethodYield(blockFrame *callFrame, args ...Object) *Poin
 	t.startFromTopFrame()
 
 	return t.stack.top()
+}
+
+func (t *thread) retrieveBlock(cf *callFrame, args []interface{}) (blockFrame *callFrame) {
+	var blockName string
+	var hasBlock bool
+
+	if len(args) > 2 {
+		hasBlock = true
+		blockFlag := args[2].(string)
+		blockName = strings.Split(blockFlag, ":")[1]
+	} else {
+		hasBlock = false
+	}
+
+	if hasBlock {
+		block := t.getBlock(blockName, cf.instructionSet.filename)
+
+		c := newCallFrame(block)
+		c.isBlock = true
+		c.ep = cf
+		c.self = cf.self
+
+		t.callFrameStack.push(c)
+		blockFrame = c
+	}
+
+	return
+}
+
+func (t *thread) evalBuiltInMethod(receiver Object, method *BuiltInMethodObject, receiverPr, argCount, argPr int, blockFrame *callFrame) {
+	methodBody := method.Fn(receiver)
+	args := []Object{}
+
+	for i := 0; i < argCount; i++ {
+		args = append(args, t.stack.Data[argPr+i].Target)
+	}
+
+	evaluated := methodBody(t, args, blockFrame)
+
+	_, ok := receiver.(*RClass)
+	if method.Name == "new" && ok {
+		instance, ok := evaluated.(*RObject)
+		if ok && instance.InitializeMethod != nil {
+			t.evalMethodObject(instance, instance.InitializeMethod, receiverPr, argCount, argPr, blockFrame)
+		}
+	}
+	t.stack.Data[receiverPr] = &Pointer{evaluated}
+	t.sp = receiverPr + 1
+}
+
+func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receiverPr, argC, argPr int, blockFrame *callFrame) {
+	c := newCallFrame(method.instructionSet)
+	c.self = receiver
+
+	for i := 0; i < argC; i++ {
+		c.insertLCL(i, 0, t.stack.Data[argPr+i].Target)
+	}
+
+	c.blockFrame = blockFrame
+	t.callFrameStack.push(c)
+	t.startFromTopFrame()
+
+	t.stack.Data[receiverPr] = t.stack.top()
+	t.sp = receiverPr + 1
 }
 
 // TODO: Use this method to replace unnecessary panics

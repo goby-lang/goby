@@ -7,6 +7,53 @@ import (
 	"testing"
 )
 
+func TestWhileStatementInBlock(t *testing.T) {
+	input := `
+	i = 1
+	thread do
+	  puts(i)
+	  while i <= 1000 do
+		puts(i)
+		i = i + 1
+	  end
+	end
+	`
+
+	expected := `
+<Block:0>
+0 putself
+1 getlocal 1 0
+2 send puts 1
+3 jump 14
+4 putnil
+5 pop
+6 jump 14
+7 putself
+8 getlocal 1 0
+9 send puts 1
+10 getlocal 1 0
+11 putobject 1
+12 send + 1
+13 setlocal 1 0
+14 getlocal 1 0
+15 putobject 1000
+16 send <= 1
+17 branchif 7
+18 putnil
+19 pop
+20 leave
+<ProgramStart>
+0 putobject 1
+1 setlocal 0 0
+2 putself
+3 send thread 0 block:0
+4 leave
+`
+
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
 func TestNextStatement(t *testing.T) {
 	input := `
 	x = 0

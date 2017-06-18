@@ -19,6 +19,22 @@ type callFrame struct {
 	blockFrame *callFrame
 }
 
+// We use lock on every local variable retrieval and insertion.
+// The main scenario is when multiple threads want to access local variables outside it's block
+// Since they share same block frame, they will all access to that frame's locals.
+// TODO: Find a better way to fix this, or prevent thread from accessing outside locals.
+func (cf *callFrame) getLCL(index, depth int) *Pointer {
+	if depth == 0 {
+		mutex.Lock()
+
+		defer mutex.Unlock()
+
+		return cf.locals[index]
+	}
+
+	return cf.blockFrame.ep.getLCL(index, depth-1)
+}
+
 func (cf *callFrame) insertLCL(index, depth int, value Object) {
 	existedLCL := cf.getLCL(index, depth)
 
@@ -26,6 +42,10 @@ func (cf *callFrame) insertLCL(index, depth int, value Object) {
 		existedLCL.Target = value
 		return
 	}
+
+	mutex.Lock()
+
+	defer mutex.Unlock()
 
 	cf.locals = append(cf.locals, nil)
 	copy(cf.locals[index:], cf.locals[index:])
@@ -79,14 +99,6 @@ func (cf *callFrame) lookupConstant(constName string) (*Pointer, bool) {
 	}
 
 	return nil, false
-}
-
-func (cf *callFrame) getLCL(index, depth int) *Pointer {
-	if depth == 0 {
-		return cf.locals[index]
-	}
-
-	return cf.blockFrame.ep.getLCL(index, depth-1)
 }
 
 func (cfs *callFrameStack) push(cf *callFrame) {

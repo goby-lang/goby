@@ -40,7 +40,7 @@ func (h *HashObject) returnClass() Class {
 	return h.Class
 }
 
-func (h *HashObject) Length() int {
+func (h *HashObject) length() int {
 	return len(h.Pairs)
 }
 
@@ -161,7 +161,7 @@ var builtinHashInstanceMethods = []*BuiltInMethodObject{
 				}
 
 				hash := receiver.(*HashObject)
-				return initilaizeInteger(hash.Length())
+				return initilaizeInteger(hash.length())
 			}
 		},
 	},

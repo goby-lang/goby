@@ -1,11 +1,20 @@
 package vm
 
+import "sync"
+
 type stack struct {
 	Data   []*Pointer
 	thread *thread
+	// Although every thread has its own stack, vm's main thread still can be accessed by other threads.
+	// This is why we need a lock in stack
+	// TODO: Find a way to fix this instead of put lock on every stack.
+	lock *sync.Mutex
 }
 
 func (s *stack) push(v *Pointer) {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	if len(s.Data) <= s.thread.sp {
 		s.Data = append(s.Data, v)
 	} else {
@@ -16,6 +25,9 @@ func (s *stack) push(v *Pointer) {
 }
 
 func (s *stack) pop() *Pointer {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	if len(s.Data) < 1 {
 		panic("Nothing to pop!")
 	}
@@ -34,6 +46,8 @@ func (s *stack) pop() *Pointer {
 }
 
 func (s *stack) top() *Pointer {
+	mutex.Lock()
+	defer mutex.Unlock()
 
 	if len(s.Data) == 0 {
 		return nil

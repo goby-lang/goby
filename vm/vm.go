@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sync"
 )
 
 var stackTrace int
@@ -77,7 +78,7 @@ func New(fileDir string, args []string) *VM {
 }
 
 func (vm *VM) newThread() *thread {
-	s := &stack{}
+	s := &stack{lock: &sync.Mutex{}}
 	cfs := &callFrameStack{callFrames: []*callFrame{}}
 	t := &thread{stack: s, callFrameStack: cfs, sp: 0, cfp: 0}
 	s.thread = t
@@ -140,6 +141,7 @@ func (vm *VM) initConstants() {
 		hashClass,
 		classClass,
 		methodClass,
+		channelClass,
 	}
 
 	args := []Object{}

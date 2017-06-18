@@ -519,6 +519,20 @@ var builtinCommonInstanceMethods = []*BuiltInMethodObject{
 			}
 		},
 	},
+	{
+		Name: "thread",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				newT := t.vm.newThread()
+
+				go func() {
+					newT.builtInMethodYield(blockFrame, args...)
+				}()
+
+				return NULL
+			}
+		},
+	},
 }
 
 // BuiltinClassMethods is a collection of class methods used by Class
