@@ -22,9 +22,10 @@ func New(input string) *Lexer {
 	l.FSM = fsm.NewFSM(
 		"initial",
 		fsm.Events{
-			{Name: "nosymbol", Src: []string{"initial"}, Dst: "nosymbol"},
+
+			{Name: "git", Src: []string{"initial"}, Dst: "nosymbol"},
 			{Name: "method", Src: []string{"initial"}, Dst: "method"},
-			{Name: "initialize", Src: []string{"method", "initial", "nosymbol"}, Dst: "initial"},
+			{Name: "initial", Src: []string{"method", "initial", "nosymbol"}, Dst: "initial"},
 		},
 		fsm.Callbacks{},
 	)
@@ -177,7 +178,7 @@ func (l *Lexer) NextToken() token.Token {
 				tok.Literal = l.readConstant()
 				tok.Type = token.Constant
 				tok.Line = l.line
-				l.FSM.Event("initialize")
+				l.FSM.Event("initial")
 			} else {
 				tok.Literal = l.readIdentifier()
 				if l.FSM.Is("method") {
@@ -186,14 +187,14 @@ func (l *Lexer) NextToken() token.Token {
 					} else {
 						tok.Type = token.Ident
 					}
-					l.FSM.Event("initialize")
+					l.FSM.Event("initial")
 
 				} else if l.FSM.Is("initial") {
 					tok.Type = token.LookupIdent(tok.Literal)
 					if tok.Literal == "def" {
 						l.FSM.Event("method")
 					} else {
-						l.FSM.Event("initialize")
+						l.FSM.Event("initial")
 					}
 				}
 				tok.Line = l.line
@@ -237,7 +238,7 @@ func (l *Lexer) skipWhitespace() {
 func (l *Lexer) resetNosymbol() {
 
 	if !l.FSM.Is("method") && l.ch != ':' {
-		l.FSM.Event("initialize")
+		l.FSM.Event("initial")
 
 	}
 
