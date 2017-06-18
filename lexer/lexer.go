@@ -22,9 +22,9 @@ func New(input string) *Lexer {
 	l.FSM = fsm.NewFSM(
 		"initial",
 		/*
-		Initial state is default state
-		Nosymbol state support we identify tok ':' is symbol or json
-		Method state support we identify tok 'class' is kind of keyword or Ident
+			Initial state is default state
+			Nosymbol state support we identify tok ':' is symbol or json
+			Method state support we identify tok 'class' is kind of keyword or Ident
 		*/
 		fsm.Events{
 			{Name: "nosymbol", Src: []string{"initial"}, Dst: "nosymbol"},
