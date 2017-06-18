@@ -88,6 +88,45 @@ func TestObjectDeliveryBetweenThread(t *testing.T) {
 
 		c.receive.bar
 		`, 100},
+		{`
+		c = Channel.new
+		c2 = Channel.new
+
+		thread do
+		  1001.times do |i| # i start from 0 to 1000
+		  	c.deliver(i)
+		  end
+
+		  c2.receive
+		  c.deliver(100)
+		end
+
+		r = 0
+
+		1001.times do
+		  r = r + c.receive
+		end
+
+		c2.deliver(true) # block thread until it finishes the loop
+		r + c.receive
+		`, 500600},
+		{`
+		c = Channel.new
+		c2 = Channel.new
+
+		1001.times do |i| # i start from 0 to 1000
+		  thread do
+		  	c.deliver(i)
+		  end
+		end
+
+		r = 0
+		1001.times do
+		  r = r + c.receive
+		end
+
+		r
+		`, 500500},
 	}
 
 	for _, tt := range tests {

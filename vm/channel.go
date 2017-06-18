@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	channelClass   *RClass
+	channelClass *RClass
 )
 
 var containerMap = map[int]Object{}
