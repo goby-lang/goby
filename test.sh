@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
+SLEEP=0.5
+
 set -e
 echo "" > coverage.txt
 
+rm -f profile.out
 for d in $(go list ./... | grep -v vendor); do
     go test -race -coverprofile=profile.out -covermode=atomic $d
     if [ -f profile.out ]; then
@@ -16,6 +19,7 @@ done
 # TODO: Write a test for this specific case
 go install .
 goby test_fixtures/server.gb & PID=$!
+echo "Sleeping $SLEEP sec for waiting server.gb being ready..."; sleep $SLEEP
 
 ab -n 3000 -c 100 http://localhost:3000/
 
