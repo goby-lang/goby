@@ -10,6 +10,7 @@ var (
 
 var containerMap = map[int]Object{}
 var containerCount = 0
+var channelID = 0
 
 // storeObj store objects into the container map
 // and update containerCount at the same time
@@ -25,15 +26,16 @@ func storeObj(obj Object) int {
 	if containerCount > 1000 {
 		containerCount = 0
 	} else {
-		containerCount += 1
+		containerCount++
 	}
 
 	mutex.Unlock()
 	return i
 }
 
+// ChannelObject represents a goby channel, which carries a golang channel
 type ChannelObject struct {
-	Id    int
+	id    int
 	Class *RClass
 	Chan  chan int
 }
@@ -47,7 +49,7 @@ func initializeChannelClass() {
 }
 
 func (co *ChannelObject) toString() string {
-	return fmt.Sprintf("<Channel: %d>", co.Id)
+	return fmt.Sprintf("<Channel: %d>", co.id)
 }
 
 func (co *ChannelObject) toJSON() string {
@@ -64,7 +66,9 @@ func builtinChannelClassMethods() []*BuiltInMethodObject {
 			Name: "new",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					return &ChannelObject{Class: channelClass, Id: 0, Chan: make(chan int)}
+					c := &ChannelObject{Class: channelClass, id: channelID, Chan: make(chan int)}
+					channelID++
+					return c
 				}
 			},
 		},
