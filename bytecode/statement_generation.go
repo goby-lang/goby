@@ -71,7 +71,7 @@ func (g *Generator) compileWhileStmt(is *instructionSet, stmt *ast.WhileStatemen
 	anchor2 := &anchor{is.Count}
 
 	scope.anchor = anchor1
-	g.compileCodeBlock(is, stmt.Body, scope, scope.localTable)
+	g.compileCodeBlock(is, stmt.Body, scope, table)
 
 	anchor1.line = is.Count
 
