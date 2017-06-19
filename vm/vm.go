@@ -147,7 +147,7 @@ func (vm *VM) initConstants() {
 	args := []Object{}
 
 	for _, arg := range vm.args {
-		args = append(args, initializeString(arg))
+		args = append(args, initStringObject(arg))
 	}
 
 	for _, c := range builtInClasses {
@@ -155,7 +155,7 @@ func (vm *VM) initConstants() {
 		constants[c.ReturnName()] = p
 	}
 
-	constants["ARGV"] = &Pointer{Target: initializeArray(args)}
+	constants["ARGV"] = &Pointer{Target: initArrayObject(args)}
 	objectClass.constants = constants
 	vm.constants["Object"] = &Pointer{objectClass}
 }

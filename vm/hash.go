@@ -44,7 +44,7 @@ func (h *HashObject) length() int {
 	return len(h.Pairs)
 }
 
-func initializeHash(pairs map[string]Object) *HashObject {
+func initHashObject(pairs map[string]Object) *HashObject {
 	return &HashObject{Pairs: pairs, Class: hashClass}
 }
 
@@ -89,7 +89,7 @@ var builtinHashInstanceMethods = []*BuiltInMethodObject{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				r := receiver.(*HashObject)
-				return initializeString(r.toJSON())
+				return initStringObject(r.toJSON())
 			}
 		},
 	},
@@ -167,7 +167,7 @@ var builtinHashInstanceMethods = []*BuiltInMethodObject{
 	},
 }
 
-func initHash() {
+func initHashClass() {
 	bc := &BaseClass{Name: "Hash", ClassMethods: newEnvironment(), Methods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
 	hc := &RHash{BaseClass: bc}
 	hc.setBuiltInMethods(builtinHashInstanceMethods, false)

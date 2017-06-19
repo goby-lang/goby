@@ -83,12 +83,12 @@ func (a *ArrayObject) shift() Object {
 	return value
 }
 
-// initializeArray returns an array that contains given objects
-func initializeArray(elements []Object) *ArrayObject {
+// initArrayObject returns an array that contains given objects
+func initArrayObject(elements []Object) *ArrayObject {
 	return &ArrayObject{Elements: elements, Class: arrayClass}
 }
 
-func initArray() {
+func initArrayClass() {
 	bc := &BaseClass{Name: "Array", ClassMethods: newEnvironment(), Methods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
 	ac := &RArray{BaseClass: bc}
 	ac.setBuiltInMethods(builtinArrayInstanceMethods, false)
@@ -327,7 +327,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 					elements[i] = result.Target
 				}
 
-				return initializeArray(elements)
+				return initArrayObject(elements)
 			}
 		},
 	},
@@ -360,7 +360,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 					}
 				}
 
-				return initializeArray(elements)
+				return initArrayObject(elements)
 			}
 		},
 	},
@@ -463,7 +463,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 				var count int
 
 				if len(args) > 1 {
-					return initializeError(ArgumentErrorClass, "Expect 1 argument, got=%v", len(args))
+					return initErrorObject(ArgumentErrorClass, "Expect 1 argument, got=%v", len(args))
 				}
 
 				if blockFrame != nil {
@@ -526,7 +526,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				arr := receiver.(*ArrayObject)
-				rotArr := initializeArray(arr.Elements)
+				rotArr := initArrayObject(arr.Elements)
 
 				rotate := 1
 
@@ -563,7 +563,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 					return newError("Expect index argument to be Integer. got=%T", args[0])
 				}
 
-				return initializeArray(arr.Elements[:arg.Value])
+				return initArrayObject(arr.Elements[:arg.Value])
 			}
 		},
 	},
@@ -584,7 +584,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 				}
 
 				l := len(arr.Elements)
-				return initializeArray(arr.Elements[l-arg.Value : l])
+				return initArrayObject(arr.Elements[l-arg.Value : l])
 			}
 		},
 	},

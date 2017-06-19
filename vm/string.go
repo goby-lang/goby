@@ -48,7 +48,7 @@ var (
 	mutex       = &sync.Mutex{}
 )
 
-func initializeString(value string) *StringObject {
+func initStringObject(value string) *StringObject {
 	if len(value) < 50 {
 		mutex.Lock()
 
@@ -290,7 +290,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 				rest := string(str[1:])
 				result := strings.ToUpper(start) + strings.ToLower(rest)
 
-				return initializeString(result)
+				return initStringObject(result)
 			}
 		},
 	},
@@ -307,7 +307,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 
 				str := receiver.(*StringObject).Value
 
-				return initializeString(strings.ToUpper(str))
+				return initStringObject(strings.ToUpper(str))
 			}
 		},
 	},
@@ -324,7 +324,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 
 				str := receiver.(*StringObject).Value
 
-				return initializeString(strings.ToLower(str))
+				return initStringObject(strings.ToLower(str))
 			}
 		},
 	},
@@ -381,7 +381,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 					revert += string(str[i])
 				}
 
-				return initializeString(revert)
+				return initStringObject(revert)
 			}
 		},
 	},
@@ -398,7 +398,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 
 				str := receiver.(*StringObject).Value
 
-				return initializeString(str)
+				return initStringObject(str)
 			}
 		},
 	},
@@ -442,7 +442,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 	},
 }
 
-func initString() {
+func initStringClass() {
 	bc := &BaseClass{Name: "String", Methods: newEnvironment(), ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
 	sc := &RString{BaseClass: bc}
 	sc.setBuiltInMethods(builtinStringInstanceMethods, false)

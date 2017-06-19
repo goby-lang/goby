@@ -29,7 +29,7 @@ func (n *NullObject) returnClass() Class {
 	return n.Class
 }
 
-func initNull() {
+func initNullClass() {
 	baseClass := &BaseClass{Name: "Null", Methods: newEnvironment(), ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass}
 	nc := &RNull{BaseClass: baseClass}
 	nc.setBuiltInMethods(builtInNullInstanceMethods, false)

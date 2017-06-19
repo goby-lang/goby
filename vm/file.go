@@ -136,7 +136,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					filename := args[0].(*StringObject).Value
-					return initializeString(filepath.Ext(filename))
+					return initStringObject(filepath.Ext(filename))
 				}
 			},
 		},
@@ -207,7 +207,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					filename := args[0].(*StringObject).Value
-					return initializeString(filepath.Base(filename))
+					return initStringObject(filepath.Base(filename))
 				}
 			},
 		},
@@ -227,7 +227,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 						elements = append(elements, next)
 					}
 
-					return initializeString(filepath.Join(elements...))
+					return initStringObject(filepath.Join(elements...))
 				}
 			},
 		},
@@ -245,10 +245,10 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 					filename := args[0].(*StringObject).Value
 					dir, file := filepath.Split(filename)
 
-					dirObject := initializeString(dir)
-					fileObject := initializeString(file)
+					dirObject := initStringObject(dir)
+					fileObject := initStringObject(file)
 
-					return initializeArray([]Object{dirObject, fileObject})
+					return initArrayObject([]Object{dirObject, fileObject})
 				}
 			},
 		},
@@ -279,7 +279,7 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					name := receiver.(*FileObject).File.Name()
-					return initializeString(name)
+					return initStringObject(name)
 				}
 			},
 		},
@@ -315,7 +315,7 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject {
 						t.returnError(err.Error())
 					}
 
-					return initializeString(string(data))
+					return initStringObject(string(data))
 				}
 			},
 		},

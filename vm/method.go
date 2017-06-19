@@ -7,7 +7,7 @@ import (
 
 var methodClass *RMethod
 
-func init() {
+func initMethodClass() {
 	methods := newEnvironment()
 
 	bc := &BaseClass{Name: "Method", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}

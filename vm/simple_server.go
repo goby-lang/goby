@@ -181,7 +181,7 @@ func setupResponse(w http.ResponseWriter, req *http.Request, res *RObject) {
 func initObject(v interface{}) Object {
 	switch v := v.(type) {
 	case string:
-		return initializeString(v)
+		return initStringObject(v)
 	case int:
 		return initilaizeInteger(v)
 	case bool:

@@ -135,7 +135,7 @@ var builtInActions = map[operationType]*action{
 				elems = append([]Object{v.Target}, elems...)
 			}
 
-			arr := initializeArray(elems)
+			arr := initArrayObject(elems)
 			t.stack.push(&Pointer{arr})
 		},
 	},
@@ -151,7 +151,7 @@ var builtInActions = map[operationType]*action{
 				pairs[k.Target.(*StringObject).Value] = v.Target
 			}
 
-			hash := initializeHash(pairs)
+			hash := initHashObject(pairs)
 			t.stack.push(&Pointer{hash})
 		},
 	},
@@ -382,7 +382,7 @@ func initializeObjectFromInstruction(value interface{}) Object {
 		case "false":
 			return FALSE
 		default:
-			return initializeString(v)
+			return initStringObject(v)
 		}
 	}
 
