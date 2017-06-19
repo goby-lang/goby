@@ -130,7 +130,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 				right, ok := args[0].(*IntegerObject)
 
 				if !ok {
-					return initializeError(TypeErrorClass, "Expect Integer. got=%T (%+v)", args[0], args[0])
+					return initErrorObject(TypeErrorClass, "Expect Integer. got=%T (%+v)", args[0], args[0])
 				}
 
 				rightValue := right.Value
@@ -439,7 +439,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 
 				int := receiver.(*IntegerObject)
 
-				return initializeString(strconv.Itoa(int.Value))
+				return initStringObject(strconv.Itoa(int.Value))
 			}
 		},
 	},
@@ -565,7 +565,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 	},
 }
 
-func initInteger() {
+func initIntegerClass() {
 	bc := &BaseClass{Name: "Integer", Methods: newEnvironment(), ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
 	ic := &RInteger{BaseClass: bc}
 	ic.setBuiltInMethods(builtinIntegerInstanceMethods, false)

@@ -8,14 +8,15 @@ var mainObj *RObject
 
 func init() {
 	initTopLevelClasses()
-	initNull()
-	initBool()
-	initInteger()
-	initString()
-	initArray()
-	initHash()
+	initNullClass()
+	initBoolClass()
+	initIntegerClass()
+	initStringClass()
+	initArrayClass()
+	initHashClass()
 	initializeChannelClass()
 	initErrorClasses()
+	initMethodClass()
 	initMainObj()
 }
 

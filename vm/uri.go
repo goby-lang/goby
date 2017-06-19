@@ -16,13 +16,13 @@ func initializeURIClass(vm *VM) {
 	uri.setBuiltInMethods(builtinURIClassMethods, true)
 
 	attrs := []Object{
-		initializeString("host"),
-		initializeString("path"),
-		initializeString("port"),
-		initializeString("query"),
-		initializeString("scheme"),
-		initializeString("user"),
-		initializeString("password"),
+		initStringObject("host"),
+		initStringObject("path"),
+		initStringObject("port"),
+		initStringObject("query"),
+		initStringObject("scheme"),
+		initStringObject("user"),
+		initStringObject("password"),
 	}
 
 	http.setAttrReader(attrs)
@@ -57,14 +57,14 @@ var builtinURIClassMethods = []*BuiltInMethodObject{
 					"@user":     NULL,
 					"@password": NULL,
 					"@query":    NULL,
-					"@path":     initializeString("/"),
+					"@path":     initStringObject("/"),
 				}
 
 				// Scheme
-				uriAttrs["@scheme"] = initializeString(u.Scheme)
+				uriAttrs["@scheme"] = initStringObject(u.Scheme)
 
 				// Host
-				uriAttrs["@host"] = initializeString(u.Host)
+				uriAttrs["@host"] = initStringObject(u.Host)
 
 				// Port
 				if len(u.Port()) == 0 {
@@ -86,22 +86,22 @@ var builtinURIClassMethods = []*BuiltInMethodObject{
 
 				// Path
 				if len(u.Path) != 0 {
-					uriAttrs["@path"] = initializeString(u.Path)
+					uriAttrs["@path"] = initStringObject(u.Path)
 				}
 
 				// Query
 				if len(u.RawQuery) != 0 {
-					uriAttrs["@query"] = initializeString(u.RawQuery)
+					uriAttrs["@query"] = initStringObject(u.RawQuery)
 				}
 
 				// User
 				if u.User != nil {
 					if len(u.User.Username()) != 0 {
-						uriAttrs["@user"] = initializeString(u.User.Username())
+						uriAttrs["@user"] = initStringObject(u.User.Username())
 					}
 
 					if p, ok := u.User.Password(); ok {
-						uriAttrs["@password"] = initializeString(p)
+						uriAttrs["@password"] = initStringObject(p)
 					}
 				}
 

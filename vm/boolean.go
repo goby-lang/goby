@@ -175,7 +175,7 @@ var builtinBooleanInstanceMethods = []*BuiltInMethodObject{
 	},
 }
 
-func initBool() {
+func initBoolClass() {
 	bc := &BaseClass{Name: "Boolean", Methods: newEnvironment(), ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
 	b := &RBool{BaseClass: bc}
 	b.setBuiltInMethods(builtinBooleanInstanceMethods, false)

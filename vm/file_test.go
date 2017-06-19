@@ -170,7 +170,7 @@ func TestSplitMethod(t *testing.T) {
 		{`
 		require "file"
 		File.split("/home/goby/plugin/test.gb")
-		`, initializeArray([]Object{initializeString("/home/goby/plugin/"), initializeString("test.gb")})},
+		`, initArrayObject([]Object{initStringObject("/home/goby/plugin/"), initStringObject("test.gb")})},
 	}
 
 	for _, tt := range tests {

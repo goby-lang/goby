@@ -56,7 +56,7 @@ func (e *Error) returnClass() Class {
 	return e.Class
 }
 
-func initializeError(errorType *RClass, format string, args ...interface{}) *Error {
+func initErrorObject(errorType *RClass, format string, args ...interface{}) *Error {
 	return &Error{
 		Class:   errorType,
 		Message: fmt.Sprintf(errorType.Name+": "+format, args...),

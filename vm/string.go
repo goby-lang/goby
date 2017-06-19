@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"sync"
 	"unicode"
 )
 
@@ -43,29 +42,7 @@ func (s *StringObject) equal(e *StringObject) bool {
 	return s.Value == e.Value
 }
 
-var (
-	stringTable = make(map[string]*StringObject)
-	mutex       = &sync.Mutex{}
-)
-
-func initializeString(value string) *StringObject {
-	if len(value) < 50 {
-		mutex.Lock()
-
-		defer mutex.Unlock()
-		addr, ok := stringTable[value]
-
-		if !ok {
-			s := &StringObject{Value: value, Class: stringClass}
-
-			stringTable[value] = s
-
-			return s
-		}
-
-		return addr
-	}
-
+func initStringObject(value string) *StringObject {
 	return &StringObject{Value: value, Class: stringClass}
 }
 
@@ -290,7 +267,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 				rest := string(str[1:])
 				result := strings.ToUpper(start) + strings.ToLower(rest)
 
-				return initializeString(result)
+				return initStringObject(result)
 			}
 		},
 	},
@@ -307,7 +284,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 
 				str := receiver.(*StringObject).Value
 
-				return initializeString(strings.ToUpper(str))
+				return initStringObject(strings.ToUpper(str))
 			}
 		},
 	},
@@ -324,7 +301,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 
 				str := receiver.(*StringObject).Value
 
-				return initializeString(strings.ToLower(str))
+				return initStringObject(strings.ToLower(str))
 			}
 		},
 	},
@@ -381,7 +358,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 					revert += string(str[i])
 				}
 
-				return initializeString(revert)
+				return initStringObject(revert)
 			}
 		},
 	},
@@ -398,7 +375,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 
 				str := receiver.(*StringObject).Value
 
-				return initializeString(str)
+				return initStringObject(str)
 			}
 		},
 	},
@@ -442,7 +419,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 	},
 }
 
-func initString() {
+func initStringClass() {
 	bc := &BaseClass{Name: "String", Methods: newEnvironment(), ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
 	sc := &RString{BaseClass: bc}
 	sc.setBuiltInMethods(builtinStringInstanceMethods, false)
