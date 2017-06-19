@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"sync"
 	"unicode"
 )
 
@@ -43,29 +42,7 @@ func (s *StringObject) equal(e *StringObject) bool {
 	return s.Value == e.Value
 }
 
-var (
-	stringTable = make(map[string]*StringObject)
-	mutex       = &sync.Mutex{}
-)
-
 func initStringObject(value string) *StringObject {
-	if len(value) < 50 {
-		mutex.Lock()
-
-		defer mutex.Unlock()
-		addr, ok := stringTable[value]
-
-		if !ok {
-			s := &StringObject{Value: value, Class: stringClass}
-
-			stringTable[value] = s
-
-			return s
-		}
-
-		return addr
-	}
-
 	return &StringObject{Value: value, Class: stringClass}
 }
 

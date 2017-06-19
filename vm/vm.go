@@ -12,6 +12,8 @@ import (
 
 var stackTrace int
 
+var mutex = &sync.Mutex{}
+
 type isIndexTable struct {
 	Data map[string]int
 }
