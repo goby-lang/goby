@@ -77,6 +77,11 @@ It will have Ruby's syntax (I'll try to support all common syntaxes) but without
 - IO
     - `puts`
     - `ARGV`
+- Thread (this should work but the implementation is quite naive and will be refined in the future)
+    - Support `thread` method to create a new thread (like `goroutine`)
+    - Has `Channel` class for passing objects between threads (like `chan` in Go)
+    - See this sample: [One thousand threads](https://github.com/goby-lang/goby/blob/master/samples/one_thousand_threads.gb)
+
     
 **(You can open an issue for any feature request)**
 
@@ -119,6 +124,7 @@ See [sample directory](https://github.com/goby-lang/goby/tree/master/samples) fo
 - [Running a "Hello World" app with built in server library](https://github.com/goby-lang/goby/blob/master/samples/server.gb)
 - [Sending request using http library](https://github.com/goby-lang/goby/blob/master/samples/http.gb)
 - [Running load test on blocking server](https://github.com/goby-lang/goby/blob/master/samples/blocking_server.gb) (This shows `Goby`'s simple server is very performant and can handle requests concurrently)
+- [One thousand threads](https://github.com/goby-lang/goby/blob/master/samples/one_thousand_threads.gb)
 
 ## Documentations
 
