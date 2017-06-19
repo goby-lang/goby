@@ -50,14 +50,15 @@ var (
 
 func initializeString(value string) *StringObject {
 	if len(value) < 50 {
+		mutex.Lock()
+
+		defer mutex.Unlock()
 		addr, ok := stringTable[value]
 
 		if !ok {
 			s := &StringObject{Value: value, Class: stringClass}
 
-			mutex.Lock()
 			stringTable[value] = s
-			mutex.Unlock()
 
 			return s
 		}
