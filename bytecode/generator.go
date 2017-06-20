@@ -10,14 +10,13 @@ import (
 type scope struct {
 	self       ast.Statement
 	program    *ast.Program
-	out        *scope
 	localTable *localTable
 	line       int
 	anchor     *anchor
 }
 
 func newScope(s *scope, stmt ast.Statement) *scope {
-	return &scope{out: s, localTable: newLocalTable(0), self: stmt, line: 0}
+	return &scope{localTable: newLocalTable(0), self: stmt, line: 0}
 }
 
 // Generator contains program's AST and will store generated instruction sets
