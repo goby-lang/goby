@@ -8,18 +8,7 @@ import (
 func (g *Generator) compileExpression(is *instructionSet, exp ast.Expression, scope *scope, table *localTable) {
 	switch exp := exp.(type) {
 	case *ast.Identifier:
-		index, depth, ok := table.getLCL(exp.Value, table.depth)
-
-		// it's local variable
-		if ok {
-			is.define(GetLocal, depth, index)
-			return
-		}
-
-		// otherwise it's a method call
-		is.define(PutSelf)
-		is.define(Send, exp.Value, 0)
-
+		g.compileIdentifier(is, exp, scope, table)
 	case *ast.Constant:
 		is.define(GetConstant, exp.Value)
 	case *ast.InstanceVariable:
@@ -50,46 +39,59 @@ func (g *Generator) compileExpression(is *instructionSet, exp ast.Expression, sc
 		}
 		g.compileInfixExpression(is, exp, scope, table)
 	case *ast.PrefixExpression:
-		switch exp.Operator {
-		case "!":
-			g.compileExpression(is, exp.Right, scope, table)
-			is.define(Send, exp.Operator, 0)
-		case "-":
-			is.define(PutObject, 0)
-			g.compileExpression(is, exp.Right, scope, table)
-			is.define(Send, exp.Operator, 1)
-		}
-
+		g.compilePrefixExpression(is, exp, scope, table)
 	case *ast.IfExpression:
 		g.compileIfExpression(is, exp, scope, table)
 	case *ast.SelfExpression:
 		is.define(PutSelf)
 	case *ast.YieldExpression:
-		is.define(PutSelf)
-
-		for _, arg := range exp.Arguments {
-			g.compileExpression(is, arg, scope, table)
-		}
-
-		is.define(InvokeBlock, len(exp.Arguments))
+		g.compileYieldExpression(is, exp, scope, table)
 	case *ast.CallExpression:
-		g.compileExpression(is, exp.Receiver, scope, table)
-
-		for _, arg := range exp.Arguments {
-			g.compileExpression(is, arg, scope, table)
-		}
-
-		if exp.Block != nil {
-			newTable := newLocalTable(table.depth + 1)
-			newTable.upper = table
-			blockIndex := g.blockCounter
-			g.blockCounter++
-			g.compileBlockArgExpression(blockIndex, exp, scope, newTable)
-			is.define(Send, exp.Method, len(exp.Arguments), fmt.Sprintf("block:%d", blockIndex))
-			return
-		}
-		is.define(Send, exp.Method, len(exp.Arguments))
+		g.compileCallExpression(is, exp, scope, table)
 	}
+}
+
+func (g *Generator) compileIdentifier(is *instructionSet, exp *ast.Identifier, scope *scope, table *localTable) {
+	index, depth, ok := table.getLCL(exp.Value, table.depth)
+
+	// it's local variable
+	if ok {
+		is.define(GetLocal, depth, index)
+		return
+	}
+
+	// otherwise it's a method call
+	is.define(PutSelf)
+	is.define(Send, exp.Value, 0)
+}
+
+func (g *Generator) compileYieldExpression(is *instructionSet, exp *ast.YieldExpression, scope *scope, table *localTable) {
+	is.define(PutSelf)
+
+	for _, arg := range exp.Arguments {
+		g.compileExpression(is, arg, scope, table)
+	}
+
+	is.define(InvokeBlock, len(exp.Arguments))
+}
+
+func (g *Generator) compileCallExpression(is *instructionSet, exp *ast.CallExpression, scope *scope, table *localTable) {
+	g.compileExpression(is, exp.Receiver, scope, table)
+
+	for _, arg := range exp.Arguments {
+		g.compileExpression(is, arg, scope, table)
+	}
+
+	if exp.Block != nil {
+		newTable := newLocalTable(table.depth + 1)
+		newTable.upper = table
+		blockIndex := g.blockCounter
+		g.blockCounter++
+		g.compileBlockArgExpression(blockIndex, exp, scope, newTable)
+		is.define(Send, exp.Method, len(exp.Arguments), fmt.Sprintf("block:%d", blockIndex))
+		return
+	}
+	is.define(Send, exp.Method, len(exp.Arguments))
 }
 
 func (g *Generator) compileAssignExpression(is *instructionSet, exp *ast.InfixExpression, scope *scope, table *localTable) {
@@ -141,6 +143,18 @@ func (g *Generator) compileIfExpression(is *instructionSet, exp *ast.IfExpressio
 	g.compileCodeBlock(is, exp.Alternative, scope, table)
 
 	anchor2.line = is.Count
+}
+
+func (g *Generator) compilePrefixExpression(is *instructionSet, exp *ast.PrefixExpression, scope *scope, table *localTable) {
+	switch exp.Operator {
+	case "!":
+		g.compileExpression(is, exp.Right, scope, table)
+		is.define(Send, exp.Operator, 0)
+	case "-":
+		is.define(PutObject, 0)
+		g.compileExpression(is, exp.Right, scope, table)
+		is.define(Send, exp.Operator, 1)
+	}
 }
 
 func (g *Generator) compileInfixExpression(is *instructionSet, node *ast.InfixExpression, scope *scope, table *localTable) {
