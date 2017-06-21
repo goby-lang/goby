@@ -87,6 +87,22 @@ It will have Ruby's syntax (I'll try to support all common syntaxes) but without
 
 ## Install
 
+## Setup `$GOBY_ROOT`
+
+Goby requires environment variable `$GOBY_ROOT` for installing libraries. Add the following line to your shell config file, either `~/.bashrc`, `~/.bash_profile`, or `~/.zshrc` if you're using zsh.
+
+```
+export GOBY_ROOT=/usr/local/goby
+```
+
+You can set any path as your `$GOBY_ROOT`.
+
+The most common messages you'll see if you do not set `$GOBY_ROOT` are 'library not found'. For example:
+
+```ruby
+require 'net/http' 
+# => Internal Error: open lib/net/http/response.gb: no such file or directory
+```
 
 ### From Source
 
@@ -98,6 +114,8 @@ It will have Ruby's syntax (I'll try to support all common syntaxes) but without
 ```
 $ go get github.com/goby-lang/goby
 ```
+
+5. Run `goby -v` to verify.
 
 ### Via homebrew
 
