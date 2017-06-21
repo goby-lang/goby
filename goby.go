@@ -14,7 +14,7 @@ import (
 )
 
 // Version stores current Goby version
-const Version string = "0.0.6"
+const Version string = "0.0.8"
 
 func main() {
 	compileOptionPtr := flag.Bool("c", false, "Compile to bytecode")
