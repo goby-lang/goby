@@ -11,4 +11,6 @@ r = 0
   r = r + c.receive
 end
 
+c.close
+
 puts(r)

@@ -106,5 +106,17 @@ func builtinChannelInstanceMethods() []*BuiltInMethodObject {
 				}
 			},
 		},
+		{
+			Name: "close",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					c := receiver.(*ChannelObject)
+
+					close(c.Chan)
+
+					return NULL
+				}
+			},
+		},
 	}
 }
