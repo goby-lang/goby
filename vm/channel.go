@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+	"sync"
 )
 
 var (
@@ -11,6 +12,7 @@ var (
 var containerMap = map[int]Object{}
 var containerCount = 0
 var channelID = 0
+var mutex = &sync.Mutex{}
 
 // storeObj store objects into the container map
 // and update containerCount at the same time

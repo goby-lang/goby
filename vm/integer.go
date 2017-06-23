@@ -402,8 +402,11 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		Name: "++",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
 				int := receiver.(*IntegerObject)
+
+				t.vm.Lock()
+				defer t.vm.Unlock()
+
 				int.Value++
 				return int
 			}
@@ -421,6 +424,10 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				int := receiver.(*IntegerObject)
+
+				t.vm.Lock()
+				defer t.vm.Unlock()
+
 				int.Value--
 				return int
 			}

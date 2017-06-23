@@ -1,5 +1,7 @@
 package vm
 
+import "sync"
+
 type callFrameStack struct {
 	callFrames []*callFrame
 	thread     *thread
@@ -17,6 +19,7 @@ type callFrame struct {
 	lPr        int
 	isBlock    bool
 	blockFrame *callFrame
+	sync.RWMutex
 }
 
 // We use lock on every local variable retrieval and insertion.
@@ -25,9 +28,9 @@ type callFrame struct {
 // TODO: Find a better way to fix this, or prevent thread from accessing outside locals.
 func (cf *callFrame) getLCL(index, depth int) *Pointer {
 	if depth == 0 {
-		mutex.Lock()
+		cf.RLock()
 
-		defer mutex.Unlock()
+		defer cf.RUnlock()
 
 		return cf.locals[index]
 	}
@@ -43,9 +46,9 @@ func (cf *callFrame) insertLCL(index, depth int, value Object) {
 		return
 	}
 
-	mutex.Lock()
+	cf.Lock()
 
-	defer mutex.Unlock()
+	defer cf.Unlock()
 
 	cf.locals = append(cf.locals, nil)
 	copy(cf.locals[index:], cf.locals[index:])
