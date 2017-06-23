@@ -7,6 +7,31 @@ import (
 	"testing"
 )
 
+func TestRangeExpression(t *testing.T) {
+	input := `
+	(1..5).each do |i|
+	  puts(i)
+	end
+	`
+
+	expected := `
+<Block:0>
+0 putself
+1 getlocal 0 0
+2 send puts 1
+3 leave
+<ProgramStart>
+0 putobject 1
+1 putobject 5
+2 newrange 0
+3 send each 0 block:0
+4 leave
+`
+
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
 func TestWhileStatementInBlock(t *testing.T) {
 	input := `
 	i = 1

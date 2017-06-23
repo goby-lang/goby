@@ -21,6 +21,10 @@ func (g *Generator) compileExpression(is *instructionSet, exp ast.Expression, sc
 		is.define(PutObject, fmt.Sprint(exp.Value))
 	case *ast.NilExpression:
 		is.define(PutNull)
+	case *ast.RangeExpression:
+		g.compileExpression(is, exp.Start, scope, table)
+		g.compileExpression(is, exp.End, scope, table)
+		is.define(NewRange, 0)
 	case *ast.ArrayExpression:
 		for _, elem := range exp.Elements {
 			g.compileExpression(is, elem, scope, table)
