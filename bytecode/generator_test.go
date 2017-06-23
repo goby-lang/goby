@@ -9,7 +9,7 @@ import (
 
 func TestRangeExpression(t *testing.T) {
 	input := `
-	(1..5).each do |i|
+	(1..(1+4)).each do |i|
 	  puts(i)
 	end
 	`
@@ -22,10 +22,12 @@ func TestRangeExpression(t *testing.T) {
 3 leave
 <ProgramStart>
 0 putobject 1
-1 putobject 5
-2 newrange 0
-3 send each 0 block:0
-4 leave
+1 putobject 1
+2 putobject 4
+3 send + 1
+4 newrange 0
+5 send each 0 block:0
+6 leave
 `
 
 	bytecode := compileToBytecode(input)
