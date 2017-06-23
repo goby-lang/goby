@@ -70,9 +70,9 @@ var builtinURIClassMethods = []*BuiltInMethodObject{
 				if len(u.Port()) == 0 {
 					switch u.Scheme {
 					case "http":
-						uriAttrs["@port"] = initilaizeInteger(80)
+						uriAttrs["@port"] = initIntegerObject(80)
 					case "https":
-						uriAttrs["@port"] = initilaizeInteger(443)
+						uriAttrs["@port"] = initIntegerObject(443)
 					}
 				} else {
 					p, err := strconv.ParseInt(u.Port(), 0, 64)
@@ -81,7 +81,7 @@ var builtinURIClassMethods = []*BuiltInMethodObject{
 						t.returnError(err.Error())
 					}
 
-					uriAttrs["@port"] = initilaizeInteger(int(p))
+					uriAttrs["@port"] = initIntegerObject(int(p))
 				}
 
 				// Path

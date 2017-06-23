@@ -41,7 +41,7 @@ func (i *IntegerObject) equal(e *IntegerObject) bool {
 	return i.Value == e.Value
 }
 
-func initilaizeInteger(value int) *IntegerObject {
+func initIntegerObject(value int) *IntegerObject {
 	return &IntegerObject{Value: value, Class: integerClass}
 }
 
@@ -324,13 +324,13 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 				rightValue := right.Value
 
 				if leftValue < rightValue {
-					return initilaizeInteger(-1)
+					return initIntegerObject(-1)
 				}
 				if leftValue > rightValue {
-					return initilaizeInteger(1)
+					return initIntegerObject(1)
 				}
 
-				return initilaizeInteger(0)
+				return initIntegerObject(0)
 			}
 		},
 	},
@@ -513,7 +513,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				i := receiver.(*IntegerObject)
-				return initilaizeInteger(i.Value + 1)
+				return initIntegerObject(i.Value + 1)
 			}
 		},
 	},
@@ -528,7 +528,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				i := receiver.(*IntegerObject)
-				return initilaizeInteger(i.Value - 1)
+				return initIntegerObject(i.Value - 1)
 			}
 		},
 	},
@@ -556,7 +556,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 				}
 
 				for i := 0; i < n.Value; i++ {
-					t.builtInMethodYield(blockFrame, initilaizeInteger(i))
+					t.builtInMethodYield(blockFrame, initIntegerObject(i))
 				}
 
 				return n

@@ -29,6 +29,7 @@ var precedence = map[token.Type]int{
 	token.COMP:               COMPARE,
 	token.And:                LOGIC,
 	token.Or:                 LOGIC,
+	token.Range:              RANGE,
 	token.Plus:               SUM,
 	token.Minus:              SUM,
 	token.Incr:               SUM,
@@ -50,6 +51,7 @@ const (
 	LOWEST
 	NORMAL
 	LOGIC
+	RANGE
 	EQUALS
 	COMPARE
 	ASSIGN
@@ -493,4 +495,17 @@ func (p *Parser) parseYieldExpression() ast.Expression {
 	}
 
 	return ye
+}
+
+func (p *Parser) parseRangeExpression(left ast.Expression) ast.Expression {
+	exp := &ast.RangeExpression{
+		Token: p.curToken,
+		Start: left,
+	}
+
+	precedence := p.curPrecedence()
+	p.nextToken()
+	exp.End = p.parseExpression(precedence)
+
+	return exp
 }

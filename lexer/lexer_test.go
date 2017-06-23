@@ -104,6 +104,8 @@ func TestNextToken(t *testing.T) {
 	{ test:50 }
 	{ test: abc }
 	{ test:abc }
+
+	(1..5)
 	`
 
 	tests := []struct {
@@ -379,7 +381,13 @@ func TestNextToken(t *testing.T) {
 		{token.Ident, "abc", 97},
 		{token.RBrace, "}", 97},
 
-		{token.EOF, "", 98},
+		{token.LParen, "(", 99},
+		{token.Int, "1", 99},
+		{token.Range, "..", 99},
+		{token.Int, "5", 99},
+		{token.RParen, ")", 99},
+
+		{token.EOF, "", 100},
 	}
 	l := New(input)
 

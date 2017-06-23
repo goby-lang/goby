@@ -91,6 +91,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.Or, p.parseInfixExpression)
 	p.registerInfix(token.ResolutionOperator, p.parseInfixExpression)
 	p.registerInfix(token.Assign, p.parseInfixExpression)
+	p.registerInfix(token.Range, p.parseRangeExpression)
 
 	return p
 }

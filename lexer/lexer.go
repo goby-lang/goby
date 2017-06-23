@@ -131,6 +131,12 @@ func (l *Lexer) NextToken() token.Token {
 	case ']':
 		tok = newToken(token.RBracket, l.ch, l.line)
 	case '.':
+		if l.peekChar() == '.' {
+			tok = token.Token{Type: token.Range, Literal: "..", Line: l.line}
+			l.readChar()
+			l.readChar()
+			return tok
+		}
 		tok = newToken(token.Dot, l.ch, l.line)
 		l.FSM.Event("method")
 	case ':':

@@ -38,8 +38,8 @@ func TestPushMethod(t *testing.T) {
 	array := generateArray(5)
 	m := getBuiltInMethod(t, array, "push")
 
-	six := initilaizeInteger(6)
-	seven := initilaizeInteger(7)
+	six := initIntegerObject(6)
+	seven := initIntegerObject(7)
 	m(nil, []Object{six, seven}, nil)
 
 	if array.length() != 7 {
@@ -54,8 +54,8 @@ func TestPushMethod(t *testing.T) {
 }
 
 func TestShiftMethod(t *testing.T) {
-	array := initArrayObject([]Object{initilaizeInteger(1), initilaizeInteger(2), initilaizeInteger(3), initilaizeInteger(4)})
-	second := initArrayObject([]Object{initilaizeInteger(2), initilaizeInteger(3), initilaizeInteger(4)})
+	array := initArrayObject([]Object{initIntegerObject(1), initIntegerObject(2), initIntegerObject(3), initIntegerObject(4)})
+	second := initArrayObject([]Object{initIntegerObject(2), initIntegerObject(3), initIntegerObject(4)})
 
 	m := getBuiltInMethod(t, array, "shift")
 	first := m(nil, nil, nil)
@@ -241,7 +241,7 @@ func TestMapMethod(t *testing.T) {
 		a.map do |i|
 			i + 3
 		end
-		`, initArrayObject([]Object{initilaizeInteger(4), initilaizeInteger(5), initilaizeInteger(10)})},
+		`, initArrayObject([]Object{initIntegerObject(4), initIntegerObject(5), initIntegerObject(10)})},
 		{`
 		a = [true, false, true, false, true ]
 		a.map do |i|
@@ -272,7 +272,7 @@ func TestSelectMethod(t *testing.T) {
 		a.select do |i|
 			i > 3
 		end
-		`, initArrayObject([]Object{initilaizeInteger(4), initilaizeInteger(5)})},
+		`, initArrayObject([]Object{initIntegerObject(4), initIntegerObject(5)})},
 		{`
 		a = [true, false, true, false, true ]
 		a.select do |i|
@@ -322,15 +322,15 @@ func TestConcatMethod(t *testing.T) {
 		{`
 		a = [1, 2]
 		a.concat([3], [4])
-		`, initArrayObject([]Object{initilaizeInteger(1), initilaizeInteger(2), initilaizeInteger(3), initilaizeInteger(4)})},
+		`, initArrayObject([]Object{initIntegerObject(1), initIntegerObject(2), initIntegerObject(3), initIntegerObject(4)})},
 		{`
 		a = []
 		a.concat([1], [2], ["a", "b"], [3], [4])
-		`, initArrayObject([]Object{initilaizeInteger(1), initilaizeInteger(2), initStringObject("a"), initStringObject("b"), initilaizeInteger(3), initilaizeInteger(4)})},
+		`, initArrayObject([]Object{initIntegerObject(1), initIntegerObject(2), initStringObject("a"), initStringObject("b"), initIntegerObject(3), initIntegerObject(4)})},
 		{`
 		a = [1, 2]
 		a.concat()
-		`, initArrayObject([]Object{initilaizeInteger(1), initilaizeInteger(2)})},
+		`, initArrayObject([]Object{initIntegerObject(1), initIntegerObject(2)})},
 	}
 
 	for _, tt := range tests {
@@ -374,35 +374,35 @@ func TestCountMethod(t *testing.T) {
 		{`
 		a = [1, 2]
 		a.count
-		`, initilaizeInteger(2)},
+		`, initIntegerObject(2)},
 		{`
 		a = [1, 2]
 		a.count(1)
-		`, initilaizeInteger(1)},
+		`, initIntegerObject(1)},
 		{`
 		a = ["a", "bb", "c", "db", "bb", 2]
 		a.count("bb")
-		`, initilaizeInteger(2)},
+		`, initIntegerObject(2)},
 		{`
 		a = [true, true, true, false, true]
 		a.count(true)
-		`, initilaizeInteger(4)},
+		`, initIntegerObject(4)},
 		{`
 		a = []
 		a.count(true)
-		`, initilaizeInteger(0)},
+		`, initIntegerObject(0)},
 		{`
 		a = [1, 2, 3, 4, 5, 6, 7, 8]
 		a.count do |i|
 			i > 3
 		end
-		`, initilaizeInteger(5)},
+		`, initIntegerObject(5)},
 		{`
 		a = ["a", "bb", "c", "db", "bb"]
 		a.count do |i|
 			i.size > 1
 		end
-		`, initilaizeInteger(3)},
+		`, initIntegerObject(3)},
 	}
 
 	for _, tt := range tests {
@@ -440,11 +440,11 @@ func TestRotateMethod(t *testing.T) {
 		{`
 		a = [1, 2]
 		a.rotate
-		`, initArrayObject([]Object{initilaizeInteger(2), initilaizeInteger(1)})},
+		`, initArrayObject([]Object{initIntegerObject(2), initIntegerObject(1)})},
 		{`
 		a = [1, 2, 3, 4]
 		a.rotate(2)
-		`, initArrayObject([]Object{initilaizeInteger(3), initilaizeInteger(4), initilaizeInteger(1), initilaizeInteger(2)})},
+		`, initArrayObject([]Object{initIntegerObject(3), initIntegerObject(4), initIntegerObject(1), initIntegerObject(2)})},
 	}
 
 	for _, tt := range tests {
@@ -484,7 +484,7 @@ func TestFirstMethod(t *testing.T) {
 		{`
 		a = [1, 2]
 		a.first
-		`, initilaizeInteger(1)},
+		`, initIntegerObject(1)},
 	}
 
 	for _, tt := range testsInt {
@@ -499,7 +499,7 @@ func TestFirstMethod(t *testing.T) {
 		{`
 		a = [3, 4, 5, 1, 6]
 		a.first(2)
-		`, initArrayObject([]Object{initilaizeInteger(3), initilaizeInteger(4)})},
+		`, initArrayObject([]Object{initIntegerObject(3), initIntegerObject(4)})},
 		{`
 		a = ["a", "b", "d", "q"]
 		a.first(2)
@@ -558,7 +558,7 @@ func TestLastMethod(t *testing.T) {
 		{`
 		a = [3, 4, 5, 1, 6]
 		a.last(3)
-		`, initArrayObject([]Object{initilaizeInteger(5), initilaizeInteger(1), initilaizeInteger(6)})},
+		`, initArrayObject([]Object{initIntegerObject(5), initIntegerObject(1), initIntegerObject(6)})},
 		{`
 		a = ["a", "b", "d", "q"]
 		a.last(2)
@@ -597,7 +597,7 @@ func TestLastMethodFail(t *testing.T) {
 func generateArray(length int) *ArrayObject {
 	var elements []Object
 	for i := 1; i <= length; i++ {
-		int := initilaizeInteger(i)
+		int := initIntegerObject(i)
 		elements = append(elements, int)
 	}
 	return initArrayObject(elements)

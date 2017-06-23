@@ -26,6 +26,7 @@ const (
 	PutNull             = "putnil"
 	NewArray            = "newarray"
 	NewHash             = "newhash"
+	NewRange            = "newrange"
 	BranchUnless        = "branchunless"
 	BranchIf            = "branchif"
 	Jump                = "jump"

@@ -161,7 +161,7 @@ var builtinHashInstanceMethods = []*BuiltInMethodObject{
 				}
 
 				hash := receiver.(*HashObject)
-				return initilaizeInteger(hash.length())
+				return initIntegerObject(hash.length())
 			}
 		},
 	},

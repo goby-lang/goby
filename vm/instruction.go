@@ -124,6 +124,15 @@ var builtInActions = map[operationType]*action{
 			cf.storeConstant(constName, v)
 		},
 	},
+	bytecode.NewRange: {
+		name: bytecode.NewRange,
+		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+			rangeEnd := t.stack.pop().Target.(*IntegerObject).Value
+			rangeStart := t.stack.pop().Target.(*IntegerObject).Value
+
+			t.stack.push(&Pointer{initRangeObject(rangeStart, rangeEnd)})
+		},
+	},
 	bytecode.NewArray: {
 		name: bytecode.NewArray,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
@@ -374,7 +383,7 @@ var builtInActions = map[operationType]*action{
 func initializeObjectFromInstruction(value interface{}) Object {
 	switch v := value.(type) {
 	case int:
-		return initilaizeInteger(int(v))
+		return initIntegerObject(int(v))
 	case string:
 		switch v {
 		case "true":

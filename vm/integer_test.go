@@ -6,7 +6,7 @@ import (
 
 func TestInitilaize(t *testing.T) {
 	expected := 101
-	i := initilaizeInteger(expected)
+	i := initIntegerObject(expected)
 	if expected != i.Value {
 		t.Fatalf("Expect: %d. got=%d", expected, i.Value)
 	}

@@ -183,7 +183,7 @@ func initObject(v interface{}) Object {
 	case string:
 		return initStringObject(v)
 	case int:
-		return initilaizeInteger(v)
+		return initIntegerObject(v)
 	case bool:
 		if v {
 			return TRUE

@@ -56,6 +56,7 @@ const (
 
 	Eq    = "=="
 	NotEq = "!="
+	Range = ".."
 
 	True   = "TRUE"
 	False  = "FALSE"
