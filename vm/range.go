@@ -47,4 +47,23 @@ func initRangeClass() {
 	rangeClass = rc
 }
 
-var builtInRangeInstanceMethods = []*BuiltInMethodObject{}
+var builtInRangeInstanceMethods = []*BuiltInMethodObject{
+	{
+		Name: "each",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				ran := receiver.(*RangeObject)
+
+				if blockFrame == nil {
+					t.returnError("Can't yield without a block")
+				}
+
+				for i := ran.Start; i <= ran.End; i++ {
+					obj := initIntegerObject(i)
+					t.builtInMethodYield(blockFrame, obj)
+				}
+				return ran
+			}
+		},
+	},
+}
