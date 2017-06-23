@@ -49,6 +49,24 @@ func initRangeClass() {
 
 var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 	{
+		Name: "first",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				ran := receiver.(*RangeObject)
+				return initIntegerObject(ran.Start)
+			}
+		},
+	},
+	{
+		Name: "last",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				ran := receiver.(*RangeObject)
+				return initIntegerObject(ran.End)
+			}
+		},
+	},
+	{
 		Name: "each",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -63,6 +81,16 @@ var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 					t.builtInMethodYield(blockFrame, obj)
 				}
 				return ran
+			}
+		},
+	},
+	{
+		Name: "to_a",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				ran := receiver.(*RangeObject)
+
+				return ran.toArray()
 			}
 		},
 	},
