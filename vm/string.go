@@ -211,13 +211,13 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 				rightValue := right.Value
 
 				if leftValue < rightValue {
-					return initilaizeInteger(-1)
+					return initIntegerObject(-1)
 				}
 				if leftValue > rightValue {
-					return initilaizeInteger(1)
+					return initIntegerObject(1)
 				}
 
-				return initilaizeInteger(0)
+				return initIntegerObject(0)
 			}
 		},
 	},
@@ -319,7 +319,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 
 				str := receiver.(*StringObject).Value
 
-				return initilaizeInteger(len(str))
+				return initIntegerObject(len(str))
 			}
 		},
 	},
@@ -337,7 +337,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 
 				str := receiver.(*StringObject).Value
 
-				return initilaizeInteger(len(str))
+				return initIntegerObject(len(str))
 			}
 		},
 	},
@@ -396,7 +396,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 				parsedStr, err := strconv.ParseInt(str, 10, 0)
 
 				if err == nil {
-					return initilaizeInteger(int(parsedStr))
+					return initIntegerObject(int(parsedStr))
 				}
 
 				var digits string
@@ -410,10 +410,10 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 
 				if len(digits) > 0 {
 					parsedStr, _ = strconv.ParseInt(digits, 10, 0)
-					return initilaizeInteger(int(parsedStr))
+					return initIntegerObject(int(parsedStr))
 				}
 
-				return initilaizeInteger(0)
+				return initIntegerObject(0)
 			}
 		},
 	},
