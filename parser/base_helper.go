@@ -57,7 +57,7 @@ func (p *Parser) registerInfix(tokenType token.Type, fn infixParseFn) {
 }
 
 func (p *Parser) noPrefixParseFnError(t token.Type) {
-	msg := fmt.Sprintf("no prefix function for %s. Line: %d", t, p.curToken.Line)
+	msg := fmt.Sprintf("no prefix function for %s Line: %d", t, p.curToken.Line)
 	p.errors = append(p.errors, msg)
 }
 
