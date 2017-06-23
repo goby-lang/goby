@@ -285,3 +285,25 @@ func (ye *YieldExpression) String() string {
 
 	return out.String()
 }
+
+type RangeExpression struct {
+	Token token.Token
+	Start Expression
+	End   Expression
+}
+
+func (re *RangeExpression) expressionNode() {}
+func (re *RangeExpression) TokenLiteral() string {
+	return re.Token.Literal
+}
+func (re *RangeExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(re.Start.String())
+	out.WriteString("..")
+	out.WriteString(re.End.String())
+	out.WriteString(")")
+
+	return out.String()
+}
