@@ -12,8 +12,6 @@ import (
 
 var stackTrace int
 
-var mutex = &sync.Mutex{}
-
 type isIndexTable struct {
 	Data map[string]int
 }
@@ -54,6 +52,8 @@ type VM struct {
 	args []string
 	// projectRoot is goby root's absolute path, which is $GOROOT/src/github.com/goby-lang/goby
 	projectRoot string
+
+	sync.Mutex
 }
 
 // New initializes a vm to initialize state and returns it.
@@ -80,7 +80,7 @@ func New(fileDir string, args []string) *VM {
 }
 
 func (vm *VM) newThread() *thread {
-	s := &stack{lock: &sync.Mutex{}}
+	s := &stack{}
 	cfs := &callFrameStack{callFrames: []*callFrame{}}
 	t := &thread{stack: s, callFrameStack: cfs, sp: 0, cfp: 0}
 	s.thread = t

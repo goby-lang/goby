@@ -2,36 +2,51 @@ package vm
 
 import (
 	"fmt"
+	"sync"
 )
 
 var (
 	channelClass *RClass
 )
 
-var containerMap = map[int]Object{}
-var containerCount = 0
-var channelID = 0
+type objectMap struct {
+	store   map[int]Object
+	counter int
+	sync.RWMutex
+}
+
+var objMap = &objectMap{store: map[int]Object{}}
 
 // storeObj store objects into the container map
 // and update containerCount at the same time
-func storeObj(obj Object) int {
-	mutex.Lock()
-	containerMap[containerCount] = obj
-	i := containerCount
+func (m *objectMap) storeObj(obj Object) int {
+	m.Lock()
+	defer m.Unlock()
+
+	m.store[m.counter] = obj
+	i := m.counter
 
 	// containerCount here can be considered as deliveries' id
 	// And this id will be unused once the delivery is completed (which will be really quick)
 	// So we can assume that if we reach 1000th delivery,
 	// previous deliveries are all completed and they don't need their id anymore.
-	if containerCount > 1000 {
-		containerCount = 0
+	if m.counter > 1000 {
+		m.counter = 0
 	} else {
-		containerCount++
+		m.counter++
 	}
 
-	mutex.Unlock()
 	return i
 }
+
+func (m *objectMap) retrieveObj(num int) Object {
+	m.RLock()
+
+	defer m.RUnlock()
+	return m.store[num]
+}
+
+var channelID = 0
 
 // ChannelObject represents a goby channel, which carries a golang channel
 type ChannelObject struct {
@@ -81,7 +96,7 @@ func builtinChannelInstanceMethods() []*BuiltInMethodObject {
 			Name: "deliver",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					id := storeObj(args[0])
+					id := objMap.storeObj(args[0])
 
 					c := receiver.(*ChannelObject)
 
@@ -99,10 +114,7 @@ func builtinChannelInstanceMethods() []*BuiltInMethodObject {
 
 					num := <-c.Chan
 
-					mutex.Lock()
-
-					defer mutex.Unlock()
-					return containerMap[num]
+					return objMap.retrieveObj(num)
 				}
 			},
 		},
