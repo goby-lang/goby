@@ -960,7 +960,7 @@ func compileToBytecode(input string) string {
 	p := parser.New(l)
 	program := p.ParseProgram()
 	p.CheckErrors()
-	g := NewGenerator(program)
+	g := NewGenerator()
 	return g.GenerateByteCode(program)
 }
 

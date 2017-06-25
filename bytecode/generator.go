@@ -21,14 +21,13 @@ func newScope(s *scope, stmt ast.Statement) *scope {
 
 // Generator contains program's AST and will store generated instruction sets
 type Generator struct {
-	program         *ast.Program
 	instructionSets []*instructionSet
 	blockCounter    int
 }
 
 // NewGenerator initializes new Generator with complete AST tree.
-func NewGenerator(program *ast.Program) *Generator {
-	return &Generator{program: program}
+func NewGenerator() *Generator {
+	return &Generator{}
 }
 
 // GenerateByteCode returns compiled bytecodes

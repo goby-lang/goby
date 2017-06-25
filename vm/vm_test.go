@@ -13,7 +13,7 @@ func testEval(t *testing.T, input string) Object {
 	p := parser.New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
-	g := bytecode.NewGenerator(program)
+	g := bytecode.NewGenerator()
 	bytecodes := g.GenerateByteCode(program)
 	return testExec(bytecodes)
 }
