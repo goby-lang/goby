@@ -125,6 +125,16 @@ func (vm *VM) ExecBytecodes(bytecodes, fn string) {
 	vm.startFromTopFrame()
 }
 
+func (vm *VM) ReplExec(bytecodes, fn string) {
+	p := newBytecodeParser(filename(fn))
+	p.vm = vm
+	p.parseBytecode(bytecodes)
+	cf := newCallFrame(p.program)
+	cf.self = mainObj
+	vm.mainThread.callFrameStack.push(cf)
+	vm.startFromTopFrame()
+}
+
 // GetExecResult returns stack's top most value. Normally it's used in tests.
 func (vm *VM) GetExecResult() Object {
 	return vm.mainThread.stack.top().Target
@@ -286,7 +296,7 @@ func (vm *VM) execGobyLib(libName string) {
 
 func (vm *VM) execRequiredFile(filepath string, file []byte) {
 	program := parser.BuildAST(file)
-	g := bytecode.NewGenerator(program)
+	g := bytecode.NewGenerator()
 	bytecodes := g.GenerateByteCode(program)
 
 	oldMethodTable := isTable{}

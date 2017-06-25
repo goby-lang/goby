@@ -11,7 +11,7 @@ import (
 
 // Parser represents lexical analyzer struct
 type Parser struct {
-	l      *lexer.Lexer
+	Lexer  *lexer.Lexer
 	errors []string
 
 	curToken  token.Token
@@ -40,14 +40,10 @@ func BuildAST(file []byte) *ast.Program {
 // New initializes a parser and returns it
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
-		l:           l,
+		Lexer:       l,
 		errors:      []string{},
 		acceptBlock: true,
 	}
-
-	// Read two tokens, so curToken and peekToken are both set.
-	p.nextToken()
-	p.nextToken()
 
 	p.prefixParseFns = make(map[token.Type]prefixParseFn)
 	p.registerPrefix(token.Ident, p.parseIdentifier)
@@ -98,6 +94,9 @@ func New(l *lexer.Lexer) *Parser {
 
 // ParseProgram update program statements and return program
 func (p *Parser) ParseProgram() *ast.Program {
+	// Read two tokens, so curToken and peekToken are both set.
+	p.nextToken()
+	p.nextToken()
 	program := &ast.Program{}
 	program.Statements = []ast.Statement{}
 

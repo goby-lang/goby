@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"github.com/goby-lang/goby/igb"
 )
 
 // Version stores current Goby version
@@ -20,8 +21,13 @@ func main() {
 	compileOptionPtr := flag.Bool("c", false, "Compile to bytecode")
 	profileOptionPtr := flag.Bool("p", false, "Profile program execution")
 	versionOptionPtr := flag.Bool("v", false, "Show current Goby version")
+	interactiveOptionPtr := flag.Bool("i", false, "Run interactive goby")
 
 	flag.Parse()
+
+	if *interactiveOptionPtr {
+		igb.Start(os.Stdin, os.Stdout)
+	}
 
 	if *profileOptionPtr {
 		defer profile.Start().Stop()
@@ -48,7 +54,7 @@ func main() {
 	case "gb", "rb":
 		program := parser.BuildAST(file)
 
-		g := bytecode.NewGenerator(program)
+		g := bytecode.NewGenerator()
 		bytecodes := g.GenerateByteCode(program)
 
 		if !*compileOptionPtr {
