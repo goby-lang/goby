@@ -56,6 +56,38 @@ func TestVM_REPLExec(t *testing.T) {
 3 send bar 1
 `},
 			100},
+		{
+			[]string{
+				`
+<Def:foo>
+0 putobject 123
+1 leave
+<ProgramStart>
+0 putself
+1 putstring "foo"
+2 def_method 0
+`,
+				`
+<ProgramStart>
+0 putself
+1 send foo 0
+`,
+				`
+<Def:foo>
+0 putobject 345
+1 leave
+<ProgramStart>
+0 putself
+1 putstring "foo"
+2 def_method 0
+`,
+
+				`
+<ProgramStart>
+0 putself
+1 send foo 0
+`,
+			}, 345},
 	}
 
 	for _, test := range tests {

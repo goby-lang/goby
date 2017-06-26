@@ -53,6 +53,8 @@ type VM struct {
 	// projectRoot is goby root's absolute path, which is $GOROOT/src/github.com/goby-lang/goby
 	projectRoot string
 
+	replMode bool
+
 	sync.Mutex
 }
 
@@ -136,6 +138,7 @@ func (vm *VM) SetMethodISIndexTable(fn filename) {
 func (vm *VM) InitForREPL() {
 	vm.SetClassISIndexTable("")
 	vm.SetMethodISIndexTable("")
+	vm.replMode = true
 	cf := newCallFrame(&instructionSet{})
 	cf.self = mainObj
 	vm.mainThread.callFrameStack.push(cf)
@@ -175,8 +178,14 @@ func (vm *VM) GetExecResult() Object {
 	return NULL
 }
 
-func (vm *VM) GetExecResultToString() string {
-	return vm.GetExecResult().toString()
+func (vm *VM) GetREPLResult() string {
+	top := vm.mainThread.stack.pop()
+
+	if top != nil {
+		return top.Target.toString()
+	}
+
+	return ""
 }
 
 func (vm *VM) initConstants() {
@@ -245,7 +254,10 @@ func (vm *VM) getMethodIS(name string, filename filename) (*instructionSet, bool
 
 	is := iss[vm.methodISIndexTables[filename].Data[name]]
 
-	vm.methodISIndexTables[filename].Data[name]++
+	if !vm.replMode {
+		vm.methodISIndexTables[filename].Data[name]++
+	}
+
 	return is, ok
 }
 
@@ -258,7 +270,10 @@ func (vm *VM) getClassIS(name string, filename filename) *instructionSet {
 
 	is := iss[vm.classISIndexTables[filename].Data[name]]
 
-	vm.classISIndexTables[filename].Data[name]++
+	if !vm.replMode {
+		vm.classISIndexTables[filename].Data[name]++
+	}
+
 	return is
 }
 

@@ -69,15 +69,14 @@ func Start(in io.Reader, out io.Writer) {
 				if sm.Is(Initial) {
 					sm.Event(Wait)
 				}
-				stmts.WriteString(line + "\n")
 
+				appendStmt(line)
 				continue
 			}
 
 			if err.IsUnexpectedEnd() {
-				stmts.WriteString(line + "\n")
-
 				sm.Event(WaitEnded)
+				appendStmt(line)
 			} else {
 				fmt.Println(err.Message)
 				continue
@@ -86,24 +85,36 @@ func Start(in io.Reader, out io.Writer) {
 		}
 
 		if sm.Is(Wait) {
-			stmts.WriteString(line + "\n")
+			appendStmt(line)
 			continue
 		}
 
 		if sm.Is(WaitEnded) {
 			l := lexer.New(stmts.String())
 			p.Lexer = l
+
+			// Test if current input can be properly parsed.
 			program, err = p.ParseProgram()
 
+			/*
+			 This could mean there still are statements not ended, for example:
+
+			 ```ruby
+			 class Foo
+			   def bar
+			   end # This make state changes to WaitEnded
+			 # But here still needs an "end"
+			 ```
+			*/
+
 			if err != nil {
-				if err.IsEOF() {
-					continue
-				} else {
+				if !err.IsEOF() {
 					fmt.Println(err.Message)
-					continue
 				}
+				continue
 			}
 
+			// If everything goes well, reset state and statements buffer
 			sm.Event(Initial)
 			stmts.Reset()
 		}
@@ -112,7 +123,11 @@ func Start(in io.Reader, out io.Writer) {
 			bytecodes := g.GenerateByteCode(program.Statements)
 			g.ResetInstructionSets()
 			v.REPLExec(bytecodes)
-			fmt.Println(v.GetExecResultToString())
+			out.Write([]byte(v.GetREPLResult() + "\n"))
 		}
 	}
+}
+
+func appendStmt(line string) {
+	stmts.WriteString(line + "\n")
 }
