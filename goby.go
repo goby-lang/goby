@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/goby-lang/goby/bytecode"
+	"github.com/goby-lang/goby/igb"
 	"github.com/goby-lang/goby/parser"
 	"github.com/goby-lang/goby/vm"
 	"github.com/pkg/profile"
@@ -20,8 +21,13 @@ func main() {
 	compileOptionPtr := flag.Bool("c", false, "Compile to bytecode")
 	profileOptionPtr := flag.Bool("p", false, "Profile program execution")
 	versionOptionPtr := flag.Bool("v", false, "Show current Goby version")
+	interactiveOptionPtr := flag.Bool("i", false, "Run interactive goby")
 
 	flag.Parse()
+
+	if *interactiveOptionPtr {
+		igb.Start(os.Stdin, os.Stdout)
+	}
 
 	if *profileOptionPtr {
 		defer profile.Start().Stop()
@@ -46,10 +52,11 @@ func main() {
 
 	switch fileExt {
 	case "gb", "rb":
-		program := parser.BuildAST(file)
+		ast := parser.BuildAST(file)
 
-		g := bytecode.NewGenerator(program)
-		bytecodes := g.GenerateByteCode(program)
+		g := bytecode.NewGenerator()
+		g.InitTopLevelScope(ast)
+		bytecodes := g.GenerateByteCode(ast.Statements)
 
 		if !*compileOptionPtr {
 			v := vm.New(dir, args)

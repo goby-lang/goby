@@ -13,8 +13,11 @@ func TestNilExpression(t *testing.T) {
 
 	l := lexer.New(input)
 	p := New(l)
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatal(err.Message)
+	}
 
 	stmt := program.Statements[0].(*ast.ExpressionStatement)
 	_, ok := stmt.Expression.(*ast.NilExpression)
@@ -31,8 +34,11 @@ func TestNamespaceConstant(t *testing.T) {
 
 	l := lexer.New(input)
 	p := New(l)
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatal(err.Message)
+	}
 
 	stmt := program.Statements[0].(*ast.ExpressionStatement)
 	exp := stmt.Expression.(*ast.InfixExpression)
@@ -86,8 +92,11 @@ func TestHashExpression(t *testing.T) {
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
 		p := New(l)
-		program := p.ParseProgram()
-		checkParserErrors(t, p)
+		program, err := p.ParseProgram()
+
+		if err != nil {
+			t.Fatal(err.Message)
+		}
 
 		if len(program.Statements) != 1 {
 			t.Fatalf("program has not enough statments. expect 1, got=%d", len(program.Statements))
@@ -121,8 +130,11 @@ func TestHashAccessExpression(t *testing.T) {
 	for i, tt := range tests {
 		l := lexer.New(tt.input)
 		p := New(l)
-		program := p.ParseProgram()
-		checkParserErrors(t, p)
+		program, err := p.ParseProgram()
+
+		if err != nil {
+			t.Fatal(err.Message)
+		}
 
 		if len(program.Statements) != 1 {
 			t.Fatalf("program has not enough statments. expect 1, got=%d", len(program.Statements))
@@ -163,8 +175,11 @@ func TestArrayExpression(t *testing.T) {
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
 		p := New(l)
-		program := p.ParseProgram()
-		checkParserErrors(t, p)
+		program, err := p.ParseProgram()
+
+		if err != nil {
+			t.Fatal(err.Message)
+		}
 
 		if len(program.Statements) != 1 {
 			t.Fatalf("program has not enough statments. expect 1, got=%d", len(program.Statements))
@@ -199,8 +214,11 @@ func TestArrayIndexExpression(t *testing.T) {
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
 		p := New(l)
-		program := p.ParseProgram()
-		checkParserErrors(t, p)
+		program, err := p.ParseProgram()
+
+		if err != nil {
+			t.Fatal(err.Message)
+		}
 
 		if len(program.Statements) != 1 {
 			t.Fatalf("program has not enough statments. expect 1, got=%d", len(program.Statements))
@@ -227,8 +245,11 @@ func TestIdentifierExpression(t *testing.T) {
 
 	l := lexer.New(input)
 	p := New(l)
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatal(err.Message)
+	}
 
 	if len(program.Statements) != 1 {
 		t.Fatalf("program has not enough statments. expect 1, got=%d", len(program.Statements))
@@ -249,8 +270,11 @@ func TestConstantExpression(t *testing.T) {
 
 	l := lexer.New(input)
 	p := New(l)
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatal(err.Message)
+	}
 
 	if len(program.Statements) != 1 {
 		t.Fatalf("program has not enough statments. expect 1, got=%d", len(program.Statements))
@@ -271,8 +295,11 @@ func TestIntegerLiteralExpression(t *testing.T) {
 
 	l := lexer.New(input)
 	p := New(l)
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatal(err.Message)
+	}
 
 	if len(program.Statements) != 1 {
 		t.Fatalf("program has wrong number of statements. got=%d", len(program.Statements))
@@ -300,8 +327,11 @@ func TestStringLiteralExpression(t *testing.T) {
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
 		p := New(l)
-		program := p.ParseProgram()
-		checkParserErrors(t, p)
+		program, err := p.ParseProgram()
+
+		if err != nil {
+			t.Fatal(err.Message)
+		}
 
 		if len(program.Statements) != 1 {
 			t.Fatalf("program has wrong number of statements. got=%d", len(program.Statements))
@@ -331,8 +361,11 @@ func TestParsingPrefixExpression(t *testing.T) {
 	for _, tt := range prefixTests {
 		l := lexer.New(tt.input)
 		p := New(l)
-		program := p.ParseProgram()
-		checkParserErrors(t, p)
+		program, err := p.ParseProgram()
+
+		if err != nil {
+			t.Fatal(err.Message)
+		}
 
 		if len(program.Statements) != 1 {
 			t.Fatalf("expect %d statements. got=%d", 1, len(program.Statements))
@@ -371,8 +404,11 @@ func TestParsingPostfixExpression(t *testing.T) {
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
 		p := New(l)
-		program := p.ParseProgram()
-		checkParserErrors(t, p)
+		program, err := p.ParseProgram()
+
+		if err != nil {
+			t.Fatal(err.Message)
+		}
 
 		if len(program.Statements) != 1 {
 			t.Fatalf("expect %d statements. got=%d", 1, len(program.Statements))
@@ -413,8 +449,11 @@ func TestParsingInfixExpression(t *testing.T) {
 	for _, tt := range infixTests {
 		l := lexer.New(tt.input)
 		p := New(l)
-		program := p.ParseProgram()
-		checkParserErrors(t, p)
+		program, err := p.ParseProgram()
+
+		if err != nil {
+			t.Fatal(err.Message)
+		}
 
 		if len(program.Statements) != 1 {
 			t.Fatalf("expect %d statements. got=%d", 1, len(program.Statements))
@@ -439,8 +478,11 @@ func TestIfExpression(t *testing.T) {
 
 	l := lexer.New(input)
 	p := New(l)
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatal(err.Message)
+	}
 
 	if len(program.Statements) != 1 {
 		t.Fatalf("expect program's statements to be 1. got=%d", len(program.Statements))
@@ -503,8 +545,11 @@ func TestMethodParameterParsing(t *testing.T) {
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
 		p := New(l)
-		program := p.ParseProgram()
-		checkParserErrors(t, p)
+		program, err := p.ParseProgram()
+
+		if err != nil {
+			t.Fatal(err.Message)
+		}
 		methodStatement := program.Statements[0].(*ast.DefStatement)
 
 		if len(methodStatement.Parameters) != len(tt.expectedParams) {
@@ -524,8 +569,11 @@ func TestCallExpression(t *testing.T) {
 
 	l := lexer.New(input)
 	p := New(l)
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatal(err.Message)
+	}
 
 	stmt := program.Statements[0].(*ast.ExpressionStatement)
 	callExpression := stmt.Expression.(*ast.CallExpression)
@@ -552,8 +600,11 @@ func TestSelfCallExpression(t *testing.T) {
 
 	l := lexer.New(input)
 	p := New(l)
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatal(err.Message)
+	}
 
 	stmt := program.Statements[0].(*ast.ExpressionStatement)
 	callExpression := stmt.Expression.(*ast.CallExpression)
@@ -586,8 +637,11 @@ func TestCallExpressionWithBlock(t *testing.T) {
 	`
 	l := lexer.New(input)
 	p := New(l)
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatal(err.Message)
+	}
 
 	stmt := program.Statements[0].(*ast.ExpressionStatement)
 	callExpression := stmt.Expression.(*ast.CallExpression)
@@ -622,8 +676,11 @@ func TestAssignInfixExpressionWithLiteralValue(t *testing.T) {
 		l := lexer.New(tt.input)
 		p := New(l)
 
-		program := p.ParseProgram()
-		checkParserErrors(t, p)
+		program, err := p.ParseProgram()
+
+		if err != nil {
+			t.Fatal(err.Message)
+		}
 
 		if program == nil {
 			t.Fatal("ParseProgram() returned nil")
@@ -653,8 +710,11 @@ func TestAssignIndexExpressionWithVariableValue(t *testing.T) {
 		l := lexer.New(tt.input)
 		p := New(l)
 
-		program := p.ParseProgram()
-		checkParserErrors(t, p)
+		program, err := p.ParseProgram()
+
+		if err != nil {
+			t.Fatal(err.Message)
+		}
 
 		if program == nil {
 			t.Fatal("ParseProgram() returned nil")

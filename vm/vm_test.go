@@ -8,27 +8,113 @@ import (
 	"github.com/goby-lang/goby/parser"
 )
 
+func TestVM_REPLExec(t *testing.T) {
+	tests := []struct {
+		inputs   []string
+		expected interface{}
+	}{
+		{
+			[]string{`
+<ProgramStart>
+<Def:foo>
+0 putobject 123
+1 leave
+<ProgramStart>
+0 putself
+1 putstring "foo"
+2 def_method 0
+`, `
+<ProgramStart>
+0 putself
+1 send foo 0
+`},
+			123},
+		{
+			[]string{
+				`
+<ProgramStart>
+<Def:bar>
+0 getlocal 0 0
+1 putobject 10
+2 send + 1
+3 leave
+<DefClass:Foo>
+0 putself
+1 putstring "bar"
+2 def_method 1
+3 leave
+<ProgramStart>
+0 putself
+1 def_class class:Foo
+2 pop
+`,
+				`
+<ProgramStart>
+0 getconstant Foo
+1 send new 0
+2 putobject 90
+3 send bar 1
+`},
+			100},
+		{
+			[]string{
+				`
+<Def:foo>
+0 putobject 123
+1 leave
+<ProgramStart>
+0 putself
+1 putstring "foo"
+2 def_method 0
+`,
+				`
+<ProgramStart>
+0 putself
+1 send foo 0
+`,
+				`
+<Def:foo>
+0 putobject 345
+1 leave
+<ProgramStart>
+0 putself
+1 putstring "foo"
+2 def_method 0
+`,
+
+				`
+<ProgramStart>
+0 putself
+1 send foo 0
+`,
+			}, 345},
+	}
+
+	for _, test := range tests {
+		v := New("./", []string{})
+		v.InitForREPL()
+
+		for _, input := range test.inputs {
+			v.REPLExec(input)
+		}
+
+		evaluated := v.GetExecResult()
+		checkExpected(t, evaluated, test.expected)
+	}
+}
+
 func testEval(t *testing.T, input string) Object {
 	l := lexer.New(input)
 	p := parser.New(l)
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
-	g := bytecode.NewGenerator(program)
-	bytecodes := g.GenerateByteCode(program)
+	program, err := p.ParseProgram()
+	if err != nil {
+		t.Fatal(err.Message)
+	}
+	g := bytecode.NewGenerator()
+	g.InitTopLevelScope(program)
+	bytecodes := g.GenerateByteCode(program.Statements)
+
 	return testExec(bytecodes)
-}
-
-func checkParserErrors(t *testing.T, p *parser.Parser) {
-	errors := p.Errors()
-	if len(errors) == 0 {
-		return
-	}
-
-	t.Errorf("parser has %d errors", len(errors))
-	for _, msg := range errors {
-		t.Errorf("parser error: %q", msg)
-	}
-	t.FailNow()
 }
 
 func testExec(bytecodes string) Object {

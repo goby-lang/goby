@@ -15,26 +15,36 @@ type scope struct {
 	anchor     *anchor
 }
 
-func newScope(s *scope, stmt ast.Statement) *scope {
+func newScope(stmt ast.Statement) *scope {
 	return &scope{localTable: newLocalTable(0), self: stmt, line: 0}
 }
 
 // Generator contains program's AST and will store generated instruction sets
 type Generator struct {
-	program         *ast.Program
+	REPL            bool
 	instructionSets []*instructionSet
 	blockCounter    int
+	scope           *scope
 }
 
 // NewGenerator initializes new Generator with complete AST tree.
-func NewGenerator(program *ast.Program) *Generator {
-	return &Generator{program: program}
+func NewGenerator() *Generator {
+	return &Generator{}
+}
+
+// ResetInstructionSets clears generator's instruction sets
+func (g *Generator) ResetInstructionSets() {
+	g.instructionSets = []*instructionSet{}
+}
+
+// InitTopLevelScope sets generator's scope with program node, which means it's the top level scope
+func (g *Generator) InitTopLevelScope(program *ast.Program) {
+	g.scope = &scope{program: program, localTable: newLocalTable(0)}
 }
 
 // GenerateByteCode returns compiled bytecodes
-func (g *Generator) GenerateByteCode(program *ast.Program) string {
-	scope := &scope{program: program, localTable: newLocalTable(0)}
-	g.compileStatements(program.Statements, scope, scope.localTable)
+func (g *Generator) GenerateByteCode(stmts []ast.Statement) string {
+	g.compileStatements(stmts, g.scope, g.scope.localTable)
 	var out bytes.Buffer
 
 	for _, is := range g.instructionSets {
@@ -51,6 +61,9 @@ func (g *Generator) compileCodeBlock(is *instructionSet, stmt *ast.BlockStatemen
 }
 
 func (g *Generator) endInstructions(is *instructionSet) {
+	if g.REPL && is.label.Name == Program {
+		return
+	}
 	is.define(Leave)
 }
 

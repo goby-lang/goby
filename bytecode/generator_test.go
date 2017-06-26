@@ -958,10 +958,13 @@ func TestBooleanCompilation(t *testing.T) {
 func compileToBytecode(input string) string {
 	l := lexer.New(input)
 	p := parser.New(l)
-	program := p.ParseProgram()
-	p.CheckErrors()
-	g := NewGenerator(program)
-	return g.GenerateByteCode(program)
+	program, err := p.ParseProgram()
+	if err != nil {
+		panic(err.Message)
+	}
+	g := NewGenerator()
+	g.InitTopLevelScope(program)
+	return g.GenerateByteCode(program.Statements)
 }
 
 func compareBytecode(t *testing.T, value, expected string) {

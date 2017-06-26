@@ -53,6 +53,8 @@ type VM struct {
 	// projectRoot is goby root's absolute path, which is $GOROOT/src/github.com/goby-lang/goby
 	projectRoot string
 
+	replMode bool
+
 	sync.Mutex
 }
 
@@ -105,8 +107,8 @@ func (vm *VM) ExecBytecodes(bytecodes, fn string) {
 	}
 
 	vm.blockTables[p.filename] = p.blockTable
-	vm.classISIndexTables[filename] = newISIndexTable()
-	vm.methodISIndexTables[filename] = newISIndexTable()
+	vm.SetClassISIndexTable(p.filename)
+	vm.SetMethodISIndexTable(p.filename)
 
 	defer func() {
 		if p := recover(); p != nil {
@@ -125,9 +127,73 @@ func (vm *VM) ExecBytecodes(bytecodes, fn string) {
 	vm.startFromTopFrame()
 }
 
+// SetClassISIndexTable adds new instruction set's index table to vm.classISIndexTables
+func (vm *VM) SetClassISIndexTable(fn filename) {
+	vm.classISIndexTables[fn] = newISIndexTable()
+}
+
+// SetMethodISIndexTable adds new instruction set's index table to vm.methodISIndexTables
+func (vm *VM) SetMethodISIndexTable(fn filename) {
+	vm.methodISIndexTables[fn] = newISIndexTable()
+}
+
+// InitForREPL does following things:
+// - Initialize instruction sets' index tables
+// - Set vm to REPL mode
+// - Create and push main object frame
+func (vm *VM) InitForREPL() {
+	vm.SetClassISIndexTable("")
+	vm.SetMethodISIndexTable("")
+	vm.replMode = true
+	cf := newCallFrame(&instructionSet{})
+	cf.self = mainObj
+	vm.mainThread.callFrameStack.push(cf)
+}
+
+// REPLExec executes instructions differently from normal program execution.
+func (vm *VM) REPLExec(bytecodes string) {
+	p := newBytecodeParser("")
+	p.vm = vm
+	p.parseBytecode(bytecodes)
+
+	for labelType, table := range p.labelTable {
+		for labelName, is := range table {
+			vm.isTables[labelType][labelName] = is
+		}
+	}
+
+	vm.blockTables[p.filename] = p.blockTable
+
+	oldFrame := vm.mainThread.callFrameStack.top()
+	cf := newCallFrame(p.program)
+	cf.self = mainObj
+	cf.locals = oldFrame.locals
+	cf.ep = oldFrame.ep
+	cf.isBlock = oldFrame.isBlock
+	cf.self = oldFrame.self
+	cf.lPr = oldFrame.lPr
+	vm.mainThread.callFrameStack.push(cf)
+	vm.startFromTopFrame()
+}
+
 // GetExecResult returns stack's top most value. Normally it's used in tests.
 func (vm *VM) GetExecResult() Object {
-	return vm.mainThread.stack.top().Target
+	top := vm.mainThread.stack.top()
+	if top != nil {
+		return top.Target
+	}
+	return NULL
+}
+
+// GetREPLResult returns strings that should be showed after each evaluation.
+func (vm *VM) GetREPLResult() string {
+	top := vm.mainThread.stack.pop()
+
+	if top != nil {
+		return top.Target.toString()
+	}
+
+	return ""
 }
 
 func (vm *VM) initConstants() {
@@ -196,7 +262,10 @@ func (vm *VM) getMethodIS(name string, filename filename) (*instructionSet, bool
 
 	is := iss[vm.methodISIndexTables[filename].Data[name]]
 
-	vm.methodISIndexTables[filename].Data[name]++
+	if !vm.replMode {
+		vm.methodISIndexTables[filename].Data[name]++
+	}
+
 	return is, ok
 }
 
@@ -209,7 +278,10 @@ func (vm *VM) getClassIS(name string, filename filename) *instructionSet {
 
 	is := iss[vm.classISIndexTables[filename].Data[name]]
 
-	vm.classISIndexTables[filename].Data[name]++
+	if !vm.replMode {
+		vm.classISIndexTables[filename].Data[name]++
+	}
+
 	return is
 }
 
@@ -286,8 +358,9 @@ func (vm *VM) execGobyLib(libName string) {
 
 func (vm *VM) execRequiredFile(filepath string, file []byte) {
 	program := parser.BuildAST(file)
-	g := bytecode.NewGenerator(program)
-	bytecodes := g.GenerateByteCode(program)
+	g := bytecode.NewGenerator()
+	g.InitTopLevelScope(program)
+	bytecodes := g.GenerateByteCode(program.Statements)
 
 	oldMethodTable := isTable{}
 	oldClassTable := isTable{}
