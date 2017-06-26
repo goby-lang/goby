@@ -77,6 +77,7 @@ It will have Ruby's syntax (I'll try to support all common syntaxes) but without
 - IO
     - `puts`
     - `ARGV`
+- REPL (run `goby -i`)
 - Thread (this should work but the implementation is quite naive and will be refined in the future)
     - Support `thread` method to create a new thread (like `goroutine`)
     - Has `Channel` class for passing objects between threads (like `chan` in Go)
@@ -130,8 +131,14 @@ For now, we recommend install `Goby` from source directly because it evolves rea
 
 ## Usage
 
+**Execute goby file:**
 ```
 $ goby ./samples/server.gb
+```
+
+**Run interactive console:**
+```
+$ goby -i
 ```
 
 ## Samples
