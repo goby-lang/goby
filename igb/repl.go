@@ -35,17 +35,25 @@ var stmts = bytes.Buffer{}
 
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
+
+	// Initialize VM
 	v := vm.New(os.Getenv("GOBY_ROOT"), []string{})
-	v.InitForREPL()
-	l := lexer.New("")
-	p := parser.New(l)
-	g := bytecode.NewGenerator()
-	g.REPL = true
-	program, _ := p.ParseProgram()
-	bytecodes := g.GenerateByteCode(program, true) // Set generator's new scope
-	v.ExecBytecodes(bytecodes, "")
 	v.SetClassISIndexTable("")
 	v.SetMethodISIndexTable("")
+	v.InitForREPL()
+
+	// Initialize code generator, and it will behavior a little different in REPL mode.
+	g := bytecode.NewGenerator()
+	g.REPL = true
+
+	// Initialize parser, lexer is not important here
+	l := lexer.New("")
+	p := parser.New(l)
+	program, _ := p.ParseProgram()
+
+	// Set generator's new scope, program here is not important
+	// The result bytecode should be just "<ProgramStart>", also can be ignored.
+	_ = g.GenerateByteCode(program, true)
 
 	for {
 		fmt.Printf(PROMT)
