@@ -16,20 +16,14 @@ import (
 
 const PROMT = ">> "
 
-const(
-	Initial = "initial"
-	Wait = "wait"
+const (
+	Initial   = "initial"
+	Wait      = "wait"
 	WaitEnded = "waitEnded"
 )
 
 var sm = fsm.NewFSM(
 	"initial",
-	/*
-		Initial state is default state
-		Nosymbol state helps us identify tok ':' is for symbol or hash value
-		Method state helps us identify 'class' literal is a keyword or an identifier
-		Reference: https://github.com/looplab/fsm
-	*/
 	fsm.Events{
 		{Name: Wait, Src: []string{Initial}, Dst: Wait},
 		{Name: WaitEnded, Src: []string{Wait}, Dst: WaitEnded},
