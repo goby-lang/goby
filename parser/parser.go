@@ -13,6 +13,7 @@ const (
 	EndOfFileError
 	WrongTokenError
 	UnexpectedTokenError
+	UnexpectedEndError
 )
 
 type Error struct {
@@ -22,6 +23,14 @@ type Error struct {
 
 func (e *Error) Panic() {
 	panic(e.Message)
+}
+
+func (e *Error) IsEOF() bool {
+	return e.errType == EndOfFileError
+}
+
+func (e *Error) IsUnexpectedEnd() bool {
+	return e.errType == UnexpectedEndError
 }
 
 // Parser represents lexical analyzer struct
@@ -111,6 +120,7 @@ func New(l *lexer.Lexer) *Parser {
 
 // ParseProgram update program statements and return program
 func (p *Parser) ParseProgram() (*ast.Program, *Error) {
+	p.error = nil
 	// Read two tokens, so curToken and peekToken are both set.
 	p.nextToken()
 	p.nextToken()
@@ -119,13 +129,15 @@ func (p *Parser) ParseProgram() (*ast.Program, *Error) {
 
 	for !p.curTokenIs(token.EOF) {
 		stmt := p.parseStatement()
-		if p.error != nil {
-			return nil, p.error
-		}
+
 		if stmt != nil {
 			program.Statements = append(program.Statements, stmt)
 		}
 		p.nextToken()
+
+		if p.error != nil {
+			return nil, p.error
+		}
 	}
 
 	return program, nil
@@ -188,7 +200,12 @@ func (p *Parser) peekError(t token.Type) {
 
 func (p *Parser) noPrefixParseFnError(t token.Type) {
 	msg := fmt.Sprintf("unexpected %s Line: %d", p.curToken.Literal, p.curToken.Line)
-	p.error = &Error{Message: msg, errType: UnexpectedTokenError}
+
+	if t == token.End {
+		p.error = &Error{Message: msg, errType: UnexpectedEndError}
+	} else {
+		p.error = &Error{Message: msg, errType: UnexpectedTokenError}
+	}
 }
 
 func (p *Parser) peekTokenAtSameLine() bool {
