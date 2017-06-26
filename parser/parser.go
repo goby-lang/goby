@@ -2,17 +2,32 @@ package parser
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/goby-lang/goby/ast"
 	"github.com/goby-lang/goby/lexer"
 	"github.com/goby-lang/goby/token"
 )
 
+const (
+	_ int = iota
+	EndOfFileError
+	WrongTokenError
+	UnexpectedTokenError
+)
+
+type Error struct {
+	Message string
+	errType int
+}
+
+func (e *Error) Panic() {
+	panic(e.Message)
+}
+
 // Parser represents lexical analyzer struct
 type Parser struct {
-	Lexer  *lexer.Lexer
-	errors []string
+	Lexer *lexer.Lexer
+	error *Error
 
 	curToken  token.Token
 	peekToken token.Token
@@ -31,8 +46,11 @@ func BuildAST(file []byte) *ast.Program {
 	input := string(file)
 	l := lexer.New(input)
 	p := New(l)
-	program := p.ParseProgram()
-	p.CheckErrors()
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		panic(err.Message)
+	}
 
 	return program
 }
@@ -41,7 +59,6 @@ func BuildAST(file []byte) *ast.Program {
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
 		Lexer:       l,
-		errors:      []string{},
 		acceptBlock: true,
 	}
 
@@ -93,7 +110,7 @@ func New(l *lexer.Lexer) *Parser {
 }
 
 // ParseProgram update program statements and return program
-func (p *Parser) ParseProgram() *ast.Program {
+func (p *Parser) ParseProgram() (*ast.Program, *Error) {
 	// Read two tokens, so curToken and peekToken are both set.
 	p.nextToken()
 	p.nextToken()
@@ -102,32 +119,16 @@ func (p *Parser) ParseProgram() *ast.Program {
 
 	for !p.curTokenIs(token.EOF) {
 		stmt := p.parseStatement()
+		if p.error != nil {
+			return nil, p.error
+		}
 		if stmt != nil {
 			program.Statements = append(program.Statements, stmt)
 		}
 		p.nextToken()
 	}
 
-	return program
-}
-
-// Errors return parser errors
-func (p *Parser) Errors() []string {
-	return p.errors
-}
-
-func (p *Parser) ResetErrors() {
-	p.errors = []string{}
-}
-
-// CheckErrors is checking for parser's errors existence
-func (p *Parser) CheckErrors() {
-	errors := p.Errors()
-	if len(errors) == 0 {
-		return
-	}
-
-	panic(fmt.Sprintf(strings.Join(errors, "\n")))
+	return program, nil
 }
 
 func (p *Parser) parseSemicolon() ast.Expression {
@@ -163,11 +164,6 @@ func (p *Parser) peekTokenIs(t token.Type) bool {
 	return p.peekToken.Type == t
 }
 
-func (p *Parser) peekError(t token.Type) {
-	msg := fmt.Sprintf("expected next token to be %s, got %s instead. Line: %d", t, p.peekToken.Type, p.peekToken.Line)
-	p.errors = append(p.errors, msg)
-}
-
 func (p *Parser) expectPeek(t token.Type) bool {
 	if p.peekTokenIs(t) {
 		p.nextToken()
@@ -185,9 +181,14 @@ func (p *Parser) registerInfix(tokenType token.Type, fn infixParseFn) {
 	p.infixParseFns[tokenType] = fn
 }
 
+func (p *Parser) peekError(t token.Type) {
+	msg := fmt.Sprintf("expected next token to be %s, got %s instead. Line: %d", t, p.peekToken.Type, p.peekToken.Line)
+	p.error = &Error{Message: msg, errType: WrongTokenError}
+}
+
 func (p *Parser) noPrefixParseFnError(t token.Type) {
-	msg := fmt.Sprintf("no prefix function for %s Line: %d", t, p.curToken.Line)
-	p.errors = append(p.errors, msg)
+	msg := fmt.Sprintf("unexpected %s Line: %d", p.curToken.Literal, p.curToken.Line)
+	p.error = &Error{Message: msg, errType: UnexpectedTokenError}
 }
 
 func (p *Parser) peekTokenAtSameLine() bool {

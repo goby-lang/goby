@@ -136,8 +136,7 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	value, err := strconv.ParseInt(lit.TokenLiteral(), 0, 64)
 	if err != nil {
 		msg := fmt.Sprintf("could not parse %q as integer", lit.TokenLiteral())
-		p.errors = append(p.errors, msg)
-		return nil
+		panic(msg)
 	}
 
 	lit.Value = int(value)
@@ -158,8 +157,7 @@ func (p *Parser) parseBooleanLiteral() ast.Expression {
 	value, err := strconv.ParseBool(lit.TokenLiteral())
 	if err != nil {
 		msg := fmt.Sprintf("could not parse %q as boolean", lit.TokenLiteral())
-		p.errors = append(p.errors, msg)
-		return nil
+		panic(msg)
 	}
 
 	lit.Value = value

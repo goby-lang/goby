@@ -14,8 +14,11 @@ func TestMethodChainExpression(t *testing.T) {
 
 	l := lexer.New(input)
 	p := New(l)
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatal(err.Message)
+	}
 
 	stmt := program.Statements[0].(*ast.ExpressionStatement)
 
@@ -153,8 +156,11 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
 		p := New(l)
-		program := p.ParseProgram()
-		checkParserErrors(t, p)
+		program, err := p.ParseProgram()
+
+		if err != nil {
+			t.Fatal(err.Message)
+		}
 
 		actual := program.String()
 		if actual != tt.expected {
@@ -172,8 +178,11 @@ func TestIgnoreComments(t *testing.T) {
 
 	l := lexer.New(input)
 	p := New(l)
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatal(err.Message)
+	}
 
 	if len(program.Statements) != 1 {
 		t.Fatalf("expect parser to ignore comment")
@@ -186,19 +195,6 @@ func TestIgnoreComments(t *testing.T) {
 		t.Fatalf("expect parser to ignore comment and return only call expression")
 	}
 
-}
-
-func checkParserErrors(t *testing.T, p *Parser) {
-	errors := p.Errors()
-	if len(errors) == 0 {
-		return
-	}
-
-	t.Errorf("parser has %d errors", len(errors))
-	for _, msg := range errors {
-		t.Errorf("parser error: %q", msg)
-	}
-	t.FailNow()
 }
 
 func testIntegerLiteral(t *testing.T, exp ast.Expression, value int) bool {

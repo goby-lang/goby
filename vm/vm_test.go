@@ -11,24 +11,13 @@ import (
 func testEval(t *testing.T, input string) Object {
 	l := lexer.New(input)
 	p := parser.New(l)
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
+	program, err := p.ParseProgram()
+	if err != nil {
+		t.Fatal(err.Message)
+	}
 	g := bytecode.NewGenerator()
 	bytecodes := g.GenerateByteCode(program, true)
 	return testExec(bytecodes)
-}
-
-func checkParserErrors(t *testing.T, p *parser.Parser) {
-	errors := p.Errors()
-	if len(errors) == 0 {
-		return
-	}
-
-	t.Errorf("parser has %d errors", len(errors))
-	for _, msg := range errors {
-		t.Errorf("parser error: %q", msg)
-	}
-	t.FailNow()
 }
 
 func testExec(bytecodes string) Object {

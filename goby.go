@@ -52,10 +52,10 @@ func main() {
 
 	switch fileExt {
 	case "gb", "rb":
-		program := parser.BuildAST(file)
+		ast := parser.BuildAST(file)
 
 		g := bytecode.NewGenerator()
-		bytecodes := g.GenerateByteCode(program, true)
+		bytecodes := g.GenerateByteCode(ast, true)
 
 		if !*compileOptionPtr {
 			v := vm.New(dir, args)

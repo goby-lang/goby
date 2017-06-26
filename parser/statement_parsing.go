@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"fmt"
 	"github.com/goby-lang/goby/ast"
 	"github.com/goby-lang/goby/token"
 )
@@ -121,14 +120,6 @@ func (p *Parser) parseModuleStatement() *ast.ModuleStatement {
 	}
 
 	stmt.Name = &ast.Constant{Token: p.curToken, Value: p.curToken.Literal}
-
-	// See if there is any inheritance
-	if p.peekTokenIs(token.LT) {
-		msg := fmt.Sprintf("Module doesn't support inheritance. Line: %d", p.curToken.Line)
-		p.errors = append(p.errors, msg)
-		return nil
-	}
-
 	stmt.Body = p.parseBlockStatement()
 
 	return stmt
@@ -221,7 +212,7 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	for !p.curTokenIs(token.End) && !p.curTokenIs(token.Else) {
 
 		if p.curTokenIs(token.EOF) {
-			p.errors = append(p.errors, syntaxError("end", "EOF"))
+			p.error = &Error{Message: "Unexpected EOF", errType: EndOfFileError}
 			return bs
 		}
 		stmt := p.parseStatement()
@@ -251,8 +242,4 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 	ws.Body = p.parseBlockStatement()
 
 	return ws
-}
-
-func syntaxError(expecting string, unexpected string) string {
-	return "Syntax error: Expecting '" + expecting + "', unexpected '" + unexpected + "'"
 }

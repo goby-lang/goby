@@ -20,9 +20,11 @@ func TestReturnStatements(t *testing.T) {
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
 		p := New(l)
+		program, err := p.ParseProgram()
 
-		program := p.ParseProgram()
-		checkParserErrors(t, p)
+		if err != nil {
+			t.Fatal(err.Message)
+		}
 
 		if len(program.Statements) != 1 {
 			t.Fatalf("program.Statements does not contain 1 statements. got=%d",
@@ -52,8 +54,11 @@ func TestClassStatement(t *testing.T) {
 
 	l := lexer.New(input)
 	p := New(l)
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatal(err.Message)
+	}
 
 	stmt := program.Statements[0].(*ast.ClassStatement)
 
@@ -86,8 +91,11 @@ func TestModuleStatement(t *testing.T) {
 
 	l := lexer.New(input)
 	p := New(l)
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatal(err.Message)
+	}
 
 	stmt := program.Statements[0].(*ast.ModuleStatement)
 
@@ -120,8 +128,11 @@ func TestClassStatementWithInheritance(t *testing.T) {
 
 	l := lexer.New(input)
 	p := New(l)
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatal(err.Message)
+	}
 
 	stmt := program.Statements[0].(*ast.ClassStatement)
 
@@ -157,8 +168,11 @@ func TestDefStatement(t *testing.T) {
 
 	l := lexer.New(input)
 	p := New(l)
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatal(err.Message)
+	}
 
 	firstStmt := program.Statements[0].(*ast.DefStatement)
 
@@ -192,8 +206,11 @@ func TestDefStatementWithYield(t *testing.T) {
 	`
 	l := lexer.New(input)
 	p := New(l)
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatal(err.Message)
+	}
 
 	stmt := program.Statements[0].(*ast.DefStatement)
 	block := stmt.BlockStatement
@@ -226,8 +243,11 @@ func TestWhileStatement(t *testing.T) {
 
 	l := lexer.New(input)
 	p := New(l)
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatal(err.Message)
+	}
 
 	whileStatement := program.Statements[0].(*ast.WhileStatement)
 
