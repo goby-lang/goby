@@ -32,10 +32,12 @@ func NewGenerator() *Generator {
 	return &Generator{}
 }
 
+// ResetInstructionSets clears generator's instruction sets
 func (g *Generator) ResetInstructionSets() {
 	g.instructionSets = []*instructionSet{}
 }
 
+// InitTopLevelScope sets generator's scope with program node, which means it's the top level scope
 func (g *Generator) InitTopLevelScope(program *ast.Program) {
 	g.scope = &scope{program: program, localTable: newLocalTable(0)}
 }

@@ -14,25 +14,26 @@ import (
 	"github.com/goby-lang/goby/Godeps/_workspace/src/github.com/looplab/fsm"
 )
 
-const PROMT = ">> "
-
 const (
-	Initial   = "initial"
-	Wait      = "wait"
-	WaitEnded = "waitEnded"
+	prompt = ">> "
+
+	initial   = "initial"
+	wait      = "wait"
+	waitEnded = "waitEnded"
 )
 
 var sm = fsm.NewFSM(
 	"initial",
 	fsm.Events{
-		{Name: Wait, Src: []string{Initial}, Dst: Wait},
-		{Name: WaitEnded, Src: []string{Wait}, Dst: WaitEnded},
-		{Name: Initial, Src: []string{WaitEnded, Initial}, Dst: Initial},
+		{Name: wait, Src: []string{initial}, Dst: wait},
+		{Name: waitEnded, Src: []string{wait}, Dst: waitEnded},
+		{Name: initial, Src: []string{waitEnded, initial}, Dst: initial},
 	},
 	fsm.Callbacks{},
 )
 var stmts = bytes.Buffer{}
 
+// Start starts goby's REPL.
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 
@@ -53,7 +54,7 @@ func Start(in io.Reader, out io.Writer) {
 	g.InitTopLevelScope(program)
 
 	for {
-		fmt.Printf(PROMT)
+		out.Write([]byte(prompt))
 		scanned := scanner.Scan()
 		if !scanned {
 			return
@@ -66,8 +67,8 @@ func Start(in io.Reader, out io.Writer) {
 
 		if err != nil {
 			if err.IsEOF() {
-				if sm.Is(Initial) {
-					sm.Event(Wait)
+				if sm.Is(initial) {
+					sm.Event(wait)
 				}
 
 				appendStmt(line)
@@ -75,7 +76,7 @@ func Start(in io.Reader, out io.Writer) {
 			}
 
 			if err.IsUnexpectedEnd() {
-				sm.Event(WaitEnded)
+				sm.Event(waitEnded)
 				appendStmt(line)
 			} else {
 				fmt.Println(err.Message)
@@ -84,12 +85,12 @@ func Start(in io.Reader, out io.Writer) {
 
 		}
 
-		if sm.Is(Wait) {
+		if sm.Is(wait) {
 			appendStmt(line)
 			continue
 		}
 
-		if sm.Is(WaitEnded) {
+		if sm.Is(waitEnded) {
 			l := lexer.New(stmts.String())
 			p.Lexer = l
 
@@ -115,11 +116,11 @@ func Start(in io.Reader, out io.Writer) {
 			}
 
 			// If everything goes well, reset state and statements buffer
-			sm.Event(Initial)
+			sm.Event(initial)
 			stmts.Reset()
 		}
 
-		if sm.Is(Initial) {
+		if sm.Is(initial) {
 			bytecodes := g.GenerateByteCode(program.Statements)
 			g.ResetInstructionSets()
 			v.REPLExec(bytecodes)

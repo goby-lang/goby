@@ -960,7 +960,7 @@ func compileToBytecode(input string) string {
 	p := parser.New(l)
 	program, err := p.ParseProgram()
 	if err != nil {
-		err.Panic()
+		panic(err.Message)
 	}
 	g := NewGenerator()
 	g.InitTopLevelScope(program)

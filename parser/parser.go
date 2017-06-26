@@ -10,25 +10,29 @@ import (
 
 const (
 	_ int = iota
+	// EndOfFileError represents normal EOF error
 	EndOfFileError
+	// WrongTokenError means that token is not what we expected
 	WrongTokenError
+	// UnexpectedTokenError means that token is not expected to appear in current condition
 	UnexpectedTokenError
+	// UnexpectedEndError means we get unexpected "end" keyword (this is mainly created for REPL)
 	UnexpectedEndError
 )
 
+// Error represents parser's parsing error
 type Error struct {
+	// Message contains the readable message of error
 	Message string
 	errType int
 }
 
-func (e *Error) Panic() {
-	panic(e.Message)
-}
-
+// IsEOF checks if error is end of file error
 func (e *Error) IsEOF() bool {
 	return e.errType == EndOfFileError
 }
 
+// IsUnexpectedEnd checks if error is unexpected "end" keyword error
 func (e *Error) IsUnexpectedEnd() bool {
 	return e.errType == UnexpectedEndError
 }

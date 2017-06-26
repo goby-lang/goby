@@ -127,14 +127,20 @@ func (vm *VM) ExecBytecodes(bytecodes, fn string) {
 	vm.startFromTopFrame()
 }
 
+// SetClassISIndexTable adds new instruction set's index table to vm.classISIndexTables
 func (vm *VM) SetClassISIndexTable(fn filename) {
 	vm.classISIndexTables[fn] = newISIndexTable()
 }
 
+// SetMethodISIndexTable adds new instruction set's index table to vm.methodISIndexTables
 func (vm *VM) SetMethodISIndexTable(fn filename) {
 	vm.methodISIndexTables[fn] = newISIndexTable()
 }
 
+// InitForREPL does following things:
+// - Initialize instruction sets' index tables
+// - Set vm to REPL mode
+// - Create and push main object frame
 func (vm *VM) InitForREPL() {
 	vm.SetClassISIndexTable("")
 	vm.SetMethodISIndexTable("")
@@ -144,6 +150,7 @@ func (vm *VM) InitForREPL() {
 	vm.mainThread.callFrameStack.push(cf)
 }
 
+// REPLExec executes instructions differently from normal program execution.
 func (vm *VM) REPLExec(bytecodes string) {
 	p := newBytecodeParser("")
 	p.vm = vm
@@ -178,6 +185,7 @@ func (vm *VM) GetExecResult() Object {
 	return NULL
 }
 
+// GetREPLResult returns strings that should be showed after each evaluation.
 func (vm *VM) GetREPLResult() string {
 	top := vm.mainThread.stack.pop()
 

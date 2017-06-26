@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/goby-lang/goby/bytecode"
+	"github.com/goby-lang/goby/igb"
 	"github.com/goby-lang/goby/parser"
 	"github.com/goby-lang/goby/vm"
 	"github.com/pkg/profile"
@@ -11,7 +12,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"github.com/goby-lang/goby/igb"
 )
 
 // Version stores current Goby version
