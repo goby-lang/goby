@@ -105,8 +105,8 @@ func (vm *VM) ExecBytecodes(bytecodes, fn string) {
 	}
 
 	vm.blockTables[p.filename] = p.blockTable
-	vm.classISIndexTables[filename] = newISIndexTable()
-	vm.methodISIndexTables[filename] = newISIndexTable()
+	vm.SetClassISIndexTable(p.filename)
+	vm.SetMethodISIndexTable(p.filename)
 
 	defer func() {
 		if p := recover(); p != nil {
@@ -125,11 +125,36 @@ func (vm *VM) ExecBytecodes(bytecodes, fn string) {
 	vm.startFromTopFrame()
 }
 
-func (vm *VM) ReplExec(bytecodes, fn string) {
-	p := newBytecodeParser(filename(fn))
+func (vm *VM) SetClassISIndexTable(fn filename) {
+	vm.classISIndexTables[fn] = newISIndexTable()
+}
+
+func (vm *VM) SetMethodISIndexTable(fn filename) {
+	vm.methodISIndexTables[fn] = newISIndexTable()
+}
+
+func (vm *VM) InitForREPL() {
+	vm.SetClassISIndexTable("")
+	vm.SetMethodISIndexTable("")
+	cf := newCallFrame(&instructionSet{})
+	cf.self = mainObj
+	vm.mainThread.callFrameStack.push(cf)
+}
+
+func (vm *VM) REPLExec(bytecodes string) {
+	p := newBytecodeParser("")
 	p.vm = vm
 	p.parseBytecode(bytecodes)
-	oldFrame := vm.mainThread.callFrameStack.pop()
+
+	for labelType, table := range p.labelTable {
+		for labelName, is := range table {
+			vm.isTables[labelType][labelName] = is
+		}
+	}
+
+	vm.blockTables[p.filename] = p.blockTable
+
+	oldFrame := vm.mainThread.callFrameStack.top()
 	cf := newCallFrame(p.program)
 	cf.self = mainObj
 	cf.locals = oldFrame.locals

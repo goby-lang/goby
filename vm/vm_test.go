@@ -8,6 +8,32 @@ import (
 	"github.com/goby-lang/goby/parser"
 )
 
+func TestVM_REPLExec(t *testing.T) {
+	inputs := []string{`
+<Def:foo>
+0 putobject 123
+1 leave
+<ProgramStart>
+0 putself
+1 putstring "foo"
+2 def_method 0
+`, `
+<ProgramStart>
+0 putself
+1 send foo 0
+`}
+
+	v := New("./", []string{})
+	v.InitForREPL()
+
+	for _, input := range inputs {
+		v.REPLExec(input)
+	}
+
+	evaluated := v.GetExecResult()
+	checkExpected(t, evaluated, 123)
+}
+
 func testEval(t *testing.T, input string) Object {
 	l := lexer.New(input)
 	p := parser.New(l)

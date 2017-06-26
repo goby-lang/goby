@@ -236,7 +236,12 @@ var builtInActions = map[operationType]*action{
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			methodName := t.stack.pop().Target.(*StringObject).Value
-			is, _ := t.getMethodIS(methodName, cf.instructionSet.filename)
+			is, ok := t.getMethodIS(methodName, cf.instructionSet.filename)
+
+			if !ok {
+				t.returnError(fmt.Sprintf("Can't get method %s's instruction set.", methodName))
+			}
+
 			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, class: methodClass}
 
 			v := t.stack.pop().Target
