@@ -74,7 +74,7 @@ func (g *Generator) compileClassStmt(is *instructionSet, stmt *ast.ClassStatemen
 	}
 
 	is.define(Pop)
-	scope = newScope(scope, stmt)
+	scope = newScope(stmt)
 
 	// compile class's content
 	newIS := &instructionSet{}
@@ -90,7 +90,7 @@ func (g *Generator) compileModuleStmt(is *instructionSet, stmt *ast.ModuleStatem
 	is.define(DefClass, "module:"+stmt.Name.Value)
 	is.define(Pop)
 
-	scope = newScope(scope, stmt)
+	scope = newScope(stmt)
 	newIS := &instructionSet{}
 	newIS.setLabel(fmt.Sprintf("%s:%s", LabelDefClass, stmt.Name.Value))
 
@@ -110,7 +110,7 @@ func (g *Generator) compileDefStmt(is *instructionSet, stmt *ast.DefStatement, s
 		is.define(DefMethod, len(stmt.Parameters))
 	}
 
-	scope = newScope(scope, stmt)
+	scope = newScope(stmt)
 
 	// compile method definition's content
 	newIS := &instructionSet{}

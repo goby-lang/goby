@@ -15,7 +15,7 @@ type scope struct {
 	anchor     *anchor
 }
 
-func newScope(s *scope, stmt ast.Statement) *scope {
+func newScope(stmt ast.Statement) *scope {
 	return &scope{localTable: newLocalTable(0), self: stmt, line: 0}
 }
 
