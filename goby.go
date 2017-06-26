@@ -55,7 +55,8 @@ func main() {
 		ast := parser.BuildAST(file)
 
 		g := bytecode.NewGenerator()
-		bytecodes := g.GenerateByteCode(ast, true)
+		g.InitTopLevelScope(ast)
+		bytecodes := g.GenerateByteCode(ast.Statements)
 
 		if !*compileOptionPtr {
 			v := vm.New(dir, args)

@@ -79,7 +79,9 @@ func testEval(t *testing.T, input string) Object {
 		t.Fatal(err.Message)
 	}
 	g := bytecode.NewGenerator()
-	bytecodes := g.GenerateByteCode(program, true)
+	g.InitTopLevelScope(program)
+	bytecodes := g.GenerateByteCode(program.Statements)
+
 	return testExec(bytecodes)
 }
 

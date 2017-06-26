@@ -42,18 +42,15 @@ func Start(in io.Reader, out io.Writer) {
 	v.SetMethodISIndexTable("")
 	v.InitForREPL()
 
-	// Initialize code generator, and it will behavior a little different in REPL mode.
-	g := bytecode.NewGenerator()
-	g.REPL = true
-
 	// Initialize parser, lexer is not important here
 	l := lexer.New("")
 	p := parser.New(l)
 	program, _ := p.ParseProgram()
 
-	// Set generator's new scope, program here is not important
-	// The result bytecode should be just "<ProgramStart>", also can be ignored.
-	_ = g.GenerateByteCode(program, true)
+	// Initialize code generator, and it will behavior a little different in REPL mode.
+	g := bytecode.NewGenerator()
+	g.REPL = true
+	g.InitTopLevelScope(program)
 
 	for {
 		fmt.Printf(PROMT)
@@ -112,7 +109,7 @@ func Start(in io.Reader, out io.Writer) {
 		}
 
 		if sm.Is(Initial) {
-			bytecodes := g.GenerateByteCode(program, false)
+			bytecodes := g.GenerateByteCode(program.Statements)
 			g.ResetInstructionSets()
 			v.REPLExec(bytecodes)
 			fmt.Println(v.GetExecResultToString())

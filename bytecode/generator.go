@@ -36,13 +36,13 @@ func (g *Generator) ResetInstructionSets() {
 	g.instructionSets = []*instructionSet{}
 }
 
-// GenerateByteCode returns compiled bytecodes
-func (g *Generator) GenerateByteCode(program *ast.Program, newScope bool) string {
-	if newScope {
-		g.scope = &scope{program: program, localTable: newLocalTable(0)}
-	}
+func (g *Generator) InitTopLevelScope(program *ast.Program) {
+	g.scope = &scope{program: program, localTable: newLocalTable(0)}
+}
 
-	g.compileStatements(program.Statements, g.scope, g.scope.localTable)
+// GenerateByteCode returns compiled bytecodes
+func (g *Generator) GenerateByteCode(stmts []ast.Statement) string {
+	g.compileStatements(stmts, g.scope, g.scope.localTable)
 	var out bytes.Buffer
 
 	for _, is := range g.instructionSets {

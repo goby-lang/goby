@@ -336,7 +336,8 @@ func (vm *VM) execGobyLib(libName string) {
 func (vm *VM) execRequiredFile(filepath string, file []byte) {
 	program := parser.BuildAST(file)
 	g := bytecode.NewGenerator()
-	bytecodes := g.GenerateByteCode(program, true)
+	g.InitTopLevelScope(program)
+	bytecodes := g.GenerateByteCode(program.Statements)
 
 	oldMethodTable := isTable{}
 	oldClassTable := isTable{}
