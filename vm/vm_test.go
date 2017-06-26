@@ -9,7 +9,13 @@ import (
 )
 
 func TestVM_REPLExec(t *testing.T) {
-	inputs := []string{`
+	tests := []struct {
+		inputs   []string
+		expected interface{}
+	}{
+		{
+			[]string{`
+<ProgramStart>
 <Def:foo>
 0 putobject 123
 1 leave
@@ -21,17 +27,48 @@ func TestVM_REPLExec(t *testing.T) {
 <ProgramStart>
 0 putself
 1 send foo 0
-`}
-
-	v := New("./", []string{})
-	v.InitForREPL()
-
-	for _, input := range inputs {
-		v.REPLExec(input)
+`},
+			123},
+		{
+			[]string{
+				`
+<ProgramStart>
+<Def:bar>
+0 getlocal 0 0
+1 putobject 10
+2 send + 1
+3 leave
+<DefClass:Foo>
+0 putself
+1 putstring "bar"
+2 def_method 1
+3 leave
+<ProgramStart>
+0 putself
+1 def_class class:Foo
+2 pop
+`,
+				`
+<ProgramStart>
+0 getconstant Foo
+1 send new 0
+2 putobject 90
+3 send bar 1
+`},
+			100},
 	}
 
-	evaluated := v.GetExecResult()
-	checkExpected(t, evaluated, 123)
+	for _, test := range tests {
+		v := New("./", []string{})
+		v.InitForREPL()
+
+		for _, input := range test.inputs {
+			v.REPLExec(input)
+		}
+
+		evaluated := v.GetExecResult()
+		checkExpected(t, evaluated, test.expected)
+	}
 }
 
 func testEval(t *testing.T, input string) Object {
