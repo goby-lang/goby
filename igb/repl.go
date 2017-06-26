@@ -19,6 +19,10 @@ func Start(in io.Reader, out io.Writer) {
 	l := lexer.New("")
 	p := parser.New(l)
 	g := bytecode.NewGenerator()
+	g.REPL = true
+	program := p.ParseProgram()
+	bytecodes := g.GenerateByteCode(program, true) // Set generator's new scope
+	v.ExecBytecodes(bytecodes, "")
 
 	for {
 		fmt.Printf(PROMT)
@@ -33,12 +37,14 @@ func Start(in io.Reader, out io.Writer) {
 		program := p.ParseProgram()
 		if len(p.Errors()) != 0 {
 			printParserErrors(out, p.Errors())
+			p.ResetErrors()
 			continue
 		}
 
-		bytecodes := g.GenerateByteCode(program)
-		fmt.Println(bytecodes)
+		bytecodes := g.GenerateByteCode(program, false)
+		g.ResetInstructionSets()
 		v.ReplExec(bytecodes, os.Getenv("GOBY_ROOT"))
+		fmt.Println(v.GetExecResultToString())
 	}
 }
 

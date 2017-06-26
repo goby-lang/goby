@@ -21,8 +21,10 @@ func newScope(s *scope, stmt ast.Statement) *scope {
 
 // Generator contains program's AST and will store generated instruction sets
 type Generator struct {
+	REPL            bool
 	instructionSets []*instructionSet
 	blockCounter    int
+	scope           *scope
 }
 
 // NewGenerator initializes new Generator with complete AST tree.
@@ -30,10 +32,17 @@ func NewGenerator() *Generator {
 	return &Generator{}
 }
 
+func (g *Generator) ResetInstructionSets() {
+	g.instructionSets = []*instructionSet{}
+}
+
 // GenerateByteCode returns compiled bytecodes
-func (g *Generator) GenerateByteCode(program *ast.Program) string {
-	scope := &scope{program: program, localTable: newLocalTable(0)}
-	g.compileStatements(program.Statements, scope, scope.localTable)
+func (g *Generator) GenerateByteCode(program *ast.Program, newScope bool) string {
+	if newScope {
+		g.scope = &scope{program: program, localTable: newLocalTable(0)}
+	}
+
+	g.compileStatements(program.Statements, g.scope, g.scope.localTable)
 	var out bytes.Buffer
 
 	for _, is := range g.instructionSets {
@@ -50,6 +59,9 @@ func (g *Generator) compileCodeBlock(is *instructionSet, stmt *ast.BlockStatemen
 }
 
 func (g *Generator) endInstructions(is *instructionSet) {
+	if g.REPL && is.label.Name == Program {
+		return
+	}
 	is.define(Leave)
 }
 

@@ -120,6 +120,10 @@ func (p *Parser) Errors() []string {
 	return p.errors
 }
 
+func (p *Parser) ResetErrors() {
+	p.errors = []string{}
+}
+
 // CheckErrors is checking for parser's errors existence
 func (p *Parser) CheckErrors() {
 	errors := p.Errors()

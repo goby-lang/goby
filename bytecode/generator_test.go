@@ -961,7 +961,7 @@ func compileToBytecode(input string) string {
 	program := p.ParseProgram()
 	p.CheckErrors()
 	g := NewGenerator()
-	return g.GenerateByteCode(program)
+	return g.GenerateByteCode(program, true)
 }
 
 func compareBytecode(t *testing.T, value, expected string) {
