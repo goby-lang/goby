@@ -17,17 +17,17 @@ import (
 const (
 	prompt = ">> "
 
-	initial   = "initial"
-	wait      = "wait"
-	waitEnded = "waitEnded"
+	readyToExec = "readyToExec"
+	Waiting     = "waiting"
+	waitEnded   = "waitEnded"
 )
 
 var sm = fsm.NewFSM(
-	"initial",
+	readyToExec,
 	fsm.Events{
-		{Name: wait, Src: []string{initial}, Dst: wait},
-		{Name: waitEnded, Src: []string{wait}, Dst: waitEnded},
-		{Name: initial, Src: []string{waitEnded, initial}, Dst: initial},
+		{Name: Waiting, Src: []string{waitEnded, readyToExec}, Dst: Waiting},
+		{Name: waitEnded, Src: []string{Waiting}, Dst: waitEnded},
+		{Name: readyToExec, Src: []string{waitEnded, readyToExec}, Dst: readyToExec},
 	},
 	fsm.Callbacks{},
 )
@@ -67,8 +67,8 @@ func Start(in io.Reader, out io.Writer) {
 
 		if err != nil {
 			if err.IsEOF() {
-				if sm.Is(initial) {
-					sm.Event(wait)
+				if !sm.Is(Waiting) {
+					sm.Event(Waiting)
 				}
 
 				appendStmt(line)
@@ -85,7 +85,7 @@ func Start(in io.Reader, out io.Writer) {
 
 		}
 
-		if sm.Is(wait) {
+		if sm.Is(Waiting) {
 			appendStmt(line)
 			continue
 		}
@@ -116,15 +116,15 @@ func Start(in io.Reader, out io.Writer) {
 			}
 
 			// If everything goes well, reset state and statements buffer
-			sm.Event(initial)
+			sm.Event(readyToExec)
 			stmts.Reset()
 		}
 
-		if sm.Is(initial) {
+		if sm.Is(readyToExec) {
 			bytecodes := g.GenerateByteCode(program.Statements)
 			g.ResetInstructionSets()
 			v.REPLExec(bytecodes)
-			out.Write([]byte(v.GetREPLResult() + "\n"))
+			out.Write([]byte(fmt.Sprintf("#=> %s\n", v.GetREPLResult())))
 		}
 	}
 }
