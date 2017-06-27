@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"github.com/goby-lang/goby/bytecode"
@@ -26,7 +27,23 @@ func main() {
 	flag.Parse()
 
 	if *interactiveOptionPtr {
-		igb.Start(os.Stdin, os.Stdout)
+		scanner := bufio.NewScanner(os.Stdin)
+
+		ch := make(chan string)
+
+		go func() {
+			for {
+				scanned := scanner.Scan()
+
+				if !scanned {
+					continue
+				}
+
+				ch <- scanner.Text()
+			}
+		}()
+
+		igb.Start(ch, os.Stdout)
 	}
 
 	if *profileOptionPtr {

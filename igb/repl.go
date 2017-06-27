@@ -1,7 +1,6 @@
 package igb
 
 import (
-	"bufio"
 	"bytes"
 	"fmt"
 	"github.com/goby-lang/goby/bytecode"
@@ -34,9 +33,7 @@ var sm = fsm.NewFSM(
 var stmts = bytes.Buffer{}
 
 // Start starts goby's REPL.
-func Start(in io.Reader, out io.Writer) {
-	scanner := bufio.NewScanner(in)
-
+func Start(ch chan string, out io.Writer) {
 	// Initialize VM
 	v := vm.New(os.Getenv("GOBY_ROOT"), []string{})
 	v.SetClassISIndexTable("")
@@ -55,12 +52,18 @@ func Start(in io.Reader, out io.Writer) {
 
 	for {
 		out.Write([]byte(prompt))
-		scanned := scanner.Scan()
-		if !scanned {
+
+		line := <-ch
+
+		out.Write([]byte(line + "\n"))
+
+		switch line {
+		case "exit":
 			return
+		case "\n":
+			continue
 		}
 
-		line := scanner.Text()
 		l := lexer.New(line)
 		p.Lexer = l
 		program, err := p.ParseProgram()
@@ -124,7 +127,15 @@ func Start(in io.Reader, out io.Writer) {
 			bytecodes := g.GenerateByteCode(program.Statements)
 			g.ResetInstructionSets()
 			v.REPLExec(bytecodes)
-			out.Write([]byte(fmt.Sprintf("#=> %s\n", v.GetREPLResult())))
+
+			r := v.GetREPLResult()
+
+			switch r {
+			case "\n", "":
+				continue
+			default:
+				out.Write([]byte(fmt.Sprintf("#=> %s\n", r)))
+			}
 		}
 	}
 }
