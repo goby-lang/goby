@@ -83,7 +83,7 @@ func TestAttrReaderAndWriter(t *testing.T) {
 	}{
 		{`
 		class Foo
-		  attr_reader("bar")
+		  attr_reader :bar
 
 		  def set_bar(bar)
 		    @bar = bar
@@ -97,7 +97,7 @@ func TestAttrReaderAndWriter(t *testing.T) {
 		`, 10},
 		{`
 		class Foo
-		  attr_writer("bar")
+		  attr_writer :bar
 
 		  def bar
 		    @bar
@@ -111,8 +111,8 @@ func TestAttrReaderAndWriter(t *testing.T) {
 		`, 10},
 		{`
 		class Foo
-		  attr_writer("bar")
-		  attr_reader("bar")
+		  attr_writer :bar
+		  attr_reader :bar
 		end
 
 		f = Foo.new
@@ -122,7 +122,7 @@ func TestAttrReaderAndWriter(t *testing.T) {
 		`, 10},
 		{`
 		class Foo
-		  attr_accessor("bar")
+		  attr_accessor :bar
 		end
 
 		f = Foo.new
@@ -132,7 +132,7 @@ func TestAttrReaderAndWriter(t *testing.T) {
 		`, 10},
 		{`
 		class Foo
-		  attr_accessor("foo", "bar")
+		  attr_accessor :foo, :bar
 		end
 
 		f = Foo.new
