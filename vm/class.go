@@ -812,8 +812,13 @@ var builtinClassClassMethods = []*BuiltInMethodObject{
 		Name: "superclass",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				c := receiver.(Class).returnSuperClass()
 
-				return receiver.(Class).returnSuperClass()
+				if c.(*RClass) == nil {
+					return NULL
+				}
+
+				return c
 			}
 		},
 	},
