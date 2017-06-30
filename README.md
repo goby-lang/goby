@@ -1,6 +1,7 @@
 # goby (rooby)
+[![Join us on Slack!](https://goby-lang-slackin.herokuapp.com/badge.svg)](https://goby-lang-slackin.herokuapp.com)
 
-[![Backers on Open Collective](https://opencollective.com/goby/backers/badge.svg)](#backers) [![Sponsors on Open Collective](https://opencollective.com/goby/sponsors/badge.svg)](#sponsors) [![Join the chat at https://gitter.im/rooby-lang/Lobby](https://badges.gitter.im/rooby-lang/Lobby.svg)](https://gitter.im/rooby-lang/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Backers on Open Collective](https://opencollective.com/goby/backers/badge.svg)](#backers) [![Sponsors on Open Collective](https://opencollective.com/goby/sponsors/badge.svg)](#sponsors)
 
 [![Build Status](https://travis-ci.org/goby-lang/goby.svg?branch=master)](https://travis-ci.org/goby-lang/goby)
 [![Code Climate](https://codeclimate.com/github/goby-lang/goby/badges/gpa.svg)](https://codeclimate.com/github/goby-lang/goby)
