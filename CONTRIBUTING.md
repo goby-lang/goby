@@ -6,7 +6,7 @@ If you are very interested in `Goby` or planning contribute `Goby` frequently, p
 
 ## What to contribute
 
-- Any issues you see, and if you think the ticket is confusing, please open an issue or ask me on [gitter](https://gitter.im/goby-lang/Lobby).
+- Any issues you see, and if you think the ticket is confusing, please open an issue or ask me on [slack](https://goby-lang-slackin.herokuapp.com).
 - Any grammar error in readme, wiki, and code comments...etc.
 - Any issues litsted in goby's [codeclimate](https://codeclimate.com/github/goby-lang/goby/issues).
 - Play around goby and report any bug you find.
