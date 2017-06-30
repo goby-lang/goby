@@ -384,7 +384,7 @@ var builtInActions = map[operationType]*action{
 			In this case the target frame is not first block frame we meet. It should be `bar`'s block.
 			And bar's frame is foo block frame's ep, so our target frame is ep's block frame.
 			 */
-			if cf.blockFrame.instructionSet == cf.instructionSet {
+			if cf.blockFrame.ep == cf.ep {
 				blockFrame = cf.blockFrame.ep.blockFrame
 			}
 
