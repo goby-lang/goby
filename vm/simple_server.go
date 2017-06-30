@@ -78,7 +78,10 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 						}
 					}()
 
-					router.PathPrefix("/").Handler(http.FileServer(http.Dir(t.vm.fileDir)))
+					if serveStatic {
+						router.PathPrefix("/").Handler(http.FileServer(http.Dir(t.vm.fileDir)))
+					}
+
 					http.Handle("/", router)
 
 					err := http.ListenAndServe(":"+port, nil)
@@ -96,7 +99,8 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					path := args[0].(*StringObject).Value
-					router.HandleFunc(path, newHandler(t, blockFrame))
+					method := args[1].(*StringObject).Value
+					router.HandleFunc(path, newHandler(t, blockFrame)).Methods(method)
 
 					return receiver
 				}

@@ -4,14 +4,14 @@ server = Net::SimpleServer.new("3000")
 
 i = 0
 
-server.mount("/") do |req, res|
+server.get("/") do |req, res|
   puts(i)
   i = i+1
   res.body = req.method + " Hello World"
   res.status = 200
 end
 
-server.mount("/not_found") do |req, res|
+server.get("/not_found") do |req, res|
   res.body = "Not Found"
   res.status = 404
 end
