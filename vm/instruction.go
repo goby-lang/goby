@@ -360,9 +360,37 @@ var builtInActions = map[operationType]*action{
 				t.returnError("Can't yield without a block")
 			}
 
-			c := newCallFrame(cf.blockFrame.instructionSet)
-			c.blockFrame = cf.blockFrame
-			c.ep = cf.blockFrame.ep
+			blockFrame := cf.blockFrame
+
+			/*
+			This is for such condition:
+
+			```ruby
+			def foo(x)
+			  yield(x + 10)
+			end
+
+			def bar(y)
+			  foo(y) do |f|
+			    yield(f) # <------- here
+			  end
+			end
+
+			bar(100) do |b|
+			  puts(b) #=> 110
+			end
+			```
+
+			In this case the target frame is not first block frame we meet. It should be `bar`'s block.
+			And bar's frame is foo block frame's ep, so our target frame is ep's block frame.
+			 */
+			if cf.blockFrame.instructionSet == cf.instructionSet {
+				blockFrame = cf.blockFrame.ep.blockFrame
+			}
+
+			c := newCallFrame(blockFrame.instructionSet)
+			c.blockFrame = blockFrame
+			c.ep = blockFrame.ep
 			c.self = receiver
 
 			for i := 0; i < argCount; i++ {

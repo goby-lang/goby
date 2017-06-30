@@ -857,6 +857,52 @@ func TestMethodCallWithNestedBlock(t *testing.T) {
 		b
 
 		`, 260},
+		{
+			`
+			def foo(x)
+			  yield(x + 10)
+			end
+
+			def bar(y)
+			  foo(y) do |f|
+			    yield(f)
+			  end
+			end
+
+			a = 0
+			bar(100) do |b|
+			  a = b
+			end
+
+			a
+			`,
+			110},
+		{
+			`
+			def foo(x)
+			  yield(x + 10)
+			end
+
+			def bar(y)
+			  foo(y) do |f|
+			    yield(f)
+			  end
+			end
+
+			def baz(z)
+			  bar(z + 100) do |b|
+			    yield(b)
+			  end
+			end
+
+			a = 0
+			baz(100) do |b|
+			  a = b
+			end
+
+			a
+			`,
+			210},
 	}
 
 	for _, tt := range tests {
