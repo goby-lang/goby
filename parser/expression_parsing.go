@@ -507,3 +507,10 @@ func (p *Parser) parseRangeExpression(left ast.Expression) ast.Expression {
 
 	return exp
 }
+
+func (p *Parser) parseRegexLiteral() ast.Expression {
+	lit := &ast.RegexLiteral{Token: p.curToken}
+	lit.Value = p.curToken.Literal
+
+	return lit
+}
