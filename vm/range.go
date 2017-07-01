@@ -236,4 +236,80 @@ var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 			}
 		},
 	},
+	{
+	// By using binary search, finds a value in range which meets the given condition in O(log n)
+	// where n is the size of the range.
+	//
+	// You can use this method to find minimum number. The elements of the range must be monotone
+	// (or sorted) with respect to the block.
+	//
+	// In find minimum mode (this is a good choice for typical use case), the block must return
+	// true or false, and there must be a value x so that:
+	//
+	// - the block returns false for any value which is less than x, and
+	//
+	// - the block returns true for any value which is greater than or equal to x.
+	//
+	// If x is within the range, this method returns the value x. Otherwise, it returns nil.
+	//
+	// ```ruby
+	// ary = [0, 4, 7, 10, 12]
+	// (0..(ary.length)).bsearch do
+	//   |i| ary[i] >= 4
+	// end
+	// #=> 1
+	//
+	// (0..(ary.length)).bsearch do |i|
+	//   ary[i] >= 6
+	// end
+	// #=> 2
+	//
+	// (0..(ary.length)).bsearch do |i|
+	//   ary[i] >= 8
+	// end
+	// #=> 3
+	//
+	// (0..(ary.length)).bsearch do |i|
+	//   ary[i] >= 100
+	// end
+	// #=> nil
+	// ```
+	// @return [Integer]
+	//Name: "bsearch",
+	//Fn: func(receiver Object) builtinMethodBody {
+	//	return func(t *thread, args []Object, blockFrame *callFrame) Object {
+	//		ran := receiver.(*RangeObject)
+	//
+	//		if blockFrame == nil {
+	//			t.returnError("Can't yield without a block")
+	//		}
+	//
+	//		start := ran.Start
+	//		end := ran.End
+	//		if start > end {
+	//			return NULL
+	//		} else {
+	//			for start <= end {
+	//				mid := (start + end) / 2
+	//				if ((start + end) % 2 != 0) {
+	//					mid += 1
+	//				}
+	//				fmt.Println(mid)
+	//				obj := initIntegerObject(mid)
+	//				result := t.builtInMethodYield(blockFrame, obj)
+	//				if result.Target.(*BooleanObject).Value {
+	//					start = mid + 1
+	//				} else {
+	//					end = mid - 1
+	//				}
+	//
+	//				if start == end {
+	//					return initIntegerObject(start)
+	//				}
+	//			}
+	//			return NULL
+	//		}
+	//	}
+	//},
+	},
 }

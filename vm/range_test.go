@@ -106,7 +106,7 @@ func TestSize(t *testing.T) {
 
 func TestStepThroughRange(t *testing.T) {
 	tests := []struct {
-		input string
+		input    string
 		expected interface{}
 	}{
 		{`
@@ -136,7 +136,7 @@ func TestStepThroughRange(t *testing.T) {
 
 func TestInclude(t *testing.T) {
 	tests := []struct {
-		input string
+		input    string
 		expected interface{}
 	}{
 		{`
