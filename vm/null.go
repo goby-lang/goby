@@ -18,7 +18,7 @@ type NullObject struct {
 
 // toString returns the name of NullObject
 func (n *NullObject) toString() string {
-	return ""
+	return "nil"
 }
 
 func (n *NullObject) toJSON() string {

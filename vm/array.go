@@ -31,7 +31,6 @@ func (a *ArrayObject) toString() string {
 		elements = append(elements, e.toString())
 	}
 
-	out.WriteString("Array:")
 	out.WriteString("[")
 	out.WriteString(strings.Join(elements, ", "))
 	out.WriteString("]")
@@ -166,7 +165,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 				if len(arr.Elements) < (indexValue + 1) {
 					newArr := make([]Object, indexValue+1)
 					copy(newArr, arr.Elements)
-					for i := range newArr[len(arr.Elements):] {
+					for i := len(arr.Elements); i <= indexValue; i++ {
 						newArr[i] = NULL
 					}
 					arr.Elements = newArr
