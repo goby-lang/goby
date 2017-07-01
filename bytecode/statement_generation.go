@@ -117,7 +117,12 @@ func (g *Generator) compileDefStmt(is *instructionSet, stmt *ast.DefStatement, s
 	newIS.setLabel(fmt.Sprintf("%s:%s", LabelDef, stmt.Name.Value))
 
 	for i := 0; i < len(stmt.Parameters); i++ {
-		scope.localTable.setLCL(stmt.Parameters[i].Value, scope.localTable.depth)
+		switch exp := stmt.Parameters[i].(type) {
+		case *ast.Identifier:
+			scope.localTable.setLCL(exp.Value, scope.localTable.depth)
+		case *ast.InfixExpression:
+			g.compileInfixExpression(is, exp, scope, scope.localTable)
+		}
 	}
 
 	if len(stmt.BlockStatement.Statements) == 0 {

@@ -99,7 +99,7 @@ type DefStatement struct {
 	Token          token.Token
 	Name           *Identifier
 	Receiver       Expression
-	Parameters     []*Identifier
+	Parameters     []Expression
 	BlockStatement *BlockStatement
 }
 
