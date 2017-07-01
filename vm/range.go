@@ -231,9 +231,8 @@ var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 				end := ran.End
 				if value >= start || value <= end {
 					return TRUE
-				} else {
-					return FALSE
 				}
+				return FALSE
 			}
 		},
 	},
