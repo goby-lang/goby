@@ -371,7 +371,7 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 			exp.Arguments = []ast.Expression{}
 		} else if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { // p.foo x, y, z || p.foo x
 			p.nextToken()
-			exp.Arguments = p.parseCallArgumentsWithoutParensDot()
+			exp.Arguments = p.parseCallArgumentsWithoutParens()
 		}
 	}
 
@@ -445,23 +445,6 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 	return args
 }
 
-func (p *Parser) parseCallArgumentsWithoutParensDot() []ast.Expression {
-	args := []ast.Expression{}
-
-	args = append(args, p.parseExpression(NORMAL))
-
-	for p.peekTokenIs(token.Comma) {
-		p.nextToken() // ","
-		p.nextToken() // start of next expression
-		args = append(args, p.parseExpression(NORMAL))
-	}
-
-	if p.peekTokenAtSameLine() {
-		return nil
-	}
-	return args
-}
-
 func (p *Parser) parseCallArgumentsWithoutParens() []ast.Expression {
 	args := []ast.Expression{}
 
@@ -489,7 +472,7 @@ func (p *Parser) parseYieldExpression() ast.Expression {
 
 	if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { // yield 123
 		p.nextToken()
-		ye.Arguments = p.parseCallArgumentsWithoutParensDot()
+		ye.Arguments = p.parseCallArgumentsWithoutParens()
 	}
 
 	return ye
