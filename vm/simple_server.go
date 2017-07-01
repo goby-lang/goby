@@ -76,7 +76,7 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 						fp := filepath.Join(currentDir, fr)
 						fs := http.FileServer(http.Dir(fp))
 						http.Handle("/", fs)
-					} else{
+					} else {
 						http.Handle("/", router)
 					}
 
