@@ -4,6 +4,45 @@ import (
 	"testing"
 )
 
+func TestMethodCallWithDefaultArgValue(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		def foo(x = 10)
+		  x
+		end
+
+		foo
+		`, 10},
+		{`
+		def foo(x = 10, y)
+		  x + y
+		end
+
+		foo(100, 10)
+		`, 110},
+		{`
+		def foo(x, y = 10)
+		  x + y
+		end
+
+		foo(100)
+		`, 110},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(t, tt.input)
+
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+		}
+
+		checkExpected(t, evaluated, tt.expected)
+	}
+}
+
 func TestNextStatement(t *testing.T) {
 	tests := []struct {
 		input    string

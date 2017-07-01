@@ -121,7 +121,8 @@ func (g *Generator) compileDefStmt(is *instructionSet, stmt *ast.DefStatement, s
 		case *ast.Identifier:
 			scope.localTable.setLCL(exp.Value, scope.localTable.depth)
 		case *ast.InfixExpression:
-			g.compileInfixExpression(is, exp, scope, scope.localTable)
+			exp.Optioned = 1
+			g.compileAssignExpression(newIS, exp, scope, scope.localTable)
 		}
 	}
 

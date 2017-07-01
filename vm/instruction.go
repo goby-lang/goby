@@ -108,9 +108,22 @@ var builtInActions = map[operationType]*action{
 	bytecode.SetLocal: {
 		name: bytecode.SetLocal,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+			var optioned bool
 			v := t.stack.pop()
 			depth := args[0].(int)
 			index := args[1].(int)
+
+			if len(args) > 2  && args[2].(int) == 1 {
+				optioned = true
+			}
+
+			if optioned {
+				if cf.getLCL(index, depth) == nil {
+					cf.insertLCL(index, depth, v.Target)
+				}
+
+				return
+			}
 
 			cf.insertLCL(index, depth, v.Target)
 		},
