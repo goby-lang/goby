@@ -149,4 +149,92 @@ var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 			}
 		},
 	},
+	{
+		// The to_s method can convert range to string format
+		//
+		// ```ruby
+		// (1..5).to_s # "(1..5)"
+		// ```
+		// @return [String]
+		Name: "to_s",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				ran := receiver.(*RangeObject)
+
+				return initStringObject(ran.toString())
+			}
+		},
+	},
+	{
+		// Returns the size of the range
+		//
+		// ```ruby
+		// (1..5).size # => 5
+		// (3..9).size # => 7
+		// ```
+		// @return [Integer]
+		Name: "size",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				ran := receiver.(*RangeObject)
+
+				return initIntegerObject(ran.End - ran.Start + 1)
+			}
+		},
+	},
+	{
+		// The step method can loop through the first to the last of the object with given steps.
+		// An error will occur if not yielded to the block.
+		//
+		// ```ruby
+		// (2..9).step(3) do |i|
+		// 	 puts i
+		// end
+		// # => 2
+		// # => 5
+		// # => 8
+		// ```
+		Name: "step",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				ran := receiver.(*RangeObject)
+
+				if blockFrame == nil {
+					t.returnError("Can't yield without a block")
+				}
+
+				stepValue := args[0].(*IntegerObject).Value
+				for i := ran.Start; i <= ran.End; i += stepValue {
+					obj := initIntegerObject(i)
+					t.builtInMethodYield(blockFrame, obj)
+				}
+				return ran
+			}
+		},
+	},
+	{
+		// The include method will check whether the integer object is in the range
+		//
+		// ```ruby
+		// (5..10).include(7) # => true
+		// (5..10).include(5) # => true
+		// (5..10).include(4) # => false
+		// ```
+		// @return [Boolean]
+		Name: "include",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				ran := receiver.(*RangeObject)
+
+				value := args[0].(*IntegerObject).Value
+				start := ran.Start
+				end := ran.End
+				if value >= start || value <= end {
+					return TRUE
+				} else {
+					return FALSE
+				}
+			}
+		},
+	},
 }
