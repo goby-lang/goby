@@ -54,7 +54,7 @@ func (g *Generator) compileExpression(is *instructionSet, exp ast.Expression, sc
 	case *ast.CallExpression:
 		g.compileCallExpression(is, exp, scope, table)
 	case *ast.RegexLiteral:
-		is.define(PutString, fmt.Sprintf("/%s/", exp.Value))
+		is.define(PutRegexp, fmt.Sprintf("/%s/", exp.Regexp2))
 	}
 }
 

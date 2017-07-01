@@ -125,8 +125,8 @@ var builtInActions = map[operationType]*action{
 			cf.storeConstant(constName, v)
 		},
 	},
-	bytecode.NewRegex: {
-		name: bytecode.NewRegex,
+	bytecode.NewRegexp: {
+		name: bytecode.NewRegexp,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
 			Pattern := t.stack.pop().Target.(*RegexpObject).toString()
 			t.stack.push(&Pointer{initRegexpObject(Pattern)})
@@ -224,6 +224,13 @@ var builtInActions = map[operationType]*action{
 		name: bytecode.PutSelf,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
 			t.stack.push(&Pointer{cf.self})
+		},
+	},
+	bytecode.PutRegexp: {
+		name: bytecode.PutRegexp,
+		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+			object := initializeObjectFromInstruction(args[0])
+			t.stack.push(&Pointer{object})
 		},
 	},
 	bytecode.PutString: {
