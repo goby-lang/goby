@@ -56,16 +56,6 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 						port = portVar.(*StringObject).Value
 					}
 
-					fileRoot, serveStatic := server.InstanceVariables.get("@file_root")
-
-					if serveStatic {
-						fr := fileRoot.(*StringObject).Value
-						currentDir, _ := os.Getwd()
-						fp := filepath.Join(currentDir, fr)
-						fs := http.FileServer(http.Dir(fp))
-						http.Handle("/", fs)
-					}
-
 					log.Println("SimpleServer start listening on port: " + port)
 
 					c := make(chan os.Signal, 1)
@@ -78,11 +68,17 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 						}
 					}()
 
-					if serveStatic {
-						router.PathPrefix("/").Handler(http.FileServer(http.Dir(t.vm.fileDir)))
-					}
+					fileRoot, serveStatic := server.InstanceVariables.get("@file_root")
 
-					http.Handle("/", router)
+					if serveStatic {
+						fr := fileRoot.(*StringObject).Value
+						currentDir, _ := os.Getwd()
+						fp := filepath.Join(currentDir, fr)
+						fs := http.FileServer(http.Dir(fp))
+						http.Handle("/", fs)
+					} else{
+						http.Handle("/", router)
+					}
 
 					err := http.ListenAndServe(":"+port, nil)
 
