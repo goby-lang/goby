@@ -3,8 +3,9 @@ package ast
 import (
 	"bytes"
 	"fmt"
-	"github.com/goby-lang/goby/token"
 	"strings"
+
+	"github.com/goby-lang/goby/token"
 )
 
 type IntegerLiteral struct {
@@ -305,5 +306,23 @@ func (re *RangeExpression) String() string {
 	out.WriteString(re.End.String())
 	out.WriteString(")")
 
+	return out.String()
+}
+
+type RegexLiteral struct {
+	Token token.Token
+	Value string
+}
+
+func (sl *RegexLiteral) expressionNode() {}
+func (sl *RegexLiteral) TokenLiteral() string {
+	return sl.Token.Literal
+}
+func (sl *RegexLiteral) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("/")
+	out.WriteString(sl.Token.Literal)
+	out.WriteString("/")
 	return out.String()
 }

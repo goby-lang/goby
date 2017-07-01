@@ -27,6 +27,7 @@ const (
 	NewArray            = "newarray"
 	NewHash             = "newhash"
 	NewRange            = "newrange"
+	NewRegex            = "newregex"
 	BranchUnless        = "branchunless"
 	BranchIf            = "branchif"
 	Jump                = "jump"

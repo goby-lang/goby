@@ -2,6 +2,7 @@ package bytecode
 
 import (
 	"fmt"
+
 	"github.com/goby-lang/goby/ast"
 )
 
@@ -52,6 +53,8 @@ func (g *Generator) compileExpression(is *instructionSet, exp ast.Expression, sc
 		g.compileYieldExpression(is, exp, scope, table)
 	case *ast.CallExpression:
 		g.compileCallExpression(is, exp, scope, table)
+	case *ast.RegexLiteral:
+		is.define(PutString, fmt.Sprintf("/%s/", exp.Value))
 	}
 }
 
