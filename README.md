@@ -147,9 +147,9 @@ $ goby -i
 See [sample directory](https://github.com/goby-lang/goby/tree/master/samples) for sample code snippets, like:
 
 - [Built a stack data structure using Goby](https://github.com/goby-lang/goby/blob/master/samples/stack.gb)
-- [Running a "Hello World" app with built in server library](https://github.com/goby-lang/goby/blob/master/samples/server.gb)
+- [Running a "Hello World" app with built in server library](https://github.com/goby-lang/goby/blob/master/samples/server/server.gb)
 - [Sending request using http library](https://github.com/goby-lang/goby/blob/master/samples/http.gb)
-- [Running load test on blocking server](https://github.com/goby-lang/goby/blob/master/samples/blocking_server.gb) (This shows `Goby`'s simple server is very performant and can handle requests concurrently)
+- [Running load test on blocking server](https://github.com/goby-lang/goby/blob/master/samples/server/blocking_server.gb) (This shows `Goby`'s simple server is very performant and can handle requests concurrently)
 - [One thousand threads](https://github.com/goby-lang/goby/blob/master/samples/one_thousand_threads.gb)
 
 ## Documentations

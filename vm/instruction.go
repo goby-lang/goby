@@ -363,27 +363,27 @@ var builtInActions = map[operationType]*action{
 			blockFrame := cf.blockFrame
 
 			/*
-			This is for such condition:
+				This is for such condition:
 
-			```ruby
-			def foo(x)
-			  yield(x + 10)
-			end
+				```ruby
+				def foo(x)
+				  yield(x + 10)
+				end
 
-			def bar(y)
-			  foo(y) do |f|
-			    yield(f) # <------- here
-			  end
-			end
+				def bar(y)
+				  foo(y) do |f|
+				    yield(f) # <------- here
+				  end
+				end
 
-			bar(100) do |b|
-			  puts(b) #=> 110
-			end
-			```
+				bar(100) do |b|
+				  puts(b) #=> 110
+				end
+				```
 
-			In this case the target frame is not first block frame we meet. It should be `bar`'s block.
-			And bar's frame is foo block frame's ep, so our target frame is ep's block frame.
-			 */
+				In this case the target frame is not first block frame we meet. It should be `bar`'s block.
+				And bar's frame is foo block frame's ep, so our target frame is ep's block frame.
+			*/
 			if cf.blockFrame.ep == cf.ep {
 				blockFrame = cf.blockFrame.ep.blockFrame
 			}

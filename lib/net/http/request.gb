@@ -1,7 +1,7 @@
 module Net
   class HTTP
     class Request
-      attr_accessor("body", "method", "path", "url")
+      attr_accessor :body, :method, :path, :url, :host
     end
   end
 end
