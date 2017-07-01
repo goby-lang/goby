@@ -66,13 +66,24 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 	}
 	// def foo
 
-	if p.peekTokenAtSameLine() { // def foo(), next token is ( and at same line
+	if p.peekTokenAtSameLine() { // `def foo()` or `def foo x `, next token at same line
 		if p.peekTokenIs(token.LParen) {
 			p.nextToken()
-			stmt.Parameters = p.parseParameters()
+
+			// empty params
+			if p.peekTokenIs(token.RParen) {
+				p.nextToken()
+				stmt.Parameters = []*ast.Identifier{}
+			} else {
+				stmt.Parameters = p.parseParameters()
+
+				if !p.expectPeek(token.RParen) {
+					return nil
+				}
+			}
 
 		} else if p.peekTokenIs(token.Ident) { // def foo x, next token is x and at same line
-			stmt.Parameters = p.parseParametersNoParen()
+			stmt.Parameters = p.parseParameters()
 		}
 
 	} else {
@@ -129,34 +140,7 @@ func (p *Parser) parseParameters() []*ast.Identifier {
 
 	identifiers := []*ast.Identifier{}
 
-	if p.peekTokenIs(token.RParen) {
-		p.nextToken()
-		return identifiers
-	} // empty params
-
 	p.nextToken()
-	ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-	identifiers = append(identifiers, ident)
-
-	for p.peekTokenIs(token.Comma) {
-		p.nextToken()
-		p.nextToken()
-		identifier := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-		identifiers = append(identifiers, identifier)
-	}
-
-	if !p.expectPeek(token.RParen) {
-		return nil
-	}
-
-	return identifiers
-}
-
-func (p *Parser) parseParametersNoParen() []*ast.Identifier {
-	identifiers := []*ast.Identifier{}
-
-	p.nextToken()
-
 	ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 	identifiers = append(identifiers, ident)
 
