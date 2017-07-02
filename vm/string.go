@@ -11,7 +11,22 @@ var (
 	stringClass *RString
 )
 
-// RString is the built in string class
+// String object holds and manipulates a sequence of characters.
+// String objects may be created using as string literals.
+// Double or single quotations can be used for representation.
+//
+// ```ruby
+// a = "Three"
+// b = 'zero'
+// c = '漢'
+// d = 'Tiếng Việt'
+// e = "😏️️"
+// ```
+//
+// **Note:**
+// Currently, manipulations are based upon Golang's Unicode manipulations.
+// - Currently, UTF-8 encoding is assumed based upon Golang's string manipulation, but the encoding is not actually specified(TBD).
+// - `String.new` is not supported.
 type RString struct {
 	*BaseClass
 }
@@ -48,11 +63,12 @@ func initStringObject(value string) *StringObject {
 
 var builtinStringInstanceMethods = []*BuiltInMethodObject{
 	{
-		// Returns the concatineted of self and another String
+		// Returns the concatenation of self and another String
 		//
 		// ```Ruby
 		// "first" + "-second" # => "first-second"
 		// ```
+		//
 		// @return [String]
 		Name: "+",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -76,6 +92,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// ```Ruby
 		// "string " * 2 # => "string string string "
 		// ```
+		//
 		// @return [String]
 		Name: "*",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -108,6 +125,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// ```Ruby
 		// "a" < "b" # => true
 		// ```
+		//
 		// @return [Boolean]
 		Name: ">",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -136,6 +154,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// ```Ruby
 		// "a" < "b" # => true
 		// ```
+		//
 		// @return [Boolean]
 		Name: "<",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -165,6 +184,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// "first" == "second" # => false
 		// "two" == "two" # => true
 		// ```
+		//
 		// @return [Boolean]
 		Name: "==",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -196,6 +216,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// "abc" <=> "abc" # => 0
 		// "abcd" <=> "abc" # => 1
 		// ```
+		//
 		// @return [Integer]
 		Name: "<=>",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -228,6 +249,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// "first" != "second" # => true
 		// "two" != "two" # => false
 		// ```
+		//
 		// @return [Boolean]
 		Name: "!=",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -257,6 +279,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// "test".capitalize # => "Test"
 		// "tEST".capitalize # => "Test"
 		// ```
+		//
 		// @return [String]
 		Name: "capitalize",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -277,6 +300,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// ```Ruby
 		// "very big".upcase # => "VERY BIG"
 		// ```
+		//
 		// @return [String]
 		Name: "upcase",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -294,6 +318,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// ```Ruby
 		// "erROR".downcase # => "error"
 		// ```
+		//
 		// @return [String]
 		Name: "downcase",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -307,11 +332,13 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 	},
 	{
 		// Returns the character length of self
+		// **Note:** the length is currently byte-based, instead of charcode-based.
 		//
 		// ```Ruby
 		// "zero".size # => 4
 		// "".size # => 0
 		// ```
+		//
 		// @return [Integer]
 		Name: "size",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -325,11 +352,13 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 	},
 	{
 		// Returns the character length of self
+		// **Note:** the length is currently byte-based, instead of charcode-based.
 		//
 		// ```Ruby
 		// "zero".size # => 4
 		// "".size # => 0
 		// ```
+		//
 		// @return [Integer]
 		Name: "length",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -343,10 +372,12 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 	},
 	{
 		// Returns a new String with reverse order of self
+		// **Note:** the length is currently byte-based, instead of charcode-based.
 		//
 		// ```Ruby
 		// "reverse".reverse # => "esrever"
 		// ```
+		//
 		// @return [String]
 		Name: "reverse",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -368,6 +399,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// ```Ruby
 		// "string".to_s # => "string"
 		// ```
+		//
 		// @return [String]
 		Name: "to_s",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -387,6 +419,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// "3d print".to_i # => 3
 		// "some text".to_i # => 0
 		// ```
+		//
 		// @return [Integer]
 		Name: "to_i",
 		Fn: func(receiver Object) builtinMethodBody {

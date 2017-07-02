@@ -324,7 +324,7 @@ var builtinCommonInstanceMethods = []*BuiltInMethodObject{
 		// File.extname("foo.rb")
 		// ```
 		//
-		// TDB: the load paths for `require`
+		// TBD: the load paths for `require`
 		//
 		// @param filename [String] Quoted file name of the library, without extension
 		// @return [Boolean] Result of loading module
