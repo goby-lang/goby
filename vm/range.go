@@ -113,7 +113,7 @@ var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 		// - Only `do`-`end` block is supported for now: `{ }` block is unavailable.
 		// - Three-dot range `...` is not supported yet.
 		//
-		// @return [nil]
+		// @return [Null]
 		Name: "each",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {

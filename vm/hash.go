@@ -178,7 +178,7 @@ var builtinHashInstanceMethods = []*BuiltInMethodObject{
 		// h['d'] = { k: 'v' } #=> { k: 'v' }
 		// ```
 		//
-		// @return [value]
+		// @return [Object] The value
 		Name: "[]=",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -204,7 +204,7 @@ var builtinHashInstanceMethods = []*BuiltInMethodObject{
 		},
 	},
 	{
-		// Return the number of key-value pairs of the hash.
+		// Returns the number of key-value pairs of the hash.
 		//
 		// ```Ruby
 		// h = { a: 1, b: "2", c: [1, 2, 3], d: { k: 'v' } }

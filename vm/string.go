@@ -31,6 +31,7 @@ type RString struct {
 //
 // **Note:**
 // Currently, manipulations are based upon Golang's Unicode manipulations.
+//
 // - Currently, UTF-8 encoding is assumed based upon Golang's string manipulation, but the encoding is not actually specified(TBD).
 // - `String.new` is not supported.
 type StringObject struct {
