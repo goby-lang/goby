@@ -103,7 +103,10 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 		// a = [1, 2, 3, "a", "b", "c"]
 		// a[0]  # => 1
 		// a[3]  # => "a"
-		// a[10] # => null
+		// a[10] # => nil
+		// a[-1] # => "c"
+		// a[-3] # => "a"
+		// a[-7] # => nil
 		// ```
 		Name: "[]",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -120,13 +123,19 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 				}
 
 				arr := receiver.(*ArrayObject)
+				arrLength := len(arr.Elements)
 
-				if int(index.Value) >= len(arr.Elements) {
+				if int(index.Value) < 0 {
+					if -int(index.Value) > arrLength {
+						return NULL
+					}
+					calculatedIndex := arrLength + int(index.Value)
+					return arr.Elements[calculatedIndex]
+				} else if int(index.Value) >= arrLength {
 					return NULL
 				}
 
 				return arr.Elements[index.Value]
-
 			}
 		},
 	},
@@ -139,7 +148,8 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 		// a = []
 		// a[0] = 10  # => 10
 		// a[3] = 20  # => 20
-		// a          # => [10, null, null, 20]
+		// a          # => [10, nil, nil, 20]
+		// a[-2] = 5  # => [10, nil, 5, 20]
 		// ```
 		Name: "[]=",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -160,6 +170,15 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 				}
 
 				arr := receiver.(*ArrayObject)
+
+				// Negative index value condition
+				if indexValue < 0 {
+					if len(arr.Elements) < -indexValue {
+						return newError("Index is too small for array. got=%T", i)
+					}
+					arr.Elements[len(arr.Elements)+indexValue] = args[1]
+					return arr.Elements[len(arr.Elements)+indexValue]
+				}
 
 				// Expand the array
 				if len(arr.Elements) < (indexValue + 1) {
@@ -370,7 +389,9 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 		// ```ruby
 		// a = [1, 2, 3]
 		// a.at(0)  # => 1
-		// a.at(10) # => Error
+		// a.at(10) # => nil
+		// a.at(-2) # => 2
+		// a.at(-4) # => nil
 		// ```
 		Name: "at",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -384,12 +405,15 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 
 				arr := receiver.(*ArrayObject)
 
-				if len(arr.Elements) == 0 {
-					return NULL
+				if index.Value < 0 {
+					if -index.Value > len(arr.Elements) {
+						return NULL
+					}
+					return arr.Elements[len(arr.Elements)+index.Value]
 				}
 
-				if int(index.Value) >= len(arr.Elements) {
-					return newError("Index out of range")
+				if len(arr.Elements) == 0 || int(index.Value) >= len(arr.Elements) {
+					return NULL
 				}
 
 				return arr.Elements[index.Value]
