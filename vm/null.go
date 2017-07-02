@@ -13,7 +13,7 @@ type RNull struct {
 
 // NullObject (`nil`) represents the null value in Goby.
 // `nil` is convert into `null` when exported to JSON format.
-// Cannot perform `Null.new`.
+// - `Null.new` is not supported.
 type NullObject struct {
 	Class *RNull
 }

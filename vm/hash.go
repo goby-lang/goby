@@ -41,6 +41,7 @@ type RHash struct {
 // **Note:**
 // - The order of key-value pairs are **not** preserved.
 // - Operator `=>` is not supported.
+// - `Hash.new` is not supported.
 type HashObject struct {
 	Class *RHash
 	Pairs map[string]Object

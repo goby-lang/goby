@@ -20,6 +20,8 @@ type RInteger struct {
 // 1 + 1 # => 2
 // 2 * 2 # => 4
 // ```
+//
+// - `Integer.new` is not supported.
 type IntegerObject struct {
 	Class *RInteger
 	Value int
