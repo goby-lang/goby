@@ -475,7 +475,6 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 				}
 			},
 		},
-
 		{
 			// Returns a string which is concatenate with the input string or character
 			//
@@ -525,7 +524,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 					indexValue := index.Value
 
 					if !ok {
-						return newError("Expect index argument to be Integer. got=%T", i)
+						return initErrorObject(TypeErrorClass, "Expect Integer. got=%T (%+v)", args[0], args[0])
 					}
 
 					if len(str) > indexValue {
@@ -548,6 +547,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 			// # TODO: Negative Index Case
 			// "Ruby"[-3] = "oo" # => "Rooby"
 			// ```
+			//
 			// @return [String]
 			Name: "[]=",
 			Fn: func(receiver Object) builtinMethodBody {
@@ -559,7 +559,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 					indexValue := index.Value
 
 					if !ok {
-						return newError("Expect index argument to be Integer. got=%T", i)
+						return initErrorObject(TypeErrorClass, "Expect Integer. got=%T (%+v)", args[0], args[0])
 					}
 
 					if len(str) < indexValue {
@@ -615,6 +615,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 			// "".empty      # => true
 			// "Hello".empty # => false
 			// ```
+			//
 			// @return [Boolean]
 			Name: "empty",
 			Fn: func(receiver Object) builtinMethodBody {
@@ -862,42 +863,100 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 				}
 			},
 		},
-		//{
-		//	// Doc
-		//	Name: "strip",
-		//	Fn: func(receiver Object) builtinMethodBody {
-		//		return func(t *thread, args []Object, blockFrame *callFrame) Object {
-		//
-		//			str := receiver.(*StringObject).Value
-		//
-		//			return t.vm.initStringObject(str)
-		//		}
-		//	},
-		//},
-		//{
-		//	// Doc
-		//	Name: "split",
-		//	Fn: func(receiver Object) builtinMethodBody {
-		//		return func(t *thread, args []Object, blockFrame *callFrame) Object {
-		//
-		//			str := receiver.(*StringObject).Value
-		//
-		//			return t.vm.initStringObject(str)
-		//		}
-		//	},
-		//},
-		//{
-		//	// Doc
-		//	Name: "slice",
-		//	Fn: func(receiver Object) builtinMethodBody {
-		//		return func(t *thread, args []Object, blockFrame *callFrame) Object {
-		//
-		//			str := receiver.(*StringObject).Value
-		//
-		//			return t.vm.initStringObject(str)
-		//		}
-		//	},
-		//},
+		{
+			// Returns a copy of str with leading and trailing whitespace removed.
+			// Whitespace is defined as any of the following characters: null, horizontal tab,
+			// line feed, vertical tab, form feed, carriage return, space.
+			//
+			// ```ruby
+			// "  Goby Lang  ".strip   # => "Goby Lang"
+			// "\nGoby Lang\r\t".strip # => "Goby Lang"
+			// ```
+			//
+			// @return [String]
+			Name: "strip",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					str := receiver.(*StringObject).Value
+
+					for {
+						str = strings.Trim(str, " ")
+
+						if strings.HasPrefix(str, "\\n") || strings.HasPrefix(str, "\\t") || strings.HasPrefix(str, "\\r") {
+							str = str[2:]
+							continue
+						}
+						if strings.HasSuffix(str, "\\n") || strings.HasSuffix(str, "\\t") || strings.HasSuffix(str, "\\r") {
+							str = str[:len(str)-4]
+							continue
+						}
+						break
+					}
+					return t.vm.initStringObject(str)
+				}
+			},
+		},
+		{
+			// Returns an array of strings separated by the given separator
+			//
+			// ```ruby
+			// "Hello World".split("o") # => ["Hell", " W", "rld"]
+			// "Goby".split("")         # => ["G", "o", "b", "y"]
+			// # TODO: Whitespace carriage return case
+			// ```
+			//
+			// @return [Array]
+			Name: "split",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					s := args[0]
+					seperator, ok := s.(*StringObject)
+
+					if !ok {
+						return wrongTypeError(receiver.returnClass())
+					}
+
+					str := receiver.(*StringObject).Value
+					arr := strings.Split(str, seperator.Value)
+
+					var elements []Object
+					for i := 0; i < len(arr); i++ {
+						elements = append(elements, t.vm.initStringObject(arr[i]))
+					}
+
+					return t.vm.initArrayObject(elements)
+				}
+			},
+		},
+		{
+			// Returns a string sliced according to the input range
+			//
+			// ```ruby
+			// "Hello World".slice(1..6) # => "ello W"
+			// # TODO: Support for integer input case
+			// # TODO: Support for negative integer input case
+			// ```
+			//
+			// @return [String]
+			Name: "slice",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					r := args[0]
+					ran, ok := r.(*RangeObject)
+
+					if !ok {
+						return initErrorObject(TypeErrorClass, "Expect Range. got=%T (%+v)", args[0], args[0])
+					}
+
+					str := receiver.(*StringObject).Value
+
+					return t.vm.initStringObject(str[ran.Start:ran.End+1])
+				}
+			},
+		},
 		//{
 		//	// Doc
 		//	Name: "replace",
@@ -906,7 +965,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 		//
 		//			str := receiver.(*StringObject).Value
 		//
-		//			return t.vm.initStringObject(str)
+		//			return initStringObject(str)
 		//		}
 		//	},
 		//},
@@ -918,7 +977,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 		//
 		//			str := receiver.(*StringObject).Value
 		//
-		//			return t.vm.initStringObject(str)
+		//			return initStringObject(str)
 		//		}
 		//	},
 		//}
