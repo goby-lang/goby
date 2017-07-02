@@ -30,8 +30,8 @@ type RString struct {
 // ```
 //
 // **Note:**
-// Currently, manipulations are based upon Golang's Unicode manipulations.
 //
+// - Currently, manipulations are based upon Golang's Unicode manipulations.
 // - Currently, UTF-8 encoding is assumed based upon Golang's string manipulation, but the encoding is not actually specified(TBD).
 // - `String.new` is not supported.
 type StringObject struct {
@@ -449,6 +449,29 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 				}
 
 				return initIntegerObject(0)
+			}
+		},
+	},
+	{
+		// Checks if the specified string is included in the receiver
+		//
+		// ```Ruby
+		// "Hello\nWorld".include("\n") # => true
+		// ```
+		//
+		// @return [Bool]
+		Name: "include",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+				rcv := receiver.(*StringObject).Value
+				arg := args[0].(*StringObject).Value
+
+				if strings.Contains(rcv, arg) {
+					return TRUE
+				}
+
+				return FALSE
 			}
 		},
 	},
