@@ -172,13 +172,13 @@ func TestEvalArrayIndex(t *testing.T) {
 		`, "a"},
 		{`
 			[1, "a", 10, 5].at(4)
-		`, NULL},
+		`, nil},
 		{`
 			[1, "a", 10, 5].at(-2)
 		`, 10},
 		{`
 			[1, "a", 10, 5].at(-5)
-		`, NULL},
+		`, nil},
 		{`
 			a = [1, "a", 10, 5]
 			a.at(0)

@@ -123,20 +123,19 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 				}
 
 				arr := receiver.(*ArrayObject)
+				arrLength := len(arr.Elements)
 
 				if int(index.Value) < 0 {
-					if -int(index.Value) > len(arr.Elements) {
+					if -int(index.Value) > arrLength {
 						return NULL
 					}
-					return arr.Elements[len(arr.Elements)+int(index.Value)]
-				}
-
-				if int(index.Value) >= len(arr.Elements) {
+					calculatedIndex := arrLength + int(index.Value)
+					return arr.Elements[calculatedIndex]
+				} else if int(index.Value) >= arrLength {
 					return NULL
 				}
 
 				return arr.Elements[index.Value]
-
 			}
 		},
 	},
