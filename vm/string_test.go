@@ -188,6 +188,7 @@ func TestIncludingString(t *testing.T) {
 	}{
 		{`"Hello\nWorld".include("\n")`, true},
 		{`"Hello\nWorld".include("\r")`, false},
+		{`"Hello ".concat("World")`, "Hello World"},
 	}
 
 	for i, tt := range tests {

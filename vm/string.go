@@ -475,6 +475,453 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 				}
 			},
 		},
+
+		{
+			// Returns a string which is concatenate with the input string or character
+			//
+			// ```ruby
+			// "Hello ".concat("World") # => "Hello World"
+			// ```
+			// @return [String]
+			Name: "concat",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					str := receiver.(*StringObject).Value
+					concatStr, ok := args[0].(*StringObject)
+
+					if !ok {
+						return wrongTypeError(receiver.returnClass())
+					}
+
+					return t.vm.initStringObject(str + concatStr.Value)
+				}
+			},
+		},
+		{
+			// Returns the character of the string with specified index
+			// It will raise error if the input is not an Integer type
+			//
+			// ```ruby
+			// "Hello"[1]        # => "e"
+			// "Hello"[5]        # => nil
+			//
+			// # TODO: Carriage Return Case
+			// "Hello\nWorld"[5] # => "\n"
+			// # TODO: Negative Index Case
+			// "Hello"[-1]       # => "o"
+			// ```
+			// @return [String]
+			Name: "[]",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return &Error{Message: "Expect 1 arguments. got=%d" + string(len(args))}
+					}
+
+					str := receiver.(*StringObject).Value
+					i := args[0]
+					index, ok := i.(*IntegerObject)
+					indexValue := index.Value
+
+					if !ok {
+						return newError("Expect index argument to be Integer. got=%T", i)
+					}
+
+					if len(str) > indexValue {
+						return t.vm.initStringObject(string([]rune(str)[indexValue]))
+					}
+					return NULL
+				}
+			},
+		},
+		{
+			// Replace character of the string with input string
+			// It will raise error if the index is not Integer type or the index value is out of
+			// range of the string length
+			//
+			// ```ruby
+			// "Ruby"[1] = "oo" # => "Rooby"
+			// "Go"[2] = "by"   # => "Goby"
+			// # TODO: Carriage Return Case
+			// "Hello\nWorld"[5] = " " # => "Hello World"
+			// # TODO: Negative Index Case
+			// "Ruby"[-3] = "oo" # => "Rooby"
+			// ```
+			// @return [String]
+			Name: "[]=",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					str := receiver.(*StringObject).Value
+					i := args[0]
+					index, ok := i.(*IntegerObject)
+					indexValue := index.Value
+
+					if !ok {
+						return newError("Expect index argument to be Integer. got=%T", i)
+					}
+
+					if len(str) < indexValue {
+						return newError("Index value out of range. got=%T", i)
+					}
+
+					replaceStr := args[1].(*StringObject).Value
+					if len(str) == indexValue {
+						return t.vm.initStringObject(str + replaceStr)
+					}
+					result := str[:indexValue] + replaceStr + str[indexValue+1:]
+					return t.vm.initStringObject(result)
+				}
+			},
+		},
+		{
+			// Returns an array of characters converted from a string
+			// ```ruby
+			// "Goby".to_a # => ["G", "o", "b", "y"]
+			// ```
+			// @return [String]
+			Name: "to_a",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					str := receiver.(*StringObject)
+					elems := []Object{}
+
+					for i := 0; i < len(str.Value); i++ {
+						elems = append(elems, t.vm.initIntegerObject(i))
+					}
+
+					return t.vm.initArrayObject(elems)
+				}
+			},
+		},
+		//{
+		//	// Doc
+		//	Name: "count",
+		//	Fn: func(receiver Object) builtinMethodBody {
+		//		return func(t *thread, args []Object, blockFrame *callFrame) Object {
+		//
+		//			str := receiver.(*StringObject).Value
+		//
+		//			return initStringObject(str)
+		//		}
+		//	},
+		//},
+		{
+			// Returns true if string is empty value
+			//
+			// ```ruby
+			// "".empty      # => true
+			// "Hello".empty # => false
+			// ```
+			// @return [Boolean]
+			Name: "empty",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					str := receiver.(*StringObject).Value
+
+					if str == "" {
+						return TRUE
+					}
+					return FALSE
+				}
+			},
+		},
+		{
+			// Returns true if receiver string is equal to argument string
+			//
+			// ```ruby
+			// "Hello".eql("Hello") # => true
+			// "Hello".eql("World") # => false
+			// ```
+			// @return [Boolean]
+			Name: "eql",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					str := receiver.(*StringObject).Value
+					compareStr, ok := args[0].(*StringObject)
+
+					if !ok {
+						return wrongTypeError(receiver.returnClass())
+					}
+
+					if compareStr.Value == str {
+						return TRUE
+					}
+					return FALSE
+				}
+			},
+		},
+		{
+			// Returns true if receiver string start with the argument string
+			//
+			// ```ruby
+			// "Hello".start_with("Hel") # => true
+			// "Hello".start_with("hel") # => false
+			// ```
+			// @return [Boolean]
+			Name: "start_with",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					str := receiver.(*StringObject).Value
+					compareStr, ok := args[0].(*StringObject)
+
+					if !ok {
+						return wrongTypeError(receiver.returnClass())
+					}
+
+					index := len(compareStr.Value) - 1
+					if compareStr.Value == str[:index] {
+						return TRUE
+					}
+					return FALSE
+				}
+			},
+		},
+		{
+			// Returns true if receiver string end with the argument string
+			//
+			// ```ruby
+			// "Hello".end_with("llo") # => true
+			// "Hello".end_with("ell") # => false
+			// ```
+			// @return [Boolean]
+			Name: "end_with",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					str := receiver.(*StringObject).Value
+					compareStr, ok := args[0].(*StringObject)
+
+					if !ok {
+						return wrongTypeError(receiver.returnClass())
+					}
+
+					index := len(compareStr.Value)
+					if compareStr.Value == str[index:] {
+						return TRUE
+					}
+					return FALSE
+				}
+			},
+		},
+		{
+			// Insert a string input in specified index value of the receiver string
+			//
+			// It will raise error if index value is not an integer or index value is out
+			// of receiver string's range
+			//
+			// It will also raise error if the input string value is not type string
+			//
+			// ```ruby
+			// "Hello".insert(0, "X") # => "XHello"
+			// "Hello".insert(2, "X") # => "HeXllo"
+			// "Hello".insert(5, "X") # => "HelloX"
+			// # TODO: Negative Index Case
+			// "Hello".insert(-1, "X") # => "HelloX"
+			// "Hello".insert(-3, "X") # => "HelXlo"
+			// ```
+			// @return [String]
+			Name: "insert",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					str := receiver.(*StringObject).Value
+					i := args[0]
+					index, ok := i.(*IntegerObject)
+					indexValue := index.Value
+
+					if !ok {
+						return newError("Expect index argument to be Integer. got=%T", i)
+					}
+
+					if len(str) < indexValue {
+						return newError("Index value out of range. got=%T", i)
+					}
+
+					insertStr, ok := args[1].(*StringObject)
+
+					if !ok {
+						return wrongTypeError(receiver.returnClass())
+					}
+
+					return t.vm.initStringObject(str[:indexValue] + insertStr.Value + str[indexValue:])
+				}
+			},
+		},
+		//{
+		//	// Doc
+		//	Name: "delete",
+		//	Fn: func(receiver Object) builtinMethodBody {
+		//		return func(t *thread, args []Object, blockFrame *callFrame) Object {
+		//
+		//			str := receiver.(*StringObject).Value
+		//			deleteStr, ok := args[0].(*StringObject)
+		//
+		//			if !ok {
+		//				return wrongTypeError(receiver.returnClass())
+		//			}
+		//
+		//			return t.vm.initStringObject(str)
+		//		}
+		//	},
+		//},
+		{
+			// Returns a string with the last character chopped
+			//
+			// ```ruby
+			// "Hello".chop # => "Hell"
+			// # TODO: Carriage Return Case
+			// "Hello World\n".chop => "Hello World"
+			// ```
+			Name: "chop",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					str := receiver.(*StringObject).Value
+
+					return t.vm.initStringObject(str[:len(str)-1])
+				}
+			},
+		},
+		{
+			// If input integer is greater than the length of receiver string, returns a new String of
+			// length integer with receiver string left justified and padded with default " "; otherwise,
+			// returns receiver string.
+			//
+			// It will raise error if the input string length is not integer type
+			//
+			// ```ruby
+			// "Hello".ljust(2) # => "Hello"
+			// "Hello".ljust(7) # => "Hello  "
+			// # TODO: Default PadString
+			// "Hello".ljust(10, "xo") => "Helloxoxox"
+			// ```
+			Name: "ljust",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					str := receiver.(*StringObject).Value
+					l := args[0]
+					strLength, ok := l.(*IntegerObject)
+					strLengthValue := strLength.Value
+
+					if !ok {
+						return newError("Expect index argument to be Integer. got=%T", l)
+					}
+
+					padString := " "
+					if strLengthValue > len(str) {
+						for i := len(str); i < strLengthValue; i += len(padString) {
+							str += padString
+						}
+					}
+
+					return t.vm.initStringObject(str)
+				}
+			},
+		},
+		{
+			// If input integer is greater than the length of receiver string, returns a new String of
+			// length integer with receiver string right justified and padded with default " "; otherwise,
+			// returns receiver string.
+			//
+			// It will raise error if the input string length is not integer type
+			//
+			// ```ruby
+			// "Hello".rjust(2) # => "Hello"
+			// "Hello".rjust(7) # => "  Hello"
+			// # TODO: Default PadString
+			// "Hello".ljust(10, "xo") => "xoxoxHello"
+			// ```
+			Name: "rjust",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					str := receiver.(*StringObject).Value
+					l := args[0]
+					strLength, ok := l.(*IntegerObject)
+					strLengthValue := strLength.Value
+
+					if !ok {
+						return newError("Expect index argument to be Integer. got=%T", l)
+					}
+
+					padString := " "
+					if strLengthValue > len(str) {
+						for i := len(str); i < strLengthValue; i += len(padString) {
+							str = padString + str
+						}
+					}
+
+					return t.vm.initStringObject(str)
+				}
+			},
+		},
+		//{
+		//	// Doc
+		//	Name: "strip",
+		//	Fn: func(receiver Object) builtinMethodBody {
+		//		return func(t *thread, args []Object, blockFrame *callFrame) Object {
+		//
+		//			str := receiver.(*StringObject).Value
+		//
+		//			return t.vm.initStringObject(str)
+		//		}
+		//	},
+		//},
+		//{
+		//	// Doc
+		//	Name: "split",
+		//	Fn: func(receiver Object) builtinMethodBody {
+		//		return func(t *thread, args []Object, blockFrame *callFrame) Object {
+		//
+		//			str := receiver.(*StringObject).Value
+		//
+		//			return t.vm.initStringObject(str)
+		//		}
+		//	},
+		//},
+		//{
+		//	// Doc
+		//	Name: "slice",
+		//	Fn: func(receiver Object) builtinMethodBody {
+		//		return func(t *thread, args []Object, blockFrame *callFrame) Object {
+		//
+		//			str := receiver.(*StringObject).Value
+		//
+		//			return t.vm.initStringObject(str)
+		//		}
+		//	},
+		//},
+		//{
+		//	// Doc
+		//	Name: "replace",
+		//	Fn: func(receiver Object) builtinMethodBody {
+		//		return func(t *thread, args []Object, blockFrame *callFrame) Object {
+		//
+		//			str := receiver.(*StringObject).Value
+		//
+		//			return t.vm.initStringObject(str)
+		//		}
+		//	},
+		//},
+		//{
+		//	// Doc
+		//	Name: "gsub",
+		//	Fn: func(receiver Object) builtinMethodBody {
+		//		return func(t *thread, args []Object, blockFrame *callFrame) Object {
+		//
+		//			str := receiver.(*StringObject).Value
+		//
+		//			return t.vm.initStringObject(str)
+		//		}
+		//	},
+		//}
 	}
 }
 
