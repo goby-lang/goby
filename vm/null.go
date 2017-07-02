@@ -11,7 +11,9 @@ type RNull struct {
 	*BaseClass
 }
 
-// NullObject represnts the null value in Goby.
+// NullObject (`nil`) represents the null value in Goby.
+// `nil` is convert into `null` when exported to JSON format.
+// - `Null.new` is not supported.
 type NullObject struct {
 	Class *RNull
 }
@@ -39,6 +41,13 @@ func initNullClass() {
 
 var builtInNullInstanceMethods = []*BuiltInMethodObject{
 	{
+		// Returns true: the flipped boolean value of nil object.
+		//
+		// ```ruby
+		// a = nil
+		// !a
+		// # => true
+		// ```
 		Name: "!",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {

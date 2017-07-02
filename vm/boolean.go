@@ -20,6 +20,7 @@ type RBool struct {
 
 // BooleanObject represents boolean object in goby.
 // It includes `true` and `FALSE` which represents logically true and false value.
+// - `Boolean.new` is not supported.
 type BooleanObject struct {
 	Class *RBool
 	Value bool
