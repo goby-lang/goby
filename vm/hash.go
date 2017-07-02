@@ -15,7 +15,32 @@ type RHash struct {
 	*BaseClass
 }
 
-// HashObject represents hash instances
+// Hash is a collection of key-value pair, which works like a dictionary.
+// Hash literal is represented with curly brackets `{ }` like `{ key: value }`.
+// Each key of the hash is unique and cannot be duplicate within the hash.
+// Adding a leading space and a trailing space within curly brackets are preferable.
+//
+// - **Key:** an alphanumeric word that starts with alphabet, without containing space and punctuations.
+// Underscore `_` can also be used within the key.
+// String literal like "mickey mouse" cannot be used as a hash key.
+// The internal key is actually a String and **not a Symbol** for now (TBD).
+// Thus only a String object or a string literal should be used when referencing with `[ ]`.
+//
+// ```ruby
+// a = { balthazar1: 100 } # valid
+// b = { 2melchior: 200 }  # invalid
+// x = 'balthazar1'
+//
+// a["balthazar1"]  # => 100
+// a[x]             # => 100
+// a[balthazar1]    # => error
+// ```
+//
+// - **Value:** String literal and objects (Integer, String, Array, Hash, nil, etc) can be used.
+//
+// **Note:**
+// - The order of key-value pairs are **not** preserved.
+// - Operator `=>` is not supported.
 type HashObject struct {
 	Class *RHash
 	Pairs map[string]Object
@@ -84,6 +109,7 @@ var builtinHashInstanceMethods = []*BuiltInMethodObject{
 		// h = { a: 1, b: [1, "2", [4, 5, nil], { foo: "bar" }]}.to_json
 		// puts(h) #=> {"a":1,"b":[1, "2", [4, 5, null], {"foo":"bar"}]}
 		// ```
+		//
 		// @return [String]
 		Name: "to_json",
 		Fn: func(receiver Object) builtinMethodBody {
@@ -94,6 +120,18 @@ var builtinHashInstanceMethods = []*BuiltInMethodObject{
 		},
 	},
 	{
+		// Retrieves the value (object) that corresponds to the key specified.
+		// Returns `nil` when specifying a nonexistent key.
+		//
+		// ```Ruby
+		// h = { a: 1, b: "2", c: [1, 2, 3], d: { k: 'v' } }
+		// h['a'] #=> 1
+		// h['b'] #=> "2"
+		// h['c'] #=> [1, 2, 3]
+		// h['d'] #=> { k: 'v' }
+		// ```
+		//
+		// @return [Object]
 		Name: "[]",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -127,6 +165,18 @@ var builtinHashInstanceMethods = []*BuiltInMethodObject{
 		},
 	},
 	{
+		// Associates the value given by `value` with the key given by `key`.
+		// Returns the `value`.
+		//
+		// ```Ruby
+		// h = { a: 1, b: "2", c: [1, 2, 3], d: { k: 'v' } }
+		// h['a'] = 1          #=> 1
+		// h['b'] = "2"        #=> "2"
+		// h['c'] = [1, 2, 3]  #=> [1, 2, 3]
+		// h['d'] = { k: 'v' } #=> { k: 'v' }
+		// ```
+		//
+		// @return [value]
 		Name: "[]=",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -152,6 +202,14 @@ var builtinHashInstanceMethods = []*BuiltInMethodObject{
 		},
 	},
 	{
+		// Return the number of key-value pairs of the hash.
+		//
+		// ```Ruby
+		// h = { a: 1, b: "2", c: [1, 2, 3], d: { k: 'v' } }
+		// h.length  #=> 4
+		// ```
+		//
+		// @return [Integer]
 		Name: "length",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
