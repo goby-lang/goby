@@ -8,6 +8,25 @@ var (
 	rangeClass *RClass
 )
 
+// Range represents an interval: a set of values from the beginning to the end specified.
+// Currently, only Integer objects or integer literal are supported.
+//
+// ```ruby
+// r = 0
+// (1..(1+4)).each do |i|
+//   puts(r = r + i)
+// end
+// ```
+//
+// ```ruby
+// r = 0
+// a = 1
+// b = 5
+// (a..b).each do |i|
+//   r = r + i
+// end
+// ```
+//
 type RangeObject struct {
 	Class *RClass
 	Start int
@@ -49,6 +68,13 @@ func initRangeClass() {
 
 var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 	{
+		// Returns the first value of the range.
+		//
+		// ```ruby
+		// (1..5).first # => 1
+		// ```
+		//
+		// @return [Integer]
 		Name: "first",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -58,6 +84,13 @@ var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 		},
 	},
 	{
+		// Returns the last value of the range.
+		//
+		// ```ruby
+		// (1..5).last # => 5
+		// ```
+		//
+		// @return [Integer]
 		Name: "last",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -67,6 +100,19 @@ var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 		},
 	},
 	{
+		// Iterates over the elements of range, passing each in turn to the block.
+		// Returns `nil`.
+		//
+		// ```ruby
+		// (1..5).to_a     # => [1, 2, 3, 4, 5]
+		// (1..5).to_a[2]  # => 3
+		// ```
+		//
+		// **Note:**
+		// - Only `do`-`end` block is supported for now: `{ }` block is unavailable.
+		// - Three-dot range `...` is not supported yet.
+		//
+		// @return [nil]
 		Name: "each",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -85,6 +131,14 @@ var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 		},
 	},
 	{
+		// Returns an Array object that contains the values of the range.
+		//
+		// ```ruby
+		// (1..5).to_a     # => [1, 2, 3, 4, 5]
+		// (1..5).to_a[2]  # => 3
+		// ```
+		//
+		// @return [Array]
 		Name: "to_a",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
