@@ -104,6 +104,12 @@ func (g *Generator) compileAssignExpression(is *instructionSet, exp *ast.InfixEx
 	switch name := exp.Left.(type) {
 	case *ast.Identifier:
 		index, depth := table.setLCL(name.Value, table.depth)
+
+		if exp.Optioned != 0 {
+			is.define(SetLocal, depth, index, exp.Optioned)
+			return
+		}
+
 		is.define(SetLocal, depth, index)
 	case *ast.InstanceVariable:
 		is.define(SetInstanceVariable, name.Value)

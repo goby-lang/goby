@@ -30,6 +30,7 @@ func (p *Parser) parseStatement() ast.Statement {
 }
 
 func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
+	var params []ast.Expression
 	stmt := &ast.DefStatement{Token: p.curToken}
 
 	p.nextToken()
@@ -66,22 +67,51 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 	}
 	// def foo
 
-	if p.peekTokenAtSameLine() { // def foo(), next token is ( and at same line
+	if p.peekTokenAtSameLine() { // `def foo()` or `def foo x `, next token at same line
 		if p.peekTokenIs(token.LParen) {
 			p.nextToken()
-			stmt.Parameters = p.parseParameters()
+
+			// empty params
+			if p.peekTokenIs(token.RParen) {
+				p.nextToken()
+				params = []ast.Expression{}
+			} else {
+				params = p.parseParameters()
+
+				if !p.expectPeek(token.RParen) {
+					return nil
+				}
+			}
 
 		} else if p.peekTokenIs(token.Ident) { // def foo x, next token is x and at same line
-			stmt.Parameters = p.parseParametersNoParen()
+			params = p.parseParameters()
 		}
 
 	} else {
-		stmt.Parameters = []*ast.Identifier{}
+		params = []ast.Expression{}
 	}
 
+	stmt.Parameters = params
 	stmt.BlockStatement = p.parseBlockStatement()
 
 	return stmt
+}
+
+func (p *Parser) parseParameters() []ast.Expression {
+	params := []ast.Expression{}
+
+	p.nextToken()
+	param := p.parseExpression(NORMAL)
+	params = append(params, param)
+
+	for p.peekTokenIs(token.Comma) {
+		p.nextToken()
+		p.nextToken()
+		param := p.parseExpression(NORMAL)
+		params = append(params, param)
+	}
+
+	return params
 }
 
 func (p *Parser) parseClassStatement() *ast.ClassStatement {
@@ -123,51 +153,6 @@ func (p *Parser) parseModuleStatement() *ast.ModuleStatement {
 	stmt.Body = p.parseBlockStatement()
 
 	return stmt
-}
-
-func (p *Parser) parseParameters() []*ast.Identifier {
-
-	identifiers := []*ast.Identifier{}
-
-	if p.peekTokenIs(token.RParen) {
-		p.nextToken()
-		return identifiers
-	} // empty params
-
-	p.nextToken()
-	ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-	identifiers = append(identifiers, ident)
-
-	for p.peekTokenIs(token.Comma) {
-		p.nextToken()
-		p.nextToken()
-		identifier := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-		identifiers = append(identifiers, identifier)
-	}
-
-	if !p.expectPeek(token.RParen) {
-		return nil
-	}
-
-	return identifiers
-}
-
-func (p *Parser) parseParametersNoParen() []*ast.Identifier {
-	identifiers := []*ast.Identifier{}
-
-	p.nextToken()
-
-	ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-	identifiers = append(identifiers, ident)
-
-	for p.peekTokenIs(token.Comma) {
-		p.nextToken()
-		p.nextToken()
-		identifier := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-		identifiers = append(identifiers, identifier)
-	}
-
-	return identifiers
 }
 
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
