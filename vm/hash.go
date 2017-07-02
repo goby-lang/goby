@@ -15,6 +15,7 @@ type RHash struct {
 	*BaseClass
 }
 
+// HashObject represents hash instances
 // Hash is a collection of key-value pair, which works like a dictionary.
 // Hash literal is represented with curly brackets `{ }` like `{ key: value }`.
 // Each key of the hash is unique and cannot be duplicate within the hash.

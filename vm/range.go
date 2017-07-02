@@ -8,6 +8,7 @@ var (
 	rangeClass *RClass
 )
 
+// RangeObject is the built in range class
 // Range represents an interval: a set of values from the beginning to the end specified.
 // Currently, only Integer objects or integer literal are supported.
 //

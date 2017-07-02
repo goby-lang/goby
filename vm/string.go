@@ -11,6 +11,12 @@ var (
 	stringClass *RString
 )
 
+// RString is the built in string class
+type RString struct {
+	*BaseClass
+}
+
+// StringObject represents string instances
 // String object holds and manipulates a sequence of characters.
 // String objects may be created using as string literals.
 // Double or single quotations can be used for representation.
@@ -27,11 +33,6 @@ var (
 // Currently, manipulations are based upon Golang's Unicode manipulations.
 // - Currently, UTF-8 encoding is assumed based upon Golang's string manipulation, but the encoding is not actually specified(TBD).
 // - `String.new` is not supported.
-type RString struct {
-	*BaseClass
-}
-
-// StringObject represents string instances
 type StringObject struct {
 	Class *RString
 	Value string
