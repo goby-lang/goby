@@ -113,7 +113,7 @@ var builtInActions = map[operationType]*action{
 			depth := args[0].(int)
 			index := args[1].(int)
 
-			if len(args) > 2  && args[2].(int) == 1 {
+			if len(args) > 2 && args[2].(int) == 1 {
 				optioned = true
 			}
 

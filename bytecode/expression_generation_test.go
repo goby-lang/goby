@@ -1,8 +1,8 @@
 package bytecode
 
 import (
-	"testing"
 	"strings"
+	"testing"
 )
 
 func TestLocalVariableAccessInCurrentScope(t *testing.T) {
@@ -270,7 +270,6 @@ Got:
 	}
 
 }
-
 
 func TestRangeCompilation(t *testing.T) {
 	input := `
