@@ -452,6 +452,29 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 			}
 		},
 	},
+	{
+		// Checks if the specified string is included in the receiver
+		//
+		// ```Ruby
+		// "Hello\nWorld".include("\n") # => true
+		// ```
+		//
+		// @return [Bool]
+		Name: "include",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+				rcv := receiver.(*StringObject).Value
+				arg := args[0].(*StringObject).Value
+
+				if strings.Contains(rcv, arg) {
+					return TRUE
+				}
+
+				return FALSE
+			}
+		},
+	},
 }
 
 func initStringClass() {

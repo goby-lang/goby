@@ -61,6 +61,8 @@ func TestEvalInfixStringExpression(t *testing.T) {
 		{`"123string123".to_i`, 123},
 		{`"string123".to_i`, 0},
 		{`"More test".reverse.upcase`, "TSET EROM"},
+		{`"Hello\nWorld".include("\n")`, true},
+		{`"Hello\nWorld".include("\r")`, false},
 	}
 
 	for _, tt := range tests {
