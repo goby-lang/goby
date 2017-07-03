@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 )
 
 var (
@@ -520,11 +521,9 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// ```ruby
 		// "Hello"[1]        # => "e"
 		// "Hello"[5]        # => nil
-		//
-		// # TODO: Carriage Return Case
 		// "Hello\nWorld"[5] # => "\n"
-		// # TODO: Negative Index Case
 		// "Hello"[-1]       # => "o"
+		// "Hello"[-6]       # => nil
 		// ```
 		//
 		// @return [String]
@@ -544,6 +543,13 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 					return wrongTypeError(integerClass)
 				}
 
+				if indexValue < 0 {
+					if -indexValue > len(str) {
+						return NULL
+					}
+					return initStringObject(string([]rune(str)[len(str)+indexValue]))
+				}
+
 				if len(str) > indexValue {
 					return initStringObject(string([]rune(str)[indexValue]))
 				}
@@ -559,9 +565,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// ```ruby
 		// "Ruby"[1] = "oo" # => "Rooby"
 		// "Go"[2] = "by"   # => "Goby"
-		// # TODO: Carriage Return Case
 		// "Hello\nWorld"[5] = " " # => "Hello World"
-		// # TODO: Negative Index Case
 		// "Ruby"[-3] = "oo" # => "Rooby"
 		// ```
 		//
@@ -579,12 +583,25 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 					return wrongTypeError(integerClass)
 				}
 
-				if len(str) < indexValue {
+				strLength := len(str)
+
+				if strLength < indexValue {
 					return newError("Index value out of range. got=%T", i)
 				}
 
 				replaceStr := args[1].(*StringObject).Value
-				if len(str) == indexValue {
+
+				// Negative Index Case
+				if indexValue < 0 {
+					if -indexValue > strLength {
+						return newError("Index value out of range. got=%T", i)
+					}
+
+					result := str[:strLength+indexValue] + replaceStr + str[strLength+indexValue+1:]
+					return initStringObject(result)
+				}
+
+				if strLength == indexValue {
 					return initStringObject(str + replaceStr)
 				}
 				result := str[:indexValue] + replaceStr + str[indexValue+1:]
@@ -609,18 +626,26 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 			}
 		},
 	},
-	//{
-	//	// Doc
-	//	Name: "count",
-	//	Fn: func(receiver Object) builtinMethodBody {
-	//		return func(t *thread, args []Object, blockFrame *callFrame) Object {
-	//
-	//			str := receiver.(*StringObject).Value
-	//
-	//			return initStringObject(str)
-	//		}
-	//	},
-	//},
+	{
+		// Returns the integer that count the string chars as UTF-8
+		//
+		// ```ruby
+		// "abcde".count        # => 5
+		// "哈囉！世界！".count   # => 6
+		// "Hello\nWorld".count # => 11
+		// ```
+		//
+		// @return [Integer]
+		Name: "count",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+				str := receiver.(*StringObject).Value
+
+				return initIntegerObject(utf8.RuneCountInString(str))
+			}
+		},
+	},
 	{
 		// Returns true if string is empty value
 		//
@@ -738,7 +763,6 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// "Hello".insert(0, "X") # => "XHello"
 		// "Hello".insert(2, "X") # => "HeXllo"
 		// "Hello".insert(5, "X") # => "HelloX"
-		// # TODO: Negative Index Case
 		// "Hello".insert(-1, "X") # => "HelloX"
 		// "Hello".insert(-3, "X") # => "HelXlo"
 		// ```
@@ -754,46 +778,63 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 				indexValue := index.Value
 
 				if !ok {
-					return wrongTypeError(stringClass)
-				}
-
-				if len(str) < indexValue {
-					return newError("Index value out of range. got=%T", i)
+					return newError("Expect index to be Integer type. got=%T", i)
 				}
 
 				insertStr, ok := args[1].(*StringObject)
 
 				if !ok {
-					return wrongTypeError(stringClass)
+					return newError("Expect insert string to be String type, got=%T", insertStr)
+				}
+				strLength := len(str)
+
+				if indexValue < 0 {
+					if -indexValue > strLength+1 {
+						return newError("Index value out of range. got=" + string(indexValue))
+					} else if -indexValue == strLength+1 {
+						return initStringObject(insertStr.Value + str)
+					}
+					return initStringObject(str[:strLength+indexValue] + insertStr.Value + str[strLength+indexValue:])
+				}
+
+				if strLength < indexValue {
+					return newError("Index value out of range. got=" + string(indexValue))
 				}
 
 				return initStringObject(str[:indexValue] + insertStr.Value + str[indexValue:])
 			}
 		},
 	},
-	//{
-	//	// Doc
-	//	Name: "delete",
-	//	Fn: func(receiver Object) builtinMethodBody {
-	//		return func(t *thread, args []Object, blockFrame *callFrame) Object {
-	//
-	//			str := receiver.(*StringObject).Value
-	//			deleteStr, ok := args[0].(*StringObject)
-	//
-	//			if !ok {
-	//				return wrongTypeError(stringClass)
-	//			}
-	//
-	//			return initStringObject(str)
-	//		}
-	//	},
-	//},
+	{
+		// Returns a string which is being partially deleted with specified values
+		//
+		// ```ruby
+		// "Hello hello HeLlo".delete("el") # => "Hlo hlo HeLlo"
+		// # TODO: Handle delete intersection of multiple strings' input case
+		// "Hello hello HeLlo".delete("el", "e") # => "Hllo hllo HLlo"
+		// ```
+		//
+		// @return [String]
+		Name: "delete",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+				str := receiver.(*StringObject).Value
+				deleteStr, ok := args[0].(*StringObject)
+
+				if !ok {
+					return wrongTypeError(stringClass)
+				}
+
+				return initStringObject(strings.Replace(str, deleteStr.Value, "", -1))
+			}
+		},
+	},
 	{
 		// Returns a string with the last character chopped
 		//
 		// ```ruby
 		// "Hello".chop # => "Hell"
-		// # TODO: Carriage Return Case
 		// "Hello World\n".chop => "Hello World"
 		// ```
 		//
@@ -816,10 +857,9 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// It will raise error if the input string length is not integer type
 		//
 		// ```ruby
-		// "Hello".ljust(2) # => "Hello"
-		// "Hello".ljust(7) # => "Hello  "
-		// # TODO: Default PadString
-		// "Hello".ljust(10, "xo") => "Helloxoxox"
+		// "Hello".ljust(2)        # => "Hello"
+		// "Hello".ljust(7)        # => "Hello  "
+		// "Hello".ljust(10, "xo") # => "Helloxoxox"
 		// ```
 		//
 		// @return [String]
@@ -828,19 +868,34 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				str := receiver.(*StringObject).Value
+
 				l := args[0]
 				strLength, ok := l.(*IntegerObject)
 				strLengthValue := strLength.Value
 
 				if !ok {
-					return wrongTypeError(stringClass)
+					return wrongTypeError(integerClass)
 				}
 
-				padString := " "
-				if strLengthValue > len(str) {
-					for i := len(str); i < strLengthValue; i += len(padString) {
-						str += padString
+				var padStringValue string
+				if len(args) == 1 {
+					padStringValue = " "
+				} else {
+					p := args[1]
+					padString, ok := p.(*StringObject)
+
+					if !ok {
+						return newError("Expect second argument is String type. got=%T", p)
 					}
+
+					padStringValue = padString.Value
+				}
+
+				if strLengthValue > len(str) {
+					for i := len(str); i < strLengthValue; i += len(padStringValue) {
+						str += padStringValue
+					}
+					str = str[:strLengthValue]
 				}
 
 				return initStringObject(str)
@@ -857,9 +912,10 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// ```ruby
 		// "Hello".rjust(2) # => "Hello"
 		// "Hello".rjust(7) # => "  Hello"
-		// # TODO: Default PadString
-		// "Hello".ljust(10, "xo") => "xoxoxHello"
+		// "Hello".rjust(10, "xo") => "xoxoxHello"
 		// ```
+		//
+		// @return [String]
 		Name: "rjust",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -870,13 +926,31 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 				strLengthValue := strLength.Value
 
 				if !ok {
-					return newError("Expect index argument to be Integer. got=%T", l)
+					return wrongTypeError(integerClass)
 				}
 
-				padString := " "
+				var padStringValue string
+				if len(args) == 1 {
+					padStringValue = " "
+				} else {
+					p := args[1]
+					padString, ok := p.(*StringObject)
+
+					if !ok {
+						return newError("Expect second argument is String type. got=%T", p)
+					}
+
+					padStringValue = padString.Value
+				}
+
 				if strLengthValue > len(str) {
-					for i := len(str); i < strLengthValue; i += len(padString) {
-						str = padString + str
+					origin := str
+					for i := len(str); i < strLengthValue; i += len(padStringValue) {
+						str = padStringValue + str
+					}
+					if len(str) > strLengthValue {
+						chopLength := len(str) - strLengthValue
+						str = str[:len(str)-len(origin)-chopLength] + origin
 					}
 				}
 
@@ -923,9 +997,9 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// Returns an array of strings separated by the given separator
 		//
 		// ```ruby
-		// "Hello World".split("o") # => ["Hell", " W", "rld"]
-		// "Goby".split("")         # => ["G", "o", "b", "y"]
-		// # TODO: Whitespace carriage return case
+		// "Hello World".split("o")         # => ["Hell", " W", "rld"]
+		// "Goby".split("")                 # => ["G", "o", "b", "y"]
+		// "Hello\nWorld\nGoby".split("\n") # => ["Hello", "World", "Goby"]
 		// ```
 		//
 		// @return [Array]
@@ -956,9 +1030,17 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// Returns a string sliced according to the input range
 		//
 		// ```ruby
-		// "Hello World".slice(1..6) # => "ello W"
-		// # TODO: Support for integer input case
-		// # TODO: Support for negative integer input case
+		// "Hello World".slice(1..6)    # => "ello W"
+		// "1234567890".slice(6..1)     # => ""
+		// "1234567890".slice(-10..1)   # => "12"
+		// "1234567890".slice(-10..-1)  # => "1234567890"
+		// "1234567890".slice(-10..-11) # => ""
+		// "1234567890".slice(1..-1)    # => "234567890"
+		// "1234567890".slice(1..-1234) # => ""
+		// "1234567890".slice(-11..5)   # => nil
+		// "1234567890".slice(-11..-12) # => nil
+		// "Hello World".slice(4)       # => "o"
+		// "Hello\nWorld".slice(6)      # => "\n"
 		// ```
 		//
 		// @return [String]
@@ -966,31 +1048,93 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-				r := args[0]
-				ran, ok := r.(*RangeObject)
-
-				if !ok {
-					return wrongTypeError(rangeClass)
-				}
-
 				str := receiver.(*StringObject).Value
+				strLength := len(str)
 
-				return initStringObject(str[ran.Start:ran.End+1])
+				switch args[0].(type) {
+				case *RangeObject:
+					ran := args[0].(*RangeObject)
+					switch {
+					case ran.Start >= 0 && ran.End >= 0:
+						if ran.Start > strLength {
+							return NULL
+						} else if ran.Start > ran.End {
+							return initStringObject("")
+						}
+						return initStringObject(str[ran.Start : ran.End+1])
+					case ran.Start < 0 && ran.End >= 0:
+						positiveStart := strLength + ran.Start
+						if -ran.Start > strLength {
+							return NULL
+						} else if positiveStart > ran.End {
+							return initStringObject("")
+						}
+						return initStringObject(str[positiveStart : ran.End+1])
+					case ran.Start >= 0 && ran.End < 0:
+						positiveEnd := strLength + ran.End
+						if ran.Start > strLength {
+							return NULL
+						} else if positiveEnd < 0 || ran.Start > positiveEnd {
+							return initStringObject("")
+						}
+						return initStringObject(str[ran.Start : positiveEnd+1])
+					case ran.Start < 0 && ran.End < 0:
+						positiveStart := strLength + ran.Start
+						positiveEnd := strLength + ran.End
+						if positiveStart > strLength {
+							return NULL
+						} else if positiveStart > positiveEnd {
+							return initStringObject("")
+						}
+						return initStringObject(str[positiveStart : positiveEnd+1])
+					default:
+						return NULL
+					}
+
+				case *IntegerObject:
+					intValue := args[0].(*IntegerObject).Value
+					if intValue < 0 {
+						if -intValue > strLength {
+							return NULL
+						}
+						return initStringObject(string([]rune(str)[strLength+intValue]))
+					}
+					if intValue > strLength {
+						return NULL
+					}
+					return initStringObject(string([]rune(str)[intValue]))
+
+				default:
+					return newError("Expect first argument is Range or Integer type. got=%T", args[0])
+				}
 			}
 		},
 	},
-	//{
-	//	// Doc
-	//	Name: "replace",
-	//	Fn: func(receiver Object) builtinMethodBody {
-	//		return func(t *thread, args []Object, blockFrame *callFrame) Object {
-	//
-	//			str := receiver.(*StringObject).Value
-	//
-	//			return initStringObject(str)
-	//		}
-	//	},
-	//},
+	{
+		// Return a string replaced by the input string
+		//
+		// ```ruby
+		// "Hello".replace("World")          # => "World"
+		// "你好"replace("再見")              # => "再見"
+		// "Ruby\nLang".replace("Goby\nLang") # => "Goby Lang"
+		// ```
+		//
+		// @return [String]
+		Name: "replace",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+				s := args[0]
+				replaceStr, ok := s.(*StringObject)
+
+				if !ok {
+					return wrongTypeError(stringClass)
+				}
+
+				return initStringObject(replaceStr.Value)
+			}
+		},
+	},
 	//{
 	//	// Doc
 	//	Name: "gsub",
