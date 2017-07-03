@@ -13,7 +13,7 @@ func TestEvalBooleanExpression(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testBooleanObject(t, evaluated, tt.expected)
+		checkExpected(t, evaluated, tt.expected)
 	}
 }
 
@@ -61,7 +61,7 @@ func TestEvalInfixBooleanExpression(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testBooleanObject(t, evaluated, tt.expected)
+		checkExpected(t, evaluated, tt.expected)
 	}
 }
 

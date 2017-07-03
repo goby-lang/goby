@@ -37,7 +37,7 @@ func TestRequireRelative(t *testing.T) {
 	`
 
 	evaluated := testEval(t, input)
-	testIntegerObject(t, evaluated, 160)
+	checkExpected(t, evaluated, 160)
 }
 
 func TestDefSingletonMethtod(t *testing.T) {
@@ -67,12 +67,7 @@ func TestDefSingletonMethtod(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
-
-		if isError(evaluated) {
-			t.Fatalf("got Error: %s.\n Input %s", evaluated.(*Error).Message, tt.input)
-		}
-
-		testIntegerObject(t, evaluated, tt.expected)
+		checkExpected(t, evaluated, tt.expected)
 	}
 }
 
@@ -145,12 +140,7 @@ func TestAttrReaderAndWriter(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
-
-		if isError(evaluated) {
-			t.Fatalf("got Error: %s.\n Input %s", evaluated.(*Error).Message, tt.input)
-		}
-
-		testIntegerObject(t, evaluated, tt.expected)
+		checkExpected(t, evaluated, tt.expected)
 	}
 }
 
@@ -314,12 +304,7 @@ func TestNamespace(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
-
-		if isError(evaluated) {
-			t.Fatalf("got Error: %s.\n Input %s", evaluated.(*Error).Message, tt.input)
-		}
-
-		testIntegerObject(t, evaluated, tt.expected)
+		checkExpected(t, evaluated, tt.expected)
 	}
 }
 
@@ -330,13 +315,7 @@ func TestRequireSuccess(t *testing.T) {
 	File.extname("foo.rb")
 	`
 	evaluated := testEval(t, input)
-
-	if isError(evaluated) {
-		t.Fatalf("got Error: %s", evaluated.(*Error).Message)
-	}
-
-	testStringObject(t, evaluated, ".rb")
-
+	checkExpected(t, evaluated, ".rb")
 }
 
 func TestRequireFail(t *testing.T) {
@@ -407,12 +386,7 @@ func TestPrimitiveType(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
-
-		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
-		}
-
-		testStringObject(t, evaluated, tt.expected)
+		checkExpected(t, evaluated, tt.expected)
 	}
 }
 
@@ -434,20 +408,7 @@ func TestEvalCustomConstructor(t *testing.T) {
 	`
 
 	evaluated := testEval(t, input)
-
-	if isError(evaluated) {
-		t.Fatalf("got Error: %s", evaluated.(*Error).Message)
-	}
-
-	result, ok := evaluated.(*IntegerObject)
-
-	if !ok {
-		t.Errorf("expect result to be an integer. got=%T", evaluated)
-	}
-
-	if result.Value != 30 {
-		t.Errorf("expect result to be 30. got=%d", result.Value)
-	}
+	checkExpected(t, evaluated, 30)
 }
 
 func TestClassInheritModule(t *testing.T) {

@@ -7,9 +7,7 @@ import (
 func TestInitilaize(t *testing.T) {
 	expected := 101
 	i := initIntegerObject(expected)
-	if expected != i.Value {
-		t.Fatalf("Expect: %d. got=%d", expected, i.Value)
-	}
+	checkExpected(t, i, expected)
 }
 
 func TestEvalInteger(t *testing.T) {
@@ -75,14 +73,7 @@ func TestEvalInteger(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		switch tt.expected.(type) {
-		case bool:
-			testBooleanObject(t, evaluated, tt.expected.(bool))
-		case int:
-			testIntegerObject(t, evaluated, tt.expected.(int))
-		case string:
-			testStringObject(t, evaluated, tt.expected.(string))
-		}
+		checkExpected(t, evaluated, tt.expected)
 	}
 }
 

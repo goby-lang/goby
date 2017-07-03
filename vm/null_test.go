@@ -6,10 +6,7 @@ func TestEvalNil(t *testing.T) {
 	input := `nil`
 
 	evaluated := testEval(t, input)
-
-	if _, ok := evaluated.(*NullObject); !ok {
-		t.Fatalf("Expect result to be Null. got=%T", evaluated)
-	}
+	checkExpected(t, evaluated, nil)
 }
 
 func TestBangPrefix(t *testing.T) {
@@ -19,5 +16,5 @@ func TestBangPrefix(t *testing.T) {
 	`
 
 	evaluated := testEval(t, input)
-	testBooleanObject(t, evaluated, true)
+	checkExpected(t, evaluated, true)
 }
