@@ -60,6 +60,11 @@ func (s *StringObject) equal(e *StringObject) bool {
 }
 
 func initStringObject(value string) *StringObject {
+	value = strings.Replace(value, "\\n", "\n", -1)
+	value = strings.Replace(value, "\\r", "\r", -1)
+	value = strings.Replace(value, "\\t", "\t", -1)
+	value = strings.Replace(value, "\\v", "\v", -1)
+	value = strings.Replace(value, "\\\\", "\\", -1)
 	return &StringObject{Value: value, Class: stringClass}
 }
 
@@ -278,8 +283,9 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// Return a new String with the first character converted to uppercase but the rest of string converted to lowercase.
 		//
 		// ```Ruby
-		// "test".capitalize # => "Test"
-		// "tEST".capitalize # => "Test"
+		// "test".capitalize         # => "Test"
+		// "tEST".capitalize         # => "Test"
+		// "heLlo\nWoRLd".capitalize # => "Hello\nworld"
 		// ```
 		//
 		// @return [String]
@@ -318,7 +324,8 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// Returns a new String with all characters is lowercase
 		//
 		// ```Ruby
-		// "erROR".downcase # => "error"
+		// "erROR".downcase        # => "error"
+		// "HeLlO\tWorLD".downcase # => "hello\tworld"
 		// ```
 		//
 		// @return [String]
@@ -377,7 +384,8 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// **Note:** the length is currently byte-based, instead of charcode-based.
 		//
 		// ```Ruby
-		// "reverse".reverse # => "esrever"
+		// "reverse".reverse      # => "esrever"
+		// "Hello\nWorld".reverse # => "dlroW\nolleH"
 		// ```
 		//
 		// @return [String]
@@ -386,6 +394,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				str := receiver.(*StringObject).Value
+
 				var revert string
 				for i := len(str) - 1; i >= 0; i-- {
 					revert += string(str[i])
