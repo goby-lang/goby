@@ -496,7 +496,7 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		{
 			`
 			class Foo
-			  def set_x x1, x2, x3
+			  def set_x x1, x2
 			    @x = x1
 			    @y = x2
 			  end
@@ -516,7 +516,7 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		{
 			`
 			class Foo
-			  def set_x x1, x2, x3
+			  def set_x x1, x2
 			    @x1 = x1
 			    @x2 = x2
 			  end

@@ -143,13 +143,18 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 	c := newCallFrame(method.instructionSet)
 	c.self = receiver
 
-	for i := 0; i < argC; i++ {
-		c.insertLCL(i, 0, t.stack.Data[argPr+i].Target)
-	}
+	if argC != method.argc {
+		e := initErrorObject(ArgumentErrorClass, "Expect %d args for method '%s'. got: %d", method.argc, method.Name, argC)
+		t.stack.push(&Pointer{e})
+	} else {
+		for i := 0; i < argC; i++ {
+			c.insertLCL(i, 0, t.stack.Data[argPr+i].Target)
+		}
 
-	c.blockFrame = blockFrame
-	t.callFrameStack.push(c)
-	t.startFromTopFrame()
+		c.blockFrame = blockFrame
+		t.callFrameStack.push(c)
+		t.startFromTopFrame()
+	}
 
 	t.stack.Data[receiverPr] = t.stack.top()
 	t.sp = receiverPr + 1
