@@ -59,8 +59,9 @@ func (s *StringObject) returnClass() Class {
 func (s *StringObject) toArray() *ArrayObject {
 	elems := []Object{}
 
+	r := []rune(s.Value)
 	for i := 0; i < len(s.Value); i++ {
-		elems = append(elems, initIntegerObject(i))
+		elems = append(elems, initStringObject(string(r[i])))
 	}
 
 	return initArrayObject(elems)
@@ -1032,7 +1033,10 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// ```ruby
 		// "Hello World".slice(1..6)    # => "ello W"
 		// "1234567890".slice(6..1)     # => ""
+		// "1234567890".slice(11..1)    # => nil
+		// "1234567890".slice(11..-1)   # => nil
 		// "1234567890".slice(-10..1)   # => "12"
+		// "1234567890".slice(-5..1)    # => ""
 		// "1234567890".slice(-10..-1)  # => "1234567890"
 		// "1234567890".slice(-10..-11) # => ""
 		// "1234567890".slice(1..-1)    # => "234567890"
@@ -1041,6 +1045,8 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		// "1234567890".slice(-11..-12) # => nil
 		// "Hello World".slice(4)       # => "o"
 		// "Hello\nWorld".slice(6)      # => "\n"
+		// "Hello\nWorld".slice(10)     # => nil
+		// "Hello\nWorld".slice(-12)    # => nil
 		// ```
 		//
 		// @return [String]
@@ -1078,17 +1084,13 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 							return initStringObject("")
 						}
 						return initStringObject(str[ran.Start : positiveEnd+1])
-					case ran.Start < 0 && ran.End < 0:
+					default:
 						positiveStart := strLength + ran.Start
 						positiveEnd := strLength + ran.End
-						if positiveStart > strLength {
-							return NULL
-						} else if positiveStart > positiveEnd {
+						if positiveStart > positiveEnd {
 							return initStringObject("")
 						}
 						return initStringObject(str[positiveStart : positiveEnd+1])
-					default:
-						return NULL
 					}
 
 				case *IntegerObject:
@@ -1136,7 +1138,7 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 		},
 	},
 	//{
-	//	// Doc
+	//	// TODO: Implement String#gsub When RegexObject Implemented
 	//	Name: "gsub",
 	//	Fn: func(receiver Object) builtinMethodBody {
 	//		return func(t *thread, args []Object, blockFrame *callFrame) Object {

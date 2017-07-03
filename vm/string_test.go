@@ -2,6 +2,7 @@ package vm
 
 import (
 	"testing"
+	"fmt"
 )
 
 func TestEvalStringExpression(t *testing.T) {
@@ -78,9 +79,13 @@ func TestEvalInfixStringExpression(t *testing.T) {
 		{`"Hello".eql("Hello")`, TRUE},
 		{`"Hello".eql("World")`, FALSE},
 		{`"Hello".start_with("Hel")`, TRUE},
+		{`"哈囉！世界！".start_with("哈囉！")`, TRUE},
 		{`"Hello".start_with("hel")`, FALSE},
+		{`"哈囉！世界".start_with("世界！")`, FALSE},
 		{`"Hello".end_with("llo")`, TRUE},
+		{`"哈囉！世界！".end_with("世界！")`, TRUE},
 		{`"Hello".end_with("ell")`, FALSE},
+		{`"哈囉！世界！".end_with("哈囉！")`, FALSE},
 		{`"Hello".insert(0, "X")`, "XHello"},
 		{`"Hello".insert(2, "X")`, "HeXllo"},
 		{`"Hello".insert(5, "X")`, "HelloX"},
@@ -101,7 +106,10 @@ func TestEvalInfixStringExpression(t *testing.T) {
 		{`"Hello\nWorld\nGoby".split("\n")`, initArrayObject([]Object{initStringObject("Hello"), initStringObject("World"), initStringObject("Goby")})},
 		{`"Hello World".slice(1..6)`, "ello W"},
 		{`"1234567890".slice(6..1)`, ""},
+		{`"1234567890".slice(11..1)`, nil},
+		{`"1234567890".slice(11..-1)`, nil},
 		{`"1234567890".slice(-10..1)`, "12"},
+		{`"1234567890".slice(-5..1)`, ""},
 		{`"1234567890".slice(-10..-1)`, "1234567890"},
 		{`"1234567890".slice(-10..-11)`, ""},
 		{`"1234567890".slice(1..-1)`, "234567890"},
@@ -129,5 +137,28 @@ func TestEvalInfixStringExpression(t *testing.T) {
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
 		checkExpected(t, evaluated, tt.expected)
+	}
+}
+
+func TestEvalInfixStringExpressionFail(t *testing.T) {
+	testsFail := []struct {
+		input    string
+		expected *Error
+	}{
+		{`"Taipei" + 101`, wrongTypeError(stringClass)},
+	}
+
+	for _, tt := range testsFail {
+		evaluated := testEval(t, tt.input)
+		err, ok := evaluated.(*Error)
+		fmt.Println("-----------------------------------------")
+		fmt.Println(err)
+		fmt.Println("-----------------------------------------")
+		if !ok {
+			t.Errorf("Expect error. got=%T (%+v)", err, err)
+		}
+		if err.Message != tt.expected.Message {
+			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
+		}
 	}
 }
