@@ -49,8 +49,14 @@ func (ro *RangeObject) returnClass() Class {
 func (ro *RangeObject) toArray() *ArrayObject {
 	elems := []Object{}
 
-	for i := ro.Start; i <= ro.End; i++ {
-		elems = append(elems, initIntegerObject(i))
+	if ro.Start <= ro.End {
+		for i := ro.Start; i <= ro.End; i++ {
+			elems = append(elems, initIntegerObject(i))
+		}
+	} else {
+		for i := ro.End; i <= ro.Start; i++ {
+			elems = append(elems, initIntegerObject(i))
+		}
 	}
 
 	return initArrayObject(elems)
@@ -72,7 +78,10 @@ var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 		// Returns the first value of the range.
 		//
 		// ```ruby
-		// (1..5).first # => 1
+		// (1..5).first   # => 1
+		// (5..1).first   # => 5
+		// (-2..3).first  # => -2
+		// (-5..-7).first # => -5
 		// ```
 		//
 		// @return [Integer]
@@ -88,7 +97,10 @@ var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 		// Returns the last value of the range.
 		//
 		// ```ruby
-		// (1..5).last # => 5
+		// (1..5).last   # => 5
+		// (5..1).last   # => 1
+		// (-2..3).last  # => 3
+		// (-5..-7).last # => -7
 		// ```
 		//
 		// @return [Integer]
@@ -105,15 +117,24 @@ var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 		// Returns `nil`.
 		//
 		// ```ruby
-		// (1..5).to_a     # => [1, 2, 3, 4, 5]
-		// (1..5).to_a[2]  # => 3
+		// sum = 0
+		// (1..5).each do |i|
+		//   sum = sum + i
+		// end
+		// sum # => 15
+		//
+		// sum = 0
+		// (-1..-5).each do |i|
+		//   sum = sum + i
+		// end
+		// sum # => -15
 		// ```
 		//
 		// **Note:**
 		// - Only `do`-`end` block is supported for now: `{ }` block is unavailable.
 		// - Three-dot range `...` is not supported yet.
 		//
-		// @return [Null]
+		// @return [Range]
 		Name: "each",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -123,9 +144,16 @@ var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 					t.returnError("Can't yield without a block")
 				}
 
-				for i := ran.Start; i <= ran.End; i++ {
-					obj := initIntegerObject(i)
-					t.builtInMethodYield(blockFrame, obj)
+				if ran.Start <= ran.End {
+					for i := ran.Start; i <= ran.End; i++ {
+						obj := initIntegerObject(i)
+						t.builtInMethodYield(blockFrame, obj)
+					}
+				} else {
+					for i := ran.End; i <= ran.Start; i++ {
+						obj := initIntegerObject(i)
+						t.builtInMethodYield(blockFrame, obj)
+					}
 				}
 				return ran
 			}
@@ -137,6 +165,8 @@ var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 		// ```ruby
 		// (1..5).to_a     # => [1, 2, 3, 4, 5]
 		// (1..5).to_a[2]  # => 3
+		// (-1..-5).to_a   # => [-1, -2, -3, -4, -5]
+		// (-1..3).to_a    # => [-1, 0, 1, 2, 3]
 		// ```
 		//
 		// @return [Array]
@@ -153,7 +183,8 @@ var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 		// The to_s method can convert range to string format
 		//
 		// ```ruby
-		// (1..5).to_s # "(1..5)"
+		// (1..5).to_s   # "(1..5)"
+		// (-1..-3).to_s # "(-1..-3)"
 		// ```
 		// @return [String]
 		Name: "to_s",
@@ -169,8 +200,10 @@ var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 		// Returns the size of the range
 		//
 		// ```ruby
-		// (1..5).size # => 5
-		// (3..9).size # => 7
+		// (1..5).size   # => 5
+		// (3..9).size   # => 7
+		// (-1..-5).size # => 5
+		// (-1..7).size  # => 9
 		// ```
 		// @return [Integer]
 		Name: "size",
@@ -178,7 +211,10 @@ var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				ran := receiver.(*RangeObject)
 
-				return initIntegerObject(ran.End - ran.Start + 1)
+				if ran.Start <= ran.End {
+					return initIntegerObject(ran.End - ran.Start + 1)
+				}
+				return initIntegerObject(ran.Start - ran.End + 1)
 			}
 		},
 	},
@@ -187,13 +223,32 @@ var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 		// An error will occur if not yielded to the block.
 		//
 		// ```ruby
+		// sum = 0
 		// (2..9).step(3) do |i|
-		// 	 puts i
+		// 	 sum = sum + i
 		// end
-		// # => 2
-		// # => 5
-		// # => 8
+		// sum # => 15
+		//
+		// sum = 0
+		// (2..-9).step(3) do |i|
+		// 	 sum = sum + i
+		// end
+		// sum # => 0
+		//
+		// sum = 0
+		// (-1..5).step(2) do |i|
+		//   sum = sum + 1
+		// end
+		// sum # => 8
+		//
+		// sum = 0
+		// (-1..-5).step(2) do |i|
+		//   sum = sum + 1
+		// end
+		// sum # => 0
 		// ```
+		//
+		// @return [Range]
 		Name: "step",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -204,6 +259,12 @@ var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 				}
 
 				stepValue := args[0].(*IntegerObject).Value
+				if stepValue == 0 {
+					return newError("Step can't be 0")
+				} else if stepValue < 0 {
+					return newError("Step can't be negative")
+				}
+
 				for i := ran.Start; i <= ran.End; i += stepValue {
 					obj := initIntegerObject(i)
 					t.builtInMethodYield(blockFrame, obj)
@@ -216,9 +277,17 @@ var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 		// The include method will check whether the integer object is in the range
 		//
 		// ```ruby
-		// (5..10).include(7) # => true
-		// (5..10).include(5) # => true
-		// (5..10).include(4) # => false
+		// (5..10).include(10)  # => true
+		// (5..10).include(11)  # => false
+		// (5..10).include(7)   # => true
+		// (5..10).include(5)   # => true
+		// (5..10).include(4)   # => false
+		// (-5..1).include(-2)  # => true
+		// (-5..-2).include(-2) # => true
+		// (-5..-3).include(-2) # => false
+		// (1..-5).include(-2)  # => true
+		// (-2..-5).include(-2) # => true
+		// (-3..-5).include(-2) # => false
 		// ```
 		// @return [Boolean]
 		Name: "include",
@@ -227,9 +296,10 @@ var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 				ran := receiver.(*RangeObject)
 
 				value := args[0].(*IntegerObject).Value
-				start := ran.Start
-				end := ran.End
-				if value >= start || value <= end {
+				ascendRangeBool := ran.Start <= ran.End && value >= ran.Start && value <= ran.End
+				descendRangeBool := ran.End <= ran.Start && value <= ran.Start && value >= ran.End
+
+				if ascendRangeBool || descendRangeBool {
 					return TRUE
 				}
 				return FALSE
