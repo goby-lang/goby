@@ -4,10 +4,6 @@ import (
 	"testing"
 )
 
-func init() {
-
-}
-
 func TestLengthMethod(t *testing.T) {
 	expected := 5
 	array := generateArray(expected)
@@ -99,9 +95,9 @@ func TestEvalArrayExpression(t *testing.T) {
 		t.Fatalf("Expect evaluated value to be an array. got=%T", evaluated)
 	}
 
-	testIntegerObject(t, arr.Elements[0], 1)
-	testStringObject(t, arr.Elements[1], "234")
-	testBooleanObject(t, arr.Elements[2], true)
+	checkExpected(t, arr.Elements[0], 1)
+	checkExpected(t, arr.Elements[1], "234")
+	checkExpected(t, arr.Elements[2], true)
 }
 
 func TestEvalArrayIndex(t *testing.T) {
@@ -207,22 +203,7 @@ func TestEvalArrayIndex(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
-
-		switch expected := tt.expected.(type) {
-		case int:
-			testIntegerObject(t, evaluated, expected)
-		case string:
-			testStringObject(t, evaluated, expected)
-		case bool:
-			testBooleanObject(t, evaluated, expected)
-		case nil:
-			_, ok := evaluated.(*NullObject)
-
-			if !ok {
-
-				t.Fatalf("expect input: \"%s\"'s result should be Null. got=%T(%s)", tt.input, evaluated, evaluated.toString())
-			}
-		}
+		checkExpected(t, evaluated, tt.expected)
 	}
 }
 
@@ -242,7 +223,7 @@ func TestEachMethod(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testIntegerObject(t, evaluated, tt.expected)
+		checkExpected(t, evaluated, tt.expected)
 	}
 }
 
@@ -262,7 +243,7 @@ func TestEachIndexMethod(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testIntegerObject(t, evaluated, tt.expected)
+		checkExpected(t, evaluated, tt.expected)
 	}
 }
 
@@ -442,7 +423,7 @@ func TestCountMethod(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testIntegerObject(t, evaluated, tt.expected.Value)
+		checkExpected(t, evaluated, tt.expected)
 	}
 }
 
@@ -524,7 +505,7 @@ func TestFirstMethod(t *testing.T) {
 
 	for _, tt := range testsInt {
 		evaluated := testEval(t, tt.input)
-		testIntegerObject(t, evaluated, tt.expected.Value)
+		checkExpected(t, evaluated, tt.expected)
 	}
 
 	testsArray := []struct {
@@ -583,7 +564,7 @@ func TestLastMethod(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testStringObject(t, evaluated, tt.expected.Value)
+		checkExpected(t, evaluated, tt.expected)
 	}
 
 	testsArray := []struct {

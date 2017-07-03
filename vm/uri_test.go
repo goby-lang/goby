@@ -84,19 +84,6 @@ func TestURIParsing(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
-
-		if isError(evaluated) {
-			t.Fatalf("got Error: %s.\n Input %s", evaluated.(*Error).Message, tt.input)
-		}
-
-		switch e := tt.expected.(type) {
-		case string:
-			testStringObject(t, evaluated, e)
-		case int:
-			testIntegerObject(t, evaluated, e)
-		case nil:
-			testNullObject(t, evaluated)
-		}
-
+		checkExpected(t, evaluated, tt.expected)
 	}
 }

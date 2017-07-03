@@ -15,7 +15,7 @@ func TestEvalStringExpression(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testStringObject(t, evaluated, tt.expected)
+		checkExpected(t, evaluated, tt.expected)
 	}
 }
 
@@ -71,13 +71,6 @@ func TestEvalInfixStringExpression(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		switch tt.expected.(type) {
-		case bool:
-			testBooleanObject(t, evaluated, tt.expected.(bool))
-		case string:
-			testStringObject(t, evaluated, tt.expected.(string))
-		case int:
-			testIntegerObject(t, evaluated, tt.expected.(int))
-		}
+		checkExpected(t, evaluated, tt.expected)
 	}
 }

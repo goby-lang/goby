@@ -141,7 +141,7 @@ func TestExtnameMethod(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testStringObject(t, evaluated, tt.expected)
+		checkExpected(t, evaluated, tt.expected)
 	}
 }
 
@@ -158,7 +158,7 @@ func TestBasenameMethod(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testStringObject(t, evaluated, tt.expected)
+		checkExpected(t, evaluated, tt.expected)
 	}
 }
 
@@ -200,7 +200,7 @@ func TestJoinMethod(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testStringObject(t, evaluated, tt.expected)
+		checkExpected(t, evaluated, tt.expected)
 	}
 }
 
@@ -212,7 +212,7 @@ func TestSizeMethod(t *testing.T) {
 	`
 
 	evaluated := testEval(t, input)
-	testIntegerObject(t, evaluated, 22)
+	checkExpected(t, evaluated, 22)
 }
 
 //@TODO add test for chmod form a847c8b41f29657b380c1731ec36a660dbf49bc4
