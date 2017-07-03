@@ -904,13 +904,13 @@ var builtinStringInstanceMethods = []*BuiltInMethodObject{
 				for {
 					str = strings.Trim(str, " ")
 
-					if strings.HasPrefix(str, "\\n") || strings.HasPrefix(str, "\\t") || strings.HasPrefix(str, "\\r") {
-						str = str[2:]
+					if strings.HasPrefix(str, "\n") || strings.HasPrefix(str, "\t") || strings.HasPrefix(str, "\r") || strings.HasPrefix(str, "\v") {
+						str = str[1:]
 						continue
 					}
 
-					if strings.HasSuffix(str, "\\n") || strings.HasSuffix(str, "\\t") || strings.HasSuffix(str, "\\r") {
-						str = str[:len(str)-4]
+					if strings.HasSuffix(str, "\n") || strings.HasSuffix(str, "\t") || strings.HasSuffix(str, "\r") || strings.HasPrefix(str, "\v") {
+						str = str[:len(str)-2]
 						continue
 					}
 					break
