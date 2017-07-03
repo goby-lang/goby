@@ -60,12 +60,8 @@ func (s *StringObject) equal(e *StringObject) bool {
 }
 
 func initStringObject(value string) *StringObject {
-	value = strings.Replace(value, "\\n", "\n", -1)
-	value = strings.Replace(value, "\\r", "\r", -1)
-	value = strings.Replace(value, "\\t", "\t", -1)
-	value = strings.Replace(value, "\\v", "\v", -1)
-	value = strings.Replace(value, "\\\\", "\\", -1)
-	return &StringObject{Value: value, Class: stringClass}
+	replacer := strings.NewReplacer("\\n", "\n", "\\r", "\r", "\\t", "\t", "\\v", "\v", "\\\\", "\\")
+	return &StringObject{Value: replacer.Replace(value), Class: stringClass}
 }
 
 var builtinStringInstanceMethods = []*BuiltInMethodObject{
