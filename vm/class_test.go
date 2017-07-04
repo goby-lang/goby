@@ -22,7 +22,7 @@ func TestMonkeyPatchBuiltInClass(t *testing.T) {
 	`
 
 	evaluated := testEval(t, input)
-	checkExpected(t, evaluated, "buz")
+	checkExpected(t, 0, evaluated, "buz")
 }
 
 func TestRequireRelative(t *testing.T) {
@@ -37,7 +37,7 @@ func TestRequireRelative(t *testing.T) {
 	`
 
 	evaluated := testEval(t, input)
-	checkExpected(t, evaluated, 160)
+	checkExpected(t, 0, evaluated, 160)
 }
 
 func TestDefSingletonMethtod(t *testing.T) {
@@ -65,9 +65,9 @@ func TestDefSingletonMethtod(t *testing.T) {
 		`, 10},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -138,9 +138,9 @@ func TestAttrReaderAndWriter(t *testing.T) {
 		`, 110},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -302,9 +302,9 @@ func TestNamespace(t *testing.T) {
 		`, 10},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -315,7 +315,7 @@ func TestRequireSuccess(t *testing.T) {
 	File.extname("foo.rb")
 	`
 	evaluated := testEval(t, input)
-	checkExpected(t, evaluated, ".rb")
+	checkExpected(t, 0, evaluated, ".rb")
 }
 
 func TestRequireFail(t *testing.T) {
@@ -384,9 +384,9 @@ func TestPrimitiveType(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -408,7 +408,7 @@ func TestEvalCustomConstructor(t *testing.T) {
 	`
 
 	evaluated := testEval(t, input)
-	checkExpected(t, evaluated, 30)
+	checkExpected(t, 0, evaluated, 30)
 }
 
 func TestClassInheritModule(t *testing.T) {

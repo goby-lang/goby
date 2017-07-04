@@ -25,7 +25,7 @@ func TestComment(t *testing.T) {
 	# Comment`
 
 	evaluated := testEval(t, input)
-	testIntegerObject(t, evaluated, 1)
+	testIntegerObject(t, 0, evaluated, 1)
 }
 
 func TestAssignStatementEvaluation(t *testing.T) {
@@ -41,9 +41,9 @@ func TestAssignStatementEvaluation(t *testing.T) {
 		{"Bar = 100; Bar", 100},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testIntegerObject(t, evaluated, tt.expectedValue)
+		testIntegerObject(t, i, evaluated, tt.expectedValue)
 	}
 }
 
@@ -67,9 +67,9 @@ func TestReturnStatementEvaluation(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testIntegerObject(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -164,9 +164,9 @@ func TestModuleStatement(t *testing.T) {
 `, 50},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testIntegerObject(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -205,8 +205,8 @@ func TestWhileStatement(t *testing.T) {
 		`, 6},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testIntegerObject(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }

@@ -27,9 +27,9 @@ func TestFileDeletion(t *testing.T) {
 		`, false},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -71,9 +71,9 @@ func TestFileWrite(t *testing.T) {
 		`, true},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -118,9 +118,9 @@ func TestFileObject(t *testing.T) {
 		`, "this file's size is\n22"},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -139,9 +139,9 @@ func TestExtnameMethod(t *testing.T) {
 		`, ".txt"},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -156,9 +156,9 @@ func TestBasenameMethod(t *testing.T) {
 		`, "test.gb"},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -173,9 +173,9 @@ func TestSplitMethod(t *testing.T) {
 		`, initArrayObject([]Object{initStringObject("/home/goby/plugin/"), initStringObject("test.gb")})},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testArrayObject(t, evaluated, tt.expected)
+		testArrayObject(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -198,9 +198,9 @@ func TestJoinMethod(t *testing.T) {
 		`, "plugin"},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -212,7 +212,7 @@ func TestSizeMethod(t *testing.T) {
 	`
 
 	evaluated := testEval(t, input)
-	checkExpected(t, evaluated, 22)
+	checkExpected(t, 0, evaluated, 22)
 }
 
 //@TODO add test for chmod form a847c8b41f29657b380c1731ec36a660dbf49bc4

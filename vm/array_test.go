@@ -56,8 +56,8 @@ func TestShiftMethod(t *testing.T) {
 	m := getBuiltInMethod(t, array, "shift")
 	first := m(nil, nil, nil)
 
-	testArrayObject(t, array, second)
-	testIntegerObject(t, first, 1)
+	testArrayObject(t, 0, array, second)
+	testIntegerObject(t, 0, first, 1)
 }
 
 func TestShiftMethodFail(t *testing.T) {
@@ -95,9 +95,9 @@ func TestEvalArrayExpression(t *testing.T) {
 		t.Fatalf("Expect evaluated value to be an array. got=%T", evaluated)
 	}
 
-	checkExpected(t, arr.Elements[0], 1)
-	checkExpected(t, arr.Elements[1], "234")
-	checkExpected(t, arr.Elements[2], true)
+	checkExpected(t, 0, arr.Elements[0], 1)
+	checkExpected(t, 0, arr.Elements[1], "234")
+	checkExpected(t, 0, arr.Elements[2], true)
 }
 
 func TestEvalArrayIndex(t *testing.T) {
@@ -162,7 +162,7 @@ func TestEvalArrayIndex(t *testing.T) {
 		`, nil},
 		{`
 			[1, 2, 10, 5].at(2)
-		`, int64(10)},
+		`, 10},
 		{`
 			[1, "a", 10, 5].at(1)
 		`, "a"},
@@ -201,9 +201,9 @@ func TestEvalArrayIndex(t *testing.T) {
 			`[nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, Continue, Switching Protocols, Processing, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, OK]`},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -221,9 +221,9 @@ func TestEachMethod(t *testing.T) {
 		`, 15},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -241,9 +241,9 @@ func TestEachIndexMethod(t *testing.T) {
 		`, 10},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -272,9 +272,9 @@ func TestMapMethod(t *testing.T) {
 		`, initArrayObject([]Object{initStringObject("11"), initStringObject("sss1"), initStringObject("qwe1")})},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testArrayObject(t, evaluated, tt.expected)
+		testArrayObject(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -303,9 +303,9 @@ func TestSelectMethod(t *testing.T) {
 		`, initArrayObject([]Object{initStringObject("test"), initStringObject("test")})},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testArrayObject(t, evaluated, tt.expected)
+		testArrayObject(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -324,9 +324,9 @@ func TestClearMethod(t *testing.T) {
 		`, initArrayObject([]Object{})},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testArrayObject(t, evaluated, tt.expected)
+		testArrayObject(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -349,9 +349,9 @@ func TestConcatMethod(t *testing.T) {
 		`, initArrayObject([]Object{initIntegerObject(1), initIntegerObject(2)})},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testArrayObject(t, evaluated, tt.expected)
+		testArrayObject(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -421,9 +421,9 @@ func TestCountMethod(t *testing.T) {
 		`, initIntegerObject(3)},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -463,9 +463,9 @@ func TestRotateMethod(t *testing.T) {
 		`, initArrayObject([]Object{initIntegerObject(3), initIntegerObject(4), initIntegerObject(1), initIntegerObject(2)})},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testArrayObject(t, evaluated, tt.expected)
+		testArrayObject(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -503,9 +503,9 @@ func TestFirstMethod(t *testing.T) {
 		`, initIntegerObject(1)},
 	}
 
-	for _, tt := range testsInt {
+	for i, tt := range testsInt {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 
 	testsArray := []struct {
@@ -522,9 +522,9 @@ func TestFirstMethod(t *testing.T) {
 		`, initArrayObject([]Object{initStringObject("a"), initStringObject("b")})},
 	}
 
-	for _, tt := range testsArray {
+	for i, tt := range testsArray {
 		evaluated := testEval(t, tt.input)
-		testArrayObject(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -562,9 +562,9 @@ func TestLastMethod(t *testing.T) {
 		`, initStringObject("b")},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 
 	testsArray := []struct {
@@ -581,9 +581,9 @@ func TestLastMethod(t *testing.T) {
 		`, initArrayObject([]Object{initStringObject("d"), initStringObject("q")})},
 	}
 
-	for _, tt := range testsArray {
+	for i, tt := range testsArray {
 		evaluated := testEval(t, tt.input)
-		testArrayObject(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 

@@ -7,7 +7,7 @@ import (
 func TestInitilaize(t *testing.T) {
 	expected := 101
 	i := initIntegerObject(expected)
-	checkExpected(t, i, expected)
+	checkExpected(t, 0, i, expected)
 }
 
 func TestEvalInteger(t *testing.T) {
@@ -71,9 +71,9 @@ func TestEvalInteger(t *testing.T) {
 			`, 3},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 

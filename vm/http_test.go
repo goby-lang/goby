@@ -20,7 +20,7 @@ func TestHTTPResponse(t *testing.T) {
 	`
 
 	evaluated := testEval(t, script)
-	checkExpected(t, evaluated, "test")
+	checkExpected(t, 0, evaluated, "test")
 }
 
 func TestNormalGet(t *testing.T) {
@@ -38,7 +38,7 @@ Net::HTTP.get("%s")
 `, ts.URL)
 
 	evaluated := testEval(t, testScript)
-	checkExpected(t, evaluated, expected)
+	checkExpected(t, 0, evaluated, expected)
 }
 
 func TestNormalGetWithPath(t *testing.T) {
@@ -61,5 +61,5 @@ Net::HTTP.get("%s", "path")
 `, ts.URL)
 
 	evaluated := testEval(t, testScript)
-	checkExpected(t, evaluated, expected)
+	checkExpected(t, 0, evaluated, expected)
 }

@@ -6,7 +6,7 @@ func TestEvalNil(t *testing.T) {
 	input := `nil`
 
 	evaluated := testEval(t, input)
-	checkExpected(t, evaluated, nil)
+	checkExpected(t, 0, evaluated, nil)
 }
 
 func TestBangPrefix(t *testing.T) {
@@ -16,5 +16,5 @@ func TestBangPrefix(t *testing.T) {
 	`
 
 	evaluated := testEval(t, input)
-	checkExpected(t, evaluated, true)
+	checkExpected(t, 0, evaluated, true)
 }

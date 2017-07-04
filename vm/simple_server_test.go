@@ -19,9 +19,9 @@ func TestServerInitialization(t *testing.T) {
 		`, 4000},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -77,14 +77,14 @@ func TestInitRequest(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		v, ok := r.InstanceVariables.get(tt.varName)
 
 		if !ok {
 			t.Fatalf("Expect request object to have %s attribute.", tt.varName)
 		}
 
-		checkExpected(t, v, tt.expected)
+		checkExpected(t, i, v, tt.expected)
 	}
 
 }
