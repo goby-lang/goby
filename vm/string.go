@@ -40,7 +40,7 @@ type StringObject struct {
 }
 
 func (s *StringObject) toString() string {
-	return "\"" + s.Value + "\""
+	return s.Value
 }
 
 func (s *StringObject) toJSON() string {
