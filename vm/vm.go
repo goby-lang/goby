@@ -132,7 +132,7 @@ func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) {
 	filename := filename(fn)
 	p := newBytecodeParser(filename)
 	p.vm = vm
-	p.parseInstructionSets(sets)
+	p.transferInstructionSets(sets)
 
 	// Keep update label table after parsed new files.
 	// TODO: Find more efficient way to do this.
@@ -190,7 +190,7 @@ func (vm *VM) InitForREPL() {
 func (vm *VM) REPLExec(sets []*bytecode.InstructionSet) {
 	p := newBytecodeParser("")
 	p.vm = vm
-	p.parseInstructionSets(sets)
+	p.transferInstructionSets(sets)
 
 	for labelType, table := range p.labelTable {
 		for labelName, is := range table {

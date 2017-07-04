@@ -7,6 +7,7 @@ import (
 	"github.com/goby-lang/goby/compiler/parser"
 )
 
+// CompileToBytecode compiles input source code into Goby bytecode
 func CompileToBytecode(input string) (string, error) {
 	l := lexer.New(input)
 	p := parser.New(l)
@@ -19,6 +20,7 @@ func CompileToBytecode(input string) (string, error) {
 	return g.GenerateByteCode(program.Statements), nil
 }
 
+// CompileToInstructions compiles input source code into instruction set data structures
 func CompileToInstructions(input string) ([]*bytecode.InstructionSet, error) {
 	l := lexer.New(input)
 	p := parser.New(l)
