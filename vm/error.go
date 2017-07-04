@@ -13,6 +13,9 @@ var (
 	TypeErrorClass *RClass
 	// UnsupportedMethodClass
 	UnsupportedMethodClass *RClass
+	// NameErrorClass
+	NameErrorClass *RClass
+	InternalErrorClass *RClass
 )
 
 const (
@@ -24,6 +27,9 @@ const (
 	TypeError = "TypeError"
 	// UnsupportedMethodError describes the error type in string
 	UnsupportedMethodError = "UnsupportedMethodError"
+	// NameError describes constant related errors
+	NameError = "NameError"
+	InternalError = "InternalError"
 )
 
 func initErrorClasses() {
@@ -35,6 +41,10 @@ func initErrorClasses() {
 	TypeErrorClass = &RClass{BaseClass: bc}
 	bc = createBaseClass(UnsupportedMethodError)
 	UnsupportedMethodClass = &RClass{BaseClass: bc}
+	bc = createBaseClass(NameError)
+	NameErrorClass = &RClass{BaseClass: bc}
+	bc = createBaseClass(InternalError)
+	InternalErrorClass = &RClass{BaseClass: bc}
 }
 
 // Error ...

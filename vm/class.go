@@ -335,8 +335,7 @@ var builtinCommonInstanceMethods = []*BuiltInMethodObject{
 				initFunc, ok := standardLibraries[libName]
 
 				if !ok {
-					msg := "Can't require \"" + libName + "\""
-					t.returnError(msg)
+					return initErrorObject(InternalErrorClass, "Can't require \"%s\"", libName)
 				}
 
 				initFunc(t.vm)
@@ -368,7 +367,7 @@ var builtinCommonInstanceMethods = []*BuiltInMethodObject{
 				file, err := ioutil.ReadFile(filepath + ".gb")
 
 				if err != nil {
-					t.returnError(err.Error())
+					return initErrorObject(InternalErrorClass,  err.Error())
 				}
 
 				t.vm.execRequiredFile(filepath, file)
@@ -708,8 +707,18 @@ var builtinClassClassMethods = []*BuiltInMethodObject{
 		Name: "include",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				var class *RClass
 				module := args[0].(*RClass)
-				class := receiver.(*RClass)
+
+				switch r := receiver.(type) {
+				case *RClass:
+					class = r
+				case *RObject:
+					if r.Class == objectClass {
+						class = objectClass
+					}
+				}
+
 				module.superClass = class.superClass
 				class.superClass = module
 
@@ -746,7 +755,7 @@ var builtinClassClassMethods = []*BuiltInMethodObject{
 				}
 
 				if class.pseudoSuperClass.isModule {
-					t.returnError("Module inheritance is not supported: " + class.pseudoSuperClass.Name)
+					return initErrorObject(InternalErrorClass, "Module inheritance is not supported: %s",  class.pseudoSuperClass.Name)
 				}
 
 				instance := class.initializeInstance()
