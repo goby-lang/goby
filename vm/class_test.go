@@ -322,7 +322,7 @@ func TestRequireFail(t *testing.T) {
 	input := `
 	require "bar"
 	`
-	expected := `Can't require "bar"`
+	expected := `InternalError: Can't require "bar"`
 
 	evaluated := testEval(t, input)
 
@@ -330,8 +330,9 @@ func TestRequireFail(t *testing.T) {
 		t.Fatalf("Should return an error")
 	}
 
-	if evaluated.(*Error).Message != expected {
-		t.Fatalf("Error message should be '%s'", expected)
+	err := evaluated.(*Error)
+	if err.Message != expected {
+		t.Fatalf("Error message should be '%s'. got: %s", expected, err.Message)
 	}
 }
 
@@ -421,7 +422,7 @@ end
 
 a = Bar.new()
 	`
-	expected := `Module inheritance is not supported: Foo`
+	expected := `InternalError: Module inheritance is not supported: Foo`
 
 	evaluated := testEval(t, input)
 
@@ -429,7 +430,9 @@ a = Bar.new()
 		t.Fatalf("Should return an error when a class inherits a module")
 	}
 
-	if evaluated.(*Error).Message != expected {
-		t.Fatalf("Error message should be '%s'\n result %s", expected, evaluated)
+	err := evaluated.(*Error)
+
+	if err.Message != expected {
+		t.Fatalf("Error message should be '%s'. got: %s", expected, err.Message)
 	}
 }

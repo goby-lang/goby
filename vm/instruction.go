@@ -60,8 +60,9 @@ var builtInActions = map[operationType]*action{
 			c := t.vm.lookupConstant(cf, constName)
 
 			if c == nil {
-				msg := "Can't find constant: " + constName
-				t.returnError(msg)
+				err := initErrorObject(NameErrorClass, "uninitialized constant %s", constName)
+				t.stack.push(&Pointer{err})
+				return
 			}
 
 			t.stack.push(c)
