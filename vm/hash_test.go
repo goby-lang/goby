@@ -161,9 +161,9 @@ func TestHashLength(t *testing.T) {
 		`, 0},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -182,11 +182,11 @@ func TestEvalHashExpression(t *testing.T) {
 	for key, value := range h.Pairs {
 		switch key {
 		case "foo":
-			testIntegerObject(t, value, 123)
+			testIntegerObject(t, 0, value, 123)
 		case "bar":
-			testStringObject(t, value, "test")
+			testStringObject(t, 0, value, "test")
 		case "baz":
-			testBooleanObject(t, value, true)
+			testBooleanObject(t, 0, value, true)
 		}
 	}
 }
@@ -241,9 +241,9 @@ func TestEvalHashAccess(t *testing.T) {
 		`, 50},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 

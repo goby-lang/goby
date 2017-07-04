@@ -82,8 +82,8 @@ func TestURIParsing(t *testing.T) {
 		`, nil},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }

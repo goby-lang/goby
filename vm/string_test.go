@@ -13,9 +13,9 @@ func TestEvalStringExpression(t *testing.T) {
 		{`'Monkey'`, "Monkey"},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -69,8 +69,8 @@ func TestEvalInfixStringExpression(t *testing.T) {
 		{`"Hello\nWorld".include("\r")`, false},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }

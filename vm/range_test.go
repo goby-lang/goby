@@ -52,9 +52,9 @@ func TestEachThroughRange(t *testing.T) {
 		`, -15},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -83,9 +83,9 @@ func TestRangeToArray(t *testing.T) {
 		`, 1},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -108,9 +108,9 @@ func TestRangeToString(t *testing.T) {
 		`, "(1..-5)"},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -145,9 +145,9 @@ func TestFirstAndLast(t *testing.T) {
 		`, -7},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -170,9 +170,9 @@ func TestSize(t *testing.T) {
 		`, 9},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -227,9 +227,9 @@ func TestStepThroughRange(t *testing.T) {
 		`, 0},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -273,8 +273,8 @@ func TestInclude(t *testing.T) {
 		`, FALSE},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }

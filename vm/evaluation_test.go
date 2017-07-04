@@ -32,14 +32,14 @@ func TestMethodCallWithDefaultArgValue(t *testing.T) {
 		`, 110},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
 
 		if isError(evaluated) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 		}
 
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -84,9 +84,9 @@ func TestNextStatement(t *testing.T) {
 		`, 12},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -230,14 +230,14 @@ func TestMethodCall(t *testing.T) {
 		`, nil},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
 
 		if isError(evaluated) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 		}
 
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -349,19 +349,9 @@ func TestClassMethodEvaluation(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-
-		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
-		}
-
-		switch expected := tt.expected.(type) {
-		case int:
-			testIntegerObject(t, evaluated, expected)
-		case string:
-			testStringObject(t, evaluated, expected)
-		}
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -418,14 +408,14 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 			"Foo"},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
 
 		if isError(evaluated) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 		}
 
-		testStringObject(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -488,14 +478,14 @@ func TestEvalInstanceVariable(t *testing.T) {
 		`, nil},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
 
 		if isError(evaluated) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 		}
 
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -585,7 +575,7 @@ func TestEvalClassInheritance(t *testing.T) {
 
 	evaluated := testEval(t, input)
 
-	testStringObject(t, evaluated, "Bar")
+	testStringObject(t, 0, evaluated, "Bar")
 }
 
 func TestEvalIfExpression(t *testing.T) {
@@ -630,18 +620,17 @@ func TestEvalIfExpression(t *testing.T) {
 		`, nil},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
 
 		switch tt.expected.(type) {
 		case int64:
-			testIntegerObject(t, evaluated, tt.expected.(int))
+			testIntegerObject(t, i, evaluated, tt.expected.(int))
 		case bool:
-			testBooleanObject(t, evaluated, tt.expected.(bool))
+			testBooleanObject(t, i, evaluated, tt.expected.(bool))
 		case nil:
-			testNullObject(t, evaluated)
+			testNullObject(t, i, evaluated)
 		}
-
 	}
 }
 
@@ -667,9 +656,9 @@ func TestEvalPostfix(t *testing.T) {
 		`, 8},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testIntegerObject(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -686,9 +675,9 @@ func TestEvalBangPrefixExpression(t *testing.T) {
 		{"!!5", true},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testBooleanObject(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -703,9 +692,9 @@ func TestEvalMinusPrefixExpression(t *testing.T) {
 		{"-(-5)", 5},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testIntegerObject(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -841,9 +830,9 @@ func TestMethodCallWithBlockArgument(t *testing.T) {
 			11},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testIntegerObject(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -944,9 +933,9 @@ func TestMethodCallWithNestedBlock(t *testing.T) {
 			210},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		testIntegerObject(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -1139,13 +1128,13 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
 
 		if isError(evaluated) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 		}
 
-		testIntegerObject(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }

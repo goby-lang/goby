@@ -11,9 +11,9 @@ func TestEvalBooleanExpression(t *testing.T) {
 		{"false", false},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -59,9 +59,9 @@ func TestEvalInfixBooleanExpression(t *testing.T) {
 		{"((10 > 3) && (3 < 4)) || ((10 == 10) || false)", true},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		evaluated := testEval(t, tt.input)
-		checkExpected(t, evaluated, tt.expected)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
