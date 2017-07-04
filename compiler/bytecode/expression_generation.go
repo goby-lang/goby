@@ -2,7 +2,7 @@ package bytecode
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/ast"
+	"github.com/goby-lang/goby/compiler/ast"
 )
 
 func (g *Generator) compileExpression(is *instructionSet, exp ast.Expression, scope *scope, table *localTable) {

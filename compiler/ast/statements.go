@@ -2,7 +2,7 @@ package ast
 
 import (
 	"bytes"
-	"github.com/goby-lang/goby/token"
+	"github.com/goby-lang/goby/compiler/token"
 )
 
 type ClassStatement struct {

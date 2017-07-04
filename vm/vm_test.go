@@ -3,9 +3,9 @@ package vm
 import (
 	"testing"
 
-	"github.com/goby-lang/goby/bytecode"
-	"github.com/goby-lang/goby/lexer"
-	"github.com/goby-lang/goby/parser"
+	"github.com/goby-lang/goby/compiler/bytecode"
+	"github.com/goby-lang/goby/compiler/lexer"
+	"github.com/goby-lang/goby/compiler/parser"
 )
 
 func TestVM_REPLExec(t *testing.T) {

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/goby-lang/goby/ast"
-	"github.com/goby-lang/goby/token"
+	"github.com/goby-lang/goby/compiler/ast"
+	"github.com/goby-lang/goby/compiler/token"
 )
 
 var arguments = map[token.Type]bool{

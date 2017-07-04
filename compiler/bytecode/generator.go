@@ -2,7 +2,7 @@ package bytecode
 
 import (
 	"bytes"
-	"github.com/goby-lang/goby/ast"
+	"github.com/goby-lang/goby/compiler/ast"
 	"regexp"
 	"strings"
 )

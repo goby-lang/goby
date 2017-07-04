@@ -1,6 +1,6 @@
 package ast
 
-import "github.com/goby-lang/goby/token"
+import "github.com/goby-lang/goby/compiler/token"
 
 type variable interface {
 	variableNode()

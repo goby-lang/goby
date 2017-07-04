@@ -3,9 +3,9 @@ package igb
 import (
 	"bytes"
 	"fmt"
-	"github.com/goby-lang/goby/bytecode"
-	"github.com/goby-lang/goby/lexer"
-	"github.com/goby-lang/goby/parser"
+	"github.com/goby-lang/goby/compiler/bytecode"
+	"github.com/goby-lang/goby/compiler/lexer"
+	"github.com/goby-lang/goby/compiler/parser"
 	"github.com/goby-lang/goby/vm"
 	"io"
 	"os"

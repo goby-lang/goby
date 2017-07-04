@@ -2,7 +2,7 @@ package bytecode
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/ast"
+	"github.com/goby-lang/goby/compiler/ast"
 )
 
 func (g *Generator) compileStatements(stmts []ast.Statement, scope *scope, table *localTable) {

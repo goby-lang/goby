@@ -2,8 +2,8 @@ package vm
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/bytecode"
-	"github.com/goby-lang/goby/parser"
+	"github.com/goby-lang/goby/compiler/bytecode"
+	"github.com/goby-lang/goby/compiler/parser"
 	"io/ioutil"
 	"os"
 	"path/filepath"

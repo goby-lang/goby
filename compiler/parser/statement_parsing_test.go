@@ -1,9 +1,9 @@
 package parser
 
 import (
-	"github.com/goby-lang/goby/ast"
-	"github.com/goby-lang/goby/lexer"
-	"github.com/goby-lang/goby/token"
+	"github.com/goby-lang/goby/compiler/ast"
+	"github.com/goby-lang/goby/compiler/lexer"
+	"github.com/goby-lang/goby/compiler/token"
 	"testing"
 )
 
