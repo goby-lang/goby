@@ -5,7 +5,7 @@ import (
 	"github.com/goby-lang/goby/compiler/ast"
 )
 
-func (g *Generator) compileExpression(is *instructionSet, exp ast.Expression, scope *scope, table *localTable) {
+func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, scope *scope, table *localTable) {
 	switch exp := exp.(type) {
 	case *ast.Identifier:
 		g.compileIdentifier(is, exp, scope, table)
@@ -55,7 +55,7 @@ func (g *Generator) compileExpression(is *instructionSet, exp ast.Expression, sc
 	}
 }
 
-func (g *Generator) compileIdentifier(is *instructionSet, exp *ast.Identifier, scope *scope, table *localTable) {
+func (g *Generator) compileIdentifier(is *InstructionSet, exp *ast.Identifier, scope *scope, table *localTable) {
 	index, depth, ok := table.getLCL(exp.Value, table.depth)
 
 	// it's local variable
@@ -69,7 +69,7 @@ func (g *Generator) compileIdentifier(is *instructionSet, exp *ast.Identifier, s
 	is.define(Send, exp.Value, 0)
 }
 
-func (g *Generator) compileYieldExpression(is *instructionSet, exp *ast.YieldExpression, scope *scope, table *localTable) {
+func (g *Generator) compileYieldExpression(is *InstructionSet, exp *ast.YieldExpression, scope *scope, table *localTable) {
 	is.define(PutSelf)
 
 	for _, arg := range exp.Arguments {
@@ -79,7 +79,7 @@ func (g *Generator) compileYieldExpression(is *instructionSet, exp *ast.YieldExp
 	is.define(InvokeBlock, len(exp.Arguments))
 }
 
-func (g *Generator) compileCallExpression(is *instructionSet, exp *ast.CallExpression, scope *scope, table *localTable) {
+func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpression, scope *scope, table *localTable) {
 	g.compileExpression(is, exp.Receiver, scope, table)
 
 	for _, arg := range exp.Arguments {
@@ -98,7 +98,7 @@ func (g *Generator) compileCallExpression(is *instructionSet, exp *ast.CallExpre
 	is.define(Send, exp.Method, len(exp.Arguments))
 }
 
-func (g *Generator) compileAssignExpression(is *instructionSet, exp *ast.InfixExpression, scope *scope, table *localTable) {
+func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.InfixExpression, scope *scope, table *localTable) {
 	g.compileExpression(is, exp.Right, scope, table)
 
 	switch name := exp.Left.(type) {
@@ -119,7 +119,7 @@ func (g *Generator) compileAssignExpression(is *instructionSet, exp *ast.InfixEx
 }
 
 func (g *Generator) compileBlockArgExpression(index int, exp *ast.CallExpression, scope *scope, table *localTable) {
-	is := &instructionSet{}
+	is := &InstructionSet{}
 	is.setLabel(fmt.Sprintf("%s:%d", Block, index))
 
 	for i := 0; i < len(exp.BlockArguments); i++ {
@@ -131,7 +131,7 @@ func (g *Generator) compileBlockArgExpression(index int, exp *ast.CallExpression
 	g.instructionSets = append(g.instructionSets, is)
 }
 
-func (g *Generator) compileIfExpression(is *instructionSet, exp *ast.IfExpression, scope *scope, table *localTable) {
+func (g *Generator) compileIfExpression(is *InstructionSet, exp *ast.IfExpression, scope *scope, table *localTable) {
 	g.compileExpression(is, exp.Condition, scope, table)
 
 	anchor1 := &anchor{}
@@ -139,7 +139,7 @@ func (g *Generator) compileIfExpression(is *instructionSet, exp *ast.IfExpressio
 
 	g.compileCodeBlock(is, exp.Consequence, scope, table)
 
-	anchor1.line = is.Count + 1
+	anchor1.line = is.count + 1
 
 	if exp.Alternative == nil {
 		anchor1.line--
@@ -152,10 +152,10 @@ func (g *Generator) compileIfExpression(is *instructionSet, exp *ast.IfExpressio
 
 	g.compileCodeBlock(is, exp.Alternative, scope, table)
 
-	anchor2.line = is.Count
+	anchor2.line = is.count
 }
 
-func (g *Generator) compilePrefixExpression(is *instructionSet, exp *ast.PrefixExpression, scope *scope, table *localTable) {
+func (g *Generator) compilePrefixExpression(is *InstructionSet, exp *ast.PrefixExpression, scope *scope, table *localTable) {
 	switch exp.Operator {
 	case "!":
 		g.compileExpression(is, exp.Right, scope, table)
@@ -167,7 +167,7 @@ func (g *Generator) compilePrefixExpression(is *instructionSet, exp *ast.PrefixE
 	}
 }
 
-func (g *Generator) compileInfixExpression(is *instructionSet, node *ast.InfixExpression, scope *scope, table *localTable) {
+func (g *Generator) compileInfixExpression(is *InstructionSet, node *ast.InfixExpression, scope *scope, table *localTable) {
 	g.compileExpression(is, node.Left, scope, table)
 	g.compileExpression(is, node.Right, scope, table)
 

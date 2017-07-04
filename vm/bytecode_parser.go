@@ -29,55 +29,6 @@ func newBytecodeParser(file filename) *bytecodeParser {
 	return p
 }
 
-// parseBytecode parses given bytecodes and transfer them into a sequence of instruction set.
-func (p *bytecodeParser) parseBytecode(bytecodes string) []*instructionSet {
-	iss := []*instructionSet{}
-	bytecodes = strings.TrimSpace(bytecodes)
-	bytecodesByLine := strings.Split(bytecodes, "\n")
-
-	defer func() {
-		if p := recover(); p != nil {
-			switch p.(type) {
-			case errorMessage:
-				return
-			default:
-				panic(p)
-			}
-		}
-	}()
-
-	p.parseSection(iss, bytecodesByLine)
-
-	return iss
-}
-
-func (p *bytecodeParser) parseSection(iss []*instructionSet, bytecodesByLine []string) {
-	is := &instructionSet{filename: p.filename}
-	count := 0
-
-	// First line is label
-	p.parseLabel(is, bytecodesByLine[0])
-
-	for _, text := range bytecodesByLine[1:] {
-		count++
-		l := strings.TrimSpace(text)
-		if strings.HasPrefix(l, "<") {
-			p.parseSection(iss, bytecodesByLine[count:])
-			break
-		} else {
-			p.parseInstruction(is, l)
-		}
-	}
-
-	iss = append(iss, is)
-}
-
-func (p *bytecodeParser) parseLabel(is *instructionSet, line string) {
-	line = strings.Trim(line, "<")
-	line = strings.Trim(line, ">")
-	p.setLabel(is, line)
-}
-
 func (p *bytecodeParser) setLabel(is *instructionSet, name string) {
 	var l *label
 	var ln string
@@ -86,10 +37,10 @@ func (p *bytecodeParser) setLabel(is *instructionSet, name string) {
 	if name == bytecode.Program {
 		p.program = is
 		return
-	} else {
-		ln = strings.Split(name, ":")[1]
-		lt = labelType(strings.Split(name, ":")[0])
 	}
+
+	ln = strings.Split(name, ":")[1]
+	lt = labelType(strings.Split(name, ":")[0])
 
 	l = &label{name: name, Type: lt}
 	is.label = l
@@ -100,6 +51,111 @@ func (p *bytecodeParser) setLabel(is *instructionSet, name string) {
 	}
 
 	p.labelTable[lt][ln] = append(p.labelTable[lt][ln], is)
+}
+
+func (p *bytecodeParser) parseParam(param string) interface{} {
+	integer, e := strconv.ParseInt(param, 0, 64)
+	if e != nil {
+		return param
+	}
+
+	i := int(integer)
+
+	return i
+}
+
+func (p *bytecodeParser) transferInstructionSets(sets []*bytecode.InstructionSet) []*instructionSet {
+	iss := []*instructionSet{}
+	count := 0
+
+	for _, set := range sets {
+		count++
+		p.transferInstructionSet(iss, set)
+	}
+
+	return iss
+}
+
+func (p *bytecodeParser) transferInstructionSet(iss []*instructionSet, set *bytecode.InstructionSet) {
+	is := &instructionSet{filename: p.filename}
+	count := 0
+	p.setLabel(is, set.LabelName())
+
+	for _, i := range set.Instructions {
+		count++
+		p.transferInstruction(is, i)
+	}
+
+	iss = append(iss, is)
+}
+
+// transferInstruction transfer a bytecode.Instruction into an vm instruction and append it into given instruction set.
+func (p *bytecodeParser) transferInstruction(is *instructionSet, i *bytecode.Instruction) {
+	var params []interface{}
+	act := operationType(i.Action)
+
+	action := builtInActions[act]
+
+	if action == nil {
+		panic(fmt.Sprintf("Unknown command: %s. line: %d", act, i.Line()))
+	} else {
+		switch act {
+		case bytecode.PutString:
+			text := strings.Split(i.Params[0], "\"")[1]
+			params = append(params, text)
+		case bytecode.BranchUnless, bytecode.BranchIf, bytecode.Jump:
+			line, err := i.AnchorLine()
+
+			if err != nil {
+				panic(err.Error())
+			}
+
+			params = append(params, line)
+		default:
+			for _, param := range i.Params {
+				params = append(params, p.parseParam(param))
+			}
+		}
+	}
+
+	is.define(i.Line(), action, params...)
+}
+
+// parseBytecode parses given bytecodes and transfer them into a sequence of instruction set.
+func (p *bytecodeParser) parseBytecode(bytecodes string) []*instructionSet {
+	iss := []*instructionSet{}
+	bytecodes = strings.TrimSpace(bytecodes)
+	bytecodesByLine := strings.Split(bytecodes, "\n")
+	p.parseBytecodeSection(iss, bytecodesByLine)
+
+	return iss
+}
+
+func (p *bytecodeParser) parseBytecodeSection(iss []*instructionSet, bytecodesByLine []string) {
+	is := &instructionSet{filename: p.filename}
+	count := 0
+
+	// First line is label
+	p.parseBytecodeLabel(is, bytecodesByLine[0])
+
+	for _, text := range bytecodesByLine[1:] {
+		count++
+		l := strings.TrimSpace(text)
+		if strings.HasPrefix(l, "<") {
+			p.parseBytecodeSection(iss, bytecodesByLine[count:])
+			break
+		} else {
+			p.parseInstruction(is, l)
+		}
+	}
+
+	iss = append(iss, is)
+}
+
+func (p *bytecodeParser) parseBytecodeLabel(is *instructionSet, line string) {
+	line = strings.Trim(line, "<")
+	line = strings.Trim(line, ">")
+	p.setLabel(is, line)
 }
 
 // parseInstruction transfer a line of bytecode into an instruction and append it into given instruction set.
@@ -126,15 +182,4 @@ func (p *bytecodeParser) parseInstruction(is *instructionSet, line string) {
 	}
 
 	is.define(int(ln), action, params...)
-}
-
-func (p *bytecodeParser) parseParam(param string) interface{} {
-	integer, e := strconv.ParseInt(param, 0, 64)
-	if e != nil {
-		return param
-	}
-
-	i := int(integer)
-
-	return i
 }

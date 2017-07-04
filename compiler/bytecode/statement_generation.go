@@ -6,7 +6,7 @@ import (
 )
 
 func (g *Generator) compileStatements(stmts []ast.Statement, scope *scope, table *localTable) {
-	is := &instructionSet{label: &label{Name: Program}}
+	is := &InstructionSet{label: &label{name: Program}}
 
 	for _, statement := range stmts {
 		g.compileStatement(is, statement, scope, table)
@@ -16,7 +16,7 @@ func (g *Generator) compileStatements(stmts []ast.Statement, scope *scope, table
 	g.instructionSets = append(g.instructionSets, is)
 }
 
-func (g *Generator) compileStatement(is *instructionSet, statement ast.Statement, scope *scope, table *localTable) {
+func (g *Generator) compileStatement(is *InstructionSet, statement ast.Statement, scope *scope, table *localTable) {
 	scope.line++
 	switch stmt := statement.(type) {
 	case *ast.ExpressionStatement:
@@ -37,7 +37,7 @@ func (g *Generator) compileStatement(is *instructionSet, statement ast.Statement
 	}
 }
 
-func (g *Generator) compileWhileStmt(is *instructionSet, stmt *ast.WhileStatement, scope *scope, table *localTable) {
+func (g *Generator) compileWhileStmt(is *InstructionSet, stmt *ast.WhileStatement, scope *scope, table *localTable) {
 	anchor1 := &anchor{}
 	is.define(Jump, anchor1)
 
@@ -45,12 +45,12 @@ func (g *Generator) compileWhileStmt(is *instructionSet, stmt *ast.WhileStatemen
 	is.define(Pop)
 	is.define(Jump, anchor1)
 
-	anchor2 := &anchor{is.Count}
+	anchor2 := &anchor{is.count}
 
 	scope.anchor = anchor1
 	g.compileCodeBlock(is, stmt.Body, scope, table)
 
-	anchor1.line = is.Count
+	anchor1.line = is.count
 
 	g.compileExpression(is, stmt.Condition, scope, table)
 
@@ -59,11 +59,11 @@ func (g *Generator) compileWhileStmt(is *instructionSet, stmt *ast.WhileStatemen
 	is.define(Pop)
 }
 
-func (g *Generator) compileNextStatement(is *instructionSet, scope *scope) {
+func (g *Generator) compileNextStatement(is *InstructionSet, scope *scope) {
 	is.define(Jump, scope.anchor)
 }
 
-func (g *Generator) compileClassStmt(is *instructionSet, stmt *ast.ClassStatement, scope *scope, table *localTable) {
+func (g *Generator) compileClassStmt(is *InstructionSet, stmt *ast.ClassStatement, scope *scope, table *localTable) {
 	is.define(PutSelf)
 
 	if stmt.SuperClass != nil {
@@ -77,7 +77,7 @@ func (g *Generator) compileClassStmt(is *instructionSet, stmt *ast.ClassStatemen
 	scope = newScope(stmt)
 
 	// compile class's content
-	newIS := &instructionSet{}
+	newIS := &InstructionSet{}
 	newIS.setLabel(fmt.Sprintf("%s:%s", LabelDefClass, stmt.Name.Value))
 
 	g.compileCodeBlock(newIS, stmt.Body, scope, scope.localTable)
@@ -85,13 +85,13 @@ func (g *Generator) compileClassStmt(is *instructionSet, stmt *ast.ClassStatemen
 	g.instructionSets = append(g.instructionSets, newIS)
 }
 
-func (g *Generator) compileModuleStmt(is *instructionSet, stmt *ast.ModuleStatement, scope *scope) {
+func (g *Generator) compileModuleStmt(is *InstructionSet, stmt *ast.ModuleStatement, scope *scope) {
 	is.define(PutSelf)
 	is.define(DefClass, "module:"+stmt.Name.Value)
 	is.define(Pop)
 
 	scope = newScope(stmt)
-	newIS := &instructionSet{}
+	newIS := &InstructionSet{}
 	newIS.setLabel(fmt.Sprintf("%s:%s", LabelDefClass, stmt.Name.Value))
 
 	g.compileCodeBlock(newIS, stmt.Body, scope, scope.localTable)
@@ -99,7 +99,7 @@ func (g *Generator) compileModuleStmt(is *instructionSet, stmt *ast.ModuleStatem
 	g.instructionSets = append(g.instructionSets, newIS)
 }
 
-func (g *Generator) compileDefStmt(is *instructionSet, stmt *ast.DefStatement, scope *scope) {
+func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, scope *scope) {
 	is.define(PutSelf)
 	is.define(PutString, fmt.Sprintf("\"%s\"", stmt.Name.Value))
 
@@ -113,7 +113,7 @@ func (g *Generator) compileDefStmt(is *instructionSet, stmt *ast.DefStatement, s
 	scope = newScope(stmt)
 
 	// compile method definition's content
-	newIS := &instructionSet{}
+	newIS := &InstructionSet{}
 	newIS.setLabel(fmt.Sprintf("%s:%s", LabelDef, stmt.Name.Value))
 
 	for i := 0; i < len(stmt.Parameters); i++ {

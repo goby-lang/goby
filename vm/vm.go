@@ -2,8 +2,8 @@ package vm
 
 import (
 	"fmt"
+	"github.com/goby-lang/goby/compiler"
 	"github.com/goby-lang/goby/compiler/bytecode"
-	"github.com/goby-lang/goby/compiler/parser"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -127,6 +127,42 @@ func (vm *VM) ExecBytecodes(bytecodes, fn string) {
 	vm.startFromTopFrame()
 }
 
+// ExecInstructions accepts a sequence of bytecodes and use vm to evaluate them.
+func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) {
+	filename := filename(fn)
+	p := newBytecodeParser(filename)
+	p.vm = vm
+	p.transferInstructionSets(sets)
+
+	// Keep update label table after parsed new files.
+	// TODO: Find more efficient way to do this.
+	for labelType, table := range p.labelTable {
+		for labelName, is := range table {
+			vm.isTables[labelType][labelName] = is
+		}
+	}
+
+	vm.blockTables[p.filename] = p.blockTable
+	vm.SetClassISIndexTable(p.filename)
+	vm.SetMethodISIndexTable(p.filename)
+
+	defer func() {
+		if p := recover(); p != nil {
+			switch p.(type) {
+			case errorMessage:
+				return
+			default:
+				panic(p)
+			}
+		}
+	}()
+
+	cf := newCallFrame(p.program)
+	cf.self = mainObj
+	vm.mainThread.callFrameStack.push(cf)
+	vm.startFromTopFrame()
+}
+
 // SetClassISIndexTable adds new instruction set's index table to vm.classISIndexTables
 func (vm *VM) SetClassISIndexTable(fn filename) {
 	vm.classISIndexTables[fn] = newISIndexTable()
@@ -151,10 +187,10 @@ func (vm *VM) InitForREPL() {
 }
 
 // REPLExec executes instructions differently from normal program execution.
-func (vm *VM) REPLExec(bytecodes string) {
+func (vm *VM) REPLExec(sets []*bytecode.InstructionSet) {
 	p := newBytecodeParser("")
 	p.vm = vm
-	p.parseBytecode(bytecodes)
+	p.transferInstructionSets(sets)
 
 	for labelType, table := range p.labelTable {
 		for labelName, is := range table {
@@ -357,10 +393,12 @@ func (vm *VM) execGobyLib(libName string) {
 }
 
 func (vm *VM) execRequiredFile(filepath string, file []byte) {
-	program := parser.BuildAST(file)
-	g := bytecode.NewGenerator()
-	g.InitTopLevelScope(program)
-	bytecodes := g.GenerateByteCode(program.Statements)
+	instructionSets, err := compiler.CompileToInstructions(string(file))
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 
 	oldMethodTable := isTable{}
 	oldClassTable := isTable{}
@@ -376,7 +414,7 @@ func (vm *VM) execRequiredFile(filepath string, file []byte) {
 
 	// This creates new execution environments for required file, including new instruction set table.
 	// So we need to copy old instruction sets and restore them later, otherwise current program's instruction set would be overwrite.
-	vm.ExecBytecodes(bytecodes, filepath)
+	vm.ExecInstructions(instructionSets, filepath)
 
 	// Restore instruction sets.
 	vm.isTables[bytecode.LabelDef] = oldMethodTable

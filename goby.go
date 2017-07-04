@@ -4,9 +4,8 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"github.com/goby-lang/goby/compiler/bytecode"
+	"github.com/goby-lang/goby/compiler"
 	"github.com/goby-lang/goby/igb"
-	"github.com/goby-lang/goby/compiler/parser"
 	"github.com/goby-lang/goby/vm"
 	"github.com/pkg/profile"
 	"io/ioutil"
@@ -69,19 +68,27 @@ func main() {
 
 	switch fileExt {
 	case "gb", "rb":
-		ast := parser.BuildAST(file)
 
-		g := bytecode.NewGenerator()
-		g.InitTopLevelScope(ast)
-		bytecodes := g.GenerateByteCode(ast.Statements)
+		if *compileOptionPtr {
+			bytecodes, err := compiler.CompileToBytecode(string(file))
 
-		if !*compileOptionPtr {
-			v := vm.New(dir, args)
-			v.ExecBytecodes(bytecodes, filepath)
+			if err != nil {
+				fmt.Println(err.Error())
+				return
+			}
+			writeByteCode(bytecodes, dir, filename)
 			return
 		}
 
-		writeByteCode(bytecodes, dir, filename)
+		instructionSets, err := compiler.CompileToInstructions(string(file))
+
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+
+		v := vm.New(dir, args)
+		v.ExecInstructions(instructionSets, filepath)
 	case "gbbc":
 		bytecodes := string(file)
 		v := vm.New(dir, args)

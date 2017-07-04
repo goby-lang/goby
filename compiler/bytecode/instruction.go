@@ -39,26 +39,41 @@ const (
 	Leave               = "leave"
 )
 
-type instruction struct {
-	action string
-	params []string
+// Instruction represents compiled bytecode instruction
+type Instruction struct {
+	Action string
+	Params []string
 	line   int
 	anchor *anchor
 }
 
-func (i *instruction) compile() string {
+// AnchorLine returns instruction anchor's line number if it has an anchor
+func (i *Instruction) AnchorLine() (int, error) {
 	if i.anchor != nil {
-		return fmt.Sprintf("%d %s %d\n", i.line, i.action, i.anchor.line)
-	}
-	if len(i.params) > 0 {
-		return fmt.Sprintf("%d %s %s\n", i.line, i.action, strings.Join(i.params, " "))
+		return i.anchor.line, nil
 	}
 
-	return fmt.Sprintf("%d %s\n", i.line, i.action)
+	return 0, fmt.Errorf("Can't find anchor on action %s", i.Action)
+}
+
+// Line returns instruction's line number
+func (i *Instruction) Line() int {
+	return i.line
+}
+
+func (i *Instruction) compile() string {
+	if i.anchor != nil {
+		return fmt.Sprintf("%d %s %d\n", i.line, i.Action, i.anchor.line)
+	}
+	if len(i.Params) > 0 {
+		return fmt.Sprintf("%d %s %s\n", i.line, i.Action, strings.Join(i.Params, " "))
+	}
+
+	return fmt.Sprintf("%d %s\n", i.line, i.Action)
 }
 
 type label struct {
-	Name string
+	name string
 }
 
 type anchor struct {
@@ -66,23 +81,29 @@ type anchor struct {
 }
 
 func (l *label) compile() string {
-	return fmt.Sprintf("<%s>\n", l.Name)
+	return fmt.Sprintf("<%s>\n", l.name)
 }
 
-type instructionSet struct {
+// InstructionSet contains a set of Instructions and attaches a label
+type InstructionSet struct {
 	label        *label
-	Instructions []*instruction
-	Count        int
+	Instructions []*Instruction
+	count        int
 }
 
-func (is *instructionSet) setLabel(name string) {
-	l := &label{Name: name}
+// LabelName returns the label name of instruction set
+func (is *InstructionSet) LabelName() string {
+	return is.label.name
+}
+
+func (is *InstructionSet) setLabel(name string) {
+	l := &label{name: name}
 	is.label = l
 }
 
-func (is *instructionSet) define(action string, params ...interface{}) {
+func (is *InstructionSet) define(action string, params ...interface{}) {
 	ps := []string{}
-	i := &instruction{action: action, params: ps, line: is.Count}
+	i := &Instruction{Action: action, Params: ps, line: is.count}
 	for _, param := range params {
 		switch p := param.(type) {
 		case string:
@@ -91,20 +112,18 @@ func (is *instructionSet) define(action string, params ...interface{}) {
 			i.anchor = p
 		case int:
 			ps = append(ps, fmt.Sprint(p))
-		case int64:
-			ps = append(ps, fmt.Sprint(p))
 		}
 	}
 
 	if len(ps) > 0 {
-		i.params = ps
+		i.Params = ps
 	}
 
 	is.Instructions = append(is.Instructions, i)
-	is.Count++
+	is.count++
 }
 
-func (is *instructionSet) compile() string {
+func (is *InstructionSet) compile() string {
 	var out bytes.Buffer
 	out.WriteString(is.label.compile())
 	for _, i := range is.Instructions {
