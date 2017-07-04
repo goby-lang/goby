@@ -134,25 +134,25 @@ func (g *Generator) compileBlockArgExpression(index int, exp *ast.CallExpression
 func (g *Generator) compileIfExpression(is *InstructionSet, exp *ast.IfExpression, scope *scope, table *localTable) {
 	g.compileExpression(is, exp.Condition, scope, table)
 
-	anchor1 := &Anchor{}
+	anchor1 := &anchor{}
 	is.define(BranchUnless, anchor1)
 
 	g.compileCodeBlock(is, exp.Consequence, scope, table)
 
-	anchor1.Line = is.Count + 1
+	anchor1.line = is.count + 1
 
 	if exp.Alternative == nil {
-		anchor1.Line--
+		anchor1.line--
 		is.define(PutNull)
 		return
 	}
 
-	anchor2 := &Anchor{}
+	anchor2 := &anchor{}
 	is.define(Jump, anchor2)
 
 	g.compileCodeBlock(is, exp.Alternative, scope, table)
 
-	anchor2.Line = is.Count
+	anchor2.line = is.count
 }
 
 func (g *Generator) compilePrefixExpression(is *InstructionSet, exp *ast.PrefixExpression, scope *scope, table *localTable) {

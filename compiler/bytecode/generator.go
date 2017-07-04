@@ -12,7 +12,7 @@ type scope struct {
 	program    *ast.Program
 	localTable *localTable
 	line       int
-	anchor     *Anchor
+	anchor     *anchor
 }
 
 func newScope(stmt ast.Statement) *scope {
@@ -67,7 +67,7 @@ func (g *Generator) compileCodeBlock(is *InstructionSet, stmt *ast.BlockStatemen
 }
 
 func (g *Generator) endInstructions(is *InstructionSet) {
-	if g.REPL && is.Label.Name == Program {
+	if g.REPL && is.label.name == Program {
 		return
 	}
 	is.define(Leave)

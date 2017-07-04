@@ -6,7 +6,7 @@ import (
 )
 
 func (g *Generator) compileStatements(stmts []ast.Statement, scope *scope, table *localTable) {
-	is := &InstructionSet{Label: &Label{Name: Program}}
+	is := &InstructionSet{label: &label{name: Program}}
 
 	for _, statement := range stmts {
 		g.compileStatement(is, statement, scope, table)
@@ -38,19 +38,19 @@ func (g *Generator) compileStatement(is *InstructionSet, statement ast.Statement
 }
 
 func (g *Generator) compileWhileStmt(is *InstructionSet, stmt *ast.WhileStatement, scope *scope, table *localTable) {
-	anchor1 := &Anchor{}
+	anchor1 := &anchor{}
 	is.define(Jump, anchor1)
 
 	is.define(PutNull)
 	is.define(Pop)
 	is.define(Jump, anchor1)
 
-	anchor2 := &Anchor{is.Count}
+	anchor2 := &anchor{is.count}
 
 	scope.anchor = anchor1
 	g.compileCodeBlock(is, stmt.Body, scope, table)
 
-	anchor1.Line = is.Count
+	anchor1.line = is.count
 
 	g.compileExpression(is, stmt.Condition, scope, table)
 

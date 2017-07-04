@@ -101,18 +101,14 @@ func TestVM_REPLExec(t *testing.T) {
 }
 
 func testEval(t *testing.T, input string) Object {
-	bytecodes, err := compiler.CompileToBytecode(input)
+	is, err := compiler.CompileToInstructions(input)
 
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
-	return testExec(bytecodes)
-}
-
-func testExec(bytecodes string) Object {
 	v := New("./", []string{})
-	v.ExecBytecodes(bytecodes, "./")
+	v.ExecInstructions(is, "./")
 
 	return v.mainThread.stack.top().Target
 }
