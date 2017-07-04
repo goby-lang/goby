@@ -12,77 +12,45 @@ func TestVM_REPLExec(t *testing.T) {
 	}{
 		{
 			[]string{`
-<ProgramStart>
-<Def:foo>
-0 putobject 123
-1 leave
-<ProgramStart>
-0 putself
-1 putstring "foo"
-2 def_method 0
+
+def foo
+  123
+end
 `, `
-<ProgramStart>
-0 putself
-1 send foo 0
+foo
 `},
 			123},
 		{
 			[]string{
 				`
-<ProgramStart>
-<Def:bar>
-0 getlocal 0 0
-1 putobject 10
-2 send + 1
-3 leave
-<DefClass:Foo>
-0 putself
-1 putstring "bar"
-2 def_method 1
-3 leave
-<ProgramStart>
-0 putself
-1 def_class class:Foo
-2 pop
+class Foo
+  def bar(x)
+    x + 10
+  end
+end
 `,
 				`
-<ProgramStart>
-0 getconstant Foo
-1 send new 0
-2 putobject 90
-3 send bar 1
+Foo.new.bar(90)
 `},
 			100},
 		{
 			[]string{
 				`
-<Def:foo>
-0 putobject 123
-1 leave
-<ProgramStart>
-0 putself
-1 putstring "foo"
-2 def_method 0
+def foo
+  123
+end
 `,
 				`
-<ProgramStart>
-0 putself
-1 send foo 0
+foo
 `,
 				`
-<Def:foo>
-0 putobject 345
-1 leave
-<ProgramStart>
-0 putself
-1 putstring "foo"
-2 def_method 0
+def foo
+  345
+end
 `,
 
 				`
-<ProgramStart>
-0 putself
-1 send foo 0
+foo
 `,
 			}, 345},
 	}
@@ -92,7 +60,13 @@ func TestVM_REPLExec(t *testing.T) {
 		v.InitForREPL()
 
 		for _, input := range test.inputs {
-			v.REPLExec(input)
+			sets, err := compiler.CompileToInstructions(input)
+
+			if err != nil {
+				t.Fatalf(err.Error())
+			}
+
+			v.REPLExec(sets)
 		}
 
 		evaluated := v.GetExecResult()

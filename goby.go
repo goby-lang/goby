@@ -68,20 +68,27 @@ func main() {
 
 	switch fileExt {
 	case "gb", "rb":
-		bytecodes, err := compiler.CompileToBytecode(string(file))
+
+		if *compileOptionPtr {
+			bytecodes, err := compiler.CompileToBytecode(string(file))
+
+			if err != nil {
+				fmt.Println(err.Error())
+				return
+			}
+			writeByteCode(bytecodes, dir, filename)
+			return
+		}
+
+		instructionSets, err := compiler.CompileToInstructions(string(file))
 
 		if err != nil {
 			fmt.Println(err.Error())
 			return
 		}
 
-		if !*compileOptionPtr {
-			v := vm.New(dir, args)
-			v.ExecBytecodes(bytecodes, filepath)
-			return
-		}
-
-		writeByteCode(bytecodes, dir, filename)
+		v := vm.New(dir, args)
+		v.ExecInstructions(instructionSets, filepath)
 	case "gbbc":
 		bytecodes := string(file)
 		v := vm.New(dir, args)

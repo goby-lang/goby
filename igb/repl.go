@@ -124,9 +124,9 @@ func Start(ch chan string, out io.Writer) {
 		}
 
 		if sm.Is(readyToExec) {
-			bytecodes := g.GenerateByteCode(program.Statements)
+			instructions := g.GenerateInstructions(program.Statements)
 			g.ResetInstructionSets()
-			v.REPLExec(bytecodes)
+			v.REPLExec(instructions)
 
 			r := v.GetREPLResult()
 
