@@ -39,56 +39,56 @@ const (
 	Leave               = "leave"
 )
 
-type instruction struct {
-	action string
-	params []string
-	line   int
-	anchor *anchor
+type Instruction struct {
+	Action string
+	Params []string
+	Line   int
+	Anchor *Anchor
 }
 
-func (i *instruction) compile() string {
-	if i.anchor != nil {
-		return fmt.Sprintf("%d %s %d\n", i.line, i.action, i.anchor.line)
+func (i *Instruction) compile() string {
+	if i.Anchor != nil {
+		return fmt.Sprintf("%d %s %d\n", i.Line, i.Action, i.Anchor.Line)
 	}
-	if len(i.params) > 0 {
-		return fmt.Sprintf("%d %s %s\n", i.line, i.action, strings.Join(i.params, " "))
+	if len(i.Params) > 0 {
+		return fmt.Sprintf("%d %s %s\n", i.Line, i.Action, strings.Join(i.Params, " "))
 	}
 
-	return fmt.Sprintf("%d %s\n", i.line, i.action)
+	return fmt.Sprintf("%d %s\n", i.Line, i.Action)
 }
 
-type label struct {
+type Label struct {
 	Name string
 }
 
-type anchor struct {
-	line int
+type Anchor struct {
+	Line int
 }
 
-func (l *label) compile() string {
+func (l *Label) compile() string {
 	return fmt.Sprintf("<%s>\n", l.Name)
 }
 
-type instructionSet struct {
-	label        *label
-	Instructions []*instruction
+type InstructionSet struct {
+	Label        *Label
+	Instructions []*Instruction
 	Count        int
 }
 
-func (is *instructionSet) setLabel(name string) {
-	l := &label{Name: name}
-	is.label = l
+func (is *InstructionSet) setLabel(name string) {
+	l := &Label{Name: name}
+	is.Label = l
 }
 
-func (is *instructionSet) define(action string, params ...interface{}) {
+func (is *InstructionSet) define(action string, params ...interface{}) {
 	ps := []string{}
-	i := &instruction{action: action, params: ps, line: is.Count}
+	i := &Instruction{Action: action, Params: ps, Line: is.Count}
 	for _, param := range params {
 		switch p := param.(type) {
 		case string:
 			ps = append(ps, p)
-		case *anchor:
-			i.anchor = p
+		case *Anchor:
+			i.Anchor = p
 		case int:
 			ps = append(ps, fmt.Sprint(p))
 		case int64:
@@ -97,16 +97,16 @@ func (is *instructionSet) define(action string, params ...interface{}) {
 	}
 
 	if len(ps) > 0 {
-		i.params = ps
+		i.Params = ps
 	}
 
 	is.Instructions = append(is.Instructions, i)
 	is.Count++
 }
 
-func (is *instructionSet) compile() string {
+func (is *InstructionSet) compile() string {
 	var out bytes.Buffer
-	out.WriteString(is.label.compile())
+	out.WriteString(is.Label.compile())
 	for _, i := range is.Instructions {
 		out.WriteString(i.compile())
 	}

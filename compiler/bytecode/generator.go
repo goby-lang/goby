@@ -12,7 +12,7 @@ type scope struct {
 	program    *ast.Program
 	localTable *localTable
 	line       int
-	anchor     *anchor
+	anchor     *Anchor
 }
 
 func newScope(stmt ast.Statement) *scope {
@@ -22,7 +22,7 @@ func newScope(stmt ast.Statement) *scope {
 // Generator contains program's AST and will store generated instruction sets
 type Generator struct {
 	REPL            bool
-	instructionSets []*instructionSet
+	instructionSets []*InstructionSet
 	blockCounter    int
 	scope           *scope
 }
@@ -34,7 +34,7 @@ func NewGenerator() *Generator {
 
 // ResetInstructionSets clears generator's instruction sets
 func (g *Generator) ResetInstructionSets() {
-	g.instructionSets = []*instructionSet{}
+	g.instructionSets = []*InstructionSet{}
 }
 
 // InitTopLevelScope sets generator's scope with program node, which means it's the top level scope
@@ -55,19 +55,19 @@ func (g *Generator) GenerateByteCode(stmts []ast.Statement) string {
 }
 
 // GenerateInstructions returns compiled instructions
-func (g *Generator) GenerateInstructions(stmts []ast.Statement) []*instructionSet {
+func (g *Generator) GenerateInstructions(stmts []ast.Statement) []*InstructionSet {
 	g.compileStatements(stmts, g.scope, g.scope.localTable)
 	return g.instructionSets
 }
 
-func (g *Generator) compileCodeBlock(is *instructionSet, stmt *ast.BlockStatement, scope *scope, table *localTable) {
+func (g *Generator) compileCodeBlock(is *InstructionSet, stmt *ast.BlockStatement, scope *scope, table *localTable) {
 	for _, s := range stmt.Statements {
 		g.compileStatement(is, s, scope, table)
 	}
 }
 
-func (g *Generator) endInstructions(is *instructionSet) {
-	if g.REPL && is.label.Name == Program {
+func (g *Generator) endInstructions(is *InstructionSet) {
+	if g.REPL && is.Label.Name == Program {
 		return
 	}
 	is.define(Leave)
