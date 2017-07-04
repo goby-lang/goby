@@ -2,8 +2,9 @@ package vm
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/compiler/bytecode"
 	"strings"
+
+	"github.com/goby-lang/goby/compiler/bytecode"
 )
 
 type operation func(t *thread, cf *callFrame, args ...interface{})
@@ -137,6 +138,13 @@ var builtInActions = map[operationType]*action{
 			cf.storeConstant(constName, v)
 		},
 	},
+	bytecode.NewRegexp: {
+		name: bytecode.NewRegexp,
+		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+			Pattern := t.stack.pop().Target.(*RegexpObject).toString()
+			t.stack.push(&Pointer{initRegexpObject(Pattern)})
+		},
+	},
 	bytecode.NewRange: {
 		name: bytecode.NewRange,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
@@ -229,6 +237,13 @@ var builtInActions = map[operationType]*action{
 		name: bytecode.PutSelf,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
 			t.stack.push(&Pointer{cf.self})
+		},
+	},
+	bytecode.PutRegexp: {
+		name: bytecode.PutRegexp,
+		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+			object := initializeObjectFromInstruction(args[0])
+			t.stack.push(&Pointer{object})
 		},
 	},
 	bytecode.PutString: {
