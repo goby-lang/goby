@@ -4,9 +4,8 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"github.com/goby-lang/goby/compiler/bytecode"
+	"github.com/goby-lang/goby/compiler"
 	"github.com/goby-lang/goby/igb"
-	"github.com/goby-lang/goby/compiler/parser"
 	"github.com/goby-lang/goby/vm"
 	"github.com/pkg/profile"
 	"io/ioutil"
@@ -69,11 +68,12 @@ func main() {
 
 	switch fileExt {
 	case "gb", "rb":
-		ast := parser.BuildAST(file)
+		bytecodes, err := compiler.CompileToBytecode(string(file))
 
-		g := bytecode.NewGenerator()
-		g.InitTopLevelScope(ast)
-		bytecodes := g.GenerateByteCode(ast.Statements)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 
 		if !*compileOptionPtr {
 			v := vm.New(dir, args)

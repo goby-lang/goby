@@ -1,11 +1,8 @@
 package vm
 
 import (
+	"github.com/goby-lang/goby/compiler"
 	"testing"
-
-	"github.com/goby-lang/goby/compiler/bytecode"
-	"github.com/goby-lang/goby/compiler/lexer"
-	"github.com/goby-lang/goby/compiler/parser"
 )
 
 func TestVM_REPLExec(t *testing.T) {
@@ -104,15 +101,11 @@ func TestVM_REPLExec(t *testing.T) {
 }
 
 func testEval(t *testing.T, input string) Object {
-	l := lexer.New(input)
-	p := parser.New(l)
-	program, err := p.ParseProgram()
+	bytecodes, err := compiler.CompileToBytecode(input)
+
 	if err != nil {
-		t.Fatal(err.Message)
+		t.Fatal(err.Error())
 	}
-	g := bytecode.NewGenerator()
-	g.InitTopLevelScope(program)
-	bytecodes := g.GenerateByteCode(program.Statements)
 
 	return testExec(bytecodes)
 }

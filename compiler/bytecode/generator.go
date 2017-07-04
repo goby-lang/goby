@@ -42,7 +42,7 @@ func (g *Generator) InitTopLevelScope(program *ast.Program) {
 	g.scope = &scope{program: program, localTable: newLocalTable(0)}
 }
 
-// GenerateByteCode returns compiled bytecodes
+// GenerateByteCode returns compiled instructions in string format
 func (g *Generator) GenerateByteCode(stmts []ast.Statement) string {
 	g.compileStatements(stmts, g.scope, g.scope.localTable)
 	var out bytes.Buffer
@@ -52,6 +52,12 @@ func (g *Generator) GenerateByteCode(stmts []ast.Statement) string {
 	}
 
 	return strings.TrimSpace(removeEmptyLine(out.String()))
+}
+
+// GenerateInstructions returns compiled instructions
+func (g *Generator) GenerateInstructions(stmts []ast.Statement) []*instructionSet {
+	g.compileStatements(stmts, g.scope, g.scope.localTable)
+	return g.instructionSets
 }
 
 func (g *Generator) compileCodeBlock(is *instructionSet, stmt *ast.BlockStatement, scope *scope, table *localTable) {
