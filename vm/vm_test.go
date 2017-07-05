@@ -75,7 +75,6 @@ foo
 }
 
 func testEval(t *testing.T, input string) Object {
-	initClasses()
 	iss, err := compiler.CompileToInstructions(input)
 
 	if err != nil {

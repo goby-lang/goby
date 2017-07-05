@@ -6,10 +6,6 @@ import (
 
 var mainObj *RObject
 
-func init() {
-	initClasses()
-}
-
 func initClasses() {
 	initTopLevelClasses()
 	initNullClass()
