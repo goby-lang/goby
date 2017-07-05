@@ -97,7 +97,7 @@ func (vm *VM) newThread() *thread {
 // ExecInstructions accepts a sequence of bytecodes and use vm to evaluate them.
 func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) {
 	filename := filename(fn)
-	p := newBytecodeParser(filename)
+	p := newInstructionTranslator(filename)
 	p.vm = vm
 	p.transferInstructionSets(sets)
 
@@ -144,7 +144,7 @@ func (vm *VM) InitForREPL() {
 
 // REPLExec executes instructions differently from normal program execution.
 func (vm *VM) REPLExec(sets []*bytecode.InstructionSet) {
-	p := newBytecodeParser("")
+	p := newInstructionTranslator("")
 	p.vm = vm
 	p.transferInstructionSets(sets)
 
