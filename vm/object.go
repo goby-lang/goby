@@ -6,7 +6,7 @@ import (
 
 var mainObj *RObject
 
-func init() {
+func initClasses() {
 	initTopLevelClasses()
 	initNullClass()
 	initBoolClass()

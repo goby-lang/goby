@@ -35,6 +35,8 @@ var standardLibraries = map[string]func(*VM){
 
 // VM represents a stack based virtual machine.
 type VM struct {
+	builtInClasses map[string]*RClass
+
 	mainThread *thread
 	// a map holds pointers of constants
 	constants map[string]*Pointer
@@ -60,6 +62,7 @@ type VM struct {
 
 // New initializes a vm to initialize state and returns it.
 func New(fileDir string, args []string) *VM {
+	initClasses()
 	vm := &VM{args: args}
 	vm.mainThread = vm.newThread()
 
@@ -145,17 +148,6 @@ func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) {
 	vm.blockTables[p.filename] = p.blockTable
 	vm.SetClassISIndexTable(p.filename)
 	vm.SetMethodISIndexTable(p.filename)
-
-	defer func() {
-		if p := recover(); p != nil {
-			switch p.(type) {
-			case errorMessage:
-				return
-			default:
-				panic(p)
-			}
-		}
-	}()
 
 	cf := newCallFrame(p.program)
 	cf.self = mainObj

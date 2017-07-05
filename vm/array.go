@@ -64,6 +64,10 @@ func (a *ArrayObject) length() int {
 
 // pop removes the last element in the array and returns it
 func (a *ArrayObject) pop() Object {
+	if len(a.Elements) < 1 {
+		return NULL
+	}
+
 	value := a.Elements[len(a.Elements)-1]
 	a.Elements = a.Elements[:len(a.Elements)-1]
 	return value
@@ -77,6 +81,10 @@ func (a *ArrayObject) push(objs []Object) *ArrayObject {
 
 // shift removes the first element in the array and returns it
 func (a *ArrayObject) shift() Object {
+	if len(a.Elements) < 1 {
+		return NULL
+	}
+
 	value := a.Elements[0]
 	a.Elements = a.Elements[1:]
 	return value

@@ -139,6 +139,18 @@ func TestModuleStatement(t *testing.T) {
 		Foo.new.bar
 		`,
 			10},
+		{`
+		module Bar
+		  def bar
+		    10
+		  end
+		end
+
+		include Bar
+
+		bar
+		`,
+			10},
 		{`module Foo
 			  def ten
 			    10

@@ -75,14 +75,15 @@ foo
 }
 
 func testEval(t *testing.T, input string) Object {
-	is, err := compiler.CompileToInstructions(input)
+	iss, err := compiler.CompileToInstructions(input)
 
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
 	v := New("./", []string{})
-	v.ExecInstructions(is, "./")
+
+	v.ExecInstructions(iss, "./")
 
 	return v.mainThread.stack.top().Target
 }
@@ -97,7 +98,7 @@ func testIntegerObject(t *testing.T, i int, obj Object, expected int) bool {
 
 		return true
 	case *Error:
-		t.Error(result.Message)
+		t.Fatalf("At test case %d: %s", i, result.Message)
 		return false
 	default:
 		t.Fatalf("At test case %d: object is not Integer. got=%T (%+v).", i, obj, obj)

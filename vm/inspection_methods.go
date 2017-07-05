@@ -18,7 +18,6 @@ func (i *instruction) inspect() string {
 func (is *instructionSet) inspect() string {
 	var out bytes.Buffer
 
-	out.WriteString(fmt.Sprintf("<%s>\n", is.label.name))
 	for _, i := range is.instructions {
 		out.WriteString(i.inspect())
 		out.WriteString("\n")
