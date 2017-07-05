@@ -15,6 +15,7 @@ func initClasses() {
 	initArrayClass()
 	initHashClass()
 	initRangeClass()
+	initRegexpClass()
 	initializeChannelClass()
 	initErrorClasses()
 	initMethodClass()
