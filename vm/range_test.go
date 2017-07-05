@@ -278,3 +278,130 @@ func TestInclude(t *testing.T) {
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
+
+func TestBsearch(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		ary = [0, 4, 7, 10, 12]
+		(0..4).bsearch do |i|
+			ary[i] >= 4
+		end
+		`, 1},
+		{`
+		ary = [0, 4, 7, 10, 12]
+		(2..4).bsearch do |i|
+			ary[i] >= 4
+		end
+		`, 2},
+		{`
+		ary = [0, 4, 7, 10, 12]
+		(0..4).bsearch do |i|
+			ary[i] >= 6
+		end
+		`, 2},
+		{`
+		ary = [0, 4, 7, 10, 12]
+		(0..4).bsearch do |i|
+			ary[i] >= 8
+		end
+		`, 3},
+		{`
+		ary = [0, 4, 7, 10, 12]
+		(0..2).bsearch do |i|
+			ary[i] >= 8
+		end
+		`, NULL},
+		{`
+		ary = [0, 4, 7, 10, 12]
+		(0..4).bsearch do |i|
+			ary[i] >= 100
+		end
+		`, NULL},
+		{`
+		ary = [0, 4, 7, 10, 12]
+		(4..0).bsearch do |i|
+			ary[i] >= 4
+		end
+		`, NULL},
+		{`
+		ary = [0, 4, 7, 10, 12]
+		(-1..3).bsearch do |i|
+			ary[i] >= 4
+		end
+		`, NULL},
+		{`
+		ary = [0, 4, 7, 10, 12]
+		(1..-2).bsearch do |i|
+			ary[i] >= 4
+		end
+		`, NULL},
+		{`
+		ary = [0, 4, 7, 10, 12]
+		(-5..-2).bsearch do |i|
+			ary[i] >= 4
+		end
+		`, NULL},
+		{`
+		ary = [0, 100, 100, 100, 200]
+		(0..4).bsearch do |i|
+			100 - ary[i]
+		end
+		`, 2},
+		{`
+		ary = [0, 100, 100, 100, 200]
+		(0..4).bsearch do |i|
+			200 - ary[i]
+		end
+		`, 4},
+		{`
+		ary = [0, 100, 100, 100, 200]
+		(0..4).bsearch do |i|
+			0 - ary[i]
+		end
+		`, 0},
+		{`
+		ary = [0, 100, 100, 100, 200]
+		(2..4).bsearch do |i|
+			100 - ary[i]
+		end
+		`, 3},
+		{`
+		ary = [0, 100, 100, 100, 200]
+		(2..4).bsearch do |i|
+			0 - ary[i]
+		end
+		`, NULL},
+		{`
+		ary = [0, 100, 100, 100, 200]
+		(-1..4).bsearch do |i|
+			0 - ary[i]
+		end
+		`, NULL},
+		{`
+		ary = [0, 100, 100, 100, 200]
+		(4..0).bsearch do |i|
+			0 - ary[i]
+		end
+		`, NULL},
+		{`
+		ary = [0, 100, 100, 100, 200]
+		(2..-1).bsearch do |i|
+			0 - ary[i]
+		end
+		`, NULL},
+		{`
+		ary = [0, 100, 100, 100, 200]
+		(-5..-1).bsearch do |i|
+			0 - ary[i]
+		end
+		`, NULL},
+	}
+
+	for i, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+	}
+}
