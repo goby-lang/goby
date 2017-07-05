@@ -5,20 +5,11 @@ import (
 	"strings"
 )
 
-var (
-	arrayClass *RArray
-)
-
-// RArray is the built in array class
-type RArray struct {
-	*BaseClass
-}
-
 // ArrayObject represents instance from Array class.
 // An array is a collection of different objects that are ordered and indexed.
 // Elements in an array can belong to any class.
 type ArrayObject struct {
-	Class    *RArray
+	Class    *RClass
 	Elements []Object
 }
 
@@ -90,16 +81,29 @@ func (a *ArrayObject) shift() Object {
 	return value
 }
 
-// initArrayObject returns an array that contains given objects
-func initArrayObject(elements []Object) *ArrayObject {
-	return &ArrayObject{Elements: elements, Class: arrayClass}
+func (vm *VM) initArrayObject(elements []Object) *ArrayObject {
+	return &ArrayObject{Elements: elements, Class: vm.builtInClasses["Array"]}
 }
 
-func initArrayClass() {
+func initArrayClass() *RClass {
 	bc := &BaseClass{Name: "Array", ClassMethods: newEnvironment(), Methods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
-	ac := &RArray{BaseClass: bc}
+	ac := &RClass{BaseClass: bc}
 	ac.setBuiltInMethods(builtinArrayInstanceMethods, false)
-	arrayClass = ac
+	ac.setBuiltInMethods(builtInArrayClassMethods(), true)
+	return ac
+}
+
+func builtInArrayClassMethods() []*BuiltInMethodObject {
+	return []*BuiltInMethodObject{
+		{
+			Name: "new",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					return t.UnsupportedMethodError("#new", receiver)
+				}
+			},
+		},
+	}
 }
 
 var builtinArrayInstanceMethods = []*BuiltInMethodObject{
@@ -353,7 +357,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 					elements[i] = result.Target
 				}
 
-				return initArrayObject(elements)
+				return t.vm.initArrayObject(elements)
 			}
 		},
 	},
@@ -386,7 +390,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 					}
 				}
 
-				return initArrayObject(elements)
+				return t.vm.initArrayObject(elements)
 			}
 		},
 	},
@@ -557,7 +561,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				arr := receiver.(*ArrayObject)
-				rotArr := initArrayObject(arr.Elements)
+				rotArr := t.vm.initArrayObject(arr.Elements)
 
 				rotate := 1
 
@@ -594,7 +598,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 					return newError("Expect index argument to be Integer. got=%T", args[0])
 				}
 
-				return initArrayObject(arr.Elements[:arg.Value])
+				return t.vm.initArrayObject(arr.Elements[:arg.Value])
 			}
 		},
 	},
@@ -615,7 +619,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 				}
 
 				l := len(arr.Elements)
-				return initArrayObject(arr.Elements[l-arg.Value : l])
+				return t.vm.initArrayObject(arr.Elements[l-arg.Value : l])
 			}
 		},
 	},

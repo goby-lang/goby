@@ -46,22 +46,6 @@ func (ro *RangeObject) returnClass() Class {
 	return ro.Class
 }
 
-func (ro *RangeObject) toArray() *ArrayObject {
-	elems := []Object{}
-
-	if ro.Start <= ro.End {
-		for i := ro.Start; i <= ro.End; i++ {
-			elems = append(elems, initIntegerObject(i))
-		}
-	} else {
-		for i := ro.End; i <= ro.Start; i++ {
-			elems = append(elems, initIntegerObject(i))
-		}
-	}
-
-	return initArrayObject(elems)
-}
-
 func initRangeObject(start, end int) *RangeObject {
 	return &RangeObject{Class: rangeClass, Start: start, End: end}
 }
@@ -173,9 +157,21 @@ var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 		Name: "to_a",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
-				ran := receiver.(*RangeObject)
+				ro := receiver.(*RangeObject)
 
-				return ran.toArray()
+				elems := []Object{}
+
+				if ro.Start <= ro.End {
+					for i := ro.Start; i <= ro.End; i++ {
+						elems = append(elems, initIntegerObject(i))
+					}
+				} else {
+					for i := ro.End; i <= ro.Start; i++ {
+						elems = append(elems, initIntegerObject(i))
+					}
+				}
+
+				return t.vm.initArrayObject(elems)
 			}
 		},
 	},

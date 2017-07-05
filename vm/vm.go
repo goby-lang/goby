@@ -65,6 +65,7 @@ func New(fileDir string, args []string) *VM {
 	initClasses()
 	vm := &VM{args: args}
 	vm.mainThread = vm.newThread()
+	vm.builtInClasses = make(map[string]*RClass)
 
 	vm.initConstants()
 	vm.methodISIndexTables = map[filename]*isIndexTable{
@@ -197,7 +198,7 @@ func (vm *VM) initConstants() {
 		stringClass,
 		booleanClass,
 		nullClass,
-		arrayClass,
+		initArrayClass(),
 		hashClass,
 		classClass,
 		methodClass,
@@ -213,9 +214,13 @@ func (vm *VM) initConstants() {
 	for _, c := range builtInClasses {
 		p := &Pointer{Target: c}
 		constants[c.ReturnName()] = p
+
+		if c.ReturnName() == "Array" {
+			vm.builtInClasses[c.ReturnName()] = c.(*RClass)
+		}
 	}
 
-	constants["ARGV"] = &Pointer{Target: initArrayObject(args)}
+	constants["ARGV"] = &Pointer{Target: vm.initArrayObject(args)}
 	objectClass.constants = constants
 	vm.constants["Object"] = &Pointer{objectClass}
 }

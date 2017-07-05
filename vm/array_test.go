@@ -29,7 +29,8 @@ func TestLengthMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
@@ -57,7 +58,8 @@ func TestPopMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
@@ -96,7 +98,8 @@ func TestPushMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
@@ -124,7 +127,8 @@ func TestShiftMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
@@ -141,7 +145,8 @@ func TestShiftMethodFail(t *testing.T) {
 	}
 
 	for _, tt := range testsFail {
-		evaluated := testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		err, ok := evaluated.(*Error)
 		if !ok {
 			t.Errorf("Expect error. got=%T (%+v)", err, err)
@@ -157,7 +162,8 @@ func TestEvalArrayExpression(t *testing.T) {
 	[1, "234", true]
 	`
 
-	evaluated := testEval(t, input)
+	v := initTestVM()
+	evaluated := v.testEval(t, input)
 
 	arr, ok := evaluated.(*ArrayObject)
 	if !ok {
@@ -271,7 +277,8 @@ func TestEvalArrayIndex(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
@@ -291,7 +298,8 @@ func TestEachMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
@@ -311,7 +319,8 @@ func TestEachIndexMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
@@ -319,108 +328,112 @@ func TestEachIndexMethod(t *testing.T) {
 func TestMapMethod(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected *ArrayObject
+		expected []Object
 	}{
 		{`
 		a = [1, 2, 7]
 		a.map do |i|
 			i + 3
 		end
-		`, initArrayObject([]Object{initIntegerObject(4), initIntegerObject(5), initIntegerObject(10)})},
+		`, []Object{initIntegerObject(4), initIntegerObject(5), initIntegerObject(10)}},
 		{`
 		a = [true, false, true, false, true ]
 		a.map do |i|
 			!i
 		end
-		`, initArrayObject([]Object{FALSE, TRUE, FALSE, TRUE, FALSE})},
+		`, []Object{FALSE, TRUE, FALSE, TRUE, FALSE}},
 		{`
 		a = ["1", "sss", "qwe"]
 		a.map do |i|
 			i + "1"
 		end
-		`, initArrayObject([]Object{initStringObject("11"), initStringObject("sss1"), initStringObject("qwe1")})},
+		`, []Object{initStringObject("11"), initStringObject("sss1"), initStringObject("qwe1")}},
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
-		testArrayObject(t, i, evaluated, tt.expected)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		testArrayObject(t, i, evaluated, vm.initArrayObject(tt.expected))
 	}
 }
 
 func TestSelectMethod(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected *ArrayObject
+		expected []Object
 	}{
 		{`
 		a = [1, 2, 3, 4, 5]
 		a.select do |i|
 			i > 3
 		end
-		`, initArrayObject([]Object{initIntegerObject(4), initIntegerObject(5)})},
+		`, []Object{initIntegerObject(4), initIntegerObject(5)}},
 		{`
 		a = [true, false, true, false, true ]
 		a.select do |i|
 			i
 		end
-		`, initArrayObject([]Object{TRUE, TRUE, TRUE})},
+		`, []Object{TRUE, TRUE, TRUE}},
 		{`
 		a = ["test", "not2", "3", "test", "5"]
 		a.select do |i|
 			i == "test"
 		end
-		`, initArrayObject([]Object{initStringObject("test"), initStringObject("test")})},
+		`, []Object{initStringObject("test"), initStringObject("test")}},
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
-		testArrayObject(t, i, evaluated, tt.expected)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		testArrayObject(t, i, evaluated, vm.initArrayObject(tt.expected))
 	}
 }
 
 func TestClearMethod(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected *ArrayObject
+		expected []Object
 	}{
 		{`
 		a = [1, 2, 3]
 		a.clear
-		`, initArrayObject([]Object{})},
+		`, []Object{}},
 		{`
 		a = []
 		a.clear
-		`, initArrayObject([]Object{})},
+		`, []Object{}},
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
-		testArrayObject(t, i, evaluated, tt.expected)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		testArrayObject(t, i, evaluated, vm.initArrayObject(tt.expected))
 	}
 }
 
 func TestConcatMethod(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected *ArrayObject
+		expected []Object
 	}{
 		{`
 		a = [1, 2]
 		a.concat([3], [4])
-		`, initArrayObject([]Object{initIntegerObject(1), initIntegerObject(2), initIntegerObject(3), initIntegerObject(4)})},
+		`, []Object{initIntegerObject(1), initIntegerObject(2), initIntegerObject(3), initIntegerObject(4)}},
 		{`
 		a = []
 		a.concat([1], [2], ["a", "b"], [3], [4])
-		`, initArrayObject([]Object{initIntegerObject(1), initIntegerObject(2), initStringObject("a"), initStringObject("b"), initIntegerObject(3), initIntegerObject(4)})},
+		`, []Object{initIntegerObject(1), initIntegerObject(2), initStringObject("a"), initStringObject("b"), initIntegerObject(3), initIntegerObject(4)}},
 		{`
 		a = [1, 2]
 		a.concat()
-		`, initArrayObject([]Object{initIntegerObject(1), initIntegerObject(2)})},
+		`, []Object{initIntegerObject(1), initIntegerObject(2)}},
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
-		testArrayObject(t, i, evaluated, tt.expected)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		testArrayObject(t, i, evaluated, vm.initArrayObject(tt.expected))
 	}
 }
 
@@ -440,7 +453,8 @@ func TestConcatMethodFail(t *testing.T) {
 	}
 
 	for _, tt := range testsFail {
-		evaluated := testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		err, ok := evaluated.(*Error)
 		if !ok {
 			t.Errorf("Expect error. got=%T (%+v)", err, err)
@@ -491,7 +505,8 @@ func TestCountMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
@@ -508,7 +523,8 @@ func TestCountMethodFail(t *testing.T) {
 	}
 
 	for _, tt := range testsFail {
-		evaluated := testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 
 		err, ok := evaluated.(*Error)
 		if !ok || err.Class.ReturnName() != ArgumentError {
@@ -520,21 +536,22 @@ func TestCountMethodFail(t *testing.T) {
 func TestRotateMethod(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected *ArrayObject
+		expected []Object
 	}{
 		{`
 		a = [1, 2]
 		a.rotate
-		`, initArrayObject([]Object{initIntegerObject(2), initIntegerObject(1)})},
+		`, []Object{initIntegerObject(2), initIntegerObject(1)}},
 		{`
 		a = [1, 2, 3, 4]
 		a.rotate(2)
-		`, initArrayObject([]Object{initIntegerObject(3), initIntegerObject(4), initIntegerObject(1), initIntegerObject(2)})},
+		`, []Object{initIntegerObject(3), initIntegerObject(4), initIntegerObject(1), initIntegerObject(2)}},
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
-		testArrayObject(t, i, evaluated, tt.expected)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		testArrayObject(t, i, evaluated, vm.initArrayObject(tt.expected))
 	}
 }
 
@@ -550,7 +567,8 @@ func TestRotateMethodFail(t *testing.T) {
 	}
 
 	for _, tt := range testsFail {
-		evaluated := testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		err, ok := evaluated.(*Error)
 		if !ok {
 			t.Errorf("Expect error. got=%T (%+v)", err, err)
@@ -573,26 +591,28 @@ func TestFirstMethod(t *testing.T) {
 	}
 
 	for i, tt := range testsInt {
-		evaluated := testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 
 	testsArray := []struct {
 		input    string
-		expected *ArrayObject
+		expected []Object
 	}{
 		{`
 		a = [3, 4, 5, 1, 6]
 		a.first(2)
-		`, initArrayObject([]Object{initIntegerObject(3), initIntegerObject(4)})},
+		`, []Object{initIntegerObject(3), initIntegerObject(4)}},
 		{`
 		a = ["a", "b", "d", "q"]
 		a.first(2)
-		`, initArrayObject([]Object{initStringObject("a"), initStringObject("b")})},
+		`, []Object{initStringObject("a"), initStringObject("b")}},
 	}
 
 	for i, tt := range testsArray {
-		evaluated := testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
@@ -609,7 +629,8 @@ func TestFirstMethodFail(t *testing.T) {
 	}
 
 	for _, tt := range testsFail {
-		evaluated := testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		err, ok := evaluated.(*Error)
 		if !ok {
 			t.Errorf("Expect error. got=%T (%+v)", err, err)
@@ -632,27 +653,29 @@ func TestLastMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 
 	testsArray := []struct {
 		input    string
-		expected *ArrayObject
+		expected []Object
 	}{
 		{`
 		a = [3, 4, 5, 1, 6]
 		a.last(3)
-		`, initArrayObject([]Object{initIntegerObject(5), initIntegerObject(1), initIntegerObject(6)})},
+		`, []Object{initIntegerObject(5), initIntegerObject(1), initIntegerObject(6)}},
 		{`
 		a = ["a", "b", "d", "q"]
 		a.last(2)
-		`, initArrayObject([]Object{initStringObject("d"), initStringObject("q")})},
+		`, []Object{initStringObject("d"), initStringObject("q")}},
 	}
 
 	for i, tt := range testsArray {
-		evaluated := testEval(t, tt.input)
-		checkExpected(t, i, evaluated, tt.expected)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		testArrayObject(t, i, evaluated, vm.initArrayObject(tt.expected))
 	}
 }
 
@@ -668,7 +691,8 @@ func TestLastMethodFail(t *testing.T) {
 	}
 
 	for _, tt := range testsFail {
-		evaluated := testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		err, ok := evaluated.(*Error)
 		if !ok {
 			t.Errorf("Expect error. got=%T (%+v)", err, err)
@@ -677,13 +701,4 @@ func TestLastMethodFail(t *testing.T) {
 			t.Errorf("Expect error message \"%s\". got=\"%s\"", err.Message, tt.expected.Message)
 		}
 	}
-}
-
-func generateArray(length int) *ArrayObject {
-	var elements []Object
-	for i := 1; i <= length; i++ {
-		int := initIntegerObject(i)
-		elements = append(elements, int)
-	}
-	return initArrayObject(elements)
 }

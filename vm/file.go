@@ -248,7 +248,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 					dirObject := initStringObject(dir)
 					fileObject := initStringObject(file)
 
-					return initArrayObject([]Object{dirObject, fileObject})
+					return t.vm.initArrayObject([]Object{dirObject, fileObject})
 				}
 			},
 		},

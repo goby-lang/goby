@@ -74,6 +74,22 @@ foo
 	}
 }
 
+func initTestVM() *VM {
+	return New("./", []string{})
+}
+
+func (v *VM) testEval(t *testing.T, input string) Object {
+	iss, err := compiler.CompileToInstructions(input)
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	v.ExecInstructions(iss, "./")
+
+	return v.mainThread.stack.top().Target
+}
+
 func testEval(t *testing.T, input string) Object {
 	iss, err := compiler.CompileToInstructions(input)
 
