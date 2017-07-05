@@ -107,12 +107,16 @@ func testIntegerObject(t *testing.T, i int, obj Object, expected int) bool {
 }
 
 func testNullObject(t *testing.T, i int, obj Object) bool {
-	if obj != NULL {
+	switch result := obj.(type) {
+	case *NullObject:
+		return true
+	case *Error:
+		t.Fatalf("At test case %d: %s", i, result.Message)
+		return false
+	default:
 		t.Fatalf("At test case %d: object is not NULL. got=%T (%+v)", i, obj, obj)
 		return false
 	}
-
-	return true
 }
 
 func testStringObject(t *testing.T, i int, obj Object, expected string) bool {
@@ -125,7 +129,7 @@ func testStringObject(t *testing.T, i int, obj Object, expected string) bool {
 
 		return true
 	case *Error:
-		t.Error(result.Message)
+		t.Fatalf(result.Message)
 		return false
 	default:
 		t.Fatalf("At test case %d: object is not String. got=%T (%+v).", i, obj, obj)
@@ -143,7 +147,7 @@ func testBooleanObject(t *testing.T, i int, obj Object, expected bool) bool {
 
 		return true
 	case *Error:
-		t.Error(result.Message)
+		t.Fatalf(result.Message)
 		return false
 	default:
 		t.Fatalf("At test case %d: object is not Boolean. got=%T (%+v).", i, obj, obj)
@@ -186,6 +190,11 @@ func testArrayObject(t *testing.T, index int, obj Object, expected *ArrayObject)
 }
 
 func checkExpected(t *testing.T, i int, evaluated Object, expected interface{}) {
+	if isError(evaluated) {
+		t.Fatalf("At test case %d: %s", i, evaluated.toString())
+		return
+	}
+
 	switch expected := expected.(type) {
 	case int:
 		testIntegerObject(t, i, evaluated, expected)

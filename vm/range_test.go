@@ -313,37 +313,37 @@ func TestBsearch(t *testing.T) {
 		(0..2).bsearch do |i|
 			ary[i] >= 8
 		end
-		`, NULL},
+		`, nil},
 		{`
 		ary = [0, 4, 7, 10, 12]
 		(0..4).bsearch do |i|
 			ary[i] >= 100
 		end
-		`, NULL},
+		`, nil},
 		{`
 		ary = [0, 4, 7, 10, 12]
 		(4..0).bsearch do |i|
 			ary[i] >= 4
 		end
-		`, NULL},
+		`, nil},
 		{`
 		ary = [0, 4, 7, 10, 12]
 		(-1..3).bsearch do |i|
 			ary[i] >= 4
 		end
-		`, NULL},
+		`, nil},
 		{`
 		ary = [0, 4, 7, 10, 12]
 		(1..-2).bsearch do |i|
 			ary[i] >= 4
 		end
-		`, NULL},
+		`, nil},
 		{`
 		ary = [0, 4, 7, 10, 12]
 		(-5..-2).bsearch do |i|
 			ary[i] >= 4
 		end
-		`, NULL},
+		`, nil},
 		{`
 		ary = [0, 100, 100, 100, 200]
 		(0..4).bsearch do |i|
@@ -373,31 +373,31 @@ func TestBsearch(t *testing.T) {
 		(2..4).bsearch do |i|
 			0 - ary[i]
 		end
-		`, NULL},
+		`, nil},
 		{`
 		ary = [0, 100, 100, 100, 200]
 		(-1..4).bsearch do |i|
 			0 - ary[i]
 		end
-		`, NULL},
+		`, nil},
 		{`
 		ary = [0, 100, 100, 100, 200]
 		(4..0).bsearch do |i|
 			0 - ary[i]
 		end
-		`, NULL},
+		`, nil},
 		{`
 		ary = [0, 100, 100, 100, 200]
 		(2..-1).bsearch do |i|
 			0 - ary[i]
 		end
-		`, NULL},
+		`, nil},
 		{`
 		ary = [0, 100, 100, 100, 200]
 		(-5..-1).bsearch do |i|
 			0 - ary[i]
 		end
-		`, NULL},
+		`, nil},
 	}
 
 	for i, tt := range tests {
