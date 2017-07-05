@@ -1,6 +1,8 @@
 package vm
 
-import "fmt"
+import (
+	"fmt"
+)
 
 var (
 	rangeClass *RClass
@@ -301,108 +303,6 @@ var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 					return TRUE
 				}
 				return FALSE
-			}
-		},
-	},
-	{
-		// By using binary search, finds a value in range which meets the given condition in O(log n)
-		// where n is the size of the range.
-		//
-		// You can use this method in two use cases: a find-minimum mode and a find-any mode. In either
-		// case, the elements of the range must be monotone (or sorted) with respect to the block.
-		//
-		// In find-minimum mode (this is a good choice for typical use case), the block must return true
-		// or false, and there must be a value x so that:
-		//
-		// - the block returns false for any value which is less than x
-		// - the block returns true for any value which is greater than or equal to x.
-		//
-		// If x is within the range, this method returns the value x. Otherwise, it returns nil.
-		//
-		// ```ruby
-		// ary = [0, 4, 7, 10, 12]
-		// (0..4).bsearch {|i| ary[i] >= 4 } #=> 1
-		// (0..4).bsearch {|i| ary[i] >= 6 } #=> 2
-		// (0..4).bsearch {|i| ary[i] >= 8 } #=> 3
-		// (0..4).bsearch {|i| ary[i] >= 100 } #=> nil
-		// ```
-		//
-		// In find-any mode , the block must return a number, and there must be two values x and y
-		// (x <= y) so that:
-		//
-		// - the block returns a positive number for v if v < x
-		// - the block returns zero for v if x <= v < y
-		// - the block returns a negative number for v if y <= v
-		//
-		// This method returns any value which is within the intersection of the given range and x…y
-		// (if any). If there is no value that satisfies the condition, it returns nil.
-		//
-		// ```ruby
-		// ary = [0, 100, 100, 100, 200]
-		// (0..4).bsearch {|i| 100 - ary[i] } #=> 1, 2 or 3
-		// (0..4).bsearch {|i| 300 - ary[i] } #=> nil
-		// (0..4).bsearch {|i|  50 - ary[i] } #=> nil
-		// ```
-		//
-		// @return [Integer]
-		Name: "bsearch",
-		Fn: func(receiver Object) builtinMethodBody {
-			return func(t *thread, args []Object, blockFrame *callFrame) Object {
-				ran := receiver.(*RangeObject)
-
-				if ran.Start > ran.End || ran.Start < 0 {
-					return NULL
-				}
-
-				start := ran.Start
-				end := ran.End
-				var mid int
-				pivot := -1
-
-				for {
-					mid = (start + end) / 2
-					if (start+end)%2 != 0 {
-						mid++
-					}
-
-					result := t.builtInMethodYield(blockFrame, initIntegerObject(mid))
-
-					switch r := result.Target.(type) {
-					case *BooleanObject:
-						if r.Value {
-							pivot = mid
-						}
-
-						if start >= end {
-							if pivot == -1 {
-								return NULL
-							}
-							return initIntegerObject(pivot)
-						}
-
-						if r.Value {
-							end = mid - 1
-						} else {
-							start = mid + 1
-						}
-					case *IntegerObject:
-						if r.Value == 0 {
-							return initIntegerObject(mid)
-						}
-
-						if start == end {
-							return NULL
-						}
-
-						if r.Value > 0 {
-							start = mid + 1
-						} else {
-							end = mid - 1
-						}
-					default:
-						return initErrorObject(TypeErrorClass, "Expect Integer or Boolean type. got=%v", r)
-					}
-				}
 			}
 		},
 	},
