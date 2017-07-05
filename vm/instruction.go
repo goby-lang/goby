@@ -296,9 +296,9 @@ var builtInActions = map[operationType]*action{
 			subject := strings.Split(args[0].(string), ":")
 			subjectType, subjectName := subject[0], subject[1]
 
-			classPtr, ok := cf.lookupConstant(subjectName)
+			classPtr := cf.lookupConstant(subjectName)
 
-			if !ok {
+			if classPtr == nil {
 				class := initializeClass(subjectName, subjectType == "module")
 				classPtr = cf.storeConstant(class.Name, class)
 

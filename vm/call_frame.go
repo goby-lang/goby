@@ -84,24 +84,19 @@ func (cf *callFrame) storeConstant(constName string, constant interface{}) *Poin
 	return ptr
 }
 
-func (cf *callFrame) lookupConstant(constName string) (*Pointer, bool) {
+func (cf *callFrame) lookupConstant(constName string) *Pointer {
+	var c *Pointer
+
 	switch scope := cf.self.(type) {
-	case *RClass:
-		p, ok := scope.constants[constName]
+	case Class:
+		c = scope.lookupConstant(constName, true)
 
-		if ok {
-			return p, true
-		}
 	default:
-		c := cf.self.returnClass().(*RClass)
-		p, ok := c.constants[constName]
-
-		if ok {
-			return p, true
-		}
+		scopeClass := scope.returnClass().(*RClass)
+		c = scopeClass.lookupConstant(constName, true)
 	}
 
-	return nil, false
+	return c
 }
 
 func (cfs *callFrameStack) push(cf *callFrame) {

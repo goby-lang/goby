@@ -329,8 +329,7 @@ func (vm *VM) loadConstant(name string, isModule bool) *RClass {
 	return c
 }
 
-func (vm *VM) lookupConstant(cf *callFrame, constName string) *Pointer {
-	var constant *Pointer
+func (vm *VM) lookupConstant(cf *callFrame, constName string) (constant *Pointer) {
 	var namespace Class
 	var hasNamespace bool
 
@@ -343,6 +342,7 @@ func (vm *VM) lookupConstant(cf *callFrame, constName string) *Pointer {
 	}
 
 	if hasNamespace {
+		// pop namespace since we don't need it anymore
 		if namespace != cf.self {
 			vm.mainThread.stack.pop()
 		}
@@ -350,27 +350,17 @@ func (vm *VM) lookupConstant(cf *callFrame, constName string) *Pointer {
 		constant = namespace.lookupConstant(constName, true)
 
 		if constant != nil {
-			return constant
+			return
 		}
 	}
 
-	switch s := cf.self.(type) {
-	case Class:
-		constant = s.lookupConstant(constName, true)
-		if constant != nil {
-			return constant
-		}
-	default:
-		c := s.returnClass()
+	constant = cf.lookupConstant(constName)
 
-		constant = c.lookupConstant(constName, true)
-		if constant != nil {
-			return constant
-		}
+	if constant == nil {
+		constant = vm.constants[constName]
 	}
 
-	constant = vm.constants[constName]
-	return constant
+	return
 }
 
 func (vm *VM) execGobyLib(libName string) {
