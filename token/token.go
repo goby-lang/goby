@@ -20,7 +20,7 @@ const (
 	InstanceVariable = "INSTANCE_VAR"
 	Int              = "INT"
 	String           = "STRING"
-	Regex            = "REGEX"
+	Regexp           = "REGEX"
 	Comment          = "COMMENT"
 
 	Assign   = "="

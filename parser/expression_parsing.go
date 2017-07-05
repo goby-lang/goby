@@ -11,7 +11,7 @@ import (
 var arguments = map[token.Type]bool{
 	token.Int:              true,
 	token.String:           true,
-	token.Regex:            true,
+	token.Regexp:           true,
 	token.True:             true,
 	token.False:            true,
 	token.Null:             true,
@@ -509,7 +509,7 @@ func (p *Parser) parseRangeExpression(left ast.Expression) ast.Expression {
 	return exp
 }
 
-func (p *Parser) parseRegexLiteral() ast.Expression {
+func (p *Parser) parseRegexpLiteral() ast.Expression {
 	lit := &ast.RegexLiteral{Token: p.curToken}
 	lit.Regexp2 = p.curToken.Literal
 
