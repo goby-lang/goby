@@ -515,17 +515,18 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 1 {
-						return &Error{Message: "Expect 1 arguments. got=%d" + string(len(args))}
+						return initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
 					str := receiver.(*StringObject).Value
 					i := args[0]
 					index, ok := i.(*IntegerObject)
-					indexValue := index.Value
 
 					if !ok {
 						return initErrorObject(TypeErrorClass, "Expect Integer. got=%T (%+v)", args[0], args[0])
 					}
+
+					indexValue := index.Value
 
 					if indexValue < 0 {
 						if -indexValue > len(str) {
@@ -546,6 +547,9 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 			// It will raise error if the index is not Integer type or the index value is out of
 			// range of the string length
 			//
+			// Currently only support assign string type value
+			// TODO: Support to assign type which have to_s method
+			//
 			// ```ruby
 			// "Ruby"[1] = "oo" # => "Rooby"
 			// "Go"[2] = "by"   # => "Goby"
@@ -561,35 +565,61 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 					str := receiver.(*StringObject).Value
 					i := args[0]
 					index, ok := i.(*IntegerObject)
-					indexValue := index.Value
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect Integer. got=%T (%+v)", args[0], args[0])
+						return initErrorObject(TypeErrorClass, "Expect index is Integer type value. got=%T", i)
 					}
 
+					indexValue := index.Value
 					strLength := len(str)
 
 					if strLength < indexValue {
-						return newError("Index value out of range. got=%T", i)
+						return initErrorObject(ArgumentErrorClass, "Index value out of range. got=%v", strconv.Itoa(indexValue))
 					}
 
-					replaceStr := args[1].(*StringObject).Value
+					r := args[1]
+					replaceStr, ok := r.(*StringObject)
+
+					if !ok {
+						return initErrorObject(TypeErrorClass, "Expect to assign String type value. got=%T", r)
+					}
+					replaceStrValue := replaceStr.Value
 
 					// Negative Index Case
 					if indexValue < 0 {
 						if -indexValue > strLength {
-							return newError("Index value out of range. got=%T", i)
+							return initErrorObject(ArgumentErrorClass, "Index value out of range. got=%v", strconv.Itoa(indexValue))
 						}
 
-						result := str[:strLength+indexValue] + replaceStr + str[strLength+indexValue+1:]
+						result := str[:strLength+indexValue] + replaceStrValue + str[strLength+indexValue+1:]
 						return t.vm.initStringObject(result)
 					}
 
 					if strLength == indexValue {
-						return t.vm.initStringObject(str + replaceStr)
+						return t.vm.initStringObject(str + replaceStrValue)
 					}
-					result := str[:indexValue] + replaceStr + str[indexValue+1:]
+					result := str[:indexValue] + replaceStrValue + str[indexValue+1:]
 					return t.vm.initStringObject(result)
+				}
+			},
+		},
+		{
+			// Returns the integer that count the string chars as UTF-8
+			//
+			// ```ruby
+			// "abcde".count        # => 5
+			// "哈囉！世界！".count   # => 6
+			// "Hello\nWorld".count # => 11
+			// ```
+			//
+			// @return [Integer]
+			Name: "count",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					str := receiver.(*StringObject).Value
+
+					return t.vm.initIntegerObject(utf8.RuneCountInString(str))
 				}
 			},
 		},
@@ -615,22 +645,27 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
-			// Returns the integer that count the string chars as UTF-8
+			// Returns true if receiver string is equal to argument string
 			//
 			// ```ruby
-			// "abcde".count        # => 5
-			// "哈囉！世界！".count   # => 6
-			// "Hello\nWorld".count # => 11
+			// "Hello".eql("Hello") # => true
+			// "Hello".eql("World") # => false
 			// ```
 			//
-			// @return [Integer]
-			Name: "count",
+			// @return [Boolean]
+			Name: "eql",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					str := receiver.(*StringObject).Value
+					compareStr, ok := args[0].(*StringObject)
 
-					return t.vm.initIntegerObject(utf8.RuneCountInString(str))
+					if !ok {
+						return FALSE
+					} else if compareStr.Value == str {
+						return TRUE
+					}
+					return FALSE
 				}
 			},
 		},
@@ -657,32 +692,6 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
-			// Returns true if receiver string is equal to argument string
-			//
-			// ```ruby
-			// "Hello".eql("Hello") # => true
-			// "Hello".eql("World") # => false
-			// ```
-			// @return [Boolean]
-			Name: "eql",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					str := receiver.(*StringObject).Value
-					compareStr, ok := args[0].(*StringObject)
-
-					if !ok {
-						return wrongTypeError(receiver.returnClass())
-					}
-
-					if compareStr.Value == str {
-						return TRUE
-					}
-					return FALSE
-				}
-			},
-		},
-		{
 			// Returns true if receiver string start with the argument string
 			//
 			// ```ruby
@@ -701,8 +710,14 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 						return wrongTypeError(receiver.returnClass())
 					}
 
-					index := len(compareStr.Value) - 1
-					if compareStr.Value == str[:index] {
+					compareStrValue := compareStr.Value
+					compareStrLength := len(compareStrValue)
+
+					if compareStrLength > len(str) {
+						return FALSE
+					}
+
+					if compareStrValue == str[:compareStrLength] {
 						return TRUE
 					}
 					return FALSE
@@ -728,8 +743,14 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 						return wrongTypeError(receiver.returnClass())
 					}
 
-					index := len(compareStr.Value)
-					if compareStr.Value == str[index:] {
+					compareStrValue := compareStr.Value
+					compareStrLength := len(compareStrValue)
+
+					if compareStrLength > len(str) {
+						return FALSE
+					}
+
+					if compareStrValue == str[len(str)-compareStrLength:] {
 						return TRUE
 					}
 					return FALSE
@@ -855,11 +876,12 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 
 					l := args[0]
 					strLength, ok := l.(*IntegerObject)
-					strLengthValue := strLength.Value
 
 					if !ok {
 						return initErrorObject(TypeErrorClass, "Expect justify width is Integer type. got=%T", l)
 					}
+
+					strLengthValue := strLength.Value
 
 					var padStringValue string
 					if len(args) == 1 {
@@ -869,19 +891,18 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 						padString, ok := p.(*StringObject)
 
 						if !ok {
-							return newError("Expect second argument is String type. got=%T", p)
+							return initErrorObject(TypeErrorClass, "Expect padding string is String type. got=%T", p)
 						}
 
 						padStringValue = padString.Value
-
-						if strLengthValue > len(str) {
-							for i := len(str); i < strLengthValue; i += len(padStringValue) {
-								str += padStringValue
-							}
-							str = str[:strLengthValue]
-						}
 					}
 
+					if strLengthValue > len(str) {
+						for i := len(str); i < strLengthValue; i += len(padStringValue) {
+							str += padStringValue
+						}
+						str = str[:strLengthValue]
+					}
 					return t.vm.initStringObject(str)
 				}
 			},
@@ -905,14 +926,14 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					str := receiver.(*StringObject).Value
-
 					l := args[0]
 					strLength, ok := l.(*IntegerObject)
-					strLengthValue := strLength.Value
 
 					if !ok {
 						return initErrorObject(TypeErrorClass, "Expect justify width is Integer type. got=%T", l)
 					}
+
+					strLengthValue := strLength.Value
 
 					var padStringValue string
 					if len(args) == 1 {
@@ -922,7 +943,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 						padString, ok := p.(*StringObject)
 
 						if !ok {
-							return newError("Expect second argument is String type. got=%T", p)
+							return initErrorObject(TypeErrorClass, "Expect padding string is String type. got=%T", p)
 						}
 
 						padStringValue = padString.Value
@@ -963,12 +984,12 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 					for {
 						str = strings.Trim(str, " ")
 
-						if strings.HasPrefix(str, "\\n") || strings.HasPrefix(str, "\\t") || strings.HasPrefix(str, "\\r") {
-							str = str[2:]
+						if strings.HasPrefix(str, "\n") || strings.HasPrefix(str, "\t") || strings.HasPrefix(str, "\r") || strings.HasPrefix(str, "\v") {
+							str = str[1:]
 							continue
 						}
-						if strings.HasSuffix(str, "\\n") || strings.HasSuffix(str, "\\t") || strings.HasSuffix(str, "\\r") {
-							str = str[:len(str)-4]
+						if strings.HasSuffix(str, "\n") || strings.HasSuffix(str, "\t") || strings.HasSuffix(str, "\r") || strings.HasSuffix(str, "\v") {
+							str = str[:len(str)-2]
 							continue
 						}
 						break
@@ -1016,15 +1037,25 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 			// ```ruby
 			// "Hello World".slice(1..6)    # => "ello W"
 			// "1234567890".slice(6..1)     # => ""
+			// "1234567890".slice(11..1)    # => nil
+			// "1234567890".slice(11..-1)   # => nil
 			// "1234567890".slice(-10..1)   # => "12"
+			// "1234567890".slice(-5..1)    # => ""
 			// "1234567890".slice(-10..-1)  # => "1234567890"
 			// "1234567890".slice(-10..-11) # => ""
 			// "1234567890".slice(1..-1)    # => "234567890"
 			// "1234567890".slice(1..-1234) # => ""
 			// "1234567890".slice(-11..5)   # => nil
+			// "1234567890".slice(-10..-5)  # => "123456"
+			// "1234567890".slice(-5..-10)  # => ""
 			// "1234567890".slice(-11..-12) # => nil
+			// "1234567890".slice(-10..-12) # => ""
 			// "Hello World".slice(4)       # => "o"
 			// "Hello\nWorld".slice(6)      # => "\n"
+			// "Hello World".slice(-3)      # => "r"
+			// "Hello World".slice(-11)     # => "H"
+			// "Hello World".slice(-12)     # => nil
+			// "Hello World".slice(11)      # => nil
 			// ```
 			//
 			// @return [String]
@@ -1045,7 +1076,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 							} else if ran.Start > ran.End {
 								return t.vm.initStringObject("")
 							}
-							return t.vm.initStringObject(str[ran.Start: ran.End+1])
+							return t.vm.initStringObject(str[ran.Start : ran.End+1])
 						case ran.Start < 0 && ran.End >= 0:
 							positiveStart := strLength + ran.Start
 							if -ran.Start > strLength {
@@ -1053,7 +1084,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 							} else if positiveStart > ran.End {
 								return t.vm.initStringObject("")
 							}
-							return t.vm.initStringObject(str[positiveStart: ran.End+1])
+							return t.vm.initStringObject(str[positiveStart : ran.End+1])
 						case ran.Start >= 0 && ran.End < 0:
 							positiveEnd := strLength + ran.End
 							if ran.Start > strLength {
@@ -1061,18 +1092,16 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 							} else if positiveEnd < 0 || ran.Start > positiveEnd {
 								return t.vm.initStringObject("")
 							}
-							return t.vm.initStringObject(str[ran.Start: positiveEnd+1])
-						case ran.Start < 0 && ran.End < 0:
+							return t.vm.initStringObject(str[ran.Start : positiveEnd+1])
+						default:
 							positiveStart := strLength + ran.Start
 							positiveEnd := strLength + ran.End
-							if positiveStart > strLength {
+							if positiveStart < 0 {
 								return NULL
 							} else if positiveStart > positiveEnd {
 								return t.vm.initStringObject("")
 							}
-							return t.vm.initStringObject(str[positiveStart: positiveEnd+1])
-						default:
-							return NULL
+							return t.vm.initStringObject(str[positiveStart : positiveEnd+1])
 						}
 
 					case *IntegerObject:
@@ -1083,13 +1112,13 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 							}
 							return t.vm.initStringObject(string([]rune(str)[strLength+intValue]))
 						}
-						if intValue > strLength {
+						if intValue > strLength-1 {
 							return NULL
 						}
 						return t.vm.initStringObject(string([]rune(str)[intValue]))
 
 					default:
-						return newError("Expect first argument is Range or Integer type. got=%T", args[0])
+						return initErrorObject(ArgumentErrorClass, "Expect slice range is Range or Integer type. got=%T", args[0])
 					}
 				}
 			},
@@ -1119,18 +1148,47 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 				}
 			},
 		},
-		//{
-		//	// Doc
-		//	Name: "gsub",
-		//	Fn: func(receiver Object) builtinMethodBody {
-		//		return func(t *thread, args []Object, blockFrame *callFrame) Object {
-		//
-		//			str := receiver.(*StringObject).Value
-		//
-		//			return initStringObject(str)
-		//		}
-		//	},
-		//}
+		{
+			// TODO: Implement String#gsub When RegexObject Implemented
+			// Returns a copy of str with the all occurrences of pattern substituted for the second argument.
+			// The pattern is typically a String or Regexp (Not implemented yet); if given as a String, any
+			// regular expression metacharacters it contains will be interpreted literally, e.g. '\\d' will
+			// match a backslash followed by ‘d’, instead of a digit.
+			//
+			// Currently only support string version of String#gsub.
+			//
+			// ```ruby
+			// "Ruby Lang".gsub("Ru", "Go") # => "Goby Lang"
+			// ```
+			//
+			// @return [String]
+			Name: "gsub",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 2 {
+						return initErrorObject(ArgumentErrorClass, "Expect to have 2 arguments. got=%v", len(args))
+					}
+
+					str := receiver.(*StringObject).Value
+
+					p := args[0]
+					pattern, ok := p.(*StringObject)
+
+					if !ok {
+						return initErrorObject(TypeErrorClass, "Expect pattern is String type. got=%T", p)
+					}
+
+					r := args[1]
+					replacement, ok := r.(*StringObject)
+
+					if !ok {
+						return initErrorObject(TypeErrorClass, "Expect replacement is String type. got=%T", r)
+					}
+
+					return t.vm.initStringObject(strings.Replace(str, pattern.Value, replacement.Value, -1))
+				}
+			},
+		},
 	}
 }
 
