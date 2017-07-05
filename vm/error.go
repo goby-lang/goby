@@ -4,6 +4,7 @@ import (
 	"fmt"
 )
 
+// Nothing to describe here, just error classes
 var (
 	// UndefinedMethodErrorClass ...
 	UndefinedMethodErrorClass *RClass
@@ -11,10 +12,11 @@ var (
 	ArgumentErrorClass *RClass
 	// TypeErrorClass ...
 	TypeErrorClass *RClass
-	// UnsupportedMethodClass
+	// UnsupportedMethodClass ...
 	UnsupportedMethodClass *RClass
-	// NameErrorClass
-	NameErrorClass     *RClass
+	// NameErrorClass ...
+	NameErrorClass *RClass
+	// InternalErrorClass ...
 	InternalErrorClass *RClass
 )
 
@@ -28,7 +30,8 @@ const (
 	// UnsupportedMethodError describes the error type in string
 	UnsupportedMethodError = "UnsupportedMethodError"
 	// NameError describes constant related errors
-	NameError     = "NameError"
+	NameError = "NameError"
+	// InternalError is the default error type
 	InternalError = "InternalError"
 )
 
