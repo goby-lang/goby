@@ -5,59 +5,128 @@ import (
 )
 
 func TestLengthMethod(t *testing.T) {
-	expected := 5
-	array := generateArray(expected)
-	m := getBuiltInMethod(t, array, "length")
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{
+			`
+			[1, 2, 3].length
+			`, 3},
+		{
+			`
+			[nil].length
+			`, 1},
+		{
+			`
+			[].length
+			`, 0},
+		{
+			`
+			a = [-10, "123", [1,2,3], 1, 2, 3]
+			a.length
+			`, 6},
+	}
 
-	result := m(nil, nil, nil).(*IntegerObject).Value
-
-	if int(result) != expected {
-		t.Fatalf("Expect length method returns array's length: %d. got=%d", expected, result)
+	for i, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
 func TestPopMethod(t *testing.T) {
-	array := generateArray(5)
-	m := getBuiltInMethod(t, array, "pop")
-	last := m(nil, nil, nil).(*IntegerObject).Value
-
-	if int(last) != 5 {
-		t.Fatalf("Expect pop to return array's last  got=%d", last)
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			`
+			a = [1, 2, 3].pop
+			a
+			`, 3},
+		{
+			`
+			a = [1, 2, 3]
+			a.pop
+			a.length
+			`, 2},
+		{
+			`
+			[].pop
+		`, nil},
 	}
 
-	if array.length() != 4 {
-		t.Fatalf("Expect pop remove last elements from array. got=%d", array.length())
+	for i, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
 func TestPushMethod(t *testing.T) {
-	array := generateArray(5)
-	m := getBuiltInMethod(t, array, "push")
-
-	six := initIntegerObject(6)
-	seven := initIntegerObject(7)
-	m(nil, []Object{six, seven}, nil)
-
-	if array.length() != 7 {
-		t.Fatalf("Expect array's length to be 7(5 + 2). got=%d", array.length())
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			`
+			a = [1, 2, 3]
+			a.push("test")
+			a[3]
+			`, "test"},
+		{
+			`
+			a = [1, 2, 3]
+			a.push("test")
+			a.length
+			`, 4},
+		{
+			`
+			a = []
+			a.push(nil)
+			a[0]
+			`, nil},
+		{
+			`
+			a = []
+			a.push("foo")
+			a.push(1)
+			a.push(234)
+			a[0]
+			`, "foo"},
 	}
 
-	last := array.Elements[array.length()-1].(*IntegerObject).Value
-
-	if int(last) != 7 {
-		t.Fatalf("Expect last object to be 7. got=%d", last)
+	for i, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
 
 func TestShiftMethod(t *testing.T) {
-	array := initArrayObject([]Object{initIntegerObject(1), initIntegerObject(2), initIntegerObject(3), initIntegerObject(4)})
-	second := initArrayObject([]Object{initIntegerObject(2), initIntegerObject(3), initIntegerObject(4)})
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			`
+			a = [1, 2, 3].shift
+			a
+			`, 1},
+		{
+			`
+			a = [1, 2, 3]
+			a.pop
+			a.length
+			`, 2},
+		{
+			`
+				[].shift
+			`, nil},
+	}
 
-	m := getBuiltInMethod(t, array, "shift")
-	first := m(nil, nil, nil)
-
-	testArrayObject(t, 0, array, second)
-	testIntegerObject(t, 0, first, 1)
+	for i, tt := range tests {
+		evaluated := testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+	}
 }
 
 func TestShiftMethodFail(t *testing.T) {
