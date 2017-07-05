@@ -3,6 +3,7 @@ package vm
 import (
 	"github.com/goby-lang/goby/compiler"
 	"testing"
+	"fmt"
 )
 
 func TestVM_REPLExec(t *testing.T) {
@@ -101,7 +102,9 @@ func testEval(t *testing.T, input string) Object {
 
 	v.ExecInstructions(iss, "./")
 
-	return v.mainThread.stack.top().Target
+	r := v.mainThread.stack.top()
+
+	return r.Target
 }
 
 func testIntegerObject(t *testing.T, i int, obj Object, expected int) bool {
