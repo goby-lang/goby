@@ -18,7 +18,6 @@ import (
 const Version string = "0.0.8"
 
 func main() {
-	compileOptionPtr := flag.Bool("c", false, "Compile to bytecode")
 	profileOptionPtr := flag.Bool("p", false, "Profile program execution")
 	versionOptionPtr := flag.Bool("v", false, "Show current Goby version")
 	interactiveOptionPtr := flag.Bool("i", false, "Run interactive goby")
@@ -63,23 +62,11 @@ func main() {
 
 	args := flag.Args()[1:]
 
-	dir, filename, fileExt := extractFileInfo(filepath)
+	dir, _, fileExt := extractFileInfo(filepath)
 	file := readFile(filepath)
 
 	switch fileExt {
 	case "gb", "rb":
-
-		if *compileOptionPtr {
-			bytecodes, err := compiler.CompileToBytecode(string(file))
-
-			if err != nil {
-				fmt.Println(err.Error())
-				return
-			}
-			writeByteCode(bytecodes, dir, filename)
-			return
-		}
-
 		instructionSets, err := compiler.CompileToInstructions(string(file))
 
 		if err != nil {
@@ -89,10 +76,6 @@ func main() {
 
 		v := vm.New(dir, args)
 		v.ExecInstructions(instructionSets, filepath)
-	case "gbbc":
-		bytecodes := string(file)
-		v := vm.New(dir, args)
-		v.ExecBytecodes(bytecodes, filepath)
 	default:
 		fmt.Printf("Unknown file extension: %s", fileExt)
 	}
