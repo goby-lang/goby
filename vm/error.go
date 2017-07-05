@@ -14,7 +14,7 @@ var (
 	// UnsupportedMethodClass
 	UnsupportedMethodClass *RClass
 	// NameErrorClass
-	NameErrorClass *RClass
+	NameErrorClass     *RClass
 	InternalErrorClass *RClass
 )
 
@@ -28,7 +28,7 @@ const (
 	// UnsupportedMethodError describes the error type in string
 	UnsupportedMethodError = "UnsupportedMethodError"
 	// NameError describes constant related errors
-	NameError = "NameError"
+	NameError     = "NameError"
 	InternalError = "InternalError"
 )
 

@@ -367,7 +367,7 @@ var builtinCommonInstanceMethods = []*BuiltInMethodObject{
 				file, err := ioutil.ReadFile(filepath + ".gb")
 
 				if err != nil {
-					return initErrorObject(InternalErrorClass,  err.Error())
+					return initErrorObject(InternalErrorClass, err.Error())
 				}
 
 				t.vm.execRequiredFile(filepath, file)
@@ -755,7 +755,7 @@ var builtinClassClassMethods = []*BuiltInMethodObject{
 				}
 
 				if class.pseudoSuperClass.isModule {
-					return initErrorObject(InternalErrorClass, "Module inheritance is not supported: %s",  class.pseudoSuperClass.Name)
+					return initErrorObject(InternalErrorClass, "Module inheritance is not supported: %s", class.pseudoSuperClass.Name)
 				}
 
 				instance := class.initializeInstance()
