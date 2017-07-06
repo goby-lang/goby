@@ -7,13 +7,8 @@ import (
 	"time"
 )
 
-var (
-	objectClass *RClass
-	classClass  *RClass
-)
-
-func initTopLevelClasses() {
-	classClass = &RClass{
+func initClassClass() *RClass {
+	classClass := &RClass{
 		BaseClass: &BaseClass{
 			Name:         "Class",
 			Methods:      newEnvironment(),
@@ -26,10 +21,14 @@ func initTopLevelClasses() {
 	classClass.setBuiltInMethods(builtinCommonInstanceMethods, true)
 	classClass.setBuiltInMethods(builtinClassClassMethods, true)
 
-	objectClass = &RClass{
+	return classClass
+}
+
+func initObjectClass(c *RClass) *RClass {
+	objectClass := &RClass{
 		BaseClass: &BaseClass{
 			Name:         "Object",
-			Class:        classClass,
+			Class:        c,
 			ClassMethods: newEnvironment(),
 			Methods:      newEnvironment(),
 			constants:    make(map[string]*Pointer),
@@ -37,24 +36,32 @@ func initTopLevelClasses() {
 	}
 
 	objectClass.setBuiltInMethods(builtinCommonInstanceMethods, false)
+
+	return objectClass
 }
 
 // initializeClass initializes and returns a class instance with given class name
-func initializeClass(name string, isModule bool) *RClass {
-	class := &RClass{
-		BaseClass: &BaseClass{
-			Name:             name,
-			Methods:          newEnvironment(),
-			ClassMethods:     newEnvironment(),
-			Class:            classClass,
-			pseudoSuperClass: objectClass,
-			superClass:       objectClass,
-			constants:        make(map[string]*Pointer),
-			isModule:         isModule,
-		},
-	}
+func (vm *VM) initializeClass(name string, isModule bool) *RClass {
+	class := &RClass{BaseClass: vm.createBaseClass(name)}
+	class.isModule = isModule
 
 	return class
+}
+
+func (vm *VM) createBaseClass(className string) *BaseClass {
+	classClass := vm.builtInClasses["Class"]
+	objectClass := vm.builtInClasses["Object"]
+
+	return &BaseClass{
+		Name:             className,
+		Methods:          newEnvironment(),
+		ClassMethods:     newEnvironment(),
+		Class:            classClass,
+		pseudoSuperClass: objectClass,
+		superClass:       objectClass,
+		constants:        make(map[string]*Pointer),
+		isModule:         false,
+	}
 }
 
 // Class is a built-in class, and also a parent superclass of Goby's built-in classes
@@ -86,7 +93,6 @@ type Class interface {
 	lookupConstant(string, bool) *Pointer
 	ReturnName() string
 	returnSuperClass() Class
-	setSingletonMethod(string, *MethodObject)
 	Object
 }
 
@@ -194,21 +200,6 @@ func (c *BaseClass) lookupConstant(constName string, findInScope bool) *Pointer 
 	return constant
 }
 
-// setSingletonMethod will sets method to class's singleton class
-// However, if the class doesn't have a singleton class, it will create one for it first.
-func (c *BaseClass) setSingletonMethod(name string, method *MethodObject) {
-	if c.pseudoSuperClass.Singleton {
-		c.pseudoSuperClass.ClassMethods.set(name, method)
-	}
-
-	class := initializeClass(c.Name+"singleton", false)
-	class.Singleton = true
-	class.ClassMethods.set(name, method)
-	class.superClass = c.superClass
-	class.Class = classClass
-	c.superClass = class
-}
-
 func (c *BaseClass) returnClass() Class {
 	return c.Class
 }
@@ -291,17 +282,6 @@ func generateAttrReadMethod(attrName string) *BuiltInMethodObject {
 func (c *RClass) setAttrAccessor(args interface{}) {
 	c.setAttrReader(args)
 	c.setAttrWriter(args)
-}
-
-func createBaseClass(className string) *BaseClass {
-	return &BaseClass{
-		Name:             className,
-		Methods:          newEnvironment(),
-		ClassMethods:     newEnvironment(),
-		Class:            classClass,
-		pseudoSuperClass: objectClass,
-		superClass:       objectClass,
-	}
 }
 
 // builtinCommonInstanceMethods is a collection of common instance methods used by Class
@@ -712,6 +692,8 @@ var builtinClassClassMethods = []*BuiltInMethodObject{
 				case *RClass:
 					class = r
 				case *RObject:
+					objectClass := t.vm.builtInClasses["Object"]
+
 					if r.Class == objectClass {
 						class = objectClass
 					}

@@ -489,9 +489,8 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 	}
 }
 
-func initStringClass() *RClass {
-	bc := &BaseClass{Name: "String", Methods: newEnvironment(), ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
-	sc := &RClass{BaseClass: bc}
+func (vm *VM) initStringClass() *RClass {
+	sc := vm.initializeClass("String", false)
 	sc.setBuiltInMethods(builtinStringInstanceMethods(), false)
 	sc.setBuiltInMethods(builtInStringClassMethods(), true)
 	return sc

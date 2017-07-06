@@ -233,9 +233,8 @@ func builtInHashClassMethods() []*BuiltInMethodObject {
 	}
 }
 
-func initHashClass() *RClass {
-	bc := &BaseClass{Name: "Hash", ClassMethods: newEnvironment(), Methods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
-	hc := &RClass{BaseClass: bc}
+func (vm *VM) initHashClass() *RClass {
+	hc := vm.initializeClass("Hash", false)
 	hc.setBuiltInMethods(builtinHashInstanceMethods(), false)
 	hc.setBuiltInMethods(builtInHashClassMethods(), true)
 	return hc

@@ -4,19 +4,6 @@ import (
 	"fmt"
 )
 
-var mainObj *RObject
-
-func initClasses() {
-	initTopLevelClasses()
-	initMainObj()
-}
-
-func initMainObj() {
-	obj := &RObject{Class: objectClass, InstanceVariables: newEnvironment()}
-
-	mainObj = obj
-}
-
 // Object represents all objects in Goby, including Array, Integer or even Method and Error.
 type Object interface {
 	returnClass() Class

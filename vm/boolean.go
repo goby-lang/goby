@@ -184,9 +184,8 @@ func builtinBooleanInstanceMethods() []*BuiltInMethodObject {
 	}
 }
 
-func initBoolClass() *RClass {
-	bc := &BaseClass{Name: "Boolean", Methods: newEnvironment(), ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
-	b := &RClass{BaseClass: bc}
+func (vm *VM) initBoolClass() *RClass {
+	b := vm.initializeClass("Boolean", false)
 	b.setBuiltInMethods(builtinBooleanInstanceMethods(), false)
 	b.setBuiltInMethods(builtInBooleanClassMethods(), true)
 

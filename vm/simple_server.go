@@ -30,7 +30,7 @@ type request struct {
 func initializeSimpleServerClass(vm *VM) {
 	initializeHTTPClass(vm)
 	net := vm.loadConstant("Net", true)
-	simpleServer := initializeClass("SimpleServer", false)
+	simpleServer := vm.initializeClass("SimpleServer", false)
 	simpleServer.setBuiltInMethods(builtinSimpleServerInstanceMethods(), false)
 	net.constants[simpleServer.Name] = &Pointer{simpleServer}
 

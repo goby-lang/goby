@@ -279,7 +279,15 @@ var builtInActions = map[operationType]*action{
 
 			switch self := v.(type) {
 			case *RClass:
-				self.setSingletonMethod(methodName, method)
+				if self.pseudoSuperClass.Singleton {
+					self.pseudoSuperClass.ClassMethods.set(methodName, method)
+				}
+
+				class := t.vm.initializeClass(self.Name+"singleton", false)
+				class.Singleton = true
+				class.ClassMethods.set(methodName, method)
+				class.superClass = self.superClass
+				self.superClass = class
 			}
 			// TODO: Support something like:
 			// ```
@@ -299,7 +307,7 @@ var builtInActions = map[operationType]*action{
 			classPtr := cf.lookupConstant(subjectName)
 
 			if classPtr == nil {
-				class := initializeClass(subjectName, subjectType == "module")
+				class := t.vm.initializeClass(subjectName, subjectType == "module")
 				classPtr = cf.storeConstant(class.Name, class)
 
 				if len(args) >= 2 {

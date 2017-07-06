@@ -37,6 +37,7 @@ var standardLibraries = map[string]func(*VM){
 type VM struct {
 	builtInClasses map[string]*RClass
 
+	mainObj    *RObject
 	mainThread *thread
 	// a map holds pointers of constants
 	constants map[string]*Pointer
@@ -62,10 +63,10 @@ type VM struct {
 
 // New initializes a vm to initialize state and returns it.
 func New(fileDir string, args []string) *VM {
-	initClasses()
 	vm := &VM{args: args}
 	vm.mainThread = vm.newThread()
 	vm.builtInClasses = make(map[string]*RClass)
+	vm.constants = make(map[string]*Pointer)
 
 	vm.initConstants()
 	vm.methodISIndexTables = map[filename]*isIndexTable{
@@ -81,6 +82,7 @@ func New(fileDir string, args []string) *VM {
 	}
 	vm.fileDir = fileDir
 	vm.projectRoot = os.Getenv("GOBY_ROOT")
+	vm.mainObj = vm.initMainObj()
 
 	return vm
 }
@@ -115,7 +117,7 @@ func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) {
 	vm.SetMethodISIndexTable(p.filename)
 
 	cf := newCallFrame(p.program)
-	cf.self = mainObj
+	cf.self = vm.mainObj
 	vm.mainThread.callFrameStack.push(cf)
 	vm.startFromTopFrame()
 }
@@ -139,7 +141,7 @@ func (vm *VM) InitForREPL() {
 	vm.SetMethodISIndexTable("")
 	vm.replMode = true
 	cf := newCallFrame(&instructionSet{})
-	cf.self = mainObj
+	cf.self = vm.mainObj
 	vm.mainThread.callFrameStack.push(cf)
 }
 
@@ -159,7 +161,7 @@ func (vm *VM) REPLExec(sets []*bytecode.InstructionSet) {
 
 	oldFrame := vm.mainThread.callFrameStack.top()
 	cf := newCallFrame(p.program)
-	cf.self = mainObj
+	cf.self = vm.mainObj
 	cf.locals = oldFrame.locals
 	cf.ep = oldFrame.ep
 	cf.isBlock = oldFrame.isBlock
@@ -189,34 +191,37 @@ func (vm *VM) GetREPLResult() string {
 	return ""
 }
 
+func (vm *VM) initMainObj() *RObject {
+	return &RObject{Class: vm.builtInClasses["Object"], InstanceVariables: newEnvironment()}
+}
+
 func (vm *VM) initConstants() {
-	vm.constants = make(map[string]*Pointer)
+	classClass := initClassClass()
+	objectClass := initObjectClass(classClass)
+
+	vm.builtInClasses["Class"] = classClass
+	vm.builtInClasses["Object"] = objectClass
+
 	constants := make(map[string]*Pointer)
 
-	builtInClasses := []Class{
-		initIntegerClass(),
-		initStringClass(),
-		initBoolClass(),
-		initNullClass(),
-		initArrayClass(),
-		initHashClass(),
-		initRangeClass(),
-		classClass,
-		initMethodClass(),
-		initializeChannelClass(),
+	builtInClasses := []*RClass{
+		vm.initIntegerClass(),
+		vm.initStringClass(),
+		vm.initBoolClass(),
+		vm.initNullClass(),
+		vm.initArrayClass(),
+		vm.initHashClass(),
+		vm.initRangeClass(),
+		vm.initMethodClass(),
+		vm.initializeChannelClass(),
 	}
 
-	initErrorClasses()
+	vm.initErrorClasses()
 
 	for _, c := range builtInClasses {
 		p := &Pointer{Target: c}
 		constants[c.ReturnName()] = p
-
-		if c.ReturnName() == "Array" || c.ReturnName() == "Channel" ||
-			c.ReturnName() == "Boolean" || c.ReturnName() == "String" ||
-			c.ReturnName() == "Hash" || c.ReturnName() == "Null" || c.ReturnName() == "Range" || c.ReturnName() == "Integer" {
-			vm.builtInClasses[c.ReturnName()] = c.(*RClass)
-		}
+		vm.builtInClasses[c.ReturnName()] = c
 	}
 
 	args := []Object{}
@@ -291,11 +296,11 @@ func (vm *VM) loadConstant(name string, isModule bool) *RClass {
 	var c *RClass
 	var ptr *Pointer
 
-	ptr = objectClass.constants[name]
+	ptr = vm.builtInClasses["Object"].constants[name]
 
 	if ptr == nil {
-		c = initializeClass(name, isModule)
-		objectClass.constants[name] = &Pointer{Target: c}
+		c = vm.initializeClass(name, isModule)
+		vm.builtInClasses["Object"].constants[name] = &Pointer{Target: c}
 	} else {
 		c = ptr.Target.(*RClass)
 	}

@@ -10,10 +10,10 @@ import (
 var fileClass *RClass
 
 func initializeFileClass(vm *VM) {
-	class := initializeClass("File", false)
+	class := vm.initializeClass("File", false)
 	class.setBuiltInMethods(builtinFileClassMethods(), true)
 	class.setBuiltInMethods(builtinFileInstanceMethods(), false)
-	objectClass.constants["File"] = &Pointer{Target: class}
+	vm.builtInClasses["Object"].constants["File"] = &Pointer{Target: class}
 	fileClass = class
 	vm.execGobyLib("file.gb")
 }

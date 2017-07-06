@@ -13,10 +13,10 @@ var (
 
 func initializeHTTPClass(vm *VM) {
 	net := vm.loadConstant("Net", true)
-	http := initializeClass("HTTP", false)
+	http := vm.initializeClass("HTTP", false)
 	http.setBuiltInMethods(builtinHTTPClassMethods, true)
-	initializeRequestClass(http)
-	initializeResponseClass(http)
+	initializeRequestClass(vm, http)
+	initializeResponseClass(vm, http)
 
 	net.constants[http.Name] = &Pointer{http}
 
@@ -25,8 +25,8 @@ func initializeHTTPClass(vm *VM) {
 	vm.execGobyLib("net/http/request.gb")
 }
 
-func initializeRequestClass(hc *RClass) *RClass {
-	requestClass := initializeClass("Request", false)
+func initializeRequestClass(vm *VM, hc *RClass) *RClass {
+	requestClass := vm.initializeClass("Request", false)
 	hc.constants["Request"] = &Pointer{requestClass}
 	builtinHTTPRequestInstanceMethods := []*BuiltInMethodObject{}
 
@@ -36,8 +36,8 @@ func initializeRequestClass(hc *RClass) *RClass {
 	return requestClass
 }
 
-func initializeResponseClass(hc *RClass) *RClass {
-	responseClass := initializeClass("Response", false)
+func initializeResponseClass(vm *VM, hc *RClass) *RClass {
+	responseClass := vm.initializeClass("Response", false)
 	hc.constants["Response"] = &Pointer{responseClass}
 	builtinHTTPResponseInstanceMethods := []*BuiltInMethodObject{}
 

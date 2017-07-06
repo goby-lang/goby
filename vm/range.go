@@ -46,9 +46,8 @@ func (vm *VM) initRangeObject(start, end int) *RangeObject {
 	return &RangeObject{Class: vm.builtInClasses["Range"], Start: start, End: end}
 }
 
-func initRangeClass() *RClass {
-	bc := &BaseClass{Name: "Range", ClassMethods: newEnvironment(), Methods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
-	rc := &RClass{BaseClass: bc}
+func (vm *VM) initRangeClass() *RClass {
+	rc := vm.initializeClass("Range", false)
 	rc.setBuiltInMethods(builtInRangeInstanceMethods(), false)
 	rc.setBuiltInMethods(builtInRangeClassMethods(), true)
 	return rc

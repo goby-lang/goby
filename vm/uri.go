@@ -6,9 +6,9 @@ import (
 )
 
 func initializeURIClass(vm *VM) {
-	uri := initializeClass("URI", true)
-	http := initializeClass("HTTP", false)
-	https := initializeClass("HTTPS", false)
+	uri := vm.initializeClass("URI", true)
+	http := vm.initializeClass("HTTP", false)
+	https := vm.initializeClass("HTTPS", false)
 	https.superClass = http
 	https.pseudoSuperClass = http
 	uri.constants[http.Name] = &Pointer{http}

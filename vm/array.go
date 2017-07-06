@@ -85,9 +85,8 @@ func (vm *VM) initArrayObject(elements []Object) *ArrayObject {
 	return &ArrayObject{Elements: elements, Class: vm.builtInClasses["Array"]}
 }
 
-func initArrayClass() *RClass {
-	bc := &BaseClass{Name: "Array", ClassMethods: newEnvironment(), Methods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
-	ac := &RClass{BaseClass: bc}
+func (vm *VM) initArrayClass() *RClass {
+	ac := vm.initializeClass("Array", false)
 	ac.setBuiltInMethods(builtinArrayInstanceMethods, false)
 	ac.setBuiltInMethods(builtInArrayClassMethods(), true)
 	return ac

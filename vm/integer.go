@@ -580,9 +580,8 @@ func builtInIntegerClassMethods() []*BuiltInMethodObject {
 	}
 }
 
-func initIntegerClass() *RClass {
-	bc := &BaseClass{Name: "Integer", Methods: newEnvironment(), ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
-	ic := &RClass{BaseClass: bc}
+func (vm *VM) initIntegerClass() *RClass {
+	ic := vm.initializeClass("Integer", false)
 	ic.setBuiltInMethods(builtinIntegerInstanceMethods(), false)
 	ic.setBuiltInMethods(builtInIntegerClassMethods(), true)
 	return ic

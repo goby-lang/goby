@@ -25,9 +25,8 @@ func (n *NullObject) returnClass() Class {
 	return n.Class
 }
 
-func initNullClass() *RClass {
-	baseClass := &BaseClass{Name: "Null", Methods: newEnvironment(), ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass}
-	nc := &RClass{BaseClass: baseClass}
+func (vm *VM) initNullClass() *RClass {
+	nc := vm.initializeClass("Null", false)
 	nc.setBuiltInMethods(builtInNullInstanceMethods(), false)
 	nc.setBuiltInMethods(builtInNullClassMethods(), true)
 	NULL = &NullObject{Class: nc}

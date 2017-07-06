@@ -5,11 +5,8 @@ import (
 	"fmt"
 )
 
-func initMethodClass() *RClass {
-	methods := newEnvironment()
-
-	bc := &BaseClass{Name: "Method", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
-	return &RClass{BaseClass: bc}
+func (vm *VM) initMethodClass() *RClass {
+	return vm.initializeClass("Method", false)
 }
 
 // MethodObject represents methods defined using goby.
