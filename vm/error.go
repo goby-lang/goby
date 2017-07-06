@@ -35,19 +35,13 @@ const (
 	InternalError = "InternalError"
 )
 
-func initErrorClasses() {
-	bc := createBaseClass(UndefinedMethodError)
-	UndefinedMethodErrorClass = &RClass{BaseClass: bc}
-	bc = createBaseClass(ArgumentError)
-	ArgumentErrorClass = &RClass{BaseClass: bc}
-	bc = createBaseClass(TypeError)
-	TypeErrorClass = &RClass{BaseClass: bc}
-	bc = createBaseClass(UnsupportedMethodError)
-	UnsupportedMethodClass = &RClass{BaseClass: bc}
-	bc = createBaseClass(NameError)
-	NameErrorClass = &RClass{BaseClass: bc}
-	bc = createBaseClass(InternalError)
-	InternalErrorClass = &RClass{BaseClass: bc}
+func (vm *VM) initErrorClasses() {
+	UndefinedMethodErrorClass = vm.initializeClass(UndefinedMethodError, false)
+	ArgumentErrorClass = vm.initializeClass(ArgumentError, false)
+	TypeErrorClass = vm.initializeClass(TypeError, false)
+	UnsupportedMethodClass = vm.initializeClass(UnsupportedMethodError, false)
+	NameErrorClass = vm.initializeClass(NameError, false)
+	InternalErrorClass = vm.initializeClass(InternalError, false)
 }
 
 // Error ...

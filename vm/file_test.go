@@ -165,16 +165,17 @@ func TestBasenameMethod(t *testing.T) {
 func TestSplitMethod(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected *ArrayObject
+		expected []interface{}
 	}{
 		{`
 		require "file"
 		File.split("/home/goby/plugin/test.gb")
-		`, initArrayObject([]Object{initStringObject("/home/goby/plugin/"), initStringObject("test.gb")})},
+		`, []interface{}{"/home/goby/plugin/", "test.gb"}},
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 		testArrayObject(t, i, evaluated, tt.expected)
 	}
 }

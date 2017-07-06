@@ -6,15 +6,6 @@ import (
 	"strings"
 )
 
-var (
-	hashClass *RHash
-)
-
-// RHash is the class of hash objects
-type RHash struct {
-	*BaseClass
-}
-
 // HashObject represents hash instances
 // Hash is a collection of key-value pair, which works like a dictionary.
 // Hash literal is represented with curly brackets `{ }` like `{ key: value }`.
@@ -44,7 +35,7 @@ type RHash struct {
 // - Operator `=>` is not supported.
 // - `Hash.new` is not supported.
 type HashObject struct {
-	Class *RHash
+	Class *RClass
 	Pairs map[string]Object
 }
 
@@ -71,8 +62,8 @@ func (h *HashObject) length() int {
 	return len(h.Pairs)
 }
 
-func initHashObject(pairs map[string]Object) *HashObject {
-	return &HashObject{Pairs: pairs, Class: hashClass}
+func (vm *VM) initHashObject(pairs map[string]Object) *HashObject {
+	return &HashObject{Pairs: pairs, Class: vm.builtInClasses[hashClass]}
 }
 
 func generateJSONFromPair(key string, v Object) string {
@@ -102,134 +93,149 @@ func (h *HashObject) toJSON() string {
 	return out.String()
 }
 
-var builtinHashInstanceMethods = []*BuiltInMethodObject{
-	{
-		// Returns json that is corresponding to the hash.
-		// Basically just like Hash#to_json in Rails but currently doesn't support options.
-		//
-		// ```Ruby
-		// h = { a: 1, b: [1, "2", [4, 5, nil], { foo: "bar" }]}.to_json
-		// puts(h) #=> {"a":1,"b":[1, "2", [4, 5, null], {"foo":"bar"}]}
-		// ```
-		//
-		// @return [String]
-		Name: "to_json",
-		Fn: func(receiver Object) builtinMethodBody {
-			return func(t *thread, args []Object, blockFrame *callFrame) Object {
-				r := receiver.(*HashObject)
-				return initStringObject(r.toJSON())
-			}
+func builtinHashInstanceMethods() []*BuiltInMethodObject {
+	return []*BuiltInMethodObject{
+		{
+			// Returns json that is corresponding to the hash.
+			// Basically just like Hash#to_json in Rails but currently doesn't support options.
+			//
+			// ```Ruby
+			// h = { a: 1, b: [1, "2", [4, 5, nil], { foo: "bar" }]}.to_json
+			// puts(h) #=> {"a":1,"b":[1, "2", [4, 5, null], {"foo":"bar"}]}
+			// ```
+			//
+			// @return [String]
+			Name: "to_json",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					r := receiver.(*HashObject)
+					return t.vm.initStringObject(r.toJSON())
+				}
+			},
 		},
-	},
-	{
-		// Retrieves the value (object) that corresponds to the key specified.
-		// Returns `nil` when specifying a nonexistent key.
-		//
-		// ```Ruby
-		// h = { a: 1, b: "2", c: [1, 2, 3], d: { k: 'v' } }
-		// h['a'] #=> 1
-		// h['b'] #=> "2"
-		// h['c'] #=> [1, 2, 3]
-		// h['d'] #=> { k: 'v' }
-		// ```
-		//
-		// @return [Object]
-		Name: "[]",
-		Fn: func(receiver Object) builtinMethodBody {
-			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+		{
+			// Retrieves the value (object) that corresponds to the key specified.
+			// Returns `nil` when specifying a nonexistent key.
+			//
+			// ```Ruby
+			// h = { a: 1, b: "2", c: [1, 2, 3], d: { k: 'v' } }
+			// h['a'] #=> 1
+			// h['b'] #=> "2"
+			// h['c'] #=> [1, 2, 3]
+			// h['d'] #=> { k: 'v' }
+			// ```
+			//
+			// @return [Object]
+			Name: "[]",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-				if len(args) != 1 {
-					return newError("Expect 1 arguments. got=%d", len(args))
+					if len(args) != 1 {
+						return newError("Expect 1 arguments. got=%d", len(args))
+					}
+
+					i := args[0]
+					key, ok := i.(*StringObject)
+
+					if !ok {
+						return newError("Expect index argument to be String. got=%T", i)
+					}
+
+					hash := receiver.(*HashObject)
+
+					if len(hash.Pairs) == 0 {
+						return NULL
+					}
+
+					value, ok := hash.Pairs[key.Value]
+
+					if !ok {
+						return NULL
+					}
+
+					return value
+
 				}
-
-				i := args[0]
-				key, ok := i.(*StringObject)
-
-				if !ok {
-					return newError("Expect index argument to be String. got=%T", i)
-				}
-
-				hash := receiver.(*HashObject)
-
-				if len(hash.Pairs) == 0 {
-					return NULL
-				}
-
-				value, ok := hash.Pairs[key.Value]
-
-				if !ok {
-					return NULL
-				}
-
-				return value
-
-			}
+			},
 		},
-	},
-	{
-		// Associates the value given by `value` with the key given by `key`.
-		// Returns the `value`.
-		//
-		// ```Ruby
-		// h = { a: 1, b: "2", c: [1, 2, 3], d: { k: 'v' } }
-		// h['a'] = 1          #=> 1
-		// h['b'] = "2"        #=> "2"
-		// h['c'] = [1, 2, 3]  #=> [1, 2, 3]
-		// h['d'] = { k: 'v' } #=> { k: 'v' }
-		// ```
-		//
-		// @return [Object] The value
-		Name: "[]=",
-		Fn: func(receiver Object) builtinMethodBody {
-			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+		{
+			// Associates the value given by `value` with the key given by `key`.
+			// Returns the `value`.
+			//
+			// ```Ruby
+			// h = { a: 1, b: "2", c: [1, 2, 3], d: { k: 'v' } }
+			// h['a'] = 1          #=> 1
+			// h['b'] = "2"        #=> "2"
+			// h['c'] = [1, 2, 3]  #=> [1, 2, 3]
+			// h['d'] = { k: 'v' } #=> { k: 'v' }
+			// ```
+			//
+			// @return [Object] The value
+			Name: "[]=",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-				// First arg is index
-				// Second arg is assigned value
-				if len(args) != 2 {
-					return newError("Expect 2 arguments. got=%d", len(args))
+					// First arg is index
+					// Second arg is assigned value
+					if len(args) != 2 {
+						return newError("Expect 2 arguments. got=%d", len(args))
+					}
+
+					k := args[0]
+					key, ok := k.(*StringObject)
+
+					if !ok {
+						return newError("Expect index argument to be String. got=%T", k)
+					}
+
+					hash := receiver.(*HashObject)
+					hash.Pairs[key.Value] = args[1]
+
+					return args[1]
 				}
-
-				k := args[0]
-				key, ok := k.(*StringObject)
-
-				if !ok {
-					return newError("Expect index argument to be String. got=%T", k)
-				}
-
-				hash := receiver.(*HashObject)
-				hash.Pairs[key.Value] = args[1]
-
-				return args[1]
-			}
+			},
 		},
-	},
-	{
-		// Returns the number of key-value pairs of the hash.
-		//
-		// ```Ruby
-		// h = { a: 1, b: "2", c: [1, 2, 3], d: { k: 'v' } }
-		// h.length  #=> 4
-		// ```
-		//
-		// @return [Integer]
-		Name: "length",
-		Fn: func(receiver Object) builtinMethodBody {
-			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+		{
+			// Returns the number of key-value pairs of the hash.
+			//
+			// ```Ruby
+			// h = { a: 1, b: "2", c: [1, 2, 3], d: { k: 'v' } }
+			// h.length  #=> 4
+			// ```
+			//
+			// @return [Integer]
+			Name: "length",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-				if len(args) != 0 {
-					return newError("Expect 0 argument. got=%d", len(args))
+					if len(args) != 0 {
+						return newError("Expect 0 argument. got=%d", len(args))
+					}
+
+					hash := receiver.(*HashObject)
+					return t.vm.initIntegerObject(hash.length())
 				}
-
-				hash := receiver.(*HashObject)
-				return initIntegerObject(hash.length())
-			}
+			},
 		},
-	},
+	}
 }
 
-func initHashClass() {
-	bc := &BaseClass{Name: "Hash", ClassMethods: newEnvironment(), Methods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
-	hc := &RHash{BaseClass: bc}
-	hc.setBuiltInMethods(builtinHashInstanceMethods, false)
-	hashClass = hc
+func builtInHashClassMethods() []*BuiltInMethodObject {
+	return []*BuiltInMethodObject{
+		{
+			Name: "new",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					return t.UnsupportedMethodError("#new", receiver)
+				}
+			},
+		},
+	}
+}
+
+func (vm *VM) initHashClass() *RClass {
+	hc := vm.initializeClass(hashClass, false)
+	hc.setBuiltInMethods(builtinHashInstanceMethods(), false)
+	hc.setBuiltInMethods(builtInHashClassMethods(), true)
+	return hc
 }

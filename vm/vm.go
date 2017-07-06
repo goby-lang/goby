@@ -10,8 +10,6 @@ import (
 	"sync"
 )
 
-var stackTrace int
-
 type isIndexTable struct {
 	Data map[string]int
 }
@@ -37,6 +35,7 @@ var standardLibraries = map[string]func(*VM){
 type VM struct {
 	builtInClasses map[string]*RClass
 
+	mainObj    *RObject
 	mainThread *thread
 	// a map holds pointers of constants
 	constants map[string]*Pointer
@@ -57,14 +56,17 @@ type VM struct {
 
 	replMode bool
 
+	stackTraceCount int
+
 	sync.Mutex
 }
 
 // New initializes a vm to initialize state and returns it.
 func New(fileDir string, args []string) *VM {
-	initClasses()
 	vm := &VM{args: args}
 	vm.mainThread = vm.newThread()
+	vm.builtInClasses = make(map[string]*RClass)
+	vm.constants = make(map[string]*Pointer)
 
 	vm.initConstants()
 	vm.methodISIndexTables = map[filename]*isIndexTable{
@@ -80,6 +82,7 @@ func New(fileDir string, args []string) *VM {
 	}
 	vm.fileDir = fileDir
 	vm.projectRoot = os.Getenv("GOBY_ROOT")
+	vm.mainObj = vm.initMainObj()
 
 	return vm
 }
@@ -114,7 +117,7 @@ func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) {
 	vm.SetMethodISIndexTable(p.filename)
 
 	cf := newCallFrame(p.program)
-	cf.self = mainObj
+	cf.self = vm.mainObj
 	vm.mainThread.callFrameStack.push(cf)
 	vm.startFromTopFrame()
 }
@@ -138,7 +141,7 @@ func (vm *VM) InitForREPL() {
 	vm.SetMethodISIndexTable("")
 	vm.replMode = true
 	cf := newCallFrame(&instructionSet{})
-	cf.self = mainObj
+	cf.self = vm.mainObj
 	vm.mainThread.callFrameStack.push(cf)
 }
 
@@ -158,7 +161,7 @@ func (vm *VM) REPLExec(sets []*bytecode.InstructionSet) {
 
 	oldFrame := vm.mainThread.callFrameStack.top()
 	cf := newCallFrame(p.program)
-	cf.self = mainObj
+	cf.self = vm.mainObj
 	cf.locals = oldFrame.locals
 	cf.ep = oldFrame.ep
 	cf.isBlock = oldFrame.isBlock
@@ -188,36 +191,48 @@ func (vm *VM) GetREPLResult() string {
 	return ""
 }
 
+func (vm *VM) initMainObj() *RObject {
+	return &RObject{Class: vm.builtInClasses[objectClass], InstanceVariables: newEnvironment()}
+}
+
 func (vm *VM) initConstants() {
-	vm.constants = make(map[string]*Pointer)
+	cClass := initClassClass()
+	objClass := initObjectClass(cClass)
+
+	vm.builtInClasses[classClass] = cClass
+	vm.builtInClasses[objectClass] = objClass
+
 	constants := make(map[string]*Pointer)
 
-	builtInClasses := []Class{
-		integerClass,
-		stringClass,
-		booleanClass,
-		nullClass,
-		arrayClass,
-		hashClass,
-		classClass,
-		methodClass,
-		channelClass,
+	builtInClasses := []*RClass{
+		vm.initIntegerClass(),
+		vm.initStringClass(),
+		vm.initBoolClass(),
+		vm.initNullClass(),
+		vm.initArrayClass(),
+		vm.initHashClass(),
+		vm.initRangeClass(),
+		vm.initMethodClass(),
+		vm.initializeChannelClass(),
+	}
+
+	vm.initErrorClasses()
+
+	for _, c := range builtInClasses {
+		p := &Pointer{Target: c}
+		constants[c.ReturnName()] = p
+		vm.builtInClasses[c.ReturnName()] = c
 	}
 
 	args := []Object{}
 
 	for _, arg := range vm.args {
-		args = append(args, initStringObject(arg))
+		args = append(args, vm.initStringObject(arg))
 	}
 
-	for _, c := range builtInClasses {
-		p := &Pointer{Target: c}
-		constants[c.ReturnName()] = p
-	}
-
-	constants["ARGV"] = &Pointer{Target: initArrayObject(args)}
-	objectClass.constants = constants
-	vm.constants["Object"] = &Pointer{objectClass}
+	constants["ARGV"] = &Pointer{Target: vm.initArrayObject(args)}
+	objClass.constants = constants
+	vm.constants[objectClass] = &Pointer{objClass}
 }
 
 // Start evaluation from top most call frame
@@ -227,10 +242,6 @@ func (vm *VM) startFromTopFrame() {
 
 func (vm *VM) currentFilePath() string {
 	return string(vm.mainThread.callFrameStack.top().instructionSet.filename)
-}
-
-func (vm *VM) printDebugInfo(i *instruction) {
-	fmt.Println(i.inspect())
 }
 
 func (vm *VM) getBlock(name string, filename filename) *instructionSet {
@@ -281,11 +292,11 @@ func (vm *VM) loadConstant(name string, isModule bool) *RClass {
 	var c *RClass
 	var ptr *Pointer
 
-	ptr = objectClass.constants[name]
+	ptr = vm.builtInClasses["Object"].constants[name]
 
 	if ptr == nil {
-		c = initializeClass(name, isModule)
-		objectClass.constants[name] = &Pointer{Target: c}
+		c = vm.initializeClass(name, isModule)
+		vm.builtInClasses["Object"].constants[name] = &Pointer{Target: c}
 	} else {
 		c = ptr.Target.(*RClass)
 	}

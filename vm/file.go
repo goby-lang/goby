@@ -7,14 +7,12 @@ import (
 	"syscall"
 )
 
-var fileClass *RClass
-
 func initializeFileClass(vm *VM) {
-	class := initializeClass("File", false)
+	class := vm.initializeClass("File", false)
 	class.setBuiltInMethods(builtinFileClassMethods(), true)
 	class.setBuiltInMethods(builtinFileInstanceMethods(), false)
-	objectClass.constants["File"] = &Pointer{Target: class}
-	fileClass = class
+	vm.builtInClasses[objectClass].constants["File"] = &Pointer{Target: class}
+
 	vm.execGobyLib("file.gb")
 }
 
@@ -100,7 +98,8 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 						t.returnError(err.Error())
 					}
 
-					fileObj := &FileObject{File: f, Class: fileClass}
+					// TODO: Refactor this class retrieval mess
+					fileObj := &FileObject{File: f, Class: t.vm.builtInClasses[objectClass].constants["File"].Target.(*RClass)}
 
 					return fileObj
 				}
@@ -120,7 +119,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 						}
 					}
 
-					return initIntegerObject(len(args))
+					return t.vm.initIntegerObject(len(args))
 				}
 			},
 		},
@@ -136,7 +135,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					filename := args[0].(*StringObject).Value
-					return initStringObject(filepath.Ext(filename))
+					return t.vm.initStringObject(filepath.Ext(filename))
 				}
 			},
 		},
@@ -166,7 +165,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 						}
 					}
 
-					return initIntegerObject(len(args) - 1)
+					return t.vm.initIntegerObject(len(args) - 1)
 				}
 			},
 		},
@@ -191,7 +190,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 						panic(err)
 					}
 
-					return initIntegerObject(int(fileStats.Size()))
+					return t.vm.initIntegerObject(int(fileStats.Size()))
 				}
 			},
 		},
@@ -207,7 +206,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					filename := args[0].(*StringObject).Value
-					return initStringObject(filepath.Base(filename))
+					return t.vm.initStringObject(filepath.Base(filename))
 				}
 			},
 		},
@@ -227,7 +226,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 						elements = append(elements, next)
 					}
 
-					return initStringObject(filepath.Join(elements...))
+					return t.vm.initStringObject(filepath.Join(elements...))
 				}
 			},
 		},
@@ -245,10 +244,10 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 					filename := args[0].(*StringObject).Value
 					dir, file := filepath.Split(filename)
 
-					dirObject := initStringObject(dir)
-					fileObject := initStringObject(file)
+					dirObject := t.vm.initStringObject(dir)
+					fileObject := t.vm.initStringObject(file)
 
-					return initArrayObject([]Object{dirObject, fileObject})
+					return t.vm.initArrayObject([]Object{dirObject, fileObject})
 				}
 			},
 		},
@@ -279,7 +278,7 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					name := receiver.(*FileObject).File.Name()
-					return initStringObject(name)
+					return t.vm.initStringObject(name)
 				}
 			},
 		},
@@ -300,7 +299,7 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject {
 						panic(err)
 					}
 
-					return initIntegerObject(int(fileStats.Size()))
+					return t.vm.initIntegerObject(int(fileStats.Size()))
 				}
 			},
 		},
@@ -315,7 +314,7 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject {
 						t.returnError(err.Error())
 					}
 
-					return initStringObject(string(data))
+					return t.vm.initStringObject(string(data))
 				}
 			},
 		},
@@ -331,7 +330,7 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject {
 						t.returnError(err.Error())
 					}
 
-					return initIntegerObject(length)
+					return t.vm.initIntegerObject(length)
 				}
 			},
 		},

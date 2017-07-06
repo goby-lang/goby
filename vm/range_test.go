@@ -240,37 +240,37 @@ func TestInclude(t *testing.T) {
 	}{
 		{`
 		(5..10).include(10)
-		`, TRUE},
+		`, true},
 		{`
 		(5..10).include(11)
-		`, FALSE},
+		`, false},
 		{`
 		(5..10).include(7)
-		`, TRUE},
+		`, true},
 		{`
 		(5..10).include(5)
-		`, TRUE},
+		`, true},
 		{`
 		(5..10).include(4)
-		`, FALSE},
+		`, false},
 		{`
 		(-5..1).include(-2)
-		`, TRUE},
+		`, true},
 		{`
 		(-5..-2).include(-2)
-		`, TRUE},
+		`, true},
 		{`
 		(-5..-3).include(-2)
-		`, FALSE},
+		`, false},
 		{`
 		(1..-5).include(-2)
-		`, TRUE},
+		`, true},
 		{`
 		(-2..-5).include(-2)
-		`, TRUE},
+		`, true},
 		{`
 		(-3..-5).include(-2)
-		`, FALSE},
+		`, false},
 	}
 
 	for i, tt := range tests {

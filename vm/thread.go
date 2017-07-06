@@ -63,10 +63,10 @@ func (t *thread) execInstruction(cf *callFrame, i *instruction) {
 
 	defer func() {
 		if p := recover(); p != nil {
-			if stackTrace == 0 {
+			if t.vm.stackTraceCount == 0 {
 				fmt.Printf("Internal Error: %s\n", p)
 			}
-			stackTrace++
+			t.vm.stackTraceCount++
 			panic(p)
 		}
 	}()

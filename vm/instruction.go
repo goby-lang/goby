@@ -49,7 +49,7 @@ var builtInActions = map[operationType]*action{
 	bytecode.PutObject: {
 		name: bytecode.PutObject,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
-			object := initializeObjectFromInstruction(args[0])
+			object := t.vm.initializeObjectFromInstruction(args[0])
 			t.stack.push(&Pointer{Target: object})
 		},
 	},
@@ -144,7 +144,7 @@ var builtInActions = map[operationType]*action{
 			rangeEnd := t.stack.pop().Target.(*IntegerObject).Value
 			rangeStart := t.stack.pop().Target.(*IntegerObject).Value
 
-			t.stack.push(&Pointer{initRangeObject(rangeStart, rangeEnd)})
+			t.stack.push(&Pointer{t.vm.initRangeObject(rangeStart, rangeEnd)})
 		},
 	},
 	bytecode.NewArray: {
@@ -158,7 +158,7 @@ var builtInActions = map[operationType]*action{
 				elems = append([]Object{v.Target}, elems...)
 			}
 
-			arr := initArrayObject(elems)
+			arr := t.vm.initArrayObject(elems)
 			t.stack.push(&Pointer{arr})
 		},
 	},
@@ -174,7 +174,7 @@ var builtInActions = map[operationType]*action{
 				pairs[k.Target.(*StringObject).Value] = v.Target
 			}
 
-			hash := initHashObject(pairs)
+			hash := t.vm.initHashObject(pairs)
 			t.stack.push(&Pointer{hash})
 		},
 	},
@@ -235,7 +235,7 @@ var builtInActions = map[operationType]*action{
 	bytecode.PutString: {
 		name: bytecode.PutString,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
-			object := initializeObjectFromInstruction(args[0])
+			object := t.vm.initializeObjectFromInstruction(args[0])
 			t.stack.push(&Pointer{object})
 		},
 	},
@@ -256,7 +256,7 @@ var builtInActions = map[operationType]*action{
 				t.returnError(fmt.Sprintf("Can't get method %s's instruction set.", methodName))
 			}
 
-			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, class: methodClass}
+			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, class: t.vm.builtInClasses["Method"]}
 
 			v := t.stack.pop().Target
 			switch self := v.(type) {
@@ -273,13 +273,21 @@ var builtInActions = map[operationType]*action{
 			argCount := args[0].(int)
 			methodName := t.stack.pop().Target.(*StringObject).Value
 			is, _ := t.getMethodIS(methodName, cf.instructionSet.filename)
-			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, class: methodClass}
+			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, class: t.vm.builtInClasses["Method"]}
 
 			v := t.stack.pop().Target
 
 			switch self := v.(type) {
 			case *RClass:
-				self.setSingletonMethod(methodName, method)
+				if self.pseudoSuperClass.Singleton {
+					self.pseudoSuperClass.ClassMethods.set(methodName, method)
+				}
+
+				class := t.vm.initializeClass(self.Name+"singleton", false)
+				class.Singleton = true
+				class.ClassMethods.set(methodName, method)
+				class.superClass = self.superClass
+				self.superClass = class
 			}
 			// TODO: Support something like:
 			// ```
@@ -299,7 +307,7 @@ var builtInActions = map[operationType]*action{
 			classPtr := cf.lookupConstant(subjectName)
 
 			if classPtr == nil {
-				class := initializeClass(subjectName, subjectType == "module")
+				class := t.vm.initializeClass(subjectName, subjectType == "module")
 				classPtr = cf.storeConstant(class.Name, class)
 
 				if len(args) >= 2 {
@@ -427,10 +435,10 @@ var builtInActions = map[operationType]*action{
 	},
 }
 
-func initializeObjectFromInstruction(value interface{}) Object {
+func (vm *VM) initializeObjectFromInstruction(value interface{}) Object {
 	switch v := value.(type) {
 	case int:
-		return initIntegerObject(int(v))
+		return vm.initIntegerObject(int(v))
 	case string:
 		switch v {
 		case "true":
@@ -438,8 +446,14 @@ func initializeObjectFromInstruction(value interface{}) Object {
 		case "false":
 			return FALSE
 		default:
-			return initStringObject(v)
+			return vm.initStringObject(v)
 		}
+	case bool:
+		if v {
+			return TRUE
+		}
+
+		return FALSE
 	}
 
 	return newError(fmt.Sprintf("Unknow data type %T", value))

@@ -74,6 +74,22 @@ foo
 	}
 }
 
+func initTestVM() *VM {
+	return New("./", []string{})
+}
+
+func (v *VM) testEval(t *testing.T, input string) Object {
+	iss, err := compiler.CompileToInstructions(input)
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	v.ExecInstructions(iss, "./")
+
+	return v.mainThread.stack.top().Target
+}
+
 func testEval(t *testing.T, input string) Object {
 	iss, err := compiler.CompileToInstructions(input)
 
@@ -155,35 +171,19 @@ func testBooleanObject(t *testing.T, i int, obj Object, expected bool) bool {
 	}
 }
 
-func testArrayObject(t *testing.T, index int, obj Object, expected *ArrayObject) bool {
+func testArrayObject(t *testing.T, index int, obj Object, expected []interface{}) bool {
 	result, ok := obj.(*ArrayObject)
 	if !ok {
 		t.Fatalf("At test case %d: object is not Array. got=%T (%+v)", index, obj, obj)
 		return false
 	}
 
-	if len(result.Elements) != len(expected.Elements) {
-		t.Fatalf("Don't equals length of array. Expect %d, got=%d", len(expected.Elements), len(result.Elements))
+	if len(result.Elements) != len(expected) {
+		t.Fatalf("Don't equals length of array. Expect %d, got=%d", len(expected), len(result.Elements))
 	}
 
 	for i := 0; i < len(result.Elements); i++ {
-		intObj, ok := expected.Elements[i].(*IntegerObject)
-		if ok {
-			testIntegerObject(t, index, result.Elements[i], intObj.Value)
-			continue
-		}
-		str, ok := expected.Elements[i].(*StringObject)
-		if ok {
-			testStringObject(t, index, result.Elements[i], str.Value)
-			continue
-		}
-
-		b, ok := expected.Elements[i].(*BooleanObject)
-		if ok {
-			testBooleanObject(t, index, result.Elements[i], b.Value)
-			continue
-		}
-		t.Fatalf("At test case %d: object is wrong type %T", index, expected.Elements[i])
+		checkExpected(t, i, result.Elements[i], expected[i])
 	}
 
 	return true
@@ -204,6 +204,8 @@ func checkExpected(t *testing.T, i int, evaluated Object, expected interface{}) 
 		testBooleanObject(t, i, evaluated, expected)
 	case nil:
 		testNullObject(t, i, evaluated)
+	default:
+		t.Fatalf("Unknown type %T at case %d", expected, i)
 	}
 }
 

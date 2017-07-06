@@ -5,20 +5,12 @@ import (
 	"sync"
 )
 
-var (
-	channelClass *RClass
-)
-
 type objectMap struct {
 	store   map[int]Object
 	counter int
 	sync.RWMutex
 }
 
-var objMap = &objectMap{store: map[int]Object{}}
-
-// storeObj store objects into the container map
-// and update containerCount at the same time
 func (m *objectMap) storeObj(obj Object) int {
 	m.Lock()
 	defer m.Unlock()
@@ -39,6 +31,8 @@ func (m *objectMap) storeObj(obj Object) int {
 	return i
 }
 
+// storeObj store objects into the container map
+// and update containerCount at the same time
 func (m *objectMap) retrieveObj(num int) Object {
 	m.RLock()
 
@@ -46,7 +40,10 @@ func (m *objectMap) retrieveObj(num int) Object {
 	return m.store[num]
 }
 
+// TODO: Change these two package variables to be VM's attributes
 var channelID = 0
+
+var objMap = &objectMap{store: map[int]Object{}}
 
 // ChannelObject represents a goby channel, which carries a golang channel
 type ChannelObject struct {
@@ -55,12 +52,11 @@ type ChannelObject struct {
 	Chan  chan int
 }
 
-func initializeChannelClass() {
-	class := initializeClass("Channel", false)
+func (vm *VM) initializeChannelClass() *RClass {
+	class := vm.initializeClass(channelClass, false)
 	class.setBuiltInMethods(builtinChannelClassMethods(), true)
 	class.setBuiltInMethods(builtinChannelInstanceMethods(), false)
-	objectClass.constants["Channel"] = &Pointer{Target: class}
-	channelClass = class
+	return class
 }
 
 func (co *ChannelObject) toString() string {
@@ -81,7 +77,7 @@ func builtinChannelClassMethods() []*BuiltInMethodObject {
 			Name: "new",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					c := &ChannelObject{Class: channelClass, id: channelID, Chan: make(chan int)}
+					c := &ChannelObject{Class: t.vm.builtInClasses[channelClass], id: channelID, Chan: make(chan int)}
 					channelID++
 					return c
 				}

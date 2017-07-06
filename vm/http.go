@@ -13,10 +13,10 @@ var (
 
 func initializeHTTPClass(vm *VM) {
 	net := vm.loadConstant("Net", true)
-	http := initializeClass("HTTP", false)
-	http.setBuiltInMethods(builtinHTTPClassMethods, true)
-	initializeRequestClass(http)
-	initializeResponseClass(http)
+	http := vm.initializeClass("HTTP", false)
+	http.setBuiltInMethods(builtinHTTPClassMethods(), true)
+	initializeRequestClass(vm, http)
+	initializeResponseClass(vm, http)
 
 	net.constants[http.Name] = &Pointer{http}
 
@@ -25,8 +25,8 @@ func initializeHTTPClass(vm *VM) {
 	vm.execGobyLib("net/http/request.gb")
 }
 
-func initializeRequestClass(hc *RClass) *RClass {
-	requestClass := initializeClass("Request", false)
+func initializeRequestClass(vm *VM, hc *RClass) *RClass {
+	requestClass := vm.initializeClass("Request", false)
 	hc.constants["Request"] = &Pointer{requestClass}
 	builtinHTTPRequestInstanceMethods := []*BuiltInMethodObject{}
 
@@ -36,8 +36,8 @@ func initializeRequestClass(hc *RClass) *RClass {
 	return requestClass
 }
 
-func initializeResponseClass(hc *RClass) *RClass {
-	responseClass := initializeClass("Response", false)
+func initializeResponseClass(vm *VM, hc *RClass) *RClass {
+	responseClass := vm.initializeClass("Response", false)
 	hc.constants["Response"] = &Pointer{responseClass}
 	builtinHTTPResponseInstanceMethods := []*BuiltInMethodObject{}
 
@@ -47,39 +47,41 @@ func initializeResponseClass(hc *RClass) *RClass {
 	return responseClass
 }
 
-var builtinHTTPClassMethods = []*BuiltInMethodObject{
-	{
-		// Sends a GET request to the target and returns the HTTP response as a string.
-		Name: "get",
-		Fn: func(receiver Object) builtinMethodBody {
-			return func(t *thread, args []Object, blockFrame *callFrame) Object {
-				var path string
+func builtinHTTPClassMethods() []*BuiltInMethodObject {
+	return []*BuiltInMethodObject{
+		{
+			// Sends a GET request to the target and returns the HTTP response as a string.
+			Name: "get",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					var path string
 
-				domain := args[0].(*StringObject).Value
+					domain := args[0].(*StringObject).Value
 
-				if len(args) > 1 {
-					path = args[1].(*StringObject).Value
+					if len(args) > 1 {
+						path = args[1].(*StringObject).Value
+					}
+
+					if !strings.HasPrefix(path, "/") {
+						path = "/" + path
+					}
+
+					resp, err := http.Get(domain + path)
+
+					if err != nil {
+						t.returnError(err.Error())
+					}
+
+					content, err := ioutil.ReadAll(resp.Body)
+					resp.Body.Close()
+
+					if err != nil {
+						t.returnError(err.Error())
+					}
+
+					return t.vm.initStringObject(string(content))
 				}
-
-				if !strings.HasPrefix(path, "/") {
-					path = "/" + path
-				}
-
-				resp, err := http.Get(domain + path)
-
-				if err != nil {
-					t.returnError(err.Error())
-				}
-
-				content, err := ioutil.ReadAll(resp.Body)
-				resp.Body.Close()
-
-				if err != nil {
-					t.returnError(err.Error())
-				}
-
-				return initStringObject(string(content))
-			}
+			},
 		},
-	},
+	}
 }
