@@ -11,10 +11,6 @@ type objectMap struct {
 	sync.RWMutex
 }
 
-var objMap = &objectMap{store: map[int]Object{}}
-
-// storeObj store objects into the container map
-// and update containerCount at the same time
 func (m *objectMap) storeObj(obj Object) int {
 	m.Lock()
 	defer m.Unlock()
@@ -35,6 +31,8 @@ func (m *objectMap) storeObj(obj Object) int {
 	return i
 }
 
+// storeObj store objects into the container map
+// and update containerCount at the same time
 func (m *objectMap) retrieveObj(num int) Object {
 	m.RLock()
 
@@ -42,7 +40,10 @@ func (m *objectMap) retrieveObj(num int) Object {
 	return m.store[num]
 }
 
+// TODO: Change these two package variables to be VM's attributes
 var channelID = 0
+
+var objMap = &objectMap{store: map[int]Object{}}
 
 // ChannelObject represents a goby channel, which carries a golang channel
 type ChannelObject struct {

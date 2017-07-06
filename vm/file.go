@@ -7,14 +7,12 @@ import (
 	"syscall"
 )
 
-var fileClass *RClass
-
 func initializeFileClass(vm *VM) {
 	class := vm.initializeClass("File", false)
 	class.setBuiltInMethods(builtinFileClassMethods(), true)
 	class.setBuiltInMethods(builtinFileInstanceMethods(), false)
 	vm.builtInClasses[objectClass].constants["File"] = &Pointer{Target: class}
-	fileClass = class
+
 	vm.execGobyLib("file.gb")
 }
 
@@ -100,7 +98,8 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 						t.returnError(err.Error())
 					}
 
-					fileObj := &FileObject{File: f, Class: fileClass}
+					// TODO: Refactor this class retrieval mess
+					fileObj := &FileObject{File: f, Class: t.vm.builtInClasses[objectClass].constants["File"].Target.(*RClass)}
 
 					return fileObj
 				}
