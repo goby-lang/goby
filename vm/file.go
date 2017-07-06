@@ -136,7 +136,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					filename := args[0].(*StringObject).Value
-					return initStringObject(filepath.Ext(filename))
+					return t.vm.initStringObject(filepath.Ext(filename))
 				}
 			},
 		},
@@ -207,7 +207,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					filename := args[0].(*StringObject).Value
-					return initStringObject(filepath.Base(filename))
+					return t.vm.initStringObject(filepath.Base(filename))
 				}
 			},
 		},
@@ -227,7 +227,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 						elements = append(elements, next)
 					}
 
-					return initStringObject(filepath.Join(elements...))
+					return t.vm.initStringObject(filepath.Join(elements...))
 				}
 			},
 		},
@@ -245,8 +245,8 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 					filename := args[0].(*StringObject).Value
 					dir, file := filepath.Split(filename)
 
-					dirObject := initStringObject(dir)
-					fileObject := initStringObject(file)
+					dirObject := t.vm.initStringObject(dir)
+					fileObject := t.vm.initStringObject(file)
 
 					return t.vm.initArrayObject([]Object{dirObject, fileObject})
 				}
@@ -279,7 +279,7 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					name := receiver.(*FileObject).File.Name()
-					return initStringObject(name)
+					return t.vm.initStringObject(name)
 				}
 			},
 		},
@@ -315,7 +315,7 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject {
 						t.returnError(err.Error())
 					}
 
-					return initStringObject(string(data))
+					return t.vm.initStringObject(string(data))
 				}
 			},
 		},

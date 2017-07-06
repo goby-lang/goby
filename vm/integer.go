@@ -448,7 +448,7 @@ var builtinIntegerInstanceMethods = []*BuiltInMethodObject{
 
 				int := receiver.(*IntegerObject)
 
-				return initStringObject(strconv.Itoa(int.Value))
+				return t.vm.initStringObject(strconv.Itoa(int.Value))
 			}
 		},
 	},

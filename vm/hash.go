@@ -117,7 +117,7 @@ var builtinHashInstanceMethods = []*BuiltInMethodObject{
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				r := receiver.(*HashObject)
-				return initStringObject(r.toJSON())
+				return t.vm.initStringObject(r.toJSON())
 			}
 		},
 	},

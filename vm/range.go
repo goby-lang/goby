@@ -188,7 +188,7 @@ var builtInRangeInstanceMethods = []*BuiltInMethodObject{
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 				ran := receiver.(*RangeObject)
 
-				return initStringObject(ran.toString())
+				return t.vm.initStringObject(ran.toString())
 			}
 		},
 	},

@@ -110,14 +110,14 @@ func newHandler(t *thread, blockFrame *callFrame) func(http.ResponseWriter, *htt
 		// Go creates one goroutine per request, so we also need to create a new Goby thread for every request.
 		thread := t.vm.newThread()
 		res := httpResponseClass.initializeInstance()
-		req := initRequest(w, r)
+		req := initRequest(t, w, r)
 		thread.builtInMethodYield(blockFrame, req, res)
 		thread = nil
 		setupResponse(w, r, res)
 	}
 }
 
-func initRequest(w http.ResponseWriter, req *http.Request) *RObject {
+func initRequest(t *thread, w http.ResponseWriter, req *http.Request) *RObject {
 	r := request{}
 	reqObj := httpRequestClass.initializeInstance()
 
@@ -138,7 +138,7 @@ func initRequest(w http.ResponseWriter, req *http.Request) *RObject {
 
 	for k, v := range m {
 		varName := "@" + strings.ToLower(k)
-		reqObj.InstanceVariables.set(varName, initObject(v))
+		reqObj.InstanceVariables.set(varName, t.vm.initializeObjectFromInstruction(v))
 	}
 
 	return reqObj
@@ -176,21 +176,4 @@ func setupResponse(w http.ResponseWriter, req *http.Request, res *RObject) {
 
 	io.WriteString(w, r.body)
 	log.Printf("%s %s %s %d\n", req.Method, req.URL.Path, req.Proto, r.status)
-}
-
-func initObject(v interface{}) Object {
-	switch v := v.(type) {
-	case string:
-		return initStringObject(v)
-	case int:
-		return initIntegerObject(v)
-	case bool:
-		if v {
-			return TRUE
-		}
-
-		return FALSE
-	default:
-		panic("Can't init object")
-	}
 }

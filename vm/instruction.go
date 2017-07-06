@@ -49,7 +49,7 @@ var builtInActions = map[operationType]*action{
 	bytecode.PutObject: {
 		name: bytecode.PutObject,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
-			object := initializeObjectFromInstruction(args[0])
+			object := t.vm.initializeObjectFromInstruction(args[0])
 			t.stack.push(&Pointer{Target: object})
 		},
 	},
@@ -235,7 +235,7 @@ var builtInActions = map[operationType]*action{
 	bytecode.PutString: {
 		name: bytecode.PutString,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
-			object := initializeObjectFromInstruction(args[0])
+			object := t.vm.initializeObjectFromInstruction(args[0])
 			t.stack.push(&Pointer{object})
 		},
 	},
@@ -427,7 +427,7 @@ var builtInActions = map[operationType]*action{
 	},
 }
 
-func initializeObjectFromInstruction(value interface{}) Object {
+func (vm *VM) initializeObjectFromInstruction(value interface{}) Object {
 	switch v := value.(type) {
 	case int:
 		return initIntegerObject(int(v))
@@ -438,8 +438,14 @@ func initializeObjectFromInstruction(value interface{}) Object {
 		case "false":
 			return FALSE
 		default:
-			return initStringObject(v)
+			return vm.initStringObject(v)
 		}
+	case bool:
+		if v {
+			return TRUE
+		}
+
+		return FALSE
 	}
 
 	return newError(fmt.Sprintf("Unknow data type %T", value))

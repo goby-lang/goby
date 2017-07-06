@@ -195,7 +195,7 @@ func (vm *VM) initConstants() {
 
 	builtInClasses := []Class{
 		integerClass,
-		stringClass,
+		initStringClass(),
 		initBoolClass(),
 		nullClass,
 		initArrayClass(),
@@ -205,19 +205,19 @@ func (vm *VM) initConstants() {
 		initializeChannelClass(),
 	}
 
-	args := []Object{}
-
-	for _, arg := range vm.args {
-		args = append(args, initStringObject(arg))
-	}
-
 	for _, c := range builtInClasses {
 		p := &Pointer{Target: c}
 		constants[c.ReturnName()] = p
 
-		if c.ReturnName() == "Array" || c.ReturnName() == "Channel" || c.ReturnName() == "Boolean" {
+		if c.ReturnName() == "Array" || c.ReturnName() == "Channel" || c.ReturnName() == "Boolean" || c.ReturnName() == "String" {
 			vm.builtInClasses[c.ReturnName()] = c.(*RClass)
 		}
+	}
+
+	args := []Object{}
+
+	for _, arg := range vm.args {
+		args = append(args, vm.initStringObject(arg))
 	}
 
 	constants["ARGV"] = &Pointer{Target: vm.initArrayObject(args)}

@@ -78,7 +78,7 @@ var builtinHTTPClassMethods = []*BuiltInMethodObject{
 					t.returnError(err.Error())
 				}
 
-				return initStringObject(string(content))
+				return t.vm.initStringObject(string(content))
 			}
 		},
 	},

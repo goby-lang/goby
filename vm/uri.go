@@ -16,13 +16,13 @@ func initializeURIClass(vm *VM) {
 	uri.setBuiltInMethods(builtinURIClassMethods, true)
 
 	attrs := []Object{
-		initStringObject("host"),
-		initStringObject("path"),
-		initStringObject("port"),
-		initStringObject("query"),
-		initStringObject("scheme"),
-		initStringObject("user"),
-		initStringObject("password"),
+		vm.initStringObject("host"),
+		vm.initStringObject("path"),
+		vm.initStringObject("port"),
+		vm.initStringObject("query"),
+		vm.initStringObject("scheme"),
+		vm.initStringObject("user"),
+		vm.initStringObject("password"),
 	}
 
 	http.setAttrReader(attrs)
@@ -57,14 +57,14 @@ var builtinURIClassMethods = []*BuiltInMethodObject{
 					"@user":     NULL,
 					"@password": NULL,
 					"@query":    NULL,
-					"@path":     initStringObject("/"),
+					"@path":     t.vm.initStringObject("/"),
 				}
 
 				// Scheme
-				uriAttrs["@scheme"] = initStringObject(u.Scheme)
+				uriAttrs["@scheme"] = t.vm.initStringObject(u.Scheme)
 
 				// Host
-				uriAttrs["@host"] = initStringObject(u.Host)
+				uriAttrs["@host"] = t.vm.initStringObject(u.Host)
 
 				// Port
 				if len(u.Port()) == 0 {
@@ -86,22 +86,22 @@ var builtinURIClassMethods = []*BuiltInMethodObject{
 
 				// Path
 				if len(u.Path) != 0 {
-					uriAttrs["@path"] = initStringObject(u.Path)
+					uriAttrs["@path"] = t.vm.initStringObject(u.Path)
 				}
 
 				// Query
 				if len(u.RawQuery) != 0 {
-					uriAttrs["@query"] = initStringObject(u.RawQuery)
+					uriAttrs["@query"] = t.vm.initStringObject(u.RawQuery)
 				}
 
 				// User
 				if u.User != nil {
 					if len(u.User.Username()) != 0 {
-						uriAttrs["@user"] = initStringObject(u.User.Username())
+						uriAttrs["@user"] = t.vm.initStringObject(u.User.Username())
 					}
 
 					if p, ok := u.User.Password(); ok {
-						uriAttrs["@password"] = initStringObject(p)
+						uriAttrs["@password"] = t.vm.initStringObject(p)
 					}
 				}
 

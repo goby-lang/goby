@@ -480,7 +480,7 @@ var builtinCommonInstanceMethods = []*BuiltInMethodObject{
 		Name: "to_s",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
-				return initStringObject(receiver.toString())
+				return t.vm.initStringObject(receiver.toString())
 			}
 		},
 	},
@@ -784,7 +784,7 @@ var builtinClassClassMethods = []*BuiltInMethodObject{
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 				name := receiver.(Class).ReturnName()
-				nameString := initStringObject(name)
+				nameString := t.vm.initStringObject(name)
 				return nameString
 			}
 		},

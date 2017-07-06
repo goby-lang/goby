@@ -10,7 +10,6 @@ func initClasses() {
 	initTopLevelClasses()
 	initNullClass()
 	initIntegerClass()
-	initStringClass()
 	initHashClass()
 	initRangeClass()
 	initializeChannelClass()
