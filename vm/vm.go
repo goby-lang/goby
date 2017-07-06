@@ -10,8 +10,6 @@ import (
 	"sync"
 )
 
-var stackTrace int
-
 type isIndexTable struct {
 	Data map[string]int
 }
@@ -57,6 +55,8 @@ type VM struct {
 	projectRoot string
 
 	replMode bool
+
+	stackTraceCount int
 
 	sync.Mutex
 }
