@@ -5,10 +5,6 @@ import (
 	"sync"
 )
 
-var (
-	channelClass *RClass
-)
-
 type objectMap struct {
 	store   map[int]Object
 	counter int
@@ -55,12 +51,11 @@ type ChannelObject struct {
 	Chan  chan int
 }
 
-func initializeChannelClass() {
+func initializeChannelClass() *RClass {
 	class := initializeClass("Channel", false)
 	class.setBuiltInMethods(builtinChannelClassMethods(), true)
 	class.setBuiltInMethods(builtinChannelInstanceMethods(), false)
-	objectClass.constants["Channel"] = &Pointer{Target: class}
-	channelClass = class
+	return class
 }
 
 func (co *ChannelObject) toString() string {
@@ -81,7 +76,7 @@ func builtinChannelClassMethods() []*BuiltInMethodObject {
 			Name: "new",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					c := &ChannelObject{Class: channelClass, id: channelID, Chan: make(chan int)}
+					c := &ChannelObject{Class: t.vm.builtInClasses["Channel"], id: channelID, Chan: make(chan int)}
 					channelID++
 					return c
 				}

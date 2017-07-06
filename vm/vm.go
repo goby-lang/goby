@@ -202,7 +202,7 @@ func (vm *VM) initConstants() {
 		hashClass,
 		classClass,
 		methodClass,
-		channelClass,
+		initializeChannelClass(),
 	}
 
 	args := []Object{}
@@ -215,7 +215,7 @@ func (vm *VM) initConstants() {
 		p := &Pointer{Target: c}
 		constants[c.ReturnName()] = p
 
-		if c.ReturnName() == "Array" {
+		if c.ReturnName() == "Array" || c.ReturnName() == "Channel" || c.ReturnName() == "Boolean" {
 			vm.builtInClasses[c.ReturnName()] = c.(*RClass)
 		}
 	}
