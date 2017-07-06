@@ -206,6 +206,8 @@ func (vm *VM) initConstants() {
 		initializeChannelClass(),
 	}
 
+	initErrorClasses()
+
 	for _, c := range builtInClasses {
 		p := &Pointer{Target: c}
 		constants[c.ReturnName()] = p
