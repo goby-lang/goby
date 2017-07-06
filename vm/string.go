@@ -52,7 +52,14 @@ func (s *StringObject) equal(e *StringObject) bool {
 
 func (vm *VM) initStringObject(value string) *StringObject {
 	replacer := strings.NewReplacer("\\n", "\n", "\\r", "\r", "\\t", "\t", "\\v", "\v", "\\\\", "\\")
-	return &StringObject{Value: replacer.Replace(value), Class: vm.builtInClasses["String"]}
+	return &StringObject{Value: replacer.Replace(value), Class: vm.builtInClasses[stringClass]}
+}
+
+func (vm *VM) initStringClass() *RClass {
+	sc := vm.initializeClass(stringClass, false)
+	sc.setBuiltInMethods(builtinStringInstanceMethods(), false)
+	sc.setBuiltInMethods(builtInStringClassMethods(), true)
+	return sc
 }
 
 func builtinStringInstanceMethods() []*BuiltInMethodObject {
@@ -487,11 +494,4 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
-}
-
-func (vm *VM) initStringClass() *RClass {
-	sc := vm.initializeClass("String", false)
-	sc.setBuiltInMethods(builtinStringInstanceMethods(), false)
-	sc.setBuiltInMethods(builtInStringClassMethods(), true)
-	return sc
 }

@@ -82,11 +82,11 @@ func (a *ArrayObject) shift() Object {
 }
 
 func (vm *VM) initArrayObject(elements []Object) *ArrayObject {
-	return &ArrayObject{Elements: elements, Class: vm.builtInClasses["Array"]}
+	return &ArrayObject{Elements: elements, Class: vm.builtInClasses[arrayClass]}
 }
 
 func (vm *VM) initArrayClass() *RClass {
-	ac := vm.initializeClass("Array", false)
+	ac := vm.initializeClass(arrayClass, false)
 	ac.setBuiltInMethods(builtinArrayInstanceMethods, false)
 	ac.setBuiltInMethods(builtInArrayClassMethods(), true)
 	return ac

@@ -63,7 +63,7 @@ func (h *HashObject) length() int {
 }
 
 func (vm *VM) initHashObject(pairs map[string]Object) *HashObject {
-	return &HashObject{Pairs: pairs, Class: vm.builtInClasses["Hash"]}
+	return &HashObject{Pairs: pairs, Class: vm.builtInClasses[hashClass]}
 }
 
 func generateJSONFromPair(key string, v Object) string {
@@ -234,7 +234,7 @@ func builtInHashClassMethods() []*BuiltInMethodObject {
 }
 
 func (vm *VM) initHashClass() *RClass {
-	hc := vm.initializeClass("Hash", false)
+	hc := vm.initializeClass(hashClass, false)
 	hc.setBuiltInMethods(builtinHashInstanceMethods(), false)
 	hc.setBuiltInMethods(builtInHashClassMethods(), true)
 	return hc

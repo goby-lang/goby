@@ -34,8 +34,15 @@ func (i *IntegerObject) equal(e *IntegerObject) bool {
 	return i.Value == e.Value
 }
 
+func (vm *VM) initIntegerClass() *RClass {
+	ic := vm.initializeClass(integerClass, false)
+	ic.setBuiltInMethods(builtinIntegerInstanceMethods(), false)
+	ic.setBuiltInMethods(builtInIntegerClassMethods(), true)
+	return ic
+}
+
 func (vm *VM) initIntegerObject(value int) *IntegerObject {
-	return &IntegerObject{Value: value, Class: vm.builtInClasses["Integer"]}
+	return &IntegerObject{Value: value, Class: vm.builtInClasses[integerClass]}
 }
 
 func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
@@ -578,11 +585,4 @@ func builtInIntegerClassMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
-}
-
-func (vm *VM) initIntegerClass() *RClass {
-	ic := vm.initializeClass("Integer", false)
-	ic.setBuiltInMethods(builtinIntegerInstanceMethods(), false)
-	ic.setBuiltInMethods(builtInIntegerClassMethods(), true)
-	return ic
 }

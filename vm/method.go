@@ -6,7 +6,7 @@ import (
 )
 
 func (vm *VM) initMethodClass() *RClass {
-	return vm.initializeClass("Method", false)
+	return vm.initializeClass(methodClass, false)
 }
 
 // MethodObject represents methods defined using goby.

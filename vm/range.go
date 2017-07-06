@@ -43,11 +43,11 @@ func (ro *RangeObject) returnClass() Class {
 }
 
 func (vm *VM) initRangeObject(start, end int) *RangeObject {
-	return &RangeObject{Class: vm.builtInClasses["Range"], Start: start, End: end}
+	return &RangeObject{Class: vm.builtInClasses[rangeClass], Start: start, End: end}
 }
 
 func (vm *VM) initRangeClass() *RClass {
-	rc := vm.initializeClass("Range", false)
+	rc := vm.initializeClass(rangeClass, false)
 	rc.setBuiltInMethods(builtInRangeInstanceMethods(), false)
 	rc.setBuiltInMethods(builtInRangeClassMethods(), true)
 	return rc

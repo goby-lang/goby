@@ -26,7 +26,7 @@ func (n *NullObject) returnClass() Class {
 }
 
 func (vm *VM) initNullClass() *RClass {
-	nc := vm.initializeClass("Null", false)
+	nc := vm.initializeClass(nullClass, false)
 	nc.setBuiltInMethods(builtInNullInstanceMethods(), false)
 	nc.setBuiltInMethods(builtInNullClassMethods(), true)
 	NULL = &NullObject{Class: nc}

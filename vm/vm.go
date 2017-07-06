@@ -192,15 +192,15 @@ func (vm *VM) GetREPLResult() string {
 }
 
 func (vm *VM) initMainObj() *RObject {
-	return &RObject{Class: vm.builtInClasses["Object"], InstanceVariables: newEnvironment()}
+	return &RObject{Class: vm.builtInClasses[objectClass], InstanceVariables: newEnvironment()}
 }
 
 func (vm *VM) initConstants() {
-	classClass := initClassClass()
-	objectClass := initObjectClass(classClass)
+	cClass := initClassClass()
+	objClass := initObjectClass(cClass)
 
-	vm.builtInClasses["Class"] = classClass
-	vm.builtInClasses["Object"] = objectClass
+	vm.builtInClasses[classClass] = cClass
+	vm.builtInClasses[objectClass] = objClass
 
 	constants := make(map[string]*Pointer)
 
@@ -231,8 +231,8 @@ func (vm *VM) initConstants() {
 	}
 
 	constants["ARGV"] = &Pointer{Target: vm.initArrayObject(args)}
-	objectClass.constants = constants
-	vm.constants["Object"] = &Pointer{objectClass}
+	objClass.constants = constants
+	vm.constants[objectClass] = &Pointer{objClass}
 }
 
 // Start evaluation from top most call frame
@@ -242,10 +242,6 @@ func (vm *VM) startFromTopFrame() {
 
 func (vm *VM) currentFilePath() string {
 	return string(vm.mainThread.callFrameStack.top().instructionSet.filename)
-}
-
-func (vm *VM) printDebugInfo(i *instruction) {
-	fmt.Println(i.inspect())
 }
 
 func (vm *VM) getBlock(name string, filename filename) *instructionSet {

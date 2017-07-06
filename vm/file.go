@@ -13,7 +13,7 @@ func initializeFileClass(vm *VM) {
 	class := vm.initializeClass("File", false)
 	class.setBuiltInMethods(builtinFileClassMethods(), true)
 	class.setBuiltInMethods(builtinFileInstanceMethods(), false)
-	vm.builtInClasses["Object"].constants["File"] = &Pointer{Target: class}
+	vm.builtInClasses[objectClass].constants["File"] = &Pointer{Target: class}
 	fileClass = class
 	vm.execGobyLib("file.gb")
 }

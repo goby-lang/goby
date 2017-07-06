@@ -7,6 +7,20 @@ import (
 	"time"
 )
 
+const (
+	objectClass  = "Object"
+	classClass   = "Class"
+	integerClass = "Integer"
+	stringClass  = "String"
+	arrayClass   = "Array"
+	hashClass    = "Hash"
+	booleanClass = "Boolean"
+	nullClass    = "Null"
+	channelClass = "Channel"
+	rangeClass   = "Range"
+	methodClass  = "method"
+)
+
 func initClassClass() *RClass {
 	classClass := &RClass{
 		BaseClass: &BaseClass{
@@ -49,8 +63,8 @@ func (vm *VM) initializeClass(name string, isModule bool) *RClass {
 }
 
 func (vm *VM) createBaseClass(className string) *BaseClass {
-	classClass := vm.builtInClasses["Class"]
-	objectClass := vm.builtInClasses["Object"]
+	classClass := vm.builtInClasses[classClass]
+	objectClass := vm.builtInClasses[objectClass]
 
 	return &BaseClass{
 		Name:             className,

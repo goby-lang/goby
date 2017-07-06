@@ -52,7 +52,7 @@ type ChannelObject struct {
 }
 
 func (vm *VM) initializeChannelClass() *RClass {
-	class := vm.initializeClass("Channel", false)
+	class := vm.initializeClass(channelClass, false)
 	class.setBuiltInMethods(builtinChannelClassMethods(), true)
 	class.setBuiltInMethods(builtinChannelInstanceMethods(), false)
 	return class
@@ -76,7 +76,7 @@ func builtinChannelClassMethods() []*BuiltInMethodObject {
 			Name: "new",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					c := &ChannelObject{Class: t.vm.builtInClasses["Channel"], id: channelID, Chan: make(chan int)}
+					c := &ChannelObject{Class: t.vm.builtInClasses[channelClass], id: channelID, Chan: make(chan int)}
 					channelID++
 					return c
 				}
