@@ -9,7 +9,6 @@ var mainObj *RObject
 func initClasses() {
 	initTopLevelClasses()
 	initIntegerClass()
-	initRangeClass()
 	initErrorClasses()
 	initMethodClass()
 	initMainObj()

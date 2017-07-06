@@ -144,7 +144,7 @@ var builtInActions = map[operationType]*action{
 			rangeEnd := t.stack.pop().Target.(*IntegerObject).Value
 			rangeStart := t.stack.pop().Target.(*IntegerObject).Value
 
-			t.stack.push(&Pointer{initRangeObject(rangeStart, rangeEnd)})
+			t.stack.push(&Pointer{t.vm.initRangeObject(rangeStart, rangeEnd)})
 		},
 	},
 	bytecode.NewArray: {

@@ -200,6 +200,7 @@ func (vm *VM) initConstants() {
 		initNullClass(),
 		initArrayClass(),
 		initHashClass(),
+		initRangeClass(),
 		classClass,
 		methodClass,
 		initializeChannelClass(),
@@ -209,7 +210,9 @@ func (vm *VM) initConstants() {
 		p := &Pointer{Target: c}
 		constants[c.ReturnName()] = p
 
-		if c.ReturnName() == "Array" || c.ReturnName() == "Channel" || c.ReturnName() == "Boolean" || c.ReturnName() == "String" || c.ReturnName() == "Hash" {
+		if c.ReturnName() == "Array" || c.ReturnName() == "Channel" ||
+			c.ReturnName() == "Boolean" || c.ReturnName() == "String" ||
+			c.ReturnName() == "Hash" || c.ReturnName() == "Null" || c.ReturnName() == "Range" {
 			vm.builtInClasses[c.ReturnName()] = c.(*RClass)
 		}
 	}
