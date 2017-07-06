@@ -52,7 +52,7 @@ type ChannelObject struct {
 	Chan  chan int
 }
 
-func (vm *VM) initializeChannelClass() *RClass {
+func (vm *VM) initChannelClass() *RClass {
 	class := vm.initializeClass(channelClass, false)
 	class.setBuiltInMethods(builtinChannelClassMethods(), true)
 	class.setBuiltInMethods(builtinChannelInstanceMethods(), false)

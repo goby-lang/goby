@@ -213,7 +213,7 @@ func (vm *VM) initConstants() {
 		vm.initHashClass(),
 		vm.initRangeClass(),
 		vm.initMethodClass(),
-		vm.initializeChannelClass(),
+		vm.initChannelClass(),
 	}
 
 	vm.initErrorClasses()
