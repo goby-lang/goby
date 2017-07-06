@@ -120,7 +120,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 						}
 					}
 
-					return initIntegerObject(len(args))
+					return t.vm.initIntegerObject(len(args))
 				}
 			},
 		},
@@ -166,7 +166,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 						}
 					}
 
-					return initIntegerObject(len(args) - 1)
+					return t.vm.initIntegerObject(len(args) - 1)
 				}
 			},
 		},
@@ -191,7 +191,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 						panic(err)
 					}
 
-					return initIntegerObject(int(fileStats.Size()))
+					return t.vm.initIntegerObject(int(fileStats.Size()))
 				}
 			},
 		},
@@ -300,7 +300,7 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject {
 						panic(err)
 					}
 
-					return initIntegerObject(int(fileStats.Size()))
+					return t.vm.initIntegerObject(int(fileStats.Size()))
 				}
 			},
 		},
@@ -331,7 +331,7 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject {
 						t.returnError(err.Error())
 					}
 
-					return initIntegerObject(length)
+					return t.vm.initIntegerObject(length)
 				}
 			},
 		},

@@ -194,7 +194,7 @@ func (vm *VM) initConstants() {
 	constants := make(map[string]*Pointer)
 
 	builtInClasses := []Class{
-		integerClass,
+		initIntegerClass(),
 		initStringClass(),
 		initBoolClass(),
 		initNullClass(),
@@ -214,7 +214,7 @@ func (vm *VM) initConstants() {
 
 		if c.ReturnName() == "Array" || c.ReturnName() == "Channel" ||
 			c.ReturnName() == "Boolean" || c.ReturnName() == "String" ||
-			c.ReturnName() == "Hash" || c.ReturnName() == "Null" || c.ReturnName() == "Range" {
+			c.ReturnName() == "Hash" || c.ReturnName() == "Null" || c.ReturnName() == "Range" || c.ReturnName() == "Integer" {
 			vm.builtInClasses[c.ReturnName()] = c.(*RClass)
 		}
 	}

@@ -224,7 +224,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 				}
 
 				arr := receiver.(*ArrayObject)
-				return initIntegerObject(arr.length())
+				return t.vm.initIntegerObject(arr.length())
 			}
 		},
 	},
@@ -325,7 +325,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 				}
 
 				for i := range arr.Elements {
-					t.builtInMethodYield(blockFrame, initIntegerObject(i))
+					t.builtInMethodYield(blockFrame, t.vm.initIntegerObject(i))
 				}
 				return arr
 			}
@@ -509,11 +509,11 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 						}
 					}
 
-					return initIntegerObject(count)
+					return t.vm.initIntegerObject(count)
 				}
 
 				if len(args) == 0 {
-					return initIntegerObject(len(arr.Elements))
+					return t.vm.initIntegerObject(len(arr.Elements))
 				}
 
 				arg := args[0]
@@ -542,7 +542,7 @@ var builtinArrayInstanceMethods = []*BuiltInMethodObject{
 					}
 				}
 
-				return initIntegerObject(count)
+				return t.vm.initIntegerObject(count)
 			}
 		},
 	},

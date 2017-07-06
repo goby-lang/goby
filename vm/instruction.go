@@ -430,7 +430,7 @@ var builtInActions = map[operationType]*action{
 func (vm *VM) initializeObjectFromInstruction(value interface{}) Object {
 	switch v := value.(type) {
 	case int:
-		return initIntegerObject(int(v))
+		return vm.initIntegerObject(int(v))
 	case string:
 		switch v {
 		case "true":

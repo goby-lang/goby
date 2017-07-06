@@ -228,13 +228,13 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					rightValue := right.Value
 
 					if leftValue < rightValue {
-						return initIntegerObject(-1)
+						return t.vm.initIntegerObject(-1)
 					}
 					if leftValue > rightValue {
-						return initIntegerObject(1)
+						return t.vm.initIntegerObject(1)
 					}
 
-					return initIntegerObject(0)
+					return t.vm.initIntegerObject(0)
 				}
 			},
 		},
@@ -344,7 +344,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 
 					str := receiver.(*StringObject).Value
 
-					return initIntegerObject(len(str))
+					return t.vm.initIntegerObject(len(str))
 				}
 			},
 		},
@@ -364,7 +364,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 
 					str := receiver.(*StringObject).Value
 
-					return initIntegerObject(len(str))
+					return t.vm.initIntegerObject(len(str))
 				}
 			},
 		},
@@ -429,7 +429,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					parsedStr, err := strconv.ParseInt(str, 10, 0)
 
 					if err == nil {
-						return initIntegerObject(int(parsedStr))
+						return t.vm.initIntegerObject(int(parsedStr))
 					}
 
 					var digits string
@@ -443,10 +443,10 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 
 					if len(digits) > 0 {
 						parsedStr, _ = strconv.ParseInt(digits, 10, 0)
-						return initIntegerObject(int(parsedStr))
+						return t.vm.initIntegerObject(int(parsedStr))
 					}
 
-					return initIntegerObject(0)
+					return t.vm.initIntegerObject(0)
 				}
 			},
 		},

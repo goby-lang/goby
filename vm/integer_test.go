@@ -4,12 +4,6 @@ import (
 	"testing"
 )
 
-func TestInitilaize(t *testing.T) {
-	expected := 101
-	i := initIntegerObject(expected)
-	checkExpected(t, 0, i, expected)
-}
-
 func TestEvalInteger(t *testing.T) {
 	tests := []struct {
 		input    string

@@ -213,7 +213,7 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 					}
 
 					hash := receiver.(*HashObject)
-					return initIntegerObject(hash.length())
+					return t.vm.initIntegerObject(hash.length())
 				}
 			},
 		},

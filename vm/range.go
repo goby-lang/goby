@@ -84,7 +84,7 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					ran := receiver.(*RangeObject)
-					return initIntegerObject(ran.Start)
+					return t.vm.initIntegerObject(ran.Start)
 				}
 			},
 		},
@@ -103,7 +103,7 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					ran := receiver.(*RangeObject)
-					return initIntegerObject(ran.End)
+					return t.vm.initIntegerObject(ran.End)
 				}
 			},
 		},
@@ -141,12 +141,12 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 
 					if ran.Start <= ran.End {
 						for i := ran.Start; i <= ran.End; i++ {
-							obj := initIntegerObject(i)
+							obj := t.vm.initIntegerObject(i)
 							t.builtInMethodYield(blockFrame, obj)
 						}
 					} else {
 						for i := ran.End; i <= ran.Start; i++ {
-							obj := initIntegerObject(i)
+							obj := t.vm.initIntegerObject(i)
 							t.builtInMethodYield(blockFrame, obj)
 						}
 					}
@@ -174,11 +174,11 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 
 					if ro.Start <= ro.End {
 						for i := ro.Start; i <= ro.End; i++ {
-							elems = append(elems, initIntegerObject(i))
+							elems = append(elems, t.vm.initIntegerObject(i))
 						}
 					} else {
 						for i := ro.End; i <= ro.Start; i++ {
-							elems = append(elems, initIntegerObject(i))
+							elems = append(elems, t.vm.initIntegerObject(i))
 						}
 					}
 
@@ -219,9 +219,9 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 					ran := receiver.(*RangeObject)
 
 					if ran.Start <= ran.End {
-						return initIntegerObject(ran.End - ran.Start + 1)
+						return t.vm.initIntegerObject(ran.End - ran.Start + 1)
 					}
-					return initIntegerObject(ran.Start - ran.End + 1)
+					return t.vm.initIntegerObject(ran.Start - ran.End + 1)
 				}
 			},
 		},
@@ -273,7 +273,7 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 					}
 
 					for i := ran.Start; i <= ran.End; i += stepValue {
-						obj := initIntegerObject(i)
+						obj := t.vm.initIntegerObject(i)
 						t.builtInMethodYield(blockFrame, obj)
 					}
 					return ran
