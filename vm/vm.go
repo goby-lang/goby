@@ -197,7 +197,7 @@ func (vm *VM) initConstants() {
 		integerClass,
 		initStringClass(),
 		initBoolClass(),
-		nullClass,
+		initNullClass(),
 		initArrayClass(),
 		initHashClass(),
 		classClass,
