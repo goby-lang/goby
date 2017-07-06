@@ -10,7 +10,6 @@ func initClasses() {
 	initTopLevelClasses()
 	initIntegerClass()
 	initErrorClasses()
-	initMethodClass()
 	initMainObj()
 }
 

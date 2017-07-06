@@ -5,24 +5,16 @@ import (
 	"fmt"
 )
 
-var methodClass *RMethod
-
-func initMethodClass() {
+func initMethodClass() *RClass {
 	methods := newEnvironment()
 
 	bc := &BaseClass{Name: "Method", Methods: methods, ClassMethods: newEnvironment(), Class: classClass, pseudoSuperClass: objectClass, superClass: objectClass}
-	mc := &RMethod{BaseClass: bc}
-	methodClass = mc
-}
-
-// RMethod represents all method's class. Currently has no methods.
-type RMethod struct {
-	*BaseClass
+	return &RClass{BaseClass: bc}
 }
 
 // MethodObject represents methods defined using goby.
 type MethodObject struct {
-	class          *RMethod
+	class          *RClass
 	Name           string
 	instructionSet *instructionSet
 	argc           int
@@ -50,7 +42,7 @@ type builtinMethodBody func(*thread, []Object, *callFrame) Object
 
 // BuiltInMethodObject represents methods defined in go.
 type BuiltInMethodObject struct {
-	class *RMethod
+	class *RClass
 	Name  string
 	Fn    func(receiver Object) builtinMethodBody
 }

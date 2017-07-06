@@ -202,7 +202,7 @@ func (vm *VM) initConstants() {
 		initHashClass(),
 		initRangeClass(),
 		classClass,
-		methodClass,
+		initMethodClass(),
 		initializeChannelClass(),
 	}
 

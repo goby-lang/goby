@@ -133,13 +133,11 @@ func (c *BaseClass) toJSON() string {
 func (c *BaseClass) setBuiltInMethods(methodList []*BuiltInMethodObject, classMethods bool) {
 	for _, m := range methodList {
 		c.Methods.set(m.Name, m)
-		m.class = methodClass
 	}
 
 	if classMethods {
 		for _, m := range methodList {
 			c.ClassMethods.set(m.Name, m)
-			m.class = methodClass
 		}
 	}
 }
