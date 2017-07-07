@@ -5,7 +5,8 @@ import "testing"
 func TestEvalNil(t *testing.T) {
 	input := `nil`
 
-	evaluated := testEval(t, input)
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input)
 	checkExpected(t, 0, evaluated, nil)
 }
 
@@ -15,6 +16,7 @@ func TestBangPrefix(t *testing.T) {
 	!a
 	`
 
-	evaluated := testEval(t, input)
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input)
 	checkExpected(t, 0, evaluated, true)
 }

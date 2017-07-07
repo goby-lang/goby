@@ -111,6 +111,7 @@ func (t *thread) retrieveBlock(cf *callFrame, args []interface{}) (blockFrame *c
 		c.self = cf.self
 
 		t.callFrameStack.push(c)
+
 		blockFrame = c
 	}
 

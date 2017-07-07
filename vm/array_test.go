@@ -4,7 +4,25 @@ import (
 	"testing"
 )
 
-func TestLengthMethod(t *testing.T) {
+func TestArrayEvaluation(t *testing.T) {
+	input := `
+	[1, "234", true]
+	`
+
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input)
+
+	arr, ok := evaluated.(*ArrayObject)
+	if !ok {
+		t.Fatalf("Expect evaluated value to be an array. got=%T", evaluated)
+	}
+
+	checkExpected(t, 0, arr.Elements[0], 1)
+	checkExpected(t, 0, arr.Elements[1], "234")
+	checkExpected(t, 0, arr.Elements[2], true)
+}
+
+func TestArrayLengthMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected int
@@ -35,7 +53,7 @@ func TestLengthMethod(t *testing.T) {
 	}
 }
 
-func TestPopMethod(t *testing.T) {
+func TestArrayPopMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -64,7 +82,7 @@ func TestPopMethod(t *testing.T) {
 	}
 }
 
-func TestPushMethod(t *testing.T) {
+func TestArrayPushMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -104,7 +122,7 @@ func TestPushMethod(t *testing.T) {
 	}
 }
 
-func TestShiftMethod(t *testing.T) {
+func TestArrayShiftMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -133,7 +151,7 @@ func TestShiftMethod(t *testing.T) {
 	}
 }
 
-func TestShiftMethodFail(t *testing.T) {
+func TestArrayShiftMethodFail(t *testing.T) {
 	testsFail := []struct {
 		input    string
 		expected *Error
@@ -157,25 +175,7 @@ func TestShiftMethodFail(t *testing.T) {
 	}
 }
 
-func TestEvalArrayExpression(t *testing.T) {
-	input := `
-	[1, "234", true]
-	`
-
-	v := initTestVM()
-	evaluated := v.testEval(t, input)
-
-	arr, ok := evaluated.(*ArrayObject)
-	if !ok {
-		t.Fatalf("Expect evaluated value to be an array. got=%T", evaluated)
-	}
-
-	checkExpected(t, 0, arr.Elements[0], 1)
-	checkExpected(t, 0, arr.Elements[1], "234")
-	checkExpected(t, 0, arr.Elements[2], true)
-}
-
-func TestEvalArrayIndex(t *testing.T) {
+func TestArrayIndex(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -283,7 +283,7 @@ func TestEvalArrayIndex(t *testing.T) {
 	}
 }
 
-func TestEachMethod(t *testing.T) {
+func TestArrayEachMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected int
@@ -304,7 +304,7 @@ func TestEachMethod(t *testing.T) {
 	}
 }
 
-func TestEachIndexMethod(t *testing.T) {
+func TestArrayEachIndexMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected int
@@ -325,7 +325,7 @@ func TestEachIndexMethod(t *testing.T) {
 	}
 }
 
-func TestMapMethod(t *testing.T) {
+func TestArrayMapMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected []interface{}
@@ -357,7 +357,7 @@ func TestMapMethod(t *testing.T) {
 	}
 }
 
-func TestSelectMethod(t *testing.T) {
+func TestArraySelectMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected []interface{}
@@ -389,7 +389,7 @@ func TestSelectMethod(t *testing.T) {
 	}
 }
 
-func TestClearMethod(t *testing.T) {
+func TestArrayClearMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected []interface{}
@@ -411,7 +411,7 @@ func TestClearMethod(t *testing.T) {
 	}
 }
 
-func TestConcatMethod(t *testing.T) {
+func TestArrayConcatMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected []interface{}
@@ -437,7 +437,7 @@ func TestConcatMethod(t *testing.T) {
 	}
 }
 
-func TestConcatMethodFail(t *testing.T) {
+func TestArrayConcatMethodFail(t *testing.T) {
 	testsFail := []struct {
 		input    string
 		expected *Error
@@ -465,7 +465,7 @@ func TestConcatMethodFail(t *testing.T) {
 	}
 }
 
-func TestCountMethod(t *testing.T) {
+func TestArrayCountMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected int
@@ -511,7 +511,7 @@ func TestCountMethod(t *testing.T) {
 	}
 }
 
-func TestCountMethodFail(t *testing.T) {
+func TestArrayCountMethodFail(t *testing.T) {
 	testsFail := []struct {
 		input    string
 		expected *Error
@@ -533,7 +533,7 @@ func TestCountMethodFail(t *testing.T) {
 	}
 }
 
-func TestRotateMethod(t *testing.T) {
+func TestArrayRotateMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected []interface{}
@@ -555,7 +555,7 @@ func TestRotateMethod(t *testing.T) {
 	}
 }
 
-func TestRotateMethodFail(t *testing.T) {
+func TestArrayRotateMethodFail(t *testing.T) {
 	testsFail := []struct {
 		input    string
 		expected *Error
@@ -579,7 +579,7 @@ func TestRotateMethodFail(t *testing.T) {
 	}
 }
 
-func TestFirstMethod(t *testing.T) {
+func TestArrayFirstMethod(t *testing.T) {
 	testsInt := []struct {
 		input    string
 		expected interface{}
@@ -617,7 +617,7 @@ func TestFirstMethod(t *testing.T) {
 	}
 }
 
-func TestFirstMethodFail(t *testing.T) {
+func TestArrayFirstMethodFail(t *testing.T) {
 	testsFail := []struct {
 		input    string
 		expected *Error
@@ -641,7 +641,7 @@ func TestFirstMethodFail(t *testing.T) {
 	}
 }
 
-func TestLastMethod(t *testing.T) {
+func TestArrayLastMethod(t *testing.T) {
 	testsArray := []struct {
 		input    string
 		expected []interface{}
@@ -663,7 +663,7 @@ func TestLastMethod(t *testing.T) {
 	}
 }
 
-func TestLastMethodFail(t *testing.T) {
+func TestArrayLastMethodFail(t *testing.T) {
 	testsFail := []struct {
 		input    string
 		expected *Error

@@ -34,7 +34,8 @@ func TestUndefinedMethodError(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 		err, ok := evaluated.(*Error)
 
 		if !ok {
@@ -65,7 +66,8 @@ func TestUnsupportedMethodError(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 		err, ok := evaluated.(*Error)
 
 		if !ok {
@@ -83,7 +85,8 @@ func TestUnsupportedMethodError(t *testing.T) {
 }
 
 func TestArgumentError(t *testing.T) {
-	evaluated := testEval(t, "[].count(5,4,3)")
+	vm := initTestVM()
+	evaluated := vm.testEval(t, "[].count(5,4,3)")
 	err, ok := evaluated.(*Error)
 	if !ok {
 		t.Errorf("Expect Error. got=%T (%+v)", evaluated, evaluated)
@@ -94,7 +97,8 @@ func TestArgumentError(t *testing.T) {
 }
 
 func TestTypeError(t *testing.T) {
-	evaluated := testEval(t, "10 * \"foo\"")
+	vm := initTestVM()
+	evaluated := vm.testEval(t, "10 * \"foo\"")
 	err, ok := evaluated.(*Error)
 	if !ok {
 		t.Errorf("Expect Error. got=%T (%+v)", evaluated, evaluated)

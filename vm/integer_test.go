@@ -66,7 +66,8 @@ func TestEvalInteger(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
@@ -118,7 +119,8 @@ func TestEvalIntegerFail(t *testing.T) {
 	}
 
 	for _, tt := range testsFail {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 		err, ok := evaluated.(*Error)
 		if !ok {
 			t.Errorf("Expect error. got=%T (%+v)", err, err)

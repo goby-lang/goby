@@ -38,7 +38,8 @@ func TestHashToJSONWithArray(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 		compareJSONResult(t, evaluated, tt.expected)
 	}
 }
@@ -85,7 +86,8 @@ func TestHashToJSONWithNestedHash(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 		compareJSONResult(t, evaluated, tt.expected)
 	}
 }
@@ -143,7 +145,8 @@ func TestHashToJSONWithBasicTypes(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 		compareJSONResult(t, evaluated, tt.expected)
 	}
 }
@@ -162,7 +165,8 @@ func TestHashLength(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
@@ -172,7 +176,8 @@ func TestEvalHashExpression(t *testing.T) {
 	{ foo: 123, bar: "test", baz: true }
 	`
 
-	evaluated := testEval(t, input)
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input)
 
 	h, ok := evaluated.(*HashObject)
 	if !ok {
@@ -242,7 +247,8 @@ func TestEvalHashAccess(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
