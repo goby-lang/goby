@@ -55,11 +55,6 @@ type Class interface {
 
 // RClass represents normal (not built in) class object
 type RClass struct {
-	*BaseClass
-}
-
-// BaseClass is a embedded struct that contains all the essential fields for a class
-type BaseClass struct {
 	// Name is the class's name
 	Name string
 	// Methods contains its instances' methods
@@ -83,12 +78,10 @@ type BaseClass struct {
 
 func initClassClass() *RClass {
 	classClass := &RClass{
-		BaseClass: &BaseClass{
-			Name:         classClass,
-			Methods:      newEnvironment(),
-			ClassMethods: newEnvironment(),
-			constants:    make(map[string]*Pointer),
-		},
+		Name:         classClass,
+		Methods:      newEnvironment(),
+		ClassMethods: newEnvironment(),
+		constants:    make(map[string]*Pointer),
 	}
 
 	classClass.setBuiltInMethods(builtinCommonInstanceMethods(), false)
@@ -100,13 +93,11 @@ func initClassClass() *RClass {
 
 func initObjectClass(c *RClass) *RClass {
 	objectClass := &RClass{
-		BaseClass: &BaseClass{
-			Name:         objectClass,
-			Class:        c,
-			ClassMethods: newEnvironment(),
-			Methods:      newEnvironment(),
-			constants:    make(map[string]*Pointer),
-		},
+		Name:         objectClass,
+		Class:        c,
+		ClassMethods: newEnvironment(),
+		Methods:      newEnvironment(),
+		constants:    make(map[string]*Pointer),
 	}
 
 	objectClass.setBuiltInMethods(builtinCommonInstanceMethods(), false)
@@ -116,17 +107,17 @@ func initObjectClass(c *RClass) *RClass {
 
 // initializeClass initializes and returns a class instance with given class name
 func (vm *VM) initializeClass(name string, isModule bool) *RClass {
-	class := &RClass{BaseClass: vm.createBaseClass(name)}
+	class := vm.createRClass(name)
 	class.isModule = isModule
 
 	return class
 }
 
-func (vm *VM) createBaseClass(className string) *BaseClass {
+func (vm *VM) createRClass(className string) *RClass {
 	classClass := vm.builtInClasses[classClass]
 	objectClass := vm.builtInClasses[objectClass]
 
-	return &BaseClass{
+	return &RClass{
 		Name:             className,
 		Methods:          newEnvironment(),
 		ClassMethods:     newEnvironment(),
@@ -140,18 +131,18 @@ func (vm *VM) createBaseClass(className string) *BaseClass {
 
 // toString returns the basic inspected result (which is class name) of current class
 // TODO: Singleton class's inspect() should also mark if it's a singleton class explicitly.
-func (c *BaseClass) toString() string {
+func (c *RClass) toString() string {
 	if c.isModule {
 		return "<Module:" + c.Name + ">"
 	}
 	return "<Class:" + c.Name + ">"
 }
 
-func (c *BaseClass) toJSON() string {
+func (c *RClass) toJSON() string {
 	return c.toString()
 }
 
-func (c *BaseClass) setBuiltInMethods(methodList []*BuiltInMethodObject, classMethods bool) {
+func (c *RClass) setBuiltInMethods(methodList []*BuiltInMethodObject, classMethods bool) {
 	for _, m := range methodList {
 		c.Methods.set(m.Name, m)
 	}
@@ -163,7 +154,7 @@ func (c *BaseClass) setBuiltInMethods(methodList []*BuiltInMethodObject, classMe
 	}
 }
 
-func (c *BaseClass) lookupClassMethod(methodName string) Object {
+func (c *RClass) lookupClassMethod(methodName string) Object {
 	method, ok := c.ClassMethods.get(methodName)
 
 	if !ok {
@@ -179,7 +170,7 @@ func (c *BaseClass) lookupClassMethod(methodName string) Object {
 	return method
 }
 
-func (c *BaseClass) lookupInstanceMethod(methodName string) Object {
+func (c *RClass) lookupInstanceMethod(methodName string) Object {
 	method, ok := c.Methods.get(methodName)
 
 	if !ok {
@@ -197,7 +188,7 @@ func (c *BaseClass) lookupInstanceMethod(methodName string) Object {
 	return method
 }
 
-func (c *BaseClass) lookupConstant(constName string, findInScope bool) *Pointer {
+func (c *RClass) lookupConstant(constName string, findInScope bool) *Pointer {
 	constant, ok := c.constants[constName]
 
 	if !ok {
@@ -215,16 +206,16 @@ func (c *BaseClass) lookupConstant(constName string, findInScope bool) *Pointer 
 	return constant
 }
 
-func (c *BaseClass) returnClass() Class {
+func (c *RClass) returnClass() Class {
 	return c.Class
 }
 
 // ReturnName returns the name of the class
-func (c *BaseClass) ReturnName() string {
+func (c *RClass) ReturnName() string {
 	return c.Name
 }
 
-func (c *BaseClass) returnSuperClass() Class {
+func (c *RClass) returnSuperClass() Class {
 	return c.pseudoSuperClass
 }
 
