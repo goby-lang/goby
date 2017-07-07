@@ -15,7 +15,7 @@ var (
 // It includes `true` and `FALSE` which represents logically true and false value.
 // - `Boolean.new` is not supported.
 type BooleanObject struct {
-	class *RClass
+	*baseObj
 	Value bool
 }
 
@@ -189,8 +189,8 @@ func (vm *VM) initBoolClass() *RClass {
 	b.setBuiltInMethods(builtinBooleanInstanceMethods(), false)
 	b.setBuiltInMethods(builtInBooleanClassMethods(), true)
 
-	TRUE = &BooleanObject{Value: true, class: b}
-	FALSE = &BooleanObject{Value: false, class: b}
+	TRUE = &BooleanObject{Value: true, baseObj: &baseObj{class: b}}
+	FALSE = &BooleanObject{Value: false, baseObj: &baseObj{class: b}}
 
 	return b
 }

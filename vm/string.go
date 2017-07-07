@@ -26,7 +26,7 @@ import (
 // - Currently, UTF-8 encoding is assumed based upon Golang's string manipulation, but the encoding is not actually specified(TBD).
 // - `String.new` is not supported.
 type StringObject struct {
-	class *RClass
+	*baseObj
 	Value string
 }
 
@@ -52,7 +52,7 @@ func (s *StringObject) equal(e *StringObject) bool {
 
 func (vm *VM) initStringObject(value string) *StringObject {
 	replacer := strings.NewReplacer("\\n", "\n", "\\r", "\r", "\\t", "\t", "\\v", "\v", "\\\\", "\\")
-	return &StringObject{Value: replacer.Replace(value), class: vm.builtInClasses[stringClass]}
+	return &StringObject{Value: replacer.Replace(value), baseObj: &baseObj{class: vm.builtInClasses[stringClass]}}
 }
 
 func (vm *VM) initStringClass() *RClass {

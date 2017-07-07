@@ -14,7 +14,7 @@ import (
 //
 // - `Integer.new` is not supported.
 type IntegerObject struct {
-	class *RClass
+	*baseObj
 	Value int
 }
 
@@ -42,7 +42,7 @@ func (vm *VM) initIntegerClass() *RClass {
 }
 
 func (vm *VM) initIntegerObject(value int) *IntegerObject {
-	return &IntegerObject{Value: value, class: vm.builtInClasses[integerClass]}
+	return &IntegerObject{Value: value, baseObj: &baseObj{class: vm.builtInClasses[integerClass]}}
 }
 
 func builtinIntegerInstanceMethods() []*BuiltInMethodObject {

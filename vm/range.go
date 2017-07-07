@@ -25,7 +25,7 @@ import (
 // ```
 //
 type RangeObject struct {
-	class *RClass
+	*baseObj
 	Start int
 	End   int
 }
@@ -43,7 +43,7 @@ func (ro *RangeObject) Class() *RClass {
 }
 
 func (vm *VM) initRangeObject(start, end int) *RangeObject {
-	return &RangeObject{class: vm.builtInClasses[rangeClass], Start: start, End: end}
+	return &RangeObject{baseObj: &baseObj{class: vm.builtInClasses[rangeClass]}, Start: start, End: end}
 }
 
 func (vm *VM) initRangeClass() *RClass {

@@ -9,7 +9,7 @@ import (
 // An array is a collection of different objects that are ordered and indexed.
 // Elements in an array can belong to any class.
 type ArrayObject struct {
-	class    *RClass
+	*baseObj
 	Elements []Object
 }
 
@@ -82,7 +82,7 @@ func (a *ArrayObject) shift() Object {
 }
 
 func (vm *VM) initArrayObject(elements []Object) *ArrayObject {
-	return &ArrayObject{Elements: elements, class: vm.builtInClasses[arrayClass]}
+	return &ArrayObject{Elements: elements, baseObj: &baseObj{class: vm.builtInClasses[arrayClass]}}
 }
 
 func (vm *VM) initArrayClass() *RClass {
