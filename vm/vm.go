@@ -140,7 +140,9 @@ func (vm *VM) InitForREPL() {
 	vm.SetClassISIndexTable("")
 	vm.SetMethodISIndexTable("")
 	vm.replMode = true
-	cf := newCallFrame(&instructionSet{})
+
+	// REPL should maintain a base call frame so that the whole program won't exit
+	cf := newCallFrame(&instructionSet{name: "REPL base"})
 	cf.self = vm.mainObj
 	vm.mainThread.callFrameStack.push(cf)
 }

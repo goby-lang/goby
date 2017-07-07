@@ -69,6 +69,7 @@ func TestEvalInteger(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -118,7 +119,7 @@ func TestEvalIntegerFail(t *testing.T) {
 		`, newError("Can't yield without a block")},
 	}
 
-	for _, tt := range testsFail {
+	for i, tt := range testsFail {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		err, ok := evaluated.(*Error)
@@ -128,5 +129,6 @@ func TestEvalIntegerFail(t *testing.T) {
 		if err.Message != tt.expected.Message {
 			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
 		}
+		vm.checkCFP(t, i, 1)
 	}
 }

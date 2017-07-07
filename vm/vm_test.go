@@ -56,7 +56,7 @@ foo
 	}
 
 	for i, test := range tests {
-		v := New("./", []string{})
+		v := initTestVM()
 		v.InitForREPL()
 
 		for _, input := range test.inputs {
@@ -71,6 +71,8 @@ foo
 
 		evaluated := v.GetExecResult()
 		checkExpected(t, i, evaluated, test.expected)
+		// Because REPL should maintain a base call frame so that the whole program won't exit
+		v.checkCFP(t, i, 1)
 	}
 }
 
@@ -90,9 +92,9 @@ func (v *VM) testEval(t *testing.T, input string) Object {
 	return v.mainThread.stack.top().Target
 }
 
-func (v *VM) inspectCFP(t *testing.T, index, expectedCFP int) {
+func (v *VM) checkCFP(t *testing.T, index, expectedCFP int) {
 	if v.mainThread.cfp != expectedCFP {
-		t.Fatalf("Expect main thread's cfp to be %d. got: %d", expectedCFP, v.mainThread.cfp)
+		t.Fatalf("At case %d expect main thread's cfp to be %d. got: %d", index, expectedCFP, v.mainThread.cfp)
 	}
 }
 

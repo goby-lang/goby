@@ -28,6 +28,7 @@ func TestReturnStatementEvaluation(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -77,6 +78,8 @@ func TestDefStatement(t *testing.T) {
 			t.Errorf("expect method %s to have %d parameters. got=%d", method.Name, len(expectedMethod.params), method.argc)
 		}
 	}
+
+	vm.checkCFP(t, 0, 0)
 }
 
 func TestModuleStatement(t *testing.T) {
@@ -139,6 +142,7 @@ func TestModuleStatement(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -181,6 +185,7 @@ func TestWhileStatement(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -229,5 +234,6 @@ func TestNextStatement(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }

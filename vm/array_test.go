@@ -11,6 +11,7 @@ func TestArrayEvaluation(t *testing.T) {
 
 	vm := initTestVM()
 	evaluated := vm.testEval(t, input)
+	vm.checkCFP(t, 0, 0)
 
 	arr, ok := evaluated.(*ArrayObject)
 	if !ok {
@@ -50,6 +51,7 @@ func TestArrayLengthMethod(t *testing.T) {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
 	}
 }
 
@@ -79,6 +81,7 @@ func TestArrayPopMethod(t *testing.T) {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
 	}
 }
 
@@ -119,6 +122,7 @@ func TestArrayPushMethod(t *testing.T) {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
 	}
 }
 
@@ -148,6 +152,7 @@ func TestArrayShiftMethod(t *testing.T) {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
 	}
 }
 
@@ -162,16 +167,20 @@ func TestArrayShiftMethodFail(t *testing.T) {
 		`, newError("Expect 0 argument. got=4")},
 	}
 
-	for _, tt := range testsFail {
+	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input)
+
 		err, ok := evaluated.(*Error)
+
 		if !ok {
 			t.Errorf("Expect error. got=%T (%+v)", err, err)
 		}
 		if err.Message != tt.expected.Message {
 			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
 		}
+
+		v.checkCFP(t, i, 1)
 	}
 }
 
@@ -280,6 +289,7 @@ func TestArrayIndex(t *testing.T) {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
 	}
 }
 
@@ -301,6 +311,7 @@ func TestArrayEachMethod(t *testing.T) {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
 	}
 }
 
@@ -322,6 +333,7 @@ func TestArrayEachIndexMethod(t *testing.T) {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
 	}
 }
 
@@ -354,6 +366,7 @@ func TestArrayMapMethod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		testArrayObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -386,6 +399,7 @@ func TestArraySelectMethod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		testArrayObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -408,6 +422,7 @@ func TestArrayClearMethod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		testArrayObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -434,6 +449,7 @@ func TestArrayConcatMethod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		testArrayObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -452,7 +468,7 @@ func TestArrayConcatMethodFail(t *testing.T) {
 		`, newError("Expect argument to be Array. got=*vm.StringObject")},
 	}
 
-	for _, tt := range testsFail {
+	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input)
 		err, ok := evaluated.(*Error)
@@ -462,6 +478,8 @@ func TestArrayConcatMethodFail(t *testing.T) {
 		if err.Message != tt.expected.Message {
 			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
 		}
+
+		v.checkCFP(t, i, 1)
 	}
 }
 
@@ -508,6 +526,7 @@ func TestArrayCountMethod(t *testing.T) {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
 	}
 }
 
@@ -522,7 +541,7 @@ func TestArrayCountMethodFail(t *testing.T) {
 		`, newError("Expect one argument. got=2")},
 	}
 
-	for _, tt := range testsFail {
+	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input)
 
@@ -530,6 +549,8 @@ func TestArrayCountMethodFail(t *testing.T) {
 		if !ok || err.Class.ReturnName() != ArgumentError {
 			t.Errorf("Expect ArgumentError. got=%T (%+v)", err, err)
 		}
+
+		v.checkCFP(t, i, 1)
 	}
 }
 
@@ -552,6 +573,7 @@ func TestArrayRotateMethod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		testArrayObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -566,7 +588,7 @@ func TestArrayRotateMethodFail(t *testing.T) {
 		`, newError("Expect index argument to be Integer. got=*vm.StringObject")},
 	}
 
-	for _, tt := range testsFail {
+	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input)
 		err, ok := evaluated.(*Error)
@@ -576,6 +598,8 @@ func TestArrayRotateMethodFail(t *testing.T) {
 		if err.Message != tt.expected.Message {
 			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
 		}
+
+		v.checkCFP(t, i, 1)
 	}
 }
 
@@ -594,6 +618,7 @@ func TestArrayFirstMethod(t *testing.T) {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
 	}
 
 	testsArray := []struct {
@@ -614,6 +639,7 @@ func TestArrayFirstMethod(t *testing.T) {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input)
 		testArrayObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
 	}
 }
 
@@ -628,7 +654,7 @@ func TestArrayFirstMethodFail(t *testing.T) {
 		`, newError("Expect index argument to be Integer. got=*vm.StringObject")},
 	}
 
-	for _, tt := range testsFail {
+	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input)
 		err, ok := evaluated.(*Error)
@@ -638,6 +664,7 @@ func TestArrayFirstMethodFail(t *testing.T) {
 		if err.Message != tt.expected.Message {
 			t.Errorf("Expect error message \"%s\". got=\"%s\"", err.Message, tt.expected.Message)
 		}
+		v.checkCFP(t, i, 1)
 	}
 }
 
@@ -660,6 +687,7 @@ func TestArrayLastMethod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		testArrayObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -674,7 +702,7 @@ func TestArrayLastMethodFail(t *testing.T) {
 		`, newError("Expect index argument to be Integer. got=*vm.StringObject")},
 	}
 
-	for _, tt := range testsFail {
+	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input)
 		err, ok := evaluated.(*Error)
@@ -684,5 +712,6 @@ func TestArrayLastMethodFail(t *testing.T) {
 		if err.Message != tt.expected.Message {
 			t.Errorf("Expect error message \"%s\". got=\"%s\"", err.Message, tt.expected.Message)
 		}
+		v.checkCFP(t, i, 1)
 	}
 }

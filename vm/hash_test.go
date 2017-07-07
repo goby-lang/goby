@@ -37,10 +37,11 @@ func TestHashToJSONWithArray(t *testing.T) {
 		}},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		compareJSONResult(t, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -85,10 +86,11 @@ func TestHashToJSONWithNestedHash(t *testing.T) {
 		}},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		compareJSONResult(t, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -144,10 +146,11 @@ func TestHashToJSONWithBasicTypes(t *testing.T) {
 		}},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		compareJSONResult(t, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -168,6 +171,7 @@ func TestHashLength(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -194,6 +198,8 @@ func TestEvalHashExpression(t *testing.T) {
 			testBooleanObject(t, 0, value, true)
 		}
 	}
+
+	vm.checkCFP(t, 0, 0)
 }
 
 func TestEvalHashAccess(t *testing.T) {
@@ -250,6 +256,7 @@ func TestEvalHashAccess(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 

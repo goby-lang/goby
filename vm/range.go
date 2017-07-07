@@ -271,10 +271,19 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 						return newError("Step can't be negative")
 					}
 
-					for i := ran.Start; i <= ran.End; i += stepValue {
-						obj := t.vm.initIntegerObject(i)
-						t.builtInMethodYield(blockFrame, obj)
+					// range end must greater or equal than range start to execute the block
+					if ran.End >= ran.Start {
+						for i := ran.Start; i <= ran.End; i += stepValue {
+							obj := t.vm.initIntegerObject(i)
+							t.builtInMethodYield(blockFrame, obj)
+						}
+
+						return ran
 					}
+
+					// if block is not used, it should be popped
+					t.callFrameStack.pop()
+
 					return ran
 				}
 			},

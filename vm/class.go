@@ -520,6 +520,10 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 						newT.builtInMethodYield(blockFrame, args...)
 					}()
 
+					// We need to pop this frame from main thread manually,
+					// because the block's 'leave' instruction is running on other process
+					t.callFrameStack.pop()
+
 					return NULL
 				}
 			},

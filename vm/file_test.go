@@ -31,6 +31,7 @@ func TestFileDeletion(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -76,6 +77,7 @@ func TestFileWrite(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -124,6 +126,7 @@ func TestFileObject(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -146,6 +149,7 @@ func TestExtnameMethod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -164,6 +168,7 @@ func TestBasenameMethod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -182,6 +187,7 @@ func TestSplitMethod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		testArrayObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -208,6 +214,7 @@ func TestJoinMethod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -221,6 +228,7 @@ func TestSizeMethod(t *testing.T) {
 	vm := initTestVM()
 	evaluated := vm.testEval(t, input)
 	checkExpected(t, 0, evaluated, 22)
+	vm.checkCFP(t, 0, 0)
 }
 
 //@TODO add test for chmod form a847c8b41f29657b380c1731ec36a660dbf49bc4

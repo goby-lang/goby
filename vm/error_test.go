@@ -33,7 +33,7 @@ func TestUndefinedMethodError(t *testing.T) {
 		`, "UndefinedMethodError: Undefined Method 'bar=' for <Instance of: Foo>"},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		err, ok := evaluated.(*Error)
@@ -49,6 +49,8 @@ func TestUndefinedMethodError(t *testing.T) {
 		if err.Message != tt.errorMsg {
 			t.Errorf("Expected error message: %s\nGot: %s\n", tt.errorMsg, err.Message)
 		}
+
+		vm.checkCFP(t, i, 1)
 	}
 }
 
@@ -94,6 +96,8 @@ func TestArgumentError(t *testing.T) {
 	if err.Class.ReturnName() != ArgumentError {
 		t.Errorf("Expect %s. got=%T (%+v)", ArgumentError, evaluated, evaluated)
 	}
+
+	vm.checkCFP(t, 0, 1)
 }
 
 func TestTypeError(t *testing.T) {
@@ -106,4 +110,5 @@ func TestTypeError(t *testing.T) {
 	if err.Class.ReturnName() != TypeError {
 		t.Errorf("Expect %s. got=%T (%+v)", TypeError, evaluated, evaluated)
 	}
+	vm.checkCFP(t, 0, 1)
 }
