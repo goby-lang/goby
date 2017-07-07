@@ -21,63 +21,6 @@ const (
 	methodClass  = "method"
 )
 
-func initClassClass() *RClass {
-	classClass := &RClass{
-		BaseClass: &BaseClass{
-			Name:         "Class",
-			Methods:      newEnvironment(),
-			ClassMethods: newEnvironment(),
-			constants:    make(map[string]*Pointer),
-		},
-	}
-
-	classClass.setBuiltInMethods(builtinCommonInstanceMethods(), false)
-	classClass.setBuiltInMethods(builtinCommonInstanceMethods(), true)
-	classClass.setBuiltInMethods(builtinClassClassMethods(), true)
-
-	return classClass
-}
-
-func initObjectClass(c *RClass) *RClass {
-	objectClass := &RClass{
-		BaseClass: &BaseClass{
-			Name:         "Object",
-			Class:        c,
-			ClassMethods: newEnvironment(),
-			Methods:      newEnvironment(),
-			constants:    make(map[string]*Pointer),
-		},
-	}
-
-	objectClass.setBuiltInMethods(builtinCommonInstanceMethods(), false)
-
-	return objectClass
-}
-
-// initializeClass initializes and returns a class instance with given class name
-func (vm *VM) initializeClass(name string, isModule bool) *RClass {
-	class := &RClass{BaseClass: vm.createBaseClass(name)}
-	class.isModule = isModule
-
-	return class
-}
-
-func (vm *VM) createBaseClass(className string) *BaseClass {
-	classClass := vm.builtInClasses[classClass]
-	objectClass := vm.builtInClasses[objectClass]
-
-	return &BaseClass{
-		Name:             className,
-		Methods:          newEnvironment(),
-		ClassMethods:     newEnvironment(),
-		Class:            classClass,
-		pseudoSuperClass: objectClass,
-		superClass:       objectClass,
-		constants:        make(map[string]*Pointer),
-		isModule:         false,
-	}
-}
-
 // Class is a built-in class, and also a parent superclass of Goby's built-in classes
 // such as String/Array/Integer.
 // Class class contains common basic class methods for any other built-in/user-defined classes.
@@ -135,6 +78,64 @@ type BaseClass struct {
 	isModule  bool
 	constants map[string]*Pointer
 	scope     Class
+	*baseObj
+}
+
+func initClassClass() *RClass {
+	classClass := &RClass{
+		BaseClass: &BaseClass{
+			Name:         classClass,
+			Methods:      newEnvironment(),
+			ClassMethods: newEnvironment(),
+			constants:    make(map[string]*Pointer),
+		},
+	}
+
+	classClass.setBuiltInMethods(builtinCommonInstanceMethods(), false)
+	classClass.setBuiltInMethods(builtinCommonInstanceMethods(), true)
+	classClass.setBuiltInMethods(builtinClassClassMethods(), true)
+
+	return classClass
+}
+
+func initObjectClass(c *RClass) *RClass {
+	objectClass := &RClass{
+		BaseClass: &BaseClass{
+			Name:         objectClass,
+			Class:        c,
+			ClassMethods: newEnvironment(),
+			Methods:      newEnvironment(),
+			constants:    make(map[string]*Pointer),
+		},
+	}
+
+	objectClass.setBuiltInMethods(builtinCommonInstanceMethods(), false)
+
+	return objectClass
+}
+
+// initializeClass initializes and returns a class instance with given class name
+func (vm *VM) initializeClass(name string, isModule bool) *RClass {
+	class := &RClass{BaseClass: vm.createBaseClass(name)}
+	class.isModule = isModule
+
+	return class
+}
+
+func (vm *VM) createBaseClass(className string) *BaseClass {
+	classClass := vm.builtInClasses[classClass]
+	objectClass := vm.builtInClasses[objectClass]
+
+	return &BaseClass{
+		Name:             className,
+		Methods:          newEnvironment(),
+		ClassMethods:     newEnvironment(),
+		pseudoSuperClass: objectClass,
+		superClass:       objectClass,
+		constants:        make(map[string]*Pointer),
+		isModule:         false,
+		baseObj:          &baseObj{Class: classClass, InstanceVariables: newEnvironment()},
+	}
 }
 
 // toString returns the basic inspected result (which is class name) of current class
