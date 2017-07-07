@@ -26,7 +26,7 @@ func (i *IntegerObject) toJSON() string {
 	return i.toString()
 }
 
-func (i *IntegerObject) returnClass() Class {
+func (i *IntegerObject) returnClass() *RClass {
 	return i.Class
 }
 

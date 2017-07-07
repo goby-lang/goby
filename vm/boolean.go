@@ -29,7 +29,7 @@ func (b *BooleanObject) toJSON() string {
 }
 
 // returnClass returns boolean object's class, which is RBool
-func (b *BooleanObject) returnClass() Class {
+func (b *BooleanObject) returnClass() *RClass {
 	return b.Class
 }
 

@@ -38,7 +38,7 @@ func (s *StringObject) toJSON() string {
 	return "\"" + s.Value + "\""
 }
 
-func (s *StringObject) returnClass() Class {
+func (s *StringObject) returnClass() *RClass {
 	if s.Class == nil {
 		panic(fmt.Sprintf("String %s doesn't have class.", s.toString()))
 	}

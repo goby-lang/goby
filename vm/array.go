@@ -44,7 +44,7 @@ func (a *ArrayObject) toJSON() string {
 }
 
 // returnClass returns current object's class, which is RArray
-func (a *ArrayObject) returnClass() Class {
+func (a *ArrayObject) returnClass() *RClass {
 	return a.Class
 }
 

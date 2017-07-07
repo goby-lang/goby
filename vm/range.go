@@ -38,7 +38,7 @@ func (ro *RangeObject) toJSON() string {
 	return ro.toString()
 }
 
-func (ro *RangeObject) returnClass() Class {
+func (ro *RangeObject) returnClass() *RClass {
 	return ro.Class
 }
 

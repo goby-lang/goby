@@ -32,7 +32,7 @@ func (f *FileObject) toJSON() string {
 }
 
 // returnClass returns current object's class, which is RArray
-func (f *FileObject) returnClass() Class {
+func (f *FileObject) returnClass() *RClass {
 	return f.Class
 }
 

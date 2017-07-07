@@ -59,7 +59,7 @@ func (e *Error) toJSON() string {
 	return e.toString()
 }
 
-func (e *Error) returnClass() Class {
+func (e *Error) returnClass() *RClass {
 	return e.Class
 }
 

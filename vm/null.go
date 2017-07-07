@@ -21,7 +21,7 @@ func (n *NullObject) toJSON() string {
 	return "null"
 }
 
-func (n *NullObject) returnClass() Class {
+func (n *NullObject) returnClass() *RClass {
 	return n.Class
 }
 

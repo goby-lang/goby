@@ -263,7 +263,7 @@ var builtInActions = map[operationType]*action{
 			case *RClass:
 				self.Methods.set(methodName, method)
 			default:
-				self.returnClass().(*RClass).Methods.set(methodName, method)
+				self.returnClass().Methods.set(methodName, method)
 			}
 		},
 	},
@@ -347,7 +347,7 @@ var builtInActions = map[operationType]*action{
 			receiver := t.stack.Data[receiverPr].Target
 
 			switch r := receiver.(type) {
-			case Class:
+			case *RClass:
 				method = r.lookupClassMethod(methodName)
 			default:
 				method = r.returnClass().lookupInstanceMethod(methodName)

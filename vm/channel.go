@@ -61,7 +61,7 @@ func (co *ChannelObject) toJSON() string {
 	return co.toString()
 }
 
-func (co *ChannelObject) returnClass() Class {
+func (co *ChannelObject) returnClass() *RClass {
 	return co.Class
 }
 

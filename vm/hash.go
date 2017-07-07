@@ -54,7 +54,7 @@ func (h *HashObject) toString() string {
 	return out.String()
 }
 
-func (h *HashObject) returnClass() Class {
+func (h *HashObject) returnClass() *RClass {
 	return h.Class
 }
 

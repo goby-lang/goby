@@ -6,7 +6,7 @@ import (
 
 // Object represents all objects in Goby, including Array, Integer or even Method and Error.
 type Object interface {
-	returnClass() Class
+	returnClass() *RClass
 	toString() string
 	toJSON() string
 }
@@ -41,7 +41,7 @@ func (ro *RObject) toJSON() string {
 }
 
 // returnClass will return object's class
-func (ro *RObject) returnClass() Class {
+func (ro *RObject) returnClass() *RClass {
 	if ro.Class == nil {
 		panic(fmt.Sprintf("Object %s doesn't have class.", ro.toString()))
 	}
@@ -64,7 +64,7 @@ func (ro *RObject) instanceVariableSet(name string, value Object) Object {
 	return value
 }
 
-func checkArgumentLen(args []Object, class Class, methodName string) *Error {
+func checkArgumentLen(args []Object, class *RClass, methodName string) *Error {
 	if len(args) > 1 {
 		return &Error{Message: fmt.Sprintf("Too many arguments for %s#%s", class.ReturnName(), methodName)}
 	}
@@ -72,6 +72,6 @@ func checkArgumentLen(args []Object, class Class, methodName string) *Error {
 	return nil
 }
 
-func wrongTypeError(c Class) *Error {
+func wrongTypeError(c *RClass) *Error {
 	return &Error{Message: fmt.Sprintf("expect argument to be %s type", c.ReturnName())}
 }

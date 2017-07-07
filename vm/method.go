@@ -31,7 +31,7 @@ func (m *MethodObject) toJSON() string {
 	return m.toString()
 }
 
-func (m *MethodObject) returnClass() Class {
+func (m *MethodObject) returnClass() *RClass {
 	return m.class
 }
 
@@ -53,6 +53,6 @@ func (bim *BuiltInMethodObject) toJSON() string {
 	return bim.toString()
 }
 
-func (bim *BuiltInMethodObject) returnClass() Class {
+func (bim *BuiltInMethodObject) returnClass() *RClass {
 	return bim.class
 }

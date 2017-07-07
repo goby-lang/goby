@@ -21,38 +21,6 @@ const (
 	methodClass  = "method"
 )
 
-// Class is a built-in class, and also a parent superclass of Goby's built-in classes
-// such as String/Array/Integer.
-// Class class contains common basic class methods for any other built-in/user-defined classes.
-//
-// **Note**: You can add methods to Class or override methods from Class, but you should avoid except for a final resort:
-//
-// ```ruby
-// class Class
-//   def my_method # adding method
-//     49
-//   end
-//   def name      # overriding method
-//     "foo"
-//   end
-// end
-// puts("string".my_method)  # => 49
-// puts("string".name)       # => foo
-// ```
-//
-type Class interface {
-	// Class is an interface that implements a class's basic functions.
-	// - lookupClassMethod: search for current class's class method with given name.
-	// - lookupInstanceMethod: search for current class's instance method with given name.
-	// - ReturnName returns class's name
-	lookupClassMethod(string) Object
-	lookupInstanceMethod(string) Object
-	lookupConstant(string, bool) *Pointer
-	ReturnName() string
-	returnSuperClass() Class
-	Object
-}
-
 // RClass represents normal (not built in) class object
 type RClass struct {
 	// Name is the class's name
@@ -72,7 +40,7 @@ type RClass struct {
 	Singleton bool
 	isModule  bool
 	constants map[string]*Pointer
-	scope     Class
+	scope     *RClass
 	*baseObj
 }
 
@@ -206,7 +174,7 @@ func (c *RClass) lookupConstant(constName string, findInScope bool) *Pointer {
 	return constant
 }
 
-func (c *RClass) returnClass() Class {
+func (c *RClass) returnClass() *RClass {
 	return c.Class
 }
 
@@ -215,7 +183,7 @@ func (c *RClass) ReturnName() string {
 	return c.Name
 }
 
-func (c *RClass) returnSuperClass() Class {
+func (c *RClass) returnSuperClass() *RClass {
 	return c.pseudoSuperClass
 }
 
@@ -774,7 +742,7 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-					name := receiver.(Class).ReturnName()
+					name := receiver.(*RClass).ReturnName()
 					nameString := t.vm.initStringObject(name)
 					return nameString
 				}
@@ -812,9 +780,9 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 			Name: "superclass",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					c := receiver.(Class).returnSuperClass()
+					c := receiver.(*RClass).returnSuperClass()
 
-					if c.(*RClass) == nil {
+					if c == nil {
 						return NULL
 					}
 
