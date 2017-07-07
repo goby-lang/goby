@@ -56,7 +56,7 @@ foo
 	}
 
 	for i, test := range tests {
-		v := New("./", []string{})
+		v := initTestVM()
 		v.InitForREPL()
 
 		for _, input := range test.inputs {
@@ -71,6 +71,8 @@ foo
 
 		evaluated := v.GetExecResult()
 		checkExpected(t, i, evaluated, test.expected)
+		// Because REPL should maintain a base call frame so that the whole program won't exit
+		v.checkCFP(t, i, 1)
 	}
 }
 
