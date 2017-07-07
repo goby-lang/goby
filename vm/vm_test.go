@@ -3,7 +3,6 @@ package vm
 import (
 	"github.com/goby-lang/goby/compiler"
 	"testing"
-	"fmt"
 )
 
 func TestVM_REPLExec(t *testing.T) {
@@ -91,20 +90,10 @@ func (v *VM) testEval(t *testing.T, input string) Object {
 	return v.mainThread.stack.top().Target
 }
 
-func testEval(t *testing.T, input string) Object {
-	iss, err := compiler.CompileToInstructions(input)
-
-	if err != nil {
-		t.Fatal(err.Error())
+func (v *VM) inspectCFP(t *testing.T, index, expectedCFP int) {
+	if v.mainThread.cfp != expectedCFP {
+		t.Fatalf("Expect main thread's cfp to be %d. got: %d", expectedCFP, v.mainThread.cfp)
 	}
-
-	v := New("./", []string{})
-
-	v.ExecInstructions(iss, "./")
-
-	r := v.mainThread.stack.top()
-
-	return r.Target
 }
 
 func testIntegerObject(t *testing.T, i int, obj Object, expected int) bool {

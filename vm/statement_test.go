@@ -4,49 +4,6 @@ import (
 	"testing"
 )
 
-func TestComment(t *testing.T) {
-	input := `
-	# Comment
-	class Foo
-		# Comment
-		def one # Comment
-			# Comment
-			1 # Comment
-			# Comment
-		end
-		# Comment
-
-		def bar(x) # Comment
-		  123
-		end  # Comment
-	end
-	# Comment
-	Foo.new.one #=> Comment
-	# Comment`
-
-	evaluated := testEval(t, input)
-	testIntegerObject(t, 0, evaluated, 1)
-}
-
-func TestAssignStatementEvaluation(t *testing.T) {
-	tests := []struct {
-		input         string
-		expectedValue int
-	}{
-		{"a = 5; a;", 5},
-		{"a = 5 * 5; a;", 25},
-		{"a = 5; b = a; b;", 5},
-		{"a = 5; b = a; c = a + b + 5; c;", 15},
-		{"a = 5; b = 10; c = if a > b; 100 else 50 end; c", 50},
-		{"Bar = 100; Bar", 100},
-	}
-
-	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
-		testIntegerObject(t, i, evaluated, tt.expectedValue)
-	}
-}
-
 func TestReturnStatementEvaluation(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -68,7 +25,8 @@ func TestReturnStatementEvaluation(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
@@ -91,7 +49,8 @@ func TestDefStatement(t *testing.T) {
 		Foo
 	`
 
-	evaluated := testEval(t, input)
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input)
 	class := evaluated.(*RClass)
 
 	expectedMethods := []struct {
@@ -177,7 +136,8 @@ func TestModuleStatement(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
@@ -218,7 +178,56 @@ func TestWhileStatement(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+	}
+}
+
+func TestNextStatement(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		x = 0
+		y = 0
+
+		while x < 10 do
+		  x = x + 1
+		  if x == 5
+		    next
+		  end
+		  y = y + 1
+		end
+
+		x + y
+		`, 19},
+		{`
+		x = 0
+		y = 0
+		i = 0
+
+		while x < 10 do
+		  x = x + 1
+		  while y < 5 do
+		    y = y + 1
+
+		    if y == 3
+		      next
+		    end
+
+		    i = i + x * y
+		  end
+		end
+
+		i
+		`, 12},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }

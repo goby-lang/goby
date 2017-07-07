@@ -28,7 +28,8 @@ func TestFileDeletion(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
@@ -72,7 +73,8 @@ func TestFileWrite(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
@@ -119,7 +121,8 @@ func TestFileObject(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
@@ -140,7 +143,8 @@ func TestExtnameMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
@@ -157,7 +161,8 @@ func TestBasenameMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
@@ -200,7 +205,8 @@ func TestJoinMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
@@ -212,7 +218,8 @@ func TestSizeMethod(t *testing.T) {
 	File.size("../test_fixtures/file_test/size.gb")
 	`
 
-	evaluated := testEval(t, input)
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input)
 	checkExpected(t, 0, evaluated, 22)
 }
 

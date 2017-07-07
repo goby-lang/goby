@@ -9,7 +9,8 @@ func TestArrayEvaluation(t *testing.T) {
 	[1, "234", true]
 	`
 
-	evaluated := testEval(t, input)
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input)
 
 	arr, ok := evaluated.(*ArrayObject)
 	if !ok {

@@ -37,7 +37,8 @@ func TestObjectMutationInThread(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
@@ -129,7 +130,8 @@ func TestObjectDeliveryBetweenThread(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }

@@ -4,90 +4,29 @@ import (
 	"testing"
 )
 
-func TestMethodCallWithDefaultArgValue(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{`
-		def foo(x = 10)
-		  x
+func TestComment(t *testing.T) {
+	input := `
+	# Comment
+	class Foo
+		# Comment
+		def one # Comment
+			# Comment
+			1 # Comment
+			# Comment
 		end
+		# Comment
 
-		foo
-		`, 10},
-		{`
-		def foo(x = 10, y)
-		  x + y
-		end
+		def bar(x) # Comment
+		  123
+		end  # Comment
+	end
+	# Comment
+	Foo.new.one #=> Comment
+	# Comment`
 
-		foo(100, 10)
-		`, 110},
-		{`
-		def foo(x, y = 10)
-		  x + y
-		end
-
-		foo(100)
-		`, 110},
-	}
-
-	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
-
-		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
-		}
-
-		checkExpected(t, i, evaluated, tt.expected)
-	}
-}
-
-func TestNextStatement(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{`
-		x = 0
-		y = 0
-
-		while x < 10 do
-		  x = x + 1
-		  if x == 5
-		    next
-		  end
-		  y = y + 1
-		end
-
-		x + y
-		`, 19},
-		{`
-		x = 0
-		y = 0
-		i = 0
-
-		while x < 10 do
-		  x = x + 1
-		  while y < 5 do
-		    y = y + 1
-
-		    if y == 3
-		      next
-		    end
-
-		    i = i + x * y
-		  end
-		end
-
-		i
-		`, 12},
-	}
-
-	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
-		checkExpected(t, i, evaluated, tt.expected)
-	}
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input)
+	testIntegerObject(t, 0, evaluated, 1)
 }
 
 func TestMethodCall(t *testing.T) {
@@ -231,7 +170,8 @@ func TestMethodCall(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 
 		if isError(evaluated) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
@@ -241,459 +181,42 @@ func TestMethodCall(t *testing.T) {
 	}
 }
 
-func TestClassMethodEvaluation(t *testing.T) {
+func TestMethodCallWithDefaultArgValue(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
 	}{
-		{
-			`
-			class Bar
-				def self.foo
-					10
-				end
-			end
-			Bar.foo;
-			`,
-			10,
-		},
-		{
-			`
-			class Bar
-				def self.foo
-					10
-				end
-			end
-			class Foo < Bar; end
-			class FooBar < Foo; end
-			FooBar.foo
-			`,
-			10,
-		},
-		{
-			`
-			class Foo
-				def self.foo
-					10
-				end
-			end
+		{`
+		def foo(x = 10)
+		  x
+		end
 
-			class Bar < Foo; end
-			Bar.foo
-			`,
-			10,
-		},
-		{
-			`
-			class Foo
-				def self.foo
-					10
-				end
-			end
+		foo
+		`, 10},
+		{`
+		def foo(x = 10, y)
+		  x + y
+		end
 
-			class Bar < Foo
-				def self.foo
-					100
-				end
-			end
-			Bar.foo
-			`,
-			100,
-		},
-		{
-			`
-			class Bar
-				def self.foo
-					bar
-				end
+		foo(100, 10)
+		`, 110},
+		{`
+		def foo(x, y = 10)
+		  x + y
+		end
 
-				def self.bar
-					100
-				end
-
-				def bar
-					1000
-				end
-			end
-			Bar.foo
-			`,
-			100,
-		},
-		{
-			`
-			# Test class method call inside class method.
-			class JobPosition
-				def initialize(name)
-					@name = name
-				end
-
-				def self.engineer
-					new("Engineer")
-				end
-
-				def name
-					@name
-				end
-			end
-			job = JobPosition.engineer
-			job.name
-			`,
-			"Engineer",
-		},
-		{
-			`
-			class Foo; end
-			Foo.new.class.name
-			`,
-			"Foo",
-		},
+		foo(100)
+		`, 110},
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
-		checkExpected(t, i, evaluated, tt.expected)
-	}
-}
-
-func TestSelfExpressionEvaluation(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected string
-	}{
-		{`self.class.name`, "Object"},
-		{
-			`
-			class Bar
-				def whoami
-					"Instance of " + self.class.name
-				end
-			end
-
-			Bar.new.whoami
-		`, "Instance of Bar"},
-		{
-			`
-			class Foo
-				Self = self
-
-				def get_self
-					Self
-				end
-			end
-
-			Foo.new.get_self.name
-			`,
-			"Foo"},
-		{
-			`
-			class Foo
-				def class
-					Foo
-				end
-			end
-
-			Foo.new.class.name
-			`,
-			"Foo"},
-		{
-			`
-			class Foo
-				def class_name
-					self.class.name
-				end
-			end
-
-			Foo.new.class_name
-			`,
-			"Foo"},
-	}
-
-	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 
 		if isError(evaluated) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 		}
 
-		checkExpected(t, i, evaluated, tt.expected)
-	}
-}
-
-func TestEvalInstanceVariable(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{`
-		class Foo
-			def set(x)
-				@x = x;
-			end
-
-			def get
-				@x
-			end
-
-			def double_get
-				self.get() * 2;
-			end
-		end
-
-		class Bar
-			def set(x)
-				@x = x;
-			end
-
-			def get
-				@x
-			end
-		end
-
-		f1 = Foo.new
-		f1.set(10)
-
-		f2 = Foo.new
-		f2.set(20)
-
-		b = Bar.new
-		b.set(10)
-
-		f2.double_get() + f1.get() + b.get()
-	`, 60},
-		{`
-		class Foo
-		  attr_reader("bar")
-		end
-
-		Foo.new.bar
-		`, nil},
-		{`
-		class Foo
-		  def bar
-		    @x
-		  end
-		end
-
-		Foo.new.bar
-		`, nil},
-	}
-
-	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
-
-		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
-		}
-
-		checkExpected(t, i, evaluated, tt.expected)
-	}
-}
-
-func TestEvalInstanceMethodCall(t *testing.T) {
-	input := `
-
-		class Bar
-			def set(x)
-				@x = x
-			end
-		end
-
-		class Foo < Bar
-			def add(x, y)
-				x + y
-			end
-		end
-
-		class FooBar < Foo
-			def get
-				@x
-			end
-		end
-
-		fb = FooBar.new
-		fb.set(100)
-		fb.add(10, fb.get)
-	`
-
-	evaluated := testEval(t, input)
-
-	if isError(evaluated) {
-		t.Fatalf("got Error: %s", evaluated.(*Error).Message)
-	}
-
-	result, ok := evaluated.(*IntegerObject)
-
-	if !ok {
-		t.Errorf("expect result to be an integer. got=%T", evaluated)
-	}
-
-	if result.Value != 110 {
-		t.Errorf("expect result to be 110. got=%d", result.Value)
-	}
-}
-
-func TestEvalMethodInheritance(t *testing.T) {
-	input := `
-		class Foo
-			def add(x, y)
-				x + y
-			end
-		end
-		Foo.new.add(10, 11)
-	`
-
-	evaluated := testEval(t, input)
-
-	if isError(evaluated) {
-		t.Fatalf("got Error: %s", evaluated.(*Error).Message)
-	}
-
-	result, ok := evaluated.(*IntegerObject)
-
-	if !ok {
-		t.Errorf("expect result to be an integer. got=%T", evaluated)
-	}
-
-	if result.Value != 21 {
-		t.Errorf("expect result to be 21. got=%d", result.Value)
-	}
-}
-
-func TestEvalClassInheritance(t *testing.T) {
-	input := `
-		class Bar
-		end
-
-		class Foo < Bar
-		  def self.add
-		    10
-		  end
-		end
-
-		Foo.superclass.name
-	`
-
-	evaluated := testEval(t, input)
-
-	testStringObject(t, 0, evaluated, "Bar")
-}
-
-func TestEvalIfExpression(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{
-			`
-			if 10 > 5
-				100
-			else
-				-10
-			end
-			`,
-			100,
-		},
-		{
-			`
-			if 5 != 5
-				false
-			else
-				true
-			end
-			`,
-			true,
-		},
-		{"if true; 10 end", 10},
-		{"if false; 10 end", nil},
-		{"if 1; 10; end", 10},
-		{"if 1 < 2; 10 end", 10},
-		{"if 1 > 2; 10 end", nil},
-		{"if 1 > 2; 10 else 20 end", 20},
-		{"if 1 < 2; 10 else 20 end", 10},
-		{"if nil; 10 else 20 end", 20},
-		{`
-		if false
-		  x = 1
-		end
-
-		x
-		`, nil},
-	}
-
-	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
-
-		switch tt.expected.(type) {
-		case int64:
-			testIntegerObject(t, i, evaluated, tt.expected.(int))
-		case bool:
-			testBooleanObject(t, i, evaluated, tt.expected.(bool))
-		case nil:
-			testNullObject(t, i, evaluated)
-		}
-	}
-}
-
-func TestEvalPostfix(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected int
-	}{
-		{"1++", 2},
-		{"10--", 9},
-		{"0--", -1},
-		{"-5++", -4},
-		{`
-		a = 10
-		a ++
-		`, 11},
-		{`
-		a = 10
-		a --
-		`, 9},
-		{`
-		(1 + 2 * 3)++
-		`, 8},
-	}
-
-	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
-		checkExpected(t, i, evaluated, tt.expected)
-	}
-}
-
-func TestEvalBangPrefixExpression(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected bool
-	}{
-		{"!5", false},
-		{"!true", false},
-		{"!false", true},
-		{"!!true", true},
-		{"!!false", false},
-		{"!!5", true},
-	}
-
-	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
-		checkExpected(t, i, evaluated, tt.expected)
-	}
-}
-
-func TestEvalMinusPrefixExpression(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected int
-	}{
-		{"-5", -5},
-		{"-10", -10},
-		{"-(-10)", 10},
-		{"-(-5)", 5},
-	}
-
-	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
@@ -831,7 +354,8 @@ func TestMethodCallWithBlockArgument(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
@@ -934,7 +458,8 @@ func TestMethodCallWithNestedBlock(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
 }
@@ -1129,7 +654,8 @@ func TestMethodCallWithoutParens(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaluated := testEval(t, tt.input)
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
 
 		if isError(evaluated) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
@@ -1137,4 +663,462 @@ func TestMethodCallWithoutParens(t *testing.T) {
 
 		checkExpected(t, i, evaluated, tt.expected)
 	}
+}
+
+func TestClassMethodCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			`
+			class Bar
+				def self.foo
+					10
+				end
+			end
+			Bar.foo;
+			`,
+			10,
+		},
+		{
+			`
+			class Bar
+				def self.foo
+					10
+				end
+			end
+			class Foo < Bar; end
+			class FooBar < Foo; end
+			FooBar.foo
+			`,
+			10,
+		},
+		{
+			`
+			class Foo
+				def self.foo
+					10
+				end
+			end
+
+			class Bar < Foo; end
+			Bar.foo
+			`,
+			10,
+		},
+		{
+			`
+			class Foo
+				def self.foo
+					10
+				end
+			end
+
+			class Bar < Foo
+				def self.foo
+					100
+				end
+			end
+			Bar.foo
+			`,
+			100,
+		},
+		{
+			`
+			class Bar
+				def self.foo
+					bar
+				end
+
+				def self.bar
+					100
+				end
+
+				def bar
+					1000
+				end
+			end
+			Bar.foo
+			`,
+			100,
+		},
+		{
+			`
+			# Test class method call inside class method.
+			class JobPosition
+				def initialize(name)
+					@name = name
+				end
+
+				def self.engineer
+					new("Engineer")
+				end
+
+				def name
+					@name
+				end
+			end
+			job = JobPosition.engineer
+			job.name
+			`,
+			"Engineer",
+		},
+		{
+			`
+			class Foo; end
+			Foo.new.class.name
+			`,
+			"Foo",
+		},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+	}
+}
+
+func TestInstanceMethodCall(t *testing.T) {
+	input := `
+
+		class Bar
+			def set(x)
+				@x = x
+			end
+		end
+
+		class Foo < Bar
+			def add(x, y)
+				x + y
+			end
+		end
+
+		class FooBar < Foo
+			def get
+				@x
+			end
+		end
+
+		fb = FooBar.new
+		fb.set(100)
+		fb.add(10, fb.get)
+	`
+
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input)
+
+	if isError(evaluated) {
+		t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+	}
+
+	result, ok := evaluated.(*IntegerObject)
+
+	if !ok {
+		t.Errorf("expect result to be an integer. got=%T", evaluated)
+	}
+
+	if result.Value != 110 {
+		t.Errorf("expect result to be 110. got=%d", result.Value)
+	}
+}
+
+func TestPostfixMethodCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{"1++", 2},
+		{"10--", 9},
+		{"0--", -1},
+		{"-5++", -4},
+		{`
+		a = 10
+		a ++
+		`, 11},
+		{`
+		a = 10
+		a --
+		`, 9},
+		{`
+		(1 + 2 * 3)++
+		`, 8},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+	}
+}
+
+func TestBangPrefixMethodCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{"!5", false},
+		{"!true", false},
+		{"!false", true},
+		{"!!true", true},
+		{"!!false", false},
+		{"!!5", true},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+	}
+}
+
+func TestMinusPrefixMethodCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{"-5", -5},
+		{"-10", -10},
+		{"-(-10)", 10},
+		{"-(-5)", 5},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+	}
+}
+
+func TestSelfExpressionEvaluation(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`self.class.name`, "Object"},
+		{
+			`
+			class Bar
+				def whoami
+					"Instance of " + self.class.name
+				end
+			end
+
+			Bar.new.whoami
+		`, "Instance of Bar"},
+		{
+			`
+			class Foo
+				Self = self
+
+				def get_self
+					Self
+				end
+			end
+
+			Foo.new.get_self.name
+			`,
+			"Foo"},
+		{
+			`
+			class Foo
+				def class
+					Foo
+				end
+			end
+
+			Foo.new.class.name
+			`,
+			"Foo"},
+		{
+			`
+			class Foo
+				def class_name
+					self.class.name
+				end
+			end
+
+			Foo.new.class_name
+			`,
+			"Foo"},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+		}
+
+		checkExpected(t, i, evaluated, tt.expected)
+	}
+}
+
+func TestInstanceVariableEvaluation(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		class Foo
+			def set(x)
+				@x = x;
+			end
+
+			def get
+				@x
+			end
+
+			def double_get
+				self.get() * 2;
+			end
+		end
+
+		class Bar
+			def set(x)
+				@x = x;
+			end
+
+			def get
+				@x
+			end
+		end
+
+		f1 = Foo.new
+		f1.set(10)
+
+		f2 = Foo.new
+		f2.set(20)
+
+		b = Bar.new
+		b.set(10)
+
+		f2.double_get() + f1.get() + b.get()
+	`, 60},
+		{`
+		class Foo
+		  attr_reader("bar")
+		end
+
+		Foo.new.bar
+		`, nil},
+		{`
+		class Foo
+		  def bar
+		    @x
+		  end
+		end
+
+		Foo.new.bar
+		`, nil},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+		}
+
+		checkExpected(t, i, evaluated, tt.expected)
+	}
+}
+
+func TestAssignmentEvaluation(t *testing.T) {
+	tests := []struct {
+		input         string
+		expectedValue int
+	}{
+		{"a = 5; a;", 5},
+		{"a = 5 * 5; a;", 25},
+		{"a = 5; b = a; b;", 5},
+		{"a = 5; b = a; c = a + b + 5; c;", 15},
+		{"a = 5; b = 10; c = if a > b; 100 else 50 end; c", 50},
+		{"Bar = 100; Bar", 100},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		testIntegerObject(t, i, evaluated, tt.expectedValue)
+	}
+}
+
+func TestIfExpressionEvaluation(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			`
+			if 10 > 5
+				100
+			else
+				-10
+			end
+			`,
+			100,
+		},
+		{
+			`
+			if 5 != 5
+				false
+			else
+				true
+			end
+			`,
+			true,
+		},
+		{"if true; 10 end", 10},
+		{"if false; 10 end", nil},
+		{"if 1; 10; end", 10},
+		{"if 1 < 2; 10 end", 10},
+		{"if 1 > 2; 10 end", nil},
+		{"if 1 > 2; 10 else 20 end", 20},
+		{"if 1 < 2; 10 else 20 end", 10},
+		{"if nil; 10 else 20 end", 20},
+		{`
+		if false
+		  x = 1
+		end
+
+		x
+		`, nil},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+
+		switch tt.expected.(type) {
+		case int64:
+			testIntegerObject(t, i, evaluated, tt.expected.(int))
+		case bool:
+			testBooleanObject(t, i, evaluated, tt.expected.(bool))
+		case nil:
+			testNullObject(t, i, evaluated)
+		}
+	}
+}
+
+func TestClassInheritance(t *testing.T) {
+	input := `
+		class Bar
+		end
+
+		class Foo < Bar
+		  def self.add
+		    10
+		  end
+		end
+
+		Foo.superclass.name
+	`
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input)
+
+	testStringObject(t, 0, evaluated, "Bar")
 }

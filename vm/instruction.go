@@ -429,11 +429,11 @@ var builtInActions = map[operationType]*action{
 	bytecode.Leave: {
 		name: bytecode.Leave,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
-			fmt.Println(t.callFrameStack.inspect())
-			fmt.Println("Before leave--------------------------------")
+			//fmt.Println(t.callFrameStack.inspect())
+			//fmt.Println("Before leave--------------------------------")
 			cf = t.callFrameStack.pop()
 			cf.pc = len(cf.instructionSet.instructions)
-			fmt.Println(t.callFrameStack.inspect())
+			//fmt.Println(t.callFrameStack.inspect())
 
 			/*
 				Remove top frame if it's a block frame

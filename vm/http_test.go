@@ -8,7 +8,7 @@ import (
 )
 
 func TestHTTPResponse(t *testing.T) {
-	script := `
+	input := `
 	require "net/http"
 
 	res = Net::HTTP::Response.new
@@ -19,7 +19,8 @@ func TestHTTPResponse(t *testing.T) {
 	res.body
 	`
 
-	evaluated := testEval(t, script)
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input)
 	checkExpected(t, 0, evaluated, "test")
 }
 
@@ -37,7 +38,8 @@ require "net/http"
 Net::HTTP.get("%s")
 `, ts.URL)
 
-	evaluated := testEval(t, testScript)
+	vm := initTestVM()
+	evaluated := vm.testEval(t, testScript)
 	checkExpected(t, 0, evaluated, expected)
 }
 
@@ -60,6 +62,7 @@ require "net/http"
 Net::HTTP.get("%s", "path")
 `, ts.URL)
 
-	evaluated := testEval(t, testScript)
+	vm := initTestVM()
+	evaluated := vm.testEval(t, testScript)
 	checkExpected(t, 0, evaluated, expected)
 }
