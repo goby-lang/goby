@@ -2,9 +2,9 @@ package bytecode
 
 import (
 	"bytes"
-	"github.com/goby-lang/goby/compiler/ast"
-	"regexp"
 	"strings"
+	
+	"github.com/goby-lang/goby/compiler/ast"
 )
 
 type scope struct {
@@ -50,8 +50,8 @@ func (g *Generator) GenerateByteCode(stmts []ast.Statement) string {
 	for _, is := range g.instructionSets {
 		out.WriteString(is.compile())
 	}
-
-	return strings.TrimSpace(removeEmptyLine(out.String()))
+	
+	return strings.TrimSpace(strings.Replace(out.String(), "\n\n", "\n", -1))
 }
 
 // GenerateInstructions returns compiled instructions
@@ -71,14 +71,4 @@ func (g *Generator) endInstructions(is *InstructionSet) {
 		return
 	}
 	is.define(Leave)
-}
-
-func removeEmptyLine(s string) string {
-	regex, err := regexp.Compile("\n+")
-	if err != nil {
-		panic(err)
-	}
-	s = regex.ReplaceAllString(s, "\n")
-
-	return s
 }
