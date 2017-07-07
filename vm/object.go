@@ -22,9 +22,13 @@ func (p *Pointer) returnClass() *RClass {
 
 // RObject represents any non built-in class's instance.
 type RObject struct {
+	*baseObj
+	InitializeMethod *MethodObject
+}
+
+type baseObj struct {
 	Class             *RClass
 	InstanceVariables *environment
-	InitializeMethod  *MethodObject
 }
 
 // toString tells which class it belongs to.

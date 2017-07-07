@@ -228,7 +228,7 @@ func (c *BaseClass) returnSuperClass() Class {
 }
 
 func (c *RClass) initializeInstance() *RObject {
-	instance := &RObject{Class: c, InstanceVariables: newEnvironment()}
+	instance := &RObject{baseObj: &baseObj{Class: c, InstanceVariables: newEnvironment()}}
 
 	return instance
 }

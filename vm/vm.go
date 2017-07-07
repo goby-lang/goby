@@ -136,7 +136,7 @@ func (vm *VM) SetMethodISIndexTable(fn filename) {
 }
 
 func (vm *VM) initMainObj() *RObject {
-	return &RObject{Class: vm.builtInClasses[objectClass], InstanceVariables: newEnvironment()}
+	return vm.builtInClasses[objectClass].initializeInstance()
 }
 
 func (vm *VM) initConstants() {
