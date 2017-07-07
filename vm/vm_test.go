@@ -92,7 +92,7 @@ func (v *VM) testEval(t *testing.T, input string) Object {
 
 func (v *VM) checkCFP(t *testing.T, index, expectedCFP int) {
 	if v.mainThread.cfp != expectedCFP {
-		t.Fatalf("Expect main thread's cfp to be %d. got: %d", expectedCFP, v.mainThread.cfp)
+		t.Fatalf("At case %d expect main thread's cfp to be %d. got: %d", index, expectedCFP, v.mainThread.cfp)
 	}
 }
 

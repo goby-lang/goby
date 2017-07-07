@@ -58,6 +58,7 @@ func TestEachThroughRange(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -90,6 +91,7 @@ func TestRangeToArray(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -116,6 +118,7 @@ func TestRangeToString(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -154,6 +157,7 @@ func TestFirstAndLast(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -180,6 +184,7 @@ func TestSize(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -238,6 +243,7 @@ func TestStepThroughRange(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -285,5 +291,6 @@ func TestInclude(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
