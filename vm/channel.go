@@ -40,14 +40,8 @@ func (m *objectMap) retrieveObj(num int) Object {
 	return m.store[num]
 }
 
-// TODO: Change these two package variables to be VM's attributes
-var channelID = 0
-
-var objMap = &objectMap{store: map[int]Object{}}
-
 // ChannelObject represents a goby channel, which carries a golang channel
 type ChannelObject struct {
-	id    int
 	Class *RClass
 	Chan  chan int
 }
@@ -60,7 +54,7 @@ func (vm *VM) initChannelClass() *RClass {
 }
 
 func (co *ChannelObject) toString() string {
-	return fmt.Sprintf("<Channel: %d>", co.id)
+	return fmt.Sprintf("<Channel: %p>", co.Chan)
 }
 
 func (co *ChannelObject) toJSON() string {
@@ -77,8 +71,7 @@ func builtinChannelClassMethods() []*BuiltInMethodObject {
 			Name: "new",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					c := &ChannelObject{Class: t.vm.builtInClasses[channelClass], id: channelID, Chan: make(chan int)}
-					channelID++
+					c := &ChannelObject{Class: t.vm.builtInClasses[channelClass], Chan: make(chan int)}
 					return c
 				}
 			},
@@ -92,7 +85,7 @@ func builtinChannelInstanceMethods() []*BuiltInMethodObject {
 			Name: "deliver",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					id := objMap.storeObj(args[0])
+					id := t.vm.channelObjectMap.storeObj(args[0])
 
 					c := receiver.(*ChannelObject)
 
@@ -110,7 +103,7 @@ func builtinChannelInstanceMethods() []*BuiltInMethodObject {
 
 					num := <-c.Chan
 
-					return objMap.retrieveObj(num)
+					return t.vm.channelObjectMap.retrieveObj(num)
 				}
 			},
 		},
