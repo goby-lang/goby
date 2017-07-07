@@ -138,7 +138,7 @@ func initRequest(t *thread, w http.ResponseWriter, req *http.Request) *RObject {
 
 	for k, v := range m {
 		varName := "@" + strings.ToLower(k)
-		reqObj.InstanceVariables.set(varName, t.vm.initializeObjectFromInstruction(v))
+		reqObj.InstanceVariables.set(varName, t.vm.initObjectFromGoType(v))
 	}
 
 	return reqObj
