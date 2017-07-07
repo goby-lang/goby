@@ -8,7 +8,6 @@
 [![GoDoc](https://godoc.org/github.com/goby-lang/goby?status.svg)](https://godoc.org/github.com/goby-lang/goby)
 [![Go Report Card](https://goreportcard.com/badge/github.com/goby-lang/goby)](https://goreportcard.com/report/github.com/goby-lang/goby)
 [![codecov](https://codecov.io/gh/goby-lang/goby/branch/master/graph/badge.svg)](https://codecov.io/gh/goby-lang/goby)
-[![BCH compliance](https://bettercodehub.com/edge/badge/goby-lang/goby?branch=master)](https://bettercodehub.com/)
 [![Readme Score](http://readme-score-api.herokuapp.com/score.svg?url=goby-lang/goby)](http://clayallsopp.github.io/readme-score?url=goby-lang/goby)
 
 Goby is a Ruby-like object oriented language written in Go. And it's **not** a new Ruby implementation. Instead, it should be a language that help developer create api server or microservice efficiently.
@@ -35,7 +34,6 @@ It will have Ruby's syntax (I'll try to support all common syntaxes) but without
 - [References](#references)
 
 ## Supported Features
-- Can be compiled into bytecode (with `.gbbc` extension)
 - Can evaluate bytecode directly
 - Everything is object
 - Support comment 
@@ -168,6 +166,7 @@ See the [guideline](https://github.com/goby-lang/goby/blob/master/CONTRIBUTING.m
 - @janczer
 - @adlerhsieh
 - @hachi8833
+- @Maxwell-Alexius
 - @shes50103
 
 ## Support Us
