@@ -9,7 +9,7 @@ var (
 // `nil` is convert into `null` when exported to JSON format.
 // - `Null.new` is not supported.
 type NullObject struct {
-	Class *RClass
+	*baseObj
 }
 
 // toString returns the name of NullObject
@@ -21,15 +21,15 @@ func (n *NullObject) toJSON() string {
 	return "null"
 }
 
-func (n *NullObject) returnClass() *RClass {
-	return n.Class
+func (n *NullObject) Class() *RClass {
+	return n.class
 }
 
 func (vm *VM) initNullClass() *RClass {
 	nc := vm.initializeClass(nullClass, false)
 	nc.setBuiltInMethods(builtInNullInstanceMethods(), false)
 	nc.setBuiltInMethods(builtInNullClassMethods(), true)
-	NULL = &NullObject{Class: nc}
+	NULL = &NullObject{baseObj: &baseObj{class: nc}}
 	return nc
 }
 

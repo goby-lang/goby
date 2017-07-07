@@ -263,7 +263,7 @@ var builtInActions = map[operationType]*action{
 			case *RClass:
 				self.Methods.set(methodName, method)
 			default:
-				self.returnClass().Methods.set(methodName, method)
+				self.Class().Methods.set(methodName, method)
 			}
 		},
 	},
@@ -316,7 +316,7 @@ var builtInActions = map[operationType]*action{
 					inheritedClass, ok := superClass.Target.(*RClass)
 
 					if !ok {
-						t.returnError("Constant " + superClassName + " is not a class. got=" + string(superClass.Target.returnClass().ReturnName()))
+						t.returnError("Constant " + superClassName + " is not a class. got=" + string(superClass.Target.Class().ReturnName()))
 					}
 
 					class.pseudoSuperClass = inheritedClass
@@ -350,7 +350,7 @@ var builtInActions = map[operationType]*action{
 			case *RClass:
 				method = r.lookupClassMethod(methodName)
 			default:
-				method = r.returnClass().lookupInstanceMethod(methodName)
+				method = r.Class().lookupInstanceMethod(methodName)
 			}
 
 			if method == nil {

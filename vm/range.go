@@ -25,7 +25,7 @@ import (
 // ```
 //
 type RangeObject struct {
-	Class *RClass
+	class *RClass
 	Start int
 	End   int
 }
@@ -38,12 +38,12 @@ func (ro *RangeObject) toJSON() string {
 	return ro.toString()
 }
 
-func (ro *RangeObject) returnClass() *RClass {
-	return ro.Class
+func (ro *RangeObject) Class() *RClass {
+	return ro.class
 }
 
 func (vm *VM) initRangeObject(start, end int) *RangeObject {
-	return &RangeObject{Class: vm.builtInClasses[rangeClass], Start: start, End: end}
+	return &RangeObject{class: vm.builtInClasses[rangeClass], Start: start, End: end}
 }
 
 func (vm *VM) initRangeClass() *RClass {

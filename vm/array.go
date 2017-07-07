@@ -9,7 +9,7 @@ import (
 // An array is a collection of different objects that are ordered and indexed.
 // Elements in an array can belong to any class.
 type ArrayObject struct {
-	Class    *RClass
+	class    *RClass
 	Elements []Object
 }
 
@@ -43,9 +43,9 @@ func (a *ArrayObject) toJSON() string {
 	return out.String()
 }
 
-// returnClass returns current object's class, which is RArray
-func (a *ArrayObject) returnClass() *RClass {
-	return a.Class
+// Class returns current object's class, which is RArray
+func (a *ArrayObject) Class() *RClass {
+	return a.class
 }
 
 // length returns the length of array's elements
@@ -82,7 +82,7 @@ func (a *ArrayObject) shift() Object {
 }
 
 func (vm *VM) initArrayObject(elements []Object) *ArrayObject {
-	return &ArrayObject{Elements: elements, Class: vm.builtInClasses[arrayClass]}
+	return &ArrayObject{Elements: elements, class: vm.builtInClasses[arrayClass]}
 }
 
 func (vm *VM) initArrayClass() *RClass {

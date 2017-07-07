@@ -6,7 +6,7 @@ import (
 
 // Object represents all objects in Goby, including Array, Integer or even Method and Error.
 type Object interface {
-	returnClass() *RClass
+	Class() *RClass
 	toString() string
 	toJSON() string
 }
@@ -27,25 +27,25 @@ type RObject struct {
 }
 
 type baseObj struct {
-	Class             *RClass
+	class             *RClass
 	InstanceVariables *environment
 }
 
 // toString tells which class it belongs to.
 func (ro *RObject) toString() string {
-	return "<Instance of: " + ro.Class.Name + ">"
+	return "<Instance of: " + ro.class.Name + ">"
 }
 
 func (ro *RObject) toJSON() string {
 	return ro.toString()
 }
 
-// returnClass will return object's class
-func (ro *RObject) returnClass() *RClass {
-	if ro.Class == nil {
+// Class will return object's class
+func (ro *RObject) Class() *RClass {
+	if ro.class == nil {
 		panic(fmt.Sprintf("Object %s doesn't have class.", ro.toString()))
 	}
-	return ro.Class
+	return ro.class
 }
 
 func (ro *RObject) instanceVariableGet(name string) (Object, bool) {

@@ -35,7 +35,7 @@ type RClass struct {
 	// It can be normal class, singleton class or a module.
 	superClass *RClass
 	// Class points to this class's class, which should be ClassClass
-	Class *RClass
+	class *RClass
 	// Singleton is a flag marks if this class a singleton class
 	Singleton bool
 	isModule  bool
@@ -62,7 +62,7 @@ func initClassClass() *RClass {
 func initObjectClass(c *RClass) *RClass {
 	objectClass := &RClass{
 		Name:         objectClass,
-		Class:        c,
+		class:        c,
 		ClassMethods: newEnvironment(),
 		Methods:      newEnvironment(),
 		constants:    make(map[string]*Pointer),
@@ -93,7 +93,7 @@ func (vm *VM) createRClass(className string) *RClass {
 		superClass:       objectClass,
 		constants:        make(map[string]*Pointer),
 		isModule:         false,
-		baseObj:          &baseObj{Class: classClass, InstanceVariables: newEnvironment()},
+		baseObj:          &baseObj{class: classClass, InstanceVariables: newEnvironment()},
 	}
 }
 
@@ -129,8 +129,8 @@ func (c *RClass) lookupClassMethod(methodName string) Object {
 		if c.superClass != nil {
 			return c.superClass.lookupClassMethod(methodName)
 		}
-		if c.Class != nil {
-			return c.Class.lookupClassMethod(methodName)
+		if c.class != nil {
+			return c.class.lookupClassMethod(methodName)
 		}
 		return nil
 	}
@@ -146,8 +146,8 @@ func (c *RClass) lookupInstanceMethod(methodName string) Object {
 			return c.superClass.lookupInstanceMethod(methodName)
 		}
 
-		if c.Class != nil {
-			return c.Class.lookupInstanceMethod(methodName)
+		if c.class != nil {
+			return c.class.lookupInstanceMethod(methodName)
 		}
 
 		return nil
@@ -174,8 +174,8 @@ func (c *RClass) lookupConstant(constName string, findInScope bool) *Pointer {
 	return constant
 }
 
-func (c *RClass) returnClass() *RClass {
-	return c.Class
+func (c *RClass) Class() *RClass {
+	return c.class
 }
 
 // ReturnName returns the name of the class
@@ -188,7 +188,7 @@ func (c *RClass) returnSuperClass() *RClass {
 }
 
 func (c *RClass) initializeInstance() *RObject {
-	instance := &RObject{baseObj: &baseObj{Class: c, InstanceVariables: newEnvironment()}}
+	instance := &RObject{baseObj: &baseObj{class: c, InstanceVariables: newEnvironment()}}
 
 	return instance
 }
@@ -378,9 +378,9 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 
 					switch r := receiver.(type) {
 					case Object:
-						return r.returnClass()
+						return r.Class()
 					default:
-						return &Error{Message: "Can't call class on %T" + string(r.returnClass().ReturnName())}
+						return &Error{Message: "Can't call class on %T" + string(r.Class().ReturnName())}
 					}
 				}
 			},
@@ -673,7 +673,7 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 					case *RObject:
 						objectClass := t.vm.builtInClasses["Object"]
 
-						if r.Class == objectClass {
+						if r.class == objectClass {
 							class = objectClass
 						}
 					}

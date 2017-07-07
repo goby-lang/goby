@@ -15,7 +15,7 @@ var (
 // It includes `true` and `FALSE` which represents logically true and false value.
 // - `Boolean.new` is not supported.
 type BooleanObject struct {
-	Class *RClass
+	class *RClass
 	Value bool
 }
 
@@ -28,9 +28,9 @@ func (b *BooleanObject) toJSON() string {
 	return b.toString()
 }
 
-// returnClass returns boolean object's class, which is RBool
-func (b *BooleanObject) returnClass() *RClass {
-	return b.Class
+// Class returns boolean object's class, which is RBool
+func (b *BooleanObject) Class() *RClass {
+	return b.class
 }
 
 func (b *BooleanObject) equal(e *BooleanObject) bool {
@@ -64,7 +64,7 @@ func builtinBooleanInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-					err := checkArgumentLen(args, receiver.returnClass(), "==")
+					err := checkArgumentLen(args, receiver.Class(), "==")
 					if err != nil {
 						return err
 					}
@@ -88,7 +88,7 @@ func builtinBooleanInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-					err := checkArgumentLen(args, receiver.returnClass(), "!=")
+					err := checkArgumentLen(args, receiver.Class(), "!=")
 					if err != nil {
 						return err
 					}
@@ -138,7 +138,7 @@ func builtinBooleanInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*BooleanObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					rightValue := right.Value
@@ -168,7 +168,7 @@ func builtinBooleanInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*BooleanObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					rightValue := right.Value
@@ -189,8 +189,8 @@ func (vm *VM) initBoolClass() *RClass {
 	b.setBuiltInMethods(builtinBooleanInstanceMethods(), false)
 	b.setBuiltInMethods(builtInBooleanClassMethods(), true)
 
-	TRUE = &BooleanObject{Value: true, Class: b}
-	FALSE = &BooleanObject{Value: false, Class: b}
+	TRUE = &BooleanObject{Value: true, class: b}
+	FALSE = &BooleanObject{Value: false, class: b}
 
 	return b
 }

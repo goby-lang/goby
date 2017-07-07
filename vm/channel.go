@@ -42,7 +42,7 @@ func (m *objectMap) retrieveObj(num int) Object {
 
 // ChannelObject represents a goby channel, which carries a golang channel
 type ChannelObject struct {
-	Class *RClass
+	class *RClass
 	Chan  chan int
 }
 
@@ -61,8 +61,8 @@ func (co *ChannelObject) toJSON() string {
 	return co.toString()
 }
 
-func (co *ChannelObject) returnClass() *RClass {
-	return co.Class
+func (co *ChannelObject) Class() *RClass {
+	return co.class
 }
 
 func builtinChannelClassMethods() []*BuiltInMethodObject {
@@ -71,7 +71,7 @@ func builtinChannelClassMethods() []*BuiltInMethodObject {
 			Name: "new",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					c := &ChannelObject{Class: t.vm.builtInClasses[channelClass], Chan: make(chan int)}
+					c := &ChannelObject{class: t.vm.builtInClasses[channelClass], Chan: make(chan int)}
 					return c
 				}
 			},
