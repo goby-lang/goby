@@ -69,10 +69,10 @@ func TestNextStatement(t *testing.T) {
 1 setlocal 0 0
 2 putobject 0
 3 setlocal 0 1
-4 jump 22
+4 jump 23
 5 putnil
 6 pop
-7 jump 22
+7 jump 23
 8 getlocal 0 0
 9 putobject 1
 10 send + 1
@@ -80,20 +80,21 @@ func TestNextStatement(t *testing.T) {
 12 getlocal 0 0
 13 putobject 5
 14 send == 1
-15 branchunless 17
-16 jump 22
-17 putnil
-18 getlocal 0 1
-19 putobject 1
-20 send + 1
-21 setlocal 0 1
-22 getlocal 0 0
-23 putobject 10
-24 send < 1
-25 branchif 8
-26 putnil
-27 pop
-28 leave
+15 branchunless 18
+16 jump 23
+17 jump 19
+18 putnil
+19 getlocal 0 1
+20 putobject 1
+21 send + 1
+22 setlocal 0 1
+23 getlocal 0 0
+24 putobject 10
+25 send < 1
+26 branchif 8
+27 putnil
+28 pop
+29 leave
 `
 
 	bytecode := compileToBytecode(input)

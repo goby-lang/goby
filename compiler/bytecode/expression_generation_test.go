@@ -56,14 +56,15 @@ func TestConditionWithoutAlternativeCompilation(t *testing.T) {
 4 getlocal 0 0
 5 getlocal 0 1
 6 send > 1
-7 branchunless 10
+7 branchunless 11
 8 putobject 10
 9 setlocal 0 2
-10 putnil
-11 getlocal 0 2
-12 putobject 1
-13 send + 1
-14 leave
+10 jump 12
+11 putnil
+12 getlocal 0 2
+13 putobject 1
+14 send + 1
+15 leave
 `
 
 	bytecode := compileToBytecode(input)

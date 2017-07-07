@@ -135,20 +135,22 @@ func (g *Generator) compileIfExpression(is *InstructionSet, exp *ast.IfExpressio
 	g.compileExpression(is, exp.Condition, scope, table)
 
 	anchor1 := &anchor{}
+	anchor2 := &anchor{}
+
 	is.define(BranchUnless, anchor1)
 
 	g.compileCodeBlock(is, exp.Consequence, scope, table)
 
 	anchor1.line = is.count + 1
 
+	is.define(Jump, anchor2)
+
 	if exp.Alternative == nil {
-		anchor1.line--
+		// jump over the `putnil` in false case
+		anchor2.line = anchor1.line + 1
 		is.define(PutNull)
 		return
 	}
-
-	anchor2 := &anchor{}
-	is.define(Jump, anchor2)
 
 	g.compileCodeBlock(is, exp.Alternative, scope, table)
 
