@@ -8,6 +8,7 @@ func TestEvalNil(t *testing.T) {
 	vm := initTestVM()
 	evaluated := vm.testEval(t, input)
 	checkExpected(t, 0, evaluated, nil)
+	vm.checkCFP(t, 0, 0)
 }
 
 func TestBangPrefix(t *testing.T) {
@@ -19,4 +20,5 @@ func TestBangPrefix(t *testing.T) {
 	vm := initTestVM()
 	evaluated := vm.testEval(t, input)
 	checkExpected(t, 0, evaluated, true)
+	vm.checkCFP(t, 0, 0)
 }
