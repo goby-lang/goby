@@ -28,9 +28,9 @@ func (is *instructionSet) inspect() string {
 
 func (cf *callFrame) inspect() string {
 	if cf.ep != nil {
-		return fmt.Sprintf("Name: %s. is block: %t. ep: %d", cf.instructionSet.label.name, cf.isBlock, len(cf.ep.locals))
+		return fmt.Sprintf("Name: %s. is block: %t. ep: %d", cf.instructionSet.name, cf.isBlock, len(cf.ep.locals))
 	}
-	return fmt.Sprintf("Name: %s. is block: %t", cf.instructionSet.label.name, cf.isBlock)
+	return fmt.Sprintf("Name: %s. is block: %t", cf.instructionSet.name, cf.isBlock)
 }
 
 func (cfs *callFrameStack) inspect() string {

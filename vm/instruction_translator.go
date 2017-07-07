@@ -30,9 +30,9 @@ func newInstructionTranslator(file filename) *instructionTranslator {
 }
 
 func (it *instructionTranslator) setLabel(is *instructionSet, name string) {
-	var l *label
 	var ln string
 	var lt labelType
+	is.name = name
 
 	if name == bytecode.Program {
 		it.program = is
@@ -41,9 +41,6 @@ func (it *instructionTranslator) setLabel(is *instructionSet, name string) {
 
 	ln = strings.Split(name, ":")[1]
 	lt = labelType(strings.Split(name, ":")[0])
-
-	l = &label{name: name, Type: lt}
-	is.label = l
 
 	if lt == bytecode.Block {
 		it.blockTable[ln] = is

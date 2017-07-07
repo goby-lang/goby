@@ -29,7 +29,7 @@ type instruction struct {
 }
 
 type instructionSet struct {
-	label        *label
+	name         string
 	instructions []*instruction
 	filename     filename
 }
@@ -429,8 +429,26 @@ var builtInActions = map[operationType]*action{
 	bytecode.Leave: {
 		name: bytecode.Leave,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+			fmt.Println(t.callFrameStack.inspect())
+			fmt.Println("Before leave--------------------------------")
 			cf = t.callFrameStack.pop()
 			cf.pc = len(cf.instructionSet.instructions)
+			fmt.Println(t.callFrameStack.inspect())
+
+			/*
+				Remove top frame if it's a block frame
+
+				Block execution frame <- This was popped when executing leave
+				---------------------
+				Block frame           <- So this frame is useless
+				---------------------
+				Main frame
+			*/
+			topFrame := t.callFrameStack.top()
+			if topFrame != nil && topFrame.isBlock {
+				cf = t.callFrameStack.pop()
+				cf.pc = len(cf.instructionSet.instructions)
+			}
 		},
 	},
 }
