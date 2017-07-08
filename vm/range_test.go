@@ -441,12 +441,12 @@ func TestBsearchFail(t *testing.T) {
 		input    string
 		expected *Error
 	}{
-		//{`
-		//ary = [0, 4, 7, 10, 12]
-		//(0..4).bsearch do |i|
-		//	"Binary Search"
-		//end
-		//`, initErrorObject(TypeErrorClass, "Expect Integer or Boolean type. got=%T", initStringObject("Binary Search"))},
+		{`
+		ary = [0, 4, 7, 10, 12]
+		(0..4).bsearch do |i|
+			"Binary Search"
+		end
+		`, initErrorObject(TypeErrorClass, "Expect Integer or Boolean type. got=%T", vm.initStringObject("Binary Search"))},
 	}
 
 	for _, tt := range testsFail {
