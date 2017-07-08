@@ -204,192 +204,6 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
-			// Returns the length of the array.
-			//
-			// ```ruby
-			// [1, 2, 3].length # => 3
-			// ```
-			// @return [Integer]
-			Name: "length",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					if len(args) != 0 {
-						return newError("Expect 0 argument. got=%d", len(args))
-					}
-
-					arr := receiver.(*ArrayObject)
-					return t.vm.initIntegerObject(arr.length())
-				}
-			},
-		},
-		{
-			// Removes the last element in the array and returns it.
-			//
-			// ```ruby
-			// a = [1, 2, 3]
-			// a.pop # => 3
-			// a     # => [1, 2]
-			// ```
-			Name: "pop",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					if len(args) != 0 {
-						return newError("Expect 0 argument. got=%d", len(args))
-					}
-
-					arr := receiver.(*ArrayObject)
-					return arr.pop()
-				}
-			},
-		},
-		{
-			// Appends the given object to the array and returns the array.
-			//
-			// ```ruby
-			// a = [1, 2, 3]
-			// a.push(4) # => [1, 2, 3, 4]
-			// ```
-			Name: "push",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					arr := receiver.(*ArrayObject)
-					return arr.push(args)
-				}
-			},
-		},
-		{
-			// Removes the first element in the array and returns it.
-			//
-			// ```ruby
-			// a = [1, 2, 3]
-			// a.shift # => 1
-			// a       # => [2, 3]
-			// ```
-			Name: "shift",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 0 {
-						return newError("Expect 0 argument. got=%d", len(args))
-					}
-
-					arr := receiver.(*ArrayObject)
-					return arr.shift()
-				}
-			},
-		},
-		{
-			// Loop through each element with the given block.
-			//
-			// ```ruby
-			// a = ["a", "b", "c"]
-			//
-			// a.each do |e|
-			//   puts(e + e)
-			// end
-			// # => "aa"
-			// # => "bb"
-			// # => "cc"
-			// ```
-			Name: "each",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					arr := receiver.(*ArrayObject)
-
-					if blockFrame == nil {
-						t.returnError("Can't yield without a block")
-					}
-
-					for _, obj := range arr.Elements {
-						t.builtInMethodYield(blockFrame, obj)
-					}
-					return arr
-				}
-			},
-		},
-		{
-			Name: "each_index",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					arr := receiver.(*ArrayObject)
-
-					if blockFrame == nil {
-						t.returnError("Can't yield without a block")
-					}
-
-					for i := range arr.Elements {
-						t.builtInMethodYield(blockFrame, t.vm.initIntegerObject(i))
-					}
-					return arr
-				}
-			},
-		},
-		{
-			// Loop through each element with the given block. Return a new array with each yield element.
-			//
-			// ```ruby
-			// a = ["a", "b", "c"]
-			//
-			// a.map do |e|
-			//   e + e
-			// end
-			// # => ["aa", "bb", "cc"]
-			// ```
-			Name: "map",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					arr := receiver.(*ArrayObject)
-					var elements = make([]Object, len(arr.Elements))
-
-					if blockFrame == nil {
-						t.returnError("Can't yield without a block")
-					}
-
-					for i, obj := range arr.Elements {
-						result := t.builtInMethodYield(blockFrame, obj)
-						elements[i] = result.Target
-					}
-
-					return t.vm.initArrayObject(elements)
-				}
-			},
-		},
-		{
-			// Loop through each element with the given block.
-			// Return a new array with each element that returns true from yield.
-			//
-			// ```ruby
-			// a = [1, 2, 3, 4, 5]
-			//
-			// a.select do |e|
-			//   e + 1 > 3
-			// end
-			// # => [3, 4, 5]
-			// ```
-			Name: "select",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					arr := receiver.(*ArrayObject)
-					var elements []Object
-
-					if blockFrame == nil {
-						t.returnError("Can't yield without a block")
-					}
-
-					for _, obj := range arr.Elements {
-						result := t.builtInMethodYield(blockFrame, obj)
-						if result.Target.(*BooleanObject).Value {
-							elements = append(elements, obj)
-						}
-					}
-
-					return t.vm.initArrayObject(elements)
-				}
-			},
-		},
-		{
 			// Retrieves an object in an array using the index argument.
 			// It raises an error if index out of range.
 			//
@@ -542,41 +356,52 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
-			// Returns a new array by putting the desired element as the first element.
-			// Use integer index as an argument to retrieve the element.
+			// Loop through each element with the given block.
 			//
 			// ```ruby
-			// a = ["a", "b", "c", "d"]
+			// a = ["a", "b", "c"]
 			//
-			// a.rotate    # => ["b", "c", "d", "a"]
-			// a.rotate(2) # => ["c", "d", "a", "b"]
-			// a.rotate(3) # => ["d", "a", "b", "c"]
+			// a.each do |e|
+			//   puts(e + e)
+			// end
+			// # => "aa"
+			// # => "bb"
+			// # => "cc"
 			// ```
-			Name: "rotate",
+			Name: "each",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					arr := receiver.(*ArrayObject)
-					rotArr := t.vm.initArrayObject(arr.Elements)
 
-					rotate := 1
-
-					if len(args) != 0 {
-						arg, ok := args[0].(*IntegerObject)
-						if !ok {
-							return newError("Expect index argument to be Integer. got=%T", args[0])
-						}
-						rotate = arg.Value
+					if blockFrame == nil {
+						t.returnError("Can't yield without a block")
 					}
 
-					for i := 0; i < rotate; i++ {
-						el := rotArr.shift()
-						rotArr.push([]Object{el})
+					for _, obj := range arr.Elements {
+						t.builtInMethodYield(blockFrame, obj)
 					}
-
-					return rotArr
+					return arr
 				}
 			},
 		},
+		{
+			Name: "each_index",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					arr := receiver.(*ArrayObject)
+
+					if blockFrame == nil {
+						t.returnError("Can't yield without a block")
+					}
+
+					for i := range arr.Elements {
+						t.builtInMethodYield(blockFrame, t.vm.initIntegerObject(i))
+					}
+					return arr
+				}
+			},
+		},
+
 		{
 			// Returns the first element of the array.
 			Name: "first",
@@ -615,6 +440,182 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 
 					l := len(arr.Elements)
 					return t.vm.initArrayObject(arr.Elements[l-arg.Value : l])
+				}
+			},
+		},
+		{
+			// Returns the length of the array.
+			//
+			// ```ruby
+			// [1, 2, 3].length # => 3
+			// ```
+			// @return [Integer]
+			Name: "length",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					if len(args) != 0 {
+						return newError("Expect 0 argument. got=%d", len(args))
+					}
+
+					arr := receiver.(*ArrayObject)
+					return t.vm.initIntegerObject(arr.length())
+				}
+			},
+		},
+		{
+			// Loop through each element with the given block. Return a new array with each yield element.
+			//
+			// ```ruby
+			// a = ["a", "b", "c"]
+			//
+			// a.map do |e|
+			//   e + e
+			// end
+			// # => ["aa", "bb", "cc"]
+			// ```
+			Name: "map",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					arr := receiver.(*ArrayObject)
+					var elements = make([]Object, len(arr.Elements))
+
+					if blockFrame == nil {
+						t.returnError("Can't yield without a block")
+					}
+
+					for i, obj := range arr.Elements {
+						result := t.builtInMethodYield(blockFrame, obj)
+						elements[i] = result.Target
+					}
+
+					return t.vm.initArrayObject(elements)
+				}
+			},
+		},
+		{
+			// Removes the last element in the array and returns it.
+			//
+			// ```ruby
+			// a = [1, 2, 3]
+			// a.pop # => 3
+			// a     # => [1, 2]
+			// ```
+			Name: "pop",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					if len(args) != 0 {
+						return newError("Expect 0 argument. got=%d", len(args))
+					}
+
+					arr := receiver.(*ArrayObject)
+					return arr.pop()
+				}
+			},
+		},
+		{
+			// Appends the given object to the array and returns the array.
+			//
+			// ```ruby
+			// a = [1, 2, 3]
+			// a.push(4) # => [1, 2, 3, 4]
+			// ```
+			Name: "push",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					arr := receiver.(*ArrayObject)
+					return arr.push(args)
+				}
+			},
+		},
+		{
+			// Returns a new array by putting the desired element as the first element.
+			// Use integer index as an argument to retrieve the element.
+			//
+			// ```ruby
+			// a = ["a", "b", "c", "d"]
+			//
+			// a.rotate    # => ["b", "c", "d", "a"]
+			// a.rotate(2) # => ["c", "d", "a", "b"]
+			// a.rotate(3) # => ["d", "a", "b", "c"]
+			// ```
+			Name: "rotate",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					arr := receiver.(*ArrayObject)
+					rotArr := t.vm.initArrayObject(arr.Elements)
+
+					rotate := 1
+
+					if len(args) != 0 {
+						arg, ok := args[0].(*IntegerObject)
+						if !ok {
+							return newError("Expect index argument to be Integer. got=%T", args[0])
+						}
+						rotate = arg.Value
+					}
+
+					for i := 0; i < rotate; i++ {
+						el := rotArr.shift()
+						rotArr.push([]Object{el})
+					}
+
+					return rotArr
+				}
+			},
+		},
+		{
+			// Loop through each element with the given block.
+			// Return a new array with each element that returns true from yield.
+			//
+			// ```ruby
+			// a = [1, 2, 3, 4, 5]
+			//
+			// a.select do |e|
+			//   e + 1 > 3
+			// end
+			// # => [3, 4, 5]
+			// ```
+			Name: "select",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					arr := receiver.(*ArrayObject)
+					var elements []Object
+
+					if blockFrame == nil {
+						t.returnError("Can't yield without a block")
+					}
+
+					for _, obj := range arr.Elements {
+						result := t.builtInMethodYield(blockFrame, obj)
+						if result.Target.(*BooleanObject).Value {
+							elements = append(elements, obj)
+						}
+					}
+
+					return t.vm.initArrayObject(elements)
+				}
+			},
+		},
+		{
+			// Removes the first element in the array and returns it.
+			//
+			// ```ruby
+			// a = [1, 2, 3]
+			// a.shift # => 1
+			// a       # => [2, 3]
+			// ```
+			Name: "shift",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return newError("Expect 0 argument. got=%d", len(args))
+					}
+
+					arr := receiver.(*ArrayObject)
+					return arr.shift()
 				}
 			},
 		},
