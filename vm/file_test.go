@@ -4,83 +4,6 @@ import (
 	"testing"
 )
 
-func TestFileDeletion(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{`
-		require "file"
-
-		File.open("/tmp/out1.txt", "w", 0755)
-		File.open("/tmp/out2.txt", "w", 0755)
-		File.open("/tmp/out3.txt", "w", 0755)
-
-		File.delete("/tmp/out1.txt", "/tmp/out2.txt", "/tmp/out3.txt")
-		`, 3},
-		{`
-		require "file"
-
-		File.open("/tmp/out.txt", "w", 0755)
-		File.delete("/tmp/out.txt")
-		File.exist("/tmp/out.txt")
-		`, false},
-	}
-
-	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
-		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
-	}
-}
-
-func TestFileWrite(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{`
-		require "file"
-
-		l = 0
-		File.open("/tmp/out.txt", "w", 0755) do |f|
-		  l = f.write("12345")
-		end
-
-		l
-		`, 5},
-		{`
-		require "file"
-
-		File.open("/tmp/out.txt", "w", 0755) do |f|
-		  f.write("Goby is awesome!!!")
-		end
-
-		File.new("/tmp/out.txt").read
-		`, "Goby is awesome!!!"},
-		{`
-		require "file"
-
-		File.open("/tmp/out.txt", "w", 0755)
-		File.new("/tmp/out.txt").size
-		`, 0},
-		{`
-		require "file"
-
-		File.open("/tmp/out.txt", "w", 0755)
-		File.exist("/tmp/out.txt")
-		`, true},
-	}
-
-	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
-		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
-	}
-}
-
 // TODO: Add failed tests
 func TestFileObject(t *testing.T) {
 	tests := []struct {
@@ -130,7 +53,57 @@ func TestFileObject(t *testing.T) {
 	}
 }
 
-func TestExtnameMethod(t *testing.T) {
+func TestFileBasenameMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`
+		require "file"
+		File.basename("/home/goby/plugin/test.gb")
+		`, "test.gb"},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
+func TestFileDeleteMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		require "file"
+
+		File.open("/tmp/out1.txt", "w", 0755)
+		File.open("/tmp/out2.txt", "w", 0755)
+		File.open("/tmp/out3.txt", "w", 0755)
+
+		File.delete("/tmp/out1.txt", "/tmp/out2.txt", "/tmp/out3.txt")
+		`, 3},
+		{`
+		require "file"
+
+		File.open("/tmp/out.txt", "w", 0755)
+		File.delete("/tmp/out.txt")
+		File.exist("/tmp/out.txt")
+		`, false},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
+func TestFileExtnameMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected string
@@ -153,45 +126,7 @@ func TestExtnameMethod(t *testing.T) {
 	}
 }
 
-func TestBasenameMethod(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected string
-	}{
-		{`
-		require "file"
-		File.basename("/home/goby/plugin/test.gb")
-		`, "test.gb"},
-	}
-
-	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
-		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
-	}
-}
-
-func TestSplitMethod(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected []interface{}
-	}{
-		{`
-		require "file"
-		File.split("/home/goby/plugin/test.gb")
-		`, []interface{}{"/home/goby/plugin/", "test.gb"}},
-	}
-
-	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
-		testArrayObject(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
-	}
-}
-
-func TestJoinMethod(t *testing.T) {
+func TestFileJoinMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected string
@@ -218,7 +153,53 @@ func TestJoinMethod(t *testing.T) {
 	}
 }
 
-func TestSizeMethod(t *testing.T) {
+func TestFileWriteMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		require "file"
+
+		l = 0
+		File.open("/tmp/out.txt", "w", 0755) do |f|
+		  l = f.write("12345")
+		end
+
+		l
+		`, 5},
+		{`
+		require "file"
+
+		File.open("/tmp/out.txt", "w", 0755) do |f|
+		  f.write("Goby is awesome!!!")
+		end
+
+		File.new("/tmp/out.txt").read
+		`, "Goby is awesome!!!"},
+		{`
+		require "file"
+
+		File.open("/tmp/out.txt", "w", 0755)
+		File.new("/tmp/out.txt").size
+		`, 0},
+		{`
+		require "file"
+
+		File.open("/tmp/out.txt", "w", 0755)
+		File.exist("/tmp/out.txt")
+		`, true},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
+func TestFileSizeMethod(t *testing.T) {
 	input := `
 	require "file"
 
@@ -229,6 +210,25 @@ func TestSizeMethod(t *testing.T) {
 	evaluated := vm.testEval(t, input)
 	checkExpected(t, 0, evaluated, 22)
 	vm.checkCFP(t, 0, 0)
+}
+
+func TestFileSplitMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+		require "file"
+		File.split("/home/goby/plugin/test.gb")
+		`, []interface{}{"/home/goby/plugin/", "test.gb"}},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		testArrayObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
 }
 
 //@TODO add test for chmod form a847c8b41f29657b380c1731ec36a660dbf49bc4

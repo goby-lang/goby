@@ -2,70 +2,6 @@ package vm
 
 import "testing"
 
-func TestMonkeyPatchBuiltInClass(t *testing.T) {
-	input := `
-	class String
-	  def buz
-	    "buz"
-	  end
-	end
-
-	"123".buz
-	`
-
-	vm := initTestVM()
-	evaluated := vm.testEval(t, input)
-	checkExpected(t, 0, evaluated, "buz")
-}
-
-func TestRequireRelative(t *testing.T) {
-	input := `
-	require_relative("../test_fixtures/require_test/foo")
-
-	fifty = Foo.bar(5)
-
-	Foo.baz do |hundred|
-	  hundred + fifty + Bar.baz
-	end
-	`
-
-	vm := initTestVM()
-	evaluated := vm.testEval(t, input)
-	checkExpected(t, 0, evaluated, 160)
-}
-
-func TestDefSingletonMethtod(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected int
-	}{
-		{`
-		class Foo
-		  def self.bar
-		    10
-		  end
-		end
-
-		Foo.bar
-		`, 10},
-		{`
-		module Foo
-		  def self.bar
-		    10
-		  end
-		end
-
-		Foo.bar
-		`, 10},
-	}
-
-	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
-		checkExpected(t, i, evaluated, tt.expected)
-	}
-}
-
 func TestAttrReaderAndWriter(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -138,6 +74,102 @@ func TestAttrReaderAndWriter(t *testing.T) {
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 	}
+}
+
+func TestClassInheritModule(t *testing.T) {
+	input := `
+module Foo
+end
+
+class Bar < Foo
+end
+
+a = Bar.new()
+	`
+	expected := `InternalError: Module inheritance is not supported: Foo`
+
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input)
+
+	if !isError(evaluated) {
+		t.Fatalf("Should return an error when a class inherits a module")
+	}
+
+	err := evaluated.(*Error)
+
+	if err.Message != expected {
+		t.Fatalf("Error message should be '%s'. got: %s", expected, err.Message)
+	}
+}
+
+func TestEvalCustomConstructor(t *testing.T) {
+	input := `
+		class Foo
+			def initialize(x, y)
+				@x = x
+				@y = y
+			end
+
+			def bar
+				@x + @y
+			end
+		end
+
+		f = Foo.new(10, 20)
+		f.bar
+	`
+
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input)
+	checkExpected(t, 0, evaluated, 30)
+}
+
+func TestDefSingletonMethtod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{`
+		class Foo
+		  def self.bar
+		    10
+		  end
+		end
+
+		Foo.bar
+		`, 10},
+		{`
+		module Foo
+		  def self.bar
+		    10
+		  end
+		end
+
+		Foo.bar
+		`, 10},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+	}
+}
+
+func TestMonkeyPatchBuiltInClass(t *testing.T) {
+	input := `
+	class String
+	  def buz
+	    "buz"
+	  end
+	end
+
+	"123".buz
+	`
+
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input)
+	checkExpected(t, 0, evaluated, "buz")
 }
 
 func TestNamespace(t *testing.T) {
@@ -305,36 +337,6 @@ func TestNamespace(t *testing.T) {
 	}
 }
 
-func TestRequireSuccess(t *testing.T) {
-	input := `
-	require "file"
-
-	File.extname("foo.rb")
-	`
-	vm := initTestVM()
-	evaluated := vm.testEval(t, input)
-	checkExpected(t, 0, evaluated, ".rb")
-}
-
-func TestRequireFail(t *testing.T) {
-	input := `
-	require "bar"
-	`
-	expected := `InternalError: Can't require "bar"`
-
-	vm := initTestVM()
-	evaluated := vm.testEval(t, input)
-
-	if !isError(evaluated) {
-		t.Fatalf("Should return an error")
-	}
-
-	err := evaluated.(*Error)
-	if err.Message != expected {
-		t.Fatalf("Error message should be '%s'. got: %s", expected, err.Message)
-	}
-}
-
 func TestPrimitiveType(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -391,49 +393,47 @@ func TestPrimitiveType(t *testing.T) {
 	}
 }
 
-func TestEvalCustomConstructor(t *testing.T) {
+func TestRequireRelative(t *testing.T) {
 	input := `
-		class Foo
-			def initialize(x, y)
-				@x = x
-				@y = y
-			end
+	require_relative("../test_fixtures/require_test/foo")
 
-			def bar
-				@x + @y
-			end
-		end
+	fifty = Foo.bar(5)
 
-		f = Foo.new(10, 20)
-		f.bar
+	Foo.baz do |hundred|
+	  hundred + fifty + Bar.baz
+	end
 	`
 
 	vm := initTestVM()
 	evaluated := vm.testEval(t, input)
-	checkExpected(t, 0, evaluated, 30)
+	checkExpected(t, 0, evaluated, 160)
 }
 
-func TestClassInheritModule(t *testing.T) {
+func TestRequireSuccess(t *testing.T) {
 	input := `
-module Foo
-end
+	require "file"
 
-class Bar < Foo
-end
-
-a = Bar.new()
+	File.extname("foo.rb")
 	`
-	expected := `InternalError: Module inheritance is not supported: Foo`
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input)
+	checkExpected(t, 0, evaluated, ".rb")
+}
+
+func TestRequireFail(t *testing.T) {
+	input := `
+	require "bar"
+	`
+	expected := `InternalError: Can't require "bar"`
 
 	vm := initTestVM()
 	evaluated := vm.testEval(t, input)
 
 	if !isError(evaluated) {
-		t.Fatalf("Should return an error when a class inherits a module")
+		t.Fatalf("Should return an error")
 	}
 
 	err := evaluated.(*Error)
-
 	if err.Message != expected {
 		t.Fatalf("Error message should be '%s'. got: %s", expected, err.Message)
 	}

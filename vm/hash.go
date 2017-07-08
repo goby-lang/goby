@@ -92,24 +92,6 @@ func (h *HashObject) toJSON() string {
 func builtinHashInstanceMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 		{
-			// Returns json that is corresponding to the hash.
-			// Basically just like Hash#to_json in Rails but currently doesn't support options.
-			//
-			// ```Ruby
-			// h = { a: 1, b: [1, "2", [4, 5, nil], { foo: "bar" }]}.to_json
-			// puts(h) #=> {"a":1,"b":[1, "2", [4, 5, null], {"foo":"bar"}]}
-			// ```
-			//
-			// @return [String]
-			Name: "to_json",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					r := receiver.(*HashObject)
-					return t.vm.initStringObject(r.toJSON())
-				}
-			},
-		},
-		{
 			// Retrieves the value (object) that corresponds to the key specified.
 			// Returns `nil` when specifying a nonexistent key.
 			//
@@ -210,6 +192,24 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 
 					hash := receiver.(*HashObject)
 					return t.vm.initIntegerObject(hash.length())
+				}
+			},
+		},
+		{
+			// Returns json that is corresponding to the hash.
+			// Basically just like Hash#to_json in Rails but currently doesn't support options.
+			//
+			// ```Ruby
+			// h = { a: 1, b: [1, "2", [4, 5, nil], { foo: "bar" }]}.to_json
+			// puts(h) #=> {"a":1,"b":[1, "2", [4, 5, null], {"foo":"bar"}]}
+			// ```
+			//
+			// @return [String]
+			Name: "to_json",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					r := receiver.(*HashObject)
+					return t.vm.initStringObject(r.toJSON())
 				}
 			},
 		},

@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestHashToJSONWithArray(t *testing.T) {
+func TestHashToJSONMethodWithArray(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -45,7 +45,7 @@ func TestHashToJSONWithArray(t *testing.T) {
 	}
 }
 
-func TestHashToJSONWithNestedHash(t *testing.T) {
+func TestHashToJSONMethodWithNestedHash(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -94,7 +94,7 @@ func TestHashToJSONWithNestedHash(t *testing.T) {
 	}
 }
 
-func TestHashToJSONWithBasicTypes(t *testing.T) {
+func TestHashToJSONMethodWithBasicTypes(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}

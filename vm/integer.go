@@ -431,37 +431,6 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
-			// Returns a `String` representation of self.
-			//
-			// ```Ruby
-			// 100.to_s # => "100"
-			// ```
-			// @return [String]
-			Name: "to_s",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					int := receiver.(*IntegerObject)
-
-					return t.vm.initStringObject(strconv.Itoa(int.Value))
-				}
-			},
-		},
-		{
-			// Returns self.
-			//
-			// ```Ruby
-			// 100.to_i # => 100
-			// ```
-			// @return [Integer]
-			Name: "to_i",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					return receiver
-				}
-			},
-		},
-		{
 			// Returns if self is even.
 			//
 			// ```Ruby
@@ -485,6 +454,52 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
+			// Returns self.
+			//
+			// ```Ruby
+			// 100.to_i # => 100
+			// ```
+			// @return [Integer]
+			Name: "to_i",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					return receiver
+				}
+			},
+		},
+		{
+			// Returns a `String` representation of self.
+			//
+			// ```Ruby
+			// 100.to_s # => "100"
+			// ```
+			// @return [String]
+			Name: "to_s",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					int := receiver.(*IntegerObject)
+
+					return t.vm.initStringObject(strconv.Itoa(int.Value))
+				}
+			},
+		},
+		{
+			// Returns self + 1.
+			//
+			// ```ruby
+			// 100.next # => 101
+			// ```
+			// @return [Integer]
+			Name: "next",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					i := receiver.(*IntegerObject)
+					return t.vm.initIntegerObject(i.Value + 1)
+				}
+			},
+		},
+		{
 			// Returns if self is odd.
 			//
 			// ```ruby
@@ -503,21 +518,6 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					}
 
 					return FALSE
-				}
-			},
-		},
-		{
-			// Returns self + 1.
-			//
-			// ```ruby
-			// 100.next # => 101
-			// ```
-			// @return [Integer]
-			Name: "next",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					i := receiver.(*IntegerObject)
-					return t.vm.initIntegerObject(i.Value + 1)
 				}
 			},
 		},

@@ -147,7 +147,6 @@ func TestArrayAtMethod(t *testing.T) {
 	}
 }
 
-
 func TestArrayClearMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -342,7 +341,6 @@ func TestArrayEachIndexMethod(t *testing.T) {
 		v.checkCFP(t, i, 0)
 	}
 }
-
 
 func TestArrayFirstMethod(t *testing.T) {
 	testsInt := []struct {
@@ -592,7 +590,6 @@ func TestArrayPushMethod(t *testing.T) {
 		v.checkCFP(t, i, 0)
 	}
 }
-
 
 func TestArrayRotateMethod(t *testing.T) {
 	tests := []struct {

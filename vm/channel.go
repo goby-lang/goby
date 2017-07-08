@@ -78,6 +78,18 @@ func builtinChannelClassMethods() []*BuiltInMethodObject {
 func builtinChannelInstanceMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 		{
+			Name: "close",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					c := receiver.(*ChannelObject)
+
+					close(c.Chan)
+
+					return NULL
+				}
+			},
+		},
+		{
 			Name: "deliver",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -100,18 +112,6 @@ func builtinChannelInstanceMethods() []*BuiltInMethodObject {
 					num := <-c.Chan
 
 					return t.vm.channelObjectMap.retrieveObj(num)
-				}
-			},
-		},
-		{
-			Name: "close",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					c := receiver.(*ChannelObject)
-
-					close(c.Chan)
-
-					return NULL
 				}
 			},
 		},

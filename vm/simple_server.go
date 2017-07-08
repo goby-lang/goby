@@ -41,7 +41,20 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 	router := mux.NewRouter()
 
 	return []*BuiltInMethodObject{
-		{Name: "start",
+		{
+			Name: "mount",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					path := args[0].(*StringObject).Value
+					method := args[1].(*StringObject).Value
+					router.HandleFunc(path, newHandler(t, blockFrame)).Methods(method)
+
+					return receiver
+				}
+			},
+		},
+		{
+			Name: "start",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					var port string
@@ -85,18 +98,6 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 					if err != http.ErrServerClosed { // HL
 						log.Fatalf("listen: %s\n", err)
 					}
-
-					return receiver
-				}
-			},
-		},
-		{
-			Name: "mount",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					path := args[0].(*StringObject).Value
-					method := args[1].(*StringObject).Value
-					router.HandleFunc(path, newHandler(t, blockFrame)).Methods(method)
 
 					return receiver
 				}
