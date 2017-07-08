@@ -546,7 +546,7 @@ func TestArrayCountMethodFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input)
 
 		err, ok := evaluated.(*Error)
-		if !ok || err.Class.ReturnName() != ArgumentError {
+		if !ok || err.Class().ReturnName() != ArgumentError {
 			t.Errorf("Expect ArgumentError. got=%T (%+v)", err, err)
 		}
 

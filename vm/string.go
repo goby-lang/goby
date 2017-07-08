@@ -1,7 +1,6 @@
 package vm
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"unicode"
@@ -26,7 +25,7 @@ import (
 // - Currently, UTF-8 encoding is assumed based upon Golang's string manipulation, but the encoding is not actually specified(TBD).
 // - `String.new` is not supported.
 type StringObject struct {
-	Class *RClass
+	*baseObj
 	Value string
 }
 
@@ -38,21 +37,13 @@ func (s *StringObject) toJSON() string {
 	return "\"" + s.Value + "\""
 }
 
-func (s *StringObject) returnClass() Class {
-	if s.Class == nil {
-		panic(fmt.Sprintf("String %s doesn't have class.", s.toString()))
-	}
-
-	return s.Class
-}
-
 func (s *StringObject) equal(e *StringObject) bool {
 	return s.Value == e.Value
 }
 
 func (vm *VM) initStringObject(value string) *StringObject {
 	replacer := strings.NewReplacer("\\n", "\n", "\\r", "\r", "\\t", "\t", "\\v", "\v", "\\\\", "\\")
-	return &StringObject{Value: replacer.Replace(value), Class: vm.builtInClasses[stringClass]}
+	return &StringObject{Value: replacer.Replace(value), baseObj: &baseObj{class: vm.builtInClasses[stringClass]}}
 }
 
 func (vm *VM) initStringClass() *RClass {
@@ -81,7 +72,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*StringObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					rightValue := right.Value
@@ -105,7 +96,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					if right.Value < 0 {
@@ -138,7 +129,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*StringObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					rightValue := right.Value
@@ -167,7 +158,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*StringObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					rightValue := right.Value
@@ -197,7 +188,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*StringObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					rightValue := right.Value
@@ -229,7 +220,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*StringObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					rightValue := right.Value
@@ -262,7 +253,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*StringObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					rightValue := right.Value

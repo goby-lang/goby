@@ -46,7 +46,7 @@ func (vm *VM) initErrorClasses() {
 
 // Error ...
 type Error struct {
-	Class   *RClass
+	*baseObj
 	Message string
 }
 
@@ -59,13 +59,9 @@ func (e *Error) toJSON() string {
 	return e.toString()
 }
 
-func (e *Error) returnClass() Class {
-	return e.Class
-}
-
 func initErrorObject(errorType *RClass, format string, args ...interface{}) *Error {
 	return &Error{
-		Class:   errorType,
+		baseObj: &baseObj{class: errorType},
 		Message: fmt.Sprintf(errorType.Name+": "+format, args...),
 	}
 }

@@ -14,7 +14,7 @@ import (
 //
 // - `Integer.new` is not supported.
 type IntegerObject struct {
-	Class *RClass
+	*baseObj
 	Value int
 }
 
@@ -24,10 +24,6 @@ func (i *IntegerObject) toString() string {
 
 func (i *IntegerObject) toJSON() string {
 	return i.toString()
-}
-
-func (i *IntegerObject) returnClass() Class {
-	return i.Class
 }
 
 func (i *IntegerObject) equal(e *IntegerObject) bool {
@@ -42,7 +38,7 @@ func (vm *VM) initIntegerClass() *RClass {
 }
 
 func (vm *VM) initIntegerObject(value int) *IntegerObject {
-	return &IntegerObject{Value: value, Class: vm.builtInClasses[integerClass]}
+	return &IntegerObject{Value: value, baseObj: &baseObj{class: vm.builtInClasses[integerClass]}}
 }
 
 func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
@@ -62,7 +58,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					rightValue := right.Value
@@ -85,7 +81,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					rightValue := right.Value
@@ -108,7 +104,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					rightValue := right.Value
@@ -154,7 +150,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					rightValue := right.Value
@@ -178,7 +174,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					rightValue := right.Value
@@ -202,7 +198,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					rightValue := right.Value
@@ -231,7 +227,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					rightValue := right.Value
@@ -260,7 +256,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					rightValue := right.Value
@@ -289,7 +285,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					rightValue := right.Value
@@ -319,7 +315,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					rightValue := right.Value
@@ -351,7 +347,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					rightValue := right.Value
@@ -380,7 +376,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					rightValue := right.Value

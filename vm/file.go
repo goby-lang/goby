@@ -18,8 +18,8 @@ func initializeFileClass(vm *VM) {
 
 // FileObject is a special type that contains file pointer so we can keep track on target file.
 type FileObject struct {
-	Class *RClass
-	File  *os.File
+	*baseObj
+	File *os.File
 }
 
 // toString returns detailed infoof a array include elements it contains
@@ -29,11 +29,6 @@ func (f *FileObject) toString() string {
 
 func (f *FileObject) toJSON() string {
 	return f.toString()
-}
-
-// returnClass returns current object's class, which is RArray
-func (f *FileObject) returnClass() Class {
-	return f.Class
 }
 
 var fileModeTable = map[string]int{
@@ -99,7 +94,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 					}
 
 					// TODO: Refactor this class retrieval mess
-					fileObj := &FileObject{File: f, Class: t.vm.builtInClasses[objectClass].constants["File"].Target.(*RClass)}
+					fileObj := &FileObject{File: f, baseObj: &baseObj{class: t.vm.builtInClasses[objectClass].constants["File"].Target.(*RClass)}}
 
 					return fileObj
 				}
