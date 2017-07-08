@@ -63,7 +63,11 @@ func main() {
 	args := flag.Args()[1:]
 
 	dir, _, fileExt := extractFileInfo(filepath)
-	file := readFile(filepath)
+	file, ok := readFile(filepath)
+
+	if !ok {
+		return
+	}
 
 	switch fileExt {
 	case "gb", "rb":
@@ -90,22 +94,13 @@ func extractFileInfo(fp string) (dir, filename, fileExt string) {
 	return
 }
 
-func writeByteCode(bytecodes, dir, filename string) {
-	f, err := os.Create(dir + filename + ".gbbc")
-
-	if err != nil {
-		panic(err)
-	}
-
-	f.WriteString(bytecodes)
-}
-
-func readFile(filepath string) []byte {
+func readFile(filepath string) (file []byte, ok bool) {
 	file, err := ioutil.ReadFile(filepath)
 
 	if err != nil {
-		panic(err)
+		fmt.Println(err.Error())
+		return []byte{}, false
 	}
 
-	return file
+	return file, true
 }
