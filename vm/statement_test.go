@@ -85,7 +85,7 @@ func TestDefStatement(t *testing.T) {
 func TestModuleStatement(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected int
+		expected interface{}
 	}{
 		{`
 		module Bar
@@ -136,6 +136,57 @@ func TestModuleStatement(t *testing.T) {
 			b = Bar.new
 			b.ten * b.five
 `, 50},
+		{`
+		module Foo
+		  def ten
+			10
+		  end
+		  def twenty
+			20
+		  end
+		end
+
+		module Bar
+		  def twenty
+			"20th"
+		  end
+		end
+
+		class Baz
+		  include(Foo)
+		  include(Bar)
+		  include(Foo)
+		end
+
+		a = Baz.new
+		a.twenty
+		`, "20th"},
+		{`
+		module Foo
+		  def ten
+			10
+		  end
+		end
+
+		module Bar
+		  def twenty
+			20
+		  end
+		end
+
+		class Baz
+		  include(Bar)
+		  include(Foo)
+		end
+
+		class Baz
+		  include(Bar)
+		  include(Foo)
+		end
+
+		b = Baz.new
+		b.ten + b.twenty
+		`, 30},
 	}
 
 	for i, tt := range tests {

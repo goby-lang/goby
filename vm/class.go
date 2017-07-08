@@ -174,6 +174,18 @@ func (c *RClass) lookupConstant(constName string, findInScope bool) *Pointer {
 	return constant
 }
 
+func (c *RClass) alreadyInherit(constant *RClass) bool {
+	if c.superClass == constant {
+		return true
+	}
+
+	if c.superClass.Name == objectClass {
+		return false
+	}
+
+	return c.superClass.alreadyInherit(constant)
+}
+
 // ReturnName returns the name of the class
 func (c *RClass) ReturnName() string {
 	return c.Name
@@ -666,6 +678,10 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 					switch r := receiver.(type) {
 					case *RClass:
 						class = r
+
+						if class.alreadyInherit(module) {
+							return class
+						}
 					case *RObject:
 						objectClass := t.vm.builtInClasses["Object"]
 
