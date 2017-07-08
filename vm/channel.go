@@ -61,10 +61,6 @@ func (co *ChannelObject) toJSON() string {
 	return co.toString()
 }
 
-func (co *ChannelObject) Class() *RClass {
-	return co.class
-}
-
 func builtinChannelClassMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 		{

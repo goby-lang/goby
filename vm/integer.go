@@ -26,10 +26,6 @@ func (i *IntegerObject) toJSON() string {
 	return i.toString()
 }
 
-func (i *IntegerObject) Class() *RClass {
-	return i.class
-}
-
 func (i *IntegerObject) equal(e *IntegerObject) bool {
 	return i.Value == e.Value
 }

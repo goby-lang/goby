@@ -59,10 +59,6 @@ func (e *Error) toJSON() string {
 	return e.toString()
 }
 
-func (e *Error) Class() *RClass {
-	return e.class
-}
-
 func initErrorObject(errorType *RClass, format string, args ...interface{}) *Error {
 	return &Error{
 		baseObj: &baseObj{class: errorType},

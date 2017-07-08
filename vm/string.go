@@ -1,7 +1,6 @@
 package vm
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"unicode"
@@ -36,14 +35,6 @@ func (s *StringObject) toString() string {
 
 func (s *StringObject) toJSON() string {
 	return "\"" + s.Value + "\""
-}
-
-func (s *StringObject) Class() *RClass {
-	if s.class == nil {
-		panic(fmt.Sprintf("String %s doesn't have class.", s.toString()))
-	}
-
-	return s.class
 }
 
 func (s *StringObject) equal(e *StringObject) bool {

@@ -9,6 +9,8 @@ type Object interface {
 	Class() *RClass
 	toString() string
 	toJSON() string
+	instanceVariableGet(string) (Object, bool)
+	instanceVariableSet(string, Object) Object
 }
 
 // Pointer is used to point to an object. Variables should hold pointer instead of holding a object directly.
@@ -41,15 +43,15 @@ func (ro *RObject) toJSON() string {
 }
 
 // Class will return object's class
-func (ro *RObject) Class() *RClass {
-	if ro.class == nil {
-		panic(fmt.Sprintf("Object %s doesn't have class.", ro.toString()))
+func (b *baseObj) Class() *RClass {
+	if b.class == nil {
+		panic(fmt.Sprint("Object doesn't have class."))
 	}
-	return ro.class
+	return b.class
 }
 
-func (ro *RObject) instanceVariableGet(name string) (Object, bool) {
-	v, ok := ro.InstanceVariables.get(name)
+func (b *baseObj) instanceVariableGet(name string) (Object, bool) {
+	v, ok := b.InstanceVariables.get(name)
 
 	if !ok {
 		return NULL, false
@@ -58,8 +60,8 @@ func (ro *RObject) instanceVariableGet(name string) (Object, bool) {
 	return v, true
 }
 
-func (ro *RObject) instanceVariableSet(name string, value Object) Object {
-	ro.InstanceVariables.set(name, value)
+func (b *baseObj) instanceVariableSet(name string, value Object) Object {
+	b.InstanceVariables.set(name, value)
 
 	return value
 }

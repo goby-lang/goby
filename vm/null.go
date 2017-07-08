@@ -21,10 +21,6 @@ func (n *NullObject) toJSON() string {
 	return "null"
 }
 
-func (n *NullObject) Class() *RClass {
-	return n.class
-}
-
 func (vm *VM) initNullClass() *RClass {
 	nc := vm.initializeClass(nullClass, false)
 	nc.setBuiltInMethods(builtInNullInstanceMethods(), false)

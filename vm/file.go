@@ -31,11 +31,6 @@ func (f *FileObject) toJSON() string {
 	return f.toString()
 }
 
-// Class returns current object's class, which is RArray
-func (f *FileObject) Class() *RClass {
-	return f.class
-}
-
 var fileModeTable = map[string]int{
 	"r":  syscall.O_RDONLY,
 	"r+": syscall.O_RDWR,

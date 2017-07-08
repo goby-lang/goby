@@ -174,10 +174,6 @@ func (c *RClass) lookupConstant(constName string, findInScope bool) *Pointer {
 	return constant
 }
 
-func (c *RClass) Class() *RClass {
-	return c.class
-}
-
 // ReturnName returns the name of the class
 func (c *RClass) ReturnName() string {
 	return c.Name

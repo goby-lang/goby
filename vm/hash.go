@@ -54,10 +54,6 @@ func (h *HashObject) toString() string {
 	return out.String()
 }
 
-func (h *HashObject) Class() *RClass {
-	return h.class
-}
-
 func (h *HashObject) length() int {
 	return len(h.Pairs)
 }

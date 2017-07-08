@@ -28,11 +28,6 @@ func (b *BooleanObject) toJSON() string {
 	return b.toString()
 }
 
-// Class returns boolean object's class, which is RBool
-func (b *BooleanObject) Class() *RClass {
-	return b.class
-}
-
 func (b *BooleanObject) equal(e *BooleanObject) bool {
 	return b.Value == e.Value
 }

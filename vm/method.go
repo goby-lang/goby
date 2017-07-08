@@ -31,10 +31,6 @@ func (m *MethodObject) toJSON() string {
 	return m.toString()
 }
 
-func (m *MethodObject) Class() *RClass {
-	return m.class
-}
-
 type builtinMethodBody func(*thread, []Object, *callFrame) Object
 
 // BuiltInMethodObject represents methods defined in go.
@@ -51,8 +47,4 @@ func (bim *BuiltInMethodObject) toString() string {
 
 func (bim *BuiltInMethodObject) toJSON() string {
 	return bim.toString()
-}
-
-func (bim *BuiltInMethodObject) Class() *RClass {
-	return bim.class
 }

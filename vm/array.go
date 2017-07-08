@@ -43,11 +43,6 @@ func (a *ArrayObject) toJSON() string {
 	return out.String()
 }
 
-// Class returns current object's class, which is RArray
-func (a *ArrayObject) Class() *RClass {
-	return a.class
-}
-
 // length returns the length of array's elements
 func (a *ArrayObject) length() int {
 	return len(a.Elements)
