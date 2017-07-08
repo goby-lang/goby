@@ -11,7 +11,7 @@ func (vm *VM) initMethodClass() *RClass {
 
 // MethodObject represents methods defined using goby.
 type MethodObject struct {
-	class          *RClass
+	*baseObj
 	Name           string
 	instructionSet *instructionSet
 	argc           int
@@ -31,17 +31,13 @@ func (m *MethodObject) toJSON() string {
 	return m.toString()
 }
 
-func (m *MethodObject) returnClass() Class {
-	return m.class
-}
-
 type builtinMethodBody func(*thread, []Object, *callFrame) Object
 
 // BuiltInMethodObject represents methods defined in go.
 type BuiltInMethodObject struct {
-	class *RClass
-	Name  string
-	Fn    func(receiver Object) builtinMethodBody
+	*baseObj
+	Name string
+	Fn   func(receiver Object) builtinMethodBody
 }
 
 // toString just returns built in method's name.
@@ -51,8 +47,4 @@ func (bim *BuiltInMethodObject) toString() string {
 
 func (bim *BuiltInMethodObject) toJSON() string {
 	return bim.toString()
-}
-
-func (bim *BuiltInMethodObject) returnClass() Class {
-	return bim.class
 }

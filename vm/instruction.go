@@ -256,14 +256,14 @@ var builtInActions = map[operationType]*action{
 				t.returnError(fmt.Sprintf("Can't get method %s's instruction set.", methodName))
 			}
 
-			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, class: t.vm.builtInClasses["Method"]}
+			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.builtInClasses[methodClass]}}
 
 			v := t.stack.pop().Target
 			switch self := v.(type) {
 			case *RClass:
 				self.Methods.set(methodName, method)
 			default:
-				self.returnClass().(*RClass).Methods.set(methodName, method)
+				self.Class().Methods.set(methodName, method)
 			}
 		},
 	},
@@ -273,7 +273,7 @@ var builtInActions = map[operationType]*action{
 			argCount := args[0].(int)
 			methodName := t.stack.pop().Target.(*StringObject).Value
 			is, _ := t.getMethodIS(methodName, cf.instructionSet.filename)
-			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, class: t.vm.builtInClasses["Method"]}
+			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.builtInClasses[methodClass]}}
 
 			v := t.stack.pop().Target
 
@@ -316,7 +316,7 @@ var builtInActions = map[operationType]*action{
 					inheritedClass, ok := superClass.Target.(*RClass)
 
 					if !ok {
-						t.returnError("Constant " + superClassName + " is not a class. got=" + string(superClass.Target.returnClass().ReturnName()))
+						t.returnError("Constant " + superClassName + " is not a class. got=" + string(superClass.Target.Class().ReturnName()))
 					}
 
 					class.pseudoSuperClass = inheritedClass
@@ -347,10 +347,10 @@ var builtInActions = map[operationType]*action{
 			receiver := t.stack.Data[receiverPr].Target
 
 			switch r := receiver.(type) {
-			case Class:
+			case *RClass:
 				method = r.lookupClassMethod(methodName)
 			default:
-				method = r.returnClass().lookupInstanceMethod(methodName)
+				method = r.Class().lookupInstanceMethod(methodName)
 			}
 
 			if method == nil {

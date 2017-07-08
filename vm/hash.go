@@ -35,7 +35,7 @@ import (
 // - Operator `=>` is not supported.
 // - `Hash.new` is not supported.
 type HashObject struct {
-	Class *RClass
+	*baseObj
 	Pairs map[string]Object
 }
 
@@ -54,16 +54,12 @@ func (h *HashObject) toString() string {
 	return out.String()
 }
 
-func (h *HashObject) returnClass() Class {
-	return h.Class
-}
-
 func (h *HashObject) length() int {
 	return len(h.Pairs)
 }
 
 func (vm *VM) initHashObject(pairs map[string]Object) *HashObject {
-	return &HashObject{Pairs: pairs, Class: vm.builtInClasses[hashClass]}
+	return &HashObject{Pairs: pairs, baseObj: &baseObj{class: vm.builtInClasses[hashClass]}}
 }
 
 func generateJSONFromPair(key string, v Object) string {

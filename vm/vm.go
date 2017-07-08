@@ -136,7 +136,7 @@ func (vm *VM) SetMethodISIndexTable(fn filename) {
 }
 
 func (vm *VM) initMainObj() *RObject {
-	return &RObject{Class: vm.builtInClasses[objectClass], InstanceVariables: newEnvironment()}
+	return vm.builtInClasses[objectClass].initializeInstance()
 }
 
 func (vm *VM) initConstants() {
@@ -249,7 +249,7 @@ func (vm *VM) loadConstant(name string, isModule bool) *RClass {
 }
 
 func (vm *VM) lookupConstant(cf *callFrame, constName string) (constant *Pointer) {
-	var namespace Class
+	var namespace *RClass
 	var hasNamespace bool
 
 	top := vm.mainThread.stack.top()
@@ -257,7 +257,7 @@ func (vm *VM) lookupConstant(cf *callFrame, constName string) (constant *Pointer
 	if top == nil {
 		hasNamespace = false
 	} else {
-		namespace, hasNamespace = top.Target.(Class)
+		namespace, hasNamespace = top.Target.(*RClass)
 	}
 
 	if hasNamespace {

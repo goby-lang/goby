@@ -42,8 +42,8 @@ func TestUndefinedMethodError(t *testing.T) {
 			t.Errorf("Expect Error. got=%T (%+v)", evaluated, evaluated)
 		}
 
-		if err.Class.Name != UndefinedMethodError {
-			t.Errorf("Expect error to be %s. got=%s", UndefinedMethodError, err.Class.Name)
+		if err.Class().Name != UndefinedMethodError {
+			t.Errorf("Expect error to be %s. got=%s", UndefinedMethodError, err.Class().Name)
 		}
 
 		if err.Message != tt.errorMsg {
@@ -76,8 +76,8 @@ func TestUnsupportedMethodError(t *testing.T) {
 			t.Errorf("Expect Error. got=%T (%+v)", evaluated, evaluated)
 		}
 
-		if err.Class.Name != UnsupportedMethodError {
-			t.Errorf("Expect error to be %s. got=%s", UnsupportedMethodError, err.Class.Name)
+		if err.Class().Name != UnsupportedMethodError {
+			t.Errorf("Expect error to be %s. got=%s", UnsupportedMethodError, err.Class().Name)
 		}
 
 		if err.Message != tt.errorMsg {
@@ -93,7 +93,7 @@ func TestArgumentError(t *testing.T) {
 	if !ok {
 		t.Errorf("Expect Error. got=%T (%+v)", evaluated, evaluated)
 	}
-	if err.Class.ReturnName() != ArgumentError {
+	if err.Class().ReturnName() != ArgumentError {
 		t.Errorf("Expect %s. got=%T (%+v)", ArgumentError, evaluated, evaluated)
 	}
 
@@ -107,7 +107,7 @@ func TestTypeError(t *testing.T) {
 	if !ok {
 		t.Errorf("Expect Error. got=%T (%+v)", evaluated, evaluated)
 	}
-	if err.Class.ReturnName() != TypeError {
+	if err.Class().ReturnName() != TypeError {
 		t.Errorf("Expect %s. got=%T (%+v)", TypeError, evaluated, evaluated)
 	}
 	vm.checkCFP(t, 0, 1)

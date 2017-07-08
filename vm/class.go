@@ -21,102 +21,8 @@ const (
 	methodClass  = "method"
 )
 
-func initClassClass() *RClass {
-	classClass := &RClass{
-		BaseClass: &BaseClass{
-			Name:         "Class",
-			Methods:      newEnvironment(),
-			ClassMethods: newEnvironment(),
-			constants:    make(map[string]*Pointer),
-		},
-	}
-
-	classClass.setBuiltInMethods(builtinCommonInstanceMethods(), false)
-	classClass.setBuiltInMethods(builtinCommonInstanceMethods(), true)
-	classClass.setBuiltInMethods(builtinClassClassMethods(), true)
-
-	return classClass
-}
-
-func initObjectClass(c *RClass) *RClass {
-	objectClass := &RClass{
-		BaseClass: &BaseClass{
-			Name:         "Object",
-			Class:        c,
-			ClassMethods: newEnvironment(),
-			Methods:      newEnvironment(),
-			constants:    make(map[string]*Pointer),
-		},
-	}
-
-	objectClass.setBuiltInMethods(builtinCommonInstanceMethods(), false)
-
-	return objectClass
-}
-
-// initializeClass initializes and returns a class instance with given class name
-func (vm *VM) initializeClass(name string, isModule bool) *RClass {
-	class := &RClass{BaseClass: vm.createBaseClass(name)}
-	class.isModule = isModule
-
-	return class
-}
-
-func (vm *VM) createBaseClass(className string) *BaseClass {
-	classClass := vm.builtInClasses[classClass]
-	objectClass := vm.builtInClasses[objectClass]
-
-	return &BaseClass{
-		Name:             className,
-		Methods:          newEnvironment(),
-		ClassMethods:     newEnvironment(),
-		Class:            classClass,
-		pseudoSuperClass: objectClass,
-		superClass:       objectClass,
-		constants:        make(map[string]*Pointer),
-		isModule:         false,
-	}
-}
-
-// Class is a built-in class, and also a parent superclass of Goby's built-in classes
-// such as String/Array/Integer.
-// Class class contains common basic class methods for any other built-in/user-defined classes.
-//
-// **Note**: You can add methods to Class or override methods from Class, but you should avoid except for a final resort:
-//
-// ```ruby
-// class Class
-//   def my_method # adding method
-//     49
-//   end
-//   def name      # overriding method
-//     "foo"
-//   end
-// end
-// puts("string".my_method)  # => 49
-// puts("string".name)       # => foo
-// ```
-//
-type Class interface {
-	// Class is an interface that implements a class's basic functions.
-	// - lookupClassMethod: search for current class's class method with given name.
-	// - lookupInstanceMethod: search for current class's instance method with given name.
-	// - ReturnName returns class's name
-	lookupClassMethod(string) Object
-	lookupInstanceMethod(string) Object
-	lookupConstant(string, bool) *Pointer
-	ReturnName() string
-	returnSuperClass() Class
-	Object
-}
-
 // RClass represents normal (not built in) class object
 type RClass struct {
-	*BaseClass
-}
-
-// BaseClass is a embedded struct that contains all the essential fields for a class
-type BaseClass struct {
 	// Name is the class's name
 	Name string
 	// Methods contains its instances' methods
@@ -129,28 +35,82 @@ type BaseClass struct {
 	// It can be normal class, singleton class or a module.
 	superClass *RClass
 	// Class points to this class's class, which should be ClassClass
-	Class *RClass
+	class *RClass
 	// Singleton is a flag marks if this class a singleton class
 	Singleton bool
 	isModule  bool
 	constants map[string]*Pointer
-	scope     Class
+	scope     *RClass
+	*baseObj
+}
+
+func initClassClass() *RClass {
+	classClass := &RClass{
+		Name:         classClass,
+		Methods:      newEnvironment(),
+		ClassMethods: newEnvironment(),
+		constants:    make(map[string]*Pointer),
+	}
+
+	classClass.setBuiltInMethods(builtinCommonInstanceMethods(), false)
+	classClass.setBuiltInMethods(builtinCommonInstanceMethods(), true)
+	classClass.setBuiltInMethods(builtinClassClassMethods(), true)
+
+	return classClass
+}
+
+func initObjectClass(c *RClass) *RClass {
+	objectClass := &RClass{
+		Name:         objectClass,
+		class:        c,
+		ClassMethods: newEnvironment(),
+		Methods:      newEnvironment(),
+		constants:    make(map[string]*Pointer),
+	}
+
+	objectClass.setBuiltInMethods(builtinCommonInstanceMethods(), false)
+
+	return objectClass
+}
+
+// initializeClass initializes and returns a class instance with given class name
+func (vm *VM) initializeClass(name string, isModule bool) *RClass {
+	class := vm.createRClass(name)
+	class.isModule = isModule
+
+	return class
+}
+
+func (vm *VM) createRClass(className string) *RClass {
+	classClass := vm.builtInClasses[classClass]
+	objectClass := vm.builtInClasses[objectClass]
+
+	return &RClass{
+		Name:             className,
+		Methods:          newEnvironment(),
+		ClassMethods:     newEnvironment(),
+		pseudoSuperClass: objectClass,
+		superClass:       objectClass,
+		constants:        make(map[string]*Pointer),
+		isModule:         false,
+		baseObj:          &baseObj{class: classClass, InstanceVariables: newEnvironment()},
+	}
 }
 
 // toString returns the basic inspected result (which is class name) of current class
 // TODO: Singleton class's inspect() should also mark if it's a singleton class explicitly.
-func (c *BaseClass) toString() string {
+func (c *RClass) toString() string {
 	if c.isModule {
 		return "<Module:" + c.Name + ">"
 	}
 	return "<Class:" + c.Name + ">"
 }
 
-func (c *BaseClass) toJSON() string {
+func (c *RClass) toJSON() string {
 	return c.toString()
 }
 
-func (c *BaseClass) setBuiltInMethods(methodList []*BuiltInMethodObject, classMethods bool) {
+func (c *RClass) setBuiltInMethods(methodList []*BuiltInMethodObject, classMethods bool) {
 	for _, m := range methodList {
 		c.Methods.set(m.Name, m)
 	}
@@ -162,15 +122,15 @@ func (c *BaseClass) setBuiltInMethods(methodList []*BuiltInMethodObject, classMe
 	}
 }
 
-func (c *BaseClass) lookupClassMethod(methodName string) Object {
+func (c *RClass) lookupClassMethod(methodName string) Object {
 	method, ok := c.ClassMethods.get(methodName)
 
 	if !ok {
 		if c.superClass != nil {
 			return c.superClass.lookupClassMethod(methodName)
 		}
-		if c.Class != nil {
-			return c.Class.lookupClassMethod(methodName)
+		if c.class != nil {
+			return c.class.lookupClassMethod(methodName)
 		}
 		return nil
 	}
@@ -178,7 +138,7 @@ func (c *BaseClass) lookupClassMethod(methodName string) Object {
 	return method
 }
 
-func (c *BaseClass) lookupInstanceMethod(methodName string) Object {
+func (c *RClass) lookupInstanceMethod(methodName string) Object {
 	method, ok := c.Methods.get(methodName)
 
 	if !ok {
@@ -186,8 +146,8 @@ func (c *BaseClass) lookupInstanceMethod(methodName string) Object {
 			return c.superClass.lookupInstanceMethod(methodName)
 		}
 
-		if c.Class != nil {
-			return c.Class.lookupInstanceMethod(methodName)
+		if c.class != nil {
+			return c.class.lookupInstanceMethod(methodName)
 		}
 
 		return nil
@@ -196,7 +156,7 @@ func (c *BaseClass) lookupInstanceMethod(methodName string) Object {
 	return method
 }
 
-func (c *BaseClass) lookupConstant(constName string, findInScope bool) *Pointer {
+func (c *RClass) lookupConstant(constName string, findInScope bool) *Pointer {
 	constant, ok := c.constants[constName]
 
 	if !ok {
@@ -214,21 +174,17 @@ func (c *BaseClass) lookupConstant(constName string, findInScope bool) *Pointer 
 	return constant
 }
 
-func (c *BaseClass) returnClass() Class {
-	return c.Class
-}
-
 // ReturnName returns the name of the class
-func (c *BaseClass) ReturnName() string {
+func (c *RClass) ReturnName() string {
 	return c.Name
 }
 
-func (c *BaseClass) returnSuperClass() Class {
+func (c *RClass) returnSuperClass() *RClass {
 	return c.pseudoSuperClass
 }
 
 func (c *RClass) initializeInstance() *RObject {
-	instance := &RObject{Class: c, InstanceVariables: newEnvironment()}
+	instance := &RObject{baseObj: &baseObj{class: c, InstanceVariables: newEnvironment()}}
 
 	return instance
 }
@@ -418,9 +374,9 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 
 					switch r := receiver.(type) {
 					case Object:
-						return r.returnClass()
+						return r.Class()
 					default:
-						return &Error{Message: "Can't call class on %T" + string(r.returnClass().ReturnName())}
+						return &Error{Message: "Can't call class on %T" + string(r.Class().ReturnName())}
 					}
 				}
 			},
@@ -713,7 +669,7 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 					case *RObject:
 						objectClass := t.vm.builtInClasses["Object"]
 
-						if r.Class == objectClass {
+						if r.class == objectClass {
 							class = objectClass
 						}
 					}
@@ -782,7 +738,7 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-					name := receiver.(Class).ReturnName()
+					name := receiver.(*RClass).ReturnName()
 					nameString := t.vm.initStringObject(name)
 					return nameString
 				}
@@ -820,9 +776,9 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 			Name: "superclass",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					c := receiver.(Class).returnSuperClass()
+					c := receiver.(*RClass).returnSuperClass()
 
-					if c.(*RClass) == nil {
+					if c == nil {
 						return NULL
 					}
 

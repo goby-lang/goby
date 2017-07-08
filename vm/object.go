@@ -6,9 +6,11 @@ import (
 
 // Object represents all objects in Goby, including Array, Integer or even Method and Error.
 type Object interface {
-	returnClass() Class
+	Class() *RClass
 	toString() string
 	toJSON() string
+	instanceVariableGet(string) (Object, bool)
+	instanceVariableSet(string, Object) Object
 }
 
 // Pointer is used to point to an object. Variables should hold pointer instead of holding a object directly.
@@ -22,30 +24,34 @@ func (p *Pointer) returnClass() *RClass {
 
 // RObject represents any non built-in class's instance.
 type RObject struct {
-	Class             *RClass
+	*baseObj
+	InitializeMethod *MethodObject
+}
+
+type baseObj struct {
+	class             *RClass
 	InstanceVariables *environment
-	InitializeMethod  *MethodObject
 }
 
 // toString tells which class it belongs to.
 func (ro *RObject) toString() string {
-	return "<Instance of: " + ro.Class.Name + ">"
+	return "<Instance of: " + ro.class.Name + ">"
 }
 
 func (ro *RObject) toJSON() string {
 	return ro.toString()
 }
 
-// returnClass will return object's class
-func (ro *RObject) returnClass() Class {
-	if ro.Class == nil {
-		panic(fmt.Sprintf("Object %s doesn't have class.", ro.toString()))
+// Class will return object's class
+func (b *baseObj) Class() *RClass {
+	if b.class == nil {
+		panic(fmt.Sprint("Object doesn't have class."))
 	}
-	return ro.Class
+	return b.class
 }
 
-func (ro *RObject) instanceVariableGet(name string) (Object, bool) {
-	v, ok := ro.InstanceVariables.get(name)
+func (b *baseObj) instanceVariableGet(name string) (Object, bool) {
+	v, ok := b.InstanceVariables.get(name)
 
 	if !ok {
 		return NULL, false
@@ -54,13 +60,13 @@ func (ro *RObject) instanceVariableGet(name string) (Object, bool) {
 	return v, true
 }
 
-func (ro *RObject) instanceVariableSet(name string, value Object) Object {
-	ro.InstanceVariables.set(name, value)
+func (b *baseObj) instanceVariableSet(name string, value Object) Object {
+	b.InstanceVariables.set(name, value)
 
 	return value
 }
 
-func checkArgumentLen(args []Object, class Class, methodName string) *Error {
+func checkArgumentLen(args []Object, class *RClass, methodName string) *Error {
 	if len(args) > 1 {
 		return &Error{Message: fmt.Sprintf("Too many arguments for %s#%s", class.ReturnName(), methodName)}
 	}
@@ -68,6 +74,6 @@ func checkArgumentLen(args []Object, class Class, methodName string) *Error {
 	return nil
 }
 
-func wrongTypeError(c Class) *Error {
+func wrongTypeError(c *RClass) *Error {
 	return &Error{Message: fmt.Sprintf("expect argument to be %s type", c.ReturnName())}
 }
