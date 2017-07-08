@@ -3,7 +3,7 @@ package bytecode
 import (
 	"bytes"
 	"strings"
-	
+
 	"github.com/goby-lang/goby/compiler/ast"
 )
 
@@ -50,7 +50,7 @@ func (g *Generator) GenerateByteCode(stmts []ast.Statement) string {
 	for _, is := range g.instructionSets {
 		out.WriteString(is.compile())
 	}
-	
+
 	return strings.TrimSpace(strings.Replace(out.String(), "\n\n", "\n", -1))
 }
 
