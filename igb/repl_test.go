@@ -53,6 +53,27 @@ f.minus_two(a)
 
 #=> 108
 >> exit`},
+		{
+			[]string{
+				"class Foo",
+				"  attr_accessor :bar",
+				"end",
+				"f = Foo.new",
+				"f.bar = 10",
+				"f.bar",
+				"exit",
+			},
+			`
+>> class Foo
+>>   attr_accessor :bar
+>> end
+#=> <Class:Foo>
+>> f = Foo.new
+>> f.bar = 10
+#=> 10
+>> f.bar
+#=> 10
+>> exit`},
 	}
 
 	for _, test := range tests {

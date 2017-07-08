@@ -317,12 +317,8 @@ func (l *Lexer) readSymbol() string {
 
 	position := l.position // currently at string's first letter
 
-	for !(l.peekChar() == ' ' || l.peekChar() == '\n' || l.peekChar() == '\r' || l.peekChar() == '\t' || l.peekChar() == ',') {
+	for !(l.peekChar() == ' ' || l.peekChar() == '\n' || l.peekChar() == '\r' || l.peekChar() == '\t' || l.peekChar() == ',' || l.peekChar() == 0) {
 		l.readChar()
-
-		if l.peekChar() == 0 {
-			panic("Unterminated string meets end of file")
-		}
 	}
 
 	l.readChar()                           // currently at string's last letter
