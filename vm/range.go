@@ -364,6 +364,8 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 					ran := receiver.(*RangeObject)
 
 					if ran.Start > ran.End || ran.Start < 0 {
+						// if block is not used, it should be popped
+						t.callFrameStack.pop()
 						return NULL
 					}
 

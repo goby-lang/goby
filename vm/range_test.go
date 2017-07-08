@@ -432,6 +432,7 @@ func TestBsearch(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -449,7 +450,7 @@ func TestBsearchFail(t *testing.T) {
 		`, initErrorObject(TypeErrorClass, "Expect Integer or Boolean type. got=%T", vm.initStringObject("Binary Search"))},
 	}
 
-	for _, tt := range testsFail {
+	for i, tt := range testsFail {
 		evaluated := vm.testEval(t, tt.input)
 		err, ok := evaluated.(*Error)
 		if !ok {
@@ -458,5 +459,6 @@ func TestBsearchFail(t *testing.T) {
 		if err.Message != tt.expected.Message {
 			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
 		}
+		vm.checkCFP(t, i, 1)
 	}
 }
