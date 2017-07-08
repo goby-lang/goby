@@ -490,6 +490,47 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 func builtinClassClassMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 		{
+			// Creates instance variables and corresponding methods that return the value of
+			// each instance variable and assign an argument to each instance variable.
+			// Only string literal can be used for now.
+			//
+			// ```ruby
+			// class Foo
+			//   attr_accessor("bar", "buz")
+			// end
+			// ```
+			// is equivalent to:
+			//
+			// ```ruby
+			// class Foo
+			//   def bar
+			//     @bar
+			//   end
+			//   def buz
+			//     @buz
+			//   end
+			//   def bar=(val)
+			//     @bar = val
+			//   end
+			//   def buz=(val)
+			//     @buz = val
+			//   end
+			// end
+			// ```
+			//
+			// @param *args [String] One or more quoted method names for 'getter/setter'
+			// @return [Null]
+			Name: "attr_accessor",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					r := receiver.(*RClass)
+					r.setAttrAccessor(args)
+
+					return r
+				}
+			},
+		},
+		{
 			// Creates instance variables and corresponding methods that return the value of each
 			// instance variable.
 			//
@@ -556,47 +597,6 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					r := receiver.(*RClass)
 					r.setAttrWriter(args)
-
-					return r
-				}
-			},
-		},
-		{
-			// Creates instance variables and corresponding methods that return the value of
-			// each instance variable and assign an argument to each instance variable.
-			// Only string literal can be used for now.
-			//
-			// ```ruby
-			// class Foo
-			//   attr_accessor("bar", "buz")
-			// end
-			// ```
-			// is equivalent to:
-			//
-			// ```ruby
-			// class Foo
-			//   def bar
-			//     @bar
-			//   end
-			//   def buz
-			//     @buz
-			//   end
-			//   def bar=(val)
-			//     @bar = val
-			//   end
-			//   def buz=(val)
-			//     @buz = val
-			//   end
-			// end
-			// ```
-			//
-			// @param *args [String] One or more quoted method names for 'getter/setter'
-			// @return [Null]
-			Name: "attr_accessor",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					r := receiver.(*RClass)
-					r.setAttrAccessor(args)
 
 					return r
 				}
@@ -682,6 +682,26 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
+			// Returns the name of the class (receiver).
+			//
+			// ```ruby
+			// puts(Array.name)  # => Array
+			// puts(Class.name)  # => Class
+			// puts(Object.name) # => Object
+			// ```
+			// @param class [Class] Receiver
+			// @return [String] Converted receiver name
+			Name: "name",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					name := receiver.(*RClass).ReturnName()
+					nameString := t.vm.initStringObject(name)
+					return nameString
+				}
+			},
+		},
+		{
 			// Creates and returns a new anonymous class from a receiver.
 			// You can use any classes you defined as the receiver:
 			//
@@ -721,26 +741,6 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 					}
 
 					return instance
-				}
-			},
-		},
-		{
-			// Returns the name of the class (receiver).
-			//
-			// ```ruby
-			// puts(Array.name)  # => Array
-			// puts(Class.name)  # => Class
-			// puts(Object.name) # => Object
-			// ```
-			// @param class [Class] Receiver
-			// @return [String] Converted receiver name
-			Name: "name",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					name := receiver.(*RClass).ReturnName()
-					nameString := t.vm.initStringObject(name)
-					return nameString
 				}
 			},
 		},

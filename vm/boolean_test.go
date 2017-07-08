@@ -19,13 +19,11 @@ func TestEvalBooleanExpression(t *testing.T) {
 	}
 }
 
-func TestEvalInfixBooleanExpression(t *testing.T) {
+func TestBooleanComparison(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected bool
 	}{
-		{"true", true},
-		{"false", false},
 		{"1 < 2", true},
 		{"1 > 2", false},
 		{"1 < 1", false},
@@ -47,6 +45,21 @@ func TestEvalInfixBooleanExpression(t *testing.T) {
 		{"(1 < 2) == false", false},
 		{"(1 > 2) == true", false},
 		{"(1 > 2) == false", true},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
+func TestBooleanLogicalExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
 		{"true && true", true},
 		{"false && true", false},
 		{"true && false", false},
