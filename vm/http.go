@@ -18,7 +18,7 @@ func initializeHTTPClass(vm *VM) {
 	initializeRequestClass(vm, http)
 	initializeResponseClass(vm, http)
 
-	net.constants[http.Name] = &Pointer{http}
+	net.setClassConstant(http)
 
 	// Use Goby code to extend request and response classes.
 	vm.execGobyLib("net/http/response.gb")
@@ -27,7 +27,7 @@ func initializeHTTPClass(vm *VM) {
 
 func initializeRequestClass(vm *VM, hc *RClass) *RClass {
 	requestClass := vm.initializeClass("Request", false)
-	hc.constants["Request"] = &Pointer{requestClass}
+	hc.setClassConstant(requestClass)
 	builtinHTTPRequestInstanceMethods := []*BuiltInMethodObject{}
 
 	requestClass.setBuiltInMethods(builtinHTTPRequestInstanceMethods, false)
@@ -38,7 +38,7 @@ func initializeRequestClass(vm *VM, hc *RClass) *RClass {
 
 func initializeResponseClass(vm *VM, hc *RClass) *RClass {
 	responseClass := vm.initializeClass("Response", false)
-	hc.constants["Response"] = &Pointer{responseClass}
+	hc.setClassConstant(responseClass)
 	builtinHTTPResponseInstanceMethods := []*BuiltInMethodObject{}
 
 	responseClass.setBuiltInMethods(builtinHTTPResponseInstanceMethods, false)

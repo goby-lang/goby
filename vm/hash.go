@@ -59,7 +59,7 @@ func (h *HashObject) length() int {
 }
 
 func (vm *VM) initHashObject(pairs map[string]Object) *HashObject {
-	return &HashObject{Pairs: pairs, baseObj: &baseObj{class: vm.builtInClasses[hashClass]}}
+	return &HashObject{Pairs: pairs, baseObj: &baseObj{class: vm.topLevelClass(hashClass)}}
 }
 
 func generateJSONFromPair(key string, v Object) string {

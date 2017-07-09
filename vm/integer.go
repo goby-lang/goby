@@ -38,7 +38,7 @@ func (vm *VM) initIntegerClass() *RClass {
 }
 
 func (vm *VM) initIntegerObject(value int) *IntegerObject {
-	return &IntegerObject{Value: value, baseObj: &baseObj{class: vm.builtInClasses[integerClass]}}
+	return &IntegerObject{Value: value, baseObj: &baseObj{class: vm.topLevelClass(integerClass)}}
 }
 
 func builtinIntegerInstanceMethods() []*BuiltInMethodObject {

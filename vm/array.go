@@ -77,7 +77,7 @@ func (a *ArrayObject) shift() Object {
 }
 
 func (vm *VM) initArrayObject(elements []Object) *ArrayObject {
-	return &ArrayObject{Elements: elements, baseObj: &baseObj{class: vm.builtInClasses[arrayClass]}}
+	return &ArrayObject{Elements: elements, baseObj: &baseObj{class: vm.topLevelClass(arrayClass)}}
 }
 
 func (vm *VM) initArrayClass() *RClass {

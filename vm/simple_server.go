@@ -32,7 +32,7 @@ func initializeSimpleServerClass(vm *VM) {
 	net := vm.loadConstant("Net", true)
 	simpleServer := vm.initializeClass("SimpleServer", false)
 	simpleServer.setBuiltInMethods(builtinSimpleServerInstanceMethods(), false)
-	net.constants[simpleServer.Name] = &Pointer{simpleServer}
+	net.setClassConstant(simpleServer)
 
 	vm.execGobyLib("net/simple_server.gb")
 }

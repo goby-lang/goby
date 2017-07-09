@@ -256,7 +256,7 @@ var builtInActions = map[operationType]*action{
 				t.returnError(fmt.Sprintf("Can't get method %s's instruction set.", methodName))
 			}
 
-			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.builtInClasses[methodClass]}}
+			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.topLevelClass(methodClass)}}
 
 			v := t.stack.pop().Target
 			switch self := v.(type) {
@@ -273,7 +273,7 @@ var builtInActions = map[operationType]*action{
 			argCount := args[0].(int)
 			methodName := t.stack.pop().Target.(*StringObject).Value
 			is, _ := t.getMethodIS(methodName, cf.instructionSet.filename)
-			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.builtInClasses[methodClass]}}
+			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.topLevelClass(methodClass)}}
 
 			v := t.stack.pop().Target
 
