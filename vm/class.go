@@ -82,8 +82,8 @@ func (vm *VM) initializeClass(name string, isModule bool) *RClass {
 }
 
 func (vm *VM) createRClass(className string) *RClass {
-	classClass := vm.builtInClasses[classClass]
-	objectClass := vm.builtInClasses[objectClass]
+	classClass := vm.topLevelClass(classClass)
+	objectClass := vm.topLevelClass(objectClass)
 
 	return &RClass{
 		Name:             className,
@@ -172,6 +172,10 @@ func (c *RClass) lookupConstant(constName string, findInScope bool) *Pointer {
 	}
 
 	return constant
+}
+
+func (c *RClass) setClassConstant(constant *RClass) {
+	c.constants[constant.Name] = &Pointer{constant}
 }
 
 func (c *RClass) alreadyInherit(constant *RClass) bool {
@@ -683,7 +687,7 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 							return class
 						}
 					case *RObject:
-						objectClass := t.vm.builtInClasses["Object"]
+						objectClass := t.vm.topLevelClass(objectClass)
 
 						if r.class == objectClass {
 							class = objectClass

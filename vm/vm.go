@@ -33,8 +33,6 @@ var standardLibraries = map[string]func(*VM){
 
 // VM represents a stack based virtual machine.
 type VM struct {
-	builtInClasses map[string]*RClass
-
 	mainObj    *RObject
 	mainThread *thread
 	// a map holds pointers of constants
@@ -67,7 +65,6 @@ type VM struct {
 func New(fileDir string, args []string) *VM {
 	vm := &VM{args: args}
 	vm.mainThread = vm.newThread()
-	vm.builtInClasses = make(map[string]*RClass)
 	vm.constants = make(map[string]*Pointer)
 
 	vm.initConstants()
@@ -136,17 +133,15 @@ func (vm *VM) SetMethodISIndexTable(fn filename) {
 }
 
 func (vm *VM) initMainObj() *RObject {
-	return vm.builtInClasses[objectClass].initializeInstance()
+	return vm.constants[objectClass].Target.(*RClass).initializeInstance()
 }
 
 func (vm *VM) initConstants() {
 	cClass := initClassClass()
 	objClass := initObjectClass(cClass)
 
-	vm.builtInClasses[classClass] = cClass
-	vm.builtInClasses[objectClass] = objClass
-
-	constants := make(map[string]*Pointer)
+	vm.constants[objectClass] = &Pointer{objClass}
+	vm.topLevelClass(objectClass).setClassConstant(cClass)
 
 	builtInClasses := []*RClass{
 		vm.initIntegerClass(),
@@ -163,9 +158,7 @@ func (vm *VM) initConstants() {
 	vm.initErrorClasses()
 
 	for _, c := range builtInClasses {
-		p := &Pointer{Target: c}
-		constants[c.ReturnName()] = p
-		vm.builtInClasses[c.ReturnName()] = c
+		objClass.setClassConstant(c)
 	}
 
 	args := []Object{}
@@ -174,9 +167,17 @@ func (vm *VM) initConstants() {
 		args = append(args, vm.initStringObject(arg))
 	}
 
-	constants["ARGV"] = &Pointer{Target: vm.initArrayObject(args)}
-	objClass.constants = constants
-	vm.constants[objectClass] = &Pointer{objClass}
+	objClass.constants["ARGV"] = &Pointer{Target: vm.initArrayObject(args)}
+}
+
+func (vm *VM) topLevelClass(cn string) *RClass {
+	objClass := vm.constants[objectClass].Target.(*RClass)
+
+	if cn == objectClass {
+		return objClass
+	}
+
+	return objClass.constants[cn].Target.(*RClass)
 }
 
 // Start evaluation from top most call frame
@@ -232,15 +233,16 @@ func (vm *VM) getClassIS(name string, filename filename) *instructionSet {
 	return is
 }
 
+// loadConstant makes sure we don't create a class twice.
 func (vm *VM) loadConstant(name string, isModule bool) *RClass {
 	var c *RClass
 	var ptr *Pointer
 
-	ptr = vm.builtInClasses["Object"].constants[name]
+	ptr = vm.topLevelClass(objectClass).constants[name]
 
 	if ptr == nil {
 		c = vm.initializeClass(name, isModule)
-		vm.builtInClasses["Object"].constants[name] = &Pointer{Target: c}
+		vm.topLevelClass(objectClass).setClassConstant(c)
 	} else {
 		c = ptr.Target.(*RClass)
 	}

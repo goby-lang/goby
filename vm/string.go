@@ -43,7 +43,7 @@ func (s *StringObject) equal(e *StringObject) bool {
 
 func (vm *VM) initStringObject(value string) *StringObject {
 	replacer := strings.NewReplacer("\\n", "\n", "\\r", "\r", "\\t", "\t", "\\v", "\v", "\\\\", "\\")
-	return &StringObject{Value: replacer.Replace(value), baseObj: &baseObj{class: vm.builtInClasses[stringClass]}}
+	return &StringObject{Value: replacer.Replace(value), baseObj: &baseObj{class: vm.topLevelClass(stringClass)}}
 }
 
 func (vm *VM) initStringClass() *RClass {

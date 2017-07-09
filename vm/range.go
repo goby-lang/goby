@@ -39,7 +39,7 @@ func (ro *RangeObject) toJSON() string {
 }
 
 func (vm *VM) initRangeObject(start, end int) *RangeObject {
-	return &RangeObject{baseObj: &baseObj{class: vm.builtInClasses[rangeClass]}, Start: start, End: end}
+	return &RangeObject{baseObj: &baseObj{class: vm.topLevelClass(rangeClass)}, Start: start, End: end}
 }
 
 func (vm *VM) initRangeClass() *RClass {
