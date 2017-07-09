@@ -8,10 +8,10 @@ import (
 )
 
 func initializeFileClass(vm *VM) {
-	class := vm.initializeClass("File", false)
-	class.setBuiltInMethods(builtinFileClassMethods(), true)
-	class.setBuiltInMethods(builtinFileInstanceMethods(), false)
-	vm.topLevelClass(objectClass).constants["File"] = &Pointer{Target: class}
+	fc := vm.initializeClass("File", false)
+	fc.setBuiltInMethods(builtinFileClassMethods(), true)
+	fc.setBuiltInMethods(builtinFileInstanceMethods(), false)
+	vm.objectClass.setClassConstant(fc)
 
 	vm.execGobyLib("file.gb")
 }
@@ -209,7 +209,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 					}
 
 					// TODO: Refactor this class retrieval mess
-					fileObj := &FileObject{File: f, baseObj: &baseObj{class: t.vm.topLevelClass(objectClass).constants["File"].Target.(*RClass)}}
+					fileObj := &FileObject{File: f, baseObj: &baseObj{class: t.vm.topLevelClass("File")}}
 
 					return fileObj
 				}

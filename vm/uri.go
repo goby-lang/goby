@@ -11,8 +11,8 @@ func initializeURIClass(vm *VM) {
 	https := vm.initializeClass("HTTPS", false)
 	https.superClass = http
 	https.pseudoSuperClass = http
-	uri.constants[http.Name] = &Pointer{http}
-	uri.constants[https.Name] = &Pointer{https}
+	uri.setClassConstant(http)
+	uri.setClassConstant(https)
 	uri.setBuiltInMethods(builtinURIClassMethods(), true)
 
 	attrs := []Object{
@@ -28,7 +28,7 @@ func initializeURIClass(vm *VM) {
 	http.setAttrReader(attrs)
 	http.setAttrWriter(attrs)
 
-	vm.constants["URI"] = &Pointer{Target: uri}
+	vm.objectClass.setClassConstant(uri)
 }
 
 func builtinURIClassMethods() []*BuiltInMethodObject {
@@ -47,7 +47,7 @@ func builtinURIClassMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					uri := args[0].(*StringObject).Value
-					uriModule := t.vm.constants["URI"].Target.(*RClass)
+					uriModule := t.vm.topLevelClass("URI")
 					u, err := url.Parse(uri)
 
 					if err != nil {
@@ -109,9 +109,9 @@ func builtinURIClassMethods() []*BuiltInMethodObject {
 					var c *RClass
 
 					if u.Scheme == "https" {
-						c = uriModule.constants["HTTPS"].Target.(*RClass)
+						c = uriModule.getClassConstant("HTTPS")
 					} else {
-						c = uriModule.constants["HTTP"].Target.(*RClass)
+						c = uriModule.getClassConstant("HTTP")
 					}
 
 					i := c.initializeInstance()

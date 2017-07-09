@@ -63,10 +63,10 @@ func (cf *callFrame) storeConstant(constName string, constant interface{}) *Poin
 	var ptr *Pointer
 
 	switch c := constant.(type) {
-	case *RClass:
-		ptr = &Pointer{Target: c}
 	case *Pointer:
 		ptr = c
+	case Object:
+		ptr = &Pointer{Target: c}
 	}
 
 	switch scope := cf.self.(type) {
