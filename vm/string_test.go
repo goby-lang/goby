@@ -178,7 +178,7 @@ func TestStringOperationFail(t *testing.T) {
 	}
 }
 
-func TestCountingString(t *testing.T) {
+func TestStringCountMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -196,7 +196,7 @@ func TestCountingString(t *testing.T) {
 	}
 }
 
-func TestCapitalizingString(t *testing.T) {
+func TestStringCapitalizeMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -218,7 +218,7 @@ func TestCapitalizingString(t *testing.T) {
 	}
 }
 
-func TestConcatenatingString(t *testing.T) {
+func TestStringConcatenateMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -233,7 +233,7 @@ func TestConcatenatingString(t *testing.T) {
 	}
 }
 
-func TestConcatenatingStringFail(t *testing.T) {
+func TestStringConcatenateMethodFail(t *testing.T) {
 	vm := initTestVM()
 	testsFail := []struct {
 		input    string
@@ -256,7 +256,7 @@ func TestConcatenatingStringFail(t *testing.T) {
 	}
 }
 
-func TestDeletingString(t *testing.T) {
+func TestStringDeleteMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -271,7 +271,7 @@ func TestDeletingString(t *testing.T) {
 	}
 }
 
-func TestDeleteStringFail(t *testing.T) {
+func TestStringDeleteMethodFail(t *testing.T) {
 	vm := initTestVM()
 	testsFail := []struct {
 		input    string
@@ -294,7 +294,7 @@ func TestDeleteStringFail(t *testing.T) {
 	}
 }
 
-func TestStringEmpty(t *testing.T) {
+func TestStringEmptyMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -310,7 +310,7 @@ func TestStringEmpty(t *testing.T) {
 	}
 }
 
-func TestStringEqual(t *testing.T) {
+func TestStringEqualMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -330,7 +330,7 @@ func TestStringEqual(t *testing.T) {
 	}
 }
 
-func TestStringStartWith(t *testing.T) {
+func TestStringStartWithMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -350,7 +350,7 @@ func TestStringStartWith(t *testing.T) {
 	}
 }
 
-func TestStringStartWithFail(t *testing.T) {
+func TestStringStartWithMethodFail(t *testing.T) {
 	vm := initTestVM()
 	testsFail := []struct {
 		input    string
@@ -373,7 +373,7 @@ func TestStringStartWithFail(t *testing.T) {
 	}
 }
 
-func TestStringEndWith(t *testing.T) {
+func TestStringEndWithMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -393,7 +393,7 @@ func TestStringEndWith(t *testing.T) {
 	}
 }
 
-func TestStringEndWithFail(t *testing.T) {
+func TestStringEndWithMethodFail(t *testing.T) {
 	vm := initTestVM()
 	testsFail := []struct {
 		input    string
@@ -416,7 +416,7 @@ func TestStringEndWithFail(t *testing.T) {
 	}
 }
 
-func TestInsertingString(t *testing.T) {
+func TestStringInsertMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -435,7 +435,7 @@ func TestInsertingString(t *testing.T) {
 	}
 }
 
-func TestInsertingStringFail(t *testing.T) {
+func TestStringInsertMethodFail(t *testing.T) {
 	vm := initTestVM()
 	testsFail := []struct {
 		input    string
@@ -459,7 +459,7 @@ func TestInsertingStringFail(t *testing.T) {
 	}
 }
 
-func TestChoppingString(t *testing.T) {
+func TestStringChopMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -475,7 +475,7 @@ func TestChoppingString(t *testing.T) {
 	}
 }
 
-func TestLeftJustifyingString(t *testing.T) {
+func TestStringLeftJustifyMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -492,7 +492,7 @@ func TestLeftJustifyingString(t *testing.T) {
 	}
 }
 
-func TestLeftJustifyStringFail(t *testing.T) {
+func TestStringLeftJustifyMethodFail(t *testing.T) {
 	vm := initTestVM()
 	testsFail := []struct {
 		input    string
@@ -518,7 +518,7 @@ func TestLeftJustifyStringFail(t *testing.T) {
 	}
 }
 
-func TestRightJustifyingString(t *testing.T) {
+func TestStringRightJustifyMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -535,7 +535,7 @@ func TestRightJustifyingString(t *testing.T) {
 	}
 }
 
-func TestRightJustifyStringFail(t *testing.T) {
+func TestStringRightJustifyFail(t *testing.T) {
 	vm := initTestVM()
 	testsFail := []struct {
 		input    string
@@ -561,7 +561,7 @@ func TestRightJustifyStringFail(t *testing.T) {
 	}
 }
 
-func TestStrippingString(t *testing.T) {
+func TestStringStripMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -577,7 +577,7 @@ func TestStrippingString(t *testing.T) {
 	}
 }
 
-func TestSplittingString(t *testing.T) {
+func TestStringSplitMethod(t *testing.T) {
 	vm := initTestVM()
 	tests := []struct {
 		input    string
@@ -635,7 +635,7 @@ func TestSplittingString(t *testing.T) {
 	}
 }
 
-func TestSplittingStringFail(t *testing.T) {
+func TestStringSplitMethodFail(t *testing.T) {
 	vm := initTestVM()
 	testsFail := []struct {
 		input    string
@@ -658,7 +658,7 @@ func TestSplittingStringFail(t *testing.T) {
 	}
 }
 
-func TestSlicingString(t *testing.T) {
+func TestStringSliceMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -694,7 +694,7 @@ func TestSlicingString(t *testing.T) {
 	}
 }
 
-func TestSlicingStringFail(t *testing.T) {
+func TestStringSliceMethodFail(t *testing.T) {
 	vm := initTestVM()
 	testsFail := []struct {
 		input    string
@@ -716,7 +716,7 @@ func TestSlicingStringFail(t *testing.T) {
 	}
 }
 
-func TestReplacingString(t *testing.T) {
+func TestStringReplaceMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -733,7 +733,7 @@ func TestReplacingString(t *testing.T) {
 	}
 }
 
-func TestReplacingStringFail(t *testing.T) {
+func TestStringReplaceMethodFail(t *testing.T) {
 	vm := initTestVM()
 	testsFail := []struct {
 		input    string
@@ -755,7 +755,7 @@ func TestReplacingStringFail(t *testing.T) {
 	}
 }
 
-func TestUpcasingString(t *testing.T) {
+func TestStringUpcaseMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -773,7 +773,7 @@ func TestUpcasingString(t *testing.T) {
 	}
 }
 
-func TestDowncasingString(t *testing.T) {
+func TestStringDowncaseMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -791,7 +791,7 @@ func TestDowncasingString(t *testing.T) {
 	}
 }
 
-func TestSizeAndLengthOfString(t *testing.T) {
+func TestStringSizeAndLengthMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -809,7 +809,7 @@ func TestSizeAndLengthOfString(t *testing.T) {
 	}
 }
 
-func TestReversingString(t *testing.T) {
+func TestStringReverseMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -828,7 +828,7 @@ func TestReversingString(t *testing.T) {
 	}
 }
 
-func TestIncludingString(t *testing.T) {
+func TestStringIncludeMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -849,7 +849,7 @@ func TestIncludingString(t *testing.T) {
 	}
 }
 
-func TestGlobalSubstitutingString(t *testing.T) {
+func TestStringGlobalSubstituteMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -866,7 +866,7 @@ func TestGlobalSubstitutingString(t *testing.T) {
 	}
 }
 
-func TestGlobalSubstitutingStringFail(t *testing.T) {
+func TestStringGlobalSubstituteMethodFail(t *testing.T) {
 	vm := initTestVM()
 	testsFail := []struct {
 		input    string
