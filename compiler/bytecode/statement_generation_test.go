@@ -364,20 +364,21 @@ func TestRemoveUnusedExpression(t *testing.T) {
 <ProgramStart>
 0 putobject 0
 1 setlocal 0 0
-2 jump 8
+2 jump 9
 3 putnil
 4 pop
-5 jump 8
+5 jump 9
 6 getlocal 0 0
 7 send ++ 0
-8 getlocal 0 0
-9 putobject 100
-10 send < 1
-11 branchif 6
-12 putnil
-13 pop
-14 getlocal 0 0
-15 leave
+8 pop
+9 getlocal 0 0
+10 putobject 100
+11 send < 1
+12 branchif 6
+13 putnil
+14 pop
+15 getlocal 0 0
+16 leave
 `
 
 	bytecode := compileToBytecode(input)

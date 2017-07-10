@@ -847,21 +847,29 @@ func TestPostfixMethodCall(t *testing.T) {
 		input    string
 		expected int
 	}{
-		{"1++", 2},
-		{"10--", 9},
-		{"0--", -1},
-		{"-5++", -4},
+		{`
+		a = 1
+		a++
+		a
+		`, 2},
 		{`
 		a = 10
-		a ++
-		`, 11},
+		a--
+		a
+		`,
+			9},
 		{`
-		a = 10
-		a --
-		`, 9},
+		a = 0
+		a--
+		a
+		`,
+			-1},
 		{`
-		(1 + 2 * 3)++
-		`, 8},
+		a = -5
+		a++
+		a
+		`,
+			-4},
 	}
 
 	for i, tt := range tests {

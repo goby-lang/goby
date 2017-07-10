@@ -123,6 +123,10 @@ func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpre
 		return
 	}
 	is.define(Send, exp.Method, len(exp.Arguments))
+
+	if exp.Method == "++" || exp.Method == "--" {
+		is.define(Pop)
+	}
 }
 
 func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.InfixExpression, scope *scope, table *localTable) {

@@ -214,6 +214,28 @@ func TestWhileStatement(t *testing.T) {
 			`, 10},
 		{
 			`
+			i = 10
+
+			while i < 0 do
+			  10
+			  i = i + 1
+			end
+
+			i
+			`, 10},
+		{
+			`
+			i = 10
+
+			while i < 0 do
+			  i = i + 1
+			  10
+			end
+
+			i
+			`, 10},
+		{
+			`
 		i = 10
 		while i > 0 do
 		  i--
