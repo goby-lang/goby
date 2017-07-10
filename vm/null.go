@@ -12,15 +12,6 @@ type NullObject struct {
 	*baseObj
 }
 
-// toString returns the name of NullObject
-func (n *NullObject) toString() string {
-	return "nil"
-}
-
-func (n *NullObject) toJSON() string {
-	return "null"
-}
-
 func (vm *VM) initNullClass() *RClass {
 	nc := vm.initializeClass(nullClass, false)
 	nc.setBuiltInMethods(builtInNullInstanceMethods(), false)
@@ -62,4 +53,15 @@ func builtInNullInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
+}
+
+// Polymorphic helper functions -----------------------------------------
+
+// toString returns the name of NullObject
+func (n *NullObject) toString() string {
+	return "nil"
+}
+
+func (n *NullObject) toJSON() string {
+	return "null"
 }

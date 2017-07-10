@@ -25,7 +25,7 @@ type filename string
 type errorMessage string
 
 var standardLibraries = map[string]func(*VM){
-	"file":              initializeFileClass,
+	"file":              initFileClass,
 	"net/http":          initializeHTTPClass,
 	"net/simple_server": initializeSimpleServerClass,
 	"uri":               initializeURIClass,

@@ -18,16 +18,8 @@ type IntegerObject struct {
 	Value int
 }
 
-func (i *IntegerObject) toString() string {
-	return strconv.Itoa(i.Value)
-}
-
-func (i *IntegerObject) toJSON() string {
-	return i.toString()
-}
-
-func (i *IntegerObject) equal(e *IntegerObject) bool {
-	return i.Value == e.Value
+func (vm *VM) initIntegerObject(value int) *IntegerObject {
+	return &IntegerObject{Value: value, baseObj: &baseObj{class: vm.topLevelClass(integerClass)}}
 }
 
 func (vm *VM) initIntegerClass() *RClass {
@@ -37,8 +29,17 @@ func (vm *VM) initIntegerClass() *RClass {
 	return ic
 }
 
-func (vm *VM) initIntegerObject(value int) *IntegerObject {
-	return &IntegerObject{Value: value, baseObj: &baseObj{class: vm.topLevelClass(integerClass)}}
+func builtInIntegerClassMethods() []*BuiltInMethodObject {
+	return []*BuiltInMethodObject{
+		{
+			Name: "new",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					return t.UnsupportedMethodError("#new", receiver)
+				}
+			},
+		},
+	}
 }
 
 func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
@@ -570,15 +571,18 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 	}
 }
 
-func builtInIntegerClassMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
-		{
-			Name: "new",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					return t.UnsupportedMethodError("#new", receiver)
-				}
-			},
-		},
-	}
+// Polymorphic helper functions -----------------------------------------
+
+// toString converts the receiver into string.
+func (i *IntegerObject) toString() string {
+	return strconv.Itoa(i.Value)
+}
+
+// toJSON converts the receiver into JSON string.
+func (i *IntegerObject) toJSON() string {
+	return i.toString()
+}
+
+func (i *IntegerObject) equal(e *IntegerObject) bool {
+	return i.Value == e.Value
 }

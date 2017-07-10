@@ -19,17 +19,15 @@ type BooleanObject struct {
 	Value bool
 }
 
-// toString returns boolean object's value, which is either true or false.
-func (b *BooleanObject) toString() string {
-	return fmt.Sprintf("%t", b.Value)
-}
+func (vm *VM) initBoolClass() *RClass {
+	b := vm.initializeClass(booleanClass, false)
+	b.setBuiltInMethods(builtinBooleanInstanceMethods(), false)
+	b.setBuiltInMethods(builtInBooleanClassMethods(), true)
 
-func (b *BooleanObject) toJSON() string {
-	return b.toString()
-}
+	TRUE = &BooleanObject{Value: true, baseObj: &baseObj{class: b}}
+	FALSE = &BooleanObject{Value: false, baseObj: &baseObj{class: b}}
 
-func (b *BooleanObject) equal(e *BooleanObject) bool {
-	return b.Value == e.Value
+	return b
 }
 
 func builtInBooleanClassMethods() []*BuiltInMethodObject {
@@ -179,13 +177,18 @@ func builtinBooleanInstanceMethods() []*BuiltInMethodObject {
 	}
 }
 
-func (vm *VM) initBoolClass() *RClass {
-	b := vm.initializeClass(booleanClass, false)
-	b.setBuiltInMethods(builtinBooleanInstanceMethods(), false)
-	b.setBuiltInMethods(builtInBooleanClassMethods(), true)
+// Polymorphic helper functions -----------------------------------------
 
-	TRUE = &BooleanObject{Value: true, baseObj: &baseObj{class: b}}
-	FALSE = &BooleanObject{Value: false, baseObj: &baseObj{class: b}}
+// toString returns boolean object's value, which is either true or false.
+func (b *BooleanObject) toString() string {
+	return fmt.Sprintf("%t", b.Value)
+}
 
-	return b
+// toJSON converts the receiver into JSON string.
+func (b *BooleanObject) toJSON() string {
+	return b.toString()
+}
+
+func (b *BooleanObject) equal(e *BooleanObject) bool {
+	return b.Value == e.Value
 }

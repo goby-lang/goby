@@ -7,13 +7,11 @@ import (
 	"syscall"
 )
 
-func initializeFileClass(vm *VM) {
-	fc := vm.initializeClass("File", false)
-	fc.setBuiltInMethods(builtinFileClassMethods(), true)
-	fc.setBuiltInMethods(builtinFileInstanceMethods(), false)
-	vm.objectClass.setClassConstant(fc)
-
-	vm.execGobyLib("file.gb")
+var fileModeTable = map[string]int{
+	"r":  syscall.O_RDONLY,
+	"r+": syscall.O_RDWR,
+	"w":  syscall.O_WRONLY,
+	"w+": syscall.O_RDWR,
 }
 
 // FileObject is a special type that contains file pointer so we can keep track on target file.
@@ -22,20 +20,13 @@ type FileObject struct {
 	File *os.File
 }
 
-// toString returns detailed infoof a array include elements it contains
-func (f *FileObject) toString() string {
-	return "<File: " + f.File.Name() + ">"
-}
+func initFileClass(vm *VM) {
+	fc := vm.initializeClass("File", false)
+	fc.setBuiltInMethods(builtinFileClassMethods(), true)
+	fc.setBuiltInMethods(builtinFileInstanceMethods(), false)
+	vm.objectClass.setClassConstant(fc)
 
-func (f *FileObject) toJSON() string {
-	return f.toString()
-}
-
-var fileModeTable = map[string]int{
-	"r":  syscall.O_RDONLY,
-	"r+": syscall.O_RDWR,
-	"w":  syscall.O_WRONLY,
-	"w+": syscall.O_RDWR,
+	vm.execGobyLib("file.gb")
 }
 
 // Only initialize file related methods after it's being required.
@@ -340,4 +331,16 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
+}
+
+// Polymorphic helper functions -----------------------------------------
+
+// toString returns detailed infoof a array include elements it contains
+func (f *FileObject) toString() string {
+	return "<File: " + f.File.Name() + ">"
+}
+
+// toJSON converts the receiver into JSON string.
+func (f *FileObject) toJSON() string {
+	return f.toString()
 }

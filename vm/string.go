@@ -29,18 +29,6 @@ type StringObject struct {
 	Value string
 }
 
-func (s *StringObject) toString() string {
-	return s.Value
-}
-
-func (s *StringObject) toJSON() string {
-	return "\"" + s.Value + "\""
-}
-
-func (s *StringObject) equal(e *StringObject) bool {
-	return s.Value == e.Value
-}
-
 func (vm *VM) initStringObject(value string) *StringObject {
 	replacer := strings.NewReplacer("\\n", "\n", "\\r", "\r", "\\t", "\t", "\\v", "\v", "\\\\", "\\")
 	return &StringObject{Value: replacer.Replace(value), baseObj: &baseObj{class: vm.topLevelClass(stringClass)}}
@@ -485,4 +473,20 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
+}
+
+// Polymorphic helper functions -----------------------------------------
+
+// toString just returns the value of string.
+func (s *StringObject) toString() string {
+	return s.Value
+}
+
+// toJSON converts the receiver into JSON string.
+func (s *StringObject) toJSON() string {
+	return "\"" + s.Value + "\""
+}
+
+func (s *StringObject) equal(e *StringObject) bool {
+	return s.Value == e.Value
 }

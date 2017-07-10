@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+// Polymorphic helper functions for inspecting internal info.
+
 func (i *instruction) inspect() string {
 	var params []string
 

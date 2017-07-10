@@ -39,54 +39,28 @@ type HashObject struct {
 	Pairs map[string]Object
 }
 
-func (h *HashObject) toString() string {
-	var out bytes.Buffer
-	var pairs []string
-
-	for key, value := range h.Pairs {
-		pairs = append(pairs, fmt.Sprintf("%s: %s", key, value.toString()))
-	}
-
-	out.WriteString("{ ")
-	out.WriteString(strings.Join(pairs, ", "))
-	out.WriteString(" }")
-
-	return out.String()
-}
-
-func (h *HashObject) length() int {
-	return len(h.Pairs)
-}
-
 func (vm *VM) initHashObject(pairs map[string]Object) *HashObject {
 	return &HashObject{Pairs: pairs, baseObj: &baseObj{class: vm.topLevelClass(hashClass)}}
 }
 
-func generateJSONFromPair(key string, v Object) string {
-	var data string
-	var out bytes.Buffer
-
-	out.WriteString(data)
-	out.WriteString("\"" + key + "\"")
-	out.WriteString(":")
-	out.WriteString(v.toJSON())
-
-	return out.String()
+func (vm *VM) initHashClass() *RClass {
+	hc := vm.initializeClass(hashClass, false)
+	hc.setBuiltInMethods(builtinHashInstanceMethods(), false)
+	hc.setBuiltInMethods(builtInHashClassMethods(), true)
+	return hc
 }
 
-func (h *HashObject) toJSON() string {
-	var out bytes.Buffer
-	var values []string
-	pairs := h.Pairs
-	out.WriteString("{")
-
-	for key, value := range pairs {
-		values = append(values, generateJSONFromPair(key, value))
+func builtInHashClassMethods() []*BuiltInMethodObject {
+	return []*BuiltInMethodObject{
+		{
+			Name: "new",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					return t.UnsupportedMethodError("#new", receiver)
+				}
+			},
+		},
 	}
-
-	out.WriteString(strings.Join(values, ","))
-	out.WriteString("}")
-	return out.String()
 }
 
 func builtinHashInstanceMethods() []*BuiltInMethodObject {
@@ -216,22 +190,54 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 	}
 }
 
-func builtInHashClassMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
-		{
-			Name: "new",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					return t.UnsupportedMethodError("#new", receiver)
-				}
-			},
-		},
+// Polymorphic helper functions -----------------------------------------
+
+// toString converts the receiver into string.
+func (h *HashObject) toString() string {
+	var out bytes.Buffer
+	var pairs []string
+
+	for key, value := range h.Pairs {
+		pairs = append(pairs, fmt.Sprintf("%s: %s", key, value.toString()))
 	}
+
+	out.WriteString("{ ")
+	out.WriteString(strings.Join(pairs, ", "))
+	out.WriteString(" }")
+
+	return out.String()
 }
 
-func (vm *VM) initHashClass() *RClass {
-	hc := vm.initializeClass(hashClass, false)
-	hc.setBuiltInMethods(builtinHashInstanceMethods(), false)
-	hc.setBuiltInMethods(builtInHashClassMethods(), true)
-	return hc
+// toJSON converts the receiver into JSON string.
+func (h *HashObject) toJSON() string {
+	var out bytes.Buffer
+	var values []string
+	pairs := h.Pairs
+	out.WriteString("{")
+
+	for key, value := range pairs {
+		values = append(values, generateJSONFromPair(key, value))
+	}
+
+	out.WriteString(strings.Join(values, ","))
+	out.WriteString("}")
+	return out.String()
+}
+
+func (h *HashObject) length() int {
+	return len(h.Pairs)
+}
+
+// Other helper functions ----------------------------------------------
+
+func generateJSONFromPair(key string, v Object) string {
+	var data string
+	var out bytes.Buffer
+
+	out.WriteString(data)
+	out.WriteString("\"" + key + "\"")
+	out.WriteString(":")
+	out.WriteString(v.toJSON())
+
+	return out.String()
 }
