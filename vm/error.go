@@ -22,15 +22,15 @@ var (
 const (
 	// InternalError is the default error type
 	InternalError = "InternalError"
-	// ArgumentError: an argument-related error
+	// ArgumentError is for an argument-related error
 	ArgumentError = "ArgumentError"
-	// NameError: a constant-related error
+	// NameError is for a constant-related error
 	NameError = "NameError"
-	// TypeError: a type-related error
+	// TypeError is for a type-related error
 	TypeError = "TypeError"
-	// UndefinedMethodError: undefined-method error
+	// UndefinedMethodError is for an undefined-method error
 	UndefinedMethodError = "UndefinedMethodError"
-	// UnsupportedMethodError: intentionally unsupported-method error
+	// UnsupportedMethodError is for an intentionally unsupported-method error
 	UnsupportedMethodError = "UnsupportedMethodError"
 )
 
