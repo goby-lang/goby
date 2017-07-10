@@ -30,7 +30,7 @@ const (
 	TypeError = "TypeError"
 	// UndefinedMethodError: undefined-method error
 	UndefinedMethodError = "UndefinedMethodError"
-	// UnsupportedMethodError: intentionally unsupported-error
+	// UnsupportedMethodError: intentionally unsupported-method error
 	UnsupportedMethodError = "UnsupportedMethodError"
 )
 
