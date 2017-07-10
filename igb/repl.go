@@ -71,7 +71,6 @@ func StartIgb(version string) {
 			return
 		case line == "":
 		default:
-			println(echo, line)
 			l := lexer.New(line)
 			p.Lexer = l
 			program, _ := p.ParseProgram()
