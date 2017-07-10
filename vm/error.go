@@ -35,6 +35,19 @@ const (
 	UnsupportedMethodError = "UnsupportedMethodError"
 )
 
+// Error ...
+type Error struct {
+	*baseObj
+	Message string
+}
+
+func initErrorObject(errorType *RClass, format string, args ...interface{}) *Error {
+	return &Error{
+		baseObj: &baseObj{class: errorType},
+		Message: fmt.Sprintf(errorType.Name+": "+format, args...),
+	}
+}
+
 func (vm *VM) initErrorClasses() {
 	ArgumentErrorClass = vm.initializeClass(ArgumentError, false)
 	InternalErrorClass = vm.initializeClass(InternalError, false)
@@ -44,24 +57,14 @@ func (vm *VM) initErrorClasses() {
 	UnsupportedMethodClass = vm.initializeClass(UnsupportedMethodError, false)
 }
 
-// Error ...
-type Error struct {
-	*baseObj
-	Message string
-}
+// Polymorphic helper functions -----------------------------------------
 
-// toString ...
+// toString converts error messages into string.
 func (e *Error) toString() string {
 	return "ERROR: " + e.Message
 }
 
+// toJSON converts the receiver into JSON string.
 func (e *Error) toJSON() string {
 	return e.toString()
-}
-
-func initErrorObject(errorType *RClass, format string, args ...interface{}) *Error {
-	return &Error{
-		baseObj: &baseObj{class: errorType},
-		Message: fmt.Sprintf(errorType.Name+": "+format, args...),
-	}
 }

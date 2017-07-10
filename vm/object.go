@@ -33,15 +33,6 @@ type baseObj struct {
 	InstanceVariables *environment
 }
 
-// toString tells which class it belongs to.
-func (ro *RObject) toString() string {
-	return "<Instance of: " + ro.class.Name + ">"
-}
-
-func (ro *RObject) toJSON() string {
-	return ro.toString()
-}
-
 // Class will return object's class
 func (b *baseObj) Class() *RClass {
 	if b.class == nil {
@@ -65,6 +56,20 @@ func (b *baseObj) instanceVariableSet(name string, value Object) Object {
 
 	return value
 }
+
+// Polymorphic helper functions -----------------------------------------
+
+// toString tells which class it belongs to.
+func (ro *RObject) toString() string {
+	return "<Instance of: " + ro.class.Name + ">"
+}
+
+// toJSON converts the receiver into JSON string.
+func (ro *RObject) toJSON() string {
+	return ro.toString()
+}
+
+// Other helper functions -----------------------------------------------
 
 func checkArgumentLen(args []Object, class *RClass, methodName string) *Error {
 	if len(args) > 1 {

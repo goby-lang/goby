@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-func initializeURIClass(vm *VM) {
+func initURIClass(vm *VM) {
 	uri := vm.initializeClass("URI", true)
 	http := vm.initializeClass("HTTP", false)
 	https := vm.initializeClass("HTTPS", false)

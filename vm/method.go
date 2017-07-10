@@ -5,10 +5,6 @@ import (
 	"fmt"
 )
 
-func (vm *VM) initMethodClass() *RClass {
-	return vm.initializeClass(methodClass, false)
-}
-
 // MethodObject represents methods defined using goby.
 type MethodObject struct {
 	*baseObj
@@ -16,6 +12,21 @@ type MethodObject struct {
 	instructionSet *instructionSet
 	argc           int
 }
+
+type builtinMethodBody func(*thread, []Object, *callFrame) Object
+
+// BuiltInMethodObject represents methods defined in go.
+type BuiltInMethodObject struct {
+	*baseObj
+	Name string
+	Fn   func(receiver Object) builtinMethodBody
+}
+
+func (vm *VM) initMethodClass() *RClass {
+	return vm.initializeClass(methodClass, false)
+}
+
+// Polymorphic helper functions -----------------------------------------
 
 // toString returns method's name, params count and instruction set.
 func (m *MethodObject) toString() string {
@@ -29,15 +40,6 @@ func (m *MethodObject) toString() string {
 
 func (m *MethodObject) toJSON() string {
 	return m.toString()
-}
-
-type builtinMethodBody func(*thread, []Object, *callFrame) Object
-
-// BuiltInMethodObject represents methods defined in go.
-type BuiltInMethodObject struct {
-	*baseObj
-	Name string
-	Fn   func(receiver Object) builtinMethodBody
 }
 
 // toString just returns built in method's name.

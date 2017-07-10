@@ -73,214 +73,6 @@ func initObjectClass(c *RClass) *RClass {
 	return objectClass
 }
 
-// initializeClass initializes and returns a class instance with given class name
-func (vm *VM) initializeClass(name string, isModule bool) *RClass {
-	class := vm.createRClass(name)
-	class.isModule = isModule
-
-	return class
-}
-
-func (vm *VM) createRClass(className string) *RClass {
-	objectClass := vm.objectClass
-	classClass := vm.topLevelClass(classClass)
-
-	return &RClass{
-		Name:             className,
-		Methods:          newEnvironment(),
-		ClassMethods:     newEnvironment(),
-		pseudoSuperClass: objectClass,
-		superClass:       objectClass,
-		constants:        make(map[string]*Pointer),
-		isModule:         false,
-		baseObj:          &baseObj{class: classClass, InstanceVariables: newEnvironment()},
-	}
-}
-
-// toString returns the basic inspected result (which is class name) of current class
-// TODO: Singleton class's inspect() should also mark if it's a singleton class explicitly.
-func (c *RClass) toString() string {
-	if c.isModule {
-		return "<Module:" + c.Name + ">"
-	}
-	return "<Class:" + c.Name + ">"
-}
-
-func (c *RClass) toJSON() string {
-	return c.toString()
-}
-
-func (c *RClass) setBuiltInMethods(methodList []*BuiltInMethodObject, classMethods bool) {
-	for _, m := range methodList {
-		c.Methods.set(m.Name, m)
-	}
-
-	if classMethods {
-		for _, m := range methodList {
-			c.ClassMethods.set(m.Name, m)
-		}
-	}
-}
-
-func (c *RClass) lookupClassMethod(methodName string) Object {
-	method, ok := c.ClassMethods.get(methodName)
-
-	if !ok {
-		if c.superClass != nil {
-			return c.superClass.lookupClassMethod(methodName)
-		}
-		if c.class != nil {
-			return c.class.lookupClassMethod(methodName)
-		}
-		return nil
-	}
-
-	return method
-}
-
-func (c *RClass) lookupInstanceMethod(methodName string) Object {
-	method, ok := c.Methods.get(methodName)
-
-	if !ok {
-		if c.superClass != nil {
-			return c.superClass.lookupInstanceMethod(methodName)
-		}
-
-		if c.class != nil {
-			return c.class.lookupInstanceMethod(methodName)
-		}
-
-		return nil
-	}
-
-	return method
-}
-
-func (c *RClass) lookupConstant(constName string, findInScope bool) *Pointer {
-	constant, ok := c.constants[constName]
-
-	if !ok {
-		if findInScope && c.scope != nil {
-			return c.scope.lookupConstant(constName, true)
-		}
-
-		if c.superClass != nil {
-			return c.superClass.lookupConstant(constName, false)
-		}
-
-		return nil
-	}
-
-	return constant
-}
-
-func (c *RClass) setClassConstant(constant *RClass) {
-	c.constants[constant.Name] = &Pointer{constant}
-}
-
-func (c *RClass) getClassConstant(constName string) (class *RClass) {
-	t := c.constants[constName].Target
-	class, ok := t.(*RClass)
-
-	if ok {
-		return
-	}
-
-	panic(constName + " is not a class.")
-}
-
-func (c *RClass) alreadyInherit(constant *RClass) bool {
-	if c.superClass == constant {
-		return true
-	}
-
-	if c.superClass.Name == objectClass {
-		return false
-	}
-
-	return c.superClass.alreadyInherit(constant)
-}
-
-// ReturnName returns the name of the class
-func (c *RClass) ReturnName() string {
-	return c.Name
-}
-
-func (c *RClass) returnSuperClass() *RClass {
-	return c.pseudoSuperClass
-}
-
-func (c *RClass) initializeInstance() *RObject {
-	instance := &RObject{baseObj: &baseObj{class: c, InstanceVariables: newEnvironment()}}
-
-	return instance
-}
-
-func (c *RClass) setAttrWriter(args interface{}) {
-
-	switch args := args.(type) {
-	case []Object:
-		for _, attr := range args {
-			attrName := attr.(*StringObject).Value
-			c.Methods.set(attrName+"=", generateAttrWriteMethod(attrName))
-		}
-	case []string:
-		for _, attrName := range args {
-			c.Methods.set(attrName+"=", generateAttrWriteMethod(attrName))
-		}
-	}
-
-}
-
-func (c *RClass) setAttrReader(args interface{}) {
-	switch args := args.(type) {
-	case []Object:
-		for _, attr := range args {
-			attrName := attr.(*StringObject).Value
-			c.Methods.set(attrName, generateAttrReadMethod(attrName))
-		}
-	case []string:
-		for _, attrName := range args {
-			c.Methods.set(attrName, generateAttrReadMethod(attrName))
-		}
-	}
-
-}
-
-func generateAttrWriteMethod(attrName string) *BuiltInMethodObject {
-	return &BuiltInMethodObject{
-		Name: attrName + "=",
-		Fn: func(receiver Object) builtinMethodBody {
-			return func(t *thread, args []Object, blockFrame *callFrame) Object {
-				v := receiver.(*RObject).InstanceVariables.set("@"+attrName, args[0])
-				return v
-			}
-		},
-	}
-}
-
-func generateAttrReadMethod(attrName string) *BuiltInMethodObject {
-	return &BuiltInMethodObject{
-		Name: attrName,
-		Fn: func(receiver Object) builtinMethodBody {
-			return func(t *thread, args []Object, blockFrame *callFrame) Object {
-				v, ok := receiver.(*RObject).InstanceVariables.get("@" + attrName)
-
-				if ok {
-					return v
-				}
-
-				return NULL
-			}
-		},
-	}
-}
-
-func (c *RClass) setAttrAccessor(args interface{}) {
-	c.setAttrReader(args)
-	c.setAttrWriter(args)
-}
-
 func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 		{
@@ -818,4 +610,219 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
+}
+
+// Common internal helper functions -------------------------------------
+
+// initializeClass is a common function for vm, which initializes and returns
+// a class instance with given class name.
+func (vm *VM) initializeClass(name string, isModule bool) *RClass {
+	class := vm.createRClass(name)
+	class.isModule = isModule
+
+	return class
+}
+
+func (vm *VM) createRClass(className string) *RClass {
+	objectClass := vm.objectClass
+	classClass := vm.topLevelClass(classClass)
+
+	return &RClass{
+		Name:             className,
+		Methods:          newEnvironment(),
+		ClassMethods:     newEnvironment(),
+		pseudoSuperClass: objectClass,
+		superClass:       objectClass,
+		constants:        make(map[string]*Pointer),
+		isModule:         false,
+		baseObj:          &baseObj{class: classClass, InstanceVariables: newEnvironment()},
+	}
+}
+
+// Polymorphic helper functions -----------------------------------------
+
+// toString returns the basic inspected result (which is class name) of current class
+// TODO: Singleton class's inspect() should also mark if it's a singleton class explicitly.
+func (c *RClass) toString() string {
+	if c.isModule {
+		return "<Module:" + c.Name + ">"
+	}
+	return "<Class:" + c.Name + ">"
+}
+
+func (c *RClass) toJSON() string {
+	return c.toString()
+}
+
+func (c *RClass) setBuiltInMethods(methodList []*BuiltInMethodObject, classMethods bool) {
+	for _, m := range methodList {
+		c.Methods.set(m.Name, m)
+	}
+
+	if classMethods {
+		for _, m := range methodList {
+			c.ClassMethods.set(m.Name, m)
+		}
+	}
+}
+
+func (c *RClass) lookupClassMethod(methodName string) Object {
+	method, ok := c.ClassMethods.get(methodName)
+
+	if !ok {
+		if c.superClass != nil {
+			return c.superClass.lookupClassMethod(methodName)
+		}
+		if c.class != nil {
+			return c.class.lookupClassMethod(methodName)
+		}
+		return nil
+	}
+
+	return method
+}
+
+func (c *RClass) lookupInstanceMethod(methodName string) Object {
+	method, ok := c.Methods.get(methodName)
+
+	if !ok {
+		if c.superClass != nil {
+			return c.superClass.lookupInstanceMethod(methodName)
+		}
+
+		if c.class != nil {
+			return c.class.lookupInstanceMethod(methodName)
+		}
+
+		return nil
+	}
+
+	return method
+}
+
+func (c *RClass) lookupConstant(constName string, findInScope bool) *Pointer {
+	constant, ok := c.constants[constName]
+
+	if !ok {
+		if findInScope && c.scope != nil {
+			return c.scope.lookupConstant(constName, true)
+		}
+
+		if c.superClass != nil {
+			return c.superClass.lookupConstant(constName, false)
+		}
+
+		return nil
+	}
+
+	return constant
+}
+
+func (c *RClass) setClassConstant(constant *RClass) {
+	c.constants[constant.Name] = &Pointer{constant}
+}
+
+func (c *RClass) getClassConstant(constName string) (class *RClass) {
+	t := c.constants[constName].Target
+	class, ok := t.(*RClass)
+
+	if ok {
+		return
+	}
+
+	panic(constName + " is not a class.")
+}
+
+func (c *RClass) alreadyInherit(constant *RClass) bool {
+	if c.superClass == constant {
+		return true
+	}
+
+	if c.superClass.Name == objectClass {
+		return false
+	}
+
+	return c.superClass.alreadyInherit(constant)
+}
+
+// ReturnName returns the name of the class
+func (c *RClass) ReturnName() string {
+	return c.Name
+}
+
+func (c *RClass) returnSuperClass() *RClass {
+	return c.pseudoSuperClass
+}
+
+func (c *RClass) initializeInstance() *RObject {
+	instance := &RObject{baseObj: &baseObj{class: c, InstanceVariables: newEnvironment()}}
+
+	return instance
+}
+
+func (c *RClass) setAttrWriter(args interface{}) {
+
+	switch args := args.(type) {
+	case []Object:
+		for _, attr := range args {
+			attrName := attr.(*StringObject).Value
+			c.Methods.set(attrName+"=", generateAttrWriteMethod(attrName))
+		}
+	case []string:
+		for _, attrName := range args {
+			c.Methods.set(attrName+"=", generateAttrWriteMethod(attrName))
+		}
+	}
+
+}
+
+func (c *RClass) setAttrReader(args interface{}) {
+	switch args := args.(type) {
+	case []Object:
+		for _, attr := range args {
+			attrName := attr.(*StringObject).Value
+			c.Methods.set(attrName, generateAttrReadMethod(attrName))
+		}
+	case []string:
+		for _, attrName := range args {
+			c.Methods.set(attrName, generateAttrReadMethod(attrName))
+		}
+	}
+
+}
+
+// Other helper functions -----------------------------------------------
+
+func generateAttrWriteMethod(attrName string) *BuiltInMethodObject {
+	return &BuiltInMethodObject{
+		Name: attrName + "=",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				v := receiver.(*RObject).InstanceVariables.set("@"+attrName, args[0])
+				return v
+			}
+		},
+	}
+}
+
+func generateAttrReadMethod(attrName string) *BuiltInMethodObject {
+	return &BuiltInMethodObject{
+		Name: attrName,
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				v, ok := receiver.(*RObject).InstanceVariables.get("@" + attrName)
+
+				if ok {
+					return v
+				}
+
+				return NULL
+			}
+		},
+	}
+}
+
+func (c *RClass) setAttrAccessor(args interface{}) {
+	c.setAttrReader(args)
+	c.setAttrWriter(args)
 }

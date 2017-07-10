@@ -1,8 +1,6 @@
 package vm
 
-import (
-	"fmt"
-)
+import "fmt"
 
 // RangeObject is the built in range class
 // Range represents an interval: a set of values from the beginning to the end specified.
@@ -30,16 +28,12 @@ type RangeObject struct {
 	End   int
 }
 
-func (ro *RangeObject) toString() string {
-	return fmt.Sprintf("(%d..%d)", ro.Start, ro.End)
-}
-
-func (ro *RangeObject) toJSON() string {
-	return ro.toString()
-}
-
 func (vm *VM) initRangeObject(start, end int) *RangeObject {
-	return &RangeObject{baseObj: &baseObj{class: vm.topLevelClass(rangeClass)}, Start: start, End: end}
+	return &RangeObject{
+		baseObj: &baseObj{class: vm.topLevelClass(rangeClass)},
+		Start:   start,
+		End:     end,
+	}
 }
 
 func (vm *VM) initRangeClass() *RClass {
@@ -424,4 +418,16 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
+}
+
+// Polymorphic helper functions -----------------------------------------
+
+// toString converts range into string.
+func (ro *RangeObject) toString() string {
+	return fmt.Sprintf("(%d..%d)", ro.Start, ro.End)
+}
+
+// toJSON converts the receiver into JSON string.
+func (ro *RangeObject) toJSON() string {
+	return ro.toString()
 }

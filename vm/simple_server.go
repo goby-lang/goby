@@ -27,8 +27,8 @@ type request struct {
 	Host   string
 }
 
-func initializeSimpleServerClass(vm *VM) {
-	initializeHTTPClass(vm)
+func initSimpleServerClass(vm *VM) {
+	initHTTPClass(vm)
 	net := vm.loadConstant("Net", true)
 	simpleServer := vm.initializeClass("SimpleServer", false)
 	simpleServer.setBuiltInMethods(builtinSimpleServerInstanceMethods(), false)

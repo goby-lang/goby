@@ -13,71 +13,11 @@ type ArrayObject struct {
 	Elements []Object
 }
 
-// toString returns detailed info of a array include elements it contains
-func (a *ArrayObject) toString() string {
-	var out bytes.Buffer
-
-	elements := []string{}
-	for _, e := range a.Elements {
-		elements = append(elements, e.toString())
-	}
-
-	out.WriteString("[")
-	out.WriteString(strings.Join(elements, ", "))
-	out.WriteString("]")
-
-	return out.String()
-}
-
-func (a *ArrayObject) toJSON() string {
-	var out bytes.Buffer
-	elements := []string{}
-	for _, e := range a.Elements {
-		elements = append(elements, e.toJSON())
-	}
-
-	out.WriteString("[")
-	out.WriteString(strings.Join(elements, ", "))
-	out.WriteString("]")
-
-	return out.String()
-}
-
-// length returns the length of array's elements
-func (a *ArrayObject) length() int {
-	return len(a.Elements)
-}
-
-// pop removes the last element in the array and returns it
-func (a *ArrayObject) pop() Object {
-	if len(a.Elements) < 1 {
-		return NULL
-	}
-
-	value := a.Elements[len(a.Elements)-1]
-	a.Elements = a.Elements[:len(a.Elements)-1]
-	return value
-}
-
-// push appends given object into array and returns the array object
-func (a *ArrayObject) push(objs []Object) *ArrayObject {
-	a.Elements = append(a.Elements, objs...)
-	return a
-}
-
-// shift removes the first element in the array and returns it
-func (a *ArrayObject) shift() Object {
-	if len(a.Elements) < 1 {
-		return NULL
-	}
-
-	value := a.Elements[0]
-	a.Elements = a.Elements[1:]
-	return value
-}
-
 func (vm *VM) initArrayObject(elements []Object) *ArrayObject {
-	return &ArrayObject{Elements: elements, baseObj: &baseObj{class: vm.topLevelClass(arrayClass)}}
+	return &ArrayObject{
+		baseObj:  &baseObj{class: vm.topLevelClass(arrayClass)},
+		Elements: elements,
+	}
 }
 
 func (vm *VM) initArrayClass() *RClass {
@@ -620,4 +560,70 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
+}
+
+// Polymorphic helper functions -----------------------------------------
+
+// toString returns detailed info of array's elements.
+func (a *ArrayObject) toString() string {
+	var out bytes.Buffer
+
+	elements := []string{}
+	for _, e := range a.Elements {
+		elements = append(elements, e.toString())
+	}
+
+	out.WriteString("[")
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteString("]")
+
+	return out.String()
+}
+
+// toJSON converts the receiver into JSON string.
+func (a *ArrayObject) toJSON() string {
+	var out bytes.Buffer
+	elements := []string{}
+	for _, e := range a.Elements {
+		elements = append(elements, e.toJSON())
+	}
+
+	out.WriteString("[")
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteString("]")
+
+	return out.String()
+}
+
+// length returns the length of array's elements
+func (a *ArrayObject) length() int {
+	return len(a.Elements)
+}
+
+// pop removes the last element in the array and returns it
+func (a *ArrayObject) pop() Object {
+	if len(a.Elements) < 1 {
+		return NULL
+	}
+
+	value := a.Elements[len(a.Elements)-1]
+	a.Elements = a.Elements[:len(a.Elements)-1]
+	return value
+}
+
+// push appends given object into array and returns the array object
+func (a *ArrayObject) push(objs []Object) *ArrayObject {
+	a.Elements = append(a.Elements, objs...)
+	return a
+}
+
+// shift removes the first element in the array and returns it
+func (a *ArrayObject) shift() Object {
+	if len(a.Elements) < 1 {
+		return NULL
+	}
+
+	value := a.Elements[0]
+	a.Elements = a.Elements[1:]
+	return value
 }
