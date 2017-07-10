@@ -61,10 +61,11 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					leftValue := receiver.(*StringObject).Value
-					right, ok := args[0].(*StringObject)
+					r := args[0]
+					right, ok := r.(*StringObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", r)
 					}
 
 					rightValue := right.Value
@@ -119,10 +120,11 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					leftValue := receiver.(*StringObject).Value
-					right, ok := args[0].(*StringObject)
+					r := args[0]
+					right, ok := r.(*StringObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", r)
 					}
 
 					rightValue := right.Value
@@ -148,10 +150,11 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					leftValue := receiver.(*StringObject).Value
-					right, ok := args[0].(*StringObject)
+					r := args[0]
+					right, ok := r.(*StringObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", r)
 					}
 
 					rightValue := right.Value
@@ -178,10 +181,11 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					leftValue := receiver.(*StringObject).Value
-					right, ok := args[0].(*StringObject)
+					r := args[0]
+					right, ok := r.(*StringObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", r)
 					}
 
 					rightValue := right.Value
@@ -210,10 +214,11 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					leftValue := receiver.(*StringObject).Value
-					right, ok := args[0].(*StringObject)
+					r := args[0]
+					right, ok := r.(*StringObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", r)
 					}
 
 					rightValue := right.Value
@@ -243,10 +248,11 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					leftValue := receiver.(*StringObject).Value
+					r := args[0]
 					right, ok := args[0].(*StringObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", r)
 					}
 
 					rightValue := right.Value
@@ -489,10 +495,11 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					str := receiver.(*StringObject).Value
-					concatStr, ok := args[0].(*StringObject)
+					c := args[0]
+					concatStr, ok := c.(*StringObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", c)
 					}
 
 					return t.vm.initStringObject(str + concatStr.Value)
@@ -705,10 +712,11 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					str := receiver.(*StringObject).Value
-					compareStr, ok := args[0].(*StringObject)
+					c := args[0]
+					compareStr, ok := c.(*StringObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", c)
 					}
 
 					compareStrValue := compareStr.Value
@@ -738,10 +746,11 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					str := receiver.(*StringObject).Value
-					compareStr, ok := args[0].(*StringObject)
+					c := args[0]
+					compareStr, ok := c.(*StringObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", c)
 					}
 
 					compareStrValue := compareStr.Value
@@ -827,10 +836,11 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					str := receiver.(*StringObject).Value
-					deleteStr, ok := args[0].(*StringObject)
+					d := args[0]
+					deleteStr, ok := d.(*StringObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", d)
 					}
 
 					return t.vm.initStringObject(strings.Replace(str, deleteStr.Value, "", -1))
@@ -1018,7 +1028,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 					seperator, ok := s.(*StringObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", s)
 					}
 
 					str := receiver.(*StringObject).Value
@@ -1139,11 +1149,11 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-					s := args[0]
-					replaceStr, ok := s.(*StringObject)
+					r := args[0]
+					replaceStr, ok := r.(*StringObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", r)
 					}
 
 					return t.vm.initStringObject(replaceStr.Value)

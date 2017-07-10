@@ -98,18 +98,18 @@ func TestStringComparison(t *testing.T) {
 }
 
 func TestStringConparisonFail(t *testing.T) {
+	vm := initTestVM()
 	testsFail := []struct {
 		input    string
 		expected *Error
 	}{
-		{`"a" < 1`, newError("expect argument to be String type")},
-		{`"a" > 1`, newError("expect argument to be String type")},
-		{`"a" == 1`, newError("expect argument to be String type")},
-		{`"a" <=> 1`, newError("expect argument to be String type")},
-		{`"a" != 1`, newError("expect argument to be String type")},
+		{`"a" < 1`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(1))},
+		{`"a" > 1`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(1))},
+		{`"a" == 1`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(1))},
+		{`"a" <=> 1`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(1))},
+		{`"a" != 1`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(1))},
 	}
 	for _, tt := range testsFail {
-		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		err, ok := evaluated.(*Error)
 		if !ok {
@@ -156,7 +156,7 @@ func TestStringOperationFail(t *testing.T) {
 		input    string
 		expected *Error
 	}{
-		{`"Taipei" + 101`, newError("expect argument to be String type")},
+		{`"Taipei" + 101`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(101))},
 		{`"Taipei" * "101"`, initErrorObject(TypeErrorClass, "Expect argument to be Integer. got=%T", vm.initStringObject("101"))},
 		{`"Taipei" * (-101)`, initErrorObject(ArgumentErrorClass, "Second argument must be greater than or equal to 0. got=%v", -101)},
 		{`"Taipei"[1] = 1`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(1))},
@@ -234,17 +234,17 @@ func TestConcatenatingString(t *testing.T) {
 }
 
 func TestConcatenatingStringFail(t *testing.T) {
+	vm := initTestVM()
 	testsFail := []struct {
 		input    string
 		expected *Error
 	}{
-		{`"a".concat(1)`, newError("expect argument to be String type")},
-		{`"a".concat(true)`, newError("expect argument to be String type")},
-		{`"a".concat(nil)`, newError("expect argument to be String type")},
+		{`"a".concat(1)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(1))},
+		{`"a".concat(true)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", TRUE)},
+		{`"a".concat(nil)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", NULL)},
 	}
 
 	for _, tt := range testsFail {
-		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		err, ok := evaluated.(*Error)
 		if !ok {
@@ -272,17 +272,17 @@ func TestDeletingString(t *testing.T) {
 }
 
 func TestDeleteStringFail(t *testing.T) {
+	vm := initTestVM()
 	testsFail := []struct {
 		input    string
 		expected *Error
 	}{
-		{`"Hello hello HeLlo".delete(1)`, newError("expect argument to be String type")},
-		{`"Hello hello HeLlo".delete(true)`, newError("expect argument to be String type")},
-		{`"Hello hello HeLlo".delete(nil)`, newError("expect argument to be String type")},
+		{`"Hello hello HeLlo".delete(1)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(1))},
+		{`"Hello hello HeLlo".delete(true)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", TRUE)},
+		{`"Hello hello HeLlo".delete(nil)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", NULL)},
 	}
 
 	for _, tt := range testsFail {
-		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		err, ok := evaluated.(*Error)
 		if !ok {
@@ -351,17 +351,17 @@ func TestStringStartWith(t *testing.T) {
 }
 
 func TestStringStartWithFail(t *testing.T) {
+	vm := initTestVM()
 	testsFail := []struct {
 		input    string
 		expected *Error
 	}{
-		{`"Taipei".start_with(101)`, newError("expect argument to be String type")},
-		{`"Hello".start_with(true)`, newError("expect argument to be String type")},
-		{`"Hello".start_with(1..5)`, newError("expect argument to be String type")},
+		{`"Taipei".start_with(101)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(101))},
+		{`"Hello".start_with(true)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", TRUE)},
+		{`"Hello".start_with(1..5)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initRangeObject(1, 5))},
 	}
 
 	for _, tt := range testsFail {
-		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		err, ok := evaluated.(*Error)
 		if !ok {
@@ -394,17 +394,17 @@ func TestStringEndWith(t *testing.T) {
 }
 
 func TestStringEndWithFail(t *testing.T) {
+	vm := initTestVM()
 	testsFail := []struct {
 		input    string
 		expected *Error
 	}{
-		{`"Taipei".end_with(101)`, newError("expect argument to be String type")},
-		{`"Hello".end_with(true)`, newError("expect argument to be String type")},
-		{`"Hello".end_with(1..5)`, newError("expect argument to be String type")},
+		{`"Taipei".end_with(101)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(101))},
+		{`"Hello".end_with(true)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", TRUE)},
+		{`"Hello".end_with(1..5)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initRangeObject(1, 5))},
 	}
 
 	for _, tt := range testsFail {
-		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		err, ok := evaluated.(*Error)
 		if !ok {
@@ -636,17 +636,17 @@ func TestSplittingString(t *testing.T) {
 }
 
 func TestSplittingStringFail(t *testing.T) {
+	vm := initTestVM()
 	testsFail := []struct {
 		input    string
 		expected *Error
 	}{
-		{`"Hello World".split(true)`, newError("expect argument to be String type")},
-		{`"Hello World".split(123)`, newError("expect argument to be String type")},
-		{`"Hello World".split(1..2)`, newError("expect argument to be String type")},
+		{`"Hello World".split(true)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", TRUE)},
+		{`"Hello World".split(123)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(123))},
+		{`"Hello World".split(1..2)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initRangeObject(1, 2))},
 	}
 
 	for _, tt := range testsFail {
-		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		err, ok := evaluated.(*Error)
 		if !ok {
@@ -734,16 +734,16 @@ func TestReplacingString(t *testing.T) {
 }
 
 func TestReplacingStringFail(t *testing.T) {
+	vm := initTestVM()
 	testsFail := []struct {
 		input    string
 		expected *Error
 	}{
-		{`"Taipei".replace(101)`, newError("expect argument to be String type")},
-		{`"Taipei".replace(true)`, newError("expect argument to be String type")},
+		{`"Taipei".replace(101)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(101))},
+		{`"Taipei".replace(true)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", TRUE)},
 	}
 
 	for _, tt := range testsFail {
-		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		err, ok := evaluated.(*Error)
 		if !ok {
