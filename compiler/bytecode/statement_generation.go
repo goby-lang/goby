@@ -99,6 +99,11 @@ func (g *Generator) compileModuleStmt(is *InstructionSet, stmt *ast.ModuleStatem
 	g.instructionSets = append(g.instructionSets, newIS)
 }
 
+const (
+	Normal int = iota
+	Optioned
+)
+
 func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, scope *scope) {
 	is.define(PutSelf)
 	is.define(PutString, fmt.Sprintf("\"%s\"", stmt.Name.Value))
@@ -117,13 +122,18 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 	newIS.setLabel(fmt.Sprintf("%s:%s", LabelDef, stmt.Name.Value))
 
 	for i := 0; i < len(stmt.Parameters); i++ {
+		var argType int
 		switch exp := stmt.Parameters[i].(type) {
 		case *ast.Identifier:
+			argType = Normal
 			scope.localTable.setLCL(exp.Value, scope.localTable.depth)
 		case *ast.InfixExpression:
+			argType = Optioned
 			exp.Optioned = 1
 			g.compileAssignExpression(newIS, exp, scope, scope.localTable)
 		}
+
+		newIS.argTypes = append(newIS.argTypes, argType)
 	}
 
 	if len(stmt.BlockStatement.Statements) == 0 {

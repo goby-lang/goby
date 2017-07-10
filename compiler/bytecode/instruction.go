@@ -89,6 +89,11 @@ type InstructionSet struct {
 	label        *label
 	Instructions []*Instruction
 	count        int
+	argTypes     []int
+}
+
+func (is *InstructionSet) ArgTypes() []int {
+	return is.argTypes
 }
 
 // LabelName returns the label name of instruction set
