@@ -14,7 +14,10 @@ type ArrayObject struct {
 }
 
 func (vm *VM) initArrayObject(elements []Object) *ArrayObject {
-	return &ArrayObject{Elements: elements, baseObj: &baseObj{class: vm.topLevelClass(arrayClass)}}
+	return &ArrayObject{
+		baseObj:  &baseObj{class: vm.topLevelClass(arrayClass)},
+		Elements: elements,
+	}
 }
 
 func (vm *VM) initArrayClass() *RClass {

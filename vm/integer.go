@@ -19,7 +19,10 @@ type IntegerObject struct {
 }
 
 func (vm *VM) initIntegerObject(value int) *IntegerObject {
-	return &IntegerObject{Value: value, baseObj: &baseObj{class: vm.topLevelClass(integerClass)}}
+	return &IntegerObject{
+		baseObj: &baseObj{class: vm.topLevelClass(integerClass)},
+		Value:   value,
+	}
 }
 
 func (vm *VM) initIntegerClass() *RClass {

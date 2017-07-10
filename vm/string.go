@@ -31,7 +31,10 @@ type StringObject struct {
 
 func (vm *VM) initStringObject(value string) *StringObject {
 	replacer := strings.NewReplacer("\\n", "\n", "\\r", "\r", "\\t", "\t", "\\v", "\v", "\\\\", "\\")
-	return &StringObject{Value: replacer.Replace(value), baseObj: &baseObj{class: vm.topLevelClass(stringClass)}}
+	return &StringObject{
+		baseObj: &baseObj{class: vm.topLevelClass(stringClass)},
+		Value:   replacer.Replace(value),
+	}
 }
 
 func (vm *VM) initStringClass() *RClass {

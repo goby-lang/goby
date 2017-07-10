@@ -40,7 +40,10 @@ type HashObject struct {
 }
 
 func (vm *VM) initHashObject(pairs map[string]Object) *HashObject {
-	return &HashObject{Pairs: pairs, baseObj: &baseObj{class: vm.topLevelClass(hashClass)}}
+	return &HashObject{
+		baseObj: &baseObj{class: vm.topLevelClass(hashClass)},
+		Pairs:   pairs,
+	}
 }
 
 func (vm *VM) initHashClass() *RClass {
