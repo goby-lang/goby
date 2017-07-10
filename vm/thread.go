@@ -147,7 +147,7 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 	c.self = receiver
 
 	for _, at := range method.instructionSet.argTypes {
-		if at == bytecode.Normal {
+		if at == bytecode.NormalArg {
 			normalArgCount++
 		}
 	}

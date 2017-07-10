@@ -5,6 +5,14 @@ import (
 	"github.com/goby-lang/goby/compiler/ast"
 )
 
+/*
+	These constants are enums that represent argument's types
+*/
+const (
+	NormalArg int = iota
+	OptionedArg
+)
+
 func (g *Generator) compileStatements(stmts []ast.Statement, scope *scope, table *localTable) {
 	is := &InstructionSet{label: &label{name: Program}}
 
@@ -99,11 +107,6 @@ func (g *Generator) compileModuleStmt(is *InstructionSet, stmt *ast.ModuleStatem
 	g.instructionSets = append(g.instructionSets, newIS)
 }
 
-const (
-	Normal int = iota
-	Optioned
-)
-
 func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, scope *scope) {
 	is.define(PutSelf)
 	is.define(PutString, fmt.Sprintf("\"%s\"", stmt.Name.Value))
@@ -125,10 +128,10 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 		var argType int
 		switch exp := stmt.Parameters[i].(type) {
 		case *ast.Identifier:
-			argType = Normal
+			argType = NormalArg
 			scope.localTable.setLCL(exp.Value, scope.localTable.depth)
 		case *ast.InfixExpression:
-			argType = Optioned
+			argType = OptionedArg
 			exp.Optioned = 1
 			g.compileAssignExpression(newIS, exp, scope, scope.localTable)
 		}

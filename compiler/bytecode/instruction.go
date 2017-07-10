@@ -92,6 +92,7 @@ type InstructionSet struct {
 	argTypes     []int
 }
 
+// ArgTypes returns enums that represents each argument's type
 func (is *InstructionSet) ArgTypes() []int {
 	return is.argTypes
 }
