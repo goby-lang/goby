@@ -35,7 +35,19 @@ const (
 	UnsupportedMethodError = "UnsupportedMethodError"
 )
 
-// Error ...
+// Error class is just for special usages that holds internal error types.
+// Goby maintainers should consider using the appropriate error type.
+// Cannot create instances of Error class, or inherit Error class.
+//
+// The type of internal errors:
+//
+// * `InternalError`: default error type
+// * `ArgumentError`: indicates an argument-related error
+// * `NameError: indicates a constant-related error
+// * `TypeError`: indicates a type-related error
+// * `UndefinedMethodError`: indicates "undefined-method error"
+// * `UnsupportedMethodError`: indicates "unsupported method error"
+//
 type Error struct {
 	*baseObj
 	Message string
