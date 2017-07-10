@@ -89,6 +89,12 @@ type InstructionSet struct {
 	label        *label
 	Instructions []*Instruction
 	count        int
+	argTypes     []int
+}
+
+// ArgTypes returns enums that represents each argument's type
+func (is *InstructionSet) ArgTypes() []int {
+	return is.argTypes
 }
 
 // LabelName returns the label name of instruction set

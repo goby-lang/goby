@@ -2,20 +2,6 @@ package vm
 
 import "testing"
 
-func TestArgumentError(t *testing.T) {
-	vm := initTestVM()
-	evaluated := vm.testEval(t, "[].count(5,4,3)")
-	err, ok := evaluated.(*Error)
-	if !ok {
-		t.Errorf("Expect Error. got=%T (%+v)", evaluated, evaluated)
-	}
-	if err.Class().ReturnName() != ArgumentError {
-		t.Errorf("Expect %s. got=%T (%+v)", ArgumentError, evaluated, evaluated)
-	}
-
-	vm.checkCFP(t, 0, 1)
-}
-
 func TestTypeError(t *testing.T) {
 	vm := initTestVM()
 	evaluated := vm.testEval(t, "10 * \"foo\"")
@@ -63,22 +49,10 @@ func TestUndefinedMethodError(t *testing.T) {
 	for i, tt := range tests {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
-
-		if !ok {
-			t.Errorf("Expect Error. got=%T (%+v)", evaluated, evaluated)
-		}
-
-		if err.Class().Name != UndefinedMethodError {
-			t.Errorf("Expect error to be %s. got=%s", UndefinedMethodError, err.Class().Name)
-		}
-
-		if err.Message != tt.errorMsg {
-			t.Errorf("Expected error message: %s\nGot: %s\n", tt.errorMsg, err.Message)
-		}
-
+		checkError(t, i, evaluated, UndefinedMethodError, tt.errorMsg)
 		vm.checkCFP(t, i, 1)
 	}
+
 }
 
 func TestUnsupportedMethodError(t *testing.T) {
@@ -94,21 +68,66 @@ func TestUnsupportedMethodError(t *testing.T) {
 		{`Null.new`, "UnsupportedMethodError: Unsupported Method #new for <Class:Null>"},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
+		checkError(t, i, evaluated, UnsupportedMethodError, tt.errorMsg)
+		vm.checkCFP(t, i, 1)
+	}
+}
 
-		if !ok {
-			t.Errorf("Expect Error. got=%T (%+v)", evaluated, evaluated)
-		}
+func TestArgumentError(t *testing.T) {
+	tests := []struct {
+		input  string
+		errMsg string
+	}{
+		{`
+		def foo(x)
+		end
 
-		if err.Class().Name != UnsupportedMethodError {
-			t.Errorf("Expect error to be %s. got=%s", UnsupportedMethodError, err.Class().Name)
-		}
+		foo
+		`,
+			"ArgumentError: Expect at least 1 args for method 'foo'. got: 0"},
+		{`
+		def foo(x)
+		end
 
-		if err.Message != tt.errorMsg {
-			t.Errorf("Expected error message: %s\nGot: %s\n", tt.errorMsg, err.Message)
-		}
+		foo(1, 2)
+		`,
+			"ArgumentError: Expect at most 1 args for method 'foo'. got: 2"},
+		{`
+		def foo(x = 10)
+		end
+
+		foo(1, 2)
+		`,
+			"ArgumentError: Expect at most 1 args for method 'foo'. got: 2"},
+		{`
+		def foo(x, y = 10)
+		end
+
+		foo(1, 2, 3)
+		`,
+			"ArgumentError: Expect at most 2 args for method 'foo'. got: 3"},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkError(t, i, evaluated, ArgumentError, tt.errMsg)
+		vm.checkCFP(t, i, 1)
+	}
+}
+
+func checkError(t *testing.T, index int, evaluated Object, expectedErrType, expectedErrMsg string) {
+	err, ok := evaluated.(*Error)
+	if !ok {
+		t.Errorf("At test case %d: Expect Error. got=%T (%+v)", index, evaluated, evaluated)
+	}
+	if err.class.Name != expectedErrType {
+		t.Errorf("At test case %d: Expect %s. got=%T (%+v)", index, expectedErrType, evaluated, err)
+	}
+	if err.Message != expectedErrMsg {
+		t.Fatalf("At test case %d: Expect error message to be:\n  %s. got: \n%s", index, expectedErrMsg, err.Message)
 	}
 }

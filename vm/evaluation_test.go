@@ -209,16 +209,25 @@ func TestMethodCallWithDefaultArgValue(t *testing.T) {
 
 		foo(100)
 		`, 110},
+		{`
+		def foo(x = 100, y = 10)
+		  x + y
+		end
+
+		foo
+		`, 110},
+		{`
+		def foo(x = 100, y = 10)
+		  x + y
+		end
+
+		foo(200)
+		`, 210},
 	}
 
 	for i, tt := range tests {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
-
-		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
-		}
-
 		checkExpected(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
 	}
@@ -496,7 +505,7 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		{
 			`
 			class Foo
-			  def set_x x1, x2, x3
+			  def set_x x1, x2
 			    @x = x1
 			    @y = x2
 			  end
@@ -516,7 +525,7 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		{
 			`
 			class Foo
-			  def set_x x1, x2, x3
+			  def set_x x1, x2
 			    @x1 = x1
 			    @x2 = x2
 			  end
