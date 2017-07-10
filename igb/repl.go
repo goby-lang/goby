@@ -2,9 +2,15 @@ package igb
 
 import (
 	"io"
+	"log"
+	"os"
 	"strings"
 
 	"github.com/chzyer/readline"
+	"github.com/goby-lang/goby/compiler/bytecode"
+	"github.com/goby-lang/goby/compiler/lexer"
+	"github.com/goby-lang/goby/compiler/parser"
+	"github.com/goby-lang/goby/vm"
 )
 
 const (
@@ -24,18 +30,6 @@ var completer = readline.NewPrefixCompleter(
 	readline.PcItem(exit),
 )
 
-//var sm = fsm.NewFSM(
-//	readyToExec,
-//	fsm.Events{
-//		{Name: Waiting, Src: []string{waitEnded, readyToExec}, Dst: Waiting},
-//		{Name: waitEnded, Src: []string{Waiting}, Dst: waitEnded},
-//		{Name: readyToExec, Src: []string{waitEnded, readyToExec}, Dst: readyToExec},
-//	},
-//	fsm.Callbacks{},
-//)
-
-//var stmts = bytes.Buffer{}
-
 // Start starts goby's REPL.
 func Start(version string) {
 	var err error
@@ -53,25 +47,25 @@ func Start(version string) {
 	}
 	defer rl.Close()
 
-	//log.SetOutput(rl.Stderr())
+	log.SetOutput(rl.Stderr())
 
 	println("Goby", version)
 
-	//// Initialize VM
-	//v := vm.New(os.Getenv("GOBY_ROOT"), []string{})
-	//v.SetClassISIndexTable("")
-	//v.SetMethodISIndexTable("")
-	//v.InitForREPL()
-	//
-	//// Initialize parser, lexer is not important here
-	//l := lexer.New("")
-	//p := parser.New(l)
-	//program, _ := p.ParseProgram()
-	//
-	//// Initialize code generator, and it will behavior a little different in REPL mode.
-	//g := bytecode.NewGenerator()
-	//g.REPL = true
-	//g.InitTopLevelScope(program)
+	// Initialize VM
+	v := vm.New(os.Getenv("GOBY_ROOT"), []string{})
+	v.SetClassISIndexTable("")
+	v.SetMethodISIndexTable("")
+	v.InitForREPL()
+
+	// Initialize parser, lexer is not important here
+	l := lexer.New("")
+	p := parser.New(l)
+	program, _ := p.ParseProgram()
+
+	// Initialize code generator, and it will behavior a little different in REPL mode.
+	g := bytecode.NewGenerator()
+	g.REPL = true
+	g.InitTopLevelScope(program)
 
 	for {
 		line, err := rl.Readline()
@@ -96,15 +90,15 @@ func Start(version string) {
 		case line == "":
 		default:
 			println(echo, line)
-			//l := lexer.New(line)
-			//p.Lexer = l
-			//program, _ := p.ParseProgram()
-			//instructions := g.GenerateInstructions(program.Statements)
-			//g.ResetInstructionSets()
-			//v.REPLExec(instructions)
-			//
-			//r := v.GetREPLResult()
-			//println(echo, r)
+			l := lexer.New(line)
+			p.Lexer = l
+			program, _ := p.ParseProgram()
+			instructions := g.GenerateInstructions(program.Statements)
+			g.ResetInstructionSets()
+			v.REPLExec(instructions)
+
+			r := v.GetREPLResult()
+			println(echo, r)
 		}
 	}
 }
