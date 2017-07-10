@@ -98,6 +98,13 @@ func (v *VM) checkCFP(t *testing.T, index, expectedCFP int) {
 	}
 }
 
+func (v *VM) checkSP(t *testing.T, index, expectedSp int) {
+	if v.mainThread.sp != expectedSp {
+		t.Fatalf("At case %d expect main thread's sp to be %d. got: %d", index, expectedSp, v.mainThread.sp)
+	}
+
+}
+
 func testIntegerObject(t *testing.T, i int, obj Object, expected int) bool {
 	switch result := obj.(type) {
 	case *IntegerObject:

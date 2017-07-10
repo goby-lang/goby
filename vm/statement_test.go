@@ -29,6 +29,7 @@ func TestReturnStatementEvaluation(t *testing.T) {
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
+
 	}
 }
 
@@ -259,6 +260,7 @@ func TestWhileStatement(t *testing.T) {
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
 	}
 }
 
