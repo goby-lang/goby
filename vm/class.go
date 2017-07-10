@@ -73,31 +73,6 @@ func initObjectClass(c *RClass) *RClass {
 	return objectClass
 }
 
-// initializeClass is a common function for vm, which initializes and returns
-// a class instance with given class name.
-func (vm *VM) initializeClass(name string, isModule bool) *RClass {
-	class := vm.createRClass(name)
-	class.isModule = isModule
-
-	return class
-}
-
-func (vm *VM) createRClass(className string) *RClass {
-	objectClass := vm.objectClass
-	classClass := vm.topLevelClass(classClass)
-
-	return &RClass{
-		Name:             className,
-		Methods:          newEnvironment(),
-		ClassMethods:     newEnvironment(),
-		pseudoSuperClass: objectClass,
-		superClass:       objectClass,
-		constants:        make(map[string]*Pointer),
-		isModule:         false,
-		baseObj:          &baseObj{class: classClass, InstanceVariables: newEnvironment()},
-	}
-}
-
 func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 		{
@@ -634,6 +609,33 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 				}
 			},
 		},
+	}
+}
+
+// Common internal helper functions -------------------------------------
+
+// initializeClass is a common function for vm, which initializes and returns
+// a class instance with given class name.
+func (vm *VM) initializeClass(name string, isModule bool) *RClass {
+	class := vm.createRClass(name)
+	class.isModule = isModule
+
+	return class
+}
+
+func (vm *VM) createRClass(className string) *RClass {
+	objectClass := vm.objectClass
+	classClass := vm.topLevelClass(classClass)
+
+	return &RClass{
+		Name:             className,
+		Methods:          newEnvironment(),
+		ClassMethods:     newEnvironment(),
+		pseudoSuperClass: objectClass,
+		superClass:       objectClass,
+		constants:        make(map[string]*Pointer),
+		isModule:         false,
+		baseObj:          &baseObj{class: classClass, InstanceVariables: newEnvironment()},
 	}
 }
 
