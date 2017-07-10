@@ -1,17 +1,17 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
-	"github.com/goby-lang/goby/compiler"
-	"github.com/goby-lang/goby/igb"
-	"github.com/goby-lang/goby/vm"
-	"github.com/pkg/profile"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/goby-lang/goby/compiler"
+	"github.com/goby-lang/goby/igb"
+	"github.com/goby-lang/goby/vm"
+	"github.com/pkg/profile"
 )
 
 // Version stores current Goby version
@@ -25,23 +25,8 @@ func main() {
 	flag.Parse()
 
 	if *interactiveOptionPtr {
-		scanner := bufio.NewScanner(os.Stdin)
-
-		ch := make(chan string)
-
-		go func() {
-			for {
-				scanned := scanner.Scan()
-
-				if !scanned {
-					continue
-				}
-
-				ch <- scanner.Text()
-			}
-		}()
-
-		igb.Start(ch, os.Stdout)
+		igb.StartIgb(Version)
+		os.Exit(0)
 	}
 
 	if *profileOptionPtr {

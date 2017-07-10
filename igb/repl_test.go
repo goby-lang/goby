@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestStart(t *testing.T) {
+func TestStartIgb(t *testing.T) {
 	tests := []struct {
 		inputs   []string
 		expected string
