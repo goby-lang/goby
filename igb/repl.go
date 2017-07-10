@@ -14,10 +14,6 @@ import (
 )
 
 const (
-	//readyToExec = "readyToExec"
-	//Waiting     = "waiting"
-	//waitEnded   = "waitEnded"
-
 	prompt    = "\033[31m»\033[0m "
 	echo      = "#=>"
 	interrupt = "^C"
