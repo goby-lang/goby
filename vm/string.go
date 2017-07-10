@@ -89,7 +89,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := r.(*IntegerObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect argument to be Integer type. got=%T", r)
+						return initErrorObject(TypeErrorClass, "Expect argument to be Integer. got=%T", r)
 					}
 
 					if right.Value < 0 {
@@ -524,7 +524,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 					index, ok := i.(*IntegerObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect Integer. got=%T (%+v)", args[0], args[0])
+						return initErrorObject(TypeErrorClass, "Expect Integer. got=%T (%+v)", i, i)
 					}
 
 					indexValue := index.Value
@@ -568,7 +568,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 					index, ok := i.(*IntegerObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect index is Integer type value. got=%T", i)
+						return initErrorObject(TypeErrorClass, "Expect index to be Integer. got=%T", i)
 					}
 
 					indexValue := index.Value
@@ -582,7 +582,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 					replaceStr, ok := r.(*StringObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect to assign String type value. got=%T", r)
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", r)
 					}
 					replaceStrValue := replaceStr.Value
 
@@ -783,20 +783,21 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 					index, ok := i.(*IntegerObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect index to be Integer type. got=%T", i)
+						return initErrorObject(TypeErrorClass, "Expect index to be Integer. got=%T", i)
 					}
 
 					indexValue := index.Value
-					insertStr, ok := args[1].(*StringObject)
+					ins := args[1]
+					insertStr, ok := ins.(*StringObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect insert string to be String type. got=%T", insertStr)
+						return initErrorObject(TypeErrorClass, "Expect insert string to be String. got=%T", ins)
 					}
 					strLength := len(str)
 
 					if indexValue < 0 {
 						if -indexValue > strLength+1 {
-							return initErrorObject(ArgumentErrorClass, "Index value out of range. got="+string(indexValue))
+							return initErrorObject(ArgumentErrorClass, "Index value out of range. got=%v", indexValue)
 						} else if -indexValue == strLength+1 {
 							return t.vm.initStringObject(insertStr.Value + str)
 						}
@@ -804,7 +805,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 					}
 
 					if strLength < indexValue {
-						return initErrorObject(ArgumentErrorClass, "Index value out of range. got="+string(indexValue))
+						return initErrorObject(ArgumentErrorClass, "Index value out of range. got=%v", indexValue)
 					}
 
 					return t.vm.initStringObject(str[:indexValue] + insertStr.Value + str[indexValue:])
@@ -879,7 +880,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 					strLength, ok := l.(*IntegerObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect justify width is Integer type. got=%T", l)
+						return initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%T", l)
 					}
 
 					strLengthValue := strLength.Value
@@ -892,7 +893,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 						padString, ok := p.(*StringObject)
 
 						if !ok {
-							return initErrorObject(TypeErrorClass, "Expect padding string is String type. got=%T", p)
+							return initErrorObject(TypeErrorClass, "Expect padding string to be String. got=%T", p)
 						}
 
 						padStringValue = padString.Value
@@ -931,7 +932,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 					strLength, ok := l.(*IntegerObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect justify width is Integer type. got=%T", l)
+						return initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%T", l)
 					}
 
 					strLengthValue := strLength.Value
@@ -944,7 +945,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 						padString, ok := p.(*StringObject)
 
 						if !ok {
-							return initErrorObject(TypeErrorClass, "Expect padding string is String type. got=%T", p)
+							return initErrorObject(TypeErrorClass, "Expect padding string to be String. got=%T", p)
 						}
 
 						padStringValue = padString.Value
@@ -1176,14 +1177,14 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 					pattern, ok := p.(*StringObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect pattern is String type. got=%T", p)
+						return initErrorObject(TypeErrorClass, "Expect pattern to be String. got=%T", p)
 					}
 
 					r := args[1]
 					replacement, ok := r.(*StringObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect replacement is String type. got=%T", r)
+						return initErrorObject(TypeErrorClass, "Expect replacement to be String. got=%T", r)
 					}
 
 					return t.vm.initStringObject(strings.Replace(str, pattern.Value, replacement.Value, -1))

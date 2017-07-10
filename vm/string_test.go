@@ -157,10 +157,10 @@ func TestStringOperationFail(t *testing.T) {
 		expected *Error
 	}{
 		{`"Taipei" + 101`, newError("expect argument to be String type")},
-		{`"Taipei" * "101"`, initErrorObject(TypeErrorClass, "Expect argument to be Integer type. got=%T", vm.initStringObject("101"))},
+		{`"Taipei" * "101"`, initErrorObject(TypeErrorClass, "Expect argument to be Integer. got=%T", vm.initStringObject("101"))},
 		{`"Taipei" * (-101)`, initErrorObject(ArgumentErrorClass, "Second argument must be greater than or equal to 0. got=%v", -101)},
-		{`"Taipei"[1] = 1`, initErrorObject(TypeErrorClass, "Expect to assign String type value. got=%T", vm.initIntegerObject(1))},
-		{`"Taipei"[1] = true`, initErrorObject(TypeErrorClass, "Expect to assign String type value. got=%T", TRUE)},
+		{`"Taipei"[1] = 1`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(1))},
+		{`"Taipei"[1] = true`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", TRUE)},
 		// TODO: Implement test for empty index or wrong index type
 		//{`"Taipei"[]`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", "0")},
 		// {`"Taipei"[true] = 101`, newError("expect argument to be Integer type")},
@@ -436,18 +436,18 @@ func TestInsertingString(t *testing.T) {
 }
 
 func TestInsertingStringFail(t *testing.T) {
+	vm := initTestVM()
 	testsFail := []struct {
 		input    string
 		expected *Error
 	}{
-	//{`"Taipei".insert("6", " 101")`, initErrorObject(TypeErrorClass, "Expect index to be Integer type. got=%T", initStringObject("6"))},
-	//{`"Taipei".insert(6, 101)`, initErrorObject(TypeErrorClass, "Expect insert string to be String type. got=%T", initIntegerObject(101))},
-	//{`"Taipei".insert(-8, "101")`, initErrorObject(ArgumentErrorClass, "Index value out of range. got=%v", "-8")},
-	//{`"Taipei".insert(7, "101")`, initErrorObject(ArgumentErrorClass, "Index value out of range. got=%v", "7")},
+		{`"Taipei".insert("6", " 101")`, initErrorObject(TypeErrorClass, "Expect index to be Integer. got=%T", vm.initStringObject("6"))},
+		{`"Taipei".insert(6, 101)`, initErrorObject(TypeErrorClass, "Expect insert string to be String. got=%T", vm.initIntegerObject(101))},
+		{`"Taipei".insert(-8, "101")`, initErrorObject(ArgumentErrorClass, "Index value out of range. got=%v", "-8")},
+		{`"Taipei".insert(7, "101")`, initErrorObject(ArgumentErrorClass, "Index value out of range. got=%v", "7")},
 	}
 
 	for _, tt := range testsFail {
-		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		err, ok := evaluated.(*Error)
 		if !ok {
@@ -498,12 +498,12 @@ func TestLeftJustifyStringFail(t *testing.T) {
 		input    string
 		expected *Error
 	}{
-		{`"Hello".ljust(true)`, initErrorObject(TypeErrorClass, "Expect justify width is Integer type. got=%T", TRUE)},
-		{`"Hello".ljust("World")`, initErrorObject(TypeErrorClass, "Expect justify width is Integer type. got=%T", vm.initStringObject("World"))},
-		{`"Hello".ljust(2..5)`, initErrorObject(TypeErrorClass, "Expect justify width is Integer type. got=%T", vm.initRangeObject(2, 5))},
-		{`"Hello".ljust(10, 10)`, initErrorObject(TypeErrorClass, "Expect padding string is String type. got=%T", vm.initIntegerObject(10))},
-		{`"Hello".ljust(10, 2..5)`, initErrorObject(TypeErrorClass, "Expect padding string is String type. got=%T", vm.initRangeObject(2, 5))},
-		{`"Hello".ljust(10, true)`, initErrorObject(TypeErrorClass, "Expect padding string is String type. got=%T", TRUE)},
+		{`"Hello".ljust(true)`, initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%T", TRUE)},
+		{`"Hello".ljust("World")`, initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%T", vm.initStringObject("World"))},
+		{`"Hello".ljust(2..5)`, initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%T", vm.initRangeObject(2, 5))},
+		{`"Hello".ljust(10, 10)`, initErrorObject(TypeErrorClass, "Expect padding string to be String. got=%T", vm.initIntegerObject(10))},
+		{`"Hello".ljust(10, 2..5)`, initErrorObject(TypeErrorClass, "Expect padding string to be String. got=%T", vm.initRangeObject(2, 5))},
+		{`"Hello".ljust(10, true)`, initErrorObject(TypeErrorClass, "Expect padding string to be String. got=%T", TRUE)},
 	}
 
 	for _, tt := range testsFail {
@@ -541,12 +541,12 @@ func TestRightJustifyStringFail(t *testing.T) {
 		input    string
 		expected *Error
 	}{
-		{`"Hello".rjust(true)`, initErrorObject(TypeErrorClass, "Expect justify width is Integer type. got=%T", TRUE)},
-		{`"Hello".rjust("World")`, initErrorObject(TypeErrorClass, "Expect justify width is Integer type. got=%T", vm.initStringObject("World"))},
-		{`"Hello".rjust(2..5)`, initErrorObject(TypeErrorClass, "Expect justify width is Integer type. got=%T", vm.initRangeObject(2, 5))},
-		{`"Hello".rjust(10, 10)`, initErrorObject(TypeErrorClass, "Expect padding string is String type. got=%T", vm.initIntegerObject(10))},
-		{`"Hello".rjust(10, 2..5)`, initErrorObject(TypeErrorClass, "Expect padding string is String type. got=%T", vm.initRangeObject(2, 5))},
-		{`"Hello".rjust(10, true)`, initErrorObject(TypeErrorClass, "Expect padding string is String type. got=%T", TRUE)},
+		{`"Hello".rjust(true)`, initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%T", TRUE)},
+		{`"Hello".rjust("World")`, initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%T", vm.initStringObject("World"))},
+		{`"Hello".rjust(2..5)`, initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%T", vm.initRangeObject(2, 5))},
+		{`"Hello".rjust(10, 10)`, initErrorObject(TypeErrorClass, "Expect padding string to be String. got=%T", vm.initIntegerObject(10))},
+		{`"Hello".rjust(10, 2..5)`, initErrorObject(TypeErrorClass, "Expect padding string to be String. got=%T", vm.initRangeObject(2, 5))},
+		{`"Hello".rjust(10, true)`, initErrorObject(TypeErrorClass, "Expect padding string to be String. got=%T", TRUE)},
 	}
 
 	for _, tt := range testsFail {
@@ -874,8 +874,8 @@ func TestGlobalSubstitutingStringFail(t *testing.T) {
 	}{
 		{`"Ruby".gsub()`, initErrorObject(ArgumentErrorClass, "Expect to have 2 arguments. got=%v", 0)},
 		{`"Ruby".gsub("Ru")`, initErrorObject(ArgumentErrorClass, "Expect to have 2 arguments. got=%v", 1)},
-		{`"Ruby".gsub(123, "Go")`, initErrorObject(TypeErrorClass, "Expect pattern is String type. got=%T", vm.initIntegerObject(123))},
-		{`"Ruby".gsub("Ru", 456)`, initErrorObject(TypeErrorClass, "Expect replacement is String type. got=%T", vm.initIntegerObject(456))},
+		{`"Ruby".gsub(123, "Go")`, initErrorObject(TypeErrorClass, "Expect pattern to be String. got=%T", vm.initIntegerObject(123))},
+		{`"Ruby".gsub("Ru", 456)`, initErrorObject(TypeErrorClass, "Expect replacement to be String. got=%T", vm.initIntegerObject(456))},
 	}
 
 	for _, tt := range testsFail {
