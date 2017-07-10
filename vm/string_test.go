@@ -239,6 +239,8 @@ func TestStringConcatenateMethodFail(t *testing.T) {
 		input    string
 		expected *Error
 	}{
+		{`"a".concat`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", 0)},
+		{`"a".concat("Hello", "World")`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", 2)},
 		{`"a".concat(1)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(1))},
 		{`"a".concat(true)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", TRUE)},
 		{`"a".concat(nil)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", NULL)},
@@ -277,6 +279,7 @@ func TestStringDeleteMethodFail(t *testing.T) {
 		input    string
 		expected *Error
 	}{
+		{`"Hello hello HeLlo".delete`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", 0)},
 		{`"Hello hello HeLlo".delete(1)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(1))},
 		{`"Hello hello HeLlo".delete(true)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", TRUE)},
 		{`"Hello hello HeLlo".delete(nil)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", NULL)},
@@ -330,6 +333,28 @@ func TestStringEqualMethod(t *testing.T) {
 	}
 }
 
+func TestStringEqualMethodFail(t *testing.T) {
+	testsFail := []struct {
+		input    string
+		expected *Error
+	}{
+		{`"Hello".eql`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", 0)},
+		{`"Hello".eql("Hello", "World")`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", 2)},
+	}
+
+	for _, tt := range testsFail {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		err, ok := evaluated.(*Error)
+		if !ok {
+			t.Errorf("Expect error. got=%T (%+v)", err, err)
+		}
+		if err.Message != tt.expected.Message {
+			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
+		}
+	}
+}
+
 func TestStringStartWithMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -356,6 +381,7 @@ func TestStringStartWithMethodFail(t *testing.T) {
 		input    string
 		expected *Error
 	}{
+		{`"Taipei".start_with("1", "0", "1")`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", 3)},
 		{`"Taipei".start_with(101)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(101))},
 		{`"Hello".start_with(true)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", TRUE)},
 		{`"Hello".start_with(1..5)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initRangeObject(1, 5))},
@@ -399,6 +425,7 @@ func TestStringEndWithMethodFail(t *testing.T) {
 		input    string
 		expected *Error
 	}{
+		{`"Taipei".end_with("1", "0", "1")`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", 3)},
 		{`"Taipei".end_with(101)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(101))},
 		{`"Hello".end_with(true)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", TRUE)},
 		{`"Hello".end_with(1..5)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initRangeObject(1, 5))},
@@ -441,6 +468,8 @@ func TestStringInsertMethodFail(t *testing.T) {
 		input    string
 		expected *Error
 	}{
+		{`"Goby Lang".insert`, initErrorObject(ArgumentErrorClass, "Expect 2 arguments. got=%v", 0)},
+		{`"Taipei".insert(6, " ", "101")`, initErrorObject(ArgumentErrorClass, "Expect 2 arguments. got=%v", 3)},
 		{`"Taipei".insert("6", " 101")`, initErrorObject(TypeErrorClass, "Expect index to be Integer. got=%T", vm.initStringObject("6"))},
 		{`"Taipei".insert(6, 101)`, initErrorObject(TypeErrorClass, "Expect insert string to be String. got=%T", vm.initIntegerObject(101))},
 		{`"Taipei".insert(-8, "101")`, initErrorObject(ArgumentErrorClass, "Index value out of range. got=%v", "-8")},
@@ -498,6 +527,9 @@ func TestStringLeftJustifyMethodFail(t *testing.T) {
 		input    string
 		expected *Error
 	}{
+		{`"Hello".ljust`, initErrorObject(ArgumentErrorClass, "Expect 1..2 arguments. got=%v", 0)},
+		{`"Hello".ljust(1, 2, 3, 4, 5)`, initErrorObject(ArgumentErrorClass, "Expect 1..2 arguments. got=%v", 5)},
+		{`"Hello".ljust(true)`, initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%T", TRUE)},
 		{`"Hello".ljust(true)`, initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%T", TRUE)},
 		{`"Hello".ljust("World")`, initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%T", vm.initStringObject("World"))},
 		{`"Hello".ljust(2..5)`, initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%T", vm.initRangeObject(2, 5))},
@@ -541,6 +573,8 @@ func TestStringRightJustifyFail(t *testing.T) {
 		input    string
 		expected *Error
 	}{
+		{`"Hello".rjust`, initErrorObject(ArgumentErrorClass, "Expect 1..2 arguments. got=%v", 0)},
+		{`"Hello".rjust(1, 2, 3, 4, 5)`, initErrorObject(ArgumentErrorClass, "Expect 1..2 arguments. got=%v", 5)},
 		{`"Hello".rjust(true)`, initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%T", TRUE)},
 		{`"Hello".rjust("World")`, initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%T", vm.initStringObject("World"))},
 		{`"Hello".rjust(2..5)`, initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%T", vm.initRangeObject(2, 5))},
@@ -641,6 +675,7 @@ func TestStringSplitMethodFail(t *testing.T) {
 		input    string
 		expected *Error
 	}{
+		{`"Hello World".split`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", 0)},
 		{`"Hello World".split(true)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", TRUE)},
 		{`"Hello World".split(123)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(123))},
 		{`"Hello World".split(1..2)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initRangeObject(1, 2))},
@@ -700,6 +735,7 @@ func TestStringSliceMethodFail(t *testing.T) {
 		input    string
 		expected *Error
 	}{
+		{`"Goby Lang".slice`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", 0)},
 		{`"Goby Lang".slice("Hello")`, initErrorObject(ArgumentErrorClass, "Expect slice range to be Range or Integer. got=%T", vm.initStringObject("Hello"))},
 		{`"Goby Lang".slice(true)`, initErrorObject(ArgumentErrorClass, "Expect slice range to be Range or Integer. got=%T", TRUE)},
 	}
@@ -739,6 +775,7 @@ func TestStringReplaceMethodFail(t *testing.T) {
 		input    string
 		expected *Error
 	}{
+		{`"Taipei".replace`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", 0)},
 		{`"Taipei".replace(101)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(101))},
 		{`"Taipei".replace(true)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", TRUE)},
 	}
@@ -849,6 +886,28 @@ func TestStringIncludeMethod(t *testing.T) {
 	}
 }
 
+func TestStringIncludeMethodFail(t *testing.T) {
+	vm := initTestVM()
+	testsFail := []struct {
+		input    string
+		expected *Error
+	}{
+		{`"Goby".include`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", 0)},
+		{`"Goby".include("Ruby", "Lang")`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", 2)},
+	}
+
+	for _, tt := range testsFail {
+		evaluated := vm.testEval(t, tt.input)
+		err, ok := evaluated.(*Error)
+		if !ok {
+			t.Errorf("Expect error. got=%T (%+v)", err, err)
+		}
+		if err.Message != tt.expected.Message {
+			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
+		}
+	}
+}
+
 func TestStringGlobalSubstituteMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -872,8 +931,8 @@ func TestStringGlobalSubstituteMethodFail(t *testing.T) {
 		input    string
 		expected *Error
 	}{
-		{`"Ruby".gsub()`, initErrorObject(ArgumentErrorClass, "Expect to have 2 arguments. got=%v", 0)},
-		{`"Ruby".gsub("Ru")`, initErrorObject(ArgumentErrorClass, "Expect to have 2 arguments. got=%v", 1)},
+		{`"Ruby".gsub()`, initErrorObject(ArgumentErrorClass, "Expect 2 arguments. got=%v", 0)},
+		{`"Ruby".gsub("Ru")`, initErrorObject(ArgumentErrorClass, "Expect 2 arguments. got=%v", 1)},
 		{`"Ruby".gsub(123, "Go")`, initErrorObject(TypeErrorClass, "Expect pattern to be String. got=%T", vm.initIntegerObject(123))},
 		{`"Ruby".gsub("Ru", 456)`, initErrorObject(TypeErrorClass, "Expect replacement to be String. got=%T", vm.initIntegerObject(456))},
 	}

@@ -45,6 +45,19 @@ func (vm *VM) initStringClass() *RClass {
 	return sc
 }
 
+func builtInStringClassMethods() []*BuiltInMethodObject {
+	return []*BuiltInMethodObject{
+		{
+			Name: "new",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					return t.UnsupportedMethodError("#new", receiver)
+				}
+			},
+		},
+	}
+}
+
 func builtinStringInstanceMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 
@@ -458,6 +471,9 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			Name: "include",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+					}
 
 					rcv := receiver.(*StringObject).Value
 					arg := args[0].(*StringObject).Value
@@ -467,19 +483,6 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					}
 
 					return FALSE
-				}
-			},
-		},
-	}
-}
-
-func builtInStringClassMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
-		{
-			Name: "new",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					return t.UnsupportedMethodError("#new", receiver)
 				}
 			},
 		},
@@ -493,6 +496,9 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 			Name: "concat",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+					}
 
 					str := receiver.(*StringObject).Value
 					c := args[0]
@@ -569,6 +575,9 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 			Name: "[]=",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 2 {
+						return initErrorObject(ArgumentErrorClass, "Expect 2 argument. got=%v", strconv.Itoa(len(args)))
+					}
 
 					str := receiver.(*StringObject).Value
 					i := args[0]
@@ -663,6 +672,9 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 			Name: "eql",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+					}
 
 					str := receiver.(*StringObject).Value
 					compareStr, ok := args[0].(*StringObject)
@@ -709,6 +721,9 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 			Name: "start_with",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+					}
 
 					str := receiver.(*StringObject).Value
 					c := args[0]
@@ -743,6 +758,9 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 			Name: "end_with",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+					}
 
 					str := receiver.(*StringObject).Value
 					c := args[0]
@@ -785,6 +803,9 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 			Name: "insert",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 2 {
+						return initErrorObject(ArgumentErrorClass, "Expect 2 arguments. got=%v", strconv.Itoa(len(args)))
+					}
 
 					str := receiver.(*StringObject).Value
 					i := args[0]
@@ -834,6 +855,9 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 			Name: "delete",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+					}
 
 					str := receiver.(*StringObject).Value
 					d := args[0]
@@ -883,6 +907,9 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 			Name: "ljust",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 && len(args) != 2 {
+						return initErrorObject(ArgumentErrorClass, "Expect 1..2 arguments. got=%v", strconv.Itoa(len(args)))
+					}
 
 					str := receiver.(*StringObject).Value
 
@@ -936,6 +963,9 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 			Name: "rjust",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 && len(args) != 2 {
+						return initErrorObject(ArgumentErrorClass, "Expect 1..2 arguments. got=%v", strconv.Itoa(len(args)))
+					}
 
 					str := receiver.(*StringObject).Value
 					l := args[0]
@@ -1023,6 +1053,9 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 			Name: "split",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+					}
 
 					s := args[0]
 					seperator, ok := s.(*StringObject)
@@ -1074,6 +1107,9 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 			Name: "slice",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+					}
 
 					str := receiver.(*StringObject).Value
 					strLength := len(str)
@@ -1148,6 +1184,9 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 			Name: "replace",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+					}
 
 					r := args[0]
 					replaceStr, ok := r.(*StringObject)
@@ -1178,7 +1217,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 2 {
-						return initErrorObject(ArgumentErrorClass, "Expect to have 2 arguments. got=%v", len(args))
+						return initErrorObject(ArgumentErrorClass, "Expect 2 arguments. got=%v", len(args))
 					}
 
 					str := receiver.(*StringObject).Value
