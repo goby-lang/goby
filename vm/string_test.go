@@ -98,26 +98,21 @@ func TestStringComparison(t *testing.T) {
 }
 
 func TestStringConparisonFail(t *testing.T) {
-	vm := initTestVM()
 	testsFail := []struct {
-		input    string
-		expected *Error
+		input  string
+		errMsg string
 	}{
-		{`"a" < 1`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(1))},
-		{`"a" > 1`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(1))},
-		{`"a" == 1`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(1))},
-		{`"a" <=> 1`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(1))},
-		{`"a" != 1`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(1))},
+		{`"a" < 1`, "TypeError: Expect argument to be String. got=Integer"},
+		{`"a" > 1`, "TypeError: Expect argument to be String. got=Integer"},
+		{`"a" == 1`, "TypeError: Expect argument to be String. got=Integer"},
+		{`"a" <=> 1`, "TypeError: Expect argument to be String. got=Integer"},
+		{`"a" != 1`, "TypeError: Expect argument to be String. got=Integer"},
 	}
-	for _, tt := range testsFail {
+	for i, tt := range testsFail {
+		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
-		if !ok {
-			t.Errorf("Expect error. got=%T (%+v)", err, err)
-		}
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
-		}
+		checkError(t, i, evaluated, TypeError, tt.errMsg)
+		vm.checkCFP(t, i, 1)
 	}
 }
 
@@ -147,34 +142,31 @@ func TestStringOperation(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
 func TestStringOperationFail(t *testing.T) {
-	vm := initTestVM()
 	testsFail := []struct {
-		input    string
-		expected *Error
+		input   string
+		errType string
+		errMsg  string
 	}{
-		{`"Taipei" + 101`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(101))},
-		{`"Taipei" * "101"`, initErrorObject(TypeErrorClass, "Expect argument to be Integer. got=%T", vm.initStringObject("101"))},
-		{`"Taipei" * (-101)`, initErrorObject(ArgumentErrorClass, "Second argument must be greater than or equal to 0. got=%v", -101)},
-		{`"Taipei"[1] = 1`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(1))},
-		{`"Taipei"[1] = true`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", TRUE)},
+		{`"Taipei" + 101`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
+		{`"Taipei" * "101"`, TypeError, "TypeError: Expect argument to be Integer. got=String"},
+		{`"Taipei" * (-101)`, ArgumentError, "ArgumentError: Second argument must be greater than or equal to 0. got=-101"},
+		{`"Taipei"[1] = 1`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
+		{`"Taipei"[1] = true`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
 		// TODO: Implement test for empty index or wrong index type
-		//{`"Taipei"[]`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", "0")},
+		//{`"Taipei"[]`, ArgumentError, "Expect 1 argument. got=%v", "0")},
 		// {`"Taipei"[true] = 101`, newError("expect argument to be Integer type")},
 	}
 
-	for _, tt := range testsFail {
+	for i, tt := range testsFail {
+		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
-		if !ok {
-			t.Errorf("Expect error. got=%T (%+v)", err, err)
-		}
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
-		}
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, 1)
 	}
 }
 
@@ -230,31 +222,28 @@ func TestStringConcatenateMethod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
 func TestStringConcatenateMethodFail(t *testing.T) {
-	vm := initTestVM()
 	testsFail := []struct {
-		input    string
-		expected *Error
+		input   string
+		errType string
+		errMsg  string
 	}{
-		{`"a".concat`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", 0)},
-		{`"a".concat("Hello", "World")`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", 2)},
-		{`"a".concat(1)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(1))},
-		{`"a".concat(true)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", TRUE)},
-		{`"a".concat(nil)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", NULL)},
+		{`"a".concat`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
+		{`"a".concat("Hello", "World")`, ArgumentError, "ArgumentError: Expect 1 argument. got=2"},
+		{`"a".concat(1)`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
+		{`"a".concat(true)`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
+		{`"a".concat(nil)`, TypeError, "TypeError: Expect argument to be String. got=Null"},
 	}
 
-	for _, tt := range testsFail {
+	for i, tt := range testsFail {
+		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
-		if !ok {
-			t.Errorf("Expect error. got=%T (%+v)", err, err)
-		}
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
-		}
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, 1)
 	}
 }
 
@@ -270,30 +259,27 @@ func TestStringDeleteMethod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
 func TestStringDeleteMethodFail(t *testing.T) {
-	vm := initTestVM()
 	testsFail := []struct {
-		input    string
-		expected *Error
+		input   string
+		errType string
+		errMsg  string
 	}{
-		{`"Hello hello HeLlo".delete`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", 0)},
-		{`"Hello hello HeLlo".delete(1)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(1))},
-		{`"Hello hello HeLlo".delete(true)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", TRUE)},
-		{`"Hello hello HeLlo".delete(nil)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", NULL)},
+		{`"Hello hello HeLlo".delete`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
+		{`"Hello hello HeLlo".delete(1)`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
+		{`"Hello hello HeLlo".delete(true)`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
+		{`"Hello hello HeLlo".delete(nil)`, TypeError, "TypeError: Expect argument to be String. got=Null"},
 	}
 
-	for _, tt := range testsFail {
+	for i, tt := range testsFail {
+		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
-		if !ok {
-			t.Errorf("Expect error. got=%T (%+v)", err, err)
-		}
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
-		}
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, 1)
 	}
 }
 
@@ -310,6 +296,7 @@ func TestStringEmptyMethod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -330,28 +317,24 @@ func TestStringEqualMethod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
 func TestStringEqualMethodFail(t *testing.T) {
 	testsFail := []struct {
-		input    string
-		expected *Error
+		input  string
+		errMsg string
 	}{
-		{`"Hello".eql`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", 0)},
-		{`"Hello".eql("Hello", "World")`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", 2)},
+		{`"Hello".eql`, "ArgumentError: Expect 1 argument. got=0"},
+		{`"Hello".eql("Hello", "World")`, "ArgumentError: Expect 1 argument. got=2"},
 	}
 
-	for _, tt := range testsFail {
+	for i, tt := range testsFail {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
-		if !ok {
-			t.Errorf("Expect error. got=%T (%+v)", err, err)
-		}
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
-		}
+		checkError(t, i, evaluated, ArgumentError, tt.errMsg)
+		vm.checkCFP(t, i, 1)
 	}
 }
 
@@ -372,30 +355,27 @@ func TestStringStartWithMethod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
 func TestStringStartWithMethodFail(t *testing.T) {
-	vm := initTestVM()
 	testsFail := []struct {
-		input    string
-		expected *Error
+		input   string
+		errType string
+		errMsg  string
 	}{
-		{`"Taipei".start_with("1", "0", "1")`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", 3)},
-		{`"Taipei".start_with(101)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(101))},
-		{`"Hello".start_with(true)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", TRUE)},
-		{`"Hello".start_with(1..5)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initRangeObject(1, 5))},
+		{`"Taipei".start_with("1", "0", "1")`, ArgumentError, "ArgumentError: Expect 1 argument. got=3"},
+		{`"Taipei".start_with(101)`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
+		{`"Hello".start_with(true)`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
+		{`"Hello".start_with(1..5)`, TypeError, "TypeError: Expect argument to be String. got=Range"},
 	}
 
-	for _, tt := range testsFail {
+	for i, tt := range testsFail {
+		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
-		if !ok {
-			t.Errorf("Expect error. got=%T (%+v)", err, err)
-		}
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
-		}
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, 1)
 	}
 }
 
@@ -416,30 +396,27 @@ func TestStringEndWithMethod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
 func TestStringEndWithMethodFail(t *testing.T) {
-	vm := initTestVM()
 	testsFail := []struct {
-		input    string
-		expected *Error
+		input   string
+		errType string
+		errMsg  string
 	}{
-		{`"Taipei".end_with("1", "0", "1")`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", 3)},
-		{`"Taipei".end_with(101)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(101))},
-		{`"Hello".end_with(true)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", TRUE)},
-		{`"Hello".end_with(1..5)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initRangeObject(1, 5))},
+		{`"Taipei".end_with("1", "0", "1")`, ArgumentError, "ArgumentError: Expect 1 argument. got=3"},
+		{`"Taipei".end_with(101)`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
+		{`"Hello".end_with(true)`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
+		{`"Hello".end_with(1..5)`, TypeError, "TypeError: Expect argument to be String. got=Range"},
 	}
 
-	for _, tt := range testsFail {
+	for i, tt := range testsFail {
+		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
-		if !ok {
-			t.Errorf("Expect error. got=%T (%+v)", err, err)
-		}
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
-		}
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, 1)
 	}
 }
 
@@ -459,32 +436,29 @@ func TestStringInsertMethod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
 func TestStringInsertMethodFail(t *testing.T) {
-	vm := initTestVM()
 	testsFail := []struct {
-		input    string
-		expected *Error
+		input   string
+		errType string
+		errMsg  string
 	}{
-		{`"Goby Lang".insert`, initErrorObject(ArgumentErrorClass, "Expect 2 arguments. got=%v", 0)},
-		{`"Taipei".insert(6, " ", "101")`, initErrorObject(ArgumentErrorClass, "Expect 2 arguments. got=%v", 3)},
-		{`"Taipei".insert("6", " 101")`, initErrorObject(TypeErrorClass, "Expect index to be Integer. got=%T", vm.initStringObject("6"))},
-		{`"Taipei".insert(6, 101)`, initErrorObject(TypeErrorClass, "Expect insert string to be String. got=%T", vm.initIntegerObject(101))},
-		{`"Taipei".insert(-8, "101")`, initErrorObject(ArgumentErrorClass, "Index value out of range. got=%v", "-8")},
-		{`"Taipei".insert(7, "101")`, initErrorObject(ArgumentErrorClass, "Index value out of range. got=%v", "7")},
+		{`"Goby Lang".insert`, ArgumentError, "ArgumentError: Expect 2 arguments. got=0"},
+		{`"Taipei".insert(6, " ", "101")`, ArgumentError, "ArgumentError: Expect 2 arguments. got=3"},
+		{`"Taipei".insert("6", " 101")`, TypeError, "TypeError: Expect index to be Integer. got=String"},
+		{`"Taipei".insert(6, 101)`, TypeError, "TypeError: Expect insert string to be String. got=Integer"},
+		{`"Taipei".insert(-8, "101")`, ArgumentError, "ArgumentError: Index value out of range. got=-8"},
+		{`"Taipei".insert(7, "101")`, ArgumentError, "ArgumentError: Index value out of range. got=7"},
 	}
 
-	for _, tt := range testsFail {
+	for i, tt := range testsFail {
+		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
-		if !ok {
-			t.Errorf("Expect error. got=%T (%+v)", err, err)
-		}
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
-		}
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, 1)
 	}
 }
 
@@ -501,6 +475,7 @@ func TestStringChopMethod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -518,35 +493,31 @@ func TestStringLeftJustifyMethod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
 func TestStringLeftJustifyMethodFail(t *testing.T) {
-	vm := initTestVM()
 	testsFail := []struct {
-		input    string
-		expected *Error
+		input   string
+		errType string
+		errMsg  string
 	}{
-		{`"Hello".ljust`, initErrorObject(ArgumentErrorClass, "Expect 1..2 arguments. got=%v", 0)},
-		{`"Hello".ljust(1, 2, 3, 4, 5)`, initErrorObject(ArgumentErrorClass, "Expect 1..2 arguments. got=%v", 5)},
-		{`"Hello".ljust(true)`, initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%T", TRUE)},
-		{`"Hello".ljust(true)`, initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%T", TRUE)},
-		{`"Hello".ljust("World")`, initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%T", vm.initStringObject("World"))},
-		{`"Hello".ljust(2..5)`, initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%T", vm.initRangeObject(2, 5))},
-		{`"Hello".ljust(10, 10)`, initErrorObject(TypeErrorClass, "Expect padding string to be String. got=%T", vm.initIntegerObject(10))},
-		{`"Hello".ljust(10, 2..5)`, initErrorObject(TypeErrorClass, "Expect padding string to be String. got=%T", vm.initRangeObject(2, 5))},
-		{`"Hello".ljust(10, true)`, initErrorObject(TypeErrorClass, "Expect padding string to be String. got=%T", TRUE)},
+		{`"Hello".ljust`, ArgumentError, "ArgumentError: Expect 1..2 arguments. got=0"},
+		{`"Hello".ljust(1, 2, 3, 4, 5)`, ArgumentError, "ArgumentError: Expect 1..2 arguments. got=5"},
+		{`"Hello".ljust(true)`, TypeError, "TypeError: Expect justify width to be Integer. got=Boolean"},
+		{`"Hello".ljust("World")`, TypeError, "TypeError: Expect justify width to be Integer. got=String"},
+		{`"Hello".ljust(2..5)`, TypeError, "TypeError: Expect justify width to be Integer. got=Range"},
+		{`"Hello".ljust(10, 10)`, TypeError, "TypeError: Expect padding string to be String. got=Integer"},
+		{`"Hello".ljust(10, 2..5)`, TypeError, "TypeError: Expect padding string to be String. got=Range"},
+		{`"Hello".ljust(10, true)`, TypeError, "TypeError: Expect padding string to be String. got=Boolean"},
 	}
 
-	for _, tt := range testsFail {
+	for i, tt := range testsFail {
+		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
-		if !ok {
-			t.Errorf("Expect error. got=%T (%+v)", err, err)
-		}
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
-		}
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, 1)
 	}
 }
 
@@ -564,34 +535,31 @@ func TestStringRightJustifyMethod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
 func TestStringRightJustifyFail(t *testing.T) {
-	vm := initTestVM()
 	testsFail := []struct {
-		input    string
-		expected *Error
+		input   string
+		errType string
+		errMsg  string
 	}{
-		{`"Hello".rjust`, initErrorObject(ArgumentErrorClass, "Expect 1..2 arguments. got=%v", 0)},
-		{`"Hello".rjust(1, 2, 3, 4, 5)`, initErrorObject(ArgumentErrorClass, "Expect 1..2 arguments. got=%v", 5)},
-		{`"Hello".rjust(true)`, initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%T", TRUE)},
-		{`"Hello".rjust("World")`, initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%T", vm.initStringObject("World"))},
-		{`"Hello".rjust(2..5)`, initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%T", vm.initRangeObject(2, 5))},
-		{`"Hello".rjust(10, 10)`, initErrorObject(TypeErrorClass, "Expect padding string to be String. got=%T", vm.initIntegerObject(10))},
-		{`"Hello".rjust(10, 2..5)`, initErrorObject(TypeErrorClass, "Expect padding string to be String. got=%T", vm.initRangeObject(2, 5))},
-		{`"Hello".rjust(10, true)`, initErrorObject(TypeErrorClass, "Expect padding string to be String. got=%T", TRUE)},
+		{`"Hello".rjust`, ArgumentError, "ArgumentError: Expect 1..2 arguments. got=0"},
+		{`"Hello".rjust(1, 2, 3, 4, 5)`, ArgumentError, "ArgumentError: Expect 1..2 arguments. got=5"},
+		{`"Hello".rjust(true)`, TypeError, "TypeError: Expect justify width to be Integer. got=Boolean"},
+		{`"Hello".rjust("World")`, TypeError, "TypeError: Expect justify width to be Integer. got=String"},
+		{`"Hello".rjust(2..5)`, TypeError, "TypeError: Expect justify width to be Integer. got=Range"},
+		{`"Hello".rjust(10, 10)`, TypeError, "TypeError: Expect padding string to be String. got=Integer"},
+		{`"Hello".rjust(10, 2..5)`, TypeError, "TypeError: Expect padding string to be String. got=Range"},
+		{`"Hello".rjust(10, true)`, TypeError, "TypeError: Expect padding string to be String. got=Boolean"},
 	}
 
-	for _, tt := range testsFail {
+	for i, tt := range testsFail {
+		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
-		if !ok {
-			t.Errorf("Expect error. got=%T (%+v)", err, err)
-		}
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
-		}
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, 1)
 	}
 }
 
@@ -608,11 +576,11 @@ func TestStringStripMethod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
 func TestStringSplitMethod(t *testing.T) {
-	vm := initTestVM()
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -664,32 +632,30 @@ func TestStringSplitMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
+		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
 func TestStringSplitMethodFail(t *testing.T) {
-	vm := initTestVM()
 	testsFail := []struct {
-		input    string
-		expected *Error
+		input   string
+		errType string
+		errMsg  string
 	}{
-		{`"Hello World".split`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", 0)},
-		{`"Hello World".split(true)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", TRUE)},
-		{`"Hello World".split(123)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(123))},
-		{`"Hello World".split(1..2)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initRangeObject(1, 2))},
+		{`"Hello World".split`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
+		{`"Hello World".split(true)`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
+		{`"Hello World".split(123)`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
+		{`"Hello World".split(1..2)`, TypeError, "TypeError: Expect argument to be String. got=Range"},
 	}
 
-	for _, tt := range testsFail {
+	for i, tt := range testsFail {
+		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
-		if !ok {
-			t.Errorf("Expect error. got=%T (%+v)", err, err)
-		}
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
-		}
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, 1)
 	}
 }
 
@@ -726,29 +692,26 @@ func TestStringSliceMethod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
 func TestStringSliceMethodFail(t *testing.T) {
-	vm := initTestVM()
 	testsFail := []struct {
-		input    string
-		expected *Error
+		input   string
+		errType string
+		errMsg  string
 	}{
-		{`"Goby Lang".slice`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", 0)},
-		{`"Goby Lang".slice("Hello")`, initErrorObject(ArgumentErrorClass, "Expect slice range to be Range or Integer. got=%T", vm.initStringObject("Hello"))},
-		{`"Goby Lang".slice(true)`, initErrorObject(ArgumentErrorClass, "Expect slice range to be Range or Integer. got=%T", TRUE)},
+		{`"Goby Lang".slice`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
+		{`"Goby Lang".slice("Hello")`, TypeError, "TypeError: Expect slice range to be Range or Integer. got=String"},
+		{`"Goby Lang".slice(true)`, TypeError, "TypeError: Expect slice range to be Range or Integer. got=Boolean"},
 	}
 
-	for _, tt := range testsFail {
+	for i, tt := range testsFail {
+		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
-		if !ok {
-			t.Errorf("Expect error. got=%T (%+v)", err, err)
-		}
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
-		}
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, 1)
 	}
 }
 
@@ -766,29 +729,26 @@ func TestStringReplaceMethod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
 func TestStringReplaceMethodFail(t *testing.T) {
-	vm := initTestVM()
 	testsFail := []struct {
-		input    string
-		expected *Error
+		input   string
+		errType string
+		errMsg  string
 	}{
-		{`"Taipei".replace`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", 0)},
-		{`"Taipei".replace(101)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", vm.initIntegerObject(101))},
-		{`"Taipei".replace(true)`, initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", TRUE)},
+		{`"Taipei".replace`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
+		{`"Taipei".replace(101)`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
+		{`"Taipei".replace(true)`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
 	}
 
-	for _, tt := range testsFail {
+	for i, tt := range testsFail {
+		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
-		if !ok {
-			t.Errorf("Expect error. got=%T (%+v)", err, err)
-		}
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
-		}
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, 1)
 	}
 }
 
@@ -887,24 +847,23 @@ func TestStringIncludeMethod(t *testing.T) {
 }
 
 func TestStringIncludeMethodFail(t *testing.T) {
-	vm := initTestVM()
 	testsFail := []struct {
-		input    string
-		expected *Error
+		input   string
+		errType string
+		errMsg  string
 	}{
-		{`"Goby".include`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", 0)},
-		{`"Goby".include("Ruby", "Lang")`, initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", 2)},
+		{`"Goby".include`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
+		{`"Goby".include("Ruby", "Lang")`, ArgumentError, "ArgumentError: Expect 1 argument. got=2"},
+		{`"Goby".include(2)`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
+		{`"Goby".include(true)`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
+		{`"Goby".include(nil)`, TypeError, "TypeError: Expect argument to be String. got=Null"},
 	}
 
-	for _, tt := range testsFail {
+	for i, tt := range testsFail {
+		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
-		if !ok {
-			t.Errorf("Expect error. got=%T (%+v)", err, err)
-		}
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
-		}
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, 1)
 	}
 }
 
@@ -922,30 +881,27 @@ func TestStringGlobalSubstituteMethod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
 func TestStringGlobalSubstituteMethodFail(t *testing.T) {
-	vm := initTestVM()
 	testsFail := []struct {
-		input    string
-		expected *Error
+		input   string
+		errType string
+		errMsg  string
 	}{
-		{`"Ruby".gsub()`, initErrorObject(ArgumentErrorClass, "Expect 2 arguments. got=%v", 0)},
-		{`"Ruby".gsub("Ru")`, initErrorObject(ArgumentErrorClass, "Expect 2 arguments. got=%v", 1)},
-		{`"Ruby".gsub(123, "Go")`, initErrorObject(TypeErrorClass, "Expect pattern to be String. got=%T", vm.initIntegerObject(123))},
-		{`"Ruby".gsub("Ru", 456)`, initErrorObject(TypeErrorClass, "Expect replacement to be String. got=%T", vm.initIntegerObject(456))},
+		{`"Ruby".gsub()`, ArgumentError, "ArgumentError: Expect 2 arguments. got=0"},
+		{`"Ruby".gsub("Ru")`, ArgumentError, "ArgumentError: Expect 2 arguments. got=1"},
+		{`"Ruby".gsub(123, "Go")`, TypeError, "TypeError: Expect pattern to be String. got=Integer"},
+		{`"Ruby".gsub("Ru", 456)`, TypeError, "TypeError: Expect replacement to be String. got=Integer"},
 	}
 
-	for _, tt := range testsFail {
+	for i, tt := range testsFail {
+		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
-		if !ok {
-			t.Errorf("Expect error. got=%T (%+v)", err, err)
-		}
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
-		}
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, 1)
 	}
 }
 
