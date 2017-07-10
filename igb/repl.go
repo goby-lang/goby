@@ -1,6 +1,7 @@
 package igb
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -11,15 +12,33 @@ import (
 	"github.com/goby-lang/goby/compiler/lexer"
 	"github.com/goby-lang/goby/compiler/parser"
 	"github.com/goby-lang/goby/vm"
+	"github.com/looplab/fsm"
 )
 
 const (
 	prompt    = "\033[31m»\033[0m "
+	prompt2   = "\033[44m*\033[0m "
 	echo      = "#=>"
 	interrupt = "^C"
 	exit      = "exit"
 	help      = "help"
+
+	readyToExec = "readyToExec"
+	Waiting     = "waiting"
+	waitEnded   = "waitEnded"
 )
+
+var sm = fsm.NewFSM(
+	readyToExec,
+	fsm.Events{
+		{Name: Waiting, Src: []string{waitEnded, readyToExec}, Dst: Waiting},
+		{Name: waitEnded, Src: []string{Waiting}, Dst: waitEnded},
+		{Name: readyToExec, Src: []string{waitEnded, readyToExec}, Dst: readyToExec},
+	},
+	fsm.Callbacks{},
+)
+
+var cmds []string
 
 var completer = readline.NewPrefixCompleter(
 	readline.PcItem(help),
@@ -47,7 +66,22 @@ func StartIgb(version string) {
 
 	println("Goby", version)
 
-	v, p, g := initREPLEnv()
+	// Initialize VM
+	v := vm.New(os.Getenv("GOBY_ROOT"), []string{})
+	v.SetClassISIndexTable("")
+	v.SetMethodISIndexTable("")
+	v.InitForREPL()
+
+	// Initialize parser, lexer is not important here
+	l := lexer.New("")
+	p := parser.New(l)
+
+	program, _ := p.ParseProgram()
+
+	// Initialize code generator, and it will behavior a little different in REPL mode.
+	g := bytecode.NewGenerator()
+	g.REPL = true
+	g.InitTopLevelScope(program)
 
 	for {
 		line, err := rl.Readline()
@@ -73,13 +107,76 @@ func StartIgb(version string) {
 		default:
 			l := lexer.New(line)
 			p.Lexer = l
-			program, _ := p.ParseProgram()
-			instructions := g.GenerateInstructions(program.Statements)
-			g.ResetInstructionSets()
-			v.REPLExec(instructions)
+			program, perr := p.ParseProgram()
 
-			r := v.GetREPLResult()
-			println(echo, r)
+			if perr != nil {
+				if perr.IsEOF() {
+					if !sm.Is(Waiting) {
+						rl.SetPrompt(prompt2)
+						sm.Event(Waiting)
+					}
+
+					rl.SetPrompt(prompt2)
+					cmds = append(cmds, line)
+					continue
+				}
+
+				if perr.IsUnexpectedEnd() {
+					rl.SetPrompt(prompt2)
+					sm.Event(waitEnded)
+					cmds = append(cmds, line)
+				} else {
+					rl.SetPrompt(prompt)
+					fmt.Println(perr.Message)
+					continue
+				}
+
+			}
+
+			if sm.Is(Waiting) {
+				rl.SetPrompt(prompt2)
+				cmds = append(cmds, line)
+				continue
+			}
+
+			if sm.Is(waitEnded) {
+				rl.SetPrompt(prompt)
+				l := lexer.New(string(strings.Join(cmds, "\n")))
+				p.Lexer = l
+
+				// Test if current input can be properly parsed.
+				program, perr = p.ParseProgram()
+
+				/*
+					   This could mean there still are statements not ended, for example:
+
+					   ```ruby
+					   class Foo
+						 def bar
+						 end # This make state changes to WaitEnded
+					   # But here still needs an "end"
+					   ```
+				*/
+
+				if perr != nil {
+					if !perr.IsEOF() {
+						fmt.Println(perr.Message)
+					}
+					continue
+				}
+
+				// If everything goes well, reset state and statements buffer
+				sm.Event(readyToExec)
+				cmds = []string{}
+			}
+			if sm.Is(readyToExec) {
+				instructions := g.GenerateInstructions(program.Statements)
+				g.ResetInstructionSets()
+				v.REPLExec(instructions)
+
+				r := v.GetREPLResult()
+				println(echo, r)
+			}
 		}
 	}
 }
@@ -96,26 +193,6 @@ func filterInput(r rune) (rune, bool) {
 }
 
 // Other helper functions --------------------------------------------------
-
-func initREPLEnv() (*vm.VM, *parser.Parser, *bytecode.Generator) {
-	// Initialize VM
-	v := vm.New(os.Getenv("GOBY_ROOT"), []string{})
-	v.SetClassISIndexTable("")
-	v.SetMethodISIndexTable("")
-	v.InitForREPL()
-
-	// Initialize parser, lexer is not important here
-	l := lexer.New("")
-	p := parser.New(l)
-	program, _ := p.ParseProgram()
-
-	// Initialize code generator, and it will behavior a little different in REPL mode.
-	g := bytecode.NewGenerator()
-	g.REPL = true
-	g.InitTopLevelScope(program)
-
-	return v, p, g
-}
 
 func usage(w io.Writer) {
 	io.WriteString(w, "commands:\n")
