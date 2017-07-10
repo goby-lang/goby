@@ -31,7 +31,7 @@ type StringObject struct {
 }
 
 func (vm *VM) initStringObject(value string) *StringObject {
-	replacer := strings.NewReplacer("\\n", "\n", "\\r", "\r", "\\t", "\t", "\\v", "\v", "\\\\", "\\")
+	replacer := strings.NewReplacer("\\n", "\n", "\\r", "\r", "\\t", "\t", "\\v", "\v", "\\f", "\f", "\\\\", "\\")
 	return &StringObject{
 		baseObj: &baseObj{class: vm.topLevelClass(stringClass)},
 		Value:   replacer.Replace(value),
@@ -598,9 +598,8 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 						if -indexValue > strLength {
 							return initErrorObject(ArgumentErrorClass, "Index value out of range. got=%v", strconv.Itoa(indexValue))
 						}
-
-						result := str[:strLength+indexValue] + replaceStrValue + str[strLength+indexValue+1:]
-						return t.vm.initStringObject(result)
+						// Change to positive index to replace the string
+						indexValue += strLength
 					}
 
 					if strLength == indexValue {
@@ -810,7 +809,8 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 						} else if -indexValue == strLength+1 {
 							return t.vm.initStringObject(insertStr.Value + str)
 						}
-						return t.vm.initStringObject(str[:strLength+indexValue] + insertStr.Value + str[strLength+indexValue:])
+						// Change it to positive index value to replace the string via index
+						indexValue += strLength
 					}
 
 					if strLength < indexValue {
@@ -1016,7 +1016,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 			// ```ruby
 			// "Hello World".split("o") # => ["Hell", " W", "rld"]
 			// "Goby".split("")         # => ["G", "o", "b", "y"]
-			// # TODO: Whitespace carriage return case
+			// "Hello\nWorld\nGoby".split("o") # => ["Hello", "World", "Goby"]
 			// ```
 			//
 			// @return [Array]
@@ -1130,7 +1130,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 						return t.vm.initStringObject(string([]rune(str)[intValue]))
 
 					default:
-						return initErrorObject(ArgumentErrorClass, "Expect slice range is Range or Integer type. got=%T", args[0])
+						return initErrorObject(ArgumentErrorClass, "Expect slice range to be Range or Integer. got=%T", args[0])
 					}
 				}
 			},

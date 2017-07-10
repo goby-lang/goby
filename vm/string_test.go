@@ -700,8 +700,8 @@ func TestStringSliceMethodFail(t *testing.T) {
 		input    string
 		expected *Error
 	}{
-		{`"Goby Lang".slice("Hello")`, initErrorObject(ArgumentErrorClass, "Expect slice range is Range or Integer type. got=%T", vm.initStringObject("Hello"))},
-		{`"Goby Lang".slice(true)`, initErrorObject(ArgumentErrorClass, "Expect slice range is Range or Integer type. got=%T", TRUE)},
+		{`"Goby Lang".slice("Hello")`, initErrorObject(ArgumentErrorClass, "Expect slice range to be Range or Integer. got=%T", vm.initStringObject("Hello"))},
+		{`"Goby Lang".slice(true)`, initErrorObject(ArgumentErrorClass, "Expect slice range to be Range or Integer. got=%T", TRUE)},
 	}
 
 	for _, tt := range testsFail {
