@@ -31,36 +31,21 @@ func TestStringConversion(t *testing.T) {
 		{`"string".to_i`, 0},
 		{`"123string123".to_i`, 123},
 		{`"string123".to_i`, 0},
-	}
-
-	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
-		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
-	}
-}
-
-func TestStringToArrayMethod(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
 		{`
-		arr = "Goby".to_a
-		arr[0]
+		  arr = "Goby".to_a
+		  arr[0]
 		`, "G"},
 		{`
-		arr = "Goby".to_a
-		arr[1]
+		  arr = "Goby".to_a
+		  arr[1]
 		`, "o"},
 		{`
-		arr = "Goby".to_a
-		arr[2]
+		  arr = "Goby".to_a
+		  arr[2]
 		`, "b"},
 		{`
-		arr = "Goby".to_a
-		arr[3]
+		  arr = "Goby".to_a
+		  arr[3]
 		`, "y"},
 	}
 
@@ -170,24 +155,6 @@ func TestStringOperationFail(t *testing.T) {
 	}
 }
 
-func TestStringCountMethod(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{`"abcde".count`, 5},
-		{`"哈囉！世界！".count`, 6},
-		{`"Hello\nWorld".count`, 11},
-	}
-
-	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
-		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
-	}
-}
-
 func TestStringCapitalizeMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -200,6 +167,23 @@ func TestStringCapitalizeMethod(t *testing.T) {
 		{`"first Lower".capitalize`, "First lower"},
 		{`"all lower".capitalize`, "All lower"},
 		{`"heLlo\nWoRLd".capitalize`, "Hello\nworld"},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
+func TestStringChopMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`"Hello".chop`, "Hell"},
+		{`"Hello\n".chop`, "Hello"},
 	}
 
 	for i, tt := range tests {
@@ -247,6 +231,24 @@ func TestStringConcatenateMethodFail(t *testing.T) {
 	}
 }
 
+func TestStringCountMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`"abcde".count`, 5},
+		{`"哈囉！世界！".count`, 6},
+		{`"Hello\nWorld".count`, 11},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
 func TestStringDeleteMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -273,6 +275,65 @@ func TestStringDeleteMethodFail(t *testing.T) {
 		{`"Hello hello HeLlo".delete(1)`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
 		{`"Hello hello HeLlo".delete(true)`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
 		{`"Hello hello HeLlo".delete(nil)`, TypeError, "TypeError: Expect argument to be String. got=Null"},
+	}
+
+	for i, tt := range testsFail {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, 1)
+	}
+}
+
+func TestStringDowncaseMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`"hEllO".downcase`, "hello"},
+		{`"MORE wOrds".downcase`, "more words"},
+		{`"HeLlO\tWorLD".downcase`, "hello\tworld"},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
+func TestStringEndWithMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`"Hello".end_with("llo")`, true},
+		{`"Hello".end_with("Hello")`, true},
+		{`"Hello".end_with("Hello ")`, false},
+		{`"哈囉！世界！".end_with("世界！")`, true},
+		{`"Hello".end_with("ell")`, false},
+		{`"哈囉！世界！".end_with("哈囉！")`, false},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
+func TestStringEndWithMethodFail(t *testing.T) {
+	testsFail := []struct {
+		input   string
+		errType string
+		errMsg  string
+	}{
+		{`"Taipei".end_with("1", "0", "1")`, ArgumentError, "ArgumentError: Expect 1 argument. got=3"},
+		{`"Taipei".end_with(101)`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
+		{`"Hello".end_with(true)`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
+		{`"Hello".end_with(1..5)`, TypeError, "TypeError: Expect argument to be String. got=Range"},
 	}
 
 	for i, tt := range testsFail {
@@ -338,17 +399,14 @@ func TestStringEqualMethodFail(t *testing.T) {
 	}
 }
 
-func TestStringStartWithMethod(t *testing.T) {
+func TestStringGlobalSubstituteMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
 	}{
-		{`"Hello".start_with("Hel")`, true},
-		{`"Hello".start_with("Hello")`, true},
-		{`"Hello".start_with("Hello ")`, false},
-		{`"哈囉！世界！".start_with("哈囉！")`, true},
-		{`"Hello".start_with("hel")`, false},
-		{`"哈囉！世界".start_with("世界！")`, false},
+		{`"Ruby".gsub("Ru", "Go")`, "Goby"},
+		{`"Hello World".gsub(" ", "\n")`, "Hello\nWorld"},
+		{`"Hello World".gsub("Hello", "Goby")`, "Goby World"},
 	}
 
 	for i, tt := range tests {
@@ -359,16 +417,16 @@ func TestStringStartWithMethod(t *testing.T) {
 	}
 }
 
-func TestStringStartWithMethodFail(t *testing.T) {
+func TestStringGlobalSubstituteMethodFail(t *testing.T) {
 	testsFail := []struct {
 		input   string
 		errType string
 		errMsg  string
 	}{
-		{`"Taipei".start_with("1", "0", "1")`, ArgumentError, "ArgumentError: Expect 1 argument. got=3"},
-		{`"Taipei".start_with(101)`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
-		{`"Hello".start_with(true)`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
-		{`"Hello".start_with(1..5)`, TypeError, "TypeError: Expect argument to be String. got=Range"},
+		{`"Ruby".gsub()`, ArgumentError, "ArgumentError: Expect 2 arguments. got=0"},
+		{`"Ruby".gsub("Ru")`, ArgumentError, "ArgumentError: Expect 2 arguments. got=1"},
+		{`"Ruby".gsub(123, "Go")`, TypeError, "TypeError: Expect pattern to be String. got=Integer"},
+		{`"Ruby".gsub("Ru", 456)`, TypeError, "TypeError: Expect replacement to be String. got=Integer"},
 	}
 
 	for i, tt := range testsFail {
@@ -379,17 +437,17 @@ func TestStringStartWithMethodFail(t *testing.T) {
 	}
 }
 
-func TestStringEndWithMethod(t *testing.T) {
+func TestStringIncludeMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
 	}{
-		{`"Hello".end_with("llo")`, true},
-		{`"Hello".end_with("Hello")`, true},
-		{`"Hello".end_with("Hello ")`, false},
-		{`"哈囉！世界！".end_with("世界！")`, true},
-		{`"Hello".end_with("ell")`, false},
-		{`"哈囉！世界！".end_with("哈囉！")`, false},
+		{`"Hello\nWorld".include("Hello")`, true},
+		{`"Hello\nWorld".include("Hello\nWorld")`, true},
+		{`"Hello\nWorld".include("Hello World")`, false},
+		{`"Hello\nWorld".include("Hello\nWorld!")`, false},
+		{`"Hello\nWorld".include("\n")`, true},
+		{`"Hello\nWorld".include("\r")`, false},
 	}
 
 	for i, tt := range tests {
@@ -400,16 +458,17 @@ func TestStringEndWithMethod(t *testing.T) {
 	}
 }
 
-func TestStringEndWithMethodFail(t *testing.T) {
+func TestStringIncludeMethodFail(t *testing.T) {
 	testsFail := []struct {
 		input   string
 		errType string
 		errMsg  string
 	}{
-		{`"Taipei".end_with("1", "0", "1")`, ArgumentError, "ArgumentError: Expect 1 argument. got=3"},
-		{`"Taipei".end_with(101)`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
-		{`"Hello".end_with(true)`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
-		{`"Hello".end_with(1..5)`, TypeError, "TypeError: Expect argument to be String. got=Range"},
+		{`"Goby".include`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
+		{`"Goby".include("Ruby", "Lang")`, ArgumentError, "ArgumentError: Expect 1 argument. got=2"},
+		{`"Goby".include(2)`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
+		{`"Goby".include(true)`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
+		{`"Goby".include(nil)`, TypeError, "TypeError: Expect argument to be String. got=Null"},
 	}
 
 	for i, tt := range testsFail {
@@ -462,23 +521,6 @@ func TestStringInsertMethodFail(t *testing.T) {
 	}
 }
 
-func TestStringChopMethod(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{`"Hello".chop`, "Hell"},
-		{`"Hello\n".chop`, "Hello"},
-	}
-
-	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
-		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
-	}
-}
-
 func TestStringLeftJustifyMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -518,6 +560,79 @@ func TestStringLeftJustifyMethodFail(t *testing.T) {
 		evaluated := vm.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
 		vm.checkCFP(t, i, 1)
+	}
+}
+
+func TestStringLengthMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`"New method".length`, 10},
+		{`" ".length`, 1},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
+func TestStringReplaceMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`"Hello".replace("World")`, "World"},
+		{`"您好".replace("再見")`, "再見"},
+		{`"Ruby\nLang".replace("Goby\nLang")`, "Goby\nLang"},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
+func TestStringReplaceMethodFail(t *testing.T) {
+	testsFail := []struct {
+		input   string
+		errType string
+		errMsg  string
+	}{
+		{`"Taipei".replace`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
+		{`"Taipei".replace(101)`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
+		{`"Taipei".replace(true)`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
+	}
+
+	for i, tt := range testsFail {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, 1)
+	}
+}
+
+func TestStringReverseMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`"Reverse Rooby-lang".reverse`, "gnal-ybooR esreveR"},
+		{`" ".reverse`, " "},
+		{`"-123".reverse`, "321-"},
+		{`"Hello\nWorld".reverse`, "dlroW\nolleH"},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -563,13 +678,13 @@ func TestStringRightJustifyFail(t *testing.T) {
 	}
 }
 
-func TestStringStripMethod(t *testing.T) {
+func TestStringSizeMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
 	}{
-		{`"  Goby Lang   ".strip`, "Goby Lang"},
-		{`"\nGoby Lang\r\t".strip`, "Goby Lang"},
+		{`"Rooby".size`, 5},
+		{`" ".size`, 1},
 	}
 
 	for i, tt := range tests {
@@ -577,6 +692,62 @@ func TestStringStripMethod(t *testing.T) {
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
+	}
+}
+
+func TestStringSliceMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`"Hello World".slice(1..6)`, "ello W"},
+		{`"1234567890".slice(6..1)`, ""},
+		{`"1234567890".slice(11..1)`, nil},
+		{`"1234567890".slice(11..-1)`, nil},
+		{`"1234567890".slice(-10..1)`, "12"},
+		{`"1234567890".slice(-5..1)`, ""},
+		{`"1234567890".slice(-10..-1)`, "1234567890"},
+		{`"1234567890".slice(-10..-11)`, ""},
+		{`"1234567890".slice(1..-1)`, "234567890"},
+		{`"1234567890".slice(1..-1234)`, ""},
+		{`"1234567890".slice(-10..-5)`, "123456"},
+		{`"1234567890".slice(-5..-10)`, ""},
+		{`"1234567890".slice(-11..5)`, nil},
+		{`"1234567890".slice(-10..-12)`, ""},
+		{`"1234567890".slice(-11..-12)`, nil},
+		{`"1234567890".slice(-11..-5)`, nil},
+		{`"Hello World".slice(4)`, "o"},
+		{`"Hello\nWorld".slice(5)`, "\n"},
+		{`"Hello World".slice(-3)`, "r"},
+		{`"Hello World".slice(-11)`, "H"},
+		{`"Hello World".slice(-12)`, nil},
+		{`"Hello World".slice(11)`, nil},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
+func TestStringSliceMethodFail(t *testing.T) {
+	testsFail := []struct {
+		input   string
+		errType string
+		errMsg  string
+	}{
+		{`"Goby Lang".slice`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
+		{`"Goby Lang".slice("Hello")`, TypeError, "TypeError: Expect slice range to be Range or Integer. got=String"},
+		{`"Goby Lang".slice(true)`, TypeError, "TypeError: Expect slice range to be Range or Integer. got=Boolean"},
+	}
+
+	for i, tt := range testsFail {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, 1)
 	}
 }
 
@@ -659,33 +830,17 @@ func TestStringSplitMethodFail(t *testing.T) {
 	}
 }
 
-func TestStringSliceMethod(t *testing.T) {
+func TestStringStartWithMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
 	}{
-		{`"Hello World".slice(1..6)`, "ello W"},
-		{`"1234567890".slice(6..1)`, ""},
-		{`"1234567890".slice(11..1)`, nil},
-		{`"1234567890".slice(11..-1)`, nil},
-		{`"1234567890".slice(-10..1)`, "12"},
-		{`"1234567890".slice(-5..1)`, ""},
-		{`"1234567890".slice(-10..-1)`, "1234567890"},
-		{`"1234567890".slice(-10..-11)`, ""},
-		{`"1234567890".slice(1..-1)`, "234567890"},
-		{`"1234567890".slice(1..-1234)`, ""},
-		{`"1234567890".slice(-10..-5)`, "123456"},
-		{`"1234567890".slice(-5..-10)`, ""},
-		{`"1234567890".slice(-11..5)`, nil},
-		{`"1234567890".slice(-10..-12)`, ""},
-		{`"1234567890".slice(-11..-12)`, nil},
-		{`"1234567890".slice(-11..-5)`, nil},
-		{`"Hello World".slice(4)`, "o"},
-		{`"Hello\nWorld".slice(5)`, "\n"},
-		{`"Hello World".slice(-3)`, "r"},
-		{`"Hello World".slice(-11)`, "H"},
-		{`"Hello World".slice(-12)`, nil},
-		{`"Hello World".slice(11)`, nil},
+		{`"Hello".start_with("Hel")`, true},
+		{`"Hello".start_with("Hello")`, true},
+		{`"Hello".start_with("Hello ")`, false},
+		{`"哈囉！世界！".start_with("哈囉！")`, true},
+		{`"Hello".start_with("hel")`, false},
+		{`"哈囉！世界".start_with("世界！")`, false},
 	}
 
 	for i, tt := range tests {
@@ -696,15 +851,16 @@ func TestStringSliceMethod(t *testing.T) {
 	}
 }
 
-func TestStringSliceMethodFail(t *testing.T) {
+func TestStringStartWithMethodFail(t *testing.T) {
 	testsFail := []struct {
 		input   string
 		errType string
 		errMsg  string
 	}{
-		{`"Goby Lang".slice`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
-		{`"Goby Lang".slice("Hello")`, TypeError, "TypeError: Expect slice range to be Range or Integer. got=String"},
-		{`"Goby Lang".slice(true)`, TypeError, "TypeError: Expect slice range to be Range or Integer. got=Boolean"},
+		{`"Taipei".start_with("1", "0", "1")`, ArgumentError, "ArgumentError: Expect 1 argument. got=3"},
+		{`"Taipei".start_with(101)`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
+		{`"Hello".start_with(true)`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
+		{`"Hello".start_with(1..5)`, TypeError, "TypeError: Expect argument to be String. got=Range"},
 	}
 
 	for i, tt := range testsFail {
@@ -715,14 +871,13 @@ func TestStringSliceMethodFail(t *testing.T) {
 	}
 }
 
-func TestStringReplaceMethod(t *testing.T) {
+func TestStringStripMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
 	}{
-		{`"Hello".replace("World")`, "World"},
-		{`"您好".replace("再見")`, "再見"},
-		{`"Ruby\nLang".replace("Goby\nLang")`, "Goby\nLang"},
+		{`"  Goby Lang   ".strip`, "Goby Lang"},
+		{`"\nGoby Lang\r\t".strip`, "Goby Lang"},
 	}
 
 	for i, tt := range tests {
@@ -730,25 +885,6 @@ func TestStringReplaceMethod(t *testing.T) {
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
-	}
-}
-
-func TestStringReplaceMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
-	}{
-		{`"Taipei".replace`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
-		{`"Taipei".replace(101)`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
-		{`"Taipei".replace(true)`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
-	}
-
-	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
 	}
 }
 
@@ -767,141 +903,6 @@ func TestStringUpcaseMethod(t *testing.T) {
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
-	}
-}
-
-func TestStringDowncaseMethod(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{`"hEllO".downcase`, "hello"},
-		{`"MORE wOrds".downcase`, "more words"},
-		{`"HeLlO\tWorLD".downcase`, "hello\tworld"},
-	}
-
-	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
-		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
-	}
-}
-
-func TestStringSizeAndLengthMethod(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{`"Rooby".size`, 5},
-		{`"New method".length`, 10},
-		{`" ".length`, 1},
-	}
-
-	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
-		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
-	}
-}
-
-func TestStringReverseMethod(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{`"Reverse Rooby-lang".reverse`, "gnal-ybooR esreveR"},
-		{`" ".reverse`, " "},
-		{`"-123".reverse`, "321-"},
-		{`"Hello\nWorld".reverse`, "dlroW\nolleH"},
-	}
-
-	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
-		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
-	}
-}
-
-func TestStringIncludeMethod(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{`"Hello\nWorld".include("Hello")`, true},
-		{`"Hello\nWorld".include("Hello\nWorld")`, true},
-		{`"Hello\nWorld".include("Hello World")`, false},
-		{`"Hello\nWorld".include("Hello\nWorld!")`, false},
-		{`"Hello\nWorld".include("\n")`, true},
-		{`"Hello\nWorld".include("\r")`, false},
-	}
-
-	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
-		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
-	}
-}
-
-func TestStringIncludeMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
-	}{
-		{`"Goby".include`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
-		{`"Goby".include("Ruby", "Lang")`, ArgumentError, "ArgumentError: Expect 1 argument. got=2"},
-		{`"Goby".include(2)`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
-		{`"Goby".include(true)`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
-		{`"Goby".include(nil)`, TypeError, "TypeError: Expect argument to be String. got=Null"},
-	}
-
-	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
-	}
-}
-
-func TestStringGlobalSubstituteMethod(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{`"Ruby".gsub("Ru", "Go")`, "Goby"},
-		{`"Hello World".gsub(" ", "\n")`, "Hello\nWorld"},
-		{`"Hello World".gsub("Hello", "Goby")`, "Goby World"},
-	}
-
-	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
-		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
-	}
-}
-
-func TestStringGlobalSubstituteMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
-	}{
-		{`"Ruby".gsub()`, ArgumentError, "ArgumentError: Expect 2 arguments. got=0"},
-		{`"Ruby".gsub("Ru")`, ArgumentError, "ArgumentError: Expect 2 arguments. got=1"},
-		{`"Ruby".gsub(123, "Go")`, TypeError, "TypeError: Expect pattern to be String. got=Integer"},
-		{`"Ruby".gsub("Ru", 456)`, TypeError, "TypeError: Expect replacement to be String. got=Integer"},
-	}
-
-	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
 	}
 }
 
