@@ -6,51 +6,78 @@ import (
 )
 
 func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, scope *scope, table *localTable) {
+	/*
+		These expression should be ignored when show up alone like:
+
+		```
+		a
+		```
+
+		```
+		1 + a
+		```
+
+		```
+		Foo
+		```
+
+		Because in these cases they are useless and will keep stack growing unnecessarily.
+	*/
+
+	if g.fsm.Is(keepExp) {
+		switch exp := exp.(type) {
+		case *ast.Identifier:
+			g.compileIdentifier(is, exp, scope, table)
+		case *ast.Constant:
+			is.define(GetConstant, exp.Value)
+		case *ast.InstanceVariable:
+			is.define(GetInstanceVariable, exp.Value)
+		case *ast.IntegerLiteral:
+			is.define(PutObject, fmt.Sprint(exp.Value))
+		case *ast.StringLiteral:
+			is.define(PutString, fmt.Sprintf("\"%s\"", exp.Value))
+		case *ast.BooleanExpression:
+			is.define(PutObject, fmt.Sprint(exp.Value))
+		case *ast.NilExpression:
+			is.define(PutNull)
+		case *ast.RangeExpression:
+			g.compileExpression(is, exp.Start, scope, table)
+			g.compileExpression(is, exp.End, scope, table)
+			is.define(NewRange, 0)
+		case *ast.ArrayExpression:
+			for _, elem := range exp.Elements {
+				g.compileExpression(is, elem, scope, table)
+			}
+			is.define(NewArray, len(exp.Elements))
+		case *ast.HashExpression:
+			for key, value := range exp.Data {
+				is.define(PutString, fmt.Sprintf("\"%s\"", key))
+				g.compileExpression(is, value, scope, table)
+			}
+			is.define(NewHash, len(exp.Data)*2)
+		case *ast.SelfExpression:
+			is.define(PutSelf)
+		case *ast.PrefixExpression:
+			g.compilePrefixExpression(is, exp, scope, table)
+		case *ast.InfixExpression:
+			if exp.Operator != "=" {
+				g.compileInfixExpression(is, exp, scope, table)
+			}
+		}
+	}
+
 	switch exp := exp.(type) {
-	case *ast.Identifier:
-		g.compileIdentifier(is, exp, scope, table)
-	case *ast.Constant:
-		is.define(GetConstant, exp.Value)
-	case *ast.InstanceVariable:
-		is.define(GetInstanceVariable, exp.Value)
-	case *ast.IntegerLiteral:
-		is.define(PutObject, fmt.Sprint(exp.Value))
-	case *ast.StringLiteral:
-		is.define(PutString, fmt.Sprintf("\"%s\"", exp.Value))
-	case *ast.BooleanExpression:
-		is.define(PutObject, fmt.Sprint(exp.Value))
-	case *ast.NilExpression:
-		is.define(PutNull)
-	case *ast.RangeExpression:
-		g.compileExpression(is, exp.Start, scope, table)
-		g.compileExpression(is, exp.End, scope, table)
-		is.define(NewRange, 0)
-	case *ast.ArrayExpression:
-		for _, elem := range exp.Elements {
-			g.compileExpression(is, elem, scope, table)
-		}
-		is.define(NewArray, len(exp.Elements))
-	case *ast.HashExpression:
-		for key, value := range exp.Data {
-			is.define(PutString, fmt.Sprintf("\"%s\"", key))
-			g.compileExpression(is, value, scope, table)
-		}
-		is.define(NewHash, len(exp.Data)*2)
 	case *ast.InfixExpression:
 		if exp.Operator == "=" {
+			g.fsm.Event(keepExp)
 			g.compileAssignExpression(is, exp, scope, table)
-			return
 		}
-		g.compileInfixExpression(is, exp, scope, table)
-	case *ast.PrefixExpression:
-		g.compilePrefixExpression(is, exp, scope, table)
 	case *ast.IfExpression:
 		g.compileIfExpression(is, exp, scope, table)
-	case *ast.SelfExpression:
-		is.define(PutSelf)
 	case *ast.YieldExpression:
 		g.compileYieldExpression(is, exp, scope, table)
 	case *ast.CallExpression:
+		g.fsm.Event(keepExp)
 		g.compileCallExpression(is, exp, scope, table)
 	}
 }
@@ -139,7 +166,9 @@ func (g *Generator) compileIfExpression(is *InstructionSet, exp *ast.IfExpressio
 
 	is.define(BranchUnless, anchor1)
 
+	g.fsm.Event(removeExp)
 	g.compileCodeBlock(is, exp.Consequence, scope, table)
+	g.fsm.Event(keepExp)
 
 	anchor1.line = is.count + 1
 
@@ -152,7 +181,9 @@ func (g *Generator) compileIfExpression(is *InstructionSet, exp *ast.IfExpressio
 		return
 	}
 
+	g.fsm.Event(removeExp)
 	g.compileCodeBlock(is, exp.Alternative, scope, table)
+	g.fsm.Event(keepExp)
 
 	anchor2.line = is.count
 }

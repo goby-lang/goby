@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"strings"
 
+	"github.com/goby-lang/goby/Godeps/_workspace/src/github.com/looplab/fsm"
 	"github.com/goby-lang/goby/compiler/ast"
 )
 
@@ -25,11 +26,32 @@ type Generator struct {
 	instructionSets []*InstructionSet
 	blockCounter    int
 	scope           *scope
+	fsm             *fsm.FSM
 }
+
+const (
+	removeExp = "removeExp"
+	keepExp   = "keepExp"
+)
 
 // NewGenerator initializes new Generator with complete AST tree.
 func NewGenerator() *Generator {
-	return &Generator{}
+	return &Generator{
+		fsm: fsm.NewFSM(
+			keepExp,
+			/*
+				Initial state is default state
+				Nosymbol state helps us identify tok ':' is for symbol or hash value
+				Method state helps us identify 'class' literal is a keyword or an identifier
+				Reference: https://github.com/looplab/fsm
+			*/
+			fsm.Events{
+				{Name: removeExp, Src: []string{keepExp}, Dst: removeExp},
+				{Name: keepExp, Src: []string{removeExp, keepExp}, Dst: keepExp},
+			},
+			fsm.Callbacks{},
+		),
+	}
 }
 
 // ResetInstructionSets clears generator's instruction sets
@@ -61,7 +83,13 @@ func (g *Generator) GenerateInstructions(stmts []ast.Statement) []*InstructionSe
 }
 
 func (g *Generator) compileCodeBlock(is *InstructionSet, stmt *ast.BlockStatement, scope *scope, table *localTable) {
-	for _, s := range stmt.Statements {
+	for i, s := range stmt.Statements {
+		if i == len(stmt.Statements)-1 && g.fsm.Is(removeExp) {
+			g.fsm.Event(keepExp)
+			g.compileStatement(is, s, scope, table)
+			g.fsm.Event(removeExp)
+			continue
+		}
 		g.compileStatement(is, s, scope, table)
 	}
 }

@@ -347,3 +347,39 @@ func TestWhileStatementWithMethodCallInCondition(t *testing.T) {
 	bytecode := compileToBytecode(input)
 	compareBytecode(t, bytecode, expected)
 }
+
+func TestRemoveUnusedExpression(t *testing.T) {
+	input := `
+	i = 0
+
+	while i < 100 do
+	  10
+	  i++
+	end
+
+	i
+	`
+
+	expected := `
+<ProgramStart>
+0 putobject 0
+1 setlocal 0 0
+2 jump 8
+3 putnil
+4 pop
+5 jump 8
+6 getlocal 0 0
+7 send ++ 0
+8 getlocal 0 0
+9 putobject 100
+10 send < 1
+11 branchif 6
+12 putnil
+13 pop
+14 getlocal 0 0
+15 leave
+`
+
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
