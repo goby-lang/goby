@@ -85,14 +85,15 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					leftValue := receiver.(*StringObject).Value
-					right, ok := args[0].(*IntegerObject)
+					r := args[0]
+					right, ok := r.(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						return initErrorObject(TypeErrorClass, "Expect argument to be Integer type. got=%T", r)
 					}
 
 					if right.Value < 0 {
-						return newError("Second argument must be greater than or equal to 0 String#*")
+						return initErrorObject(ArgumentErrorClass, "Second argument must be greater than or equal to 0. got=%v", right.Value)
 					}
 
 					var result string
@@ -491,7 +492,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 					concatStr, ok := args[0].(*StringObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					return t.vm.initStringObject(str + concatStr.Value)
@@ -637,7 +638,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 					elems := []Object{}
 
 					for i := 0; i < len(str.Value); i++ {
-						elems = append(elems, t.vm.initIntegerObject(i))
+						elems = append(elems, t.vm.initStringObject(string([]rune(str.Value)[i])))
 					}
 
 					return t.vm.initArrayObject(elems)
@@ -707,7 +708,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 					compareStr, ok := args[0].(*StringObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					compareStrValue := compareStr.Value
@@ -740,7 +741,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 					compareStr, ok := args[0].(*StringObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					compareStrValue := compareStr.Value
@@ -780,22 +781,22 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 					str := receiver.(*StringObject).Value
 					i := args[0]
 					index, ok := i.(*IntegerObject)
-					indexValue := index.Value
 
 					if !ok {
-						return newError("Expect index argument to be Integer. got=%T", i)
+						return initErrorObject(TypeErrorClass, "Expect index to be Integer type. got=%T", i)
 					}
 
+					indexValue := index.Value
 					insertStr, ok := args[1].(*StringObject)
 
 					if !ok {
-						return newError("Expect insert string to be String type, got=%T", insertStr)
+						return initErrorObject(TypeErrorClass, "Expect insert string to be String type. got=%T", insertStr)
 					}
 					strLength := len(str)
 
 					if indexValue < 0 {
 						if -indexValue > strLength+1 {
-							return newError("Index value out of range. got=" + string(indexValue))
+							return initErrorObject(ArgumentErrorClass, "Index value out of range. got="+string(indexValue))
 						} else if -indexValue == strLength+1 {
 							return t.vm.initStringObject(insertStr.Value + str)
 						}
@@ -803,7 +804,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 					}
 
 					if strLength < indexValue {
-						return newError("Index value out of range. got=" + string(indexValue))
+						return initErrorObject(ArgumentErrorClass, "Index value out of range. got="+string(indexValue))
 					}
 
 					return t.vm.initStringObject(str[:indexValue] + insertStr.Value + str[indexValue:])
@@ -828,7 +829,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 					deleteStr, ok := args[0].(*StringObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					return t.vm.initStringObject(strings.Replace(str, deleteStr.Value, "", -1))
@@ -1016,7 +1017,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 					seperator, ok := s.(*StringObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					str := receiver.(*StringObject).Value
@@ -1141,7 +1142,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 					replaceStr, ok := s.(*StringObject)
 
 					if !ok {
-						return wrongTypeError(receiver.returnClass())
+						return wrongTypeError(receiver.Class())
 					}
 
 					return t.vm.initStringObject(replaceStr.Value)
