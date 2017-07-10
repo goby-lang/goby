@@ -164,12 +164,17 @@ func (g *Generator) compileIfExpression(is *InstructionSet, exp *ast.IfExpressio
 
 	anchor1.line = is.count + 1
 
-	is.define(Jump, anchor2)
+	if g.fsm.Is(keepExp) {
+		is.define(Jump, anchor2)
+	}
 
 	if exp.Alternative == nil {
-		// jump over the `putnil` in false case
-		anchor2.line = anchor1.line + 1
-		is.define(PutNull)
+		if g.fsm.Is(keepExp) {
+			// jump over the `putnil` in false case
+			anchor2.line = anchor1.line + 1
+			is.define(PutNull)
+		}
+
 		return
 	}
 
