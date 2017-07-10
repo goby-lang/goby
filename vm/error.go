@@ -4,12 +4,11 @@ import (
 	"fmt"
 )
 
-// Nothing to describe here, just error classes
 var (
-	// ArgumentErrorClass ...
-	ArgumentErrorClass *RClass
 	// InternalErrorClass ...
 	InternalErrorClass *RClass
+	// ArgumentErrorClass ...
+	ArgumentErrorClass *RClass
 	// NameErrorClass ...
 	NameErrorClass *RClass
 	// TypeErrorClass ...
@@ -21,32 +20,33 @@ var (
 )
 
 const (
-	// ArgumentError describes the error type in string
-	ArgumentError = "ArgumentError"
 	// InternalError is the default error type
 	InternalError = "InternalError"
-	// NameError describes constant related errors
+	// ArgumentError: an argument-related error
+	ArgumentError = "ArgumentError"
+	// NameError: a constant-related error
 	NameError = "NameError"
-	// TypeError describes the error type in string
+	// TypeError: a type-related error
 	TypeError = "TypeError"
-	// UndefinedMethodError describes the error type in string
+	// UndefinedMethodError: undefined-method error
 	UndefinedMethodError = "UndefinedMethodError"
-	// UnsupportedMethodError describes the error type in string
+	// UnsupportedMethodError: intentionally unsupported-error
 	UnsupportedMethodError = "UnsupportedMethodError"
 )
 
-// Error class is just for special usages that holds internal error types.
+// Error class is actually a special struct to hold internal error types with messages.
+// Goby developers need not to take care of the struct.
 // Goby maintainers should consider using the appropriate error type.
 // Cannot create instances of Error class, or inherit Error class.
 //
 // The type of internal errors:
 //
 // * `InternalError`: default error type
-// * `ArgumentError`: indicates an argument-related error
-// * `NameError: indicates a constant-related error
-// * `TypeError`: indicates a type-related error
-// * `UndefinedMethodError`: indicates "undefined-method error"
-// * `UnsupportedMethodError`: indicates "unsupported method error"
+// * `ArgumentError`: an argument-related error
+// * `NameError`: a constant-related error
+// * `TypeError`: a type-related error
+// * `UndefinedMethodError`: undefined-method error
+// * `UnsupportedMethodError`: intentionally unsupported-method error
 //
 type Error struct {
 	*baseObj
@@ -61,8 +61,8 @@ func initErrorObject(errorType *RClass, format string, args ...interface{}) *Err
 }
 
 func (vm *VM) initErrorClasses() {
-	ArgumentErrorClass = vm.initializeClass(ArgumentError, false)
 	InternalErrorClass = vm.initializeClass(InternalError, false)
+	ArgumentErrorClass = vm.initializeClass(ArgumentError, false)
 	NameErrorClass = vm.initializeClass(NameError, false)
 	TypeErrorClass = vm.initializeClass(TypeError, false)
 	UndefinedMethodErrorClass = vm.initializeClass(UndefinedMethodError, false)
