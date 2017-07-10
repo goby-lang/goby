@@ -26,9 +26,9 @@ type errorMessage string
 
 var standardLibraries = map[string]func(*VM){
 	"file":              initFileClass,
-	"net/http":          initializeHTTPClass,
-	"net/simple_server": initializeSimpleServerClass,
-	"uri":               initializeURIClass,
+	"net/http":          initHTTPClass,
+	"net/simple_server": initSimpleServerClass,
+	"uri":               initURIClass,
 }
 
 // VM represents a stack based virtual machine.
