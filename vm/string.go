@@ -78,7 +78,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := r.(*StringObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", r)
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", r.Class().Name)
 					}
 
 					rightValue := right.Value
@@ -103,7 +103,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := r.(*IntegerObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect argument to be Integer. got=%T", r)
+						return initErrorObject(TypeErrorClass, "Expect argument to be Integer. got=%v", r.Class().Name)
 					}
 
 					if right.Value < 0 {
@@ -137,7 +137,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := r.(*StringObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", r)
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", r.Class().Name)
 					}
 
 					rightValue := right.Value
@@ -167,7 +167,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := r.(*StringObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", r)
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", r.Class().Name)
 					}
 
 					rightValue := right.Value
@@ -198,7 +198,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := r.(*StringObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", r)
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", r.Class().Name)
 					}
 
 					rightValue := right.Value
@@ -231,7 +231,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := r.(*StringObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", r)
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", r.Class().Name)
 					}
 
 					rightValue := right.Value
@@ -265,7 +265,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*StringObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", r)
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", r.Class().Name)
 					}
 
 					rightValue := right.Value
@@ -475,10 +475,15 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 						return initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
-					rcv := receiver.(*StringObject).Value
-					arg := args[0].(*StringObject).Value
+					str := receiver.(*StringObject).Value
+					i := args[0]
+					includeStr, ok := i.(*StringObject)
 
-					if strings.Contains(rcv, arg) {
+					if !ok {
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", i.Class().Name)
+					}
+
+					if strings.Contains(str, includeStr.Value) {
 						return TRUE
 					}
 
@@ -505,7 +510,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					concatStr, ok := c.(*StringObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", c)
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", c.Class().Name)
 					}
 
 					return t.vm.initStringObject(str + concatStr.Value)
@@ -537,7 +542,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					index, ok := i.(*IntegerObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect Integer. got=%T (%+v)", i, i)
+						return initErrorObject(TypeErrorClass, "Expect index to be Integer. got=%v", i.Class().Name)
 					}
 
 					indexValue := index.Value
@@ -576,7 +581,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 2 {
-						return initErrorObject(ArgumentErrorClass, "Expect 2 argument. got=%v", strconv.Itoa(len(args)))
+						return initErrorObject(ArgumentErrorClass, "Expect 2 arguments. got=%v", strconv.Itoa(len(args)))
 					}
 
 					str := receiver.(*StringObject).Value
@@ -584,7 +589,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					index, ok := i.(*IntegerObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect index to be Integer. got=%T", i)
+						return initErrorObject(TypeErrorClass, "Expect index to be Integer. got=%v", i.Class().Name)
 					}
 
 					indexValue := index.Value
@@ -598,7 +603,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					replaceStr, ok := r.(*StringObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", r)
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", r.Class().Name)
 					}
 					replaceStrValue := replaceStr.Value
 
@@ -730,7 +735,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					compareStr, ok := c.(*StringObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", c)
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", c.Class().Name)
 					}
 
 					compareStrValue := compareStr.Value
@@ -767,7 +772,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					compareStr, ok := c.(*StringObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", c)
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", c.Class().Name)
 					}
 
 					compareStrValue := compareStr.Value
@@ -812,7 +817,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					index, ok := i.(*IntegerObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect index to be Integer. got=%T", i)
+						return initErrorObject(TypeErrorClass, "Expect index to be Integer. got=%v", i.Class().Name)
 					}
 
 					indexValue := index.Value
@@ -820,7 +825,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					insertStr, ok := ins.(*StringObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect insert string to be String. got=%T", ins)
+						return initErrorObject(TypeErrorClass, "Expect insert string to be String. got=%v", ins.Class().Name)
 					}
 					strLength := len(str)
 
@@ -864,7 +869,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					deleteStr, ok := d.(*StringObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", d)
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", d.Class().Name)
 					}
 
 					return t.vm.initStringObject(strings.Replace(str, deleteStr.Value, "", -1))
@@ -917,7 +922,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					strLength, ok := l.(*IntegerObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%T", l)
+						return initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%v", l.Class().Name)
 					}
 
 					strLengthValue := strLength.Value
@@ -930,7 +935,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 						padString, ok := p.(*StringObject)
 
 						if !ok {
-							return initErrorObject(TypeErrorClass, "Expect padding string to be String. got=%T", p)
+							return initErrorObject(TypeErrorClass, "Expect padding string to be String. got=%v", p.Class().Name)
 						}
 
 						padStringValue = padString.Value
@@ -972,7 +977,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					strLength, ok := l.(*IntegerObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%T", l)
+						return initErrorObject(TypeErrorClass, "Expect justify width to be Integer. got=%v", l.Class().Name)
 					}
 
 					strLengthValue := strLength.Value
@@ -985,7 +990,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 						padString, ok := p.(*StringObject)
 
 						if !ok {
-							return initErrorObject(TypeErrorClass, "Expect padding string to be String. got=%T", p)
+							return initErrorObject(TypeErrorClass, "Expect padding string to be String. got=%v", p.Class().Name)
 						}
 
 						padStringValue = padString.Value
@@ -1061,7 +1066,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					seperator, ok := s.(*StringObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", s)
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", s.Class().Name)
 					}
 
 					str := receiver.(*StringObject).Value
@@ -1166,7 +1171,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 						return t.vm.initStringObject(string([]rune(str)[intValue]))
 
 					default:
-						return initErrorObject(ArgumentErrorClass, "Expect slice range to be Range or Integer. got=%T", args[0])
+						return initErrorObject(TypeErrorClass, "Expect slice range to be Range or Integer. got=%v", args[0].Class().Name)
 					}
 				}
 			},
@@ -1192,7 +1197,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					replaceStr, ok := r.(*StringObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%T", r)
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", r.Class().Name)
 					}
 
 					return t.vm.initStringObject(replaceStr.Value)
@@ -1226,14 +1231,14 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					pattern, ok := p.(*StringObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect pattern to be String. got=%T", p)
+						return initErrorObject(TypeErrorClass, "Expect pattern to be String. got=%v", p.Class().Name)
 					}
 
 					r := args[1]
 					replacement, ok := r.(*StringObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect replacement to be String. got=%T", r)
+						return initErrorObject(TypeErrorClass, "Expect replacement to be String. got=%v", r.Class().Name)
 					}
 
 					return t.vm.initStringObject(strings.Replace(str, pattern.Value, replacement.Value, -1))
