@@ -25,7 +25,7 @@ func main() {
 	flag.Parse()
 
 	if *interactiveOptionPtr {
-		igb.Start(Version)
+		igb.StartIgb(Version)
 		os.Exit(0)
 	}
 

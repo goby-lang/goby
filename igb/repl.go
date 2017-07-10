@@ -27,7 +27,7 @@ var completer = readline.NewPrefixCompleter(
 )
 
 // Start starts goby's REPL.
-func Start(version string) {
+func StartIgb(version string) {
 	var err error
 	rl, err := readline.NewEx(&readline.Config{
 		Prompt:              prompt,
@@ -47,21 +47,7 @@ func Start(version string) {
 
 	println("Goby", version)
 
-	// Initialize VM
-	v := vm.New(os.Getenv("GOBY_ROOT"), []string{})
-	v.SetClassISIndexTable("")
-	v.SetMethodISIndexTable("")
-	v.InitForREPL()
-
-	// Initialize parser, lexer is not important here
-	l := lexer.New("")
-	p := parser.New(l)
-	program, _ := p.ParseProgram()
-
-	// Initialize code generator, and it will behavior a little different in REPL mode.
-	g := bytecode.NewGenerator()
-	g.REPL = true
-	g.InitTopLevelScope(program)
+	v, p, g := initREPLEnv()
 
 	for {
 		line, err := rl.Readline()
@@ -99,10 +85,7 @@ func Start(version string) {
 	}
 }
 
-func usage(w io.Writer) {
-	io.WriteString(w, "commands:\n")
-	io.WriteString(w, completer.Tree("    "))
-}
+// Polymorphic helper functions --------------------------------------------
 
 func filterInput(r rune) (rune, bool) {
 	switch r {
@@ -111,4 +94,31 @@ func filterInput(r rune) (rune, bool) {
 		return r, false
 	}
 	return r, true
+}
+
+// Other helper functions --------------------------------------------------
+
+func initREPLEnv() (*vm.VM, *parser.Parser, *bytecode.Generator) {
+	// Initialize VM
+	v := vm.New(os.Getenv("GOBY_ROOT"), []string{})
+	v.SetClassISIndexTable("")
+	v.SetMethodISIndexTable("")
+	v.InitForREPL()
+
+	// Initialize parser, lexer is not important here
+	l := lexer.New("")
+	p := parser.New(l)
+	program, _ := p.ParseProgram()
+
+	// Initialize code generator, and it will behavior a little different in REPL mode.
+	g := bytecode.NewGenerator()
+	g.REPL = true
+	g.InitTopLevelScope(program)
+
+	return v, p, g
+}
+
+func usage(w io.Writer) {
+	io.WriteString(w, "commands:\n")
+	io.WriteString(w, completer.Tree("    "))
 }
