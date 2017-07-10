@@ -6,24 +6,7 @@ import (
 )
 
 func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, scope *scope, table *localTable) {
-	/*
-		These expression should be ignored when show up alone like:
-
-		```
-		a
-		```
-
-		```
-		1 + a
-		```
-
-		```
-		Foo
-		```
-
-		Because in these cases they are useless and will keep stack growing unnecessarily.
-	*/
-
+	// See fsm initialization's comment
 	if g.fsm.Is(keepExp) {
 		switch exp := exp.(type) {
 		case *ast.Identifier:
@@ -69,6 +52,7 @@ func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, sc
 	switch exp := exp.(type) {
 	case *ast.InfixExpression:
 		if exp.Operator == "=" {
+			// Because this is assignment so we do need the expression's value
 			g.fsm.Event(keepExp)
 			g.compileAssignExpression(is, exp, scope, table)
 		}
@@ -125,6 +109,7 @@ func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpre
 	is.define(Send, exp.Method, len(exp.Arguments))
 
 	if exp.Method == "++" || exp.Method == "--" {
+		// ++ and -- are methods with side effect but shouldn't return anything
 		is.define(Pop)
 	}
 }
@@ -157,7 +142,10 @@ func (g *Generator) compileBlockArgExpression(index int, exp *ast.CallExpression
 		table.set(exp.BlockArguments[i].Value)
 	}
 
+	g.fsm.Event(removeExp)
 	g.compileCodeBlock(is, exp.Block, scope, table)
+	g.fsm.Event(keepExp)
+
 	g.endInstructions(is)
 	g.instructionSets = append(g.instructionSets, is)
 }
