@@ -36,8 +36,8 @@ type VM struct {
 	mainObj     *RObject
 	mainThread  *thread
 	objectClass *RClass
-	// a map holds different types of label tables
-	isTables map[labelType]isTable
+	// a map holds different types of instruction set tables
+	isTables map[setType]isTable
 	// method instruction set table
 	methodISIndexTables map[filename]*isIndexTable
 	// class instruction set table
@@ -73,9 +73,9 @@ func New(fileDir string, args []string) *VM {
 		filename(fileDir): newISIndexTable(),
 	}
 	vm.blockTables = make(map[filename]map[string]*instructionSet)
-	vm.isTables = map[labelType]isTable{
-		bytecode.LabelDef:      make(isTable),
-		bytecode.LabelDefClass: make(isTable),
+	vm.isTables = map[setType]isTable{
+		bytecode.MethodDef: make(isTable),
+		bytecode.ClassDef:  make(isTable),
 	}
 	vm.fileDir = fileDir
 	vm.projectRoot = os.Getenv("GOBY_ROOT")
@@ -102,11 +102,11 @@ func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) {
 	p.vm = vm
 	p.transferInstructionSets(sets)
 
-	// Keep update label table after parsed new files.
+	// Keep instruction set table updated after parsed new files.
 	// TODO: Find more efficient way to do this.
-	for labelType, table := range p.labelTable {
-		for labelName, is := range table {
-			vm.isTables[labelType][labelName] = is
+	for setType, table := range p.setTable {
+		for name, is := range table {
+			vm.isTables[setType][name] = is
 		}
 	}
 
@@ -186,7 +186,7 @@ func (vm *VM) currentFilePath() string {
 }
 
 func (vm *VM) getBlock(name string, filename filename) *instructionSet {
-	// The "name" here is actually an index from label
+	// The "name" here is actually an index of block
 	// for example <Block:1>'s name is "1"
 	is, ok := vm.blockTables[filename][name]
 
@@ -198,7 +198,7 @@ func (vm *VM) getBlock(name string, filename filename) *instructionSet {
 }
 
 func (vm *VM) getMethodIS(name string, filename filename) (*instructionSet, bool) {
-	iss, ok := vm.isTables[bytecode.LabelDef][name]
+	iss, ok := vm.isTables[bytecode.MethodDef][name]
 
 	if !ok {
 		return nil, false
@@ -214,7 +214,7 @@ func (vm *VM) getMethodIS(name string, filename filename) (*instructionSet, bool
 }
 
 func (vm *VM) getClassIS(name string, filename filename) *instructionSet {
-	iss, ok := vm.isTables[bytecode.LabelDefClass][name]
+	iss, ok := vm.isTables[bytecode.ClassDef][name]
 
 	if !ok {
 		panic(fmt.Sprintf("Can't find class %s's instructions", name))
@@ -307,11 +307,11 @@ func (vm *VM) execRequiredFile(filepath string, file []byte) {
 	oldClassTable := isTable{}
 
 	// Copy current file's instruction sets.
-	for name, is := range vm.isTables[bytecode.LabelDef] {
+	for name, is := range vm.isTables[bytecode.MethodDef] {
 		oldMethodTable[name] = is
 	}
 
-	for name, is := range vm.isTables[bytecode.LabelDefClass] {
+	for name, is := range vm.isTables[bytecode.ClassDef] {
 		oldClassTable[name] = is
 	}
 
@@ -320,8 +320,8 @@ func (vm *VM) execRequiredFile(filepath string, file []byte) {
 	vm.ExecInstructions(instructionSets, filepath)
 
 	// Restore instruction sets.
-	vm.isTables[bytecode.LabelDef] = oldMethodTable
-	vm.isTables[bytecode.LabelDefClass] = oldClassTable
+	vm.isTables[bytecode.MethodDef] = oldMethodTable
+	vm.isTables[bytecode.ClassDef] = oldClassTable
 }
 
 func newError(format string, args ...interface{}) *Error {

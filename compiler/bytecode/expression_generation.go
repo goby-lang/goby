@@ -136,7 +136,8 @@ func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.InfixEx
 
 func (g *Generator) compileBlockArgExpression(index int, exp *ast.CallExpression, scope *scope, table *localTable) {
 	is := &InstructionSet{}
-	is.name = fmt.Sprintf("%s:%d", Block, index)
+	is.name = fmt.Sprint(index)
+	is.isType = Block
 
 	for i := 0; i < len(exp.BlockArguments); i++ {
 		table.set(exp.BlockArguments[i].Value)

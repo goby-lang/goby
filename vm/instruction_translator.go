@@ -11,43 +11,38 @@ import (
 type instructionTranslator struct {
 	vm         *VM
 	line       int
-	labelTable map[labelType]map[string][]*instructionSet
+	setTable   map[setType]map[string][]*instructionSet
 	blockTable map[string]*instructionSet
 	filename   filename
 	program    *instructionSet
 }
 
-// newInstructionTranslator initializes instructionTranslator and its label table then returns it
+// newInstructionTranslator initializes instructionTranslator and its instruction set table then returns it
 func newInstructionTranslator(file filename) *instructionTranslator {
 	it := &instructionTranslator{filename: file}
 	it.blockTable = make(map[string]*instructionSet)
-	it.labelTable = map[labelType]map[string][]*instructionSet{
-		bytecode.LabelDef:      make(map[string][]*instructionSet),
-		bytecode.LabelDefClass: make(map[string][]*instructionSet),
+	it.setTable = map[setType]map[string][]*instructionSet{
+		bytecode.MethodDef: make(map[string][]*instructionSet),
+		bytecode.ClassDef:  make(map[string][]*instructionSet),
 	}
 
 	return it
 }
 
-func (it *instructionTranslator) setLabel(is *instructionSet, name string) {
-	var ln string
-	var lt labelType
-	is.name = name
+func (it *instructionTranslator) setMetadata(is *instructionSet, set *bytecode.InstructionSet) {
+	t := setType(set.SetType())
+	n := set.Name()
 
-	if name == bytecode.Program {
+	is.name = n
+
+	switch t {
+	case bytecode.Program:
 		it.program = is
-		return
+	case bytecode.Block:
+		it.blockTable[n] = is
+	default:
+		it.setTable[t][n] = append(it.setTable[t][n], is)
 	}
-
-	ln = strings.Split(name, ":")[1]
-	lt = labelType(strings.Split(name, ":")[0])
-
-	if lt == bytecode.Block {
-		it.blockTable[ln] = is
-		return
-	}
-
-	it.labelTable[lt][ln] = append(it.labelTable[lt][ln], is)
 }
 
 func (it *instructionTranslator) parseParam(param string) interface{} {
@@ -63,10 +58,8 @@ func (it *instructionTranslator) parseParam(param string) interface{} {
 
 func (it *instructionTranslator) transferInstructionSets(sets []*bytecode.InstructionSet) []*instructionSet {
 	iss := []*instructionSet{}
-	count := 0
 
 	for _, set := range sets {
-		count++
 		it.transferInstructionSet(iss, set)
 	}
 
@@ -75,11 +68,9 @@ func (it *instructionTranslator) transferInstructionSets(sets []*bytecode.Instru
 
 func (it *instructionTranslator) transferInstructionSet(iss []*instructionSet, set *bytecode.InstructionSet) {
 	is := &instructionSet{filename: it.filename}
-	count := 0
-	it.setLabel(is, set.Name())
+	it.setMetadata(is, set)
 
 	for _, i := range set.Instructions {
-		count++
 		it.transferInstruction(is, i)
 	}
 

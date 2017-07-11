@@ -10,12 +10,7 @@ type operation func(t *thread, cf *callFrame, args ...interface{})
 
 type operationType string
 
-type label struct {
-	name string
-	Type labelType
-}
-
-type labelType string
+type setType string
 
 type action struct {
 	name      string
