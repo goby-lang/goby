@@ -1,0 +1,6 @@
+{
+	"ImportPath": "github.com/goby-lang/goby/Godeps",
+	"GoVersion": "go1.8",
+	"GodepVersion": "v62",
+	"Deps": []
+}

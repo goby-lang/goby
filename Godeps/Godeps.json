@@ -4,6 +4,11 @@
 	"GodepVersion": "v60",
 	"Deps": [
 		{
+			"ImportPath": "github.com/chzyer/readline",
+			"Comment": "v1.4-24-g41eea22",
+			"Rev": "41eea22f717c616615e1e59aa06cf831f9901f35"
+		},
+		{
 			"ImportPath": "github.com/fatih/structs",
 			"Comment": "v1.0-2-g74a29b9",
 			"Rev": "74a29b9fac7397d933f47e33eba94d2d83a464a2"
@@ -24,6 +29,10 @@
 			"ImportPath": "github.com/pkg/profile",
 			"Comment": "v1.2.0-9-g06b9068",
 			"Rev": "06b906832ed0e32302a942b63b6c5f8359034d26"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/unix",
+			"Rev": "abf9c25f54453410d0c6668e519582a9e1115027"
 		}
 	]
 }
