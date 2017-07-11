@@ -64,7 +64,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 		{
 			// Returns the concatenation of self and another String
 			//
-			// ```Ruby
+			// ```ruby
 			// "first" + "-second" # => "first-second"
 			// ```
 			//
@@ -89,7 +89,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 		{
 			// Returns self multiplying another Integer
 			//
-			// ```Ruby
+			// ```ruby
 			// "string " * 2 # => "string string string "
 			// ```
 			//
@@ -123,7 +123,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 		{
 			// Returns a Boolean if first string greater than second string
 			//
-			// ```Ruby
+			// ```ruby
 			// "a" < "b" # => true
 			// ```
 			//
@@ -153,7 +153,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 		{
 			// Returns a Boolean if first string less than second string
 			//
-			// ```Ruby
+			// ```ruby
 			// "a" < "b" # => true
 			// ```
 			//
@@ -183,7 +183,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 		{
 			// Returns a Boolean of compared two strings
 			//
-			// ```Ruby
+			// ```ruby
 			// "first" == "second" # => false
 			// "two" == "two" # => true
 			// ```
@@ -215,7 +215,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// Returns a Integer. If first string is less than second string returns -1, if equal to returns 0, if greater returns 1
 			//
 			//
-			// ```Ruby
+			// ```ruby
 			// "abc" <=> "abcd" # => -1
 			// "abc" <=> "abc" # => 0
 			// "abcd" <=> "abc" # => 1
@@ -250,7 +250,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 		{
 			// Returns a Boolean of compared two strings
 			//
-			// ```Ruby
+			// ```ruby
 			// "first" != "second" # => true
 			// "two" != "two" # => false
 			// ```
@@ -275,245 +275,6 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					}
 
 					return FALSE
-				}
-			},
-		},
-		{
-			// Return a new String with the first character converted to uppercase but the rest of string converted to lowercase.
-			//
-			// ```Ruby
-			// "test".capitalize         # => "Test"
-			// "tEST".capitalize         # => "Test"
-			// "heLlo\nWoRLd".capitalize # => "Hello\nworld"
-			// ```
-			//
-			// @return [String]
-			Name: "capitalize",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					str := []byte(receiver.(*StringObject).Value)
-					start := string(str[0])
-					rest := string(str[1:])
-					result := strings.ToUpper(start) + strings.ToLower(rest)
-
-					return t.vm.initStringObject(result)
-				}
-			},
-		},
-		{
-			// Returns a new String with all characters is upcase
-			//
-			// ```Ruby
-			// "very big".upcase # => "VERY BIG"
-			// ```
-			//
-			// @return [String]
-			Name: "upcase",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					str := receiver.(*StringObject).Value
-
-					return t.vm.initStringObject(strings.ToUpper(str))
-				}
-			},
-		},
-		{
-			// Returns a new String with all characters is lowercase
-			//
-			// ```Ruby
-			// "erROR".downcase        # => "error"
-			// "HeLlO\tWorLD".downcase # => "hello\tworld"
-			// ```
-			//
-			// @return [String]
-			Name: "downcase",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					str := receiver.(*StringObject).Value
-
-					return t.vm.initStringObject(strings.ToLower(str))
-				}
-			},
-		},
-		{
-			// Returns the character length of self
-			// **Note:** the length is currently byte-based, instead of charcode-based.
-			//
-			// ```Ruby
-			// "zero".size # => 4
-			// "".size # => 0
-			// ```
-			//
-			// @return [Integer]
-			Name: "size",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					str := receiver.(*StringObject).Value
-
-					return t.vm.initIntegerObject(len(str))
-				}
-			},
-		},
-		{
-			// Returns the character length of self
-			// **Note:** the length is currently byte-based, instead of charcode-based.
-			//
-			// ```Ruby
-			// "zero".size # => 4
-			// "".size # => 0
-			// ```
-			//
-			// @return [Integer]
-			Name: "length",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					str := receiver.(*StringObject).Value
-
-					return t.vm.initIntegerObject(len(str))
-				}
-			},
-		},
-		{
-			// Returns a new String with reverse order of self
-			// **Note:** the length is currently byte-based, instead of charcode-based.
-			//
-			// ```Ruby
-			// "reverse".reverse      # => "esrever"
-			// "Hello\nWorld".reverse # => "dlroW\nolleH"
-			// ```
-			//
-			// @return [String]
-			Name: "reverse",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					str := receiver.(*StringObject).Value
-
-					var revert string
-					for i := len(str) - 1; i >= 0; i-- {
-						revert += string(str[i])
-					}
-
-					return t.vm.initStringObject(revert)
-				}
-			},
-		},
-		{
-			// Returns a new String with self value
-			//
-			// ```Ruby
-			// "string".to_s # => "string"
-			// ```
-			//
-			// @return [String]
-			Name: "to_s",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					str := receiver.(*StringObject).Value
-
-					return t.vm.initStringObject(str)
-				}
-			},
-		},
-		{
-			// Returns the result of converting self to Integer
-			//
-			// ```Ruby
-			// "123".to_i # => 123
-			// "3d print".to_i # => 3
-			// "some text".to_i # => 0
-			// ```
-			//
-			// @return [Integer]
-			Name: "to_i",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					str := receiver.(*StringObject).Value
-					parsedStr, err := strconv.ParseInt(str, 10, 0)
-
-					if err == nil {
-						return t.vm.initIntegerObject(int(parsedStr))
-					}
-
-					var digits string
-					for _, char := range str {
-						if unicode.IsDigit(char) {
-							digits += string(char)
-						} else {
-							break
-						}
-					}
-
-					if len(digits) > 0 {
-						parsedStr, _ = strconv.ParseInt(digits, 10, 0)
-						return t.vm.initIntegerObject(int(parsedStr))
-					}
-
-					return t.vm.initIntegerObject(0)
-				}
-			},
-		},
-		{
-			// Checks if the specified string is included in the receiver
-			//
-			// ```Ruby
-			// "Hello\nWorld".include("\n") # => true
-			// ```
-			//
-			// @return [Bool]
-			Name: "include",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 1 {
-						return initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
-					}
-
-					str := receiver.(*StringObject).Value
-					i := args[0]
-					includeStr, ok := i.(*StringObject)
-
-					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", i.Class().Name)
-					}
-
-					if strings.Contains(str, includeStr.Value) {
-						return TRUE
-					}
-
-					return FALSE
-				}
-			},
-		},
-		{
-			// Returns a string which is concatenate with the input string or character
-			//
-			// ```ruby
-			// "Hello ".concat("World") # => "Hello World"
-			// ```
-			// @return [String]
-			Name: "concat",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 1 {
-						return initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
-					}
-
-					str := receiver.(*StringObject).Value
-					c := args[0]
-					concatStr, ok := c.(*StringObject)
-
-					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", c.Class().Name)
-					}
-
-					return t.vm.initStringObject(str + concatStr.Value)
 				}
 			},
 		},
@@ -625,6 +386,75 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
+			// Return a new String with the first character converted to uppercase but the rest of string converted to lowercase.
+			//
+			// ```ruby
+			// "test".capitalize         # => "Test"
+			// "tEST".capitalize         # => "Test"
+			// "heLlo\nWoRLd".capitalize # => "Hello\nworld"
+			// ```
+			//
+			// @return [String]
+			Name: "capitalize",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					str := []byte(receiver.(*StringObject).Value)
+					start := string(str[0])
+					rest := string(str[1:])
+					result := strings.ToUpper(start) + strings.ToLower(rest)
+
+					return t.vm.initStringObject(result)
+				}
+			},
+		},
+		{
+			// Returns a string with the last character chopped
+			//
+			// ```ruby
+			// "Hello".chop # => "Hell"
+			// "Hello World\n".chop => "Hello World"
+			// ```
+			//
+			// @return [String]
+			Name: "chop",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					str := receiver.(*StringObject).Value
+
+					return t.vm.initStringObject(str[:len(str)-1])
+				}
+			},
+		},
+		{
+			// Returns a string which is concatenate with the input string or character
+			//
+			// ```ruby
+			// "Hello ".concat("World") # => "Hello World"
+			// ```
+			//
+			// @return [String]
+			Name: "concat",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+					}
+
+					str := receiver.(*StringObject).Value
+					c := args[0]
+					concatStr, ok := c.(*StringObject)
+
+					if !ok {
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", c.Class().Name)
+					}
+
+					return t.vm.initStringObject(str + concatStr.Value)
+				}
+			},
+		},
+		{
 			// Returns the integer that count the string chars as UTF-8
 			//
 			// ```ruby
@@ -645,23 +475,110 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
-			// Returns an array of characters converted from a string
+			// Returns a string which is being partially deleted with specified values
+			//
 			// ```ruby
-			// "Goby".to_a # => ["G", "o", "b", "y"]
+			// "Hello hello HeLlo".delete("el") # => "Hlo hlo HeLlo"
+			// # TODO: Handle delete intersection of multiple strings' input case
+			// "Hello hello HeLlo".delete("el", "e") # => "Hllo hllo HLlo"
 			// ```
+			//
 			// @return [String]
-			Name: "to_a",
+			Name: "delete",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+					}
+
+					str := receiver.(*StringObject).Value
+					d := args[0]
+					deleteStr, ok := d.(*StringObject)
+
+					if !ok {
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", d.Class().Name)
+					}
+
+					return t.vm.initStringObject(strings.Replace(str, deleteStr.Value, "", -1))
+				}
+			},
+		},
+		{
+			// Returns a new String with all characters is lowercase
+			//
+			// ```ruby
+			// "erROR".downcase        # => "error"
+			// "HeLlO\tWorLD".downcase # => "hello\tworld"
+			// ```
+			//
+			// @return [String]
+			Name: "downcase",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-					str := receiver.(*StringObject)
-					elems := []Object{}
+					str := receiver.(*StringObject).Value
 
-					for i := 0; i < len(str.Value); i++ {
-						elems = append(elems, t.vm.initStringObject(string([]rune(str.Value)[i])))
+					return t.vm.initStringObject(strings.ToLower(str))
+				}
+			},
+		},
+		{
+			// Returns true if string is empty value
+			//
+			// ```ruby
+			// "".empty      # => true
+			// "Hello".empty # => false
+			// ```
+			//
+			// @return [Boolean]
+			Name: "empty",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					str := receiver.(*StringObject).Value
+
+					if str == "" {
+						return TRUE
+					}
+					return FALSE
+				}
+			},
+		},
+		{
+			// Returns true if receiver string end with the argument string
+			//
+			// ```ruby
+			// "Hello".end_with("llo") # => true
+			// "Hello".end_with("ell") # => false
+			// ```
+			//
+			// @return [Boolean]
+			Name: "end_with",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
-					return t.vm.initArrayObject(elems)
+					str := receiver.(*StringObject).Value
+					c := args[0]
+					compareStr, ok := c.(*StringObject)
+
+					if !ok {
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", c.Class().Name)
+					}
+
+					compareStrValue := compareStr.Value
+					compareStrLength := len(compareStrValue)
+
+					if compareStrLength > len(str) {
+						return FALSE
+					}
+
+					if compareStrValue == str[len(str)-compareStrLength:] {
+						return TRUE
+					}
+					return FALSE
 				}
 			},
 		},
@@ -694,36 +611,55 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
-			// Returns true if string is empty value
+			// TODO: Implement String#gsub When RegexObject Implemented
+			// Returns a copy of str with the all occurrences of pattern substituted for the second argument.
+			// The pattern is typically a String or Regexp (Not implemented yet); if given as a String, any
+			// regular expression metacharacters it contains will be interpreted literally, e.g. '\\d' will
+			// match a backslash followed by ‘d’, instead of a digit.
+			//
+			// Currently only support string version of String#gsub.
 			//
 			// ```ruby
-			// "".empty      # => true
-			// "Hello".empty # => false
+			// "Ruby Lang".gsub("Ru", "Go") # => "Goby Lang"
 			// ```
 			//
-			// @return [Boolean]
-			Name: "empty",
+			// @return [String]
+			Name: "gsub",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 2 {
+						return initErrorObject(ArgumentErrorClass, "Expect 2 arguments. got=%v", len(args))
+					}
 
 					str := receiver.(*StringObject).Value
 
-					if str == "" {
-						return TRUE
+					p := args[0]
+					pattern, ok := p.(*StringObject)
+
+					if !ok {
+						return initErrorObject(TypeErrorClass, "Expect pattern to be String. got=%v", p.Class().Name)
 					}
-					return FALSE
+
+					r := args[1]
+					replacement, ok := r.(*StringObject)
+
+					if !ok {
+						return initErrorObject(TypeErrorClass, "Expect replacement to be String. got=%v", r.Class().Name)
+					}
+
+					return t.vm.initStringObject(strings.Replace(str, pattern.Value, replacement.Value, -1))
 				}
 			},
 		},
 		{
-			// Returns true if receiver string start with the argument string
+			// Checks if the specified string is included in the receiver
 			//
 			// ```ruby
-			// "Hello".start_with("Hel") # => true
-			// "Hello".start_with("hel") # => false
+			// "Hello\nWorld".include("\n") # => true
 			// ```
-			// @return [Boolean]
-			Name: "start_with",
+			//
+			// @return [Bool]
+			Name: "include",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 1 {
@@ -731,60 +667,17 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					}
 
 					str := receiver.(*StringObject).Value
-					c := args[0]
-					compareStr, ok := c.(*StringObject)
+					i := args[0]
+					includeStr, ok := i.(*StringObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", c.Class().Name)
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", i.Class().Name)
 					}
 
-					compareStrValue := compareStr.Value
-					compareStrLength := len(compareStrValue)
-
-					if compareStrLength > len(str) {
-						return FALSE
-					}
-
-					if compareStrValue == str[:compareStrLength] {
+					if strings.Contains(str, includeStr.Value) {
 						return TRUE
 					}
-					return FALSE
-				}
-			},
-		},
-		{
-			// Returns true if receiver string end with the argument string
-			//
-			// ```ruby
-			// "Hello".end_with("llo") # => true
-			// "Hello".end_with("ell") # => false
-			// ```
-			// @return [Boolean]
-			Name: "end_with",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 1 {
-						return initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
-					}
 
-					str := receiver.(*StringObject).Value
-					c := args[0]
-					compareStr, ok := c.(*StringObject)
-
-					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", c.Class().Name)
-					}
-
-					compareStrValue := compareStr.Value
-					compareStrLength := len(compareStrValue)
-
-					if compareStrLength > len(str) {
-						return FALSE
-					}
-
-					if compareStrValue == str[len(str)-compareStrLength:] {
-						return TRUE
-					}
 					return FALSE
 				}
 			},
@@ -804,6 +697,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// "Hello".insert(-1, "X") # => "HelloX"
 			// "Hello".insert(-3, "X") # => "HelXlo"
 			// ```
+			//
 			// @return [String]
 			Name: "insert",
 			Fn: func(receiver Object) builtinMethodBody {
@@ -848,50 +742,22 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
-			// Returns a string which is being partially deleted with specified values
+			// Returns the character length of self
+			// **Note:** the length is currently byte-based, instead of charcode-based.
 			//
 			// ```ruby
-			// "Hello hello HeLlo".delete("el") # => "Hlo hlo HeLlo"
-			// # TODO: Handle delete intersection of multiple strings' input case
-			// "Hello hello HeLlo".delete("el", "e") # => "Hllo hllo HLlo"
+			// "zero".size # => 4
+			// "".size # => 0
 			// ```
 			//
-			// @return [String]
-			Name: "delete",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 1 {
-						return initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
-					}
-
-					str := receiver.(*StringObject).Value
-					d := args[0]
-					deleteStr, ok := d.(*StringObject)
-
-					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", d.Class().Name)
-					}
-
-					return t.vm.initStringObject(strings.Replace(str, deleteStr.Value, "", -1))
-				}
-			},
-		},
-		{
-			// Returns a string with the last character chopped
-			//
-			// ```ruby
-			// "Hello".chop # => "Hell"
-			// "Hello World\n".chop => "Hello World"
-			// ```
-			//
-			// @return [String]
-			Name: "chop",
+			// @return [Integer]
+			Name: "length",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					str := receiver.(*StringObject).Value
 
-					return t.vm.initStringObject(str[:len(str)-1])
+					return t.vm.initIntegerObject(len(str))
 				}
 			},
 		},
@@ -948,6 +814,59 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 						str = str[:strLengthValue]
 					}
 					return t.vm.initStringObject(str)
+				}
+			},
+		},
+		{
+			// Return a string replaced by the input string
+			//
+			// ```ruby
+			// "Hello".replace("World")          # => "World"
+			// "你好"replace("再見")              # => "再見"
+			// "Ruby\nLang".replace("Goby\nLang") # => "Goby Lang"
+			// ```
+			//
+			// @return [String]
+			Name: "replace",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+					}
+
+					r := args[0]
+					replaceStr, ok := r.(*StringObject)
+
+					if !ok {
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", r.Class().Name)
+					}
+
+					return t.vm.initStringObject(replaceStr.Value)
+				}
+			},
+		},
+		{
+			// Returns a new String with reverse order of self
+			// **Note:** the length is currently byte-based, instead of charcode-based.
+			//
+			// ```ruby
+			// "reverse".reverse      # => "esrever"
+			// "Hello\nWorld".reverse # => "dlroW\nolleH"
+			// ```
+			//
+			// @return [String]
+			Name: "reverse",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					str := receiver.(*StringObject).Value
+
+					var revert string
+					for i := len(str) - 1; i >= 0; i-- {
+						revert += string(str[i])
+					}
+
+					return t.vm.initStringObject(revert)
 				}
 			},
 		},
@@ -1012,72 +931,22 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
-			// Returns a copy of str with leading and trailing whitespace removed.
-			// Whitespace is defined as any of the following characters: null, horizontal tab,
-			// line feed, vertical tab, form feed, carriage return, space.
+			// Returns the character length of self
+			// **Note:** the length is currently byte-based, instead of charcode-based.
 			//
 			// ```ruby
-			// "  Goby Lang  ".strip   # => "Goby Lang"
-			// "\nGoby Lang\r\t".strip # => "Goby Lang"
+			// "zero".size # => 4
+			// "".size # => 0
 			// ```
 			//
-			// @return [String]
-			Name: "strip",
+			// @return [Integer]
+			Name: "size",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					str := receiver.(*StringObject).Value
 
-					for {
-						str = strings.Trim(str, " ")
-
-						if strings.HasPrefix(str, "\n") || strings.HasPrefix(str, "\t") || strings.HasPrefix(str, "\r") || strings.HasPrefix(str, "\v") {
-							str = str[1:]
-							continue
-						}
-						if strings.HasSuffix(str, "\n") || strings.HasSuffix(str, "\t") || strings.HasSuffix(str, "\r") || strings.HasSuffix(str, "\v") {
-							str = str[:len(str)-2]
-							continue
-						}
-						break
-					}
-					return t.vm.initStringObject(str)
-				}
-			},
-		},
-		{
-			// Returns an array of strings separated by the given separator
-			//
-			// ```ruby
-			// "Hello World".split("o") # => ["Hell", " W", "rld"]
-			// "Goby".split("")         # => ["G", "o", "b", "y"]
-			// "Hello\nWorld\nGoby".split("o") # => ["Hello", "World", "Goby"]
-			// ```
-			//
-			// @return [Array]
-			Name: "split",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 1 {
-						return initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
-					}
-
-					s := args[0]
-					seperator, ok := s.(*StringObject)
-
-					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", s.Class().Name)
-					}
-
-					str := receiver.(*StringObject).Value
-					arr := strings.Split(str, seperator.Value)
-
-					var elements []Object
-					for i := 0; i < len(arr); i++ {
-						elements = append(elements, t.vm.initStringObject(arr[i]))
-					}
-
-					return t.vm.initArrayObject(elements)
+					return t.vm.initIntegerObject(len(str))
 				}
 			},
 		},
@@ -1177,71 +1046,208 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
-			// Return a string replaced by the input string
+			// Returns an array of strings separated by the given separator
 			//
 			// ```ruby
-			// "Hello".replace("World")          # => "World"
-			// "你好"replace("再見")              # => "再見"
-			// "Ruby\nLang".replace("Goby\nLang") # => "Goby Lang"
+			// "Hello World".split("o") # => ["Hell", " W", "rld"]
+			// "Goby".split("")         # => ["G", "o", "b", "y"]
+			// "Hello\nWorld\nGoby".split("o") # => ["Hello", "World", "Goby"]
 			// ```
 			//
-			// @return [String]
-			Name: "replace",
+			// @return [Array]
+			Name: "split",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 1 {
 						return initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
-					r := args[0]
-					replaceStr, ok := r.(*StringObject)
+					s := args[0]
+					seperator, ok := s.(*StringObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", r.Class().Name)
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", s.Class().Name)
 					}
 
-					return t.vm.initStringObject(replaceStr.Value)
+					str := receiver.(*StringObject).Value
+					arr := strings.Split(str, seperator.Value)
+
+					var elements []Object
+					for i := 0; i < len(arr); i++ {
+						elements = append(elements, t.vm.initStringObject(arr[i]))
+					}
+
+					return t.vm.initArrayObject(elements)
 				}
 			},
 		},
 		{
-			// TODO: Implement String#gsub When RegexObject Implemented
-			// Returns a copy of str with the all occurrences of pattern substituted for the second argument.
-			// The pattern is typically a String or Regexp (Not implemented yet); if given as a String, any
-			// regular expression metacharacters it contains will be interpreted literally, e.g. '\\d' will
-			// match a backslash followed by ‘d’, instead of a digit.
-			//
-			// Currently only support string version of String#gsub.
+			// Returns true if receiver string start with the argument string
 			//
 			// ```ruby
-			// "Ruby Lang".gsub("Ru", "Go") # => "Goby Lang"
+			// "Hello".start_with("Hel") # => true
+			// "Hello".start_with("hel") # => false
 			// ```
 			//
-			// @return [String]
-			Name: "gsub",
+			// @return [Boolean]
+			Name: "start_with",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 2 {
-						return initErrorObject(ArgumentErrorClass, "Expect 2 arguments. got=%v", len(args))
+					if len(args) != 1 {
+						return initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
 					str := receiver.(*StringObject).Value
-
-					p := args[0]
-					pattern, ok := p.(*StringObject)
-
-					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect pattern to be String. got=%v", p.Class().Name)
-					}
-
-					r := args[1]
-					replacement, ok := r.(*StringObject)
+					c := args[0]
+					compareStr, ok := c.(*StringObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect replacement to be String. got=%v", r.Class().Name)
+						return initErrorObject(TypeErrorClass, "Expect argument to be String. got=%v", c.Class().Name)
 					}
 
-					return t.vm.initStringObject(strings.Replace(str, pattern.Value, replacement.Value, -1))
+					compareStrValue := compareStr.Value
+					compareStrLength := len(compareStrValue)
+
+					if compareStrLength > len(str) {
+						return FALSE
+					}
+
+					if compareStrValue == str[:compareStrLength] {
+						return TRUE
+					}
+					return FALSE
+				}
+			},
+		},
+		{
+			// Returns a copy of str with leading and trailing whitespace removed.
+			// Whitespace is defined as any of the following characters: null, horizontal tab,
+			// line feed, vertical tab, form feed, carriage return, space.
+			//
+			// ```ruby
+			// "  Goby Lang  ".strip   # => "Goby Lang"
+			// "\nGoby Lang\r\t".strip # => "Goby Lang"
+			// ```
+			//
+			// @return [String]
+			Name: "strip",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					str := receiver.(*StringObject).Value
+
+					for {
+						str = strings.Trim(str, " ")
+
+						if strings.HasPrefix(str, "\n") || strings.HasPrefix(str, "\t") || strings.HasPrefix(str, "\r") || strings.HasPrefix(str, "\v") {
+							str = str[1:]
+							continue
+						}
+						if strings.HasSuffix(str, "\n") || strings.HasSuffix(str, "\t") || strings.HasSuffix(str, "\r") || strings.HasSuffix(str, "\v") {
+							str = str[:len(str)-2]
+							continue
+						}
+						break
+					}
+					return t.vm.initStringObject(str)
+				}
+			},
+		},
+		{
+			// Returns an array of characters converted from a string
+			//
+			// ```ruby
+			// "Goby".to_a # => ["G", "o", "b", "y"]
+			// ```
+			//
+			// @return [String]
+			Name: "to_a",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					str := receiver.(*StringObject)
+					elems := []Object{}
+
+					for i := 0; i < len(str.Value); i++ {
+						elems = append(elems, t.vm.initStringObject(string([]rune(str.Value)[i])))
+					}
+
+					return t.vm.initArrayObject(elems)
+				}
+			},
+		},
+		{
+			// Returns the result of converting self to Integer
+			//
+			// ```ruby
+			// "123".to_i # => 123
+			// "3d print".to_i # => 3
+			// "some text".to_i # => 0
+			// ```
+			//
+			// @return [Integer]
+			Name: "to_i",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					str := receiver.(*StringObject).Value
+					parsedStr, err := strconv.ParseInt(str, 10, 0)
+
+					if err == nil {
+						return t.vm.initIntegerObject(int(parsedStr))
+					}
+
+					var digits string
+					for _, char := range str {
+						if unicode.IsDigit(char) {
+							digits += string(char)
+						} else {
+							break
+						}
+					}
+
+					if len(digits) > 0 {
+						parsedStr, _ = strconv.ParseInt(digits, 10, 0)
+						return t.vm.initIntegerObject(int(parsedStr))
+					}
+
+					return t.vm.initIntegerObject(0)
+				}
+			},
+		},
+		{
+			// Returns a new String with self value
+			//
+			// ```ruby
+			// "string".to_s # => "string"
+			// ```
+			//
+			// @return [String]
+			Name: "to_s",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					str := receiver.(*StringObject).Value
+
+					return t.vm.initStringObject(str)
+				}
+			},
+		},
+		{
+			// Returns a new String with all characters is upcase
+			//
+			// ```ruby
+			// "very big".upcase # => "VERY BIG"
+			// ```
+			//
+			// @return [String]
+			Name: "upcase",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					str := receiver.(*StringObject).Value
+
+					return t.vm.initStringObject(strings.ToUpper(str))
 				}
 			},
 		},
