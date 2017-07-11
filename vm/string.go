@@ -64,7 +64,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 		{
 			// Returns the concatenation of self and another String
 			//
-			// ```Ruby
+			// ```ruby
 			// "first" + "-second" # => "first-second"
 			// ```
 			//
@@ -89,7 +89,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 		{
 			// Returns self multiplying another Integer
 			//
-			// ```Ruby
+			// ```ruby
 			// "string " * 2 # => "string string string "
 			// ```
 			//
@@ -123,7 +123,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 		{
 			// Returns a Boolean if first string greater than second string
 			//
-			// ```Ruby
+			// ```ruby
 			// "a" < "b" # => true
 			// ```
 			//
@@ -153,7 +153,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 		{
 			// Returns a Boolean if first string less than second string
 			//
-			// ```Ruby
+			// ```ruby
 			// "a" < "b" # => true
 			// ```
 			//
@@ -183,7 +183,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 		{
 			// Returns a Boolean of compared two strings
 			//
-			// ```Ruby
+			// ```ruby
 			// "first" == "second" # => false
 			// "two" == "two" # => true
 			// ```
@@ -215,7 +215,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// Returns a Integer. If first string is less than second string returns -1, if equal to returns 0, if greater returns 1
 			//
 			//
-			// ```Ruby
+			// ```ruby
 			// "abc" <=> "abcd" # => -1
 			// "abc" <=> "abc" # => 0
 			// "abcd" <=> "abc" # => 1
@@ -250,7 +250,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 		{
 			// Returns a Boolean of compared two strings
 			//
-			// ```Ruby
+			// ```ruby
 			// "first" != "second" # => true
 			// "two" != "two" # => false
 			// ```
@@ -388,7 +388,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 		{
 			// Return a new String with the first character converted to uppercase but the rest of string converted to lowercase.
 			//
-			// ```Ruby
+			// ```ruby
 			// "test".capitalize         # => "Test"
 			// "tEST".capitalize         # => "Test"
 			// "heLlo\nWoRLd".capitalize # => "Hello\nworld"
@@ -433,6 +433,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// ```ruby
 			// "Hello ".concat("World") # => "Hello World"
 			// ```
+			//
 			// @return [String]
 			Name: "concat",
 			Fn: func(receiver Object) builtinMethodBody {
@@ -505,7 +506,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 		{
 			// Returns a new String with all characters is lowercase
 			//
-			// ```Ruby
+			// ```ruby
 			// "erROR".downcase        # => "error"
 			// "HeLlO\tWorLD".downcase # => "hello\tworld"
 			// ```
@@ -550,6 +551,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// "Hello".end_with("llo") # => true
 			// "Hello".end_with("ell") # => false
 			// ```
+			//
 			// @return [Boolean]
 			Name: "end_with",
 			Fn: func(receiver Object) builtinMethodBody {
@@ -652,7 +654,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 		{
 			// Checks if the specified string is included in the receiver
 			//
-			// ```Ruby
+			// ```ruby
 			// "Hello\nWorld".include("\n") # => true
 			// ```
 			//
@@ -695,6 +697,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// "Hello".insert(-1, "X") # => "HelloX"
 			// "Hello".insert(-3, "X") # => "HelXlo"
 			// ```
+			//
 			// @return [String]
 			Name: "insert",
 			Fn: func(receiver Object) builtinMethodBody {
@@ -742,7 +745,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// Returns the character length of self
 			// **Note:** the length is currently byte-based, instead of charcode-based.
 			//
-			// ```Ruby
+			// ```ruby
 			// "zero".size # => 4
 			// "".size # => 0
 			// ```
@@ -846,7 +849,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// Returns a new String with reverse order of self
 			// **Note:** the length is currently byte-based, instead of charcode-based.
 			//
-			// ```Ruby
+			// ```ruby
 			// "reverse".reverse      # => "esrever"
 			// "Hello\nWorld".reverse # => "dlroW\nolleH"
 			// ```
@@ -931,7 +934,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// Returns the character length of self
 			// **Note:** the length is currently byte-based, instead of charcode-based.
 			//
-			// ```Ruby
+			// ```ruby
 			// "zero".size # => 4
 			// "".size # => 0
 			// ```
@@ -1085,6 +1088,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// "Hello".start_with("Hel") # => true
 			// "Hello".start_with("hel") # => false
 			// ```
+			//
 			// @return [Boolean]
 			Name: "start_with",
 			Fn: func(receiver Object) builtinMethodBody {
@@ -1151,9 +1155,11 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 		},
 		{
 			// Returns an array of characters converted from a string
+			//
 			// ```ruby
 			// "Goby".to_a # => ["G", "o", "b", "y"]
 			// ```
+			//
 			// @return [String]
 			Name: "to_a",
 			Fn: func(receiver Object) builtinMethodBody {
@@ -1173,7 +1179,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 		{
 			// Returns the result of converting self to Integer
 			//
-			// ```Ruby
+			// ```ruby
 			// "123".to_i # => 123
 			// "3d print".to_i # => 3
 			// "some text".to_i # => 0
@@ -1212,7 +1218,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 		{
 			// Returns a new String with self value
 			//
-			// ```Ruby
+			// ```ruby
 			// "string".to_s # => "string"
 			// ```
 			//
@@ -1230,7 +1236,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 		{
 			// Returns a new String with all characters is upcase
 			//
-			// ```Ruby
+			// ```ruby
 			// "very big".upcase # => "VERY BIG"
 			// ```
 			//
