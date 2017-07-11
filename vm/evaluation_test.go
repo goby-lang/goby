@@ -847,21 +847,29 @@ func TestPostfixMethodCall(t *testing.T) {
 		input    string
 		expected int
 	}{
-		{"1++", 2},
-		{"10--", 9},
-		{"0--", -1},
-		{"-5++", -4},
+		{`
+		a = 1
+		a++
+		a
+		`, 2},
 		{`
 		a = 10
-		a ++
-		`, 11},
+		a--
+		a
+		`,
+			9},
 		{`
-		a = 10
-		a --
-		`, 9},
+		a = 0
+		a--
+		a
+		`,
+			-1},
 		{`
-		(1 + 2 * 3)++
-		`, 8},
+		a = -5
+		a++
+		a
+		`,
+			-4},
 	}
 
 	for i, tt := range tests {
@@ -1072,8 +1080,9 @@ func TestAssignmentEvaluation(t *testing.T) {
 
 func TestIfExpressionEvaluation(t *testing.T) {
 	tests := []struct {
-		input    string
-		expected interface{}
+		input      string
+		expected   interface{}
+		expectedSP int
 	}{
 		{
 			`
@@ -1084,6 +1093,7 @@ func TestIfExpressionEvaluation(t *testing.T) {
 			end
 			`,
 			100,
+			1,
 		},
 		{
 			`
@@ -1094,25 +1104,38 @@ func TestIfExpressionEvaluation(t *testing.T) {
 			end
 			`,
 			true,
+			1,
 		},
 		{`
 		if true
 		   10
-		end`, 10},
-		{"if false; 10 end", nil},
-		{"if 1; 10; end", 10},
-		{"if 1 < 2; 10 end", 10},
-		{"if 1 > 2; 10 end", nil},
-		{"if 1 > 2; 10 else 20 end", 20},
-		{"if 1 < 2; 10 else 20 end", 10},
-		{"if nil; 10 else 20 end", 20},
+		end`,
+			10,
+			1,
+		},
+		{"if false; 10 end", nil, 1},
+		{"if 1; 10; end", 10, 1},
+		{"if 1 < 2; 10 end", 10, 1},
+		{"if 1 > 2; 10 end", nil, 1},
+		{"if 1 > 2; 10 else 20 end", 20, 1},
+		{"if 1 < 2; 10 else 20 end", 10, 1},
+		{"if nil; 10 else 20 end", 20, 1},
 		{`
 		if false
 		  x = 1
+		end # This pushes nil
+
+		x # This pushes nil too
+		`, nil, 2},
+		{`
+		def foo
+		  if false
+		    x = 1
+	      end # This shouldn't push nil
 		end
 
-		x
-		`, nil},
+		foo # This should push nil
+		`, nil, 1},
 	}
 
 	for i, tt := range tests {
@@ -1120,6 +1143,7 @@ func TestIfExpressionEvaluation(t *testing.T) {
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, tt.expectedSP)
 	}
 }
 

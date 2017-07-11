@@ -36,7 +36,10 @@ func (g *Generator) compileStatement(is *InstructionSet, statement ast.Statement
 	case *ast.ModuleStatement:
 		g.compileModuleStmt(is, stmt, scope)
 	case *ast.ReturnStatement:
+		oldState := g.fsm.Current()
+		g.fsm.Event(keepExp)
 		g.compileExpression(is, stmt.ReturnValue, scope, table)
+		g.fsm.Event(oldState)
 		g.endInstructions(is)
 	case *ast.WhileStatement:
 		g.compileWhileStmt(is, stmt, scope, table)
@@ -56,7 +59,9 @@ func (g *Generator) compileWhileStmt(is *InstructionSet, stmt *ast.WhileStatemen
 	anchor2 := &anchor{is.count}
 
 	scope.anchor = anchor1
+	g.fsm.Event(removeExp)
 	g.compileCodeBlock(is, stmt.Body, scope, table)
+	g.fsm.Event(keepExp)
 
 	anchor1.line = is.count
 
@@ -142,7 +147,9 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 	if len(stmt.BlockStatement.Statements) == 0 {
 		newIS.define(PutNull)
 	} else {
+		g.fsm.Event(removeExp)
 		g.compileCodeBlock(newIS, stmt.BlockStatement, scope, scope.localTable)
+		g.fsm.Event(keepExp)
 	}
 
 	g.endInstructions(newIS)
