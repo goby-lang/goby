@@ -79,6 +79,7 @@ type anchor struct {
 // InstructionSet contains a set of Instructions and attaches a label
 type InstructionSet struct {
 	name         string
+	isType       string
 	Instructions []*Instruction
 	count        int
 	argTypes     []int
@@ -92,6 +93,11 @@ func (is *InstructionSet) ArgTypes() []int {
 // Name returns instruction set's name
 func (is *InstructionSet) Name() string {
 	return is.name
+}
+
+// SetType returns instruction's type
+func (is *InstructionSet) SetType() string {
+	return is.isType
 }
 
 func (is *InstructionSet) define(action string, params ...interface{}) {
@@ -118,7 +124,12 @@ func (is *InstructionSet) define(action string, params ...interface{}) {
 
 func (is *InstructionSet) compile() string {
 	var out bytes.Buffer
-	out.WriteString(fmt.Sprintf("<%s>\n", is.name))
+	if is.isType == Program {
+		out.WriteString(fmt.Sprintf("<%s>\n", is.isType))
+	} else {
+		out.WriteString(fmt.Sprintf("<%s:%s>\n", is.isType, is.name))
+	}
+
 	for _, i := range is.Instructions {
 		out.WriteString(i.compile())
 	}
