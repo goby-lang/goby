@@ -90,6 +90,7 @@ func StartIgb(version string) {
 			break
 		}
 
+		// Pressing ctrl-C
 		if err == readline.ErrInterrupt {
 			if len(line) == 0 {
 				break
@@ -129,9 +130,11 @@ func StartIgb(version string) {
 			}
 
 			if perr.IsUnexpectedEnd() {
-				rl.SetPrompt(prompt2)
+				rl.SetPrompt(prompt)
+				fmt.Println(perr.Message)
 				sm.Event(waitEnded)
-				cmds = append(cmds, line)
+				cmds = []string{}
+				continue
 			} else {
 				rl.SetPrompt(prompt)
 				fmt.Println(perr.Message)
