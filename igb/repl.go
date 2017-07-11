@@ -129,7 +129,8 @@ func StartIgb(version string) {
 				continue
 			}
 
-			if perr.IsUnexpectedEnd() {
+			// If cmds is empty, it means that user just typed 'end' without corresponding statement/expression
+			if perr.IsUnexpectedEnd() && len(cmds) != 0 {
 				rl.SetPrompt(prompt2)
 				sm.Event(waitEnded)
 				cmds = append(cmds, line)
