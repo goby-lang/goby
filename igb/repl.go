@@ -45,7 +45,7 @@ var completer = readline.NewPrefixCompleter(
 	readline.PcItem(exit),
 )
 
-// Start starts goby's REPL.
+// StartIgb starts goby's REPL.
 func StartIgb(version string) {
 	var err error
 	rl, err := readline.NewEx(&readline.Config{
