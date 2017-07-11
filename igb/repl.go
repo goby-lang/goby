@@ -130,11 +130,9 @@ func StartIgb(version string) {
 			}
 
 			if perr.IsUnexpectedEnd() {
-				rl.SetPrompt(prompt)
-				fmt.Println(perr.Message)
+				rl.SetPrompt(prompt2)
 				sm.Event(waitEnded)
-				cmds = []string{}
-				continue
+				cmds = append(cmds, line)
 			} else {
 				rl.SetPrompt(prompt)
 				fmt.Println(perr.Message)
