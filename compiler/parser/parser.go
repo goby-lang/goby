@@ -213,5 +213,5 @@ func (p *Parser) noPrefixParseFnError(t token.Type) {
 }
 
 func (p *Parser) peekTokenAtSameLine() bool {
-	return p.curToken.Line == p.peekToken.Line
+	return p.curToken.Line == p.peekToken.Line && p.peekToken.Type != token.EOF
 }
