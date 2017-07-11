@@ -92,7 +92,7 @@ func (g *Generator) compileClassStmt(is *InstructionSet, stmt *ast.ClassStatemen
 	// compile class's content
 	newIS := &InstructionSet{}
 	newIS.name = stmt.Name.Value
-	newIS.isType = LabelDefClass
+	newIS.isType = ClassDef
 
 	g.compileCodeBlock(newIS, stmt.Body, scope, scope.localTable)
 	newIS.define(Leave)
@@ -107,7 +107,7 @@ func (g *Generator) compileModuleStmt(is *InstructionSet, stmt *ast.ModuleStatem
 	scope = newScope(stmt)
 	newIS := &InstructionSet{}
 	newIS.name = stmt.Name.Value
-	newIS.isType = LabelDefClass
+	newIS.isType = ClassDef
 
 	g.compileCodeBlock(newIS, stmt.Body, scope, scope.localTable)
 	newIS.define(Leave)
@@ -130,7 +130,7 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 	// compile method definition's content
 	newIS := &InstructionSet{}
 	newIS.name = stmt.Name.Value
-	newIS.isType = LabelDef
+	newIS.isType = MethodDef
 
 	for i := 0; i < len(stmt.Parameters); i++ {
 		var argType int

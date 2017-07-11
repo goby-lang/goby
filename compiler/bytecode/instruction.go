@@ -6,14 +6,16 @@ import (
 	"strings"
 )
 
+// instruction set types
 const (
-	// label types
-	LabelDef      = "Def"
-	LabelDefClass = "DefClass"
-	Block         = "Block"
-	Program       = "ProgramStart"
+	MethodDef = "Def"
+	ClassDef  = "DefClass"
+	Block     = "Block"
+	Program   = "ProgramStart"
+)
 
-	// instruction actions
+// instruction actions
+const (
 	GetLocal            = "getlocal"
 	GetConstant         = "getconstant"
 	GetInstanceVariable = "getinstancevariable"
@@ -76,7 +78,7 @@ type anchor struct {
 	line int
 }
 
-// InstructionSet contains a set of Instructions and attaches a label
+// InstructionSet contains a set of Instructions and some metadata
 type InstructionSet struct {
 	name         string
 	isType       string

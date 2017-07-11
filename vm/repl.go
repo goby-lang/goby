@@ -23,9 +23,9 @@ func (vm *VM) REPLExec(sets []*bytecode.InstructionSet) {
 	p.vm = vm
 	p.transferInstructionSets(sets)
 
-	for labelType, table := range p.labelTable {
-		for labelName, is := range table {
-			vm.isTables[labelType][labelName] = is
+	for setType, table := range p.setTable {
+		for name, is := range table {
+			vm.isTables[setType][name] = is
 		}
 	}
 

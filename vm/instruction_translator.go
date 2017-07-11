@@ -11,26 +11,26 @@ import (
 type instructionTranslator struct {
 	vm         *VM
 	line       int
-	labelTable map[labelType]map[string][]*instructionSet
+	setTable   map[setType]map[string][]*instructionSet
 	blockTable map[string]*instructionSet
 	filename   filename
 	program    *instructionSet
 }
 
-// newInstructionTranslator initializes instructionTranslator and its label table then returns it
+// newInstructionTranslator initializes instructionTranslator and its instruction set table then returns it
 func newInstructionTranslator(file filename) *instructionTranslator {
 	it := &instructionTranslator{filename: file}
 	it.blockTable = make(map[string]*instructionSet)
-	it.labelTable = map[labelType]map[string][]*instructionSet{
-		bytecode.LabelDef:      make(map[string][]*instructionSet),
-		bytecode.LabelDefClass: make(map[string][]*instructionSet),
+	it.setTable = map[setType]map[string][]*instructionSet{
+		bytecode.MethodDef: make(map[string][]*instructionSet),
+		bytecode.ClassDef:  make(map[string][]*instructionSet),
 	}
 
 	return it
 }
 
-func (it *instructionTranslator) setLabel(is *instructionSet, set *bytecode.InstructionSet) {
-	t := labelType(set.SetType())
+func (it *instructionTranslator) setMetadata(is *instructionSet, set *bytecode.InstructionSet) {
+	t := setType(set.SetType())
 	n := set.Name()
 
 	is.name = n
@@ -45,7 +45,7 @@ func (it *instructionTranslator) setLabel(is *instructionSet, set *bytecode.Inst
 		return
 	}
 
-	it.labelTable[t][n] = append(it.labelTable[t][n], is)
+	it.setTable[t][n] = append(it.setTable[t][n], is)
 }
 
 func (it *instructionTranslator) parseParam(param string) interface{} {
@@ -74,7 +74,7 @@ func (it *instructionTranslator) transferInstructionSets(sets []*bytecode.Instru
 func (it *instructionTranslator) transferInstructionSet(iss []*instructionSet, set *bytecode.InstructionSet) {
 	is := &instructionSet{filename: it.filename}
 	count := 0
-	it.setLabel(is, set)
+	it.setMetadata(is, set)
 
 	for _, i := range set.Instructions {
 		count++
