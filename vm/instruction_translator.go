@@ -29,25 +29,23 @@ func newInstructionTranslator(file filename) *instructionTranslator {
 	return it
 }
 
-func (it *instructionTranslator) setLabel(is *instructionSet, name string) {
-	var ln string
-	var lt labelType
-	is.name = name
+func (it *instructionTranslator) setLabel(is *instructionSet, set *bytecode.InstructionSet) {
+	t := labelType(set.SetType())
+	n := set.Name()
 
-	if name == bytecode.Program {
+	is.name = n
+
+	if t == bytecode.Program {
 		it.program = is
 		return
 	}
 
-	ln = strings.Split(name, ":")[1]
-	lt = labelType(strings.Split(name, ":")[0])
-
-	if lt == bytecode.Block {
-		it.blockTable[ln] = is
+	if t == bytecode.Block {
+		it.blockTable[n] = is
 		return
 	}
 
-	it.labelTable[lt][ln] = append(it.labelTable[lt][ln], is)
+	it.labelTable[t][n] = append(it.labelTable[t][n], is)
 }
 
 func (it *instructionTranslator) parseParam(param string) interface{} {
@@ -76,7 +74,7 @@ func (it *instructionTranslator) transferInstructionSets(sets []*bytecode.Instru
 func (it *instructionTranslator) transferInstructionSet(iss []*instructionSet, set *bytecode.InstructionSet) {
 	is := &instructionSet{filename: it.filename}
 	count := 0
-	it.setLabel(is, set.Name())
+	it.setLabel(is, set)
 
 	for _, i := range set.Instructions {
 		count++
