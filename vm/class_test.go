@@ -236,7 +236,7 @@ func TestNamespace(t *testing.T) {
 		  class Bar
 		    class Foo
 		      def bar
-			100
+				100
 		      end
 		    end
 		  end
@@ -270,7 +270,7 @@ func TestNamespace(t *testing.T) {
 
 		    class Foo
 		      def bar
-			100
+				100
 		      end
 		    end
 		  end
@@ -328,6 +328,22 @@ func TestNamespace(t *testing.T) {
 
 		Object::Foo
 		`, 10},
+		{`
+		class X
+		  Bar = 100
+		end
+
+		module Foo
+		  Bar = 10
+
+		  class Baz < X
+			def self.result
+			  Bar
+			end
+		  end
+		end
+
+		Foo::Baz.result`, 10},
 	}
 
 	for i, tt := range tests {

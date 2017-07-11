@@ -1136,6 +1136,17 @@ func TestIfExpressionEvaluation(t *testing.T) {
 
 		foo # This should push nil
 		`, nil, 1},
+		{`
+		def foo
+		  x = 0
+		  if true
+		    x = 1
+	      end # This shouldn't push nil
+	      x
+		end
+
+		foo # This should push nil
+		`, 1, 1},
 	}
 
 	for i, tt := range tests {
