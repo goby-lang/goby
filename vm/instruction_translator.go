@@ -35,17 +35,14 @@ func (it *instructionTranslator) setMetadata(is *instructionSet, set *bytecode.I
 
 	is.name = n
 
-	if t == bytecode.Program {
+	switch t {
+	case bytecode.Program:
 		it.program = is
-		return
-	}
-
-	if t == bytecode.Block {
+	case bytecode.Block:
 		it.blockTable[n] = is
-		return
+	default:
+		it.setTable[t][n] = append(it.setTable[t][n], is)
 	}
-
-	it.setTable[t][n] = append(it.setTable[t][n], is)
 }
 
 func (it *instructionTranslator) parseParam(param string) interface{} {
@@ -61,10 +58,8 @@ func (it *instructionTranslator) parseParam(param string) interface{} {
 
 func (it *instructionTranslator) transferInstructionSets(sets []*bytecode.InstructionSet) []*instructionSet {
 	iss := []*instructionSet{}
-	count := 0
 
 	for _, set := range sets {
-		count++
 		it.transferInstructionSet(iss, set)
 	}
 
@@ -73,11 +68,9 @@ func (it *instructionTranslator) transferInstructionSets(sets []*bytecode.Instru
 
 func (it *instructionTranslator) transferInstructionSet(iss []*instructionSet, set *bytecode.InstructionSet) {
 	is := &instructionSet{filename: it.filename}
-	count := 0
 	it.setMetadata(is, set)
 
 	for _, i := range set.Instructions {
-		count++
 		it.transferInstruction(is, i)
 	}
 
