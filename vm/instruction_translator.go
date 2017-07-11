@@ -76,7 +76,7 @@ func (it *instructionTranslator) transferInstructionSets(sets []*bytecode.Instru
 func (it *instructionTranslator) transferInstructionSet(iss []*instructionSet, set *bytecode.InstructionSet) {
 	is := &instructionSet{filename: it.filename}
 	count := 0
-	it.setLabel(is, set.LabelName())
+	it.setLabel(is, set.Name())
 
 	for _, i := range set.Instructions {
 		count++

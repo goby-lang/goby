@@ -14,7 +14,7 @@ const (
 )
 
 func (g *Generator) compileStatements(stmts []ast.Statement, scope *scope, table *localTable) {
-	is := &InstructionSet{label: &label{name: Program}}
+	is := &InstructionSet{name: Program}
 
 	for _, statement := range stmts {
 		g.compileStatement(is, statement, scope, table)
@@ -91,7 +91,7 @@ func (g *Generator) compileClassStmt(is *InstructionSet, stmt *ast.ClassStatemen
 
 	// compile class's content
 	newIS := &InstructionSet{}
-	newIS.setLabel(fmt.Sprintf("%s:%s", LabelDefClass, stmt.Name.Value))
+	newIS.name = fmt.Sprintf("%s:%s", LabelDefClass, stmt.Name.Value)
 
 	g.compileCodeBlock(newIS, stmt.Body, scope, scope.localTable)
 	newIS.define(Leave)
@@ -105,7 +105,7 @@ func (g *Generator) compileModuleStmt(is *InstructionSet, stmt *ast.ModuleStatem
 
 	scope = newScope(stmt)
 	newIS := &InstructionSet{}
-	newIS.setLabel(fmt.Sprintf("%s:%s", LabelDefClass, stmt.Name.Value))
+	newIS.name = fmt.Sprintf("%s:%s", LabelDefClass, stmt.Name.Value)
 
 	g.compileCodeBlock(newIS, stmt.Body, scope, scope.localTable)
 	newIS.define(Leave)
@@ -127,7 +127,7 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 
 	// compile method definition's content
 	newIS := &InstructionSet{}
-	newIS.setLabel(fmt.Sprintf("%s:%s", LabelDef, stmt.Name.Value))
+	newIS.name = fmt.Sprintf("%s:%s", LabelDef, stmt.Name.Value)
 
 	for i := 0; i < len(stmt.Parameters); i++ {
 		var argType int

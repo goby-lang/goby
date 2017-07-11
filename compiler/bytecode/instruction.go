@@ -72,21 +72,13 @@ func (i *Instruction) compile() string {
 	return fmt.Sprintf("%d %s\n", i.line, i.Action)
 }
 
-type label struct {
-	name string
-}
-
 type anchor struct {
 	line int
 }
 
-func (l *label) compile() string {
-	return fmt.Sprintf("<%s>\n", l.name)
-}
-
 // InstructionSet contains a set of Instructions and attaches a label
 type InstructionSet struct {
-	label        *label
+	name         string
 	Instructions []*Instruction
 	count        int
 	argTypes     []int
@@ -97,14 +89,9 @@ func (is *InstructionSet) ArgTypes() []int {
 	return is.argTypes
 }
 
-// LabelName returns the label name of instruction set
-func (is *InstructionSet) LabelName() string {
-	return is.label.name
-}
-
-func (is *InstructionSet) setLabel(name string) {
-	l := &label{name: name}
-	is.label = l
+// Name returns instruction set's name
+func (is *InstructionSet) Name() string {
+	return is.name
 }
 
 func (is *InstructionSet) define(action string, params ...interface{}) {
@@ -131,7 +118,7 @@ func (is *InstructionSet) define(action string, params ...interface{}) {
 
 func (is *InstructionSet) compile() string {
 	var out bytes.Buffer
-	out.WriteString(is.label.compile())
+	out.WriteString(fmt.Sprintf("<%s>\n", is.name))
 	for _, i := range is.Instructions {
 		out.WriteString(i.compile())
 	}

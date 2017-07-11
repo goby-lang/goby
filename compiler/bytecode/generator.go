@@ -138,7 +138,7 @@ func (g *Generator) compileCodeBlock(is *InstructionSet, stmt *ast.BlockStatemen
 }
 
 func (g *Generator) endInstructions(is *InstructionSet) {
-	if g.REPL && is.label.name == Program {
+	if g.REPL && is.name == Program {
 		return
 	}
 	is.define(Leave)
