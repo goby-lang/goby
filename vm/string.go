@@ -288,6 +288,8 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// "Hello\nWorld"[5] # => "\n"
 			// "Hello"[-1]       # => "o"
 			// "Hello"[-6]       # => nil
+			// "Hello😊"[5]      # => "😊"
+			// "Hello😊"[-1]     # => "😊"
 			// ```
 			//
 			// @return [String]
@@ -309,10 +311,11 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					indexValue := index.Value
 
 					if indexValue < 0 {
-						if -indexValue > len(str) {
+						strLength := utf8.RuneCountInString(str)
+						if -indexValue > strLength {
 							return NULL
 						}
-						return t.vm.initStringObject(string([]rune(str)[len(str)+indexValue]))
+						return t.vm.initStringObject(string([]rune(str)[strLength+indexValue]))
 					}
 
 					if len(str) > indexValue {
@@ -335,6 +338,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// "Go"[2] = "by"   # => "Goby"
 			// "Hello\nWorld"[5] = " " # => "Hello World"
 			// "Ruby"[-3] = "oo" # => "Rooby"
+			// "Hello😊"[5] = "🐟" # => "Hello🐟"
 			// ```
 			//
 			// @return [String]
@@ -354,7 +358,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					}
 
 					indexValue := index.Value
-					strLength := len(str)
+					strLength := utf8.RuneCountInString(str)
 
 					if strLength < indexValue {
 						return initErrorObject(ArgumentErrorClass, "Index value out of range. got=%v", strconv.Itoa(indexValue))
@@ -380,7 +384,8 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					if strLength == indexValue {
 						return t.vm.initStringObject(str + replaceStrValue)
 					}
-					result := str[:indexValue] + replaceStrValue + str[indexValue+1:]
+					// Using rune type to support UTF-8 encoding to replace character
+					result := string([]rune(str)[:indexValue]) + replaceStrValue + string([]rune(str)[indexValue+1:])
 					return t.vm.initStringObject(result)
 				}
 			},
@@ -392,6 +397,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// "test".capitalize         # => "Test"
 			// "tEST".capitalize         # => "Test"
 			// "heLlo\nWoRLd".capitalize # => "Hello\nworld"
+			// "😊HeLlO🐟".capitalize    # => "😊hello🐟"
 			// ```
 			//
 			// @return [String]
@@ -399,9 +405,9 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-					str := []byte(receiver.(*StringObject).Value)
-					start := string(str[0])
-					rest := string(str[1:])
+					str := receiver.(*StringObject).Value
+					start := string([]rune(str)[0])
+					rest := string([]rune(str)[1:])
 					result := strings.ToUpper(start) + strings.ToLower(rest)
 
 					return t.vm.initStringObject(result)
@@ -412,8 +418,9 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// Returns a string with the last character chopped
 			//
 			// ```ruby
-			// "Hello".chop # => "Hell"
-			// "Hello World\n".chop => "Hello World"
+			// "Hello".chop         # => "Hell"
+			// "Hello World\n".chop # => "Hello World"
+			// "Hello😊".chop       # => "Hello"
 			// ```
 			//
 			// @return [String]
@@ -422,8 +429,10 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					str := receiver.(*StringObject).Value
+					strLength := utf8.RuneCountInString(str)
 
-					return t.vm.initStringObject(str[:len(str)-1])
+					// Support UTF-8 Encoding
+					return t.vm.initStringObject(string([]rune(str)[:strLength-1]))
 				}
 			},
 		},
@@ -431,7 +440,8 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// Returns a string which is concatenate with the input string or character
 			//
 			// ```ruby
-			// "Hello ".concat("World") # => "Hello World"
+			// "Hello ".concat("World")   # => "Hello World"
+			// "Hello World".concat("😊") # => "Hello World😊"
 			// ```
 			//
 			// @return [String]
@@ -458,9 +468,10 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// Returns the integer that count the string chars as UTF-8
 			//
 			// ```ruby
-			// "abcde".count        # => 5
-			// "哈囉！世界！".count   # => 6
-			// "Hello\nWorld".count # => 11
+			// "abcde".count          # => 5
+			// "哈囉！世界！".count     # => 6
+			// "Hello\nWorld".count   # => 11
+			// "Hello\nWorld😊".count # => 12
 			// ```
 			//
 			// @return [Integer]
@@ -470,6 +481,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 
 					str := receiver.(*StringObject).Value
 
+					// Support UTF-8 Encoding
 					return t.vm.initIntegerObject(utf8.RuneCountInString(str))
 				}
 			},
@@ -478,7 +490,8 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// Returns a string which is being partially deleted with specified values
 			//
 			// ```ruby
-			// "Hello hello HeLlo".delete("el") # => "Hlo hlo HeLlo"
+			// "Hello hello HeLlo".delete("el")        # => "Hlo hlo HeLlo"
+			// "Hello 😊 Hello 😊 Hello".delete("😊") # => "Hello  Hello  Hello"
 			// # TODO: Handle delete intersection of multiple strings' input case
 			// "Hello hello HeLlo".delete("el", "e") # => "Hllo hllo HLlo"
 			// ```
@@ -548,8 +561,10 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// Returns true if receiver string end with the argument string
 			//
 			// ```ruby
-			// "Hello".end_with("llo") # => true
-			// "Hello".end_with("ell") # => false
+			// "Hello".end_with("llo")     # => true
+			// "Hello".end_with("ell")     # => false
+			// "😊Hello🐟".end_with("🐟") # => true
+			// "😊Hello🐟".end_with("😊") # => false
 			// ```
 			//
 			// @return [Boolean]
@@ -569,13 +584,14 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					}
 
 					compareStrValue := compareStr.Value
-					compareStrLength := len(compareStrValue)
+					compareStrLength := utf8.RuneCountInString(compareStrValue)
+					strLength := utf8.RuneCountInString(str)
 
-					if compareStrLength > len(str) {
+					if compareStrLength > strLength {
 						return FALSE
 					}
 
-					if compareStrValue == str[len(str)-compareStrLength:] {
+					if compareStrValue == string([]rune(str)[strLength-compareStrLength:]) {
 						return TRUE
 					}
 					return FALSE
@@ -586,8 +602,9 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// Returns true if receiver string is equal to argument string
 			//
 			// ```ruby
-			// "Hello".eql("Hello") # => true
-			// "Hello".eql("World") # => false
+			// "Hello".eql("Hello")     # => true
+			// "Hello".eql("World")     # => false
+			// "Hello😊".eql("Hello😊") # => true
 			// ```
 			//
 			// @return [Boolean]
@@ -620,7 +637,8 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// Currently only support string version of String#gsub.
 			//
 			// ```ruby
-			// "Ruby Lang".gsub("Ru", "Go") # => "Goby Lang"
+			// "Ruby Lang".gsub("Ru", "Go")                # => "Goby Lang"
+			// "Hello 😊 Hello 😊 Hello".gsub("😊", "🐟") # => "Hello 🐟 Hello 🐟 Hello"
 			// ```
 			//
 			// @return [String]
@@ -655,7 +673,8 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// Checks if the specified string is included in the receiver
 			//
 			// ```ruby
-			// "Hello\nWorld".include("\n") # => true
+			// "Hello\nWorld".include("\n")   # => true
+			// "Hello 😊 Hello".include("😊") # => true
 			// ```
 			//
 			// @return [Bool]
@@ -721,7 +740,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					if !ok {
 						return initErrorObject(TypeErrorClass, "Expect insert string to be String. got=%v", ins.Class().Name)
 					}
-					strLength := len(str)
+					strLength := utf8.RuneCountInString(str)
 
 					if indexValue < 0 {
 						if -indexValue > strLength+1 {
@@ -737,7 +756,8 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 						return initErrorObject(ArgumentErrorClass, "Index value out of range. got=%v", indexValue)
 					}
 
-					return t.vm.initStringObject(str[:indexValue] + insertStr.Value + str[indexValue:])
+					// Support UTF-8 Encoding
+					return t.vm.initStringObject(string([]rune(str)[:indexValue]) + insertStr.Value + string([]rune(str)[indexValue:]))
 				}
 			},
 		},
@@ -746,8 +766,9 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// **Note:** the length is currently byte-based, instead of charcode-based.
 			//
 			// ```ruby
-			// "zero".size # => 4
-			// "".size # => 0
+			// "zero".length # => 4
+			// "".length     # => 0
+			// "😊".length   # => 1
 			// ```
 			//
 			// @return [Integer]
@@ -757,7 +778,8 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 
 					str := receiver.(*StringObject).Value
 
-					return t.vm.initIntegerObject(len(str))
+					// Support UTF-8 Encoding
+					return t.vm.initIntegerObject(utf8.RuneCountInString(str))
 				}
 			},
 		},
@@ -769,9 +791,10 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// It will raise error if the input string length is not integer type
 			//
 			// ```ruby
-			// "Hello".ljust(2)        # => "Hello"
-			// "Hello".ljust(7)        # => "Hello  "
-			// "Hello".ljust(10, "xo") # => "Helloxoxox"
+			// "Hello".ljust(2)           # => "Hello"
+			// "Hello".ljust(7)           # => "Hello  "
+			// "Hello".ljust(10, "xo")    # => "Helloxoxox"
+			// "Hello".ljust(10, "😊🐟") # => "Hello😊🐟😊🐟😊"
 			// ```
 			//
 			// @return [String]
@@ -793,26 +816,31 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 
 					strLengthValue := strLength.Value
 
-					var padStringValue string
+					var padStrValue string
 					if len(args) == 1 {
-						padStringValue = " "
+						padStrValue = " "
 					} else {
 						p := args[1]
-						padString, ok := p.(*StringObject)
+						padStr, ok := p.(*StringObject)
 
 						if !ok {
 							return initErrorObject(TypeErrorClass, "Expect padding string to be String. got=%v", p.Class().Name)
 						}
 
-						padStringValue = padString.Value
+						padStrValue = padStr.Value
 					}
 
-					if strLengthValue > len(str) {
-						for i := len(str); i < strLengthValue; i += len(padStringValue) {
-							str += padStringValue
+					currentStrLength := utf8.RuneCountInString(str)
+					padStrLength := utf8.RuneCountInString(padStrValue)
+
+					if strLengthValue > currentStrLength {
+						for i := currentStrLength; i < strLengthValue; i += padStrLength {
+							str += padStrValue
 						}
-						str = str[:strLengthValue]
+						str = string([]rune(str)[:strLengthValue])
 					}
+
+					// Support UTF-8 Encoding
 					return t.vm.initStringObject(str)
 				}
 			},
@@ -824,6 +852,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// "Hello".replace("World")          # => "World"
 			// "你好"replace("再見")              # => "再見"
 			// "Ruby\nLang".replace("Goby\nLang") # => "Goby Lang"
+			// "Hello😊".replace("World🐟")      # => "World🐟"
 			// ```
 			//
 			// @return [String]
@@ -850,8 +879,9 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// **Note:** the length is currently byte-based, instead of charcode-based.
 			//
 			// ```ruby
-			// "reverse".reverse      # => "esrever"
-			// "Hello\nWorld".reverse # => "dlroW\nolleH"
+			// "reverse".reverse           # => "esrever"
+			// "Hello\nWorld".reverse      # => "dlroW\nolleH"
+			// "Hello 😊🐟 World".reverse # => "dlroW 🐟😊 olleH"
 			// ```
 			//
 			// @return [String]
@@ -862,10 +892,11 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					str := receiver.(*StringObject).Value
 
 					var revert string
-					for i := len(str) - 1; i >= 0; i-- {
-						revert += string(str[i])
+					for i := utf8.RuneCountInString(str) - 1; i >= 0; i-- {
+						revert += string([]rune(str)[i])
 					}
 
+					// Support UTF-8 Encoding
 					return t.vm.initStringObject(revert)
 				}
 			},
@@ -878,9 +909,10 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// It will raise error if the input string length is not integer type
 			//
 			// ```ruby
-			// "Hello".rjust(2) # => "Hello"
-			// "Hello".rjust(7) # => "  Hello"
-			// "Hello".rjust(10, "xo") => "xoxoxHello"
+			// "Hello".rjust(2)          # => "Hello"
+			// "Hello".rjust(7)          # => "  Hello"
+			// "Hello".rjust(10, "xo")   # => "xoxoxHello"
+			// "Hello".rjust(10, "😊🐟") # => "😊🐟😊🐟😊Hello"
 			// ```
 			//
 			// @return [String]
@@ -901,31 +933,36 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 
 					strLengthValue := strLength.Value
 
-					var padStringValue string
+					var padStrValue string
 					if len(args) == 1 {
-						padStringValue = " "
+						padStrValue = " "
 					} else {
 						p := args[1]
-						padString, ok := p.(*StringObject)
+						padStr, ok := p.(*StringObject)
 
 						if !ok {
 							return initErrorObject(TypeErrorClass, "Expect padding string to be String. got=%v", p.Class().Name)
 						}
 
-						padStringValue = padString.Value
+						padStrValue = padStr.Value
 					}
+
+					padStrLength := utf8.RuneCountInString(padStrValue)
 
 					if strLengthValue > len(str) {
 						origin := str
-						for i := len(str); i < strLengthValue; i += len(padStringValue) {
-							str = padStringValue + str
+						originStrLength := utf8.RuneCountInString(origin)
+						for i := originStrLength; i < strLengthValue; i += padStrLength {
+							str = padStrValue + str
 						}
-						if len(str) > strLengthValue {
-							chopLength := len(str) - strLengthValue
-							str = str[:len(str)-len(origin)-chopLength] + origin
+						currentStrLength := utf8.RuneCountInString(str)
+						if currentStrLength > strLengthValue {
+							chopLength := currentStrLength - strLengthValue
+							str = string([]rune(str)[:currentStrLength-originStrLength-chopLength]) + origin
 						}
 					}
 
+					// Support UTF-8 Encoding
 					return t.vm.initStringObject(str)
 				}
 			},
@@ -935,8 +972,9 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// **Note:** the length is currently byte-based, instead of charcode-based.
 			//
 			// ```ruby
-			// "zero".size # => 4
-			// "".size # => 0
+			// "zero".size  # => 4
+			// "".size      # => 0
+			// "😊".size   # => 1
 			// ```
 			//
 			// @return [Integer]
@@ -946,7 +984,8 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 
 					str := receiver.(*StringObject).Value
 
-					return t.vm.initIntegerObject(len(str))
+					// Support UTF-8 Encoding
+					return t.vm.initIntegerObject(utf8.RuneCountInString(str))
 				}
 			},
 		},
@@ -969,12 +1008,22 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// "1234567890".slice(-5..-10)  # => ""
 			// "1234567890".slice(-11..-12) # => nil
 			// "1234567890".slice(-10..-12) # => ""
+			// "Hello 😊🐟 World".slice(1..6)    # => "ello 😊"
+			// "Hello 😊🐟 World".slice(-10..7)  # => "o 😊🐟"
+			// "Hello 😊🐟 World".slice(1..-1)   # => "ello 😊🐟 World"
+			// "Hello 😊🐟 World".slice(-12..-5) # => "llo 😊🐟 W"
 			// "Hello World".slice(4)       # => "o"
 			// "Hello\nWorld".slice(6)      # => "\n"
 			// "Hello World".slice(-3)      # => "r"
 			// "Hello World".slice(-11)     # => "H"
 			// "Hello World".slice(-12)     # => nil
 			// "Hello World".slice(11)      # => nil
+			// "Hello World".slice(4)       # => "o"
+			// "Hello 😊🐟 World".slice(6)      # => "😊"
+			// "Hello 😊🐟 World".slice(-7)      # => "🐟"
+			// "Hello 😊🐟 World".slice(-10)     # => "o"
+			// "Hello 😊🐟 World".slice(-15)     # => nil
+			// "Hello 😊🐟 World".slice(14)      # => nil
 			// ```
 			//
 			// @return [String]
@@ -986,8 +1035,9 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					}
 
 					str := receiver.(*StringObject).Value
-					strLength := len(str)
+					strLength := utf8.RuneCountInString(str)
 
+					// All Case Support UTF-8 Encoding
 					switch args[0].(type) {
 					case *RangeObject:
 						ran := args[0].(*RangeObject)
@@ -998,7 +1048,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 							} else if ran.Start > ran.End {
 								return t.vm.initStringObject("")
 							}
-							return t.vm.initStringObject(str[ran.Start : ran.End+1])
+							return t.vm.initStringObject(string([]rune(str)[ran.Start : ran.End+1]))
 						case ran.Start < 0 && ran.End >= 0:
 							positiveStart := strLength + ran.Start
 							if -ran.Start > strLength {
@@ -1006,7 +1056,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 							} else if positiveStart > ran.End {
 								return t.vm.initStringObject("")
 							}
-							return t.vm.initStringObject(str[positiveStart : ran.End+1])
+							return t.vm.initStringObject(string([]rune(str)[positiveStart : ran.End+1]))
 						case ran.Start >= 0 && ran.End < 0:
 							positiveEnd := strLength + ran.End
 							if ran.Start > strLength {
@@ -1014,7 +1064,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 							} else if positiveEnd < 0 || ran.Start > positiveEnd {
 								return t.vm.initStringObject("")
 							}
-							return t.vm.initStringObject(str[ran.Start : positiveEnd+1])
+							return t.vm.initStringObject(string([]rune(str)[ran.Start : positiveEnd+1]))
 						default:
 							positiveStart := strLength + ran.Start
 							positiveEnd := strLength + ran.End
@@ -1023,7 +1073,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 							} else if positiveStart > positiveEnd {
 								return t.vm.initStringObject("")
 							}
-							return t.vm.initStringObject(str[positiveStart : positiveEnd+1])
+							return t.vm.initStringObject(string([]rune(str)[positiveStart : positiveEnd+1]))
 						}
 
 					case *IntegerObject:
@@ -1052,6 +1102,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// "Hello World".split("o") # => ["Hell", " W", "rld"]
 			// "Goby".split("")         # => ["G", "o", "b", "y"]
 			// "Hello\nWorld\nGoby".split("o") # => ["Hello", "World", "Goby"]
+			// "Hello🐟World🐟Goby".split("🐟") # => ["Hello", "World", "Goby"]
 			// ```
 			//
 			// @return [Array]
@@ -1085,8 +1136,10 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// Returns true if receiver string start with the argument string
 			//
 			// ```ruby
-			// "Hello".start_with("Hel") # => true
-			// "Hello".start_with("hel") # => false
+			// "Hello".start_with("Hel")     # => true
+			// "Hello".start_with("hel")     # => false
+			// "😊Hello🐟".start_with("😊") # => true
+			// "😊Hello🐟".start_with("🐟") # => false
 			// ```
 			//
 			// @return [Boolean]
@@ -1106,13 +1159,14 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					}
 
 					compareStrValue := compareStr.Value
-					compareStrLength := len(compareStrValue)
+					compareStrLength := utf8.RuneCountInString(compareStrValue)
+					strLength := utf8.RuneCountInString(str)
 
-					if compareStrLength > len(str) {
+					if compareStrLength > strLength {
 						return FALSE
 					}
 
-					if compareStrValue == str[:compareStrLength] {
+					if compareStrValue == string([]rune(str)[:compareStrLength]) {
 						return TRUE
 					}
 					return FALSE
@@ -1140,11 +1194,11 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 						str = strings.Trim(str, " ")
 
 						if strings.HasPrefix(str, "\n") || strings.HasPrefix(str, "\t") || strings.HasPrefix(str, "\r") || strings.HasPrefix(str, "\v") {
-							str = str[1:]
+							str = string([]rune(str)[1:])
 							continue
 						}
 						if strings.HasSuffix(str, "\n") || strings.HasSuffix(str, "\t") || strings.HasSuffix(str, "\r") || strings.HasSuffix(str, "\v") {
-							str = str[:len(str)-2]
+							str = string([]rune(str)[:utf8.RuneCountInString(str)-2])
 							continue
 						}
 						break
@@ -1157,7 +1211,8 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// Returns an array of characters converted from a string
 			//
 			// ```ruby
-			// "Goby".to_a # => ["G", "o", "b", "y"]
+			// "Goby".to_a       # => ["G", "o", "b", "y"]
+			// "😊Hello🐟".to_a # => ["😊", "H", "e", "l", "l", "o", "🐟"]
 			// ```
 			//
 			// @return [String]
@@ -1166,9 +1221,10 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					str := receiver.(*StringObject)
+					strLength := utf8.RuneCountInString(str.Value)
 					elems := []Object{}
 
-					for i := 0; i < len(str.Value); i++ {
+					for i := 0; i < strLength; i++ {
 						elems = append(elems, t.vm.initStringObject(string([]rune(str.Value)[i])))
 					}
 

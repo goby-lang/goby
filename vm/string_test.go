@@ -47,6 +47,14 @@ func TestStringConversion(t *testing.T) {
 		  arr = "Goby".to_a
 		  arr[3]
 		`, "y"},
+		{`
+		  arr = "🍣Goby🍺".to_a
+		  arr[0]
+		`, "🍣"},
+		{`
+		  arr = "🍣Goby🍺".to_a
+		  arr[5]
+		`, "🍺"},
 	}
 
 	for i, tt := range tests {
@@ -115,12 +123,17 @@ func TestStringOperation(t *testing.T) {
 		{`"Hello"[5]`, nil},
 		{`"Hello"[-1]`, "o"},
 		{`"Hello"[-6]`, nil},
+		{`"Hello🍣"[5]`, "🍣"},
+		{`"Hello🍣"[-1]`, "🍣"},
 		{`"Hello\nWorld"[5]`, "\n"},
 		{`"Ruby"[1] = "oo"`, "Rooby"},
 		{`"Go"[2] = "by"`, "Goby"},
 		{`"Ruby"[-3] = "oo"`, "Rooby"},
 		{`"Hello"[-5] = "Tr"`, "Trello"},
 		{`"Hello\nWorld"[5] = " "`, "Hello World"},
+		{`"Hello🍣"[5] = "🍺"`, "Hello🍺"},
+		{`"Hello🍣"[1] = "🍺"`, "H🍺llo🍣"},
+		{`"Hello🍣"[-1] = "🍺"`, "Hello🍺"},
 	}
 
 	for i, tt := range tests {
@@ -167,6 +180,7 @@ func TestStringCapitalizeMethod(t *testing.T) {
 		{`"first Lower".capitalize`, "First lower"},
 		{`"all lower".capitalize`, "All lower"},
 		{`"heLlo\nWoRLd".capitalize`, "Hello\nworld"},
+		{`"🍣HeLlO🍺".capitalize`, "🍣hello🍺"},
 	}
 
 	for i, tt := range tests {
@@ -184,6 +198,7 @@ func TestStringChopMethod(t *testing.T) {
 	}{
 		{`"Hello".chop`, "Hell"},
 		{`"Hello\n".chop`, "Hello"},
+		{`"Hello🍣".chop`, "Hello"},
 	}
 
 	for i, tt := range tests {
@@ -200,6 +215,7 @@ func TestStringConcatenateMethod(t *testing.T) {
 		expected interface{}
 	}{
 		{`"Hello ".concat("World")`, "Hello World"},
+		{`"Hello World".concat("🍣")`, "Hello World🍣"},
 	}
 
 	for i, tt := range tests {
@@ -239,6 +255,7 @@ func TestStringCountMethod(t *testing.T) {
 		{`"abcde".count`, 5},
 		{`"哈囉！世界！".count`, 6},
 		{`"Hello\nWorld".count`, 11},
+		{`"Hello\nWorld🍣".count`, 12},
 	}
 
 	for i, tt := range tests {
@@ -255,6 +272,7 @@ func TestStringDeleteMethod(t *testing.T) {
 		expected interface{}
 	}{
 		{`"Hello hello HeLlo".delete("el")`, "Hlo hlo HeLlo"},
+		{`"Hello 🍣 Hello 🍣 Hello".delete("🍣")`, "Hello  Hello  Hello"},
 	}
 
 	for i, tt := range tests {
@@ -293,6 +311,7 @@ func TestStringDowncaseMethod(t *testing.T) {
 		{`"hEllO".downcase`, "hello"},
 		{`"MORE wOrds".downcase`, "more words"},
 		{`"HeLlO\tWorLD".downcase`, "hello\tworld"},
+		{`"🍣HeLlO🍺".downcase`, "🍣hello🍺"},
 	}
 
 	for i, tt := range tests {
@@ -314,6 +333,8 @@ func TestStringEndWithMethod(t *testing.T) {
 		{`"哈囉！世界！".end_with("世界！")`, true},
 		{`"Hello".end_with("ell")`, false},
 		{`"哈囉！世界！".end_with("哈囉！")`, false},
+		{`"🍣Hello🍺".end_with("🍺")`, true},
+		{`"🍣Hello🍺".end_with("🍣")`, false},
 	}
 
 	for i, tt := range tests {
@@ -372,6 +393,7 @@ func TestStringEqualMethod(t *testing.T) {
 		{`"Hello".eql(1)`, false},
 		{`"Hello".eql(true)`, false},
 		{`"Hello".eql(2..4)`, false},
+		{`"Hello🍣".eql("Hello🍣")`, true},
 	}
 
 	for i, tt := range tests {
@@ -407,6 +429,7 @@ func TestStringGlobalSubstituteMethod(t *testing.T) {
 		{`"Ruby".gsub("Ru", "Go")`, "Goby"},
 		{`"Hello World".gsub(" ", "\n")`, "Hello\nWorld"},
 		{`"Hello World".gsub("Hello", "Goby")`, "Goby World"},
+		{`"Hello 🍣 Hello 🍣 Hello".gsub("🍣", "🍺")`, "Hello 🍺 Hello 🍺 Hello"},
 	}
 
 	for i, tt := range tests {
@@ -448,6 +471,7 @@ func TestStringIncludeMethod(t *testing.T) {
 		{`"Hello\nWorld".include("Hello\nWorld!")`, false},
 		{`"Hello\nWorld".include("\n")`, true},
 		{`"Hello\nWorld".include("\r")`, false},
+		{`"Hello🍣".include("🍣")`, true},
 	}
 
 	for i, tt := range tests {
@@ -489,6 +513,11 @@ func TestStringInsertMethod(t *testing.T) {
 		{`"Hello".insert(5, "X")`, "HelloX"},
 		{`"Hello".insert(-2, "X")`, "HelXlo"},
 		{`"Hello".insert(-6, "X")`, "XHello"},
+		{`"Hello".insert(0, "🍣")`, "🍣Hello"},
+		{`"Hello".insert(2, "🍣")`, "He🍣llo"},
+		{`"Hello".insert(5, "🍣")`, "Hello🍣"},
+		{`"Hello".insert(-2, "🍣")`, "Hel🍣lo"},
+		{`"Hello".insert(-6, "🍣")`, "🍣Hello"},
 	}
 
 	for i, tt := range tests {
@@ -529,6 +558,7 @@ func TestStringLeftJustifyMethod(t *testing.T) {
 		{`"Hello".ljust(2)`, "Hello"},
 		{`"Hello".ljust(7)`, "Hello  "},
 		{`"Hello".ljust(10, "xo")`, "Helloxoxox"},
+		{`"Hello".ljust(10, "🍣🍺")`, "Hello🍣🍺🍣🍺🍣"},
 	}
 
 	for i, tt := range tests {
@@ -570,6 +600,7 @@ func TestStringLengthMethod(t *testing.T) {
 	}{
 		{`"New method".length`, 10},
 		{`" ".length`, 1},
+		{`"🍣🍣🍣".length`, 3},
 	}
 
 	for i, tt := range tests {
@@ -588,6 +619,7 @@ func TestStringReplaceMethod(t *testing.T) {
 		{`"Hello".replace("World")`, "World"},
 		{`"您好".replace("再見")`, "再見"},
 		{`"Ruby\nLang".replace("Goby\nLang")`, "Goby\nLang"},
+		{`"Hello🍣".replace("World🍺")`, "World🍺"},
 	}
 
 	for i, tt := range tests {
@@ -626,6 +658,7 @@ func TestStringReverseMethod(t *testing.T) {
 		{`" ".reverse`, " "},
 		{`"-123".reverse`, "321-"},
 		{`"Hello\nWorld".reverse`, "dlroW\nolleH"},
+		{`"Hello 🍣🍺 World".reverse`, "dlroW 🍺🍣 olleH"},
 	}
 
 	for i, tt := range tests {
@@ -644,6 +677,7 @@ func TestStringRightJustifyMethod(t *testing.T) {
 		{`"Hello".rjust(2)`, "Hello"},
 		{`"Hello".rjust(7)`, "  Hello"},
 		{`"Hello".rjust(10, "xo")`, "xoxoxHello"},
+		{`"Hello".rjust(10, "🍣🍺")`, "🍣🍺🍣🍺🍣Hello"},
 	}
 
 	for i, tt := range tests {
@@ -685,6 +719,7 @@ func TestStringSizeMethod(t *testing.T) {
 	}{
 		{`"Rooby".size`, 5},
 		{`" ".size`, 1},
+		{`"🍣🍺🍺🍣".size`, 4},
 	}
 
 	for i, tt := range tests {
@@ -716,12 +751,21 @@ func TestStringSliceMethod(t *testing.T) {
 		{`"1234567890".slice(-10..-12)`, ""},
 		{`"1234567890".slice(-11..-12)`, nil},
 		{`"1234567890".slice(-11..-5)`, nil},
+		{`"Hello 🍣🍺 World".slice(1..6)`, "ello 🍣"},
+		{`"Hello 🍣🍺 World".slice(-10..7)`, "o 🍣🍺"},
+		{`"Hello 🍣🍺 World".slice(1..-1)`, "ello 🍣🍺 World"},
+		{`"Hello 🍣🍺 World".slice(-12..-5)`, "llo 🍣🍺 W"},
 		{`"Hello World".slice(4)`, "o"},
 		{`"Hello\nWorld".slice(5)`, "\n"},
 		{`"Hello World".slice(-3)`, "r"},
 		{`"Hello World".slice(-11)`, "H"},
 		{`"Hello World".slice(-12)`, nil},
 		{`"Hello World".slice(11)`, nil},
+		{`"Hello 🍣🍺 World".slice(6)`, "🍣"},
+		{`"Hello 🍣🍺 World".slice(-7)`, "🍺"},
+		{`"Hello 🍣🍺 World".slice(-10)`, "o"},
+		{`"Hello 🍣🍺 World".slice(-15)`, nil},
+		{`"Hello 🍣🍺 World".slice(14)`, nil},
 	}
 
 	for i, tt := range tests {
@@ -800,6 +844,26 @@ func TestStringSplitMethod(t *testing.T) {
 		arr = "Hello\nWorld\nGoby".split("\n")
 		arr[2]
 		`, "Goby"},
+		{`
+		arr = "Hello🍺World🍺Goby".split("🍺")
+		arr[0]
+		`, "Hello"},
+		{`
+		arr = "Hello🍺World🍺Goby".split("🍺")
+		arr[1]
+		`, "World"},
+		{`
+		arr = "Hello🍺World🍺Goby".split("🍺")
+		arr[2]
+		`, "Goby"},
+		{`
+		arr = "Hello🍺World🍣Goby".split("🍺")
+		arr[0]
+		`, "Hello"},
+		{`
+		arr = "Hello🍺World🍣Goby".split("🍺")
+		arr[1]
+		`, "World🍣Goby"},
 	}
 
 	for i, tt := range tests {
@@ -841,6 +905,8 @@ func TestStringStartWithMethod(t *testing.T) {
 		{`"哈囉！世界！".start_with("哈囉！")`, true},
 		{`"Hello".start_with("hel")`, false},
 		{`"哈囉！世界".start_with("世界！")`, false},
+		{`"🍣Hello🍺".start_with("🍣")`, true},
+		{`"🍣Hello🍺".start_with("🍺")`, false},
 	}
 
 	for i, tt := range tests {
@@ -878,6 +944,7 @@ func TestStringStripMethod(t *testing.T) {
 	}{
 		{`"  Goby Lang   ".strip`, "Goby Lang"},
 		{`"\nGoby Lang\r\t".strip`, "Goby Lang"},
+		{`" \t 🍣 Goby Lang 🍺 \r\n ".strip`, "🍣 Goby Lang 🍺"},
 	}
 
 	for i, tt := range tests {
@@ -896,6 +963,7 @@ func TestStringUpcaseMethod(t *testing.T) {
 		{`"hEllO".upcase`, "HELLO"},
 		{`"MORE wOrds".upcase`, "MORE WORDS"},
 		{`"Hello\nWorld".upcase`, "HELLO\nWORLD"},
+		{`"🍣Hello🍺".upcase`, "🍣HELLO🍺"},
 	}
 
 	for i, tt := range tests {
