@@ -14,8 +14,7 @@ import (
 	"github.com/pkg/profile"
 )
 
-// Version stores current Goby version
-const Version string = "0.0.9"
+const Version string = vm.Version
 
 func main() {
 	profileOptionPtr := flag.Bool("p", false, "Profile program execution")

@@ -10,6 +10,9 @@ import (
 	"sync"
 )
 
+// Version stores current Goby version
+const Version = "0.0.9"
+
 type isIndexTable struct {
 	Data map[string]int
 }
@@ -82,7 +85,7 @@ func New(fileDir string, args []string) *VM {
 	gobyRoot := os.Getenv("GOBY_ROOT")
 
 	if len(gobyRoot) == 0 {
-		vm.projectRoot = "/usr/local/goby"
+		vm.projectRoot = fmt.Sprintf("/usr/local/Cellar/goby/%s/", Version)
 	} else {
 		vm.projectRoot = gobyRoot
 	}
