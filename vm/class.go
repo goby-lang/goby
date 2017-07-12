@@ -480,7 +480,11 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					var class *RClass
-					module := args[0].(*RClass)
+					module, ok := args[0].(*RClass)
+
+					if !ok {
+						return initErrorObject(TypeErrorClass, "Expect argument to be a module. got=%v", args[0].Class().Name)
+					}
 
 					switch r := receiver.(type) {
 					case *RClass:
