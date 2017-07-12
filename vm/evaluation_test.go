@@ -883,12 +883,6 @@ func TestPostfixMethodCall(t *testing.T) {
 		`,
 			0},
 		{`
-		a = nil
-    b = 1
-		a ||= b
-		`,
-			1},
-		{`
 		a = 1
     b = 2
 		a ||= b

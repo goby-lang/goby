@@ -121,6 +121,14 @@ func (l *Lexer) NextToken() token.Token {
 			l.readChar()
 			return tok
 		}
+		if l.peekChar() == '=' {
+			tok.Literal = "+="
+			tok.Line = l.line
+			tok.Type = token.PlusEql
+			l.readChar()
+			l.readChar()
+			return tok
+		}
 		tok = newToken(token.Plus, l.ch, l.line)
 	case '{':
 		tok = newToken(token.LBrace, l.ch, l.line)
