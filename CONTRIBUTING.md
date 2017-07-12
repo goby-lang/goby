@@ -29,7 +29,25 @@ If you are very interested in `Goby` or planning contribute `Goby` frequently, p
 **Note**: Before sending PR, you should perform `make test` on the root directory of the project to perform all tests (`go test` works only against goby.go file and will be incomplete for the test).
 
 
+## Setup Environment
 
+
+### `$GOBY_ROOT`
+
+By default Goby finds standard libs in `/usr/local/goby` when you install it via homebrew.
+But if you want to develop Goby or you installed Goby from source, you might want to set `$GOBY_ROOT` to Goby's project root so you can use latest libs.
+Add the following line to your shell config file, either `~/.bashrc`, `~/.bash_profile`, or `~/.zshrc` if you're using zsh.
+
+```
+export GOBY_ROOT=$GOPATH/src/github.com/goby-lang/goby
+```
+
+The most common messages you'll see if you do not set `$GOBY_ROOT` right are 'library not found'. For example:
+
+```ruby
+require 'net/http'
+# => Internal Error: open lib/net/http/response.gb: no such file or directory
+```
 
 
 
