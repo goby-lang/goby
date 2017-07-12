@@ -9,8 +9,6 @@ func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, sc
 	// See fsm initialization's comment
 	if g.fsm.Is(keepExp) {
 		switch exp := exp.(type) {
-		case *ast.Identifier:
-			g.compileIdentifier(is, exp, scope, table)
 		case *ast.Constant:
 			is.define(GetConstant, exp.Value)
 		case *ast.InstanceVariable:
@@ -50,6 +48,8 @@ func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, sc
 	}
 
 	switch exp := exp.(type) {
+	case *ast.Identifier:
+		g.compileIdentifier(is, exp, scope, table)
 	case *ast.InfixExpression:
 		if exp.Operator == "=" {
 			// Because this is assignment so we do need the expression's value
@@ -70,7 +70,7 @@ func (g *Generator) compileIdentifier(is *InstructionSet, exp *ast.Identifier, s
 	index, depth, ok := table.getLCL(exp.Value, table.depth)
 
 	// it's local variable
-	if ok {
+	if ok && g.fsm.Is(keepExp) {
 		is.define(GetLocal, depth, index)
 		return
 	}

@@ -38,6 +38,51 @@ func TestMethodCall(t *testing.T) {
 		{
 			`
 			class Foo
+			  def baz
+			    @foo = 100
+			  end
+
+			  def foo
+			    @foo
+			  end
+
+			  def bar
+			    baz
+			    foo
+			  end
+			end
+
+			Foo.new.bar
+			`, 100,
+		},
+		{
+			`
+			class Foo
+			  def baz
+			    @foo = 100
+			  end
+
+			  def foo
+			    @foo
+			  end
+
+			  def baz2
+			    @foo = @foo + 100
+			  end
+
+			  def bar
+			    baz
+			    baz2
+			    foo
+			  end
+			end
+
+			Foo.new.bar
+			`, 200,
+		},
+		{
+			`
+			class Foo
 			  def set_x(x) # Set x
 			    @x = x
 			  end

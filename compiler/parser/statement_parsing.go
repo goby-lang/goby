@@ -8,7 +8,6 @@ import (
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.InstanceVariable, token.Ident, token.Constant:
-
 		return p.parseExpressionStatement()
 	case token.Return:
 		return p.parseReturnStatement()

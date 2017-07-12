@@ -76,32 +76,55 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 
 	leftExp := parseFn()
 
+	if !p.peekTokenAtSameLine() {
+		return leftExp
+	}
+
 	// For method call without self and parens like
 	//
 	// foo do |bar|
 	//   #dosomething
 	// end
 
-	if p.peekTokenIs(token.Do) && precedence == LOWEST {
-		infixFn := p.parseCallExpression
-		return infixFn(leftExp)
+	if p.curTokenIs(token.Ident) && precedence == LOWEST  {
+		if p.peekTokenIs(token.Do) {
+			return p.parseCallExpressionWithoutParenAndReceiver(p.curToken)
+		}
+
+		/*
+			This means method call with arguments but without parens like:
+
+			```
+			foo x
+			foo @bar
+			foo 10
+			```
+
+			Program like
+
+			```
+			foo
+			x
+			```
+
+			will also enter this condition, but we'll check if those two token is at same line in the parsing function
+		*/
+		if arguments[p.peekToken.Type] {
+			// Method token
+			tok := p.curToken
+			p.nextToken()
+			return  p.parseCallExpressionWithoutParenAndReceiver(tok)
+		}
 	}
 
-	// I use precedence "LOWEST" to identify call_without_parens case, this is not an appropriate way but it work in current situation
-	if arguments[p.peekToken.Type] && precedence == LOWEST {
-		infixFn := p.parseCallExpression
+	for !p.peekTokenIs(token.Semicolon) && precedence < p.peekPrecedence() && p.peekTokenAtSameLine() {
+
+		infixFn := p.infixParseFns[p.peekToken.Type]
+		if infixFn == nil {
+			return leftExp
+		}
 		p.nextToken()
 		leftExp = infixFn(leftExp)
-	} else {
-		for !p.peekTokenIs(token.Semicolon) && precedence < p.peekPrecedence() && p.peekTokenAtSameLine() {
-
-			infixFn := p.infixParseFns[p.peekToken.Type]
-			if infixFn == nil {
-				return leftExp
-			}
-			p.nextToken()
-			leftExp = infixFn(leftExp)
-		}
 	}
 
 	return leftExp
@@ -332,12 +355,32 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	return ie
 }
 
+func (p *Parser) parseCallExpressionWithoutParenAndReceiver(methodToken token.Token) ast.Expression {
+	// real receiver is self
+	selfTok := token.Token{Type: token.Self, Literal: "self", Line: p.curToken.Line}
+	self := &ast.SelfExpression{Token: selfTok}
+
+	// current token is identifier (method name)
+	exp := &ast.CallExpression{Token: p.curToken, Receiver: self, Method: methodToken.Literal}
+
+	if p.curToken.Line == methodToken.Line { // foo x
+		exp.Arguments = p.parseCallArgumentsWithoutParens()
+	}
+
+	// Parse block
+	if p.peekTokenIs(token.Do) && p.acceptBlock {
+		p.parseBlockParameters(exp)
+	}
+
+	return exp
+}
+
 func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 	var exp *ast.CallExpression
 
-	if p.curTokenIs(token.LParen) || arguments[p.curToken.Type] { // foo(x) || foo x
-		// receiver arg is actually the method name
+	if p.curTokenIs(token.LParen) { // foo(x)
 		m := receiver.(*ast.Identifier).Value
+
 		// real receiver is self
 		selfTok := token.Token{Type: token.Self, Literal: "self", Line: p.curToken.Line}
 		self := &ast.SelfExpression{Token: selfTok}
@@ -345,14 +388,7 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 
 		// current token is identifier (method name)
 		exp = &ast.CallExpression{Token: p.curToken, Receiver: receiver, Method: m}
-
-		if p.curTokenIs(token.LParen) { // foo(x)
-			exp.Arguments = p.parseCallArguments()
-
-		} else { // foo x
-			exp.Arguments = p.parseCallArgumentsWithoutParens()
-		}
-
+		exp.Arguments = p.parseCallArguments()
 	} else if p.curTokenIs(token.Dot) { // call expression has a receiver like: p.foo
 
 		exp = &ast.CallExpression{Token: p.curToken, Receiver: receiver}
@@ -367,7 +403,7 @@ func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
 		if p.peekTokenIs(token.LParen) { // p.foo(x)
 			p.nextToken()
 			exp.Arguments = p.parseCallArguments()
-		} else if p.peekTokenIs(token.Dot) { // p.foo.bar; || p.foo; || p.foo + 123
+		} else if p.peekTokenIs(token.Dot) { // p.foo.bar
 			exp.Arguments = []ast.Expression{}
 		} else if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { // p.foo x, y, z || p.foo x
 			p.nextToken()
