@@ -15,7 +15,7 @@ import (
 )
 
 // Version stores current Goby version
-const Version string = "0.0.8"
+const Version string = "0.0.9"
 
 func main() {
 	profileOptionPtr := flag.Bool("p", false, "Profile program execution")
