@@ -102,9 +102,8 @@ It will have Ruby's syntax (I'll try to support all common syntaxes) but without
     ```
     $GOPATH/src/github.com/goby-lang/goby
     ```
-6. Run `goby -v` to verify.
 
-### Via homebrew
+### Via Homebrew
 
 **Please checkout the [latest release](https://github.com/goby-lang/goby/releases) before using this approach**
 
@@ -112,6 +111,16 @@ It will have Ruby's syntax (I'll try to support all common syntaxes) but without
 brew tap goby-lang/goby
 brew install goby
 ```
+
+### Verify Your Installation
+
+1. Run `goby -v` to see the version.
+2. Run `goby -i` to enter interactive console.
+3. Type `require "file"`.
+4. If no error shows up than you have successfully installed Goby :)
+5. You can also just run `brew test goby` if you install it via homebrew.
+
+**If you have any issue installing Goby, please open an issue for it**
 
 ## Usage
 
