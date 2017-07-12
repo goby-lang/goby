@@ -78,7 +78,15 @@ func New(fileDir string, args []string) *VM {
 		bytecode.ClassDef:  make(isTable),
 	}
 	vm.fileDir = fileDir
-	vm.projectRoot = os.Getenv("GOBY_ROOT")
+
+	gobyRoot := os.Getenv("GOBY_ROOT")
+
+	if len(gobyRoot) == 0 {
+		vm.projectRoot = "/usr/local/goby"
+	} else {
+		vm.projectRoot = gobyRoot
+	}
+
 	vm.mainObj = vm.initMainObj()
 	vm.channelObjectMap = &objectMap{store: map[int]Object{}}
 
