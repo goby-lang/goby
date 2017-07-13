@@ -19,6 +19,8 @@ const (
 	UnexpectedTokenError
 	// UnexpectedEndError means we get unexpected "end" keyword (this is mainly created for REPL)
 	UnexpectedEndError
+	// MethodDefinitionError means there's an error on method definition's method name
+	MethodDefinitionError
 )
 
 // Error represents parser's parsing error
