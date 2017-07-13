@@ -241,7 +241,7 @@ func (p *Parser) parseArrayExpression() ast.Expression {
 	return arr
 }
 
-func (p *Parser) parseArrayIndexExpression(left ast.Expression) ast.Expression {
+func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
 	callExpression := &ast.CallExpression{Receiver: left, Method: "[]", Token: p.curToken}
 
 	if p.peekTokenIs(token.RBracket) {
