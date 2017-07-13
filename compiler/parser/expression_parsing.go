@@ -323,7 +323,7 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 	variable, ok := v.(ast.Variable)
 
 	if !ok {
-		p.error = &Error{Message: fmt.Sprintf("Can't assign value to \"%s\". Line: %d", v.String(), p.curToken.Line), errType: InvalidAssignmentError}
+		p.error = &Error{Message: fmt.Sprintf("Can't assign value to %s. Line: %d", v.String(), p.curToken.Line), errType: InvalidAssignmentError}
 	}
 
 	exp := &ast.AssignExpression{
