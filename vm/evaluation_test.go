@@ -38,6 +38,26 @@ func TestMethodCall(t *testing.T) {
 		{
 			`
 			class Foo
+			  def bar
+			    10
+			  end
+
+			  def baz(x)
+			    x + 100
+			  end
+
+			  def foo
+			    x = baz(bar)
+			    x
+			  end
+			end
+
+			Foo.new.foo
+			`, 110,
+		},
+		{
+			`
+			class Foo
 			  def baz
 			    @foo = 100
 			  end
@@ -408,6 +428,16 @@ func TestMethodCallWithBlockArgument(t *testing.T) {
 		r
 		`,
 			11},
+		{
+			`
+			def foo
+			  yield(10)
+			end
+
+			foo do |ten|
+			  ten + 20
+			end
+			`, 30},
 	}
 
 	for i, tt := range tests {
@@ -528,6 +558,26 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		input    string
 		expected int
 	}{
+		{
+			`
+			class Foo
+			  def bar
+			    10
+			  end
+
+			  def baz(x)
+			    x + 100
+			  end
+
+			  def foo
+			    x = baz bar
+			    x
+			  end
+			end
+
+			Foo.new.foo
+			`, 110,
+		},
 		{
 			`
 			class Foo
@@ -710,6 +760,17 @@ func TestMethodCallWithoutParens(t *testing.T) {
 			i
 			`, 10,
 		},
+		{`
+		def foo
+		  10
+		end
+
+		def double(x)
+		  x * 2
+		end
+
+		double foo
+		`, 20},
 	}
 
 	for i, tt := range tests {
