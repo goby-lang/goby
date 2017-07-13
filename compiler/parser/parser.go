@@ -6,6 +6,7 @@ import (
 	"github.com/goby-lang/goby/compiler/ast"
 	"github.com/goby-lang/goby/compiler/lexer"
 	"github.com/goby-lang/goby/compiler/token"
+	"github.com/looplab/fsm"
 )
 
 const (
@@ -18,6 +19,8 @@ const (
 	UnexpectedTokenError
 	// UnexpectedEndError means we get unexpected "end" keyword (this is mainly created for REPL)
 	UnexpectedEndError
+	// MethodDefinitionError means there's an error on method definition's method name
+	MethodDefinitionError
 )
 
 // Error represents parser's parsing error
@@ -52,6 +55,7 @@ type Parser struct {
 	// currently only used when parsing while statement.
 	// However, this is not a very good practice should change it in the future.
 	acceptBlock bool
+	fsm         *fsm.FSM
 }
 
 // BuildAST tokenizes and parses given file to build AST
@@ -68,12 +72,28 @@ func BuildAST(file []byte) *ast.Program {
 	return program
 }
 
+const (
+	normal           = "normal"
+	parseFuncCall    = "parseFuncCall"
+	parseMethodParam = "parseMethodParam"
+)
+
 // New initializes a parser and returns it
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
 		Lexer:       l,
 		acceptBlock: true,
 	}
+
+	p.fsm = fsm.NewFSM(
+		normal,
+		fsm.Events{
+			{Name: parseFuncCall, Src: []string{normal}, Dst: parseFuncCall},
+			{Name: parseMethodParam, Src: []string{normal}, Dst: parseMethodParam},
+			{Name: normal, Src: []string{parseFuncCall, parseMethodParam}, Dst: normal},
+		},
+		fsm.Callbacks{},
+	)
 
 	p.prefixParseFns = make(map[token.Type]prefixParseFn)
 	p.registerPrefix(token.Ident, p.parseIdentifier)
@@ -108,9 +128,6 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.GT, p.parseInfixExpression)
 	p.registerInfix(token.GTE, p.parseInfixExpression)
 	p.registerInfix(token.COMP, p.parseInfixExpression)
-	p.registerInfix(token.Dot, p.parseCallExpression)
-	p.registerInfix(token.LParen, p.parseCallExpression)
-	p.registerInfix(token.LBracket, p.parseArrayIndexExpression)
 	p.registerInfix(token.Incr, p.parsePostfixExpression)
 	p.registerInfix(token.Decr, p.parsePostfixExpression)
 	p.registerInfix(token.And, p.parseInfixExpression)
@@ -118,6 +135,9 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.ResolutionOperator, p.parseInfixExpression)
 	p.registerInfix(token.Assign, p.parseInfixExpression)
 	p.registerInfix(token.Range, p.parseRangeExpression)
+	p.registerInfix(token.Dot, p.parseCallExpressionWithDot)
+	p.registerInfix(token.LParen, p.parseCallExpressionWithParen)
+	p.registerInfix(token.LBracket, p.parseIndexExpression)
 
 	return p
 }

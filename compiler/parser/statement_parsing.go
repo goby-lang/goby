@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"github.com/goby-lang/goby/compiler/ast"
 	"github.com/goby-lang/goby/compiler/token"
 )
@@ -8,7 +9,6 @@ import (
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.InstanceVariable, token.Ident, token.Constant:
-
 		return p.parseExpressionStatement()
 	case token.Return:
 		return p.parseReturnStatement()
@@ -34,59 +34,50 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 	stmt := &ast.DefStatement{Token: p.curToken}
 
 	p.nextToken()
-	switch p.curToken.Type {
-	case token.Ident:
-		if p.peekTokenIs(token.Dot) {
+
+	// Method has specific receiver like `def self.foo` or `def bar.foo`
+	if p.peekTokenIs(token.Dot) {
+		switch p.curToken.Type {
+		case token.Ident:
 			stmt.Receiver = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-			p.nextToken() // .
-			if !p.expectPeek(token.Ident) {
-				return nil
-			}
-			stmt.Name =
-				&ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-		} else {
-
-			stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-
+		case token.Self:
+			stmt.Receiver = &ast.SelfExpression{Token: p.curToken}
+		default:
+			p.error = &Error{Message: fmt.Sprintf("Invalid method receiver: %s. Line: %d", p.curToken.Literal, p.curToken.Line), errType: MethodDefinitionError}
 		}
-	case token.Self:
-		stmt.Receiver = &ast.SelfExpression{Token: p.curToken}
+
 		p.nextToken() // .
 		if !p.expectPeek(token.Ident) {
 			return nil
 		}
-		stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-	default:
-		return nil
 	}
+
+	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 
 	// Setter method def foo=()
 	if p.peekTokenIs(token.Assign) {
 		stmt.Name.Value = stmt.Name.Value + "="
 		p.nextToken()
 	}
-	// def foo
 
-	if p.peekTokenAtSameLine() { // `def foo()` or `def foo x `, next token at same line
-		if p.peekTokenIs(token.LParen) {
+	if p.peekTokenIs(token.Ident) && p.peekTokenAtSameLine() { // def foo x, next token is x and at same line
+		p.error = &Error{Message: fmt.Sprintf("Please add parentheses around method \"%s\"'s parameters. Line: %d", stmt.Name.Value, p.curToken.Line), errType: MethodDefinitionError}
+	}
+
+	if p.peekTokenIs(token.LParen) {
+		p.nextToken()
+
+		// empty params
+		if p.peekTokenIs(token.RParen) {
 			p.nextToken()
-
-			// empty params
-			if p.peekTokenIs(token.RParen) {
-				p.nextToken()
-				params = []ast.Expression{}
-			} else {
-				params = p.parseParameters()
-
-				if !p.expectPeek(token.RParen) {
-					return nil
-				}
-			}
-
-		} else if p.peekTokenIs(token.Ident) { // def foo x, next token is x and at same line
+			params = []ast.Expression{}
+		} else {
 			params = p.parseParameters()
-		}
 
+			if !p.expectPeek(token.RParen) {
+				return nil
+			}
+		}
 	} else {
 		params = []ast.Expression{}
 	}
@@ -98,6 +89,7 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 }
 
 func (p *Parser) parseParameters() []ast.Expression {
+	p.fsm.Event(parseMethodParam)
 	params := []ast.Expression{}
 
 	p.nextToken()
@@ -111,6 +103,7 @@ func (p *Parser) parseParameters() []ast.Expression {
 		params = append(params, param)
 	}
 
+	p.fsm.Event(normal)
 	return params
 }
 
