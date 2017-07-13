@@ -2,6 +2,7 @@ package ast
 
 import "github.com/goby-lang/goby/compiler/token"
 
+// Variable interface represents assignable nodes in Goby, currently are Identifier, InstanceVariable and Constant
 type Variable interface {
 	variableNode()
 	ReturnValue() string

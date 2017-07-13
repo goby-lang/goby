@@ -138,6 +138,7 @@ func (ie *InfixExpression) String() string {
 	return out.String()
 }
 
+// AssignExpression represents variable assignment in Goby.
 type AssignExpression struct {
 	Token    token.Token
 	Variable Variable
