@@ -138,7 +138,7 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 		case *ast.Identifier:
 			argType = NormalArg
 			scope.localTable.setLCL(exp.Value, scope.localTable.depth)
-		case *ast.InfixExpression:
+		case *ast.AssignExpression:
 			argType = OptionedArg
 			exp.Optioned = 1
 			g.compileAssignExpression(newIS, exp, scope, scope.localTable)

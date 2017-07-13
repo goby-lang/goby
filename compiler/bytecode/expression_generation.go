@@ -41,19 +41,15 @@ func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, sc
 		case *ast.PrefixExpression:
 			g.compilePrefixExpression(is, exp, scope, table)
 		case *ast.InfixExpression:
-			if exp.Operator != "=" {
-				g.compileInfixExpression(is, exp, scope, table)
-			}
+			g.compileInfixExpression(is, exp, scope, table)
 		}
 	}
 
 	switch exp := exp.(type) {
 	case *ast.Identifier:
 		g.compileIdentifier(is, exp, scope, table)
-	case *ast.InfixExpression:
-		if exp.Operator == "=" {
-			g.compileAssignExpression(is, exp, scope, table)
-		}
+	case *ast.AssignExpression:
+		g.compileAssignExpression(is, exp, scope, table)
 	case *ast.IfExpression:
 		g.compileIfExpression(is, exp, scope, table)
 	case *ast.YieldExpression:
@@ -123,13 +119,13 @@ func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpre
 	g.fsm.Event(oldState)
 }
 
-func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.InfixExpression, scope *scope, table *localTable) {
+func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.AssignExpression, scope *scope, table *localTable) {
 	oldState := g.fsm.Current()
 	g.fsm.Event(keepExp)
-	g.compileExpression(is, exp.Right, scope, table)
+	g.compileExpression(is, exp.Value, scope, table)
 	g.fsm.Event(oldState)
 
-	switch name := exp.Left.(type) {
+	switch name := exp.Variable.(type) {
 	case *ast.Identifier:
 		index, depth := table.setLCL(name.Value, table.depth)
 

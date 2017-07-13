@@ -21,6 +21,8 @@ const (
 	UnexpectedEndError
 	// MethodDefinitionError means there's an error on method definition's method name
 	MethodDefinitionError
+	// InvalidAssignmentError means user assigns value to wrong type of expressions
+	InvalidAssignmentError
 )
 
 // Error represents parser's parsing error
@@ -56,20 +58,6 @@ type Parser struct {
 	// However, this is not a very good practice should change it in the future.
 	acceptBlock bool
 	fsm         *fsm.FSM
-}
-
-// BuildAST tokenizes and parses given file to build AST
-func BuildAST(file []byte) *ast.Program {
-	input := string(file)
-	l := lexer.New(input)
-	p := New(l)
-	program, err := p.ParseProgram()
-
-	if err != nil {
-		panic(err.Message)
-	}
-
-	return program
 }
 
 const (
@@ -133,7 +121,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.And, p.parseInfixExpression)
 	p.registerInfix(token.Or, p.parseInfixExpression)
 	p.registerInfix(token.ResolutionOperator, p.parseInfixExpression)
-	p.registerInfix(token.Assign, p.parseInfixExpression)
+	p.registerInfix(token.Assign, p.parseAssignExpression)
 	p.registerInfix(token.Range, p.parseRangeExpression)
 	p.registerInfix(token.Dot, p.parseCallExpressionWithDot)
 	p.registerInfix(token.LParen, p.parseCallExpressionWithParen)
