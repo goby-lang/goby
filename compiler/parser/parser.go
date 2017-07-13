@@ -53,7 +53,7 @@ type Parser struct {
 	// currently only used when parsing while statement.
 	// However, this is not a very good practice should change it in the future.
 	acceptBlock bool
-	fsm *fsm.FSM
+	fsm         *fsm.FSM
 }
 
 // BuildAST tokenizes and parses given file to build AST
@@ -70,10 +70,10 @@ func BuildAST(file []byte) *ast.Program {
 	return program
 }
 
-const(
-	normal = "normal"
-	parseFuncWithParen = "parseFuncWithParen"
-	parseFuncWithoutParen = "parseFuncWithoutParen"
+const (
+	normal           = "normal"
+	parseFuncCall    = "parseFuncCall"
+	parseMethodParam = "parseMethodParam"
 )
 
 // New initializes a parser and returns it
@@ -86,9 +86,9 @@ func New(l *lexer.Lexer) *Parser {
 	p.fsm = fsm.NewFSM(
 		normal,
 		fsm.Events{
-			{Name: parseFuncWithParen, Src: []string{normal}, Dst: parseFuncWithParen},
-			{Name: parseFuncWithoutParen, Src: []string{normal}, Dst: parseFuncWithoutParen},
-			{Name: normal, Src: []string{parseFuncWithoutParen, parseFuncWithParen}, Dst: normal},
+			{Name: parseFuncCall, Src: []string{normal}, Dst: parseFuncCall},
+			{Name: parseMethodParam, Src: []string{normal}, Dst: parseMethodParam},
+			{Name: normal, Src: []string{parseFuncCall, parseMethodParam}, Dst: normal},
 		},
 		fsm.Callbacks{},
 	)

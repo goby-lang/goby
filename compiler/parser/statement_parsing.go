@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"github.com/goby-lang/goby/compiler/ast"
 	"github.com/goby-lang/goby/compiler/token"
 )
@@ -41,13 +42,9 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 			if !p.expectPeek(token.Ident) {
 				return nil
 			}
-			stmt.Name =
-				&ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-		} else {
-
-			stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-
 		}
+
+		stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 	case token.Self:
 		stmt.Receiver = &ast.SelfExpression{Token: p.curToken}
 		p.nextToken() // .
@@ -56,7 +53,7 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 		}
 		stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 	default:
-		return nil
+		p.error = &Error{Message: fmt.Sprintf("Invalid method definition. Line: %d", p.curToken.Line)}
 	}
 
 	// Setter method def foo=()
@@ -97,6 +94,7 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 }
 
 func (p *Parser) parseParameters() []ast.Expression {
+	p.fsm.Event(parseMethodParam)
 	params := []ast.Expression{}
 
 	p.nextToken()
@@ -110,6 +108,7 @@ func (p *Parser) parseParameters() []ast.Expression {
 		params = append(params, param)
 	}
 
+	p.fsm.Event(normal)
 	return params
 }
 

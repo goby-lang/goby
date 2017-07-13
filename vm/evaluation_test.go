@@ -531,7 +531,7 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		{
 			`
 			class Foo
-			  def set_x x0
+			  def set_x(x0)
 			    @x = x0
 			  end
 
@@ -550,7 +550,7 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		{
 			`
 			class Foo
-			  def set_x x1, x2
+			  def set_x(x1, x2)
 			    @x = x1
 			    @y = x2
 			  end
@@ -570,12 +570,12 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		{
 			`
 			class Foo
-			  def set_x x1, x2
+			  def set_x(x1, x2)
 			    @x1 = x1
 			    @x2 = x2
 			  end
 
-			  def set_y y1, y2, y3
+			  def set_y(y1, y2, y3)
 			    @y3 = y3
 			    @y1 = y1
 			  end
@@ -583,7 +583,7 @@ func TestMethodCallWithoutParens(t *testing.T) {
 			  def foo
 			    set_x 15,17
 			    set_y 3,4,5
-			    set_x (10,11)
+			    set_x 10,11
 			    @x1 + @x2 + @y3
 			  end
 			end
@@ -596,13 +596,13 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		{
 			`
 			class Foo
-			  attr_reader("x", "y")
+			  attr_reader :x, :y
 
-			  def set_x x1
+			  def set_x(x1)
 			    @x1 = x1
 			  end
 
-			  def set_y y1, y2, y3
+			  def set_y(y1, y2, y3)
 			    @y = y1 + y2 + y3
 			  end
 
@@ -623,9 +623,9 @@ func TestMethodCallWithoutParens(t *testing.T) {
 			`
 
 			class Foo
-   			  attr_reader("y")
+   			  attr_reader :y
 
-			  def set_y y1, y2, y3
+			  def set_y(y1, y2, y3)
 			    @y = y1 + y2 + y3
 			  end
 
@@ -641,13 +641,13 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		{
 			`
 			class Foo
-			  attr_reader("x", "y")
+			  attr_reader :x, :y
 
-			  def set_x x1
+			  def set_x(x1)
 			    @x = x1
 			  end
 
-			  def set_y y1, y2, y3
+			  def set_y(y1, y2, y3)
 			    @y = y1 + y2 + y3
 			  end
 			end
@@ -665,11 +665,11 @@ func TestMethodCallWithoutParens(t *testing.T) {
 			class Foo
 			  attr_reader :x, :y
 
-			  def set_x x1, x2, x3
+			  def set_x(x1, x2, x3)
 			    @x = x1 + x2 + x3
 			  end
 
-			  def set_y y1, y2, y3
+			  def set_y(y1, y2, y3)
 			    @y = y1 + y2 + y3
 			  end
 			end

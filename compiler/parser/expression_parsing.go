@@ -74,19 +74,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		return nil
 	}
 
-	leftExp := parseFn()
-
-	if !p.peekTokenAtSameLine() {
-		return leftExp
-	}
-
-	// For method call without self and parens like
-	//
-	// foo do |bar|
-	//   #dosomething
-	// end
-
-	if p.curTokenIs(token.Ident) && precedence == LOWEST  {
+	if p.curTokenIs(token.Ident) && p.fsm.Is(normal) {
 		if p.peekTokenIs(token.Do) {
 			return p.parseCallExpressionWithoutParenAndReceiver(p.curToken)
 		}
@@ -109,13 +97,15 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 
 			will also enter this condition, but we'll check if those two token is at same line in the parsing function
 		*/
-		if arguments[p.peekToken.Type] {
+		if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() {
 			// Method token
 			tok := p.curToken
 			p.nextToken()
-			return  p.parseCallExpressionWithoutParenAndReceiver(tok)
+			return p.parseCallExpressionWithoutParenAndReceiver(tok)
 		}
 	}
+
+	leftExp := parseFn()
 
 	for !p.peekTokenIs(token.Semicolon) && precedence < p.peekPrecedence() && p.peekTokenAtSameLine() {
 
@@ -356,6 +346,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 }
 
 func (p *Parser) parseCallExpressionWithoutParenAndReceiver(methodToken token.Token) ast.Expression {
+	p.fsm.Event(parseFuncCall)
 	// real receiver is self
 	selfTok := token.Token{Type: token.Self, Literal: "self", Line: p.curToken.Line}
 	self := &ast.SelfExpression{Token: selfTok}
@@ -367,6 +358,8 @@ func (p *Parser) parseCallExpressionWithoutParenAndReceiver(methodToken token.To
 		exp.Arguments = p.parseCallArgumentsWithoutParens()
 	}
 
+	p.fsm.Event(normal)
+
 	// Parse block
 	if p.peekTokenIs(token.Do) && p.acceptBlock {
 		p.parseBlockParameters(exp)
@@ -376,6 +369,7 @@ func (p *Parser) parseCallExpressionWithoutParenAndReceiver(methodToken token.To
 }
 
 func (p *Parser) parseCallExpressionWithParen(receiver ast.Expression) ast.Expression {
+	p.fsm.Event(parseFuncCall)
 	m := receiver.(*ast.Identifier).Value
 
 	// real receiver is self
@@ -386,6 +380,8 @@ func (p *Parser) parseCallExpressionWithParen(receiver ast.Expression) ast.Expre
 	// current token is identifier (method name)
 	exp := &ast.CallExpression{Token: p.curToken, Receiver: receiver, Method: m}
 	exp.Arguments = p.parseCallArguments()
+
+	p.fsm.Event(normal)
 
 	// Setter method call like: p.foo = x
 	if p.peekTokenIs(token.Assign) {
@@ -404,6 +400,7 @@ func (p *Parser) parseCallExpressionWithParen(receiver ast.Expression) ast.Expre
 }
 
 func (p *Parser) parseCallExpressionWithDot(receiver ast.Expression) ast.Expression {
+	p.fsm.Event(parseFuncCall)
 	exp := &ast.CallExpression{Token: p.curToken, Receiver: receiver}
 
 	// check if method name is identifier
@@ -422,6 +419,8 @@ func (p *Parser) parseCallExpressionWithDot(receiver ast.Expression) ast.Express
 		p.nextToken()
 		exp.Arguments = p.parseCallArgumentsWithoutParens()
 	}
+
+	p.fsm.Event(normal)
 
 	// Setter method call like: p.foo = x
 	if p.peekTokenIs(token.Assign) {
