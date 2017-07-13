@@ -319,6 +319,26 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	return exp
 }
 
+func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
+	variable, ok := v.(ast.Variable)
+
+	if !ok {
+		p.error = &Error{Message: fmt.Sprintf("Can't assign value to \"%s\". Line: %d", v.String(), p.curToken.Line), errType: InvalidAssignmentError}
+	}
+
+	exp := &ast.AssignExpression{
+		Token:    p.curToken,
+		Variable: variable,
+		Operator: p.curToken.Literal,
+	}
+
+	precedence := p.curPrecedence()
+	p.nextToken()
+	exp.Value = p.parseExpression(precedence)
+
+	return exp
+}
+
 func (p *Parser) parseGroupedExpression() ast.Expression {
 	p.nextToken()
 

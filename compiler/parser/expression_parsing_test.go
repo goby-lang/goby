@@ -722,49 +722,49 @@ func TestAssignIndexExpressionWithVariableValue(t *testing.T) {
 
 		stmt := program.Statements[0].(*ast.ExpressionStatement)
 		exp := stmt.Expression
-		infixExp, ok := exp.(*ast.InfixExpression)
+		infixExp, ok := exp.(*ast.AssignExpression)
 
 		if !ok {
-			t.Fatalf("exp is not InfixExpression. got=%T", exp)
+			t.Fatalf("exp is not AssignExpression. got=%T", exp)
 		}
 
-		if !tt.variableMatchFunc(t, infixExp.Left, tt.expectedIdentifier) {
+		if !tt.variableMatchFunc(t, infixExp.Variable, tt.expectedIdentifier) {
 			return
 		}
 
 		if infixExp.Operator != "=" {
-			t.Errorf("infixExp's operator is not =. got=%q", infixExp.Operator)
+			t.Errorf("AssignExpression's operator is not =. got=%q", infixExp.Operator)
 			return
 		}
 
-		if !tt.valueMatchFunc(t, infixExp.Right, tt.expectedValue) {
+		if !tt.valueMatchFunc(t, infixExp.Value, tt.expectedValue) {
 			return
 		}
 	}
 }
 
 func testAssignExpression(t *testing.T, exp ast.Expression, expectedIdentifier string, variableMatchFunction func(*testing.T, ast.Expression, string) bool, expected interface{}) {
-	infixExp, ok := exp.(*ast.InfixExpression)
+	infixExp, ok := exp.(*ast.AssignExpression)
 
 	if !ok {
-		t.Fatalf("exp is not InfixExpression. got=%T", exp)
+		t.Fatalf("exp is not AssignExpression. got=%T", exp)
 	}
 
-	if !variableMatchFunction(t, infixExp.Left, expectedIdentifier) {
+	if !variableMatchFunction(t, infixExp.Variable, expectedIdentifier) {
 		return
 	}
 
 	if infixExp.Operator != "=" {
-		t.Errorf("infixExp's operator is not =. got=%q", infixExp.Operator)
+		t.Errorf("Assignment's operator is not =. got=%q", infixExp.Operator)
 		return
 	}
 
 	switch expected := expected.(type) {
 	case int:
-		testIntegerLiteral(t, infixExp.Right, expected)
+		testIntegerLiteral(t, infixExp.Value, expected)
 	case string:
-		testStringLiteral(t, infixExp.Right, expected)
+		testStringLiteral(t, infixExp.Value, expected)
 	case bool:
-		testBoolLiteral(t, infixExp.Right, expected)
+		testBoolLiteral(t, infixExp.Value, expected)
 	}
 }
