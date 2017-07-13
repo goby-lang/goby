@@ -118,10 +118,6 @@ type InfixExpression struct {
 	Left     Expression
 	Operator string
 	Right    Expression
-	// Optioned attribute is only used when infix expression is local assignment in params.
-	// For example: `foo(x = 10)`'s `x = 10` is an optioned assign expression
-	// TODO: Remove this when we can put metadata inside bytecode.
-	Optioned int
 }
 
 func (ie *InfixExpression) expressionNode() {}
@@ -137,6 +133,33 @@ func (ie *InfixExpression) String() string {
 	out.WriteString(ie.Operator)
 	out.WriteString(" ")
 	out.WriteString(ie.Right.String())
+	out.WriteString(")")
+
+	return out.String()
+}
+
+type AssignExpression struct {
+	Token    token.Token
+	Variable Variable
+	Operator string
+	Value    Expression
+	// Optioned attribute is only used when infix expression is local assignment in params.
+	// For example: `foo(x = 10)`'s `x = 10` is an optioned assign expression
+	// TODO: Remove this when we can put metadata inside bytecode.
+	Optioned int
+}
+
+func (ae *AssignExpression) expressionNode() {}
+func (ae *AssignExpression) TokenLiteral() string {
+	return ae.Token.Literal
+}
+func (ae *AssignExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(ae.Variable.String())
+	out.WriteString(" = ")
+	out.WriteString(ae.Value.String())
 	out.WriteString(")")
 
 	return out.String()

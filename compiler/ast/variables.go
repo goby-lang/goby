@@ -2,10 +2,10 @@ package ast
 
 import "github.com/goby-lang/goby/compiler/token"
 
-type variable interface {
+type Variable interface {
 	variableNode()
 	ReturnValue() string
-	node
+	Expression
 }
 
 type Identifier struct {
