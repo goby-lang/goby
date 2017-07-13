@@ -375,40 +375,52 @@ func (p *Parser) parseCallExpressionWithoutParenAndReceiver(methodToken token.To
 	return exp
 }
 
-func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
-	var exp *ast.CallExpression
+func (p *Parser) parseCallExpressionWithParen(receiver ast.Expression) ast.Expression {
+	m := receiver.(*ast.Identifier).Value
 
-	if p.curTokenIs(token.LParen) { // foo(x)
-		m := receiver.(*ast.Identifier).Value
+	// real receiver is self
+	selfTok := token.Token{Type: token.Self, Literal: "self", Line: p.curToken.Line}
+	self := &ast.SelfExpression{Token: selfTok}
+	receiver = self
 
-		// real receiver is self
-		selfTok := token.Token{Type: token.Self, Literal: "self", Line: p.curToken.Line}
-		self := &ast.SelfExpression{Token: selfTok}
-		receiver = self
+	// current token is identifier (method name)
+	exp := &ast.CallExpression{Token: p.curToken, Receiver: receiver, Method: m}
+	exp.Arguments = p.parseCallArguments()
 
-		// current token is identifier (method name)
-		exp = &ast.CallExpression{Token: p.curToken, Receiver: receiver, Method: m}
+	// Setter method call like: p.foo = x
+	if p.peekTokenIs(token.Assign) {
+		exp.Method = exp.Method + "="
+		p.nextToken()
+		p.nextToken()
+		exp.Arguments = append(exp.Arguments, p.parseExpression(NORMAL))
+	}
+
+	// Parse block
+	if p.peekTokenIs(token.Do) && p.acceptBlock {
+		p.parseBlockParameters(exp)
+	}
+
+	return exp
+}
+
+func (p *Parser) parseCallExpressionWithDot(receiver ast.Expression) ast.Expression {
+	exp := &ast.CallExpression{Token: p.curToken, Receiver: receiver}
+
+	// check if method name is identifier
+	if !p.expectPeek(token.Ident) {
+		return nil
+	}
+
+	exp.Method = p.curToken.Literal
+
+	if p.peekTokenIs(token.LParen) { // p.foo(x)
+		p.nextToken()
 		exp.Arguments = p.parseCallArguments()
-	} else if p.curTokenIs(token.Dot) { // call expression has a receiver like: p.foo
-
-		exp = &ast.CallExpression{Token: p.curToken, Receiver: receiver}
-
-		// check if method name is identifier
-		if !p.expectPeek(token.Ident) {
-			return nil
-		}
-
-		exp.Method = p.curToken.Literal
-
-		if p.peekTokenIs(token.LParen) { // p.foo(x)
-			p.nextToken()
-			exp.Arguments = p.parseCallArguments()
-		} else if p.peekTokenIs(token.Dot) { // p.foo.bar
-			exp.Arguments = []ast.Expression{}
-		} else if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { // p.foo x, y, z || p.foo x
-			p.nextToken()
-			exp.Arguments = p.parseCallArgumentsWithoutParens()
-		}
+	} else if p.peekTokenIs(token.Dot) { // p.foo.bar
+		exp.Arguments = []ast.Expression{}
+	} else if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { // p.foo x, y, z || p.foo x
+		p.nextToken()
+		exp.Arguments = p.parseCallArgumentsWithoutParens()
 	}
 
 	// Setter method call like: p.foo = x
