@@ -52,8 +52,6 @@ func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, sc
 		g.compileIdentifier(is, exp, scope, table)
 	case *ast.InfixExpression:
 		if exp.Operator == "=" {
-			// Because this is assignment so we do need the expression's value
-			g.fsm.Event(keepExp)
 			g.compileAssignExpression(is, exp, scope, table)
 		}
 	case *ast.IfExpression:
@@ -61,7 +59,6 @@ func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, sc
 	case *ast.YieldExpression:
 		g.compileYieldExpression(is, exp, scope, table)
 	case *ast.CallExpression:
-		g.fsm.Event(keepExp)
 		g.compileCallExpression(is, exp, scope, table)
 	}
 }
@@ -69,7 +66,8 @@ func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, sc
 func (g *Generator) compileIdentifier(is *InstructionSet, exp *ast.Identifier, scope *scope, table *localTable) {
 	index, depth, ok := table.getLCL(exp.Value, table.depth)
 
-	// it's local variable
+	// This means it's a local variable.
+	// But we only define the instruction when we'll need it.
 	if ok && g.fsm.Is(keepExp) {
 		is.define(GetLocal, depth, index)
 		return
@@ -81,6 +79,9 @@ func (g *Generator) compileIdentifier(is *InstructionSet, exp *ast.Identifier, s
 }
 
 func (g *Generator) compileYieldExpression(is *InstructionSet, exp *ast.YieldExpression, scope *scope, table *localTable) {
+	oldState := g.fsm.Current()
+	g.fsm.Event(keepExp)
+
 	is.define(PutSelf)
 
 	for _, arg := range exp.Arguments {
@@ -88,9 +89,14 @@ func (g *Generator) compileYieldExpression(is *InstructionSet, exp *ast.YieldExp
 	}
 
 	is.define(InvokeBlock, len(exp.Arguments))
+	g.fsm.Event(oldState)
 }
 
 func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpression, scope *scope, table *localTable) {
+	oldState := g.fsm.Current()
+
+	// We need the receiver expression and argument expressions
+	g.fsm.Event(keepExp)
 	g.compileExpression(is, exp.Receiver, scope, table)
 
 	for _, arg := range exp.Arguments {
@@ -98,6 +104,7 @@ func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpre
 	}
 
 	if exp.Block != nil {
+		// Inside block should be one level deeper than outside
 		newTable := newLocalTable(table.depth + 1)
 		newTable.upper = table
 		blockIndex := g.blockCounter
@@ -109,13 +116,18 @@ func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpre
 	is.define(Send, exp.Method, len(exp.Arguments))
 
 	if exp.Method == "++" || exp.Method == "--" {
-		// ++ and -- are methods with side effect but shouldn't return anything
+		// ++ and -- are methods with side effect and shouldn't return anything
 		is.define(Pop)
 	}
+
+	g.fsm.Event(oldState)
 }
 
 func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.InfixExpression, scope *scope, table *localTable) {
+	oldState := g.fsm.Current()
+	g.fsm.Event(keepExp)
 	g.compileExpression(is, exp.Right, scope, table)
+	g.fsm.Event(oldState)
 
 	switch name := exp.Left.(type) {
 	case *ast.Identifier:
@@ -135,6 +147,10 @@ func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.InfixEx
 }
 
 func (g *Generator) compileBlockArgExpression(index int, exp *ast.CallExpression, scope *scope, table *localTable) {
+	oldState := g.fsm.Current()
+	// We don't need any unused expression inside block
+	g.fsm.Event(removeExp)
+
 	is := &InstructionSet{}
 	is.name = fmt.Sprint(index)
 	is.isType = Block
@@ -143,15 +159,18 @@ func (g *Generator) compileBlockArgExpression(index int, exp *ast.CallExpression
 		table.set(exp.BlockArguments[i].Value)
 	}
 
-	g.fsm.Event(removeExp)
 	g.compileCodeBlock(is, exp.Block, scope, table)
-	g.fsm.Event(keepExp)
-
 	g.endInstructions(is)
 	g.instructionSets = append(g.instructionSets, is)
+
+	g.fsm.Event(oldState)
 }
 
 func (g *Generator) compileIfExpression(is *InstructionSet, exp *ast.IfExpression, scope *scope, table *localTable) {
+	oldState := g.fsm.Current()
+
+	// Compiles condition so we need every expression
+	g.fsm.Event(keepExp)
 	g.compileExpression(is, exp.Condition, scope, table)
 
 	anchor1 := &anchor{}
@@ -159,13 +178,17 @@ func (g *Generator) compileIfExpression(is *InstructionSet, exp *ast.IfExpressio
 
 	is.define(BranchUnless, anchor1)
 
+	// We don't need unused expression in consequence block
 	g.fsm.Event(removeExp)
 	g.compileCodeBlock(is, exp.Consequence, scope, table)
-	g.fsm.Event(keepExp)
+	g.fsm.Event(oldState)
 
-	anchor1.line = is.count + 1
+	anchor1.line = is.count
 
+	// This and the PutNull bellow is needed when we need the returned result
 	if g.fsm.Is(keepExp) {
+		// BranchIf needs move one more line because the we'll add jump into instructions
+		anchor1.line++
 		is.define(Jump, anchor2)
 	}
 
@@ -179,9 +202,10 @@ func (g *Generator) compileIfExpression(is *InstructionSet, exp *ast.IfExpressio
 		return
 	}
 
+	// We don't need unused expression in alternative block either
 	g.fsm.Event(removeExp)
 	g.compileCodeBlock(is, exp.Alternative, scope, table)
-	g.fsm.Event(keepExp)
+	g.fsm.Event(oldState)
 
 	anchor2.line = is.count
 }
