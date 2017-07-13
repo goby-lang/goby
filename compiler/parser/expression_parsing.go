@@ -95,7 +95,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 			x
 			```
 
-			will also enter this condition, but we'll check if those two token is at same line in the parsing function
+			will also enter this condition first, but we'll check if those two token is at same line in the parsing function
 		*/
 		if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() {
 			// Method token
@@ -351,8 +351,10 @@ func (p *Parser) parseCallExpressionWithoutParenAndReceiver(methodToken token.To
 	selfTok := token.Token{Type: token.Self, Literal: "self", Line: p.curToken.Line}
 	self := &ast.SelfExpression{Token: selfTok}
 
-	// current token is identifier (method name)
-	exp := &ast.CallExpression{Token: p.curToken, Receiver: self, Method: methodToken.Literal}
+	// current token might be the first argument
+	//     method name      |       argument
+	// foo <- method token     x <- current token
+	exp := &ast.CallExpression{Token: methodToken, Receiver: self, Method: methodToken.Literal}
 
 	if p.curToken.Line == methodToken.Line { // foo x
 		exp.Arguments = p.parseCallArgumentsWithoutParens()
@@ -370,26 +372,18 @@ func (p *Parser) parseCallExpressionWithoutParenAndReceiver(methodToken token.To
 
 func (p *Parser) parseCallExpressionWithParen(receiver ast.Expression) ast.Expression {
 	p.fsm.Event(parseFuncCall)
-	m := receiver.(*ast.Identifier).Value
+	m := receiver.(*ast.Identifier)
+	mn := m.Value
 
 	// real receiver is self
 	selfTok := token.Token{Type: token.Self, Literal: "self", Line: p.curToken.Line}
 	self := &ast.SelfExpression{Token: selfTok}
 	receiver = self
 
-	// current token is identifier (method name)
-	exp := &ast.CallExpression{Token: p.curToken, Receiver: receiver, Method: m}
+	exp := &ast.CallExpression{Token: m.Token, Receiver: receiver, Method: mn}
 	exp.Arguments = p.parseCallArguments()
 
 	p.fsm.Event(normal)
-
-	// Setter method call like: p.foo = x
-	if p.peekTokenIs(token.Assign) {
-		exp.Method = exp.Method + "="
-		p.nextToken()
-		p.nextToken()
-		exp.Arguments = append(exp.Arguments, p.parseExpression(NORMAL))
-	}
 
 	// Parse block
 	if p.peekTokenIs(token.Do) && p.acceptBlock {
