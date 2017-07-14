@@ -74,34 +74,47 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		return nil
 	}
 
-	leftExp := parseFn()
+	if p.curTokenIs(token.Ident) && p.fsm.Is(normal) {
+		if p.peekTokenIs(token.Do) {
+			return p.parseCallExpressionWithoutParenAndReceiver(p.curToken)
+		}
 
-	// For method call without self and parens like
-	//
-	// foo do |bar|
-	//   #dosomething
-	// end
+		/*
+			This means method call with arguments but without parens like:
 
-	if p.peekTokenIs(token.Do) && precedence == LOWEST {
-		infixFn := p.parseCallExpression
-		return infixFn(leftExp)
+			```
+			foo x
+			foo @bar
+			foo 10
+			```
+
+			Program like
+
+			```
+			foo
+			x
+			```
+
+			will also enter this condition first, but we'll check if those two token is at same line in the parsing function
+		*/
+		if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() {
+			// Method token
+			tok := p.curToken
+			p.nextToken()
+			return p.parseCallExpressionWithoutParenAndReceiver(tok)
+		}
 	}
 
-	// I use precedence "LOWEST" to identify call_without_parens case, this is not an appropriate way but it work in current situation
-	if arguments[p.peekToken.Type] && precedence == LOWEST {
-		infixFn := p.parseCallExpression
+	leftExp := parseFn()
+
+	for !p.peekTokenIs(token.Semicolon) && precedence < p.peekPrecedence() && p.peekTokenAtSameLine() {
+
+		infixFn := p.infixParseFns[p.peekToken.Type]
+		if infixFn == nil {
+			return leftExp
+		}
 		p.nextToken()
 		leftExp = infixFn(leftExp)
-	} else {
-		for !p.peekTokenIs(token.Semicolon) && precedence < p.peekPrecedence() && p.peekTokenAtSameLine() {
-
-			infixFn := p.infixParseFns[p.peekToken.Type]
-			if infixFn == nil {
-				return leftExp
-			}
-			p.nextToken()
-			leftExp = infixFn(leftExp)
-		}
 	}
 
 	return leftExp
@@ -228,7 +241,7 @@ func (p *Parser) parseArrayExpression() ast.Expression {
 	return arr
 }
 
-func (p *Parser) parseArrayIndexExpression(left ast.Expression) ast.Expression {
+func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
 	callExpression := &ast.CallExpression{Receiver: left, Method: "[]", Token: p.curToken}
 
 	if p.peekTokenIs(token.RBracket) {
@@ -306,6 +319,26 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	return exp
 }
 
+func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
+	variable, ok := v.(ast.Variable)
+
+	if !ok {
+		p.error = &Error{Message: fmt.Sprintf("Can't assign value to %s. Line: %d", v.String(), p.curToken.Line), errType: InvalidAssignmentError}
+	}
+
+	exp := &ast.AssignExpression{
+		Token:    p.curToken,
+		Variable: variable,
+		Operator: p.curToken.Literal,
+	}
+
+	precedence := p.curPrecedence()
+	p.nextToken()
+	exp.Value = p.parseExpression(precedence)
+
+	return exp
+}
+
 func (p *Parser) parseGroupedExpression() ast.Expression {
 	p.nextToken()
 
@@ -332,48 +365,76 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	return ie
 }
 
-func (p *Parser) parseCallExpression(receiver ast.Expression) ast.Expression {
-	var exp *ast.CallExpression
+func (p *Parser) parseCallExpressionWithoutParenAndReceiver(methodToken token.Token) ast.Expression {
+	p.fsm.Event(parseFuncCall)
+	// real receiver is self
+	selfTok := token.Token{Type: token.Self, Literal: "self", Line: p.curToken.Line}
+	self := &ast.SelfExpression{Token: selfTok}
 
-	if p.curTokenIs(token.LParen) || arguments[p.curToken.Type] { // foo(x) || foo x
-		// receiver arg is actually the method name
-		m := receiver.(*ast.Identifier).Value
-		// real receiver is self
-		selfTok := token.Token{Type: token.Self, Literal: "self", Line: p.curToken.Line}
-		self := &ast.SelfExpression{Token: selfTok}
-		receiver = self
+	// current token might be the first argument
+	//     method name      |       argument
+	// foo <- method token     x <- current token
+	exp := &ast.CallExpression{Token: methodToken, Receiver: self, Method: methodToken.Literal}
 
-		// current token is identifier (method name)
-		exp = &ast.CallExpression{Token: p.curToken, Receiver: receiver, Method: m}
-
-		if p.curTokenIs(token.LParen) { // foo(x)
-			exp.Arguments = p.parseCallArguments()
-
-		} else { // foo x
-			exp.Arguments = p.parseCallArgumentsWithoutParens()
-		}
-
-	} else if p.curTokenIs(token.Dot) { // call expression has a receiver like: p.foo
-
-		exp = &ast.CallExpression{Token: p.curToken, Receiver: receiver}
-
-		// check if method name is identifier
-		if !p.expectPeek(token.Ident) {
-			return nil
-		}
-
-		exp.Method = p.curToken.Literal
-
-		if p.peekTokenIs(token.LParen) { // p.foo(x)
-			p.nextToken()
-			exp.Arguments = p.parseCallArguments()
-		} else if p.peekTokenIs(token.Dot) { // p.foo.bar; || p.foo; || p.foo + 123
-			exp.Arguments = []ast.Expression{}
-		} else if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { // p.foo x, y, z || p.foo x
-			p.nextToken()
-			exp.Arguments = p.parseCallArgumentsWithoutParens()
-		}
+	if p.curToken.Line == methodToken.Line { // foo x
+		exp.Arguments = p.parseCallArgumentsWithoutParens()
 	}
+
+	p.fsm.Event(normal)
+
+	// Parse block
+	if p.peekTokenIs(token.Do) && p.acceptBlock {
+		p.parseBlockParameters(exp)
+	}
+
+	return exp
+}
+
+func (p *Parser) parseCallExpressionWithParen(receiver ast.Expression) ast.Expression {
+	p.fsm.Event(parseFuncCall)
+	m := receiver.(*ast.Identifier)
+	mn := m.Value
+
+	// real receiver is self
+	selfTok := token.Token{Type: token.Self, Literal: "self", Line: p.curToken.Line}
+	self := &ast.SelfExpression{Token: selfTok}
+	receiver = self
+
+	exp := &ast.CallExpression{Token: m.Token, Receiver: receiver, Method: mn}
+	exp.Arguments = p.parseCallArguments()
+
+	p.fsm.Event(normal)
+
+	// Parse block
+	if p.peekTokenIs(token.Do) && p.acceptBlock {
+		p.parseBlockParameters(exp)
+	}
+
+	return exp
+}
+
+func (p *Parser) parseCallExpressionWithDot(receiver ast.Expression) ast.Expression {
+	p.fsm.Event(parseFuncCall)
+	exp := &ast.CallExpression{Token: p.curToken, Receiver: receiver}
+
+	// check if method name is identifier
+	if !p.expectPeek(token.Ident) {
+		return nil
+	}
+
+	exp.Method = p.curToken.Literal
+
+	if p.peekTokenIs(token.LParen) { // p.foo(x)
+		p.nextToken()
+		exp.Arguments = p.parseCallArguments()
+	} else if p.peekTokenIs(token.Dot) { // p.foo.bar
+		exp.Arguments = []ast.Expression{}
+	} else if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { // p.foo x, y, z || p.foo x
+		p.nextToken()
+		exp.Arguments = p.parseCallArgumentsWithoutParens()
+	}
+
+	p.fsm.Event(normal)
 
 	// Setter method call like: p.foo = x
 	if p.peekTokenIs(token.Assign) {

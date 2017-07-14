@@ -38,6 +38,71 @@ func TestMethodCall(t *testing.T) {
 		{
 			`
 			class Foo
+			  def bar
+			    10
+			  end
+
+			  def baz(x)
+			    x + 100
+			  end
+
+			  def foo
+			    x = baz(bar)
+			    x
+			  end
+			end
+
+			Foo.new.foo
+			`, 110,
+		},
+		{
+			`
+			class Foo
+			  def baz
+			    @foo = 100
+			  end
+
+			  def foo
+			    @foo
+			  end
+
+			  def bar
+			    baz
+			    foo
+			  end
+			end
+
+			Foo.new.bar
+			`, 100,
+		},
+		{
+			`
+			class Foo
+			  def baz
+			    @foo = 100
+			  end
+
+			  def foo
+			    @foo
+			  end
+
+			  def baz2
+			    @foo = @foo + 100
+			  end
+
+			  def bar
+			    baz
+			    baz2
+			    foo
+			  end
+			end
+
+			Foo.new.bar
+			`, 200,
+		},
+		{
+			`
+			class Foo
 			  def set_x(x) # Set x
 			    @x = x
 			  end
@@ -363,6 +428,16 @@ func TestMethodCallWithBlockArgument(t *testing.T) {
 		r
 		`,
 			11},
+		{
+			`
+			def foo
+			  yield(10)
+			end
+
+			foo do |ten|
+			  ten + 20
+			end
+			`, 30},
 	}
 
 	for i, tt := range tests {
@@ -486,7 +561,27 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		{
 			`
 			class Foo
-			  def set_x x0
+			  def bar
+			    10
+			  end
+
+			  def baz(x)
+			    x + 100
+			  end
+
+			  def foo
+			    x = baz bar
+			    x
+			  end
+			end
+
+			Foo.new.foo
+			`, 110,
+		},
+		{
+			`
+			class Foo
+			  def set_x(x0)
 			    @x = x0
 			  end
 
@@ -505,7 +600,7 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		{
 			`
 			class Foo
-			  def set_x x1, x2
+			  def set_x(x1, x2)
 			    @x = x1
 			    @y = x2
 			  end
@@ -525,12 +620,12 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		{
 			`
 			class Foo
-			  def set_x x1, x2
+			  def set_x(x1, x2)
 			    @x1 = x1
 			    @x2 = x2
 			  end
 
-			  def set_y y1, y2, y3
+			  def set_y(y1, y2, y3)
 			    @y3 = y3
 			    @y1 = y1
 			  end
@@ -538,7 +633,7 @@ func TestMethodCallWithoutParens(t *testing.T) {
 			  def foo
 			    set_x 15,17
 			    set_y 3,4,5
-			    set_x (10,11)
+			    set_x 10,11
 			    @x1 + @x2 + @y3
 			  end
 			end
@@ -551,13 +646,13 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		{
 			`
 			class Foo
-			  attr_reader("x", "y")
+			  attr_reader :x, :y
 
-			  def set_x x1
+			  def set_x(x1)
 			    @x1 = x1
 			  end
 
-			  def set_y y1, y2, y3
+			  def set_y(y1, y2, y3)
 			    @y = y1 + y2 + y3
 			  end
 
@@ -578,9 +673,9 @@ func TestMethodCallWithoutParens(t *testing.T) {
 			`
 
 			class Foo
-   			  attr_reader("y")
+   			  attr_reader :y
 
-			  def set_y y1, y2, y3
+			  def set_y(y1, y2, y3)
 			    @y = y1 + y2 + y3
 			  end
 
@@ -596,13 +691,13 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		{
 			`
 			class Foo
-			  attr_reader("x", "y")
+			  attr_reader :x, :y
 
-			  def set_x x1
+			  def set_x(x1)
 			    @x = x1
 			  end
 
-			  def set_y y1, y2, y3
+			  def set_y(y1, y2, y3)
 			    @y = y1 + y2 + y3
 			  end
 			end
@@ -620,11 +715,11 @@ func TestMethodCallWithoutParens(t *testing.T) {
 			class Foo
 			  attr_reader :x, :y
 
-			  def set_x x1, x2, x3
+			  def set_x(x1, x2, x3)
 			    @x = x1 + x2 + x3
 			  end
 
-			  def set_y y1, y2, y3
+			  def set_y(y1, y2, y3)
 			    @y = y1 + y2 + y3
 			  end
 			end
@@ -665,6 +760,17 @@ func TestMethodCallWithoutParens(t *testing.T) {
 			i
 			`, 10,
 		},
+		{`
+		def foo
+		  10
+		end
+
+		def double(x)
+		  x * 2
+		end
+
+		double foo
+		`, 20},
 	}
 
 	for i, tt := range tests {
