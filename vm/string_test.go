@@ -163,9 +163,8 @@ func TestStringOperationFail(t *testing.T) {
 		{`"Taipei" * (-101)`, ArgumentError, "ArgumentError: Second argument must be greater than or equal to 0. got=-101"},
 		{`"Taipei"[1] = 1`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
 		{`"Taipei"[1] = true`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
-		// TODO: Implement test for empty index or wrong index type
-		//{`"Taipei"[]`, ArgumentError, "Expect 1 argument. got=%v", "0")},
-		// {`"Taipei"[true] = 101`, newError("expect argument to be Integer type")},
+		{`"Taipei"[]`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
+		{`"Taipei"[true] = 101`, TypeError, "TypeError: Expect index to be Integer. got=Boolean"},
 	}
 
 	for i, tt := range testsFail {

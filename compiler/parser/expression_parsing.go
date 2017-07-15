@@ -245,7 +245,9 @@ func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
 	callExpression := &ast.CallExpression{Receiver: left, Method: "[]", Token: p.curToken}
 
 	if p.peekTokenIs(token.RBracket) {
-		return nil
+		callExpression.Arguments = []ast.Expression{}
+		p.nextToken()
+		return callExpression
 	}
 
 	p.nextToken()

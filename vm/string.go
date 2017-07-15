@@ -297,7 +297,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 1 {
-						return initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+						return initErrorObject(ArgumentErrorClass, "Expect 1 argument. got=%d", len(args))
 					}
 
 					str := receiver.(*StringObject).Value
