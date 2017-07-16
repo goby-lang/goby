@@ -102,15 +102,14 @@ func StartIgb(version string) {
 					println("")
 					println("Bye!")
 					return
-				} else {
-					// Erasing command buffer
-					println("")
-					stack = 0
-					rl.SetPrompt(prompt1)
-					sm.Event(Waiting)
-					cmds = nil
-					continue
 				}
+				// Erasing command buffer
+				println("")
+				stack = 0
+				rl.SetPrompt(prompt1)
+				sm.Event(Waiting)
+				cmds = nil
+				continue
 			}
 		}
 
@@ -239,7 +238,6 @@ func indent(c int) string {
 func prompt(s int) string {
 	if s > 0 {
 		return prompt2
-	} else {
-		return prompt1
 	}
+	return prompt1
 }
