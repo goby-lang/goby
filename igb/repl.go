@@ -95,17 +95,18 @@ func StartIgb(version string) {
 		if err != nil {
 			switch {
 			case err == io.EOF:
-				println(line + "-- err:io.EOF")
+				println(line + "")
 				return
 			case err == readline.ErrInterrupt: // Pressing Ctrl-C
 				if len(line) == 0 && cmds == nil {
-					println(line + "-- ctrl+c")
+					println("")
 					println("Bye!")
 					return
 				} else {
 					// Erasing command buffer
-					println(prompt(stack) + indent(stack) + line)
-					rl.SetPrompt(prompt(stack))
+					println("")
+					stack = 0
+					rl.SetPrompt(prompt1)
 					sm.Event(Waiting)
 					cmds = nil
 					continue
@@ -152,8 +153,9 @@ func StartIgb(version string) {
 			} else {
 				println(prompt(stack) + indent(stack) + line)
 				stack = 0
-				rl.SetPrompt(prompt(stack))
+				rl.SetPrompt(prompt1)
 				fmt.Println(perr.Message)
+				cmds = nil
 				continue
 			}
 
