@@ -18,6 +18,7 @@ import (
 const (
 	prompt    = "\033[32m»\033[0m "
 	prompt2   = "\033[31m*\033[0m "
+	pad       = "  "
 	echo      = "#=>"
 	interrupt = "^C"
 	exit      = "exit"
@@ -48,6 +49,8 @@ var completer = readline.NewPrefixCompleter(
 // StartIgb starts goby's REPL.
 func StartIgb(version string) {
 	var err error
+	stack := 0
+
 	rl, err := readline.NewEx(&readline.Config{
 		Prompt:              prompt,
 		HistoryFile:         "/tmp/readline_goby.tmp",
@@ -127,17 +130,20 @@ func StartIgb(version string) {
 					sm.Event(Waiting)
 				}
 
-				rl.SetPrompt(prompt2)
+				stack++
+				rl.SetPrompt(prompt2 + indent(stack))
 				cmds = append(cmds, line)
 				continue
 			}
 
 			// If cmds is empty, it means that user just typed 'end' without corresponding statement/expression
 			if perr.IsUnexpectedEnd() && len(cmds) != 0 {
-				rl.SetPrompt(prompt2)
+				stack--
+				rl.SetPrompt(prompt2 + indent(stack))
 				sm.Event(waitEnded)
 				cmds = append(cmds, line)
 			} else {
+				stack = 0
 				rl.SetPrompt(prompt)
 				fmt.Println(perr.Message)
 				continue
@@ -146,7 +152,7 @@ func StartIgb(version string) {
 		}
 
 		if sm.Is(Waiting) {
-			rl.SetPrompt(prompt2)
+			rl.SetPrompt(prompt2 + indent(stack))
 			cmds = append(cmds, line)
 			continue
 		}
@@ -208,4 +214,12 @@ func filterInput(r rune) (rune, bool) {
 func usage(w io.Writer) {
 	io.WriteString(w, "commands:\n")
 	io.WriteString(w, completer.Tree("   "))
+}
+
+func indent(c int) string {
+	var s string
+	for i := 0; i < c; i++ {
+		s = s + pad
+	}
+	return s
 }
