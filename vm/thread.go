@@ -176,7 +176,6 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 func (t *thread) returnError(msg string) {
 	err := &Error{Message: msg}
 	t.stack.push(&Pointer{err})
-	panic(errorMessage(msg))
 }
 
 func (t *thread) UndefinedMethodError(methodName string, receiver Object) {
