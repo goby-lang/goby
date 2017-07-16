@@ -30,6 +30,22 @@ func builtInNullClassMethods() []*BuiltInMethodObject {
 				}
 			},
 		},
+		{
+			// Returns true because it is nil.
+			//
+			// ```ruby
+			// a = nil
+			// a.is_nil
+			// # => true
+			// ```
+			Name: "is_nil",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					return TRUE
+				}
+			},
+		},
 	}
 }
 

@@ -371,6 +371,32 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 				}
 			},
 		},
+		{
+			// Returns true if Object class is equal to the input argument class
+			// @param n/a []
+			// @return [Boolean]
+			Name: "is_a",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					c := args[0].(*RClass)
+					if receiver.Class().Name == c.Name {
+						return TRUE
+					}
+					return FALSE
+				}
+			},
+		},
+		{
+			// Returns true if Object is nil
+			// @param n/a []
+			// @return [Boolean]
+			Name: "is_nil",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					return FALSE
+				}
+			},
+		},
 	}
 }
 
