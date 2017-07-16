@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	prompt    = "\033[32m»\033[0m "
+	prompt1   = "\033[32m»\033[0m "
 	prompt2   = "\033[31m*\033[0m "
 	pad       = "  "
 	echo      = "#=>"
@@ -52,7 +52,7 @@ func StartIgb(version string) {
 	stack := 0
 
 	rl, err := readline.NewEx(&readline.Config{
-		Prompt:              prompt,
+		Prompt:              prompt1,
 		HistoryFile:         "/tmp/readline_goby.tmp",
 		AutoComplete:        completer,
 		InterruptPrompt:     interrupt,
@@ -76,8 +76,7 @@ func StartIgb(version string) {
 	v.InitForREPL()
 
 	// Initialize parser, lexer is not important here
-	l := lexer.New("")
-	p := parser.New(l)
+	p := parser.New(lexer.New(""))
 
 	program, _ := p.ParseProgram()
 
@@ -87,41 +86,48 @@ func StartIgb(version string) {
 	g.InitTopLevelScope(program)
 
 	for {
+		rl.Config.UniqueEditLine = true
 		line, err := rl.Readline()
-
-		if err == io.EOF {
-			break
-		}
-
-		// Pressing ctrl-C
-		if err == readline.ErrInterrupt {
-			if len(line) == 0 && cmds == nil {
-				println("Bye!")
-				break
-			} else {
-				// Erasing command buffer
-				rl.SetPrompt(prompt)
-				sm.Event(Waiting)
-				cmds = nil
-				continue
-			}
-		}
+		rl.Config.UniqueEditLine = false
 
 		line = strings.TrimSpace(line)
 
+		if err != nil {
+			switch {
+			case err == io.EOF:
+				println(line + "-- err:io.EOF")
+				return
+			case err == readline.ErrInterrupt: // Pressing Ctrl-C
+				if len(line) == 0 && cmds == nil {
+					println(line + "-- ctrl+c")
+					println("Bye!")
+					return
+				} else {
+					// Erasing command buffer
+					println(prompt(stack) + indent(stack) + line)
+					rl.SetPrompt(prompt(stack))
+					sm.Event(Waiting)
+					cmds = nil
+					continue
+				}
+			}
+		}
+
 		switch {
 		case line == help:
+			println(prompt(stack) + line)
 			usage(rl.Stderr())
 			continue
 		case line == exit:
+			println(prompt(stack) + line)
 			println("Bye!")
 			return
 		case line == "":
+			println(prompt(stack) + indent(stack) + line)
 			continue
 		}
 
-		l := lexer.New(line)
-		p.Lexer = l
+		p.Lexer = lexer.New(line)
 		program, perr := p.ParseProgram()
 
 		if perr != nil {
@@ -130,21 +136,23 @@ func StartIgb(version string) {
 					sm.Event(Waiting)
 				}
 
+				println(prompt(stack) + indent(stack) + line)
 				stack++
-				rl.SetPrompt(prompt2 + indent(stack))
-				cmds = append(cmds, strings.TrimSpace(line))
+				rl.SetPrompt(prompt(stack) + indent(stack))
+				cmds = append(cmds, line)
 				continue
 			}
 
 			// If cmds is empty, it means that user just typed 'end' without corresponding statement/expression
 			if perr.IsUnexpectedEnd() && len(cmds) != 0 {
 				stack--
-				rl.SetPrompt(prompt2 + indent(stack))
+				rl.SetPrompt(prompt(stack) + indent(stack))
 				sm.Event(waitEnded)
-				cmds = append(cmds, strings.TrimSpace(line))
+				cmds = append(cmds, line)
 			} else {
+				println(prompt(stack) + indent(stack) + line)
 				stack = 0
-				rl.SetPrompt(prompt)
+				rl.SetPrompt(prompt(stack))
 				fmt.Println(perr.Message)
 				continue
 			}
@@ -152,14 +160,14 @@ func StartIgb(version string) {
 		}
 
 		if sm.Is(Waiting) {
-			rl.SetPrompt(prompt2 + indent(stack))
-			cmds = append(cmds, strings.TrimSpace(line))
+			println(prompt(stack) + indent(stack) + line)
+			rl.SetPrompt(prompt(stack) + indent(stack))
+			cmds = append(cmds, line)
 			continue
 		}
 
 		if sm.Is(waitEnded) {
-			l := lexer.New(string(strings.Join(cmds, "\n")))
-			p.Lexer = l
+			p.Lexer = lexer.New(string(strings.Join(cmds, "\n")))
 
 			// Test if current input can be properly parsed.
 			program, perr = p.ParseProgram()
@@ -179,15 +187,17 @@ func StartIgb(version string) {
 				if !perr.IsEOF() {
 					fmt.Println(perr.Message)
 				}
+				println(prompt(stack) + indent(stack) + line)
 				continue
 			}
 
 			// If everything goes well, reset state and statements buffer
-			rl.SetPrompt(prompt)
+			rl.SetPrompt(prompt(stack))
 			sm.Event(readyToExec)
 			cmds = nil
 		}
 		if sm.Is(readyToExec) {
+			println(prompt(stack) + line)
 			instructions := g.GenerateInstructions(program.Statements)
 			g.ResetInstructionSets()
 			v.REPLExec(instructions)
@@ -222,4 +232,12 @@ func indent(c int) string {
 		s = s + pad
 	}
 	return s
+}
+
+func prompt(s int) string {
+	if s > 0 {
+		return prompt2
+	} else {
+		return prompt1
+	}
 }
