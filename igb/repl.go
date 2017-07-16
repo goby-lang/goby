@@ -16,8 +16,9 @@ import (
 )
 
 const (
-	prompt    = "\033[32m»\033[0m "
+	prompt1   = "\033[32m»\033[0m "
 	prompt2   = "\033[31m*\033[0m "
+	pad       = "  "
 	echo      = "#=>"
 	interrupt = "^C"
 	exit      = "exit"
@@ -48,8 +49,10 @@ var completer = readline.NewPrefixCompleter(
 // StartIgb starts goby's REPL.
 func StartIgb(version string) {
 	var err error
+	stack := 0
+
 	rl, err := readline.NewEx(&readline.Config{
-		Prompt:              prompt,
+		Prompt:              prompt1,
 		HistoryFile:         "/tmp/readline_goby.tmp",
 		AutoComplete:        completer,
 		InterruptPrompt:     interrupt,
@@ -73,8 +76,7 @@ func StartIgb(version string) {
 	v.InitForREPL()
 
 	// Initialize parser, lexer is not important here
-	l := lexer.New("")
-	p := parser.New(l)
+	p := parser.New(lexer.New(""))
 
 	program, _ := p.ParseProgram()
 
@@ -84,41 +86,48 @@ func StartIgb(version string) {
 	g.InitTopLevelScope(program)
 
 	for {
+		rl.Config.UniqueEditLine = true
 		line, err := rl.Readline()
+		rl.Config.UniqueEditLine = false
 
-		if err == io.EOF {
-			break
-		}
+		line = strings.TrimSpace(line)
 
-		// Pressing ctrl-C
-		if err == readline.ErrInterrupt {
-			if len(line) == 0 && cmds == nil {
-				println("Bye!")
-				break
-			} else {
+		if err != nil {
+			switch {
+			case err == io.EOF:
+				println(line + "")
+				return
+			case err == readline.ErrInterrupt: // Pressing Ctrl-C
+				if len(line) == 0 && cmds == nil {
+					println("")
+					println("Bye!")
+					return
+				}
 				// Erasing command buffer
-				rl.SetPrompt(prompt)
+				println("")
+				stack = 0
+				rl.SetPrompt(prompt1)
 				sm.Event(Waiting)
 				cmds = nil
 				continue
 			}
 		}
 
-		line = strings.TrimSpace(line)
-
 		switch {
 		case line == help:
+			println(prompt(stack) + line)
 			usage(rl.Stderr())
 			continue
 		case line == exit:
+			println(prompt(stack) + line)
 			println("Bye!")
 			return
 		case line == "":
+			println(prompt(stack) + indent(stack) + line)
 			continue
 		}
 
-		l := lexer.New(line)
-		p.Lexer = l
+		p.Lexer = lexer.New(line)
 		program, perr := p.ParseProgram()
 
 		if perr != nil {
@@ -127,33 +136,39 @@ func StartIgb(version string) {
 					sm.Event(Waiting)
 				}
 
-				rl.SetPrompt(prompt2)
+				println(prompt(stack) + indent(stack) + line)
+				stack++
+				rl.SetPrompt(prompt(stack) + indent(stack))
 				cmds = append(cmds, line)
 				continue
 			}
 
 			// If cmds is empty, it means that user just typed 'end' without corresponding statement/expression
 			if perr.IsUnexpectedEnd() && len(cmds) != 0 {
-				rl.SetPrompt(prompt2)
+				stack--
+				rl.SetPrompt(prompt(stack) + indent(stack))
 				sm.Event(waitEnded)
 				cmds = append(cmds, line)
 			} else {
-				rl.SetPrompt(prompt)
+				println(prompt(stack) + indent(stack) + line)
+				stack = 0
+				rl.SetPrompt(prompt1)
 				fmt.Println(perr.Message)
+				cmds = nil
 				continue
 			}
 
 		}
 
 		if sm.Is(Waiting) {
-			rl.SetPrompt(prompt2)
+			println(prompt(stack) + indent(stack) + line)
+			rl.SetPrompt(prompt(stack) + indent(stack))
 			cmds = append(cmds, line)
 			continue
 		}
 
 		if sm.Is(waitEnded) {
-			l := lexer.New(string(strings.Join(cmds, "\n")))
-			p.Lexer = l
+			p.Lexer = lexer.New(string(strings.Join(cmds, "\n")))
 
 			// Test if current input can be properly parsed.
 			program, perr = p.ParseProgram()
@@ -173,15 +188,17 @@ func StartIgb(version string) {
 				if !perr.IsEOF() {
 					fmt.Println(perr.Message)
 				}
+				println(prompt(stack) + indent(stack) + line)
 				continue
 			}
 
 			// If everything goes well, reset state and statements buffer
-			rl.SetPrompt(prompt)
+			rl.SetPrompt(prompt(stack))
 			sm.Event(readyToExec)
 			cmds = nil
 		}
 		if sm.Is(readyToExec) {
+			println(prompt(stack) + line)
 			instructions := g.GenerateInstructions(program.Statements)
 			g.ResetInstructionSets()
 			v.REPLExec(instructions)
@@ -208,4 +225,19 @@ func filterInput(r rune) (rune, bool) {
 func usage(w io.Writer) {
 	io.WriteString(w, "commands:\n")
 	io.WriteString(w, completer.Tree("   "))
+}
+
+func indent(c int) string {
+	var s string
+	for i := 0; i < c; i++ {
+		s = s + pad
+	}
+	return s
+}
+
+func prompt(s int) string {
+	if s > 0 {
+		return prompt2
+	}
+	return prompt1
 }
