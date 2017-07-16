@@ -50,7 +50,7 @@ func StartIgb(version string) {
 	var err error
 	rl, err := readline.NewEx(&readline.Config{
 		Prompt:              prompt,
-		HistoryFile:         "/tmp/readline.tmp",
+		HistoryFile:         "/tmp/readline_goby.tmp",
 		AutoComplete:        completer,
 		InterruptPrompt:     interrupt,
 		EOFPrompt:           exit,
@@ -92,10 +92,14 @@ func StartIgb(version string) {
 
 		// Pressing ctrl-C
 		if err == readline.ErrInterrupt {
-			if len(line) == 0 {
+			if len(line) == 0 && cmds == nil {
+				println("Bye!")
 				break
 			} else {
-				rl.SetPrompt(prompt2)
+				// Erasing command buffer
+				rl.SetPrompt(prompt)
+				sm.Event(Waiting)
+				cmds = nil
 				continue
 			}
 		}
@@ -120,7 +124,6 @@ func StartIgb(version string) {
 		if perr != nil {
 			if perr.IsEOF() {
 				if !sm.Is(Waiting) {
-					rl.SetPrompt(prompt2)
 					sm.Event(Waiting)
 				}
 
@@ -176,7 +179,7 @@ func StartIgb(version string) {
 			// If everything goes well, reset state and statements buffer
 			rl.SetPrompt(prompt)
 			sm.Event(readyToExec)
-			cmds = []string{}
+			cmds = nil
 		}
 		if sm.Is(readyToExec) {
 			instructions := g.GenerateInstructions(program.Statements)
