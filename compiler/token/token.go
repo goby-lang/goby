@@ -24,7 +24,7 @@ const (
 
 	Assign   = "="
 	Plus     = "+"
-	PlusEql = "+="
+	PlusEql  = "+="
 	Minus    = "-"
 	MinusEql = "-="
 	Bang     = "!"

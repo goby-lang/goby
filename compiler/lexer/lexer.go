@@ -125,9 +125,7 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Literal = "+="
 			tok.Line = l.line
 			tok.Type = token.PlusEql
-			l.readChar()
-			l.readChar()
-			return tok
+			tok = token.Token{Type: token.PlusEql, Literal: "+=", Line: l.line}
 		}
 		tok = newToken(token.Plus, l.ch, l.line)
 	case '{':
