@@ -132,7 +132,7 @@ func StartIgb(version string) {
 
 				stack++
 				rl.SetPrompt(prompt2 + indent(stack))
-				cmds = append(cmds, line)
+				cmds = append(cmds, strings.TrimSpace(line))
 				continue
 			}
 
@@ -141,7 +141,7 @@ func StartIgb(version string) {
 				stack--
 				rl.SetPrompt(prompt2 + indent(stack))
 				sm.Event(waitEnded)
-				cmds = append(cmds, line)
+				cmds = append(cmds, strings.TrimSpace(line))
 			} else {
 				stack = 0
 				rl.SetPrompt(prompt)
@@ -153,7 +153,7 @@ func StartIgb(version string) {
 
 		if sm.Is(Waiting) {
 			rl.SetPrompt(prompt2 + indent(stack))
-			cmds = append(cmds, line)
+			cmds = append(cmds, strings.TrimSpace(line))
 			continue
 		}
 
