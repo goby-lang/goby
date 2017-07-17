@@ -49,6 +49,64 @@ func TestWhileStatementInBlock(t *testing.T) {
 	compareBytecode(t, bytecode, expected)
 }
 
+func TestCustomClassConstructor(t *testing.T) {
+	input := `
+class Foo
+  def initialize(x, y)
+    @x = x
+    @y = y
+    @z = x - y
+  end
+
+  def bar
+    @x + @y + @z
+  end
+end
+
+Foo.new(100, 50).bar
+`
+
+	expected := `
+<Def:initialize>
+0 getlocal 0 0
+1 setinstancevariable @x
+2 getlocal 0 1
+3 setinstancevariable @y
+4 getlocal 0 0
+5 getlocal 0 1
+6 send - 1
+7 setinstancevariable @z
+8 leave
+<Def:bar>
+0 getinstancevariable @x
+1 getinstancevariable @y
+2 send + 1
+3 getinstancevariable @z
+4 send + 1
+5 leave
+<DefClass:Foo>
+0 putself
+1 putstring "initialize"
+2 def_method 2
+3 putself
+4 putstring "bar"
+5 def_method 0
+6 leave
+<ProgramStart>
+0 putself
+1 def_class class:Foo
+2 pop
+3 getconstant Foo false
+4 putobject 100
+5 putobject 50
+6 send new 2
+7 send bar 0
+8 leave
+`
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
 func TestNextStatement(t *testing.T) {
 	input := `
 	x = 0
@@ -136,9 +194,9 @@ func TestNamespacedClass(t *testing.T) {
 0 putself
 1 def_class module:Foo
 2 pop
-3 getconstant Foo
-4 getconstant Bar
-5 getconstant Baz
+3 getconstant Foo true
+4 getconstant Bar true
+5 getconstant Baz false
 6 send new 0
 7 send bar 0
 8 leave
@@ -171,7 +229,7 @@ Foo.bar
 0 putself
 1 def_class class:Foo
 2 pop
-3 getconstant Foo
+3 getconstant Foo false
 4 send bar 0
 5 leave
 `
@@ -209,10 +267,10 @@ Foo.new.bar
 1 def_class class:Bar
 2 pop
 3 putself
-4 getconstant Bar
+4 getconstant Bar false
 5 def_class class:Foo Bar
 6 pop
-7 getconstant Foo
+7 getconstant Foo false
 8 send new 0
 9 send bar 0
 10 leave
@@ -248,7 +306,7 @@ Foo.new.bar
 3 leave
 <DefClass:Foo>
 0 putself
-1 getconstant Bar
+1 getconstant Bar false
 2 send include 1
 3 leave
 <ProgramStart>
@@ -258,7 +316,7 @@ Foo.new.bar
 3 putself
 4 def_class class:Foo
 5 pop
-6 getconstant Foo
+6 getconstant Foo false
 7 send new 0
 8 send bar 0
 9 leave
