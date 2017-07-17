@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/chzyer/readline"
 	"github.com/goby-lang/goby/compiler/bytecode"
@@ -28,6 +30,8 @@ const (
 	readyToExec = "readyToExec"
 	Waiting     = "waiting"
 	waitEnded   = "waitEnded"
+
+	emojis = "😀😁😂🤣😃😄😅😆😉😊😋😎😍😘😗😙😚☺🙂🤗🤔😐😑😶🙄😏😣😥😮🤐😯😪😫😴😌😛😜😝🤤😒😓😔😕🙃🤑😲☹🙁😖😞😟😤😢😭😦😧😨😩😬😰😱😳😵😡😠😷🤒🤕🤢🤧😇🤠🤡🤥🤓😈👿👹👺💀👻👽🤖💩😺😸😹😻😼😽🙀😿😾"
 )
 
 var sm = fsm.NewFSM(
@@ -70,7 +74,7 @@ restart:
 
 	log.SetOutput(rl.Stderr())
 
-	println("Goby", version)
+	greet(rl, version)
 
 	// Initialize VM
 	v := vm.New(os.Getenv("GOBY_ROOT"), []string{})
@@ -183,14 +187,14 @@ restart:
 			program, perr = p.ParseProgram()
 
 			/*
-				   This could mean there still are statements not ended, for example:
+			 This could mean there still are statements not ended, for example:
 
-				   ```ruby
-				   class Foo
-					 def bar
-					 end # This make state changes to WaitEnded
-				   # But here still needs an "end"
-				   ```
+			 ```ruby
+			 class Foo
+			 def bar
+			 end # This make state changes to WaitEnded
+			 # But here still needs an "end"
+			 ```
 			*/
 
 			if perr != nil {
@@ -248,4 +252,19 @@ func prompt(s int) string {
 		return prompt2
 	}
 	return prompt1
+}
+
+func fortune() string {
+	var randSrc = rand.NewSource(time.Now().UnixNano())
+	s := strings.Split(emojis, "")
+	l := len(s)
+	r := randSrc.Int63() % int64(l)
+	return s[r]
+}
+
+func greet(rl *readline.Instance, version string) {
+	rl.Config.UniqueEditLine = true
+	println("Goby", version, fortune(), fortune(), fortune())
+	println("Goby", version, fortune(), fortune(), fortune())
+	rl.Config.UniqueEditLine = false
 }
