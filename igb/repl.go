@@ -23,6 +23,7 @@ const (
 	interrupt = "^C"
 	exit      = "exit"
 	help      = "help"
+	restart   = "restart"
 
 	readyToExec = "readyToExec"
 	Waiting     = "waiting"
@@ -43,11 +44,13 @@ var cmds []string
 
 var completer = readline.NewPrefixCompleter(
 	readline.PcItem(help),
+	readline.PcItem(restart),
 	readline.PcItem(exit),
 )
 
 // StartIgb starts goby's REPL.
 func StartIgb(version string) {
+restart:
 	var err error
 	stack := 0
 
@@ -118,6 +121,12 @@ func StartIgb(version string) {
 			println(prompt(stack) + line)
 			usage(rl.Stderr())
 			continue
+		case line == restart:
+			rl = nil
+			cmds = nil
+			println(prompt(stack) + line)
+			println("Restarting Igb...")
+			goto restart
 		case line == exit:
 			println(prompt(stack) + line)
 			println("Bye!")
