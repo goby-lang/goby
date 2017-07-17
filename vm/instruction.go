@@ -54,10 +54,15 @@ var builtInActions = map[operationType]*action{
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
 			constName := args[0].(string)
 			c := t.vm.lookupConstant(cf, constName)
+			c.isNamespace = args[1].(string) == "true"
+
+			if t.stack.top() != nil && t.stack.top().isNamespace {
+				t.stack.pop()
+			}
 
 			if c == nil {
 				err := initErrorObject(NameErrorClass, "uninitialized constant %s", constName)
-				t.stack.push(&Pointer{err})
+				t.stack.push(&Pointer{Target: err})
 				return
 			}
 
@@ -73,7 +78,7 @@ var builtInActions = map[operationType]*action{
 			p := cf.getLCL(index, depth)
 
 			if p == nil {
-				t.stack.push(&Pointer{NULL})
+				t.stack.push(&Pointer{Target: NULL})
 				return
 			}
 
@@ -140,7 +145,7 @@ var builtInActions = map[operationType]*action{
 			rangeEnd := t.stack.pop().Target.(*IntegerObject).Value
 			rangeStart := t.stack.pop().Target.(*IntegerObject).Value
 
-			t.stack.push(&Pointer{t.vm.initRangeObject(rangeStart, rangeEnd)})
+			t.stack.push(&Pointer{Target: t.vm.initRangeObject(rangeStart, rangeEnd)})
 		},
 	},
 	bytecode.NewArray: {
@@ -155,7 +160,7 @@ var builtInActions = map[operationType]*action{
 			}
 
 			arr := t.vm.initArrayObject(elems)
-			t.stack.push(&Pointer{arr})
+			t.stack.push(&Pointer{Target: arr})
 		},
 	},
 	bytecode.NewHash: {
@@ -171,7 +176,7 @@ var builtInActions = map[operationType]*action{
 			}
 
 			hash := t.vm.initHashObject(pairs)
-			t.stack.push(&Pointer{hash})
+			t.stack.push(&Pointer{Target: hash})
 		},
 	},
 	bytecode.BranchUnless: {
@@ -225,20 +230,20 @@ var builtInActions = map[operationType]*action{
 	bytecode.PutSelf: {
 		name: bytecode.PutSelf,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
-			t.stack.push(&Pointer{cf.self})
+			t.stack.push(&Pointer{Target: cf.self})
 		},
 	},
 	bytecode.PutString: {
 		name: bytecode.PutString,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
 			object := t.vm.initObjectFromGoType(args[0])
-			t.stack.push(&Pointer{object})
+			t.stack.push(&Pointer{Target: object})
 		},
 	},
 	bytecode.PutNull: {
 		name: bytecode.PutNull,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
-			t.stack.push(&Pointer{NULL})
+			t.stack.push(&Pointer{Target: NULL})
 		},
 	},
 	bytecode.DefMethod: {

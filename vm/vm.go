@@ -264,11 +264,6 @@ func (vm *VM) lookupConstant(cf *callFrame, constName string) (constant *Pointer
 	}
 
 	if hasNamespace {
-		// pop namespace since we don't need it anymore
-		if namespace != cf.self {
-			vm.mainThread.stack.pop()
-		}
-
 		constant = namespace.lookupConstant(constName, true)
 
 		if constant != nil {
@@ -283,7 +278,7 @@ func (vm *VM) lookupConstant(cf *callFrame, constName string) (constant *Pointer
 	}
 
 	if constName == objectClass {
-		constant = &Pointer{vm.objectClass}
+		constant = &Pointer{Target: vm.objectClass}
 	}
 
 	return

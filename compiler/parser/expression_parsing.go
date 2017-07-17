@@ -132,6 +132,7 @@ func (p *Parser) parseConstant() ast.Expression {
 	c := &ast.Constant{Token: p.curToken, Value: p.curToken.Literal}
 
 	if p.peekTokenIs(token.ResolutionOperator) {
+		c.IsNamespace = true
 		p.nextToken()
 		return p.parseInfixExpression(c)
 	}

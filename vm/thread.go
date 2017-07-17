@@ -136,7 +136,7 @@ func (t *thread) evalBuiltInMethod(receiver Object, method *BuiltInMethodObject,
 			t.evalMethodObject(instance, instance.InitializeMethod, receiverPr, argCount, argPr, blockFrame)
 		}
 	}
-	t.stack.Data[receiverPr] = &Pointer{evaluated}
+	t.stack.Data[receiverPr] = &Pointer{Target: evaluated}
 	t.sp = receiverPr + 1
 }
 
@@ -154,10 +154,10 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 
 	if argC < normalArgCount {
 		e := initErrorObject(ArgumentErrorClass, "Expect at least %d args for method '%s'. got: %d", normalArgCount, method.Name, argC)
-		t.stack.push(&Pointer{e})
+		t.stack.push(&Pointer{Target: e})
 	} else if argC > method.argc {
 		e := initErrorObject(ArgumentErrorClass, "Expect at most %d args for method '%s'. got: %d", method.argc, method.Name, argC)
-		t.stack.push(&Pointer{e})
+		t.stack.push(&Pointer{Target: e})
 	} else {
 		for i := 0; i < argC; i++ {
 			c.insertLCL(i, 0, t.stack.Data[argPr+i].Target)
@@ -175,12 +175,12 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 // TODO: Use this method to replace unnecessary panics
 func (t *thread) returnError(msg string) {
 	err := &Error{Message: msg}
-	t.stack.push(&Pointer{err})
+	t.stack.push(&Pointer{Target: err})
 }
 
 func (t *thread) UndefinedMethodError(methodName string, receiver Object) {
 	err := initErrorObject(UndefinedMethodErrorClass, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
-	t.stack.push(&Pointer{err})
+	t.stack.push(&Pointer{Target: err})
 }
 
 func (t *thread) UnsupportedMethodError(methodName string, receiver Object) *Error {

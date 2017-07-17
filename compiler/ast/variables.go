@@ -44,8 +44,9 @@ func (iv *InstanceVariable) String() string {
 }
 
 type Constant struct {
-	Token token.Token
-	Value string
+	Token       token.Token
+	Value       string
+	IsNamespace bool
 }
 
 func (c *Constant) variableNode() {}

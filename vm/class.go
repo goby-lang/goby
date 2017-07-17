@@ -723,7 +723,7 @@ func (c *RClass) lookupConstant(constName string, findInScope bool) *Pointer {
 }
 
 func (c *RClass) setClassConstant(constant *RClass) {
-	c.constants[constant.Name] = &Pointer{constant}
+	c.constants[constant.Name] = &Pointer{Target: constant}
 }
 
 func (c *RClass) getClassConstant(constName string) (class *RClass) {
