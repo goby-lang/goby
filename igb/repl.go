@@ -25,7 +25,7 @@ const (
 	interrupt = "^C"
 	exit      = "exit"
 	help      = "help"
-	restart   = "restart"
+	reset     = "reset"
 
 	readyToExec = "readyToExec"
 	Waiting     = "waiting"
@@ -48,13 +48,13 @@ var cmds []string
 
 var completer = readline.NewPrefixCompleter(
 	readline.PcItem(help),
-	readline.PcItem(restart),
+	readline.PcItem(reset),
 	readline.PcItem(exit),
 )
 
 // StartIgb starts goby's REPL.
 func StartIgb(version string) {
-restart:
+reset:
 	var err error
 	stack := 0
 
@@ -74,7 +74,7 @@ restart:
 
 	log.SetOutput(rl.Stderr())
 
-	greet(rl, version)
+	println("Goby", version, fortune(), fortune(), fortune())
 
 	// Initialize VM
 	v := vm.New(os.Getenv("GOBY_ROOT"), []string{})
@@ -107,7 +107,7 @@ restart:
 			case err == readline.ErrInterrupt: // Pressing Ctrl-C
 				if len(line) == 0 && cmds == nil {
 					println("")
-					println("Bye!")
+					println("Bye!", fortune(), fortune(), fortune())
 					return
 				}
 				// Erasing command buffer
@@ -125,15 +125,15 @@ restart:
 			println(prompt(stack) + line)
 			usage(rl.Stderr())
 			continue
-		case line == restart:
+		case line == reset:
 			rl = nil
 			cmds = nil
 			println(prompt(stack) + line)
 			println("Restarting Igb...")
-			goto restart
+			goto reset
 		case line == exit:
 			println(prompt(stack) + line)
-			println("Bye!")
+			println("Bye!", fortune(), fortune(), fortune())
 			return
 		case line == "":
 			println(prompt(stack) + indent(stack) + line)
@@ -260,11 +260,4 @@ func fortune() string {
 	l := len(s)
 	r := randSrc.Int63() % int64(l)
 	return s[r]
-}
-
-func greet(rl *readline.Instance, version string) {
-	rl.Config.UniqueEditLine = true
-	println("Goby", version, fortune(), fortune(), fortune())
-	println("Goby", version, fortune(), fortune(), fortune())
-	rl.Config.UniqueEditLine = false
 }
