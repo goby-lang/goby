@@ -373,14 +373,44 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 		},
 		{
 			// Returns true if Object class is equal to the input argument class
+			//
+			// ```ruby
+			// "Hello".is_a(String)            # => true
+			// 123.is_a(Integer)               # => true
+			// [1, true, "String"].is_a(Array) # => true
+			// { a: 1, b: 2 }.is_a(Hash)       # => true
+			// "Hello".is_a(Integer)           # => false
+			// 123.is_a(Range)                 # => false
+			// (2..4).is_a(Hash)               # => false
+			// nil.is_a(Integer)               # => false
+			// ```
+			//
 			// @param n/a []
 			// @return [Boolean]
 			Name: "is_a",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					c := args[0].(*RClass)
-					if receiver.Class().Name == c.Name {
-						return TRUE
+					if len(args) != 1 {
+						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got=%d", len(args))
+					}
+
+					c := args[0]
+					gobyClass, ok := c.(*RClass)
+
+					if !ok {
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, classClass, c.Class().Name)
+					}
+
+					receiverClass := receiver.Class()
+
+					for {
+						if receiverClass.Name == gobyClass.Name {
+							return TRUE
+						}
+						receiverClass = receiverClass.superClass
+						if receiverClass == nil {
+							break
+						}
 					}
 					return FALSE
 				}
@@ -388,11 +418,23 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 		},
 		{
 			// Returns true if Object is nil
+			//
+			// ```ruby
+			// 123.is_nil            # => false
+			// "String".is_nil       # => false
+			// { a: 1, b: 2 }.is_nil # => false
+			// (3..5).is_nil         # => false
+			// nil.is_nil            # => true  (See the implementation of Null#is_nil in vm/null.go file)
+			// ```
+			//
 			// @param n/a []
 			// @return [Boolean]
 			Name: "is_nil",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(ArgumentError, "Expect 0 argument. got=%d", len(args))
+					}
 					return FALSE
 				}
 			},

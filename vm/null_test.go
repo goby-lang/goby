@@ -43,3 +43,26 @@ func TestNullComparisonOperation(t *testing.T) {
 		vm.checkCFP(t, i, 0)
 	}
 }
+
+func TestNullIsNilMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{`123.is_nil`, false},
+		{`"Hello World".is_nil`, false},
+		{`(2..10).is_nil`, false},
+		{`{ a: 1, b: "2", c: ["Goby", 123] }.is_nil`, false},
+		{`[1, 2, 3, 4, 5].is_nil`, false},
+		{`true.is_nil`, false},
+		{`String.is_nil`, false},
+		{`nil.is_nil`, true},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
