@@ -10,7 +10,7 @@ func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, sc
 	if g.fsm.Is(keepExp) {
 		switch exp := exp.(type) {
 		case *ast.Constant:
-			is.define(GetConstant, exp.Value)
+			is.define(GetConstant, exp.Value, fmt.Sprint(exp.IsNamespace))
 		case *ast.InstanceVariable:
 			is.define(GetInstanceVariable, exp.Value)
 		case *ast.IntegerLiteral:

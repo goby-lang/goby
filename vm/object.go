@@ -15,7 +15,8 @@ type Object interface {
 
 // Pointer is used to point to an object. Variables should hold pointer instead of holding a object directly.
 type Pointer struct {
-	Target Object
+	Target      Object
+	isNamespace bool
 }
 
 func (p *Pointer) returnClass() *RClass {

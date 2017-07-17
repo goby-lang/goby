@@ -120,10 +120,10 @@ func TestConstantCompilation(t *testing.T) {
 <ProgramStart>
 0 putobject 10
 1 setconstant Foo
-2 getconstant Foo
+2 getconstant Foo false
 3 setconstant Bar
-4 getconstant Foo
-5 getconstant Bar
+4 getconstant Foo false
+5 getconstant Bar false
 6 send + 1
 7 leave
 `
