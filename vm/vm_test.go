@@ -2,6 +2,9 @@ package vm
 
 import (
 	"github.com/goby-lang/goby/compiler"
+	"github.com/goby-lang/goby/compiler/bytecode"
+	"github.com/goby-lang/goby/compiler/lexer"
+	"github.com/goby-lang/goby/compiler/parser"
 	"testing"
 )
 
@@ -10,6 +13,47 @@ func TestVM_REPLExec(t *testing.T) {
 		inputs   []string
 		expected interface{}
 	}{
+		{
+			[]string{`
+def foo(x)
+  yield(x + 10)
+end
+def bar(y)
+  foo(y) do |f|
+	yield(f)
+  end
+end
+def baz(z)
+  bar(z + 100) do |b|
+	yield(b)
+  end
+end
+a = 0
+baz(100) do |b|
+  a = b
+end
+a
+			`,
+				`
+class Foo
+  def bar
+	100
+  end
+end
+module Baz
+  class Bar
+	def bar
+	  Foo.new.bar
+	end
+  end
+end
+				`,
+				`
+Baz::Bar.new.bar + a
+`,
+			},
+			310,
+		},
 		{
 			[]string{`
 
@@ -59,12 +103,21 @@ foo
 		v := initTestVM()
 		v.InitForREPL()
 
-		for _, input := range test.inputs {
-			sets, err := compiler.CompileToInstructions(input)
+		// Initialize parser, lexer is not important here
+		p := parser.New(lexer.New(""))
 
-			if err != nil {
-				t.Fatalf(err.Error())
-			}
+		program, _ := p.ParseProgram()
+
+		// Initialize code generator, and it will behavior a little different in REPL mode.
+		g := bytecode.NewGenerator()
+		g.REPL = true
+		g.InitTopLevelScope(program)
+
+		for _, input := range test.inputs {
+			p := parser.New(lexer.New(input))
+
+			program, _ := p.ParseProgram()
+			sets := g.GenerateInstructions(program.Statements)
 
 			v.REPLExec(sets)
 		}

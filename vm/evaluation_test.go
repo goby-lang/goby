@@ -4,6 +4,48 @@ import (
 	"testing"
 )
 
+func TestComplexEvaluation(t *testing.T) {
+	input := `
+	def foo(x)
+	  yield(x + 10)
+	end
+	def bar(y)
+	  foo(y) do |f|
+		yield(f)
+	  end
+	end
+	def baz(z)
+	  bar(z + 100) do |b|
+		yield(b)
+	  end
+	end
+	a = 0
+	baz(100) do |b|
+	  a = b
+	end
+	a
+
+	class Foo
+	  def bar
+		100
+	  end
+	end
+	module Baz
+	  class Bar
+		def bar
+		  Foo.new.bar
+		end
+	  end
+	end
+	Baz::Bar.new.bar + a
+	`
+
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input)
+	testIntegerObject(t, 0, evaluated, 310)
+	vm.checkCFP(t, 0, 0)
+}
+
 func TestComment(t *testing.T) {
 	input := `
 	# Comment

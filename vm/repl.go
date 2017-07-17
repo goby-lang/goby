@@ -9,7 +9,6 @@ import "github.com/goby-lang/goby/compiler/bytecode"
 func (vm *VM) InitForREPL() {
 	vm.SetClassISIndexTable("")
 	vm.SetMethodISIndexTable("")
-	vm.replMode = true
 
 	// REPL should maintain a base call frame so that the whole program won't exit
 	cf := newCallFrame(&instructionSet{name: "REPL base"})
@@ -31,7 +30,7 @@ func (vm *VM) REPLExec(sets []*bytecode.InstructionSet) {
 
 	vm.blockTables[p.filename] = p.blockTable
 
-	oldFrame := vm.mainThread.callFrameStack.top()
+	oldFrame := vm.mainThread.callFrameStack.pop()
 	cf := newCallFrame(p.program)
 	cf.self = vm.mainObj
 	cf.locals = oldFrame.locals

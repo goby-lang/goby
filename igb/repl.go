@@ -200,7 +200,6 @@ func StartIgb(version string) {
 		if sm.Is(readyToExec) {
 			println(prompt(stack) + line)
 			instructions := g.GenerateInstructions(program.Statements)
-			g.ResetInstructionSets()
 			v.REPLExec(instructions)
 
 			r := v.GetREPLResult()

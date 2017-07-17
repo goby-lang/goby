@@ -54,8 +54,6 @@ type VM struct {
 	// projectRoot is goby root's absolute path, which is $GOROOT/src/github.com/goby-lang/goby
 	projectRoot string
 
-	replMode bool
-
 	stackTraceCount int
 
 	channelObjectMap *objectMap
@@ -217,9 +215,7 @@ func (vm *VM) getMethodIS(name string, filename filename) (*instructionSet, bool
 
 	is := iss[vm.methodISIndexTables[filename].Data[name]]
 
-	if !vm.replMode {
-		vm.methodISIndexTables[filename].Data[name]++
-	}
+	vm.methodISIndexTables[filename].Data[name]++
 
 	return is, ok
 }
@@ -233,9 +229,7 @@ func (vm *VM) getClassIS(name string, filename filename) *instructionSet {
 
 	is := iss[vm.classISIndexTables[filename].Data[name]]
 
-	if !vm.replMode {
-		vm.classISIndexTables[filename].Data[name]++
-	}
+	vm.classISIndexTables[filename].Data[name]++
 
 	return is
 }
