@@ -570,7 +570,12 @@ func (a *ArrayObject) toString() string {
 
 	elements := []string{}
 	for _, e := range a.Elements {
-		elements = append(elements, e.toString())
+		_, isString := e.(*StringObject)
+		if isString {
+			elements = append(elements, "\""+e.toString()+"\"")
+		} else {
+			elements = append(elements, e.toString())
+		}
 	}
 
 	out.WriteString("[")
