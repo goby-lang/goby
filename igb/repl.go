@@ -31,32 +31,31 @@ const (
 	Waiting     = "waiting"
 	waitEnded   = "waitEnded"
 
-	emojis = "😀😁😂🤣😃😄😅😆😉😊😋😎😍😘😗😙😚☺🙂🤗🤔😐😑😶🙄😏😣😥😮🤐😯😪😫😴😌😛😜😝🤤😒😓😔😕🙃🤑😲☹🙁😖😞😟😤😢😭😦😧😨😩😬😰😱😳😵😡😠😷🤒🤕🤢🤧😇🤠🤡🤥🤓😈👿👹👺💀👻👽🤖💩😺😸😹😻😼😽🙀😿😾"
-)
-
-var sm = fsm.NewFSM(
-	readyToExec,
-	fsm.Events{
-		{Name: Waiting, Src: []string{waitEnded, readyToExec}, Dst: Waiting},
-		{Name: waitEnded, Src: []string{Waiting}, Dst: waitEnded},
-		{Name: readyToExec, Src: []string{waitEnded, readyToExec}, Dst: readyToExec},
-	},
-	fsm.Callbacks{},
-)
-
-var cmds []string
-
-var completer = readline.NewPrefixCompleter(
-	readline.PcItem(help),
-	readline.PcItem(reset),
-	readline.PcItem(exit),
+	emojis = "😀😁😂🤣😃😄😅😆😉😊😋😎😍😘😗😙😚🙂🤗🤔😐😑😶🙄😏😮😪😴😌😛😜😝🤤🙃🤑😲😭😳🤧😇🤠🤡🤥🤓😈👿👹👺💀👻👽🤖💩😺😸😹😻😼😽"
 )
 
 // StartIgb starts goby's REPL.
 func StartIgb(version string) {
 reset:
+	var sm = fsm.NewFSM(
+		readyToExec,
+		fsm.Events{
+			{Name: Waiting, Src: []string{waitEnded, readyToExec}, Dst: Waiting},
+			{Name: waitEnded, Src: []string{Waiting}, Dst: waitEnded},
+			{Name: readyToExec, Src: []string{waitEnded, readyToExec}, Dst: readyToExec},
+		},
+		fsm.Callbacks{},
+	)
+
+	var completer = readline.NewPrefixCompleter(
+		readline.PcItem(help),
+		readline.PcItem(reset),
+		readline.PcItem(exit),
+	)
+
+	var cmds []string
 	var err error
-	stack := 0
+	var stack = 0
 
 	rl, err := readline.NewEx(&readline.Config{
 		Prompt:              prompt1,
@@ -107,7 +106,7 @@ reset:
 			case err == readline.ErrInterrupt: // Pressing Ctrl-C
 				if len(line) == 0 && cmds == nil {
 					println("")
-					println("Bye!", fortune(), fortune(), fortune())
+					println("Bye!")
 					return
 				}
 				// Erasing command buffer
@@ -123,7 +122,7 @@ reset:
 		switch {
 		case line == help:
 			println(prompt(stack) + line)
-			usage(rl.Stderr())
+			usage(rl.Stderr(), completer)
 			continue
 		case line == reset:
 			rl = nil
@@ -133,7 +132,7 @@ reset:
 			goto reset
 		case line == exit:
 			println(prompt(stack) + line)
-			println("Bye!", fortune(), fortune(), fortune())
+			println("Bye!")
 			return
 		case line == "":
 			println(prompt(stack) + indent(stack) + line)
@@ -234,9 +233,9 @@ func filterInput(r rune) (rune, bool) {
 
 // Other helper functions --------------------------------------------------
 
-func usage(w io.Writer) {
+func usage(w io.Writer, c *readline.PrefixCompleter) {
 	io.WriteString(w, "commands:\n")
-	io.WriteString(w, completer.Tree("   "))
+	io.WriteString(w, c.Tree("   "))
 }
 
 func indent(c int) string {
