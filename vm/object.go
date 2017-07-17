@@ -69,17 +69,3 @@ func (ro *RObject) toString() string {
 func (ro *RObject) toJSON() string {
 	return ro.toString()
 }
-
-// Other helper functions -----------------------------------------------
-
-func checkArgumentLen(args []Object, class *RClass, methodName string) *Error {
-	if len(args) > 1 {
-		return &Error{Message: fmt.Sprintf("Too many arguments for %s#%s", class.ReturnName(), methodName)}
-	}
-
-	return nil
-}
-
-func wrongTypeError(c *RClass) *Error {
-	return &Error{Message: fmt.Sprintf("expect argument to be %s type", c.ReturnName())}
-}

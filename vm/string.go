@@ -78,7 +78,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := r.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect argument to be String. got=%v", r.Class().Name)
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, r.Class().Name)
 					}
 
 					rightValue := right.Value
@@ -103,7 +103,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := r.(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect argument to be Integer. got=%v", r.Class().Name)
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, integerClass, r.Class().Name)
 					}
 
 					if right.Value < 0 {
@@ -137,7 +137,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := r.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect argument to be String. got=%v", r.Class().Name)
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, r.Class().Name)
 					}
 
 					rightValue := right.Value
@@ -167,7 +167,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := r.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect argument to be String. got=%v", r.Class().Name)
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, r.Class().Name)
 					}
 
 					rightValue := right.Value
@@ -198,7 +198,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := r.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect argument to be String. got=%v", r.Class().Name)
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, r.Class().Name)
 					}
 
 					rightValue := right.Value
@@ -231,7 +231,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := r.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect argument to be String. got=%v", r.Class().Name)
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, r.Class().Name)
 					}
 
 					rightValue := right.Value
@@ -265,7 +265,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect argument to be String. got=%v", r.Class().Name)
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, r.Class().Name)
 					}
 
 					rightValue := right.Value
@@ -305,7 +305,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					index, ok := i.(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect index to be Integer. got=%v", i.Class().Name)
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, integerClass, i.Class().Name)
 					}
 
 					indexValue := index.Value
@@ -354,7 +354,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					index, ok := i.(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect index to be Integer. got=%v", i.Class().Name)
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, integerClass, i.Class().Name)
 					}
 
 					indexValue := index.Value
@@ -368,7 +368,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					replaceStr, ok := r.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect argument to be String. got=%v", r.Class().Name)
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, r.Class().Name)
 					}
 					replaceStrValue := replaceStr.Value
 
@@ -457,7 +457,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					concatStr, ok := c.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect argument to be String. got=%v", c.Class().Name)
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, c.Class().Name)
 					}
 
 					return t.vm.initStringObject(str + concatStr.Value)
@@ -509,7 +509,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					deleteStr, ok := d.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect argument to be String. got=%v", d.Class().Name)
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, d.Class().Name)
 					}
 
 					return t.vm.initStringObject(strings.Replace(str, deleteStr.Value, "", -1))
@@ -580,7 +580,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					compareStr, ok := c.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect argument to be String. got=%v", c.Class().Name)
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, c.Class().Name)
 					}
 
 					compareStrValue := compareStr.Value
@@ -655,14 +655,14 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					pattern, ok := p.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect pattern to be String. got=%v", p.Class().Name)
+						return t.vm.initErrorObject(TypeError, "Expect pattern to be String. got: %s", p.Class().Name)
 					}
 
 					r := args[1]
 					replacement, ok := r.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect replacement to be String. got=%v", r.Class().Name)
+						return t.vm.initErrorObject(TypeError, "Expect replacement to be String. got: %s", r.Class().Name)
 					}
 
 					return t.vm.initStringObject(strings.Replace(str, pattern.Value, replacement.Value, -1))
@@ -690,7 +690,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					includeStr, ok := i.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect argument to be String. got=%v", i.Class().Name)
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, i.Class().Name)
 					}
 
 					if strings.Contains(str, includeStr.Value) {
@@ -722,7 +722,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 2 {
-						return t.vm.initErrorObject(ArgumentError, "Expect 2 arguments. got=%v", strconv.Itoa(len(args)))
+						return t.vm.initErrorObject(ArgumentError, "Expect 2 arguments. got=%d", len(args))
 					}
 
 					str := receiver.(*StringObject).Value
@@ -730,7 +730,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					index, ok := i.(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect index to be Integer. got=%v", i.Class().Name)
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, integerClass, i.Class().Name)
 					}
 
 					indexValue := index.Value
@@ -738,7 +738,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					insertStr, ok := ins.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect insert string to be String. got=%v", ins.Class().Name)
+						return t.vm.initErrorObject(TypeError, "Expect insert string to be String. got: %s", ins.Class().Name)
 					}
 					strLength := utf8.RuneCountInString(str)
 
@@ -811,7 +811,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					strLength, ok := l.(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect justify width to be Integer. got=%v", l.Class().Name)
+						return t.vm.initErrorObject(TypeError, "Expect justify width to be Integer. got: %s", l.Class().Name)
 					}
 
 					strLengthValue := strLength.Value
@@ -824,7 +824,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 						padStr, ok := p.(*StringObject)
 
 						if !ok {
-							return t.vm.initErrorObject(TypeError, "Expect padding string to be String. got=%v", p.Class().Name)
+							return t.vm.initErrorObject(TypeError, "Expect padding string to be String. got: %s", p.Class().Name)
 						}
 
 						padStrValue = padStr.Value
@@ -867,7 +867,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					replaceStr, ok := r.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect argument to be String. got=%v", r.Class().Name)
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, r.Class().Name)
 					}
 
 					return t.vm.initStringObject(replaceStr.Value)
@@ -928,7 +928,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					strLength, ok := l.(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect justify width to be Integer. got=%v", l.Class().Name)
+						return t.vm.initErrorObject(TypeError, "Expect justify width to be Integer. got: %s", l.Class().Name)
 					}
 
 					strLengthValue := strLength.Value
@@ -941,7 +941,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 						padStr, ok := p.(*StringObject)
 
 						if !ok {
-							return t.vm.initErrorObject(TypeError, "Expect padding string to be String. got=%v", p.Class().Name)
+							return t.vm.initErrorObject(TypeError, "Expect padding string to be String. got: %s", p.Class().Name)
 						}
 
 						padStrValue = padStr.Value
@@ -1090,7 +1090,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 						return t.vm.initStringObject(string([]rune(str)[intValue]))
 
 					default:
-						return t.vm.initErrorObject(TypeError, "Expect slice range to be Range or Integer. got=%v", args[0].Class().Name)
+						return t.vm.initErrorObject(TypeError, "Expect slice range to be Range or Integer. got: %s", args[0].Class().Name)
 					}
 				}
 			},
@@ -1117,7 +1117,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					seperator, ok := s.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect argument to be String. got=%v", s.Class().Name)
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, s.Class().Name)
 					}
 
 					str := receiver.(*StringObject).Value
@@ -1155,7 +1155,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					compareStr, ok := c.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect argument to be String. got=%v", c.Class().Name)
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, c.Class().Name)
 					}
 
 					compareStrValue := compareStr.Value

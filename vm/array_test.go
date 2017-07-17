@@ -200,29 +200,22 @@ func TestArrayConcatMethod(t *testing.T) {
 func TestArrayConcatMethodFail(t *testing.T) {
 	testsFail := []struct {
 		input    string
-		expected *Error
+		expected string
 	}{
 		{`
 		a = [1, 2]
 		a.concat(3)
-		`, newError("Expect argument to be Array. got=*vm.IntegerObject")},
+		`, "TypeError: Expect argument to be Array. got: Integer"},
 		{`
 		a = []
 		a.concat("a")
-		`, newError("Expect argument to be Array. got=*vm.StringObject")},
+		`, "TypeError: Expect argument to be Array. got: String"},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
-		if !ok {
-			t.Errorf("Expect error. got=%T (%+v)", err, err)
-		}
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
-		}
-
+		checkError(t, i, evaluated, TypeError, tt.expected)
 		v.checkCFP(t, i, 1)
 	}
 }
@@ -385,24 +378,18 @@ func TestArrayFirstMethod(t *testing.T) {
 func TestArrayFirstMethodFail(t *testing.T) {
 	testsFail := []struct {
 		input    string
-		expected *Error
+		expected string
 	}{
 		{`
 		a = [1, 2]
 		a.first("a")
-		`, newError("Expect index argument to be Integer. got=*vm.StringObject")},
+		`, "TypeError: Expect argument to be Integer. got: String"},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
-		if !ok {
-			t.Errorf("Expect error. got=%T (%+v)", err, err)
-		}
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", err.Message, tt.expected.Message)
-		}
+		checkError(t, i, evaluated, TypeError, tt.expected)
 		v.checkCFP(t, i, 1)
 	}
 }
@@ -433,24 +420,18 @@ func TestArrayLastMethod(t *testing.T) {
 func TestArrayLastMethodFail(t *testing.T) {
 	testsFail := []struct {
 		input    string
-		expected *Error
+		expected string
 	}{
 		{`
 		a = [1, 2]
 		a.last("l")
-		`, newError("Expect index argument to be Integer. got=*vm.StringObject")},
+		`, "TypeError: Expect argument to be Integer. got: String"},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
-		if !ok {
-			t.Errorf("Expect error. got=%T (%+v)", err, err)
-		}
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", err.Message, tt.expected.Message)
-		}
+		checkError(t, i, evaluated, TypeError, tt.expected)
 		v.checkCFP(t, i, 1)
 	}
 }
@@ -617,24 +598,18 @@ func TestArrayRotateMethod(t *testing.T) {
 func TestArrayRotateMethodFail(t *testing.T) {
 	testsFail := []struct {
 		input    string
-		expected *Error
+		expected string
 	}{
 		{`
 		a = [1, 2]
 		a.rotate("a")
-		`, newError("Expect index argument to be Integer. got=*vm.StringObject")},
+		`, "TypeError: Expect argument to be Integer. got: String"},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
-		if !ok {
-			t.Errorf("Expect error. got=%T (%+v)", err, err)
-		}
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
-		}
+		checkError(t, i, evaluated, TypeError, tt.expected)
 
 		v.checkCFP(t, i, 1)
 	}
@@ -706,26 +681,18 @@ func TestArrayShiftMethod(t *testing.T) {
 func TestArrayShiftMethodFail(t *testing.T) {
 	testsFail := []struct {
 		input    string
-		expected *Error
+		expected string
 	}{
 		{`
 		a = [1, 2]
 		a.shift(3, 3, 4, 5)
-		`, newError("Expect 0 argument. got=4")},
+		`, "ArgumentError: Expect 0 argument. got=4"},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input)
-
-		err, ok := evaluated.(*Error)
-
-		if !ok {
-			t.Errorf("Expect error. got=%T (%+v)", err, err)
-		}
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
-		}
+		checkError(t, i, evaluated, ArgumentError, tt.expected)
 
 		v.checkCFP(t, i, 1)
 	}

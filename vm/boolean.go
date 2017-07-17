@@ -56,15 +56,15 @@ func builtinBooleanInstanceMethods() []*BuiltInMethodObject {
 			Name: "==",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					err := checkArgumentLen(args, receiver.Class(), "==")
-					if err != nil {
+					if len(args) != 1 {
+						err := t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
 						return err
 					}
 
 					if receiver == args[0] {
 						return TRUE
 					}
+
 					return FALSE
 				}
 			},
@@ -80,9 +80,8 @@ func builtinBooleanInstanceMethods() []*BuiltInMethodObject {
 			Name: "!=",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					err := checkArgumentLen(args, receiver.Class(), "!=")
-					if err != nil {
+					if len(args) != 1 {
+						err := t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
 						return err
 					}
 
@@ -131,7 +130,8 @@ func builtinBooleanInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*BooleanObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						err := t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, booleanClass, right.Class().Name)
+						return err
 					}
 
 					rightValue := right.Value
@@ -161,7 +161,8 @@ func builtinBooleanInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*BooleanObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						err := t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, booleanClass, right.Class().Name)
+						return err
 					}
 
 					rightValue := right.Value

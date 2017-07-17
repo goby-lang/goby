@@ -43,32 +43,26 @@ func TestIntegerArithmeticOperation(t *testing.T) {
 func TestIntegerArithmeticOperationFail(t *testing.T) {
 	testsFail := []struct {
 		input    string
-		expected *Error
+		expected string
 	}{
 		{`
 		1 + "p"
-		`, newError("expect argument to be Integer type")},
+		`, "TypeError: Expect argument to be Integer. got: String"},
 		{`
 		1 - "m"
-		`, newError("expect argument to be Integer type")},
+		`, "TypeError: Expect argument to be Integer. got: String"},
 		{`
 		1 ** "p"
-		`, newError("expect argument to be Integer type")},
+		`, "TypeError: Expect argument to be Integer. got: String"},
 		{`
 		1 / "t"
-		`, newError("expect argument to be Integer type")},
+		`, "TypeError: Expect argument to be Integer. got: String"},
 	}
 
 	for i, tt := range testsFail {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
-		if !ok {
-			t.Errorf("Expect error. got=%T (%+v)", err, err)
-		}
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
-		}
+		checkError(t, i, evaluated, TypeError, tt.expected)
 		vm.checkCFP(t, i, 1)
 	}
 }
@@ -112,41 +106,35 @@ func TestIntegerComparison(t *testing.T) {
 func TestIntegerComparisonFail(t *testing.T) {
 	testsFail := []struct {
 		input    string
-		expected *Error
+		expected string
 	}{
 		{`
 		1 > "m"
-		`, newError("expect argument to be Integer type")},
+		`, "TypeError: Expect argument to be Integer. got: String"},
 		{`
 		1 >= "m"
-		`, newError("expect argument to be Integer type")},
+		`, "TypeError: Expect argument to be Integer. got: String"},
 		{`
 		1 < "m"
-		`, newError("expect argument to be Integer type")},
+		`, "TypeError: Expect argument to be Integer. got: String"},
 		{`
 		1 <= "m"
-		`, newError("expect argument to be Integer type")},
+		`, "TypeError: Expect argument to be Integer. got: String"},
 		{`
 		1 <=> "m"
-		`, newError("expect argument to be Integer type")},
+		`, "TypeError: Expect argument to be Integer. got: String"},
 		{`
 		1 == "m"
-		`, newError("expect argument to be Integer type")},
+		`, "TypeError: Expect argument to be Integer. got: String"},
 		{`
 		1 != "m"
-		`, newError("expect argument to be Integer type")},
+		`, "TypeError: Expect argument to be Integer. got: String"},
 	}
 
 	for i, tt := range testsFail {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
-		if !ok {
-			t.Errorf("Expect error. got=%T (%+v)", err, err)
-		}
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
-		}
+		checkError(t, i, evaluated, TypeError, tt.expected)
 		vm.checkCFP(t, i, 1)
 	}
 }

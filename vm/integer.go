@@ -62,7 +62,8 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						err := t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						return err
 					}
 
 					rightValue := right.Value
@@ -85,7 +86,8 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						err := t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						return err
 					}
 
 					rightValue := right.Value
@@ -108,7 +110,8 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						err := t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						return err
 					}
 
 					rightValue := right.Value
@@ -131,7 +134,8 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect Integer. got=%T (%+v)", args[0], args[0])
+						err := t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						return err
 					}
 
 					rightValue := right.Value
@@ -154,7 +158,8 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						err := t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						return err
 					}
 
 					rightValue := right.Value
@@ -178,7 +183,8 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						err := t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						return err
 					}
 
 					rightValue := right.Value
@@ -202,7 +208,8 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						err := t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						return err
 					}
 
 					rightValue := right.Value
@@ -231,7 +238,8 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						err := t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						return err
 					}
 
 					rightValue := right.Value
@@ -260,7 +268,8 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						err := t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						return err
 					}
 
 					rightValue := right.Value
@@ -289,7 +298,8 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						err := t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						return err
 					}
 
 					rightValue := right.Value
@@ -319,7 +329,8 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						err := t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						return err
 					}
 
 					rightValue := right.Value
@@ -351,7 +362,8 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						err := t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						return err
 					}
 
 					rightValue := right.Value
@@ -380,7 +392,8 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return wrongTypeError(receiver.Class())
+						err := t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						return err
 					}
 
 					rightValue := right.Value

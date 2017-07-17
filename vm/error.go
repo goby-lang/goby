@@ -19,6 +19,11 @@ const (
 	UnsupportedMethodError = "UnsupportedMethodError"
 )
 
+const (
+	WrongArgumentTypeFormat     = "Expect argument to be %s. got: %s"
+	CantYieldWithoutBlockFormat = "Can't yield without a block"
+)
+
 // Error class is actually a special struct to hold internal error types with messages.
 // Goby developers need not to take care of the struct.
 // Goby maintainers should consider using the appropriate error type.
