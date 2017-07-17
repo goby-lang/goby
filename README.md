@@ -18,6 +18,10 @@ Goby interpreter is a monolithic binary executable, which consists of a YARV-lik
 
 We are optimizing and expanding Goby all the time and need your help. One of our vision is to utilize and manages tons of Go's packages easily from Goby scripts. To bind Goby scripts and Go packages, we might introduce a type-system partially.
 
+**Demo:**
+
+<img src="http://i.imgur.com/5RxFgIW.gif?1" height="700">
+
 **Supporting Goby by sending your first PR! See [contribution guideline](https://github.com/goby-lang/goby/blob/master/CONTRIBUTING.md)**
 
 **Or support us by [donation](https://opencollective.com/goby) (I quit my job to develop `Goby` in full-time, so financial support are needed 😢)**
