@@ -61,7 +61,7 @@ var builtInActions = map[operationType]*action{
 			}
 
 			if c == nil {
-				err := initErrorObject(NameErrorClass, "uninitialized constant %s", constName)
+				err := t.vm.initErrorObject(NameError, "uninitialized constant %s", constName)
 				t.stack.push(&Pointer{Target: err})
 				return
 			}

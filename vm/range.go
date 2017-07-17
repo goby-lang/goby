@@ -158,7 +158,7 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 								end = mid - 1
 							}
 						default:
-							return initErrorObject(TypeErrorClass, "Expect Integer or Boolean type. got=%T", r)
+							return t.vm.initErrorObject(TypeError, "Expect Integer or Boolean type. got=%s", r.Class().Name)
 						}
 					}
 				}

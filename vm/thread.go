@@ -153,10 +153,10 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 	}
 
 	if argC < normalArgCount {
-		e := initErrorObject(ArgumentErrorClass, "Expect at least %d args for method '%s'. got: %d", normalArgCount, method.Name, argC)
-		t.stack.push(&Pointer{Target: e})
+		e := t.vm.initErrorObject(ArgumentError, "Expect at least %d args for method '%s'. got: %d", normalArgCount, method.Name, argC)
+		t.stack.push(&Pointer{Target:e})
 	} else if argC > method.argc {
-		e := initErrorObject(ArgumentErrorClass, "Expect at most %d args for method '%s'. got: %d", method.argc, method.Name, argC)
+		e := t.vm.initErrorObject(ArgumentError, "Expect at most %d args for method '%s'. got: %d", method.argc, method.Name, argC)
 		t.stack.push(&Pointer{Target: e})
 	} else {
 		for i := 0; i < argC; i++ {
@@ -179,10 +179,10 @@ func (t *thread) returnError(msg string) {
 }
 
 func (t *thread) UndefinedMethodError(methodName string, receiver Object) {
-	err := initErrorObject(UndefinedMethodErrorClass, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
-	t.stack.push(&Pointer{Target: err})
+	err := t.vm.initErrorObject(UndefinedMethodError, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
+	t.stack.push(&Pointer{Target:err})
 }
 
 func (t *thread) UnsupportedMethodError(methodName string, receiver Object) *Error {
-	return initErrorObject(UnsupportedMethodClass, "Unsupported Method %s for %+v", methodName, receiver.toString())
+	return t.vm.initErrorObject(UnsupportedMethodError, "Unsupported Method %s for %+v", methodName, receiver.toString())
 }

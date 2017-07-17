@@ -131,7 +131,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect Integer. got=%T (%+v)", args[0], args[0])
+						return t.vm.initErrorObject(TypeError, "Expect Integer. got=%T (%+v)", args[0], args[0])
 					}
 
 					rightValue := right.Value

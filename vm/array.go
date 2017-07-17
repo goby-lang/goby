@@ -247,7 +247,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 					var count int
 
 					if len(args) > 1 {
-						return initErrorObject(ArgumentErrorClass, "Expect 1 argument, got=%v", len(args))
+						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument, got=%v", len(args))
 					}
 
 					if blockFrame != nil {

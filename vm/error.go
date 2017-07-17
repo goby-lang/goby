@@ -4,21 +4,6 @@ import (
 	"fmt"
 )
 
-var (
-	// InternalErrorClass ...
-	InternalErrorClass *RClass
-	// ArgumentErrorClass ...
-	ArgumentErrorClass *RClass
-	// NameErrorClass ...
-	NameErrorClass *RClass
-	// TypeErrorClass ...
-	TypeErrorClass *RClass
-	// UndefinedMethodErrorClass ...
-	UndefinedMethodErrorClass *RClass
-	// UnsupportedMethodClass ...
-	UnsupportedMethodClass *RClass
-)
-
 const (
 	// InternalError is the default error type
 	InternalError = "InternalError"
@@ -53,20 +38,22 @@ type Error struct {
 	Message string
 }
 
-func initErrorObject(errorType *RClass, format string, args ...interface{}) *Error {
+func (vm *VM) initErrorObject(errorType, format string, args ...interface{}) *Error {
+	errClass := vm.objectClass.getClassConstant(errorType)
+
 	return &Error{
-		baseObj: &baseObj{class: errorType},
-		Message: fmt.Sprintf(errorType.Name+": "+format, args...),
+		baseObj: &baseObj{class: errClass},
+		Message: fmt.Sprintf(errorType+": "+format, args...),
 	}
 }
 
 func (vm *VM) initErrorClasses() {
-	InternalErrorClass = vm.initializeClass(InternalError, false)
-	ArgumentErrorClass = vm.initializeClass(ArgumentError, false)
-	NameErrorClass = vm.initializeClass(NameError, false)
-	TypeErrorClass = vm.initializeClass(TypeError, false)
-	UndefinedMethodErrorClass = vm.initializeClass(UndefinedMethodError, false)
-	UnsupportedMethodClass = vm.initializeClass(UnsupportedMethodError, false)
+	errTypes := []string{InternalError, ArgumentError, NameError, TypeError, UndefinedMethodError, UnsupportedMethodError}
+
+	for _, errType := range errTypes {
+		c := vm.initializeClass(errType, false)
+		vm.topLevelClass(objectClass).setClassConstant(c)
+	}
 }
 
 // Polymorphic helper functions -----------------------------------------
