@@ -109,6 +109,16 @@ func TestArgumentError(t *testing.T) {
 		foo(1, 2, 3)
 		`,
 			"ArgumentError: Expect at most 2 args for method 'foo'. got: 3"},
+		{`
+		"1234567890".include "123", Class
+		`,
+			"ArgumentError: Expect 1 argument. got=2",
+		},
+		{`
+		"1234567890".include "123", Class, String
+		`,
+			"ArgumentError: Expect 1 argument. got=3",
+		},
 	}
 
 	for i, tt := range tests {
