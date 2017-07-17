@@ -254,7 +254,7 @@ var builtInActions = map[operationType]*action{
 			is, ok := t.getMethodIS(methodName, cf.instructionSet.filename)
 
 			if !ok {
-				t.returnError(fmt.Sprintf("Can't get method %s's instruction set.", methodName))
+				t.returnError(InternalError, "Can't get method %s's instruction set.", methodName)
 			}
 
 			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.topLevelClass(methodClass)}}
@@ -317,7 +317,7 @@ var builtInActions = map[operationType]*action{
 					inheritedClass, ok := superClass.Target.(*RClass)
 
 					if !ok {
-						t.returnError("Constant " + superClassName + " is not a class. got=" + string(superClass.Target.Class().ReturnName()))
+						t.returnError(InternalError, "Constant %s is not a class. got=%s", superClassName, string(superClass.Target.Class().ReturnName()))
 					}
 
 					class.pseudoSuperClass = inheritedClass
@@ -367,7 +367,7 @@ var builtInActions = map[operationType]*action{
 			case *BuiltInMethodObject:
 				t.evalBuiltInMethod(receiver, m, receiverPr, argCount, argPr, blockFrame)
 			case *Error:
-				t.returnError(m.toString())
+				t.returnError(InternalError, m.toString())
 			}
 		},
 	},
@@ -380,7 +380,7 @@ var builtInActions = map[operationType]*action{
 			receiver := t.stack.Data[receiverPr].Target
 
 			if cf.blockFrame == nil {
-				t.returnError("Can't yield without a block")
+				t.returnError(InternalError, "Can't yield without a block")
 			}
 
 			blockFrame := cf.blockFrame

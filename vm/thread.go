@@ -172,9 +172,8 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 	t.sp = receiverPr + 1
 }
 
-// TODO: Use this method to replace unnecessary panics
-func (t *thread) returnError(msg string) {
-	err := &Error{Message: msg}
+func (t *thread) returnError(errorType, format string, args ...interface{}) {
+	err := t.vm.initErrorObject(errorType, format, args)
 	t.stack.push(&Pointer{Target: err})
 }
 

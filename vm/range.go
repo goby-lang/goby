@@ -193,7 +193,7 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 					ran := receiver.(*RangeObject)
 
 					if blockFrame == nil {
-						t.returnError("Can't yield without a block")
+						t.returnError(InternalError, "Can't yield without a block")
 					}
 
 					if ran.Start <= ran.End {
@@ -341,7 +341,7 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 					ran := receiver.(*RangeObject)
 
 					if blockFrame == nil {
-						t.returnError("Can't yield without a block")
+						t.returnError(InternalError, "Can't yield without a block")
 					}
 
 					stepValue := args[0].(*IntegerObject).Value

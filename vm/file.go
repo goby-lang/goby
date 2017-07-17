@@ -70,7 +70,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 
 						err := os.Chmod(filename, os.FileMode(uint32(filemod)))
 						if err != nil {
-							t.returnError(err.Error())
+							t.returnError(InternalError, err.Error())
 						}
 					}
 
@@ -87,7 +87,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 						err := os.Remove(filename)
 
 						if err != nil {
-							t.returnError(err.Error())
+							t.returnError(InternalError, err.Error())
 							return nil
 						}
 					}
@@ -176,7 +176,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 							md, ok := fileModeTable[m]
 
 							if !ok {
-								t.returnError("Unknown file mode: " + m)
+								t.returnError(InternalError, "Unknown file mode: %s", m)
 							}
 
 							if md == syscall.O_RDWR || md == syscall.O_WRONLY {
@@ -196,7 +196,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 					f, err := os.OpenFile(fn, mode, perm)
 
 					if err != nil {
-						t.returnError(err.Error())
+						t.returnError(InternalError, err.Error())
 					}
 
 					// TODO: Refactor this class retrieval mess
@@ -286,7 +286,7 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject {
 					data, err := ioutil.ReadFile(file.Name())
 
 					if err != nil {
-						t.returnError(err.Error())
+						t.returnError(InternalError, err.Error())
 					}
 
 					return t.vm.initStringObject(string(data))
@@ -323,7 +323,7 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject {
 					length, err := file.Write([]byte(data))
 
 					if err != nil {
-						t.returnError(err.Error())
+						t.returnError(InternalError, err.Error())
 					}
 
 					return t.vm.initIntegerObject(length)

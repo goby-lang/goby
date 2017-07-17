@@ -289,7 +289,7 @@ func (vm *VM) execGobyLib(libName string) {
 	file, err := ioutil.ReadFile(libPath)
 
 	if err != nil {
-		vm.mainThread.returnError(err.Error())
+		vm.mainThread.returnError(InternalError, err.Error())
 	}
 
 	vm.execRequiredFile(libPath, file)
