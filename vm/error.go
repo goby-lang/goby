@@ -19,6 +19,9 @@ const (
 	UnsupportedMethodError = "UnsupportedMethodError"
 )
 
+/*
+	Here defines different error message formats for different types of errors
+*/
 const (
 	WrongArgumentTypeFormat     = "Expect argument to be %s. got: %s"
 	CantYieldWithoutBlockFormat = "Can't yield without a block"
