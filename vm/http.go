@@ -69,14 +69,14 @@ func builtinHTTPClassMethods() []*BuiltInMethodObject {
 					resp, err := http.Get(domain + path)
 
 					if err != nil {
-						t.returnError(err.Error())
+						return t.vm.initErrorObject(InternalError, err.Error())
 					}
 
 					content, err := ioutil.ReadAll(resp.Body)
 					resp.Body.Close()
 
 					if err != nil {
-						t.returnError(err.Error())
+						return t.vm.initErrorObject(InternalError, err.Error())
 					}
 
 					return t.vm.initStringObject(string(content))

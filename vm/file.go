@@ -70,7 +70,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 
 						err := os.Chmod(filename, os.FileMode(uint32(filemod)))
 						if err != nil {
-							t.returnError(err.Error())
+							return t.vm.initErrorObject(InternalError, err.Error())
 						}
 					}
 
@@ -87,8 +87,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 						err := os.Remove(filename)
 
 						if err != nil {
-							t.returnError(err.Error())
-							return nil
+							return t.vm.initErrorObject(InternalError, err.Error())
 						}
 					}
 
@@ -163,7 +162,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 					var perm os.FileMode
 
 					if len(args) < 1 {
-						return newError("Expect at least a filename to open file")
+						return t.vm.initErrorObject(InternalError, "Expect at least a filename to open file")
 					}
 
 					if len(args) >= 1 {
@@ -176,7 +175,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 							md, ok := fileModeTable[m]
 
 							if !ok {
-								t.returnError("Unknown file mode: " + m)
+								return t.vm.initErrorObject(InternalError, "Unknown file mode: %s", m)
 							}
 
 							if md == syscall.O_RDWR || md == syscall.O_WRONLY {
@@ -196,7 +195,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 					f, err := os.OpenFile(fn, mode, perm)
 
 					if err != nil {
-						t.returnError(err.Error())
+						return t.vm.initErrorObject(InternalError, err.Error())
 					}
 
 					// TODO: Refactor this class retrieval mess
@@ -224,7 +223,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 
 					fileStats, err := os.Stat(filename)
 					if err != nil {
-						panic(err)
+						return t.vm.initErrorObject(InternalError, err.Error())
 					}
 
 					return t.vm.initIntegerObject(int(fileStats.Size()))
@@ -286,7 +285,7 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject {
 					data, err := ioutil.ReadFile(file.Name())
 
 					if err != nil {
-						t.returnError(err.Error())
+						return t.vm.initErrorObject(InternalError, err.Error())
 					}
 
 					return t.vm.initStringObject(string(data))
@@ -307,7 +306,7 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject {
 
 					fileStats, err := os.Stat(file.Name())
 					if err != nil {
-						panic(err)
+						return t.vm.initErrorObject(InternalError, err.Error())
 					}
 
 					return t.vm.initIntegerObject(int(fileStats.Size()))
@@ -323,7 +322,7 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject {
 					length, err := file.Write([]byte(data))
 
 					if err != nil {
-						t.returnError(err.Error())
+						return t.vm.initErrorObject(InternalError, err.Error())
 					}
 
 					return t.vm.initIntegerObject(length)

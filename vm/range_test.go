@@ -149,25 +149,19 @@ func TestRangeBsearchMethodFail(t *testing.T) {
 	vm := initTestVM()
 	testsFail := []struct {
 		input    string
-		expected *Error
+		errorMsg string
 	}{
 		{`
 		ary = [0, 4, 7, 10, 12]
 		(0..4).bsearch do |i|
 			"Binary Search"
 		end
-		`, initErrorObject(TypeErrorClass, "Expect Integer or Boolean type. got=%T", vm.initStringObject("Binary Search"))},
+		`, "TypeError: Expect Integer or Boolean type. got=String"},
 	}
 
 	for i, tt := range testsFail {
 		evaluated := vm.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
-		if !ok {
-			t.Errorf("Expect error. got=%T (%+v)", err, err)
-		}
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
-		}
+		checkError(t, i, evaluated, TypeError, tt.errorMsg)
 		vm.checkCFP(t, i, 1)
 	}
 }

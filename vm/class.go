@@ -102,7 +102,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 					initFunc, ok := standardLibraries[libName]
 
 					if !ok {
-						return initErrorObject(InternalErrorClass, "Can't require \"%s\"", libName)
+						return t.vm.initErrorObject(InternalError, "Can't require \"%s\"", libName)
 					}
 
 					initFunc(t.vm)
@@ -134,7 +134,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 					file, err := ioutil.ReadFile(filepath + ".gb")
 
 					if err != nil {
-						return initErrorObject(InternalErrorClass, err.Error())
+						return t.vm.initErrorObject(InternalError, err.Error())
 					}
 
 					t.vm.execRequiredFile(filepath, file)
@@ -483,7 +483,7 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 					module, ok := args[0].(*RClass)
 
 					if !ok {
-						return initErrorObject(TypeErrorClass, "Expect argument to be a module. got=%v", args[0].Class().Name)
+						return t.vm.initErrorObject(TypeError, "Expect argument to be a module. got=%v", args[0].Class().Name)
 					}
 
 					switch r := receiver.(type) {
@@ -522,13 +522,13 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 0 {
-						return initErrorObject(ArgumentErrorClass, "Expect 0 argument. got: %d", len(args))
+						return t.vm.initErrorObject(ArgumentError, "Expect 0 argument. got: %d", len(args))
 					}
 
 					n, ok := receiver.(*RClass)
 
 					if !ok {
-						return initErrorObject(UndefinedMethodErrorClass, "Undefined Method '%+v' for %+v", "#name", receiver.toString())
+						return t.vm.initErrorObject(UndefinedMethodError, "Undefined Method '%s' for %s", "#name", receiver.toString())
 					}
 
 					name := n.ReturnName()
@@ -566,7 +566,7 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 					}
 
 					if class.pseudoSuperClass.isModule {
-						return initErrorObject(InternalErrorClass, "Module inheritance is not supported: %s", class.pseudoSuperClass.Name)
+						return t.vm.initErrorObject(InternalError, "Module inheritance is not supported: %s", class.pseudoSuperClass.Name)
 					}
 
 					instance := class.initializeInstance()
@@ -613,13 +613,13 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 0 {
-						return initErrorObject(ArgumentErrorClass, "Expect 0 argument. got: %d", len(args))
+						return t.vm.initErrorObject(ArgumentError, "Expect 0 argument. got: %d", len(args))
 					}
 
 					c, ok := receiver.(*RClass)
 
 					if !ok {
-						return initErrorObject(UndefinedMethodErrorClass, "Undefined Method '%+v' for %+v", "#superclass", receiver.toString())
+						return t.vm.initErrorObject(UndefinedMethodError, "Undefined Method '%s' for %s", "#superclass", receiver.toString())
 					}
 
 					superClass := c.returnSuperClass()

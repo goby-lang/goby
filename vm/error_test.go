@@ -2,19 +2,6 @@ package vm
 
 import "testing"
 
-func TestTypeError(t *testing.T) {
-	vm := initTestVM()
-	evaluated := vm.testEval(t, "10 * \"foo\"")
-	err, ok := evaluated.(*Error)
-	if !ok {
-		t.Errorf("Expect Error. got=%T (%+v)", evaluated, evaluated)
-	}
-	if err.Class().ReturnName() != TypeError {
-		t.Errorf("Expect %s. got=%T (%+v)", TypeError, evaluated, evaluated)
-	}
-	vm.checkCFP(t, 0, 1)
-}
-
 func TestUndefinedMethodError(t *testing.T) {
 	tests := []struct {
 		input    string

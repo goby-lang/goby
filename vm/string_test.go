@@ -103,11 +103,11 @@ func TestStringConparisonFail(t *testing.T) {
 		input  string
 		errMsg string
 	}{
-		{`"a" < 1`, "TypeError: Expect argument to be String. got=Integer"},
-		{`"a" > 1`, "TypeError: Expect argument to be String. got=Integer"},
-		{`"a" == 1`, "TypeError: Expect argument to be String. got=Integer"},
-		{`"a" <=> 1`, "TypeError: Expect argument to be String. got=Integer"},
-		{`"a" != 1`, "TypeError: Expect argument to be String. got=Integer"},
+		{`"a" < 1`, "TypeError: Expect argument to be String. got: Integer"},
+		{`"a" > 1`, "TypeError: Expect argument to be String. got: Integer"},
+		{`"a" == 1`, "TypeError: Expect argument to be String. got: Integer"},
+		{`"a" <=> 1`, "TypeError: Expect argument to be String. got: Integer"},
+		{`"a" != 1`, "TypeError: Expect argument to be String. got: Integer"},
 	}
 	for i, tt := range testsFail {
 		vm := initTestVM()
@@ -158,13 +158,13 @@ func TestStringOperationFail(t *testing.T) {
 		errType string
 		errMsg  string
 	}{
-		{`"Taipei" + 101`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
-		{`"Taipei" * "101"`, TypeError, "TypeError: Expect argument to be Integer. got=String"},
+		{`"Taipei" + 101`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
+		{`"Taipei" * "101"`, TypeError, "TypeError: Expect argument to be Integer. got: String"},
 		{`"Taipei" * (-101)`, ArgumentError, "ArgumentError: Second argument must be greater than or equal to 0. got=-101"},
-		{`"Taipei"[1] = 1`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
-		{`"Taipei"[1] = true`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
+		{`"Taipei"[1] = 1`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
+		{`"Taipei"[1] = true`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
 		{`"Taipei"[]`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
-		{`"Taipei"[true] = 101`, TypeError, "TypeError: Expect index to be Integer. got=Boolean"},
+		{`"Taipei"[true] = 101`, TypeError, "TypeError: Expect argument to be Integer. got: Boolean"},
 	}
 
 	for i, tt := range testsFail {
@@ -241,9 +241,9 @@ func TestStringConcatenateMethodFail(t *testing.T) {
 	}{
 		{`"a".concat`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
 		{`"a".concat("Hello", "World")`, ArgumentError, "ArgumentError: Expect 1 argument. got=2"},
-		{`"a".concat(1)`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
-		{`"a".concat(true)`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
-		{`"a".concat(nil)`, TypeError, "TypeError: Expect argument to be String. got=Null"},
+		{`"a".concat(1)`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
+		{`"a".concat(true)`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
+		{`"a".concat(nil)`, TypeError, "TypeError: Expect argument to be String. got: Null"},
 	}
 
 	for i, tt := range testsFail {
@@ -297,9 +297,9 @@ func TestStringDeleteMethodFail(t *testing.T) {
 		errMsg  string
 	}{
 		{`"Hello hello HeLlo".delete`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
-		{`"Hello hello HeLlo".delete(1)`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
-		{`"Hello hello HeLlo".delete(true)`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
-		{`"Hello hello HeLlo".delete(nil)`, TypeError, "TypeError: Expect argument to be String. got=Null"},
+		{`"Hello hello HeLlo".delete(1)`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
+		{`"Hello hello HeLlo".delete(true)`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
+		{`"Hello hello HeLlo".delete(nil)`, TypeError, "TypeError: Expect argument to be String. got: Null"},
 	}
 
 	for i, tt := range testsFail {
@@ -359,9 +359,9 @@ func TestStringEndWithMethodFail(t *testing.T) {
 		errMsg  string
 	}{
 		{`"Taipei".end_with("1", "0", "1")`, ArgumentError, "ArgumentError: Expect 1 argument. got=3"},
-		{`"Taipei".end_with(101)`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
-		{`"Hello".end_with(true)`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
-		{`"Hello".end_with(1..5)`, TypeError, "TypeError: Expect argument to be String. got=Range"},
+		{`"Taipei".end_with(101)`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
+		{`"Hello".end_with(true)`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
+		{`"Hello".end_with(1..5)`, TypeError, "TypeError: Expect argument to be String. got: Range"},
 	}
 
 	for i, tt := range testsFail {
@@ -455,8 +455,8 @@ func TestStringGlobalSubstituteMethodFail(t *testing.T) {
 	}{
 		{`"Ruby".gsub()`, ArgumentError, "ArgumentError: Expect 2 arguments. got=0"},
 		{`"Ruby".gsub("Ru")`, ArgumentError, "ArgumentError: Expect 2 arguments. got=1"},
-		{`"Ruby".gsub(123, "Go")`, TypeError, "TypeError: Expect pattern to be String. got=Integer"},
-		{`"Ruby".gsub("Ru", 456)`, TypeError, "TypeError: Expect replacement to be String. got=Integer"},
+		{`"Ruby".gsub(123, "Go")`, TypeError, "TypeError: Expect pattern to be String. got: Integer"},
+		{`"Ruby".gsub("Ru", 456)`, TypeError, "TypeError: Expect replacement to be String. got: Integer"},
 	}
 
 	for i, tt := range testsFail {
@@ -497,9 +497,9 @@ func TestStringIncludeMethodFail(t *testing.T) {
 	}{
 		{`"Goby".include`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
 		{`"Goby".include("Ruby", "Lang")`, ArgumentError, "ArgumentError: Expect 1 argument. got=2"},
-		{`"Goby".include(2)`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
-		{`"Goby".include(true)`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
-		{`"Goby".include(nil)`, TypeError, "TypeError: Expect argument to be String. got=Null"},
+		{`"Goby".include(2)`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
+		{`"Goby".include(true)`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
+		{`"Goby".include(nil)`, TypeError, "TypeError: Expect argument to be String. got: Null"},
 	}
 
 	for i, tt := range testsFail {
@@ -543,8 +543,8 @@ func TestStringInsertMethodFail(t *testing.T) {
 	}{
 		{`"Goby Lang".insert`, ArgumentError, "ArgumentError: Expect 2 arguments. got=0"},
 		{`"Taipei".insert(6, " ", "101")`, ArgumentError, "ArgumentError: Expect 2 arguments. got=3"},
-		{`"Taipei".insert("6", " 101")`, TypeError, "TypeError: Expect index to be Integer. got=String"},
-		{`"Taipei".insert(6, 101)`, TypeError, "TypeError: Expect insert string to be String. got=Integer"},
+		{`"Taipei".insert("6", " 101")`, TypeError, "TypeError: Expect argument to be Integer. got: String"},
+		{`"Taipei".insert(6, 101)`, TypeError, "TypeError: Expect insert string to be String. got: Integer"},
 		{`"Taipei".insert(-8, "101")`, ArgumentError, "ArgumentError: Index value out of range. got=-8"},
 		{`"Taipei".insert(7, "101")`, ArgumentError, "ArgumentError: Index value out of range. got=7"},
 	}
@@ -584,12 +584,12 @@ func TestStringLeftJustifyMethodFail(t *testing.T) {
 	}{
 		{`"Hello".ljust`, ArgumentError, "ArgumentError: Expect 1..2 arguments. got=0"},
 		{`"Hello".ljust(1, 2, 3, 4, 5)`, ArgumentError, "ArgumentError: Expect 1..2 arguments. got=5"},
-		{`"Hello".ljust(true)`, TypeError, "TypeError: Expect justify width to be Integer. got=Boolean"},
-		{`"Hello".ljust("World")`, TypeError, "TypeError: Expect justify width to be Integer. got=String"},
-		{`"Hello".ljust(2..5)`, TypeError, "TypeError: Expect justify width to be Integer. got=Range"},
-		{`"Hello".ljust(10, 10)`, TypeError, "TypeError: Expect padding string to be String. got=Integer"},
-		{`"Hello".ljust(10, 2..5)`, TypeError, "TypeError: Expect padding string to be String. got=Range"},
-		{`"Hello".ljust(10, true)`, TypeError, "TypeError: Expect padding string to be String. got=Boolean"},
+		{`"Hello".ljust(true)`, TypeError, "TypeError: Expect justify width to be Integer. got: Boolean"},
+		{`"Hello".ljust("World")`, TypeError, "TypeError: Expect justify width to be Integer. got: String"},
+		{`"Hello".ljust(2..5)`, TypeError, "TypeError: Expect justify width to be Integer. got: Range"},
+		{`"Hello".ljust(10, 10)`, TypeError, "TypeError: Expect padding string to be String. got: Integer"},
+		{`"Hello".ljust(10, 2..5)`, TypeError, "TypeError: Expect padding string to be String. got: Range"},
+		{`"Hello".ljust(10, true)`, TypeError, "TypeError: Expect padding string to be String. got: Boolean"},
 	}
 
 	for i, tt := range testsFail {
@@ -644,8 +644,8 @@ func TestStringReplaceMethodFail(t *testing.T) {
 		errMsg  string
 	}{
 		{`"Taipei".replace`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
-		{`"Taipei".replace(101)`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
-		{`"Taipei".replace(true)`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
+		{`"Taipei".replace(101)`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
+		{`"Taipei".replace(true)`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
 	}
 
 	for i, tt := range testsFail {
@@ -703,12 +703,12 @@ func TestStringRightJustifyFail(t *testing.T) {
 	}{
 		{`"Hello".rjust`, ArgumentError, "ArgumentError: Expect 1..2 arguments. got=0"},
 		{`"Hello".rjust(1, 2, 3, 4, 5)`, ArgumentError, "ArgumentError: Expect 1..2 arguments. got=5"},
-		{`"Hello".rjust(true)`, TypeError, "TypeError: Expect justify width to be Integer. got=Boolean"},
-		{`"Hello".rjust("World")`, TypeError, "TypeError: Expect justify width to be Integer. got=String"},
-		{`"Hello".rjust(2..5)`, TypeError, "TypeError: Expect justify width to be Integer. got=Range"},
-		{`"Hello".rjust(10, 10)`, TypeError, "TypeError: Expect padding string to be String. got=Integer"},
-		{`"Hello".rjust(10, 2..5)`, TypeError, "TypeError: Expect padding string to be String. got=Range"},
-		{`"Hello".rjust(10, true)`, TypeError, "TypeError: Expect padding string to be String. got=Boolean"},
+		{`"Hello".rjust(true)`, TypeError, "TypeError: Expect justify width to be Integer. got: Boolean"},
+		{`"Hello".rjust("World")`, TypeError, "TypeError: Expect justify width to be Integer. got: String"},
+		{`"Hello".rjust(2..5)`, TypeError, "TypeError: Expect justify width to be Integer. got: Range"},
+		{`"Hello".rjust(10, 10)`, TypeError, "TypeError: Expect padding string to be String. got: Integer"},
+		{`"Hello".rjust(10, 2..5)`, TypeError, "TypeError: Expect padding string to be String. got: Range"},
+		{`"Hello".rjust(10, true)`, TypeError, "TypeError: Expect padding string to be String. got: Boolean"},
 	}
 
 	for i, tt := range testsFail {
@@ -790,8 +790,8 @@ func TestStringSliceMethodFail(t *testing.T) {
 		errMsg  string
 	}{
 		{`"Goby Lang".slice`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
-		{`"Goby Lang".slice("Hello")`, TypeError, "TypeError: Expect slice range to be Range or Integer. got=String"},
-		{`"Goby Lang".slice(true)`, TypeError, "TypeError: Expect slice range to be Range or Integer. got=Boolean"},
+		{`"Goby Lang".slice("Hello")`, TypeError, "TypeError: Expect slice range to be Range or Integer. got: String"},
+		{`"Goby Lang".slice(true)`, TypeError, "TypeError: Expect slice range to be Range or Integer. got: Boolean"},
 	}
 
 	for i, tt := range testsFail {
@@ -888,9 +888,9 @@ func TestStringSplitMethodFail(t *testing.T) {
 		errMsg  string
 	}{
 		{`"Hello World".split`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
-		{`"Hello World".split(true)`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
-		{`"Hello World".split(123)`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
-		{`"Hello World".split(1..2)`, TypeError, "TypeError: Expect argument to be String. got=Range"},
+		{`"Hello World".split(true)`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
+		{`"Hello World".split(123)`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
+		{`"Hello World".split(1..2)`, TypeError, "TypeError: Expect argument to be String. got: Range"},
 	}
 
 	for i, tt := range testsFail {
@@ -931,9 +931,9 @@ func TestStringStartWithMethodFail(t *testing.T) {
 		errMsg  string
 	}{
 		{`"Taipei".start_with("1", "0", "1")`, ArgumentError, "ArgumentError: Expect 1 argument. got=3"},
-		{`"Taipei".start_with(101)`, TypeError, "TypeError: Expect argument to be String. got=Integer"},
-		{`"Hello".start_with(true)`, TypeError, "TypeError: Expect argument to be String. got=Boolean"},
-		{`"Hello".start_with(1..5)`, TypeError, "TypeError: Expect argument to be String. got=Range"},
+		{`"Taipei".start_with(101)`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
+		{`"Hello".start_with(true)`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
+		{`"Hello".start_with(1..5)`, TypeError, "TypeError: Expect argument to be String. got: Range"},
 	}
 
 	for i, tt := range testsFail {

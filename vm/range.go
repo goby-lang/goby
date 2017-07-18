@@ -158,7 +158,7 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 								end = mid - 1
 							}
 						default:
-							return initErrorObject(TypeErrorClass, "Expect Integer or Boolean type. got=%T", r)
+							return t.vm.initErrorObject(TypeError, "Expect Integer or Boolean type. got=%s", r.Class().Name)
 						}
 					}
 				}
@@ -193,7 +193,7 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 					ran := receiver.(*RangeObject)
 
 					if blockFrame == nil {
-						t.returnError("Can't yield without a block")
+						return t.vm.initErrorObject(InternalError, CantYieldWithoutBlockFormat)
 					}
 
 					if ran.Start <= ran.End {
@@ -341,7 +341,7 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 					ran := receiver.(*RangeObject)
 
 					if blockFrame == nil {
-						t.returnError("Can't yield without a block")
+						return t.vm.initErrorObject(InternalError, CantYieldWithoutBlockFormat)
 					}
 
 					stepValue := args[0].(*IntegerObject).Value

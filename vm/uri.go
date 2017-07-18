@@ -51,7 +51,7 @@ func builtinURIClassMethods() []*BuiltInMethodObject {
 					u, err := url.Parse(uri)
 
 					if err != nil {
-						t.returnError(err.Error())
+						return t.vm.initErrorObject(InternalError, err.Error())
 					}
 
 					uriAttrs := map[string]Object{
@@ -79,7 +79,7 @@ func builtinURIClassMethods() []*BuiltInMethodObject {
 						p, err := strconv.ParseInt(u.Port(), 0, 64)
 
 						if err != nil {
-							t.returnError(err.Error())
+							return t.vm.initErrorObject(InternalError, err.Error())
 						}
 
 						uriAttrs["@port"] = t.vm.initIntegerObject(int(p))
