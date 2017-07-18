@@ -3,7 +3,9 @@ package vm
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path"
+	"plugin"
 	"reflect"
 	"time"
 )
@@ -139,6 +141,23 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 					if className == compareClassName && reflect.DeepEqual(receiver, args[0]) {
 						return FALSE
 					}
+					return TRUE
+				}
+			},
+		},
+		{
+			Name: "import",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					libName := args[0].(*StringObject).Value
+					goPath := os.Getenv("GOPATH")
+					p, err := plugin.Open(goPath + "/pkg/linux_amd64/" + libName + ".a")
+					if err != nil {
+						panic(err)
+					}
+
+					fmt.Println(p)
+
 					return TRUE
 				}
 			},
