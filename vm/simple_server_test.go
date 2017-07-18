@@ -78,6 +78,22 @@ func TestInitRequest(t *testing.T) {
 			"@body",
 			"Hello World",
 		},
+		{
+			"@protocol",
+			"HTTP/1.1",
+		},
+		{
+			"@content_length",
+			11, // Length of the body: "Hello World"
+		},
+		//{
+		//	"@transfer_encoding",
+		//	0,
+		//},
+		//{
+		//	"@headers",
+		//	123,
+		//},
 	}
 
 	for i, tt := range tests {

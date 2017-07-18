@@ -1,7 +1,7 @@
 module Net
   class HTTP
     class Response
-      attr_accessor "body", "status", "content_type", "header", "http_version", "request_http_version", "request"
+      attr_accessor :body, :status, :content_type, :headers, :http_version, :request_http_version, :request
     end
   end
 end

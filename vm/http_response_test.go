@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestHTTPResponse(t *testing.T) {
+func TestHTTPResponseObject(t *testing.T) {
 	input := `
 	require "net/http"
 
@@ -25,7 +25,7 @@ func TestHTTPResponse(t *testing.T) {
 	vm.checkCFP(t, 0, 0)
 }
 
-func TestNormalGet(t *testing.T) {
+func TestNormalGetResponse(t *testing.T) {
 	expected := "Hello, client"
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, expected)
@@ -45,7 +45,7 @@ Net::HTTP.get("%s")
 	vm.checkCFP(t, 0, 0)
 }
 
-func TestNormalGetWithPath(t *testing.T) {
+func TestNormalGetResponseWithPath(t *testing.T) {
 	expected := "Hello, client"
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.RequestURI {
