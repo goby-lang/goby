@@ -521,8 +521,17 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 			Name: "name",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return initErrorObject(ArgumentErrorClass, "Expect 0 argument. got: %d", len(args))
+					}
 
-					name := receiver.(*RClass).ReturnName()
+					n, ok := receiver.(*RClass)
+
+					if !ok {
+						return initErrorObject(UndefinedMethodErrorClass, "Undefined Method '%+v' for %+v", "#name", receiver.toString())
+					}
+
+					name := n.ReturnName()
 					nameString := t.vm.initStringObject(name)
 					return nameString
 				}
@@ -603,13 +612,23 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 			Name: "superclass",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					c := receiver.(*RClass).returnSuperClass()
+					if len(args) != 0 {
+						return initErrorObject(ArgumentErrorClass, "Expect 0 argument. got: %d", len(args))
+					}
 
-					if c == nil {
+					c, ok := receiver.(*RClass)
+
+					if !ok {
+						return initErrorObject(UndefinedMethodErrorClass, "Undefined Method '%+v' for %+v", "#superclass", receiver.toString())
+					}
+
+					superClass := c.returnSuperClass()
+
+					if superClass == nil {
 						return NULL
 					}
 
-					return c
+					return superClass
 				}
 			},
 		},

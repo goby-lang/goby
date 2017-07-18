@@ -454,3 +454,91 @@ func TestRequireFail(t *testing.T) {
 		t.Fatalf("Error message should be '%s'. got: %s", expected, err.Message)
 	}
 }
+
+func TestClassNameClassMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`Integer.name`, "Integer"},
+		{`String.name`, "String"},
+		{`Boolean.name`, "Boolean"},
+		{`Range.name`, "Range"},
+		{`Hash.name`, "Hash"},
+		{`Array.name`, "Array"},
+		{`Class.name`, "Class"},
+		{`Object.name`, "Object"},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
+func TestClassNameClassMethodFail(t *testing.T) {
+	testsFail := []struct {
+		input   string
+		errType string
+		errMsg  string
+	}{
+		{`"Taipei".name`, UndefinedMethodError, "UndefinedMethodError: Undefined Method '#name' for Taipei"},
+		{`123.name`, UndefinedMethodError, "UndefinedMethodError: Undefined Method '#name' for 123"},
+		{`true.name`, UndefinedMethodError, "UndefinedMethodError: Undefined Method '#name' for true"},
+		{`Integer.name(Integer)`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1"},
+		{`String.name(Hash, Array)`, ArgumentError, "ArgumentError: Expect 0 argument. got: 2"},
+	}
+
+	for i, tt := range testsFail {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, 1)
+	}
+}
+
+func TestClassSuperclassClassMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`Integer.superclass.name`, "Object"},
+		{`String.superclass.name`, "Object"},
+		{`Boolean.superclass.name`, "Object"},
+		{`Range.superclass.name`, "Object"},
+		{`Hash.superclass.name`, "Object"},
+		{`Array.superclass.name`, "Object"},
+		{`Object.superclass`, nil},
+		{`Class.superclass`, nil},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
+func TestClassSuperclassClassMethodFail(t *testing.T) {
+	testsFail := []struct {
+		input   string
+		errType string
+		errMsg  string
+	}{
+		{`"Taipei".superclass`, UndefinedMethodError, "UndefinedMethodError: Undefined Method '#superclass' for Taipei"},
+		{`123.superclass`, UndefinedMethodError, "UndefinedMethodError: Undefined Method '#superclass' for 123"},
+		{`true.superclass`, UndefinedMethodError, "UndefinedMethodError: Undefined Method '#superclass' for true"},
+		{`Integer.superclass(Integer)`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1"},
+		{`String.superclass(Hash, Array)`, ArgumentError, "ArgumentError: Expect 0 argument. got: 2"},
+	}
+
+	for i, tt := range testsFail {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, 1)
+	}
+}
