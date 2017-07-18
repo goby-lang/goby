@@ -493,16 +493,16 @@ func TestGeneralIsNilMethodFail(t *testing.T) {
 		input  string
 		errMsg string
 	}{
-		{`123.is_nil("Hello")`, "ArgumentError: Expect 0 argument. got=1"},
-		{`123.is_nil("Hello", "World")`, "ArgumentError: Expect 0 argument. got=2"},
-		{`"Fail".is_nil("Hello")`, "ArgumentError: Expect 0 argument. got=1"},
-		{`"Fail".is_nil("Hello", "World")`, "ArgumentError: Expect 0 argument. got=2"},
-		{`[1, 2, 3].is_nil("Hello")`, "ArgumentError: Expect 0 argument. got=1"},
-		{`[1, 2, 3].is_nil("Hello", "World")`, "ArgumentError: Expect 0 argument. got=2"},
-		{`{ a: 1, b: 2, c: 3 }.is_nil("Hello")`, "ArgumentError: Expect 0 argument. got=1"},
-		{`{ a: 1, b: 2, c: 3 }.is_nil("Hello", "World")`, "ArgumentError: Expect 0 argument. got=2"},
-		{`(1..10).is_nil("Hello")`, "ArgumentError: Expect 0 argument. got=1"},
-		{`(1..10).is_nil("Hello", "World")`, "ArgumentError: Expect 0 argument. got=2"},
+		{`123.is_nil("Hello")`, "ArgumentError: Expect 0 argument. got: 1"},
+		{`123.is_nil("Hello", "World")`, "ArgumentError: Expect 0 argument. got: 2"},
+		{`"Fail".is_nil("Hello")`, "ArgumentError: Expect 0 argument. got: 1"},
+		{`"Fail".is_nil("Hello", "World")`, "ArgumentError: Expect 0 argument. got: 2"},
+		{`[1, 2, 3].is_nil("Hello")`, "ArgumentError: Expect 0 argument. got: 1"},
+		{`[1, 2, 3].is_nil("Hello", "World")`, "ArgumentError: Expect 0 argument. got: 2"},
+		{`{ a: 1, b: 2, c: 3 }.is_nil("Hello")`, "ArgumentError: Expect 0 argument. got: 1"},
+		{`{ a: 1, b: 2, c: 3 }.is_nil("Hello", "World")`, "ArgumentError: Expect 0 argument. got: 2"},
+		{`(1..10).is_nil("Hello")`, "ArgumentError: Expect 0 argument. got: 1"},
+		{`(1..10).is_nil("Hello", "World")`, "ArgumentError: Expect 0 argument. got: 2"},
 	}
 
 	for i, tt := range testsFail {
@@ -606,12 +606,12 @@ func TestGeneralIsAMethodFail(t *testing.T) {
 		errType string
 		errMsg  string
 	}{
-		{`123.is_a`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
-		{`Class.is_a`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
-		{`123.is_a(123, 456)`, ArgumentError, "ArgumentError: Expect 1 argument. got=2"},
-		{`123.is_a(Integer, String)`, ArgumentError, "ArgumentError: Expect 1 argument. got=2"},
-		{`123.is_a(true)`, TypeError, "TypeError: Expect argument to be Class. got=Boolean"},
-		{`Class.is_a(true)`, TypeError, "TypeError: Expect argument to be Class. got=Boolean"},
+		{`123.is_a`, ArgumentError, "ArgumentError: Expect 1 argument. got: 0"},
+		{`Class.is_a`, ArgumentError, "ArgumentError: Expect 1 argument. got: 0"},
+		{`123.is_a(123, 456)`, ArgumentError, "ArgumentError: Expect 1 argument. got: 2"},
+		{`123.is_a(Integer, String)`, ArgumentError, "ArgumentError: Expect 1 argument. got: 2"},
+		{`123.is_a(true)`, TypeError, "TypeError: Expect argument to be Class. got: Boolean"},
+		{`Class.is_a(true)`, TypeError, "TypeError: Expect argument to be Class. got: Boolean"},
 	}
 
 	for i, tt := range testsFail {

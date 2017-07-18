@@ -73,8 +73,8 @@ func TestNullIsNilMethodFail(t *testing.T) {
 		errType string
 		errMsg  string
 	}{
-		{`nil.is_nil("Hello")`, ArgumentError, "ArgumentError: Expect 0 argument. got=1"},
-		{`nil.is_nil("Hello", "World")`, ArgumentError, "ArgumentError: Expect 0 argument. got=2"},
+		{`nil.is_nil("Hello")`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1"},
+		{`nil.is_nil("Hello", "World")`, ArgumentError, "ArgumentError: Expect 0 argument. got: 2"},
 	}
 
 	for i, tt := range testsFail {

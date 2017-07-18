@@ -391,7 +391,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got=%d", len(args))
+						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
 					}
 
 					c := args[0]
@@ -433,7 +433,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(ArgumentError, "Expect 0 argument. got=%d", len(args))
+						return t.vm.initErrorObject(ArgumentError, "Expect 0 argument. got: %d", len(args))
 					}
 					return FALSE
 				}
