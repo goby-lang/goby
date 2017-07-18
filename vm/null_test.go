@@ -66,3 +66,21 @@ func TestNullIsNilMethod(t *testing.T) {
 		vm.checkCFP(t, i, 0)
 	}
 }
+
+func TestNullIsNilMethodFail(t *testing.T) {
+	testsFail := []struct {
+		input   string
+		errType string
+		errMsg  string
+	}{
+		{`nil.is_nil("Hello")`, ArgumentError, "ArgumentError: Expect 0 argument. got=1"},
+		{`nil.is_nil("Hello", "World")`, ArgumentError, "ArgumentError: Expect 0 argument. got=2"},
+	}
+
+	for i, tt := range testsFail {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, 1)
+	}
+}

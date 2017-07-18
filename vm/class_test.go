@@ -488,6 +488,31 @@ func TestGeneralIsNilMethod(t *testing.T) {
 	}
 }
 
+func TestGeneralIsNilMethodFail(t *testing.T) {
+	testsFail := []struct {
+		input  string
+		errMsg string
+	}{
+		{`123.is_nil("Hello")`, "ArgumentError: Expect 0 argument. got=1"},
+		{`123.is_nil("Hello", "World")`, "ArgumentError: Expect 0 argument. got=2"},
+		{`"Fail".is_nil("Hello")`, "ArgumentError: Expect 0 argument. got=1"},
+		{`"Fail".is_nil("Hello", "World")`, "ArgumentError: Expect 0 argument. got=2"},
+		{`[1, 2, 3].is_nil("Hello")`, "ArgumentError: Expect 0 argument. got=1"},
+		{`[1, 2, 3].is_nil("Hello", "World")`, "ArgumentError: Expect 0 argument. got=2"},
+		{`{ a: 1, b: 2, c: 3 }.is_nil("Hello")`, "ArgumentError: Expect 0 argument. got=1"},
+		{`{ a: 1, b: 2, c: 3 }.is_nil("Hello", "World")`, "ArgumentError: Expect 0 argument. got=2"},
+		{`(1..10).is_nil("Hello")`, "ArgumentError: Expect 0 argument. got=1"},
+		{`(1..10).is_nil("Hello", "World")`, "ArgumentError: Expect 0 argument. got=2"},
+	}
+
+	for i, tt := range testsFail {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkError(t, i, evaluated, ArgumentError, tt.errMsg)
+		vm.checkCFP(t, i, 1)
+	}
+}
+
 func TestGeneralIsAMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -517,9 +542,9 @@ func TestGeneralIsAMethod(t *testing.T) {
 		{`true.is_a(Object)`, true},
 		{`true.is_a(Array)`, false},
 		{`true.is_a(Integer)`, false},
-		//{`(String).is_a(Class)`, true},
-		//{`String.is_a(String)`, false},
-		//{`String.is_a(Array)`, false},
+		{`String.is_a(Class)`, true},
+		{`String.is_a(String)`, false},
+		{`String.is_a(Array)`, false},
 		{`nil.is_a(Null)`, true},
 		{`nil.is_a(Object)`, true},
 		{`nil.is_a(String)`, false},
@@ -572,6 +597,28 @@ func TestClassGeneralComparisonOperation(t *testing.T) {
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
+	}
+}
+
+func TestGeneralIsAMethodFail(t *testing.T) {
+	testsFail := []struct {
+		input   string
+		errType string
+		errMsg  string
+	}{
+		{`123.is_a`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
+		{`Class.is_a`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
+		{`123.is_a(123, 456)`, ArgumentError, "ArgumentError: Expect 1 argument. got=2"},
+		{`123.is_a(Integer, String)`, ArgumentError, "ArgumentError: Expect 1 argument. got=2"},
+		{`123.is_a(true)`, TypeError, "TypeError: Expect argument to be Class. got=Boolean"},
+		{`Class.is_a(true)`, TypeError, "TypeError: Expect argument to be Class. got=Boolean"},
+	}
+
+	for i, tt := range testsFail {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, 1)
 	}
 }
 
