@@ -35,7 +35,6 @@ func builtInNullClassMethods() []*BuiltInMethodObject {
 
 func builtInNullInstanceMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
-
 		{
 			// Returns true: the flipped boolean value of nil object.
 			//
@@ -49,6 +48,50 @@ func builtInNullInstanceMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					return TRUE
+				}
+			},
+		},
+		{
+			// Returns true: the flipped boolean value of nil object.
+			//
+			// ```ruby
+			// a = nil
+			// a == nil
+			// # => true
+			// ```
+			Name: "==",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
+					}
+
+					if _, ok := args[0].(*NullObject); ok {
+						return TRUE
+					}
+					return FALSE
+				}
+			},
+		},
+		{
+			// Returns true: the flipped boolean value of nil object.
+			//
+			// ```ruby
+			// a = nil
+			// a != nil
+			// # => false
+			// ```
+			Name: "!=",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
+					}
+
+					if _, ok := args[0].(*NullObject); !ok {
+						return TRUE
+					}
+					return FALSE
 				}
 			},
 		},

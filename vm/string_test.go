@@ -70,13 +70,23 @@ func TestStringComparison(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`"Dog" == "Dog"`, true},
+		{`"123" == "123"`, true},
+		{`"123" == "124"`, false},
+		{`"123" == 123`, false},
+		{`"123" == (1..3)`, false},
+		{`"123" == { a: 1, b: 2 }`, false},
+		{`"123" == [1, "String", true, 2..5]`, false},
+		{`"123" != "123"`, false},
+		{`"123" != "124"`, true},
+		{`"123" != 123`, true},
+		{`"123" != (1..3)`, true},
+		{`"123" != { a: 1, b: 2 }`, true},
+		{`"123" != [1, "String", true, 2..5]`, true},
+		{`"123" != String`, true},
 		{`"1234" > "123"`, true},
 		{`"123" > "1235"`, false},
 		{`"1234" < "123"`, false},
 		{`"1234" < "12jdkfj3"`, true},
-		{`"1234" != "123"`, true},
-		{`"123" != "123"`, false},
 		{`"1234" <=> "1234"`, 0},
 		{`"1234" <=> "4"`, -1},
 		{`"abcdef" <=> "abcde"`, 1},
@@ -105,9 +115,7 @@ func TestStringConparisonFail(t *testing.T) {
 	}{
 		{`"a" < 1`, "TypeError: Expect argument to be String. got: Integer"},
 		{`"a" > 1`, "TypeError: Expect argument to be String. got: Integer"},
-		{`"a" == 1`, "TypeError: Expect argument to be String. got: Integer"},
 		{`"a" <=> 1`, "TypeError: Expect argument to be String. got: Integer"},
-		{`"a" != 1`, "TypeError: Expect argument to be String. got: Integer"},
 	}
 	for i, tt := range testsFail {
 		vm := initTestVM()

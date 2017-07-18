@@ -23,6 +23,47 @@ func TestArrayEvaluation(t *testing.T) {
 	checkExpected(t, 0, arr.Elements[2], true)
 }
 
+func TestArrayComparisonOperation(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`[1, "String", true, 2..5] == 123`, false},
+		{`[1, "String", true, 2..5] == "123"`, false},
+		{`[1, "String", true, 2..5] == "124"`, false},
+		{`[1, "String", true, 2..5] == (1..3)`, false},
+		{`[1, "String", true, 2..5] == { a: 1, b: 2 }`, false},
+		{`[1, "String", true, 2..5] == [1, "String", true, 2..5]`, true},
+		{`[1, "String", true, 2..5] == [1, "String", false, 2..5]`, false},
+		{`[1, "String", true, 2..5] == ["String", 1, false, 2..5]`, false}, // Array has order issue
+		{`[1, { a: 1, b: 2 }, "Goby" ] == [1, { a: 1, b: 2 }, "Goby"]`, true},
+		{`[1, { a: 1, b: 2 }, "Goby" ] == [1, { b: 2, a: 1 }, "Goby"]`, true},
+		{`[1, { a: 1, b: 2 }, "Goby" ] == [1, { a: 1, b: 2, c: 3 }, "Goby"]`, false}, // Array of hash has no order issue
+		{`[1, { a: 1, b: 2 }, "Goby" ] == [1, { a: 2, b: 2, a: 1 }, "Goby"]`, true},  // Array of hash key will be overwritten if duplicated
+		{`[1, "String", true, 2..5] == Integer`, false},
+		{`[1, "String", true, 2..5] != 123`, true},
+		{`[1, "String", true, 2..5] != "123"`, true},
+		{`[1, "String", true, 2..5] != "124"`, true},
+		{`[1, "String", true, 2..5] != (1..3)`, true},
+		{`[1, "String", true, 2..5] != { a: 1, b: 2 }`, true},
+		{`[1, "String", true, 2..5] != [1, "String", true, 2..5]`, false},
+		{`[1, "String", true, 2..5] != [1, "String", false, 2..5]`, true},
+		{`[1, "String", true, 2..5] != ["String", 1, false, 2..5]`, true}, // Array has order issue
+		{`[1, { a: 1, b: 2 }, "Goby" ] != [1, { a: 1, b: 2 }, "Goby"]`, false},
+		{`[1, { a: 1, b: 2 }, "Goby" ] != [1, { b: 2, a: 1 }, "Goby"]`, false},
+		{`[1, { a: 1, b: 2 }, "Goby" ] != [1, { a: 1, b: 2, c: 3 }, "Goby"]`, true},  // Array of hash has no order issue
+		{`[1, { a: 1, b: 2 }, "Goby" ] != [1, { a: 2, b: 2, a: 1 }, "Goby"]`, false}, // Array of hash key will be overwritten if duplicated
+		{`[1, "String", true, 2..5] != Integer`, true},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
 func TestArrayIndex(t *testing.T) {
 	tests := []struct {
 		input    string

@@ -198,7 +198,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := r.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, r.Class().Name)
+						return FALSE
 					}
 
 					rightValue := right.Value
@@ -261,11 +261,10 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					leftValue := receiver.(*StringObject).Value
-					r := args[0]
 					right, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, r.Class().Name)
+						return TRUE
 					}
 
 					rightValue := right.Value

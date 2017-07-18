@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path"
+	"reflect"
 	"time"
 )
 
@@ -75,6 +76,73 @@ func initObjectClass(c *RClass) *RClass {
 
 func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
+		{
+			// General method for comparing equalty of the objects
+			//
+			// ```ruby
+			// 123 == 123   # => true
+			// 123 == "123" # => false
+			//
+			// # Hash will not concern about the key-value pair order
+			// { a: 1, b: 2 } == { a: 1, b: 2 } # => true
+			// { a: 1, b: 2 } == { b: 2, a: 1 } # => true
+			//
+			// # Hash key will be override if the key duplicated
+			// { a: 1, b: 2 } == { a: 2, b: 2, a: 1 } # => true
+			// { a: 1, b: 2 } == { a: 1, b: 2, a: 2 } # => false
+			//
+			// # Array will concern about the order of the elements
+			// [1, 2, 3] == [1, 2, 3] # => true
+			// [1, 2, 3] == [3, 2, 1] # => false
+			// ```
+			//
+			// @return [@boolean]
+			Name: "==",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					className := receiver.Class().Name
+					compareClassName := args[0].Class().Name
+
+					if className == compareClassName && reflect.DeepEqual(receiver, args[0]) {
+						return TRUE
+					}
+					return FALSE
+				}
+			},
+		}, {
+			// General method for comparing inequalty of the objects
+			//
+			// ```ruby
+			// 123 != 123   # => false
+			// 123 != "123" # => true
+			//
+			// # Hash will not concern about the key-value pair order
+			// { a: 1, b: 2 } != { a: 1, b: 2 } # => false
+			// { a: 1, b: 2 } != { b: 2, a: 1 } # => false
+			//
+			// # Hash key will be override if the key duplicated
+			// { a: 1, b: 2 } != { a: 2, b: 2, a: 1 } # => false
+			// { a: 1, b: 2 } != { a: 1, b: 2, a: 2 } # => true
+			//
+			// # Array will concern about the order of the elements
+			// [1, 2, 3] != [1, 2, 3] # => false
+			// [1, 2, 3] != [3, 2, 1] # => true
+			// ```
+			//
+			// @return [@boolean]
+			Name: "!=",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					className := receiver.Class().Name
+					compareClassName := args[0].Class().Name
+
+					if className == compareClassName && reflect.DeepEqual(receiver, args[0]) {
+						return FALSE
+					}
+					return TRUE
+				}
+			},
+		},
 		{
 			// Loads the given Goby library name without extension (mainly for modules), returning `true`
 			// if successful and `false` if the feature is already loaded.

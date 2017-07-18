@@ -56,10 +56,6 @@ func builtinBooleanInstanceMethods() []*BuiltInMethodObject {
 			Name: "==",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 1 {
-						err := t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
-						return err
-					}
 
 					if receiver == args[0] {
 						return TRUE
@@ -80,10 +76,6 @@ func builtinBooleanInstanceMethods() []*BuiltInMethodObject {
 			Name: "!=",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 1 {
-						err := t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
-						return err
-					}
 
 					if receiver != args[0] {
 						return TRUE

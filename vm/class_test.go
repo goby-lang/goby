@@ -455,6 +455,47 @@ func TestRequireFail(t *testing.T) {
 	}
 }
 
+func TestClassGeneralComparisonOperation(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`Integer == 123`, false},
+		{`Integer == "123"`, false},
+		{`Integer == "124"`, false},
+		{`Integer == (1..3)`, false},
+		{`Integer == { a: 1, b: 2 }`, false},
+		{`Integer == [1, "String", true, 2..5]`, false},
+		{`Integer == Integer`, true},
+		{`Integer == String`, false},
+		{`123.class == Integer`, true},
+		// TODO: Comparing to Object cause panic
+		//{`Integer == Object`, false},
+		//{`Integer.superclass == Object`, true},
+		//{`123.class.superclass == Object`, true},
+		{`Integer != 123`, true},
+		{`Integer != "123"`, true},
+		{`Integer != "124"`, true},
+		{`Integer != (1..3)`, true},
+		{`Integer != { a: 1, b: 2 }`, true},
+		{`Integer != [1, "String", true, 2..5]`, true},
+		{`Integer != Integer`, false},
+		{`Integer != String`, true},
+		{`123.class != Integer`, false},
+		// TODO: Comparing to Object cause panic
+		//{`Integer != Object`, true},
+		//{`Integer.superclass != Object`, false},
+		//{`123.class.superclass != Object`, false},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
 func TestClassNameClassMethod(t *testing.T) {
 	tests := []struct {
 		input    string

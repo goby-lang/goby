@@ -59,6 +59,64 @@ func builtInRangeClassMethods() []*BuiltInMethodObject {
 func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 		{
+			// Returns a Boolean of compared two ranges
+			//
+			// ```ruby
+			// (1..5) == (1..5) # => true
+			// (1..5) == (1..6) # => false
+			// ```
+			//
+			// @return [Boolean]
+			Name: "==",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					left := receiver.(*RangeObject)
+					r := args[0]
+					right, ok := r.(*RangeObject)
+
+					if !ok {
+						return FALSE
+					}
+
+					if left.Start == right.Start && left.End == right.End {
+						return TRUE
+					}
+
+					return FALSE
+				}
+			},
+		},
+		{
+			// Returns a Boolean of compared two ranges
+			//
+			// ```ruby
+			// (1..5) != (1..5) # => false
+			// (1..5) != (1..6) # => true
+			// ```
+			//
+			// @return [Boolean]
+			Name: "!=",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					left := receiver.(*RangeObject)
+					r := args[0]
+					right, ok := r.(*RangeObject)
+
+					if !ok {
+						return TRUE
+					}
+
+					if left.Start == right.Start && left.End == right.End {
+						return FALSE
+					}
+
+					return TRUE
+				}
+			},
+		},
+		{
 			// By using binary search, finds a value in range which meets the given condition in O(log n)
 			// where n is the size of the range.
 			//
