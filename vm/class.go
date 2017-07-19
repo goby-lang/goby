@@ -21,6 +21,7 @@ const (
 	channelClass = "Channel"
 	rangeClass   = "Range"
 	methodClass  = "method"
+	pluginClass  = "Plugin"
 )
 
 // RClass represents normal (not built in) class object
@@ -154,15 +155,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 						panic(err)
 					}
 
-					f, err := p.Lookup("Foo")
-
-					if err != nil {
-						panic(err)
-					}
-
-					f.(func())()
-
-					return TRUE
+					return &PluginObject{fn: fullPath, plugin: p}
 				}
 			},
 		},
