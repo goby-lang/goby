@@ -22,9 +22,13 @@ We are optimizing and expanding Goby all the time and need your help. One of our
 
 <img src="http://i.imgur.com/5RxFgIW.gif?1" height="700">
 
+**Project Structure:**
+
+![](http://i.imgur.com/WoO1EEY.jpg)
+
 **Supporting Goby by sending your first PR! See [contribution guideline](https://github.com/goby-lang/goby/blob/master/CONTRIBUTING.md)**
 
-**Or support us by [donation](https://opencollective.com/goby) (I quit my job to develop `Goby` in full-time, so financial support are needed 😢)**
+**Or [support us on opencollective](https://opencollective.com/goby) (I quit my job to develop `Goby` in full-time, so financial support are needed 😢)**
 
 
 (**We'll release first beta version in August, please checkout this [issue](https://github.com/goby-lang/goby/issues/72) for what features `Goby` will support.**)
