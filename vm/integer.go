@@ -362,8 +362,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						err := t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
-						return err
+						return FALSE
 					}
 
 					rightValue := right.Value
@@ -392,8 +391,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						err := t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
-						return err
+						return TRUE
 					}
 
 					rightValue := right.Value

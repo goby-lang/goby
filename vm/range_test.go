@@ -4,6 +4,37 @@ import (
 	"testing"
 )
 
+func TestRangeComparisonOperation(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{`(1..3) == (1..3)`, true},
+		{`(1..3) == (1..4)`, false},
+		{`(1..3) == 123`, false},
+		{`(1..3) == "123"`, false},
+		{`(1..3) == "124"`, false},
+		{`(1..3) == { a: 1, b: 2 }`, false},
+		{`(1..3) == [1, "String", true, 2..5]`, false},
+		{`(1..3) == Integer`, false},
+		{`(1..3) != (1..3)`, false},
+		{`(1..3) != (1..4)`, true},
+		{`(1..3) != 123`, true},
+		{`(1..3) != "123"`, true},
+		{`(1..3) != "124"`, true},
+		{`(1..3) != { a: 1, b: 2 }`, true},
+		{`(1..3) != [1, "String", true, 2..5]`, true},
+		{`(1..3) != Integer`, true},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
 func TestRangeBsearchMethod(t *testing.T) {
 	tests := []struct {
 		input    string

@@ -76,8 +76,6 @@ func TestIntegerComparison(t *testing.T) {
 		{`4 > 6`, false},
 		{`-5 < -4`, true},
 		{`100 < 81`, false},
-		{`5 ** 4`, 625},
-		{`25 / 5`, 5},
 		{`25 > 5`, true},
 		{`4 > 6`, false},
 		{`4 >= 4`, true},
@@ -89,10 +87,20 @@ func TestIntegerComparison(t *testing.T) {
 		{`10 <=> 0`, 1},
 		{`1 <=> 2`, -1},
 		{`4 <=> 4`, 0},
-		{`8 == 8`, true},
-		{`3 == 4`, false},
-		{`3 != 4`, true},
-		{`4 != 4`, false},
+		{`123 == 123`, true},
+		{`123 == 124`, false},
+		{`123 == "123"`, false},
+		{`123 == (1..3)`, false},
+		{`123 == { a: 1, b: 2 }`, false},
+		{`123 == [1, "String", true, 2..5]`, false},
+		{`123 == Integer`, false},
+		{`123 != 123`, false},
+		{`123 != 124`, true},
+		{`123 != "123"`, true},
+		{`123 != (1..3)`, true},
+		{`123 != { a: 1, b: 2 }`, true},
+		{`123 != [1, "String", true, 2..5]`, true},
+		{`123 != Integer`, true},
 	}
 
 	for i, tt := range tests {
@@ -122,12 +130,6 @@ func TestIntegerComparisonFail(t *testing.T) {
 		`, "TypeError: Expect argument to be Integer. got: String"},
 		{`
 		1 <=> "m"
-		`, "TypeError: Expect argument to be Integer. got: String"},
-		{`
-		1 == "m"
-		`, "TypeError: Expect argument to be Integer. got: String"},
-		{`
-		1 != "m"
 		`, "TypeError: Expect argument to be Integer. got: String"},
 	}
 

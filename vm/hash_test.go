@@ -6,6 +6,49 @@ import (
 	"testing"
 )
 
+func TestHashComparisonOperation(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`{ a: 1, b: 2 } == 123`, false},
+		{`{ a: 1, b: 2 } == "123"`, false},
+		{`{ a: 1, b: 2 } == "124"`, false},
+		{`{ a: 1, b: 2 } == (1..3)`, false},
+		{`{ a: 1, b: 2 } == { a: 1, b: 2 }`, true},
+		{`{ b: 2, a: 1 } == { a: 1, b: 2 }`, true}, // Hash has no order issue
+		{`{ a: 1, b: 2 } == { a: 2, b: 1 }`, false},
+		{`{ a: 1, b: 2 } == { b: 1, a: 2 }`, false},
+		{`{ a: 1, b: 2 } == { a: 1, b: 2, c: 3 }`, false},
+		{`{ a: 1, b: 2 } == { a: 2, b: 2, a: 1 }`, true}, // Hash front key will be overwritten if duplicated
+		{`{ a: [1, 2, 3], b: 2 } == { a: [1, 2, 3], b: 2 }`, true},
+		{`{ a: [1, 2, 3], b: 2 } == { a: [3, 2, 1], b: 2 }`, false}, // Hash of array has order issue
+		{`{ a: 1, b: 2 } == [1, "String", true, 2..5]`, false},
+		{`{ a: 1, b: 2 } == Integer`, false},
+		{`{ a: 1, b: 2 } != 123`, true},
+		{`{ a: 1, b: 2 } != "123"`, true},
+		{`{ a: 1, b: 2 } != "124"`, true},
+		{`{ a: 1, b: 2 } != (1..3)`, true},
+		{`{ a: 1, b: 2 } != { a: 1, b: 2 }`, false},
+		{`{ b: 2, a: 1 } != { a: 1, b: 2 }`, false}, // Hash has no order issue
+		{`{ a: 1, b: 2 } != { a: 2, b: 1 }`, true},
+		{`{ a: 1, b: 2 } != { b: 1, a: 2 }`, true},
+		{`{ a: 1, b: 2 } != { a: 1, b: 2, c: 3 }`, true},
+		{`{ a: 1, b: 2 } != { a: 2, b: 2, a: 1 }`, false}, // Hash front key will be overwritten if duplicated
+		{`{ a: [1, 2, 3], b: 2 } != { a: [1, 2, 3], b: 2 }`, false},
+		{`{ a: [1, 2, 3], b: 2 } != { a: [3, 2, 1], b: 2 }`, true}, // Hash of array has order issue
+		{`{ a: 1, b: 2 } != [1, "String", true, 2..5]`, true},
+		{`{ a: 1, b: 2 } != Integer`, true},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
 func TestHashToJSONMethodWithArray(t *testing.T) {
 	tests := []struct {
 		input    string
