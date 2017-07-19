@@ -1,2 +1,1 @@
-import "database/sql"
-import "github.com/lib/pq"
+import "./plugin.so"
