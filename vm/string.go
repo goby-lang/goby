@@ -1321,6 +1321,10 @@ func (s *StringObject) toJSON() string {
 	return "\"" + s.Value + "\""
 }
 
+func (s *StringObject) value() interface{} {
+	return s.Value
+}
+
 func (s *StringObject) equal(e *StringObject) bool {
 	return s.Value == e.Value
 }

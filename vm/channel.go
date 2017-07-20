@@ -93,6 +93,10 @@ func (co *ChannelObject) toJSON() string {
 	return co.toString()
 }
 
+func (co *ChannelObject) value() interface{} {
+	return co.Chan
+}
+
 func (m *objectMap) storeObj(obj Object) int {
 	m.Lock()
 	defer m.Unlock()

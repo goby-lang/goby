@@ -185,3 +185,7 @@ func (b *BooleanObject) toJSON() string {
 func (b *BooleanObject) equal(e *BooleanObject) bool {
 	return b.Value == e.Value
 }
+
+func (b *BooleanObject) value() interface{} {
+	return b.Value
+}

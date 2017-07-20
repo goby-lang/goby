@@ -25,6 +25,11 @@ const (
 	structClass  = "Struct"
 )
 
+type builtInType interface {
+	value() interface{}
+	Object
+}
+
 // RClass represents normal (not built in) class object
 type RClass struct {
 	// Name is the class's name

@@ -126,3 +126,7 @@ func (n *NullObject) toString() string {
 func (n *NullObject) toJSON() string {
 	return "null"
 }
+
+func (n *NullObject) value() interface{} {
+	return nil
+}

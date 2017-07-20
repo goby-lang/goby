@@ -63,7 +63,13 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 						funcArgs := make([]reflect.Value, len(args)-1)
 
 						for i := range args[1:] {
-							funcArgs[i] = reflect.ValueOf(args[i])
+							v, ok := args[i].(builtInType)
+
+							if ok {
+								funcArgs[i] = reflect.ValueOf(v.value())
+							} else {
+								t.vm.initErrorObject(InternalError, "Can't pass %s type object when calling go function", args[i].Class().Name)
+							}
 						}
 
 						result := reflect.ValueOf(reflect.ValueOf(f).Call(funcArgs))
