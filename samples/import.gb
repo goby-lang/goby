@@ -1,4 +1,4 @@
-p = import "./plugin.so"
+p = import "github.com/goby-lang/goby/plugin/main.go"
 p.send("Foo", "!")
 p.send("Baz")
 # b = p.send("NewBar", "foo")

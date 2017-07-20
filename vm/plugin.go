@@ -94,7 +94,6 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 						return t.vm.initStructObject(result)
 					}
 
-
 				}
 			},
 		},

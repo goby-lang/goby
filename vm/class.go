@@ -3,9 +3,13 @@ package vm
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
+	"os/exec"
 	"path"
+	"path/filepath"
 	"plugin"
 	"reflect"
+	"strings"
 	"time"
 )
 
@@ -155,8 +159,21 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 			Name: "import",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					fullPath := args[0].(*StringObject).Value
-					p, err := plugin.Open(fullPath)
+					pkgPath := args[0].(*StringObject).Value
+					fullPath := filepath.Join(os.Getenv("GOPATH"), "src", pkgPath)
+					_, pkgName := filepath.Split(fullPath)
+					pkgName = strings.Split(pkgName, ".")[0]
+
+					cmd := exec.Command("go", "build", "-buildmode=plugin", "-o", fmt.Sprintf("./%s.so", pkgName), fullPath)
+					out, err := cmd.CombinedOutput()
+
+					if err != nil {
+						return t.vm.initErrorObject(InternalError, "Error: %s from %s", string(out), strings.Join(cmd.Args, " "))
+					}
+
+					soName := filepath.Join("./", pkgName+".so")
+
+					p, err := plugin.Open(soName)
 					if err != nil {
 						panic(err)
 					}
