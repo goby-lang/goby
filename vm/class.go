@@ -22,6 +22,7 @@ const (
 	rangeClass   = "Range"
 	methodClass  = "method"
 	pluginClass  = "Plugin"
+	structClass  = "Struct"
 )
 
 // RClass represents normal (not built in) class object

@@ -54,7 +54,9 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 					case func():
 						f()
 						return NULL
-
+					case func(string) interface{}:
+						arg := args[1].(*StringObject).Value
+						return t.vm.initStructObject(f(arg))
 					default:
 						return FALSE
 					}
