@@ -52,57 +52,49 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(InternalError, err.Error())
 					}
 
-					switch f := f.(type) {
-					case func():
-						f()
-						return NULL
-					//case func(string) interface{}:
-					//	arg := args[1].(*StringObject).Value
-					//	return t.vm.initStructObject(f(arg))
-					default:
-						funcArgs := make([]reflect.Value, len(args)-1)
+					funcArgs := make([]reflect.Value, len(args)-1)
 
-						for i, arg := range args[1:] {
-							v, ok := arg.(builtInType)
+					for i, arg := range args[1:] {
+						v, ok := arg.(builtInType)
 
-							if ok {
-								funcArgs[i] = reflect.ValueOf(v.value())
-							} else {
-								return t.vm.initErrorObject(InternalError, "Can't pass %s type object when calling go function", arg.Class().Name)
-							}
-						}
-
-						fmt.Println(funcArgs)
-						var ptr reflect.Value
-						value := reflect.ValueOf(f)
-						if value.Type().Kind() == reflect.Ptr {
-							ptr = value
-							value = ptr.Elem() // acquire value referenced by pointer
+						if ok {
+							funcArgs[i] = reflect.ValueOf(v.value())
 						} else {
-							ptr = reflect.New(reflect.TypeOf(f)) // create new pointer
-							temp := ptr.Elem()                   // create variable to value of pointer
-							temp.Set(value)                      // set value of variable to our passed in value
+							return t.vm.initErrorObject(InternalError, "Can't pass %s type object when calling go function", arg.Class().Name)
 						}
-
-						result := reflect.ValueOf(reflect.ValueOf(f).Call(funcArgs)).Interface()
-
-						switch result := result.(type) {
-						case []reflect.Value:
-							if len(result) == 1 {
-								return t.vm.initStructObject(result[0])
-							}
-
-							structs := []Object{}
-							for _, v := range result {
-								structs = append(structs, t.vm.initStructObject(v))
-							}
-
-							return t.vm.initArrayObject(structs)
-						default:
-							return t.vm.initStructObject(result)
-						}
-
 					}
+
+					fmt.Println(funcArgs)
+					var ptr reflect.Value
+					value := reflect.ValueOf(f)
+					if value.Type().Kind() == reflect.Ptr {
+						ptr = value
+						value = ptr.Elem() // acquire value referenced by pointer
+					} else {
+						ptr = reflect.New(reflect.TypeOf(f)) // create new pointer
+						temp := ptr.Elem()                   // create variable to value of pointer
+						temp.Set(value)                      // set value of variable to our passed in value
+					}
+
+					result := reflect.ValueOf(reflect.ValueOf(f).Call(funcArgs)).Interface()
+
+					switch result := result.(type) {
+					case []reflect.Value:
+						if len(result) == 1 {
+							return t.vm.initStructObject(result[0])
+						}
+
+						structs := []Object{}
+						for _, v := range result {
+							structs = append(structs, t.vm.initStructObject(v))
+						}
+
+						return t.vm.initArrayObject(structs)
+					default:
+						return t.vm.initStructObject(result)
+					}
+
+
 				}
 			},
 		},

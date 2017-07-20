@@ -1,4 +1,5 @@
 p = import "./plugin.so"
 p.send("Foo", "!")
+p.send("Baz")
 # b = p.send("NewBar", "foo")
 # b.send("Name")
