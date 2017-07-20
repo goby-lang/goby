@@ -12,11 +12,14 @@ RUN mkdir -p $GOPATH/src/github.com/goby-lang/goby
 
 WORKDIR $GOPATH/src/github.com/goby-lang/goby
 
-ADD . ./
+RUN mkdir -p Godeps/_workspace
+ADD Godeps/Godeps.json ./Godeps
+
 RUN godep restore
 
+ADD . ./
+
 RUN go build -buildmode=plugin -o ./plugin.so ./plugin/main.go
-RUN ls
 
 #RUN ls $GOPATH/src/github.com/lib/pq
 RUN go run goby.go ./samples/import.gb
