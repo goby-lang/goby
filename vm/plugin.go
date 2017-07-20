@@ -1,7 +1,9 @@
 package vm
 
 import (
+	"fmt"
 	"plugin"
+	"reflect"
 )
 
 // PluginObject is a special type that contains file pointer so we can keep track on target file.
@@ -58,7 +60,15 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 						arg := args[1].(*StringObject).Value
 						return t.vm.initStructObject(f(arg))
 					default:
-						return FALSE
+						funcArgs := make([]reflect.Value, len(args)-1)
+
+						for i := range args[1:] {
+							funcArgs[i] = reflect.ValueOf(args[i])
+						}
+
+						result := reflect.ValueOf(reflect.ValueOf(f).Call(funcArgs))
+						fmt.Println(result)
+						return t.vm.initStructObject(result)
 					}
 				}
 			},

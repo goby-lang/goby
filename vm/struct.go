@@ -45,8 +45,8 @@ func builtinStructInstanceMethods() []*BuiltInMethodObject {
 					r := receiver.(*StructObject)
 
 					funcArgs := make([]reflect.Value, len(args)-1)
-					for i := range args {
-						funcArgs[0] = reflect.ValueOf(args[i+1])
+					for i := range args[1:] {
+						funcArgs[i] = reflect.ValueOf(args[i])
 					}
 
 					result := reflect.ValueOf(reflect.ValueOf(r.data).MethodByName(funcName).Call(funcArgs))
