@@ -1,1 +1,2 @@
-import "./plugin.so"
+p = import "./plugin.so"
+p.send("Foo")

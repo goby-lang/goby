@@ -155,7 +155,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 						panic(err)
 					}
 
-					return &PluginObject{fn: fullPath, plugin: p}
+					return t.vm.initPluginObject(fullPath, p)
 				}
 			},
 		},
