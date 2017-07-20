@@ -1,3 +1,4 @@
 p = import "./plugin.so"
-b = p.send("NewBar", "foo")
-b.send("Name")
+p.send("Foo", "!")
+# b = p.send("NewBar", "foo")
+# b.send("Name")

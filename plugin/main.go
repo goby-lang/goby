@@ -14,8 +14,8 @@ func NewBar(name string) *Bar {
 	return &Bar{name: name}
 }
 
-func Foo() {
-	fmt.Println("Foo")
+func Foo(s string) {
+	fmt.Println("Foo" + s)
 }
 
 func main() {
