@@ -53,9 +53,8 @@ func initClassClass() *RClass {
 		constants:    make(map[string]*Pointer),
 	}
 
-	classClass.setBuiltInMethods(builtinCommonInstanceMethods(), false)
 	classClass.setBuiltInMethods(builtinCommonInstanceMethods(), true)
-	classClass.setBuiltInMethods(builtinClassClassMethods(), true)
+	classClass.setBuiltInMethods(builtinCommonClassMethods(), true)
 
 	return classClass
 }
@@ -74,307 +73,7 @@ func initObjectClass(c *RClass) *RClass {
 	return objectClass
 }
 
-func builtinCommonInstanceMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
-		{
-			// General method for comparing equalty of the objects
-			//
-			// ```ruby
-			// 123 == 123   # => true
-			// 123 == "123" # => false
-			//
-			// # Hash will not concern about the key-value pair order
-			// { a: 1, b: 2 } == { a: 1, b: 2 } # => true
-			// { a: 1, b: 2 } == { b: 2, a: 1 } # => true
-			//
-			// # Hash key will be override if the key duplicated
-			// { a: 1, b: 2 } == { a: 2, b: 2, a: 1 } # => true
-			// { a: 1, b: 2 } == { a: 1, b: 2, a: 2 } # => false
-			//
-			// # Array will concern about the order of the elements
-			// [1, 2, 3] == [1, 2, 3] # => true
-			// [1, 2, 3] == [3, 2, 1] # => false
-			// ```
-			//
-			// @return [@boolean]
-			Name: "==",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					className := receiver.Class().Name
-					compareClassName := args[0].Class().Name
-
-					if className == compareClassName && reflect.DeepEqual(receiver, args[0]) {
-						return TRUE
-					}
-					return FALSE
-				}
-			},
-		}, {
-			// General method for comparing inequalty of the objects
-			//
-			// ```ruby
-			// 123 != 123   # => false
-			// 123 != "123" # => true
-			//
-			// # Hash will not concern about the key-value pair order
-			// { a: 1, b: 2 } != { a: 1, b: 2 } # => false
-			// { a: 1, b: 2 } != { b: 2, a: 1 } # => false
-			//
-			// # Hash key will be override if the key duplicated
-			// { a: 1, b: 2 } != { a: 2, b: 2, a: 1 } # => false
-			// { a: 1, b: 2 } != { a: 1, b: 2, a: 2 } # => true
-			//
-			// # Array will concern about the order of the elements
-			// [1, 2, 3] != [1, 2, 3] # => false
-			// [1, 2, 3] != [3, 2, 1] # => true
-			// ```
-			//
-			// @return [@boolean]
-			Name: "!=",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					className := receiver.Class().Name
-					compareClassName := args[0].Class().Name
-
-					if className == compareClassName && reflect.DeepEqual(receiver, args[0]) {
-						return FALSE
-					}
-					return TRUE
-				}
-			},
-		},
-		{
-			// Loads the given Goby library name without extension (mainly for modules), returning `true`
-			// if successful and `false` if the feature is already loaded.
-			//
-			// Currently, only the following embedded Goby libraries are targeted:
-			//
-			// - "file"
-			// - "net/http"
-			// - "net/simple_server"
-			// - "uri"
-			//
-			// ```ruby
-			// require("file")
-			// File.extname("foo.rb")
-			// ```
-			//
-			// TBD: the load paths for `require`
-			//
-			// @param filename [String] Quoted file name of the library, without extension
-			// @return [Boolean] Result of loading module
-			Name: "require",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					libName := args[0].(*StringObject).Value
-					initFunc, ok := standardLibraries[libName]
-
-					if !ok {
-						return t.vm.initErrorObject(InternalError, "Can't require \"%s\"", libName)
-					}
-
-					initFunc(t.vm)
-
-					return TRUE
-				}
-			},
-		},
-		{
-			// Loads the Goby library (mainly for modules) from the given local path plus name
-			// without extension from the current directory, returning `true` if successful,
-			// and `false` if the feature is already loaded.
-			//
-			// ```ruby
-			// require_relative("../test_fixtures/require_test/foo")
-			// fifty = Foo.bar(5)
-			// ```
-			//
-			// @param path/name [String] Quoted file path to library plus name, without extension
-			// @return [Boolean] Result of loading module
-			Name: "require_relative",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					callerDir := path.Dir(t.vm.currentFilePath())
-					filepath := args[0].(*StringObject).Value
-
-					filepath = path.Join(callerDir, filepath)
-
-					file, err := ioutil.ReadFile(filepath + ".gb")
-
-					if err != nil {
-						return t.vm.initErrorObject(InternalError, err.Error())
-					}
-
-					t.vm.execRequiredFile(filepath, file)
-
-					return TRUE
-				}
-			},
-		},
-		{
-			// Puts string literals or objects into stdout with a tailing line feed, converting into String
-			// if needed.
-			//
-			// ```ruby
-			// puts("foo", "bar")
-			// # => foo
-			// # => bar
-			// puts("baz", String.name)
-			// # => baz
-			// # => String
-			// puts("foo" + "bar")
-			// # => foobar
-			// ```
-			// TODO: interpolation is needed to be implemented.
-			//
-			// @param *args [Class] String literals, or other objects that can be converted into String.
-			// @return [Null]
-			Name: "puts",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					for _, arg := range args {
-						fmt.Println(arg.toString())
-					}
-
-					return NULL
-				}
-			},
-		},
-		{
-			// Returns the class of the object. Receiver cannot be omitted.
-			//
-			// FYI: You can convert the class into String with `#name`.
-			//
-			// ```ruby
-			// puts(100.class)         # => <Class:Integer>
-			// puts(100.class.name)    # => Integer
-			// puts("123".class)       # => <Class:String>
-			// puts("123".class.name)  # => String
-			// ```
-			//
-			// @param object [Object] Receiver (required)
-			// @return [Class] The class of the receiver
-			Name: "class",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					switch r := receiver.(type) {
-					case Object:
-						return r.Class()
-					default:
-						return &Error{Message: "Can't call class on %T" + string(r.Class().ReturnName())}
-					}
-				}
-			},
-		},
-		{
-			// Inverts the boolean value.
-			//
-			// ```ruby
-			// !true  # => false
-			// !false # => true
-			// ```
-			//
-			// @param object [Object] object that return boolean value to invert
-			// @return [Object] Inverted boolean value
-			Name: "!",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					return FALSE
-				}
-			},
-		},
-		{
-			// Suspends the current thread for duration (sec).
-			//
-			// **Note:** currently, parameter cannot be omitted, and only Integer can be specified.
-			//
-			// ```ruby
-			// a = sleep(2)
-			// puts(a)     # => 2
-			// ```
-			//
-			// @param sec [Integer] time to wait in sec
-			// @return [Integer] actual time slept in sec
-			Name: "sleep",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					int := args[0].(*IntegerObject)
-					seconds := int.Value
-					time.Sleep(time.Duration(seconds) * time.Second)
-					return int
-				}
-			},
-		},
-		{
-			// Returns object's string representation.
-			// @param n/a []
-			// @return [String] Object's string representation.
-			Name: "to_s",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					return t.vm.initStringObject(receiver.toString())
-				}
-			},
-		},
-		{
-			// Returns true if a block is given in the current context and `yield` is ready to call.
-			//
-			// **Note:** The method name does not end with '?' because the sign is unavalable in Goby for now.
-			//
-			// ```ruby
-			// class File
-			//   def self.open(filename, mode, perm)
-			//     file = new(filename, mode, perm)
-			//
-			//     if block_given
-			//       yield(file)
-			//     end
-			//
-			//     file.close
-			//   end
-			// end
-			// ```
-			//
-			// @param n/a []
-			// @return [Boolean] true/false
-			Name: "block_given",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					cf := t.callFrameStack.top()
-
-					if cf.blockFrame == nil {
-						return FALSE
-					}
-
-					return TRUE
-				}
-			},
-		},
-		{
-			Name: "thread",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					newT := t.vm.newThread()
-
-					go func() {
-						newT.builtInMethodYield(blockFrame, args...)
-					}()
-
-					// We need to pop this frame from main thread manually,
-					// because the block's 'leave' instruction is running on other process
-					t.callFrameStack.pop()
-
-					return NULL
-				}
-			},
-		},
-	}
-}
-
-func builtinClassClassMethods() []*BuiltInMethodObject {
+func builtinCommonClassMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 		{
 			// Creates instance variables and corresponding methods that return the value of
@@ -697,6 +396,306 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 					}
 
 					return superClass
+				}
+			},
+		},
+	}
+}
+
+func builtinCommonInstanceMethods() []*BuiltInMethodObject {
+	return []*BuiltInMethodObject{
+		{
+			// General method for comparing equalty of the objects
+			//
+			// ```ruby
+			// 123 == 123   # => true
+			// 123 == "123" # => false
+			//
+			// # Hash will not concern about the key-value pair order
+			// { a: 1, b: 2 } == { a: 1, b: 2 } # => true
+			// { a: 1, b: 2 } == { b: 2, a: 1 } # => true
+			//
+			// # Hash key will be override if the key duplicated
+			// { a: 1, b: 2 } == { a: 2, b: 2, a: 1 } # => true
+			// { a: 1, b: 2 } == { a: 1, b: 2, a: 2 } # => false
+			//
+			// # Array will concern about the order of the elements
+			// [1, 2, 3] == [1, 2, 3] # => true
+			// [1, 2, 3] == [3, 2, 1] # => false
+			// ```
+			//
+			// @return [@boolean]
+			Name: "==",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					className := receiver.Class().Name
+					compareClassName := args[0].Class().Name
+
+					if className == compareClassName && reflect.DeepEqual(receiver, args[0]) {
+						return TRUE
+					}
+					return FALSE
+				}
+			},
+		}, {
+			// General method for comparing inequalty of the objects
+			//
+			// ```ruby
+			// 123 != 123   # => false
+			// 123 != "123" # => true
+			//
+			// # Hash will not concern about the key-value pair order
+			// { a: 1, b: 2 } != { a: 1, b: 2 } # => false
+			// { a: 1, b: 2 } != { b: 2, a: 1 } # => false
+			//
+			// # Hash key will be override if the key duplicated
+			// { a: 1, b: 2 } != { a: 2, b: 2, a: 1 } # => false
+			// { a: 1, b: 2 } != { a: 1, b: 2, a: 2 } # => true
+			//
+			// # Array will concern about the order of the elements
+			// [1, 2, 3] != [1, 2, 3] # => false
+			// [1, 2, 3] != [3, 2, 1] # => true
+			// ```
+			//
+			// @return [@boolean]
+			Name: "!=",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					className := receiver.Class().Name
+					compareClassName := args[0].Class().Name
+
+					if className == compareClassName && reflect.DeepEqual(receiver, args[0]) {
+						return FALSE
+					}
+					return TRUE
+				}
+			},
+		},
+		{
+			// Loads the given Goby library name without extension (mainly for modules), returning `true`
+			// if successful and `false` if the feature is already loaded.
+			//
+			// Currently, only the following embedded Goby libraries are targeted:
+			//
+			// - "file"
+			// - "net/http"
+			// - "net/simple_server"
+			// - "uri"
+			//
+			// ```ruby
+			// require("file")
+			// File.extname("foo.rb")
+			// ```
+			//
+			// TBD: the load paths for `require`
+			//
+			// @param filename [String] Quoted file name of the library, without extension
+			// @return [Boolean] Result of loading module
+			Name: "require",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					libName := args[0].(*StringObject).Value
+					initFunc, ok := standardLibraries[libName]
+
+					if !ok {
+						return t.vm.initErrorObject(InternalError, "Can't require \"%s\"", libName)
+					}
+
+					initFunc(t.vm)
+
+					return TRUE
+				}
+			},
+		},
+		{
+			// Loads the Goby library (mainly for modules) from the given local path plus name
+			// without extension from the current directory, returning `true` if successful,
+			// and `false` if the feature is already loaded.
+			//
+			// ```ruby
+			// require_relative("../test_fixtures/require_test/foo")
+			// fifty = Foo.bar(5)
+			// ```
+			//
+			// @param path/name [String] Quoted file path to library plus name, without extension
+			// @return [Boolean] Result of loading module
+			Name: "require_relative",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					callerDir := path.Dir(t.vm.currentFilePath())
+					filepath := args[0].(*StringObject).Value
+
+					filepath = path.Join(callerDir, filepath)
+
+					file, err := ioutil.ReadFile(filepath + ".gb")
+
+					if err != nil {
+						return t.vm.initErrorObject(InternalError, err.Error())
+					}
+
+					t.vm.execRequiredFile(filepath, file)
+
+					return TRUE
+				}
+			},
+		},
+		{
+			// Puts string literals or objects into stdout with a tailing line feed, converting into String
+			// if needed.
+			//
+			// ```ruby
+			// puts("foo", "bar")
+			// # => foo
+			// # => bar
+			// puts("baz", String.name)
+			// # => baz
+			// # => String
+			// puts("foo" + "bar")
+			// # => foobar
+			// ```
+			// TODO: interpolation is needed to be implemented.
+			//
+			// @param *args [Class] String literals, or other objects that can be converted into String.
+			// @return [Null]
+			Name: "puts",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					for _, arg := range args {
+						fmt.Println(arg.toString())
+					}
+
+					return NULL
+				}
+			},
+		},
+		{
+			// Returns the class of the object. Receiver cannot be omitted.
+			//
+			// FYI: You can convert the class into String with `#name`.
+			//
+			// ```ruby
+			// puts(100.class)         # => <Class:Integer>
+			// puts(100.class.name)    # => Integer
+			// puts("123".class)       # => <Class:String>
+			// puts("123".class.name)  # => String
+			// ```
+			//
+			// @param object [Object] Receiver (required)
+			// @return [Class] The class of the receiver
+			Name: "class",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					switch r := receiver.(type) {
+					case Object:
+						return r.Class()
+					default:
+						return &Error{Message: "Can't call class on %T" + string(r.Class().ReturnName())}
+					}
+				}
+			},
+		},
+		{
+			// Inverts the boolean value.
+			//
+			// ```ruby
+			// !true  # => false
+			// !false # => true
+			// ```
+			//
+			// @param object [Object] object that return boolean value to invert
+			// @return [Object] Inverted boolean value
+			Name: "!",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					return FALSE
+				}
+			},
+		},
+		{
+			// Suspends the current thread for duration (sec).
+			//
+			// **Note:** currently, parameter cannot be omitted, and only Integer can be specified.
+			//
+			// ```ruby
+			// a = sleep(2)
+			// puts(a)     # => 2
+			// ```
+			//
+			// @param sec [Integer] time to wait in sec
+			// @return [Integer] actual time slept in sec
+			Name: "sleep",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					int := args[0].(*IntegerObject)
+					seconds := int.Value
+					time.Sleep(time.Duration(seconds) * time.Second)
+					return int
+				}
+			},
+		},
+		{
+			// Returns object's string representation.
+			// @param n/a []
+			// @return [String] Object's string representation.
+			Name: "to_s",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					return t.vm.initStringObject(receiver.toString())
+				}
+			},
+		},
+		{
+			// Returns true if a block is given in the current context and `yield` is ready to call.
+			//
+			// **Note:** The method name does not end with '?' because the sign is unavalable in Goby for now.
+			//
+			// ```ruby
+			// class File
+			//   def self.open(filename, mode, perm)
+			//     file = new(filename, mode, perm)
+			//
+			//     if block_given
+			//       yield(file)
+			//     end
+			//
+			//     file.close
+			//   end
+			// end
+			// ```
+			//
+			// @param n/a []
+			// @return [Boolean] true/false
+			Name: "block_given",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					cf := t.callFrameStack.top()
+
+					if cf.blockFrame == nil {
+						return FALSE
+					}
+
+					return TRUE
+				}
+			},
+		},
+		{
+			Name: "thread",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					newT := t.vm.newThread()
+
+					go func() {
+						newT.builtInMethodYield(blockFrame, args...)
+					}()
+
+					// We need to pop this frame from main thread manually,
+					// because the block's 'leave' instruction is running on other process
+					t.callFrameStack.pop()
+
+					return NULL
 				}
 			},
 		},
