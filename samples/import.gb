@@ -1,5 +1,5 @@
-p = import "github.com/goby-lang/goby/plugin/main.go"
-p.send("Foo", "!")
-p.send("Baz")
-# b = p.send("NewBar", "foo")
-# b.send("Name")
+# This only works on Linux, where we can compile Go program into plugin
+p = import "github.com/goby-lang/goby/test_fixtures/import_test/plugin.go"
+result = p.send("NewBar", "xyz") # multiple result, so result is an array
+bar = result[0]
+puts(bar.send("Name"))
