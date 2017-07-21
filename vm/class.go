@@ -160,7 +160,13 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					pkgPath := args[0].(*StringObject).Value
-					fullPath := filepath.Join(os.Getenv("GOPATH"), "src", pkgPath)
+					goPath := os.Getenv("GOPATH")
+					// This is to prevent some path like GODEP_PATH:GOPATH
+					// which can happen on Travis CI
+					ps := strings.Split(goPath, ":")
+					goPath = ps[len(ps)-1]
+
+					fullPath := filepath.Join(goPath, "src", pkgPath)
 					_, pkgName := filepath.Split(fullPath)
 					pkgName = strings.Split(pkgName, ".")[0]
 

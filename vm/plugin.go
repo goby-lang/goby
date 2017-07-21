@@ -6,7 +6,7 @@ import (
 	"reflect"
 )
 
-// PluginObject is a special type that contains file pointer so we can keep track on target file.
+// PluginObject is a special type that contains a Go's plugin
 type PluginObject struct {
 	*baseObj
 	fn     string
@@ -108,6 +108,6 @@ func (p *PluginObject) toString() string {
 }
 
 // toJSON converts the receiver into JSON string.
-func (f *PluginObject) toJSON() string {
-	return f.toString()
+func (p *PluginObject) toJSON() string {
+	return p.toString()
 }

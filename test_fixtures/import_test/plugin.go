@@ -2,14 +2,12 @@ package main
 
 import "fmt"
 
-type Bar struct {
-	name string
-}
-
+// Foo ...
 func Foo(s string) {
 	fmt.Println("Foo" + s)
 }
 
+// Baz ...
 func Baz() {
 	fmt.Println("Baz")
 }
