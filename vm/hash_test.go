@@ -260,21 +260,28 @@ func TestHashEachKeyMethod(t *testing.T) {
 }
 
 func TestHashEachKeyMethodFail(t *testing.T) {
-	vm := initTestVM()
+	testsFail := []struct {
+		input       string
+		errType     string
+		errMsg      string
+		expectedCfp int
+	}{
+		{`
+		{ a: 1, b: 2, c: 3 }.each_key("Hello") do |key|
+		  puts key
+		end
+		`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1", 2},
+		{`
+		{ a: 1, b: 2, c: 3 }.each_key
+		`, InternalError, "InternalError: Can't yield without a block", 1},
+	}
 
-	testArgumentError := `
-	{ a: 1, b: 2, c: 3 }.each_key("Hello") do |key|
-	  puts key
-	end
-	`
-	evaluated := vm.testEval(t, testArgumentError)
-	checkError(t, 0, evaluated, ArgumentError, "ArgumentError: Expect 0 argument. got: 1")
-	vm.checkCFP(t, 0, 2)
-
-	testInternalError := `{ a: 1, b: 2, c: 3 }.each_key`
-	evaluated = vm.testEval(t, testInternalError)
-	checkError(t, 1, evaluated, InternalError, "InternalError: Can't yield without a block")
-	vm.checkCFP(t, 1, 3)
+	for i, tt := range testsFail {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, tt.expectedCfp)
+	}
 }
 
 func TestHashEachValueMethod(t *testing.T) {
@@ -342,21 +349,28 @@ func TestHashEachValueMethod(t *testing.T) {
 }
 
 func TestHashEachValueMethodFail(t *testing.T) {
-	vm := initTestVM()
+	testsFail := []struct {
+		input       string
+		errType     string
+		errMsg      string
+		expectedCfp int
+	}{
+		{`
+		{ a: 1, b: 2, c: 3 }.each_value("Hello") do |value|
+		  puts value
+		end
+		`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1", 2},
+		{`
+		{ a: 1, b: 2, c: 3 }.each_value
+		`, InternalError, "InternalError: Can't yield without a block", 1},
+	}
 
-	testArgumentError := `
-	{ a: 1, b: 2, c: 3 }.each_value("Hello") do |value|
-	  puts value
-	end
-	`
-	evaluated := vm.testEval(t, testArgumentError)
-	checkError(t, 0, evaluated, ArgumentError, "ArgumentError: Expect 0 argument. got: 1")
-	vm.checkCFP(t, 0, 2)
-
-	testInternalError := `{ a: 1, b: 2, c: 3 }.each_value`
-	evaluated = vm.testEval(t, testInternalError)
-	checkError(t, 1, evaluated, InternalError, "InternalError: Can't yield without a block")
-	vm.checkCFP(t, 1, 3)
+	for i, tt := range testsFail {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, tt.expectedCfp)
+	}
 }
 
 func TestHashEmptyMethod(t *testing.T) {
@@ -658,21 +672,28 @@ func TestHashMapValuesMethod(t *testing.T) {
 }
 
 func TestHashMapValuesMethodFail(t *testing.T) {
-	vm := initTestVM()
+	testsFail := []struct {
+		input       string
+		errType     string
+		errMsg      string
+		expectedCfp int
+	}{
+		{`
+		{ a: 1, b: 2, c: 3 }.map_values("Hello") do |value|
+		  value * 3
+		end
+		`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1", 2},
+		{`
+		{ a: 1, b: 2, c: 3 }.map_values
+		`, InternalError, "InternalError: Can't yield without a block", 1},
+	}
 
-	testArgumentError := `
-	{ a: 1, b: 2, c: 3 }.map_values("Hello") do |value|
-	  value * 3
-	end
-	`
-	evaluated := vm.testEval(t, testArgumentError)
-	checkError(t, 0, evaluated, ArgumentError, "ArgumentError: Expect 0 argument. got: 1")
-	vm.checkCFP(t, 0, 2)
-
-	testInternalError := `{ a: 1, b: 2, c: 3 }.map_values`
-	evaluated = vm.testEval(t, testInternalError)
-	checkError(t, 1, evaluated, InternalError, "InternalError: Can't yield without a block")
-	vm.checkCFP(t, 1, 3)
+	for i, tt := range testsFail {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, tt.expectedCfp)
+	}
 }
 
 func TestHashMergeMethod(t *testing.T) {
@@ -1097,21 +1118,28 @@ func TestHashTransformValuesMethod(t *testing.T) {
 }
 
 func TestHashTransformValuesMethodFail(t *testing.T) {
-	vm := initTestVM()
+	testsFail := []struct {
+		input       string
+		errType     string
+		errMsg      string
+		expectedCfp int
+	}{
+		{`
+		{ a: 1, b: 2, c: 3 }.transform_values("Hello") do |value|
+		  value * 3
+		end
+		`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1", 2},
+		{`
+		{ a: 1, b: 2, c: 3 }.transform_values
+		`, InternalError, "InternalError: Can't yield without a block", 1},
+	}
 
-	testArgumentError := `
-	{ a: 1, b: 2, c: 3 }.transform_values("Hello") do |value|
-	  value * 3
-	end
-	`
-	evaluated := vm.testEval(t, testArgumentError)
-	checkError(t, 0, evaluated, ArgumentError, "ArgumentError: Expect 0 argument. got: 1")
-	vm.checkCFP(t, 0, 2)
-
-	testInternalError := `{ a: 1, b: 2, c: 3 }.transform_values`
-	evaluated = vm.testEval(t, testInternalError)
-	checkError(t, 1, evaluated, InternalError, "InternalError: Can't yield without a block")
-	vm.checkCFP(t, 1, 3)
+	for i, tt := range testsFail {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, tt.expectedCfp)
+	}
 }
 
 func TestHashValuesMethod(t *testing.T) {
