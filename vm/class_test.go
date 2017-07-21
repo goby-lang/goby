@@ -494,15 +494,10 @@ func TestGeneralIsNilMethodFail(t *testing.T) {
 		errMsg string
 	}{
 		{`123.is_nil("Hello")`, "ArgumentError: Expect 0 argument. got: 1"},
-		{`123.is_nil("Hello", "World")`, "ArgumentError: Expect 0 argument. got: 2"},
 		{`"Fail".is_nil("Hello")`, "ArgumentError: Expect 0 argument. got: 1"},
-		{`"Fail".is_nil("Hello", "World")`, "ArgumentError: Expect 0 argument. got: 2"},
 		{`[1, 2, 3].is_nil("Hello")`, "ArgumentError: Expect 0 argument. got: 1"},
-		{`[1, 2, 3].is_nil("Hello", "World")`, "ArgumentError: Expect 0 argument. got: 2"},
 		{`{ a: 1, b: 2, c: 3 }.is_nil("Hello")`, "ArgumentError: Expect 0 argument. got: 1"},
-		{`{ a: 1, b: 2, c: 3 }.is_nil("Hello", "World")`, "ArgumentError: Expect 0 argument. got: 2"},
 		{`(1..10).is_nil("Hello")`, "ArgumentError: Expect 0 argument. got: 1"},
-		{`(1..10).is_nil("Hello", "World")`, "ArgumentError: Expect 0 argument. got: 2"},
 	}
 
 	for i, tt := range testsFail {
@@ -573,7 +568,7 @@ func TestClassGeneralComparisonOperation(t *testing.T) {
 		{`Integer == Integer`, true},
 		{`Integer == String`, false},
 		{`123.class == Integer`, true},
-		// TODO: Comparing to Object cause panic
+		// TODO: Issue #289 Comparing to Object cause panic
 		//{`Integer == Object`, false},
 		//{`Integer.superclass == Object`, true},
 		//{`123.class.superclass == Object`, true},
@@ -586,7 +581,7 @@ func TestClassGeneralComparisonOperation(t *testing.T) {
 		{`Integer != Integer`, false},
 		{`Integer != String`, true},
 		{`123.class != Integer`, false},
-		// TODO: Comparing to Object cause panic
+		// TODO: Issue #289 Comparing to Object cause panic
 		//{`Integer != Object`, true},
 		//{`Integer.superclass != Object`, false},
 		//{`123.class.superclass != Object`, false},
