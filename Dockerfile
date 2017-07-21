@@ -9,6 +9,7 @@ RUN go get github.com/tools/godep
 RUN go build -buildmode=plugin std
 
 RUN mkdir -p $GOPATH/src/github.com/goby-lang/goby
+ENV GOBY_ROOT=$GOPATH/src/github.com/goby-lang/goby
 
 WORKDIR $GOPATH/src/github.com/goby-lang/goby
 
@@ -20,7 +21,7 @@ RUN godep restore
 
 ADD . ./
 
-#RUN go build -buildmode=plugin -o ./plugin.so ./plugin/plugin.go
+# Run test when building image is not a good practice, but it's more convenient for development
 
-#RUN ls $GOPATH/src/github.com/lib/pq
-RUN go run goby.go ./samples/import.gb
+#RUN ./test.sh
+#RUN TEST_PLUGIN=true go test ./vm --run .?Plugin.? -v

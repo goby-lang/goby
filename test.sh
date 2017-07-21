@@ -13,6 +13,14 @@ for d in $(go list ./... | grep -v vendor); do
     fi
 done
 
+# Plugin related tests can't run under race condition
+TEST_PLUGIN=true go test ./vm --run .?Plugin.? -v -coverprofile=profile.out -covermode=atomic $d
+
+if [ -f profile.out ]; then
+  cat profile.out >> coverage.txt
+  rm profile.out
+fi
+
 
 # Test if libs that require built in Goby script would work.
 # TODO: Write a test for this specific case
