@@ -68,17 +68,14 @@ func callMethod(i interface{}, methodName string, args []reflect.Value) interfac
 	var value reflect.Value
 	var finalMethod reflect.Value
 
-	fmt.Println(i)
-	value = reflect.ValueOf(i)
+	value = i.(reflect.Value)
 
 	// if we start with a pointer, we need to get value pointed to
 	// if we start with a value, we need to get a pointer to that value
 	if value.Type().Kind() == reflect.Ptr {
-		fmt.Println("Ptr")
 		ptr = value
 		value = ptr.Elem()
 	} else {
-		fmt.Println("Obj")
 		ptr = reflect.New(reflect.TypeOf(i))
 		temp := ptr.Elem()
 		temp.Set(value)
@@ -102,7 +99,7 @@ func callMethod(i interface{}, methodName string, args []reflect.Value) interfac
 	}
 
 	// return or panic, method not found of either type
-	panic("!!!!!!!!!!!!!!!!!!")
+	panic(fmt.Sprintf("%T type objects don't have %s method.", value.Interface(), methodName))
 }
 
 // Polymorphic helper functions -----------------------------------------

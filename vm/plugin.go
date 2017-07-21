@@ -1,7 +1,6 @@
 package vm
 
 import (
-	"fmt"
 	"plugin"
 	"reflect"
 )
@@ -64,7 +63,6 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 						}
 					}
 
-					fmt.Println(funcArgs)
 					var ptr reflect.Value
 					value := reflect.ValueOf(f)
 					if value.Type().Kind() == reflect.Ptr {
