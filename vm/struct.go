@@ -44,26 +44,21 @@ func builtinStructInstanceMethods() []*BuiltInMethodObject {
 					funcName := s.Value
 					r := receiver.(*StructObject)
 
-					funcArgs := make([]reflect.Value, len(args)-1)
+					funcArgs, err := convertToGoFuncArgs(args)
 
-					for i, arg := range args[1:] {
-						v, ok := arg.(builtInType)
-
-						if ok {
-							funcArgs[i] = reflect.ValueOf(v.value())
-						} else {
-							return t.vm.initErrorObject(InternalError, "Can't pass %s type object when calling go function", arg.Class().Name)
-						}
+					if err != nil {
+						t.vm.initErrorObject(TypeError, err.Error())
 					}
 
-					return t.vm.initObjectFromGoType(callMethod(r.data, funcName, funcArgs))
+					result := callGoFunc(r.data, funcName, funcArgs)
+					return t.vm.initObjectFromGoType(unwrapGoFuncResult(result))
 				}
 			},
 		},
 	}
 }
 
-func callMethod(i interface{}, methodName string, args []reflect.Value) interface{} {
+func callGoFunc(i interface{}, methodName string, args []reflect.Value) interface{} {
 	var ptr reflect.Value
 	var value reflect.Value
 	var finalMethod reflect.Value
@@ -74,16 +69,7 @@ func callMethod(i interface{}, methodName string, args []reflect.Value) interfac
 		value = reflect.ValueOf(i)
 	}
 
-	// if we start with a pointer, we need to get value pointed to
-	// if we start with a value, we need to get a pointer to that value
-	if value.Type().Kind() == reflect.Ptr {
-		ptr = value
-		value = ptr.Elem()
-	} else {
-		ptr = reflect.New(reflect.TypeOf(i))
-		temp := ptr.Elem()
-		temp.Set(value)
-	}
+	ptr, value = getReflectPtrAndValue(value, i)
 
 	// check for method on value
 	method := value.MethodByName(methodName)
@@ -99,8 +85,33 @@ func callMethod(i interface{}, methodName string, args []reflect.Value) interfac
 	}
 
 	if finalMethod.IsValid() {
-		result := finalMethod.Call(args)
+		return finalMethod.Call(args)
+	}
 
+	// return or panic, method not found of either type
+	panic(fmt.Sprintf("%T type objects don't have %s method.", value.Interface(), methodName))
+}
+
+func convertToGoFuncArgs(args []Object) ([]reflect.Value, error) {
+	funcArgs := make([]reflect.Value, len(args)-1)
+
+	for i, arg := range args[1:] {
+		v, ok := arg.(builtInType)
+
+		if ok {
+			funcArgs[i] = reflect.ValueOf(v.value())
+		} else {
+			err := fmt.Errorf("Can't pass %s type object when calling go function", arg.Class().Name)
+			return nil, err
+		}
+	}
+
+	return funcArgs, nil
+}
+
+func unwrapGoFuncResult(result interface{}) interface{} {
+	switch result := result.(type) {
+	case []reflect.Value:
 		if len(result) == 0 {
 			return NULL
 		} else if len(result) == 1 {
@@ -114,10 +125,22 @@ func callMethod(i interface{}, methodName string, args []reflect.Value) interfac
 
 			return values
 		}
+	default:
+		return result
+	}
+}
+
+func getReflectPtrAndValue(value reflect.Value, rawValue interface{}) (ptr, v reflect.Value) {
+	if value.Type().Kind() == reflect.Ptr {
+		ptr = value
+		value = ptr.Elem() // acquire value referenced by pointer
+	} else {
+		ptr = reflect.New(reflect.TypeOf(rawValue)) // create new pointer
+		temp := ptr.Elem()                          // create variable to value of pointer
+		temp.Set(value)                             // set value of variable to our passed in value
 	}
 
-	// return or panic, method not found of either type
-	panic(fmt.Sprintf("%T type objects don't have %s method.", value.Interface(), methodName))
+	return ptr, value
 }
 
 // Polymorphic helper functions -----------------------------------------

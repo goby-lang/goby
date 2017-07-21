@@ -51,47 +51,15 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(InternalError, err.Error())
 					}
 
-					funcArgs := make([]reflect.Value, len(args)-1)
+					funcArgs, err := convertToGoFuncArgs(args)
 
-					for i, arg := range args[1:] {
-						v, ok := arg.(builtInType)
-
-						if ok {
-							funcArgs[i] = reflect.ValueOf(v.value())
-						} else {
-							return t.vm.initErrorObject(InternalError, "Can't pass %s type object when calling go function", arg.Class().Name)
-						}
-					}
-
-					var ptr reflect.Value
-					value := reflect.ValueOf(f)
-					if value.Type().Kind() == reflect.Ptr {
-						ptr = value
-						value = ptr.Elem() // acquire value referenced by pointer
-					} else {
-						ptr = reflect.New(reflect.TypeOf(f)) // create new pointer
-						temp := ptr.Elem()                   // create variable to value of pointer
-						temp.Set(value)                      // set value of variable to our passed in value
+					if err != nil {
+						t.vm.initErrorObject(TypeError, err.Error())
 					}
 
 					result := reflect.ValueOf(reflect.ValueOf(f).Call(funcArgs)).Interface()
 
-					switch result := result.(type) {
-					case []reflect.Value:
-						if len(result) == 1 {
-							return t.vm.initObjectFromGoType(result[0].Interface())
-						}
-
-						structs := []Object{}
-						for _, v := range result {
-							structs = append(structs, t.vm.initObjectFromGoType(v.Interface()))
-						}
-
-						return t.vm.initArrayObject(structs)
-					default:
-						return t.vm.initObjectFromGoType(result)
-					}
-
+					return t.vm.initObjectFromGoType(unwrapGoFuncResult(result))
 				}
 			},
 		},
