@@ -8,23 +8,18 @@ type Bar struct {
 }
 
 // Name ...
-func (b *Bar) Name() string {
-	return b.name
+func (b *Bar) Name(s string) (string, error) {
+	return b.name + s, nil
+}
+
+// Add ...
+func (b *Bar) Add(x int, y int64) int64 {
+	return int64(x) + y
 }
 
 // NewBar ...
 func NewBar(name string) (*Bar, error) {
 	return &Bar{name: name}, nil
-}
-
-// Foo ...
-func Foo(s string) {
-	fmt.Println("Foo" + s)
-}
-
-// Baz ...
-func Baz() {
-	fmt.Println("Baz")
 }
 
 func main() {

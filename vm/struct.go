@@ -68,7 +68,11 @@ func callMethod(i interface{}, methodName string, args []reflect.Value) interfac
 	var value reflect.Value
 	var finalMethod reflect.Value
 
-	value = i.(reflect.Value)
+	value, ok := i.(reflect.Value)
+
+	if !ok {
+		value = reflect.ValueOf(i)
+	}
 
 	// if we start with a pointer, we need to get value pointed to
 	// if we start with a value, we need to get a pointer to that value
@@ -95,7 +99,21 @@ func callMethod(i interface{}, methodName string, args []reflect.Value) interfac
 	}
 
 	if finalMethod.IsValid() {
-		return finalMethod.Call(args)[0].Interface()
+		result := finalMethod.Call(args)
+
+		if len(result) == 0 {
+			return NULL
+		} else if len(result) == 1 {
+			return result[0].Interface()
+		} else {
+			values := []interface{}{}
+
+			for _, v := range result {
+				values = append(values, v.Interface())
+			}
+
+			return values
+		}
 	}
 
 	// return or panic, method not found of either type

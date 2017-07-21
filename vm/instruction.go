@@ -1,7 +1,6 @@
 package vm
 
 import (
-	"fmt"
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"strings"
 )
@@ -457,6 +456,10 @@ var builtInActions = map[operationType]*action{
 func (vm *VM) initObjectFromGoType(value interface{}) Object {
 	switch v := value.(type) {
 	case int:
+		return vm.initIntegerObject(v)
+	case int64:
+		return vm.initIntegerObject(int(v))
+	case int32:
 		return vm.initIntegerObject(int(v))
 	case string:
 		switch v {
@@ -473,7 +476,15 @@ func (vm *VM) initObjectFromGoType(value interface{}) Object {
 		}
 
 		return FALSE
-	}
+	case []interface{}:
+		var objs []Object
 
-	return newError(fmt.Sprintf("Unknow data type %T", value))
+		for _, elem := range v {
+			objs = append(objs, vm.initObjectFromGoType(elem))
+		}
+
+		return vm.initArrayObject(objs)
+	default:
+		return vm.initStructObject(value)
+	}
 }

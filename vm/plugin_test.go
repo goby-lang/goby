@@ -11,7 +11,7 @@ func TestCallingPluginFunction(t *testing.T) {
 	skipPluginTestIfEnvNotSet(t)
 
 	input := `
-	p = import "github.com/goby-lang/goby/test_fixtures/import_test/plugin.go"
+	p = import "github.com/goby-lang/goby/test_fixtures/import_test/plugin/plugin.go"
 	p.send("Foo", "!")
 	p.send("Baz")
 	`
@@ -28,15 +28,13 @@ func TestCallingPluginFunctionWithReturnValue(t *testing.T) {
 	skipPluginTestIfEnvNotSet(t)
 
 	input := `
-	p = import "github.com/goby-lang/goby/test_fixtures/import_test/plugin.go"
-	result = p.send("NewBar", "xyz") # multiple result, so result is an array
-	bar = result[0]
-	bar.send("Name")
+	p = import "github.com/goby-lang/goby/test_fixtures/import_test/plugin/plugin.go"
+	p.send("Bar")
 	`
 
 	vm := initTestVM()
 	evaluated := vm.testEval(t, input)
-	checkExpected(t, 0, evaluated, "xyz")
+	checkExpected(t, 0, evaluated, "Bar")
 	vm.checkCFP(t, 0, 0)
 }
 

@@ -79,17 +79,17 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 					switch result := result.(type) {
 					case []reflect.Value:
 						if len(result) == 1 {
-							return t.vm.initStructObject(result[0])
+							return t.vm.initObjectFromGoType(result[0].Interface())
 						}
 
 						structs := []Object{}
 						for _, v := range result {
-							structs = append(structs, t.vm.initStructObject(v))
+							structs = append(structs, t.vm.initObjectFromGoType(v.Interface()))
 						}
 
 						return t.vm.initArrayObject(structs)
 					default:
-						return t.vm.initStructObject(result)
+						return t.vm.initObjectFromGoType(result)
 					}
 
 				}
