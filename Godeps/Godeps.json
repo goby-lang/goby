@@ -1,7 +1,7 @@
 {
 	"ImportPath": "github.com/goby-lang/goby",
 	"GoVersion": "go1.8",
-	"GodepVersion": "v60",
+	"GodepVersion": "v79",
 	"Deps": [
 		{
 			"ImportPath": "github.com/chzyer/readline",

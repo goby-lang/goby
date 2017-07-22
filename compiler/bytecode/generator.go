@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"strings"
 
-	"github.com/goby-lang/goby/Godeps/_workspace/src/github.com/looplab/fsm"
 	"github.com/goby-lang/goby/compiler/ast"
+	"github.com/looplab/fsm"
 )
 
 type scope struct {

@@ -14,7 +14,7 @@ ENV GOBY_ROOT=$GOPATH/src/github.com/goby-lang/goby
 WORKDIR $GOPATH/src/github.com/goby-lang/goby
 
 RUN mkdir plugins
-RUN mkdir -p Godeps/_workspace
+RUN mkdir Godeps/
 ADD Godeps/Godeps.json ./Godeps
 
 RUN godep restore
@@ -24,4 +24,5 @@ ADD . ./
 # Run test when building image is not a good practice, but it's more convenient for development
 
 #RUN ./test.sh
-#RUN TEST_PLUGIN=true go test ./vm --run .?Plugin.? -v
+RUN TEST_PLUGIN=true go test ./vm --run .?Plugin.? -v
+RUN TEST_PLUGIN=true go test ./vm --run .?Struct.? -v
