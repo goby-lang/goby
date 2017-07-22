@@ -5,6 +5,17 @@ import (
 	"strconv"
 )
 
+/*
+This is enum defined for integer's flag
+*/
+
+const (
+	_ int = iota
+	integer
+	integer32
+	integer64
+)
+
 // IntegerObject represents number objects which can bring into mathematical calculations.
 //
 // ```ruby
@@ -16,12 +27,14 @@ import (
 type IntegerObject struct {
 	*baseObj
 	Value int
+	flag  int
 }
 
 func (vm *VM) initIntegerObject(value int) *IntegerObject {
 	return &IntegerObject{
 		baseObj: &baseObj{class: vm.topLevelClass(integerClass)},
 		Value:   value,
+		flag:    integer,
 	}
 }
 
@@ -579,6 +592,26 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					}
 
 					return n
+				}
+			},
+		},
+		{
+			Name: "to_int32",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					r := receiver.(*IntegerObject)
+					r.flag = integer32
+					return r
+				}
+			},
+		},
+		{
+			Name: "to_int64",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					r := receiver.(*IntegerObject)
+					r.flag = integer64
+					return r
 				}
 			},
 		},

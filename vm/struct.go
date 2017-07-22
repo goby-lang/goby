@@ -99,6 +99,17 @@ func convertToGoFuncArgs(args []Object) ([]reflect.Value, error) {
 		v, ok := arg.(builtInType)
 
 		if ok {
+			if integer, ok := v.(*IntegerObject); ok {
+				switch integer.flag {
+				case integer64:
+					funcArgs[i] = reflect.ValueOf(int64(integer.Value))
+					continue
+				case integer32:
+					funcArgs[i] = reflect.ValueOf(int32(integer.Value))
+					continue
+				}
+			}
+
 			funcArgs[i] = reflect.ValueOf(v.value())
 		} else {
 			err := fmt.Errorf("Can't pass %s type object when calling go function", arg.Class().Name)
