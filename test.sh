@@ -21,6 +21,12 @@ if [ -f profile.out ]; then
   rm profile.out
 fi
 
+TEST_PLUGIN=true go test ./vm --run .?Struct.? -v -coverprofile=profile.out -covermode=atomic $d
+
+if [ -f profile.out ]; then
+  cat profile.out >> coverage.txt
+  rm profile.out
+fi
 
 # Test if libs that require built in Goby script would work.
 # TODO: Write a test for this specific case
