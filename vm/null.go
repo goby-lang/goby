@@ -52,7 +52,7 @@ func builtInNullInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
-			// Returns true: the flipped boolean value of nil object.
+			// Returns true because it is nil. (See the main implementation of is_nil method in vm/class.go)
 			//
 			// ```ruby
 			// a = nil
@@ -92,6 +92,24 @@ func builtInNullInstanceMethods() []*BuiltInMethodObject {
 						return TRUE
 					}
 					return FALSE
+				}
+			},
+		},
+		{
+			// Returns true because it is nil.
+			//
+			// ```ruby
+			// a = nil
+			// a.is_nil
+			// # => true
+			// ```
+			Name: "is_nil",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(ArgumentError, "Expect 0 argument. got: %d", len(args))
+					}
+					return TRUE
 				}
 			},
 		},

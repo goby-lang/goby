@@ -73,6 +73,7 @@ func TestAttrReaderAndWriter(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -100,6 +101,7 @@ a = Bar.new()
 	if err.Message != expected {
 		t.Fatalf("Error message should be '%s'. got: %s", expected, err.Message)
 	}
+	vm.checkCFP(t, 0, 1)
 }
 
 func TestEvalCustomConstructor(t *testing.T) {
@@ -122,6 +124,7 @@ func TestEvalCustomConstructor(t *testing.T) {
 	vm := initTestVM()
 	evaluated := vm.testEval(t, input)
 	checkExpected(t, 0, evaluated, 30)
+	vm.checkCFP(t, 0, 0)
 }
 
 func TestDefSingletonMethtod(t *testing.T) {
@@ -153,6 +156,7 @@ func TestDefSingletonMethtod(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -170,6 +174,7 @@ func TestMonkeyPatchBuiltInClass(t *testing.T) {
 	vm := initTestVM()
 	evaluated := vm.testEval(t, input)
 	checkExpected(t, 0, evaluated, "buz")
+	vm.checkCFP(t, 0, 0)
 }
 
 func TestNamespace(t *testing.T) {
@@ -350,6 +355,7 @@ func TestNamespace(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -406,6 +412,7 @@ func TestPrimitiveType(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
 
@@ -423,6 +430,7 @@ func TestRequireRelative(t *testing.T) {
 	vm := initTestVM()
 	evaluated := vm.testEval(t, input)
 	checkExpected(t, 0, evaluated, 160)
+	vm.checkCFP(t, 0, 0)
 }
 
 func TestRequireSuccess(t *testing.T) {
@@ -434,6 +442,7 @@ func TestRequireSuccess(t *testing.T) {
 	vm := initTestVM()
 	evaluated := vm.testEval(t, input)
 	checkExpected(t, 0, evaluated, ".rb")
+	vm.checkCFP(t, 0, 0)
 }
 
 func TestRequireFail(t *testing.T) {
@@ -453,6 +462,96 @@ func TestRequireFail(t *testing.T) {
 	if err.Message != expected {
 		t.Fatalf("Error message should be '%s'. got: %s", expected, err.Message)
 	}
+	vm.checkCFP(t, 0, 1)
+}
+
+func TestGeneralIsNilMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{`123.is_nil`, false},
+		{`"Hello World".is_nil`, false},
+		{`(2..10).is_nil`, false},
+		{`{ a: 1, b: "2", c: ["Goby", 123] }.is_nil`, false},
+		{`[1, 2, 3, 4, 5].is_nil`, false},
+		{`true.is_nil`, false},
+		{`String.is_nil`, false},
+		{`nil.is_nil`, true},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
+func TestGeneralIsNilMethodFail(t *testing.T) {
+	testsFail := []struct {
+		input  string
+		errMsg string
+	}{
+		{`123.is_nil("Hello")`, "ArgumentError: Expect 0 argument. got: 1"},
+		{`"Fail".is_nil("Hello")`, "ArgumentError: Expect 0 argument. got: 1"},
+		{`[1, 2, 3].is_nil("Hello")`, "ArgumentError: Expect 0 argument. got: 1"},
+		{`{ a: 1, b: 2, c: 3 }.is_nil("Hello")`, "ArgumentError: Expect 0 argument. got: 1"},
+		{`(1..10).is_nil("Hello")`, "ArgumentError: Expect 0 argument. got: 1"},
+	}
+
+	for i, tt := range testsFail {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkError(t, i, evaluated, ArgumentError, tt.errMsg)
+		vm.checkCFP(t, i, 1)
+	}
+}
+
+func TestGeneralIsAMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{`123.is_a(Integer)`, true},
+		{`123.is_a(Object)`, true},
+		{`123.is_a(String)`, false},
+		{`123.is_a(Range)`, false},
+		{`"Hello World".is_a(String)`, true},
+		{`"Hello World".is_a(Object)`, true},
+		{`"Hello World".is_a(Boolean)`, false},
+		{`"Hello World".is_a(Array)`, false},
+		{`(2..10).is_a(Range)`, true},
+		{`(2..10).is_a(Object)`, true},
+		{`(2..10).is_a(Null)`, false},
+		{`(2..10).is_a(Hash)`, false},
+		{`{ a: 1, b: "2", c: ["Goby", 123] }.is_a(Hash)`, true},
+		{`{ a: 1, b: "2", c: ["Goby", 123] }.is_a(Object)`, true},
+		{`{ a: 1, b: "2", c: ["Goby", 123] }.is_a(Class)`, false},
+		{`{ a: 1, b: "2", c: ["Goby", 123] }.is_a(Array)`, false},
+		{`[1, 2, 3, 4, 5].is_a(Array)`, true},
+		{`[1, 2, 3, 4, 5].is_a(Object)`, true},
+		{`[1, 2, 3, 4, 5].is_a(Null)`, false},
+		{`[1, 2, 3, 4, 5].is_a(String)`, false},
+		{`true.is_a(Boolean)`, true},
+		{`true.is_a(Object)`, true},
+		{`true.is_a(Array)`, false},
+		{`true.is_a(Integer)`, false},
+		{`String.is_a(Class)`, true},
+		{`String.is_a(String)`, false},
+		{`String.is_a(Array)`, false},
+		{`nil.is_a(Null)`, true},
+		{`nil.is_a(Object)`, true},
+		{`nil.is_a(String)`, false},
+		{`nil.is_a(Range)`, false},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
 }
 
 func TestClassGeneralComparisonOperation(t *testing.T) {
@@ -469,7 +568,7 @@ func TestClassGeneralComparisonOperation(t *testing.T) {
 		{`Integer == Integer`, true},
 		{`Integer == String`, false},
 		{`123.class == Integer`, true},
-		// TODO: Comparing to Object cause panic
+		// TODO: Issue #289 Comparing to Object cause panic
 		//{`Integer == Object`, false},
 		//{`Integer.superclass == Object`, true},
 		//{`123.class.superclass == Object`, true},
@@ -482,7 +581,7 @@ func TestClassGeneralComparisonOperation(t *testing.T) {
 		{`Integer != Integer`, false},
 		{`Integer != String`, true},
 		{`123.class != Integer`, false},
-		// TODO: Comparing to Object cause panic
+		// TODO: Issue #289 Comparing to Object cause panic
 		//{`Integer != Object`, true},
 		//{`Integer.superclass != Object`, false},
 		//{`123.class.superclass != Object`, false},
@@ -493,6 +592,28 @@ func TestClassGeneralComparisonOperation(t *testing.T) {
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
+	}
+}
+
+func TestGeneralIsAMethodFail(t *testing.T) {
+	testsFail := []struct {
+		input   string
+		errType string
+		errMsg  string
+	}{
+		{`123.is_a`, ArgumentError, "ArgumentError: Expect 1 argument. got: 0"},
+		{`Class.is_a`, ArgumentError, "ArgumentError: Expect 1 argument. got: 0"},
+		{`123.is_a(123, 456)`, ArgumentError, "ArgumentError: Expect 1 argument. got: 2"},
+		{`123.is_a(Integer, String)`, ArgumentError, "ArgumentError: Expect 1 argument. got: 2"},
+		{`123.is_a(true)`, TypeError, "TypeError: Expect argument to be Class. got: Boolean"},
+		{`Class.is_a(true)`, TypeError, "TypeError: Expect argument to be Class. got: Boolean"},
+	}
+
+	for i, tt := range testsFail {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, 1)
 	}
 }
 
