@@ -158,6 +158,8 @@ func (vm *VM) initConstants() {
 		vm.initRangeClass(),
 		vm.initMethodClass(),
 		vm.initChannelClass(),
+		vm.initPluginClass(),
+		vm.initStructClass(),
 	}
 
 	vm.initErrorClasses()

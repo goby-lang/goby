@@ -632,3 +632,7 @@ func (a *ArrayObject) shift() Object {
 	a.Elements = a.Elements[1:]
 	return value
 }
+
+func (a *ArrayObject) value() interface{} {
+	return a.Elements
+}

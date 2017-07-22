@@ -721,6 +721,10 @@ func (h *HashObject) toJSON() string {
 	return out.String()
 }
 
+func (h *HashObject) value() interface{} {
+	return h.Pairs
+}
+
 func (h *HashObject) length() int {
 	return len(h.Pairs)
 }

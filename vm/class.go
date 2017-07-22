@@ -3,8 +3,13 @@ package vm
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
+	"os/exec"
 	"path"
+	"path/filepath"
+	"plugin"
 	"reflect"
+	"strings"
 	"time"
 )
 
@@ -20,7 +25,14 @@ const (
 	channelClass = "Channel"
 	rangeClass   = "Range"
 	methodClass  = "method"
+	pluginClass  = "Plugin"
+	structClass  = "Struct"
 )
+
+type builtInType interface {
+	value() interface{}
+	Object
+}
 
 // RClass represents normal (not built in) class object
 type RClass struct {
@@ -140,6 +152,39 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 						return FALSE
 					}
 					return TRUE
+				}
+			},
+		},
+		{
+			Name: "import",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					pkgPath := args[0].(*StringObject).Value
+					goPath := os.Getenv("GOPATH")
+					// This is to prevent some path like GODEP_PATH:GOPATH
+					// which can happen on Travis CI
+					ps := strings.Split(goPath, ":")
+					goPath = ps[len(ps)-1]
+
+					fullPath := filepath.Join(goPath, "src", pkgPath)
+					_, pkgName := filepath.Split(fullPath)
+					pkgName = strings.Split(pkgName, ".")[0]
+
+					cmd := exec.Command("go", "build", "-buildmode=plugin", "-o", fmt.Sprintf("./%s.so", pkgName), fullPath)
+					out, err := cmd.CombinedOutput()
+
+					if err != nil {
+						return t.vm.initErrorObject(InternalError, "Error: %s from %s", string(out), strings.Join(cmd.Args, " "))
+					}
+
+					soName := filepath.Join("./", pkgName+".so")
+
+					p, err := plugin.Open(soName)
+					if err != nil {
+						panic(err)
+					}
+
+					return t.vm.initPluginObject(fullPath, p)
 				}
 			},
 		},
