@@ -18,8 +18,10 @@ import (
 )
 
 const (
-	prompt1   = "\033[32m»\033[0m "
-	prompt2   = "\033[31m›\033[0m "
+	prmpt1    = "»"
+	prmpt2    = "¤"
+	prompt1   = "\033[32m" + prmpt1 + "\033[0m "
+	prompt2   = "\033[31m" + prmpt2 + "\033[0m "
 	pad       = "  "
 	echo      = "\033[33m#»\033[0m"
 	interrupt = "^C"
@@ -97,6 +99,8 @@ reset:
 		line, err := rl.Readline()
 		rl.Config.UniqueEditLine = false
 
+		line = strings.TrimPrefix(line, prmpt1)
+		line = strings.TrimPrefix(line, prmpt2)
 		line = strings.TrimSpace(line)
 
 		if err != nil {
@@ -218,7 +222,7 @@ reset:
 			v.REPLExec(instructions)
 
 			r := v.GetREPLResult()
-			
+
 			// Suppress echo back on trailing ';'
 			if cmds != nil {
 				if t := cmds[len(cmds)-1]; string(t[len(t)-1]) != semicolon {
