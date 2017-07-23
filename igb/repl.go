@@ -23,6 +23,7 @@ const (
 	pad       = "  "
 	echo      = "\033[33m#»\033[0m"
 	interrupt = "^C"
+	semicolon = ";"
 	exit      = "exit"
 	help      = "help"
 	reset     = "reset"
@@ -210,7 +211,6 @@ reset:
 			// If everything goes well, reset state and statements buffer
 			rl.SetPrompt(prompt(stack))
 			sm.Event(readyToExec)
-			cmds = nil
 		}
 		if sm.Is(readyToExec) {
 			println(prompt(stack) + line)
@@ -218,7 +218,19 @@ reset:
 			v.REPLExec(instructions)
 
 			r := v.GetREPLResult()
-			println(echo, r)
+			
+			// Suppress echo back on trailing ';'
+			if cmds != nil {
+				if t := cmds[len(cmds)-1]; string(t[len(t)-1]) != semicolon {
+					println(echo, r)
+				}
+			} else {
+				if string(line[len(line)-1]) != semicolon {
+					println(echo, r)
+				}
+			}
+			//}
+			cmds = nil
 		}
 	}
 }
