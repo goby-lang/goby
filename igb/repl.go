@@ -19,9 +19,9 @@ import (
 
 const (
 	prompt1   = "\033[32m»\033[0m "
-	prompt2   = "\033[31m*\033[0m "
+	prompt2   = "\033[31m›\033[0m "
 	pad       = "  "
-	echo      = "#=>"
+	echo      = "\033[33m#»\033[0m"
 	interrupt = "^C"
 	exit      = "exit"
 	help      = "help"
