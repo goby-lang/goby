@@ -104,6 +104,37 @@ a = Bar.new()
 	vm.checkCFP(t, 0, 1)
 }
 
+func TestClassInstanceVariable(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{`
+		class Bar
+		  @foo = 1
+		end
+
+		Bar.instance_variable_get("@foo")
+		`, 1},
+		{`
+		class Bar
+		  @foo = 1
+		end
+
+		Bar.instance_variable_set("@bar", 100)
+		Bar.instance_variable_set("@foo", 20)
+		Bar.instance_variable_get("@foo") + Bar.instance_variable_get("@bar")
+		`, 120},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
 func TestEvalCustomConstructor(t *testing.T) {
 	input := `
 		class Foo

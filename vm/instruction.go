@@ -89,7 +89,7 @@ var builtInActions = map[operationType]*action{
 		name: bytecode.GetInstanceVariable,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
 			variableName := args[0].(string)
-			v, ok := cf.self.(*RObject).InstanceVariables.get(variableName)
+			v, ok := cf.self.instanceVariableGet(variableName)
 			if !ok {
 				t.stack.push(&Pointer{Target: NULL})
 				return
@@ -104,7 +104,7 @@ var builtInActions = map[operationType]*action{
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
 			variableName := args[0].(string)
 			p := t.stack.pop()
-			cf.self.(*RObject).InstanceVariables.set(variableName, p.Target)
+			cf.self.instanceVariableSet(variableName, p.Target)
 		},
 	},
 	bytecode.SetLocal: {

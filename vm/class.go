@@ -490,6 +490,47 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 				}
 			},
 		},
+		{
+			Name: "instance_variable_get",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					arg, isStr := args[0].(*StringObject)
+
+					if !isStr {
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
+					}
+
+					obj, ok := receiver.instanceVariableGet(arg.Value)
+
+					if !ok {
+						return NULL
+					}
+
+					return obj
+				}
+			},
+		},
+		{
+			Name: "instance_variable_set",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 2 {
+						return t.vm.initErrorObject(ArgumentError, "Expect 2 arguments. got: %d", len(args))
+					}
+
+					argName, isStr := args[0].(*StringObject)
+					obj := args[1]
+
+					if !isStr {
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
+					}
+
+					receiver.instanceVariableSet(argName.Value, obj)
+
+					return obj
+				}
+			},
+		},
 	}
 }
 
