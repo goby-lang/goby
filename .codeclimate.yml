@@ -9,6 +9,7 @@ engines:
 exclude_paths:
   - "Godeps"
   - "test_fixtures"
+  - "vendor"
 
 ratings:
   paths:
