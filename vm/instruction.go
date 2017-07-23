@@ -53,16 +53,17 @@ var builtInActions = map[operationType]*action{
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
 			constName := args[0].(string)
 			c := t.vm.lookupConstant(cf, constName)
-			c.isNamespace = args[1].(string) == "true"
-
-			if t.stack.top() != nil && t.stack.top().isNamespace {
-				t.stack.pop()
-			}
 
 			if c == nil {
 				err := t.vm.initErrorObject(NameError, "uninitialized constant %s", constName)
 				t.stack.push(&Pointer{Target: err})
 				return
+			}
+
+			c.isNamespace = args[1].(string) == "true"
+
+			if t.stack.top() != nil && t.stack.top().isNamespace {
+				t.stack.pop()
 			}
 
 			t.stack.push(c)
