@@ -120,6 +120,9 @@ reset:
 		}
 
 		switch {
+		case strings.HasPrefix(line, "#"):
+			println(prompt(stack) + line)
+			continue
 		case line == help:
 			println(prompt(stack) + line)
 			usage(rl.Stderr(), completer)
