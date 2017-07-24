@@ -123,6 +123,7 @@ func initObjectClass(c *RClass) *RClass {
 	objectClass.inherits(objectClass)
 	c.inherits(objectClass)
 
+	objectClass.setBuiltInMethods(builtinClassClassMethods(), true)
 	objectClass.setBuiltInMethods(builtinCommonInstanceMethods(), false)
 
 	return objectClass
@@ -972,9 +973,12 @@ func (c *RClass) setBuiltInMethods(methodList []*BuiltInMethodObject, classMetho
 
 func (c *RClass) lookupClassMethod(methodName string) Object {
 	method, ok := c.ClassMethods.get(methodName)
-
+	//
+	//fmt.Println(c.Name)
+	//fmt.Println(methodName)
 	if !ok {
-		if c.superClass != nil {
+		if c.superClass != nil && c.superClass != c {
+			//fmt.Printf("Finding class method: %s on %s. Superclass is %s\n", methodName, c.Name, c.superClass.Name)
 			return c.superClass.lookupClassMethod(methodName)
 		}
 		if c.class != nil {
@@ -989,12 +993,18 @@ func (c *RClass) lookupClassMethod(methodName string) Object {
 func (c *RClass) lookupInstanceMethod(methodName string) Object {
 	method, ok := c.Methods.get(methodName)
 
+	//fmt.Println(c.Name)
 	if !ok {
-		if c.superClass != nil {
+		if c.superClass != nil && c.superClass != c {
+			//fmt.Printf("Finding instance method: %s on %s. Superclass is %s\n", methodName, c.Name, c.superClass.Name)
 			return c.superClass.lookupInstanceMethod(methodName)
 		}
 
-		if c.class != nil {
+		if c.singletonClass != nil {
+			return c.singletonClass.lookupInstanceMethod(methodName)
+		}
+
+		if c.class != nil && c.Name != objectClass {
 			return c.class.lookupInstanceMethod(methodName)
 		}
 
@@ -1011,10 +1021,10 @@ func (c *RClass) lookupConstant(constName string, findInScope bool) *Pointer {
 		if findInScope && c.scope != nil {
 			return c.scope.lookupConstant(constName, true)
 		}
-
-		fmt.Println(constName)
-		fmt.Println(c.Name)
-		fmt.Println(c.superClass.Name)
+		//
+		//fmt.Println(constName)
+		//fmt.Println(c.Name)
+		//fmt.Println(c.superClass.Name)
 		if c.superClass != nil && c.Name != objectClass {
 			return c.superClass.lookupConstant(constName, false)
 		}

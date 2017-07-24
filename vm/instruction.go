@@ -354,6 +354,10 @@ var builtInActions = map[operationType]*action{
 				method = r.Class().lookupInstanceMethod(methodName)
 			}
 
+			if receiver == t.vm.mainObj && methodName == "include" {
+				method, _ = t.vm.topLevelClass(classClass).Methods.get("include")
+			}
+
 			if method == nil {
 				t.UndefinedMethodError(methodName, receiver)
 				return
