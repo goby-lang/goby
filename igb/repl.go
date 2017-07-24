@@ -113,14 +113,15 @@ reset:
 					println("")
 					println("Bye!")
 					return
+				} else {
+					// Erasing command buffer
+					println("")
+					stack = 0
+					rl.SetPrompt(prompt1)
+					sm.Event(Waiting)
+					cmds = nil
+					continue
 				}
-				// Erasing command buffer
-				println("")
-				stack = 0
-				rl.SetPrompt(prompt1)
-				sm.Event(Waiting)
-				cmds = nil
-				continue
 			}
 		}
 
@@ -190,7 +191,6 @@ reset:
 
 		if sm.Is(Waiting) && stack > 0 {
 			println(prompt(stack) + indent(stack) + line)
-			sm.Event(Waiting)
 			rl.SetPrompt(prompt(stack) + indent(stack))
 			cmds = append(cmds, line)
 			continue
