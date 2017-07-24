@@ -63,13 +63,40 @@ func initClassClass() *RClass {
 		Methods:      newEnvironment(),
 		ClassMethods: newEnvironment(),
 		constants:    make(map[string]*Pointer),
+		baseObj:      &baseObj{},
 	}
+
+	singletonClass := &RClass{
+		Name:         "#<Class:Class>",
+		Methods:      newEnvironment(),
+		ClassMethods: newEnvironment(),
+		constants:    make(map[string]*Pointer),
+		isModule:     false,
+		baseObj:      &baseObj{class: classClass, InstanceVariables: newEnvironment()},
+		Singleton:    true,
+	}
+
+	classClass.class = classClass
+	classClass.singletonClass = singletonClass
 
 	classClass.setBuiltInMethods(builtinCommonInstanceMethods(), false)
 	classClass.setBuiltInMethods(builtinCommonInstanceMethods(), true)
 	classClass.setBuiltInMethods(builtinClassClassMethods(), true)
 
 	return classClass
+}
+
+func (c *RClass) inherits(sc *RClass) {
+	if c.superClass == c.pseudoSuperClass {
+		c.superClass = sc
+	}
+	c.pseudoSuperClass = sc
+
+	if sc.singletonClass == nil {
+		panic("!!!!!!!!!!!")
+	}
+
+	c.singletonClass = sc.singletonClass
 }
 
 func initObjectClass(c *RClass) *RClass {
@@ -79,7 +106,22 @@ func initObjectClass(c *RClass) *RClass {
 		ClassMethods: newEnvironment(),
 		Methods:      newEnvironment(),
 		constants:    make(map[string]*Pointer),
+		baseObj:      &baseObj{class: c},
 	}
+
+	singletonClass := &RClass{
+		Name:         "#<Class:Object>",
+		Methods:      newEnvironment(),
+		ClassMethods: newEnvironment(),
+		constants:    make(map[string]*Pointer),
+		isModule:     false,
+		baseObj:      &baseObj{class: c, InstanceVariables: newEnvironment()},
+		Singleton:    true,
+	}
+
+	objectClass.singletonClass = singletonClass
+	objectClass.inherits(objectClass)
+	c.inherits(objectClass)
 
 	objectClass.setBuiltInMethods(builtinCommonInstanceMethods(), false)
 
@@ -878,6 +920,9 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 func (vm *VM) initializeClass(name string, isModule bool) *RClass {
 	class := vm.createRClass(name)
 	class.isModule = isModule
+	singletonClass := vm.createRClass(fmt.Sprintf("#<Class:%s>", name))
+	singletonClass.Singleton = true
+	class.singletonClass = class
 
 	return class
 }
@@ -967,7 +1012,10 @@ func (c *RClass) lookupConstant(constName string, findInScope bool) *Pointer {
 			return c.scope.lookupConstant(constName, true)
 		}
 
-		if c.superClass != nil {
+		fmt.Println(constName)
+		fmt.Println(c.Name)
+		fmt.Println(c.superClass.Name)
+		if c.superClass != nil && c.Name != objectClass {
 			return c.superClass.lookupConstant(constName, false)
 		}
 
