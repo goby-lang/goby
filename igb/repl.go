@@ -33,6 +33,7 @@ const (
 	readyToExec = "readyToExec"
 	Waiting     = "waiting"
 	waitEnded   = "waitEnded"
+	waitExited  = "waitExited"
 
 	emojis = "😀😁😂🤣😃😄😅😆😉😊😋😎😍😘😗😙😚🙂🤗🤔😐😑😶🙄😏😮😪😴😌😛😜😝🤤🙃🤑😲😭😳🤧😇🤠🤡🤥🤓😈👿👹👺💀👻👽🤖💩😺😸😹😻😼😽"
 )
@@ -45,6 +46,7 @@ reset:
 		fsm.Events{
 			{Name: Waiting, Src: []string{waitEnded, readyToExec}, Dst: Waiting},
 			{Name: waitEnded, Src: []string{Waiting}, Dst: waitEnded},
+			{Name: waitExited, Src: []string{Waiting, waitEnded}, Dst: readyToExec},
 			{Name: readyToExec, Src: []string{waitEnded, readyToExec}, Dst: readyToExec},
 		},
 		fsm.Callbacks{},
@@ -109,19 +111,20 @@ reset:
 				println(line + "")
 				return
 			case err == readline.ErrInterrupt: // Pressing Ctrl-C
-				if len(line) == 0 && cmds == nil {
-					println("")
-					println("Bye!")
-				} else {
-					// Erasing command buffer
-					println("")
-					stack = 0
-					rl.SetPrompt(prompt1)
-					sm.Event(Waiting)
-					cmds = nil
-					continue
+				if len(line) == 0 {
+					if cmds == nil {
+						println("")
+						println("Bye!")
+						return
+					}
 				}
-				return
+				// Erasing command buffer
+				stack = 0
+				rl.SetPrompt(prompt1)
+				sm.Event(waitExited)
+				cmds = nil
+				println(" -- block cleared")
+				continue
 			}
 		}
 
