@@ -112,7 +112,6 @@ reset:
 				if len(line) == 0 && cmds == nil {
 					println("")
 					println("Bye!")
-					return
 				} else {
 					// Erasing command buffer
 					println("")
@@ -122,6 +121,7 @@ reset:
 					cmds = nil
 					continue
 				}
+				return
 			}
 		}
 
