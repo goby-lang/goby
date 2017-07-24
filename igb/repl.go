@@ -155,7 +155,6 @@ reset:
 				if !sm.Is(Waiting) {
 					sm.Event(Waiting)
 				}
-
 				println(prompt(stack) + indent(stack) + line)
 				stack++
 				rl.SetPrompt(prompt(stack) + indent(stack))
@@ -164,12 +163,7 @@ reset:
 			}
 
 			// If cmds is empty, it means that user just typed 'end' without corresponding statement/expression
-			if perr.IsUnexpectedEnd() && len(cmds) != 0 {
-				stack--
-				rl.SetPrompt(prompt(stack) + indent(stack))
-				sm.Event(waitEnded)
-				cmds = append(cmds, line)
-			} else {
+			if perr.IsUnexpectedEnd() && len(cmds) == 0 {
 				println(prompt(stack) + indent(stack) + line)
 				stack = 0
 				rl.SetPrompt(prompt1)
@@ -178,10 +172,25 @@ reset:
 				continue
 			}
 
+			if perr.IsUnexpectedEnd() {
+				if stack > 1 {
+					stack--
+					println(prompt(stack) + indent(stack) + line)
+					sm.Event(Waiting)
+					rl.SetPrompt(prompt(stack) + indent(stack))
+					cmds = append(cmds, line)
+					continue
+				}
+				stack = 0
+				sm.Event(waitEnded)
+				rl.SetPrompt(prompt(stack) + indent(stack))
+				cmds = append(cmds, line)
+			}
 		}
 
-		if sm.Is(Waiting) {
+		if sm.Is(Waiting) && stack > 0 {
 			println(prompt(stack) + indent(stack) + line)
+			sm.Event(Waiting)
 			rl.SetPrompt(prompt(stack) + indent(stack))
 			cmds = append(cmds, line)
 			continue
