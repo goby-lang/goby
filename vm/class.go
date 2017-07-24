@@ -352,6 +352,10 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 			Name: "sleep",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
+					}
+
 					int := args[0].(*IntegerObject)
 					seconds := int.Value
 					time.Sleep(time.Duration(seconds) * time.Second)
@@ -408,6 +412,10 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 			Name: "thread",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if blockFrame == nil {
+						t.vm.initErrorObject(InternalError, CantYieldWithoutBlockFormat)
+					}
+
 					newT := t.vm.newThread()
 
 					go func() {
