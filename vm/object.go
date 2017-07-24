@@ -7,6 +7,7 @@ import (
 // Object represents all objects in Goby, including Array, Integer or even Method and Error.
 type Object interface {
 	Class() *RClass
+	SingletonClass() *RClass
 	toString() string
 	toJSON() string
 	instanceVariableGet(string) (Object, bool)
@@ -31,6 +32,7 @@ type RObject struct {
 
 type baseObj struct {
 	class             *RClass
+	singletonClass    *RClass
 	InstanceVariables *environment
 }
 
@@ -40,6 +42,11 @@ func (b *baseObj) Class() *RClass {
 		panic(fmt.Sprint("Object doesn't have class."))
 	}
 	return b.class
+}
+
+// SingletonClass returns object's singleton class
+func (b *baseObj) SingletonClass() *RClass {
+	return b.singletonClass
 }
 
 func (b *baseObj) instanceVariableGet(name string) (Object, bool) {
