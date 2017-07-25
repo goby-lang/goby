@@ -763,19 +763,10 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(TypeError, "Expect argument to be a module. got=%v", args[0].Class().Name)
 					}
 
-					switch r := receiver.(type) {
-					case *RClass:
-						class = r
+					class = receiver.(*RClass)
 
-						if class.alreadyInherit(module) {
-							return class
-						}
-					case *RObject:
-						objectClass := t.vm.topLevelClass(objectClass)
-
-						if r.class == objectClass {
-							class = objectClass
-						}
+					if class.alreadyInherit(module) {
+						return class
 					}
 
 					module.superClass = class.superClass

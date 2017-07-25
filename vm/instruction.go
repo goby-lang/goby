@@ -341,13 +341,14 @@ var builtInActions = map[operationType]*action{
 				} else {
 					method = r.SingletonClass().lookupInstanceMethod(methodName)
 				}
-
 			default:
 				method = r.Class().lookupInstanceMethod(methodName)
 			}
 
+			// TODO: This can be removed once we implement singleton class of instances
 			if receiver == t.vm.mainObj && methodName == "include" {
 				method, _ = t.vm.topLevelClass(classClass).Methods.get("include")
+				receiver = receiver.Class()
 			}
 
 			if method == nil {
