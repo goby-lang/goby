@@ -75,8 +75,6 @@ func initClassClass() *RClass {
 	classClass.class = classClass
 	classClass.singletonClass = singletonClass
 
-	classClass.setBuiltInMethods(builtinCommonInstanceMethods(), false)
-	classClass.setBuiltInMethods(builtinCommonInstanceMethods(), true)
 	classClass.setBuiltInMethods(builtinClassClassMethods(), true)
 
 	return classClass
@@ -113,7 +111,7 @@ func initObjectClass(c *RClass) *RClass {
 	objectClass.pseudoSuperClass = objectClass
 	c.inherits(objectClass)
 
-	objectClass.setBuiltInMethods(builtinClassClassMethods(), true)
+	objectClass.setBuiltInMethods(builtinCommonInstanceMethods(), true)
 	objectClass.setBuiltInMethods(builtinCommonInstanceMethods(), false)
 
 	return objectClass
