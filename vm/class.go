@@ -505,10 +505,12 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 						if receiverClass.Name == gobyClass.Name {
 							return TRUE
 						}
-						receiverClass = receiverClass.superClass
-						if receiverClass == nil {
+
+						if receiverClass.Name == objectClass {
 							break
 						}
+
+						receiverClass = receiverClass.superClass
 					}
 					return FALSE
 				}
