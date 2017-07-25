@@ -336,12 +336,6 @@ var builtInActions = map[operationType]*action{
 
 			method = receiver.findMethod(methodName)
 
-			// TODO: This can be removed once we implement singleton class of instances
-			if receiver == t.vm.mainObj && methodName == "include" {
-				method = t.vm.topLevelClass(classClass).lookupMethod("include")
-				receiver = receiver.Class()
-			}
-
 			if method == nil {
 				t.UndefinedMethodError(methodName, receiver)
 				return

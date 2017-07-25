@@ -763,7 +763,12 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(TypeError, "Expect argument to be a module. got=%v", args[0].Class().Name)
 					}
 
-					class = receiver.(*RClass)
+					switch r := receiver.(type) {
+					case *RClass:
+						class = r
+					default:
+						class = r.SingletonClass()
+					}
 
 					if class.alreadyInherit(module) {
 						return class

@@ -66,8 +66,16 @@ func (b *baseObj) instanceVariableSet(name string, value Object) Object {
 	return value
 }
 
-func (b *baseObj) findMethod(methodName string) Object {
-	return b.Class().lookupMethod(methodName)
+func (b *baseObj) findMethod(methodName string) (method Object) {
+	if b.SingletonClass() != nil {
+		method = b.SingletonClass().lookupMethod(methodName)
+	}
+
+	if method == nil {
+		method = b.Class().lookupMethod(methodName)
+	}
+
+	return
 }
 
 // Polymorphic helper functions -----------------------------------------

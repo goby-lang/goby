@@ -140,7 +140,12 @@ func (vm *VM) SetMethodISIndexTable(fn filename) {
 }
 
 func (vm *VM) initMainObj() *RObject {
-	return vm.objectClass.initializeInstance()
+	obj := vm.objectClass.initializeInstance()
+	singletonClass := vm.initializeClass(fmt.Sprintf("#<Class:%s>", obj.toString()), false)
+	singletonClass.Methods.set("include", vm.topLevelClass(classClass).lookupMethod("include"))
+	obj.singletonClass = singletonClass
+
+	return obj
 }
 
 func (vm *VM) initConstants() {
