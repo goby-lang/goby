@@ -40,8 +40,6 @@ type RClass struct {
 	Name string
 	// Methods contains its instances' methods
 	Methods *environment
-	// ClassMethods contains this class's methods
-	ClassMethods *environment
 	// pseudoSuperClass points to the class it inherits
 	pseudoSuperClass *RClass
 	// This is the class where we should looking for a method.
@@ -61,7 +59,6 @@ func initClassClass() *RClass {
 	classClass := &RClass{
 		Name:         classClass,
 		Methods:      newEnvironment(),
-		ClassMethods: newEnvironment(),
 		constants:    make(map[string]*Pointer),
 		baseObj:      &baseObj{},
 	}
@@ -69,7 +66,6 @@ func initClassClass() *RClass {
 	singletonClass := &RClass{
 		Name:         "#<Class:Class>",
 		Methods:      newEnvironment(),
-		ClassMethods: newEnvironment(),
 		constants:    make(map[string]*Pointer),
 		isModule:     false,
 		baseObj:      &baseObj{class: classClass, InstanceVariables: newEnvironment()},
@@ -97,7 +93,6 @@ func initObjectClass(c *RClass) *RClass {
 	objectClass := &RClass{
 		Name:         objectClass,
 		class:        c,
-		ClassMethods: newEnvironment(),
 		Methods:      newEnvironment(),
 		constants:    make(map[string]*Pointer),
 		baseObj:      &baseObj{class: c},
@@ -106,7 +101,6 @@ func initObjectClass(c *RClass) *RClass {
 	singletonClass := &RClass{
 		Name:         "#<Class:Object>",
 		Methods:      newEnvironment(),
-		ClassMethods: newEnvironment(),
 		constants:    make(map[string]*Pointer),
 		isModule:     false,
 		baseObj:      &baseObj{class: c, InstanceVariables: newEnvironment()},
@@ -940,7 +934,6 @@ func (vm *VM) createRClass(className string) *RClass {
 	return &RClass{
 		Name:             className,
 		Methods:          newEnvironment(),
-		ClassMethods:     newEnvironment(),
 		pseudoSuperClass: objectClass,
 		superClass:       objectClass,
 		constants:        make(map[string]*Pointer),
