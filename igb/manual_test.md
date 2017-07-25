@@ -38,7 +38,11 @@ Currently we are unable to perform automated tests against REPL. Follow the step
     ```
 5. type `r` and then type Tab key
     * expect: autocomplet for `reset` works
-6. type `exit` and Return key
+
+6. perform shortcuts from [readline](https://github.com/chzyer/readline/blob/master/doc/shortcut.md)
+    * expect: any shortcuts, including command history, are available
+
+7. type `exit` and Return key
     * expect: the following message is shown and exited
     ```ruby
     » exit
@@ -220,7 +224,7 @@ Currently we are unable to perform automated tests against REPL. Follow the step
     » x + y
     ```
 
-    * expect: obtains the same result as 1., with all prompts are truncated:
+    * expect: obtains the same result as 1., with all prompts truncated:
     ```ruby
     » x = 0
     #»
