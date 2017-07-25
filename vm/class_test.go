@@ -600,10 +600,9 @@ func TestClassGeneralComparisonOperation(t *testing.T) {
 		{`Integer == Integer`, true},
 		{`Integer == String`, false},
 		{`123.class == Integer`, true},
-		// TODO: Issue #289 Comparing to Object cause panic
-		//{`Integer == Object`, false},
-		//{`Integer.superclass == Object`, true},
-		//{`123.class.superclass == Object`, true},
+		{`Integer == Object`, false},
+		{`Integer.superclass == Object`, true},
+		{`123.class.superclass == Object`, true},
 		{`Integer != 123`, true},
 		{`Integer != "123"`, true},
 		{`Integer != "124"`, true},
@@ -613,10 +612,9 @@ func TestClassGeneralComparisonOperation(t *testing.T) {
 		{`Integer != Integer`, false},
 		{`Integer != String`, true},
 		{`123.class != Integer`, false},
-		// TODO: Issue #289 Comparing to Object cause panic
-		//{`Integer != Object`, true},
-		//{`Integer.superclass != Object`, false},
-		//{`123.class.superclass != Object`, false},
+		{`Integer != Object`, true},
+		{`Integer.superclass != Object`, false},
+		{`123.class.superclass != Object`, false},
 	}
 
 	for i, tt := range tests {
