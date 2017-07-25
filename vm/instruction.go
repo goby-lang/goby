@@ -336,7 +336,7 @@ var builtInActions = map[operationType]*action{
 
 			switch r := receiver.(type) {
 			case *RClass:
-				if r.Singleton {
+				if r.isSingleton {
 					method = r.superClass.lookupInstanceMethod(methodName)
 				} else {
 					method = r.SingletonClass().lookupInstanceMethod(methodName)

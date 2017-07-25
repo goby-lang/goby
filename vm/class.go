@@ -47,11 +47,11 @@ type RClass struct {
 	superClass *RClass
 	// Class points to this class's class, which should be ClassClass
 	class *RClass
-	// Singleton is a flag marks if this class a singleton class
-	Singleton bool
-	isModule  bool
-	constants map[string]*Pointer
-	scope     *RClass
+	// isSingleton is a flag marks if this class a singleton class
+	isSingleton bool
+	isModule    bool
+	constants   map[string]*Pointer
+	scope       *RClass
 	*baseObj
 }
 
@@ -64,12 +64,12 @@ func initClassClass() *RClass {
 	}
 
 	singletonClass := &RClass{
-		Name:         "#<Class:Class>",
-		Methods:      newEnvironment(),
-		constants:    make(map[string]*Pointer),
-		isModule:     false,
-		baseObj:      &baseObj{class: classClass, InstanceVariables: newEnvironment()},
-		Singleton:    true,
+		Name:        "#<Class:Class>",
+		Methods:     newEnvironment(),
+		constants:   make(map[string]*Pointer),
+		isModule:    false,
+		baseObj:     &baseObj{class: classClass, InstanceVariables: newEnvironment()},
+		isSingleton: true,
 	}
 
 	classClass.class = classClass
@@ -97,13 +97,13 @@ func initObjectClass(c *RClass) *RClass {
 	}
 
 	singletonClass := &RClass{
-		Name:         "#<Class:Object>",
-		Methods:      newEnvironment(),
-		constants:    make(map[string]*Pointer),
-		isModule:     false,
-		baseObj:      &baseObj{class: c, InstanceVariables: newEnvironment()},
-		Singleton:    true,
-		superClass:   c,
+		Name:        "#<Class:Object>",
+		Methods:     newEnvironment(),
+		constants:   make(map[string]*Pointer),
+		isModule:    false,
+		baseObj:     &baseObj{class: c, InstanceVariables: newEnvironment()},
+		isSingleton: true,
+		superClass:  c,
 	}
 
 	objectClass.singletonClass = singletonClass
@@ -920,7 +920,7 @@ func (vm *VM) initializeClass(name string, isModule bool) *RClass {
 	class := vm.createRClass(name)
 	class.isModule = isModule
 	singletonClass := vm.createRClass(fmt.Sprintf("#<Class:%s>", name))
-	singletonClass.Singleton = true
+	singletonClass.isSingleton = true
 	class.singletonClass = singletonClass
 	class.inherits(vm.objectClass)
 
