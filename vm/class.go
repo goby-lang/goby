@@ -57,10 +57,10 @@ type RClass struct {
 
 func initClassClass() *RClass {
 	classClass := &RClass{
-		Name:         classClass,
-		Methods:      newEnvironment(),
-		constants:    make(map[string]*Pointer),
-		baseObj:      &baseObj{},
+		Name:      classClass,
+		Methods:   newEnvironment(),
+		constants: make(map[string]*Pointer),
+		baseObj:   &baseObj{},
 	}
 
 	singletonClass := &RClass{
@@ -89,11 +89,11 @@ func (c *RClass) inherits(sc *RClass) {
 
 func initObjectClass(c *RClass) *RClass {
 	objectClass := &RClass{
-		Name:         objectClass,
-		class:        c,
-		Methods:      newEnvironment(),
-		constants:    make(map[string]*Pointer),
-		baseObj:      &baseObj{class: c},
+		Name:      objectClass,
+		class:     c,
+		Methods:   newEnvironment(),
+		constants: make(map[string]*Pointer),
+		baseObj:   &baseObj{class: c},
 	}
 
 	singletonClass := &RClass{
@@ -969,10 +969,8 @@ func (c *RClass) setBuiltInMethods(methodList []*BuiltInMethodObject, classMetho
 func (c *RClass) lookupInstanceMethod(methodName string) Object {
 	method, ok := c.Methods.get(methodName)
 
-	//fmt.Println(c.Name)
 	if !ok {
 		if c.superClass != nil && c.superClass != c {
-			//fmt.Printf("Finding instance method: %s on %s. Superclass is %s\n", methodName, c.Name, c.superClass.Name)
 			if c.Name == classClass {
 				return nil
 			}
