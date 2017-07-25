@@ -8,6 +8,7 @@ import (
 type Object interface {
 	Class() *RClass
 	SingletonClass() *RClass
+	findMethod(string) Object
 	toString() string
 	toJSON() string
 	instanceVariableGet(string) (Object, bool)
@@ -63,6 +64,10 @@ func (b *baseObj) instanceVariableSet(name string, value Object) Object {
 	b.InstanceVariables.set(name, value)
 
 	return value
+}
+
+func (b *baseObj) findMethod(methodName string) Object {
+	return b.Class().lookupMethod(methodName)
 }
 
 // Polymorphic helper functions -----------------------------------------

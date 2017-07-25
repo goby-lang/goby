@@ -334,20 +334,11 @@ var builtInActions = map[operationType]*action{
 			receiverPr := argPr - 1
 			receiver := t.stack.Data[receiverPr].Target
 
-			switch r := receiver.(type) {
-			case *RClass:
-				if r.isSingleton {
-					method = r.superClass.lookupInstanceMethod(methodName)
-				} else {
-					method = r.SingletonClass().lookupInstanceMethod(methodName)
-				}
-			default:
-				method = r.Class().lookupInstanceMethod(methodName)
-			}
+			method = receiver.findMethod(methodName)
 
 			// TODO: This can be removed once we implement singleton class of instances
 			if receiver == t.vm.mainObj && methodName == "include" {
-				method, _ = t.vm.topLevelClass(classClass).Methods.get("include")
+				method = t.vm.topLevelClass(classClass).lookupMethod("include")
 				receiver = receiver.Class()
 			}
 

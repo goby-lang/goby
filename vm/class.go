@@ -838,7 +838,7 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 					}
 
 					instance := class.initializeInstance()
-					initMethod := class.lookupInstanceMethod("initialize")
+					initMethod := class.lookupMethod("initialize")
 
 					if initMethod != nil {
 						instance.InitializeMethod = initMethod.(*MethodObject)
@@ -957,7 +957,17 @@ func (c *RClass) setBuiltInMethods(methodList []*BuiltInMethodObject, classMetho
 	}
 }
 
-func (c *RClass) lookupInstanceMethod(methodName string) Object {
+func (c *RClass) findMethod(methodName string) (method Object) {
+	if c.isSingleton {
+		method = c.superClass.lookupMethod(methodName)
+	} else {
+		method = c.SingletonClass().lookupMethod(methodName)
+	}
+
+	return
+}
+
+func (c *RClass) lookupMethod(methodName string) Object {
 	method, ok := c.Methods.get(methodName)
 
 	if !ok {
@@ -966,7 +976,7 @@ func (c *RClass) lookupInstanceMethod(methodName string) Object {
 				return nil
 			}
 
-			return c.superClass.lookupInstanceMethod(methodName)
+			return c.superClass.lookupMethod(methodName)
 		}
 
 		return nil
