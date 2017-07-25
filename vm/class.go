@@ -968,26 +968,9 @@ func (c *RClass) setBuiltInMethods(methodList []*BuiltInMethodObject, classMetho
 
 	if classMethods {
 		for _, m := range methodList {
-			c.ClassMethods.set(m.Name, m)
+			c.singletonClass.Methods.set(m.Name, m)
 		}
 	}
-}
-
-func (c *RClass) lookupClassMethod(methodName string) Object {
-	method, ok := c.ClassMethods.get(methodName)
-
-	if !ok {
-		if c.superClass != nil && c.superClass != c {
-			//fmt.Printf("Finding class method: %s on %s. Superclass is %s\n", methodName, c.Name, c.superClass.Name)
-			return c.superClass.lookupClassMethod(methodName)
-		}
-		if c.class != nil {
-			return c.class.lookupClassMethod(methodName)
-		}
-		return nil
-	}
-
-	return method
 }
 
 func (c *RClass) lookupInstanceMethod(methodName string) Object {
@@ -1002,10 +985,6 @@ func (c *RClass) lookupInstanceMethod(methodName string) Object {
 			}
 
 			return c.superClass.lookupInstanceMethod(methodName)
-		}
-
-		if c.singletonClass != nil {
-			return c.singletonClass.lookupInstanceMethod(methodName)
 		}
 
 		return nil

@@ -277,19 +277,7 @@ var builtInActions = map[operationType]*action{
 			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.topLevelClass(methodClass)}}
 
 			v := t.stack.pop().Target
-
-			switch self := v.(type) {
-			case *RClass:
-				if self.pseudoSuperClass.Singleton {
-					self.pseudoSuperClass.ClassMethods.set(methodName, method)
-				}
-
-				class := t.vm.initializeClass(self.Name+"singleton", false)
-				class.Singleton = true
-				class.ClassMethods.set(methodName, method)
-				class.superClass = self.superClass
-				self.superClass = class
-			}
+			v.SingletonClass().Methods.set(methodName, method)
 			// TODO: Support something like:
 			// ```
 			// f = Foo.new
@@ -348,7 +336,12 @@ var builtInActions = map[operationType]*action{
 
 			switch r := receiver.(type) {
 			case *RClass:
-				method = r.lookupClassMethod(methodName)
+				if r.Singleton {
+					method = r.superClass.lookupInstanceMethod(methodName)
+				} else {
+					method = r.SingletonClass().lookupInstanceMethod(methodName)
+				}
+
 			default:
 				method = r.Class().lookupInstanceMethod(methodName)
 			}
