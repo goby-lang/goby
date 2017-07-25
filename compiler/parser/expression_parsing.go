@@ -29,9 +29,12 @@ var precedence = map[token.Type]int{
 	token.COMP:               COMPARE,
 	token.And:                LOGIC,
 	token.Or:                 LOGIC,
+	token.OrEq:               LOGIC,
 	token.Range:              RANGE,
 	token.Plus:               SUM,
+	token.PlusEq:             SUM,
 	token.Minus:              SUM,
+	token.MinusEq:            SUM,
 	token.Incr:               SUM,
 	token.Decr:               SUM,
 	token.Modulo:             SUM,
@@ -329,17 +332,50 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 		p.error = &Error{Message: fmt.Sprintf("Can't assign value to %s. Line: %d", v.String(), p.curToken.Line), errType: InvalidAssignmentError}
 	}
 
-	exp := &ast.AssignExpression{
-		Token:    p.curToken,
-		Variable: variable,
-		Operator: p.curToken.Literal,
+	if p.curTokenIs(token.Assign) {
+		exp := &ast.AssignExpression{
+			Token:    p.curToken,
+			Variable: variable,
+			Operator: p.curToken.Literal,
+		}
+
+		precedence := p.curPrecedence()
+		p.nextToken()
+		exp.Value = p.parseExpression(precedence)
+
+		return exp
+	} else {
+		// Assignment with operator case
+		operator := token.Token{ Line: p.curToken.Line }
+		assignment := token.Token{ Type: token.Assign, Literal: "=", Line: p.curToken.Line }
+		switch p.curToken.Type {
+		case token.PlusEq:
+			operator.Type = token.Plus
+			operator.Literal = "+"
+		case token.MinusEq:
+			operator.Type = token.Minus
+			operator.Literal = "-"
+		case token.OrEq:
+			operator.Type = token.Or
+			operator.Literal = "||"
+		}
+		p.nextToken()
+		infixExp := &ast.InfixExpression{
+			Token:    operator,
+			Left:     variable,
+			Operator: operator.Literal,
+			Right:    p.parseExpression(LOWEST),
+		}
+
+		exp := &ast.AssignExpression{
+			Token:    assignment,
+			Variable: variable,
+			Operator: assignment.Literal,
+			Value:    infixExp,
+		}
+
+		return exp
 	}
-
-	precedence := p.curPrecedence()
-	p.nextToken()
-	exp.Value = p.parseExpression(precedence)
-
-	return exp
 }
 
 func (p *Parser) parseGroupedExpression() ast.Expression {
