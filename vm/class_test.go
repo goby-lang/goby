@@ -723,6 +723,32 @@ func TestClassSuperclassClassMethod(t *testing.T) {
 	}
 }
 
+func TestClassSingletonClassClassMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`Integer.singleton_class.name`, "#<Class:Integer>"},
+		{`Integer.singleton_class.superclass.name`, "#<Class:Object>"},
+		{`
+		class Bar; end
+		Bar.singleton_class.name
+		`, "#<Class:Bar>"},
+		{`
+		class Bar; end
+		class Foo < Bar; end
+		Foo.singleton_class.superclass.name
+		`, "#<Class:Bar>"},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
 func TestClassSuperclassClassMethodFail(t *testing.T) {
 	testsFail := []struct {
 		input   string

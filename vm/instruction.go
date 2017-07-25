@@ -320,8 +320,7 @@ var builtInActions = map[operationType]*action{
 						t.returnError(InternalError, "Constant %s is not a class. got=%s", superClassName, string(superClass.Target.Class().ReturnName()))
 					}
 
-					class.pseudoSuperClass = inheritedClass
-					class.superClass = inheritedClass
+					class.inherits(inheritedClass)
 				}
 			}
 

@@ -87,16 +87,10 @@ func initClassClass() *RClass {
 }
 
 func (c *RClass) inherits(sc *RClass) {
-	if c.superClass == c.pseudoSuperClass {
-		c.superClass = sc
-	}
+	c.superClass = sc
 	c.pseudoSuperClass = sc
-
-	if sc.singletonClass == nil {
-		panic("!!!!!!!!!!!")
-	}
-
-	c.singletonClass = sc.singletonClass
+	c.singletonClass.superClass = sc.singletonClass
+	c.singletonClass.pseudoSuperClass = sc.singletonClass
 }
 
 func initObjectClass(c *RClass) *RClass {
@@ -117,10 +111,12 @@ func initObjectClass(c *RClass) *RClass {
 		isModule:     false,
 		baseObj:      &baseObj{class: c, InstanceVariables: newEnvironment()},
 		Singleton:    true,
+		superClass:   c,
 	}
 
 	objectClass.singletonClass = singletonClass
-	objectClass.inherits(objectClass)
+	objectClass.superClass = objectClass
+	objectClass.pseudoSuperClass = objectClass
 	c.inherits(objectClass)
 
 	objectClass.setBuiltInMethods(builtinClassClassMethods(), true)
@@ -131,6 +127,14 @@ func initObjectClass(c *RClass) *RClass {
 
 func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
+		{
+			Name: "singleton_class",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					return receiver.SingletonClass()
+				}
+			},
+		},
 		{
 			// General method for comparing equalty of the objects
 			//
@@ -923,7 +927,8 @@ func (vm *VM) initializeClass(name string, isModule bool) *RClass {
 	class.isModule = isModule
 	singletonClass := vm.createRClass(fmt.Sprintf("#<Class:%s>", name))
 	singletonClass.Singleton = true
-	class.singletonClass = class
+	class.singletonClass = singletonClass
+	class.inherits(vm.objectClass)
 
 	return class
 }
@@ -949,10 +954,7 @@ func (vm *VM) createRClass(className string) *RClass {
 // toString returns the basic inspected result (which is class name) of current class
 // TODO: Singleton class's inspect() should also mark if it's a singleton class explicitly.
 func (c *RClass) toString() string {
-	if c.isModule {
-		return "<Module:" + c.Name + ">"
-	}
-	return "<Class:" + c.Name + ">"
+	return c.Name
 }
 
 func (c *RClass) toJSON() string {
@@ -973,9 +975,7 @@ func (c *RClass) setBuiltInMethods(methodList []*BuiltInMethodObject, classMetho
 
 func (c *RClass) lookupClassMethod(methodName string) Object {
 	method, ok := c.ClassMethods.get(methodName)
-	//
-	//fmt.Println(c.Name)
-	//fmt.Println(methodName)
+
 	if !ok {
 		if c.superClass != nil && c.superClass != c {
 			//fmt.Printf("Finding class method: %s on %s. Superclass is %s\n", methodName, c.Name, c.superClass.Name)
@@ -997,15 +997,15 @@ func (c *RClass) lookupInstanceMethod(methodName string) Object {
 	if !ok {
 		if c.superClass != nil && c.superClass != c {
 			//fmt.Printf("Finding instance method: %s on %s. Superclass is %s\n", methodName, c.Name, c.superClass.Name)
+			if c.Name == classClass {
+				return nil
+			}
+
 			return c.superClass.lookupInstanceMethod(methodName)
 		}
 
 		if c.singletonClass != nil {
 			return c.singletonClass.lookupInstanceMethod(methodName)
-		}
-
-		if c.class != nil && c.Name != objectClass {
-			return c.class.lookupInstanceMethod(methodName)
 		}
 
 		return nil
@@ -1021,10 +1021,7 @@ func (c *RClass) lookupConstant(constName string, findInScope bool) *Pointer {
 		if findInScope && c.scope != nil {
 			return c.scope.lookupConstant(constName, true)
 		}
-		//
-		//fmt.Println(constName)
-		//fmt.Println(c.Name)
-		//fmt.Println(c.superClass.Name)
+
 		if c.superClass != nil && c.Name != objectClass {
 			return c.superClass.lookupConstant(constName, false)
 		}
