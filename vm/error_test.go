@@ -47,12 +47,12 @@ func TestUnsupportedMethodError(t *testing.T) {
 		input    string
 		errorMsg string
 	}{
-		{`String.new`, "UnsupportedMethodError: Unsupported Method #new for <Class:String>"},
-		{`Integer.new`, "UnsupportedMethodError: Unsupported Method #new for <Class:Integer>"},
-		{`Hash.new`, "UnsupportedMethodError: Unsupported Method #new for <Class:Hash>"},
-		{`Array.new`, "UnsupportedMethodError: Unsupported Method #new for <Class:Array>"},
-		{`Boolean.new`, "UnsupportedMethodError: Unsupported Method #new for <Class:Boolean>"},
-		{`Null.new`, "UnsupportedMethodError: Unsupported Method #new for <Class:Null>"},
+		{`String.new`, "UnsupportedMethodError: Unsupported Method #new for String"},
+		{`Integer.new`, "UnsupportedMethodError: Unsupported Method #new for Integer"},
+		{`Hash.new`, "UnsupportedMethodError: Unsupported Method #new for Hash"},
+		{`Array.new`, "UnsupportedMethodError: Unsupported Method #new for Array"},
+		{`Boolean.new`, "UnsupportedMethodError: Unsupported Method #new for Boolean"},
+		{`Null.new`, "UnsupportedMethodError: Unsupported Method #new for Null"},
 	}
 
 	for i, tt := range tests {

@@ -539,6 +539,45 @@ func TestGeneralIsNilMethodFail(t *testing.T) {
 	}
 }
 
+func TestClassGeneralComparisonOperation(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`Integer == 123`, false},
+		{`Integer == "123"`, false},
+		{`Integer == "124"`, false},
+		{`Integer == (1..3)`, false},
+		{`Integer == { a: 1, b: 2 }`, false},
+		{`Integer == [1, "String", true, 2..5]`, false},
+		{`Integer == Integer`, true},
+		{`Integer == String`, false},
+		{`123.class == Integer`, true},
+		{`Integer == Object`, false},
+		{`Integer.superclass == Object`, true},
+		{`123.class.superclass == Object`, true},
+		{`Integer != 123`, true},
+		{`Integer != "123"`, true},
+		{`Integer != "124"`, true},
+		{`Integer != (1..3)`, true},
+		{`Integer != { a: 1, b: 2 }`, true},
+		{`Integer != [1, "String", true, 2..5]`, true},
+		{`Integer != Integer`, false},
+		{`Integer != String`, true},
+		{`123.class != Integer`, false},
+		{`Integer != Object`, true},
+		{`Integer.superclass != Object`, false},
+		{`123.class.superclass != Object`, false},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
 func TestGeneralIsAMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -575,47 +614,6 @@ func TestGeneralIsAMethod(t *testing.T) {
 		{`nil.is_a(Object)`, true},
 		{`nil.is_a(String)`, false},
 		{`nil.is_a(Range)`, false},
-	}
-
-	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
-		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
-	}
-}
-
-func TestClassGeneralComparisonOperation(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{`Integer == 123`, false},
-		{`Integer == "123"`, false},
-		{`Integer == "124"`, false},
-		{`Integer == (1..3)`, false},
-		{`Integer == { a: 1, b: 2 }`, false},
-		{`Integer == [1, "String", true, 2..5]`, false},
-		{`Integer == Integer`, true},
-		{`Integer == String`, false},
-		{`123.class == Integer`, true},
-		// TODO: Issue #289 Comparing to Object cause panic
-		//{`Integer == Object`, false},
-		//{`Integer.superclass == Object`, true},
-		//{`123.class.superclass == Object`, true},
-		{`Integer != 123`, true},
-		{`Integer != "123"`, true},
-		{`Integer != "124"`, true},
-		{`Integer != (1..3)`, true},
-		{`Integer != { a: 1, b: 2 }`, true},
-		{`Integer != [1, "String", true, 2..5]`, true},
-		{`Integer != Integer`, false},
-		{`Integer != String`, true},
-		{`123.class != Integer`, false},
-		// TODO: Issue #289 Comparing to Object cause panic
-		//{`Integer != Object`, true},
-		//{`Integer.superclass != Object`, false},
-		//{`123.class.superclass != Object`, false},
 	}
 
 	for i, tt := range tests {
@@ -677,9 +675,9 @@ func TestClassNameClassMethodFail(t *testing.T) {
 		errType string
 		errMsg  string
 	}{
-		{`"Taipei".name`, UndefinedMethodError, "UndefinedMethodError: Undefined Method '#name' for Taipei"},
-		{`123.name`, UndefinedMethodError, "UndefinedMethodError: Undefined Method '#name' for 123"},
-		{`true.name`, UndefinedMethodError, "UndefinedMethodError: Undefined Method '#name' for true"},
+		{`"Taipei".name`, UndefinedMethodError, "UndefinedMethodError: Undefined Method 'name' for Taipei"},
+		{`123.name`, UndefinedMethodError, "UndefinedMethodError: Undefined Method 'name' for 123"},
+		{`true.name`, UndefinedMethodError, "UndefinedMethodError: Undefined Method 'name' for true"},
 		{`Integer.name(Integer)`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1"},
 		{`String.name(Hash, Array)`, ArgumentError, "ArgumentError: Expect 0 argument. got: 2"},
 	}
@@ -703,8 +701,15 @@ func TestClassSuperclassClassMethod(t *testing.T) {
 		{`Range.superclass.name`, "Object"},
 		{`Hash.superclass.name`, "Object"},
 		{`Array.superclass.name`, "Object"},
-		{`Object.superclass`, nil},
-		{`Class.superclass`, nil},
+		{`Object.superclass.name`, "Object"},
+		{`Class.superclass.name`, "Object"},
+		{`
+		module Bar; end
+		class Foo
+		  include Bar
+		end
+		Foo.superclass.name
+		`, "Object"},
 	}
 
 	for i, tt := range tests {
@@ -721,9 +726,9 @@ func TestClassSuperclassClassMethodFail(t *testing.T) {
 		errType string
 		errMsg  string
 	}{
-		{`"Taipei".superclass`, UndefinedMethodError, "UndefinedMethodError: Undefined Method '#superclass' for Taipei"},
-		{`123.superclass`, UndefinedMethodError, "UndefinedMethodError: Undefined Method '#superclass' for 123"},
-		{`true.superclass`, UndefinedMethodError, "UndefinedMethodError: Undefined Method '#superclass' for true"},
+		{`"Taipei".superclass`, UndefinedMethodError, "UndefinedMethodError: Undefined Method 'superclass' for Taipei"},
+		{`123.superclass`, UndefinedMethodError, "UndefinedMethodError: Undefined Method 'superclass' for 123"},
+		{`true.superclass`, UndefinedMethodError, "UndefinedMethodError: Undefined Method 'superclass' for true"},
 		{`Integer.superclass(Integer)`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1"},
 		{`String.superclass(Hash, Array)`, ArgumentError, "ArgumentError: Expect 0 argument. got: 2"},
 	}
@@ -733,5 +738,31 @@ func TestClassSuperclassClassMethodFail(t *testing.T) {
 		evaluated := vm.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
 		vm.checkCFP(t, i, 1)
+	}
+}
+
+func TestClassSingletonClassClassMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`Integer.singleton_class.name`, "#<Class:Integer>"},
+		{`Integer.singleton_class.superclass.name`, "#<Class:Object>"},
+		{`
+		class Bar; end
+		Bar.singleton_class.name
+		`, "#<Class:Bar>"},
+		{`
+		class Bar; end
+		class Foo < Bar; end
+		Foo.singleton_class.superclass.name
+		`, "#<Class:Bar>"},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
 	}
 }
