@@ -143,11 +143,6 @@ func initRequest(t *thread, w http.ResponseWriter, req *http.Request) *RObject {
 	r.Path = req.URL.Path
 	r.URL = req.RequestURI
 
-	// Default Header is an empty map
-	if r.Headers == nil {
-		r.Headers = make(http.Header)
-	}
-
 	m := structs.Map(r)
 
 	for k, v := range m {

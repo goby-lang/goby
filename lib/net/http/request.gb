@@ -4,22 +4,21 @@ module Net
       attr_accessor :method, :protocol, :body, :content_length, :transfer_encoding, :host, :path, :url
       attr_reader   :headers
 
+      def initialize(headers = {})
+        @headers = headers
+      end
+
       def set_header(key, value)
-        if !@headers
-          @headers = {}
-        end
         @headers[key] = value
       end
 
       def get_header(key)
-        return @headers[key]
+        @headers[key]
       end
 
-      def delete_header(key)
-        # @headers.delete(key)
+      def remove_header(key)
+        @headers.delete(key)
       end
     end
   end
 end
-
-puts "HELLO"

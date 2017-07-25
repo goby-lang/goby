@@ -453,6 +453,77 @@ func TestHashEqualMethodFail(t *testing.T) {
 	}
 }
 
+func TestHashDeleteMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		h = { a: 1, b: "Hello", c: true }.delete("a")
+		h["a"]
+		`, nil},
+		{`
+		h = { a: 1, b: "Hello", c: true }.delete("a")
+		h["b"]
+		`, "Hello"},
+		{`
+		h = { a: 1, b: "Hello", c: true }.delete("a")
+		h["c"]
+		`, true},
+		{`
+		h = { a: 1, b: "Hello", c: true }.delete("b")
+		h["a"]
+		`, 1},
+		{`
+		h = { a: 1, b: "Hello", c: true }.delete("b")
+		h["b"]
+		`, nil},
+		{`
+		h = { a: 1, b: "Hello", c: true }.delete("b")
+		h["c"]
+		`, true},
+		{`
+		h = { a: 1, b: "Hello", c: true }.delete("c")
+		h["a"]
+		`, 1},
+		{`
+		h = { a: 1, b: "Hello", c: true }.delete("c")
+		h["b"]
+		`, "Hello"},
+		{`
+		h = { a: 1, b: "Hello", c: true }.delete("c")
+		h["c"]
+		`, nil},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
+func TestHashDeleteMethodFail(t *testing.T) {
+	testsFail := []struct {
+		input   string
+		errType string
+		errMsg  string
+	}{
+		{`{ a: 1, b: "Hello", c: true }.delete`, ArgumentError, "ArgumentError: Expect 1 argument. got: 0"},
+		{`{ a: 1, b: "Hello", c: true }.delete("a", "b")`, ArgumentError, "ArgumentError: Expect 1 argument. got: 2"},
+		{`{ a: 1, b: "Hello", c: true }.delete(123)`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
+		{`{ a: 1, b: "Hello", c: true }.delete(true)`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
+	}
+
+	for i, tt := range testsFail {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		vm.checkCFP(t, i, 1)
+	}
+}
+
 func TestHashHasKeyMethod(t *testing.T) {
 	tests := []struct {
 		input    string
