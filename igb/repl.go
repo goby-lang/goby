@@ -49,27 +49,9 @@ type Igb struct {
 
 // StartIgb starts goby's REPL.
 func StartIgb(version string) {
-	var err error
 reset:
-	igb := Igb{
-		cmds:  nil,
-		stack: 0,
-		sm: fsm.NewFSM(
-			readyToExec,
-			fsm.Events{
-				{Name: Waiting, Src: []string{waitEnded, readyToExec}, Dst: Waiting},
-				{Name: waitEnded, Src: []string{Waiting}, Dst: waitEnded},
-				{Name: waitExited, Src: []string{Waiting, waitEnded}, Dst: readyToExec},
-				{Name: readyToExec, Src: []string{waitEnded, readyToExec}, Dst: readyToExec},
-			},
-			fsm.Callbacks{},
-		),
-		completer: readline.NewPrefixCompleter(
-			readline.PcItem(help),
-			readline.PcItem(reset),
-			readline.PcItem(exit),
-		),
-	}
+	var err error
+	igb := initIgb()
 
 	igb.rl, err = readline.NewEx(&readline.Config{
 		Prompt:              prompt1,
@@ -259,6 +241,28 @@ reset:
 			//}
 			igb.cmds = nil
 		}
+	}
+}
+
+func initIgb() *Igb {
+	return &Igb{
+		cmds:  nil,
+		stack: 0,
+		sm: fsm.NewFSM(
+			readyToExec,
+			fsm.Events{
+				{Name: Waiting, Src: []string{waitEnded, readyToExec}, Dst: Waiting},
+				{Name: waitEnded, Src: []string{Waiting}, Dst: waitEnded},
+				{Name: waitExited, Src: []string{Waiting, waitEnded}, Dst: readyToExec},
+				{Name: readyToExec, Src: []string{waitEnded, readyToExec}, Dst: readyToExec},
+			},
+			fsm.Callbacks{},
+		),
+		completer: readline.NewPrefixCompleter(
+			readline.PcItem(help),
+			readline.PcItem(reset),
+			readline.PcItem(exit),
+		),
 	}
 }
 
