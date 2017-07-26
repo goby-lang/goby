@@ -42,34 +42,36 @@ type Igb struct {
 	sm        *fsm.FSM
 	rl        *readline.Instance
 	completer *readline.PrefixCompleter
+	line      string
 	cmds      []string
 	stack     int
 }
 
 // StartIgb starts goby's REPL.
 func StartIgb(version string) {
+	var err error
 reset:
-	var igb Igb
-	igb.sm = fsm.NewFSM(
-		readyToExec,
-		fsm.Events{
-			{Name: Waiting, Src: []string{waitEnded, readyToExec}, Dst: Waiting},
-			{Name: waitEnded, Src: []string{Waiting}, Dst: waitEnded},
-			{Name: waitExited, Src: []string{Waiting, waitEnded}, Dst: readyToExec},
-			{Name: readyToExec, Src: []string{waitEnded, readyToExec}, Dst: readyToExec},
-		},
-		fsm.Callbacks{},
-	)
+	igb := Igb{
+		cmds:  nil,
+		stack: 0,
+		sm: fsm.NewFSM(
+			readyToExec,
+			fsm.Events{
+				{Name: Waiting, Src: []string{waitEnded, readyToExec}, Dst: Waiting},
+				{Name: waitEnded, Src: []string{Waiting}, Dst: waitEnded},
+				{Name: waitExited, Src: []string{Waiting, waitEnded}, Dst: readyToExec},
+				{Name: readyToExec, Src: []string{waitEnded, readyToExec}, Dst: readyToExec},
+			},
+			fsm.Callbacks{},
+		),
+		completer: readline.NewPrefixCompleter(
+			readline.PcItem(help),
+			readline.PcItem(reset),
+			readline.PcItem(exit),
+		),
+	}
 
-	igb.completer = readline.NewPrefixCompleter(
-		readline.PcItem(help),
-		readline.PcItem(reset),
-		readline.PcItem(exit),
-	)
-
-	igb.stack = 0
-
-	igb.rl, _ = readline.NewEx(&readline.Config{
+	igb.rl, err = readline.NewEx(&readline.Config{
 		Prompt:              prompt1,
 		HistoryFile:         "/tmp/readline_goby.tmp",
 		AutoComplete:        igb.completer,
@@ -78,8 +80,12 @@ reset:
 		HistorySearchFold:   true,
 		FuncFilterInputRune: filterInput,
 	})
-
 	defer igb.rl.Close()
+
+	if err != nil {
+		fmt.Printf("Igb error: %s", err)
+		return
+	}
 
 	log.SetOutput(igb.rl.Stderr())
 
@@ -103,20 +109,20 @@ reset:
 
 	for {
 		igb.rl.Config.UniqueEditLine = true
-		line, err := igb.rl.Readline()
+		igb.line, err = igb.rl.Readline()
 		igb.rl.Config.UniqueEditLine = false
 
-		line = strings.TrimPrefix(line, prmpt1)
-		line = strings.TrimPrefix(line, prmpt2)
-		line = strings.TrimSpace(line)
+		igb.line = strings.TrimPrefix(igb.line, prmpt1)
+		igb.line = strings.TrimPrefix(igb.line, prmpt2)
+		igb.line = strings.TrimSpace(igb.line)
 
 		if err != nil {
 			switch {
 			case err == io.EOF:
-				println(line + "")
+				println(igb.line + "")
 				return
 			case err == readline.ErrInterrupt: // Pressing Ctrl-C
-				if len(line) == 0 {
+				if len(igb.line) == 0 {
 					if igb.cmds == nil {
 						println("")
 						println("Bye!")
@@ -134,29 +140,29 @@ reset:
 		}
 
 		switch {
-		case strings.HasPrefix(line, "#"):
-			println(prompt(igb.stack) + line)
+		case strings.HasPrefix(igb.line, "#"):
+			println(prompt(igb.stack) + igb.line)
 			continue
-		case line == help:
-			println(prompt(igb.stack) + line)
+		case igb.line == help:
+			println(prompt(igb.stack) + igb.line)
 			usage(igb.rl.Stderr(), igb.completer)
 			continue
-		case line == reset:
+		case igb.line == reset:
 			igb.rl = nil
 			igb.cmds = nil
-			println(prompt(igb.stack) + line)
+			println(prompt(igb.stack) + igb.line)
 			println("Restarting Igb...")
 			goto reset
-		case line == exit:
-			println(prompt(igb.stack) + line)
+		case igb.line == exit:
+			println(prompt(igb.stack) + igb.line)
 			println("Bye!")
 			return
-		case line == "":
-			println(prompt(igb.stack) + indent(igb.stack) + line)
+		case igb.line == "":
+			println(prompt(igb.stack) + indent(igb.stack) + igb.line)
 			continue
 		}
 
-		p.Lexer = lexer.New(line)
+		p.Lexer = lexer.New(igb.line)
 		program, perr := p.ParseProgram()
 
 		if perr != nil {
@@ -164,16 +170,16 @@ reset:
 				if !igb.sm.Is(Waiting) {
 					igb.sm.Event(Waiting)
 				}
-				println(prompt(igb.stack) + indent(igb.stack) + line)
+				println(prompt(igb.stack) + indent(igb.stack) + igb.line)
 				igb.stack++
 				igb.rl.SetPrompt(prompt(igb.stack) + indent(igb.stack))
-				igb.cmds = append(igb.cmds, line)
+				igb.cmds = append(igb.cmds, igb.line)
 				continue
 			}
 
 			// If igb.cmds is empty, it means that user just typed 'end' without corresponding statement/expression
 			if perr.IsUnexpectedEnd() && len(igb.cmds) == 0 {
-				println(prompt(igb.stack) + indent(igb.stack) + line)
+				println(prompt(igb.stack) + indent(igb.stack) + igb.line)
 				igb.stack = 0
 				igb.rl.SetPrompt(prompt1)
 				fmt.Println(perr.Message)
@@ -184,23 +190,23 @@ reset:
 			if perr.IsUnexpectedEnd() {
 				if igb.stack > 1 {
 					igb.stack--
-					println(prompt(igb.stack) + indent(igb.stack) + line)
+					println(prompt(igb.stack) + indent(igb.stack) + igb.line)
 					igb.sm.Event(Waiting)
 					igb.rl.SetPrompt(prompt(igb.stack) + indent(igb.stack))
-					igb.cmds = append(igb.cmds, line)
+					igb.cmds = append(igb.cmds, igb.line)
 					continue
 				}
 				igb.stack = 0
 				igb.sm.Event(waitEnded)
 				igb.rl.SetPrompt(prompt(igb.stack) + indent(igb.stack))
-				igb.cmds = append(igb.cmds, line)
+				igb.cmds = append(igb.cmds, igb.line)
 			}
 		}
 
 		if igb.sm.Is(Waiting) && igb.stack > 0 {
-			println(prompt(igb.stack) + indent(igb.stack) + line)
+			println(prompt(igb.stack) + indent(igb.stack) + igb.line)
 			igb.rl.SetPrompt(prompt(igb.stack) + indent(igb.stack))
-			igb.cmds = append(igb.cmds, line)
+			igb.cmds = append(igb.cmds, igb.line)
 			continue
 		}
 
@@ -225,7 +231,7 @@ reset:
 				if !perr.IsEOF() {
 					fmt.Println(perr.Message)
 				}
-				println(prompt(igb.stack) + indent(igb.stack) + line)
+				println(prompt(igb.stack) + indent(igb.stack) + igb.line)
 				continue
 			}
 
@@ -234,7 +240,7 @@ reset:
 			igb.sm.Event(readyToExec)
 		}
 		if igb.sm.Is(readyToExec) {
-			println(prompt(igb.stack) + line)
+			println(prompt(igb.stack) + igb.line)
 			instructions := g.GenerateInstructions(program.Statements)
 			v.REPLExec(instructions)
 
@@ -246,7 +252,7 @@ reset:
 					println(echo, r)
 				}
 			} else {
-				if string(line[len(line)-1]) != semicolon {
+				if string(igb.line[len(igb.line)-1]) != semicolon {
 					println(echo, r)
 				}
 			}
