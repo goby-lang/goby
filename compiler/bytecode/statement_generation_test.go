@@ -404,6 +404,89 @@ func TestNextStatement(t *testing.T) {
 	compareBytecode(t, bytecode, expected)
 }
 
+func TestBreakStatement(t *testing.T) {
+	input := `
+x = 0
+y = 0
+i = 0
+
+while x < 10 do
+  x = x + 1
+  while y < 5 do
+	y = y + 1
+
+	if y == 3
+	  break
+	end
+
+	i = i + x * y
+  end
+end
+
+a = i * 10
+a + 100
+`
+	expected := `
+<ProgramStart>
+0 putobject 0
+1 setlocal 0 0
+2 putobject 0
+3 setlocal 0 1
+4 putobject 0
+5 setlocal 0 2
+6 jump 39
+7 putnil
+8 pop
+9 jump 39
+10 getlocal 0 0
+11 putobject 1
+12 send + 1
+13 setlocal 0 0
+14 jump 33
+15 putnil
+16 pop
+17 jump 33
+18 getlocal 0 1
+19 putobject 1
+20 send + 1
+21 setlocal 0 1
+22 getlocal 0 1
+23 putobject 3
+24 send == 1
+25 branchunless 27
+26 jump 39
+27 getlocal 0 2
+28 getlocal 0 0
+29 getlocal 0 1
+30 send * 1
+31 send + 1
+32 setlocal 0 2
+33 getlocal 0 1
+34 putobject 5
+35 send < 1
+36 branchif 18
+37 putnil
+38 pop
+39 getlocal 0 0
+40 putobject 10
+41 send < 1
+42 branchif 10
+43 putnil
+44 pop
+45 getlocal 0 2
+46 putobject 10
+47 send * 1
+48 setlocal 0 3
+49 getlocal 0 3
+50 putobject 100
+51 send + 1
+52 leave
+
+`
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
 func TestRemoveUnusedExpression(t *testing.T) {
 	input := `
 	i = 0

@@ -350,8 +350,9 @@ while x < 10 do
   end
 end
 
-i
-		`, 21},
+a = i * 10
+a + 100
+		`, 310},
 	}
 
 	for i, tt := range tests {
