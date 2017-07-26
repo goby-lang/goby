@@ -65,6 +65,7 @@ const (
 	Else   = "ELSE"
 	Return = "RETURN"
 	Next   = "NEXT"
+	Break  = "BREAK"
 	Def    = "DEF"
 	Self   = "SELF"
 	End    = "END"
@@ -93,6 +94,7 @@ var keywords = map[string]Type{
 	"next":   Next,
 	"class":  Class,
 	"module": Module,
+	"break":  Break,
 }
 
 // LookupIdent is used for keyword identification
