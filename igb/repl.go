@@ -86,6 +86,7 @@ reset:
 	for {
 		igb, err = readIgb(igb, err)
 
+		// Interruption handling
 		if err != nil {
 			switch {
 			case err == io.EOF:
@@ -109,6 +110,7 @@ reset:
 			}
 		}
 
+		// Command handling
 		switch {
 		case strings.HasPrefix(igb.line, "#"):
 			println(prompt(igb.stack) + indent(igb.stack) + igb.line)
@@ -135,6 +137,7 @@ reset:
 		ivm.p.Lexer = lexer.New(igb.line)
 		program, perr := ivm.p.ParseProgram()
 
+		// Parse error handling
 		if perr != nil {
 			switch {
 			case perr.IsEOF():
@@ -183,17 +186,6 @@ reset:
 			// Test if current input can be properly parsed.
 			program, perr = ivm.p.ParseProgram()
 
-			/*
-			 This could mean there still are statements not ended, for example:
-
-			 ```ruby
-			 class Foo
-			 def bar
-			 end # This make state changes to WaitEnded
-			 # But here still needs an "end"
-			 ```
-			*/
-
 			if perr != nil {
 				if !perr.IsEOF() {
 					fmt.Println(perr.Message)
@@ -206,6 +198,7 @@ reset:
 			igb.rl.SetPrompt(prompt(igb.stack))
 			igb.sm.Event(readyToExec)
 		}
+
 		if igb.sm.Is(readyToExec) {
 			println(prompt(igb.stack) + igb.line)
 			instructions := ivm.g.GenerateInstructions(program.Statements)
