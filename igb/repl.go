@@ -109,7 +109,7 @@ reset:
 
 		switch {
 		case strings.HasPrefix(igb.line, "#"):
-			println(prompt(igb.stack) + igb.line)
+			println(prompt(igb.stack) + indent(igb.stack) + igb.line)
 			continue
 		case igb.line == help:
 			println(prompt(igb.stack) + igb.line)
