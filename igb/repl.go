@@ -47,6 +47,12 @@ type Igb struct {
 	stack     int
 }
 
+type Ivm struct {
+	v *vm.VM
+	p *parser.Parser
+	g *bytecode.Generator
+}
+
 // StartIgb starts goby's REPL.
 func StartIgb(version string) {
 reset:
