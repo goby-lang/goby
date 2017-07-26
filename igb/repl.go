@@ -79,22 +79,7 @@ reset:
 
 	println("Goby", version, fortune(), fortune(), fortune())
 
-	// Initialize VM
-	ivm := Ivm{}
-	ivm.v = vm.New(os.Getenv("GOBY_ROOT"), []string{})
-	ivm.v.SetClassISIndexTable("")
-	ivm.v.SetMethodISIndexTable("")
-	ivm.v.InitForREPL()
-
-	// Initialize parser, lexer is not important here
-	ivm.p = parser.New(lexer.New(""))
-
-	program, _ := ivm.p.ParseProgram()
-
-	// Initialize code generator, and it will behavior a little different in REPL mode.
-	ivm.g = bytecode.NewGenerator()
-	ivm.g.REPL = true
-	ivm.g.InitTopLevelScope(program)
+	ivm := createVM()
 
 	for {
 		igb.rl.Config.UniqueEditLine = true
@@ -251,6 +236,10 @@ reset:
 	}
 }
 
+// Polymorphic helper functions --------------------------------------------
+
+// Other helper functions --------------------------------------------------
+
 func initIgb() *Igb {
 	return &Igb{
 		cmds:  nil,
@@ -273,7 +262,22 @@ func initIgb() *Igb {
 	}
 }
 
-// Polymorphic helper functions --------------------------------------------
+func createVM() Ivm {
+	// Initialize VM
+	ivm := Ivm{}
+	ivm.v = vm.New(os.Getenv("GOBY_ROOT"), []string{})
+	ivm.v.SetClassISIndexTable("")
+	ivm.v.SetMethodISIndexTable("")
+	ivm.v.InitForREPL()
+	// Initialize parser, lexer is not important here
+	ivm.p = parser.New(lexer.New(""))
+	program, _ := ivm.p.ParseProgram()
+	// Initialize code generator, and it will behavior a little different in REPL mode.
+	ivm.g = bytecode.NewGenerator()
+	ivm.g.REPL = true
+	ivm.g.InitTopLevelScope(program)
+	return ivm
+}
 
 func filterInput(r rune) (rune, bool) {
 	switch r {
@@ -283,8 +287,6 @@ func filterInput(r rune) (rune, bool) {
 	}
 	return r, true
 }
-
-// Other helper functions --------------------------------------------------
 
 func usage(w io.Writer, c *readline.PrefixCompleter) {
 	io.WriteString(w, "commands:\n")
