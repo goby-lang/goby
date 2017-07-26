@@ -38,10 +38,19 @@ const (
 	emojis = "😀😁😂🤣😃😄😅😆😉😊😋😎😍😘😗😙😚🙂🤗🤔😐😑😶🙄😏😮😪😴😌😛😜😝🤤🙃🤑😲😭😳🤧😇🤠🤡🤥🤓😈👿👹👺💀👻👽🤖💩😺😸😹😻😼😽"
 )
 
+type Igb struct {
+	sm        *fsm.FSM
+	rl        *readline.Instance
+	completer *readline.PrefixCompleter
+	cmds      []string
+	stack     int
+}
+
 // StartIgb starts goby's REPL.
 func StartIgb(version string) {
 reset:
-	var sm = fsm.NewFSM(
+	var igb Igb
+	igb.sm = fsm.NewFSM(
 		readyToExec,
 		fsm.Events{
 			{Name: Waiting, Src: []string{waitEnded, readyToExec}, Dst: Waiting},
@@ -52,31 +61,27 @@ reset:
 		fsm.Callbacks{},
 	)
 
-	var completer = readline.NewPrefixCompleter(
+	igb.completer = readline.NewPrefixCompleter(
 		readline.PcItem(help),
 		readline.PcItem(reset),
 		readline.PcItem(exit),
 	)
 
-	var cmds []string
-	var err error
-	var stack = 0
+	igb.stack = 0
 
-	rl, err := readline.NewEx(&readline.Config{
+	igb.rl, _ = readline.NewEx(&readline.Config{
 		Prompt:              prompt1,
 		HistoryFile:         "/tmp/readline_goby.tmp",
-		AutoComplete:        completer,
+		AutoComplete:        igb.completer,
 		InterruptPrompt:     interrupt,
 		EOFPrompt:           exit,
 		HistorySearchFold:   true,
 		FuncFilterInputRune: filterInput,
 	})
-	if err != nil {
-		panic(err)
-	}
-	defer rl.Close()
 
-	log.SetOutput(rl.Stderr())
+	defer igb.rl.Close()
+
+	log.SetOutput(igb.rl.Stderr())
 
 	println("Goby", version, fortune(), fortune(), fortune())
 
@@ -97,9 +102,9 @@ reset:
 	g.InitTopLevelScope(program)
 
 	for {
-		rl.Config.UniqueEditLine = true
-		line, err := rl.Readline()
-		rl.Config.UniqueEditLine = false
+		igb.rl.Config.UniqueEditLine = true
+		line, err := igb.rl.Readline()
+		igb.rl.Config.UniqueEditLine = false
 
 		line = strings.TrimPrefix(line, prmpt1)
 		line = strings.TrimPrefix(line, prmpt2)
@@ -112,17 +117,17 @@ reset:
 				return
 			case err == readline.ErrInterrupt: // Pressing Ctrl-C
 				if len(line) == 0 {
-					if cmds == nil {
+					if igb.cmds == nil {
 						println("")
 						println("Bye!")
 						return
 					}
 				}
 				// Erasing command buffer
-				stack = 0
-				rl.SetPrompt(prompt1)
-				sm.Event(waitExited)
-				cmds = nil
+				igb.stack = 0
+				igb.rl.SetPrompt(prompt1)
+				igb.sm.Event(waitExited)
+				igb.cmds = nil
 				println(" -- block cleared")
 				continue
 			}
@@ -130,24 +135,24 @@ reset:
 
 		switch {
 		case strings.HasPrefix(line, "#"):
-			println(prompt(stack) + line)
+			println(prompt(igb.stack) + line)
 			continue
 		case line == help:
-			println(prompt(stack) + line)
-			usage(rl.Stderr(), completer)
+			println(prompt(igb.stack) + line)
+			usage(igb.rl.Stderr(), igb.completer)
 			continue
 		case line == reset:
-			rl = nil
-			cmds = nil
-			println(prompt(stack) + line)
+			igb.rl = nil
+			igb.cmds = nil
+			println(prompt(igb.stack) + line)
 			println("Restarting Igb...")
 			goto reset
 		case line == exit:
-			println(prompt(stack) + line)
+			println(prompt(igb.stack) + line)
 			println("Bye!")
 			return
 		case line == "":
-			println(prompt(stack) + indent(stack) + line)
+			println(prompt(igb.stack) + indent(igb.stack) + line)
 			continue
 		}
 
@@ -156,51 +161,51 @@ reset:
 
 		if perr != nil {
 			if perr.IsEOF() {
-				if !sm.Is(Waiting) {
-					sm.Event(Waiting)
+				if !igb.sm.Is(Waiting) {
+					igb.sm.Event(Waiting)
 				}
-				println(prompt(stack) + indent(stack) + line)
-				stack++
-				rl.SetPrompt(prompt(stack) + indent(stack))
-				cmds = append(cmds, line)
+				println(prompt(igb.stack) + indent(igb.stack) + line)
+				igb.stack++
+				igb.rl.SetPrompt(prompt(igb.stack) + indent(igb.stack))
+				igb.cmds = append(igb.cmds, line)
 				continue
 			}
 
-			// If cmds is empty, it means that user just typed 'end' without corresponding statement/expression
-			if perr.IsUnexpectedEnd() && len(cmds) == 0 {
-				println(prompt(stack) + indent(stack) + line)
-				stack = 0
-				rl.SetPrompt(prompt1)
+			// If igb.cmds is empty, it means that user just typed 'end' without corresponding statement/expression
+			if perr.IsUnexpectedEnd() && len(igb.cmds) == 0 {
+				println(prompt(igb.stack) + indent(igb.stack) + line)
+				igb.stack = 0
+				igb.rl.SetPrompt(prompt1)
 				fmt.Println(perr.Message)
-				cmds = nil
+				igb.cmds = nil
 				continue
 			}
 
 			if perr.IsUnexpectedEnd() {
-				if stack > 1 {
-					stack--
-					println(prompt(stack) + indent(stack) + line)
-					sm.Event(Waiting)
-					rl.SetPrompt(prompt(stack) + indent(stack))
-					cmds = append(cmds, line)
+				if igb.stack > 1 {
+					igb.stack--
+					println(prompt(igb.stack) + indent(igb.stack) + line)
+					igb.sm.Event(Waiting)
+					igb.rl.SetPrompt(prompt(igb.stack) + indent(igb.stack))
+					igb.cmds = append(igb.cmds, line)
 					continue
 				}
-				stack = 0
-				sm.Event(waitEnded)
-				rl.SetPrompt(prompt(stack) + indent(stack))
-				cmds = append(cmds, line)
+				igb.stack = 0
+				igb.sm.Event(waitEnded)
+				igb.rl.SetPrompt(prompt(igb.stack) + indent(igb.stack))
+				igb.cmds = append(igb.cmds, line)
 			}
 		}
 
-		if sm.Is(Waiting) && stack > 0 {
-			println(prompt(stack) + indent(stack) + line)
-			rl.SetPrompt(prompt(stack) + indent(stack))
-			cmds = append(cmds, line)
+		if igb.sm.Is(Waiting) && igb.stack > 0 {
+			println(prompt(igb.stack) + indent(igb.stack) + line)
+			igb.rl.SetPrompt(prompt(igb.stack) + indent(igb.stack))
+			igb.cmds = append(igb.cmds, line)
 			continue
 		}
 
-		if sm.Is(waitEnded) {
-			p.Lexer = lexer.New(string(strings.Join(cmds, "\n")))
+		if igb.sm.Is(waitEnded) {
+			p.Lexer = lexer.New(string(strings.Join(igb.cmds, "\n")))
 
 			// Test if current input can be properly parsed.
 			program, perr = p.ParseProgram()
@@ -220,24 +225,24 @@ reset:
 				if !perr.IsEOF() {
 					fmt.Println(perr.Message)
 				}
-				println(prompt(stack) + indent(stack) + line)
+				println(prompt(igb.stack) + indent(igb.stack) + line)
 				continue
 			}
 
 			// If everything goes well, reset state and statements buffer
-			rl.SetPrompt(prompt(stack))
-			sm.Event(readyToExec)
+			igb.rl.SetPrompt(prompt(igb.stack))
+			igb.sm.Event(readyToExec)
 		}
-		if sm.Is(readyToExec) {
-			println(prompt(stack) + line)
+		if igb.sm.Is(readyToExec) {
+			println(prompt(igb.stack) + line)
 			instructions := g.GenerateInstructions(program.Statements)
 			v.REPLExec(instructions)
 
 			r := v.GetREPLResult()
 
 			// Suppress echo back on trailing ';'
-			if cmds != nil {
-				if t := cmds[len(cmds)-1]; string(t[len(t)-1]) != semicolon {
+			if igb.cmds != nil {
+				if t := igb.cmds[len(igb.cmds)-1]; string(t[len(t)-1]) != semicolon {
 					println(echo, r)
 				}
 			} else {
@@ -246,7 +251,7 @@ reset:
 				}
 			}
 			//}
-			cmds = nil
+			igb.cmds = nil
 		}
 	}
 }
