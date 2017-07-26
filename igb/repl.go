@@ -80,20 +80,21 @@ reset:
 	println("Goby", version, fortune(), fortune(), fortune())
 
 	// Initialize VM
-	v := vm.New(os.Getenv("GOBY_ROOT"), []string{})
-	v.SetClassISIndexTable("")
-	v.SetMethodISIndexTable("")
-	v.InitForREPL()
+	ivm := Ivm{}
+	ivm.v = vm.New(os.Getenv("GOBY_ROOT"), []string{})
+	ivm.v.SetClassISIndexTable("")
+	ivm.v.SetMethodISIndexTable("")
+	ivm.v.InitForREPL()
 
 	// Initialize parser, lexer is not important here
-	p := parser.New(lexer.New(""))
+	ivm.p = parser.New(lexer.New(""))
 
-	program, _ := p.ParseProgram()
+	program, _ := ivm.p.ParseProgram()
 
 	// Initialize code generator, and it will behavior a little different in REPL mode.
-	g := bytecode.NewGenerator()
-	g.REPL = true
-	g.InitTopLevelScope(program)
+	ivm.g = bytecode.NewGenerator()
+	ivm.g.REPL = true
+	ivm.g.InitTopLevelScope(program)
 
 	for {
 		igb.rl.Config.UniqueEditLine = true
@@ -150,8 +151,8 @@ reset:
 			continue
 		}
 
-		p.Lexer = lexer.New(igb.line)
-		program, perr := p.ParseProgram()
+		ivm.p.Lexer = lexer.New(igb.line)
+		program, perr := ivm.p.ParseProgram()
 
 		if perr != nil {
 			if perr.IsEOF() {
@@ -199,10 +200,10 @@ reset:
 		}
 
 		if igb.sm.Is(waitEnded) {
-			p.Lexer = lexer.New(string(strings.Join(igb.cmds, "\n")))
+			ivm.p.Lexer = lexer.New(string(strings.Join(igb.cmds, "\n")))
 
 			// Test if current input can be properly parsed.
-			program, perr = p.ParseProgram()
+			program, perr = ivm.p.ParseProgram()
 
 			/*
 			 This could mean there still are statements not ended, for example:
@@ -229,10 +230,10 @@ reset:
 		}
 		if igb.sm.Is(readyToExec) {
 			println(prompt(igb.stack) + igb.line)
-			instructions := g.GenerateInstructions(program.Statements)
-			v.REPLExec(instructions)
+			instructions := ivm.g.GenerateInstructions(program.Statements)
+			ivm.v.REPLExec(instructions)
 
-			r := v.GetREPLResult()
+			r := ivm.v.GetREPLResult()
 
 			// Suppress echo back on trailing ';'
 			if igb.cmds != nil {
