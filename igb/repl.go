@@ -38,6 +38,7 @@ const (
 	emojis = "😀😁😂🤣😃😄😅😆😉😊😋😎😍😘😗😙😚🙂🤗🤔😐😑😶🙄😏😮😪😴😌😛😜😝🤤🙃🤑😲😭😳🤧😇🤠🤡🤥🤓😈👿👹👺💀👻👽🤖💩😺😸😹😻😼😽"
 )
 
+// Igb holds internal states of Igb.
 type Igb struct {
 	sm        *fsm.FSM
 	rl        *readline.Instance
@@ -47,6 +48,7 @@ type Igb struct {
 	stack     int
 }
 
+// Ivm holds VM only for Igb.
 type Ivm struct {
 	v *vm.VM
 	p *parser.Parser
