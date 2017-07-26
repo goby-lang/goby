@@ -1223,6 +1223,27 @@ func TestAssignmentEvaluation(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input)
 		testIntegerObject(t, i, evaluated, tt.expectedValue)
+		vm.checkCFP(t, 0, 0)
+	}
+}
+
+func TestAssignmentByOperationEvaluation(t *testing.T) {
+	tests := []struct {
+		input         string
+		expectedValue interface{}
+	}{
+		{"a = 5; a += 2; a;", 7},
+		{"a = 5; a -= 10; a;", -5},
+		{"a = 5; a += 2 * 3 + 5; a;", 16},
+		{"a = 5; a -= 2 * 3 + 5; a;", -6},
+		{"a = false; a ||= true; a;", true},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expectedValue)
+		vm.checkCFP(t, 0, 0)
 	}
 }
 
