@@ -332,6 +332,7 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 		p.error = &Error{Message: fmt.Sprintf("Can't assign value to %s. Line: %d", v.String(), p.curToken.Line), errType: InvalidAssignmentError}
 	}
 
+	// Pure assignment case
 	if p.curTokenIs(token.Assign) {
 		exp := &ast.AssignExpression{
 			Token:    p.curToken,
@@ -344,38 +345,38 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 		exp.Value = p.parseExpression(precedence)
 
 		return exp
-	} else {
-		// Assignment with operator case
-		operator := token.Token{ Line: p.curToken.Line }
-		assignment := token.Token{ Type: token.Assign, Literal: "=", Line: p.curToken.Line }
-		switch p.curToken.Type {
-		case token.PlusEq:
-			operator.Type = token.Plus
-			operator.Literal = "+"
-		case token.MinusEq:
-			operator.Type = token.Minus
-			operator.Literal = "-"
-		case token.OrEq:
-			operator.Type = token.Or
-			operator.Literal = "||"
-		}
-		p.nextToken()
-		infixExp := &ast.InfixExpression{
-			Token:    operator,
-			Left:     variable,
-			Operator: operator.Literal,
-			Right:    p.parseExpression(LOWEST),
-		}
-
-		exp := &ast.AssignExpression{
-			Token:    assignment,
-			Variable: variable,
-			Operator: assignment.Literal,
-			Value:    infixExp,
-		}
-
-		return exp
 	}
+
+	// Syntax Surgar: Assignment with operator case
+	operator := token.Token{Line: p.curToken.Line}
+	assignment := token.Token{Type: token.Assign, Literal: "=", Line: p.curToken.Line}
+	switch p.curToken.Type {
+	case token.PlusEq:
+		operator.Type = token.Plus
+		operator.Literal = "+"
+	case token.MinusEq:
+		operator.Type = token.Minus
+		operator.Literal = "-"
+	case token.OrEq:
+		operator.Type = token.Or
+		operator.Literal = "||"
+	}
+	p.nextToken()
+	infixExp := &ast.InfixExpression{
+		Token:    operator,
+		Left:     variable,
+		Operator: operator.Literal,
+		Right:    p.parseExpression(LOWEST),
+	}
+
+	exp := &ast.AssignExpression{
+		Token:    assignment,
+		Variable: variable,
+		Operator: assignment.Literal,
+		Value:    infixExp,
+	}
+
+	return exp
 }
 
 func (p *Parser) parseGroupedExpression() ast.Expression {

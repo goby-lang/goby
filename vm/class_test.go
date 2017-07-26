@@ -578,6 +578,34 @@ func TestClassGeneralComparisonOperation(t *testing.T) {
 	}
 }
 
+func TestGeneralAssignmentByOperation(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`a = 123;    a ||= 456;                  a;`, 123},
+		{`a = 123;    a ||= true;                 a;`, 123},
+		{`a = "Goby"; a ||= "Fish";               a;`, "Goby"},
+		{`a = (1..3); a ||= [1, 2, 3];          a.to_s;`, "(1..3)"},
+		{`a = false;  a ||= 123;                  a;`, 123},
+		{`a = nil;    a ||= { b: 1 };             a["b"];`, 1},
+		{`a = false;  a ||= false;                a;`, false},
+		{`a = nil;    a ||= false;                a;`, false},
+		{`a = false;  a ||= nil;                  a;`, nil},
+		{`a = nil;    a ||= nil;                  a;`, nil},
+		{`a = false;  a ||= nil || false;         a;`, false},
+		{`a = false;  a ||= false || nil;         a;`, nil},
+		{`a = false;  a ||= true && false || nil; a;`, nil},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
 func TestGeneralIsAMethod(t *testing.T) {
 	tests := []struct {
 		input    string

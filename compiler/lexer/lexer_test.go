@@ -113,6 +113,7 @@ func TestNextToken(t *testing.T) {
 
 	a += 1
 	b -= 2
+	c ||= true
 	`
 
 	tests := []struct {
@@ -410,7 +411,11 @@ func TestNextToken(t *testing.T) {
 		{token.MinusEq, "-=", 106},
 		{token.Int, "2", 106},
 
-		{token.EOF, "", 107},
+		{token.Ident, "c", 107},
+		{token.OrEq, "||=", 107},
+		{token.True, "true", 107},
+
+		{token.EOF, "", 108},
 	}
 	l := New(input)
 
