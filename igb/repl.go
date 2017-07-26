@@ -134,7 +134,8 @@ reset:
 		program, perr := ivm.p.ParseProgram()
 
 		if perr != nil {
-			if perr.IsEOF() {
+			switch {
+			case perr.IsEOF():
 				if !igb.sm.Is(Waiting) {
 					igb.sm.Event(Waiting)
 				}
@@ -143,19 +144,15 @@ reset:
 				igb.rl.SetPrompt(prompt(igb.stack) + indent(igb.stack))
 				igb.cmds = append(igb.cmds, igb.line)
 				continue
-			}
-
-			// If igb.cmds is empty, it means that user just typed 'end' without corresponding statement/expression
-			if perr.IsUnexpectedEnd() && len(igb.cmds) == 0 {
+			case perr.IsUnexpectedEnd() && len(igb.cmds) == 0:
+				// If igb.cmds is empty, it means that user just typed 'end' without corresponding statement/expression
 				println(prompt(igb.stack) + indent(igb.stack) + igb.line)
 				igb.stack = 0
 				igb.rl.SetPrompt(prompt1)
 				fmt.Println(perr.Message)
 				igb.cmds = nil
 				continue
-			}
-
-			if perr.IsUnexpectedEnd() {
+			case perr.IsUnexpectedEnd():
 				if igb.stack > 1 {
 					igb.stack--
 					println(prompt(igb.stack) + indent(igb.stack) + igb.line)
