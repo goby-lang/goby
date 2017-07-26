@@ -82,13 +82,7 @@ reset:
 	ivm := createVM()
 
 	for {
-		igb.rl.Config.UniqueEditLine = true
-		igb.line, err = igb.rl.Readline()
-		igb.rl.Config.UniqueEditLine = false
-
-		igb.line = strings.TrimPrefix(igb.line, prmpt1)
-		igb.line = strings.TrimPrefix(igb.line, prmpt2)
-		igb.line = strings.TrimSpace(igb.line)
+		igb, err = readIgb(igb, err)
 
 		if err != nil {
 			switch {
@@ -277,6 +271,16 @@ func createVM() Ivm {
 	ivm.g.REPL = true
 	ivm.g.InitTopLevelScope(program)
 	return ivm
+}
+
+func readIgb(igb *Igb, err error) (*Igb, error) {
+	igb.rl.Config.UniqueEditLine = true
+	igb.line, err = igb.rl.Readline()
+	igb.rl.Config.UniqueEditLine = false
+	igb.line = strings.TrimPrefix(igb.line, prmpt1)
+	igb.line = strings.TrimPrefix(igb.line, prmpt2)
+	igb.line = strings.TrimSpace(igb.line)
+	return igb, err
 }
 
 func filterInput(r rune) (rune, bool) {
