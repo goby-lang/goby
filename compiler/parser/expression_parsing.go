@@ -328,50 +328,59 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 	var value ast.Expression
 	var tok token.Token
-	variable, ok := v.(ast.Variable)
 
-	if !ok {
+	exp := &ast.AssignExpression{}
+
+	switch v := v.(type) {
+	case ast.Variable:
+		exp.Variables = []ast.Variable{v}
+	case *ast.MultiVariableExpression:
+		exp.Variables = v.Variables
+	default:
 		p.error = &Error{Message: fmt.Sprintf("Can't assign value to %s. Line: %d", v.String(), p.curToken.Line), errType: InvalidAssignmentError}
 	}
 
-	exp := &ast.AssignExpression{
-		Variables: []ast.Variable{variable},
-	}
+	if len(exp.Variables) == 1 {
+		// Pure assignment case
+		switch p.curToken.Type {
+		case token.Assign:
+			tok = p.curToken
+			precedence := p.curPrecedence()
+			p.nextToken()
+			value = p.parseExpression(precedence)
+		case token.MinusEq, token.PlusEq, token.OrEq:
+			tok = token.Token{Type: token.Assign, Literal: "=", Line: p.curToken.Line}
 
-	// Pure assignment case
-	switch p.curToken.Type {
-	case token.Assign:
+			// Syntax Surgar: Assignment with operator case
+			infixOperator := token.Token{Line: p.curToken.Line}
+			switch p.curToken.Type {
+			case token.PlusEq:
+				infixOperator.Type = token.Plus
+				infixOperator.Literal = "+"
+			case token.MinusEq:
+				infixOperator.Type = token.Minus
+				infixOperator.Literal = "-"
+			case token.OrEq:
+				infixOperator.Type = token.Or
+				infixOperator.Literal = "||"
+			}
+
+			p.nextToken()
+
+			value = &ast.InfixExpression{
+				Token:    infixOperator,
+				Left:     exp.Variables[0],
+				Operator: infixOperator.Literal,
+				Right:    p.parseExpression(LOWEST),
+			}
+		default:
+			p.error = &Error{errType: UnexpectedTokenError, Message: fmt.Sprintf("Unexpect token '%s' for assgin expression", p.curToken.Literal)}
+		}
+	} else {
 		tok = p.curToken
 		precedence := p.curPrecedence()
 		p.nextToken()
 		value = p.parseExpression(precedence)
-	case token.MinusEq, token.PlusEq, token.OrEq:
-		tok = token.Token{Type: token.Assign, Literal: "=", Line: p.curToken.Line}
-
-		// Syntax Surgar: Assignment with operator case
-		infixOperator := token.Token{Line: p.curToken.Line}
-		switch p.curToken.Type {
-		case token.PlusEq:
-			infixOperator.Type = token.Plus
-			infixOperator.Literal = "+"
-		case token.MinusEq:
-			infixOperator.Type = token.Minus
-			infixOperator.Literal = "-"
-		case token.OrEq:
-			infixOperator.Type = token.Or
-			infixOperator.Literal = "||"
-		}
-
-		p.nextToken()
-
-		value = &ast.InfixExpression{
-			Token:    infixOperator,
-			Left:     variable,
-			Operator: infixOperator.Literal,
-			Right:    p.parseExpression(LOWEST),
-		}
-	default:
-		p.error = &Error{errType: UnexpectedTokenError, Message: fmt.Sprintf("Unexpect token '%s' for assgin expression", p.curToken.Literal)}
 	}
 
 	exp.Token = tok
@@ -591,4 +600,43 @@ func (p *Parser) parseRangeExpression(left ast.Expression) ast.Expression {
 	exp.End = p.parseExpression(precedence)
 
 	return exp
+}
+
+func (p *Parser) parseMultiVariables(left ast.Expression) ast.Expression {
+	var1, ok := left.(ast.Variable)
+
+	if !ok {
+		p.noPrefixParseFnError(p.curToken.Type)
+	}
+
+	vars := []ast.Variable{var1}
+
+	p.nextToken()
+
+	exp := p.parseExpression(NORMAL)
+
+	var2, ok := exp.(ast.Variable)
+
+	if !ok {
+		p.noPrefixParseFnError(p.curToken.Type)
+	}
+
+	vars = append(vars, var2)
+
+	for p.peekTokenIs(token.Comma) {
+		p.nextToken()
+		p.nextToken()
+		exp := p.parseExpression(CALL) // Use highest precedence
+
+		v, ok := exp.(ast.Variable)
+
+		if !ok {
+			p.noPrefixParseFnError(p.curToken.Type)
+		}
+
+		vars = append(vars, v)
+	}
+
+	result := &ast.MultiVariableExpression{Variables: vars}
+	return result
 }

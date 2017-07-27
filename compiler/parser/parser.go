@@ -123,6 +123,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.And, p.parseInfixExpression)
 	p.registerInfix(token.Or, p.parseInfixExpression)
 	p.registerInfix(token.OrEq, p.parseAssignExpression)
+	p.registerInfix(token.Comma, p.parseMultiVariables)
 	p.registerInfix(token.ResolutionOperator, p.parseInfixExpression)
 	p.registerInfix(token.Assign, p.parseAssignExpression)
 	p.registerInfix(token.Range, p.parseRangeExpression)
