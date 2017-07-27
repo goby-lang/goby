@@ -67,6 +67,33 @@ func TestNullIsNilMethod(t *testing.T) {
 	}
 }
 
+func TestNullAssignmentByOperation(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`a = nil; a ||= 123;       a;`, 123},
+		{`a = nil; a ||= "string";  a;`, "string"},
+		{`a = nil; a ||= nil;     a;`, nil},
+		{`a = nil; a ||= (1..4);    a.to_s;`, "(1..4)"},
+		{`a = nil; a ||= { b: 1 };  a["b"];`, 1},
+		{`a = nil; a ||= Object;    a.name;`, "Object"},
+		{`a = nil; a ||= [1, 2, 3]; a[0];`, 1},
+		{`a = nil; a ||= [1, 2, 3]; a[1];`, 2},
+		{`a = nil; a ||= [1, 2, 3]; a[2];`, 3},
+		{`a = nil; a ||= nil;       a;`, nil},
+		{`a = nil; a ||= nil || 1;  a;`, 1},
+		{`a = nil; a ||= 1 || nil;  a;`, 1},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
 func TestNullIsNilMethodFail(t *testing.T) {
 	testsFail := []struct {
 		input   string

@@ -66,6 +66,13 @@ func (l *Lexer) NextToken() token.Token {
 			l.readChar()
 			l.readChar()
 			return tok
+		} else if l.peekChar() == '=' {
+			tok.Literal = "-="
+			tok.Line = l.line
+			tok.Type = token.MinusEq
+			l.readChar()
+			l.readChar()
+			return tok
 		}
 		tok = newToken(token.Minus, l.ch, l.line)
 	case '!':
@@ -120,6 +127,13 @@ func (l *Lexer) NextToken() token.Token {
 			l.readChar()
 			l.readChar()
 			return tok
+		} else if l.peekChar() == '=' {
+			tok.Literal = "+="
+			tok.Line = l.line
+			tok.Type = token.PlusEq
+			l.readChar()
+			l.readChar()
+			return tok
 		}
 		tok = newToken(token.Plus, l.ch, l.line)
 	case '{':
@@ -163,7 +177,12 @@ func (l *Lexer) NextToken() token.Token {
 	case '|':
 		if l.peekChar() == '|' {
 			l.readChar()
-			tok = token.Token{Type: token.Or, Literal: "||", Line: l.line}
+			if l.peekChar() == '=' {
+				l.readChar()
+				tok = token.Token{Type: token.OrEq, Literal: "||=", Line: l.line}
+			} else {
+				tok = token.Token{Type: token.Or, Literal: "||", Line: l.line}
+			}
 		} else {
 			tok = newToken(token.Bar, l.ch, l.line)
 		}

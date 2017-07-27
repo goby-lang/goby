@@ -82,6 +82,43 @@ func TestBooleanLogicalExpression(t *testing.T) {
 	}
 }
 
+func TestBooleanAssignmentByOperation(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`a = true;  a ||= 123;       a;`, true},
+		{`a = true;  a ||= "string";  a;`, true},
+		{`a = true;  a ||= false;     a;`, true},
+		{`a = true;  a ||= (1..4);    a;`, true},
+		{`a = true;  a ||= { b: 1 };  a;`, true},
+		{`a = true;  a ||= Object;    a;`, true},
+		{`a = true;  a ||= [1, 2, 3]; a;`, true},
+		{`a = true;  a ||= nil;       a;`, true},
+		{`a = true;  a ||= nil || 1;  a;`, true},
+		{`a = true;  a ||= 1 || nil;  a;`, true},
+		{`a = false; a ||= 123;       a;`, 123},
+		{`a = false; a ||= "string";  a;`, "string"},
+		{`a = false; a ||= false;     a;`, false},
+		{`a = false; a ||= (1..4);    a.to_s;`, "(1..4)"},
+		{`a = false; a ||= { b: 1 };  a["b"];`, 1},
+		{`a = false; a ||= Object;    a.name;`, "Object"},
+		{`a = false; a ||= [1, 2, 3]; a[0];`, 1},
+		{`a = false; a ||= [1, 2, 3]; a[1];`, 2},
+		{`a = false; a ||= [1, 2, 3]; a[2];`, 3},
+		{`a = false; a ||= nil;       a;`, nil},
+		{`a = false; a ||= nil || 1;  a;`, 1},
+		{`a = false; a ||= 1 || nil;  a;`, 1},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
 func TestInitializeBoolean(t *testing.T) {
 	if !TRUE.Value {
 		t.Errorf("expected 'true'. got=%t", TRUE.Value)
