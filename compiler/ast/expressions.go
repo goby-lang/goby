@@ -143,15 +143,15 @@ type MultiVariableExpression struct {
 	Variables []Variable
 }
 
-func (me *MultiVariableExpression) expressionNode() {}
-func (me *MultiVariableExpression) TokenLiteral() string {
+func (m *MultiVariableExpression) expressionNode() {}
+func (m *MultiVariableExpression) TokenLiteral() string {
 	return ""
 }
-func (me *MultiVariableExpression) String() string {
+func (m *MultiVariableExpression) String() string {
 	var out bytes.Buffer
 	var variables []string
 
-	for _, v := range me.Variables {
+	for _, v := range m.Variables {
 		variables = append(variables, v.String())
 	}
 
