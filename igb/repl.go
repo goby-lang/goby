@@ -272,7 +272,7 @@ func readIgb(igb *iGb, err error) (*iGb, error) {
 	igb.rl.Config.UniqueEditLine = true // required to update the previous prompt
 	igb.lines, err = igb.rl.Readline()
 	igb.rl.Config.UniqueEditLine = false
-	
+
 	igb.lines = strings.TrimSpace(igb.lines)
 	igb.lines = strings.TrimPrefix(igb.lines, prmpt1)
 	igb.lines = strings.TrimPrefix(igb.lines, prmpt2)
