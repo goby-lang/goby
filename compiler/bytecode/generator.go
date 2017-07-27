@@ -13,11 +13,11 @@ type scope struct {
 	program    *ast.Program
 	localTable *localTable
 	line       int
-	anchor     *anchor
+	anchors    map[string]*anchor
 }
 
 func newScope(stmt ast.Statement) *scope {
-	return &scope{localTable: newLocalTable(0), self: stmt, line: 0}
+	return &scope{localTable: newLocalTable(0), self: stmt, line: 0, anchors: make(map[string]*anchor)}
 }
 
 // Generator contains program's AST and will store generated instruction sets
@@ -93,7 +93,7 @@ func (g *Generator) ResetInstructionSets() {
 
 // InitTopLevelScope sets generator's scope with program node, which means it's the top level scope
 func (g *Generator) InitTopLevelScope(program *ast.Program) {
-	g.scope = &scope{program: program, localTable: newLocalTable(0)}
+	g.scope = &scope{program: program, localTable: newLocalTable(0), anchors: make(map[string]*anchor)}
 }
 
 // GenerateByteCode returns compiled instructions in string format
