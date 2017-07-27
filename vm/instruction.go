@@ -466,6 +466,8 @@ var builtInActions = map[operationType]*action{
 
 func (vm *VM) initObjectFromGoType(value interface{}) Object {
 	switch v := value.(type) {
+	case nil:
+		return NULL
 	case int:
 		return vm.initIntegerObject(v)
 	case int64:
