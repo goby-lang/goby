@@ -137,6 +137,7 @@ func (v *VM) testEval(t *testing.T, input string) Object {
 	iss, err := compiler.CompileToInstructions(input)
 
 	if err != nil {
+		t.Errorf("Error when compiling input: %s", input)
 		t.Fatal(err.Error())
 	}
 
