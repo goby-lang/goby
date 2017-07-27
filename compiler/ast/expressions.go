@@ -142,7 +142,6 @@ func (ie *InfixExpression) String() string {
 type AssignExpression struct {
 	Token     token.Token
 	Variables []Variable
-	Operator  string
 	Value     Expression
 	// Optioned attribute is only used when infix expression is local assignment in params.
 	// For example: `foo(x = 10)`'s `x = 10` is an optioned assign expression
