@@ -728,12 +728,7 @@ func TestAssignIndexExpressionWithVariableValue(t *testing.T) {
 			t.Fatalf("exp is not AssignExpression. got=%T", exp)
 		}
 
-		if !tt.variableMatchFunc(t, infixExp.Variables, tt.expectedIdentifier) {
-			return
-		}
-
-		if infixExp.Operator != "=" {
-			t.Errorf("AssignExpression's operator is not =. got=%q", infixExp.Operator)
+		if !tt.variableMatchFunc(t, infixExp.Variables[0], tt.expectedIdentifier) {
 			return
 		}
 
@@ -744,27 +739,22 @@ func TestAssignIndexExpressionWithVariableValue(t *testing.T) {
 }
 
 func testAssignExpression(t *testing.T, exp ast.Expression, expectedIdentifier string, variableMatchFunction func(*testing.T, ast.Expression, string) bool, expected interface{}) {
-	infixExp, ok := exp.(*ast.AssignExpression)
+	assignExp, ok := exp.(*ast.AssignExpression)
 
 	if !ok {
 		t.Fatalf("exp is not AssignExpression. got=%T", exp)
 	}
 
-	if !variableMatchFunction(t, infixExp.Variables, expectedIdentifier) {
-		return
-	}
-
-	if infixExp.Operator != "=" {
-		t.Errorf("Assignment's operator is not =. got=%q", infixExp.Operator)
+	if !variableMatchFunction(t, assignExp.Variables[0], expectedIdentifier) {
 		return
 	}
 
 	switch expected := expected.(type) {
 	case int:
-		testIntegerLiteral(t, infixExp.Value, expected)
+		testIntegerLiteral(t, assignExp.Value, expected)
 	case string:
-		testStringLiteral(t, infixExp.Value, expected)
+		testStringLiteral(t, assignExp.Value, expected)
 	case bool:
-		testBoolLiteral(t, infixExp.Value, expected)
+		testBoolLiteral(t, assignExp.Value, expected)
 	}
 }
