@@ -1346,3 +1346,81 @@ func TestClassInheritance(t *testing.T) {
 	testStringObject(t, 0, evaluated, "Bar")
 	vm.checkCFP(t, 0, 0)
 }
+
+func TestMultiVarAssignment(t *testing.T) {
+	tests := []struct {
+		input      string
+		expected   interface{}
+		expectedSP int
+	}{
+		{`
+		a, b = [1, 2]
+		a
+		`,
+			1,
+			1},
+		{`
+		a, b = [1, 2]
+		b
+		`,
+			2,
+			1},
+
+		{`
+		a, b, c = [1, 2, 3]
+		c
+		`,
+			3,
+			1},
+		{`
+		a, b, c = [1]
+		b
+		`,
+			nil,
+			1},
+		{`
+		a, b, c = [1]
+		c
+		`,
+			nil,
+			1},
+		{`
+		arr = [1, 2, 3]
+		a, b, c = arr
+		b
+		`, 2,
+			1},
+		{`
+		arr = [1, 2, 3]
+		a, b, c = arr
+		c
+		`, 3,
+			1},
+		{`
+		arr = [1]
+		a, b, c = arr
+		a
+		`, 1,
+			1},
+		{`
+		arr = [1]
+		a, b, c = arr
+		b
+		`, nil,
+			1},
+		{`
+		arr = [1]
+		a, b, c = arr
+		c
+		`, nil,
+			1},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, tt.expectedSP)
+	}
+}
