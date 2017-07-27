@@ -335,9 +335,9 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 	// Pure assignment case
 	if p.curTokenIs(token.Assign) {
 		exp := &ast.AssignExpression{
-			Token:    p.curToken,
-			Variable: variable,
-			Operator: p.curToken.Literal,
+			Token:     p.curToken,
+			Variables: []ast.Variable{variable},
+			Operator:  p.curToken.Literal,
 		}
 
 		precedence := p.curPrecedence()
@@ -370,10 +370,10 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 	}
 
 	exp := &ast.AssignExpression{
-		Token:    assignment,
-		Variable: variable,
-		Operator: assignment.Literal,
-		Value:    infixExp,
+		Token:     assignment,
+		Variables: []ast.Variable{variable},
+		Operator:  assignment.Literal,
+		Value:     infixExp,
 	}
 
 	return exp

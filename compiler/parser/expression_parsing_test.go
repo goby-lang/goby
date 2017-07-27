@@ -728,7 +728,7 @@ func TestAssignIndexExpressionWithVariableValue(t *testing.T) {
 			t.Fatalf("exp is not AssignExpression. got=%T", exp)
 		}
 
-		if !tt.variableMatchFunc(t, infixExp.Variable, tt.expectedIdentifier) {
+		if !tt.variableMatchFunc(t, infixExp.Variables, tt.expectedIdentifier) {
 			return
 		}
 
@@ -750,7 +750,7 @@ func testAssignExpression(t *testing.T, exp ast.Expression, expectedIdentifier s
 		t.Fatalf("exp is not AssignExpression. got=%T", exp)
 	}
 
-	if !variableMatchFunction(t, infixExp.Variable, expectedIdentifier) {
+	if !variableMatchFunction(t, infixExp.Variables, expectedIdentifier) {
 		return
 	}
 
