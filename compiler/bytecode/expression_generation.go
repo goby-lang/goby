@@ -125,8 +125,12 @@ func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.AssignE
 	g.compileExpression(is, exp.Value, scope, table)
 	g.fsm.Event(oldState)
 
-	if len(exp.Variables) == 1 {
-		switch name := exp.Variables[0].(type) {
+	if len(exp.Variables) > 1 {
+		is.define(ExpandArray, len(exp.Variables))
+	}
+
+	for _, v := range exp.Variables {
+		switch name := v.(type) {
 		case *ast.Identifier:
 			index, depth := table.setLCL(name.Value, table.depth)
 
