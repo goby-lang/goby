@@ -1018,6 +1018,12 @@ func TestPostfixMethodCall(t *testing.T) {
 		a
 		`,
 			-4},
+		{`
+		a = 1
+		a+=1
+		a
+		`,
+			2},
 	}
 
 	for i, tt := range tests {
