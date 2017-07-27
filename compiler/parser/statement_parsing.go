@@ -167,8 +167,9 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	stmt := &ast.ExpressionStatement{Token: p.curToken}
 
-	if p.curTokenIs(token.Ident) {
-		// I use precedence to identify call_without_parens case, this is not an appropriate way but it work in current situation
+	if p.curTokenIs(token.Ident) || p.curTokenIs(token.InstanceVariable) {
+		// This is used for identifying method call without parens
+		// Or multiple variable assignment
 		stmt.Expression = p.parseExpression(LOWEST)
 	} else {
 		stmt.Expression = p.parseExpression(NORMAL)

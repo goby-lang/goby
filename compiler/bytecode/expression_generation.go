@@ -125,20 +125,26 @@ func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.AssignE
 	g.compileExpression(is, exp.Value, scope, table)
 	g.fsm.Event(oldState)
 
-	switch name := exp.Variable.(type) {
-	case *ast.Identifier:
-		index, depth := table.setLCL(name.Value, table.depth)
+	if len(exp.Variables) > 1 {
+		is.define(ExpandArray, len(exp.Variables))
+	}
 
-		if exp.Optioned != 0 {
-			is.define(SetLocal, depth, index, exp.Optioned)
-			return
+	for _, v := range exp.Variables {
+		switch name := v.(type) {
+		case *ast.Identifier:
+			index, depth := table.setLCL(name.Value, table.depth)
+
+			if exp.Optioned != 0 {
+				is.define(SetLocal, depth, index, exp.Optioned)
+				return
+			}
+
+			is.define(SetLocal, depth, index)
+		case *ast.InstanceVariable:
+			is.define(SetInstanceVariable, name.Value)
+		case *ast.Constant:
+			is.define(SetConstant, name.Value)
 		}
-
-		is.define(SetLocal, depth, index)
-	case *ast.InstanceVariable:
-		is.define(SetInstanceVariable, name.Value)
-	case *ast.Constant:
-		is.define(SetConstant, name.Value)
 	}
 }
 

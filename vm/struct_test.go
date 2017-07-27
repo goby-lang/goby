@@ -9,9 +9,9 @@ func TestCallingStructFunctionWithReturnValue(t *testing.T) {
 
 	input := `
 	p = import "github.com/goby-lang/goby/test_fixtures/import_test/struct/struct.go"
-	result = p.send("NewBar", "xyz") # multiple result, so result is an array
-	bar = result[0]
-	bar.send("Name", "!")[0]
+	bar, err = p.send("NewBar", "xyz") # multiple result, so result is an array
+	result, err = bar.send("Name", "!")
+	result
 	`
 
 	vm := initTestVM()
@@ -20,13 +20,28 @@ func TestCallingStructFunctionWithReturnValue(t *testing.T) {
 	vm.checkCFP(t, 0, 0)
 }
 
+func TestCallingStructFunctionWithReturnError(t *testing.T) {
+	skipPluginTestIfEnvNotSet(t)
+
+	input := `
+	p = import "github.com/goby-lang/goby/test_fixtures/import_test/struct/struct.go"
+	bar, err = p.send("NewBar", "xyz") # multiple result, so result is an array
+	result, err = bar.send("Name", "!")
+	err
+	`
+
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input)
+	checkExpected(t, 0, evaluated, nil)
+	vm.checkCFP(t, 0, 0)
+}
+
 func TestCallingStructFuncWithDifferentType(t *testing.T) {
 	skipPluginTestIfEnvNotSet(t)
 
 	input := `
 	p = import "github.com/goby-lang/goby/test_fixtures/import_test/struct/struct.go"
-	result = p.send("NewBar", "xyz") # multiple result, so result is an array
-	bar = result[0]
+	bar, err = p.send("NewBar", "xyz") # multiple result, so result is an array
 	bar.send("Add", 10, 100.to_int64) # Add is func(int, int64) int64
 	`
 
