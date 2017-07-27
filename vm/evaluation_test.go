@@ -1414,6 +1414,78 @@ func TestMultiVarAssignment(t *testing.T) {
 		c
 		`, nil,
 			1},
+		{`
+		arr = [1]
+		a, b, c, d = arr
+		d
+		`, nil,
+			1},
+		{`
+		arr = [1, 2, 3]
+		@a, @b, c = arr
+		@a
+		`, 1,
+			1},
+		{`
+		arr = [1, 2, 3]
+		@a, @b, c = arr
+		@b
+		`, 2,
+			1},
+		{`
+		arr = [1, 2, 3]
+		@a, @b, c = arr
+		c
+		`, 3,
+			1},
+		{`
+		class Foo
+		  attr_reader :a, :b, :c
+
+		  def bar(arr)
+		    @a, @b, c = arr
+		    @c = @a + @b + c
+		  end
+		end
+
+		f = Foo.new
+
+		f.bar([10, 100, 200])
+		f.a
+		`, 10,
+			3},
+		{`
+		class Foo
+		  attr_reader :a, :b, :c
+
+		  def bar(arr)
+		    @a, @b, c = arr
+		    @c = @a + @b + c
+		  end
+		end
+
+		f = Foo.new
+
+		f.bar([10, 100, 200])
+		f.b
+		`, 100,
+			3},
+		{`
+		class Foo
+		  attr_reader :a, :b, :c
+
+		  def bar(arr)
+		    @a, @b, c = arr
+		    @c = @a + @b + c
+		  end
+		end
+
+		f = Foo.new
+
+		f.bar([10, 100, 200])
+		f.c
+		`, 310,
+			3},
 	}
 
 	for i, tt := range tests {
