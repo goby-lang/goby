@@ -45,11 +45,15 @@ func (g *Generator) compileStatement(is *InstructionSet, statement ast.Statement
 		g.compileWhileStmt(is, stmt, scope, table)
 	case *ast.NextStatement:
 		g.compileNextStatement(is, scope)
+	case *ast.BreakStatement:
+		g.compileBreakStatement(is, scope)
 	}
 }
 
 func (g *Generator) compileWhileStmt(is *InstructionSet, stmt *ast.WhileStatement, scope *scope, table *localTable) {
 	anchor1 := &anchor{}
+	breakAnchor := &anchor{}
+
 	is.define(Jump, anchor1)
 
 	is.define(PutNull)
@@ -58,7 +62,8 @@ func (g *Generator) compileWhileStmt(is *InstructionSet, stmt *ast.WhileStatemen
 
 	anchor2 := &anchor{is.count}
 
-	scope.anchor = anchor1
+	scope.anchors["next"] = anchor1
+	scope.anchors["break"] = breakAnchor
 	g.fsm.Event(removeExp)
 	g.compileCodeBlock(is, stmt.Body, scope, table)
 	g.fsm.Event(keepExp)
@@ -70,10 +75,16 @@ func (g *Generator) compileWhileStmt(is *InstructionSet, stmt *ast.WhileStatemen
 	is.define(BranchIf, anchor2)
 	is.define(PutNull)
 	is.define(Pop)
+
+	breakAnchor.line = is.count
 }
 
 func (g *Generator) compileNextStatement(is *InstructionSet, scope *scope) {
-	is.define(Jump, scope.anchor)
+	is.define(Jump, scope.anchors["next"])
+}
+
+func (g *Generator) compileBreakStatement(is *InstructionSet, scope *scope) {
+	is.define(Jump, scope.anchors["break"])
 }
 
 func (g *Generator) compileClassStmt(is *InstructionSet, stmt *ast.ClassStatement, scope *scope, table *localTable) {

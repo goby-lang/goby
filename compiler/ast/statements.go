@@ -144,6 +144,21 @@ func (ns *NextStatement) String() string {
 	return "next"
 }
 
+// BreakStatement represents "break" keyword
+type BreakStatement struct {
+	Token token.Token
+}
+
+func (bs *BreakStatement) statementNode() {}
+
+// TokenLiteral returns token's literal
+func (bs *BreakStatement) TokenLiteral() string {
+	return bs.Token.Literal
+}
+func (bs *BreakStatement) String() string {
+	return bs.TokenLiteral()
+}
+
 type WhileStatement struct {
 	Token     token.Token
 	Condition Expression

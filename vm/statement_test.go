@@ -270,39 +270,89 @@ func TestNextStatement(t *testing.T) {
 		expected interface{}
 	}{
 		{`
-		x = 0
-		y = 0
+x = 0
+y = 0
 
-		while x < 10 do
-		  x = x + 1
-		  if x == 5
-		    next
-		  end
-		  y = y + 1
-		end
+while x < 10 do
+  x = x + 1
+  if x == 5
+	next
+  end
+  y = y + 1
+end
 
-		x + y
+x + y
 		`, 19},
 		{`
-		x = 0
-		y = 0
-		i = 0
+x = 0
+y = 0
+i = 0
 
-		while x < 10 do
-		  x = x + 1
-		  while y < 5 do
-		    y = y + 1
+while x < 10 do
+  x = x + 1
+  while y < 5 do
+	y = y + 1
 
-		    if y == 3
-		      next
-		    end
+	if y == 3
+	  next
+	end
 
-		    i = i + x * y
-		  end
-		end
+	i = i + x * y
+  end
+end
 
-		i
+i
 		`, 12},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
+func TestBreakStatement(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+x = 0
+y = 0
+
+while x < 10 do
+  x = x + 1
+  if x == 5
+	break
+  end
+  y = y + 1
+end
+
+x + y
+		`, 9},
+		{`
+x = 0
+y = 0
+i = 0
+
+while x < 10 do
+  x = x + 1
+  while y < 5 do
+	y = y + 1
+
+	if y == 3
+	  break
+	end
+
+	i = i + x * y
+  end
+end
+
+a = i * 10
+a + 100
+		`, 310},
 	}
 
 	for i, tt := range tests {

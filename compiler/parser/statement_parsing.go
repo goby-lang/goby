@@ -24,6 +24,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseModuleStatement()
 	case token.Next:
 		return &ast.NextStatement{Token: p.curToken}
+	case token.Break:
+		return &ast.BreakStatement{Token: p.curToken}
 	default:
 		return p.parseExpressionStatement()
 	}
