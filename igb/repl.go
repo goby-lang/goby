@@ -38,8 +38,8 @@ const (
 	emojis = "😀😁😂🤣😃😄😅😆😉😊😋😎😍😘😗😙😚🙂🤗🤔😐😑😶🙄😏😮😪😴😌😛😜😝🤤🙃🤑😲😭😳🤧😇🤠🤡🤥🤓😈👿👹👺💀👻👽🤖💩😺😸😹😻😼😽"
 )
 
-// Igb holds internal states of Igb.
-type Igb struct {
+// iGb holds internal states of iGb.
+type iGb struct {
 	sm        *fsm.FSM
 	rl        *readline.Instance
 	completer *readline.PrefixCompleter
@@ -48,8 +48,8 @@ type Igb struct {
 	stack     int
 }
 
-// Ivm holds VM only for Igb.
-type Ivm struct {
+// iVM holds VM only for iGb.
+type iVM struct {
 	v *vm.VM
 	p *parser.Parser
 	g *bytecode.Generator
@@ -73,7 +73,7 @@ reset:
 	defer igb.rl.Close()
 
 	if err != nil {
-		fmt.Printf("Igb error: %s", err)
+		fmt.Printf("iGb error: %s", err)
 		return
 	}
 
@@ -123,7 +123,7 @@ reset:
 			igb.rl = nil
 			igb.cmds = nil
 			println(prompt(igb.stack) + igb.line)
-			println("Restarting Igb...")
+			println("Restarting iGb...")
 			goto reset
 		case igb.line == exit:
 			println(prompt(igb.stack) + igb.line)
@@ -226,8 +226,8 @@ reset:
 
 // Other helper functions --------------------------------------------------
 
-func initIgb() *Igb {
-	return &Igb{
+func initIgb() *iGb {
+	return &iGb{
 		cmds:  nil,
 		stack: 0,
 		sm: fsm.NewFSM(
@@ -248,9 +248,9 @@ func initIgb() *Igb {
 	}
 }
 
-func createVM() Ivm {
+func createVM() iVM {
 	// Initialize VM
-	ivm := Ivm{}
+	ivm := iVM{}
 	ivm.v = vm.New(os.Getenv("GOBY_ROOT"), []string{})
 	ivm.v.SetClassISIndexTable("")
 	ivm.v.SetMethodISIndexTable("")
@@ -265,7 +265,7 @@ func createVM() Ivm {
 	return ivm
 }
 
-func readIgb(igb *Igb, err error) (*Igb, error) {
+func readIgb(igb *iGb, err error) (*iGb, error) {
 	igb.rl.Config.UniqueEditLine = true
 	igb.line, err = igb.rl.Readline()
 	igb.rl.Config.UniqueEditLine = false
