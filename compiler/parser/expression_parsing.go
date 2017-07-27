@@ -613,7 +613,7 @@ func (p *Parser) parseMultiVariables(left ast.Expression) ast.Expression {
 
 	p.nextToken()
 
-	exp := p.parseExpression(NORMAL)
+	exp := p.parseExpression(CALL)
 
 	var2, ok := exp.(ast.Variable)
 
