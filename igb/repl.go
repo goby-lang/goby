@@ -43,9 +43,9 @@ type iGb struct {
 	sm        *fsm.FSM
 	rl        *readline.Instance
 	completer *readline.PrefixCompleter
-	line      string
+	lines     string
 	cmds      []string
-	stack     int
+	indents   int
 }
 
 // iVM holds VM only for iGb.
@@ -59,7 +59,7 @@ type iVM struct {
 func StartIgb(version string) {
 reset:
 	var err error
-	igb := initIgb()
+	igb := newIgb()
 
 	igb.rl, err = readline.NewEx(&readline.Config{
 		Prompt:              prompt1,
@@ -81,7 +81,7 @@ reset:
 
 	println("Goby", version, fortune(), fortune(), fortune())
 
-	ivm := createVM()
+	ivm := newIVM()
 
 	for {
 		igb, err = readIgb(igb, err)
@@ -90,10 +90,10 @@ reset:
 		if err != nil {
 			switch {
 			case err == io.EOF:
-				println(igb.line + "")
+				println(igb.lines + "")
 				return
 			case err == readline.ErrInterrupt: // Pressing Ctrl-C
-				if len(igb.line) == 0 {
+				if len(igb.lines) == 0 {
 					if igb.cmds == nil {
 						println("")
 						println("Bye!")
@@ -101,7 +101,7 @@ reset:
 					}
 				}
 				// Erasing command buffer
-				igb.stack = 0
+				igb.indents = 0
 				igb.rl.SetPrompt(prompt1)
 				igb.sm.Event(waitExited)
 				igb.cmds = nil
@@ -112,29 +112,29 @@ reset:
 
 		// Command handling
 		switch {
-		case strings.HasPrefix(igb.line, "#"):
-			println(prompt(igb.stack) + indent(igb.stack) + igb.line)
+		case strings.HasPrefix(igb.lines, "#"):
+			println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
 			continue
-		case igb.line == help:
-			println(prompt(igb.stack) + igb.line)
+		case igb.lines == help:
+			println(prompt(igb.indents) + igb.lines)
 			usage(igb.rl.Stderr(), igb.completer)
 			continue
-		case igb.line == reset:
+		case igb.lines == reset:
 			igb.rl = nil
 			igb.cmds = nil
-			println(prompt(igb.stack) + igb.line)
+			println(prompt(igb.indents) + igb.lines)
 			println("Restarting iGb...")
 			goto reset
-		case igb.line == exit:
-			println(prompt(igb.stack) + igb.line)
+		case igb.lines == exit:
+			println(prompt(igb.indents) + igb.lines)
 			println("Bye!")
 			return
-		case igb.line == "":
-			println(prompt(igb.stack) + indent(igb.stack) + igb.line)
+		case igb.lines == "":
+			println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
 			continue
 		}
 
-		ivm.p.Lexer = lexer.New(igb.line)
+		ivm.p.Lexer = lexer.New(igb.lines)
 		program, perr := ivm.p.ParseProgram()
 
 		// Parse error handling
@@ -144,39 +144,39 @@ reset:
 				if !igb.sm.Is(Waiting) {
 					igb.sm.Event(Waiting)
 				}
-				println(prompt(igb.stack) + indent(igb.stack) + igb.line)
-				igb.stack++
-				igb.rl.SetPrompt(prompt(igb.stack) + indent(igb.stack))
-				igb.cmds = append(igb.cmds, igb.line)
+				println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
+				igb.indents++
+				igb.rl.SetPrompt(prompt(igb.indents) + indent(igb.indents))
+				igb.cmds = append(igb.cmds, igb.lines)
 				continue
 			case perr.IsUnexpectedEnd() && len(igb.cmds) == 0:
 				// If igb.cmds is empty, it means that user just typed 'end' without corresponding statement/expression
-				println(prompt(igb.stack) + indent(igb.stack) + igb.line)
-				igb.stack = 0
+				println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
+				igb.indents = 0
 				igb.rl.SetPrompt(prompt1)
 				fmt.Println(perr.Message)
 				igb.cmds = nil
 				continue
 			case perr.IsUnexpectedEnd():
-				if igb.stack > 1 {
-					igb.stack--
-					println(prompt(igb.stack) + indent(igb.stack) + igb.line)
+				if igb.indents > 1 {
+					igb.indents--
+					println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
 					igb.sm.Event(Waiting)
-					igb.rl.SetPrompt(prompt(igb.stack) + indent(igb.stack))
-					igb.cmds = append(igb.cmds, igb.line)
+					igb.rl.SetPrompt(prompt(igb.indents) + indent(igb.indents))
+					igb.cmds = append(igb.cmds, igb.lines)
 					continue
 				}
-				igb.stack = 0
+				igb.indents = 0
 				igb.sm.Event(waitEnded)
-				igb.rl.SetPrompt(prompt(igb.stack) + indent(igb.stack))
-				igb.cmds = append(igb.cmds, igb.line)
+				igb.rl.SetPrompt(prompt(igb.indents) + indent(igb.indents))
+				igb.cmds = append(igb.cmds, igb.lines)
 			}
 		}
 
-		if igb.sm.Is(Waiting) && igb.stack > 0 {
-			println(prompt(igb.stack) + indent(igb.stack) + igb.line)
-			igb.rl.SetPrompt(prompt(igb.stack) + indent(igb.stack))
-			igb.cmds = append(igb.cmds, igb.line)
+		if igb.sm.Is(Waiting) && igb.indents > 0 {
+			println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
+			igb.rl.SetPrompt(prompt(igb.indents) + indent(igb.indents))
+			igb.cmds = append(igb.cmds, igb.lines)
 			continue
 		}
 
@@ -190,17 +190,17 @@ reset:
 				if !perr.IsEOF() {
 					fmt.Println(perr.Message)
 				}
-				println(prompt(igb.stack) + indent(igb.stack) + igb.line)
+				println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
 				continue
 			}
 
 			// If everything goes well, reset state and statements buffer
-			igb.rl.SetPrompt(prompt(igb.stack))
+			igb.rl.SetPrompt(prompt(igb.indents))
 			igb.sm.Event(readyToExec)
 		}
 
 		if igb.sm.Is(readyToExec) {
-			println(prompt(igb.stack) + igb.line)
+			println(prompt(igb.indents) + igb.lines)
 			instructions := ivm.g.GenerateInstructions(program.Statements)
 			ivm.v.REPLExec(instructions)
 
@@ -212,7 +212,7 @@ reset:
 					println(echo, r)
 				}
 			} else {
-				if string(igb.line[len(igb.line)-1]) != semicolon {
+				if string(igb.lines[len(igb.lines)-1]) != semicolon {
 					println(echo, r)
 				}
 			}
@@ -226,10 +226,11 @@ reset:
 
 // Other helper functions --------------------------------------------------
 
-func initIgb() *iGb {
+// newIgb initializes iGb.
+func newIgb() *iGb {
 	return &iGb{
-		cmds:  nil,
-		stack: 0,
+		cmds:    nil,
+		indents: 0,
 		sm: fsm.NewFSM(
 			readyToExec,
 			fsm.Events{
@@ -248,8 +249,9 @@ func initIgb() *iGb {
 	}
 }
 
-func createVM() iVM {
-	// Initialize VM
+//
+// newIVM initializes iVM.
+func newIVM() iVM {
 	ivm := iVM{}
 	ivm.v = vm.New(os.Getenv("GOBY_ROOT"), []string{})
 	ivm.v.SetClassISIndexTable("")
@@ -265,30 +267,34 @@ func createVM() iVM {
 	return ivm
 }
 
+// readIgb fetches one line from input, with helps of Readline lib.
 func readIgb(igb *iGb, err error) (*iGb, error) {
-	igb.rl.Config.UniqueEditLine = true
-	igb.line, err = igb.rl.Readline()
+	igb.rl.Config.UniqueEditLine = true // required to update the previous prompt
+	igb.lines, err = igb.rl.Readline()
 	igb.rl.Config.UniqueEditLine = false
-	igb.line = strings.TrimPrefix(igb.line, prmpt1)
-	igb.line = strings.TrimPrefix(igb.line, prmpt2)
-	igb.line = strings.TrimSpace(igb.line)
+
+	igb.lines = strings.TrimPrefix(igb.lines, prmpt1)
+	igb.lines = strings.TrimPrefix(igb.lines, prmpt2)
+	igb.lines = strings.TrimSpace(igb.lines)
 	return igb, err
 }
 
+// filterInput just ignores Ctrl-z.
 func filterInput(r rune) (rune, bool) {
 	switch r {
-	// block CtrlZ feature
 	case readline.CharCtrlZ:
 		return r, false
 	}
 	return r, true
 }
 
+// usage shows help lines.
 func usage(w io.Writer, c *readline.PrefixCompleter) {
 	io.WriteString(w, "commands:\n")
 	io.WriteString(w, c.Tree("   "))
 }
 
+// indent performs indentation with space padding.
 func indent(c int) string {
 	var s string
 	for i := 0; i < c; i++ {
@@ -297,6 +303,7 @@ func indent(c int) string {
 	return s
 }
 
+// prompt switches prompt sign.
 func prompt(s int) string {
 	if s > 0 {
 		return prompt2
@@ -304,6 +311,7 @@ func prompt(s int) string {
 	return prompt1
 }
 
+// fortune is just a fun item to show slot machine: receiving rep-digit would imply your fortune ;-)
 func fortune() string {
 	var randSrc = rand.NewSource(time.Now().UnixNano())
 	s := strings.Split(emojis, "")
