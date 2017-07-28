@@ -109,6 +109,40 @@ func TestConditionWithAlternativeCompilation(t *testing.T) {
 	compareBytecode(t, bytecode, expected)
 }
 
+func TestMultipleVariableAssignment(t *testing.T) {
+	input := `
+
+	def foo
+	  [1, 2, 3]
+	end
+
+	a, @b, c = foo
+	`
+
+	expected := `
+<Def:foo>
+0 putobject 1
+1 putobject 2
+2 putobject 3
+3 newarray 3
+4 leave
+<ProgramStart>
+0 putself
+1 putstring "foo"
+2 def_method 0
+3 putself
+4 send foo 0
+5 expand_array 3
+6 setlocal 0 0
+7 setinstancevariable @b
+8 setlocal 0 1
+9 leave
+`
+
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
 func TestConstantCompilation(t *testing.T) {
 	input := `
 	Foo = 10

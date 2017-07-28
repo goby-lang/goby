@@ -27,6 +27,7 @@ const (
 	PutObject           = "putobject"
 	PutNull             = "putnil"
 	NewArray            = "newarray"
+	ExpandArray         = "expand_array"
 	NewHash             = "newhash"
 	NewRange            = "newrange"
 	BranchUnless        = "branchunless"

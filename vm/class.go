@@ -195,6 +195,38 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
+			// Returns the receiver if it is truthy value. However, if the receiver value is falsey, it will
+			// return the right value
+			//
+			// ```ruby
+			// a = 123;    a ||= 456;       a; # => 123
+			// a = 123;    a ||= true;      a; # => 123
+			// a = "Goby"; a ||= "Fish";    a; # => "Goby"
+			// a = 1..3;   a ||= [1, 2, 3]; a; # => 1..3
+			//
+			// # The substitution case (See the implementation of the || method in the NullClass and the BooleanClass)
+			// a = false;  a ||= 123;       a; # => 123
+			// a = nil;    a ||= { b: 1 };  a; # => { b: 1 }
+			// a = false;  a ||= false;     a; # => false
+			// a = nil;    a ||= false;     a; # => false
+			// a = false;  a ||= nil;       a; # => nil
+			// a = nil;    a ||= nil;       a; # => nil
+			// a = false;  a ||= nil || false;         a; # => false
+			// a = false;  a ||= false || nil;         a; # => nil
+			// a = false;  a ||= true && false || nil; a; # => nil
+			// ```
+			// @return [Object]
+			Name: "||",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
+					}
+					return receiver
+				}
+			},
+		},
+		{
 			Name: "import",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {

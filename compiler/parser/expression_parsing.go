@@ -35,7 +35,6 @@ var precedence = map[token.Type]int{
 	token.Incr:               SUM,
 	token.Decr:               SUM,
 	token.Modulo:             SUM,
-	token.Assign:             ASSIGN,
 	token.Slash:              PRODUCT,
 	token.Asterisk:           PRODUCT,
 	token.Pow:                PRODUCT,
@@ -43,6 +42,10 @@ var precedence = map[token.Type]int{
 	token.Dot:                CALL,
 	token.LParen:             CALL,
 	token.ResolutionOperator: CALL,
+	token.Assign:             ASSIGN,
+	token.PlusEq:             ASSIGN,
+	token.MinusEq:            ASSIGN,
+	token.OrEq:               ASSIGN,
 }
 
 // Constants for denoting precedence
@@ -50,11 +53,11 @@ const (
 	_ int = iota
 	LOWEST
 	NORMAL
+	ASSIGN
 	LOGIC
 	RANGE
 	EQUALS
 	COMPARE
-	ASSIGN
 	SUM
 	PRODUCT
 	PREFIX
@@ -323,21 +326,65 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 }
 
 func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
-	variable, ok := v.(ast.Variable)
+	var value ast.Expression
+	var tok token.Token
 
-	if !ok {
+	exp := &ast.AssignExpression{}
+
+	switch v := v.(type) {
+	case ast.Variable:
+		exp.Variables = []ast.Variable{v}
+	case *ast.MultiVariableExpression:
+		exp.Variables = v.Variables
+	default:
 		p.error = &Error{Message: fmt.Sprintf("Can't assign value to %s. Line: %d", v.String(), p.curToken.Line), errType: InvalidAssignmentError}
 	}
 
-	exp := &ast.AssignExpression{
-		Token:    p.curToken,
-		Variable: variable,
-		Operator: p.curToken.Literal,
+	if len(exp.Variables) == 1 {
+		// Pure assignment case
+		switch p.curToken.Type {
+		case token.Assign:
+			tok = p.curToken
+			precedence := p.curPrecedence()
+			p.nextToken()
+			value = p.parseExpression(precedence)
+		case token.MinusEq, token.PlusEq, token.OrEq:
+			tok = token.Token{Type: token.Assign, Literal: "=", Line: p.curToken.Line}
+
+			// Syntax Surgar: Assignment with operator case
+			infixOperator := token.Token{Line: p.curToken.Line}
+			switch p.curToken.Type {
+			case token.PlusEq:
+				infixOperator.Type = token.Plus
+				infixOperator.Literal = "+"
+			case token.MinusEq:
+				infixOperator.Type = token.Minus
+				infixOperator.Literal = "-"
+			case token.OrEq:
+				infixOperator.Type = token.Or
+				infixOperator.Literal = "||"
+			}
+
+			p.nextToken()
+
+			value = &ast.InfixExpression{
+				Token:    infixOperator,
+				Left:     exp.Variables[0],
+				Operator: infixOperator.Literal,
+				Right:    p.parseExpression(LOWEST),
+			}
+		default:
+			p.error = &Error{errType: UnexpectedTokenError, Message: fmt.Sprintf("Unexpect token '%s' for assgin expression", p.curToken.Literal)}
+		}
+	} else {
+		tok = p.curToken
+		precedence := p.curPrecedence()
+		p.nextToken()
+		value = p.parseExpression(precedence)
 	}
 
-	precedence := p.curPrecedence()
-	p.nextToken()
-	exp.Value = p.parseExpression(precedence)
+	exp.Token = tok
+	exp.Value = value
 
 	return exp
 }
@@ -553,4 +600,43 @@ func (p *Parser) parseRangeExpression(left ast.Expression) ast.Expression {
 	exp.End = p.parseExpression(precedence)
 
 	return exp
+}
+
+func (p *Parser) parseMultiVariables(left ast.Expression) ast.Expression {
+	var1, ok := left.(ast.Variable)
+
+	if !ok {
+		p.noPrefixParseFnError(p.curToken.Type)
+	}
+
+	vars := []ast.Variable{var1}
+
+	p.nextToken()
+
+	exp := p.parseExpression(CALL)
+
+	var2, ok := exp.(ast.Variable)
+
+	if !ok {
+		p.noPrefixParseFnError(p.curToken.Type)
+	}
+
+	vars = append(vars, var2)
+
+	for p.peekTokenIs(token.Comma) {
+		p.nextToken()
+		p.nextToken()
+		exp := p.parseExpression(CALL) // Use highest precedence
+
+		v, ok := exp.(ast.Variable)
+
+		if !ok {
+			p.noPrefixParseFnError(p.curToken.Type)
+		}
+
+		vars = append(vars, v)
+	}
+
+	result := &ast.MultiVariableExpression{Variables: vars}
+	return result
 }

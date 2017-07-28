@@ -138,12 +138,33 @@ func (ie *InfixExpression) String() string {
 	return out.String()
 }
 
+// MultiVariableExpression is not really an expression, it's just a container that holds multiple Variables
+type MultiVariableExpression struct {
+	Variables []Variable
+}
+
+func (m *MultiVariableExpression) expressionNode() {}
+func (m *MultiVariableExpression) TokenLiteral() string {
+	return ""
+}
+func (m *MultiVariableExpression) String() string {
+	var out bytes.Buffer
+	var variables []string
+
+	for _, v := range m.Variables {
+		variables = append(variables, v.String())
+	}
+
+	out.WriteString(strings.Join(variables, ", "))
+
+	return out.String()
+}
+
 // AssignExpression represents variable assignment in Goby.
 type AssignExpression struct {
-	Token    token.Token
-	Variable Variable
-	Operator string
-	Value    Expression
+	Token     token.Token
+	Variables []Variable
+	Value     Expression
 	// Optioned attribute is only used when infix expression is local assignment in params.
 	// For example: `foo(x = 10)`'s `x = 10` is an optioned assign expression
 	// TODO: Remove this when we can put metadata inside bytecode.
@@ -156,9 +177,14 @@ func (ae *AssignExpression) TokenLiteral() string {
 }
 func (ae *AssignExpression) String() string {
 	var out bytes.Buffer
+	var variables []string
+
+	for _, v := range ae.Variables {
+		variables = append(variables, v.String())
+	}
 
 	out.WriteString("(")
-	out.WriteString(ae.Variable.String())
+	out.WriteString(strings.Join(variables, ", "))
 	out.WriteString(" = ")
 	out.WriteString(ae.Value.String())
 	out.WriteString(")")

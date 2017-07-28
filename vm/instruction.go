@@ -163,6 +163,34 @@ var builtInActions = map[operationType]*action{
 			t.stack.push(&Pointer{Target: arr})
 		},
 	},
+	bytecode.ExpandArray: {
+		name: bytecode.ExpandArray,
+		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+			arrLength := args[0].(int)
+			arr, ok := t.stack.pop().Target.(*ArrayObject)
+
+			if !ok {
+				t.returnError(TypeError, "Expect stack top's value to be an Array when executing 'expandarray' instruction.")
+			}
+
+			elems := []Object{}
+
+			for i := 0; i < arrLength; i++ {
+				var elem Object
+				if i < len(arr.Elements) {
+					elem = arr.Elements[i]
+				} else {
+					elem = NULL
+				}
+
+				elems = append([]Object{elem}, elems...)
+			}
+
+			for _, elem := range elems {
+				t.stack.push(&Pointer{Target: elem})
+			}
+		},
+	},
 	bytecode.NewHash: {
 		name: bytecode.NewHash,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
@@ -438,6 +466,8 @@ var builtInActions = map[operationType]*action{
 
 func (vm *VM) initObjectFromGoType(value interface{}) Object {
 	switch v := value.(type) {
+	case nil:
+		return NULL
 	case int:
 		return vm.initIntegerObject(v)
 	case int64:

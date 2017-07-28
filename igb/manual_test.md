@@ -113,6 +113,9 @@ Currently we are unable to perform automated tests against REPL. Follow the step
     #»
     ```
 
+ 4. Paste " ¤ #"
+    * expect: no error causes
+
 ### 5. Interruption
 
 1. type Ctrl-z

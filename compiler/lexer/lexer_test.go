@@ -110,6 +110,10 @@ func TestNextToken(t *testing.T) {
 	while i < 10 do
 	  break
 	end
+
+	a += 1
+	b -= 2
+	c ||= true
 	`
 
 	tests := []struct {
@@ -399,7 +403,19 @@ func TestNextToken(t *testing.T) {
 		{token.Break, "break", 102},
 		{token.End, "end", 103},
 
-		{token.EOF, "", 104},
+		{token.Ident, "a", 105},
+		{token.PlusEq, "+=", 105},
+		{token.Int, "1", 105},
+
+		{token.Ident, "b", 106},
+		{token.MinusEq, "-=", 106},
+		{token.Int, "2", 106},
+
+		{token.Ident, "c", 107},
+		{token.OrEq, "||=", 107},
+		{token.True, "true", 107},
+
+		{token.EOF, "", 108},
 	}
 	l := New(input)
 

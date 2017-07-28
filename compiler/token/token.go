@@ -24,7 +24,9 @@ const (
 
 	Assign   = "="
 	Plus     = "+"
+	PlusEq   = "+="
 	Minus    = "-"
+	MinusEq  = "-="
 	Bang     = "!"
 	Asterisk = "*"
 	Pow      = "**"
@@ -34,6 +36,7 @@ const (
 	Decr     = "--"
 	And      = "&&"
 	Or       = "||"
+	OrEq     = "||="
 	Modulo   = "%"
 
 	LT   = "<"
