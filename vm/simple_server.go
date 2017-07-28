@@ -10,7 +10,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
-	"strings"
+	"unicode"
 )
 
 type response struct {
@@ -20,11 +20,15 @@ type response struct {
 }
 
 type request struct {
-	Method string
-	Body   string
-	URL    string
-	Path   string
-	Host   string
+	Method           string
+	Body             string
+	URL              string
+	Path             string
+	Host             string
+	Protocol         string
+	Headers          map[string][]string
+	ContentLength    int64
+	TransferEncoding []string
 }
 
 func initSimpleServerClass(vm *VM) {
@@ -130,15 +134,19 @@ func initRequest(t *thread, w http.ResponseWriter, req *http.Request) *RObject {
 	}
 
 	r.Method = req.Method
+	r.Protocol = req.Proto
+	r.Headers = req.Header
 	r.Body = string(body)
+	r.ContentLength = req.ContentLength
+	r.TransferEncoding = req.TransferEncoding
+	r.Host = req.Host
 	r.Path = req.URL.Path
 	r.URL = req.RequestURI
-	r.Host = req.Host
 
 	m := structs.Map(r)
 
 	for k, v := range m {
-		varName := "@" + strings.ToLower(k)
+		varName := "@" + toSnakeCase(k)
 		reqObj.InstanceVariables.set(varName, t.vm.initObjectFromGoType(v))
 	}
 
@@ -177,4 +185,19 @@ func setupResponse(w http.ResponseWriter, req *http.Request, res *RObject) {
 
 	io.WriteString(w, r.body)
 	log.Printf("%s %s %s %d\n", req.Method, req.URL.Path, req.Proto, r.status)
+}
+
+func toSnakeCase(in string) string {
+	runes := []rune(in)
+	length := len(runes)
+
+	var out []rune
+	for i := 0; i < length; i++ {
+		if i > 0 && unicode.IsUpper(runes[i]) && ((i+1 < length && unicode.IsLower(runes[i+1])) || unicode.IsLower(runes[i-1])) {
+			out = append(out, '_')
+		}
+		out = append(out, unicode.ToLower(runes[i]))
+	}
+
+	return string(out)
 }

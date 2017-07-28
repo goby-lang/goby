@@ -303,6 +303,38 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
+			// Remove the key from the hash if key exist
+			//
+			// ```Ruby
+			// h = { a: 1, b: 2, c: 3 }
+			// h.delete("b") # =>  { a: 1, c: 3 }
+			// ```
+			//
+			// @return [Hash]
+			Name: "delete",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
+					}
+
+					h := receiver.(*HashObject)
+					d := args[0]
+					deleteKey, ok := d.(*StringObject)
+
+					if !ok {
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, d.Class().Name)
+					}
+
+					deleteKeyValue := deleteKey.Value
+					if _, ok := h.Pairs[deleteKeyValue]; ok {
+						delete(h.Pairs, deleteKeyValue)
+					}
+					return h
+				}
+			},
+		},
+		{
 			// Returns true if the key exist in the hash. Currently, it can only input string
 			// type object.
 			//

@@ -1,7 +1,7 @@
 module Net
   class SimpleServer
-    attr_reader "port"
-    attr_accessor "file_root"
+    attr_reader   :port
+    attr_accessor :file_root
 
     def initialize(port)
       @port = port
