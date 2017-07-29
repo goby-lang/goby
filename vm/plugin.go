@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"github.com/st0012/metago"
 	"plugin"
 	"reflect"
 )
@@ -57,9 +58,9 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 						t.vm.initErrorObject(TypeError, err.Error())
 					}
 
-					result := reflect.ValueOf(reflect.ValueOf(f).Call(funcArgs)).Interface()
+					result := reflect.ValueOf(reflect.ValueOf(f).Call(metago.WrapArguments(funcArgs...))).Interface()
 
-					return t.vm.initObjectFromGoType(unwrapGoFuncResult(result))
+					return t.vm.initObjectFromGoType(metago.UnwrapReflectValues(result))
 				}
 			},
 		},

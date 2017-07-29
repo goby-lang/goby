@@ -31,6 +31,10 @@
 			"Rev": "06b906832ed0e32302a942b63b6c5f8359034d26"
 		},
 		{
+			"ImportPath": "github.com/st0012/metago",
+			"Rev": "0405a10ef6ad0c60ffd715d3bcdfdc1555741ac7"
+		},
+		{
 			"ImportPath": "golang.org/x/sys/unix",
 			"Rev": "abf9c25f54453410d0c6668e519582a9e1115027"
 		}

@@ -2,7 +2,7 @@ package vm
 
 import (
 	"fmt"
-	"reflect"
+	"github.com/st0012/metago"
 )
 
 // StructObject ...
@@ -50,45 +50,16 @@ func builtinStructInstanceMethods() []*BuiltInMethodObject {
 						t.vm.initErrorObject(TypeError, err.Error())
 					}
 
-					result := callGoFunc(r.data, funcName, funcArgs)
-					return t.vm.initObjectFromGoType(unwrapGoFuncResult(result))
+					result := metago.CallFunc(r.data, funcName, funcArgs...)
+					return t.vm.initObjectFromGoType(result)
 				}
 			},
 		},
 	}
 }
 
-func callGoFunc(receiver interface{}, methodName string, args []reflect.Value) interface{} {
-	var ptr reflect.Value
-	var value reflect.Value
-
-	value, ok := receiver.(reflect.Value)
-
-	if !ok {
-		value = reflect.ValueOf(receiver)
-	}
-
-	ptr, value = getReflectPtrAndValue(value, receiver)
-
-	method := value.MethodByName(methodName)
-
-	if method.IsValid() {
-		return method.Call(args)
-	}
-
-	// check for method on pointer
-	method = ptr.MethodByName(methodName)
-
-	if method.IsValid() {
-		return method.Call(args)
-	}
-
-	// return or panic, method not found of either type
-	panic(fmt.Sprintf("%T type objects don't have %s method.", value.Interface(), methodName))
-}
-
-func convertToGoFuncArgs(args []Object) ([]reflect.Value, error) {
-	funcArgs := []reflect.Value{}
+func convertToGoFuncArgs(args []Object) ([]interface{}, error) {
+	funcArgs := []interface{}{}
 
 	for _, arg := range args {
 		v, ok := arg.(builtInType)
@@ -97,15 +68,15 @@ func convertToGoFuncArgs(args []Object) ([]reflect.Value, error) {
 			if integer, ok := v.(*IntegerObject); ok {
 				switch integer.flag {
 				case integer64:
-					funcArgs = append(funcArgs, reflect.ValueOf(int64(integer.Value)))
+					funcArgs = append(funcArgs, int64(integer.Value))
 					continue
 				case integer32:
-					funcArgs = append(funcArgs, reflect.ValueOf(int32(integer.Value)))
+					funcArgs = append(funcArgs, int32(integer.Value))
 					continue
 				}
 			}
 
-			funcArgs = append(funcArgs, reflect.ValueOf(v.value()))
+			funcArgs = append(funcArgs, v.value())
 		} else {
 			err := fmt.Errorf("Can't pass %s type object when calling go function", arg.Class().Name)
 			return nil, err
@@ -113,40 +84,6 @@ func convertToGoFuncArgs(args []Object) ([]reflect.Value, error) {
 	}
 
 	return funcArgs, nil
-}
-
-func unwrapGoFuncResult(result interface{}) interface{} {
-	switch result := result.(type) {
-	case []reflect.Value:
-		if len(result) == 0 {
-			return NULL
-		} else if len(result) == 1 {
-			return result[0].Interface()
-		} else {
-			values := []interface{}{}
-
-			for _, v := range result {
-				values = append(values, v.Interface())
-			}
-
-			return values
-		}
-	default:
-		return result
-	}
-}
-
-func getReflectPtrAndValue(value reflect.Value, rawValue interface{}) (ptr, v reflect.Value) {
-	if value.Type().Kind() == reflect.Ptr {
-		ptr = value
-		value = ptr.Elem() // acquire value referenced by pointer
-	} else {
-		ptr = reflect.New(reflect.TypeOf(rawValue)) // create new pointer
-		temp := ptr.Elem()                          // create variable to value of pointer
-		temp.Set(value)                             // set value of variable to our passed in value
-	}
-
-	return ptr, value
 }
 
 // Polymorphic helper functions -----------------------------------------
