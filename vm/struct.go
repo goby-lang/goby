@@ -44,7 +44,7 @@ func builtinStructInstanceMethods() []*BuiltInMethodObject {
 					funcName := s.Value
 					r := receiver.(*StructObject)
 
-					funcArgs, err := convertToGoFuncArgs(args)
+					funcArgs, err := convertToGoFuncArgs(args[1:])
 
 					if err != nil {
 						t.vm.initErrorObject(TypeError, err.Error())
@@ -58,34 +58,29 @@ func builtinStructInstanceMethods() []*BuiltInMethodObject {
 	}
 }
 
-func callGoFunc(i interface{}, methodName string, args []reflect.Value) interface{} {
+func callGoFunc(receiver interface{}, methodName string, args []reflect.Value) interface{} {
 	var ptr reflect.Value
 	var value reflect.Value
-	var finalMethod reflect.Value
 
-	value, ok := i.(reflect.Value)
+	value, ok := receiver.(reflect.Value)
 
 	if !ok {
-		value = reflect.ValueOf(i)
+		value = reflect.ValueOf(receiver)
 	}
 
-	ptr, value = getReflectPtrAndValue(value, i)
+	ptr, value = getReflectPtrAndValue(value, receiver)
 
-	// check for method on value
 	method := value.MethodByName(methodName)
+
 	if method.IsValid() {
-		finalMethod = method
+		return method.Call(args)
 	}
 
 	// check for method on pointer
 	method = ptr.MethodByName(methodName)
 
 	if method.IsValid() {
-		finalMethod = method
-	}
-
-	if finalMethod.IsValid() {
-		return finalMethod.Call(args)
+		return method.Call(args)
 	}
 
 	// return or panic, method not found of either type
@@ -93,24 +88,24 @@ func callGoFunc(i interface{}, methodName string, args []reflect.Value) interfac
 }
 
 func convertToGoFuncArgs(args []Object) ([]reflect.Value, error) {
-	funcArgs := make([]reflect.Value, len(args)-1)
+	funcArgs := []reflect.Value{}
 
-	for i, arg := range args[1:] {
+	for _, arg := range args {
 		v, ok := arg.(builtInType)
 
 		if ok {
 			if integer, ok := v.(*IntegerObject); ok {
 				switch integer.flag {
 				case integer64:
-					funcArgs[i] = reflect.ValueOf(int64(integer.Value))
+					funcArgs = append(funcArgs, reflect.ValueOf(int64(integer.Value)))
 					continue
 				case integer32:
-					funcArgs[i] = reflect.ValueOf(int32(integer.Value))
+					funcArgs = append(funcArgs, reflect.ValueOf(int32(integer.Value)))
 					continue
 				}
 			}
 
-			funcArgs[i] = reflect.ValueOf(v.value())
+			funcArgs = append(funcArgs, reflect.ValueOf(v.value()))
 		} else {
 			err := fmt.Errorf("Can't pass %s type object when calling go function", arg.Class().Name)
 			return nil, err

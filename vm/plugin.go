@@ -51,7 +51,7 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(InternalError, err.Error())
 					}
 
-					funcArgs, err := convertToGoFuncArgs(args)
+					funcArgs, err := convertToGoFuncArgs(args[1:])
 
 					if err != nil {
 						t.vm.initErrorObject(TypeError, err.Error())
