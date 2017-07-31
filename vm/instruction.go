@@ -105,6 +105,8 @@ var builtInActions = map[operationType]*action{
 			variableName := args[0].(string)
 			p := t.stack.pop()
 			cf.self.instanceVariableSet(variableName, p.Target)
+
+			t.stack.push(&Pointer{Target: p.Target})
 		},
 	},
 	bytecode.SetLocal: {
@@ -128,6 +130,8 @@ var builtInActions = map[operationType]*action{
 			}
 
 			cf.insertLCL(index, depth, v.Target)
+
+			t.stack.push(&Pointer{Target: v.Target})
 		},
 	},
 	bytecode.SetConstant: {

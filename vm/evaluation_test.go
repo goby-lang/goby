@@ -1217,6 +1217,36 @@ func TestAssignmentEvaluation(t *testing.T) {
 		{"a = 5; b = a; c = a + b + 5; c;", 15},
 		{"a = 5; b = 10; c = if a > b; 100 else 50 end; c", 50},
 		{"Bar = 100; Bar", 100},
+		{`
+		a = 100
+		b = a
+		b = 1000
+		a
+		`, 100},
+		{`
+		a = 100
+		b = a
+		a = 1000
+		b
+		`, 100},
+		{`
+		i = 0
+
+		if a = 10
+		  i = 100
+		end
+
+		i + a
+		`, 110},
+		{`
+		i = 0
+
+		if @a = 10
+		  i = 100
+		end
+
+		i + @a
+		`, 110},
 	}
 
 	for i, tt := range tests {
