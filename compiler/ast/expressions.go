@@ -165,6 +165,7 @@ type AssignExpression struct {
 	Token     token.Token
 	Variables []Variable
 	Value     Expression
+	IsStmt    bool
 	// Optioned attribute is only used when infix expression is local assignment in params.
 	// For example: `foo(x = 10)`'s `x = 10` is an optioned assign expression
 	// TODO: Remove this when we can put metadata inside bytecode.

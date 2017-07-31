@@ -329,7 +329,7 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 	var value ast.Expression
 	var tok token.Token
 
-	exp := &ast.AssignExpression{}
+	exp := &ast.AssignExpression{IsStmt: true}
 
 	switch v := v.(type) {
 	case ast.Variable:
@@ -381,6 +381,12 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 		precedence := p.curPrecedence()
 		p.nextToken()
 		value = p.parseExpression(precedence)
+
+		assignExp, ok := value.(*ast.AssignExpression)
+
+		if ok {
+			assignExp.IsStmt = false
+		}
 	}
 
 	exp.Token = tok
@@ -405,6 +411,13 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	ie := &ast.IfExpression{Token: p.curToken}
 	p.nextToken()
 	ie.Condition = p.parseExpression(NORMAL)
+
+	assignExp, ok := ie.Condition.(*ast.AssignExpression)
+
+	if ok {
+		assignExp.IsStmt = false
+	}
+
 	ie.Consequence = p.parseBlockStatement()
 
 	// curToken is now ELSE or RBRACE
