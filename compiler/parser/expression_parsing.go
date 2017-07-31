@@ -110,7 +110,22 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 
 	leftExp := parseFn()
 
-	for !p.peekTokenIs(token.Semicolon) && precedence < p.peekPrecedence() && p.peekTokenAtSameLine() {
+	/*
+		Precedence example:
+
+		```
+		1 + 1 * 5 == 1 + (1 * 5)
+
+		```
+
+		Because "*"'s precedence is PRODUCT which is higher than "+"'s precedence SUM, we'll parse "*" first.
+
+	*/
+
+	for !p.peekTokenIs(token.Semicolon) &&
+		(precedence < p.peekPrecedence() || (p.fsm.Is(parseAssignment) && p.peekTokenIs(token.Assign))) &&
+		// This is for preventing parser treat next line's expression as function's argument.
+		p.peekTokenAtSameLine() {
 
 		infixFn := p.infixParseFns[p.peekToken.Type]
 		if infixFn == nil {
@@ -329,6 +344,9 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 	var value ast.Expression
 	var tok token.Token
 
+	oldState := p.fsm.Current()
+	p.fsm.Event(parseAssignment)
+
 	exp := &ast.AssignExpression{IsStmt: true}
 
 	switch v := v.(type) {
@@ -381,16 +399,18 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 		precedence := p.curPrecedence()
 		p.nextToken()
 		value = p.parseExpression(precedence)
+	}
 
-		assignExp, ok := value.(*ast.AssignExpression)
+	assignExp, ok := value.(*ast.AssignExpression)
 
-		if ok {
-			assignExp.IsStmt = false
-		}
+	if ok {
+		assignExp.IsStmt = false
 	}
 
 	exp.Token = tok
 	exp.Value = value
+
+	p.fsm.Event(oldState)
 
 	return exp
 }

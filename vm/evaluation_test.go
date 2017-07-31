@@ -1247,6 +1247,13 @@ func TestAssignmentEvaluation(t *testing.T) {
 
 		i + @a
 		`, 110},
+		{`a = b = 10; a`, 10},
+		{`a = b = c = 10; a`, 10},
+		{`
+		i = 100
+		a = b = i + 10
+		a + b
+		`, 220},
 	}
 
 	for i, tt := range tests {

@@ -64,6 +64,7 @@ const (
 	normal           = "normal"
 	parseFuncCall    = "parseFuncCall"
 	parseMethodParam = "parseMethodParam"
+	parseAssignment  = "parseAssignment"
 )
 
 // New initializes a parser and returns it
@@ -77,8 +78,9 @@ func New(l *lexer.Lexer) *Parser {
 		normal,
 		fsm.Events{
 			{Name: parseFuncCall, Src: []string{normal}, Dst: parseFuncCall},
-			{Name: parseMethodParam, Src: []string{normal}, Dst: parseMethodParam},
-			{Name: normal, Src: []string{parseFuncCall, parseMethodParam}, Dst: normal},
+			{Name: parseMethodParam, Src: []string{normal, parseAssignment}, Dst: parseMethodParam},
+			{Name: parseAssignment, Src: []string{normal, parseFuncCall}, Dst: parseAssignment},
+			{Name: normal, Src: []string{parseFuncCall, parseMethodParam, parseAssignment}, Dst: normal},
 		},
 		fsm.Callbacks{},
 	)
