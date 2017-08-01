@@ -43,6 +43,12 @@ func TestHashAccessOperation(t *testing.T) {
 			{}[:foo]
 		`, nil},
 		{`
+			{}[:foo123]
+		`, nil},
+		{`
+			{ foo123: 100 }[:foo123]
+		`, 100},
+		{`
 			{}["foo"]
 		`, nil},
 		{`
