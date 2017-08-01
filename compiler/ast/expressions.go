@@ -3,12 +3,11 @@ package ast
 import (
 	"bytes"
 	"fmt"
-	"github.com/goby-lang/goby/compiler/token"
 	"strings"
 )
 
 type IntegerLiteral struct {
-	Token token.Token
+	*BaseNode
 	Value int
 }
 
@@ -21,7 +20,7 @@ func (il *IntegerLiteral) String() string {
 }
 
 type StringLiteral struct {
-	Token token.Token
+	*BaseNode
 	Value string
 }
 
@@ -39,7 +38,7 @@ func (sl *StringLiteral) String() string {
 }
 
 type ArrayExpression struct {
-	Token    token.Token
+	*BaseNode
 	Elements []Expression
 }
 
@@ -69,8 +68,8 @@ func (ae *ArrayExpression) String() string {
 }
 
 type HashExpression struct {
-	Token token.Token
-	Data  map[string]Expression
+	*BaseNode
+	Data map[string]Expression
 }
 
 func (he *HashExpression) expressionNode() {}
@@ -93,7 +92,7 @@ func (he *HashExpression) String() string {
 }
 
 type PrefixExpression struct {
-	Token    token.Token
+	*BaseNode
 	Operator string
 	Right    Expression
 }
@@ -114,7 +113,7 @@ func (pe *PrefixExpression) String() string {
 }
 
 type InfixExpression struct {
-	Token    token.Token
+	*BaseNode
 	Left     Expression
 	Operator string
 	Right    Expression
@@ -162,7 +161,7 @@ func (m *MultiVariableExpression) String() string {
 
 // AssignExpression represents variable assignment in Goby.
 type AssignExpression struct {
-	Token     token.Token
+	*BaseNode
 	Variables []Variable
 	Value     Expression
 	IsStmt    bool
@@ -194,7 +193,7 @@ func (ae *AssignExpression) String() string {
 }
 
 type BooleanExpression struct {
-	Token token.Token
+	*BaseNode
 	Value bool
 }
 
@@ -208,7 +207,7 @@ func (b *BooleanExpression) String() string {
 
 // NilExpression represents nil node
 type NilExpression struct {
-	Token token.Token
+	*BaseNode
 }
 
 func (n *NilExpression) expressionNode() {}
@@ -224,7 +223,7 @@ func (n *NilExpression) String() string {
 }
 
 type IfExpression struct {
-	Token       token.Token
+	*BaseNode
 	Condition   Expression
 	Consequence *BlockStatement
 	Alternative *BlockStatement
@@ -255,8 +254,8 @@ func (ie *IfExpression) String() string {
 }
 
 type CallExpression struct {
+	*BaseNode
 	Receiver       Expression
-	Token          token.Token
 	Method         string
 	Arguments      []Expression
 	Block          *BlockStatement
@@ -305,7 +304,7 @@ func (ce *CallExpression) String() string {
 }
 
 type SelfExpression struct {
-	Token token.Token
+	*BaseNode
 }
 
 func (se *SelfExpression) expressionNode() {}
@@ -317,7 +316,7 @@ func (se *SelfExpression) String() string {
 }
 
 type YieldExpression struct {
-	Token     token.Token
+	*BaseNode
 	Arguments []Expression
 }
 
@@ -342,7 +341,7 @@ func (ye *YieldExpression) String() string {
 }
 
 type RangeExpression struct {
-	Token token.Token
+	*BaseNode
 	Start Expression
 	End   Expression
 }

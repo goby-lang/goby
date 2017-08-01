@@ -43,7 +43,7 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 		case token.Ident:
 			stmt.Receiver = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 		case token.Self:
-			stmt.Receiver = &ast.SelfExpression{Token: p.curToken}
+			stmt.Receiver = &ast.SelfExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
 		default:
 			p.error = &Error{Message: fmt.Sprintf("Invalid method receiver: %s. Line: %d", p.curToken.Literal, p.curToken.Line), errType: MethodDefinitionError}
 		}

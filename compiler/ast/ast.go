@@ -2,7 +2,12 @@ package ast
 
 import (
 	"bytes"
+	"github.com/goby-lang/goby/compiler/token"
 )
+
+type BaseNode struct {
+	Token token.Token
+}
 
 type node interface {
 	TokenLiteral() string

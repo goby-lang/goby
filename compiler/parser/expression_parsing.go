@@ -152,7 +152,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 }
 
 func (p *Parser) parseSelfExpression() ast.Expression {
-	return &ast.SelfExpression{Token: p.curToken}
+	return &ast.SelfExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
 }
 
 func (p *Parser) parseIdentifier() ast.Expression {
@@ -176,7 +176,7 @@ func (p *Parser) parseInstanceVariable() ast.Expression {
 }
 
 func (p *Parser) parseIntegerLiteral() ast.Expression {
-	lit := &ast.IntegerLiteral{Token: p.curToken}
+	lit := &ast.IntegerLiteral{BaseNode: &ast.BaseNode{Token: p.curToken}}
 
 	value, err := strconv.ParseInt(lit.TokenLiteral(), 0, 64)
 	if err != nil {
@@ -190,14 +190,14 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 }
 
 func (p *Parser) parseStringLiteral() ast.Expression {
-	lit := &ast.StringLiteral{Token: p.curToken}
+	lit := &ast.StringLiteral{BaseNode: &ast.BaseNode{Token: p.curToken}}
 	lit.Value = p.curToken.Literal
 
 	return lit
 }
 
 func (p *Parser) parseBooleanLiteral() ast.Expression {
-	lit := &ast.BooleanExpression{Token: p.curToken}
+	lit := &ast.BooleanExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
 
 	value, err := strconv.ParseBool(lit.TokenLiteral())
 	if err != nil {
@@ -211,16 +211,16 @@ func (p *Parser) parseBooleanLiteral() ast.Expression {
 }
 
 func (p *Parser) parseNilExpression() ast.Expression {
-	return &ast.NilExpression{Token: p.curToken}
+	return &ast.NilExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
 }
 
 func (p *Parser) parsePostfixExpression(receiver ast.Expression) ast.Expression {
 	arguments := []ast.Expression{}
-	return &ast.CallExpression{Token: p.curToken, Receiver: receiver, Method: p.curToken.Literal, Arguments: arguments}
+	return &ast.CallExpression{BaseNode: &ast.BaseNode{Token: p.curToken}, Receiver: receiver, Method: p.curToken.Literal, Arguments: arguments}
 }
 
 func (p *Parser) parseHashExpression() ast.Expression {
-	hash := &ast.HashExpression{Token: p.curToken}
+	hash := &ast.HashExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
 	hash.Data = p.parseHashPairs()
 	return hash
 }
@@ -268,13 +268,13 @@ func (p *Parser) parseHashPair(pairs map[string]ast.Expression) {
 }
 
 func (p *Parser) parseArrayExpression() ast.Expression {
-	arr := &ast.ArrayExpression{Token: p.curToken}
+	arr := &ast.ArrayExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
 	arr.Elements = p.parseArrayElements()
 	return arr
 }
 
 func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
-	callExpression := &ast.CallExpression{Receiver: left, Method: "[]", Token: p.curToken}
+	callExpression := &ast.CallExpression{Receiver: left, Method: "[]", BaseNode: &ast.BaseNode{Token: p.curToken}}
 
 	if p.peekTokenIs(token.RBracket) {
 		callExpression.Arguments = []ast.Expression{}
@@ -328,7 +328,7 @@ func (p *Parser) parseArrayElements() []ast.Expression {
 
 func (p *Parser) parsePrefixExpression() ast.Expression {
 	pe := &ast.PrefixExpression{
-		Token:    p.curToken,
+		BaseNode: &ast.BaseNode{Token: p.curToken},
 		Operator: p.curToken.Literal,
 	}
 
@@ -341,7 +341,7 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 
 func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	exp := &ast.InfixExpression{
-		Token:    p.curToken,
+		BaseNode: &ast.BaseNode{Token: p.curToken},
 		Left:     left,
 		Operator: p.curToken.Literal,
 	}
@@ -356,7 +356,7 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 	var value ast.Expression
 	var tok token.Token
-	exp := &ast.AssignExpression{IsStmt: true}
+	exp := &ast.AssignExpression{IsStmt: true, BaseNode: &ast.BaseNode{}}
 
 	if p.fsm.Is(parsingFuncCall) {
 		exp.IsStmt = false
@@ -402,7 +402,7 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 			p.nextToken()
 
 			value = &ast.InfixExpression{
-				Token:    infixOperator,
+				BaseNode: &ast.BaseNode{Token: infixOperator},
 				Left:     exp.Variables[0],
 				Operator: infixOperator.Literal,
 				Right:    p.parseExpression(LOWEST),
@@ -445,7 +445,7 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 }
 
 func (p *Parser) parseIfExpression() ast.Expression {
-	ie := &ast.IfExpression{Token: p.curToken}
+	ie := &ast.IfExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
 	p.nextToken()
 	ie.Condition = p.parseExpression(NORMAL)
 
@@ -469,12 +469,12 @@ func (p *Parser) parseCallExpressionWithoutParenAndReceiver(methodToken token.To
 	p.fsm.Event(parseFuncCall)
 	// real receiver is self
 	selfTok := token.Token{Type: token.Self, Literal: "self", Line: p.curToken.Line}
-	self := &ast.SelfExpression{Token: selfTok}
+	self := &ast.SelfExpression{BaseNode: &ast.BaseNode{Token: selfTok}}
 
 	// current token might be the first argument
 	//     method name      |       argument
 	// foo <- method token     x <- current token
-	exp := &ast.CallExpression{Token: methodToken, Receiver: self, Method: methodToken.Literal}
+	exp := &ast.CallExpression{BaseNode: &ast.BaseNode{Token: methodToken}, Receiver: self, Method: methodToken.Literal}
 
 	if p.curToken.Line == methodToken.Line { // foo x
 		exp.Arguments = p.parseCallArgumentsWithoutParens()
@@ -497,10 +497,10 @@ func (p *Parser) parseCallExpressionWithParen(receiver ast.Expression) ast.Expre
 
 	// real receiver is self
 	selfTok := token.Token{Type: token.Self, Literal: "self", Line: p.curToken.Line}
-	self := &ast.SelfExpression{Token: selfTok}
+	self := &ast.SelfExpression{BaseNode: &ast.BaseNode{Token: selfTok}}
 	receiver = self
 
-	exp := &ast.CallExpression{Token: m.Token, Receiver: receiver, Method: mn}
+	exp := &ast.CallExpression{BaseNode: &ast.BaseNode{Token: m.Token}, Receiver: receiver, Method: mn}
 	exp.Arguments = p.parseCallArguments()
 
 	p.fsm.Event(backToNormal)
@@ -515,7 +515,7 @@ func (p *Parser) parseCallExpressionWithParen(receiver ast.Expression) ast.Expre
 
 func (p *Parser) parseCallExpressionWithDot(receiver ast.Expression) ast.Expression {
 	p.fsm.Event(parseFuncCall)
-	exp := &ast.CallExpression{Token: p.curToken, Receiver: receiver}
+	exp := &ast.CallExpression{BaseNode: &ast.BaseNode{Token: p.curToken}, Receiver: receiver}
 
 	// check if method name is identifier
 	if !p.expectPeek(token.Ident) {
@@ -624,7 +624,7 @@ func (p *Parser) parseCallArgumentsWithoutParens() []ast.Expression {
 }
 
 func (p *Parser) parseYieldExpression() ast.Expression {
-	ye := &ast.YieldExpression{Token: p.curToken}
+	ye := &ast.YieldExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
 
 	if p.peekTokenIs(token.LParen) {
 		p.nextToken()
@@ -641,8 +641,8 @@ func (p *Parser) parseYieldExpression() ast.Expression {
 
 func (p *Parser) parseRangeExpression(left ast.Expression) ast.Expression {
 	exp := &ast.RangeExpression{
-		Token: p.curToken,
-		Start: left,
+		BaseNode: &ast.BaseNode{Token: p.curToken},
+		Start:    left,
 	}
 
 	precedence := p.curPrecedence()
