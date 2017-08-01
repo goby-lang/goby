@@ -18,7 +18,18 @@ func (g *Generator) compileStatements(stmts []ast.Statement, scope *scope, table
 
 	for _, statement := range stmts {
 		g.compileStatement(is, statement, scope, table)
+
+		if !g.REPL {
+			expStmt, ok := statement.(*ast.ExpressionStatement)
+
+			if ok && expStmt.Expression.IsExp() {
+				continue
+			}
+
+			is.define(Pop)
+		}
 	}
+
 
 	g.endInstructions(is)
 	g.instructionSets = append(g.instructionSets, is)

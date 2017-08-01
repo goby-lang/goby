@@ -1303,7 +1303,6 @@ func TestIfExpressionEvaluation(t *testing.T) {
 	tests := []struct {
 		input      string
 		expected   interface{}
-		expectedSP int
 	}{
 		{
 			`
@@ -1314,7 +1313,6 @@ func TestIfExpressionEvaluation(t *testing.T) {
 			end
 			`,
 			100,
-			1,
 		},
 		{
 			`
@@ -1325,29 +1323,27 @@ func TestIfExpressionEvaluation(t *testing.T) {
 			end
 			`,
 			true,
-			1,
 		},
 		{`
 		if true
 		   10
 		end`,
 			10,
-			1,
 		},
-		{"if false; 10 end", nil, 1},
-		{"if 1; 10; end", 10, 1},
-		{"if 1 < 2; 10 end", 10, 1},
-		{"if 1 > 2; 10 end", nil, 1},
-		{"if 1 > 2; 10 else 20 end", 20, 1},
-		{"if 1 < 2; 10 else 20 end", 10, 1},
-		{"if nil; 10 else 20 end", 20, 1},
+		{"if false; 10 end", nil},
+		{"if 1; 10; end", 10},
+		{"if 1 < 2; 10 end", 10},
+		{"if 1 > 2; 10 end", nil},
+		{"if 1 > 2; 10 else 20 end", 20},
+		{"if 1 < 2; 10 else 20 end", 10},
+		{"if nil; 10 else 20 end", 20},
 		{`
 		if false
 		  x = 1
 		end # This pushes nil
 
 		x # This pushes nil too
-		`, nil, 2},
+		`, nil},
 		{`
 		def foo
 		  if false
@@ -1356,7 +1352,7 @@ func TestIfExpressionEvaluation(t *testing.T) {
 		end
 
 		foo # This should push nil
-		`, nil, 1},
+		`, nil},
 		{`
 		def foo
 		  x = 0
@@ -1367,7 +1363,7 @@ func TestIfExpressionEvaluation(t *testing.T) {
 		end
 
 		foo # This should push nil
-		`, 1, 1},
+		`, 1},
 	}
 
 	for i, tt := range tests {
@@ -1375,7 +1371,7 @@ func TestIfExpressionEvaluation(t *testing.T) {
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
-		vm.checkSP(t, i, tt.expectedSP)
+		vm.checkSP(t, i, 1)
 	}
 }
 
@@ -1403,93 +1399,78 @@ func TestMultiVarAssignment(t *testing.T) {
 	tests := []struct {
 		input      string
 		expected   interface{}
-		expectedSP int
 	}{
 		{`
 		a, b = [1, 2]
 		a
 		`,
-			1,
-			1},
+			1,},
 		{`
 		a, b = [1, 2]
 		b
 		`,
-			2,
-			1},
+			2,},
 
 		{`
 		a, b, c = [1, 2, 3]
 		c
 		`,
-			3,
-			1},
+			3,},
 		{`
 		a, b, c = [1]
 		b
 		`,
-			nil,
-			1},
+			nil,},
 		{`
 		a, b, c = [1]
 		c
 		`,
-			nil,
-			1},
+			nil,},
 		{`
 		arr = [1, 2, 3]
 		a, b, c = arr
 		b
-		`, 2,
-			1},
+		`, 2,},
 		{`
 		arr = [1, 2, 3]
 		a, b, c = arr
 		c
-		`, 3,
-			1},
+		`, 3,},
 		{`
 		arr = [1]
 		a, b, c = arr
 		a
-		`, 1,
-			1},
+		`, 1,},
 		{`
 		arr = [1]
 		a, b, c = arr
 		b
-		`, nil,
-			1},
+		`, nil,},
 		{`
 		arr = [1]
 		a, b, c = arr
 		c
-		`, nil,
-			1},
+		`, nil,},
 		{`
 		arr = [1]
 		a, b, c, d = arr
 		d
-		`, nil,
-			1},
+		`, nil,},
 		{`
 		arr = [1, 2, 3]
 		@a, @b, c = arr
 		@a
-		`, 1,
-			1},
+		`, 1,},
 		{`
 		arr = [1, 2, 3]
 		@a, @b, c = arr
 		@b
-		`, 2,
-			1},
+		`, 2,},
 		{`
 		arr = [1, 2, 3]
 		@a, @b, c = arr
 		c
-		`, 3,
-			1},
+		`, 3,},
 		{`
 		class Foo
 		  attr_reader :a, :b, :c
@@ -1504,8 +1485,7 @@ func TestMultiVarAssignment(t *testing.T) {
 
 		f.bar([10, 100, 200])
 		f.a
-		`, 10,
-			3},
+		`, 10,},
 		{`
 		class Foo
 		  attr_reader :a, :b, :c
@@ -1520,8 +1500,7 @@ func TestMultiVarAssignment(t *testing.T) {
 
 		f.bar([10, 100, 200])
 		f.b
-		`, 100,
-			3},
+		`, 100,},
 		{`
 		class Foo
 		  attr_reader :a, :b, :c
@@ -1536,8 +1515,7 @@ func TestMultiVarAssignment(t *testing.T) {
 
 		f.bar([10, 100, 200])
 		f.c
-		`, 310,
-			3},
+		`, 310,},
 	}
 
 	for i, tt := range tests {
@@ -1545,6 +1523,6 @@ func TestMultiVarAssignment(t *testing.T) {
 		evaluated := vm.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
-		vm.checkSP(t, i, tt.expectedSP)
+		vm.checkSP(t, i, 1)
 	}
 }
