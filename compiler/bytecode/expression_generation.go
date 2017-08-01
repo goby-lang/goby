@@ -124,7 +124,7 @@ func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.AssignE
 		is.define(ExpandArray, len(exp.Variables))
 	}
 
-	for _, v := range exp.Variables {
+	for i, v := range exp.Variables {
 		switch name := v.(type) {
 		case *ast.Identifier:
 			index, depth := table.setLCL(name.Value, table.depth)
@@ -141,7 +141,7 @@ func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.AssignE
 			is.define(SetConstant, name.Value)
 		}
 
-		if !exp.IsExp() && !g.REPL {
+		if !exp.IsExp() && !g.REPL && i != len(exp.Variables) - 1 {
 			is.define(Pop)
 		}
 	}
