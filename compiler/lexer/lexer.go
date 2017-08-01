@@ -332,7 +332,8 @@ func (l *Lexer) readSymbol() string {
 
 	position := l.position // currently at string's first letter
 
-	for !(l.peekChar() == ' ' || l.peekChar() == '\n' || l.peekChar() == '\r' || l.peekChar() == '\t' || l.peekChar() == ',' || l.peekChar() == 0) {
+	for !(l.peekChar() == ' ' || l.peekChar() == '\n' || l.peekChar() == '\r' || l.peekChar() == '\t' || l.peekChar() == ',' || l.peekChar() == 0) &&
+		isLetter(l.peekChar()) {
 		l.readChar()
 	}
 

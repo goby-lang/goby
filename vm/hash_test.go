@@ -40,11 +40,20 @@ func TestHashAccessOperation(t *testing.T) {
 		expected interface{}
 	}{
 		{`
+			{}[:foo]
+		`, nil},
+		{`
 			{}["foo"]
 		`, nil},
 		{`
+			{ bar: "foo" }[:bar]
+		`, "foo"},
+		{`
 			{ bar: "foo" }["bar"]
 		`, "foo"},
+		{`
+			{ foo: 2, bar: "foo" }[:foo]
+		`, 2},
 		{`
 			{ foo: 2, bar: "foo" }["foo"]
 		`, 2},
