@@ -141,7 +141,15 @@ func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.AssignE
 			is.define(SetConstant, name.Value)
 		}
 
-		if !exp.IsExp() && !g.REPL && i != len(exp.Variables) - 1 {
+		/*
+			Keep last value so we can have value to pop
+
+			```ruby
+			a, b = [1, 2]
+
+			Here we only pop '2', and the statement compilation will add another pop to pop '1'
+		*/
+		if exp.IsStmt() && !g.REPL && i != len(exp.Variables)-1 {
 			is.define(Pop)
 		}
 	}

@@ -148,6 +148,10 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		leftExp = infixFn(leftExp)
 	}
 
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+	}
+
 	return leftExp
 }
 
@@ -358,8 +362,8 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 	var tok token.Token
 	exp := &ast.AssignExpression{BaseNode: &ast.BaseNode{}}
 
-	if p.fsm.Is(parsingFuncCall) {
-		exp.MarkAsExp()
+	if !p.fsm.Is(parsingFuncCall) {
+		exp.MarkAsStmt()
 	}
 
 	oldState := p.fsm.Current()
@@ -417,7 +421,6 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 		value = p.parseExpression(precedence)
 	}
 
-	value.MarkAsExp()
 	exp.Token = tok
 	exp.Value = value
 
@@ -443,7 +446,6 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	ie := &ast.IfExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
 	p.nextToken()
 	ie.Condition = p.parseExpression(NORMAL)
-	ie.Condition.MarkAsExp()
 
 	ie.Consequence = p.parseBlockStatement()
 

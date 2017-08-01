@@ -9,10 +9,10 @@ import (
 	"strings"
 
 	"github.com/goby-lang/goby/compiler"
+	"github.com/goby-lang/goby/compiler/parser"
 	"github.com/goby-lang/goby/igb"
 	"github.com/goby-lang/goby/vm"
 	"github.com/pkg/profile"
-	"github.com/goby-lang/goby/compiler/parser"
 )
 
 const Version string = vm.Version

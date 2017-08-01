@@ -6,22 +6,32 @@ import (
 )
 
 type BaseNode struct {
-	Token token.Token
-	isExp bool
+	Token  token.Token
+	isStmt bool
 }
 
 func (b *BaseNode) IsExp() bool {
-	return b.isExp
+	return !b.isStmt
+}
+
+func (b *BaseNode) IsStmt() bool {
+	return b.isStmt
+}
+
+func (b *BaseNode) MarkAsStmt() {
+	b.isStmt = true
 }
 
 func (b *BaseNode) MarkAsExp() {
-	b.isExp = true
+	b.isStmt = false
 }
 
 type node interface {
 	TokenLiteral() string
 	String() string
 	IsExp() bool
+	IsStmt() bool
+	MarkAsStmt()
 	MarkAsExp()
 }
 

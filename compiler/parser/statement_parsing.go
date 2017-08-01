@@ -27,7 +27,13 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.Break:
 		return &ast.BreakStatement{BaseNode: &ast.BaseNode{Token: p.curToken}}
 	default:
-		return p.parseExpressionStatement()
+		exp := p.parseExpressionStatement()
+
+		if exp.Expression != nil {
+			exp.Expression.MarkAsStmt()
+		}
+
+		return exp
 	}
 }
 
@@ -166,7 +172,6 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	stmt := &ast.ExpressionStatement{BaseNode: &ast.BaseNode{Token: p.curToken}}
-
 	if p.curTokenIs(token.Ident) || p.curTokenIs(token.InstanceVariable) {
 		// This is used for identifying method call without parens
 		// Or multiple variable assignment
@@ -175,10 +180,7 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 		stmt.Expression = p.parseExpression(NORMAL)
 	}
 
-	if p.peekTokenIs(token.Semicolon) {
-		p.nextToken()
-	}
-
+	stmt.Expression.MarkAsStmt()
 	return stmt
 }
 
@@ -190,6 +192,10 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 
 	p.nextToken()
 
+	if p.curTokenIs(token.Semicolon) {
+		p.nextToken()
+	}
+
 	for !p.curTokenIs(token.End) && !p.curTokenIs(token.Else) {
 
 		if p.curTokenIs(token.EOF) {
@@ -197,6 +203,7 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 			return bs
 		}
 		stmt := p.parseStatement()
+
 		if stmt != nil {
 			bs.Statements = append(bs.Statements, stmt)
 		}

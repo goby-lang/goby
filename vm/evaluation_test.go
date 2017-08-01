@@ -1301,8 +1301,8 @@ func TestAssignmentByOperationEvaluation(t *testing.T) {
 
 func TestIfExpressionEvaluation(t *testing.T) {
 	tests := []struct {
-		input      string
-		expected   interface{}
+		input    string
+		expected interface{}
 	}{
 		{
 			`
@@ -1397,80 +1397,80 @@ func TestClassInheritance(t *testing.T) {
 
 func TestMultiVarAssignment(t *testing.T) {
 	tests := []struct {
-		input      string
-		expected   interface{}
+		input    string
+		expected interface{}
 	}{
 		{`
 		a, b = [1, 2]
 		a
 		`,
-			1,},
+			1},
 		{`
 		a, b = [1, 2]
 		b
 		`,
-			2,},
+			2},
 
 		{`
 		a, b, c = [1, 2, 3]
 		c
 		`,
-			3,},
+			3},
 		{`
 		a, b, c = [1]
 		b
 		`,
-			nil,},
+			nil},
 		{`
 		a, b, c = [1]
 		c
 		`,
-			nil,},
+			nil},
 		{`
 		arr = [1, 2, 3]
 		a, b, c = arr
 		b
-		`, 2,},
+		`, 2},
 		{`
 		arr = [1, 2, 3]
 		a, b, c = arr
 		c
-		`, 3,},
+		`, 3},
 		{`
 		arr = [1]
 		a, b, c = arr
 		a
-		`, 1,},
+		`, 1},
 		{`
 		arr = [1]
 		a, b, c = arr
 		b
-		`, nil,},
+		`, nil},
 		{`
 		arr = [1]
 		a, b, c = arr
 		c
-		`, nil,},
+		`, nil},
 		{`
 		arr = [1]
 		a, b, c, d = arr
 		d
-		`, nil,},
+		`, nil},
 		{`
 		arr = [1, 2, 3]
 		@a, @b, c = arr
 		@a
-		`, 1,},
+		`, 1},
 		{`
 		arr = [1, 2, 3]
 		@a, @b, c = arr
 		@b
-		`, 2,},
+		`, 2},
 		{`
 		arr = [1, 2, 3]
 		@a, @b, c = arr
 		c
-		`, 3,},
+		`, 3},
 		{`
 		class Foo
 		  attr_reader :a, :b, :c
@@ -1485,7 +1485,7 @@ func TestMultiVarAssignment(t *testing.T) {
 
 		f.bar([10, 100, 200])
 		f.a
-		`, 10,},
+		`, 10},
 		{`
 		class Foo
 		  attr_reader :a, :b, :c
@@ -1500,7 +1500,7 @@ func TestMultiVarAssignment(t *testing.T) {
 
 		f.bar([10, 100, 200])
 		f.b
-		`, 100,},
+		`, 100},
 		{`
 		class Foo
 		  attr_reader :a, :b, :c
@@ -1515,7 +1515,7 @@ func TestMultiVarAssignment(t *testing.T) {
 
 		f.bar([10, 100, 200])
 		f.c
-		`, 310,},
+		`, 310},
 	}
 
 	for i, tt := range tests {
