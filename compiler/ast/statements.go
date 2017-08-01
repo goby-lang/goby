@@ -2,11 +2,10 @@ package ast
 
 import (
 	"bytes"
-	"github.com/goby-lang/goby/compiler/token"
 )
 
 type ClassStatement struct {
-	Token          token.Token
+	*BaseNode
 	Name           *Constant
 	Body           *BlockStatement
 	SuperClass     Expression
@@ -31,7 +30,7 @@ func (cs *ClassStatement) String() string {
 
 // ModuleStatement represents module node in AST
 type ModuleStatement struct {
-	Token      token.Token
+	*BaseNode
 	Name       *Constant
 	Body       *BlockStatement
 	SuperClass *Constant
@@ -56,7 +55,7 @@ func (ms *ModuleStatement) String() string {
 }
 
 type ReturnStatement struct {
-	Token       token.Token
+	*BaseNode
 	ReturnValue Expression
 }
 
@@ -79,7 +78,7 @@ func (rs *ReturnStatement) String() string {
 }
 
 type ExpressionStatement struct {
-	Token      token.Token
+	*BaseNode
 	Expression Expression
 }
 
@@ -96,7 +95,7 @@ func (es *ExpressionStatement) String() string {
 }
 
 type DefStatement struct {
-	Token          token.Token
+	*BaseNode
 	Name           *Identifier
 	Receiver       Expression
 	Parameters     []Expression
@@ -131,7 +130,7 @@ func (ds *DefStatement) String() string {
 
 // NextStatement represents "next" keyword
 type NextStatement struct {
-	Token token.Token
+	*BaseNode
 }
 
 func (ns *NextStatement) statementNode() {}
@@ -146,7 +145,7 @@ func (ns *NextStatement) String() string {
 
 // BreakStatement represents "break" keyword
 type BreakStatement struct {
-	Token token.Token
+	*BaseNode
 }
 
 func (bs *BreakStatement) statementNode() {}
@@ -160,7 +159,7 @@ func (bs *BreakStatement) String() string {
 }
 
 type WhileStatement struct {
-	Token     token.Token
+	*BaseNode
 	Condition Expression
 	Body      *BlockStatement
 }
@@ -182,7 +181,7 @@ func (ws *WhileStatement) String() string {
 }
 
 type BlockStatement struct {
-	Token      token.Token // {
+	*BaseNode
 	Statements []Statement
 }
 
