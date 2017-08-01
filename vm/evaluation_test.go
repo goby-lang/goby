@@ -1262,6 +1262,13 @@ func TestAssignmentEvaluation(t *testing.T) {
 		a = b = i + 10
 		a + b
 		`, 220},
+		{`
+		def foo(x)
+		  x
+		end
+
+		foo(a = b = c = d = 10)
+		`, 10},
 	}
 
 	for i, tt := range tests {
