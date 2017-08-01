@@ -1,7 +1,5 @@
 package ast
 
-import "github.com/goby-lang/goby/compiler/token"
-
 // Variable interface represents assignable nodes in Goby, currently are Identifier, InstanceVariable and Constant
 type Variable interface {
 	variableNode()
@@ -10,7 +8,7 @@ type Variable interface {
 }
 
 type Identifier struct {
-	Token token.Token
+	*BaseNode
 	Value string
 }
 
@@ -27,7 +25,7 @@ func (i *Identifier) String() string {
 }
 
 type InstanceVariable struct {
-	Token token.Token
+	*BaseNode
 	Value string
 }
 
@@ -44,7 +42,7 @@ func (iv *InstanceVariable) String() string {
 }
 
 type Constant struct {
-	Token       token.Token
+	*BaseNode
 	Value       string
 	IsNamespace bool
 }

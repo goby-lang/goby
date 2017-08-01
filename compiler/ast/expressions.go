@@ -139,6 +139,7 @@ func (ie *InfixExpression) String() string {
 
 // MultiVariableExpression is not really an expression, it's just a container that holds multiple Variables
 type MultiVariableExpression struct {
+	*BaseNode
 	Variables []Variable
 }
 

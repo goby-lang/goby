@@ -21,6 +21,8 @@ func (b *BaseNode) MarkAsExp() {
 type node interface {
 	TokenLiteral() string
 	String() string
+	IsExp() bool
+	MarkAsExp()
 }
 
 type Statement interface {

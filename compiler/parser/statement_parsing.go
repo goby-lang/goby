@@ -41,7 +41,7 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 	if p.peekTokenIs(token.Dot) {
 		switch p.curToken.Type {
 		case token.Ident:
-			stmt.Receiver = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+			stmt.Receiver = &ast.Identifier{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
 		case token.Self:
 			stmt.Receiver = &ast.SelfExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
 		default:
@@ -54,7 +54,7 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 		}
 	}
 
-	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	stmt.Name = &ast.Identifier{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
 
 	// Setter method def foo=()
 	if p.peekTokenIs(token.Assign) {
@@ -116,7 +116,7 @@ func (p *Parser) parseClassStatement() *ast.ClassStatement {
 		return nil
 	}
 
-	stmt.Name = &ast.Constant{Token: p.curToken, Value: p.curToken.Literal}
+	stmt.Name = &ast.Constant{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
 
 	// See if there is any inheritance
 	if p.peekTokenIs(token.LT) {
@@ -144,7 +144,7 @@ func (p *Parser) parseModuleStatement() *ast.ModuleStatement {
 		return nil
 	}
 
-	stmt.Name = &ast.Constant{Token: p.curToken, Value: p.curToken.Literal}
+	stmt.Name = &ast.Constant{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
 	stmt.Body = p.parseBlockStatement()
 
 	return stmt

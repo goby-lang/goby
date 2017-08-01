@@ -156,11 +156,11 @@ func (p *Parser) parseSelfExpression() ast.Expression {
 }
 
 func (p *Parser) parseIdentifier() ast.Expression {
-	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	return &ast.Identifier{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
 }
 
 func (p *Parser) parseConstant() ast.Expression {
-	c := &ast.Constant{Token: p.curToken, Value: p.curToken.Literal}
+	c := &ast.Constant{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
 
 	if p.peekTokenIs(token.ResolutionOperator) {
 		c.IsNamespace = true
@@ -172,7 +172,7 @@ func (p *Parser) parseConstant() ast.Expression {
 }
 
 func (p *Parser) parseInstanceVariable() ast.Expression {
-	return &ast.InstanceVariable{Token: p.curToken, Value: p.curToken.Literal}
+	return &ast.InstanceVariable{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
 }
 
 func (p *Parser) parseIntegerLiteral() ast.Expression {
@@ -417,12 +417,7 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 		value = p.parseExpression(precedence)
 	}
 
-	assignExp, ok := value.(*ast.AssignExpression)
-
-	if ok {
-		assignExp.MarkAsExp()
-	}
-
+	value.MarkAsExp()
 	exp.Token = tok
 	exp.Value = value
 
@@ -448,12 +443,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	ie := &ast.IfExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
 	p.nextToken()
 	ie.Condition = p.parseExpression(NORMAL)
-
-	assignExp, ok := ie.Condition.(*ast.AssignExpression)
-
-	if ok {
-		assignExp.MarkAsExp()
-	}
+	ie.Condition.MarkAsExp()
 
 	ie.Consequence = p.parseBlockStatement()
 
@@ -562,13 +552,13 @@ func (p *Parser) parseBlockParameters(exp *ast.CallExpression) {
 		p.nextToken()
 		p.nextToken()
 
-		param := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+		param := &ast.Identifier{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
 		params = append(params, param)
 
 		for p.peekTokenIs(token.Comma) {
 			p.nextToken()
 			p.nextToken()
-			param := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+			param := &ast.Identifier{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
 			params = append(params, param)
 		}
 
