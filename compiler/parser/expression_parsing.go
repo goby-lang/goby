@@ -90,7 +90,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		a = foo 10
 		```
 	*/
-	if p.curTokenIs(token.Ident) && (p.fsm.Is(normal) || p.fsm.Is(parseAssignment)) {
+	if p.curTokenIs(token.Ident) && (p.fsm.Is(normal) || p.fsm.Is(parsingAssignment)) {
 		if p.peekTokenIs(token.Do) {
 			return p.parseCallExpressionWithoutParenAndReceiver(p.curToken)
 		}
@@ -136,7 +136,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	*/
 
 	for !p.peekTokenIs(token.Semicolon) &&
-		(precedence < p.peekPrecedence() || (p.fsm.Is(parseAssignment) && p.peekTokenIs(token.Assign))) &&
+		(precedence < p.peekPrecedence() || (p.fsm.Is(parsingAssignment) && p.peekTokenIs(token.Assign))) &&
 		// This is for preventing parser treat next line's expression as function's argument.
 		p.peekTokenAtSameLine() {
 
@@ -358,7 +358,7 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 	var tok token.Token
 	exp := &ast.AssignExpression{IsStmt: true}
 
-	if p.fsm.Is(parseFuncCall) {
+	if p.fsm.Is(parsingFuncCall) {
 		exp.IsStmt = false
 	}
 
@@ -426,7 +426,8 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 	exp.Token = tok
 	exp.Value = value
 
-	p.fsm.Event(oldState)
+	event, _ := eventTable[oldState]
+	p.fsm.Event(event)
 
 	return exp
 }
@@ -479,7 +480,7 @@ func (p *Parser) parseCallExpressionWithoutParenAndReceiver(methodToken token.To
 		exp.Arguments = p.parseCallArgumentsWithoutParens()
 	}
 
-	p.fsm.Event(normal)
+	p.fsm.Event(backToNormal)
 
 	// Parse block
 	if p.peekTokenIs(token.Do) && p.acceptBlock {
@@ -502,7 +503,7 @@ func (p *Parser) parseCallExpressionWithParen(receiver ast.Expression) ast.Expre
 	exp := &ast.CallExpression{Token: m.Token, Receiver: receiver, Method: mn}
 	exp.Arguments = p.parseCallArguments()
 
-	p.fsm.Event(normal)
+	p.fsm.Event(backToNormal)
 
 	// Parse block
 	if p.peekTokenIs(token.Do) && p.acceptBlock {
@@ -533,7 +534,7 @@ func (p *Parser) parseCallExpressionWithDot(receiver ast.Expression) ast.Express
 		exp.Arguments = p.parseCallArgumentsWithoutParens()
 	}
 
-	p.fsm.Event(normal)
+	p.fsm.Event(backToNormal)
 
 	// Setter method call like: p.foo = x
 	if p.peekTokenIs(token.Assign) {
