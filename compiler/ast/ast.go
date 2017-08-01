@@ -7,6 +7,15 @@ import (
 
 type BaseNode struct {
 	Token token.Token
+	isExp bool
+}
+
+func (b *BaseNode) IsExp() bool {
+	return b.isExp
+}
+
+func (b *BaseNode) MarkAsExp() {
+	b.isExp = true
 }
 
 type node interface {

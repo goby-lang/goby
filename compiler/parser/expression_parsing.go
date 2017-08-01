@@ -356,10 +356,10 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 	var value ast.Expression
 	var tok token.Token
-	exp := &ast.AssignExpression{IsStmt: true, BaseNode: &ast.BaseNode{}}
+	exp := &ast.AssignExpression{BaseNode: &ast.BaseNode{}}
 
 	if p.fsm.Is(parsingFuncCall) {
-		exp.IsStmt = false
+		exp.MarkAsExp()
 	}
 
 	oldState := p.fsm.Current()
@@ -420,7 +420,7 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 	assignExp, ok := value.(*ast.AssignExpression)
 
 	if ok {
-		assignExp.IsStmt = false
+		assignExp.MarkAsExp()
 	}
 
 	exp.Token = tok
@@ -452,7 +452,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	assignExp, ok := ie.Condition.(*ast.AssignExpression)
 
 	if ok {
-		assignExp.IsStmt = false
+		assignExp.MarkAsExp()
 	}
 
 	ie.Consequence = p.parseBlockStatement()
