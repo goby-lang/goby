@@ -600,6 +600,14 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		input    string
 		expected int
 	}{
+		{`
+		def foo(x)
+		  x
+		end
+
+		a = foo 10
+		a
+		`, 10},
 		{
 			`
 			class Foo

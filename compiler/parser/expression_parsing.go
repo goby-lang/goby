@@ -77,7 +77,20 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		return nil
 	}
 
-	if p.curTokenIs(token.Ident) && p.fsm.Is(normal) {
+	/*
+		Parse method call without explicit receiver and doesn't have parens around arguments. Here's some examples:
+
+		When state is normal:
+		```
+		foo 10
+		```
+
+		When state is parseAssignment:
+		```
+		a = foo 10
+		```
+	*/
+	if p.curTokenIs(token.Ident) && (p.fsm.Is(normal) || p.fsm.Is(parseAssignment)) {
 		if p.peekTokenIs(token.Do) {
 			return p.parseCallExpressionWithoutParenAndReceiver(p.curToken)
 		}
