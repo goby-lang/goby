@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/goby-lang/goby/compiler"
 	"github.com/goby-lang/goby/compiler/bytecode"
+	"github.com/goby-lang/goby/compiler/parser"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -303,7 +304,7 @@ func (vm *VM) execGobyLib(libName string) {
 }
 
 func (vm *VM) execRequiredFile(filepath string, file []byte) {
-	instructionSets, err := compiler.CompileToInstructions(string(file))
+	instructionSets, err := compiler.CompileToInstructions(string(file), parser.NormalMode)
 
 	if err != nil {
 		fmt.Println(err.Error())

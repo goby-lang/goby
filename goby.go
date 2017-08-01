@@ -12,6 +12,7 @@ import (
 	"github.com/goby-lang/goby/igb"
 	"github.com/goby-lang/goby/vm"
 	"github.com/pkg/profile"
+	"github.com/goby-lang/goby/compiler/parser"
 )
 
 const Version string = vm.Version
@@ -55,7 +56,7 @@ func main() {
 
 	switch fileExt {
 	case "gb", "rb":
-		instructionSets, err := compiler.CompileToInstructions(string(file))
+		instructionSets, err := compiler.CompileToInstructions(string(file), parser.NormalMode)
 
 		if err != nil {
 			fmt.Println(err.Error())

@@ -58,7 +58,14 @@ type Parser struct {
 	// However, this is not a very good practice should change it in the future.
 	acceptBlock bool
 	fsm         *fsm.FSM
+	Mode        int
 }
+
+const (
+	NormalMode int = iota
+	REPLMode
+	TestMode
+)
 
 // These are state machine's events
 const (
@@ -171,6 +178,15 @@ func (p *Parser) ParseProgram() (*ast.Program, *Error) {
 
 		if p.error != nil {
 			return nil, p.error
+		}
+	}
+
+	if p.Mode == TestMode {
+		stmt := program.Statements[len(program.Statements)-1]
+		expStmt, ok := stmt.(*ast.ExpressionStatement)
+
+		if ok {
+			expStmt.Expression.MarkAsExp()
 		}
 	}
 
