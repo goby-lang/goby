@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestLocalVariableAccessInCurrentScope(t *testing.T) {
+func TestLocalVariableAccessCompilation(t *testing.T) {
 	input := `
 	a = 10
 	a = 100
@@ -17,26 +17,29 @@ func TestLocalVariableAccessInCurrentScope(t *testing.T) {
 <ProgramStart>
 0 putobject 10
 1 setlocal 0 0
-2 putobject 100
-3 setlocal 0 0
-4 putobject 5
-5 setlocal 0 1
-6 getlocal 0 1
-7 getlocal 0 0
-8 send * 1
-9 putobject 100
-10 send + 1
-11 putobject 2
-12 send / 1
-13 putself
-14 send foo 0
-15 leave`
+2 pop
+3 putobject 100
+4 setlocal 0 0
+5 pop
+6 putobject 5
+7 setlocal 0 1
+8 pop
+9 getlocal 0 1
+10 getlocal 0 0
+11 send * 1
+12 putobject 100
+13 send + 1
+14 putobject 2
+15 send / 1
+16 putself
+17 send foo 0
+18 leave`
 
 	bytecode := compileToBytecode(input)
 	compareBytecode(t, bytecode, expected)
 }
 
-func TestConditionWithoutAlternativeCompilation(t *testing.T) {
+func TestIfExpressionWithoutAlternativeCompilation(t *testing.T) {
 	input := `
 	a = 10
 	b = 5
@@ -51,27 +54,30 @@ func TestConditionWithoutAlternativeCompilation(t *testing.T) {
 <ProgramStart>
 0 putobject 10
 1 setlocal 0 0
-2 putobject 5
-3 setlocal 0 1
-4 getlocal 0 0
-5 getlocal 0 1
-6 send > 1
-7 branchunless 11
-8 putobject 10
-9 setlocal 0 2
-10 jump 12
-11 putnil
-12 getlocal 0 2
-13 putobject 1
-14 send + 1
-15 leave
+2 pop
+3 putobject 5
+4 setlocal 0 1
+5 pop
+6 getlocal 0 0
+7 getlocal 0 1
+8 send > 1
+9 branchunless 14
+10 putobject 10
+11 setlocal 0 2
+12 pop
+13 jump 15
+14 putnil
+15 getlocal 0 2
+16 putobject 1
+17 send + 1
+18 leave
 `
 
 	bytecode := compileToBytecode(input)
 	compareBytecode(t, bytecode, expected)
 }
 
-func TestConditionWithAlternativeCompilation(t *testing.T) {
+func TestIfExpressionWithAlternativeCompilation(t *testing.T) {
 	input := `
 	a = 10
 	b = 5
@@ -88,28 +94,32 @@ func TestConditionWithAlternativeCompilation(t *testing.T) {
 <ProgramStart>
 0 putobject 10
 1 setlocal 0 0
-2 putobject 5
-3 setlocal 0 1
-4 getlocal 0 0
-5 getlocal 0 1
-6 send > 1
-7 branchunless 11
-8 putobject 10
-9 setlocal 0 2
-10 jump 13
-11 putobject 5
-12 setlocal 0 2
-13 getlocal 0 2
-14 putobject 1
-15 send + 1
-16 leave
+2 pop
+3 putobject 5
+4 setlocal 0 1
+5 pop
+6 getlocal 0 0
+7 getlocal 0 1
+8 send > 1
+9 branchunless 14
+10 putobject 10
+11 setlocal 0 2
+12 pop
+13 jump 17
+14 putobject 5
+15 setlocal 0 2
+16 pop
+17 getlocal 0 2
+18 putobject 1
+19 send + 1
+20 leave
 `
 
 	bytecode := compileToBytecode(input)
 	compareBytecode(t, bytecode, expected)
 }
 
-func TestMultipleVariableAssignment(t *testing.T) {
+func TestMultipleVariableAssignmentCompilation(t *testing.T) {
 	input := `
 
 	def foo
@@ -134,9 +144,12 @@ func TestMultipleVariableAssignment(t *testing.T) {
 4 send foo 0
 5 expand_array 3
 6 setlocal 0 0
-7 setinstancevariable @b
-8 setlocal 0 1
-9 leave
+7 pop
+8 setinstancevariable @b
+9 pop
+10 setlocal 0 1
+11 pop
+12 leave
 `
 
 	bytecode := compileToBytecode(input)
@@ -154,12 +167,14 @@ func TestConstantCompilation(t *testing.T) {
 <ProgramStart>
 0 putobject 10
 1 setconstant Foo
-2 getconstant Foo false
-3 setconstant Bar
-4 getconstant Foo false
-5 getconstant Bar false
-6 send + 1
-7 leave
+2 pop
+3 getconstant Foo false
+4 setconstant Bar
+5 pop
+6 getconstant Foo false
+7 getconstant Bar false
+8 send + 1
+9 leave
 `
 	bytecode := compileToBytecode(input)
 	compareBytecode(t, bytecode, expected)
@@ -175,13 +190,15 @@ func TestBooleanCompilation(t *testing.T) {
 <ProgramStart>
 0 putobject true
 1 setlocal 0 0
-2 putobject false
-3 setlocal 0 1
-4 getlocal 0 0
-5 send ! 0
-6 getlocal 0 1
-7 send == 1
-8 leave
+2 pop
+3 putobject false
+4 setlocal 0 1
+5 pop
+6 getlocal 0 0
+7 send ! 0
+8 getlocal 0 1
+9 send == 1
+10 leave
 `
 
 	bytecode := compileToBytecode(input)
@@ -202,15 +219,17 @@ func TestArrayCompilation(t *testing.T) {
 2 putstring "bar"
 3 newarray 3
 4 setlocal 0 0
-5 getlocal 0 0
-6 putobject 0
-7 putstring "foo"
-8 send []= 2
-9 getlocal 0 0
-10 putobject 0
-11 send [] 1
-12 setlocal 0 1
-13 leave
+5 pop
+6 getlocal 0 0
+7 putobject 0
+8 putstring "foo"
+9 send []= 2
+10 getlocal 0 0
+11 putobject 0
+12 send [] 1
+13 setlocal 0 1
+14 pop
+15 leave
 `
 	bytecode := compileToBytecode(input)
 	compareBytecode(t, bytecode, expected)
@@ -232,26 +251,28 @@ func TestHashCompilation(t *testing.T) {
 3 putobject 5
 4 newhash 4
 5 setlocal 0 0
-6 newhash 0
-7 setlocal 0 1
-8 getlocal 0 1
-9 putstring "baz"
-10 getlocal 0 0
-11 putstring "bar"
-12 send [] 1
-13 getlocal 0 0
-14 putstring "foo"
-15 send [] 1
-16 send - 1
-17 send []= 2
-18 getlocal 0 1
-19 putstring "baz"
-20 send [] 1
-21 getlocal 0 0
-22 putstring "bar"
-23 send [] 1
-24 send + 1
-25 leave
+6 pop
+7 newhash 0
+8 setlocal 0 1
+9 pop
+10 getlocal 0 1
+11 putstring "baz"
+12 getlocal 0 0
+13 putstring "bar"
+14 send [] 1
+15 getlocal 0 0
+16 putstring "foo"
+17 send [] 1
+18 send - 1
+19 send []= 2
+20 getlocal 0 1
+21 putstring "baz"
+22 send [] 1
+23 getlocal 0 0
+24 putstring "bar"
+25 send [] 1
+26 send + 1
+27 leave
 `
 	expected2 := `
 <ProgramStart>
@@ -261,26 +282,28 @@ func TestHashCompilation(t *testing.T) {
 3 putobject 1
 4 newhash 4
 5 setlocal 0 0
-6 newhash 0
-7 setlocal 0 1
-8 getlocal 0 1
-9 putstring "baz"
-10 getlocal 0 0
-11 putstring "bar"
-12 send [] 1
-13 getlocal 0 0
-14 putstring "foo"
-15 send [] 1
-16 send - 1
-17 send []= 2
-18 getlocal 0 1
-19 putstring "baz"
-20 send [] 1
-21 getlocal 0 0
-22 putstring "bar"
-23 send [] 1
-24 send + 1
-25 leave
+6 pop
+7 newhash 0
+8 setlocal 0 1
+9 pop
+10 getlocal 0 1
+11 putstring "baz"
+12 getlocal 0 0
+13 putstring "bar"
+14 send [] 1
+15 getlocal 0 0
+16 putstring "foo"
+17 send [] 1
+18 send - 1
+19 send []= 2
+20 getlocal 0 1
+21 putstring "baz"
+22 send [] 1
+23 getlocal 0 0
+24 putstring "bar"
+25 send [] 1
+26 send + 1
+27 leave
 `
 	bytecode := strings.TrimSpace(compileToBytecode(input))
 
@@ -327,6 +350,46 @@ func TestRangeCompilation(t *testing.T) {
 4 newrange 0
 5 send each 0 block:0
 6 leave
+`
+
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
+func TestUnusedExpressionRemoval(t *testing.T) {
+	input := `
+	i = 0
+
+	while i < 100 do
+	  10
+	  i += 1
+	end
+
+	i
+	`
+
+	expected := `
+<ProgramStart>
+0 putobject 0
+1 setlocal 0 0
+2 pop
+3 jump 12
+4 putnil
+5 pop
+6 jump 12
+7 getlocal 0 0
+8 putobject 1
+9 send + 1
+10 setlocal 0 0
+11 pop
+12 getlocal 0 0
+13 putobject 100
+14 send < 1
+15 branchif 7
+16 putnil
+17 pop
+18 getlocal 0 0
+19 leave
 `
 
 	bytecode := compileToBytecode(input)

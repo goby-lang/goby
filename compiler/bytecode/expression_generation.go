@@ -145,6 +145,10 @@ func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.AssignE
 		case *ast.Constant:
 			is.define(SetConstant, name.Value)
 		}
+
+		if exp.IsStmt && !g.REPL {
+			is.define(Pop)
+		}
 	}
 }
 

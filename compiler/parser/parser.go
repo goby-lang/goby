@@ -60,11 +60,28 @@ type Parser struct {
 	fsm         *fsm.FSM
 }
 
+// These are state machine's events
 const (
-	normal           = "normal"
+	backToNormal     = "backToNormal"
 	parseFuncCall    = "parseFuncCall"
 	parseMethodParam = "parseMethodParam"
+	parseAssignment  = "parseAssignment"
 )
+
+// These are state machine's states
+const (
+	normal             = "normal"
+	parsingFuncCall    = "parsingFuncCall"
+	parsingMethodParam = "parsingMethodParam"
+	parsingAssignment  = "parsingAssignment"
+)
+
+var eventTable = map[string]string{
+	normal:             backToNormal,
+	parsingFuncCall:    parseFuncCall,
+	parsingMethodParam: parseMethodParam,
+	parsingAssignment:  parseAssignment,
+}
 
 // New initializes a parser and returns it
 func New(l *lexer.Lexer) *Parser {
@@ -76,9 +93,10 @@ func New(l *lexer.Lexer) *Parser {
 	p.fsm = fsm.NewFSM(
 		normal,
 		fsm.Events{
-			{Name: parseFuncCall, Src: []string{normal}, Dst: parseFuncCall},
-			{Name: parseMethodParam, Src: []string{normal}, Dst: parseMethodParam},
-			{Name: normal, Src: []string{parseFuncCall, parseMethodParam}, Dst: normal},
+			{Name: parseFuncCall, Src: []string{normal}, Dst: parsingFuncCall},
+			{Name: parseMethodParam, Src: []string{normal, parsingAssignment}, Dst: parsingMethodParam},
+			{Name: parseAssignment, Src: []string{normal, parsingFuncCall}, Dst: parsingAssignment},
+			{Name: backToNormal, Src: []string{parsingFuncCall, parsingMethodParam, parsingAssignment}, Dst: normal},
 		},
 		fsm.Callbacks{},
 	)

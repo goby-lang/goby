@@ -105,7 +105,7 @@ func (p *Parser) parseParameters() []ast.Expression {
 		params = append(params, param)
 	}
 
-	p.fsm.Event(normal)
+	p.fsm.Event(backToNormal)
 	return params
 }
 

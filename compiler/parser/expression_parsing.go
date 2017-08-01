@@ -77,7 +77,20 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		return nil
 	}
 
-	if p.curTokenIs(token.Ident) && p.fsm.Is(normal) {
+	/*
+		Parse method call without explicit receiver and doesn't have parens around arguments. Here's some examples:
+
+		When state is normal:
+		```
+		foo 10
+		```
+
+		When state is parseAssignment:
+		```
+		a = foo 10
+		```
+	*/
+	if p.curTokenIs(token.Ident) && (p.fsm.Is(normal) || p.fsm.Is(parsingAssignment)) {
 		if p.peekTokenIs(token.Do) {
 			return p.parseCallExpressionWithoutParenAndReceiver(p.curToken)
 		}
@@ -110,7 +123,22 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 
 	leftExp := parseFn()
 
-	for !p.peekTokenIs(token.Semicolon) && precedence < p.peekPrecedence() && p.peekTokenAtSameLine() {
+	/*
+		Precedence example:
+
+		```
+		1 + 1 * 5 == 1 + (1 * 5)
+
+		```
+
+		Because "*"'s precedence is PRODUCT which is higher than "+"'s precedence SUM, we'll parse "*" first.
+
+	*/
+
+	for !p.peekTokenIs(token.Semicolon) &&
+		(precedence < p.peekPrecedence() || (p.fsm.Is(parsingAssignment) && p.peekTokenIs(token.Assign))) &&
+		// This is for preventing parser treat next line's expression as function's argument.
+		p.peekTokenAtSameLine() {
 
 		infixFn := p.infixParseFns[p.peekToken.Type]
 		if infixFn == nil {
@@ -328,8 +356,14 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 	var value ast.Expression
 	var tok token.Token
+	exp := &ast.AssignExpression{IsStmt: true}
 
-	exp := &ast.AssignExpression{}
+	if p.fsm.Is(parsingFuncCall) {
+		exp.IsStmt = false
+	}
+
+	oldState := p.fsm.Current()
+	p.fsm.Event(parseAssignment)
 
 	switch v := v.(type) {
 	case ast.Variable:
@@ -383,8 +417,17 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 		value = p.parseExpression(precedence)
 	}
 
+	assignExp, ok := value.(*ast.AssignExpression)
+
+	if ok {
+		assignExp.IsStmt = false
+	}
+
 	exp.Token = tok
 	exp.Value = value
+
+	event, _ := eventTable[oldState]
+	p.fsm.Event(event)
 
 	return exp
 }
@@ -405,6 +448,13 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	ie := &ast.IfExpression{Token: p.curToken}
 	p.nextToken()
 	ie.Condition = p.parseExpression(NORMAL)
+
+	assignExp, ok := ie.Condition.(*ast.AssignExpression)
+
+	if ok {
+		assignExp.IsStmt = false
+	}
+
 	ie.Consequence = p.parseBlockStatement()
 
 	// curToken is now ELSE or RBRACE
@@ -430,7 +480,7 @@ func (p *Parser) parseCallExpressionWithoutParenAndReceiver(methodToken token.To
 		exp.Arguments = p.parseCallArgumentsWithoutParens()
 	}
 
-	p.fsm.Event(normal)
+	p.fsm.Event(backToNormal)
 
 	// Parse block
 	if p.peekTokenIs(token.Do) && p.acceptBlock {
@@ -453,7 +503,7 @@ func (p *Parser) parseCallExpressionWithParen(receiver ast.Expression) ast.Expre
 	exp := &ast.CallExpression{Token: m.Token, Receiver: receiver, Method: mn}
 	exp.Arguments = p.parseCallArguments()
 
-	p.fsm.Event(normal)
+	p.fsm.Event(backToNormal)
 
 	// Parse block
 	if p.peekTokenIs(token.Do) && p.acceptBlock {
@@ -484,7 +534,7 @@ func (p *Parser) parseCallExpressionWithDot(receiver ast.Expression) ast.Express
 		exp.Arguments = p.parseCallArgumentsWithoutParens()
 	}
 
-	p.fsm.Event(normal)
+	p.fsm.Event(backToNormal)
 
 	// Setter method call like: p.foo = x
 	if p.peekTokenIs(token.Assign) {

@@ -86,32 +86,38 @@ i
 1 getlocal 2 1
 2 send + 1
 3 setlocal 2 1
-4 leave
+4 pop
+5 leave
 <Block:0>
 0 putobject 3
 1 getlocal 1 0
 2 send * 1
 3 setlocal 1 1
-4 getlocal 1 3
-5 send bar 0 block:1
-6 leave
+4 pop
+5 getlocal 1 3
+6 send bar 0 block:1
+7 leave
 <ProgramStart>
 0 putself
 1 def_class class:Foo
 2 pop
 3 putobject 100
 4 setlocal 0 0
-5 putobject 10
-6 setlocal 0 1
-7 putobject 1000
-8 setlocal 0 2
-9 getconstant Foo false
-10 send new 0
-11 setlocal 0 3
-12 getlocal 0 3
-13 send bar 0 block:0
-14 getlocal 0 1
-15 leave
+5 pop
+6 putobject 10
+7 setlocal 0 1
+8 pop
+9 putobject 1000
+10 setlocal 0 2
+11 pop
+12 getconstant Foo false
+13 send new 0
+14 setlocal 0 3
+15 pop
+16 getlocal 0 3
+17 send bar 0 block:0
+18 getlocal 0 1
+19 leave
 `
 	bytecode := compileToBytecode(input)
 	compareBytecode(t, bytecode, expected)
@@ -138,24 +144,27 @@ puts(x)
 2 send puts 1
 3 putobject 1
 4 setlocal 0 0
-5 putself
-6 getlocal 0 0
-7 send puts 1
-8 putobject 2
-9 setlocal 1 0
-10 putself
-11 getlocal 1 0
-12 send puts 1
-13 leave
+5 pop
+6 putself
+7 getlocal 0 0
+8 send puts 1
+9 putobject 2
+10 setlocal 1 0
+11 pop
+12 putself
+13 getlocal 1 0
+14 send puts 1
+15 leave
 <ProgramStart>
 0 putobject 1
 1 setlocal 0 0
-2 putself
-3 send foo 0 block:0
-4 putself
-5 getlocal 0 0
-6 send puts 1
-7 leave
+2 pop
+3 putself
+4 send foo 0 block:0
+5 putself
+6 getlocal 0 0
+7 send puts 1
+8 leave
 `
 
 	bytecode := compileToBytecode(input)
@@ -238,12 +247,13 @@ func TestBasicMethodDefineAndExecution(t *testing.T) {
 <Def:foo>
 0 putobject 10
 1 setlocal 0 2
-2 getlocal 0 0
-3 getlocal 0 1
-4 send - 1
-5 getlocal 0 2
-6 send + 1
-7 leave
+2 pop
+3 getlocal 0 0
+4 getlocal 0 1
+5 send - 1
+6 getlocal 0 2
+7 send + 1
+8 leave
 <ProgramStart>
 0 putself
 1 putstring "foo"

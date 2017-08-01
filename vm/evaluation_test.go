@@ -600,6 +600,14 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		input    string
 		expected int
 	}{
+		{`
+		def foo(x)
+		  x
+		end
+
+		a = foo 10
+		a
+		`, 10},
 		{
 			`
 			class Foo
@@ -1217,6 +1225,50 @@ func TestAssignmentEvaluation(t *testing.T) {
 		{"a = 5; b = a; c = a + b + 5; c;", 15},
 		{"a = 5; b = 10; c = if a > b; 100 else 50 end; c", 50},
 		{"Bar = 100; Bar", 100},
+		{`
+		a = 100
+		b = a
+		b = 1000
+		a
+		`, 100},
+		{`
+		a = 100
+		b = a
+		a = 1000
+		b
+		`, 100},
+		{`
+		i = 0
+
+		if a = 10
+		  i = 100
+		end
+
+		i + a
+		`, 110},
+		{`
+		i = 0
+
+		if @a = 10
+		  i = 100
+		end
+
+		i + @a
+		`, 110},
+		{`a = b = 10; a`, 10},
+		{`a = b = c = 10; a`, 10},
+		{`
+		i = 100
+		a = b = i + 10
+		a + b
+		`, 220},
+		{`
+		def foo(x)
+		  x
+		end
+
+		foo(a = b = c = d = 10)
+		`, 10},
 	}
 
 	for i, tt := range tests {

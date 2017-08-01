@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"fmt"
 	"github.com/goby-lang/goby/compiler"
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/compiler/lexer"
@@ -154,6 +155,7 @@ func (v *VM) checkCFP(t *testing.T, index, expectedCFP int) {
 
 func (v *VM) checkSP(t *testing.T, index, expectedSp int) {
 	if v.mainThread.sp != expectedSp {
+		fmt.Println(v.mainThread.stack.inspect())
 		t.Fatalf("At case %d expect main thread's sp to be %d. got: %d", index, expectedSp, v.mainThread.sp)
 	}
 
