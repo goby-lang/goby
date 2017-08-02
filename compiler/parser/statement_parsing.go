@@ -87,6 +87,7 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 
 	stmt.Parameters = params
 	stmt.BlockStatement = p.parseBlockStatement()
+	stmt.BlockStatement.KeepLastValue()
 
 	return stmt
 }
@@ -179,7 +180,6 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 		stmt.Expression = p.parseExpression(NORMAL)
 	}
 
-	stmt.Expression.MarkAsStmt()
 	return stmt
 }
 

@@ -448,10 +448,12 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	ie.Condition = p.parseExpression(NORMAL)
 
 	ie.Consequence = p.parseBlockStatement()
+	ie.Consequence.KeepLastValue()
 
 	// curToken is now ELSE or RBRACE
 	if p.curTokenIs(token.Else) {
 		ie.Alternative = p.parseBlockStatement()
+		ie.Alternative.KeepLastValue()
 	}
 
 	return ie
@@ -586,6 +588,7 @@ func (p *Parser) parseBlockArgument(exp *ast.CallExpression) {
 	}
 
 	exp.Block = p.parseBlockStatement()
+	exp.Block.KeepLastValue()
 }
 
 func (p *Parser) parseCallArguments() []ast.Expression {

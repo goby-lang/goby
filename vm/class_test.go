@@ -9,6 +9,17 @@ func TestAttrReaderAndWriter(t *testing.T) {
 	}{
 		{`
 		class Foo
+		  attr_writer :bar
+		  attr_reader :bar
+		end
+
+		f = Foo.new
+		f.bar = 10
+		f.bar
+
+		`, 10},
+		{`
+		class Foo
 		  attr_reader :bar
 
 		  def set_bar(bar)
@@ -28,17 +39,6 @@ func TestAttrReaderAndWriter(t *testing.T) {
 		  def bar
 		    @bar
 		  end
-		end
-
-		f = Foo.new
-		f.bar = 10
-		f.bar
-
-		`, 10},
-		{`
-		class Foo
-		  attr_writer :bar
-		  attr_reader :bar
 		end
 
 		f = Foo.new
@@ -74,7 +74,7 @@ func TestAttrReaderAndWriter(t *testing.T) {
 		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
-		//v.checkSP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 

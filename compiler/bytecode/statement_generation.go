@@ -39,6 +39,10 @@ func (g *Generator) compileStatement(is *InstructionSet, statement ast.Statement
 	switch stmt := statement.(type) {
 	case *ast.ExpressionStatement:
 		g.compileExpression(is, stmt.Expression, scope, table)
+
+		if stmt.Expression.IsStmt() {
+			is.define(Pop)
+		}
 	case *ast.DefStatement:
 		g.compileDefStmt(is, stmt, scope)
 	case *ast.ClassStatement:

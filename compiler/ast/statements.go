@@ -198,3 +198,15 @@ func (bs *BlockStatement) String() string {
 
 	return out.String()
 }
+func (bs *BlockStatement) KeepLastValue() {
+	if len(bs.Statements) == 0 {
+		return
+	}
+
+	stmt := bs.Statements[len(bs.Statements)-1]
+	expStmt, ok := stmt.(*ExpressionStatement)
+
+	if ok {
+		expStmt.Expression.MarkAsExp()
+	}
+}
