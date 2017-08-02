@@ -12,10 +12,11 @@ func TestEvalBooleanExpression(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -48,10 +49,11 @@ func TestBooleanComparison(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -75,10 +77,11 @@ func TestBooleanLogicalExpression(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -112,10 +115,11 @@ func TestBooleanAssignmentByOperation(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
