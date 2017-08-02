@@ -369,7 +369,8 @@ var builtInActions = map[operationType]*action{
 			method = receiver.findMethod(methodName)
 
 			if method == nil {
-				t.UndefinedMethodError(methodName, receiver)
+
+				t.UndefinedMethodError(methodName, receiver, receiverPr)
 				return
 			}
 
