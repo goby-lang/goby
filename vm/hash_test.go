@@ -12,8 +12,8 @@ func TestEvalHashExpression(t *testing.T) {
 	{ foo: 123, bar: "test", baz: true }
 	`
 
-	vm := initTestVM()
-	evaluated := vm.testEval(t, input)
+	v := initTestVM()
+	evaluated := v.testEval(t, input)
 
 	h, ok := evaluated.(*HashObject)
 	if !ok {
@@ -31,7 +31,8 @@ func TestEvalHashExpression(t *testing.T) {
 		}
 	}
 
-	vm.checkCFP(t, 0, 0)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
 }
 
 func TestHashAccessOperation(t *testing.T) {
@@ -100,10 +101,11 @@ func TestHashAccessOperation(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -119,42 +121,11 @@ func TestHashAccessOperationFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
-	}
-}
-
-func JSONBytesEqual(a, b []byte) (bool, error) {
-	var j, j2 interface{}
-	if err := json.Unmarshal(a, &j); err != nil {
-		return false, err
-	}
-	if err := json.Unmarshal(b, &j2); err != nil {
-		return false, err
-	}
-	return reflect.DeepEqual(j2, j), nil
-}
-
-// We can't compare string directly because the key/value's order might change and we can't control it.
-func compareJSONResult(t *testing.T, evaluated Object, exp interface{}) {
-	expected, err := json.Marshal(exp)
-
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	s := evaluated.(*StringObject).Value
-
-	r, err := JSONBytesEqual([]byte(s), expected)
-
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	if !r {
-		t.Fatalf("Expect json:\n%s \n\n got: %s", string(expected), s)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -194,10 +165,11 @@ func TestHashComparisonOperation(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -206,8 +178,8 @@ func TestHashClearMethod(t *testing.T) {
 	{ foo: 123, bar: "test", baz: true }.clear
 	`
 
-	vm := initTestVM()
-	evaluated := vm.testEval(t, input)
+	v := initTestVM()
+	evaluated := v.testEval(t, input)
 
 	h, ok := evaluated.(*HashObject)
 	if !ok {
@@ -216,7 +188,8 @@ func TestHashClearMethod(t *testing.T) {
 		t.Fatalf("Expect length of pairs of hash to be 0. got: %v", h.length())
 	}
 
-	vm.checkCFP(t, 0, 0)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
 }
 
 func TestHashClearMethodFail(t *testing.T) {
@@ -230,10 +203,11 @@ func TestHashClearMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -267,10 +241,11 @@ func TestHashEachKeyMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		testArrayObject(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -292,10 +267,11 @@ func TestHashEachKeyMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, tt.expectedCfp)
+		v.checkCFP(t, i, tt.expectedCfp)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -322,10 +298,11 @@ func TestHashEachValueMethod(t *testing.T) {
 	}
 
 	for i, tt := range hashTests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		testArrayObject(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 
 	normalTests := []struct {
@@ -356,10 +333,11 @@ func TestHashEachValueMethod(t *testing.T) {
 	}
 
 	for i, tt := range normalTests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -381,10 +359,11 @@ func TestHashEachValueMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, tt.expectedCfp)
+		v.checkCFP(t, i, tt.expectedCfp)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -398,10 +377,11 @@ func TestHashEmptyMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -416,10 +396,11 @@ func TestHashEmptyMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -443,10 +424,11 @@ func TestHashEqualMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -461,10 +443,11 @@ func TestHashEqualMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -512,10 +495,11 @@ func TestHashDeleteMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -532,10 +516,11 @@ func TestHashDeleteMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -549,10 +534,11 @@ func TestHashHasKeyMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -569,10 +555,11 @@ func TestHashHasKeyMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -591,10 +578,11 @@ func TestHashHasValueMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -609,10 +597,11 @@ func TestHashHasValueMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -621,8 +610,8 @@ func TestHashKeysMethod(t *testing.T) {
 	{ foo: 123, bar: "test", baz: true }.keys
 	`
 
-	vm := initTestVM()
-	evaluated := vm.testEval(t, input)
+	v := initTestVM()
+	evaluated := v.testEval(t, input)
 
 	arr, ok := evaluated.(*ArrayObject)
 	if !ok {
@@ -640,7 +629,8 @@ func TestHashKeysMethod(t *testing.T) {
 		t.Fatalf("Expect evaluated array to be [\"bar\", \"baz\", \"foo\". got: %v", evaluatedArr)
 	}
 
-	vm.checkCFP(t, 0, 0)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
 }
 
 func TestHashKeysMethodFail(t *testing.T) {
@@ -654,10 +644,11 @@ func TestHashKeysMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -675,10 +666,11 @@ func TestHashLengthMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -693,10 +685,11 @@ func TestHashLengthMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -750,10 +743,11 @@ func TestHashMapValuesMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -775,10 +769,11 @@ func TestHashMapValuesMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, tt.expectedCfp)
+		v.checkCFP(t, i, tt.expectedCfp)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -788,9 +783,9 @@ func TestHashMergeMethod(t *testing.T) {
 		`{ b: 123, d: false }.merge({ a: "Hello", c: 123 }, { b: true, d: ["World"] }, { d: ["World", 456, false] })`,
 	}
 
-	for i, v := range input {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, v)
+	for i, value := range input {
+		v := initTestVM()
+		evaluated := v.testEval(t, value)
 
 		h, ok := evaluated.(*HashObject)
 		if !ok {
@@ -810,7 +805,8 @@ func TestHashMergeMethod(t *testing.T) {
 			}
 		}
 
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -826,10 +822,11 @@ func TestHashMergeMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -846,10 +843,11 @@ func TestHashSortedKeysMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		testArrayObject(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -864,10 +862,11 @@ func TestHashSortedKeysMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -885,18 +884,19 @@ func TestHashToArrayMethod(t *testing.T) {
 	}
 
 	for i, tt := range testsSortedArray {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		testArrayObject(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 
 	input := `
 	{ a: 123, b: "test", c: true, d: [1, "Goby", false] }.to_a
 	`
 
-	vm := initTestVM()
-	evaluated := vm.testEval(t, input)
+	v := initTestVM()
+	evaluated := v.testEval(t, input)
 
 	arr, ok := evaluated.(*ArrayObject)
 	if !ok {
@@ -923,7 +923,7 @@ func TestHashToArrayMethod(t *testing.T) {
 			testArrayObject(t, 0, v, []interface{}{1, "Goby", false})
 		}
 	}
-	vm.checkCFP(t, 0, 0)
+	v.checkCFP(t, 0, 0)
 }
 
 func TestHashToArrayMethodFail(t *testing.T) {
@@ -937,10 +937,11 @@ func TestHashToArrayMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -976,10 +977,11 @@ func TestHashToJSONMethodWithArray(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		compareJSONResult(t, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -1025,10 +1027,11 @@ func TestHashToJSONMethodWithNestedHash(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		compareJSONResult(t, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -1085,10 +1088,11 @@ func TestHashToJSONMethodWithBasicTypes(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		compareJSONResult(t, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -1103,10 +1107,11 @@ func TestHashToJSONMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -1121,10 +1126,11 @@ func TestHashToStringMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -1139,10 +1145,11 @@ func TestHashToStringMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -1196,10 +1203,11 @@ func TestHashTransformValuesMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -1221,10 +1229,11 @@ func TestHashTransformValuesMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, tt.expectedCfp)
+		v.checkCFP(t, i, tt.expectedCfp)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -1233,8 +1242,8 @@ func TestHashValuesMethod(t *testing.T) {
 	{ a: 123, b: "test", c: true, d: [1, "Goby", false] }.values
 	`
 
-	vm := initTestVM()
-	evaluated := vm.testEval(t, input)
+	v := initTestVM()
+	evaluated := v.testEval(t, input)
 
 	arr, ok := evaluated.(*ArrayObject)
 	if !ok {
@@ -1255,7 +1264,8 @@ func TestHashValuesMethod(t *testing.T) {
 			testArrayObject(t, 0, v, []interface{}{1, "Goby", false})
 		}
 	}
-	vm.checkCFP(t, 0, 0)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
 }
 
 func TestHashValuesMethodFail(t *testing.T) {
@@ -1269,9 +1279,42 @@ func TestHashValuesMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func JSONBytesEqual(a, b []byte) (bool, error) {
+	var j, j2 interface{}
+	if err := json.Unmarshal(a, &j); err != nil {
+		return false, err
+	}
+	if err := json.Unmarshal(b, &j2); err != nil {
+		return false, err
+	}
+	return reflect.DeepEqual(j2, j), nil
+}
+
+// We can't compare string directly because the key/value's order might change and we can't control it.
+func compareJSONResult(t *testing.T, evaluated Object, exp interface{}) {
+	expected, err := json.Marshal(exp)
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	s := evaluated.(*StringObject).Value
+
+	r, err := JSONBytesEqual([]byte(s), expected)
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if !r {
+		t.Fatalf("Expect json:\n%s \n\n got: %s", string(expected), s)
 	}
 }

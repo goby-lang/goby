@@ -19,10 +19,11 @@ func TestHTTPResponseObject(t *testing.T) {
 	res.body
 	`
 
-	vm := initTestVM()
-	evaluated := vm.testEval(t, input)
+	v := initTestVM()
+	evaluated := v.testEval(t, input)
 	checkExpected(t, 0, evaluated, "test")
-	vm.checkCFP(t, 0, 0)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
 }
 
 func TestNormalGetResponse(t *testing.T) {
@@ -39,10 +40,11 @@ require "net/http"
 Net::HTTP.get("%s")
 `, ts.URL)
 
-	vm := initTestVM()
-	evaluated := vm.testEval(t, testScript)
+	v := initTestVM()
+	evaluated := v.testEval(t, testScript)
 	checkExpected(t, 0, evaluated, expected)
-	vm.checkCFP(t, 0, 0)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
 }
 
 func TestNormalGetResponseWithPath(t *testing.T) {
@@ -64,8 +66,9 @@ require "net/http"
 Net::HTTP.get("%s", "path")
 `, ts.URL)
 
-	vm := initTestVM()
-	evaluated := vm.testEval(t, testScript)
+	v := initTestVM()
+	evaluated := v.testEval(t, testScript)
 	checkExpected(t, 0, evaluated, expected)
-	vm.checkCFP(t, 0, 0)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
 }

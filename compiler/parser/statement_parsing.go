@@ -26,7 +26,10 @@ func (p *Parser) parseStatement() ast.Statement {
 		return &ast.BreakStatement{BaseNode: &ast.BaseNode{Token: p.curToken}}
 	default:
 		exp := p.parseExpressionStatement()
-		exp.Expression.MarkAsStmt()
+
+		if p.Mode != REPLMode {
+			exp.Expression.MarkAsStmt()
+		}
 
 		return exp
 	}

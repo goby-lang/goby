@@ -111,9 +111,7 @@ func (g *Generator) compileClassStmt(is *InstructionSet, stmt *ast.ClassStatemen
 		is.define(DefClass, "class:"+stmt.Name.Value)
 	}
 
-	if stmt.IsStmt() {
-		is.define(Pop)
-	}
+	is.define(Pop)
 
 	scope = newScope(stmt)
 
@@ -130,9 +128,7 @@ func (g *Generator) compileClassStmt(is *InstructionSet, stmt *ast.ClassStatemen
 func (g *Generator) compileModuleStmt(is *InstructionSet, stmt *ast.ModuleStatement, scope *scope) {
 	is.define(PutSelf)
 	is.define(DefClass, "module:"+stmt.Name.Value)
-	if stmt.IsStmt() {
-		is.define(Pop)
-	}
+	is.define(Pop)
 
 	scope = newScope(stmt)
 	newIS := &InstructionSet{}

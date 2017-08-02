@@ -364,7 +364,6 @@ func TestClassNamespace(t *testing.T) {
 
 		Object::Foo.bar
 		`, 10},
-
 		{`
 		Foo = 10
 

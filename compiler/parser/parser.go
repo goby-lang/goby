@@ -172,7 +172,6 @@ func (p *Parser) ParseProgram() (*ast.Program, *Error) {
 		stmt := p.parseStatement()
 
 		if stmt != nil {
-			stmt.MarkAsStmt()
 			program.Statements = append(program.Statements, stmt)
 		}
 		p.nextToken()

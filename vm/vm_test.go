@@ -117,6 +117,7 @@ foo
 
 		for _, input := range test.inputs {
 			p := parser.New(lexer.New(input))
+			p.Mode = parser.REPLMode
 
 			program, _ := p.ParseProgram()
 			sets := g.GenerateInstructions(program.Statements)

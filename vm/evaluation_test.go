@@ -40,10 +40,11 @@ func TestComplexEvaluation(t *testing.T) {
 	Baz::Bar.new.bar + a
 	`
 
-	vm := initTestVM()
-	evaluated := vm.testEval(t, input)
+	v := initTestVM()
+	evaluated := v.testEval(t, input)
 	testIntegerObject(t, 0, evaluated, 310)
-	vm.checkCFP(t, 0, 0)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
 }
 
 func TestComment(t *testing.T) {
@@ -66,10 +67,11 @@ func TestComment(t *testing.T) {
 	Foo.new.one #=> Comment
 	# Comment`
 
-	vm := initTestVM()
-	evaluated := vm.testEval(t, input)
+	v := initTestVM()
+	evaluated := v.testEval(t, input)
 	testIntegerObject(t, 0, evaluated, 1)
-	vm.checkCFP(t, 0, 0)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
 }
 
 func TestMethodCall(t *testing.T) {
@@ -278,15 +280,16 @@ func TestMethodCall(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 
 		if isError(evaluated) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 		}
 
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -333,10 +336,11 @@ func TestMethodCallWithDefaultArgValue(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -483,10 +487,11 @@ func TestMethodCallWithBlockArgument(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -588,10 +593,11 @@ func TestMethodCallWithNestedBlock(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -824,15 +830,16 @@ func TestMethodCallWithoutParens(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 
 		if isError(evaluated) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 		}
 
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -945,10 +952,11 @@ func TestClassMethodCall(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -978,8 +986,8 @@ func TestInstanceMethodCall(t *testing.T) {
 		fb.add(10, fb.get)
 	`
 
-	vm := initTestVM()
-	evaluated := vm.testEval(t, input)
+	v := initTestVM()
+	evaluated := v.testEval(t, input)
 
 	if isError(evaluated) {
 		t.Fatalf("got Error: %s", evaluated.(*Error).Message)
@@ -995,7 +1003,8 @@ func TestInstanceMethodCall(t *testing.T) {
 		t.Errorf("expect result to be 110. got=%d", result.Value)
 	}
 
-	vm.checkCFP(t, 0, 0)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
 }
 
 func TestPostfixMethodCall(t *testing.T) {
@@ -1029,10 +1038,11 @@ func TestPostfixMethodCall(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -1050,10 +1060,11 @@ func TestBangPrefixMethodCall(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -1069,10 +1080,11 @@ func TestMinusPrefixMethodCall(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -1130,15 +1142,16 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 
 		if isError(evaluated) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 		}
 
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -1202,82 +1215,84 @@ func TestInstanceVariableEvaluation(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 
 		if isError(evaluated) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 		}
 
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
-//func TestAssignmentEvaluation(t *testing.T) {
-//	tests := []struct {
-//		input         string
-//		expectedValue int
-//	}{
-//		{"a = 5; a;", 5},
-//		{"a = 5 * 5; a;", 25},
-//		{"a = 5; b = a; b;", 5},
-//		{"a = 5; b = a; c = a + b + 5; c;", 15},
-//		{"a = 5; b = 10; c = if a > b; 100 else 50 end; c", 50},
-//		{"Bar = 100; Bar", 100},
-//		{`
-//		a = 100
-//		b = a
-//		b = 1000
-//		a
-//		`, 100},
-//		{`
-//		a = 100
-//		b = a
-//		a = 1000
-//		b
-//		`, 100},
-//		{`
-//		i = 0
-//
-//		if a = 10
-//		  i = 100
-//		end
-//
-//		i + a
-//		`, 110},
-//		{`
-//		i = 0
-//
-//		if @a = 10
-//		  i = 100
-//		end
-//
-//		i + @a
-//		`, 110},
-//		{`a = b = 10; a`, 10},
-//		{`a = b = c = 10; a`, 10},
-//		{`
-//		i = 100
-//		a = b = i + 10
-//		a + b
-//		`, 220},
-//		{`
-//		def foo(x)
-//		  x
-//		end
-//
-//		foo(a = b = c = d = 10)
-//		`, 10},
-//	}
-//
-//	for i, tt := range tests {
-//		vm := initTestVM()
-//		evaluated := vm.testEval(t, tt.input)
-//		testIntegerObject(t, i, evaluated, tt.expectedValue)
-//		vm.checkCFP(t, 0, 0)
-//	}
-//}
+func TestAssignmentEvaluation(t *testing.T) {
+	tests := []struct {
+		input         string
+		expectedValue int
+	}{
+		{"a = 5; a;", 5},
+		{"a = 5 * 5; a;", 25},
+		{"a = 5; b = a; b;", 5},
+		{"a = 5; b = a; c = a + b + 5; c;", 15},
+		{"a = 5; b = 10; c = if a > b; 100 else 50 end; c", 50},
+		{"Bar = 100; Bar", 100},
+		{`
+		a = 100
+		b = a
+		b = 1000
+		a
+		`, 100},
+		{`
+		a = 100
+		b = a
+		a = 1000
+		b
+		`, 100},
+		{`
+		i = 0
+
+		if a = 10
+		  i = 100
+		end
+
+		i + a
+		`, 110},
+		{`
+		i = 0
+
+		if @a = 10
+		  i = 100
+		end
+
+		i + @a
+		`, 110},
+		{`a = b = 10; a`, 10},
+		{`a = b = c = 10; a`, 10},
+		{`
+		i = 100
+		a = b = i + 10
+		a + b
+		`, 220},
+		{`
+		def foo(x)
+		  x
+		end
+
+		foo(a = b = c = d = 10)
+		`, 10},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
+		testIntegerObject(t, i, evaluated, tt.expectedValue)
+		v.checkCFP(t, 0, 0)
+		v.checkSP(t, i, 1)
+	}
+}
 
 func TestAssignmentByOperationEvaluation(t *testing.T) {
 	tests := []struct {
@@ -1292,10 +1307,11 @@ func TestAssignmentByOperationEvaluation(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expectedValue)
-		vm.checkCFP(t, 0, 0)
+		v.checkCFP(t, 0, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -1367,11 +1383,11 @@ func TestIfExpressionEvaluation(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
-		vm.checkSP(t, i, 1)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -1388,11 +1404,12 @@ func TestClassInheritance(t *testing.T) {
 
 		Foo.superclass.name
 	`
-	vm := initTestVM()
-	evaluated := vm.testEval(t, input)
+	v := initTestVM()
+	evaluated := v.testEval(t, input)
 
 	testStringObject(t, 0, evaluated, "Bar")
-	vm.checkCFP(t, 0, 0)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
 }
 
 func TestMultiVarAssignment(t *testing.T) {
@@ -1519,10 +1536,10 @@ func TestMultiVarAssignment(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
-		vm.checkSP(t, i, 1)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
