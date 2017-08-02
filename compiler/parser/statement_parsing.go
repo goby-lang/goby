@@ -8,8 +8,6 @@ import (
 
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
-	case token.InstanceVariable, token.Ident, token.Constant:
-		return p.parseExpressionStatement()
 	case token.Return:
 		return p.parseReturnStatement()
 	case token.Def:
@@ -29,7 +27,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	default:
 		exp := p.parseExpressionStatement()
 
-		if exp.Expression != nil {
+		if exp.Expression != nil && !p.fsm.Is(parsingAssignment) {
 			exp.Expression.MarkAsStmt()
 		}
 
@@ -117,6 +115,10 @@ func (p *Parser) parseParameters() []ast.Expression {
 
 func (p *Parser) parseClassStatement() *ast.ClassStatement {
 	stmt := &ast.ClassStatement{BaseNode: &ast.BaseNode{Token: p.curToken}}
+
+	if !(p.fsm.Is(parsingFuncCall) || p.fsm.Is(parsingAssignment)) {
+		stmt.MarkAsStmt()
+	}
 
 	if !p.expectPeek(token.Constant) {
 		return nil
@@ -208,6 +210,16 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 			bs.Statements = append(bs.Statements, stmt)
 		}
 		p.nextToken()
+	}
+
+	if len(bs.Statements) < 1 {
+		return bs
+	}
+
+	stmt := bs.Statements[len(bs.Statements)-1]
+
+	if expStmt, ok := stmt.(*ast.ExpressionStatement); ok {
+		expStmt.Expression.IsExp()
 	}
 
 	return bs
