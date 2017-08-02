@@ -458,6 +458,9 @@ func (p *Parser) parseIfExpression() ast.Expression {
 }
 
 func (p *Parser) parseCallExpressionWithoutParenAndReceiver(methodToken token.Token) ast.Expression {
+	exp := &ast.CallExpression{BaseNode: &ast.BaseNode{}}
+
+	oldState := p.fsm.Current()
 	p.fsm.Event(parseFuncCall)
 	// real receiver is self
 	selfTok := token.Token{Type: token.Self, Literal: "self", Line: p.curToken.Line}
@@ -466,13 +469,15 @@ func (p *Parser) parseCallExpressionWithoutParenAndReceiver(methodToken token.To
 	// current token might be the first argument
 	//     method name      |       argument
 	// foo <- method token     x <- current token
-	exp := &ast.CallExpression{BaseNode: &ast.BaseNode{Token: methodToken}, Receiver: self, Method: methodToken.Literal}
+	exp.Token = methodToken
+	exp.Receiver = self
+	exp.Method = methodToken.Literal
 
 	if p.curToken.Line == methodToken.Line { // foo x
 		exp.Arguments = p.parseCallArgumentsWithoutParens()
 	}
 
-	p.fsm.Event(backToNormal)
+	p.fsm.Event(eventTable[oldState])
 
 	// Parse block
 	if p.peekTokenIs(token.Do) && p.acceptBlock {
@@ -483,6 +488,9 @@ func (p *Parser) parseCallExpressionWithoutParenAndReceiver(methodToken token.To
 }
 
 func (p *Parser) parseCallExpressionWithParen(receiver ast.Expression) ast.Expression {
+	exp := &ast.CallExpression{BaseNode: &ast.BaseNode{}}
+
+	oldState := p.fsm.Current()
 	p.fsm.Event(parseFuncCall)
 	m := receiver.(*ast.Identifier)
 	mn := m.Value
@@ -492,10 +500,12 @@ func (p *Parser) parseCallExpressionWithParen(receiver ast.Expression) ast.Expre
 	self := &ast.SelfExpression{BaseNode: &ast.BaseNode{Token: selfTok}}
 	receiver = self
 
-	exp := &ast.CallExpression{BaseNode: &ast.BaseNode{Token: m.Token}, Receiver: receiver, Method: mn}
+	exp.Token = m.Token
+	exp.Receiver = receiver
+	exp.Method = mn
 	exp.Arguments = p.parseCallArguments()
 
-	p.fsm.Event(backToNormal)
+	p.fsm.Event(eventTable[oldState])
 
 	// Parse block
 	if p.peekTokenIs(token.Do) && p.acceptBlock {
@@ -506,14 +516,18 @@ func (p *Parser) parseCallExpressionWithParen(receiver ast.Expression) ast.Expre
 }
 
 func (p *Parser) parseCallExpressionWithDot(receiver ast.Expression) ast.Expression {
+	exp := &ast.CallExpression{BaseNode: &ast.BaseNode{}}
+
+	oldState := p.fsm.Current()
 	p.fsm.Event(parseFuncCall)
-	exp := &ast.CallExpression{BaseNode: &ast.BaseNode{Token: p.curToken}, Receiver: receiver}
 
 	// check if method name is identifier
 	if !p.expectPeek(token.Ident) {
 		return nil
 	}
 
+	exp.Token = p.curToken
+	exp.Receiver = receiver
 	exp.Method = p.curToken.Literal
 
 	if p.peekTokenIs(token.LParen) { // p.foo(x)
@@ -526,7 +540,7 @@ func (p *Parser) parseCallExpressionWithDot(receiver ast.Expression) ast.Express
 		exp.Arguments = p.parseCallArgumentsWithoutParens()
 	}
 
-	p.fsm.Event(backToNormal)
+	p.fsm.Event(eventTable[oldState])
 
 	// Setter method call like: p.foo = x
 	if p.peekTokenIs(token.Assign) {
