@@ -481,7 +481,7 @@ func (p *Parser) parseCallExpressionWithoutParenAndReceiver(methodToken token.To
 
 	// Parse block
 	if p.peekTokenIs(token.Do) && p.acceptBlock {
-		p.parseBlockParameters(exp)
+		p.parseBlockArgument(exp)
 	}
 
 	return exp
@@ -509,7 +509,7 @@ func (p *Parser) parseCallExpressionWithParen(receiver ast.Expression) ast.Expre
 
 	// Parse block
 	if p.peekTokenIs(token.Do) && p.acceptBlock {
-		p.parseBlockParameters(exp)
+		p.parseBlockArgument(exp)
 	}
 
 	return exp
@@ -552,13 +552,13 @@ func (p *Parser) parseCallExpressionWithDot(receiver ast.Expression) ast.Express
 
 	// Parse block
 	if p.peekTokenIs(token.Do) && p.acceptBlock {
-		p.parseBlockParameters(exp)
+		p.parseBlockArgument(exp)
 	}
 
 	return exp
 }
 
-func (p *Parser) parseBlockParameters(exp *ast.CallExpression) {
+func (p *Parser) parseBlockArgument(exp *ast.CallExpression) {
 	p.nextToken()
 
 	// Parse block arguments
