@@ -1380,6 +1380,18 @@ func TestIfExpressionEvaluation(t *testing.T) {
 
 		foo # This should push nil
 		`, 1},
+		{`
+			a = 10
+			b = 5
+			if a > b
+			  puts(123)
+			  c = 10
+			else
+			  c = 5
+			end
+
+			c + 1
+		`, 11},
 	}
 
 	for i, tt := range tests {

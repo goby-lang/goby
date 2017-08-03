@@ -163,21 +163,14 @@ func (g *Generator) compileIfExpression(is *InstructionSet, exp *ast.IfExpressio
 
 	g.compileCodeBlock(is, exp.Consequence, scope, table)
 
-	anchor1.line = is.count
+	anchor1.line = is.count + 1
 
-	// This and the PutNull bellow is needed when we need the returned result
-	if exp.IsExp() {
-		// BranchIf needs move one more line because the we'll add jump into instructions
-		anchor1.line++
-		is.define(Jump, anchor2)
-	}
+	is.define(Jump, anchor2)
 
 	if exp.Alternative == nil {
-		if exp.IsExp() {
-			// jump over the `putnil` in false case
-			anchor2.line = anchor1.line + 1
-			is.define(PutNull)
-		}
+		// jump over the `putnil` in false case
+		anchor2.line = anchor1.line + 1
+		is.define(PutNull)
 
 		return
 	}
