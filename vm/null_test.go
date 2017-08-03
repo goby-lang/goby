@@ -5,10 +5,11 @@ import "testing"
 func TestEvalNil(t *testing.T) {
 	input := `nil`
 
-	vm := initTestVM()
-	evaluated := vm.testEval(t, input)
+	v := initTestVM()
+	evaluated := v.testEval(t, input)
 	checkExpected(t, 0, evaluated, nil)
-	vm.checkCFP(t, 0, 0)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
 }
 
 func TestBangPrefix(t *testing.T) {
@@ -17,10 +18,11 @@ func TestBangPrefix(t *testing.T) {
 	!a
 	`
 
-	vm := initTestVM()
-	evaluated := vm.testEval(t, input)
+	v := initTestVM()
+	evaluated := v.testEval(t, input)
 	checkExpected(t, 0, evaluated, true)
-	vm.checkCFP(t, 0, 0)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
 }
 
 func TestNullComparisonOperation(t *testing.T) {
@@ -37,10 +39,11 @@ func TestNullComparisonOperation(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -60,10 +63,11 @@ func TestNullIsNilMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -87,10 +91,11 @@ func TestNullAssignmentByOperation(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -104,9 +109,10 @@ func TestNullIsNilMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }

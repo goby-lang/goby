@@ -16,12 +16,13 @@ func TestCallingPluginFunction(t *testing.T) {
 	p.send("Baz")
 	`
 
-	vm := initTestVM()
+	v := initTestVM()
 	// We don't test the result here for two reasons:
 	// - If it doesn't work it'll returns error or panic
 	// - It's hard to test a plugin obj
-	vm.testEval(t, input)
-	vm.checkCFP(t, 0, 0)
+	v.testEval(t, input)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
 }
 
 func TestCallingPluginFunctionWithReturnValue(t *testing.T) {
@@ -32,10 +33,11 @@ func TestCallingPluginFunctionWithReturnValue(t *testing.T) {
 	p.send("Bar")
 	`
 
-	vm := initTestVM()
-	evaluated := vm.testEval(t, input)
+	v := initTestVM()
+	evaluated := v.testEval(t, input)
 	checkExpected(t, 0, evaluated, "Bar")
-	vm.checkCFP(t, 0, 0)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
 }
 
 func skipPluginTestIfEnvNotSet(t *testing.T) {

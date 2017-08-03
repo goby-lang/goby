@@ -14,10 +14,11 @@ func TestEvalStringExpression(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -58,10 +59,11 @@ func TestStringConversion(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -101,10 +103,11 @@ func TestStringComparison(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -118,10 +121,11 @@ func TestStringConparisonFail(t *testing.T) {
 		{`"a" <=> 1`, "TypeError: Expect argument to be String. got: Integer"},
 	}
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, TypeError, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -153,10 +157,11 @@ func TestStringOperation(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -176,10 +181,11 @@ func TestStringOperationFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -199,10 +205,11 @@ func TestStringCapitalizeMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -217,10 +224,11 @@ func TestStringChopMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -234,10 +242,11 @@ func TestStringConcatenateMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -255,10 +264,11 @@ func TestStringConcatenateMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -274,10 +284,11 @@ func TestStringCountMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -291,10 +302,11 @@ func TestStringDeleteMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -311,10 +323,11 @@ func TestStringDeleteMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -330,10 +343,11 @@ func TestStringDowncaseMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -353,10 +367,11 @@ func TestStringEndWithMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -373,10 +388,11 @@ func TestStringEndWithMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -390,10 +406,11 @@ func TestStringEmptyMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -412,10 +429,11 @@ func TestStringEqualMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -429,10 +447,11 @@ func TestStringEqualMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, ArgumentError, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -448,10 +467,11 @@ func TestStringGlobalSubstituteMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -468,10 +488,11 @@ func TestStringGlobalSubstituteMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -490,10 +511,11 @@ func TestStringIncludeMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -511,10 +533,11 @@ func TestStringIncludeMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -536,10 +559,11 @@ func TestStringInsertMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -558,10 +582,11 @@ func TestStringInsertMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -577,10 +602,11 @@ func TestStringLeftJustifyMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -601,10 +627,11 @@ func TestStringLeftJustifyMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -619,10 +646,11 @@ func TestStringLengthMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -638,10 +666,11 @@ func TestStringReplaceMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -657,10 +686,11 @@ func TestStringReplaceMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -677,10 +707,11 @@ func TestStringReverseMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -696,10 +727,11 @@ func TestStringRightJustifyMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -720,10 +752,11 @@ func TestStringRightJustifyFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -738,10 +771,11 @@ func TestStringSizeMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -784,10 +818,11 @@ func TestStringSliceMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -803,10 +838,11 @@ func TestStringSliceMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -882,10 +918,11 @@ func TestStringSplitMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -902,10 +939,11 @@ func TestStringSplitMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -925,10 +963,11 @@ func TestStringStartWithMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -945,10 +984,11 @@ func TestStringStartWithMethodFail(t *testing.T) {
 	}
 
 	for i, tt := range testsFail {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		vm.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -963,10 +1003,11 @@ func TestStringStripMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -982,10 +1023,11 @@ func TestStringUpcaseMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -998,9 +1040,10 @@ func TestChainingStringMethods(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }

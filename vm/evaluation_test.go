@@ -40,10 +40,11 @@ func TestComplexEvaluation(t *testing.T) {
 	Baz::Bar.new.bar + a
 	`
 
-	vm := initTestVM()
-	evaluated := vm.testEval(t, input)
+	v := initTestVM()
+	evaluated := v.testEval(t, input)
 	testIntegerObject(t, 0, evaluated, 310)
-	vm.checkCFP(t, 0, 0)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
 }
 
 func TestComment(t *testing.T) {
@@ -66,10 +67,11 @@ func TestComment(t *testing.T) {
 	Foo.new.one #=> Comment
 	# Comment`
 
-	vm := initTestVM()
-	evaluated := vm.testEval(t, input)
+	v := initTestVM()
+	evaluated := v.testEval(t, input)
 	testIntegerObject(t, 0, evaluated, 1)
-	vm.checkCFP(t, 0, 0)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
 }
 
 func TestMethodCall(t *testing.T) {
@@ -278,15 +280,16 @@ func TestMethodCall(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 
 		if isError(evaluated) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 		}
 
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -333,10 +336,11 @@ func TestMethodCallWithDefaultArgValue(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -483,10 +487,11 @@ func TestMethodCallWithBlockArgument(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -588,10 +593,11 @@ func TestMethodCallWithNestedBlock(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -824,15 +830,16 @@ func TestMethodCallWithoutParens(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 
 		if isError(evaluated) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 		}
 
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -945,10 +952,11 @@ func TestClassMethodCall(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -978,8 +986,8 @@ func TestInstanceMethodCall(t *testing.T) {
 		fb.add(10, fb.get)
 	`
 
-	vm := initTestVM()
-	evaluated := vm.testEval(t, input)
+	v := initTestVM()
+	evaluated := v.testEval(t, input)
 
 	if isError(evaluated) {
 		t.Fatalf("got Error: %s", evaluated.(*Error).Message)
@@ -995,7 +1003,8 @@ func TestInstanceMethodCall(t *testing.T) {
 		t.Errorf("expect result to be 110. got=%d", result.Value)
 	}
 
-	vm.checkCFP(t, 0, 0)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
 }
 
 func TestPostfixMethodCall(t *testing.T) {
@@ -1029,10 +1038,11 @@ func TestPostfixMethodCall(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -1050,10 +1060,11 @@ func TestBangPrefixMethodCall(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -1069,10 +1080,11 @@ func TestMinusPrefixMethodCall(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -1130,15 +1142,16 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 
 		if isError(evaluated) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 		}
 
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -1202,15 +1215,16 @@ func TestInstanceVariableEvaluation(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 
 		if isError(evaluated) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
 		}
 
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -1272,10 +1286,11 @@ func TestAssignmentEvaluation(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		testIntegerObject(t, i, evaluated, tt.expectedValue)
-		vm.checkCFP(t, 0, 0)
+		v.checkCFP(t, 0, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -1292,18 +1307,18 @@ func TestAssignmentByOperationEvaluation(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expectedValue)
-		vm.checkCFP(t, 0, 0)
+		v.checkCFP(t, 0, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
 func TestIfExpressionEvaluation(t *testing.T) {
 	tests := []struct {
-		input      string
-		expected   interface{}
-		expectedSP int
+		input    string
+		expected interface{}
 	}{
 		{
 			`
@@ -1314,7 +1329,6 @@ func TestIfExpressionEvaluation(t *testing.T) {
 			end
 			`,
 			100,
-			1,
 		},
 		{
 			`
@@ -1325,29 +1339,27 @@ func TestIfExpressionEvaluation(t *testing.T) {
 			end
 			`,
 			true,
-			1,
 		},
 		{`
 		if true
 		   10
 		end`,
 			10,
-			1,
 		},
-		{"if false; 10 end", nil, 1},
-		{"if 1; 10; end", 10, 1},
-		{"if 1 < 2; 10 end", 10, 1},
-		{"if 1 > 2; 10 end", nil, 1},
-		{"if 1 > 2; 10 else 20 end", 20, 1},
-		{"if 1 < 2; 10 else 20 end", 10, 1},
-		{"if nil; 10 else 20 end", 20, 1},
+		{"if false; 10 end", nil},
+		{"if 1; 10; end", 10},
+		{"if 1 < 2; 10 end", 10},
+		{"if 1 > 2; 10 end", nil},
+		{"if 1 > 2; 10 else 20 end", 20},
+		{"if 1 < 2; 10 else 20 end", 10},
+		{"if nil; 10 else 20 end", 20},
 		{`
 		if false
 		  x = 1
 		end # This pushes nil
 
 		x # This pushes nil too
-		`, nil, 2},
+		`, nil},
 		{`
 		def foo
 		  if false
@@ -1356,7 +1368,7 @@ func TestIfExpressionEvaluation(t *testing.T) {
 		end
 
 		foo # This should push nil
-		`, nil, 1},
+		`, nil},
 		{`
 		def foo
 		  x = 0
@@ -1367,15 +1379,15 @@ func TestIfExpressionEvaluation(t *testing.T) {
 		end
 
 		foo # This should push nil
-		`, 1, 1},
+		`, 1},
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
-		vm.checkSP(t, i, tt.expectedSP)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -1392,104 +1404,90 @@ func TestClassInheritance(t *testing.T) {
 
 		Foo.superclass.name
 	`
-	vm := initTestVM()
-	evaluated := vm.testEval(t, input)
+	v := initTestVM()
+	evaluated := v.testEval(t, input)
 
 	testStringObject(t, 0, evaluated, "Bar")
-	vm.checkCFP(t, 0, 0)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
 }
 
 func TestMultiVarAssignment(t *testing.T) {
 	tests := []struct {
-		input      string
-		expected   interface{}
-		expectedSP int
+		input    string
+		expected interface{}
 	}{
 		{`
 		a, b = [1, 2]
 		a
 		`,
-			1,
 			1},
 		{`
 		a, b = [1, 2]
 		b
 		`,
-			2,
-			1},
+			2},
 
 		{`
 		a, b, c = [1, 2, 3]
 		c
 		`,
-			3,
-			1},
+			3},
 		{`
 		a, b, c = [1]
 		b
 		`,
-			nil,
-			1},
+			nil},
 		{`
 		a, b, c = [1]
 		c
 		`,
-			nil,
-			1},
+			nil},
 		{`
 		arr = [1, 2, 3]
 		a, b, c = arr
 		b
-		`, 2,
-			1},
+		`, 2},
 		{`
 		arr = [1, 2, 3]
 		a, b, c = arr
 		c
-		`, 3,
-			1},
+		`, 3},
 		{`
 		arr = [1]
 		a, b, c = arr
 		a
-		`, 1,
-			1},
+		`, 1},
 		{`
 		arr = [1]
 		a, b, c = arr
 		b
-		`, nil,
-			1},
+		`, nil},
 		{`
 		arr = [1]
 		a, b, c = arr
 		c
-		`, nil,
-			1},
+		`, nil},
 		{`
 		arr = [1]
 		a, b, c, d = arr
 		d
-		`, nil,
-			1},
+		`, nil},
 		{`
 		arr = [1, 2, 3]
 		@a, @b, c = arr
 		@a
-		`, 1,
-			1},
+		`, 1},
 		{`
 		arr = [1, 2, 3]
 		@a, @b, c = arr
 		@b
-		`, 2,
-			1},
+		`, 2},
 		{`
 		arr = [1, 2, 3]
 		@a, @b, c = arr
 		c
-		`, 3,
-			1},
+		`, 3},
 		{`
 		class Foo
 		  attr_reader :a, :b, :c
@@ -1504,8 +1502,7 @@ func TestMultiVarAssignment(t *testing.T) {
 
 		f.bar([10, 100, 200])
 		f.a
-		`, 10,
-			3},
+		`, 10},
 		{`
 		class Foo
 		  attr_reader :a, :b, :c
@@ -1520,8 +1517,7 @@ func TestMultiVarAssignment(t *testing.T) {
 
 		f.bar([10, 100, 200])
 		f.b
-		`, 100,
-			3},
+		`, 100},
 		{`
 		class Foo
 		  attr_reader :a, :b, :c
@@ -1536,15 +1532,14 @@ func TestMultiVarAssignment(t *testing.T) {
 
 		f.bar([10, 100, 200])
 		f.c
-		`, 310,
-			3},
+		`, 310},
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
-		vm.checkSP(t, i, tt.expectedSP)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }

@@ -21,9 +21,10 @@ func CompileToBytecode(input string) (string, error) {
 }
 
 // CompileToInstructions compiles input source code into instruction set data structures
-func CompileToInstructions(input string) ([]*bytecode.InstructionSet, error) {
+func CompileToInstructions(input string, parserMode int) ([]*bytecode.InstructionSet, error) {
 	l := lexer.New(input)
 	p := parser.New(l)
+	p.Mode = parserMode
 	program, err := p.ParseProgram()
 	if err != nil {
 		return nil, fmt.Errorf(err.Message)

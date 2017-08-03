@@ -258,6 +258,7 @@ func TestArrayConcatMethodFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, TypeError, tt.expected)
 		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -329,6 +330,7 @@ func TestArrayCountMethodFail(t *testing.T) {
 		}
 
 		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -432,6 +434,7 @@ func TestArrayFirstMethodFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input)
 		checkError(t, i, evaluated, TypeError, tt.expected)
 		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -506,6 +509,7 @@ func TestArrayLengthMethod(t *testing.T) {
 		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -535,10 +539,11 @@ func TestArrayMapMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		testArrayObject(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -569,6 +574,7 @@ func TestArrayPopMethod(t *testing.T) {
 		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -610,6 +616,7 @@ func TestArrayPushMethod(t *testing.T) {
 		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -629,10 +636,11 @@ func TestArrayRotateMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		testArrayObject(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -653,6 +661,7 @@ func TestArrayRotateMethodFail(t *testing.T) {
 		checkError(t, i, evaluated, TypeError, tt.expected)
 
 		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -682,10 +691,11 @@ func TestArraySelectMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input)
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
 		testArrayObject(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -716,6 +726,7 @@ func TestArrayShiftMethod(t *testing.T) {
 		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -736,5 +747,6 @@ func TestArrayShiftMethodFail(t *testing.T) {
 		checkError(t, i, evaluated, ArgumentError, tt.expected)
 
 		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }

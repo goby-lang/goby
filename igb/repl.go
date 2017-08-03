@@ -259,6 +259,7 @@ func newIVM() iVM {
 	ivm.v.InitForREPL()
 	// Initialize parser, lexer is not important here
 	ivm.p = parser.New(lexer.New(""))
+	ivm.p.Mode = parser.REPLMode
 	program, _ := ivm.p.ParseProgram()
 	// Initialize code generator, and it will behavior a little different in REPL mode.
 	ivm.g = bytecode.NewGenerator()

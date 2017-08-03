@@ -14,10 +14,11 @@ func TestCallingStructFunctionWithReturnValue(t *testing.T) {
 	result
 	`
 
-	vm := initTestVM()
-	evaluated := vm.testEval(t, input)
+	v := initTestVM()
+	evaluated := v.testEval(t, input)
 	checkExpected(t, 0, evaluated, "xyz!")
-	vm.checkCFP(t, 0, 0)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
 }
 
 func TestCallingStructFunctionWithReturnError(t *testing.T) {
@@ -30,10 +31,11 @@ func TestCallingStructFunctionWithReturnError(t *testing.T) {
 	err
 	`
 
-	vm := initTestVM()
-	evaluated := vm.testEval(t, input)
+	v := initTestVM()
+	evaluated := v.testEval(t, input)
 	checkExpected(t, 0, evaluated, nil)
-	vm.checkCFP(t, 0, 0)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
 }
 
 func TestCallingStructFuncWithDifferentType(t *testing.T) {
@@ -45,8 +47,9 @@ func TestCallingStructFuncWithDifferentType(t *testing.T) {
 	bar.send("Add", 10, 100.to_int64) # Add is func(int, int64) int64
 	`
 
-	vm := initTestVM()
-	evaluated := vm.testEval(t, input)
+	v := initTestVM()
+	evaluated := v.testEval(t, input)
 	checkExpected(t, 0, evaluated, 110)
-	vm.checkCFP(t, 0, 0)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
 }

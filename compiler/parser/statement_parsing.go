@@ -8,8 +8,6 @@ import (
 
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
-	case token.InstanceVariable, token.Ident, token.Constant:
-		return p.parseExpressionStatement()
 	case token.Return:
 		return p.parseReturnStatement()
 	case token.Def:
@@ -23,17 +21,23 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.Module:
 		return p.parseModuleStatement()
 	case token.Next:
-		return &ast.NextStatement{Token: p.curToken}
+		return &ast.NextStatement{BaseNode: &ast.BaseNode{Token: p.curToken}}
 	case token.Break:
-		return &ast.BreakStatement{Token: p.curToken}
+		return &ast.BreakStatement{BaseNode: &ast.BaseNode{Token: p.curToken}}
 	default:
-		return p.parseExpressionStatement()
+		exp := p.parseExpressionStatement()
+
+		if p.Mode != REPLMode {
+			exp.Expression.MarkAsStmt()
+		}
+
+		return exp
 	}
 }
 
 func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 	var params []ast.Expression
-	stmt := &ast.DefStatement{Token: p.curToken}
+	stmt := &ast.DefStatement{BaseNode: &ast.BaseNode{Token: p.curToken}}
 
 	p.nextToken()
 
@@ -41,9 +45,9 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 	if p.peekTokenIs(token.Dot) {
 		switch p.curToken.Type {
 		case token.Ident:
-			stmt.Receiver = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+			stmt.Receiver = &ast.Identifier{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
 		case token.Self:
-			stmt.Receiver = &ast.SelfExpression{Token: p.curToken}
+			stmt.Receiver = &ast.SelfExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
 		default:
 			p.error = &Error{Message: fmt.Sprintf("Invalid method receiver: %s. Line: %d", p.curToken.Literal, p.curToken.Line), errType: MethodDefinitionError}
 		}
@@ -54,7 +58,7 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 		}
 	}
 
-	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	stmt.Name = &ast.Identifier{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
 
 	// Setter method def foo=()
 	if p.peekTokenIs(token.Assign) {
@@ -86,6 +90,7 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 
 	stmt.Parameters = params
 	stmt.BlockStatement = p.parseBlockStatement()
+	stmt.BlockStatement.KeepLastValue()
 
 	return stmt
 }
@@ -110,13 +115,13 @@ func (p *Parser) parseParameters() []ast.Expression {
 }
 
 func (p *Parser) parseClassStatement() *ast.ClassStatement {
-	stmt := &ast.ClassStatement{Token: p.curToken}
+	stmt := &ast.ClassStatement{BaseNode: &ast.BaseNode{Token: p.curToken}}
 
 	if !p.expectPeek(token.Constant) {
 		return nil
 	}
 
-	stmt.Name = &ast.Constant{Token: p.curToken, Value: p.curToken.Literal}
+	stmt.Name = &ast.Constant{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
 
 	// See if there is any inheritance
 	if p.peekTokenIs(token.LT) {
@@ -138,20 +143,20 @@ func (p *Parser) parseClassStatement() *ast.ClassStatement {
 }
 
 func (p *Parser) parseModuleStatement() *ast.ModuleStatement {
-	stmt := &ast.ModuleStatement{Token: p.curToken}
+	stmt := &ast.ModuleStatement{BaseNode: &ast.BaseNode{Token: p.curToken}}
 
 	if !p.expectPeek(token.Constant) {
 		return nil
 	}
 
-	stmt.Name = &ast.Constant{Token: p.curToken, Value: p.curToken.Literal}
+	stmt.Name = &ast.Constant{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
 	stmt.Body = p.parseBlockStatement()
 
 	return stmt
 }
 
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
-	stmt := &ast.ReturnStatement{Token: p.curToken}
+	stmt := &ast.ReturnStatement{BaseNode: &ast.BaseNode{Token: p.curToken}}
 
 	p.nextToken()
 
@@ -165,8 +170,7 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 }
 
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
-	stmt := &ast.ExpressionStatement{Token: p.curToken}
-
+	stmt := &ast.ExpressionStatement{BaseNode: &ast.BaseNode{Token: p.curToken}}
 	if p.curTokenIs(token.Ident) || p.curTokenIs(token.InstanceVariable) {
 		// This is used for identifying method call without parens
 		// Or multiple variable assignment
@@ -175,20 +179,20 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 		stmt.Expression = p.parseExpression(NORMAL)
 	}
 
-	if p.peekTokenIs(token.Semicolon) {
-		p.nextToken()
-	}
-
 	return stmt
 }
 
 func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 
-	// curToken is {
-	bs := &ast.BlockStatement{Token: p.curToken}
+	// curToken is '{'
+	bs := &ast.BlockStatement{BaseNode: &ast.BaseNode{Token: p.curToken}}
 	bs.Statements = []ast.Statement{}
 
 	p.nextToken()
+
+	if p.curTokenIs(token.Semicolon) {
+		p.nextToken()
+	}
 
 	for !p.curTokenIs(token.End) && !p.curTokenIs(token.Else) {
 
@@ -197,6 +201,7 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 			return bs
 		}
 		stmt := p.parseStatement()
+
 		if stmt != nil {
 			bs.Statements = append(bs.Statements, stmt)
 		}
@@ -207,7 +212,7 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 }
 
 func (p *Parser) parseWhileStatement() *ast.WhileStatement {
-	ws := &ast.WhileStatement{Token: p.curToken}
+	ws := &ast.WhileStatement{BaseNode: &ast.BaseNode{Token: p.curToken}}
 
 	p.nextToken()
 	// Prevent expression's method call to consume while's block as argument.

@@ -18,6 +18,16 @@ func (g *Generator) compileStatements(stmts []ast.Statement, scope *scope, table
 
 	for _, statement := range stmts {
 		g.compileStatement(is, statement, scope, table)
+
+		if !g.REPL {
+			expStmt, ok := statement.(*ast.ExpressionStatement)
+
+			if ok && expStmt.Expression.IsExp() {
+				continue
+			}
+
+			is.define(Pop)
+		}
 	}
 
 	g.endInstructions(is)
@@ -29,6 +39,10 @@ func (g *Generator) compileStatement(is *InstructionSet, statement ast.Statement
 	switch stmt := statement.(type) {
 	case *ast.ExpressionStatement:
 		g.compileExpression(is, stmt.Expression, scope, table)
+
+		if stmt.Expression.IsStmt() {
+			is.define(Pop)
+		}
 	case *ast.DefStatement:
 		g.compileDefStmt(is, stmt, scope)
 	case *ast.ClassStatement:
@@ -98,6 +112,7 @@ func (g *Generator) compileClassStmt(is *InstructionSet, stmt *ast.ClassStatemen
 	}
 
 	is.define(Pop)
+
 	scope = newScope(stmt)
 
 	// compile class's content

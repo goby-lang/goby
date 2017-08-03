@@ -106,6 +106,7 @@ foo
 
 		// Initialize parser, lexer is not important here
 		p := parser.New(lexer.New(""))
+		p.Mode = parser.REPLMode
 
 		program, _ := p.ParseProgram()
 
@@ -116,6 +117,7 @@ foo
 
 		for _, input := range test.inputs {
 			p := parser.New(lexer.New(input))
+			p.Mode = parser.REPLMode
 
 			program, _ := p.ParseProgram()
 			sets := g.GenerateInstructions(program.Statements)
@@ -135,7 +137,7 @@ func initTestVM() *VM {
 }
 
 func (v *VM) testEval(t *testing.T, input string) Object {
-	iss, err := compiler.CompileToInstructions(input)
+	iss, err := compiler.CompileToInstructions(input, parser.TestMode)
 
 	if err != nil {
 		t.Errorf("Error when compiling input: %s", input)
