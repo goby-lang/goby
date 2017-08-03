@@ -6,7 +6,6 @@ import (
 )
 
 func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, scope *scope, table *localTable) {
-	// See fsm initialization's comment
 	switch exp := exp.(type) {
 	case *ast.Constant:
 		is.define(GetConstant, exp.Value, fmt.Sprint(exp.IsNamespace))
@@ -57,9 +56,7 @@ func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, sc
 func (g *Generator) compileIdentifier(is *InstructionSet, exp *ast.Identifier, scope *scope, table *localTable) {
 	index, depth, ok := table.getLCL(exp.Value, table.depth)
 
-	// This means it's a local variable.
-	// But we only define the instruction when we'll need it.
-	if ok && g.fsm.Is(keepExp) {
+	if ok {
 		is.define(GetLocal, depth, index)
 		return
 	}
@@ -70,9 +67,6 @@ func (g *Generator) compileIdentifier(is *InstructionSet, exp *ast.Identifier, s
 }
 
 func (g *Generator) compileYieldExpression(is *InstructionSet, exp *ast.YieldExpression, scope *scope, table *localTable) {
-	oldState := g.fsm.Current()
-	g.fsm.Event(keepExp)
-
 	is.define(PutSelf)
 
 	for _, arg := range exp.Arguments {
@@ -80,14 +74,9 @@ func (g *Generator) compileYieldExpression(is *InstructionSet, exp *ast.YieldExp
 	}
 
 	is.define(InvokeBlock, len(exp.Arguments))
-	g.fsm.Event(oldState)
 }
 
 func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpression, scope *scope, table *localTable) {
-	oldState := g.fsm.Current()
-
-	// We need the receiver expression and argument expressions
-	g.fsm.Event(keepExp)
 	g.compileExpression(is, exp.Receiver, scope, table)
 
 	for _, arg := range exp.Arguments {
@@ -110,15 +99,10 @@ func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpre
 		// ++ and -- are methods with side effect and shouldn't return anything
 		is.define(Pop)
 	}
-
-	g.fsm.Event(oldState)
 }
 
 func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.AssignExpression, scope *scope, table *localTable) {
-	oldState := g.fsm.Current()
-	g.fsm.Event(keepExp)
 	g.compileExpression(is, exp.Value, scope, table)
-	g.fsm.Event(oldState)
 
 	if len(exp.Variables) > 1 {
 		is.define(ExpandArray, len(exp.Variables))
@@ -156,10 +140,6 @@ func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.AssignE
 }
 
 func (g *Generator) compileBlockArgExpression(index int, exp *ast.CallExpression, scope *scope, table *localTable) {
-	oldState := g.fsm.Current()
-	// We don't need any unused expression inside block
-	g.fsm.Event(removeExp)
-
 	is := &InstructionSet{}
 	is.name = fmt.Sprint(index)
 	is.isType = Block
@@ -171,15 +151,9 @@ func (g *Generator) compileBlockArgExpression(index int, exp *ast.CallExpression
 	g.compileCodeBlock(is, exp.Block, scope, table)
 	g.endInstructions(is)
 	g.instructionSets = append(g.instructionSets, is)
-
-	g.fsm.Event(oldState)
 }
 
 func (g *Generator) compileIfExpression(is *InstructionSet, exp *ast.IfExpression, scope *scope, table *localTable) {
-	oldState := g.fsm.Current()
-
-	// Compiles condition so we need every expression
-	g.fsm.Event(keepExp)
 	g.compileExpression(is, exp.Condition, scope, table)
 
 	anchor1 := &anchor{}
@@ -187,22 +161,19 @@ func (g *Generator) compileIfExpression(is *InstructionSet, exp *ast.IfExpressio
 
 	is.define(BranchUnless, anchor1)
 
-	// We don't need unused expression in consequence block
-	g.fsm.Event(removeExp)
 	g.compileCodeBlock(is, exp.Consequence, scope, table)
-	g.fsm.Event(oldState)
 
 	anchor1.line = is.count
 
 	// This and the PutNull bellow is needed when we need the returned result
-	if g.fsm.Is(keepExp) {
+	if exp.IsExp() {
 		// BranchIf needs move one more line because the we'll add jump into instructions
 		anchor1.line++
 		is.define(Jump, anchor2)
 	}
 
 	if exp.Alternative == nil {
-		if g.fsm.Is(keepExp) {
+		if exp.IsExp() {
 			// jump over the `putnil` in false case
 			anchor2.line = anchor1.line + 1
 			is.define(PutNull)
@@ -211,10 +182,7 @@ func (g *Generator) compileIfExpression(is *InstructionSet, exp *ast.IfExpressio
 		return
 	}
 
-	// We don't need unused expression in alternative block either
-	g.fsm.Event(removeExp)
 	g.compileCodeBlock(is, exp.Alternative, scope, table)
-	g.fsm.Event(oldState)
 
 	anchor2.line = is.count
 }
