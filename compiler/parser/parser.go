@@ -61,6 +61,7 @@ type Parser struct {
 	Mode        int
 }
 
+// These are the enums for marking parser's mode, which decides whether it should pop unused values.
 const (
 	NormalMode int = iota
 	REPLMode
