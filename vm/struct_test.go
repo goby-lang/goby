@@ -38,7 +38,7 @@ func TestCallingStructFunctionWithReturnError(t *testing.T) {
 	v.checkSP(t, 0, 1)
 }
 
-func TestCallingStructFuncWithDifferentType(t *testing.T) {
+func TestCallingStructFuncWithInt64(t *testing.T) {
 	skipPluginTestIfEnvNotSet(t)
 
 	input := `
@@ -50,6 +50,22 @@ func TestCallingStructFuncWithDifferentType(t *testing.T) {
 	v := initTestVM()
 	evaluated := v.testEval(t, input)
 	checkExpected(t, 0, evaluated, 110)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
+}
+
+func TestCallingStructFuncWithGoObject(t *testing.T) {
+	skipPluginTestIfEnvNotSet(t)
+
+	input := `
+	p = import "github.com/goby-lang/goby/test_fixtures/import_test/struct/struct.go"
+	bar, err = p.send("NewBar", "xyz") # multiple result, so result is an array
+	p.send("GetBarName", bar) # GetBarName is func(*Bar) string
+	`
+
+	v := initTestVM()
+	evaluated := v.testEval(t, input)
+	checkExpected(t, 0, evaluated, "xyz")
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
 }

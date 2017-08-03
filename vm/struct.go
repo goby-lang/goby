@@ -95,3 +95,7 @@ func (s *StructObject) toString() string {
 func (s *StructObject) toJSON() string {
 	return s.toString()
 }
+
+func (s *StructObject) value() interface{} {
+	return s.data
+}

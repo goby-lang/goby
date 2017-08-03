@@ -22,6 +22,10 @@ func NewBar(name string) (*Bar, error) {
 	return &Bar{name: name}, nil
 }
 
+func GetBarName(b *Bar) string {
+	return b.name
+}
+
 func main() {
 	fmt.Println("Main")
 }
