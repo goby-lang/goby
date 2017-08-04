@@ -22,6 +22,16 @@
 			"Rev": "e444e69cbd2e2e3e0749a2f3c717cec491552bbf"
 		},
 		{
+			"ImportPath": "github.com/lib/pq",
+			"Comment": "go1.0-cutoff-84-g3cd0097",
+			"Rev": "3cd0097429be7d611bb644ef85b42bfb102ceea4"
+		},
+		{
+			"ImportPath": "github.com/lib/pq/oid",
+			"Comment": "go1.0-cutoff-84-g3cd0097",
+			"Rev": "3cd0097429be7d611bb644ef85b42bfb102ceea4"
+		},
+		{
 			"ImportPath": "github.com/looplab/fsm",
 			"Rev": "bcc3636384ce80a109a6039432b30ff5b82476ee"
 		},
