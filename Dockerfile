@@ -23,4 +23,4 @@ ADD . ./
 
 #RUN ./test.sh
 RUN TEST_PLUGIN=true go test ./vm --run .?Plugin.? -v
-RUN TEST_PLUGIN=true go test ./vm --run .?Struct.? -v
+RUN TEST_PLUGIN=true go test ./vm --run .?GoObject.? -v

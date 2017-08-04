@@ -5,31 +5,31 @@ import (
 	"github.com/st0012/metago"
 )
 
-// StructObject ...
-type StructObject struct {
+// GoObject ...
+type GoObject struct {
 	*baseObj
 	data interface{}
 }
 
-func (vm *VM) initStructObject(d interface{}) *StructObject {
-	return &StructObject{data: d, baseObj: &baseObj{class: vm.topLevelClass(structClass)}}
+func (vm *VM) initGoObject(d interface{}) *GoObject {
+	return &GoObject{data: d, baseObj: &baseObj{class: vm.topLevelClass(goObjectClass)}}
 }
 
-func (vm *VM) initStructClass() *RClass {
-	sc := vm.initializeClass(structClass, false)
-	sc.setBuiltInMethods(builtinStructClassMethods(), true)
-	sc.setBuiltInMethods(builtinStructInstanceMethods(), false)
+func (vm *VM) initGoClass() *RClass {
+	sc := vm.initializeClass(goObjectClass, false)
+	sc.setBuiltInMethods(builtinGoClassMethods(), true)
+	sc.setBuiltInMethods(builtinGoInstanceMethods(), false)
 	vm.objectClass.setClassConstant(sc)
 	return sc
 }
 
 // Only initialize file related methods after it's being required.
-func builtinStructClassMethods() []*BuiltInMethodObject {
+func builtinGoClassMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{}
 }
 
 // Only initialize file related methods after it's being required.
-func builtinStructInstanceMethods() []*BuiltInMethodObject {
+func builtinGoInstanceMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 		{
 			Name: "send",
@@ -42,7 +42,7 @@ func builtinStructInstanceMethods() []*BuiltInMethodObject {
 					}
 
 					funcName := s.Value
-					r := receiver.(*StructObject)
+					r := receiver.(*GoObject)
 
 					funcArgs, err := convertToGoFuncArgs(args[1:])
 
@@ -88,14 +88,14 @@ func convertToGoFuncArgs(args []Object) ([]interface{}, error) {
 
 // Polymorphic helper functions -----------------------------------------
 
-func (s *StructObject) toString() string {
+func (s *GoObject) toString() string {
 	return fmt.Sprintf("<Strcut: %p>", s)
 }
 
-func (s *StructObject) toJSON() string {
+func (s *GoObject) toJSON() string {
 	return s.toString()
 }
 
-func (s *StructObject) value() interface{} {
+func (s *GoObject) value() interface{} {
 	return s.data
 }

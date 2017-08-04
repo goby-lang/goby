@@ -14,19 +14,19 @@ import (
 )
 
 const (
-	objectClass  = "Object"
-	classClass   = "Class"
-	integerClass = "Integer"
-	stringClass  = "String"
-	arrayClass   = "Array"
-	hashClass    = "Hash"
-	booleanClass = "Boolean"
-	nullClass    = "Null"
-	channelClass = "Channel"
-	rangeClass   = "Range"
-	methodClass  = "method"
-	pluginClass  = "Plugin"
-	structClass  = "Struct"
+	objectClass   = "Object"
+	classClass    = "Class"
+	integerClass  = "Integer"
+	stringClass   = "String"
+	arrayClass    = "Array"
+	hashClass     = "Hash"
+	booleanClass  = "Boolean"
+	nullClass     = "Null"
+	channelClass  = "Channel"
+	rangeClass    = "Range"
+	methodClass   = "method"
+	pluginClass   = "Plugin"
+	goObjectClass = "GoObject"
 )
 
 type builtInType interface {

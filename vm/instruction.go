@@ -503,6 +503,6 @@ func (vm *VM) initObjectFromGoType(value interface{}) Object {
 
 		return vm.initArrayObject(objs)
 	default:
-		return vm.initStructObject(value)
+		return vm.initGoObject(value)
 	}
 }

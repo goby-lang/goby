@@ -4,7 +4,7 @@ package vm
 
 import "testing"
 
-func TestCallingStructFunctionWithReturnValue(t *testing.T) {
+func TestCallingGoObjectFunctionWithReturnValue(t *testing.T) {
 	skipPluginTestIfEnvNotSet(t)
 
 	input := `
@@ -21,7 +21,7 @@ func TestCallingStructFunctionWithReturnValue(t *testing.T) {
 	v.checkSP(t, 0, 1)
 }
 
-func TestCallingStructFunctionWithReturnError(t *testing.T) {
+func TestCallingGoObjectFunctionWithReturnError(t *testing.T) {
 	skipPluginTestIfEnvNotSet(t)
 
 	input := `
@@ -38,7 +38,7 @@ func TestCallingStructFunctionWithReturnError(t *testing.T) {
 	v.checkSP(t, 0, 1)
 }
 
-func TestCallingStructFuncWithInt64(t *testing.T) {
+func TestCallingGoObjectFuncWithInt64(t *testing.T) {
 	skipPluginTestIfEnvNotSet(t)
 
 	input := `
@@ -54,7 +54,7 @@ func TestCallingStructFuncWithInt64(t *testing.T) {
 	v.checkSP(t, 0, 1)
 }
 
-func TestCallingStructFuncWithGoObject(t *testing.T) {
+func TestCallingGoObjectFuncWithGoObject(t *testing.T) {
 	skipPluginTestIfEnvNotSet(t)
 
 	input := `

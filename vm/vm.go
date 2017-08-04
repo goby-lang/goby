@@ -165,7 +165,7 @@ func (vm *VM) initConstants() {
 		vm.initMethodClass(),
 		vm.initChannelClass(),
 		vm.initPluginClass(),
-		vm.initStructClass(),
+		vm.initGoClass(),
 	}
 
 	vm.initErrorClasses()
