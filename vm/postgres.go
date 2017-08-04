@@ -11,7 +11,7 @@ func initPGClass(vm *VM) *RClass {
 	pg.setBuiltInMethods(builtInPGInstanceMethods(), false)
 	vm.objectClass.setClassConstant(pg)
 
-	//vm.execGobyLib("pg.gb")
+	vm.execGobyLib("db_drivers/pg.gb")
 
 	return pg
 }
@@ -34,7 +34,11 @@ func builtInPGClassMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(InternalError, err.Error())
 					}
 
-					return t.vm.initObjectFromGoType(conn)
+					connObj := t.vm.initObjectFromGoType(conn)
+					pgDriver := receiver.(*RClass).initializeInstance()
+					pgDriver.instanceVariableSet("@connection", connObj)
+
+					return pgDriver
 				}
 			},
 		},
