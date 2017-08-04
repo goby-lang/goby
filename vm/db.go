@@ -35,7 +35,7 @@ func builtInDBClassMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(ArgumentError, "Expect database's data source to be a String object. got: %s", args[1].Class().Name)
 					}
 
-					driverInitFunc, ok := driverTable[driverName.Value]
+					driverInitFunc, ok := driverTable[driverName.value]
 
 					if !ok {
 						return t.vm.initErrorObject(InternalError, "Can't find specified driver: %s", driverName.Value)

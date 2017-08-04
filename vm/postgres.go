@@ -28,7 +28,7 @@ func builtInPGClassMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(ArgumentError, "Expect postgres' data source to be a String object. got: %s", args[1].Class().Name)
 					}
 
-					conn, err := sql.Open("postgres", dataSource.Value)
+					conn, err := sql.Open("postgres", dataSource.value)
 
 					if err != nil {
 						return t.vm.initErrorObject(InternalError, err.Error())

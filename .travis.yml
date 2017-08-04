@@ -3,8 +3,14 @@ language: go
 go:
   - 1.8.x
 
+services:
+  - postgresql
+
 before_install:
   - sudo apt-get install apache2-utils
+
+before_script:
+  - psql -c 'create database goby_test;' -U postgres
 
 script:
   - make test
