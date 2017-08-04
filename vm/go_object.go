@@ -89,7 +89,7 @@ func convertToGoFuncArgs(args []Object) ([]interface{}, error) {
 // Polymorphic helper functions -----------------------------------------
 
 func (s *GoObject) toString() string {
-	return fmt.Sprintf("<Strcut: %p>", s)
+	return fmt.Sprintf("<GoObject: %p>", s)
 }
 
 func (s *GoObject) toJSON() string {
