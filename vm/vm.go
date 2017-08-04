@@ -33,6 +33,7 @@ var standardLibraries = map[string]func(*VM){
 	"net/http":          initHTTPClass,
 	"net/simple_server": initSimpleServerClass,
 	"uri":               initURIClass,
+	"db":                initDBClass,
 }
 
 // VM represents a stack based virtual machine.

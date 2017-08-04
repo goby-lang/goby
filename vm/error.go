@@ -41,6 +41,7 @@ func (vm *VM) initErrorClasses() {
 	Here defines different error message formats for different types of errors
 */
 const (
+	WrongNumberOfArgumentFormat = "Expect %d arguments. got: %d"
 	WrongArgumentTypeFormat     = "Expect argument to be %s. got: %s"
 	CantYieldWithoutBlockFormat = "Can't yield without a block"
 )

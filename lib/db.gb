@@ -1,0 +1,12 @@
+class DB
+  attr_reader :driver
+
+  def initialize(driver)
+    @driver = driver
+  end
+
+  def self.open(driver_name, data_source)
+    driver = init_driver(driver_name, data_source)
+    new(driver)
+  end
+end
