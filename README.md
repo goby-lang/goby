@@ -19,7 +19,7 @@ We are optimizing and expanding Goby all the time and need your help. One of our
 
 **Demo:**
 
-<img src="http://i.imgur.com/5RxFgIW.gif?1" height="700">
+<img src="http://i.imgur.com/5RxFgIW.gif?1" width="60%">
 
 **Project Structure:**
 
