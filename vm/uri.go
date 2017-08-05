@@ -46,7 +46,7 @@ func builtinURIClassMethods() []*BuiltInMethodObject {
 			Name: "parse",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					uri := args[0].(*StringObject).Value
+					uri := args[0].(*StringObject).value
 					uriModule := t.vm.topLevelClass("URI")
 					u, err := url.Parse(uri)
 

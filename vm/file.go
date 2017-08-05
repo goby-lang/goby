@@ -43,7 +43,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 			Name: "basename",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					filename := args[0].(*StringObject).Value
+					filename := args[0].(*StringObject).value
 					return t.vm.initStringObject(filepath.Base(filename))
 				}
 			},
@@ -61,9 +61,9 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 			Name: "chmod",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					filemod := args[0].(*IntegerObject).Value
+					filemod := args[0].(*IntegerObject).value
 					for i := 1; i < len(args); i++ {
-						filename := args[i].(*StringObject).Value
+						filename := args[i].(*StringObject).value
 						if !filepath.IsAbs(filename) {
 							filename = filepath.Join(t.vm.fileDir, filename)
 						}
@@ -83,7 +83,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					for _, arg := range args {
-						filename := arg.(*StringObject).Value
+						filename := arg.(*StringObject).value
 						err := os.Remove(filename)
 
 						if err != nil {
@@ -99,7 +99,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 			Name: "exist",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					filename := args[0].(*StringObject).Value
+					filename := args[0].(*StringObject).value
 					_, err := os.Stat(filename)
 
 					if err != nil {
@@ -121,7 +121,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 			Name: "extname",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					filename := args[0].(*StringObject).Value
+					filename := args[0].(*StringObject).value
 					return t.vm.initStringObject(filepath.Ext(filename))
 				}
 			},
@@ -138,7 +138,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					var elements []string
 					for i := 0; i < len(args); i++ {
-						next := args[i].(*StringObject).Value
+						next := args[i].(*StringObject).value
 						elements = append(elements, next)
 					}
 
@@ -166,12 +166,12 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 					}
 
 					if len(args) >= 1 {
-						fn = args[0].(*StringObject).Value
+						fn = args[0].(*StringObject).value
 						mode = syscall.O_RDONLY
 						perm = os.FileMode(0755)
 
 						if len(args) >= 2 {
-							m := args[1].(*StringObject).Value
+							m := args[1].(*StringObject).value
 							md, ok := fileModeTable[m]
 
 							if !ok {
@@ -186,7 +186,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 							perm = os.FileMode(0755)
 
 							if len(args) == 3 {
-								p := args[2].(*IntegerObject).Value
+								p := args[2].(*IntegerObject).value
 								perm = os.FileMode(p)
 							}
 						}
@@ -216,7 +216,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 			Name: "size",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					filename := args[0].(*StringObject).Value
+					filename := args[0].(*StringObject).value
 					if !filepath.IsAbs(filename) {
 						filename = filepath.Join(t.vm.fileDir, filename)
 					}
@@ -241,7 +241,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 			Name: "split",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					filename := args[0].(*StringObject).Value
+					filename := args[0].(*StringObject).value
 					dir, file := filepath.Split(filename)
 
 					dirObject := t.vm.initStringObject(dir)
@@ -318,7 +318,7 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					file := receiver.(*FileObject).File
-					data := args[0].(*StringObject).Value
+					data := args[0].(*StringObject).value
 					length, err := file.Write([]byte(data))
 
 					if err != nil {

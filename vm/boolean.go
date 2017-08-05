@@ -16,7 +16,7 @@ var (
 // - `Boolean.new` is not supported.
 type BooleanObject struct {
 	*baseObj
-	Value bool
+	value bool
 }
 
 func (vm *VM) initBoolClass() *RClass {
@@ -24,8 +24,8 @@ func (vm *VM) initBoolClass() *RClass {
 	b.setBuiltInMethods(builtinBooleanInstanceMethods(), false)
 	b.setBuiltInMethods(builtInBooleanClassMethods(), true)
 
-	TRUE = &BooleanObject{Value: true, baseObj: &baseObj{class: b}}
-	FALSE = &BooleanObject{Value: false, baseObj: &baseObj{class: b}}
+	TRUE = &BooleanObject{value: true, baseObj: &baseObj{class: b}}
+	FALSE = &BooleanObject{value: false, baseObj: &baseObj{class: b}}
 
 	return b
 }
@@ -96,7 +96,7 @@ func builtinBooleanInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-					rightValue := receiver.(*BooleanObject).Value
+					rightValue := receiver.(*BooleanObject).value
 
 					if rightValue {
 						return FALSE
@@ -118,7 +118,7 @@ func builtinBooleanInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-					leftValue := receiver.(*BooleanObject).Value
+					leftValue := receiver.(*BooleanObject).value
 					right, ok := args[0].(*BooleanObject)
 
 					if !ok {
@@ -126,7 +126,7 @@ func builtinBooleanInstanceMethods() []*BuiltInMethodObject {
 						return err
 					}
 
-					rightValue := right.Value
+					rightValue := right.value
 
 					if leftValue && rightValue {
 						return TRUE
@@ -171,7 +171,7 @@ func builtinBooleanInstanceMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
 					}
 
-					leftValue := receiver.(*BooleanObject).Value
+					leftValue := receiver.(*BooleanObject).value
 
 					if leftValue {
 						return receiver
@@ -187,7 +187,7 @@ func builtinBooleanInstanceMethods() []*BuiltInMethodObject {
 
 // toString returns boolean object's value, which is either true or false.
 func (b *BooleanObject) toString() string {
-	return fmt.Sprintf("%t", b.Value)
+	return fmt.Sprintf("%t", b.value)
 }
 
 // toJSON converts the receiver into JSON string.
@@ -196,9 +196,9 @@ func (b *BooleanObject) toJSON() string {
 }
 
 func (b *BooleanObject) equal(e *BooleanObject) bool {
-	return b.Value == e.Value
+	return b.value == e.value
 }
 
-func (b *BooleanObject) value() interface{} {
-	return b.Value
+func (b *BooleanObject) Value() interface{} {
+	return b.value
 }

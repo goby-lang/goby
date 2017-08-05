@@ -30,7 +30,7 @@ const (
 )
 
 type builtInType interface {
-	value() interface{}
+	Value() interface{}
 	Object
 }
 
@@ -230,7 +230,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 			Name: "import",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					pkgPath := args[0].(*StringObject).Value
+					pkgPath := args[0].(*StringObject).value
 					goPath := os.Getenv("GOPATH")
 					// This is to prevent some path like GODEP_PATH:GOPATH
 					// which can happen on Travis CI
@@ -288,7 +288,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 			Name: "require",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					libName := args[0].(*StringObject).Value
+					libName := args[0].(*StringObject).value
 					initFunc, ok := standardLibraries[libName]
 
 					if !ok {
@@ -317,7 +317,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					callerDir := path.Dir(t.vm.currentFilePath())
-					filepath := args[0].(*StringObject).Value
+					filepath := args[0].(*StringObject).value
 
 					filepath = path.Join(callerDir, filepath)
 
@@ -428,7 +428,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 					}
 
 					int := args[0].(*IntegerObject)
-					seconds := int.Value
+					seconds := int.value
 					time.Sleep(time.Duration(seconds) * time.Second)
 					return int
 				}
@@ -581,7 +581,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
 					}
 
-					obj, ok := receiver.instanceVariableGet(arg.Value)
+					obj, ok := receiver.instanceVariableGet(arg.value)
 
 					if !ok {
 						return NULL
@@ -606,7 +606,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
 					}
 
-					receiver.instanceVariableSet(argName.Value, obj)
+					receiver.instanceVariableSet(argName.value, obj)
 
 					return obj
 				}
@@ -1087,7 +1087,7 @@ func (c *RClass) setAttrWriter(args interface{}) {
 	switch args := args.(type) {
 	case []Object:
 		for _, attr := range args {
-			attrName := attr.(*StringObject).Value
+			attrName := attr.(*StringObject).value
 			c.Methods.set(attrName+"=", generateAttrWriteMethod(attrName))
 		}
 	case []string:
@@ -1102,7 +1102,7 @@ func (c *RClass) setAttrReader(args interface{}) {
 	switch args := args.(type) {
 	case []Object:
 		for _, attr := range args {
-			attrName := attr.(*StringObject).Value
+			attrName := attr.(*StringObject).value
 			c.Methods.set(attrName, generateAttrReadMethod(attrName))
 		}
 	case []string:

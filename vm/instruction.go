@@ -146,8 +146,8 @@ var builtInActions = map[operationType]*action{
 	bytecode.NewRange: {
 		name: bytecode.NewRange,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
-			rangeEnd := t.stack.pop().Target.(*IntegerObject).Value
-			rangeStart := t.stack.pop().Target.(*IntegerObject).Value
+			rangeEnd := t.stack.pop().Target.(*IntegerObject).value
+			rangeStart := t.stack.pop().Target.(*IntegerObject).value
 
 			t.stack.push(&Pointer{Target: t.vm.initRangeObject(rangeStart, rangeEnd)})
 		},
@@ -204,7 +204,7 @@ var builtInActions = map[operationType]*action{
 			for i := 0; i < argCount/2; i++ {
 				v := t.stack.pop()
 				k := t.stack.pop()
-				pairs[k.Target.(*StringObject).Value] = v.Target
+				pairs[k.Target.(*StringObject).value] = v.Target
 			}
 
 			hash := t.vm.initHashObject(pairs)
@@ -218,7 +218,7 @@ var builtInActions = map[operationType]*action{
 			bool, isBool := v.Target.(*BooleanObject)
 
 			if isBool {
-				if bool.Value {
+				if bool.value {
 					return
 				}
 
@@ -243,7 +243,7 @@ var builtInActions = map[operationType]*action{
 			bool, isBool := v.Target.(*BooleanObject)
 
 			if isBool {
-				if !bool.Value {
+				if !bool.value {
 					return
 				}
 
@@ -282,7 +282,7 @@ var builtInActions = map[operationType]*action{
 		name: bytecode.DefMethod,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
 			argCount := args[0].(int)
-			methodName := t.stack.pop().Target.(*StringObject).Value
+			methodName := t.stack.pop().Target.(*StringObject).value
 			is, ok := t.getMethodIS(methodName, cf.instructionSet.filename)
 
 			if !ok {
@@ -304,7 +304,7 @@ var builtInActions = map[operationType]*action{
 		name: bytecode.DefSingletonMethod,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
 			argCount := args[0].(int)
-			methodName := t.stack.pop().Target.(*StringObject).Value
+			methodName := t.stack.pop().Target.(*StringObject).value
 			is, _ := t.getMethodIS(methodName, cf.instructionSet.filename)
 			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.topLevelClass(methodClass)}}
 

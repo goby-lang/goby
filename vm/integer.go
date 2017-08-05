@@ -26,14 +26,14 @@ const (
 // - `Integer.new` is not supported.
 type IntegerObject struct {
 	*baseObj
-	Value int
+	value int
 	flag  int
 }
 
 func (vm *VM) initIntegerObject(value int) *IntegerObject {
 	return &IntegerObject{
 		baseObj: &baseObj{class: vm.topLevelClass(integerClass)},
-		Value:   value,
+		value:   value,
 		flag:    integer,
 	}
 }
@@ -71,7 +71,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-					leftValue := receiver.(*IntegerObject).Value
+					leftValue := receiver.(*IntegerObject).value
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
@@ -79,7 +79,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 						return err
 					}
 
-					rightValue := right.Value
+					rightValue := right.value
 					return t.vm.initIntegerObject(leftValue + rightValue)
 				}
 			},
@@ -95,7 +95,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-					leftValue := receiver.(*IntegerObject).Value
+					leftValue := receiver.(*IntegerObject).value
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
@@ -103,7 +103,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 						return err
 					}
 
-					rightValue := right.Value
+					rightValue := right.value
 					return t.vm.initIntegerObject(leftValue % rightValue)
 				}
 			},
@@ -119,7 +119,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-					leftValue := receiver.(*IntegerObject).Value
+					leftValue := receiver.(*IntegerObject).value
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
@@ -127,7 +127,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 						return err
 					}
 
-					rightValue := right.Value
+					rightValue := right.value
 					return t.vm.initIntegerObject(leftValue - rightValue)
 				}
 			},
@@ -143,7 +143,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-					leftValue := receiver.(*IntegerObject).Value
+					leftValue := receiver.(*IntegerObject).value
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
@@ -151,7 +151,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 						return err
 					}
 
-					rightValue := right.Value
+					rightValue := right.value
 					return t.vm.initIntegerObject(leftValue * rightValue)
 				}
 			},
@@ -167,7 +167,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-					leftValue := receiver.(*IntegerObject).Value
+					leftValue := receiver.(*IntegerObject).value
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
@@ -175,7 +175,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 						return err
 					}
 
-					rightValue := right.Value
+					rightValue := right.value
 					result := math.Pow(float64(leftValue), float64(rightValue))
 					return t.vm.initIntegerObject(int(result))
 				}
@@ -192,7 +192,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-					leftValue := receiver.(*IntegerObject).Value
+					leftValue := receiver.(*IntegerObject).value
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
@@ -200,7 +200,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 						return err
 					}
 
-					rightValue := right.Value
+					rightValue := right.value
 					return t.vm.initIntegerObject(leftValue / rightValue)
 				}
 			},
@@ -217,7 +217,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-					leftValue := receiver.(*IntegerObject).Value
+					leftValue := receiver.(*IntegerObject).value
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
@@ -225,7 +225,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 						return err
 					}
 
-					rightValue := right.Value
+					rightValue := right.value
 
 					if leftValue > rightValue {
 						return TRUE
@@ -247,7 +247,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-					leftValue := receiver.(*IntegerObject).Value
+					leftValue := receiver.(*IntegerObject).value
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
@@ -255,7 +255,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 						return err
 					}
 
-					rightValue := right.Value
+					rightValue := right.value
 
 					if leftValue >= rightValue {
 						return TRUE
@@ -277,7 +277,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-					leftValue := receiver.(*IntegerObject).Value
+					leftValue := receiver.(*IntegerObject).value
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
@@ -285,7 +285,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 						return err
 					}
 
-					rightValue := right.Value
+					rightValue := right.value
 
 					if leftValue < rightValue {
 						return TRUE
@@ -307,7 +307,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-					leftValue := receiver.(*IntegerObject).Value
+					leftValue := receiver.(*IntegerObject).value
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
@@ -315,7 +315,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 						return err
 					}
 
-					rightValue := right.Value
+					rightValue := right.value
 
 					if leftValue <= rightValue {
 						return TRUE
@@ -338,7 +338,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-					leftValue := receiver.(*IntegerObject).Value
+					leftValue := receiver.(*IntegerObject).value
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
@@ -346,7 +346,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 						return err
 					}
 
-					rightValue := right.Value
+					rightValue := right.value
 
 					if leftValue < rightValue {
 						return t.vm.initIntegerObject(-1)
@@ -371,14 +371,14 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-					leftValue := receiver.(*IntegerObject).Value
+					leftValue := receiver.(*IntegerObject).value
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
 						return FALSE
 					}
 
-					rightValue := right.Value
+					rightValue := right.value
 
 					if leftValue == rightValue {
 						return TRUE
@@ -400,14 +400,14 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-					leftValue := receiver.(*IntegerObject).Value
+					leftValue := receiver.(*IntegerObject).value
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
 						return TRUE
 					}
 
-					rightValue := right.Value
+					rightValue := right.value
 
 					if leftValue != rightValue {
 						return TRUE
@@ -432,7 +432,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					t.vm.Lock()
 					defer t.vm.Unlock()
 
-					int.Value++
+					int.value++
 					return int
 				}
 			},
@@ -453,7 +453,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					t.vm.Lock()
 					defer t.vm.Unlock()
 
-					int.Value--
+					int.value--
 					return int
 				}
 			},
@@ -471,7 +471,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					i := receiver.(*IntegerObject)
-					even := i.Value%2 == 0
+					even := i.value%2 == 0
 
 					if even {
 						return TRUE
@@ -508,7 +508,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 
 					int := receiver.(*IntegerObject)
 
-					return t.vm.initStringObject(strconv.Itoa(int.Value))
+					return t.vm.initStringObject(strconv.Itoa(int.value))
 				}
 			},
 		},
@@ -523,7 +523,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					i := receiver.(*IntegerObject)
-					return t.vm.initIntegerObject(i.Value + 1)
+					return t.vm.initIntegerObject(i.value + 1)
 				}
 			},
 		},
@@ -540,7 +540,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					i := receiver.(*IntegerObject)
-					odd := i.Value%2 != 0
+					odd := i.value%2 != 0
 					if odd {
 						return TRUE
 					}
@@ -560,7 +560,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					i := receiver.(*IntegerObject)
-					return t.vm.initIntegerObject(i.Value - 1)
+					return t.vm.initIntegerObject(i.value - 1)
 				}
 			},
 		},
@@ -579,15 +579,15 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					n := receiver.(*IntegerObject)
 
-					if n.Value < 0 {
-						return newError("Expect paramentr to be greater 0. got=%d", n.Value)
+					if n.value < 0 {
+						return newError("Expect paramentr to be greater 0. got=%d", n.value)
 					}
 
 					if blockFrame == nil {
 						return newError("Can't yield without a block")
 					}
 
-					for i := 0; i < n.Value; i++ {
+					for i := 0; i < n.value; i++ {
 						t.builtInMethodYield(blockFrame, t.vm.initIntegerObject(i))
 					}
 
@@ -622,7 +622,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 
 // toString converts the receiver into string.
 func (i *IntegerObject) toString() string {
-	return strconv.Itoa(i.Value)
+	return strconv.Itoa(i.value)
 }
 
 // toJSON converts the receiver into JSON string.
@@ -630,10 +630,10 @@ func (i *IntegerObject) toJSON() string {
 	return i.toString()
 }
 
-func (i *IntegerObject) value() interface{} {
-	return i.Value
+func (i *IntegerObject) Value() interface{} {
+	return i.value
 }
 
 func (i *IntegerObject) equal(e *IntegerObject) bool {
-	return i.Value == e.Value
+	return i.value == e.value
 }

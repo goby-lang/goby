@@ -49,8 +49,8 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 			Name: "mount",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					path := args[0].(*StringObject).Value
-					method := args[1].(*StringObject).Value
+					path := args[0].(*StringObject).value
+					method := args[1].(*StringObject).value
 					router.HandleFunc(path, newHandler(t, blockFrame)).Methods(method)
 
 					return receiver
@@ -70,7 +70,7 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 					if !ok {
 						port = "8080"
 					} else {
-						port = portVar.(*StringObject).Value
+						port = portVar.(*StringObject).value
 					}
 
 					log.Println("SimpleServer start listening on port: " + port)
@@ -88,7 +88,7 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 					fileRoot, serveStatic := server.InstanceVariables.get("@file_root")
 
 					if serveStatic {
-						fr := fileRoot.(*StringObject).Value
+						fr := fileRoot.(*StringObject).value
 						currentDir, _ := os.Getwd()
 						fp := filepath.Join(currentDir, fr)
 						fs := http.FileServer(http.Dir(fp))
@@ -159,7 +159,7 @@ func setupResponse(w http.ResponseWriter, req *http.Request, res *RObject) {
 	resStatus, ok := res.instanceVariableGet("@status")
 
 	if ok {
-		r.status = resStatus.(*IntegerObject).Value
+		r.status = resStatus.(*IntegerObject).value
 	} else {
 		r.status = http.StatusOK
 	}
@@ -169,7 +169,7 @@ func setupResponse(w http.ResponseWriter, req *http.Request, res *RObject) {
 	if !ok {
 		r.body = ""
 	} else {
-		r.body = resBody.(*StringObject).Value
+		r.body = resBody.(*StringObject).value
 	}
 
 	contentType, ok := res.instanceVariableGet("@content_type")

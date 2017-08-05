@@ -56,10 +56,10 @@ func builtinHTTPClassMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					var path string
 
-					domain := args[0].(*StringObject).Value
+					domain := args[0].(*StringObject).value
 
 					if len(args) > 1 {
-						path = args[1].(*StringObject).Value
+						path = args[1].(*StringObject).value
 					}
 
 					if !strings.HasPrefix(path, "/") {

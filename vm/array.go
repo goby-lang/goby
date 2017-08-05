@@ -72,17 +72,17 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 					arr := receiver.(*ArrayObject)
 					arrLength := len(arr.Elements)
 
-					if int(index.Value) < 0 {
-						if -int(index.Value) > arrLength {
+					if int(index.value) < 0 {
+						if -int(index.value) > arrLength {
 							return NULL
 						}
-						calculatedIndex := arrLength + int(index.Value)
+						calculatedIndex := arrLength + int(index.value)
 						return arr.Elements[calculatedIndex]
-					} else if int(index.Value) >= arrLength {
+					} else if int(index.value) >= arrLength {
 						return NULL
 					}
 
-					return arr.Elements[index.Value]
+					return arr.Elements[index.value]
 				}
 			},
 		},
@@ -110,7 +110,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 
 					i := args[0]
 					index, ok := i.(*IntegerObject)
-					indexValue := index.Value
+					indexValue := index.value
 
 					if !ok {
 						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
@@ -166,18 +166,18 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 
 					arr := receiver.(*ArrayObject)
 
-					if index.Value < 0 {
-						if -index.Value > len(arr.Elements) {
+					if index.value < 0 {
+						if -index.value > len(arr.Elements) {
 							return NULL
 						}
-						return arr.Elements[len(arr.Elements)+index.Value]
+						return arr.Elements[len(arr.Elements)+index.value]
 					}
 
-					if len(arr.Elements) == 0 || int(index.Value) >= len(arr.Elements) {
+					if len(arr.Elements) == 0 || int(index.value) >= len(arr.Elements) {
 						return NULL
 					}
 
-					return arr.Elements[index.Value]
+					return arr.Elements[index.value]
 				}
 			},
 		},
@@ -253,7 +253,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 					if blockFrame != nil {
 						for _, obj := range arr.Elements {
 							result := t.builtInMethodYield(blockFrame, obj)
-							if result.Target.(*BooleanObject).Value {
+							if result.Target.(*BooleanObject).value {
 								count++
 							}
 						}
@@ -358,7 +358,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
 					}
 
-					return t.vm.initArrayObject(arr.Elements[:arg.Value])
+					return t.vm.initArrayObject(arr.Elements[:arg.value])
 				}
 			},
 		},
@@ -379,7 +379,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 					}
 
 					l := len(arr.Elements)
-					return t.vm.initArrayObject(arr.Elements[l-arg.Value : l])
+					return t.vm.initArrayObject(arr.Elements[l-arg.value: l])
 				}
 			},
 		},
@@ -494,7 +494,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 						if !ok {
 							return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
 						}
-						rotate = arg.Value
+						rotate = arg.value
 					}
 
 					for i := 0; i < rotate; i++ {
@@ -530,7 +530,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 
 					for _, obj := range arr.Elements {
 						result := t.builtInMethodYield(blockFrame, obj)
-						if result.Target.(*BooleanObject).Value {
+						if result.Target.(*BooleanObject).value {
 							elements = append(elements, obj)
 						}
 					}
@@ -633,6 +633,6 @@ func (a *ArrayObject) shift() Object {
 	return value
 }
 
-func (a *ArrayObject) value() interface{} {
+func (a *ArrayObject) Value() interface{} {
 	return a.Elements
 }

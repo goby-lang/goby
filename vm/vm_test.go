@@ -166,8 +166,8 @@ func (v *VM) checkSP(t *testing.T, index, expectedSp int) {
 func testIntegerObject(t *testing.T, i int, obj Object, expected int) bool {
 	switch result := obj.(type) {
 	case *IntegerObject:
-		if result.Value != expected {
-			t.Fatalf("At test case %d: object has wrong value. expect=%d, got=%d", i, expected, result.Value)
+		if result.value != expected {
+			t.Fatalf("At test case %d: object has wrong value. expect=%d, got=%d", i, expected, result.value)
 			return false
 		}
 
@@ -197,8 +197,8 @@ func testNullObject(t *testing.T, i int, obj Object) bool {
 func testStringObject(t *testing.T, i int, obj Object, expected string) bool {
 	switch result := obj.(type) {
 	case *StringObject:
-		if result.Value != expected {
-			t.Fatalf("At test case %d: object has wrong value. expect=%s, got=%s", i, expected, result.Value)
+		if result.value != expected {
+			t.Fatalf("At test case %d: object has wrong value. expect=%s, got=%s", i, expected, result.value)
 			return false
 		}
 
@@ -215,8 +215,8 @@ func testStringObject(t *testing.T, i int, obj Object, expected string) bool {
 func testBooleanObject(t *testing.T, i int, obj Object, expected bool) bool {
 	switch result := obj.(type) {
 	case *BooleanObject:
-		if result.Value != expected {
-			t.Fatalf("At test case %d: object has wrong value. expect=%d, got=%d", i, expected, result.Value)
+		if result.value != expected {
+			t.Fatalf("At test case %d: object has wrong value. expect=%d, got=%d", i, expected, result.value)
 			return false
 		}
 

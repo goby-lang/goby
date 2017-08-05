@@ -43,7 +43,7 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
 					}
 
-					funcName := s.Value
+					funcName := s.value
 					r := receiver.(*PluginObject)
 					p := r.plugin
 					f, err := p.Lookup(funcName)

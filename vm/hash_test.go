@@ -622,7 +622,7 @@ func TestHashKeysMethod(t *testing.T) {
 
 	var evaluatedArr []string
 	for _, k := range arr.Elements {
-		evaluatedArr = append(evaluatedArr, k.(*StringObject).Value)
+		evaluatedArr = append(evaluatedArr, k.(*StringObject).value)
 	}
 	sort.Strings(evaluatedArr)
 	if !reflect.DeepEqual(evaluatedArr, []string{"bar", "baz", "foo"}) {
@@ -908,7 +908,7 @@ func TestHashToArrayMethod(t *testing.T) {
 	evaluatedArr := make(map[string]Object)
 	for _, p := range arr.Elements {
 		pair := p.(*ArrayObject)
-		evaluatedArr[pair.Elements[0].(*StringObject).Value] = pair.Elements[1]
+		evaluatedArr[pair.Elements[0].(*StringObject).value] = pair.Elements[1]
 	}
 
 	for k, v := range evaluatedArr {
@@ -1306,7 +1306,7 @@ func compareJSONResult(t *testing.T, evaluated Object, exp interface{}) {
 		t.Fatal(err.Error())
 	}
 
-	s := evaluated.(*StringObject).Value
+	s := evaluated.(*StringObject).value
 
 	r, err := JSONBytesEqual([]byte(s), expected)
 

@@ -999,8 +999,8 @@ func TestInstanceMethodCall(t *testing.T) {
 		t.Errorf("expect result to be an integer. got=%T", evaluated)
 	}
 
-	if result.Value != 110 {
-		t.Errorf("expect result to be 110. got=%d", result.Value)
+	if result.value != 110 {
+		t.Errorf("expect result to be 110. got=%d", result.value)
 	}
 
 	v.checkCFP(t, 0, 0)

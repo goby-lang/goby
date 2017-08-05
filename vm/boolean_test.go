@@ -124,11 +124,11 @@ func TestBooleanAssignmentByOperation(t *testing.T) {
 }
 
 func TestInitializeBoolean(t *testing.T) {
-	if !TRUE.Value {
-		t.Errorf("expected 'true'. got=%t", TRUE.Value)
+	if !TRUE.value {
+		t.Errorf("expected 'true'. got=%t", TRUE.value)
 	}
 
-	if FALSE.Value {
-		t.Errorf("expected 'false'. got=%t", FALSE.Value)
+	if FALSE.value {
+		t.Errorf("expected 'false'. got=%t", FALSE.value)
 	}
 }

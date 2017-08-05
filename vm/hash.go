@@ -30,7 +30,7 @@ import (
 // a[balthazar1]    # => error
 // ```
 //
-// - **Value:** String literal and objects (Integer, String, Array, Hash, nil, etc) can be used.
+// - **value:** String literal and objects (Integer, String, Array, Hash, nil, etc) can be used.
 //
 // **Note:**
 // - The order of key-value pairs are **not** preserved.
@@ -104,7 +104,7 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 						return NULL
 					}
 
-					value, ok := h.Pairs[key.Value]
+					value, ok := h.Pairs[key.value]
 
 					if !ok {
 						return NULL
@@ -145,7 +145,7 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 					}
 
 					h := receiver.(*HashObject)
-					h.Pairs[key.Value] = args[1]
+					h.Pairs[key.value] = args[1]
 
 					return args[1]
 				}
@@ -326,7 +326,7 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, d.Class().Name)
 					}
 
-					deleteKeyValue := deleteKey.Value
+					deleteKeyValue := deleteKey.value
 					if _, ok := h.Pairs[deleteKeyValue]; ok {
 						delete(h.Pairs, deleteKeyValue)
 					}
@@ -363,7 +363,7 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, i.Class().Name)
 					}
 
-					if _, ok := h.Pairs[input.Value]; ok {
+					if _, ok := h.Pairs[input.value]; ok {
 						return TRUE
 					}
 					return FALSE
@@ -583,7 +583,7 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 						if !ok {
 							return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, booleanClass, s.Class().Name)
 						}
-						sorted = st.Value
+						sorted = st.value
 					}
 
 					var resultArr []Object
@@ -753,7 +753,7 @@ func (h *HashObject) toJSON() string {
 	return out.String()
 }
 
-func (h *HashObject) value() interface{} {
+func (h *HashObject) Value() interface{} {
 	return h.Pairs
 }
 

@@ -183,7 +183,7 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 
 						switch r := result.Target.(type) {
 						case *BooleanObject:
-							if r.Value {
+							if r.value {
 								pivot = mid
 							}
 
@@ -194,7 +194,7 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 								return t.vm.initIntegerObject(pivot)
 							}
 
-							if r.Value {
+							if r.value {
 								end = mid - 1
 							} else if mid+1 > ran.End {
 								return NULL
@@ -202,7 +202,7 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 								start = mid + 1
 							}
 						case *IntegerObject:
-							if r.Value == 0 {
+							if r.value == 0 {
 								return t.vm.initIntegerObject(mid)
 							}
 
@@ -210,7 +210,7 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 								return NULL
 							}
 
-							if r.Value > 0 {
+							if r.value > 0 {
 								start = mid + 1
 							} else {
 								end = mid - 1
@@ -310,7 +310,7 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					ran := receiver.(*RangeObject)
 
-					value := args[0].(*IntegerObject).Value
+					value := args[0].(*IntegerObject).value
 					ascendRangeBool := ran.Start <= ran.End && value >= ran.Start && value <= ran.End
 					descendRangeBool := ran.End <= ran.Start && value <= ran.Start && value >= ran.End
 
@@ -402,7 +402,7 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(InternalError, CantYieldWithoutBlockFormat)
 					}
 
-					stepValue := args[0].(*IntegerObject).Value
+					stepValue := args[0].(*IntegerObject).value
 					if stepValue == 0 {
 						return newError("Step can't be 0")
 					} else if stepValue < 0 {

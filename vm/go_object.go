@@ -41,7 +41,7 @@ func builtinGoInstanceMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
 					}
 
-					funcName := s.Value
+					funcName := s.value
 					r := receiver.(*GoObject)
 
 					funcArgs, err := convertToGoFuncArgs(args[1:])
@@ -68,15 +68,15 @@ func convertToGoFuncArgs(args []Object) ([]interface{}, error) {
 			if integer, ok := v.(*IntegerObject); ok {
 				switch integer.flag {
 				case integer64:
-					funcArgs = append(funcArgs, int64(integer.Value))
+					funcArgs = append(funcArgs, int64(integer.value))
 					continue
 				case integer32:
-					funcArgs = append(funcArgs, int32(integer.Value))
+					funcArgs = append(funcArgs, int32(integer.value))
 					continue
 				}
 			}
 
-			funcArgs = append(funcArgs, v.value())
+			funcArgs = append(funcArgs, v.Value())
 		} else {
 			err := fmt.Errorf("Can't pass %s type object when calling go function", arg.Class().Name)
 			return nil, err
@@ -96,6 +96,6 @@ func (s *GoObject) toJSON() string {
 	return s.toString()
 }
 
-func (s *GoObject) value() interface{} {
+func (s *GoObject) Value() interface{} {
 	return s.data
 }

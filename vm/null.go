@@ -154,6 +154,6 @@ func (n *NullObject) toJSON() string {
 	return "null"
 }
 
-func (n *NullObject) value() interface{} {
+func (n *NullObject) Value() interface{} {
 	return nil
 }

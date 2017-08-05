@@ -93,7 +93,7 @@ func (co *ChannelObject) toJSON() string {
 	return co.toString()
 }
 
-func (co *ChannelObject) value() interface{} {
+func (co *ChannelObject) Value() interface{} {
 	return co.Chan
 }
 
