@@ -3,8 +3,8 @@ package vm
 import "testing"
 
 func TestPGConnectionPing(t *testing.T) {
-	tests := []struct{
-		input string
+	tests := []struct {
+		input    string
 		expected interface{}
 	}{
 		{`
@@ -22,7 +22,6 @@ func TestPGConnectionPing(t *testing.T) {
 			`,
 			false},
 	}
-
 
 	for i, tt := range tests {
 		v := initTestVM()

@@ -2,6 +2,7 @@ package vm
 
 import (
 	"database/sql"
+	// PG driver package
 	_ "github.com/lib/pq"
 )
 
