@@ -56,7 +56,7 @@ func compileVarsSection(funcs []*function) string {
 const importSectionTemplate = `
 import(
   {{- range $pkg := .}}
-	{{printf "%s %s\n" $pkg.Prefix $pkg.Name -}}
+	{{printf "%s \"%s\"\n" $pkg.Prefix $pkg.Name -}}
   {{- end}}
 )
 `
@@ -75,5 +75,5 @@ package main
 
 {{- .VarSection -}}
 
-func main {}
+func main() {}
 `

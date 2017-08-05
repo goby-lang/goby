@@ -30,15 +30,15 @@ package main
 
 
 import(
-	 database/sql
+	 "database/sql"
 
-	_ github.com/lib/pq
+	_ "github.com/lib/pq"
 
 )
 
 var Open = sql.Open
 
-func main {}
+func main() {}
 `)
 
 	if result != expected {
