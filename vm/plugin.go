@@ -65,7 +65,15 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 						t.vm.initErrorObject(TypeError, err.Error())
 					}
 
-					result := reflect.ValueOf(reflect.ValueOf(f).Call(metago.WrapArguments(funcArgs...))).Interface()
+					funcValue := reflect.ValueOf(f)
+
+					// Check if f is a pointer to function instead of function object
+					if funcValue.Type().Kind() == reflect.Ptr {
+						ptr := funcValue
+						funcValue = ptr.Elem()
+					}
+
+					result := reflect.ValueOf(funcValue.Call(metago.WrapArguments(funcArgs...))).Interface()
 
 					return t.vm.initObjectFromGoType(metago.UnwrapReflectValues(result))
 				}

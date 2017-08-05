@@ -1,6 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/goby-lang/goby/test_fixtures/import_test/plugin/lib"
+)
+
+var ReturnLibName = lib.ReturnLibName
 
 func Bar() string {
 	return "Bar"

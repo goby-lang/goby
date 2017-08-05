@@ -40,6 +40,21 @@ func TestCallingPluginFunctionWithReturnValue(t *testing.T) {
 	v.checkSP(t, 0, 1)
 }
 
+func TestCallingLibFuncFromPlugin(t *testing.T) {
+	skipPluginTestIfEnvNotSet(t)
+
+	input := `
+	p = import "github.com/goby-lang/goby/test_fixtures/import_test/plugin/plugin.go"
+	p.send("ReturnLibName")
+	`
+
+	v := initTestVM()
+	evaluated := v.testEval(t, input)
+	checkExpected(t, 0, evaluated, "lib")
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
+}
+
 func skipPluginTestIfEnvNotSet(t *testing.T) {
 	if os.Getenv("TEST_PLUGIN") == "" {
 		t.Skip("skipping plugin related tests")
