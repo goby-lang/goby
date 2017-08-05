@@ -8,7 +8,6 @@ import (
 	"plugin"
 	"reflect"
 	"strings"
-	"syscall"
 )
 
 func (vm *VM) initPluginObject(fn string, p *plugin.Plugin) *PluginObject {
@@ -130,14 +129,15 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 					}
 
 					if !ok {
-						os.Mkdir(pluginDir, syscall.O_RDWR)
+						os.Mkdir(pluginDir, 0777)
 					}
 
 					fn := fmt.Sprintf("%s/%p", pluginDir, pc)
-					file, err := os.Create(fn + ".go")
+
+					file, err := os.OpenFile(fn+".go", os.O_RDWR|os.O_CREATE, 0755)
 
 					if err != nil {
-						return t.vm.initErrorObject(InternalError, err.Error())
+						return t.vm.initErrorObject(InternalError, "Error when creating plugin: %s", err.Error())
 					}
 
 					file.WriteString(pluginContent)

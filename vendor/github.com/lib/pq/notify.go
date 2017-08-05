@@ -623,7 +623,7 @@ func (l *Listener) resync(cn *ListenerConn, notificationChan <-chan *Notificatio
 			// close and then return the error message from the connection, as
 			// per ListenerConn's interface.
 			if err != nil {
-				for _ = range notificationChan {
+				for range notificationChan {
 				}
 				doneChan <- cn.Err()
 				return
