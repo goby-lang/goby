@@ -67,7 +67,7 @@ func TestNewPluginUsage(t *testing.T) {
 	input := `
 	require "plugin"
 
-	p = Plugin.config do |c|
+	p = Plugin.config("db") do |c|
 	  c.add_pkg("", "database/sql")
 	  c.add_pkg("_", "github.com/lib/pq")
 	  c.add_func("sql", "Open")

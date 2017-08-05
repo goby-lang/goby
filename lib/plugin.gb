@@ -1,8 +1,8 @@
 class Plugin
   attr_accessor :context
 
-  def self.config
-    plugin = new
+  def self.config(name)
+    plugin = new(name)
     plugin.context = PluginContext.new
     yield(plugin.context)
     plugin

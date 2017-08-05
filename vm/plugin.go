@@ -98,7 +98,17 @@ func builtinPluginClassMethods() []*BuiltInMethodObject {
 			Name: "new",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					return &PluginObject{baseObj: &baseObj{class: t.vm.topLevelClass(pluginClass), InstanceVariables: newEnvironment()}}
+					if len(args) != 1 {
+						return t.vm.initErrorObject(ArgumentError, WrongNumberOfArgumentFormat, 1, len(args))
+					}
+
+					name, ok := args[0].(*StringObject)
+
+					if !ok {
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, "String", args[0].Class().Name)
+					}
+
+					return &PluginObject{fn: name.value, baseObj: &baseObj{class: t.vm.topLevelClass(pluginClass), InstanceVariables: newEnvironment()}}
 				}
 			},
 		},
@@ -111,15 +121,14 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 			Name: "compile",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					r := receiver.(*PluginObject)
 					context, ok := receiver.instanceVariableGet("@context")
 
 					if !ok {
 						return NULL
 					}
 
-					pc := setPluginContext(context)
-					pluginContent := compilePluginTemplate(pc.pkgs, pc.funcs)
-
+					// Create plugins directory
 					pluginDir := "./plugins"
 
 					ok, err := fileExists(pluginDir)
@@ -132,7 +141,12 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 						os.Mkdir(pluginDir, 0777)
 					}
 
-					fn := fmt.Sprintf("%s/%p", pluginDir, pc)
+					// generate plugin content from context
+					pc := setPluginContext(context)
+					pluginContent := compilePluginTemplate(pc.pkgs, pc.funcs)
+
+					// create plugin file
+					fn := fmt.Sprintf("%s/%s", pluginDir, r.fn)
 
 					file, err := os.OpenFile(fn+".go", os.O_RDWR|os.O_CREATE, 0755)
 
@@ -163,8 +177,6 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 						}
 					}
 
-					r := receiver.(*PluginObject)
-					r.fn = fn
 					r.plugin = p
 
 					return r

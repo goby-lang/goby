@@ -12,7 +12,7 @@ func TestPluginInitialization(t *testing.T) {
 		{`
 		require "plugin"
 
-		p = Plugin.config do |c|
+		p = Plugin.config("db") do |c|
 		  c.add_pkg("", "database/sql")
 		  c.add_func("sql", "Open")
 		end
@@ -23,7 +23,7 @@ func TestPluginInitialization(t *testing.T) {
 		{`
 		require "plugin"
 
-		p = Plugin.config do |c|
+		p = Plugin.config("db") do |c|
 		  c.add_pkg("", "database/sql")
 		  c.add_func("sql", "Open")
 		end
@@ -34,7 +34,7 @@ func TestPluginInitialization(t *testing.T) {
 		{`
 		require "plugin"
 
-		p = Plugin.config do |c|
+		p = Plugin.config("db") do |c|
 		  c.add_pkg("", "database/sql")
 		  c.add_func("sql", "Open")
 		end
