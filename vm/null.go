@@ -5,6 +5,14 @@ var (
 	NULL *NullObject
 )
 
+func (vm *VM) initNullClass() *RClass {
+	nc := vm.initializeClass(nullClass, false)
+	nc.setBuiltInMethods(builtInNullInstanceMethods(), false)
+	nc.setBuiltInMethods(builtInNullClassMethods(), true)
+	NULL = &NullObject{baseObj: &baseObj{class: nc}}
+	return nc
+}
+
 // NullObject (`nil`) represents the null value in Goby.
 // `nil` is convert into `null` when exported to JSON format.
 // - `Null.new` is not supported.
@@ -12,12 +20,16 @@ type NullObject struct {
 	*baseObj
 }
 
-func (vm *VM) initNullClass() *RClass {
-	nc := vm.initializeClass(nullClass, false)
-	nc.setBuiltInMethods(builtInNullInstanceMethods(), false)
-	nc.setBuiltInMethods(builtInNullClassMethods(), true)
-	NULL = &NullObject{baseObj: &baseObj{class: nc}}
-	return nc
+func (n *NullObject) Value() interface{} {
+	return nil
+}
+
+func (n *NullObject) toString() string {
+	return "nil"
+}
+
+func (n *NullObject) toJSON() string {
+	return "null"
 }
 
 func builtInNullClassMethods() []*BuiltInMethodObject {
@@ -141,19 +153,4 @@ func builtInNullInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
-}
-
-// Polymorphic helper functions -----------------------------------------
-
-// toString returns the name of NullObject
-func (n *NullObject) toString() string {
-	return "nil"
-}
-
-func (n *NullObject) toJSON() string {
-	return "null"
-}
-
-func (n *NullObject) Value() interface{} {
-	return nil
 }

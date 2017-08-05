@@ -7,6 +7,21 @@ import (
 	"unicode/utf8"
 )
 
+func (vm *VM) initStringObject(value string) *StringObject {
+	replacer := strings.NewReplacer("\\n", "\n", "\\r", "\r", "\\t", "\t", "\\v", "\v", "\\f", "\f", "\\\\", "\\")
+	return &StringObject{
+		baseObj: &baseObj{class: vm.topLevelClass(stringClass)},
+		value:   replacer.Replace(value),
+	}
+}
+
+func (vm *VM) initStringClass() *RClass {
+	sc := vm.initializeClass(stringClass, false)
+	sc.setBuiltInMethods(builtinStringInstanceMethods(), false)
+	sc.setBuiltInMethods(builtInStringClassMethods(), true)
+	return sc
+}
+
 // StringObject represents string instances
 // String object holds and manipulates a sequence of characters.
 // String objects may be created using as string literals.
@@ -30,19 +45,8 @@ type StringObject struct {
 	value string
 }
 
-func (vm *VM) initStringObject(value string) *StringObject {
-	replacer := strings.NewReplacer("\\n", "\n", "\\r", "\r", "\\t", "\t", "\\v", "\v", "\\f", "\f", "\\\\", "\\")
-	return &StringObject{
-		baseObj: &baseObj{class: vm.topLevelClass(stringClass)},
-		value:   replacer.Replace(value),
-	}
-}
-
-func (vm *VM) initStringClass() *RClass {
-	sc := vm.initializeClass(stringClass, false)
-	sc.setBuiltInMethods(builtinStringInstanceMethods(), false)
-	sc.setBuiltInMethods(builtInStringClassMethods(), true)
-	return sc
+func (s *StringObject) Value() interface{} {
+	return s.value
 }
 
 func builtInStringClassMethods() []*BuiltInMethodObject {
@@ -1319,10 +1323,6 @@ func (s *StringObject) toString() string {
 // toJSON converts the receiver into JSON string.
 func (s *StringObject) toJSON() string {
 	return "\"" + s.value + "\""
-}
-
-func (s *StringObject) Value() interface{} {
-	return s.value
 }
 
 func (s *StringObject) equal(e *StringObject) bool {

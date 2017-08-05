@@ -11,14 +11,6 @@ var (
 	FALSE *BooleanObject
 )
 
-// BooleanObject represents boolean object in goby.
-// It includes `true` and `FALSE` which represents logically true and false value.
-// - `Boolean.new` is not supported.
-type BooleanObject struct {
-	*baseObj
-	value bool
-}
-
 func (vm *VM) initBoolClass() *RClass {
 	b := vm.initializeClass(booleanClass, false)
 	b.setBuiltInMethods(builtinBooleanInstanceMethods(), false)
@@ -28,6 +20,31 @@ func (vm *VM) initBoolClass() *RClass {
 	FALSE = &BooleanObject{value: false, baseObj: &baseObj{class: b}}
 
 	return b
+}
+
+// BooleanObject represents boolean object in goby.
+// It includes `true` and `FALSE` which represents logically true and false value.
+// - `Boolean.new` is not supported.
+type BooleanObject struct {
+	*baseObj
+	value bool
+}
+
+func (b *BooleanObject) Value() interface{} {
+	return b.value
+}
+
+// Polymorphic helper functions -----------------------------------------
+func (b *BooleanObject) toString() string {
+	return fmt.Sprintf("%t", b.value)
+}
+
+func (b *BooleanObject) toJSON() string {
+	return b.toString()
+}
+
+func (b *BooleanObject) equal(e *BooleanObject) bool {
+	return b.value == e.value
 }
 
 func builtInBooleanClassMethods() []*BuiltInMethodObject {
@@ -181,24 +198,4 @@ func builtinBooleanInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
-}
-
-// Polymorphic helper functions -----------------------------------------
-
-// toString returns boolean object's value, which is either true or false.
-func (b *BooleanObject) toString() string {
-	return fmt.Sprintf("%t", b.value)
-}
-
-// toJSON converts the receiver into JSON string.
-func (b *BooleanObject) toJSON() string {
-	return b.toString()
-}
-
-func (b *BooleanObject) equal(e *BooleanObject) bool {
-	return b.value == e.value
-}
-
-func (b *BooleanObject) Value() interface{} {
-	return b.value
 }

@@ -6,13 +6,6 @@ import (
 	"reflect"
 )
 
-// PluginObject is a special type that contains a Go's plugin
-type PluginObject struct {
-	*baseObj
-	fn     string
-	plugin *plugin.Plugin
-}
-
 func (vm *VM) initPluginObject(fn string, p *plugin.Plugin) *PluginObject {
 	return &PluginObject{fn: fn, plugin: p, baseObj: &baseObj{class: vm.topLevelClass(pluginClass)}}
 }
@@ -25,12 +18,26 @@ func (vm *VM) initPluginClass() *RClass {
 	return pc
 }
 
-// Only initialize file related methods after it's being required.
+// PluginObject is a special type that contains a Go's plugin
+type PluginObject struct {
+	*baseObj
+	fn     string
+	plugin *plugin.Plugin
+}
+
+// Polymorphic helper functions -----------------------------------------
+func (p *PluginObject) toString() string {
+	return "<Plugin: " + p.fn + ">"
+}
+
+func (p *PluginObject) toJSON() string {
+	return p.toString()
+}
+
 func builtinPluginClassMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{}
 }
 
-// Only initialize file related methods after it's being required.
 func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 		{
@@ -65,16 +72,4 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
-}
-
-// Polymorphic helper functions -----------------------------------------
-
-// toString returns detailed infoof a array include elements it contains
-func (p *PluginObject) toString() string {
-	return "<Plugin: " + p.fn + ">"
-}
-
-// toJSON converts the receiver into JSON string.
-func (p *PluginObject) toJSON() string {
-	return p.toString()
 }

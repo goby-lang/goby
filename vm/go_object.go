@@ -5,12 +5,6 @@ import (
 	"github.com/st0012/metago"
 )
 
-// GoObject ...
-type GoObject struct {
-	*baseObj
-	data interface{}
-}
-
 func (vm *VM) initGoObject(d interface{}) *GoObject {
 	return &GoObject{data: d, baseObj: &baseObj{class: vm.topLevelClass(goObjectClass)}}
 }
@@ -23,12 +17,29 @@ func (vm *VM) initGoClass() *RClass {
 	return sc
 }
 
-// Only initialize file related methods after it's being required.
+// GoObject ...
+type GoObject struct {
+	*baseObj
+	data interface{}
+}
+
+// Polymorphic helper functions -----------------------------------------
+func (s *GoObject) toString() string {
+	return fmt.Sprintf("<GoObject: %p>", s)
+}
+
+func (s *GoObject) toJSON() string {
+	return s.toString()
+}
+
+func (s *GoObject) Value() interface{} {
+	return s.data
+}
+
 func builtinGoClassMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{}
 }
 
-// Only initialize file related methods after it's being required.
 func builtinGoInstanceMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 		{
@@ -84,18 +95,4 @@ func convertToGoFuncArgs(args []Object) ([]interface{}, error) {
 	}
 
 	return funcArgs, nil
-}
-
-// Polymorphic helper functions -----------------------------------------
-
-func (s *GoObject) toString() string {
-	return fmt.Sprintf("<GoObject: %p>", s)
-}
-
-func (s *GoObject) toJSON() string {
-	return s.toString()
-}
-
-func (s *GoObject) Value() interface{} {
-	return s.data
 }

@@ -5,10 +5,46 @@ import (
 	"sync"
 )
 
+func (vm *VM) initChannelClass() *RClass {
+	class := vm.initializeClass(channelClass, false)
+	class.setBuiltInMethods(builtinChannelClassMethods(), true)
+	class.setBuiltInMethods(builtinChannelInstanceMethods(), false)
+	return class
+}
+
 type objectMap struct {
 	store   map[int]Object
 	counter int
 	sync.RWMutex
+}
+
+func (m *objectMap) storeObj(obj Object) int {
+	m.Lock()
+	defer m.Unlock()
+
+	m.store[m.counter] = obj
+	i := m.counter
+
+	// containerCount here can be considered as deliveries' id
+	// And this id will be unused once the delivery is completed (which will be really quick)
+	// So we can assume that if we reach 1000th delivery,
+	// previous deliveries are all completed and they don't need their id anymore.
+	if m.counter > 1000 {
+		m.counter = 0
+	} else {
+		m.counter++
+	}
+
+	return i
+}
+
+// storeObj store objects into the container map
+// and update containerCount at the same time
+func (m *objectMap) retrieveObj(num int) Object {
+	m.RLock()
+
+	defer m.RUnlock()
+	return m.store[num]
 }
 
 // ChannelObject represents a goby channel, which carries a golang channel
@@ -17,11 +53,17 @@ type ChannelObject struct {
 	Chan chan int
 }
 
-func (vm *VM) initChannelClass() *RClass {
-	class := vm.initializeClass(channelClass, false)
-	class.setBuiltInMethods(builtinChannelClassMethods(), true)
-	class.setBuiltInMethods(builtinChannelInstanceMethods(), false)
-	return class
+func (co *ChannelObject) Value() interface{} {
+	return co.Chan
+}
+
+// Polymorphic helper functions -----------------------------------------
+func (co *ChannelObject) toString() string {
+	return fmt.Sprintf("<Channel: %p>", co.Chan)
+}
+
+func (co *ChannelObject) toJSON() string {
+	return co.toString()
 }
 
 func builtinChannelClassMethods() []*BuiltInMethodObject {
@@ -79,49 +121,4 @@ func builtinChannelInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
-}
-
-// Polymorphic helper functions -----------------------------------------
-
-// toString returns detailed info of a channel include elements it contains.
-func (co *ChannelObject) toString() string {
-	return fmt.Sprintf("<Channel: %p>", co.Chan)
-}
-
-// toJSON converts the receiver into JSON string.
-func (co *ChannelObject) toJSON() string {
-	return co.toString()
-}
-
-func (co *ChannelObject) Value() interface{} {
-	return co.Chan
-}
-
-func (m *objectMap) storeObj(obj Object) int {
-	m.Lock()
-	defer m.Unlock()
-
-	m.store[m.counter] = obj
-	i := m.counter
-
-	// containerCount here can be considered as deliveries' id
-	// And this id will be unused once the delivery is completed (which will be really quick)
-	// So we can assume that if we reach 1000th delivery,
-	// previous deliveries are all completed and they don't need their id anymore.
-	if m.counter > 1000 {
-		m.counter = 0
-	} else {
-		m.counter++
-	}
-
-	return i
-}
-
-// storeObj store objects into the container map
-// and update containerCount at the same time
-func (m *objectMap) retrieveObj(num int) Object {
-	m.RLock()
-
-	defer m.RUnlock()
-	return m.store[num]
 }

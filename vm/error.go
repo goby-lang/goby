@@ -19,6 +19,24 @@ const (
 	UnsupportedMethodError = "UnsupportedMethodError"
 )
 
+func (vm *VM) initErrorObject(errorType, format string, args ...interface{}) *Error {
+	errClass := vm.objectClass.getClassConstant(errorType)
+
+	return &Error{
+		baseObj: &baseObj{class: errClass},
+		Message: fmt.Sprintf(errorType+": "+format, args...),
+	}
+}
+
+func (vm *VM) initErrorClasses() {
+	errTypes := []string{InternalError, ArgumentError, NameError, TypeError, UndefinedMethodError, UnsupportedMethodError}
+
+	for _, errType := range errTypes {
+		c := vm.initializeClass(errType, false)
+		vm.topLevelClass(objectClass).setClassConstant(c)
+	}
+}
+
 /*
 	Here defines different error message formats for different types of errors
 */
@@ -46,32 +64,11 @@ type Error struct {
 	Message string
 }
 
-func (vm *VM) initErrorObject(errorType, format string, args ...interface{}) *Error {
-	errClass := vm.objectClass.getClassConstant(errorType)
-
-	return &Error{
-		baseObj: &baseObj{class: errClass},
-		Message: fmt.Sprintf(errorType+": "+format, args...),
-	}
-}
-
-func (vm *VM) initErrorClasses() {
-	errTypes := []string{InternalError, ArgumentError, NameError, TypeError, UndefinedMethodError, UnsupportedMethodError}
-
-	for _, errType := range errTypes {
-		c := vm.initializeClass(errType, false)
-		vm.topLevelClass(objectClass).setClassConstant(c)
-	}
-}
-
 // Polymorphic helper functions -----------------------------------------
-
-// toString converts error messages into string.
 func (e *Error) toString() string {
 	return "ERROR: " + e.Message
 }
 
-// toJSON converts the receiver into JSON string.
 func (e *Error) toJSON() string {
 	return e.toString()
 }

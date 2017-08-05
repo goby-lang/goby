@@ -8,6 +8,20 @@ import (
 	"strings"
 )
 
+func (vm *VM) initHashObject(pairs map[string]Object) *HashObject {
+	return &HashObject{
+		baseObj: &baseObj{class: vm.topLevelClass(hashClass)},
+		Pairs:   pairs,
+	}
+}
+
+func (vm *VM) initHashClass() *RClass {
+	hc := vm.initializeClass(hashClass, false)
+	hc.setBuiltInMethods(builtinHashInstanceMethods(), false)
+	hc.setBuiltInMethods(builtInHashClassMethods(), true)
+	return hc
+}
+
 // HashObject represents hash instances
 // Hash is a collection of key-value pair, which works like a dictionary.
 // Hash literal is represented with curly brackets `{ }` like `{ key: value }`.
@@ -41,18 +55,70 @@ type HashObject struct {
 	Pairs map[string]Object
 }
 
-func (vm *VM) initHashObject(pairs map[string]Object) *HashObject {
-	return &HashObject{
-		baseObj: &baseObj{class: vm.topLevelClass(hashClass)},
-		Pairs:   pairs,
-	}
+func (h *HashObject) Value() interface{} {
+	return h.Pairs
 }
 
-func (vm *VM) initHashClass() *RClass {
-	hc := vm.initializeClass(hashClass, false)
-	hc.setBuiltInMethods(builtinHashInstanceMethods(), false)
-	hc.setBuiltInMethods(builtInHashClassMethods(), true)
-	return hc
+// Polymorphic helper functions -----------------------------------------
+func (h *HashObject) toString() string {
+	var out bytes.Buffer
+	var pairs []string
+
+	for _, key := range h.sortedKeys() {
+		// TODO: Improve this conditional statement
+		if _, isString := h.Pairs[key].(*StringObject); isString {
+			pairs = append(pairs, fmt.Sprintf("%s: \"%s\"", key, h.Pairs[key].toString()))
+		} else {
+			pairs = append(pairs, fmt.Sprintf("%s: %s", key, h.Pairs[key].toString()))
+		}
+	}
+
+	out.WriteString("{ ")
+	out.WriteString(strings.Join(pairs, ", "))
+	out.WriteString(" }")
+
+	return out.String()
+}
+
+func (h *HashObject) toJSON() string {
+	var out bytes.Buffer
+	var values []string
+	pairs := h.Pairs
+	out.WriteString("{")
+
+	for key, value := range pairs {
+		values = append(values, generateJSONFromPair(key, value))
+	}
+
+	out.WriteString(strings.Join(values, ","))
+	out.WriteString("}")
+	return out.String()
+}
+
+func (h *HashObject) length() int {
+	return len(h.Pairs)
+}
+
+func (h *HashObject) sortedKeys() []string {
+	var arr []string
+	for k := range h.Pairs {
+		arr = append(arr, k)
+	}
+	sort.Strings(arr)
+	return arr
+}
+
+// Other helper functions ----------------------------------------------
+func generateJSONFromPair(key string, v Object) string {
+	var data string
+	var out bytes.Buffer
+
+	out.WriteString(data)
+	out.WriteString("\"" + key + "\"")
+	out.WriteString(":")
+	out.WriteString(v.toJSON())
+
+	return out.String()
 }
 
 func builtInHashClassMethods() []*BuiltInMethodObject {
@@ -712,74 +778,4 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
-}
-
-// Polymorphic helper functions -----------------------------------------
-
-// toString converts the receiver into string.
-func (h *HashObject) toString() string {
-	var out bytes.Buffer
-	var pairs []string
-
-	for _, key := range h.sortedKeys() {
-		// TODO: Improve this conditional statement
-		if _, isString := h.Pairs[key].(*StringObject); isString {
-			pairs = append(pairs, fmt.Sprintf("%s: \"%s\"", key, h.Pairs[key].toString()))
-		} else {
-			pairs = append(pairs, fmt.Sprintf("%s: %s", key, h.Pairs[key].toString()))
-		}
-	}
-
-	out.WriteString("{ ")
-	out.WriteString(strings.Join(pairs, ", "))
-	out.WriteString(" }")
-
-	return out.String()
-}
-
-// toJSON converts the receiver into JSON string.
-func (h *HashObject) toJSON() string {
-	var out bytes.Buffer
-	var values []string
-	pairs := h.Pairs
-	out.WriteString("{")
-
-	for key, value := range pairs {
-		values = append(values, generateJSONFromPair(key, value))
-	}
-
-	out.WriteString(strings.Join(values, ","))
-	out.WriteString("}")
-	return out.String()
-}
-
-func (h *HashObject) Value() interface{} {
-	return h.Pairs
-}
-
-func (h *HashObject) length() int {
-	return len(h.Pairs)
-}
-
-func (h *HashObject) sortedKeys() []string {
-	var arr []string
-	for k := range h.Pairs {
-		arr = append(arr, k)
-	}
-	sort.Strings(arr)
-	return arr
-}
-
-// Other helper functions ----------------------------------------------
-
-func generateJSONFromPair(key string, v Object) string {
-	var data string
-	var out bytes.Buffer
-
-	out.WriteString(data)
-	out.WriteString("\"" + key + "\"")
-	out.WriteString(":")
-	out.WriteString(v.toJSON())
-
-	return out.String()
 }

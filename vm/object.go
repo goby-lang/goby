@@ -25,12 +25,6 @@ func (p *Pointer) returnClass() *RClass {
 	return p.Target.(*RClass)
 }
 
-// RObject represents any non built-in class's instance.
-type RObject struct {
-	*baseObj
-	InitializeMethod *MethodObject
-}
-
 type baseObj struct {
 	class             *RClass
 	singletonClass    *RClass
@@ -78,14 +72,17 @@ func (b *baseObj) findMethod(methodName string) (method Object) {
 	return
 }
 
-// Polymorphic helper functions -----------------------------------------
+// RObject represents any non built-in class's instance.
+type RObject struct {
+	*baseObj
+	InitializeMethod *MethodObject
+}
 
-// toString tells which class it belongs to.
+// Polymorphic helper functions -----------------------------------------
 func (ro *RObject) toString() string {
 	return "<Instance of: " + ro.class.Name + ">"
 }
 
-// toJSON converts the receiver into JSON string.
 func (ro *RObject) toJSON() string {
 	return ro.toString()
 }

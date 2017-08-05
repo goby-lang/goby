@@ -8,13 +8,27 @@ import (
 /*
 This is enum defined for integer's flag
 */
-
 const (
 	_ int = iota
 	integer
 	integer32
 	integer64
 )
+
+func (vm *VM) initIntegerObject(value int) *IntegerObject {
+	return &IntegerObject{
+		baseObj: &baseObj{class: vm.topLevelClass(integerClass)},
+		value:   value,
+		flag:    integer,
+	}
+}
+
+func (vm *VM) initIntegerClass() *RClass {
+	ic := vm.initializeClass(integerClass, false)
+	ic.setBuiltInMethods(builtinIntegerInstanceMethods(), false)
+	ic.setBuiltInMethods(builtInIntegerClassMethods(), true)
+	return ic
+}
 
 // IntegerObject represents number objects which can bring into mathematical calculations.
 //
@@ -30,19 +44,21 @@ type IntegerObject struct {
 	flag  int
 }
 
-func (vm *VM) initIntegerObject(value int) *IntegerObject {
-	return &IntegerObject{
-		baseObj: &baseObj{class: vm.topLevelClass(integerClass)},
-		value:   value,
-		flag:    integer,
-	}
+func (i *IntegerObject) Value() interface{} {
+	return i.value
 }
 
-func (vm *VM) initIntegerClass() *RClass {
-	ic := vm.initializeClass(integerClass, false)
-	ic.setBuiltInMethods(builtinIntegerInstanceMethods(), false)
-	ic.setBuiltInMethods(builtInIntegerClassMethods(), true)
-	return ic
+// Polymorphic helper functions -----------------------------------------
+func (i *IntegerObject) toString() string {
+	return strconv.Itoa(i.value)
+}
+
+func (i *IntegerObject) toJSON() string {
+	return i.toString()
+}
+
+func (i *IntegerObject) equal(e *IntegerObject) bool {
+	return i.value == e.value
 }
 
 func builtInIntegerClassMethods() []*BuiltInMethodObject {
@@ -616,24 +632,4 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
-}
-
-// Polymorphic helper functions -----------------------------------------
-
-// toString converts the receiver into string.
-func (i *IntegerObject) toString() string {
-	return strconv.Itoa(i.value)
-}
-
-// toJSON converts the receiver into JSON string.
-func (i *IntegerObject) toJSON() string {
-	return i.toString()
-}
-
-func (i *IntegerObject) Value() interface{} {
-	return i.value
-}
-
-func (i *IntegerObject) equal(e *IntegerObject) bool {
-	return i.value == e.value
 }

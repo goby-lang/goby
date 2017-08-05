@@ -5,6 +5,12 @@ import (
 	"fmt"
 )
 
+func (vm *VM) initMethodClass() *RClass {
+	return vm.initializeClass(methodClass, false)
+}
+
+type builtinMethodBody func(*thread, []Object, *callFrame) Object
+
 // MethodObject represents methods defined using goby.
 type MethodObject struct {
 	*baseObj
@@ -13,22 +19,7 @@ type MethodObject struct {
 	argc           int
 }
 
-type builtinMethodBody func(*thread, []Object, *callFrame) Object
-
-// BuiltInMethodObject represents methods defined in go.
-type BuiltInMethodObject struct {
-	*baseObj
-	Name string
-	Fn   func(receiver Object) builtinMethodBody
-}
-
-func (vm *VM) initMethodClass() *RClass {
-	return vm.initializeClass(methodClass, false)
-}
-
 // Polymorphic helper functions -----------------------------------------
-
-// toString returns method's name, params count and instruction set.
 func (m *MethodObject) toString() string {
 	var out bytes.Buffer
 
@@ -42,7 +33,14 @@ func (m *MethodObject) toJSON() string {
 	return m.toString()
 }
 
-// toString just returns built in method's name.
+// BuiltInMethodObject represents methods defined in go.
+type BuiltInMethodObject struct {
+	*baseObj
+	Name string
+	Fn   func(receiver Object) builtinMethodBody
+}
+
+// Polymorphic helper functions -----------------------------------------
 func (bim *BuiltInMethodObject) toString() string {
 	return "<BuiltInMethod: " + bim.Name + ">"
 }
