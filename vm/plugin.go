@@ -5,7 +5,6 @@ import (
 	"github.com/st0012/metago"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"plugin"
 	"reflect"
 	"strings"
@@ -63,17 +62,17 @@ func setPluginContext(context Object) *pluginContext {
 	ps := pkgs.(*ArrayObject)
 
 	for _, f := range fs.Elements {
-		fInfos := f.(*ArrayObject)
-		prefix := fInfos.Elements[0].(*StringObject).value
-		name := fInfos.Elements[1].(*StringObject).value
+		fInfos := f.(*HashObject)
+		prefix := fInfos.Pairs["prefix"].(*StringObject).value
+		name := fInfos.Pairs["name"].(*StringObject).value
 
 		pc.addFunc(prefix, name)
 	}
 
 	for _, p := range ps.Elements {
-		pInfos := p.(*ArrayObject)
-		prefix := pInfos.Elements[0].(*StringObject).value
-		name := pInfos.Elements[1].(*StringObject).value
+		pInfos := p.(*HashObject)
+		prefix := pInfos.Pairs["prefix"].(*StringObject).value
+		name := pInfos.Pairs["name"].(*StringObject).value
 
 		pc.importPkg(prefix, name)
 	}
@@ -99,25 +98,25 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 
 					pc := setPluginContext(context)
 
-					fmt.Println(pc)
-					pkgPath := args[0].(*StringObject).value
-					goPath := os.Getenv("GOPATH")
-					// This is to prevent some path like GODEP_PATH:GOPATH
-					// which can happen on Travis CI
-					ps := strings.Split(goPath, ":")
-					goPath = ps[len(ps)-1]
+					pluginContent := compilePluginTemplate(pc.pkgs, pc.funcs)
 
-					fullPath := filepath.Join(goPath, "src", pkgPath)
-					_, pkgName := filepath.Split(fullPath)
-					pkgName = strings.Split(pkgName, ".")[0]
-					soName := filepath.Join("./", pkgName+".so")
+					fn := fmt.Sprintf("/tmp/%p", pc)
+					file, err := os.Create(fn + ".go")
+
+					if err != nil {
+						return t.vm.initErrorObject(InternalError, err.Error())
+					}
+
+					file.WriteString(pluginContent)
+
+					soName := fn + ".so"
 
 					// Open plugin first
 					p, err := plugin.Open(soName)
 
 					// If there's any issue open a plugin, assume it's not well compiled
 					if err != nil {
-						cmd := exec.Command("go", "build", "-buildmode=plugin", "-o", fmt.Sprintf("./%s.so", pkgName), fullPath)
+						cmd := exec.Command("go", "build", "-buildmode=plugin", "-o", soName, fn)
 						out, err := cmd.CombinedOutput()
 
 						if err != nil {
@@ -131,7 +130,7 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 						}
 					}
 
-					return t.vm.initPluginObject(fullPath, p)
+					return t.vm.initPluginObject(fn, p)
 				}
 			},
 		},
