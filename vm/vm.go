@@ -197,6 +197,7 @@ func (vm *VM) initConstants() {
 		vm.initArrayClass(),
 		vm.initHashClass(),
 		vm.initRangeClass(),
+		vm.initRegexpClass(),
 		vm.initMethodClass(),
 		vm.initChannelClass(),
 		vm.initGoClass(),

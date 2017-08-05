@@ -10,6 +10,23 @@ import (
 	"time"
 )
 
+const (
+	objectClass   = "Object"
+	classClass    = "Class"
+	integerClass  = "Integer"
+	stringClass   = "String"
+	arrayClass    = "Array"
+	hashClass     = "Hash"
+	booleanClass  = "Boolean"
+	nullClass     = "Null"
+	channelClass  = "Channel"
+	rangeClass    = "Range"
+	regexpClass   = "Regexp"
+	methodClass   = "method"
+	pluginClass   = "Plugin"
+	goObjectClass = "GoObject"
+)
+
 // initializeClass is a common function for vm, which initializes and returns
 // a class instance with given class name.
 func (vm *VM) initializeClass(name string, isModule bool) *RClass {
