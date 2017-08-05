@@ -7,7 +7,7 @@ import (
 
 type importSection struct {
 	HasLib bool
-	Pkgs   []pkg
+	Pkgs   []*pkg
 }
 
 type pluginSections struct {
@@ -37,7 +37,7 @@ func compileTemplate(obj interface{}, sn, tn string) string {
 	return buffer.String()
 }
 
-func compilePluginTemplate(pkgs []pkg, funcs []function) string {
+func compilePluginTemplate(pkgs []*pkg, funcs []*function) string {
 	is := compileImportSection(pkgs)
 	vs := compileVarsSection(funcs)
 	p := pluginSections{ImportSection: is, VarSection: vs}
@@ -45,11 +45,11 @@ func compilePluginTemplate(pkgs []pkg, funcs []function) string {
 	return compileTemplate(p, "pluginSections", pluginTemplate)
 }
 
-func compileImportSection(pkgs []pkg) string {
+func compileImportSection(pkgs []*pkg) string {
 	return compileTemplate(pkgs, "importSection", importSectionTemplate)
 }
 
-func compileVarsSection(funcs []function) string {
+func compileVarsSection(funcs []*function) string {
 	return compileTemplate(funcs, "functionSection", functionSectionTemplate)
 }
 
