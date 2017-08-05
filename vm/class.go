@@ -299,7 +299,7 @@ func generateAttrWriteMethod(attrName string) *BuiltInMethodObject {
 		Name: attrName + "=",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
-				v := receiver.(*RObject).InstanceVariables.set("@"+attrName, args[0])
+				v := receiver.instanceVariableSet("@"+attrName, args[0])
 				return v
 			}
 		},
@@ -311,7 +311,7 @@ func generateAttrReadMethod(attrName string) *BuiltInMethodObject {
 		Name: attrName,
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
-				v, ok := receiver.(*RObject).InstanceVariables.get("@" + attrName)
+				v, ok := receiver.instanceVariableGet("@" + attrName)
 
 				if ok {
 					return v
