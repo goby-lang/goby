@@ -11,6 +11,8 @@ func TestCallingPluginFunction(t *testing.T) {
 	skipPluginTestIfEnvNotSet(t)
 
 	input := `
+	require "plugin"
+
 	p = import "github.com/goby-lang/goby/test_fixtures/import_test/plugin/plugin.go"
 	p.send("Foo", "!")
 	p.send("Baz")
@@ -29,6 +31,8 @@ func TestCallingPluginFunctionWithReturnValue(t *testing.T) {
 	skipPluginTestIfEnvNotSet(t)
 
 	input := `
+	require "plugin"
+
 	p = import "github.com/goby-lang/goby/test_fixtures/import_test/plugin/plugin.go"
 	p.send("Bar")
 	`
@@ -44,6 +48,8 @@ func TestCallingLibFuncFromPlugin(t *testing.T) {
 	skipPluginTestIfEnvNotSet(t)
 
 	input := `
+	require "plugin"
+
 	p = import "github.com/goby-lang/goby/test_fixtures/import_test/plugin/plugin.go"
 	p.send("ReturnLibName")
 	`
