@@ -8,6 +8,7 @@ import (
 	"plugin"
 	"reflect"
 	"strings"
+	"syscall"
 )
 
 func (vm *VM) initPluginObject(fn string, p *plugin.Plugin) *PluginObject {
@@ -80,6 +81,18 @@ func setPluginContext(context Object) *pluginContext {
 	return pc
 }
 
+// exists returns whether the given file or directory exists or not
+func fileExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return true, err
+}
+
 func builtinPluginClassMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 		{
@@ -108,7 +121,19 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 					pc := setPluginContext(context)
 					pluginContent := compilePluginTemplate(pc.pkgs, pc.funcs)
 
-					fn := fmt.Sprintf("./%p", pc)
+					pluginDir := "./plugins"
+
+					ok, err := fileExists(pluginDir)
+
+					if err != nil {
+						return t.vm.initErrorObject(InternalError, err.Error())
+					}
+
+					if !ok {
+						os.Mkdir(pluginDir, syscall.O_RDWR)
+					}
+
+					fn := fmt.Sprintf("%s/%p", pluginDir, pc)
 					file, err := os.Create(fn + ".go")
 
 					if err != nil {
