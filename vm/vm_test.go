@@ -216,7 +216,7 @@ func testBooleanObject(t *testing.T, i int, obj Object, expected bool) bool {
 	switch result := obj.(type) {
 	case *BooleanObject:
 		if result.value != expected {
-			t.Fatalf("At test case %d: object has wrong value. expect=%d, got=%d", i, expected, result.value)
+			t.Fatalf("At test case %d: object has wrong value. expect=%t, got=%t", i, expected, result.value)
 			return false
 		}
 

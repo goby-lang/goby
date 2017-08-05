@@ -284,6 +284,8 @@ func (c *RClass) setAttrReader(args interface{}) {
 		for _, attrName := range args {
 			c.Methods.set(attrName, generateAttrReadMethod(attrName))
 		}
+	case string:
+		c.Methods.set(args, generateAttrReadMethod(args))
 	}
 
 }
