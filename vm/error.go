@@ -20,6 +20,7 @@ const (
 )
 
 func (vm *VM) initErrorObject(errorType, format string, args ...interface{}) *Error {
+	fmt.Println(errorType)
 	errClass := vm.objectClass.getClassConstant(errorType)
 
 	return &Error{
@@ -33,7 +34,7 @@ func (vm *VM) initErrorClasses() {
 
 	for _, errType := range errTypes {
 		c := vm.initializeClass(errType, false)
-		vm.topLevelClass(objectClass).setClassConstant(c)
+		vm.objectClass.setClassConstant(c)
 	}
 }
 

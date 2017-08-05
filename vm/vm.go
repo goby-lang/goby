@@ -34,6 +34,7 @@ var standardLibraries = map[string]func(*VM){
 	"net/simple_server": initSimpleServerClass,
 	"uri":               initURIClass,
 	"db":                initDBClass,
+	"plugin":            initPluginClass,
 }
 
 // VM represents a stack based virtual machine.
@@ -165,7 +166,6 @@ func (vm *VM) initConstants() {
 		vm.initRangeClass(),
 		vm.initMethodClass(),
 		vm.initChannelClass(),
-		vm.initPluginClass(),
 		vm.initGoClass(),
 	}
 

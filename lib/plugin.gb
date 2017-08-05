@@ -1,0 +1,28 @@
+class Plugin
+  attr_reader :context
+
+  def initialize
+    @context = PluginContext.new
+
+    yield(context)
+  end
+
+
+
+  class PluginContext
+    attr_accessor :funcs, :pkgs
+
+    def initialize
+      @funcs = []
+      @pkgs = []
+    end
+
+    def add_func(prefix, name)
+      @funcs.push([prefix, name])
+    end
+
+    def add_pkg(prefix, name)
+      @pkgs.push([prefix, name])
+    end
+  end
+end
