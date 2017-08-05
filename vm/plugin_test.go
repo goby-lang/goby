@@ -18,7 +18,7 @@ func TestPluginInitialization(t *testing.T) {
 		end
 
 		c = p.context
-		c.pkgs.first[1]
+		c.pkgs.first[:name]
 	`, "database/sql"},
 		{`
 		require "plugin"
@@ -29,7 +29,7 @@ func TestPluginInitialization(t *testing.T) {
 		end
 
 		c = p.context
-		c.funcs.first[0]
+		c.funcs.first[:prefix]
 	`, "sql"},
 		{`
 		require "plugin"
@@ -40,7 +40,7 @@ func TestPluginInitialization(t *testing.T) {
 		end
 
 		c = p.context
-		c.funcs.first[1]
+		c.funcs.first[:name]
 	`, "Open"},
 	}
 

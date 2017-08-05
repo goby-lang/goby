@@ -7,8 +7,6 @@ class Plugin
     yield(context)
   end
 
-
-
   class PluginContext
     attr_accessor :funcs, :pkgs
 
@@ -18,11 +16,11 @@ class Plugin
     end
 
     def add_func(prefix, name)
-      @funcs.push([prefix, name])
+      @funcs.push({ prefix: prefix, name: name })
     end
 
     def add_pkg(prefix, name)
-      @pkgs.push([prefix, name])
+      @pkgs.push({ prefix: prefix, name: name })
     end
   end
 end
