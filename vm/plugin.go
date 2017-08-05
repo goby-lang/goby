@@ -81,7 +81,16 @@ func setPluginContext(context Object) *pluginContext {
 }
 
 func builtinPluginClassMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{}
+	return []*BuiltInMethodObject{
+		{
+			Name: "new",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					return &PluginObject{baseObj: &baseObj{class: t.vm.topLevelClass(pluginClass), InstanceVariables: newEnvironment()}}
+				}
+			},
+		},
+	}
 }
 
 func builtinPluginInstanceMethods() []*BuiltInMethodObject {
@@ -97,10 +106,9 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 					}
 
 					pc := setPluginContext(context)
-
 					pluginContent := compilePluginTemplate(pc.pkgs, pc.funcs)
 
-					fn := fmt.Sprintf("/tmp/%p", pc)
+					fn := fmt.Sprintf("./%p", pc)
 					file, err := os.Create(fn + ".go")
 
 					if err != nil {
@@ -116,7 +124,7 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 
 					// If there's any issue open a plugin, assume it's not well compiled
 					if err != nil {
-						cmd := exec.Command("go", "build", "-buildmode=plugin", "-o", soName, fn)
+						cmd := exec.Command("go", "build", "-buildmode=plugin", "-o", soName, file.Name())
 						out, err := cmd.CombinedOutput()
 
 						if err != nil {
@@ -130,7 +138,11 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 						}
 					}
 
-					return t.vm.initPluginObject(fn, p)
+					r := receiver.(*PluginObject)
+					r.fn = fn
+					r.plugin = p
+
+					return r
 				}
 			},
 		},

@@ -1,10 +1,11 @@
 class Plugin
-  attr_reader :context
+  attr_accessor :context
 
-  def initialize
-    @context = PluginContext.new
-
-    yield(context)
+  def self.config
+    plugin = new
+    plugin.context = PluginContext.new
+    yield(plugin.context)
+    plugin
   end
 
   class PluginContext
