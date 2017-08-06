@@ -67,13 +67,12 @@ func TestNewPluginUsage(t *testing.T) {
 	input := `
 	require "plugin"
 
-	p = Plugin.config("db") do |c|
-	  c.import_pkg("", "database/sql")
-	  c.import_pkg("_", "github.com/lib/pq")
-	  c.link_function("sql", "Open")
+	p = Plugin.generate("db") do |p|
+	  p.import_pkg("", "database/sql")
+	  p.import_pkg("_", "github.com/lib/pq")
+	  p.link_function("sql", "Open")
 	end
 
-	p.compile
 	conn, err = p.send("Open", "postgres", "")
 	err = conn.send("Ping")
 	err.is_nil

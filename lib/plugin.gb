@@ -1,6 +1,14 @@
 class Plugin
   attr_accessor :context
 
+  def self.generate(name)
+    p = config(name) do |c|
+      yield(c)
+    end
+
+    p.compile
+  end
+
   def self.config(name)
     plugin = new(name)
     plugin.context = PluginContext.new
