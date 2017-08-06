@@ -40,8 +40,7 @@ func (t *thread) evalCallFrame(cf *callFrame) {
 	for cf.pc < len(cf.instructionSet.instructions) {
 		i := cf.instructionSet.instructions[cf.pc]
 		t.execInstruction(cf, i)
-		if msg, yes := t.hasError(); yes {
-			fmt.Println(msg)
+		if _, yes := t.hasError(); yes {
 			return
 		}
 	}

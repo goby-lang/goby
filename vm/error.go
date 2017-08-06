@@ -20,7 +20,6 @@ const (
 )
 
 func (vm *VM) initErrorObject(errorType, format string, args ...interface{}) *Error {
-	fmt.Println(errorType)
 	errClass := vm.objectClass.getClassConstant(errorType)
 
 	return &Error{
