@@ -61,7 +61,7 @@ func TestCallingLibFuncFromPlugin(t *testing.T) {
 	v.checkSP(t, 0, 1)
 }
 
-func TestNewPluginUsage(t *testing.T) {
+func TestPluginGeneration(t *testing.T) {
 	skipPluginTestIfEnvNotSet(t)
 
 	input := `
@@ -75,12 +75,12 @@ func TestNewPluginUsage(t *testing.T) {
 
 	conn, err = p.send("Open", "postgres", "")
 	err = conn.send("Ping")
-	err.is_nil
+	!err.is_nil && err.send("Error").is_a(String)
 	`
 
 	v := initTestVM()
 	evaluated := v.testEval(t, input)
-	checkExpected(t, 0, evaluated, false)
+	checkExpected(t, 0, evaluated, true)
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
 }
