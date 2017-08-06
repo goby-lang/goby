@@ -115,6 +115,29 @@ func builtinPluginClassMethods() []*BuiltInMethodObject {
 	}
 }
 
+func compileAndOpenPlugin(soName, fileName string) (*plugin.Plugin, error) {
+	// Open plugin first
+	p, err := plugin.Open(soName)
+
+	// If there's any issue open a plugin, assume it's not well compiled
+	if err != nil {
+		cmd := exec.Command("go", "build", "-buildmode=plugin", "-o", soName, fileName)
+		out, err := cmd.CombinedOutput()
+
+		if err != nil {
+			return nil, fmt.Errorf("Error: %s from %s", string(out), strings.Join(cmd.Args, " "))
+		}
+
+		p, err = plugin.Open(soName)
+
+		if err != nil {
+			return nil, fmt.Errorf("Error occurs when open %s package: %s", soName, err.Error())
+		}
+	}
+
+	return p, nil
+}
+
 func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 		{
@@ -158,23 +181,10 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 
 					soName := fn + ".so"
 
-					// Open plugin first
-					p, err := plugin.Open(soName)
+					p, err := compileAndOpenPlugin(soName, file.Name())
 
-					// If there's any issue open a plugin, assume it's not well compiled
 					if err != nil {
-						cmd := exec.Command("go", "build", "-buildmode=plugin", "-o", soName, file.Name())
-						out, err := cmd.CombinedOutput()
-
-						if err != nil {
-							return t.vm.initErrorObject(InternalError, "Error: %s from %s", string(out), strings.Join(cmd.Args, " "))
-						}
-
-						p, err = plugin.Open(soName)
-
-						if err != nil {
-							return t.vm.initErrorObject(InternalError, "Error occurs when open %s package: %s", soName, err.Error())
-						}
+						t.vm.initErrorObject(InternalError, err.Error())
 					}
 
 					r.plugin = p
