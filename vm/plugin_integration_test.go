@@ -14,8 +14,8 @@ func TestCallingPluginFunction(t *testing.T) {
 	require "plugin"
 
 	p = Plugin.use "github.com/goby-lang/goby/test_fixtures/import_test/plugin/plugin.go"
-	p.send("Foo", "!")
-	p.send("Baz")
+	p.go_func("Foo", "!")
+	p.go_func("Baz")
 	`
 
 	v := initTestVM()
@@ -34,7 +34,7 @@ func TestCallingPluginFunctionWithReturnValue(t *testing.T) {
 	require "plugin"
 
 	p = Plugin.use "github.com/goby-lang/goby/test_fixtures/import_test/plugin/plugin.go"
-	p.send("Bar")
+	p.go_func("Bar")
 	`
 
 	v := initTestVM()
@@ -51,7 +51,7 @@ func TestCallingLibFuncFromPlugin(t *testing.T) {
 	require "plugin"
 
 	p = Plugin.use "github.com/goby-lang/goby/test_fixtures/import_test/plugin/plugin.go"
-	p.send("ReturnLibName")
+	p.go_func("ReturnLibName")
 	`
 
 	v := initTestVM()
@@ -73,9 +73,9 @@ func TestPluginGeneration(t *testing.T) {
 	  p.link_function("sql", "Open")
 	end
 
-	conn, err = p.send("Open", "postgres", "")
-	err = conn.send("Ping")
-	!err.is_nil && err.send("Error").is_a(String)
+	conn, err = p.go_func("Open", "postgres", "")
+	err = conn.go_func("Ping")
+	!err.is_nil && err.go_func("Error").is_a(String)
 	`
 
 	v := initTestVM()

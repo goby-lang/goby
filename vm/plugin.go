@@ -221,7 +221,7 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
-			Name: "send",
+			Name: "go_func",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					s, ok := args[0].(*StringObject)
