@@ -13,7 +13,7 @@ func TestCallingPluginFunction(t *testing.T) {
 	input := `
 	require "plugin"
 
-	p = import "github.com/goby-lang/goby/test_fixtures/import_test/plugin/plugin.go"
+	p = Plugin.use "github.com/goby-lang/goby/test_fixtures/import_test/plugin/plugin.go"
 	p.send("Foo", "!")
 	p.send("Baz")
 	`
@@ -33,7 +33,7 @@ func TestCallingPluginFunctionWithReturnValue(t *testing.T) {
 	input := `
 	require "plugin"
 
-	p = import "github.com/goby-lang/goby/test_fixtures/import_test/plugin/plugin.go"
+	p = Plugin.use "github.com/goby-lang/goby/test_fixtures/import_test/plugin/plugin.go"
 	p.send("Bar")
 	`
 
@@ -50,7 +50,7 @@ func TestCallingLibFuncFromPlugin(t *testing.T) {
 	input := `
 	require "plugin"
 
-	p = import "github.com/goby-lang/goby/test_fixtures/import_test/plugin/plugin.go"
+	p = Plugin.use "github.com/goby-lang/goby/test_fixtures/import_test/plugin/plugin.go"
 	p.send("ReturnLibName")
 	`
 

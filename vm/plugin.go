@@ -5,6 +5,7 @@ import (
 	"github.com/st0012/metago"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"plugin"
 	"reflect"
 	"strings"
@@ -92,29 +93,6 @@ func fileExists(path string) (bool, error) {
 	return true, err
 }
 
-func builtinPluginClassMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
-		{
-			Name: "new",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 1 {
-						return t.vm.initErrorObject(ArgumentError, WrongNumberOfArgumentFormat, 1, len(args))
-					}
-
-					name, ok := args[0].(*StringObject)
-
-					if !ok {
-						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, "String", args[0].Class().Name)
-					}
-
-					return &PluginObject{fn: name.value, baseObj: &baseObj{class: t.vm.topLevelClass(pluginClass), InstanceVariables: newEnvironment()}}
-				}
-			},
-		},
-	}
-}
-
 func compileAndOpenPlugin(soName, fileName string) (*plugin.Plugin, error) {
 	// Open plugin first
 	p, err := plugin.Open(soName)
@@ -136,6 +114,55 @@ func compileAndOpenPlugin(soName, fileName string) (*plugin.Plugin, error) {
 	}
 
 	return p, nil
+}
+
+func builtinPluginClassMethods() []*BuiltInMethodObject {
+	return []*BuiltInMethodObject{
+		{
+			Name: "new",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(ArgumentError, WrongNumberOfArgumentFormat, 1, len(args))
+					}
+
+					name, ok := args[0].(*StringObject)
+
+					if !ok {
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, "String", args[0].Class().Name)
+					}
+
+					return &PluginObject{fn: name.value, baseObj: &baseObj{class: t.vm.topLevelClass(pluginClass), InstanceVariables: newEnvironment()}}
+				}
+			},
+		},
+		{
+			Name: "use",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					pkgPath := args[0].(*StringObject).value
+					goPath := os.Getenv("GOPATH")
+					// This is to prevent some path like GODEP_PATH:GOPATH
+					// which can happen on Travis CI
+					ps := strings.Split(goPath, ":")
+					goPath = ps[len(ps)-1]
+
+					fullPath := filepath.Join(goPath, "src", pkgPath)
+					_, pkgName := filepath.Split(fullPath)
+					pkgName = strings.Split(pkgName, ".")[0]
+					soName := filepath.Join("./", pkgName+".so")
+
+					p, err := compileAndOpenPlugin(soName, fullPath)
+
+					if err != nil {
+						t.vm.initErrorObject(InternalError, err.Error())
+					}
+
+					return t.vm.initPluginObject(fullPath, p)
+				}
+			},
+		},
+	}
 }
 
 func builtinPluginInstanceMethods() []*BuiltInMethodObject {

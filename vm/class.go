@@ -3,11 +3,8 @@ package vm
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
 	"path"
-	"path/filepath"
 	"reflect"
-	"strings"
 	"time"
 )
 
@@ -430,32 +427,6 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
 					}
 					return receiver
-				}
-			},
-		},
-		{
-			Name: "import",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					pkgPath := args[0].(*StringObject).value
-					goPath := os.Getenv("GOPATH")
-					// This is to prevent some path like GODEP_PATH:GOPATH
-					// which can happen on Travis CI
-					ps := strings.Split(goPath, ":")
-					goPath = ps[len(ps)-1]
-
-					fullPath := filepath.Join(goPath, "src", pkgPath)
-					_, pkgName := filepath.Split(fullPath)
-					pkgName = strings.Split(pkgName, ".")[0]
-					soName := filepath.Join("./", pkgName+".so")
-
-					p, err := compileAndOpenPlugin(soName, fullPath)
-
-					if err != nil {
-						t.vm.initErrorObject(InternalError, err.Error())
-					}
-
-					return t.vm.initPluginObject(fullPath, p)
 				}
 			},
 		},
