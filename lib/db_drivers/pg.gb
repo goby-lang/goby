@@ -2,10 +2,10 @@ class PG
   attr_reader :connection
 
   def ping
-    err = connection.send("Ping")
+    err = connection.go_func("Ping")
 
     if err
-      puts(err.send("Error"))
+      puts(err.go_func("Error"))
       false
     else
       true
