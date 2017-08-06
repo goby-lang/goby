@@ -55,8 +55,8 @@ func (p *PluginObject) toJSON() string {
 func setPluginContext(context Object) *pluginContext {
 	pc := &pluginContext{pkgs: []*pkg{}, funcs: []*function{}}
 
-	funcs, _ := context.instanceVariableGet("@funcs")
-	pkgs, _ := context.instanceVariableGet("@pkgs")
+	funcs, _ := context.instanceVariableGet("@functions")
+	pkgs, _ := context.instanceVariableGet("@packages")
 
 	fs := funcs.(*ArrayObject)
 	ps := pkgs.(*ArrayObject)

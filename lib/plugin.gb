@@ -9,19 +9,19 @@ class Plugin
   end
 
   class PluginContext
-    attr_accessor :funcs, :pkgs
+    attr_accessor :functions, :packages
 
     def initialize
-      @funcs = []
-      @pkgs = []
+      @functions = []
+      @packages = []
     end
 
-    def add_func(prefix, name)
-      @funcs.push({ prefix: prefix, name: name })
+    def link_function(prefix, name)
+      @functions.push({ prefix: prefix, name: name })
     end
 
-    def add_pkg(prefix, name)
-      @pkgs.push({ prefix: prefix, name: name })
+    def import_pkg(prefix, name)
+      @packages.push({ prefix: prefix, name: name })
     end
   end
 end

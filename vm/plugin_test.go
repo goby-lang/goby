@@ -13,34 +13,34 @@ func TestPluginInitialization(t *testing.T) {
 		require "plugin"
 
 		p = Plugin.config("db") do |c|
-		  c.add_pkg("", "database/sql")
-		  c.add_func("sql", "Open")
+		  c.import_pkg("", "database/sql")
+		  c.link_function("sql", "Open")
 		end
 
 		c = p.context
-		c.pkgs.first[:name]
+		c.packages.first[:name]
 	`, "database/sql"},
 		{`
 		require "plugin"
 
 		p = Plugin.config("db") do |c|
-		  c.add_pkg("", "database/sql")
-		  c.add_func("sql", "Open")
+		  c.import_pkg("", "database/sql")
+		  c.link_function("sql", "Open")
 		end
 
 		c = p.context
-		c.funcs.first[:prefix]
+		c.functions.first[:prefix]
 	`, "sql"},
 		{`
 		require "plugin"
 
 		p = Plugin.config("db") do |c|
-		  c.add_pkg("", "database/sql")
-		  c.add_func("sql", "Open")
+		  c.import_pkg("", "database/sql")
+		  c.link_function("sql", "Open")
 		end
 
 		c = p.context
-		c.funcs.first[:name]
+		c.functions.first[:name]
 	`, "Open"},
 	}
 
