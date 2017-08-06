@@ -105,7 +105,7 @@ func builtInArrayClassMethods() []*BuiltInMethodObject {
 			Name: "new",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					return t.UnsupportedMethodError("#new", receiver)
+					return t.unsupportedMethodError("#new", receiver)
 				}
 			},
 		},

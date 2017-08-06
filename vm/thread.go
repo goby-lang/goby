@@ -177,12 +177,6 @@ func (t *thread) returnError(errorType, format string, args ...interface{}) {
 	t.stack.push(&Pointer{Target: err})
 }
 
-func (t *thread) UndefinedMethodError(methodName string, receiver Object, receiverPtr int) {
-	err := t.vm.initErrorObject(UndefinedMethodError, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
-	t.stack.Data[receiverPtr] = &Pointer{Target: err}
-	t.sp = receiverPtr + 1
-}
-
-func (t *thread) UnsupportedMethodError(methodName string, receiver Object) *Error {
+func (t *thread) unsupportedMethodError(methodName string, receiver Object) *Error {
 	return t.vm.initErrorObject(UnsupportedMethodError, "Unsupported Method %s for %+v", methodName, receiver.toString())
 }

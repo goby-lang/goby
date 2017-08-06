@@ -369,8 +369,9 @@ var builtInActions = map[operationType]*action{
 			method = receiver.findMethod(methodName)
 
 			if method == nil {
-
-				t.UndefinedMethodError(methodName, receiver, receiverPr)
+				err := t.vm.initErrorObject(UndefinedMethodError, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
+				t.stack.Data[receiverPr] = &Pointer{Target: err}
+				t.sp = receiverPr + 1
 				return
 			}
 

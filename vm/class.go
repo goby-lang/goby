@@ -1032,7 +1032,7 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 					class, ok := receiver.(*RClass)
 
 					if !ok {
-						return t.UnsupportedMethodError("#new", receiver)
+						return t.unsupportedMethodError("#new", receiver)
 					}
 
 					if class.pseudoSuperClass.isModule {
