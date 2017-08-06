@@ -1,62 +1,54 @@
-// +build linux
-
 package vm
 
 import (
-	"os"
 	"testing"
 )
 
-func TestCallingPluginFunction(t *testing.T) {
-	skipPluginTestIfEnvNotSet(t)
+func TestPluginInitialization(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		require "plugin"
 
-	input := `
-	p = import "github.com/goby-lang/goby/test_fixtures/import_test/plugin/plugin.go"
-	p.send("Foo", "!")
-	p.send("Baz")
-	`
+		p = Plugin.config("db") do |c|
+		  c.import_pkg("", "database/sql")
+		  c.link_function("sql", "Open")
+		end
 
-	v := initTestVM()
-	// We don't test the result here for two reasons:
-	// - If it doesn't work it'll returns error or panic
-	// - It's hard to test a plugin obj
-	v.testEval(t, input)
-	v.checkCFP(t, 0, 0)
-	v.checkSP(t, 0, 1)
-}
+		c = p.context
+		c.packages.first[:name]
+	`, "database/sql"},
+		{`
+		require "plugin"
 
-func TestCallingPluginFunctionWithReturnValue(t *testing.T) {
-	skipPluginTestIfEnvNotSet(t)
+		p = Plugin.config("db") do |c|
+		  c.import_pkg("", "database/sql")
+		  c.link_function("sql", "Open")
+		end
 
-	input := `
-	p = import "github.com/goby-lang/goby/test_fixtures/import_test/plugin/plugin.go"
-	p.send("Bar")
-	`
+		c = p.context
+		c.functions.first[:prefix]
+	`, "sql"},
+		{`
+		require "plugin"
 
-	v := initTestVM()
-	evaluated := v.testEval(t, input)
-	checkExpected(t, 0, evaluated, "Bar")
-	v.checkCFP(t, 0, 0)
-	v.checkSP(t, 0, 1)
-}
+		p = Plugin.config("db") do |c|
+		  c.import_pkg("", "database/sql")
+		  c.link_function("sql", "Open")
+		end
 
-func TestCallingLibFuncFromPlugin(t *testing.T) {
-	skipPluginTestIfEnvNotSet(t)
+		c = p.context
+		c.functions.first[:name]
+	`, "Open"},
+	}
 
-	input := `
-	p = import "github.com/goby-lang/goby/test_fixtures/import_test/plugin/plugin.go"
-	p.send("ReturnLibName")
-	`
-
-	v := initTestVM()
-	evaluated := v.testEval(t, input)
-	checkExpected(t, 0, evaluated, "lib")
-	v.checkCFP(t, 0, 0)
-	v.checkSP(t, 0, 1)
-}
-
-func skipPluginTestIfEnvNotSet(t *testing.T) {
-	if os.Getenv("TEST_PLUGIN") == "" {
-		t.Skip("skipping plugin related tests")
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }

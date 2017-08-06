@@ -6,27 +6,25 @@ set -e
 echo "" > coverage.txt
 
 for d in $(go list ./... | grep -v vendor); do
+    if [ $d == "github.com/goby-lang/goby/vm" ]; then
+        # Test vm's code without running race detection because that breaks plugin tests.
+        # This can generate full coverage report of vm package.
+        TEST_PLUGIN=true go test -coverprofile=profile.out -covermode=atomic $d
+        if [ -f profile.out ]; then
+          cat profile.out >> coverage.txt
+          rm profile.out
+        fi
+
+        # Then we test the race condition without plugin tests.
+        go test -race $d -v cover
+        continue
+    fi
     go test -race -coverprofile=profile.out -covermode=atomic $d
     if [ -f profile.out ]; then
       cat profile.out >> coverage.txt
       rm profile.out
     fi
 done
-
-# Plugin related tests can't run under race condition
-TEST_PLUGIN=true go test ./vm --run .?Plugin.? -v -coverprofile=profile.out -covermode=atomic $d
-
-if [ -f profile.out ]; then
-  cat profile.out >> coverage.txt
-  rm profile.out
-fi
-
-TEST_PLUGIN=true go test ./vm --run .?Struct.? -v -coverprofile=profile.out -covermode=atomic $d
-
-if [ -f profile.out ]; then
-  cat profile.out >> coverage.txt
-  rm profile.out
-fi
 
 # Test if libs that require built in Goby script would work.
 # TODO: Write a test for this specific case

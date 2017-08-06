@@ -3,13 +3,8 @@ package vm
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
-	"os/exec"
 	"path"
-	"path/filepath"
-	"plugin"
 	"reflect"
-	"strings"
 	"time"
 )
 
@@ -432,45 +427,6 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
 					}
 					return receiver
-				}
-			},
-		},
-		{
-			Name: "import",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					pkgPath := args[0].(*StringObject).value
-					goPath := os.Getenv("GOPATH")
-					// This is to prevent some path like GODEP_PATH:GOPATH
-					// which can happen on Travis CI
-					ps := strings.Split(goPath, ":")
-					goPath = ps[len(ps)-1]
-
-					fullPath := filepath.Join(goPath, "src", pkgPath)
-					_, pkgName := filepath.Split(fullPath)
-					pkgName = strings.Split(pkgName, ".")[0]
-					soName := filepath.Join("./", pkgName+".so")
-
-					// Open plugin first
-					p, err := plugin.Open(soName)
-
-					// If there's any issue open a plugin, assume it's not well compiled
-					if err != nil {
-						cmd := exec.Command("go", "build", "-buildmode=plugin", "-o", fmt.Sprintf("./%s.so", pkgName), fullPath)
-						out, err := cmd.CombinedOutput()
-
-						if err != nil {
-							return t.vm.initErrorObject(InternalError, "Error: %s from %s", string(out), strings.Join(cmd.Args, " "))
-						}
-
-						p, err = plugin.Open(soName)
-
-						if err != nil {
-							return t.vm.initErrorObject(InternalError, "Error occurs when open %s package: %s", soName, err.Error())
-						}
-					}
-
-					return t.vm.initPluginObject(fullPath, p)
 				}
 			},
 		},

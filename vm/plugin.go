@@ -1,21 +1,40 @@
 package vm
 
 import (
+	"fmt"
 	"github.com/st0012/metago"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"plugin"
 	"reflect"
+	"strings"
 )
 
 func (vm *VM) initPluginObject(fn string, p *plugin.Plugin) *PluginObject {
 	return &PluginObject{fn: fn, plugin: p, baseObj: &baseObj{class: vm.topLevelClass(pluginClass)}}
 }
 
-func (vm *VM) initPluginClass() *RClass {
+func initPluginClass(vm *VM) {
 	pc := vm.initializeClass(pluginClass, false)
 	pc.setBuiltInMethods(builtinPluginClassMethods(), true)
 	pc.setBuiltInMethods(builtinPluginInstanceMethods(), false)
 	vm.objectClass.setClassConstant(pc)
-	return pc
+
+	vm.execGobyLib("plugin.gb")
+}
+
+type pluginContext struct {
+	pkgs  []*pkg
+	funcs []*function
+}
+
+func (c *pluginContext) importPkg(prefix, name string) {
+	c.pkgs = append(c.pkgs, &pkg{Prefix: prefix, Name: name})
+}
+
+func (c *pluginContext) addFunc(prefix, name string) {
+	c.funcs = append(c.funcs, &function{Prefix: prefix, Name: name})
 }
 
 // PluginObject is a special type that contains a Go's plugin
@@ -34,12 +53,173 @@ func (p *PluginObject) toJSON() string {
 	return p.toString()
 }
 
+func setPluginContext(context Object) *pluginContext {
+	pc := &pluginContext{pkgs: []*pkg{}, funcs: []*function{}}
+
+	funcs, _ := context.instanceVariableGet("@functions")
+	pkgs, _ := context.instanceVariableGet("@packages")
+
+	fs := funcs.(*ArrayObject)
+	ps := pkgs.(*ArrayObject)
+
+	for _, f := range fs.Elements {
+		fInfos := f.(*HashObject)
+		prefix := fInfos.Pairs["prefix"].(*StringObject).value
+		name := fInfos.Pairs["name"].(*StringObject).value
+
+		pc.addFunc(prefix, name)
+	}
+
+	for _, p := range ps.Elements {
+		pInfos := p.(*HashObject)
+		prefix := pInfos.Pairs["prefix"].(*StringObject).value
+		name := pInfos.Pairs["name"].(*StringObject).value
+
+		pc.importPkg(prefix, name)
+	}
+
+	return pc
+}
+
+// exists returns whether the given file or directory exists or not
+func fileExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return true, err
+}
+
+func compileAndOpenPlugin(soName, fileName string) (*plugin.Plugin, error) {
+	// Open plugin first
+	p, err := plugin.Open(soName)
+
+	// If there's any issue open a plugin, assume it's not well compiled
+	if err != nil {
+		cmd := exec.Command("go", "build", "-buildmode=plugin", "-o", soName, fileName)
+		out, err := cmd.CombinedOutput()
+
+		if err != nil {
+			return nil, fmt.Errorf("Error: %s from %s", string(out), strings.Join(cmd.Args, " "))
+		}
+
+		p, err = plugin.Open(soName)
+
+		if err != nil {
+			return nil, fmt.Errorf("Error occurs when open %s package: %s", soName, err.Error())
+		}
+	}
+
+	return p, nil
+}
+
 func builtinPluginClassMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{}
+	return []*BuiltInMethodObject{
+		{
+			Name: "new",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(ArgumentError, WrongNumberOfArgumentFormat, 1, len(args))
+					}
+
+					name, ok := args[0].(*StringObject)
+
+					if !ok {
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, "String", args[0].Class().Name)
+					}
+
+					return &PluginObject{fn: name.value, baseObj: &baseObj{class: t.vm.topLevelClass(pluginClass), InstanceVariables: newEnvironment()}}
+				}
+			},
+		},
+		{
+			Name: "use",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					pkgPath := args[0].(*StringObject).value
+					goPath := os.Getenv("GOPATH")
+					// This is to prevent some path like GODEP_PATH:GOPATH
+					// which can happen on Travis CI
+					ps := strings.Split(goPath, ":")
+					goPath = ps[len(ps)-1]
+
+					fullPath := filepath.Join(goPath, "src", pkgPath)
+					_, pkgName := filepath.Split(fullPath)
+					pkgName = strings.Split(pkgName, ".")[0]
+					soName := filepath.Join("./", pkgName+".so")
+
+					p, err := compileAndOpenPlugin(soName, fullPath)
+
+					if err != nil {
+						t.vm.initErrorObject(InternalError, err.Error())
+					}
+
+					return t.vm.initPluginObject(fullPath, p)
+				}
+			},
+		},
+	}
 }
 
 func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
+		{
+			Name: "compile",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					r := receiver.(*PluginObject)
+					context, ok := receiver.instanceVariableGet("@context")
+
+					if !ok {
+						return NULL
+					}
+
+					// Create plugins directory
+					pluginDir := "./plugins"
+
+					ok, err := fileExists(pluginDir)
+
+					if err != nil {
+						return t.vm.initErrorObject(InternalError, err.Error())
+					}
+
+					if !ok {
+						os.Mkdir(pluginDir, 0777)
+					}
+
+					// generate plugin content from context
+					pc := setPluginContext(context)
+					pluginContent := compilePluginTemplate(pc.pkgs, pc.funcs)
+
+					// create plugin file
+					fn := fmt.Sprintf("%s/%s", pluginDir, r.fn)
+
+					file, err := os.OpenFile(fn+".go", os.O_RDWR|os.O_CREATE, 0755)
+
+					if err != nil {
+						return t.vm.initErrorObject(InternalError, "Error when creating plugin: %s", err.Error())
+					}
+
+					file.WriteString(pluginContent)
+
+					soName := fn + ".so"
+
+					p, err := compileAndOpenPlugin(soName, file.Name())
+
+					if err != nil {
+						t.vm.initErrorObject(InternalError, err.Error())
+					}
+
+					r.plugin = p
+
+					return r
+				}
+			},
+		},
 		{
 			Name: "send",
 			Fn: func(receiver Object) builtinMethodBody {
