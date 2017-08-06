@@ -135,7 +135,7 @@ func (t *thread) evalBuiltInMethod(receiver Object, method *BuiltInMethodObject,
 			t.evalMethodObject(instance, instance.InitializeMethod, receiverPr, argCount, argPr, blockFrame)
 		}
 	}
-	t.stack.Data[receiverPr] = &Pointer{Target: evaluated}
+	t.stack.set(receiverPr, &Pointer{Target: evaluated})
 	t.sp = receiverPr + 1
 }
 
@@ -167,7 +167,7 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 		t.startFromTopFrame()
 	}
 
-	t.stack.Data[receiverPr] = t.stack.top()
+	t.stack.set(receiverPr, t.stack.top())
 	t.sp = receiverPr + 1
 }
 

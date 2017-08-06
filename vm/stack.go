@@ -8,7 +8,13 @@ type stack struct {
 	// Although every thread has its own stack, vm's main thread still can be accessed by other threads.
 	// This is why we need a lock in stack
 	// TODO: Find a way to fix this instead of put lock on every stack.
-	sync.RWMutex
+	*sync.RWMutex
+}
+
+func (s *stack) set(index int, pointer *Pointer) {
+	s.Lock()
+	s.Data[index] = pointer
+	s.Unlock()
 }
 
 func (s *stack) push(v *Pointer) {

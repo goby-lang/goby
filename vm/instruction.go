@@ -370,7 +370,7 @@ var builtInActions = map[operationType]*action{
 
 			if method == nil {
 				err := t.vm.initErrorObject(UndefinedMethodError, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
-				t.stack.Data[receiverPr] = &Pointer{Target: err}
+				t.stack.set(receiverPr, &Pointer{Target: err})
 				t.sp = receiverPr + 1
 				return
 			}
@@ -439,7 +439,7 @@ var builtInActions = map[operationType]*action{
 			t.callFrameStack.push(c)
 			t.startFromTopFrame()
 
-			t.stack.Data[receiverPr] = t.stack.top()
+			t.stack.set(receiverPr, t.stack.top())
 			t.sp = receiverPr + 1
 		},
 	},

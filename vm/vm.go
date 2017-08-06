@@ -98,7 +98,7 @@ func New(fileDir string, args []string) *VM {
 }
 
 func (vm *VM) newThread() *thread {
-	s := &stack{}
+	s := &stack{RWMutex: new(sync.RWMutex)}
 	cfs := &callFrameStack{callFrames: []*callFrame{}}
 	t := &thread{stack: s, callFrameStack: cfs, sp: 0, cfp: 0}
 	s.thread = t
