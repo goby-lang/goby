@@ -480,6 +480,14 @@ func (vm *VM) initObjectFromGoType(value interface{}) Object {
 		return vm.initIntegerObject(int(v))
 	case int32:
 		return vm.initIntegerObject(int(v))
+	case []uint8:
+		bytes := []byte{}
+
+		for _, i := range v {
+			bytes = append(bytes, byte(i))
+		}
+
+		return vm.initStringObject(string(bytes))
 	case string:
 		switch v {
 		case "true":

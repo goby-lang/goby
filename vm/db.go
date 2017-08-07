@@ -1,7 +1,8 @@
 package vm
 
 import (
-	"database/sql"
+	"fmt"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
@@ -12,6 +13,23 @@ func initDBClass(vm *VM) {
 	vm.objectClass.setClassConstant(pg)
 
 	vm.execGobyLib("db.gb")
+}
+
+func getDBConn(t *thread, receiver Object) (*sqlx.DB, error) {
+	connection, _ := receiver.instanceVariableGet("@connection")
+	connObj, _ := connection.instanceVariableGet("@conn_obj")
+
+	if connObj == NULL {
+		return nil, fmt.Errorf("DB connection is nil")
+	}
+
+	conn, ok := connObj.(*GoObject).data.(*sqlx.DB)
+
+	if !ok {
+		return nil, fmt.Errorf("Connection is not *sql.DB")
+	}
+
+	return conn, nil
 }
 
 func builtInDBClassMethods() []*BuiltInMethodObject {
@@ -36,7 +54,7 @@ func builtInDBClassMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(ArgumentError, "Expect database's data source to be a String object. got: %s", args[1].Class().Name)
 					}
 
-					conn, err := sql.Open(driverName.value, dataSource.value)
+					conn, err := sqlx.Open(driverName.value, dataSource.value)
 
 					if err != nil {
 						return t.vm.initErrorObject(InternalError, err.Error())
@@ -51,5 +69,89 @@ func builtInDBClassMethods() []*BuiltInMethodObject {
 }
 
 func builtInDBInstanceMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{}
+	return []*BuiltInMethodObject{
+		{
+			Name: "exec",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) < 1 {
+						return t.vm.initErrorObject(ArgumentError, "Expect at least 1 argument.")
+					}
+
+					conn, err := getDBConn(t, receiver)
+
+					if err != nil {
+						return t.vm.initErrorObject(InternalError, err.Error())
+					}
+
+					queryString := args[0].(*StringObject).value
+					execArgs := []interface{}{}
+
+					for _, arg := range args[1:] {
+						execArgs = append(execArgs, arg.(builtInType).Value())
+					}
+
+					_, err = conn.Exec(queryString, execArgs...)
+
+					if err != nil {
+						return t.vm.initErrorObject(InternalError, err.Error())
+					}
+
+					return TRUE
+				}
+			},
+		},
+		{
+			Name: "query",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) < 1 {
+						return t.vm.initErrorObject(ArgumentError, "Expect at least 1 argument.")
+					}
+
+					conn, err := getDBConn(t, receiver)
+
+					if err != nil {
+						return t.vm.initErrorObject(InternalError, err.Error())
+					}
+
+					queryString := args[0].(*StringObject).value
+					execArgs := []interface{}{}
+
+					for _, arg := range args[1:] {
+						execArgs = append(execArgs, arg.(builtInType).Value())
+					}
+
+					rows, err := conn.Queryx(queryString, execArgs...)
+
+					if err != nil {
+						return t.vm.initErrorObject(InternalError, err.Error())
+					}
+
+					results := []Object{}
+
+					for rows.Next() {
+						row := make(map[string]interface{})
+
+						err = rows.MapScan(row)
+
+						if err != nil {
+							return t.vm.initErrorObject(InternalError, err.Error())
+						}
+
+						data := map[string]Object{}
+
+						for k, v := range row {
+							data[k] = t.vm.initObjectFromGoType(v)
+						}
+
+						result := t.vm.initHashObject(data)
+						results = append(results, result)
+					}
+
+					return t.vm.initArrayObject(results)
+				}
+			},
+		},
+	}
 }
