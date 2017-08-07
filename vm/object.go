@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+	"strconv"
 )
 
 // Object represents all objects in Goby, including Array, Integer or even Method and Error.
@@ -11,6 +12,7 @@ type Object interface {
 	findMethod(string) Object
 	toString() string
 	toJSON() string
+	id() int
 	instanceVariableGet(string) (Object, bool)
 	instanceVariableSet(string, Object) Object
 }
@@ -70,6 +72,14 @@ func (b *baseObj) findMethod(methodName string) (method Object) {
 	}
 
 	return
+}
+
+func (b *baseObj) id() int {
+	r, e := strconv.ParseInt(fmt.Sprintf("%p", b), 0, 64)
+	if e != nil {
+		panic(e.Error())
+	}
+	return int(r)
 }
 
 // RObject represents any non built-in class's instance.

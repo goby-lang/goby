@@ -13,8 +13,7 @@ func (vm *VM) initChannelClass() *RClass {
 }
 
 type objectMap struct {
-	store   map[int]Object
-	counter int
+	store map[int]Object
 	sync.RWMutex
 }
 
@@ -22,28 +21,17 @@ func (m *objectMap) storeObj(obj Object) int {
 	m.Lock()
 	defer m.Unlock()
 
-	m.store[m.counter] = obj
-	i := m.counter
+	m.store[obj.id()] = obj
 
-	// containerCount here can be considered as deliveries' id
-	// And this id will be unused once the delivery is completed (which will be really quick)
-	// So we can assume that if we reach 1000th delivery,
-	// previous deliveries are all completed and they don't need their id anymore.
-	if m.counter > 1000 {
-		m.counter = 0
-	} else {
-		m.counter++
-	}
-
-	return i
+	return obj.id()
 }
 
 // storeObj store objects into the container map
 // and update containerCount at the same time
 func (m *objectMap) retrieveObj(num int) Object {
-	m.RLock()
+	m.Lock()
 
-	defer m.RUnlock()
+	defer m.Unlock()
 	return m.store[num]
 }
 
