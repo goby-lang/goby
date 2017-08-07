@@ -1,5 +1,10 @@
 package vm
 
+import (
+	"database/sql"
+	_ "github.com/lib/pq"
+)
+
 func initDBClass(vm *VM) {
 	pg := vm.initializeClass("DB", false)
 	pg.setBuiltInMethods(builtInDBClassMethods(), true)
@@ -9,14 +14,10 @@ func initDBClass(vm *VM) {
 	vm.execGobyLib("db.gb")
 }
 
-var driverTable = map[string]func(*VM) *RClass{
-	"postgres": initPGClass,
-}
-
 func builtInDBClassMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 		{
-			Name: "init_driver",
+			Name: "get_connection",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 2 {
@@ -29,23 +30,20 @@ func builtInDBClassMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(ArgumentError, "Expect database's driver name to be a String object. got: %s", args[0].Class().Name)
 					}
 
-					_, ok = args[1].(*StringObject)
+					dataSource, ok := args[1].(*StringObject)
 
 					if !ok {
 						return t.vm.initErrorObject(ArgumentError, "Expect database's data source to be a String object. got: %s", args[1].Class().Name)
 					}
 
-					driverInitFunc, ok := driverTable[driverName.value]
+					conn, err := sql.Open(driverName.value, dataSource.value)
 
-					if !ok {
-						return t.vm.initErrorObject(InternalError, "Can't find specified driver: %s", driverName.Value)
+					if err != nil {
+						return t.vm.initErrorObject(InternalError, err.Error())
 					}
 
-					driverClass := driverInitFunc(t.vm)
-					initMethod := driverClass.singletonClass.lookupMethod("new").(*BuiltInMethodObject)
-					driver := initMethod.Fn(driverClass)(t, args, blockFrame)
-
-					return driver
+					connObj := t.vm.initObjectFromGoType(conn)
+					return connObj
 				}
 			},
 		},
