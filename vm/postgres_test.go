@@ -10,15 +10,15 @@ func TestPGConnectionPing(t *testing.T) {
 		{`
 			require "db"
 
-			db = DB.open("postgres", "user=postgres dbname=postgres sslmode=disable")
-			db.driver.ping
+			db = DB.open("postgres", "user=postgres sslmode=disable")
+			db.ping
 			`,
 			true},
 		{`
 			require "db"
 
-			db = DB.open("postgres", "user=test dbname=postgres sslmode=disable")
-			db.driver.ping
+			db = DB.open("postgres", "user=test sslmode=disable")
+			db.ping
 			`,
 			false},
 	}

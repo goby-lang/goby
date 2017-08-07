@@ -9,4 +9,8 @@ class DB
     driver = init_driver(driver_name, data_source)
     new(driver)
   end
+
+  def ping
+    driver.ping
+  end
 end
