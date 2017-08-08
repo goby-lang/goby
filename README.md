@@ -89,9 +89,14 @@ Become a sponsor and get your logo on our README on Github with a link to your s
 - [References](#references)
 
 ## Supported Features
-- Can evaluate bytecode directly
+
+### Special features
+- Allow you to use Go libraries dynamically (only on linux)
+- Support calling Go's method using Goby directly
+- Built in multi-threaded server and DB library
+
+### Normal language features
 - Everything is object
-- Support comment 
 - Object and Class
     - Top level main object
     - Constructor
@@ -99,8 +104,7 @@ Become a sponsor and get your logo on our README on Github with a link to your s
     - Support inheritance
     - Support instance variable
     - Support `self`
-- Module
-- Namespace
+- Module & Namespace
 - Variables
     - Constant
     - Local variable
@@ -128,6 +132,7 @@ Become a sponsor and get your logo on our README on Github with a link to your s
     - `Net::HTTP`
     - `Net::SimpleServer` (This is very cool and quite performante, check the [sample](https://github.com/goby-lang/goby/blob/master/samples/server.gb))
     - `File`
+    - `DB`
 - IO
     - `puts`
     - `ARGV`
