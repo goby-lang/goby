@@ -1,12 +1,40 @@
 class DB
-  attr_reader :driver
-
-  def initialize(driver)
-    @driver = driver
-  end
+  attr_reader :connection
 
   def self.open(driver_name, data_source)
-    driver = init_driver(driver_name, data_source)
-    new(driver)
+    conn_obj = get_connection(driver_name, data_source)
+    connection = Connection.new(conn_obj)
+    new(connection)
+  end
+
+  def initialize(connection)
+    @connection = connection
+  end
+
+  def ping
+    connection.ping
+  end
+
+  def conn_obj
+    connection.conn_obj
+  end
+
+  class Connection
+    attr_reader :conn_obj
+
+    def initialize(conn_obj)
+      @conn_obj = conn_obj
+    end
+
+    def ping
+      err = conn_obj.go_func("Ping")
+
+      if err
+        puts(err.go_func("Error"))
+        false
+      else
+        true
+      end
+    end
   end
 end
