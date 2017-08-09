@@ -620,7 +620,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 			//   def self.open(filename, mode, perm)
 			//     file = new(filename, mode, perm)
 			//
-			//     if block_given
+			//     if block_given?
 			//       yield(file)
 			//     end
 			//
@@ -631,7 +631,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 			//
 			// @param n/a []
 			// @return [Boolean] true/false
-			Name: "block_given",
+			Name: "block_given?",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					cf := t.callFrameStack.top()
@@ -670,19 +670,19 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 			// Returns true if Object class is equal to the input argument class
 			//
 			// ```ruby
-			// "Hello".is_a(String)            # => true
-			// 123.is_a(Integer)               # => true
-			// [1, true, "String"].is_a(Array) # => true
-			// { a: 1, b: 2 }.is_a(Hash)       # => true
-			// "Hello".is_a(Integer)           # => false
-			// 123.is_a(Range)                 # => false
-			// (2..4).is_a(Hash)               # => false
-			// nil.is_a(Integer)               # => false
+			// "Hello".is_a?(String)            # => true
+			// 123.is_a?(Integer)               # => true
+			// [1, true, "String"].is_a?(Array) # => true
+			// { a: 1, b: 2 }.is_a?(Hash)       # => true
+			// "Hello".is_a?(Integer)           # => false
+			// 123.is_a?(Range)                 # => false
+			// (2..4).is_a?(Hash)               # => false
+			// nil.is_a?(Integer)               # => false
 			// ```
 			//
 			// @param n/a []
 			// @return [Boolean]
-			Name: "is_a",
+			Name: "is_a?",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 1 {
