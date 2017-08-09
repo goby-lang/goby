@@ -356,14 +356,14 @@ func TestStringEndWithMethod(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`"Hello".end_with("llo")`, true},
-		{`"Hello".end_with("Hello")`, true},
-		{`"Hello".end_with("Hello ")`, false},
-		{`"哈囉！世界！".end_with("世界！")`, true},
-		{`"Hello".end_with("ell")`, false},
-		{`"哈囉！世界！".end_with("哈囉！")`, false},
-		{`"🍣Hello🍺".end_with("🍺")`, true},
-		{`"🍣Hello🍺".end_with("🍣")`, false},
+		{`"Hello".end_with?("llo")`, true},
+		{`"Hello".end_with?("Hello")`, true},
+		{`"Hello".end_with?("Hello ")`, false},
+		{`"哈囉！世界！".end_with?("世界！")`, true},
+		{`"Hello".end_with?("ell")`, false},
+		{`"哈囉！世界！".end_with?("哈囉！")`, false},
+		{`"🍣Hello🍺".end_with?("🍺")`, true},
+		{`"🍣Hello🍺".end_with?("🍣")`, false},
 	}
 
 	for i, tt := range tests {
@@ -381,10 +381,10 @@ func TestStringEndWithMethodFail(t *testing.T) {
 		errType string
 		errMsg  string
 	}{
-		{`"Taipei".end_with("1", "0", "1")`, ArgumentError, "ArgumentError: Expect 1 argument. got=3"},
-		{`"Taipei".end_with(101)`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
-		{`"Hello".end_with(true)`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
-		{`"Hello".end_with(1..5)`, TypeError, "TypeError: Expect argument to be String. got: Range"},
+		{`"Taipei".end_with?("1", "0", "1")`, ArgumentError, "ArgumentError: Expect 1 argument. got=3"},
+		{`"Taipei".end_with?(101)`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
+		{`"Hello".end_with?(true)`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
+		{`"Hello".end_with?(1..5)`, TypeError, "TypeError: Expect argument to be String. got: Range"},
 	}
 
 	for i, tt := range testsFail {
@@ -401,8 +401,8 @@ func TestStringEmptyMethod(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`"".empty`, true},
-		{`"Hello".empty`, false},
+		{`"".empty?`, true},
+		{`"Hello".empty?`, false},
 	}
 
 	for i, tt := range tests {
@@ -419,13 +419,13 @@ func TestStringEqualMethod(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`"Hello".eql("Hello")`, true},
-		{`"Hello\nWorld".eql("Hello\nWorld")`, true},
-		{`"Hello".eql("World")`, false},
-		{`"Hello".eql(1)`, false},
-		{`"Hello".eql(true)`, false},
-		{`"Hello".eql(2..4)`, false},
-		{`"Hello🍣".eql("Hello🍣")`, true},
+		{`"Hello".eql?("Hello")`, true},
+		{`"Hello\nWorld".eql?("Hello\nWorld")`, true},
+		{`"Hello".eql?("World")`, false},
+		{`"Hello".eql?(1)`, false},
+		{`"Hello".eql?(true)`, false},
+		{`"Hello".eql?(2..4)`, false},
+		{`"Hello🍣".eql?("Hello🍣")`, true},
 	}
 
 	for i, tt := range tests {
@@ -442,8 +442,8 @@ func TestStringEqualMethodFail(t *testing.T) {
 		input  string
 		errMsg string
 	}{
-		{`"Hello".eql`, "ArgumentError: Expect 1 argument. got=0"},
-		{`"Hello".eql("Hello", "World")`, "ArgumentError: Expect 1 argument. got=2"},
+		{`"Hello".eql?`, "ArgumentError: Expect 1 argument. got=0"},
+		{`"Hello".eql?("Hello", "World")`, "ArgumentError: Expect 1 argument. got=2"},
 	}
 
 	for i, tt := range testsFail {
@@ -501,13 +501,13 @@ func TestStringIncludeMethod(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`"Hello\nWorld".include("Hello")`, true},
-		{`"Hello\nWorld".include("Hello\nWorld")`, true},
-		{`"Hello\nWorld".include("Hello World")`, false},
-		{`"Hello\nWorld".include("Hello\nWorld!")`, false},
-		{`"Hello\nWorld".include("\n")`, true},
-		{`"Hello\nWorld".include("\r")`, false},
-		{`"Hello🍣".include("🍣")`, true},
+		{`"Hello\nWorld".include?("Hello")`, true},
+		{`"Hello\nWorld".include?("Hello\nWorld")`, true},
+		{`"Hello\nWorld".include?("Hello World")`, false},
+		{`"Hello\nWorld".include?("Hello\nWorld!")`, false},
+		{`"Hello\nWorld".include?("\n")`, true},
+		{`"Hello\nWorld".include?("\r")`, false},
+		{`"Hello🍣".include?("🍣")`, true},
 	}
 
 	for i, tt := range tests {
@@ -525,11 +525,11 @@ func TestStringIncludeMethodFail(t *testing.T) {
 		errType string
 		errMsg  string
 	}{
-		{`"Goby".include`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
-		{`"Goby".include("Ruby", "Lang")`, ArgumentError, "ArgumentError: Expect 1 argument. got=2"},
-		{`"Goby".include(2)`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
-		{`"Goby".include(true)`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
-		{`"Goby".include(nil)`, TypeError, "TypeError: Expect argument to be String. got: Null"},
+		{`"Goby".include?`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
+		{`"Goby".include?("Ruby", "Lang")`, ArgumentError, "ArgumentError: Expect 1 argument. got=2"},
+		{`"Goby".include?(2)`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
+		{`"Goby".include?(true)`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
+		{`"Goby".include?(nil)`, TypeError, "TypeError: Expect argument to be String. got: Null"},
 	}
 
 	for i, tt := range testsFail {
