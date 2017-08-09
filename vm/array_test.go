@@ -378,6 +378,39 @@ func TestArrayEachIndexMethod(t *testing.T) {
 	}
 }
 
+func TestArrayEmptyMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{
+			`
+			[1, 2, 3].empty?
+			`, false},
+		{
+			`
+			[nil].empty?
+			`, false},
+		{
+			`
+			[].empty?
+			`, true},
+		{
+			`
+			a = [[]]
+			a.empty?
+			`, false},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayFirstMethod(t *testing.T) {
 	testsInt := []struct {
 		input    string

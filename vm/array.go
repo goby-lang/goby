@@ -426,7 +426,32 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 				}
 			},
 		},
+		{
+			// Returns if the array"s length is 0 or not.
+			//
+			// ```ruby
+			// [1, 2, 3].empty? # => false
+			// [].empty? # => true
+			// ```
+			// @return [Boolean]
+			Name: "empty?",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
+					if len(args) != 0 {
+						return t.vm.initErrorObject(ArgumentError, "Expect 0 argument. got=%d", len(args))
+					}
+
+					arr := receiver.(*ArrayObject)
+
+					if arr.length() == 0 {
+						return TRUE
+					}
+
+					return FALSE
+				}
+			},
+		},
 		{
 			// Returns the first element of the array.
 			Name: "first",
