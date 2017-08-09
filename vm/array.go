@@ -446,9 +446,9 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 
 					if arr.length() == 0 {
 						return TRUE
-					} else {
-						return FALSE
 					}
+
+					return FALSE
 				}
 			},
 		},
