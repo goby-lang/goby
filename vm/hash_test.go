@@ -372,8 +372,8 @@ func TestHashEmptyMethod(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`{}.empty`, true},
-		{`{ a: "Hello" }.empty`, false},
+		{`{}.empty?`, true},
+		{`{ a: "Hello" }.empty?`, false},
 	}
 
 	for i, tt := range tests {
@@ -391,8 +391,8 @@ func TestHashEmptyMethodFail(t *testing.T) {
 		errType string
 		errMsg  string
 	}{
-		{`{ a: 1, b: 2 }.empty(123)`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1"},
-		{`{ a: 1, b: 2 }.empty(true, { hello: "World" })`, ArgumentError, "ArgumentError: Expect 0 argument. got: 2"},
+		{`{ a: 1, b: 2 }.empty?(123)`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1"},
+		{`{ a: 1, b: 2 }.empty?(true, { hello: "World" })`, ArgumentError, "ArgumentError: Expect 0 argument. got: 2"},
 	}
 
 	for i, tt := range testsFail {
@@ -409,18 +409,18 @@ func TestHashEqualMethod(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`{ a: 1 }.eql({ a: 1 })`, true},
-		{`{ a: 1 }.eql({ a: 1, b: 2 })`, false},
-		{`{ a: 1, b: 2 }.eql({ a: 1, b: 2 })`, true},
-		{`{ a: 1, b: 2 }.eql({ b: 2, a: 1 })`, true},
-		{`{ a: 1, b: 2 }.eql({ a: 2, b: 1 })`, false},
-		{`{ a: 1, b: 2 }.eql({ a: 2, b: 2, a: 1 })`, true},
-		{`{ a: 1, b: 2 }.eql({ a: 1, b: 2, a: 2 })`, false},
-		{`{ a: [1, 2, 3], b: { hello: "World" } }.eql({ a: [1, 2, 3], b: { hello: "World"} })`, true},
-		{`{ a: [1, 2, 3], b: { hello: "World" } }.eql({ a: [3, 2, 1], b: { hello: "World"} })`, false},
-		{`{ b: { hello: "World", lang: "Goby" } }.eql({ b: { lang: "Goby", hello: "World"} })`, true},
-		{`{ number: 1, boolean: true, string: "Goby", array: [1, "2", true], hash: { hello: "World", lang: "Goby" }, range: 2..5, null: nil }.eql({ number: 1, boolean: true, string: "Goby", array: [1, "2", true], hash: { hello: "World", lang: "Goby" }, range: 2..5, null: nil })`, true},
-		{`{ number: 1, boolean: true, string: "Goby", array: [1, "2", true], hash: { lang: "Goby", hello: "World" }, range: 2..5, null: nil }.eql({ range: 2..5, null: nil, string: "Goby", number: 1, array: [1, "2", true], boolean: true, hash: { hello: "World", lang: "Goby" } })`, true},
+		{`{ a: 1 }.eql?({ a: 1 })`, true},
+		{`{ a: 1 }.eql?({ a: 1, b: 2 })`, false},
+		{`{ a: 1, b: 2 }.eql?({ a: 1, b: 2 })`, true},
+		{`{ a: 1, b: 2 }.eql?({ b: 2, a: 1 })`, true},
+		{`{ a: 1, b: 2 }.eql?({ a: 2, b: 1 })`, false},
+		{`{ a: 1, b: 2 }.eql?({ a: 2, b: 2, a: 1 })`, true},
+		{`{ a: 1, b: 2 }.eql?({ a: 1, b: 2, a: 2 })`, false},
+		{`{ a: [1, 2, 3], b: { hello: "World" } }.eql?({ a: [1, 2, 3], b: { hello: "World"} })`, true},
+		{`{ a: [1, 2, 3], b: { hello: "World" } }.eql?({ a: [3, 2, 1], b: { hello: "World"} })`, false},
+		{`{ b: { hello: "World", lang: "Goby" } }.eql?({ b: { lang: "Goby", hello: "World"} })`, true},
+		{`{ number: 1, boolean: true, string: "Goby", array: [1, "2", true], hash: { hello: "World", lang: "Goby" }, range: 2..5, null: nil }.eql?({ number: 1, boolean: true, string: "Goby", array: [1, "2", true], hash: { hello: "World", lang: "Goby" }, range: 2..5, null: nil })`, true},
+		{`{ number: 1, boolean: true, string: "Goby", array: [1, "2", true], hash: { lang: "Goby", hello: "World" }, range: 2..5, null: nil }.eql?({ range: 2..5, null: nil, string: "Goby", number: 1, array: [1, "2", true], boolean: true, hash: { hello: "World", lang: "Goby" } })`, true},
 	}
 
 	for i, tt := range tests {
@@ -438,8 +438,8 @@ func TestHashEqualMethodFail(t *testing.T) {
 		errType string
 		errMsg  string
 	}{
-		{`{ a: 1, b: 2 }.eql`, ArgumentError, "ArgumentError: Expect 1 argument. got: 0"},
-		{`{ a: 1, b: 2 }.eql(true, { hello: "World" })`, ArgumentError, "ArgumentError: Expect 1 argument. got: 2"},
+		{`{ a: 1, b: 2 }.eql?`, ArgumentError, "ArgumentError: Expect 1 argument. got: 0"},
+		{`{ a: 1, b: 2 }.eql?(true, { hello: "World" })`, ArgumentError, "ArgumentError: Expect 1 argument. got: 2"},
 	}
 
 	for i, tt := range testsFail {
@@ -529,8 +529,8 @@ func TestHashHasKeyMethod(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`{ a: "Hello", b: 123, c: true }.has_key("a")`, true},
-		{`{ a: "Hello", b: 123, c: true }.has_key("d")`, false},
+		{`{ a: "Hello", b: 123, c: true }.has_key?("a")`, true},
+		{`{ a: "Hello", b: 123, c: true }.has_key?("d")`, false},
 	}
 
 	for i, tt := range tests {
@@ -548,10 +548,10 @@ func TestHashHasKeyMethodFail(t *testing.T) {
 		errType string
 		errMsg  string
 	}{
-		{`{ a: 1, b: 2 }.has_key`, ArgumentError, "ArgumentError: Expect 1 argument. got: 0"},
-		{`{ a: 1, b: 2 }.has_key(true, { hello: "World" })`, ArgumentError, "ArgumentError: Expect 1 argument. got: 2"},
-		{`{ a: 1, b: 2 }.has_key(true)`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
-		{`{ a: 1, b: 2 }.has_key(123)`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
+		{`{ a: 1, b: 2 }.has_key?`, ArgumentError, "ArgumentError: Expect 1 argument. got: 0"},
+		{`{ a: 1, b: 2 }.has_key?(true, { hello: "World" })`, ArgumentError, "ArgumentError: Expect 1 argument. got: 2"},
+		{`{ a: 1, b: 2 }.has_key?(true)`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
+		{`{ a: 1, b: 2 }.has_key?(123)`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
 	}
 
 	for i, tt := range testsFail {
@@ -568,13 +568,13 @@ func TestHashHasValueMethod(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`{ a: "Hello", b: 123, c: true }.has_value("Hello")`, true},
-		{`{ a: "Hello", b: 123, c: true }.has_value("World")`, false},
-		{`{ a: "Hello", b: 123, c: true }.has_value(123)`, true},
-		{`{ a: "Hello", b: 123, c: true }.has_value(false)`, false},
-		{`{ a: "Hello", b: { lang: "Goby", arr: [3, 1, 2] }, c: true }.has_value({ lang: "Goby", arr: [3, 1, 2] })`, true},
-		{`{ a: "Hello", b: { lang: "Goby", arr: [3, 1, 2] }, c: true }.has_value({ lang: "Goby", arr: [1, 2, 3] })`, false},
-		{`{ a: "Hello", b: { lang: "Goby", arr: [3, 1, 2] }, c: true }.has_value({ arr: [3, 1, 2], lang: "Goby" })`, true},
+		{`{ a: "Hello", b: 123, c: true }.has_value?("Hello")`, true},
+		{`{ a: "Hello", b: 123, c: true }.has_value?("World")`, false},
+		{`{ a: "Hello", b: 123, c: true }.has_value?(123)`, true},
+		{`{ a: "Hello", b: 123, c: true }.has_value?(false)`, false},
+		{`{ a: "Hello", b: { lang: "Goby", arr: [3, 1, 2] }, c: true }.has_value?({ lang: "Goby", arr: [3, 1, 2] })`, true},
+		{`{ a: "Hello", b: { lang: "Goby", arr: [3, 1, 2] }, c: true }.has_value?({ lang: "Goby", arr: [1, 2, 3] })`, false},
+		{`{ a: "Hello", b: { lang: "Goby", arr: [3, 1, 2] }, c: true }.has_value?({ arr: [3, 1, 2], lang: "Goby" })`, true},
 	}
 
 	for i, tt := range tests {
@@ -592,8 +592,8 @@ func TestHashHasValueMethodFail(t *testing.T) {
 		errType string
 		errMsg  string
 	}{
-		{`{ a: 1, b: 2 }.has_value`, ArgumentError, "ArgumentError: Expect 1 argument. got: 0"},
-		{`{ a: 1, b: 2 }.has_value(true, { hello: "World" })`, ArgumentError, "ArgumentError: Expect 1 argument. got: 2"},
+		{`{ a: 1, b: 2 }.has_value?`, ArgumentError, "ArgumentError: Expect 1 argument. got: 0"},
+		{`{ a: 1, b: 2 }.has_value?(true, { hello: "World" })`, ArgumentError, "ArgumentError: Expect 1 argument. got: 2"},
 	}
 
 	for i, tt := range testsFail {
