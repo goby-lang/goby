@@ -2,7 +2,7 @@ class File
   def self.open(filename, mode = "r", perm = 0755)
     file = new(filename, mode, perm)
 
-    if block_given
+    if block_given?
       yield(file)
     end
 
