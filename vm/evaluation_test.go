@@ -1283,6 +1283,46 @@ func TestAssignmentEvaluation(t *testing.T) {
 
 		foo(a = b = c = d = 10)
 		`, 10},
+		{`
+		a = b = { foo: 100 }
+		b[:foo] = 10
+		a[:foo]
+		`, 100},
+		{`
+		a = b = [1, 2]
+		b[1] = 10
+		a[1]
+		`, 2},
+		{`
+		@a = b = { foo: 100 }
+		b[:foo] = 10
+		@a[:foo]
+		`, 100},
+		{`
+		@a = b = [1, 2]
+		b[1] = 10
+		@a[1]
+		`, 2},
+		{`
+		a = @b = { foo: 100 }
+		@b[:foo] = 10
+		a[:foo]
+		`, 100},
+		{`
+		a = @b = [1, 2]
+		@b[1] = 10
+		a[1]
+		`, 2},
+		{`
+		@a = @b = { foo: 100 }
+		@b[:foo] = 10
+		@a[:foo]
+		`, 100},
+		{`
+		@a = @b = [1, 2]
+		@b[1] = 10
+		@a[1]
+		`, 2},
 	}
 
 	for i, tt := range tests {

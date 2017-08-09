@@ -108,6 +108,21 @@ func (h *HashObject) sortedKeys() []string {
 	return arr
 }
 
+func (h *HashObject) copy() Object {
+	elems := map[string]Object{}
+
+	for k, v := range h.Pairs {
+		elems[k] = v
+	}
+
+	newHash := &HashObject{
+		baseObj: &baseObj{class: h.class},
+		Pairs:   elems,
+	}
+
+	return newHash
+}
+
 // Other helper functions ----------------------------------------------
 func generateJSONFromPair(key string, v Object) string {
 	var data string

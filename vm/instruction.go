@@ -106,14 +106,27 @@ var builtInActions = map[operationType]*action{
 			p := t.stack.pop()
 			cf.self.instanceVariableSet(variableName, p.Target)
 
-			t.stack.push(&Pointer{Target: p.Target})
+			var obj Object
+
+			switch v := p.Target.(type) {
+			case *HashObject:
+				obj = v.copy()
+			case *ArrayObject:
+				obj = v.copy()
+			case *ChannelObject:
+				obj = v.copy()
+			default:
+				obj = v
+			}
+
+			t.stack.push(&Pointer{Target: obj})
 		},
 	},
 	bytecode.SetLocal: {
 		name: bytecode.SetLocal,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
 			var optioned bool
-			v := t.stack.pop()
+			p := t.stack.pop()
 			depth := args[0].(int)
 			index := args[1].(int)
 
@@ -123,15 +136,28 @@ var builtInActions = map[operationType]*action{
 
 			if optioned {
 				if cf.getLCL(index, depth) == nil {
-					cf.insertLCL(index, depth, v.Target)
+					cf.insertLCL(index, depth, p.Target)
 				}
 
 				return
 			}
 
-			cf.insertLCL(index, depth, v.Target)
+			cf.insertLCL(index, depth, p.Target)
 
-			t.stack.push(&Pointer{Target: v.Target})
+			var obj Object
+
+			switch v := p.Target.(type) {
+			case *HashObject:
+				obj = v.copy()
+			case *ArrayObject:
+				obj = v.copy()
+			case *ChannelObject:
+				obj = v.copy()
+			default:
+				obj = v
+			}
+
+			t.stack.push(&Pointer{Target: obj})
 		},
 	},
 	bytecode.SetConstant: {

@@ -54,6 +54,11 @@ func (co *ChannelObject) toJSON() string {
 	return co.toString()
 }
 
+func (co *ChannelObject) copy() Object {
+	newC := &ChannelObject{baseObj: &baseObj{class: co.class}, Chan: make(chan int)}
+	return newC
+}
+
 func builtinChannelClassMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 		{

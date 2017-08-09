@@ -99,6 +99,19 @@ func (a *ArrayObject) shift() Object {
 	return value
 }
 
+func (a *ArrayObject) copy() Object {
+	elems := make([]Object, len(a.Elements))
+
+	copy(elems, a.Elements)
+
+	newArr := &ArrayObject{
+		baseObj:  &baseObj{class: a.class},
+		Elements: elems,
+	}
+
+	return newArr
+}
+
 func builtInArrayClassMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 		{
