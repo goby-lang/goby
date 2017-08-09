@@ -293,37 +293,37 @@ func TestRangeIncludeMethod(t *testing.T) {
 		expected interface{}
 	}{
 		{`
-		(5..10).include(10)
+		(5..10).include?(10)
 		`, true},
 		{`
-		(5..10).include(11)
+		(5..10).include?(11)
 		`, false},
 		{`
-		(5..10).include(7)
+		(5..10).include?(7)
 		`, true},
 		{`
-		(5..10).include(5)
+		(5..10).include?(5)
 		`, true},
 		{`
-		(5..10).include(4)
+		(5..10).include?(4)
 		`, false},
 		{`
-		(-5..1).include(-2)
+		(-5..1).include?(-2)
 		`, true},
 		{`
-		(-5..-2).include(-2)
+		(-5..-2).include?(-2)
 		`, true},
 		{`
-		(-5..-3).include(-2)
+		(-5..-3).include?(-2)
 		`, false},
 		{`
-		(1..-5).include(-2)
+		(1..-5).include?(-2)
 		`, true},
 		{`
-		(-2..-5).include(-2)
+		(-2..-5).include?(-2)
 		`, true},
 		{`
-		(-3..-5).include(-2)
+		(-3..-5).include?(-2)
 		`, false},
 	}
 
