@@ -91,13 +91,16 @@ func builtInDBInstanceMethods() []*BuiltInMethodObject {
 						execArgs = append(execArgs, arg.(builtInType).Value())
 					}
 
-					_, err = conn.Exec(queryString, execArgs...)
+					// The reason I implement this way: https://github.com/lib/pq/issues/24
+					var id int
+
+					err = conn.QueryRow(fmt.Sprintf("%s RETURNING id", queryString), execArgs...).Scan(&id)
 
 					if err != nil {
 						return t.vm.initErrorObject(InternalError, err.Error())
 					}
 
-					return TRUE
+					return t.vm.initIntegerObject(id)
 				}
 			},
 		},
