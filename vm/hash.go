@@ -337,12 +337,12 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 			// Returns true if hash has no key-value pairs
 			//
 			// ```Ruby
-			// {}.empty       # => true
-			// { a: 1 }.empty # => false
+			// {}.empty?       # => true
+			// { a: 1 }.empty? # => false
 			// ```
 			//
 			// @return [Boolean]
-			Name: "empty",
+			Name: "empty?",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 0 {
@@ -361,11 +361,11 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 			// Returns true if hash is exactly equal to another hash
 			//
 			// ```Ruby
-			// { a: "Hello", b: "World" }.eql(1) # => false
+			// { a: "Hello", b: "World" }.eql?(1) # => false
 			// ```
 			//
 			// @return [Boolean]
-			Name: "eql",
+			Name: "eql?",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 1 {
@@ -421,15 +421,15 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 			//
 			// ```Ruby
 			// h = { a: 1, b: "2", c: [1, 2, 3], d: { k: "v" } }
-			// h.has_key("a") # => true
-			// h.has_key("e") # => false
+			// h.has_key?("a") # => true
+			// h.has_key?("e") # => false
 			// # TODO: Support Symbol Type Key Input
-			// h.has_key(:b)  # => true
-			// h.has_key(:f)  # => false
+			// h.has_key?(:b)  # => true
+			// h.has_key?(:f)  # => false
 			// ```
 			//
 			// @return [Boolean]
-			Name: "has_key",
+			Name: "has_key?",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 1 {
@@ -456,15 +456,15 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 			//
 			// ```Ruby
 			// h = { a: 1, b: "2", c: [1, 2, 3], d: { k: "v" } }
-			// h.has_value(1)          # => true
-			// h.has_value(2)          # => false
-			// h.has_value("2")        # => true
-			// h.has_value([1, 2, 3])  # => true
-			// h.has_value({ k: "v" }) # => true
+			// h.has_value?(1)          # => true
+			// h.has_value?(2)          # => false
+			// h.has_value?("2")        # => true
+			// h.has_value?([1, 2, 3])  # => true
+			// h.has_value?({ k: "v" }) # => true
 			// ```
 			//
 			// @return [Boolean]
-			Name: "has_value",
+			Name: "has_value?",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 1 {
