@@ -99,12 +99,12 @@ func TestArgumentError(t *testing.T) {
 		`,
 			"ArgumentError: Expect at most 2 args for method 'foo'. got: 3"},
 		{`
-		"1234567890".include "123", Class
+		"1234567890".include? "123", Class
 		`,
 			"ArgumentError: Expect 1 argument. got=2",
 		},
 		{`
-		"1234567890".include "123", Class, String
+		"1234567890".include? "123", Class, String
 		`,
 			"ArgumentError: Expect 1 argument. got=3",
 		},

@@ -542,12 +542,12 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// Returns true if string is empty value
 			//
 			// ```ruby
-			// "".empty      # => true
-			// "Hello".empty # => false
+			// "".empty?      # => true
+			// "Hello".empty? # => false
 			// ```
 			//
 			// @return [Boolean]
-			Name: "empty",
+			Name: "empty?",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
@@ -564,14 +564,14 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// Returns true if receiver string end with the argument string
 			//
 			// ```ruby
-			// "Hello".end_with("llo")     # => true
-			// "Hello".end_with("ell")     # => false
-			// "😊Hello🐟".end_with("🐟") # => true
-			// "😊Hello🐟".end_with("😊") # => false
+			// "Hello".end_with?("llo")     # => true
+			// "Hello".end_with?("ell")     # => false
+			// "😊Hello🐟".end_with?("🐟") # => true
+			// "😊Hello🐟".end_with?("😊") # => false
 			// ```
 			//
 			// @return [Boolean]
-			Name: "end_with",
+			Name: "end_with?",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 1 {
@@ -605,13 +605,13 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// Returns true if receiver string is equal to argument string
 			//
 			// ```ruby
-			// "Hello".eql("Hello")     # => true
-			// "Hello".eql("World")     # => false
-			// "Hello😊".eql("Hello😊") # => true
+			// "Hello".eql?("Hello")     # => true
+			// "Hello".eql?("World")     # => false
+			// "Hello😊".eql?("Hello😊") # => true
 			// ```
 			//
 			// @return [Boolean]
-			Name: "eql",
+			Name: "eql?",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 1 {
@@ -676,12 +676,12 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			// Checks if the specified string is included in the receiver
 			//
 			// ```ruby
-			// "Hello\nWorld".include("\n")   # => true
-			// "Hello 😊 Hello".include("😊") # => true
+			// "Hello\nWorld".include?("\n")   # => true
+			// "Hello 😊 Hello".include?("😊") # => true
 			// ```
 			//
 			// @return [Bool]
-			Name: "include",
+			Name: "include?",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 1 {
