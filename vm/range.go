@@ -301,20 +301,20 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 			// The include method will check whether the integer object is in the range
 			//
 			// ```ruby
-			// (5..10).include(10)  # => true
-			// (5..10).include(11)  # => false
-			// (5..10).include(7)   # => true
-			// (5..10).include(5)   # => true
-			// (5..10).include(4)   # => false
-			// (-5..1).include(-2)  # => true
-			// (-5..-2).include(-2) # => true
-			// (-5..-3).include(-2) # => false
-			// (1..-5).include(-2)  # => true
-			// (-2..-5).include(-2) # => true
-			// (-3..-5).include(-2) # => false
+			// (5..10).include?(10)  # => true
+			// (5..10).include?(11)  # => false
+			// (5..10).include?(7)   # => true
+			// (5..10).include?(5)   # => true
+			// (5..10).include?(4)   # => false
+			// (-5..1).include?(-2)  # => true
+			// (-5..-2).include?(-2) # => true
+			// (-5..-3).include?(-2) # => false
+			// (1..-5).include?(-2)  # => true
+			// (-2..-5).include?(-2) # => true
+			// (-3..-5).include?(-2) # => false
 			// ```
 			// @return [Boolean]
-			Name: "include",
+			Name: "include?",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					ran := receiver.(*RangeObject)
