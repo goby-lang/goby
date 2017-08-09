@@ -478,11 +478,11 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			// Returns if self is even.
 			//
 			// ```Ruby
-			// 1.even # => false
-			// 2.even # => true
+			// 1.even? # => false
+			// 2.even? # => true
 			// ```
 			// @return [Boolean]
-			Name: "even",
+			Name: "even?",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
@@ -547,11 +547,11 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			// Returns if self is odd.
 			//
 			// ```ruby
-			// 3.odd # => true
-			// 4.odd # => false
+			// 3.odd? # => true
+			// 4.odd? # => false
 			// ```
 			// @return [Boolean]
-			Name: "odd",
+			Name: "odd?",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 

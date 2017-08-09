@@ -168,8 +168,8 @@ func TestIntegerEvenMethod(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`1.even`, false},
-		{`2.even`, true},
+		{`1.even?`, false},
+		{`2.even?`, true},
 	}
 
 	for i, tt := range tests {
@@ -204,8 +204,8 @@ func TestIntegerOddMethod(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`1.odd`, true},
-		{`2.odd`, false},
+		{`1.odd?`, true},
+		{`2.odd?`, false},
 	}
 
 	for i, tt := range tests {
