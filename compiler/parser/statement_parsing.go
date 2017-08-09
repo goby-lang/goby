@@ -27,7 +27,10 @@ func (p *Parser) parseStatement() ast.Statement {
 	default:
 		exp := p.parseExpressionStatement()
 
-		if p.Mode != REPLMode {
+		// In REPL mode everything should return a value.
+		if p.Mode != REPLMode &&
+			// If parseExpressionStatement got error exp.Expression would be nil
+			(exp.Expression != nil) {
 			exp.Expression.MarkAsStmt()
 		}
 
