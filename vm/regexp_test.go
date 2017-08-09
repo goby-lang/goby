@@ -29,7 +29,7 @@ func TestRegexpClassCreation(t *testing.T) {
 //	}{
 //		{`
 //		  re = Regexp.new("🍣Goby🍺"
-//		  re.match("Hello, 🍣Goby🍺!")
+//		  re.match?("Hello, 🍣Goby🍺!")
 //		`, true},
 //	}
 //

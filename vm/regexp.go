@@ -14,16 +14,16 @@ import (
 //
 // ```ruby
 // a = Regexp.new("orl")
-// a.match("Hello World")   #=> true
-// a.match("Hello Regexp")  #=> false
+// a.match?("Hello World")   #=> true
+// a.match?("Hello Regexp")  #=> false
 //
 // b = Regexp.new("😏")
-// b.match("🤡 😏 😐")   #=> true
-// b.match("😝 😍 😊")   #=> false
+// b.match?("🤡 😏 😐")   #=> true
+// b.match?("😝 😍 😊")   #=> false
 //
 // c = Regexp.new("居(ら(?=れ)|さ(?=せ)|る|ろ|れ(?=[ばる])|よ|(?=な[いかくけそ]|ま[しすせ]|そう|た|て))")
-// c.match("居られればいいのに")  #=> true
-// c.match("居ずまいを正す")      #=> false
+// c.match?("居られればいいのに")  #=> true
+// c.match?("居ずまいを正す")      #=> false
 // ```
 //
 // **Note:**
@@ -86,7 +86,7 @@ func builtinRegexpInstanceMethods() []*BuiltInMethodObject {
 			//
 			// @param string [String]
 			// @return [Boolean]
-			Name: "match",
+			Name: "match?",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
