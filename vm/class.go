@@ -717,16 +717,16 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 			// Returns true if Object is nil
 			//
 			// ```ruby
-			// 123.is_nil            # => false
-			// "String".is_nil       # => false
-			// { a: 1, b: 2 }.is_nil # => false
-			// (3..5).is_nil         # => false
-			// nil.is_nil            # => true  (See the implementation of Null#is_nil in vm/null.go file)
+			// 123.nil?            # => false
+			// "String".nil?       # => false
+			// { a: 1, b: 2 }.nil? # => false
+			// (3..5).nil?         # => false
+			// nil.nil?            # => true  (See the implementation of Null#nil? in vm/null.go file)
 			// ```
 			//
 			// @param n/a []
 			// @return [Boolean]
-			Name: "is_nil",
+			Name: "nil?",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 0 {

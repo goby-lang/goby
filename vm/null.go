@@ -91,7 +91,7 @@ func builtInNullInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
-			// Returns true because it is nil. (See the main implementation of is_nil method in vm/class.go)
+			// Returns true because it is nil. (See the main implementation of nil? method in vm/class.go)
 			//
 			// ```ruby
 			// a = nil
@@ -139,10 +139,10 @@ func builtInNullInstanceMethods() []*BuiltInMethodObject {
 			//
 			// ```ruby
 			// a = nil
-			// a.is_nil
+			// a.nil?
 			// # => true
 			// ```
-			Name: "is_nil",
+			Name: "nil?",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 0 {

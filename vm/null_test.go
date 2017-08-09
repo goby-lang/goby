@@ -52,14 +52,14 @@ func TestNullIsNilMethod(t *testing.T) {
 		input    string
 		expected bool
 	}{
-		{`123.is_nil`, false},
-		{`"Hello World".is_nil`, false},
-		{`(2..10).is_nil`, false},
-		{`{ a: 1, b: "2", c: ["Goby", 123] }.is_nil`, false},
-		{`[1, 2, 3, 4, 5].is_nil`, false},
-		{`true.is_nil`, false},
-		{`String.is_nil`, false},
-		{`nil.is_nil`, true},
+		{`123.nil?`, false},
+		{`"Hello World".nil?`, false},
+		{`(2..10).nil?`, false},
+		{`{ a: 1, b: "2", c: ["Goby", 123] }.nil?`, false},
+		{`[1, 2, 3, 4, 5].nil?`, false},
+		{`true.nil?`, false},
+		{`String.nil?`, false},
+		{`nil.nil?`, true},
 	}
 
 	for i, tt := range tests {
@@ -105,7 +105,7 @@ func TestNullIsNilMethodFail(t *testing.T) {
 		errType string
 		errMsg  string
 	}{
-		{`nil.is_nil("Hello")`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1"},
+		{`nil.nil?("Hello")`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1"},
 	}
 
 	for i, tt := range testsFail {

@@ -75,7 +75,7 @@ func TestPluginGeneration(t *testing.T) {
 
 	conn, err = p.go_func("Open", "postgres", "")
 	err = conn.go_func("Ping")
-	!err.is_nil && err.go_func("Error").is_a(String)
+	!err.nil? && err.go_func("Error").is_a(String)
 	`
 
 	v := initTestVM()
