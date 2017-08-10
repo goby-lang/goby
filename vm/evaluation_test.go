@@ -1015,24 +1015,24 @@ func TestPostfixMethodCall(t *testing.T) {
 	}{
 		{`
 		a = 1
-		a++
+		a += 1
 		a
 		`, 2},
 		{`
 		a = 10
-		a--
+		a -= 1
 		a
 		`,
 			9},
 		{`
 		a = 0
-		a--
+		a -= 1
 		a
 		`,
 			-1},
 		{`
 		a = -5
-		a++
+		a += 1
 		a
 		`,
 			-4},
@@ -1323,6 +1323,36 @@ func TestAssignmentEvaluation(t *testing.T) {
 		@a = @b = [1, 2]
 		@b[1] = 10
 		@a[1]
+		`, 2},
+		{`
+		a = [1, 2]
+		a[1] += 2
+		a[1]
+		`, 4},
+		{`
+		a = [1, 2]
+		a[1] -= 2
+		a[1]
+		`, 0},
+		{`
+		a = []
+		a[0] ||= 2
+		a[0]
+		`, 2},
+		{`
+		h = { foo: 2 }
+		h[:foo] += 2
+		h[:foo]
+		`, 4},
+		{`
+		h = { foo: 2 }
+		h[:foo] -= 2
+		h[:foo]
+		`, 0},
+		{`
+		h = {}
+		h[:foo] ||= 2
+		h[:foo]
 		`, 2},
 	}
 

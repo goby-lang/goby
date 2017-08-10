@@ -94,11 +94,6 @@ func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpre
 		return
 	}
 	is.define(Send, exp.Method, len(exp.Arguments))
-
-	if exp.Method == "++" || exp.Method == "--" {
-		// ++ and -- are methods with side effect and shouldn't return anything
-		is.define(Pop)
-	}
 }
 
 func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.AssignExpression, scope *scope, table *localTable) {
