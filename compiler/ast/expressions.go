@@ -137,29 +137,6 @@ func (ie *InfixExpression) String() string {
 	return out.String()
 }
 
-// MultiVariableExpression is not really an expression, it's just a container that holds multiple Variables
-type MultiVariableExpression struct {
-	*BaseNode
-	Variables []Variable
-}
-
-func (m *MultiVariableExpression) expressionNode() {}
-func (m *MultiVariableExpression) TokenLiteral() string {
-	return ""
-}
-func (m *MultiVariableExpression) String() string {
-	var out bytes.Buffer
-	var variables []string
-
-	for _, v := range m.Variables {
-		variables = append(variables, v.String())
-	}
-
-	out.WriteString(strings.Join(variables, ", "))
-
-	return out.String()
-}
-
 // AssignExpression represents variable assignment in Goby.
 type AssignExpression struct {
 	*BaseNode

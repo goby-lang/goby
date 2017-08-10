@@ -1,10 +1,38 @@
 package ast
 
+import (
+	"bytes"
+	"strings"
+)
+
 // Variable interface represents assignable nodes in Goby, currently are Identifier, InstanceVariable and Constant
 type Variable interface {
 	variableNode()
 	ReturnValue() string
 	Expression
+}
+
+// MultiVariableExpression is not really an expression, it's just a container that holds multiple Variables
+type MultiVariableExpression struct {
+	*BaseNode
+	Variables []Expression
+}
+
+func (m *MultiVariableExpression) expressionNode() {}
+func (m *MultiVariableExpression) TokenLiteral() string {
+	return ""
+}
+func (m *MultiVariableExpression) String() string {
+	var out bytes.Buffer
+	var variables []string
+
+	for _, v := range m.Variables {
+		variables = append(variables, v.String())
+	}
+
+	out.WriteString(strings.Join(variables, ", "))
+
+	return out.String()
 }
 
 type Identifier struct {

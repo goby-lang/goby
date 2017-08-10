@@ -373,13 +373,7 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 	case ast.Variable:
 		exp.Variables = []ast.Expression{v}
 	case *ast.MultiVariableExpression:
-		exps := []ast.Expression{}
-
-		for _, variable := range v.Variables {
-			exps = append(exps, variable)
-		}
-
-		exp.Variables = exps
+		exp.Variables = v.Variables
 	case *ast.CallExpression:
 		/*
 			for cases like: `a[i] += b`
@@ -526,7 +520,7 @@ func (p *Parser) parseMultiVariables(left ast.Expression) ast.Expression {
 		p.noPrefixParseFnError(p.curToken.Type)
 	}
 
-	vars := []ast.Variable{var1}
+	vars := []ast.Expression{var1}
 
 	p.nextToken()
 
