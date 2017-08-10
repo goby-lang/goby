@@ -142,14 +142,9 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 		return args
 	}
 
-	p.nextToken() // start of first expression
-	args = append(args, p.parseExpression(NORMAL))
+	p.nextToken() // move to first argument token
 
-	for p.peekTokenIs(token.Comma) {
-		p.nextToken() // ","
-		p.nextToken() // start of next expression
-		args = append(args, p.parseExpression(NORMAL))
-	}
+	args = p.parseCallArgumentsWithoutParens()
 
 	if !p.expectPeek(token.RParen) {
 		return nil
