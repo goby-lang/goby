@@ -163,7 +163,7 @@ func (m *MultiVariableExpression) String() string {
 // AssignExpression represents variable assignment in Goby.
 type AssignExpression struct {
 	*BaseNode
-	Variables []Variable
+	Variables []Expression
 	Value     Expression
 	// Optioned attribute is only used when infix expression is local assignment in params.
 	// For example: `foo(x = 10)`'s `x = 10` is an optioned assign expression
