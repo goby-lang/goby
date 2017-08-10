@@ -29,9 +29,11 @@ func TestObjectMutationInThread(t *testing.T) {
 		  c.deliver(i)
 		end
 
-		i += 1
+		# if we put i += 1 here than it will execute along with other thread,
+		# which will cause raise condition
 		# Used to block main process until thread is finished
 		c.receive
+		i += 1
 		i
 		`, 2},
 	}
