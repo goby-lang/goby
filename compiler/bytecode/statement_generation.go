@@ -18,16 +18,6 @@ func (g *Generator) compileStatements(stmts []ast.Statement, scope *scope, table
 
 	for _, statement := range stmts {
 		g.compileStatement(is, statement, scope, table)
-
-		if !g.REPL {
-			expStmt, ok := statement.(*ast.ExpressionStatement)
-
-			if ok && expStmt.Expression.IsExp() {
-				continue
-			}
-
-			is.define(Pop)
-		}
 	}
 
 	g.endInstructions(is)
@@ -38,15 +28,33 @@ func (g *Generator) compileStatement(is *InstructionSet, statement ast.Statement
 	scope.line++
 	switch stmt := statement.(type) {
 	case *ast.ExpressionStatement:
-		g.compileExpression(is, stmt.Expression, scope, table)
+		if !g.REPL && stmt.Expression.IsStmt() {
+			switch stmt.Expression.(type) {
+			case *ast.AssignExpression, *ast.IfExpression, *ast.Identifier, *ast.CallExpression, *ast.YieldExpression:
+				g.compileExpression(is, stmt.Expression, scope, table)
+				is.define(Pop)
+			}
 
-		if stmt.Expression.IsStmt() {
-			is.define(Pop)
+			return
 		}
+
+		g.compileExpression(is, stmt.Expression, scope, table)
 	case *ast.DefStatement:
 		g.compileDefStmt(is, stmt, scope)
 	case *ast.ClassStatement:
 		g.compileClassStmt(is, stmt, scope, table)
+		/*
+			```
+			This is for pop 'Bar' in
+
+			```
+			class Foo < Bar
+			end
+			```
+		*/
+		if stmt.SuperClass != nil {
+			is.define(Pop)
+		}
 	case *ast.ModuleStatement:
 		g.compileModuleStmt(is, stmt, scope)
 	case *ast.ReturnStatement:

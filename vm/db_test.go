@@ -60,8 +60,6 @@ func TestPGConnectionPing(t *testing.T) {
 func TestDBExec(t *testing.T) {
 	setupDB(t)
 
-	v := initTestVM()
-
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -102,6 +100,7 @@ func TestDBExec(t *testing.T) {
 	}
 
 	for i, tt := range tests {
+		v := initTestVM()
 		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)

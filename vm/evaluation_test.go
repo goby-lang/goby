@@ -1626,3 +1626,38 @@ func TestMultiVarAssignment(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
+func TestRemoveUnusedExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		1
+		100
+		10
+		`, 10},
+		{`
+		[1, 2]
+		"123"
+		10
+		`, 10},
+		{`
+		@foo
+		10
+		`, 10},
+		{`
+		class Bar; end
+		Bar
+		10
+		`, 10},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
