@@ -65,11 +65,12 @@ func TestComment(t *testing.T) {
 	end
 	# Comment
 	Foo.new.one #=> Comment
+	Foo.new.bar 10 #=> Comment
 	# Comment`
 
 	v := initTestVM()
 	evaluated := v.testEval(t, input)
-	testIntegerObject(t, 0, evaluated, 1)
+	testIntegerObject(t, 0, evaluated, 123)
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
 }

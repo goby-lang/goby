@@ -626,9 +626,14 @@ func (p *Parser) parseCallArgumentsWithoutParens() []ast.Expression {
 		args = append(args, p.parseExpression(NORMAL))
 	}
 
-	if p.peekTokenAtSameLine() {
+	/*
+	Prevent something like: foo x y
+	But ignore cases like: foo x # comment
+	 */
+	if p.peekTokenAtSameLine() && !p.peekTokenIs(token.Comment) {
 		return nil
 	}
+
 	return args
 }
 
