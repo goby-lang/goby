@@ -141,24 +141,17 @@ func builtinPluginClassMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					pkgPath := args[0].(*StringObject).value
-					goPath := os.Getenv("GOPATH")
-					// This is to prevent some path like GODEP_PATH:GOPATH
-					// which can happen on Travis CI
-					ps := strings.Split(goPath, ":")
-					goPath = ps[len(ps)-1]
-
-					fullPath := filepath.Join(goPath, "src", pkgPath)
-					_, pkgName := filepath.Split(fullPath)
+					_, pkgName := filepath.Split(pkgPath)
 					pkgName = strings.Split(pkgName, ".")[0]
 					soName := filepath.Join("./", pkgName+".so")
 
-					p, err := compileAndOpenPlugin(soName, fullPath)
+					p, err := compileAndOpenPlugin(soName, pkgPath)
 
 					if err != nil {
-						t.vm.initErrorObject(InternalError, err.Error())
+						return t.vm.initErrorObject(InternalError, err.Error())
 					}
 
-					return t.vm.initPluginObject(fullPath, p)
+					return t.vm.initPluginObject(pkgPath, p)
 				}
 			},
 		},

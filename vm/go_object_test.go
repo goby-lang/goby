@@ -10,7 +10,7 @@ func TestCallingGoObjectFunctionWithReturnValue(t *testing.T) {
 	input := `
 	require "plugin"
 
-	p = Plugin.use "github.com/goby-lang/goby/test_fixtures/import_test/struct/struct.go"
+	p = Plugin.use "../test_fixtures/import_test/struct/struct.go"
 	bar, err = p.go_func("NewBar", "xyz") # multiple result, so result is an array
 	result, err = bar.go_func("Name", "!")
 	result
@@ -29,7 +29,7 @@ func TestCallingGoObjectFunctionWithReturnError(t *testing.T) {
 	input := `
 	require "plugin"
 
-	p = Plugin.use "github.com/goby-lang/goby/test_fixtures/import_test/struct/struct.go"
+	p = Plugin.use "../test_fixtures/import_test/struct/struct.go"
 	bar, err = p.go_func("NewBar", "xyz") # multiple result, so result is an array
 	result, err = bar.go_func("Name", "!")
 	err
@@ -48,7 +48,7 @@ func TestCallingGoObjectFuncWithInt64(t *testing.T) {
 	input := `
 	require "plugin"
 
-	p = Plugin.use "github.com/goby-lang/goby/test_fixtures/import_test/struct/struct.go"
+	p = Plugin.use "../test_fixtures/import_test/struct/struct.go"
 	bar, err = p.go_func("NewBar", "xyz") # multiple result, so result is an array
 	bar.go_func("Add", 10, 100.to_int64) # Add is func(int, int64) int64
 	`
@@ -66,7 +66,7 @@ func TestCallingGoObjectFuncWithGoObject(t *testing.T) {
 	input := `
 	require "plugin"
 
-	p = Plugin.use "github.com/goby-lang/goby/test_fixtures/import_test/struct/struct.go"
+	p = Plugin.use "../test_fixtures/import_test/struct/struct.go"
 	bar, err = p.go_func("NewBar", "xyz") # multiple result, so result is an array
 	p.go_func("GetBarName", bar) # GetBarName is func(*Bar) string
 	`
