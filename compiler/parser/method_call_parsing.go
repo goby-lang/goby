@@ -75,25 +75,25 @@ func (p *Parser) parseCallExpressionWithDot(receiver ast.Expression) ast.Express
 	exp.Receiver = receiver
 	exp.Method = p.curToken.Literal
 
-	if p.peekTokenIs(token.LParen) { // p.foo(x)
+	switch p.peekToken.Type {
+	case token.LParen: // p.foo(x)
 		p.nextToken()
 		exp.Arguments = p.parseCallArguments()
-	} else if p.peekTokenIs(token.Dot) { // p.foo.bar
-		exp.Arguments = []ast.Expression{}
-	} else if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { // p.foo x, y, z || p.foo x
-		p.nextToken()
-		exp.Arguments = p.parseCallArgumentsWithoutParens()
-	}
-
-	p.fsm.Event(eventTable[oldState])
-
-	// Setter method call like: p.foo = x
-	if p.peekTokenIs(token.Assign) {
+	case token.Assign: // Setter method call like: p.foo = x
 		exp.Method = exp.Method + "="
 		p.nextToken()
 		p.nextToken()
 		exp.Arguments = append(exp.Arguments, p.parseExpression(NORMAL))
+	default:
+		if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { // p.foo x, y, z || p.foo x
+			p.nextToken()
+			exp.Arguments = p.parseCallArgumentsWithoutParens()
+		} else {
+			exp.Arguments = []ast.Expression{}
+		}
 	}
+
+	p.fsm.Event(eventTable[oldState])
 
 	// Parse block
 	if p.peekTokenIs(token.Do) && p.acceptBlock {
