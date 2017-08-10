@@ -1324,6 +1324,36 @@ func TestAssignmentEvaluation(t *testing.T) {
 		@b[1] = 10
 		@a[1]
 		`, 2},
+		{`
+		a = [1, 2]
+		a[1] += 2
+		a[1]
+		`, 4},
+		{`
+		a = [1, 2]
+		a[1] -= 2
+		a[1]
+		`, 0},
+		{`
+		a = []
+		a[0] ||= 2
+		a[0]
+		`, 2},
+		{`
+		h = { foo: 2 }
+		h[:foo] += 2
+		h[:foo]
+		`, 4},
+		{`
+		h = { foo: 2 }
+		h[:foo] -= 2
+		h[:foo]
+		`, 0},
+		{`
+		h = {}
+		h[:foo] ||= 2
+		h[:foo]
+		`, 2},
 	}
 
 	for i, tt := range tests {
