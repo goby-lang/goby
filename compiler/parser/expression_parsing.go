@@ -92,7 +92,8 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	*/
 	if p.curTokenIs(token.Ident) && (p.fsm.Is(normal) || p.fsm.Is(parsingAssignment)) {
 		if p.peekTokenIs(token.Do) {
-			return p.parseCallExpressionWithoutParenAndReceiver(p.curToken)
+			method := p.parseIdentifier()
+			return p.parseCallExpressionWithoutReceiver(method)
 		}
 
 		/*
@@ -114,10 +115,9 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 			will also enter this condition first, but we'll check if those two token is at same line in the parsing function
 		*/
 		if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() {
-			// Method token
-			tok := p.curToken
+			method := p.parseIdentifier()
 			p.nextToken()
-			return p.parseCallExpressionWithoutParenAndReceiver(tok)
+			return p.parseCallExpressionWithoutReceiver(method)
 		}
 	}
 
@@ -464,12 +464,12 @@ func (p *Parser) parseYieldExpression() ast.Expression {
 
 	if p.peekTokenIs(token.LParen) {
 		p.nextToken()
-		ye.Arguments = p.parseCallArguments()
+		ye.Arguments = p.parseCallArgumentsWithParens()
 	}
 
 	if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { // yield 123
 		p.nextToken()
-		ye.Arguments = p.parseCallArgumentsWithoutParens()
+		ye.Arguments = p.parseCallArguments()
 	}
 
 	return ye

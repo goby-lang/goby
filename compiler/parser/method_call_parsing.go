@@ -5,7 +5,9 @@ import (
 	"github.com/goby-lang/goby/compiler/token"
 )
 
-func (p *Parser) parseCallExpressionWithoutParenAndReceiver(methodToken token.Token) ast.Expression {
+func (p *Parser) parseCallExpressionWithoutReceiver(receiver ast.Expression) ast.Expression {
+	methodToken := receiver.(*ast.Identifier).Token
+
 	exp := &ast.CallExpression{BaseNode: &ast.BaseNode{}}
 
 	oldState := p.fsm.Current()
@@ -21,13 +23,13 @@ func (p *Parser) parseCallExpressionWithoutParenAndReceiver(methodToken token.To
 	exp.Receiver = self
 	exp.Method = methodToken.Literal
 
-	p.fsm.Event(eventTable[oldState])
-
 	if p.curTokenIs(token.LParen) {
-		exp.Arguments = p.parseCallArguments()
+		exp.Arguments = p.parseCallArgumentsWithParens()
 	} else if p.curToken.Line == methodToken.Line && p.curToken != methodToken { // 'foo x' but not 'thread'
-		exp.Arguments = p.parseCallArgumentsWithoutParens()
+		exp.Arguments = p.parseCallArguments()
 	}
+
+	p.fsm.Event(eventTable[oldState])
 
 	if p.peekTokenIs(token.Do) && p.acceptBlock { // foo do
 		p.parseBlockArgument(exp)
@@ -36,12 +38,7 @@ func (p *Parser) parseCallExpressionWithoutParenAndReceiver(methodToken token.To
 	return exp
 }
 
-func (p *Parser) parseCallExpressionWithParen(receiver ast.Expression) ast.Expression {
-	methodToken := receiver.(*ast.Identifier).Token
-	return p.parseCallExpressionWithoutParenAndReceiver(methodToken)
-}
-
-func (p *Parser) parseCallExpressionWithDot(receiver ast.Expression) ast.Expression {
+func (p *Parser) parseCallExpressionWithReceiver(receiver ast.Expression) ast.Expression {
 	exp := &ast.CallExpression{BaseNode: &ast.BaseNode{}}
 
 	oldState := p.fsm.Current()
@@ -59,7 +56,7 @@ func (p *Parser) parseCallExpressionWithDot(receiver ast.Expression) ast.Express
 	switch p.peekToken.Type {
 	case token.LParen: // p.foo(x)
 		p.nextToken()
-		exp.Arguments = p.parseCallArguments()
+		exp.Arguments = p.parseCallArgumentsWithParens()
 	case token.Assign: // Setter method call like: p.foo = x
 		exp.Method = exp.Method + "="
 		p.nextToken()
@@ -68,7 +65,7 @@ func (p *Parser) parseCallExpressionWithDot(receiver ast.Expression) ast.Express
 	default:
 		if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { // p.foo x, y, z || p.foo x
 			p.nextToken()
-			exp.Arguments = p.parseCallArgumentsWithoutParens()
+			exp.Arguments = p.parseCallArguments()
 		} else {
 			exp.Arguments = []ast.Expression{}
 		}
@@ -82,6 +79,39 @@ func (p *Parser) parseCallExpressionWithDot(receiver ast.Expression) ast.Express
 	}
 
 	return exp
+}
+
+func (p *Parser) parseCallArgumentsWithParens() []ast.Expression {
+	args := []ast.Expression{}
+
+	if p.peekTokenIs(token.RParen) {
+		p.nextToken() // ')'
+		return args
+	}
+
+	p.nextToken() // move to first argument token
+
+	args = p.parseCallArguments()
+
+	if !p.expectPeek(token.RParen) {
+		return nil
+	}
+
+	return args
+}
+
+func (p *Parser) parseCallArguments() []ast.Expression {
+	args := []ast.Expression{}
+
+	args = append(args, p.parseExpression(NORMAL))
+
+	for p.peekTokenIs(token.Comma) {
+		p.nextToken() // ","
+		p.nextToken() // start of next expression
+		args = append(args, p.parseExpression(NORMAL))
+	}
+
+	return args
 }
 
 func (p *Parser) parseBlockArgument(exp *ast.CallExpression) {
@@ -113,37 +143,4 @@ func (p *Parser) parseBlockArgument(exp *ast.CallExpression) {
 
 	exp.Block = p.parseBlockStatement()
 	exp.Block.KeepLastValue()
-}
-
-func (p *Parser) parseCallArguments() []ast.Expression {
-	args := []ast.Expression{}
-
-	if p.peekTokenIs(token.RParen) {
-		p.nextToken() // ')'
-		return args
-	}
-
-	p.nextToken() // move to first argument token
-
-	args = p.parseCallArgumentsWithoutParens()
-
-	if !p.expectPeek(token.RParen) {
-		return nil
-	}
-
-	return args
-}
-
-func (p *Parser) parseCallArgumentsWithoutParens() []ast.Expression {
-	args := []ast.Expression{}
-
-	args = append(args, p.parseExpression(NORMAL))
-
-	for p.peekTokenIs(token.Comma) {
-		p.nextToken() // ","
-		p.nextToken() // start of next expression
-		args = append(args, p.parseExpression(NORMAL))
-	}
-
-	return args
 }

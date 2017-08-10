@@ -153,8 +153,8 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.ResolutionOperator, p.parseInfixExpression)
 	p.registerInfix(token.Assign, p.parseAssignExpression)
 	p.registerInfix(token.Range, p.parseRangeExpression)
-	p.registerInfix(token.Dot, p.parseCallExpressionWithDot)
-	p.registerInfix(token.LParen, p.parseCallExpressionWithParen)
+	p.registerInfix(token.Dot, p.parseCallExpressionWithReceiver)
+	p.registerInfix(token.LParen, p.parseCallExpressionWithoutReceiver)
 	p.registerInfix(token.LBracket, p.parseIndexExpression)
 
 	return p
