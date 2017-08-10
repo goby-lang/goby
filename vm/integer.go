@@ -434,47 +434,6 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
-			// Adds 1 to self and returns.
-			//
-			// ```Ruby
-			// 1++ # => 2
-			// ```
-			// @return [Integer]
-			Name: "++",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					int := receiver.(*IntegerObject)
-
-					t.vm.Lock()
-					defer t.vm.Unlock()
-
-					int.value++
-					return int
-				}
-			},
-		},
-		{
-			// Substracts 1 from self and returns.
-			//
-			// ```Ruby
-			// 0-- # => -1
-			// ```
-			// @return [Integer]
-			Name: "--",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					int := receiver.(*IntegerObject)
-
-					t.vm.Lock()
-					defer t.vm.Unlock()
-
-					int.value--
-					return int
-				}
-			},
-		},
-		{
 			// Returns if self is even.
 			//
 			// ```Ruby
@@ -586,7 +545,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			// ```Ruby
 			// a = 0
 			// 3.times do
-			//    a++
+			//    a += 1
 			// end
 			// a # => 3
 			// ```

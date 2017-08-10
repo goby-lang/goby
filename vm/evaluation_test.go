@@ -1015,24 +1015,24 @@ func TestPostfixMethodCall(t *testing.T) {
 	}{
 		{`
 		a = 1
-		a++
+		a += 1
 		a
 		`, 2},
 		{`
 		a = 10
-		a--
+		a -= 1
 		a
 		`,
 			9},
 		{`
 		a = 0
-		a--
+		a -= 1
 		a
 		`,
 			-1},
 		{`
 		a = -5
-		a++
+		a += 1
 		a
 		`,
 			-4},

@@ -12,7 +12,7 @@ func TestObjectMutationInThread(t *testing.T) {
 
 		i = 0
 		thread do
-		  i++
+		  i += 1
 		  c.deliver(i)
 		end
 
@@ -25,11 +25,11 @@ func TestObjectMutationInThread(t *testing.T) {
 
 		i = 0
 		thread do
-		  i++
+		  i += 1
 		  c.deliver(i)
 		end
 
-		i++
+		i += 1
 		# Used to block main process until thread is finished
 		c.receive
 		i
