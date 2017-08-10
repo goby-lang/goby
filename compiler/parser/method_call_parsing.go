@@ -23,41 +23,22 @@ func (p *Parser) parseCallExpressionWithoutParenAndReceiver(methodToken token.To
 
 	p.fsm.Event(eventTable[oldState])
 
+	if p.curTokenIs(token.LParen) {
+		exp.Arguments = p.parseCallArguments()
+	} else if p.curToken.Line == methodToken.Line && p.curToken != methodToken { // 'foo x' but not 'thread'
+		exp.Arguments = p.parseCallArgumentsWithoutParens()
+	}
+
 	if p.peekTokenIs(token.Do) && p.acceptBlock { // foo do
 		p.parseBlockArgument(exp)
-	} else if p.curToken.Line == methodToken.Line { // foo x
-		exp.Arguments = p.parseCallArgumentsWithoutParens()
 	}
 
 	return exp
 }
 
 func (p *Parser) parseCallExpressionWithParen(receiver ast.Expression) ast.Expression {
-	exp := &ast.CallExpression{BaseNode: &ast.BaseNode{}}
-
-	oldState := p.fsm.Current()
-	p.fsm.Event(parseFuncCall)
-	m := receiver.(*ast.Identifier)
-	mn := m.Value
-
-	// real receiver is self
-	selfTok := token.Token{Type: token.Self, Literal: "self", Line: p.curToken.Line}
-	self := &ast.SelfExpression{BaseNode: &ast.BaseNode{Token: selfTok}}
-	receiver = self
-
-	exp.Token = m.Token
-	exp.Receiver = receiver
-	exp.Method = mn
-	exp.Arguments = p.parseCallArguments()
-
-	p.fsm.Event(eventTable[oldState])
-
-	// Parse block
-	if p.peekTokenIs(token.Do) && p.acceptBlock {
-		p.parseBlockArgument(exp)
-	}
-
-	return exp
+	methodToken := receiver.(*ast.Identifier).Token
+	return p.parseCallExpressionWithoutParenAndReceiver(methodToken)
 }
 
 func (p *Parser) parseCallExpressionWithDot(receiver ast.Expression) ast.Expression {

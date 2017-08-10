@@ -20,20 +20,20 @@ func TestObjectMutationInThread(t *testing.T) {
 		c.receive
 		i
 		`, 1},
-		//{`
-		//c = Channel.new
-		//
-		//i = 0
-		//thread do
-		//  i++
-		//  c.deliver(i)
-		//end
-		//
-		//i++
-		//# Used to block main process until thread is finished
-		//c.receive
-		//i
-		//`, 2},
+		{`
+		c = Channel.new
+
+		i = 0
+		thread do
+		  i++
+		  c.deliver(i)
+		end
+
+		i++
+		# Used to block main process until thread is finished
+		c.receive
+		i
+		`, 2},
 	}
 
 	for i, tt := range tests {
