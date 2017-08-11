@@ -545,12 +545,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 
 					elements := []string{}
 					for _, e := range arr.flatten() {
-						_, isString := e.(*StringObject)
-						if isString {
-							elements = append(elements, "\""+e.toString()+"\"")
-						} else {
-							elements = append(elements, e.toString())
-						}
+						elements = append(elements, e.toString())
 					}
 
 					return t.vm.initStringObject(strings.Join(elements, sep))

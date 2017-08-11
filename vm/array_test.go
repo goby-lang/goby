@@ -498,6 +498,26 @@ func TestArrayFlattenMethod(t *testing.T) {
 	}
 }
 
+func TestArrayFlattenMethodFail(t *testing.T) {
+	testsFail := []struct {
+		input    string
+		expected string
+	}{
+		{`
+		a = [1, 2]
+		a.flatten(1)
+		`, "ArgumentError: Expect 0 argument. got=1"},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
+		checkError(t, i, evaluated, ArgumentError, tt.expected)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayJoinMethod(t *testing.T) {
 	testsInt := []struct {
 		input    string
@@ -505,6 +525,9 @@ func TestArrayJoinMethod(t *testing.T) {
 	}{
 		{`
 		[1, 2].join
+		`, "12"},
+		{`
+		["1", 2].join
 		`, "12"},
 		{`
 		[1, 2].join(",")
@@ -519,6 +542,46 @@ func TestArrayJoinMethod(t *testing.T) {
 		evaluated := v.testEval(t, tt.input)
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+	}
+}
+
+func TestArrayJoinMethodFailWithArgumentError(t *testing.T) {
+	testsFail := []struct {
+		input    string
+		expected string
+	}{
+		{`
+		a = [1, 2]
+		a.join(",", "-")
+		`, "ArgumentError: Expect 0 or 1 argument. got=2"},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
+		checkError(t, i, evaluated, ArgumentError, tt.expected)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayJoinMethodFailWithTypeError(t *testing.T) {
+	testsFail := []struct {
+		input    string
+		expected string
+	}{
+		{`
+		a = [1, 2]
+		a.join(1)
+		`, "TypeError: Expect argument to be String. got: Integer"},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
+		checkError(t, i, evaluated, TypeError, tt.expected)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
