@@ -51,15 +51,12 @@ Foo.new(100, 50).bar
 0 putself
 1 def_class class:Foo
 2 pop
-3 pop
-4 getconstant Foo false
-5 putobject 100
-6 putobject 50
-7 send new 2
-8 send bar 0
-9 pop
-10 pop
-11 leave
+3 getconstant Foo false
+4 putobject 100
+5 putobject 50
+6 send new 2
+7 send bar 0
+8 leave
 `
 	bytecode := compileToBytecode(input)
 	compareBytecode(t, bytecode, expected)
@@ -102,15 +99,12 @@ func TestNamespacedClass(t *testing.T) {
 0 putself
 1 def_class module:Foo
 2 pop
-3 pop
-4 getconstant Foo true
-5 getconstant Bar true
-6 getconstant Baz false
-7 send new 0
-8 send bar 0
-9 pop
-10 pop
-11 leave
+3 getconstant Foo true
+4 getconstant Bar true
+5 getconstant Baz false
+6 send new 0
+7 send bar 0
+8 leave
 `
 
 	bytecode := compileToBytecode(input)
@@ -140,12 +134,9 @@ Foo.bar
 0 putself
 1 def_class class:Foo
 2 pop
-3 pop
-4 getconstant Foo false
-5 send bar 0
-6 pop
-7 pop
-8 leave
+3 getconstant Foo false
+4 send bar 0
+5 leave
 `
 
 	bytecode := compileToBytecode(input)
@@ -180,18 +171,15 @@ Foo.new.bar
 0 putself
 1 def_class class:Bar
 2 pop
-3 pop
-4 putself
-5 getconstant Bar false
-6 def_class class:Foo Bar
+3 putself
+4 getconstant Bar false
+5 def_class class:Foo Bar
+6 pop
 7 pop
-8 pop
-9 getconstant Foo false
-10 send new 0
-11 send bar 0
-12 pop
-13 pop
-14 leave
+8 getconstant Foo false
+9 send new 0
+10 send bar 0
+11 leave
 `
 	bytecode := compileToBytecode(input)
 	compareBytecode(t, bytecode, expected)
@@ -232,17 +220,13 @@ Foo.new.bar
 0 putself
 1 def_class module:Bar
 2 pop
-3 pop
-4 putself
-5 def_class class:Foo
-6 pop
-7 pop
-8 getconstant Foo false
-9 send new 0
-10 send bar 0
-11 pop
-12 pop
-13 leave
+3 putself
+4 def_class class:Foo
+5 pop
+6 getconstant Foo false
+7 send new 0
+8 send bar 0
+9 leave
 `
 	bytecode := compileToBytecode(input)
 	compareBytecode(t, bytecode, expected)
@@ -290,12 +274,9 @@ func TestWhileStatementInBlock(t *testing.T) {
 0 putobject 1
 1 setlocal 0 0
 2 pop
-3 pop
-4 putself
-5 send thread 0 block:0
-6 pop
-7 pop
-8 leave
+3 putself
+4 send thread 0 block:0
+5 leave
 `
 
 	bytecode := compileToBytecode(input)
@@ -317,27 +298,23 @@ func TestWhileStatementWithoutMethodCallInCondition(t *testing.T) {
 0 putobject 10
 1 setlocal 0 0
 2 pop
-3 pop
-4 jump 13
-5 putnil
-6 pop
-7 jump 13
-8 getlocal 0 0
-9 putobject 1
-10 send - 1
-11 setlocal 0 0
-12 pop
-13 getlocal 0 0
-14 putobject 0
-15 send > 1
-16 branchif 8
-17 putnil
-18 pop
-19 pop
-20 getlocal 0 0
-21 pop
-22 pop
-23 leave
+3 jump 12
+4 putnil
+5 pop
+6 jump 12
+7 getlocal 0 0
+8 putobject 1
+9 send - 1
+10 setlocal 0 0
+11 pop
+12 getlocal 0 0
+13 putobject 0
+14 send > 1
+15 branchif 7
+16 putnil
+17 pop
+18 getlocal 0 0
+19 leave
 `
 
 	bytecode := compileToBytecode(input)
@@ -356,39 +333,34 @@ func TestWhileStatementWithMethodCallInCondition(t *testing.T) {
 	i
 `
 	expected := `
-<ProgramStart>
+ <ProgramStart>
 0 putobject 10
 1 setlocal 0 0
 2 pop
-3 pop
-4 putobject 1
-5 putobject 2
-6 putobject 3
-7 newarray 3
-8 setlocal 0 1
-9 pop
-10 pop
-11 jump 20
-12 putnil
-13 pop
-14 jump 20
-15 getlocal 0 0
-16 putobject 1
-17 send - 1
-18 setlocal 0 0
-19 pop
-20 getlocal 0 0
-21 getlocal 0 1
-22 send length 0
-23 send > 1
-24 branchif 15
-25 putnil
-26 pop
-27 pop
-28 getlocal 0 0
-29 pop
-30 pop
-31 leave
+3 putobject 1
+4 putobject 2
+5 putobject 3
+6 newarray 3
+7 setlocal 0 1
+8 pop
+9 jump 18
+10 putnil
+11 pop
+12 jump 18
+13 getlocal 0 0
+14 putobject 1
+15 send - 1
+16 setlocal 0 0
+17 pop
+18 getlocal 0 0
+19 getlocal 0 1
+20 send length 0
+21 send > 1
+22 branchif 13
+23 putnil
+24 pop
+25 getlocal 0 0
+26 leave
 `
 
 	bytecode := compileToBytecode(input)
@@ -414,41 +386,38 @@ func TestNextStatementCompilation(t *testing.T) {
 0 putobject 0
 1 setlocal 0 0
 2 pop
-3 pop
-4 putobject 0
-5 setlocal 0 1
-6 pop
-7 pop
-8 jump 30
-9 putnil
-10 pop
-11 jump 30
-12 getlocal 0 0
-13 putobject 1
-14 send + 1
-15 setlocal 0 0
-16 pop
-17 getlocal 0 0
-18 putobject 5
-19 send == 1
-20 branchunless 23
-21 jump 30
-22 jump 24
-23 putnil
-24 pop
-25 getlocal 0 1
-26 putobject 1
-27 send + 1
-28 setlocal 0 1
-29 pop
-30 getlocal 0 0
-31 putobject 10
-32 send < 1
-33 branchif 12
-34 putnil
-35 pop
-36 pop
-37 leave
+3 putobject 0
+4 setlocal 0 1
+5 pop
+6 jump 28
+7 putnil
+8 pop
+9 jump 28
+10 getlocal 0 0
+11 putobject 1
+12 send + 1
+13 setlocal 0 0
+14 pop
+15 getlocal 0 0
+16 putobject 5
+17 send == 1
+18 branchunless 21
+19 jump 28
+20 jump 22
+21 putnil
+22 pop
+23 getlocal 0 1
+24 putobject 1
+25 send + 1
+26 setlocal 0 1
+27 pop
+28 getlocal 0 0
+29 putobject 10
+30 send < 1
+31 branchif 10
+32 putnil
+33 pop
+34 leave
 `
 
 	bytecode := compileToBytecode(input)
@@ -482,73 +451,66 @@ a + 100
 0 putobject 0
 1 setlocal 0 0
 2 pop
-3 pop
-4 putobject 0
-5 setlocal 0 1
-6 pop
-7 pop
-8 putobject 0
-9 setlocal 0 2
-10 pop
+3 putobject 0
+4 setlocal 0 1
+5 pop
+6 putobject 0
+7 setlocal 0 2
+8 pop
+9 jump 48
+10 putnil
 11 pop
-12 jump 51
-13 putnil
-14 pop
-15 jump 51
-16 getlocal 0 0
-17 putobject 1
-18 send + 1
-19 setlocal 0 0
+12 jump 48
+13 getlocal 0 0
+14 putobject 1
+15 send + 1
+16 setlocal 0 0
+17 pop
+18 jump 42
+19 putnil
 20 pop
-21 jump 45
-22 putnil
-23 pop
-24 jump 45
-25 getlocal 0 1
-26 putobject 1
-27 send + 1
-28 setlocal 0 1
-29 pop
-30 getlocal 0 1
-31 putobject 3
-32 send == 1
-33 branchunless 36
-34 jump 51
-35 jump 37
-36 putnil
-37 pop
-38 getlocal 0 2
-39 getlocal 0 0
-40 getlocal 0 1
-41 send * 1
-42 send + 1
-43 setlocal 0 2
-44 pop
-45 getlocal 0 1
-46 putobject 5
-47 send < 1
-48 branchif 25
-49 putnil
-50 pop
-51 getlocal 0 0
-52 putobject 10
-53 send < 1
-54 branchif 16
-55 putnil
-56 pop
-57 pop
-58 getlocal 0 2
-59 putobject 10
-60 send * 1
-61 setlocal 0 3
-62 pop
-63 pop
-64 getlocal 0 3
-65 putobject 100
-66 send + 1
-67 pop
-68 pop
-69 leave
+21 jump 42
+22 getlocal 0 1
+23 putobject 1
+24 send + 1
+25 setlocal 0 1
+26 pop
+27 getlocal 0 1
+28 putobject 3
+29 send == 1
+30 branchunless 33
+31 jump 48
+32 jump 34
+33 putnil
+34 pop
+35 getlocal 0 2
+36 getlocal 0 0
+37 getlocal 0 1
+38 send * 1
+39 send + 1
+40 setlocal 0 2
+41 pop
+42 getlocal 0 1
+43 putobject 5
+44 send < 1
+45 branchif 22
+46 putnil
+47 pop
+48 getlocal 0 0
+49 putobject 10
+50 send < 1
+51 branchif 13
+52 putnil
+53 pop
+54 getlocal 0 2
+55 putobject 10
+56 send * 1
+57 setlocal 0 3
+58 pop
+59 getlocal 0 3
+60 putobject 100
+61 send + 1
+62 leave
 `
 	bytecode := compileToBytecode(input)
 	compareBytecode(t, bytecode, expected)
