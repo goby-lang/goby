@@ -471,6 +471,57 @@ func TestArrayFirstMethodFail(t *testing.T) {
 	}
 }
 
+func TestArrayFlattenMethod(t *testing.T) {
+	testsArray := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+		[1, 2].flatten
+		`, []interface{}{1, 2}},
+		{`
+		[1, 2, [3, 4, 5]].flatten
+		`, []interface{}{1, 2, 3, 4, 5}},
+		{`
+		[[1, 2], [3, 4], [5, 6]].flatten
+		`, []interface{}{1, 2, 3, 4, 5, 6}},
+		{`
+		[[[1, 2], [[[3, 4]], [5, 6]]]].flatten
+		`, []interface{}{1, 2, 3, 4, 5, 6}},
+	}
+
+	for i, tt := range testsArray {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input)
+		testArrayObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
+func TestArrayJoinMethod(t *testing.T) {
+	testsInt := []struct {
+		input    string
+		expected string
+	}{
+		{`
+		[1, 2].join
+		`, "12"},
+		{`
+		[1, 2].join(",")
+		`, "1,2"},
+		{`
+		[1, 2, [3, 4]].join(",")
+		`, "1,2,3,4"},
+	}
+
+	for i, tt := range testsInt {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+	}
+}
+
 func TestArrayLastMethod(t *testing.T) {
 	testsArray := []struct {
 		input    string
