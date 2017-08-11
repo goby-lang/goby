@@ -15,7 +15,7 @@ Goby will finally equip a reduced set of Ruby's fundamental syntax, including Ru
 
 Goby interpreter is a monolithic binary executable, which consists of a YARV-like VM and a compiler, and a REPL (which is better than `irb`!). All components of Goby compiler, such as AST, lexer, parser, token, are written in 100% pure Go, instead of using conventional static yacc/lex/bison conversion. Goby maintainers don't need to care about C language anymore!
 
-We are optimizing and expanding Goby all the time and need your help. One of our vision is to utilize and manages tons of Go's packages easily from Goby scripts. Currently we already have some progress, see the introduction of Goby's [Plugin System](https://goby-lang.gitbooks.io/goby/content/chapter1.html)
+We are optimizing and expanding Goby all the time and need your help. One of our vision is to utilize and manages tons of Go's packages easily from Goby scripts. Currently we already have some progress, see the introduction of Goby's [Plugin System](https://goby-lang.gitbooks.io/goby/content/plugin-system.html)
 
 **Demo:**
 
