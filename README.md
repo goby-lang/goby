@@ -7,7 +7,7 @@
 [![codecov](https://codecov.io/gh/goby-lang/goby/branch/master/graph/badge.svg)](https://codecov.io/gh/goby-lang/goby)
 [![Readme Score](http://readme-score-api.herokuapp.com/score.svg?url=goby-lang/goby)](http://clayallsopp.github.io/readme-score?url=goby-lang/goby)
 
-Join us on Slack! [![](https://goby-lang-slackin.herokuapp.com/badge.svg)](https://goby-lang-slackin.herokuapp.com)
+**Join us on Slack!** [![](https://goby-lang-slackin.herokuapp.com/badge.svg)](https://goby-lang-slackin.herokuapp.com)
 
 Goby is an object-oriented interpreter language deeply inspired by Ruby and written in 100% pure Go. The goal of Goby is to help web developers create api servers or microservices simply and efficiently, with a help of tough thread-mechanism from Go's goroutine, see the [thread's example](https://github.com/goby-lang/goby/blob/master/samples/one_thousand_threads.gb). Howerver, We do not intend to reproduce all of works in Ruby implementation.
 
@@ -17,13 +17,11 @@ Goby interpreter is a monolithic binary executable, which consists of a YARV-lik
 
 We are optimizing and expanding Goby all the time and need your help. One of our vision is to utilize and manages tons of Go's packages easily from Goby scripts. Currently we already have some progress, see the introduction of Goby's [Plugin System](https://goby-lang.gitbooks.io/goby/content/plugin-system.html)
 
+[**User Manual (WIP)**](https://goby-lang.gitbooks.io/goby/content/)
+
 **Demo:**
 
 <img src="http://i.imgur.com/5RxFgIW.gif?1" width="60%">
-
-**Project Structure:**
-
-![](http://i.imgur.com/WoO1EEY.jpg)
 
 Support us with a monthly donation and help us continue our activities. [[Become a backer](https://opencollective.com/goby#backer)]
 
@@ -217,11 +215,8 @@ See the [guideline](https://github.com/goby-lang/goby/blob/master/CONTRIBUTING.m
 ## Maintainers
 
 - @st0012
-- @janczer
-- @adlerhsieh
 - @hachi8833
 - @Maxwell-Alexius
-- @shes50103
 
 ## Support Us
 
