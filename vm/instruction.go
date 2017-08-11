@@ -164,7 +164,14 @@ var builtInActions = map[operationType]*action{
 		name: bytecode.SetConstant,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
 			constName := args[0].(string)
+			c := t.vm.lookupConstant(cf, constName)
 			v := t.stack.pop()
+
+			if c != nil {
+				err := t.vm.initErrorObject(ConstantAlreadyInitializedError, "Constant %s already been initialized. Can't assign value to a constant twice.", constName)
+				t.stack.push(&Pointer{Target: err})
+				return
+			}
 
 			cf.storeConstant(constName, v)
 		},

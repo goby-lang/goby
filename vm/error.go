@@ -17,6 +17,8 @@ const (
 	UndefinedMethodError = "UndefinedMethodError"
 	// UnsupportedMethodError is for an intentionally unsupported-method error
 	UnsupportedMethodError = "UnsupportedMethodError"
+	// ConstantAlreadyInitializedError means user re-declares twice
+	ConstantAlreadyInitializedError = "ConstantAlreadyInitializedError"
 )
 
 func (vm *VM) initErrorObject(errorType, format string, args ...interface{}) *Error {
@@ -29,7 +31,7 @@ func (vm *VM) initErrorObject(errorType, format string, args ...interface{}) *Er
 }
 
 func (vm *VM) initErrorClasses() {
-	errTypes := []string{InternalError, ArgumentError, NameError, TypeError, UndefinedMethodError, UnsupportedMethodError}
+	errTypes := []string{InternalError, ArgumentError, NameError, TypeError, UndefinedMethodError, UnsupportedMethodError, ConstantAlreadyInitializedError}
 
 	for _, errType := range errTypes {
 		c := vm.initializeClass(errType, false)

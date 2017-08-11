@@ -119,6 +119,34 @@ func TestArgumentError(t *testing.T) {
 	}
 }
 
+func TestConstantAlreadyInitializedError(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`
+		Foo = 10
+		Foo = 100
+		`, "ConstantAlreadyInitializedError: Constant Foo already been initialized. Can't assign value to a constant twice."},
+		{`
+		class Foo; end
+		Foo = 100
+		`, "ConstantAlreadyInitializedError: Constant Foo already been initialized. Can't assign value to a constant twice."},
+		{`
+		module Foo; end
+		Foo = 100
+		`, "ConstantAlreadyInitializedError: Constant Foo already been initialized. Can't assign value to a constant twice."},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
+		checkError(t, i, evaluated, ConstantAlreadyInitializedError, tt.expected)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func checkError(t *testing.T, index int, evaluated Object, expectedErrType, expectedErrMsg string) {
 	err, ok := evaluated.(*Error)
 	if !ok {
