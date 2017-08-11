@@ -66,6 +66,22 @@ func (a *ArrayObject) toJSON() string {
 	return out.String()
 }
 
+// flatten returns a array of Objects that is one-dimensional flattening of Elements
+func (a *ArrayObject) flatten() []Object {
+	var result []Object
+
+	for _, e := range a.Elements {
+		arr, isArray := e.(*ArrayObject)
+		if isArray {
+			result = append(result, arr.flatten()...)
+		} else {
+			result = append(result, e)
+		}
+	}
+
+	return result
+}
+
 // length returns the length of array's elements
 func (a *ArrayObject) length() int {
 	return len(a.Elements)
@@ -469,6 +485,70 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 					}
 
 					return t.vm.initArrayObject(arr.Elements[:arg.value])
+				}
+			},
+		},
+		{
+			// Returns a new array that is a one-dimensional flattening of self.
+			//
+			// ```ruby
+			// a = [ 1, 2, 3 ]
+			// b = [ 4, 5, 6, [7, 8] ]
+			// c = [ a, b, 9, 10 ] # => [[1, 2, 3], [4, 5, 6, [7, 8]], 9, 10]
+			// c.flatten # => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			// ```
+			// @return [Array]
+			Name: "flatten",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					arr := receiver.(*ArrayObject)
+
+					if len(args) != 0 {
+						return t.vm.initErrorObject(ArgumentError, "Expect 0 argument. got=%d", len(args))
+					}
+
+					newElements := arr.flatten()
+
+					return t.vm.initArrayObject(newElements)
+				}
+			},
+		},
+		{
+			// Returns a string by concatenating each element to string, separated by given separator.
+			// If separator is nil, it uses empty string.
+			//
+			// ```ruby
+			// [ 1, 2, 3 ].join # => "123"
+			// [ 1, 2, 3 ].join("-") # => "1-2-3"
+			// ```
+			// @param separator [String]
+			// @return [String]
+			Name: "join",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					arr := receiver.(*ArrayObject)
+
+					var sep string
+					if len(args) == 0 {
+						sep = ""
+					} else if len(args) == 1 {
+						arg, ok := args[0].(*StringObject)
+
+						if !ok {
+							return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
+						}
+
+						sep = arg.value
+					} else {
+						return t.vm.initErrorObject(ArgumentError, "Expect 0 or 1 argument. got=%d", len(args))
+					}
+
+					elements := []string{}
+					for _, e := range arr.flatten() {
+						elements = append(elements, e.toString())
+					}
+
+					return t.vm.initStringObject(strings.Join(elements, sep))
 				}
 			},
 		},
