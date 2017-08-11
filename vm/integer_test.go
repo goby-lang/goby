@@ -242,7 +242,7 @@ func TestIntegerTimesMethod(t *testing.T) {
 	}{
 		{`	a = 0
 		  	3.times do
-		  		a++
+		  		a += 1
 			end
 			a
 			`, 3},

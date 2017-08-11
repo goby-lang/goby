@@ -20,12 +20,9 @@ func TestRequireRelativeCompilation(t *testing.T) {
 1 putstring "foo"
 2 send require_relative 1
 3 pop
-4 pop
-5 getconstant Foo false
-6 send bar 0
-7 pop
-8 pop
-9 leave
+4 getconstant Foo false
+5 send bar 0
+6 leave
 `
 
 	bytecode := compileToBytecode(input)
@@ -45,12 +42,9 @@ func TestRequireCompilation(t *testing.T) {
 1 putstring "foo"
 2 send require 1
 3 pop
-4 pop
-5 getconstant Foo false
-6 send bar 0
-7 pop
-8 pop
-9 leave
+4 getconstant Foo false
+5 send bar 0
+6 leave
 `
 
 	bytecode := compileToBytecode(input)
@@ -108,32 +102,24 @@ i
 0 putself
 1 def_class class:Foo
 2 pop
-3 pop
-4 putobject 100
-5 setlocal 0 0
-6 pop
-7 pop
-8 putobject 10
-9 setlocal 0 1
-10 pop
+3 putobject 100
+4 setlocal 0 0
+5 pop
+6 putobject 10
+7 setlocal 0 1
+8 pop
+9 putobject 1000
+10 setlocal 0 2
 11 pop
-12 putobject 1000
-13 setlocal 0 2
-14 pop
+12 getconstant Foo false
+13 send new 0
+14 setlocal 0 3
 15 pop
-16 getconstant Foo false
-17 send new 0
-18 setlocal 0 3
-19 pop
-20 pop
-21 getlocal 0 3
-22 send bar 0 block:0
-23 pop
-24 pop
-25 getlocal 0 1
-26 pop
-27 pop
-28 leave
+16 getlocal 0 3
+17 send bar 0 block:0
+18 pop
+19 getlocal 0 1
+20 leave
 `
 	bytecode := compileToBytecode(input)
 	compareBytecode(t, bytecode, expected)
@@ -177,17 +163,13 @@ puts(x)
 0 putobject 1
 1 setlocal 0 0
 2 pop
-3 pop
-4 putself
-5 send foo 0 block:0
-6 pop
-7 pop
-8 putself
-9 getlocal 0 0
-10 send puts 1
-11 pop
-12 pop
-13 leave
+3 putself
+4 send foo 0 block:0
+5 pop
+6 putself
+7 getlocal 0 0
+8 send puts 1
+9 leave
 `
 
 	bytecode := compileToBytecode(input)
@@ -208,9 +190,7 @@ func TestArithmeticCompilation(t *testing.T) {
 4 send + 1
 5 putobject 2
 6 send / 1
-7 pop
-8 pop
-9 leave
+7 leave
 `
 
 	bytecode := compileToBytecode(input)
@@ -245,17 +225,13 @@ func TestBasicMethodReDefineAndExecution(t *testing.T) {
 0 putself
 1 putstring "foo"
 2 def_method 1
-3 pop
-4 putself
-5 putstring "foo"
-6 def_method 1
-7 pop
-8 putself
-9 putobject 11
-10 send foo 1
-11 pop
-12 pop
-13 leave
+3 putself
+4 putstring "foo"
+5 def_method 1
+6 putself
+7 putobject 11
+8 send foo 1
+9 leave
 `
 
 	bytecode := compileToBytecode(input)
@@ -287,14 +263,11 @@ func TestBasicMethodDefineAndExecution(t *testing.T) {
 0 putself
 1 putstring "foo"
 2 def_method 2
-3 pop
-4 putself
-5 putobject 11
-6 putobject 1
-7 send foo 2
-8 pop
-9 pop
-10 leave
+3 putself
+4 putobject 11
+5 putobject 1
+6 send foo 2
+7 leave
 `
 
 	bytecode := compileToBytecode(input)
@@ -322,13 +295,10 @@ func TestMethodDefWithDefaultValueArgument(t *testing.T) {
 0 putself
 1 putstring "foo"
 2 def_method 2
-3 pop
-4 putself
-5 putobject 100
-6 send foo 1
-7 pop
-8 pop
-9 leave
+3 putself
+4 putobject 100
+5 send foo 1
+6 leave
 `
 
 	bytecode := compileToBytecode(input)
@@ -338,6 +308,7 @@ func TestMethodDefWithDefaultValueArgument(t *testing.T) {
 func compileToBytecode(input string) string {
 	l := lexer.New(input)
 	p := parser.New(l)
+	p.Mode = parser.TestMode
 	program, err := p.ParseProgram()
 	if err != nil {
 		panic(err.Message)
@@ -357,7 +328,8 @@ Expect:
 "%s"
 
 Got:
-"%s"
+
+%s
 `, expected, value)
 	}
 }

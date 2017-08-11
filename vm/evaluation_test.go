@@ -1015,24 +1015,24 @@ func TestPostfixMethodCall(t *testing.T) {
 	}{
 		{`
 		a = 1
-		a++
+		a += 1
 		a
 		`, 2},
 		{`
 		a = 10
-		a--
+		a -= 1
 		a
 		`,
 			9},
 		{`
 		a = 0
-		a--
+		a -= 1
 		a
 		`,
 			-1},
 		{`
 		a = -5
-		a++
+		a += 1
 		a
 		`,
 			-4},
@@ -1324,6 +1324,36 @@ func TestAssignmentEvaluation(t *testing.T) {
 		@b[1] = 10
 		@a[1]
 		`, 2},
+		{`
+		a = [1, 2]
+		a[1] += 2
+		a[1]
+		`, 4},
+		{`
+		a = [1, 2]
+		a[1] -= 2
+		a[1]
+		`, 0},
+		{`
+		a = []
+		a[0] ||= 2
+		a[0]
+		`, 2},
+		{`
+		h = { foo: 2 }
+		h[:foo] += 2
+		h[:foo]
+		`, 4},
+		{`
+		h = { foo: 2 }
+		h[:foo] -= 2
+		h[:foo]
+		`, 0},
+		{`
+		h = {}
+		h[:foo] ||= 2
+		h[:foo]
+		`, 2},
 	}
 
 	for i, tt := range tests {
@@ -1586,6 +1616,41 @@ func TestMultiVarAssignment(t *testing.T) {
 		f.bar([10, 100, 200])
 		f.c
 		`, 310},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestRemoveUnusedExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		1
+		100
+		10
+		`, 10},
+		{`
+		[1, 2]
+		"123"
+		10
+		`, 10},
+		{`
+		@foo
+		10
+		`, 10},
+		{`
+		class Bar; end
+		Bar
+		10
+		`, 10},
 	}
 
 	for i, tt := range tests {
