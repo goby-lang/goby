@@ -326,6 +326,11 @@ func (l *Lexer) readString(ch byte) string {
 		l.readChar()
 	}
 
+	if l.peekChar() == 0 {
+		l.readChar()
+		return ""
+	}
+
 	l.readChar()                           // currently at string's last letter
 	result := l.input[position:l.position] // get full string
 	l.readChar()                           // move to string's later quote
