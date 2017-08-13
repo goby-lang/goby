@@ -71,6 +71,28 @@ func builtInDBClassMethods() []*BuiltInMethodObject {
 func builtInDBInstanceMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 		{
+			Name: "close",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					conn, err := getDBConn(t, receiver)
+
+					if err != nil {
+						return t.vm.initErrorObject(InternalError, err.Error())
+					}
+
+					err = conn.Close()
+
+					if err != nil {
+						if err != nil {
+							return t.vm.initErrorObject(InternalError, "Error happens when closing DB connection: %s", err.Error())
+						}
+					}
+
+					return TRUE
+				}
+			},
+		},
+		{
 			Name: "exec",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {

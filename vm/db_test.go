@@ -57,6 +57,34 @@ func TestPGConnectionPing(t *testing.T) {
 	}
 }
 
+func TestDBClose(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+			require "db"
+
+			db = DB.open("postgres", "user=postgres sslmode=disable")
+			first_ping = db.ping # This should be successful
+
+			db.close
+			second_ping = db.ping # This should be failed
+
+			first_ping && !second_ping
+			`,
+			true},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestDBExec(t *testing.T) {
 	setupDB(t)
 
