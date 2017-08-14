@@ -58,6 +58,18 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
+			Name: "static",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					prefix := args[0].(*StringObject).value
+					fileName := args[1].(*StringObject).value
+					router.PathPrefix(prefix).Handler(http.StripPrefix(prefix, http.FileServer(http.Dir(fileName))))
+
+					return receiver
+				}
+			},
+		},
+		{
 			Name: "start",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
