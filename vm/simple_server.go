@@ -58,6 +58,18 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
+			Name: "static",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					prefix := args[0].(*StringObject).value
+					fileName := args[1].(*StringObject).value
+					router.PathPrefix(prefix).Handler(http.StripPrefix(prefix, http.FileServer(http.Dir(fileName))))
+
+					return receiver
+				}
+			},
+		},
+		{
 			Name: "start",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -87,7 +99,7 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 
 					fileRoot, serveStatic := server.InstanceVariables.get("@file_root")
 
-					if serveStatic {
+					if serveStatic && fileRoot.Class() != t.vm.objectClass.getClassConstant(nullClass) {
 						fr := fileRoot.(*StringObject).value
 						currentDir, _ := os.Getwd()
 						fp := filepath.Join(currentDir, fr)
@@ -116,7 +128,13 @@ func newHandler(t *thread, blockFrame *callFrame) func(http.ResponseWriter, *htt
 		thread := t.vm.newThread()
 		res := httpResponseClass.initializeInstance()
 		req := initRequest(t, w, r)
-		thread.builtInMethodYield(blockFrame, req, res)
+		result := thread.builtInMethodYield(blockFrame, req, res)
+
+		if err, ok := result.Target.(*Error); ok {
+			log.Printf("Error: %s", err.Message)
+			res.instanceVariableSet("@status", t.vm.initIntegerObject(500))
+		}
+
 		thread = nil
 		setupResponse(w, r, res)
 	}
@@ -172,16 +190,18 @@ func setupResponse(w http.ResponseWriter, req *http.Request, res *RObject) {
 		r.body = resBody.(*StringObject).value
 	}
 
-	contentType, ok := res.instanceVariableGet("@content_type")
+	h, ok := res.instanceVariableGet("@headers")
 
-	if !ok {
-		r.contentType = "text/plain; charset=utf-8"
+	if headers, isHashObject := h.(*HashObject); ok && isHashObject {
+		for k, v := range headers.Pairs {
+			w.Header().Set(k, v.(*StringObject).value)
+		}
 	} else {
-		r.contentType = contentType.toString()
+		r.contentType = "text/plain; charset=utf-8"
+		w.Header().Set("Content-Type", r.contentType) // normal header
 	}
 
 	w.WriteHeader(r.status)
-	w.Header().Set("Content-Type", r.contentType) // normal header
 
 	io.WriteString(w, r.body)
 	log.Printf("%s %s %s %d\n", req.Method, req.URL.Path, req.Proto, r.status)
