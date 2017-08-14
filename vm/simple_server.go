@@ -116,7 +116,13 @@ func newHandler(t *thread, blockFrame *callFrame) func(http.ResponseWriter, *htt
 		thread := t.vm.newThread()
 		res := httpResponseClass.initializeInstance()
 		req := initRequest(t, w, r)
-		thread.builtInMethodYield(blockFrame, req, res)
+		result := thread.builtInMethodYield(blockFrame, req, res)
+
+		if err, ok := result.Target.(*Error); ok {
+			log.Printf("Error: %s", err.Message)
+			res.instanceVariableSet("@status", t.vm.initIntegerObject(500))
+		}
+
 		thread = nil
 		setupResponse(w, r, res)
 	}
