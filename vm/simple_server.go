@@ -178,16 +178,18 @@ func setupResponse(w http.ResponseWriter, req *http.Request, res *RObject) {
 		r.body = resBody.(*StringObject).value
 	}
 
-	contentType, ok := res.instanceVariableGet("@content_type")
+	h, ok := res.instanceVariableGet("@headers")
 
-	if !ok {
-		r.contentType = "text/plain; charset=utf-8"
+	if headers, isHashObject := h.(*HashObject); ok && isHashObject {
+		for k, v := range headers.Pairs {
+			w.Header().Set(k, v.(*StringObject).value)
+		}
 	} else {
-		r.contentType = contentType.toString()
+		r.contentType = "text/plain; charset=utf-8"
+		w.Header().Set("Content-Type", r.contentType) // normal header
 	}
 
 	w.WriteHeader(r.status)
-	w.Header().Set("Content-Type", r.contentType) // normal header
 
 	io.WriteString(w, r.body)
 	log.Printf("%s %s %s %d\n", req.Method, req.URL.Path, req.Proto, r.status)

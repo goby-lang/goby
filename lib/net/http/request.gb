@@ -9,6 +9,9 @@ module Net
       end
 
       def set_header(key, value)
+        if @headers.nil?
+          @headers = {}
+        end
         @headers[key] = value
       end
 
