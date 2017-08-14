@@ -87,7 +87,7 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 
 					fileRoot, serveStatic := server.InstanceVariables.get("@file_root")
 
-					if serveStatic {
+					if serveStatic && fileRoot.Class() != t.vm.objectClass.getClassConstant(nullClass) {
 						fr := fileRoot.(*StringObject).value
 						currentDir, _ := os.Getwd()
 						fp := filepath.Join(currentDir, fr)
