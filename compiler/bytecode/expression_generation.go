@@ -149,22 +149,22 @@ func (g *Generator) compileBlockArgExpression(index int, exp *ast.CallExpression
 }
 
 func (g *Generator) compileIfExpression(is *InstructionSet, exp *ast.IfExpression, scope *scope, table *localTable) {
-	g.compileExpression(is, exp.Condition, scope, table)
+	anchorLast := &anchor{}
 
-	anchor1 := &anchor{}
-	anchor2 := &anchor{}
+	for _, c := range exp.Conditionals {
+		anchorConditional := &anchor{}
 
-	is.define(BranchUnless, anchor1)
+		g.compileExpression(is, c.Condition, scope, table)
+		is.define(BranchUnless, anchorConditional)
 
-	g.compileCodeBlock(is, exp.Consequence, scope, table)
-
-	anchor1.line = is.count + 1
-
-	is.define(Jump, anchor2)
+		g.compileCodeBlock(is, c.Consequence, scope, table)
+		anchorConditional.line = is.count + 1
+		is.define(Jump, anchorLast)
+	}
 
 	if exp.Alternative == nil {
 		// jump over the `putnil` in false case
-		anchor2.line = anchor1.line + 1
+		anchorLast.line = is.count + 1
 		is.define(PutNull)
 
 		return
@@ -172,7 +172,7 @@ func (g *Generator) compileIfExpression(is *InstructionSet, exp *ast.IfExpressio
 
 	g.compileCodeBlock(is, exp.Alternative, scope, table)
 
-	anchor2.line = is.count
+	anchorLast.line = is.count
 }
 
 func (g *Generator) compilePrefixExpression(is *InstructionSet, exp *ast.PrefixExpression, scope *scope, table *localTable) {

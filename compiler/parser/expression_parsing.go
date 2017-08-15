@@ -469,11 +469,8 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 
 func (p *Parser) parseIfExpression() ast.Expression {
 	ie := &ast.IfExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
-	p.nextToken()
-	ie.Condition = p.parseExpression(NORMAL)
-
-	ie.Consequence = p.parseBlockStatement()
-	ie.Consequence.KeepLastValue()
+	// parse if and elsif expressions
+	ie.Conditionals = p.parseConditionalExpressions()
 
 	// curToken is now ELSE or RBRACE
 	if p.curTokenIs(token.Else) {
@@ -482,6 +479,28 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	}
 
 	return ie
+}
+
+func (p *Parser) parseConditionalExpressions() []*ast.ConditionalExpression {
+	// first conditional expression should start with if
+	cs := []*ast.ConditionalExpression{p.parseConditionalExpression()}
+
+	for p.curTokenIs(token.ElsIf) {
+		cs = append(cs, p.parseConditionalExpression())
+	}
+
+	return cs
+}
+
+func (p *Parser) parseConditionalExpression() *ast.ConditionalExpression {
+	ce := &ast.ConditionalExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
+	p.nextToken()
+	ce.Condition = p.parseExpression(NORMAL)
+
+	ce.Consequence = p.parseBlockStatement()
+	ce.Consequence.KeepLastValue()
+
+	return ce
 }
 
 func (p *Parser) parseYieldExpression() ast.Expression {
