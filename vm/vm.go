@@ -35,6 +35,7 @@ var standardLibraries = map[string]func(*VM){
 	"uri":               initURIClass,
 	"db":                initDBClass,
 	"plugin":            initPluginClass,
+	"json":              initJSONClass,
 }
 
 // VM represents a stack based virtual machine.

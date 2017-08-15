@@ -513,6 +513,8 @@ func (vm *VM) initObjectFromGoType(value interface{}) Object {
 		return vm.initIntegerObject(int(v))
 	case int32:
 		return vm.initIntegerObject(int(v))
+	case float64:
+		return vm.initIntegerObject(int(v))
 	case []uint8:
 		bytes := []byte{}
 
