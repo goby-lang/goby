@@ -131,7 +131,7 @@ func TestMultipleVariableAssignmentCompilation(t *testing.T) {
 4 leave
 <ProgramStart>
 0 putself
-1 putstring "foo"
+1 putstring foo
 2 def_method 0
 3 putself
 4 send foo 0
@@ -206,13 +206,13 @@ func TestArrayCompilation(t *testing.T) {
 <ProgramStart>
 0 putobject 1
 1 putobject 2
-2 putstring "bar"
+2 putstring bar
 3 newarray 3
 4 setlocal 0 0
 5 pop
 6 getlocal 0 0
 7 putobject 0
-8 putstring "foo"
+8 putstring foo
 9 send []= 2
 10 pop
 11 getlocal 0 0
@@ -235,9 +235,9 @@ func TestHashCompilation(t *testing.T) {
 
 	expected1 := `
 <ProgramStart>
-0 putstring "foo"
+0 putstring foo
 1 putobject 1
-2 putstring "bar"
+2 putstring bar
 3 putobject 5
 4 newhash 4
 5 setlocal 0 0
@@ -246,30 +246,30 @@ func TestHashCompilation(t *testing.T) {
 8 setlocal 0 1
 9 pop
 10 getlocal 0 1
-11 putstring "baz"
+11 putstring baz
 12 getlocal 0 0
-13 putstring "bar"
+13 putstring bar
 14 send [] 1
 15 getlocal 0 0
-16 putstring "foo"
+16 putstring foo
 17 send [] 1
 18 send - 1
 19 send []= 2
 20 pop
 21 getlocal 0 1
-22 putstring "baz"
+22 putstring baz
 23 send [] 1
 24 getlocal 0 0
-25 putstring "bar"
+25 putstring bar
 26 send [] 1
 27 send + 1
 28 leave
 `
 	expected2 := `
 <ProgramStart>
-0 putstring "bar"
+0 putstring bar
 1 putobject 5
-2 putstring "foo"
+2 putstring foo
 3 putobject 1
 4 newhash 4
 5 setlocal 0 0
@@ -278,21 +278,21 @@ func TestHashCompilation(t *testing.T) {
 8 setlocal 0 1
 9 pop
 10 getlocal 0 1
-11 putstring "baz"
+11 putstring baz
 12 getlocal 0 0
-13 putstring "bar"
+13 putstring bar
 14 send [] 1
 15 getlocal 0 0
-16 putstring "foo"
+16 putstring foo
 17 send [] 1
 18 send - 1
 19 send []= 2
 20 pop
 21 getlocal 0 1
-22 putstring "baz"
+22 putstring baz
 23 send [] 1
 24 getlocal 0 0
-25 putstring "bar"
+25 putstring bar
 26 send [] 1
 27 send + 1
 28 leave

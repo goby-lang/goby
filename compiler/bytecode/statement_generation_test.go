@@ -41,10 +41,10 @@ Foo.new(100, 50).bar
 5 leave
 <DefClass:Foo>
 0 putself
-1 putstring "initialize"
+1 putstring initialize
 2 def_method 2
 3 putself
-4 putstring "bar"
+4 putstring bar
 5 def_method 0
 6 leave
 <ProgramStart>
@@ -82,7 +82,7 @@ func TestNamespacedClass(t *testing.T) {
 1 leave
 <DefClass:Baz>
 0 putself
-1 putstring "bar"
+1 putstring bar
 2 def_method 0
 3 leave
 <DefClass:Bar>
@@ -127,7 +127,7 @@ Foo.bar
 1 leave
 <DefClass:Foo>
 0 putself
-1 putstring "bar"
+1 putstring bar
 2 def_singleton_method 0
 3 leave
 <ProgramStart>
@@ -162,7 +162,7 @@ Foo.new.bar
 1 leave
 <DefClass:Bar>
 0 putself
-1 putstring "bar"
+1 putstring bar
 2 def_method 0
 3 leave
 <DefClass:Foo>
@@ -207,7 +207,7 @@ Foo.new.bar
 1 leave
 <DefClass:Bar>
 0 putself
-1 putstring "bar"
+1 putstring bar
 2 def_method 0
 3 leave
 <DefClass:Foo>

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"strconv"
-	"strings"
 )
 
 // instructionTranslator is responsible for parsing bytecodes
@@ -92,8 +91,7 @@ func (it *instructionTranslator) transferInstruction(is *instructionSet, i *byte
 
 	switch act {
 	case bytecode.PutString:
-		text := strings.Split(i.Params[0], "\"")[1]
-		params = append(params, text)
+		params = append(params, i.Params[0])
 	case bytecode.BranchUnless, bytecode.BranchIf, bytecode.Jump:
 		line, err := i.AnchorLine()
 

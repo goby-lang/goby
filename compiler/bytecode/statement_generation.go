@@ -1,7 +1,6 @@
 package bytecode
 
 import (
-	"fmt"
 	"github.com/goby-lang/goby/compiler/ast"
 )
 
@@ -146,7 +145,7 @@ func (g *Generator) compileModuleStmt(is *InstructionSet, stmt *ast.ModuleStatem
 
 func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, scope *scope) {
 	is.define(PutSelf)
-	is.define(PutString, fmt.Sprintf("\"%s\"", stmt.Name.Value))
+	is.define(PutString, stmt.Name.Value)
 
 	switch stmt.Receiver.(type) {
 	case *ast.SelfExpression:
