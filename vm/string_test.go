@@ -1047,3 +1047,22 @@ func TestChainingStringMethods(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
+func TestFormattedString(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`String.fmt("This is %s", "goby")`, "This is goby"},
+		{`String.fmt("This is %slang", "goby")`, "This is gobylang"},
+		{`String.fmt("This is %s %s", "goby", "ruby")`, "This is goby ruby"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
