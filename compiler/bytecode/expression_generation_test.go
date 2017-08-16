@@ -71,6 +71,62 @@ func TestIfExpressionWithoutAlternativeCompilation(t *testing.T) {
 	compareBytecode(t, bytecode, expected)
 }
 
+func TestIfExpressionWithElsifCompilation(t *testing.T) {
+	input := `
+	a = 10
+	b = 5
+	if a > b
+	  c = 10
+	elsif a < b
+	  c = 5
+	elsif a == b
+	  c = 1
+	end
+
+	c + 1
+	`
+
+	expected := `
+<ProgramStart>
+0 putobject 10
+1 setlocal 0 0
+2 pop
+3 putobject 5
+4 setlocal 0 1
+5 pop
+6 getlocal 0 0
+7 getlocal 0 1
+8 send > 1
+9 branchunless 13
+10 putobject 10
+11 setlocal 0 2
+12 jump 28
+13 getlocal 0 0
+14 getlocal 0 1
+15 send < 1
+16 branchunless 20
+17 putobject 5
+18 setlocal 0 2
+19 jump 28
+20 getlocal 0 0
+21 getlocal 0 1
+22 send == 1
+23 branchunless 27
+24 putobject 1
+25 setlocal 0 2
+26 jump 28
+27 putnil
+28 pop
+29 getlocal 0 2
+30 putobject 1
+31 send + 1
+32 leave
+`
+
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
 func TestIfExpressionWithAlternativeCompilation(t *testing.T) {
 	input := `
 	a = 10
