@@ -168,6 +168,56 @@ func TestIfExpressionWithAlternativeCompilation(t *testing.T) {
 	compareBytecode(t, bytecode, expected)
 }
 
+func TestIfExpressionWithElsifAndAlternativeCompilation(t *testing.T) {
+	input := `
+	a = 10
+	b = 5
+	if a > b
+	  c = 10
+	elsif a < b
+	  c = 9
+	else
+	  c = 8
+	end
+
+	c + 1
+	`
+
+	expected := `
+<ProgramStart>
+0 putobject 10
+1 setlocal 0 0
+2 pop
+3 putobject 5
+4 setlocal 0 1
+5 pop
+6 getlocal 0 0
+7 getlocal 0 1
+8 send > 1
+9 branchunless 13
+10 putobject 10
+11 setlocal 0 2
+12 jump 22
+13 getlocal 0 0
+14 getlocal 0 1
+15 send < 1
+16 branchunless 20
+17 putobject 9
+18 setlocal 0 2
+19 jump 22
+20 putobject 8
+21 setlocal 0 2
+22 pop
+23 getlocal 0 2
+24 putobject 1
+25 send + 1
+26 leave
+`
+
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
 func TestMultipleVariableAssignmentCompilation(t *testing.T) {
 	input := `
 
