@@ -161,7 +161,7 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 }
 
 func (t *thread) returnError(errorType, format string, args ...interface{}) {
-	err := t.vm.initErrorObject(errorType, format, args)
+	err := t.vm.initErrorObject(errorType, format, args...)
 	t.stack.push(&Pointer{Target: err})
 }
 
