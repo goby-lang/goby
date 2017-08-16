@@ -4,6 +4,24 @@ import (
 	"testing"
 )
 
+func TestArrayClassSuperclass(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`Array.class.name`, "Class"},
+		{`Array.superclass.name`, "Object"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayEvaluation(t *testing.T) {
 	input := `
 	[1, "234", true]

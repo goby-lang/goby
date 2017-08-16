@@ -7,6 +7,24 @@ import (
 	"testing"
 )
 
+func TestHashClassSuperclass(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`Hash.class.name`, "Class"},
+		{`Hash.superclass.name`, "Object"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestEvalHashExpression(t *testing.T) {
 	input := `
 	{ foo: 123, bar: "test", baz: true }
