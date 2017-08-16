@@ -118,17 +118,14 @@ func TestNullAssignmentByOperation(t *testing.T) {
 }
 
 func TestNullIsNilMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input  string
-		errMsg string
-	}{
-		{`nil.nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1"},
+	testsFail := []errorTestCase{
+		{`nil.nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}

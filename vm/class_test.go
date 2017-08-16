@@ -97,8 +97,7 @@ func TestAttrReaderAndWriter(t *testing.T) {
 }
 
 func TestClassInheritModule(t *testing.T) {
-	input := `
-module Foo
+	input := `module Foo
 end
 
 class Bar < Foo
@@ -505,14 +504,12 @@ func TestRequireSuccess(t *testing.T) {
 }
 
 func TestRequireFail(t *testing.T) {
-	input := `
-	require "bar"
-	`
+	input := `require "bar"`
 	expected := `InternalError: Can't require "bar"`
 
 	v := initTestVM()
 	evaluated := v.testEval(t, input, getFilename())
-	checkError(t, 0, evaluated, expected, getFilename(), 0)
+	checkError(t, 0, evaluated, expected, getFilename(), 1)
 	v.checkCFP(t, 0, 1)
 	v.checkSP(t, 0, 1)
 }
@@ -542,21 +539,18 @@ func TestGeneralIsNilMethod(t *testing.T) {
 }
 
 func TestGeneralIsNilMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input  string
-		errMsg string
-	}{
-		{`123.nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1"},
-		{`"Fail".nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1"},
-		{`[1, 2, 3].nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1"},
-		{`{ a: 1, b: 2, c: 3 }.nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1"},
-		{`(1..10).nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1"},
+	testsFail := []errorTestCase{
+		{`123.nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`"Fail".nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`[1, 2, 3].nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`{ a: 1, b: 2, c: 3 }.nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`(1..10).nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -679,22 +673,19 @@ func TestGeneralIsAMethod(t *testing.T) {
 }
 
 func TestGeneralIsAMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input  string
-		errMsg string
-	}{
-		{`123.is_a?`, "ArgumentError: Expect 1 argument. got: 0"},
-		{`Class.is_a?`, "ArgumentError: Expect 1 argument. got: 0"},
-		{`123.is_a?(123, 456)`, "ArgumentError: Expect 1 argument. got: 2"},
-		{`123.is_a?(Integer, String)`, "ArgumentError: Expect 1 argument. got: 2"},
-		{`123.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean"},
-		{`Class.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean"},
+	testsFail := []errorTestCase{
+		{`123.is_a?`, "ArgumentError: Expect 1 argument. got: 0", 1},
+		{`Class.is_a?`, "ArgumentError: Expect 1 argument. got: 0", 1},
+		{`123.is_a?(123, 456)`, "ArgumentError: Expect 1 argument. got: 2", 1},
+		{`123.is_a?(Integer, String)`, "ArgumentError: Expect 1 argument. got: 2", 1},
+		{`123.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1},
+		{`Class.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -725,21 +716,18 @@ func TestClassNameClassMethod(t *testing.T) {
 }
 
 func TestClassNameClassMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input  string
-		errMsg string
-	}{
-		{`"Taipei".name`, "UndefinedMethodError: Undefined Method 'name' for Taipei"},
-		{`123.name`, "UndefinedMethodError: Undefined Method 'name' for 123"},
-		{`true.name`, "UndefinedMethodError: Undefined Method 'name' for true"},
-		{`Integer.name(Integer)`, "ArgumentError: Expect 0 argument. got: 1"},
-		{`String.name(Hash, Array)`, "ArgumentError: Expect 0 argument. got: 2"},
+	testsFail := []errorTestCase{
+		{`"Taipei".name`, "UndefinedMethodError: Undefined Method 'name' for Taipei", 1},
+		{`123.name`, "UndefinedMethodError: Undefined Method 'name' for 123", 1},
+		{`true.name`, "UndefinedMethodError: Undefined Method 'name' for true", 1},
+		{`Integer.name(Integer)`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`String.name(Hash, Array)`, "ArgumentError: Expect 0 argument. got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -777,21 +765,18 @@ func TestClassSuperclassClassMethod(t *testing.T) {
 }
 
 func TestClassSuperclassClassMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input  string
-		errMsg string
-	}{
-		{`"Taipei".superclass`, "UndefinedMethodError: Undefined Method 'superclass' for Taipei"},
-		{`123.superclass`, "UndefinedMethodError: Undefined Method 'superclass' for 123"},
-		{`true.superclass`, "UndefinedMethodError: Undefined Method 'superclass' for true"},
-		{`Integer.superclass(Integer)`, "ArgumentError: Expect 0 argument. got: 1"},
-		{`String.superclass(Hash, Array)`, "ArgumentError: Expect 0 argument. got: 2"},
+	testsFail := []errorTestCase{
+		{`"Taipei".superclass`, "UndefinedMethodError: Undefined Method 'superclass' for Taipei", 1},
+		{`123.superclass`, "UndefinedMethodError: Undefined Method 'superclass' for 123", 1},
+		{`true.superclass`, "UndefinedMethodError: Undefined Method 'superclass' for true", 1},
+		{`Integer.superclass(Integer)`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`String.superclass(Hash, Array)`, "ArgumentError: Expect 0 argument. got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}

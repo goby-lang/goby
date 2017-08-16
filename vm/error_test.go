@@ -5,41 +5,62 @@ import (
 	"testing"
 )
 
-func TestUndefinedMethodError(t *testing.T) {
-	tests := []struct {
-		input    string
-		errorMsg string
-	}{
-		{`a`, "UndefinedMethodError: Undefined Method 'a' for <Instance of: Object>"},
-		{`
-		 class Foo
+func TestErrorLineNumber(t *testing.T) {
+	tests := []errorTestCase{
+		{`a
+		123
+		`, "UndefinedMethodError: Undefined Method 'a' for <Instance of: Object>", 1},
+		{`class Foo
 		 end
 
 		 a = Foo.new
 		 a.bar = "fuz"
-		`, "UndefinedMethodError: Undefined Method 'bar=' for <Instance of: Foo>"},
-		{`
-		 class Foo
-		   attr_reader("foo")
-		 end
-
-		 a = Foo.new
-		 a.bar = "fuz"
-		`, "UndefinedMethodError: Undefined Method 'bar=' for <Instance of: Foo>"},
-		{`
-		class Foo
-		  attr_reader("bar")
-		end
-
-		a = Foo.new
-		a.bar = "fuz"
-		`, "UndefinedMethodError: Undefined Method 'bar=' for <Instance of: Foo>"},
+		 a.z
+		`, "UndefinedMethodError: Undefined Method 'bar=' for <Instance of: Foo>",
+			5},
 	}
 
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errorMsg, getFilename(), 0)
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestUndefinedMethodError(t *testing.T) {
+	tests := []errorTestCase{
+		{`a`, "UndefinedMethodError: Undefined Method 'a' for <Instance of: Object>", 1},
+		{`class Foo
+		 end
+
+		 a = Foo.new
+		 a.bar = "fuz"
+		`, "UndefinedMethodError: Undefined Method 'bar=' for <Instance of: Foo>",
+			5},
+		{`class Foo
+		   attr_reader("foo")
+		 end
+
+		 a = Foo.new
+		 a.bar = "fuz"
+		`, "UndefinedMethodError: Undefined Method 'bar=' for <Instance of: Foo>",
+			6},
+		{`class Foo
+		  attr_reader("bar")
+		end
+
+		a = Foo.new
+		a.bar = "fuz"
+		`, "UndefinedMethodError: Undefined Method 'bar=' for <Instance of: Foo>",
+			6},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -47,104 +68,91 @@ func TestUndefinedMethodError(t *testing.T) {
 }
 
 func TestUnsupportedMethodError(t *testing.T) {
-	tests := []struct {
-		input    string
-		errorMsg string
-	}{
-		{`String.new`, "UnsupportedMethodError: Unsupported Method #new for String"},
-		{`Integer.new`, "UnsupportedMethodError: Unsupported Method #new for Integer"},
-		{`Hash.new`, "UnsupportedMethodError: Unsupported Method #new for Hash"},
-		{`Array.new`, "UnsupportedMethodError: Unsupported Method #new for Array"},
-		{`Boolean.new`, "UnsupportedMethodError: Unsupported Method #new for Boolean"},
-		{`Null.new`, "UnsupportedMethodError: Unsupported Method #new for Null"},
+	tests := []errorTestCase{
+		{`String.new`, "UnsupportedMethodError: Unsupported Method #new for String", 1},
+		{`Integer.new`, "UnsupportedMethodError: Unsupported Method #new for Integer", 1},
+		{`Hash.new`, "UnsupportedMethodError: Unsupported Method #new for Hash", 1},
+		{`Array.new`, "UnsupportedMethodError: Unsupported Method #new for Array", 1},
+		{`Boolean.new`, "UnsupportedMethodError: Unsupported Method #new for Boolean", 1},
+		{`Null.new`, "UnsupportedMethodError: Unsupported Method #new for Null", 1},
 	}
 
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errorMsg, getFilename(), 0)
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
 }
 
 func TestArgumentError(t *testing.T) {
-	tests := []struct {
-		input  string
-		errMsg string
-	}{
-		{`
-		def foo(x)
+	tests := []errorTestCase{
+		{`def foo(x)
 		end
 
 		foo
 		`,
-			"ArgumentError: Expect at least 1 args for method 'foo'. got: 0"},
-		{`
-		def foo(x)
+			"ArgumentError: Expect at least 1 args for method 'foo'. got: 0",
+			4},
+		{`def foo(x)
 		end
 
 		foo(1, 2)
 		`,
-			"ArgumentError: Expect at most 1 args for method 'foo'. got: 2"},
-		{`
-		def foo(x = 10)
+			"ArgumentError: Expect at most 1 args for method 'foo'. got: 2",
+			4},
+		{`def foo(x = 10)
 		end
 
 		foo(1, 2)
 		`,
-			"ArgumentError: Expect at most 1 args for method 'foo'. got: 2"},
-		{`
-		def foo(x, y = 10)
+			"ArgumentError: Expect at most 1 args for method 'foo'. got: 2",
+			4},
+		{`def foo(x, y = 10)
 		end
 
 		foo(1, 2, 3)
 		`,
-			"ArgumentError: Expect at most 2 args for method 'foo'. got: 3"},
-		{`
-		"1234567890".include? "123", Class
-		`,
+			"ArgumentError: Expect at most 2 args for method 'foo'. got: 3",
+			4},
+		{`"1234567890".include? "123", Class`,
 			"ArgumentError: Expect 1 argument. got=2",
-		},
-		{`
-		"1234567890".include? "123", Class, String
-		`,
+			1},
+		{`"1234567890".include? "123", Class, String`,
 			"ArgumentError: Expect 1 argument. got=3",
-		},
+			1},
 	}
 
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
 }
 
 func TestConstantAlreadyInitializedError(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected string
-	}{
-		{`
-		Foo = 10
+	tests := []errorTestCase{
+		{`Foo = 10
 		Foo = 100
-		`, "ConstantAlreadyInitializedError: Constant Foo already been initialized. Can't assign value to a constant twice."},
-		{`
-		class Foo; end
+		`, "ConstantAlreadyInitializedError: Constant Foo already been initialized. Can't assign value to a constant twice.",
+			2},
+		{`class Foo; end
 		Foo = 100
-		`, "ConstantAlreadyInitializedError: Constant Foo already been initialized. Can't assign value to a constant twice."},
-		{`
-		module Foo; end
+		`, "ConstantAlreadyInitializedError: Constant Foo already been initialized. Can't assign value to a constant twice.",
+			2},
+		{`module Foo; end
 		Foo = 100
-		`, "ConstantAlreadyInitializedError: Constant Foo already been initialized. Can't assign value to a constant twice."},
+		`, "ConstantAlreadyInitializedError: Constant Foo already been initialized. Can't assign value to a constant twice.",
+			2},
 	}
 
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), 0)
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}

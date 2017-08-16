@@ -258,12 +258,10 @@ func TestArrayConcatMethod(t *testing.T) {
 
 func TestArrayConcatMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`
-		a = [1, 2]
+		{`a = [1, 2]
 		a.concat(3)
 		`, "TypeError: Expect argument to be Array. got: Integer", 2},
-		{`
-		a = []
+		{`a = []
 		a.concat("a")
 		`, "TypeError: Expect argument to be Array. got: String", 2},
 	}
@@ -326,8 +324,8 @@ func TestArrayCountMethod(t *testing.T) {
 
 func TestArrayCountMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`
-		a = [1, 2]
+		{
+			`a = [1, 2]
 		a.count(3, 3)
 		`, "ArgumentError: Expect 1 argument, got=2", 2},
 	}
@@ -460,8 +458,7 @@ func TestArrayFirstMethod(t *testing.T) {
 
 func TestArrayFirstMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`
-		a = [1, 2]
+		{`a = [1, 2]
 		a.first("a")
 		`, "TypeError: Expect argument to be Integer. got: String", 2},
 	}
@@ -504,8 +501,7 @@ func TestArrayFlattenMethod(t *testing.T) {
 
 func TestArrayFlattenMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`
-		a = [1, 2]
+		{`a = [1, 2]
 		a.flatten(1)
 		`, "ArgumentError: Expect 0 argument. got=1", 2},
 	}
@@ -548,8 +544,7 @@ func TestArrayJoinMethod(t *testing.T) {
 
 func TestArrayJoinMethodFailWithArgumentError(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`
-		a = [1, 2]
+		{`a = [1, 2]
 		a.join(",", "-")
 		`, "ArgumentError: Expect 0 or 1 argument. got=2", 2},
 	}
@@ -565,8 +560,7 @@ func TestArrayJoinMethodFailWithArgumentError(t *testing.T) {
 
 func TestArrayJoinMethodFailWithTypeError(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`
-		a = [1, 2]
+		{`a = [1, 2]
 		a.join(1)
 		`, "TypeError: Expect argument to be String. got: Integer", 2},
 	}
@@ -605,8 +599,7 @@ func TestArrayLastMethod(t *testing.T) {
 
 func TestArrayLastMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`
-		a = [1, 2]
+		{`a = [1, 2]
 		a.last("l")
 		`, "TypeError: Expect argument to be Integer. got: String", 2},
 	}
@@ -785,8 +778,7 @@ func TestArrayRotateMethod(t *testing.T) {
 
 func TestArrayRotateMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`
-		a = [1, 2]
+		{`a = [1, 2]
 		a.rotate("a")
 		`,
 			"TypeError: Expect argument to be Integer. got: String",
@@ -870,8 +862,7 @@ func TestArrayShiftMethod(t *testing.T) {
 
 func TestArrayShiftMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`
-		a = [1, 2]
+		{`a = [1, 2]
 		a.shift(3, 3, 4, 5)
 		`,
 			"ArgumentError: Expect 0 argument. got=4",
