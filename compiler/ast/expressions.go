@@ -235,6 +235,7 @@ func (ie *IfExpression) String() string {
 	return out.String()
 }
 
+// ConditionalExpression represents if or elsif expression
 type ConditionalExpression struct {
 	*BaseNode
 	Condition   Expression
@@ -243,6 +244,7 @@ type ConditionalExpression struct {
 
 func (ce *ConditionalExpression) expressionNode() {}
 
+// TokenLiteral returns `if` or `elsif`
 func (ce *ConditionalExpression) TokenLiteral() string {
 	return ce.Token.Literal
 }
