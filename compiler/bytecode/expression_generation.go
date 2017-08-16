@@ -14,7 +14,7 @@ func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, sc
 	case *ast.IntegerLiteral:
 		is.define(PutObject, fmt.Sprint(exp.Value))
 	case *ast.StringLiteral:
-		is.define(PutString, fmt.Sprintf("\"%s\"", exp.Value))
+		is.define(PutString, exp.Value)
 	case *ast.BooleanExpression:
 		is.define(PutObject, fmt.Sprint(exp.Value))
 	case *ast.NilExpression:
@@ -30,7 +30,7 @@ func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, sc
 		is.define(NewArray, len(exp.Elements))
 	case *ast.HashExpression:
 		for key, value := range exp.Data {
-			is.define(PutString, fmt.Sprintf("\"%s\"", key))
+			is.define(PutString, key)
 			g.compileExpression(is, value, scope, table)
 		}
 		is.define(NewHash, len(exp.Data)*2)

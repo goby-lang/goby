@@ -1,6 +1,8 @@
 package vm
 
 import (
+	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 	"unicode"
@@ -51,6 +53,38 @@ func (s *StringObject) Value() interface{} {
 
 func builtInStringClassMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
+		{
+			Name: "fmt",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) < 1 {
+						return t.vm.initErrorObject(ArgumentError, "Expect at least 1 argument. got=%v", strconv.Itoa(len(args)))
+					}
+
+					formatObj, ok := args[0].(*StringObject)
+
+					if !ok {
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
+					}
+
+					format := formatObj.value
+					arguments := []interface{}{}
+
+					for _, arg := range args[1:] {
+						arguments = append(arguments, arg.toString())
+					}
+					re := regexp.MustCompile(`\%s{1}`)
+
+					count := len(re.FindAllString(format, -1))
+
+					if len(args[1:]) != count {
+						return t.vm.initErrorObject(ArgumentError, "Expect %d string arguments. got=%d", count, len(args[1:]))
+					}
+
+					return t.vm.initStringObject(fmt.Sprintf(format, arguments...))
+				}
+			},
+		},
 		{
 			Name: "new",
 			Fn: func(receiver Object) builtinMethodBody {
