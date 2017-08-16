@@ -17,9 +17,10 @@ type action struct {
 }
 
 type instruction struct {
-	action *action
-	Params []interface{}
-	Line   int
+	action     *action
+	Params     []interface{}
+	Line       int
+	sourceLine int
 }
 
 type instructionSet struct {
@@ -29,9 +30,10 @@ type instructionSet struct {
 	argTypes     []int
 }
 
-func (is *instructionSet) define(line int, a *action, params ...interface{}) {
+func (is *instructionSet) define(line int, a *action, params ...interface{}) *instruction {
 	i := &instruction{action: a, Params: params, Line: line}
 	is.instructions = append(is.instructions, i)
+	return i
 }
 
 var builtInActions = map[operationType]*action{

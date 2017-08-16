@@ -11,6 +11,11 @@ type BaseNode struct {
 	isStmt bool
 }
 
+// Line returns node's token's line number
+func (b *BaseNode) Line() int {
+	return b.Token.Line
+}
+
 // IsExp returns if current node should be considered as an expression
 func (b *BaseNode) IsExp() bool {
 	return !b.isStmt
@@ -34,6 +39,7 @@ func (b *BaseNode) MarkAsExp() {
 type node interface {
 	TokenLiteral() string
 	String() string
+	Line() int
 	IsExp() bool
 	IsStmt() bool
 	MarkAsStmt()
