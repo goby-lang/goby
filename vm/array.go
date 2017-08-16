@@ -415,7 +415,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 					arr := receiver.(*ArrayObject)
 
 					if blockFrame == nil {
-						t.vm.initErrorObject(InternalError, CantYieldWithoutBlockFormat)
+						return t.vm.initErrorObject(InternalError, CantYieldWithoutBlockFormat)
 					}
 
 					for _, obj := range arr.Elements {
@@ -432,7 +432,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 					arr := receiver.(*ArrayObject)
 
 					if blockFrame == nil {
-						t.vm.initErrorObject(InternalError, CantYieldWithoutBlockFormat)
+						return t.vm.initErrorObject(InternalError, CantYieldWithoutBlockFormat)
 					}
 
 					for i := range arr.Elements {
@@ -611,7 +611,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 					var elements = make([]Object, len(arr.Elements))
 
 					if blockFrame == nil {
-						t.vm.initErrorObject(InternalError, CantYieldWithoutBlockFormat)
+						return t.vm.initErrorObject(InternalError, CantYieldWithoutBlockFormat)
 					}
 
 					for i, obj := range arr.Elements {
@@ -715,7 +715,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 					var elements []Object
 
 					if blockFrame == nil {
-						t.vm.initErrorObject(InternalError, CantYieldWithoutBlockFormat)
+						return t.vm.initErrorObject(InternalError, CantYieldWithoutBlockFormat)
 					}
 
 					for _, obj := range arr.Elements {
