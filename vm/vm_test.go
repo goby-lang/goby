@@ -11,6 +11,12 @@ import (
 	"testing"
 )
 
+type errorTestCase struct {
+	input     string
+	expected  string
+	errorLine int
+}
+
 func TestVM_REPLExec(t *testing.T) {
 	tests := []struct {
 		inputs   []string

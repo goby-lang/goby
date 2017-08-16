@@ -140,7 +140,7 @@ func TestHashAccessOperationFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -221,7 +221,7 @@ func TestHashClearMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -284,7 +284,7 @@ func TestHashEachKeyMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, tt.expectedCfp)
 		v.checkSP(t, i, 1)
 	}
@@ -375,7 +375,7 @@ func TestHashEachValueMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, tt.expectedCfp)
 		v.checkSP(t, i, 1)
 	}
@@ -411,7 +411,7 @@ func TestHashEmptyMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -457,7 +457,7 @@ func TestHashEqualMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -529,7 +529,7 @@ func TestHashDeleteMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -567,7 +567,7 @@ func TestHashHasKeyMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -608,7 +608,7 @@ func TestHashHasValueMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -654,7 +654,7 @@ func TestHashKeysMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -694,7 +694,7 @@ func TestHashLengthMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -777,7 +777,7 @@ func TestHashMapValuesMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, tt.expectedCfp)
 		v.checkSP(t, i, 1)
 	}
@@ -829,7 +829,7 @@ func TestHashMergeMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -868,7 +868,7 @@ func TestHashSortedKeysMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -942,7 +942,7 @@ func TestHashToArrayMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -1111,7 +1111,7 @@ func TestHashToJSONMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -1148,7 +1148,7 @@ func TestHashToStringMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -1231,7 +1231,7 @@ func TestHashTransformValuesMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, tt.expectedCfp)
 		v.checkSP(t, i, 1)
 	}
@@ -1280,7 +1280,7 @@ func TestHashValuesMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}

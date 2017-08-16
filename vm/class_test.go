@@ -110,7 +110,7 @@ a = Bar.new()
 
 	v := initTestVM()
 	evaluated := v.testEval(t, input, getFilename())
-	checkError(t, 0, evaluated, expected, getFilename())
+	checkError(t, 0, evaluated, expected, getFilename(), 0)
 	v.checkCFP(t, 0, 1)
 	v.checkSP(t, 0, 1)
 }
@@ -512,7 +512,7 @@ func TestRequireFail(t *testing.T) {
 
 	v := initTestVM()
 	evaluated := v.testEval(t, input, getFilename())
-	checkError(t, 0, evaluated, expected, getFilename())
+	checkError(t, 0, evaluated, expected, getFilename(), 0)
 	v.checkCFP(t, 0, 1)
 	v.checkSP(t, 0, 1)
 }
@@ -556,7 +556,7 @@ func TestGeneralIsNilMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -694,7 +694,7 @@ func TestGeneralIsAMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -739,7 +739,7 @@ func TestClassNameClassMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -791,7 +791,7 @@ func TestClassSuperclassClassMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}

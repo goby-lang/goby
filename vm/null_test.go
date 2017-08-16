@@ -128,7 +128,7 @@ func TestNullIsNilMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}

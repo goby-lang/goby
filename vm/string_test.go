@@ -141,7 +141,7 @@ func TestStringConparisonFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -200,7 +200,7 @@ func TestStringOperationFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -282,7 +282,7 @@ func TestStringConcatenateMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -340,7 +340,7 @@ func TestStringDeleteMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -404,7 +404,7 @@ func TestStringEndWithMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -463,7 +463,7 @@ func TestStringEqualMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -503,7 +503,7 @@ func TestStringGlobalSubstituteMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -547,7 +547,7 @@ func TestStringIncludeMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -595,7 +595,7 @@ func TestStringInsertMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -639,7 +639,7 @@ func TestStringLeftJustifyMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -697,7 +697,7 @@ func TestStringReplaceMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -762,7 +762,7 @@ func TestStringRightJustifyFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -847,7 +847,7 @@ func TestStringSliceMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -947,7 +947,7 @@ func TestStringSplitMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -991,7 +991,7 @@ func TestStringStartWithMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}

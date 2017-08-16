@@ -26,10 +26,12 @@ func (vm *VM) initErrorObject(errorType, format string, args ...interface{}) *Er
 
 	t := vm.mainThread
 	cf := t.callFrameStack.callFrames[t.cfp-1]
+	i := cf.instructionSet.instructions[cf.pc-1]
 
 	return &Error{
 		baseObj: &baseObj{class: errClass},
-		Message: fmt.Sprintf("%s. At %s:%d", fmt.Sprintf(errorType+": "+format, args...), cf.instructionSet.filename, 0),
+		// Add 1 to source line because it's zero indexed
+		Message: fmt.Sprintf("%s. At %s:%d", fmt.Sprintf(errorType+": "+format, args...), cf.instructionSet.filename, i.sourceLine+1),
 	}
 }
 

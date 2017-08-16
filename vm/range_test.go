@@ -212,7 +212,7 @@ func TestRangeBsearchMethodFail(t *testing.T) {
 
 	for i, tt := range testsFail {
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errorMsg, getFilename())
+		checkError(t, i, evaluated, tt.errorMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}

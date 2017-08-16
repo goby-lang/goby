@@ -39,7 +39,7 @@ func TestUndefinedMethodError(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errorMsg, getFilename())
+		checkError(t, i, evaluated, tt.errorMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -62,7 +62,7 @@ func TestUnsupportedMethodError(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errorMsg, getFilename())
+		checkError(t, i, evaluated, tt.errorMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -116,7 +116,7 @@ func TestArgumentError(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.errMsg, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -144,19 +144,19 @@ func TestConstantAlreadyInitializedError(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), 0)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
 }
 
-func checkError(t *testing.T, index int, evaluated Object, expectedErrMsg, fn string) {
+func checkError(t *testing.T, index int, evaluated Object, expectedErrMsg, fn string, line int) {
 	err, ok := evaluated.(*Error)
 	if !ok {
 		t.Errorf("At test case %d: Expect Error. got=%T (%+v)", index, evaluated, evaluated)
 	}
 
-	expectedErrMsg = fmt.Sprintf("%s. At %s:%d", expectedErrMsg, fn, 0)
+	expectedErrMsg = fmt.Sprintf("%s. At %s:%d", expectedErrMsg, fn, line)
 	if err.Message != expectedErrMsg {
 		t.Fatalf("At test case %d: Expect error message to be:\n  %s. got: \n%s", index, expectedErrMsg, err.Message)
 	}
