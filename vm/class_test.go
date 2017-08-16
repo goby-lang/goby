@@ -110,9 +110,9 @@ a = Bar.new()
 
 	v := initTestVM()
 	evaluated := v.testEval(t, input, getFilename())
-	checkError(t, 0, evaluated, expected, getFilename(), 0)
+	checkError(t, 0, evaluated, expected, getFilename(), 4)
 	v.checkCFP(t, 0, 1)
-	v.checkSP(t, 0, 1)
+	v.checkSP(t, 0, 3)
 }
 
 func TestClassInstanceVariable(t *testing.T) {
