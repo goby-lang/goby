@@ -201,7 +201,7 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 		p.nextToken()
 	}
 
-	for !p.curTokenIs(token.End) && !p.curTokenIs(token.Else) {
+	for !p.curTokenIs(token.End) && !p.curTokenIs(token.Else) && !p.curTokenIs(token.ElsIf) {
 
 		if p.curTokenIs(token.EOF) {
 			p.error = &Error{Message: "Unexpected EOF", errType: EndOfFileError}

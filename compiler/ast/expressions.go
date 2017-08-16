@@ -201,9 +201,8 @@ func (n *NilExpression) String() string {
 
 type IfExpression struct {
 	*BaseNode
-	Condition   Expression
-	Consequence *BlockStatement
-	Alternative *BlockStatement
+	Conditionals []*ConditionalExpression
+	Alternative  *BlockStatement
 }
 
 func (ie *IfExpression) expressionNode() {}
@@ -213,11 +212,17 @@ func (ie *IfExpression) TokenLiteral() string {
 func (ie *IfExpression) String() string {
 	var out bytes.Buffer
 
-	out.WriteString("if")
-	out.WriteString(" ")
-	out.WriteString(ie.Condition.String())
-	out.WriteString("\n")
-	out.WriteString(ie.Consequence.String())
+	for i, c := range ie.Conditionals {
+		if i == 0 {
+			out.WriteString("if")
+			out.WriteString(" ")
+		} else {
+			out.WriteString("elsif")
+			out.WriteString(" ")
+		}
+
+		out.WriteString(c.String())
+	}
 
 	if ie.Alternative != nil {
 		out.WriteString("\n")
@@ -226,6 +231,30 @@ func (ie *IfExpression) String() string {
 	}
 
 	out.WriteString("\nend")
+
+	return out.String()
+}
+
+// ConditionalExpression represents if or elsif expression
+type ConditionalExpression struct {
+	*BaseNode
+	Condition   Expression
+	Consequence *BlockStatement
+}
+
+func (ce *ConditionalExpression) expressionNode() {}
+
+// TokenLiteral returns `if` or `elsif`
+func (ce *ConditionalExpression) TokenLiteral() string {
+	return ce.Token.Literal
+}
+
+func (ce *ConditionalExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(ce.Condition.String())
+	out.WriteString("\n")
+	out.WriteString(ce.Consequence.String())
 
 	return out.String()
 }

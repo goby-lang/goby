@@ -471,6 +471,10 @@ func TestIfExpression(t *testing.T) {
 	input := `
 	if x < y
 	  x + 5
+	elsif x == y
+	  y + 5
+	elsif x > y
+	  y - 1
 	else
 	  y + 4
 	end
@@ -500,21 +504,69 @@ func TestIfExpression(t *testing.T) {
 		t.Fatalf("expect statement to be an IfExpression. got=%T", stmt.Expression)
 	}
 
-	if !testInfixExpression(t, exp.Condition, "x", "<", "y") {
+	cs := exp.Conditionals
+
+	if len(cs) != 3 {
+		t.Fatalf("expect the length of conditionals to be 3. got=%d", len(cs))
+	}
+
+	c0 := cs[0]
+
+	if !testInfixExpression(t, c0.Condition, "x", "<", "y") {
 		return
 	}
 
-	if len(exp.Consequence.Statements) != 1 {
-		t.Errorf("should be only one consequence. got=%d\n", len(exp.Consequence.Statements))
+	if len(c0.Consequence.Statements) != 1 {
+		t.Errorf("should be only one consequence. got=%d\n", len(c0.Consequence.Statements))
 	}
 
-	consequence, ok := exp.Consequence.Statements[0].(*ast.ExpressionStatement)
+	consequence0, ok := c0.Consequence.Statements[0].(*ast.ExpressionStatement)
 
 	if !ok {
-		t.Errorf("expect consequence should be an expression statement. got=%T", exp.Consequence.Statements[0])
+		t.Errorf("expect consequence should be an expression statement. got=%T", c0.Consequence.Statements[0])
 	}
 
-	if !testInfixExpression(t, consequence.Expression, "x", "+", 5) {
+	if !testInfixExpression(t, consequence0.Expression, "x", "+", 5) {
+		return
+	}
+
+	c1 := cs[1]
+
+	if !testInfixExpression(t, c1.Condition, "x", "==", "y") {
+		return
+	}
+
+	if len(c1.Consequence.Statements) != 1 {
+		t.Errorf("should be only one consequence. got=%d\n", len(c1.Consequence.Statements))
+	}
+
+	consequence1, ok := c1.Consequence.Statements[0].(*ast.ExpressionStatement)
+
+	if !ok {
+		t.Errorf("expect consequence should be an expression statement. got=%T", c1.Consequence.Statements[0])
+	}
+
+	if !testInfixExpression(t, consequence1.Expression, "y", "+", 5) {
+		return
+	}
+
+	c2 := cs[2]
+
+	if !testInfixExpression(t, c2.Condition, "x", ">", "y") {
+		return
+	}
+
+	if len(c2.Consequence.Statements) != 1 {
+		t.Errorf("should be only one consequence. got=%d\n", len(c2.Consequence.Statements))
+	}
+
+	consequence2, ok := c2.Consequence.Statements[0].(*ast.ExpressionStatement)
+
+	if !ok {
+		t.Errorf("expect consequence should be an expression statement. got=%T", c2.Consequence.Statements[0])
+	}
+
+	if !testInfixExpression(t, consequence2.Expression, "y", "-", 1) {
 		return
 	}
 
