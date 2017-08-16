@@ -1,8 +1,9 @@
 package vm
 
 import (
-	"github.com/jmoiron/sqlx"
 	"testing"
+
+	"github.com/jmoiron/sqlx"
 )
 
 func setupDB(t *testing.T) *sqlx.DB {
