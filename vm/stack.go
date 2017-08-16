@@ -1,6 +1,8 @@
 package vm
 
-import "sync"
+import (
+	"sync"
+)
 
 type stack struct {
 	Data   []*Pointer
@@ -25,6 +27,11 @@ func (s *stack) push(v *Pointer) {
 		s.Data = append(s.Data, v)
 	} else {
 		s.Data[s.thread.sp] = v
+	}
+
+	if _, ok := v.Target.(*Error); ok {
+		cf := s.thread.callFrameStack.top()
+		cf.pc = len(cf.instructionSet.instructions)
 	}
 
 	s.thread.sp++
