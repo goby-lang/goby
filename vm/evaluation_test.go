@@ -1395,6 +1395,8 @@ func TestIfExpressionEvaluation(t *testing.T) {
 			`
 			if 10 > 5
 				100
+			elsif 10 == 9
+			  0
 			else
 				-10
 			end
@@ -1405,11 +1407,25 @@ func TestIfExpressionEvaluation(t *testing.T) {
 			`
 			if 5 != 5
 				false
+			elsif 5 == 5
+			  true
 			else
-				true
+				1
 			end
 			`,
 			true,
+		},
+		{
+			`
+			if 5 > 5
+				false
+			elsif 5 < 5
+			  true
+			else
+				11
+			end
+			`,
+			11,
 		},
 		{`
 		if true
@@ -1421,9 +1437,14 @@ func TestIfExpressionEvaluation(t *testing.T) {
 		{"if 1; 10; end", 10},
 		{"if 1 < 2; 10 end", 10},
 		{"if 1 > 2; 10 end", nil},
+		{"if 1 > 2; 10 elsif 1 < 2; 20 end", 20},
+		{"if 1 > 2; 10 elsif 1 < 0; 20 end", nil},
 		{"if 1 > 2; 10 else 20 end", 20},
 		{"if 1 < 2; 10 else 20 end", 10},
 		{"if nil; 10 else 20 end", 20},
+		{"if 2 == 2; 10 elsif 1 < 2; 20 else 30 end", 10},
+		{"if 2 != 2; 10 elsif 1 < 2; 20 else 30 end", 20},
+		{"if 2 != 2; 10 elsif 1 > 2; 20 else 30 end", 30},
 		{`
 		if false
 		  x = 1
@@ -1462,6 +1483,65 @@ func TestIfExpressionEvaluation(t *testing.T) {
 			end
 
 			c + 1
+		`, 11},
+		{`
+			a = 10
+			b = 5
+			c = 4
+			if a == b
+			  d = 10
+			elsif b == c
+			  d = 9
+			elsif c == 4
+			  d = 8
+			else
+			  d = 5
+			end
+
+			d + 1
+		`, 9},
+		{`
+			if false
+			  if true
+			    1
+			  elsif true
+			    2
+			  elsif true
+			    3
+			  end
+			elsif true
+			  if true
+			  	if false
+			  	  4
+			  	elsif true
+			  	  5
+
+			  	  if false
+			  	  	6
+			  	  elsif false
+			  	  	7
+			  	  elsif false
+			  	  	8
+			  	  else
+			  	  	if true
+			  	  		if false
+			  	  			9
+			  	  		elsif false
+			  	  			10
+			  	  		elsif true
+			  	  			11
+			  	  		else
+			  	  			12
+			  	  		end
+			  	  	end
+			  	  end
+			  	 end
+			  end
+			elsif true
+			  13
+			else
+			  14
+			end
 		`, 11},
 	}
 
