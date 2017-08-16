@@ -24,9 +24,12 @@ const (
 func (vm *VM) initErrorObject(errorType, format string, args ...interface{}) *Error {
 	errClass := vm.objectClass.getClassConstant(errorType)
 
+	t := vm.mainThread
+	cf := t.callFrameStack.callFrames[t.cfp-1]
+
 	return &Error{
 		baseObj: &baseObj{class: errClass},
-		Message: fmt.Sprintf(errorType+": "+format, args...),
+		Message: fmt.Sprintf("%s. At %s:%d", fmt.Sprintf(errorType+": "+format, args...), cf.instructionSet.filename, 0),
 	}
 }
 

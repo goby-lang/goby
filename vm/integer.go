@@ -555,11 +555,11 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					n := receiver.(*IntegerObject)
 
 					if n.value < 0 {
-						return newError("Expect paramentr to be greater 0. got=%d", n.value)
+						return t.vm.initErrorObject(InternalError, "Expect integer greater than or equal 0. got: %d", n.value)
 					}
 
 					if blockFrame == nil {
-						return newError("Can't yield without a block")
+						return t.vm.initErrorObject(InternalError, CantYieldWithoutBlockFormat)
 					}
 
 					for i := 0; i < n.value; i++ {

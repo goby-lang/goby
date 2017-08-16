@@ -13,7 +13,7 @@ func TestNullClassSuperclass(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -24,7 +24,7 @@ func TestEvalNil(t *testing.T) {
 	input := `nil`
 
 	v := initTestVM()
-	evaluated := v.testEval(t, input)
+	evaluated := v.testEval(t, input, getFilename())
 	checkExpected(t, 0, evaluated, nil)
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
@@ -37,7 +37,7 @@ func TestBangPrefix(t *testing.T) {
 	`
 
 	v := initTestVM()
-	evaluated := v.testEval(t, input)
+	evaluated := v.testEval(t, input, getFilename())
 	checkExpected(t, 0, evaluated, true)
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
@@ -58,7 +58,7 @@ func TestNullComparisonOperation(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -82,7 +82,7 @@ func TestNullIsNilMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -110,7 +110,7 @@ func TestNullAssignmentByOperation(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -119,17 +119,16 @@ func TestNullAssignmentByOperation(t *testing.T) {
 
 func TestNullIsNilMethodFail(t *testing.T) {
 	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
+		input  string
+		errMsg string
 	}{
-		{`nil.nil?("Hello")`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1"},
+		{`nil.nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1"},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename())
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}

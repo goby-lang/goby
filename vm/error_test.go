@@ -1,6 +1,9 @@
 package vm
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestUndefinedMethodError(t *testing.T) {
 	tests := []struct {
@@ -35,8 +38,8 @@ func TestUndefinedMethodError(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, UndefinedMethodError, tt.errorMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.errorMsg, getFilename())
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -58,8 +61,8 @@ func TestUnsupportedMethodError(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, UnsupportedMethodError, tt.errorMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.errorMsg, getFilename())
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -112,8 +115,8 @@ func TestArgumentError(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, ArgumentError, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename())
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -140,21 +143,20 @@ func TestConstantAlreadyInitializedError(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, ConstantAlreadyInitializedError, tt.expected)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename())
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
 }
 
-func checkError(t *testing.T, index int, evaluated Object, expectedErrType, expectedErrMsg string) {
+func checkError(t *testing.T, index int, evaluated Object, expectedErrMsg, fn string) {
 	err, ok := evaluated.(*Error)
 	if !ok {
 		t.Errorf("At test case %d: Expect Error. got=%T (%+v)", index, evaluated, evaluated)
 	}
-	if err.class.Name != expectedErrType {
-		t.Errorf("At test case %d: Expect %s. got=%T (%+v)", index, expectedErrType, evaluated, err)
-	}
+
+	expectedErrMsg = fmt.Sprintf("%s. At %s:%d", expectedErrMsg, fn, 0)
 	if err.Message != expectedErrMsg {
 		t.Fatalf("At test case %d: Expect error message to be:\n  %s. got: \n%s", index, expectedErrMsg, err.Message)
 	}

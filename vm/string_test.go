@@ -15,7 +15,7 @@ func TestStringClassSuperclass(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -33,7 +33,7 @@ func TestEvalStringExpression(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -78,7 +78,7 @@ func TestStringConversion(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -122,7 +122,7 @@ func TestStringComparison(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -140,8 +140,8 @@ func TestStringConparisonFail(t *testing.T) {
 	}
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, TypeError, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename())
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -176,7 +176,7 @@ func TestStringOperation(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -185,23 +185,22 @@ func TestStringOperation(t *testing.T) {
 
 func TestStringOperationFail(t *testing.T) {
 	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
+		input  string
+		errMsg string
 	}{
-		{`"Taipei" + 101`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
-		{`"Taipei" * "101"`, TypeError, "TypeError: Expect argument to be Integer. got: String"},
-		{`"Taipei" * (-101)`, ArgumentError, "ArgumentError: Second argument must be greater than or equal to 0. got=-101"},
-		{`"Taipei"[1] = 1`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
-		{`"Taipei"[1] = true`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
-		{`"Taipei"[]`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
-		{`"Taipei"[true] = 101`, TypeError, "TypeError: Expect argument to be Integer. got: Boolean"},
+		{`"Taipei" + 101`, "TypeError: Expect argument to be String. got: Integer"},
+		{`"Taipei" * "101"`, "TypeError: Expect argument to be Integer. got: String"},
+		{`"Taipei" * (-101)`, "ArgumentError: Second argument must be greater than or equal to 0. got=-101"},
+		{`"Taipei"[1] = 1`, "TypeError: Expect argument to be String. got: Integer"},
+		{`"Taipei"[1] = true`, "TypeError: Expect argument to be String. got: Boolean"},
+		{`"Taipei"[]`, "ArgumentError: Expect 1 argument. got=0"},
+		{`"Taipei"[true] = 101`, "TypeError: Expect argument to be Integer. got: Boolean"},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename())
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -224,7 +223,7 @@ func TestStringCapitalizeMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -243,7 +242,7 @@ func TestStringChopMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -261,7 +260,7 @@ func TestStringConcatenateMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -270,21 +269,20 @@ func TestStringConcatenateMethod(t *testing.T) {
 
 func TestStringConcatenateMethodFail(t *testing.T) {
 	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
+		input  string
+		errMsg string
 	}{
-		{`"a".concat`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
-		{`"a".concat("Hello", "World")`, ArgumentError, "ArgumentError: Expect 1 argument. got=2"},
-		{`"a".concat(1)`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
-		{`"a".concat(true)`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
-		{`"a".concat(nil)`, TypeError, "TypeError: Expect argument to be String. got: Null"},
+		{`"a".concat`, "ArgumentError: Expect 1 argument. got=0"},
+		{`"a".concat("Hello", "World")`, "ArgumentError: Expect 1 argument. got=2"},
+		{`"a".concat(1)`, "TypeError: Expect argument to be String. got: Integer"},
+		{`"a".concat(true)`, "TypeError: Expect argument to be String. got: Boolean"},
+		{`"a".concat(nil)`, "TypeError: Expect argument to be String. got: Null"},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename())
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -303,7 +301,7 @@ func TestStringCountMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -321,7 +319,7 @@ func TestStringDeleteMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -330,20 +328,19 @@ func TestStringDeleteMethod(t *testing.T) {
 
 func TestStringDeleteMethodFail(t *testing.T) {
 	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
+		input  string
+		errMsg string
 	}{
-		{`"Hello hello HeLlo".delete`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
-		{`"Hello hello HeLlo".delete(1)`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
-		{`"Hello hello HeLlo".delete(true)`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
-		{`"Hello hello HeLlo".delete(nil)`, TypeError, "TypeError: Expect argument to be String. got: Null"},
+		{`"Hello hello HeLlo".delete`, "ArgumentError: Expect 1 argument. got=0"},
+		{`"Hello hello HeLlo".delete(1)`, "TypeError: Expect argument to be String. got: Integer"},
+		{`"Hello hello HeLlo".delete(true)`, "TypeError: Expect argument to be String. got: Boolean"},
+		{`"Hello hello HeLlo".delete(nil)`, "TypeError: Expect argument to be String. got: Null"},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename())
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -362,7 +359,7 @@ func TestStringDowncaseMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -386,7 +383,7 @@ func TestStringEndWithMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -395,20 +392,19 @@ func TestStringEndWithMethod(t *testing.T) {
 
 func TestStringEndWithMethodFail(t *testing.T) {
 	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
+		input  string
+		errMsg string
 	}{
-		{`"Taipei".end_with?("1", "0", "1")`, ArgumentError, "ArgumentError: Expect 1 argument. got=3"},
-		{`"Taipei".end_with?(101)`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
-		{`"Hello".end_with?(true)`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
-		{`"Hello".end_with?(1..5)`, TypeError, "TypeError: Expect argument to be String. got: Range"},
+		{`"Taipei".end_with?("1", "0", "1")`, "ArgumentError: Expect 1 argument. got=3"},
+		{`"Taipei".end_with?(101)`, "TypeError: Expect argument to be String. got: Integer"},
+		{`"Hello".end_with?(true)`, "TypeError: Expect argument to be String. got: Boolean"},
+		{`"Hello".end_with?(1..5)`, "TypeError: Expect argument to be String. got: Range"},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename())
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -425,7 +421,7 @@ func TestStringEmptyMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -448,7 +444,7 @@ func TestStringEqualMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -466,8 +462,8 @@ func TestStringEqualMethodFail(t *testing.T) {
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, ArgumentError, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename())
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -486,7 +482,7 @@ func TestStringGlobalSubstituteMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -495,20 +491,19 @@ func TestStringGlobalSubstituteMethod(t *testing.T) {
 
 func TestStringGlobalSubstituteMethodFail(t *testing.T) {
 	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
+		input  string
+		errMsg string
 	}{
-		{`"Ruby".gsub()`, ArgumentError, "ArgumentError: Expect 2 arguments. got=0"},
-		{`"Ruby".gsub("Ru")`, ArgumentError, "ArgumentError: Expect 2 arguments. got=1"},
-		{`"Ruby".gsub(123, "Go")`, TypeError, "TypeError: Expect pattern to be String. got: Integer"},
-		{`"Ruby".gsub("Ru", 456)`, TypeError, "TypeError: Expect replacement to be String. got: Integer"},
+		{`"Ruby".gsub()`, "ArgumentError: Expect 2 arguments. got=0"},
+		{`"Ruby".gsub("Ru")`, "ArgumentError: Expect 2 arguments. got=1"},
+		{`"Ruby".gsub(123, "Go")`, "TypeError: Expect pattern to be String. got: Integer"},
+		{`"Ruby".gsub("Ru", 456)`, "TypeError: Expect replacement to be String. got: Integer"},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename())
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -530,7 +525,7 @@ func TestStringIncludeMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -539,21 +534,20 @@ func TestStringIncludeMethod(t *testing.T) {
 
 func TestStringIncludeMethodFail(t *testing.T) {
 	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
+		input  string
+		errMsg string
 	}{
-		{`"Goby".include?`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
-		{`"Goby".include?("Ruby", "Lang")`, ArgumentError, "ArgumentError: Expect 1 argument. got=2"},
-		{`"Goby".include?(2)`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
-		{`"Goby".include?(true)`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
-		{`"Goby".include?(nil)`, TypeError, "TypeError: Expect argument to be String. got: Null"},
+		{`"Goby".include?`, "ArgumentError: Expect 1 argument. got=0"},
+		{`"Goby".include?("Ruby", "Lang")`, "ArgumentError: Expect 1 argument. got=2"},
+		{`"Goby".include?(2)`, "TypeError: Expect argument to be String. got: Integer"},
+		{`"Goby".include?(true)`, "TypeError: Expect argument to be String. got: Boolean"},
+		{`"Goby".include?(nil)`, "TypeError: Expect argument to be String. got: Null"},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename())
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -578,7 +572,7 @@ func TestStringInsertMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -587,22 +581,21 @@ func TestStringInsertMethod(t *testing.T) {
 
 func TestStringInsertMethodFail(t *testing.T) {
 	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
+		input  string
+		errMsg string
 	}{
-		{`"Goby Lang".insert`, ArgumentError, "ArgumentError: Expect 2 arguments. got=0"},
-		{`"Taipei".insert(6, " ", "101")`, ArgumentError, "ArgumentError: Expect 2 arguments. got=3"},
-		{`"Taipei".insert("6", " 101")`, TypeError, "TypeError: Expect argument to be Integer. got: String"},
-		{`"Taipei".insert(6, 101)`, TypeError, "TypeError: Expect insert string to be String. got: Integer"},
-		{`"Taipei".insert(-8, "101")`, ArgumentError, "ArgumentError: Index value out of range. got=-8"},
-		{`"Taipei".insert(7, "101")`, ArgumentError, "ArgumentError: Index value out of range. got=7"},
+		{`"Goby Lang".insert`, "ArgumentError: Expect 2 arguments. got=0"},
+		{`"Taipei".insert(6, " ", "101")`, "ArgumentError: Expect 2 arguments. got=3"},
+		{`"Taipei".insert("6", " 101")`, "TypeError: Expect argument to be Integer. got: String"},
+		{`"Taipei".insert(6, 101)`, "TypeError: Expect insert string to be String. got: Integer"},
+		{`"Taipei".insert(-8, "101")`, "ArgumentError: Index value out of range. got=-8"},
+		{`"Taipei".insert(7, "101")`, "ArgumentError: Index value out of range. got=7"},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename())
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -621,7 +614,7 @@ func TestStringLeftJustifyMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -630,24 +623,23 @@ func TestStringLeftJustifyMethod(t *testing.T) {
 
 func TestStringLeftJustifyMethodFail(t *testing.T) {
 	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
+		input  string
+		errMsg string
 	}{
-		{`"Hello".ljust`, ArgumentError, "ArgumentError: Expect 1..2 arguments. got=0"},
-		{`"Hello".ljust(1, 2, 3, 4, 5)`, ArgumentError, "ArgumentError: Expect 1..2 arguments. got=5"},
-		{`"Hello".ljust(true)`, TypeError, "TypeError: Expect justify width to be Integer. got: Boolean"},
-		{`"Hello".ljust("World")`, TypeError, "TypeError: Expect justify width to be Integer. got: String"},
-		{`"Hello".ljust(2..5)`, TypeError, "TypeError: Expect justify width to be Integer. got: Range"},
-		{`"Hello".ljust(10, 10)`, TypeError, "TypeError: Expect padding string to be String. got: Integer"},
-		{`"Hello".ljust(10, 2..5)`, TypeError, "TypeError: Expect padding string to be String. got: Range"},
-		{`"Hello".ljust(10, true)`, TypeError, "TypeError: Expect padding string to be String. got: Boolean"},
+		{`"Hello".ljust`, "ArgumentError: Expect 1..2 arguments. got=0"},
+		{`"Hello".ljust(1, 2, 3, 4, 5)`, "ArgumentError: Expect 1..2 arguments. got=5"},
+		{`"Hello".ljust(true)`, "TypeError: Expect justify width to be Integer. got: Boolean"},
+		{`"Hello".ljust("World")`, "TypeError: Expect justify width to be Integer. got: String"},
+		{`"Hello".ljust(2..5)`, "TypeError: Expect justify width to be Integer. got: Range"},
+		{`"Hello".ljust(10, 10)`, "TypeError: Expect padding string to be String. got: Integer"},
+		{`"Hello".ljust(10, 2..5)`, "TypeError: Expect padding string to be String. got: Range"},
+		{`"Hello".ljust(10, true)`, "TypeError: Expect padding string to be String. got: Boolean"},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename())
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -665,7 +657,7 @@ func TestStringLengthMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -685,7 +677,7 @@ func TestStringReplaceMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -694,19 +686,18 @@ func TestStringReplaceMethod(t *testing.T) {
 
 func TestStringReplaceMethodFail(t *testing.T) {
 	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
+		input  string
+		errMsg string
 	}{
-		{`"Taipei".replace`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
-		{`"Taipei".replace(101)`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
-		{`"Taipei".replace(true)`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
+		{`"Taipei".replace`, "ArgumentError: Expect 1 argument. got=0"},
+		{`"Taipei".replace(101)`, "TypeError: Expect argument to be String. got: Integer"},
+		{`"Taipei".replace(true)`, "TypeError: Expect argument to be String. got: Boolean"},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename())
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -726,7 +717,7 @@ func TestStringReverseMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -746,7 +737,7 @@ func TestStringRightJustifyMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -755,24 +746,23 @@ func TestStringRightJustifyMethod(t *testing.T) {
 
 func TestStringRightJustifyFail(t *testing.T) {
 	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
+		input  string
+		errMsg string
 	}{
-		{`"Hello".rjust`, ArgumentError, "ArgumentError: Expect 1..2 arguments. got=0"},
-		{`"Hello".rjust(1, 2, 3, 4, 5)`, ArgumentError, "ArgumentError: Expect 1..2 arguments. got=5"},
-		{`"Hello".rjust(true)`, TypeError, "TypeError: Expect justify width to be Integer. got: Boolean"},
-		{`"Hello".rjust("World")`, TypeError, "TypeError: Expect justify width to be Integer. got: String"},
-		{`"Hello".rjust(2..5)`, TypeError, "TypeError: Expect justify width to be Integer. got: Range"},
-		{`"Hello".rjust(10, 10)`, TypeError, "TypeError: Expect padding string to be String. got: Integer"},
-		{`"Hello".rjust(10, 2..5)`, TypeError, "TypeError: Expect padding string to be String. got: Range"},
-		{`"Hello".rjust(10, true)`, TypeError, "TypeError: Expect padding string to be String. got: Boolean"},
+		{`"Hello".rjust`, "ArgumentError: Expect 1..2 arguments. got=0"},
+		{`"Hello".rjust(1, 2, 3, 4, 5)`, "ArgumentError: Expect 1..2 arguments. got=5"},
+		{`"Hello".rjust(true)`, "TypeError: Expect justify width to be Integer. got: Boolean"},
+		{`"Hello".rjust("World")`, "TypeError: Expect justify width to be Integer. got: String"},
+		{`"Hello".rjust(2..5)`, "TypeError: Expect justify width to be Integer. got: Range"},
+		{`"Hello".rjust(10, 10)`, "TypeError: Expect padding string to be String. got: Integer"},
+		{`"Hello".rjust(10, 2..5)`, "TypeError: Expect padding string to be String. got: Range"},
+		{`"Hello".rjust(10, true)`, "TypeError: Expect padding string to be String. got: Boolean"},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename())
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -790,7 +780,7 @@ func TestStringSizeMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -837,7 +827,7 @@ func TestStringSliceMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -846,19 +836,18 @@ func TestStringSliceMethod(t *testing.T) {
 
 func TestStringSliceMethodFail(t *testing.T) {
 	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
+		input  string
+		errMsg string
 	}{
-		{`"Goby Lang".slice`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
-		{`"Goby Lang".slice("Hello")`, TypeError, "TypeError: Expect slice range to be Range or Integer. got: String"},
-		{`"Goby Lang".slice(true)`, TypeError, "TypeError: Expect slice range to be Range or Integer. got: Boolean"},
+		{`"Goby Lang".slice`, "ArgumentError: Expect 1 argument. got=0"},
+		{`"Goby Lang".slice("Hello")`, "TypeError: Expect slice range to be Range or Integer. got: String"},
+		{`"Goby Lang".slice(true)`, "TypeError: Expect slice range to be Range or Integer. got: Boolean"},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename())
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -937,7 +926,7 @@ func TestStringSplitMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -946,20 +935,19 @@ func TestStringSplitMethod(t *testing.T) {
 
 func TestStringSplitMethodFail(t *testing.T) {
 	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
+		input  string
+		errMsg string
 	}{
-		{`"Hello World".split`, ArgumentError, "ArgumentError: Expect 1 argument. got=0"},
-		{`"Hello World".split(true)`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
-		{`"Hello World".split(123)`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
-		{`"Hello World".split(1..2)`, TypeError, "TypeError: Expect argument to be String. got: Range"},
+		{`"Hello World".split`, "ArgumentError: Expect 1 argument. got=0"},
+		{`"Hello World".split(true)`, "TypeError: Expect argument to be String. got: Boolean"},
+		{`"Hello World".split(123)`, "TypeError: Expect argument to be String. got: Integer"},
+		{`"Hello World".split(1..2)`, "TypeError: Expect argument to be String. got: Range"},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename())
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -982,7 +970,7 @@ func TestStringStartWithMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -991,20 +979,19 @@ func TestStringStartWithMethod(t *testing.T) {
 
 func TestStringStartWithMethodFail(t *testing.T) {
 	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
+		input  string
+		errMsg string
 	}{
-		{`"Taipei".start_with("1", "0", "1")`, ArgumentError, "ArgumentError: Expect 1 argument. got=3"},
-		{`"Taipei".start_with(101)`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
-		{`"Hello".start_with(true)`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
-		{`"Hello".start_with(1..5)`, TypeError, "TypeError: Expect argument to be String. got: Range"},
+		{`"Taipei".start_with("1", "0", "1")`, "ArgumentError: Expect 1 argument. got=3"},
+		{`"Taipei".start_with(101)`, "TypeError: Expect argument to be String. got: Integer"},
+		{`"Hello".start_with(true)`, "TypeError: Expect argument to be String. got: Boolean"},
+		{`"Hello".start_with(1..5)`, "TypeError: Expect argument to be String. got: Range"},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.errMsg, getFilename())
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -1022,7 +1009,7 @@ func TestStringStripMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -1042,7 +1029,7 @@ func TestStringUpcaseMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -1059,7 +1046,7 @@ func TestChainingStringMethods(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -1078,7 +1065,7 @@ func TestFormattedString(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)

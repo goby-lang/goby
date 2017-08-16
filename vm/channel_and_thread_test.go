@@ -13,7 +13,7 @@ func TestChannelClassSuperclass(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -58,7 +58,7 @@ func TestObjectMutationInThread(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -153,7 +153,7 @@ func TestObjectDeliveryBetweenThread(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
