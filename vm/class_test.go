@@ -443,6 +443,16 @@ func TestPrimitiveType(t *testing.T) {
 			`,
 			"Integer",
 		},
+		{
+			`
+			Object.class.name
+			`, "Class",
+		},
+		{
+			`
+			Class.class.name
+			`, "Class",
+		},
 	}
 
 	for i, tt := range tests {
