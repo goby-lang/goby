@@ -661,6 +661,52 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
+			// Loop through each elements and accumulate each results of given block in the first argument of the block
+			// If you do not give an argument, the first element of collection is used as an initial value
+			//
+			// ```ruby
+			// a = [1, 2, 7]
+			//
+			// a.reduce do |sum, n|
+			//   sum + n
+			// end
+			// # => 10
+			//
+			// a.reduce(10) do |sum, n|
+			//   sum + n
+			// end
+			// # => 20
+			// ```
+			Name: "reduce",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					arr := receiver.(*ArrayObject)
+					if blockFrame == nil {
+						t.vm.initErrorObject(InternalError, CantYieldWithoutBlockFormat)
+					}
+
+					var prev Object
+					var start int
+					if len(args) == 0 {
+						prev = arr.Elements[0]
+						start = 1
+					} else if len(args) == 1 {
+						prev = args[0]
+						start = 0
+					} else {
+						return t.vm.initErrorObject(ArgumentError, "Expect 0 or 1 argument. got=%d", len(args))
+					}
+
+					for i := start; i < len(arr.Elements); i++ {
+						result := t.builtInMethodYield(blockFrame, prev, arr.Elements[i])
+						prev = result.Target
+					}
+
+					return prev
+				}
+			},
+		},
+		{
 			// Returns a new array by putting the desired element as the first element.
 			// Use integer index as an argument to retrieve the element.
 			//

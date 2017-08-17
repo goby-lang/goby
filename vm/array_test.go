@@ -785,6 +785,46 @@ func TestArrayPushMethod(t *testing.T) {
 	}
 }
 
+func TestArrayReduceMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		a = [1, 2, 7]
+		a.reduce do |sum, n|
+			sum + n
+		end
+		`, 10},
+		{`
+		a = [1, 2, 7]
+		a.reduce(10) do |sum, n|
+			sum + n
+		end
+		`, 20},
+		{`
+		a = ["This ", "is a ", "test!"]
+		a.reduce do |prev, s|
+			prev + s
+		end
+		`, "This is a test!"},
+		{`
+		a = ["this ", "is a ", "test!"]
+		a.reduce("Yes, ") do |prev, s|
+			prev + s
+		end
+		`, "Yes, this is a test!"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayRotateMethod(t *testing.T) {
 	tests := []struct {
 		input    string
