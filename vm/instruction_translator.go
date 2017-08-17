@@ -106,5 +106,6 @@ func (it *instructionTranslator) transferInstruction(is *instructionSet, i *byte
 		}
 	}
 
-	is.define(i.Line(), action, params...)
+	vmI := is.define(i.Line(), action, params...)
+	vmI.sourceLine = i.SourceLine()
 }

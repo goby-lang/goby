@@ -19,7 +19,7 @@ func (g *Generator) compileStatements(stmts []ast.Statement, scope *scope, table
 		g.compileStatement(is, statement, scope, table)
 	}
 
-	g.endInstructions(is)
+	g.endInstructions(is, stmts[len(stmts)-1].Line())
 	g.instructionSets = append(g.instructionSets, is)
 }
 
@@ -31,7 +31,7 @@ func (g *Generator) compileStatement(is *InstructionSet, statement ast.Statement
 			switch stmt.Expression.(type) {
 			case *ast.AssignExpression, *ast.IfExpression, *ast.Identifier, *ast.CallExpression, *ast.YieldExpression:
 				g.compileExpression(is, stmt.Expression, scope, table)
-				is.define(Pop)
+				is.define(Pop, statement.Line())
 			}
 
 			return
@@ -52,19 +52,19 @@ func (g *Generator) compileStatement(is *InstructionSet, statement ast.Statement
 			```
 		*/
 		if stmt.SuperClass != nil {
-			is.define(Pop)
+			is.define(Pop, statement.Line())
 		}
 	case *ast.ModuleStatement:
 		g.compileModuleStmt(is, stmt, scope)
 	case *ast.ReturnStatement:
 		g.compileExpression(is, stmt.ReturnValue, scope, table)
-		g.endInstructions(is)
+		g.endInstructions(is, stmt.Line())
 	case *ast.WhileStatement:
 		g.compileWhileStmt(is, stmt, scope, table)
 	case *ast.NextStatement:
-		g.compileNextStatement(is, scope)
+		g.compileNextStatement(is, stmt, scope)
 	case *ast.BreakStatement:
-		g.compileBreakStatement(is, scope)
+		g.compileBreakStatement(is, stmt, scope)
 	}
 }
 
@@ -72,11 +72,11 @@ func (g *Generator) compileWhileStmt(is *InstructionSet, stmt *ast.WhileStatemen
 	anchor1 := &anchor{}
 	breakAnchor := &anchor{}
 
-	is.define(Jump, anchor1)
+	is.define(Jump, stmt.Line(), anchor1)
 
-	is.define(PutNull)
-	is.define(Pop)
-	is.define(Jump, anchor1)
+	is.define(PutNull, stmt.Line())
+	is.define(Pop, stmt.Line())
+	is.define(Jump, stmt.Line(), anchor1)
 
 	anchor2 := &anchor{is.count}
 
@@ -89,32 +89,32 @@ func (g *Generator) compileWhileStmt(is *InstructionSet, stmt *ast.WhileStatemen
 
 	g.compileExpression(is, stmt.Condition, scope, table)
 
-	is.define(BranchIf, anchor2)
-	is.define(PutNull)
-	is.define(Pop)
+	is.define(BranchIf, stmt.Line(), anchor2)
+	is.define(PutNull, stmt.Line())
+	is.define(Pop, stmt.Line())
 
 	breakAnchor.line = is.count
 }
 
-func (g *Generator) compileNextStatement(is *InstructionSet, scope *scope) {
-	is.define(Jump, scope.anchors["next"])
+func (g *Generator) compileNextStatement(is *InstructionSet, stmt ast.Statement, scope *scope) {
+	is.define(Jump, stmt.Line(), scope.anchors["next"])
 }
 
-func (g *Generator) compileBreakStatement(is *InstructionSet, scope *scope) {
-	is.define(Jump, scope.anchors["break"])
+func (g *Generator) compileBreakStatement(is *InstructionSet, stmt ast.Statement, scope *scope) {
+	is.define(Jump, stmt.Line(), scope.anchors["break"])
 }
 
 func (g *Generator) compileClassStmt(is *InstructionSet, stmt *ast.ClassStatement, scope *scope, table *localTable) {
-	is.define(PutSelf)
+	is.define(PutSelf, stmt.Line())
 
 	if stmt.SuperClass != nil {
 		g.compileExpression(is, stmt.SuperClass, scope, table)
-		is.define(DefClass, "class:"+stmt.Name.Value, stmt.SuperClassName)
+		is.define(DefClass, stmt.Line(), "class:"+stmt.Name.Value, stmt.SuperClassName)
 	} else {
-		is.define(DefClass, "class:"+stmt.Name.Value)
+		is.define(DefClass, stmt.Line(), "class:"+stmt.Name.Value)
 	}
 
-	is.define(Pop)
+	is.define(Pop, stmt.Line())
 
 	scope = newScope(stmt)
 
@@ -124,14 +124,14 @@ func (g *Generator) compileClassStmt(is *InstructionSet, stmt *ast.ClassStatemen
 	newIS.isType = ClassDef
 
 	g.compileCodeBlock(newIS, stmt.Body, scope, scope.localTable)
-	newIS.define(Leave)
+	newIS.define(Leave, stmt.Line())
 	g.instructionSets = append(g.instructionSets, newIS)
 }
 
 func (g *Generator) compileModuleStmt(is *InstructionSet, stmt *ast.ModuleStatement, scope *scope) {
-	is.define(PutSelf)
-	is.define(DefClass, "module:"+stmt.Name.Value)
-	is.define(Pop)
+	is.define(PutSelf, stmt.Line())
+	is.define(DefClass, stmt.Line(), "module:"+stmt.Name.Value)
+	is.define(Pop, stmt.Line())
 
 	scope = newScope(stmt)
 	newIS := &InstructionSet{}
@@ -139,19 +139,19 @@ func (g *Generator) compileModuleStmt(is *InstructionSet, stmt *ast.ModuleStatem
 	newIS.isType = ClassDef
 
 	g.compileCodeBlock(newIS, stmt.Body, scope, scope.localTable)
-	newIS.define(Leave)
+	newIS.define(Leave, stmt.Line())
 	g.instructionSets = append(g.instructionSets, newIS)
 }
 
 func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, scope *scope) {
-	is.define(PutSelf)
-	is.define(PutString, stmt.Name.Value)
+	is.define(PutSelf, stmt.Line())
+	is.define(PutString, stmt.Line(), stmt.Name.Value)
 
 	switch stmt.Receiver.(type) {
 	case *ast.SelfExpression:
-		is.define(DefSingletonMethod, len(stmt.Parameters))
+		is.define(DefSingletonMethod, stmt.Line(), len(stmt.Parameters))
 	case nil:
-		is.define(DefMethod, len(stmt.Parameters))
+		is.define(DefMethod, stmt.Line(), len(stmt.Parameters))
 	}
 
 	scope = newScope(stmt)
@@ -177,11 +177,11 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 	}
 
 	if len(stmt.BlockStatement.Statements) == 0 {
-		newIS.define(PutNull)
+		newIS.define(PutNull, stmt.Line())
 	} else {
 		g.compileCodeBlock(newIS, stmt.BlockStatement, scope, scope.localTable)
 	}
 
-	g.endInstructions(newIS)
+	g.endInstructions(newIS, stmt.Line())
 	g.instructionSets = append(g.instructionSets, newIS)
 }

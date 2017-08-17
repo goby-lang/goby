@@ -6,8 +6,16 @@ import (
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/compiler/lexer"
 	"github.com/goby-lang/goby/compiler/parser"
+	"os"
+	"runtime"
 	"testing"
 )
+
+type errorTestCase struct {
+	input     string
+	expected  string
+	errorLine int
+}
 
 func TestVM_REPLExec(t *testing.T) {
 	tests := []struct {
@@ -133,10 +141,18 @@ foo
 }
 
 func initTestVM() *VM {
-	return New("./", []string{})
+	fn, err := os.Getwd()
+
+	if err != nil {
+		panic(err)
+	}
+
+	v := New(fn, []string{})
+	v.mode = TestMode
+	return v
 }
 
-func (v *VM) testEval(t *testing.T, input string) Object {
+func (v *VM) testEval(t *testing.T, input, filepath string) Object {
 	iss, err := compiler.CompileToInstructions(input, parser.TestMode)
 
 	if err != nil {
@@ -144,7 +160,7 @@ func (v *VM) testEval(t *testing.T, input string) Object {
 		t.Fatal(err.Error())
 	}
 
-	v.ExecInstructions(iss, "./")
+	v.ExecInstructions(iss, filepath)
 
 	return v.mainThread.stack.top().Target
 }
@@ -274,4 +290,9 @@ func isError(obj Object) bool {
 		return ok
 	}
 	return false
+}
+
+func getFilename() string {
+	_, filename, _, _ := runtime.Caller(1)
+	return filename
 }

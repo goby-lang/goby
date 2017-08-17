@@ -1,7 +1,6 @@
 package vm
 
 import (
-	"fmt"
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"strings"
 )
@@ -60,16 +59,6 @@ func (t *thread) hasError() (string, bool) {
 
 func (t *thread) execInstruction(cf *callFrame, i *instruction) {
 	cf.pc++
-
-	defer func() {
-		if p := recover(); p != nil {
-			if t.vm.stackTraceCount == 0 {
-				fmt.Printf("Internal Error: %s\n", p)
-			}
-			t.vm.stackTraceCount++
-			panic(p)
-		}
-	}()
 
 	i.action.operation(t, cf, i.Params...)
 }
@@ -172,7 +161,7 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 }
 
 func (t *thread) returnError(errorType, format string, args ...interface{}) {
-	err := t.vm.initErrorObject(errorType, format, args)
+	err := t.vm.initErrorObject(errorType, format, args...)
 	t.stack.push(&Pointer{Target: err})
 }
 
