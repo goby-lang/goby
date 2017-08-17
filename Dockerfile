@@ -19,8 +19,4 @@ RUN godep restore
 
 ADD . ./
 
-# Run test when building image is not a good practice, but it's more convenient for development
-
-#RUN ./test.sh
-RUN TEST_PLUGIN=true go test ./vm --run .?Plugin.? -v
-RUN TEST_PLUGIN=true go test ./vm --run .?GoObject.? -v
+RUN go install .
