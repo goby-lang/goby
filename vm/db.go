@@ -35,6 +35,27 @@ func getDBConn(t *thread, receiver Object) (*sqlx.DB, error) {
 func builtInDBClassMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 		{
+			// The get_connection method returns a connection object which requires the name of the driver
+			// and the source which specifies the parameter including the name of the database and the
+			// username ...etc.
+			//
+			// Currently supported DB driver is 'postgres'
+			//
+			// (The example is the DB#open class method which is implemented in db.gb file)
+			//
+			// ```ruby
+			// class DB
+			//   def self.open(driver_name, data_source)
+			//	   conn_obj = get_connection(driver_name, data_source) # => Returns the Conn object
+			//	   connection = Connection.new(conn_obj)
+			//	   new(connection)
+			//   end
+			//
+			//   # ... Omitted
+			// ```
+			//
+			// @return [Object]
+			//
 			Name: "get_connection",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -71,6 +92,18 @@ func builtInDBClassMethods() []*BuiltInMethodObject {
 func builtInDBInstanceMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 		{
+			// The close method closes the connection of the DB instance
+			//
+			// ```ruby
+			// require "db"
+			//
+			// db = DB.open("postgres", "user=postgres sslmode=disable")
+			// db.ping  # => true
+			//
+			// db.close # Close the DB connection
+			// db.ping  # => false
+			// ```
+			//
 			Name: "close",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -93,6 +126,33 @@ func builtInDBInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
+			// The exec method executes the Psql and automatically returns the data's primary key value
+			//
+			// ```ruby
+			// require "db"
+			//
+			// # Assume that there is a User table with name and age column
+			//
+			// # Create Action
+			// db = DB.open("postgres", "user=postgres dbname=goby_doc sslmode=disable")
+			// id = db.exec("INSERT INTO users (name, age) VALUES ('Stan', 23)")
+			// puts id # => 1
+			//
+			// # Update Action
+			//
+			// id2 = db.exec("INSERT INTO users (name, age) VALUES ('Maxwell', 21)")
+			// puts id2 # => 2
+			// id3 = db.exec("UPDATE users SET age=18 WHERE id = $1", id)
+			// puts id3 # => 2
+			//
+			// # Delete Action
+			// id4 = db.exec("DELETE FROM users WHERE id = $1", id3)
+			// puts id4 # => 2
+			//
+			// ```
+			//
+			// @return [Integer]
+			//
 			Name: "exec",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -127,6 +187,35 @@ func builtInDBInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
+			// The query method queries the result of the data set
+			//
+			// ```ruby
+			// require "db"
+			//
+			// # Assume that there is a User table with name and age column
+			//
+			// db = DB.open("postgres", "user=postgres dbname=goby_doc sslmode=disable")
+			// id = db.exec("INSERT INTO users (name, age) VALUES ('Stan', 23)")
+			// puts id # => 1
+			//
+			// id2 = db.exec("INSERT INTO users (name, age) VALUES ('Maxwell', 21)")
+			// puts id # => 2
+			//
+			// results = db.query("SELECT * FROM users WHERE id = $1", id)
+			// results.size          # => 1
+			// results.first[:name]  # => 'Stan'
+			// results.first[:age]   # => 23
+			//
+			// age = 21
+			// results2 = db.query("SELECT * FROM users WHERE age = $1", age)
+			// results2.size         # => 1
+			// results2.first[:name] # => 'Maxwell'
+			// results2.first[:age]  # => 21
+			//
+			// ```
+			//
+			// @return [Array]
+			//
 			Name: "query",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
