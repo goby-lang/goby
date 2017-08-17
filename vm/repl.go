@@ -13,6 +13,7 @@ func (vm *VM) InitForREPL() {
 	// REPL should maintain a base call frame so that the whole program won't exit
 	cf := newCallFrame(&instructionSet{name: "REPL base"})
 	cf.self = vm.mainObj
+	vm.mode = REPLMode
 	vm.mainThread.callFrameStack.push(cf)
 }
 

@@ -147,7 +147,9 @@ func initTestVM() *VM {
 		panic(err)
 	}
 
-	return New(fn, []string{})
+	v := New(fn, []string{})
+	v.mode = TestMode
+	return v
 }
 
 func (v *VM) testEval(t *testing.T, input, filepath string) Object {
