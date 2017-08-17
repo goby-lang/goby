@@ -65,6 +65,7 @@ const (
 	False  = "FALSE"
 	Null   = "Null"
 	If     = "IF"
+	ElsIf  = "ELSIF"
 	Else   = "ELSE"
 	Return = "RETURN"
 	Next   = "NEXT"
@@ -87,6 +88,7 @@ var keywords = map[string]Type{
 	"false":  False,
 	"nil":    Null,
 	"if":     If,
+	"elsif":  ElsIf,
 	"else":   Else,
 	"return": Return,
 	"self":   Self,

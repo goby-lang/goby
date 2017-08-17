@@ -14,6 +14,13 @@ import (
 // Version stores current Goby version
 const Version = "0.0.9"
 
+// These are the enums for marking parser's mode, which decides whether it should pop unused values.
+const (
+	NormalMode int = iota
+	REPLMode
+	TestMode
+)
+
 type isIndexTable struct {
 	Data map[string]int
 }
@@ -63,6 +70,8 @@ type VM struct {
 	channelObjectMap *objectMap
 
 	sync.Mutex
+
+	mode int
 }
 
 // New initializes a vm to initialize state and returns it.

@@ -80,7 +80,6 @@ func initClassClass() *RClass {
 func initObjectClass(c *RClass) *RClass {
 	objectClass := &RClass{
 		Name:      objectClass,
-		class:     c,
 		Methods:   newEnvironment(),
 		constants: make(map[string]*Pointer),
 		baseObj:   &baseObj{class: c},
@@ -124,8 +123,6 @@ type RClass struct {
 	// It can be normal class, singleton class or a module.
 	superClass *RClass
 	// Class points to this class's class, which should be ClassClass
-	class *RClass
-	// isSingleton is a flag marks if this class a singleton class
 	isSingleton bool
 	isModule    bool
 	constants   map[string]*Pointer
@@ -1033,10 +1030,6 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 
 					if !ok {
 						return t.unsupportedMethodError("#new", receiver)
-					}
-
-					if class.pseudoSuperClass.isModule {
-						return t.vm.initErrorObject(InternalError, "Module inheritance is not supported: %s", class.pseudoSuperClass.Name)
 					}
 
 					instance := class.initializeInstance()

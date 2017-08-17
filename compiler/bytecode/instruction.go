@@ -44,10 +44,11 @@ const (
 
 // Instruction represents compiled bytecode instruction
 type Instruction struct {
-	Action string
-	Params []string
-	line   int
-	anchor *anchor
+	Action     string
+	Params     []string
+	line       int
+	anchor     *anchor
+	sourceLine int
 }
 
 // AnchorLine returns instruction anchor's line number if it has an anchor
@@ -62,6 +63,11 @@ func (i *Instruction) AnchorLine() (int, error) {
 // Line returns instruction's line number
 func (i *Instruction) Line() int {
 	return i.line
+}
+
+// SourceLine returns instruction's source line number
+func (i *Instruction) SourceLine() int {
+	return i.sourceLine
 }
 
 func (i *Instruction) compile() string {
@@ -103,9 +109,9 @@ func (is *InstructionSet) SetType() string {
 	return is.isType
 }
 
-func (is *InstructionSet) define(action string, params ...interface{}) {
+func (is *InstructionSet) define(action string, sourceLine int, params ...interface{}) {
 	ps := []string{}
-	i := &Instruction{Action: action, Params: ps, line: is.count}
+	i := &Instruction{Action: action, Params: ps, line: is.count, sourceLine: sourceLine}
 	for _, param := range params {
 		switch p := param.(type) {
 		case string:
