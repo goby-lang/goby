@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 )
 
@@ -192,6 +193,15 @@ func (vm *VM) initConstants() {
 	}
 
 	vm.objectClass.constants["ARGV"] = &Pointer{Target: vm.initArrayObject(args)}
+
+	envs := map[string]Object{}
+
+	for _, e := range os.Environ() {
+		pair := strings.Split(e, "=")
+		envs[pair[0]] = vm.initStringObject(pair[1])
+	}
+
+	vm.objectClass.constants["ENV"] = &Pointer{Target: vm.initHashObject(envs)}
 }
 
 func (vm *VM) topLevelClass(cn string) *RClass {

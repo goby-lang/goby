@@ -1,8 +1,28 @@
 package vm
 
 import (
+	"fmt"
+	"os"
 	"testing"
 )
+
+func TestEnvironmentVariable(t *testing.T) {
+	os.Setenv("FOO", "This is foo")
+
+	input := `
+	ENV["FOO"]
+	ENV["BAR"] = "This is bar"
+	String.fmt("%s. %s.", ENV["FOO"], ENV["BAR"])
+	`
+
+	v := initTestVM()
+	evaluated := v.testEval(t, input, getFilename())
+	checkExpected(t, 0, evaluated, "This is foo. This is bar.")
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
+
+	os.Setenv("FOO", "")
+}
 
 func TestComplexEvaluation(t *testing.T) {
 	input := `
