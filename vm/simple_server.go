@@ -10,7 +10,6 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
-	"strings"
 	"unicode"
 )
 
@@ -52,15 +51,6 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					path := args[0].(*StringObject).value
 					method := args[1].(*StringObject).value
-					method = strings.ToUpper(method)
-
-					if method == "DELETE" {
-						router.HandleFunc(path, newHandler(t, blockFrame)).MatcherFunc(func(r *http.Request, rm *mux.RouteMatch) bool {
-							return strings.ToUpper(r.Method) == "DELETE"
-						})
-
-						return receiver
-					}
 
 					router.HandleFunc(path, newHandler(t, blockFrame)).Methods(method)
 
@@ -126,6 +116,10 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 						log.Fatalf("listen: %s\n", err)
 					}
 
+					router.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+						log.Printf("%s %s %s %d\n", r.Method, r.URL.Path, r.Proto, 404)
+					})
+
 					return receiver
 				}
 			},
@@ -177,8 +171,16 @@ func initRequest(t *thread, w http.ResponseWriter, req *http.Request) *RObject {
 
 	for k, v := range m {
 		varName := "@" + toSnakeCase(k)
-		reqObj.InstanceVariables.set(varName, t.vm.initObjectFromGoType(v))
+		reqObj.instanceVariableSet(varName, t.vm.initObjectFromGoType(v))
 	}
+
+	vars := map[string]Object{}
+
+	for k, v := range mux.Vars(req) {
+		vars[k] = t.vm.initStringObject(v)
+	}
+
+	reqObj.instanceVariableSet("@params", t.vm.initHashObject(vars))
 
 	return reqObj
 }
