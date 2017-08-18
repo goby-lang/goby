@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"unicode"
 )
 
@@ -51,6 +52,16 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					path := args[0].(*StringObject).value
 					method := args[1].(*StringObject).value
+					method = strings.ToUpper(method)
+
+					if method == "DELETE" {
+						router.HandleFunc(path, newHandler(t, blockFrame)).MatcherFunc(func(r *http.Request, rm *mux.RouteMatch) bool {
+							return strings.ToUpper(r.Method) == "DELETE"
+						})
+
+						return receiver
+					}
+
 					router.HandleFunc(path, newHandler(t, blockFrame)).Methods(method)
 
 					return receiver
@@ -127,6 +138,7 @@ func newHandler(t *thread, blockFrame *callFrame) func(http.ResponseWriter, *htt
 		// Go creates one goroutine per request, so we also need to create a new Goby thread for every request.
 		thread := t.vm.newThread()
 		res := httpResponseClass.initializeInstance()
+
 		req := initRequest(t, w, r)
 		result := thread.builtInMethodYield(blockFrame, req, res)
 
