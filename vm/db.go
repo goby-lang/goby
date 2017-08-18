@@ -126,6 +126,37 @@ func builtInDBInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
+			Name: "run",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) < 1 {
+						return t.vm.initErrorObject(ArgumentError, "Expect at least 1 argument.")
+					}
+
+					conn, err := getDBConn(t, receiver)
+
+					if err != nil {
+						return t.vm.initErrorObject(InternalError, err.Error())
+					}
+
+					queryString := args[0].(*StringObject).value
+					execArgs := []interface{}{}
+
+					for _, arg := range args[1:] {
+						execArgs = append(execArgs, arg.(builtInType).Value())
+					}
+
+					_, err = conn.Exec(queryString, execArgs...)
+
+					if err != nil {
+						return t.vm.initErrorObject(InternalError, err.Error())
+					}
+
+					return TRUE
+				}
+			},
+		},
+		{
 			// The exec method executes the Psql and automatically returns the data's primary key value
 			//
 			// ```ruby
