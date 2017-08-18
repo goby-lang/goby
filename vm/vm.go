@@ -8,11 +8,19 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 )
 
 // Version stores current Goby version
 const Version = "0.0.9"
+
+// These are the enums for marking parser's mode, which decides whether it should pop unused values.
+const (
+	NormalMode int = iota
+	REPLMode
+	TestMode
+)
 
 type isIndexTable struct {
 	Data map[string]int
@@ -63,6 +71,8 @@ type VM struct {
 	channelObjectMap *objectMap
 
 	sync.Mutex
+
+	mode int
 }
 
 // New initializes a vm to initialize state and returns it.
@@ -183,6 +193,15 @@ func (vm *VM) initConstants() {
 	}
 
 	vm.objectClass.constants["ARGV"] = &Pointer{Target: vm.initArrayObject(args)}
+
+	envs := map[string]Object{}
+
+	for _, e := range os.Environ() {
+		pair := strings.Split(e, "=")
+		envs[pair[0]] = vm.initStringObject(pair[1])
+	}
+
+	vm.objectClass.constants["ENV"] = &Pointer{Target: vm.initHashObject(envs)}
 }
 
 func (vm *VM) topLevelClass(cn string) *RClass {

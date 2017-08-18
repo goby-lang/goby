@@ -22,7 +22,7 @@ func TestCallingPluginFunction(t *testing.T) {
 	// We don't test the result here for two reasons:
 	// - If it doesn't work it'll returns error or panic
 	// - It's hard to test a plugin obj
-	v.testEval(t, input)
+	v.testEval(t, input, getFilename())
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
 }
@@ -38,7 +38,7 @@ func TestCallingPluginFunctionWithReturnValue(t *testing.T) {
 	`
 
 	v := initTestVM()
-	evaluated := v.testEval(t, input)
+	evaluated := v.testEval(t, input, getFilename())
 	checkExpected(t, 0, evaluated, "Bar")
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
@@ -55,7 +55,7 @@ func TestCallingLibFuncFromPlugin(t *testing.T) {
 	`
 
 	v := initTestVM()
-	evaluated := v.testEval(t, input)
+	evaluated := v.testEval(t, input, getFilename())
 	checkExpected(t, 0, evaluated, "lib")
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
@@ -79,7 +79,7 @@ func TestPluginGeneration(t *testing.T) {
 	`
 
 	v := initTestVM()
-	evaluated := v.testEval(t, input)
+	evaluated := v.testEval(t, input, getFilename())
 	checkExpected(t, 0, evaluated, true)
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)

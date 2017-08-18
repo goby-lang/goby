@@ -1032,10 +1032,6 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 						return t.unsupportedMethodError("#new", receiver)
 					}
 
-					if class.pseudoSuperClass.isModule {
-						return t.vm.initErrorObject(InternalError, "Module inheritance is not supported: %s", class.pseudoSuperClass.Name)
-					}
-
 					instance := class.initializeInstance()
 					initMethod := class.lookupMethod("initialize")
 

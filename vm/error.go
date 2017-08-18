@@ -24,9 +24,21 @@ const (
 func (vm *VM) initErrorObject(errorType, format string, args ...interface{}) *Error {
 	errClass := vm.objectClass.getClassConstant(errorType)
 
+	t := vm.mainThread
+	cf := t.callFrameStack.top()
+
+	// If program counter is 0 means we need to trace back to previous call frame
+	if cf.pc == 0 {
+		t.callFrameStack.pop()
+		cf = t.callFrameStack.top()
+	}
+
+	i := cf.instructionSet.instructions[cf.pc-1]
+
 	return &Error{
 		baseObj: &baseObj{class: errClass},
-		Message: fmt.Sprintf(errorType+": "+format, args...),
+		// Add 1 to source line because it's zero indexed
+		Message: fmt.Sprintf("%s. At %s:%d", fmt.Sprintf(errorType+": "+format, args...), cf.instructionSet.filename, i.sourceLine+1),
 	}
 }
 

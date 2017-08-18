@@ -17,9 +17,10 @@ type action struct {
 }
 
 type instruction struct {
-	action *action
-	Params []interface{}
-	Line   int
+	action     *action
+	Params     []interface{}
+	Line       int
+	sourceLine int
 }
 
 type instructionSet struct {
@@ -29,9 +30,10 @@ type instructionSet struct {
 	argTypes     []int
 }
 
-func (is *instructionSet) define(line int, a *action, params ...interface{}) {
+func (is *instructionSet) define(line int, a *action, params ...interface{}) *instruction {
 	i := &instruction{action: a, Params: params, Line: line}
 	is.instructions = append(is.instructions, i)
+	return i
 }
 
 var builtInActions = map[operationType]*action{
@@ -208,6 +210,7 @@ var builtInActions = map[operationType]*action{
 
 			if !ok {
 				t.returnError(TypeError, "Expect stack top's value to be an Array when executing 'expandarray' instruction.")
+				return
 			}
 
 			elems := []Object{}
@@ -320,6 +323,7 @@ var builtInActions = map[operationType]*action{
 
 			if !ok {
 				t.returnError(InternalError, "Can't get method %s's instruction set.", methodName)
+				return
 			}
 
 			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.topLevelClass(methodClass)}}
@@ -371,6 +375,12 @@ var builtInActions = map[operationType]*action{
 
 					if !ok {
 						t.returnError(InternalError, "Constant %s is not a class. got=%s", superClassName, string(superClass.Target.Class().ReturnName()))
+						return
+					}
+
+					if inheritedClass.isModule {
+						t.returnError(InternalError, "Module inheritance is not supported: %s", inheritedClass.Name)
+						return
 					}
 
 					class.inherits(inheritedClass)
@@ -430,6 +440,7 @@ var builtInActions = map[operationType]*action{
 
 			if cf.blockFrame == nil {
 				t.returnError(InternalError, "Can't yield without a block")
+				return
 			}
 
 			blockFrame := cf.blockFrame

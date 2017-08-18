@@ -15,7 +15,7 @@ func TestIntegerClassSuperclass(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -52,7 +52,7 @@ func TestIntegerArithmeticOperation(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -60,28 +60,17 @@ func TestIntegerArithmeticOperation(t *testing.T) {
 }
 
 func TestIntegerArithmeticOperationFail(t *testing.T) {
-	testsFail := []struct {
-		input    string
-		expected string
-	}{
-		{`
-		1 + "p"
-		`, "TypeError: Expect argument to be Integer. got: String"},
-		{`
-		1 - "m"
-		`, "TypeError: Expect argument to be Integer. got: String"},
-		{`
-		1 ** "p"
-		`, "TypeError: Expect argument to be Integer. got: String"},
-		{`
-		1 / "t"
-		`, "TypeError: Expect argument to be Integer. got: String"},
+	testsFail := []errorTestCase{
+		{`1 + "p"`, "TypeError: Expect argument to be Integer. got: String", 1},
+		{`1 - "m"`, "TypeError: Expect argument to be Integer. got: String", 1},
+		{`1 ** "p"`, "TypeError: Expect argument to be Integer. got: String", 1},
+		{`1 / "t"`, "TypeError: Expect argument to be Integer. got: String", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, TypeError, tt.expected)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -125,7 +114,7 @@ func TestIntegerComparison(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -133,31 +122,18 @@ func TestIntegerComparison(t *testing.T) {
 }
 
 func TestIntegerComparisonFail(t *testing.T) {
-	testsFail := []struct {
-		input    string
-		expected string
-	}{
-		{`
-		1 > "m"
-		`, "TypeError: Expect argument to be Integer. got: String"},
-		{`
-		1 >= "m"
-		`, "TypeError: Expect argument to be Integer. got: String"},
-		{`
-		1 < "m"
-		`, "TypeError: Expect argument to be Integer. got: String"},
-		{`
-		1 <= "m"
-		`, "TypeError: Expect argument to be Integer. got: String"},
-		{`
-		1 <=> "m"
-		`, "TypeError: Expect argument to be Integer. got: String"},
+	testsFail := []errorTestCase{
+		{`1 > "m"`, "TypeError: Expect argument to be Integer. got: String", 1},
+		{`1 >= "m"`, "TypeError: Expect argument to be Integer. got: String", 1},
+		{`1 < "m"`, "TypeError: Expect argument to be Integer. got: String", 1},
+		{`1 <= "m"`, "TypeError: Expect argument to be Integer. got: String", 1},
+		{`1 <=> "m"`, "TypeError: Expect argument to be Integer. got: String", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, TypeError, tt.expected)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -174,7 +150,7 @@ func TestIntegerConversion(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -192,7 +168,7 @@ func TestIntegerEvenMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -210,7 +186,7 @@ func TestIntegerNextMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -228,7 +204,7 @@ func TestIntegerOddMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -246,7 +222,7 @@ func TestIntegerPredMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -268,7 +244,7 @@ func TestIntegerTimesMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -276,28 +252,15 @@ func TestIntegerTimesMethod(t *testing.T) {
 }
 
 func TestIntegerTimesMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input    string
-		expected *Error
-	}{
-		{`
-		(-2).times
-		`, newError("Expect paramentr to be greater 0. got=-2")},
-		{`
-		2.times
-		`, newError("Can't yield without a block")},
+	testsFail := []errorTestCase{
+		{`(-2).times`, "InternalError: Expect integer greater than or equal 0. got: -2", 1},
+		{`2.times`, "InternalError: Can't yield without a block", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		err, ok := evaluated.(*Error)
-		if !ok {
-			t.Errorf("Expect error. got=%T (%+v)", err, err)
-		}
-		if err.Message != tt.expected.Message {
-			t.Errorf("Expect error message \"%s\". got=\"%s\"", tt.expected.Message, err.Message)
-		}
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}

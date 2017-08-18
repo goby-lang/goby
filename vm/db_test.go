@@ -51,7 +51,7 @@ func TestPGConnectionPing(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -79,11 +79,36 @@ func TestDBClose(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
+}
+
+func TestDBRun(t *testing.T) {
+	input := `
+	require "db"
+
+	db = DB.open("postgres", "user=postgres dbname=goby_test sslmode=disable")
+	db.run("create table if not exists test_items (
+	  id   serial primary key,
+	  title varchar(40)
+	)")
+
+	id = db.exec("INSERT INTO test_items (title) VALUES ('Stan')")
+	results = db.query("SELECT EXISTS(SELECT * FROM test_items WHERE id = $1)", id)
+
+	db.run("drop table test_items")
+
+	results.first[:exists]
+	`
+
+	v := initTestVM()
+	evaluated := v.testEval(t, input, getFilename())
+	checkExpected(t, 0, evaluated, true)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
 }
 
 func TestDBExec(t *testing.T) {
@@ -130,7 +155,7 @@ func TestDBExec(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)

@@ -54,6 +54,16 @@ func (s *StringObject) Value() interface{} {
 func builtInStringClassMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 		{
+			// The String.fmt implements formatted I/O with functions analogous to C's printf and scanf
+			// Currently only support plain "%s" formatting
+			// TODO: Support other kind of formatting such as %f, %v ... etc
+			//
+			// ```ruby
+			// String.fmt("Hello! %s Lang!", "Goby")                    # => "Hello! Goby Lang!"
+			// String.fmt("I love to eat %s and %s!", "Sushi", "Ramen") # => "I love to eat Sushi and Ramen"
+			// ```
+			//
+			// @return [String]
 			Name: "fmt",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
