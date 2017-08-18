@@ -682,7 +682,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					arr := receiver.(*ArrayObject)
 					if blockFrame == nil {
-						t.vm.initErrorObject(InternalError, CantYieldWithoutBlockFormat)
+						return t.vm.initErrorObject(InternalError, CantYieldWithoutBlockFormat)
 					}
 
 					var prev Object

@@ -825,6 +825,48 @@ func TestArrayReduceMethod(t *testing.T) {
 	}
 }
 
+func TestArrayReduceMethodFailWithInternalError(t *testing.T) {
+	testsFail := []struct {
+		input    string
+		expected string
+	}{
+		{`
+		a = [1, 2]
+		a.reduce(1)
+		`, "InternalError: Can't yield without a block"},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
+		checkError(t, i, evaluated, InternalError, tt.expected)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayReduceMethodFailWithArgumentError(t *testing.T) {
+	testsFail := []struct {
+		input    string
+		expected string
+	}{
+		{`
+		a = [1, 2]
+		a.reduce(1, 2) do |prev, n|
+			prev + n
+		end
+		`, "ArgumentError: Expect 0 or 1 argument. got=2"},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input)
+		checkError(t, i, evaluated, ArgumentError, tt.expected)
+		v.checkCFP(t, i, 2)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayRotateMethod(t *testing.T) {
 	tests := []struct {
 		input    string
