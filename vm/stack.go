@@ -16,9 +16,21 @@ type stack struct {
 }
 
 func (s *stack) set(index int, pointer *Pointer) {
+	if err, ok := pointer.Target.(*Error); ok {
+		cf := s.thread.callFrameStack.top()
+		cf.pc = len(cf.instructionSet.instructions)
+
+		if s.thread.vm.mode == NormalMode {
+			fmt.Println(err.Message)
+			os.Exit(1)
+		}
+	}
+
 	s.Lock()
+
+	defer s.Unlock()
+
 	s.Data[index] = pointer
-	s.Unlock()
 }
 
 func (s *stack) push(v *Pointer) {
