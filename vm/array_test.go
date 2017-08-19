@@ -793,7 +793,7 @@ func TestArrayReduceMethod(t *testing.T) {
 }
 
 func TestArrayReduceMethodFailWithInternalError(t *testing.T) {
-	testsFail := []errorTestCase {
+	testsFail := []errorTestCase{
 		{`a = [1, 2]
 		a.reduce(1)
 		`,
