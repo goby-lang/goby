@@ -475,6 +475,10 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					arr := receiver.(*ArrayObject)
 
+					if len(arr.Elements) == 0 {
+						return NULL
+					}
+
 					if len(args) == 0 {
 						return arr.Elements[0]
 					}
