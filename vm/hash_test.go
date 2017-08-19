@@ -27,7 +27,7 @@ func TestHashClassSuperclass(t *testing.T) {
 
 func TestEvalHashExpression(t *testing.T) {
 	input := `
-	{ foo: 123, bar: "test", baz: true }
+	{ foo: 123, bar: "test", Baz: true }
 	`
 
 	v := initTestVM()
@@ -44,7 +44,7 @@ func TestEvalHashExpression(t *testing.T) {
 			testIntegerObject(t, 0, value, 123)
 		case "bar":
 			testStringObject(t, 0, value, "test")
-		case "baz":
+		case "Baz":
 			testBooleanObject(t, 0, value, true)
 		}
 	}
