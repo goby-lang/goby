@@ -785,7 +785,7 @@ func TestArrayReduceMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -793,43 +793,39 @@ func TestArrayReduceMethod(t *testing.T) {
 }
 
 func TestArrayReduceMethodFailWithInternalError(t *testing.T) {
-	testsFail := []struct {
-		input    string
-		expected string
-	}{
-		{`
-		a = [1, 2]
+	testsFail := []errorTestCase {
+		{`a = [1, 2]
 		a.reduce(1)
-		`, "InternalError: Can't yield without a block"},
+		`,
+			"InternalError: Can't yield without a block",
+			2},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, InternalError, tt.expected)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
 }
 
 func TestArrayReduceMethodFailWithArgumentError(t *testing.T) {
-	testsFail := []struct {
-		input    string
-		expected string
-	}{
-		{`
-		a = [1, 2]
+	testsFail := []errorTestCase{
+		{`a = [1, 2]
 		a.reduce(1, 2) do |prev, n|
 			prev + n
 		end
-		`, "ArgumentError: Expect 0 or 1 argument. got=2"},
+		`,
+			"ArgumentError: Expect 0 or 1 argument. got=2",
+			2},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, ArgumentError, tt.expected)
-		v.checkCFP(t, i, 2)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
 }
