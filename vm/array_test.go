@@ -752,6 +752,84 @@ func TestArrayPushMethod(t *testing.T) {
 	}
 }
 
+func TestArrayReduceMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		a = [1, 2, 7]
+		a.reduce do |sum, n|
+			sum + n
+		end
+		`, 10},
+		{`
+		a = [1, 2, 7]
+		a.reduce(10) do |sum, n|
+			sum + n
+		end
+		`, 20},
+		{`
+		a = ["This ", "is a ", "test!"]
+		a.reduce do |prev, s|
+			prev + s
+		end
+		`, "This is a test!"},
+		{`
+		a = ["this ", "is a ", "test!"]
+		a.reduce("Yes, ") do |prev, s|
+			prev + s
+		end
+		`, "Yes, this is a test!"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayReduceMethodFailWithInternalError(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`a = [1, 2]
+		a.reduce(1)
+		`,
+			"InternalError: Can't yield without a block",
+			2},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayReduceMethodFailWithArgumentError(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`a = [1, 2]
+		a.reduce(1, 2) do |prev, n|
+			prev + n
+		end
+		`,
+			"ArgumentError: Expect 0 or 1 argument. got=2",
+			2},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayRotateMethod(t *testing.T) {
 	tests := []struct {
 		input    string
