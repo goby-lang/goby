@@ -100,6 +100,10 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 
 					fileRoot, serveStatic := server.InstanceVariables.get("@file_root")
 
+					router.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+						log.Printf("%s %s %s %d\n", r.Method, r.URL.Path, r.Proto, 404)
+					})
+
 					if serveStatic && fileRoot.Class() != t.vm.objectClass.getClassConstant(nullClass) {
 						fr := fileRoot.(*StringObject).value
 						currentDir, _ := os.Getwd()
@@ -115,10 +119,6 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 					if err != http.ErrServerClosed { // HL
 						log.Fatalf("listen: %s\n", err)
 					}
-
-					router.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-						log.Printf("%s %s %s %d\n", r.Method, r.URL.Path, r.Proto, 404)
-					})
 
 					return receiver
 				}
