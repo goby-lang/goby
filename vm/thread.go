@@ -129,32 +129,86 @@ func (t *thread) evalBuiltInMethod(receiver Object, method *BuiltInMethodObject,
 }
 
 func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receiverPr, argC, argPr int, blockFrame *callFrame) {
-	var normalArgCount int
-
 	c := newCallFrame(method.instructionSet)
 	c.self = receiver
 
+	minimumArgNumber := 0
+
 	for _, at := range method.instructionSet.argTypes {
 		if at == bytecode.NormalArg {
-			normalArgCount++
+			minimumArgNumber++
 		}
 	}
 
-	if argC < normalArgCount {
-		e := t.vm.initErrorObject(ArgumentError, "Expect at least %d args for method '%s'. got: %d", normalArgCount, method.Name, argC)
-		t.stack.push(&Pointer{Target: e})
-	} else if argC > method.argc {
+	if argC > method.argc {
 		e := t.vm.initErrorObject(ArgumentError, "Expect at most %d args for method '%s'. got: %d", method.argc, method.Name, argC)
-		t.stack.push(&Pointer{Target: e})
-	} else {
-		for i := 0; i < argC; i++ {
-			c.insertLCL(i, 0, t.stack.Data[argPr+i].Target)
+		t.stack.set(receiverPr, &Pointer{Target: e})
+		t.sp = receiverPr + 1
+		return
+	}
+
+	if minimumArgNumber > argC {
+		e := t.vm.initErrorObject(ArgumentError, "Expect at least %d args for method '%s'. got: %d", minimumArgNumber, method.Name, argC)
+		t.stack.set(receiverPr, &Pointer{Target: e})
+		t.sp = receiverPr + 1
+		return
+	}
+
+	if minimumArgNumber == argC {
+		argIndex := 0
+		for i, argType := range method.instructionSet.argTypes {
+			if argType == bytecode.NormalArg {
+				c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
+				argIndex++
+			}
+		}
+	}
+
+	/*
+	 def foo(a = 10, b = 11, c); end
+
+	 foo(1, 2)
+
+	 In the above example, method foo's minimum argument number is 1 (`c`).
+	 And the given argument number is 2.
+
+	 So we first assign arguments to those doesn't have a default value (`c` in this example).
+	 And then we assign the rest of given values from first parameter, so `a` would be assigned 2.
+
+	 Result:
+
+	 a == 2
+	 b == 11
+	 c == 1
+	*/
+
+	if minimumArgNumber < argC {
+		// Fill required argument first
+		argIndex := 0
+		for i, argType := range method.instructionSet.argTypes {
+			if argType == bytecode.NormalArg {
+				c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
+				argIndex++
+			}
 		}
 
-		c.blockFrame = blockFrame
-		t.callFrameStack.push(c)
-		t.startFromTopFrame()
+		// Fill arguments with default value from beginning
+		for i, argType := range method.instructionSet.argTypes {
+			if argType != bytecode.NormalArg {
+				c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
+				argIndex++
+			}
+
+			// If argument index == argument count means we already assigned all arguments
+			if argIndex == argC {
+				break
+			}
+		}
 	}
+
+	c.blockFrame = blockFrame
+	t.callFrameStack.push(c)
+	t.startFromTopFrame()
 
 	t.stack.set(receiverPr, t.stack.top())
 	t.sp = receiverPr + 1
