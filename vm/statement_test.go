@@ -190,6 +190,34 @@ func TestModuleStatement(t *testing.T) {
 		b = Baz.new
 		b.ten + b.twenty
 		`, 30},
+		{`
+		module Foo
+		  def ten
+		    10
+		  end
+		end
+
+		class Bar
+		  extend Foo
+		end
+
+		Bar.ten
+		`, 10},
+		{`
+		module Foo; end
+
+		class Bar
+		  extend Foo
+		end
+
+		module Foo
+		  def ten
+		    10
+		  end
+		end
+
+		Bar.ten
+		`, 10},
 	}
 
 	for i, tt := range tests {

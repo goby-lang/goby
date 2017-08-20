@@ -976,6 +976,30 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
+			Name: "extend",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					var class *RClass
+					module, ok := args[0].(*RClass)
+
+					if !ok {
+						return t.vm.initErrorObject(TypeError, "Expect argument to be a module. got=%v", args[0].Class().Name)
+					}
+
+					class = receiver.SingletonClass()
+
+					if class.alreadyInherit(module) {
+						return class
+					}
+
+					module.superClass = class.superClass
+					class.superClass = module
+
+					return class
+				}
+			},
+		},
+		{
 			// Returns the name of the class (receiver).
 			//
 			// ```ruby
