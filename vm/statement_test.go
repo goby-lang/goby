@@ -35,54 +35,88 @@ func TestReturnStatementEvaluation(t *testing.T) {
 }
 
 func TestDefStatement(t *testing.T) {
-	input := `
-		class Foo
-			def bar(x, y)
-				x + y
-			end
-
-			def foo(y)
-				y
-			end
-
-			def baz=(x)
-			end
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		def foo
+		  10
 		end
 
-		Foo
-	`
+		foo
+		`, 10},
+		{`
+		def foo(x)
+		  x + 10
+		end
 
-	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
-	class := evaluated.(*RClass)
+		foo(10)
+		`, 20},
+		{`
+		def foo(x, y=10)
+		  x + y
+		end
 
-	expectedMethods := []struct {
-		name   string
-		params []string
-	}{
-		{name: "foo", params: []string{"y"}},
-		{name: "bar", params: []string{"x", "y"}},
-		{name: "baz=", params: []string{"x"}},
+		foo(10)
+		`, 20},
+		{`
+		def foo(x = 100, y=10)
+		  x + y
+		end
+
+		foo
+		`, 110},
+		{`
+		def foo(x = 100, y=10)
+		  x + y
+		end
+
+		foo(20)
+		`, 30},
+		{`
+		class Foo; end
+
+		def Foo.foo
+		  10
+		end
+
+		Foo.foo
+		`, 10},
+		{`
+		class Foo
+		  def ten
+		    10
+		  end
+		end
+
+		f1 = Foo.new
+		f2 = Foo.new
+
+		def f1.ten
+		  20
+		end
+
+		f2.ten + f1.ten
+		`, 30},
+		{`
+		a = 1
+
+		def a.foo
+		  10
+		end
+
+		a.foo
+		`, 10},
 	}
 
-	for _, expectedMethod := range expectedMethods {
-		methodObj, ok := class.Methods.get(expectedMethod.name)
-		if !ok {
-			t.Errorf("expect class %s to have method %s.", class.Name, expectedMethod.name)
-		}
-
-		method := methodObj.(*MethodObject)
-		if method.Name != expectedMethod.name {
-			t.Errorf("expect method's name to be %s. got=%s", expectedMethod.name, method.Name)
-		}
-
-		if method.argc != len(expectedMethod.params) {
-			t.Errorf("expect method %s to have %d parameters. got=%d", method.Name, len(expectedMethod.params), method.argc)
-		}
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
-
-	v.checkCFP(t, 0, 0)
-	v.checkSP(t, 0, 1)
 }
 
 func TestModuleStatement(t *testing.T) {

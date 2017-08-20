@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"fmt"
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"strings"
 )
@@ -346,14 +347,16 @@ var builtInActions = map[operationType]*action{
 			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.topLevelClass(methodClass)}}
 
 			v := t.stack.pop().Target
-			v.SingletonClass().Methods.set(methodName, method)
-			// TODO: Support something like:
-			// ```
-			// f = Foo.new
-			// def f.bar
-			//   10
-			// end
-			// ```
+
+			switch v := v.(type) {
+			case *RClass:
+				v.SingletonClass().Methods.set(methodName, method)
+			default:
+				singletonClass := t.vm.createRClass(fmt.Sprintf("#<Class:#<%s:%s>>", v.Class().Name, v.id()))
+				singletonClass.Methods.set(methodName, method)
+				singletonClass.isSingleton = true
+				v.SetSingletonClass(singletonClass)
+			}
 		},
 	},
 	bytecode.DefClass: {

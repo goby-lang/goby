@@ -9,6 +9,7 @@ import (
 type Object interface {
 	Class() *RClass
 	SingletonClass() *RClass
+	SetSingletonClass(*RClass)
 	findMethod(string) Object
 	toString() string
 	toJSON() string
@@ -44,6 +45,11 @@ func (b *baseObj) Class() *RClass {
 // SingletonClass returns object's singleton class
 func (b *baseObj) SingletonClass() *RClass {
 	return b.singletonClass
+}
+
+// SetSingletonClass sets object's singleton class
+func (b *baseObj) SetSingletonClass(c *RClass) {
+	b.singletonClass = c
 }
 
 func (b *baseObj) instanceVariableGet(name string) (Object, bool) {
