@@ -417,7 +417,7 @@ var builtInActions = map[operationType]*action{
 			if method == nil {
 				err := t.vm.initErrorObject(UndefinedMethodError, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
 				t.stack.set(receiverPr, &Pointer{Target: err})
-				t.sp = receiverPr + 1
+				t.sp = argPr
 				return
 			}
 
@@ -425,9 +425,9 @@ var builtInActions = map[operationType]*action{
 
 			switch m := method.(type) {
 			case *MethodObject:
-				t.evalMethodObject(receiver, m, receiverPr, argCount, argPr, blockFrame)
+				t.evalMethodObject(receiver, m, receiverPr, argCount, blockFrame)
 			case *BuiltInMethodObject:
-				t.evalBuiltInMethod(receiver, m, receiverPr, argCount, argPr, blockFrame)
+				t.evalBuiltInMethod(receiver, m, receiverPr, argCount, blockFrame)
 			case *Error:
 				t.returnError(InternalError, m.toString())
 			}

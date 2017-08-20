@@ -107,9 +107,10 @@ func (t *thread) retrieveBlock(cf *callFrame, args []interface{}) (blockFrame *c
 	return
 }
 
-func (t *thread) evalBuiltInMethod(receiver Object, method *BuiltInMethodObject, receiverPr, argCount, argPr int, blockFrame *callFrame) {
+func (t *thread) evalBuiltInMethod(receiver Object, method *BuiltInMethodObject, receiverPr, argCount int, blockFrame *callFrame) {
 	methodBody := method.Fn(receiver)
 	args := []Object{}
+	argPr := receiverPr + 1
 
 	for i := 0; i < argCount; i++ {
 		args = append(args, t.stack.Data[argPr+i].Target)
@@ -121,17 +122,17 @@ func (t *thread) evalBuiltInMethod(receiver Object, method *BuiltInMethodObject,
 	if method.Name == "new" && ok {
 		instance, ok := evaluated.(*RObject)
 		if ok && instance.InitializeMethod != nil {
-			t.evalMethodObject(instance, instance.InitializeMethod, receiverPr, argCount, argPr, blockFrame)
+			t.evalMethodObject(instance, instance.InitializeMethod, receiverPr, argCount, blockFrame)
 		}
 	}
 	t.stack.set(receiverPr, &Pointer{Target: evaluated})
-	t.sp = receiverPr + 1
+	t.sp = argPr
 }
 
-func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receiverPr, argC, argPr int, blockFrame *callFrame) {
+func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receiverPr, argC int, blockFrame *callFrame) {
 	c := newCallFrame(method.instructionSet)
 	c.self = receiver
-
+	argPr := receiverPr + 1
 	minimumArgNumber := 0
 
 	for _, at := range method.instructionSet.argTypes {
@@ -143,24 +144,23 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 	if argC > method.argc {
 		e := t.vm.initErrorObject(ArgumentError, "Expect at most %d args for method '%s'. got: %d", method.argc, method.Name, argC)
 		t.stack.set(receiverPr, &Pointer{Target: e})
-		t.sp = receiverPr + 1
+		t.sp = argPr
 		return
 	}
 
 	if minimumArgNumber > argC {
 		e := t.vm.initErrorObject(ArgumentError, "Expect at least %d args for method '%s'. got: %d", minimumArgNumber, method.Name, argC)
 		t.stack.set(receiverPr, &Pointer{Target: e})
-		t.sp = receiverPr + 1
+		t.sp = argPr
 		return
 	}
 
-	if minimumArgNumber == argC {
-		argIndex := 0
-		for i, argType := range method.instructionSet.argTypes {
-			if argType == bytecode.NormalArg {
-				c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
-				argIndex++
-			}
+	argIndex := 0
+
+	for i, argType := range method.instructionSet.argTypes {
+		if argType == bytecode.NormalArg {
+			c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
+			argIndex++
 		}
 	}
 
@@ -183,15 +183,6 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 	*/
 
 	if minimumArgNumber < argC {
-		// Fill required argument first
-		argIndex := 0
-		for i, argType := range method.instructionSet.argTypes {
-			if argType == bytecode.NormalArg {
-				c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
-				argIndex++
-			}
-		}
-
 		// Fill arguments with default value from beginning
 		for i, argType := range method.instructionSet.argTypes {
 			if argType != bytecode.NormalArg {
@@ -199,7 +190,7 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 				argIndex++
 			}
 
-			// If argument index == argument count means we already assigned all arguments
+			// If argument index equals argument count means we already assigned all arguments
 			if argIndex == argC {
 				break
 			}
@@ -211,7 +202,7 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 	t.startFromTopFrame()
 
 	t.stack.set(receiverPr, t.stack.top())
-	t.sp = receiverPr + 1
+	t.sp = argPr
 }
 
 func (t *thread) returnError(errorType, format string, args ...interface{}) {
