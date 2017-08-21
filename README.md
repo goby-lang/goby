@@ -35,8 +35,6 @@ One of our goal is to provide web developers a sort of small and handy environme
 - [Support us](#support-us)
 - [References](#references)
 
-Goby interpreter is a monolithic binary executable, which consists of a YARV-like VM and a compiler, and a REPL (which is better than `irb`!). All components of Goby compiler, such as AST, lexer, parser, token, are written in 100% pure Go, instead of using conventional static yacc/lex/bison conversion. Goby maintainers don't need to care about C language anymore!
-
 ## Demo screen and sample Goby app
 
 <img src="http://i.imgur.com/5RxFgIW.gif?1" width="60%">
