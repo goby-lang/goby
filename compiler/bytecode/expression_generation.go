@@ -130,7 +130,7 @@ func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.AssignE
 			Here we only pop '2', and the statement compilation will add another pop to pop '1'
 		*/
 
-		if exp.IsStmt() && i != len(exp.Variables)-1 {
+		if i != len(exp.Variables)-1 {
 			is.define(Pop, exp.Line())
 		}
 	}

@@ -32,14 +32,6 @@ func (p *Parser) parseStatement() ast.Statement {
 			// In REPL mode everything should return a value.
 			if p.Mode == REPLMode {
 				exp.Expression.MarkAsExp()
-
-				// Multi-variable assignment needs to be marked as statement
-				// so that the value can be popped after being assigned
-				if assignExp, ok := exp.Expression.(*ast.AssignExpression); ok {
-					if len(assignExp.Variables) > 1 {
-						assignExp.MarkAsStmt()
-					}
-				}
 			} else {
 				exp.Expression.MarkAsStmt()
 			}
