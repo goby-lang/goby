@@ -37,7 +37,7 @@ One of our goal is to provide web developers a sort of small and handy environme
 
 ## Demo screen and sample Goby app
 
-<img src="http://i.imgur.com/5RxFgIW.gif?1" width="60%">
+<img src="http://i.imgur.com/9YrDZOR.gif" width="60%">
 
 **New!** Check-out our [sample app](http://sample.goby-lang.org) built with Goby. Source code is also available [here](https://github.com/goby-lang/sample-web-app).
 
