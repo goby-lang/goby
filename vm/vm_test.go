@@ -23,6 +23,14 @@ func TestVM_REPLExec(t *testing.T) {
 		expected interface{}
 	}{
 		{
+			[]string{
+				`
+				a, b = [3, 6]
+				a + b
+				`,
+
+			}, 9},
+		{
 			[]string{`
 def foo(x)
   yield(x + 10)
