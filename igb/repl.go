@@ -187,10 +187,7 @@ reset:
 			program, perr = ivm.p.ParseProgram()
 
 			if perr != nil {
-				if !perr.IsEOF() {
-					fmt.Println(perr.Message)
-				}
-				println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
+				handleParserError(perr, igb)
 				continue
 			}
 
@@ -201,6 +198,12 @@ reset:
 
 		if igb.sm.Is(readyToExec) {
 			println(prompt(igb.indents) + igb.lines)
+
+			if perr != nil {
+				handleParserError(perr, igb)
+				continue
+			}
+
 			instructions := ivm.g.GenerateInstructions(program.Statements)
 			ivm.v.REPLExec(instructions)
 
@@ -219,6 +222,15 @@ reset:
 			//}
 			igb.cmds = nil
 		}
+	}
+}
+
+func handleParserError(e *parser.Error, igb *iGb) {
+	if e != nil {
+		if !e.IsEOF() {
+			fmt.Println(e.Message)
+		}
+		println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
 	}
 }
 

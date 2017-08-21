@@ -174,7 +174,12 @@ func (p *Parser) ParseProgram() (*ast.Program, *Error) {
 
 		if stmt != nil {
 			program.Statements = append(program.Statements, stmt)
+		} else {
+			if p.error != nil {
+				return nil, p.error
+			}
 		}
+
 		p.nextToken()
 
 		if p.error != nil {
