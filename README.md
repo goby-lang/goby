@@ -1,4 +1,5 @@
-<img src="http://i.imgur.com/ElGAzRn.png?1" width="15%">
+![Goby](http://i.imgur.com/ElGAzRn.png?3)
+=========
 
 [![Build Status](https://travis-ci.org/goby-lang/goby.svg?branch=master)](https://travis-ci.org/goby-lang/goby)
 [![Code Climate](https://codeclimate.com/github/goby-lang/goby/badges/gpa.svg)](https://codeclimate.com/github/goby-lang/goby)
