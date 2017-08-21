@@ -1,4 +1,4 @@
-# goby (rooby)
+# Goby
 
 [![Build Status](https://travis-ci.org/goby-lang/goby.svg?branch=master)](https://travis-ci.org/goby-lang/goby)
 [![Code Climate](https://codeclimate.com/github/goby-lang/goby/badges/gpa.svg)](https://codeclimate.com/github/goby-lang/goby)
@@ -12,6 +12,8 @@
 Goby is an object-oriented interpreter language deeply inspired by Ruby and written in 100% pure Go. The goal of Goby is to help web developers create api servers or microservices simply and efficiently, with a help of tough thread-mechanism from Go's goroutine, see the [thread's example](https://github.com/goby-lang/goby/blob/master/samples/one_thousand_threads.gb). Howerver, We do not intend to reproduce all of works in Ruby implementation.
 
 Goby will finally equip a reduced set of Ruby's fundamental syntax, including Ruby's common methods and libraries, but will not equip most of Ruby's meta-programming magic to make Goby VM simpler. Goby will also finally equip a built-in HTTP library and multi-threaded server that comes from Go's HTTP packages.
+
+**Checkout our [sample app](http://sample.goby-lang.org) built with Goby! And [here](https://github.com/goby-lang/sample-web-app) is the source code**
 
 Goby interpreter is a monolithic binary executable, which consists of a YARV-like VM and a compiler, and a REPL (which is better than `irb`!). All components of Goby compiler, such as AST, lexer, parser, token, are written in 100% pure Go, instead of using conventional static yacc/lex/bison conversion. Goby maintainers don't need to care about C language anymore!
 
