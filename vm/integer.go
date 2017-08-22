@@ -10,16 +10,27 @@ This is enum defined for integer's flag
 */
 const (
 	_ int = iota
-	integer
-	integer32
-	integer64
+	ui
+	ui8
+	ui16
+	ui32
+	ui64
+
+	i
+	i8
+	i16
+	i32
+	i64
+
+	f32
+	f64
 )
 
 func (vm *VM) initIntegerObject(value int) *IntegerObject {
 	return &IntegerObject{
 		baseObj: &baseObj{class: vm.topLevelClass(integerClass)},
 		value:   value,
-		flag:    integer,
+		flag:    i,
 	}
 }
 
@@ -571,12 +582,46 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
+			Name: "to_int",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					r := receiver.(*IntegerObject)
+					newInt := t.vm.initIntegerObject(r.value)
+					newInt.flag = i
+					return newInt
+				}
+			},
+		},
+		{
+			Name: "to_int8",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					r := receiver.(*IntegerObject)
+					newInt := t.vm.initIntegerObject(r.value)
+					newInt.flag = i8
+					return newInt
+				}
+			},
+		},
+		{
+			Name: "to_int16",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					r := receiver.(*IntegerObject)
+					newInt := t.vm.initIntegerObject(r.value)
+					newInt.flag = i16
+					return newInt
+				}
+			},
+		},
+		{
 			Name: "to_int32",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					r := receiver.(*IntegerObject)
-					r.flag = integer32
-					return r
+					newInt := t.vm.initIntegerObject(r.value)
+					newInt.flag = i32
+					return newInt
 				}
 			},
 		},
@@ -585,8 +630,86 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					r := receiver.(*IntegerObject)
-					r.flag = integer64
-					return r
+					newInt := t.vm.initIntegerObject(r.value)
+					newInt.flag = i64
+					return newInt
+				}
+			},
+		},
+		{
+			Name: "to_uint",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					r := receiver.(*IntegerObject)
+					newInt := t.vm.initIntegerObject(r.value)
+					newInt.flag = ui
+					return newInt
+				}
+			},
+		},
+		{
+			Name: "to_uint8",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					r := receiver.(*IntegerObject)
+					newInt := t.vm.initIntegerObject(r.value)
+					newInt.flag = ui8
+					return newInt
+				}
+			},
+		},
+		{
+			Name: "to_uint16",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					r := receiver.(*IntegerObject)
+					newInt := t.vm.initIntegerObject(r.value)
+					newInt.flag = ui16
+					return newInt
+				}
+			},
+		},
+		{
+			Name: "to_uint32",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					r := receiver.(*IntegerObject)
+					newInt := t.vm.initIntegerObject(r.value)
+					newInt.flag = ui32
+					return newInt
+				}
+			},
+		},
+		{
+			Name: "to_uint64",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					r := receiver.(*IntegerObject)
+					newInt := t.vm.initIntegerObject(r.value)
+					newInt.flag = ui64
+					return newInt
+				}
+			},
+		},
+		{
+			Name: "to_float32",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					r := receiver.(*IntegerObject)
+					newInt := t.vm.initIntegerObject(r.value)
+					newInt.flag = f32
+					return newInt
+				}
+			},
+		},
+		{
+			Name: "to_float64",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					r := receiver.(*IntegerObject)
+					newInt := t.vm.initIntegerObject(r.value)
+					newInt.flag = f64
+					return newInt
 				}
 			},
 		},
