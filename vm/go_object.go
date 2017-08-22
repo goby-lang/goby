@@ -109,7 +109,6 @@ func convertToGoFuncArgs(args []Object) ([]interface{}, error) {
 				case i8:
 					funcArgs = append(funcArgs, int8(v.value))
 					continue
-
 				}
 			}
 

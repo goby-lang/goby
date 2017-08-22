@@ -1354,6 +1354,15 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 				}
 			},
 		},
+		{
+			Name: "to_bytes",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					r := receiver.(*StringObject)
+					return t.vm.initGoObject([]byte(r.value))
+				}
+			},
+		},
 	}
 }
 
