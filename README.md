@@ -14,10 +14,11 @@ One of our goal is to provide web developers a sort of small and handy environme
 
 - Tough thread/channel mechanism powered by Go's goroutine
 - Builtin high-performance HTTP server
-- Database adapter (currently for PostgreSQL)
+- Builtin database library (currently only support PostgreSQL adapter)
 - JSON support
-- Plugin system that can load existing Go packages dynamically and access from Goby
-    - Only for Linux by now.
+- Plugin system that can load existing Go packages dynamically (Only for Linux by now)
+- Accessing Go objects from Goby directly
+   
 
 ## Table of contents
 
@@ -170,7 +171,7 @@ Try this if you'd like to contribute Goby! Skip 1 if you already have Golang in 
 1. Prepare Golang environment
     1-1. Install Golang
     1-2. Make sure `$GOPATH` in your shell's config file( like .bashrc) is correct
-    1-3. Add you add your `$GOPATH/bin` to `$PATH`in your shell's env var
+    1-3. Add you `$GOPATH/bin` to `$PATH`
 2. Run `go get github.com/goby-lang/goby`
 3. Set the Goby project's exact root path `$GOBY_ROOT` manually, which should be:
 
