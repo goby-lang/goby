@@ -90,6 +90,11 @@ func TestBooleanLogicalExpression(t *testing.T) {
 		{"false || false", false},
 		{"100 > 10 && true == false", false},
 		{"true && true == true", true},
+		{"true && true == true", true},
+		{`
+		h = {}
+		h && true
+		`, true},
 		{"(false || true) && (\"string\" == \"string\")", true},
 		{"((10 > 3) && (3 < 4)) || ((10 == 10) || false)", true},
 	}

@@ -91,6 +91,17 @@ func builtInNullInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
+			Name: "&&",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
+					}
+					return FALSE
+				}
+			},
+		},
+		{
 			// Returns true because it is nil. (See the main implementation of nil? method in vm/class.go)
 			//
 			// ```ruby
