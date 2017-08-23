@@ -221,6 +221,9 @@ See the [guideline](https://github.com/goby-lang/goby/blob/master/CONTRIBUTING.m
 - @hachi8833
 - @Maxwell-Alexius
 
+## Designer
+- [steward379](https://dribbble.com/steward379)
+
 ## Support Us
 
 ### Donations
