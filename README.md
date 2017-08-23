@@ -189,6 +189,10 @@ FYI: You can just run `brew test goby` to check Homebrew installation.
 
 **If you have any issue installing Goby, please let us know via [Github issues](https://github.com/goby-lang/goby/issues)**
 
+### Using Docker
+
+Goby has official [docker image](https://cloud.docker.com/app/gobylang/repository/docker/gobylang/goby/general) as well. You can try the [Plugin System](https://goby-lang.gitbooks.io/goby/content/plugin-system.html) using docker.
+
 ## Sample codes
 
 - [Built a stack data structure using Goby](https://github.com/goby-lang/goby/blob/master/samples/stack.gb)
