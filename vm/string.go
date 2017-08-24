@@ -1375,7 +1375,7 @@ func (s *StringObject) toString() string {
 
 // toJSON converts the receiver into JSON string.
 func (s *StringObject) toJSON() string {
-	return "\"" + s.value + "\""
+	return strconv.Quote(s.value)
 }
 
 func (s *StringObject) equal(e *StringObject) bool {
