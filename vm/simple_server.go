@@ -138,7 +138,8 @@ func newHandler(t *thread, blockFrame *callFrame) func(http.ResponseWriter, *htt
 
 		if err, ok := result.Target.(*Error); ok {
 			log.Printf("Error: %s", err.Message)
-			res.instanceVariableSet("@status", t.vm.initIntegerObject(500))
+			// TODO: This is prevent user spot a error and keeps attacking it
+			res.instanceVariableSet("@status", t.vm.initIntegerObject(400))
 		}
 
 		thread = nil
