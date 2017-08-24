@@ -102,6 +102,22 @@ func builtInNullInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
+			Name: "to_i",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					return t.vm.initIntegerObject(0)
+				}
+			},
+		},
+		{
+			Name: "to_s",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					return t.vm.initStringObject("")
+				}
+			},
+		},
+		{
 			// Returns true because it is nil. (See the main implementation of nil? method in vm/class.go)
 			//
 			// ```ruby

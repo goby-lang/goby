@@ -89,6 +89,24 @@ func TestNullIsNilMethod(t *testing.T) {
 	}
 }
 
+func TestNullTypeConversion(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`nil.to_i`, 0},
+		{`nil.to_s`, ""},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestNullAssignmentByOperation(t *testing.T) {
 	tests := []struct {
 		input    string
