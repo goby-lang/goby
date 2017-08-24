@@ -2,6 +2,38 @@ package vm
 
 import "testing"
 
+func TestJSONValidateMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		require "json"
+		JSON.validate('{"Name": "Stan"}')
+	`, true},
+		{`
+		require "json"
+		JSON.validate('{"Name": "Stan}')
+	`, false},
+		{`
+		require "json"
+		JSON.validate('{"Name": Stan}')
+	`, false},
+		{`
+		require "json"
+		JSON.validate('{Name: "Stan"')
+	`, false},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestJSONObjectParsing(t *testing.T) {
 	tests := []struct {
 		input    string
