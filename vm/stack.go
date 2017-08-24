@@ -1,7 +1,6 @@
 package vm
 
 import (
-	"fmt"
 	"os"
 	"sync"
 )
@@ -16,13 +15,16 @@ type stack struct {
 }
 
 func (s *stack) set(index int, pointer *Pointer) {
-	if err, ok := pointer.Target.(*Error); ok {
-		cf := s.thread.callFrameStack.top()
+	t := s.thread
+
+	if _, ok := pointer.Target.(*Error); ok {
+		cf := t.callFrameStack.top()
 		cf.pc = len(cf.instructionSet.instructions)
 
-		if s.thread.vm.mode == NormalMode {
-			fmt.Println(err.Message)
-			os.Exit(1)
+		if t.vm.mode == NormalMode {
+			if t.isMainThread() {
+				os.Exit(1)
+			}
 		}
 	}
 
@@ -43,13 +45,15 @@ func (s *stack) push(v *Pointer) {
 		s.Data[s.thread.sp] = v
 	}
 
-	if err, ok := v.Target.(*Error); ok {
-		cf := s.thread.callFrameStack.top()
+	if _, ok := v.Target.(*Error); ok {
+		t := s.thread
+		cf := t.callFrameStack.top()
 		cf.pc = len(cf.instructionSet.instructions)
 
-		if s.thread.vm.mode == NormalMode {
-			fmt.Println(err.Message)
-			os.Exit(1)
+		if t.vm.mode == NormalMode {
+			if t.isMainThread() {
+				os.Exit(1)
+			}
 		}
 	}
 

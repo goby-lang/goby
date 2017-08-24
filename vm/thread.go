@@ -18,6 +18,10 @@ type thread struct {
 	vm *VM
 }
 
+func (t *thread) isMainThread() bool {
+	return t == t.vm.mainThread
+}
+
 func (t *thread) getBlock(name string, filename filename) *instructionSet {
 	return t.vm.getBlock(name, filename)
 }
