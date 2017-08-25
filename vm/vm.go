@@ -117,7 +117,7 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 	}
 
 	vm.mainObj = vm.initMainObj()
-	vm.channelObjectMap = &objectMap{store: map[int]Object{}}
+	vm.channelObjectMap = &objectMap{store: &sync.Map{}}
 
 	return
 }
