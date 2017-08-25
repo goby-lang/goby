@@ -8,11 +8,11 @@
 [![codecov](https://codecov.io/gh/goby-lang/goby/branch/master/graph/badge.svg)](https://codecov.io/gh/goby-lang/goby)
 [![Readme Score](http://readme-score-api.herokuapp.com/score.svg?url=goby-lang/goby)](http://clayallsopp.github.io/readme-score?url=goby-lang/goby)
 
-**Goby** is an object-oriented interpreter language deeply inspired by **Ruby** as well as its core implementation by 100% pure **Go**. Moreover, it has standard libraries to several features such as the Plugin system. Note that we do not intend to reproduce whole of the honorable works of Ruby syntax/implementation/libraries. 
+**Goby** is an object-oriented interpreter language deeply inspired by **Ruby** as well as its core implementation by 100% pure **Go**. Moreover, it has standard libraries to provide several features such as the Plugin system. Note that we do not intend to reproduce whole of the honorable works of Ruby syntax/implementation/libraries. 
 
 One of our goal is to provide web developers a sort of small and handy environment that mainly focusing on creating **API servers or microservices**. For this, Goby includes the following native features:
 
-- Tough thread/channel mechanism powered by Go's goroutine
+- Robust thread/channel mechanism powered by Go's goroutine
 - Builtin high-performance HTTP server
 - Builtin database library (currently only support PostgreSQL adapter)
 - JSON support
@@ -58,7 +58,7 @@ Goby has several aspects: language specification, design of compiler and vm, imp
 
 **VM**: YARV-conscious, including **stack** and **call_frame**, as well as containing Goby's native classes, plus some standard library and additional components. All are written in Go as well.
 
-**Implementation**: Built-in monolithic Go binary executable which equips several native features such as a tough **thread/channel** mechanism powered by goroutine, a very new experimental [**Plugin system**](https://goby-lang.gitbooks.io/goby/content/plugin-system.html) to manage existing Go packages dynamically from Goby codes, **igb** (REPL) powered by readline package. Goby contains some standard or third-party Go packages, but the dependency to them is not high. These packages contain **no CGO** codes (at least by now) thus cross-compile for any OS environments that Go supports should work fine. 
+**Implementation**: Built-in monolithic Go binary executable which equips several native features such as a robust **thread/channel** mechanism powered by goroutine, a very new experimental [**Plugin system**](https://goby-lang.gitbooks.io/goby/content/plugin-system.html) to manage existing Go packages dynamically from Goby codes, **igb** (REPL) powered by readline package. Goby contains some standard or third-party Go packages, but the dependency to them is not high. These packages contain **no CGO** codes (at least by now) thus cross-compile for any OS environments that Go supports should work fine. 
 
 **Library**: Provides some lean but sufficient standard libraries to support developers, including **threaded high-performance HTTP server**, **DB adapter**, **file** or **JSON**. Curiously, most of them are split into Go and Goby codes, and Goby codes are not within Goby executable but placed under lib directory as Goby script files. Of course you can create custom libraries and include them to your codes. Thanks to the flexibility of **Plugin system**, we expect that you can quickly import most of the existing Go packages to your Goby scripts without creating additional libraries from scratch in almost all cases. 
 
