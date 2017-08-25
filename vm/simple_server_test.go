@@ -51,7 +51,7 @@ func TestSetupResponseDefaultValue(t *testing.T) {
 }
 
 func TestInitRequest(t *testing.T) {
-	v := New("./", []string{})
+	v := initTestVM()
 	reader := strings.NewReader("Hello World")
 	r := initRequest(v.mainThread, httptest.NewRecorder(), httptest.NewRequest("GET", "https://google.com/path", reader))
 

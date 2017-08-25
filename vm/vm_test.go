@@ -154,7 +154,12 @@ func initTestVM() *VM {
 		panic(err)
 	}
 
-	v := New(fn, []string{})
+	v, err := New(fn, []string{})
+
+	if err != nil {
+		panic(err)
+	}
+
 	v.mode = TestMode
 	return v
 }

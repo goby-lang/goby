@@ -81,7 +81,12 @@ reset:
 
 	println("Goby", version, fortune(), fortune(), fortune())
 
-	ivm := newIVM()
+	ivm, err := newIVM()
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 
 	for {
 		igb, err = readIgb(igb, err)
@@ -263,9 +268,14 @@ func newIgb() *iGb {
 
 //
 // newIVM initializes iVM.
-func newIVM() iVM {
-	ivm := iVM{}
-	ivm.v = vm.New(os.Getenv("GOBY_ROOT"), []string{})
+func newIVM() (ivm iVM, err error) {
+	ivm = iVM{}
+	v, err := vm.New(os.Getenv("GOBY_ROOT"), []string{})
+
+	if err != nil {
+		return ivm, err
+	}
+	ivm.v = v
 	ivm.v.SetClassISIndexTable("")
 	ivm.v.SetMethodISIndexTable("")
 	ivm.v.InitForREPL()
@@ -277,7 +287,7 @@ func newIVM() iVM {
 	ivm.g = bytecode.NewGenerator()
 	ivm.g.REPL = true
 	ivm.g.InitTopLevelScope(program)
-	return ivm
+	return ivm, nil
 }
 
 // readIgb fetches one line from input, with helps of Readline lib.

@@ -63,7 +63,12 @@ func main() {
 			return
 		}
 
-		v := vm.New(dir, args)
+		v, err := vm.New(dir, args)
+
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 
 		fp, err := filepath.Abs(fp)
 

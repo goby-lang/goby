@@ -76,8 +76,8 @@ type VM struct {
 }
 
 // New initializes a vm to initialize state and returns it.
-func New(fileDir string, args []string) *VM {
-	vm := &VM{args: args}
+func New(fileDir string, args []string) (vm *VM, e error) {
+	vm = &VM{args: args}
 	vm.mainThread = vm.newThread()
 
 	vm.initConstants()
@@ -97,7 +97,21 @@ func New(fileDir string, args []string) *VM {
 	gobyRoot := os.Getenv("GOBY_ROOT")
 
 	if len(gobyRoot) == 0 {
-		vm.projectRoot = fmt.Sprintf("/usr/local/Cellar/goby/%s/", Version)
+		vm.projectRoot = fmt.Sprintf("/usr/local/Cellar/goby/%s/e", Version)
+
+		_, err := os.Stat(vm.projectRoot)
+
+		if err != nil {
+			path, _ := filepath.Abs("$GOPATH/src/github.com/goby-lang/goby/e")
+			_, err = os.Stat(path)
+
+			if err != nil {
+				e = fmt.Errorf("You haven't set $GOBY_ROOT properly")
+				return nil, e
+			}
+
+			vm.projectRoot = path
+		}
 	} else {
 		vm.projectRoot = gobyRoot
 	}
@@ -105,7 +119,7 @@ func New(fileDir string, args []string) *VM {
 	vm.mainObj = vm.initMainObj()
 	vm.channelObjectMap = &objectMap{store: map[int]Object{}}
 
-	return vm
+	return
 }
 
 func (vm *VM) newThread() *thread {
