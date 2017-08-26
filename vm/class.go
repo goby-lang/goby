@@ -9,19 +9,20 @@ import (
 )
 
 const (
-	objectClass   = "Object"
-	classClass    = "Class"
-	integerClass  = "Integer"
-	stringClass   = "String"
-	arrayClass    = "Array"
-	hashClass     = "Hash"
-	booleanClass  = "Boolean"
-	nullClass     = "Null"
-	channelClass  = "Channel"
-	rangeClass    = "Range"
-	methodClass   = "method"
-	pluginClass   = "Plugin"
-	goObjectClass = "GoObject"
+	objectClass     = "Object"
+	classClass      = "Class"
+	integerClass    = "Integer"
+	stringClass     = "String"
+	arrayClass      = "Array"
+	hashClass       = "Hash"
+	booleanClass    = "Boolean"
+	nullClass       = "Null"
+	channelClass    = "Channel"
+	rangeClass      = "Range"
+	enumeratorClass = "Enumerator"
+	methodClass     = "method"
+	pluginClass     = "Plugin"
+	goObjectClass   = "GoObject"
 )
 
 // initializeClass is a common function for vm, which initializes and returns
