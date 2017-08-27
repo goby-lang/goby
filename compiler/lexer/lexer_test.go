@@ -116,6 +116,21 @@ func TestNextToken(t *testing.T) {
 	a += 1
 	b -= 2
 	c ||= true
+
+	"\nstring\n"
+	'\nstring\n'
+	"\tstring\t"
+	'\tstring\t'
+	"\vstring\v"
+	'\vstring\v'
+	"\fstring\f"
+	'\fstring\f'
+	"\rstring\r"
+	'\rstring\r'
+	"\"string\""
+	'\"string\"'
+	"\'string\'"
+	'\'string\''
 	`
 
 	tests := []struct {
@@ -424,7 +439,23 @@ func TestNextToken(t *testing.T) {
 		{token.OrEq, "||=", 109},
 		{token.True, "true", 109},
 
-		{token.EOF, "", 110},
+		// Escaped character tests
+		{token.String, "\nstring\n", 111},
+		{token.String, "\\nstring\\n", 112},
+		{token.String, "\tstring\t", 113},
+		{token.String, "\\tstring\\t", 114},
+		{token.String, "\vstring\v", 115},
+		{token.String, "\\vstring\\v", 116},
+		{token.String, "\fstring\f", 117},
+		{token.String, "\\fstring\\f", 118},
+		{token.String, "\rstring\r", 119},
+		{token.String, "\\rstring\\r", 120},
+		{token.String, "\"string\"", 121},
+		{token.String, "\\\"string\\\"", 122},
+		{token.String, "'string'", 123},
+		{token.String, "'string'", 124},
+
+		{token.EOF, "", 125},
 	}
 	l := New(input)
 

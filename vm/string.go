@@ -10,10 +10,9 @@ import (
 )
 
 func (vm *VM) initStringObject(value string) *StringObject {
-	replacer := strings.NewReplacer("\\n", "\n", "\\r", "\r", "\\t", "\t", "\\v", "\v", "\\f", "\f", "\\\\", "\\")
 	return &StringObject{
 		baseObj: &baseObj{class: vm.topLevelClass(stringClass)},
-		value:   replacer.Replace(value),
+		value:   value,
 	}
 }
 

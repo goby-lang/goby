@@ -29,6 +29,12 @@ func TestEvalStringExpression(t *testing.T) {
 	}{
 		{`"st0012"`, "st0012"},
 		{`'Monkey'`, "Monkey"},
+		{`"\"Maxwell\""`, "\"Maxwell\""},
+		{`"'Alexius'"`, "'Alexius'"},
+		{`"\'Maxwell\'"`, "'Maxwell'"},
+		{`'\'Alexius\''`, "'Alexius'"},
+		{`"Maxwell\nAlexius"`, "Maxwell\nAlexius"},
+		{`'Maxwell\nAlexius'`, "Maxwell\\nAlexius"},
 	}
 
 	for i, tt := range tests {
@@ -46,6 +52,12 @@ func TestStringConversion(t *testing.T) {
 		expected interface{}
 	}{
 		{`"string".to_s`, "string"},
+		{`"Maxwell\nAlexius".to_s`, "Maxwell\nAlexius"},
+		{`'Maxwell\nAlexius'.to_s`, "Maxwell\\nAlexius"},
+		{`"\"Maxwell\"".to_s`, "\"Maxwell\""},
+		{`'\"Maxwell\"'.to_s`, "\\\"Maxwell\\\""},
+		{`"\'Maxwell\'".to_s`, "'Maxwell'"},
+		{`'\'Maxwell\''.to_s`, "'Maxwell'"},
 		{`"123".to_i`, 123},
 		{`"string".to_i`, 0},
 		{`"123string123".to_i`, 123},
@@ -74,6 +86,58 @@ func TestStringConversion(t *testing.T) {
 		  arr = "🍣Goby🍺".to_a
 		  arr[5]
 		`, "🍺"},
+		{`
+		  arr = "Maxwell\nAlexius".to_a
+		  arr[7]
+		 `, "\n"},
+		{`
+		  arr = 'Maxwell\nAlexius'.to_a
+		  arr[7]
+		 `, "\\"},
+		{`
+		  arr = 'Maxwell\nAlexius'.to_a
+		  arr[8]
+		 `, "n"},
+		{`
+		  arr = "\"Maxwell\"".to_a
+		  arr[0]
+		 `, "\""},
+		{`
+		  arr = "\"Maxwell\"".to_a
+		  arr[-1]
+		 `, "\""},
+		{`
+		  arr = "\'Maxwell\'".to_a
+		  arr[0]
+		 `, "'"},
+		{`
+		  arr = "\'Maxwell\'".to_a
+		  arr[-1]
+		 `, "'"},
+		{`
+		  arr = '\"Maxwell\"'.to_a
+		  arr[0]
+		 `, "\\"},
+		{`
+		  arr = '\"Maxwell\"'.to_a
+		  arr[1]
+		 `, "\""},
+		{`
+		  arr = '\"Maxwell\"'.to_a
+		  arr[-1]
+		 `, "\""},
+		{`
+		  arr = '\"Maxwell\"'.to_a
+		  arr[-2]
+		 `, "\\"},
+		{`
+		  arr = '\'Maxwell\''.to_a
+		  arr[0]
+		 `, "'"},
+		{`
+		  arr = '\'Maxwell\''.to_a
+		  arr[-1]
+		 `, "'"},
 	}
 
 	for i, tt := range tests {
@@ -96,6 +160,9 @@ func TestStringComparison(t *testing.T) {
 		{`"123" == (1..3)`, false},
 		{`"123" == { a: 1, b: 2 }`, false},
 		{`"123" == [1, "String", true, 2..5]`, false},
+		{`"\"Maxwell\"" == '"Maxwell"'`, true},
+		{`"\'Maxwell\'" == '\'Maxwell\''`, true},
+		{`"\"Maxwell\"" == '\"Maxwell\"'`, false},
 		{`"123" != "123"`, false},
 		{`"123" != "124"`, true},
 		{`"123" != 123`, true},
@@ -161,6 +228,16 @@ func TestStringOperation(t *testing.T) {
 		{`"Hello🍣"[5]`, "🍣"},
 		{`"Hello🍣"[-1]`, "🍣"},
 		{`"Hello\nWorld"[5]`, "\n"},
+		{`"\"Maxwell\""[0]`, "\""},
+		{`"\"Maxwell\""[-1]`, "\""},
+		{`"\'Maxwell\'"[0]`, "'"},
+		{`"\'Maxwell\'"[-1]`, "'"},
+		{`'\"Maxwell\"'[0]`, "\\"},
+		{`'\"Maxwell\"'[1]`, "\""},
+		{`'\"Maxwell\"'[-1]`, "\""},
+		{`'\"Maxwell\"'[-2]`, "\\"},
+		{`'\'Maxwell\''[0]`, "'"},
+		{`'\'Maxwell\''[-1]`, "'"},
 		{`"Ruby"[1] = "oo"`, "Rooby"},
 		{`"Go"[2] = "by"`, "Goby"},
 		{`"Ruby"[-3] = "oo"`, "Rooby"},
