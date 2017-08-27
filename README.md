@@ -1,4 +1,5 @@
-# goby (rooby)
+![Goby](http://i.imgur.com/ElGAzRn.png?3)
+=========
 
 [![Build Status](https://travis-ci.org/goby-lang/goby.svg?branch=master)](https://travis-ci.org/goby-lang/goby)
 [![Code Climate](https://codeclimate.com/github/goby-lang/goby/badges/gpa.svg)](https://codeclimate.com/github/goby-lang/goby)
@@ -7,21 +8,225 @@
 [![codecov](https://codecov.io/gh/goby-lang/goby/branch/master/graph/badge.svg)](https://codecov.io/gh/goby-lang/goby)
 [![Readme Score](http://readme-score-api.herokuapp.com/score.svg?url=goby-lang/goby)](http://clayallsopp.github.io/readme-score?url=goby-lang/goby)
 
+**Goby** is an object-oriented interpreter language deeply inspired by **Ruby** as well as its core implementation by 100% pure **Go**. Moreover, it has standard libraries to provide several features such as the Plugin system. Note that we do not intend to reproduce whole of the honorable works of Ruby syntax/implementation/libraries. 
+
+One of our goal is to provide web developers a sort of small and handy environment that mainly focusing on creating **API servers or microservices**. For this, Goby includes the following native features:
+
+- Robust thread/channel mechanism powered by Go's goroutine
+- Builtin high-performance HTTP server
+- Builtin database library (currently only support PostgreSQL adapter)
+- JSON support
+- [Plugin system](https://goby-lang.gitbooks.io/goby/content/plugin-system.html) that can load existing Go packages dynamically (Only for Linux by now)
+- Accessing Go objects from Goby directly
+
+> Note: Goby had been formerly known as "Rooby", which was renamed in May 2017.
+
+## Table of contents
+
+- [Demo and sample Goby app](#demo_and_sample_app)
+- [Aspects](#aspects)
+    - [Features](#features)
+    - [Language](#language)
+    - [Native class](#native_class)
+    - [Standard class](#standard_class)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Sample codes](#sample_codes)
+- [Documentation](#documentation)
+- [Joining to Goby](#joining-to-goby)
+- [Maintainers](#maintainers)
+- [Support us](#support-us)
+- [References](#references)
+
+## Demo screen and sample Goby app
+
+<img src="http://i.imgur.com/9YrDZOR.gif" width="60%">
+
+**New!** Check-out our [sample app](http://sample.goby-lang.org) built with Goby. Source code is also available [here](https://github.com/goby-lang/sample-web-app).
+
+## Aspects
+
+Goby has several aspects: language specification, design of compiler and vm, implementation (just one for now), library, and the whole of them. 
+
+----------
+
+**Language**: Class-based, straight-ahead object-oriented script language. Syntax is influenced by Ruby language (and by Go a bit), but has been **condensed and simplified** (and slightly modified) to keep Goby VM simple and concise. Several aspects of Ruby such as meta-programming (known as 'magic'), special variables with `$`, or like that, have been dropped for now, but note that we might resurrect some of them with a different form or implementation in the future.
+
+**Class**: Single inheritance. Module is supported for mixin with `#include` or `#extend`. Defining singleton class and singleton method are also supported. Goby has two kinds of class internally: native class and standard class. **Native class** (or builtin class) provides fundamental classes such as `Array` or `String`. `Object` class is a superclass of any other native/standard classes including `Class` class. `Class` class contains most common methods such as `#puts`. **Standard class** (or standard library) can be loaded via `require` and provides additional methods. Standard classes are often split internal Go code and external Goby code in order to make implementation easier. Both kinds of class are transparent to Goby developers and can be overridden by child classes. Any classes including `Class` class are under `Object` class. 
+
+**Compiler**: Consists of **AST**, **lexer**, **parser**, and **token**. Pretty conventional and should be familiar to language creators. These components are all written in 100% pure Go, instead of using conventional static yacc/lex/bison conversion with a mess of ad-hoc macros. This makes Goby's codes far smaller, concise, and legible. You can inspect, maintain, or improve Goby codes more easily, being free from pains like C/C++ era. 
+
+**VM**: YARV-conscious, including **stack** and **call_frame**, as well as containing Goby's native classes, plus some standard library and additional components. All are written in Go as well.
+
+**Implementation**: Built-in monolithic Go binary executable which equips several native features such as a robust **thread/channel** mechanism powered by goroutine, a very new experimental [**Plugin system**](https://goby-lang.gitbooks.io/goby/content/plugin-system.html) to manage existing Go packages dynamically from Goby codes, **igb** (REPL) powered by readline package. Goby contains some standard or third-party Go packages, but the dependency to them is not high. These packages contain **no CGO** codes (at least by now) thus cross-compile for any OS environments that Go supports should work fine. 
+
+**Library**: Provides some lean but sufficient standard libraries to support developers, including **threaded high-performance HTTP server**, **DB adapter**, **file** or **JSON**. Curiously, most of them are split into Go and Goby codes, and Goby codes are not within Goby executable but placed under lib directory as Goby script files. Of course you can create custom libraries and include them to your codes. Thanks to the flexibility of **Plugin system**, we expect that you can quickly import most of the existing Go packages to your Goby scripts without creating additional libraries from scratch in almost all cases. 
+
+-----------
+
+**Let's improve Goby together!**: We are optimizing and expanding Goby all the time. Toward the first release, we've been focusing on implementing Goby first. 
+
+### Features
+
+- Plugin system
+    - Allows to use Go libraries (packages) dynamically
+    - Allows to call Go's methods from Goby directly (only on Linux for now)
+- Builtin multi-threaded server and DB library
+- REPL (run `goby -i`)
+
+### Language
+
+Perhaps Goby should be far easier for Rubyists to comprehend. You can use Ruby's syntax highlighting for Goby as well😀
+ 
+- Everything is object
+- Object and Class
+    - Top level main object
+    - Constructor
+    - Class/instance method
+    - Class
+        - Inheritance
+        - Singleton class is now supported
+    - `self`
+- Module
+    - `#include`
+    - `#extend`
+    - `::` for namespace
+- Variable: starts with lowercase letter like 'var`
+    - Local variable
+    - Instance variable
+- Constant
+    - Starts with uppercase like `Var` or `VAR`
+    - global if defined on top-level 
+    - **not reentrant**
+    - (special variables with `$` are unsupported)
+- Methods 
+    - Evaluation with arguments
+    - Evaluation without arguments
+    - Evaluation with block (closure)
+    - Defining singleton methods
+- Block
+    - `do` - `end`
+- Flow control
+    - `if`, `else`, `elsif`
+    - `while`
+- IO
+    - `#puts`
+    - `ARGV`
+- Import files
+    - `require` (Just for standard libraries by now)
+    - `require_relative`
+- Thread (not a class!)
+    - Goroutine-based `thread` method to create a new thread
+    - Works with `Channel` class for passing objects between threads, like `chan` in Go
+    - See this sample: [One thousand threads](https://github.com/goby-lang/goby/blob/master/samples/one_thousand_threads.gb)
+
+### Native class
+ 
+Written in Go.
+
+- `Class`
+- `Integer`
+- `String`
+- `Boolean`
+- `Null` (`nil`)
+- `Hash`
+- `Array`
+- `Range`
+- `URI`
+- `Channel`
+- `GoObject` (provides `#go_func` that wraps pure Go objects or pointers for interaction)
+
+### Standard library
+
+written in Go and Goby.
+
+- Loadable class
+    - `File`
+    - `DB` (only for PostgreSQL by now)
+    - `Plugin`
+- Loadable module
+    - NET
+        - `Net::HTTP:Request`
+        - `Net::HTTP:Response`
+        - `Net::SimpleServer` (try [sample Goby app](http://sample.goby-lang.org) and [source](https://github.com/goby-lang/sample-web-app), or [sample code](https://github.com/goby-lang/goby/blob/master/samples/server.gb)!)
+
+## Installation
+
+Confirmed Goby runs on Mac OS and Linux for now. Try Windows and let us know the result.
+
+### A. Via Homebrew (binary installation for Mac OS)
+
+**Note: Please check the [latest release](https://github.com/goby-lang/goby/releases) before installing Goby via Homebrew**
+
+```
+brew tap goby-lang/goby
+brew install goby
+```
+
+In the case, `$GOBY_ROOT` is automatically configured. 
+
+### B. From Source
+
+Try this if you'd like to contribute Goby! Skip 1 if you already have Golang in your environment.
+
+1. Prepare Golang environment
+    1-1. Install Golang
+    1-2. Make sure `$GOPATH` in your shell's config file( like .bashrc) is correct
+    1-3. Add you `$GOPATH/bin` to `$PATH`
+2. Run `go get github.com/goby-lang/goby`
+3. Set the Goby project's exact root path `$GOBY_ROOT` manually, which should be:
+
+```
+$GOPATH/src/github.com/goby-lang/goby
+```
+
+### Verifying Goby installation
+
+1. Run `goby -v` to see the version.
+2. Run `goby -i` to launch igb REPL.
+3. Type `require "file"` in igb.
+
+FYI: You can just run `brew test goby` to check Homebrew installation.
+
+**If you have any issue installing Goby, please let us know via [Github issues](https://github.com/goby-lang/goby/issues)**
+
+### Using Docker
+
+Goby has official [docker image](https://cloud.docker.com/app/gobylang/repository/docker/gobylang/goby/general) as well. You can try the [Plugin System](https://goby-lang.gitbooks.io/goby/content/plugin-system.html) using docker.
+
+## Sample codes
+
+- [Built a stack data structure using Goby](https://github.com/goby-lang/goby/blob/master/samples/stack.gb)
+- [Running a "Hello World" app with built in server library](https://github.com/goby-lang/goby/blob/master/samples/server/server.gb)
+- [Sending request using http library](https://github.com/goby-lang/goby/blob/master/samples/http.gb)
+- [Running load test on blocking server](https://github.com/goby-lang/goby/blob/master/samples/server/blocking_server.gb) (This shows `Goby`'s simple server is very performant and can handle requests concurrently)
+- [One thousand threads](https://github.com/goby-lang/goby/blob/master/samples/one_thousand_threads.gb)
+
+More sample Goby codes can be found in [sample directory](https://github.com/goby-lang/goby/tree/master/samples).
+
+## Documentation
+
+- [**User Manual (WIP)**](https://goby-lang.gitbooks.io/goby/content/)(Gitbooks)
+- [API Documentation](https://goby-lang.github.io/api.doc/) -- needs update the build script. See the [guide for API doc](https://github.com/goby-lang/api.doc#documenting-goby-code) if you'd like to contribute. 
+
+## Joining to Goby
+
 **Join us on Slack!** [![](https://goby-lang-slackin.herokuapp.com/badge.svg)](https://goby-lang-slackin.herokuapp.com)
 
-Goby is an object-oriented interpreter language deeply inspired by Ruby and written in 100% pure Go. The goal of Goby is to help web developers create api servers or microservices simply and efficiently, with a help of tough thread-mechanism from Go's goroutine, see the [thread's example](https://github.com/goby-lang/goby/blob/master/samples/one_thousand_threads.gb). Howerver, We do not intend to reproduce all of works in Ruby implementation.
+See the [guideline](https://github.com/goby-lang/goby/blob/master/CONTRIBUTING.md).
 
-Goby will finally equip a reduced set of Ruby's fundamental syntax, including Ruby's common methods and libraries, but will not equip most of Ruby's meta-programming magic to make Goby VM simpler. Goby will also finally equip a built-in HTTP library and multi-threaded server that comes from Go's HTTP packages.
+## Maintainers
 
-Goby interpreter is a monolithic binary executable, which consists of a YARV-like VM and a compiler, and a REPL (which is better than `irb`!). All components of Goby compiler, such as AST, lexer, parser, token, are written in 100% pure Go, instead of using conventional static yacc/lex/bison conversion. Goby maintainers don't need to care about C language anymore!
+- @st0012
+- @hachi8833
+- @Maxwell-Alexius
 
-We are optimizing and expanding Goby all the time and need your help. One of our vision is to utilize and manages tons of Go's packages easily from Goby scripts. Currently we already have some progress, see the introduction of Goby's [Plugin System](https://goby-lang.gitbooks.io/goby/content/plugin-system.html)
+## Designer
+- [steward379](https://dribbble.com/steward379)
 
-[**User Manual (WIP)**](https://goby-lang.gitbooks.io/goby/content/)
+## Support Us
 
-**Demo:**
-
-<img src="http://i.imgur.com/5RxFgIW.gif?1" width="60%">
+### Donations
 
 Support us with a monthly donation and help us continue our activities. [[Become a backer](https://opencollective.com/goby#backer)]
 
@@ -56,10 +261,9 @@ Support us with a monthly donation and help us continue our activities. [[Become
 <a href="https://opencollective.com/goby/backer/28/website" target="_blank"><img src="https://opencollective.com/goby/backer/28/avatar.svg"></a>
 <a href="https://opencollective.com/goby/backer/29/website" target="_blank"><img src="https://opencollective.com/goby/backer/29/avatar.svg"></a>
 
-
 ### Sponsors
 
-Become a sponsor and get your logo on our README on Github with a link to your site. [[Become a sponsor](https://opencollective.com/goby#sponsor)]
+[![](http://i.imgur.com/dsKTzXZ.png?1)](https://5xruby.tw/en)
 
 <a href="https://opencollective.com/goby/sponsor/0/website" target="_blank"><img src="https://opencollective.com/goby/sponsor/0/avatar.svg"></a>
 <a href="https://opencollective.com/goby/sponsor/1/website" target="_blank"><img src="https://opencollective.com/goby/sponsor/1/avatar.svg"></a>
@@ -74,161 +278,13 @@ Become a sponsor and get your logo on our README on Github with a link to your s
 
 (**We'll release first beta version in August, please checkout this [issue](https://github.com/goby-lang/goby/issues/72) for what features `Goby` will support.**)
 
-## Table of contents
-
-- [Supported Features](#supported-features)
-- [Install](#install)
-- [Usage](#usage)
-- [Samples](#samples)
-- [Documentations](#documentations)
-- [Contribute](#contribute)
-- [Maintainers](#maintainers)
-- [Support us](#support-us)
-- [References](#references)
-
-## Supported Features
-
-### Special features
-- Allow you to use Go libraries dynamically (only on linux)
-- Support calling Go's method using Goby directly
-- Built in multi-threaded server and DB library
-
-### Normal language features
-- Everything is object
-- Object and Class
-    - Top level main object
-    - Constructor
-    - Support class methods
-    - Support inheritance
-    - Support instance variable
-    - Support `self`
-- Module & Namespace
-- Variables
-    - Constant
-    - Local variable
-    - Instance variable
-- Method
-    - Support evaluation with arguments
-    - Support evaluation without arguments
-    - Support evaluation with block (closure)
-- BuiltIn Data Types (All of them are classes 😀)
-    - Class
-    - Integer
-    - String
-    - Boolean
-    - nil
-    - Hash (with built in `to_json` method)
-    - Array
-- Flow control
-    - If statement
-    - while statement
-- Import other files
-    - require_relative
-    - require (only for standard libraries now)
-- Standard Libraries (all of them are at very early stage)
-    - `URI`
-    - `Net::HTTP`
-    - `Net::SimpleServer` (This is very cool and quite performante, check the [sample](https://github.com/goby-lang/goby/blob/master/samples/server.gb))
-    - `File`
-    - `DB`
-- IO
-    - `puts`
-    - `ARGV`
-- REPL (run `goby -i`)
-- Thread (this should work but the implementation is quite naive and will be refined in the future)
-    - Support `thread` method to create a new thread (like `goroutine`)
-    - Has `Channel` class for passing objects between threads (like `chan` in Go)
-    - See this sample: [One thousand threads](https://github.com/goby-lang/goby/blob/master/samples/one_thousand_threads.gb)
-
-    
-**(You can open an issue for any feature request)**
-
-## Install
-
-### From Source
-
-1. You must have Golang installed
-2. You must have set $GOPATH
-3. Add your $GOPATH/bin into $PATH
-4. Run following command 
-
-    ```
-    $ go get github.com/goby-lang/goby
-    ```
-5. Set `GOBY_ROOT` to the project's root path, which should be:
-
-    ```
-    $GOPATH/src/github.com/goby-lang/goby
-    ```
-
-### Via Homebrew
-
-**Please checkout the [latest release](https://github.com/goby-lang/goby/releases) before using this approach**
-
-```
-brew tap goby-lang/goby
-brew install goby
-```
-
-### Verify Your Installation
-
-1. Run `goby -v` to see the version.
-2. Run `goby -i` to enter interactive console.
-3. Type `require "file"`.
-4. If no error shows up than you have successfully installed Goby :)
-5. You can also just run `brew test goby` if you install it via homebrew.
-
-**If you have any issue installing Goby, please open an issue for it**
-
-## Usage
-
-**Execute goby file:**
-```
-$ goby ./samples/server.gb
-```
-
-**Run interactive console:**
-```
-$ goby -i
-```
-
-## Samples
-
-See [sample directory](https://github.com/goby-lang/goby/tree/master/samples) for sample code snippets, like:
-
-- [Built a stack data structure using Goby](https://github.com/goby-lang/goby/blob/master/samples/stack.gb)
-- [Running a "Hello World" app with built in server library](https://github.com/goby-lang/goby/blob/master/samples/server/server.gb)
-- [Sending request using http library](https://github.com/goby-lang/goby/blob/master/samples/http.gb)
-- [Running load test on blocking server](https://github.com/goby-lang/goby/blob/master/samples/server/blocking_server.gb) (This shows `Goby`'s simple server is very performant and can handle requests concurrently)
-- [One thousand threads](https://github.com/goby-lang/goby/blob/master/samples/one_thousand_threads.gb)
-
-## Documentations
-
-Check out our [API Documentation](https://goby-lang.github.io/api.doc/).
-
-There is still a lot of document to add. Feel free to contribute following [this guide](https://github.com/goby-lang/api.doc#documenting-goby-code).
-
-## Contribute
-
-See the [guideline](https://github.com/goby-lang/goby/blob/master/CONTRIBUTING.md).
-
-## Maintainers
-
-- @st0012
-- @hachi8833
-- @Maxwell-Alexius
-
-## Support Us
-
-### Backers
-
 **Supporting Goby by sending your first PR! See [contribution guideline](https://github.com/goby-lang/goby/blob/master/CONTRIBUTING.md)**
 
 **Or [support us on opencollective](https://opencollective.com/goby) (I quit my job to develop `Goby` in full-time, so financial support are needed 😢)**
 
 ## References
 
-I can't build this project without these resources, and I highly recommend you to check them out if you're interested in building your own languages:
+The followings are the essential resources to create Goby; I highly recommend you to check them first if you'd be interested in building your own languages:
 
 - [Write An Interpreter In Go](https://interpreterbook.com)
 - [Nand2Tetris II](https://www.coursera.org/learn/nand2tetris2/home/welcome)

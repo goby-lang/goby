@@ -7,17 +7,17 @@ import (
 
 // Lexer is used for tokenizing programs
 type Lexer struct {
-	input        string
+	input        []rune
 	position     int
 	readPosition int
-	ch           byte
+	ch           rune
 	line         int
 	FSM          *fsm.FSM
 }
 
 // New initializes a new lexer with input string
 func New(input string) *Lexer {
-	l := &Lexer{input: input}
+	l := &Lexer{input: []rune(input)}
 	l.readChar()
 	l.FSM = fsm.NewFSM(
 		"initial",
@@ -45,7 +45,7 @@ func (l *Lexer) NextToken() token.Token {
 
 	l.skipWhitespace()
 	switch l.ch {
-	case '"', byte('\''):
+	case '"', '\'':
 		tok.Literal = l.readString(l.ch)
 		tok.Type = token.String
 		tok.Line = l.line
@@ -165,7 +165,7 @@ func (l *Lexer) NextToken() token.Token {
 				tok = token.Token{Type: token.ResolutionOperator, Literal: "::", Line: l.line}
 
 			} else if isLetter(l.peekChar()) {
-				tok.Literal = l.readSymbol()
+				tok.Literal = string(l.readSymbol())
 				tok.Type = token.String
 				tok.Line = l.line
 				return tok
@@ -194,7 +194,7 @@ func (l *Lexer) NextToken() token.Token {
 	case '%':
 		tok = newToken(token.Modulo, l.ch, l.line)
 	case '#':
-		tok.Literal = l.absorbComment()
+		tok.Literal = string(l.absorbComment())
 		tok.Type = token.Comment
 		tok.Line = l.line
 		return tok
@@ -205,12 +205,12 @@ func (l *Lexer) NextToken() token.Token {
 	default:
 		if isLetter(l.ch) {
 			if 'A' <= l.ch && l.ch <= 'Z' {
-				tok.Literal = l.readConstant()
+				tok.Literal = string(l.readConstant())
 				tok.Type = token.Constant
 				tok.Line = l.line
 				l.FSM.Event("initial")
 			} else {
-				tok.Literal = l.readIdentifier()
+				tok.Literal = string(l.readIdentifier())
 				if l.FSM.Is("method") {
 					if tok.Literal == "self" {
 						tok.Type = token.LookupIdent(tok.Literal)
@@ -235,7 +235,7 @@ func (l *Lexer) NextToken() token.Token {
 			return tok
 		} else if isInstanceVariable(l.ch) {
 			if isLetter(l.peekChar()) {
-				tok.Literal = l.readInstanceVariable()
+				tok.Literal = string(l.readInstanceVariable())
 				tok.Type = token.InstanceVariable
 				tok.Line = l.line
 				return tok
@@ -243,7 +243,7 @@ func (l *Lexer) NextToken() token.Token {
 
 			return newToken(token.Illegal, l.ch, l.line)
 		} else if isDigit(l.ch) {
-			tok.Literal = l.readNumber()
+			tok.Literal = string(l.readNumber())
 			tok.Type = token.Int
 			tok.Line = l.line
 			return tok
@@ -274,7 +274,7 @@ func (l *Lexer) resetNosymbol() {
 
 }
 
-func (l *Lexer) readNumber() string {
+func (l *Lexer) readNumber() []rune {
 	position := l.position
 	for isDigit(l.ch) {
 		l.readChar()
@@ -282,7 +282,7 @@ func (l *Lexer) readNumber() string {
 	return l.input[position:l.position]
 }
 
-func (l *Lexer) readIdentifier() string {
+func (l *Lexer) readIdentifier() []rune {
 	position := l.position
 	for isLetter(l.ch) || isDigit(l.ch) {
 		l.readChar()
@@ -295,7 +295,7 @@ func (l *Lexer) readIdentifier() string {
 	return l.input[position:l.position]
 }
 
-func (l *Lexer) readConstant() string {
+func (l *Lexer) readConstant() []rune {
 	position := l.position
 	for isLetter(l.ch) || isDigit(l.ch) {
 		l.readChar()
@@ -303,7 +303,7 @@ func (l *Lexer) readConstant() string {
 	return l.input[position:l.position]
 }
 
-func (l *Lexer) readInstanceVariable() string {
+func (l *Lexer) readInstanceVariable() []rune {
 	position := l.position
 	for isLetter(l.ch) || isInstanceVariable(l.ch) || isDigit(l.ch) {
 		l.readChar()
@@ -311,33 +311,38 @@ func (l *Lexer) readInstanceVariable() string {
 	return l.input[position:l.position]
 }
 
-func (l *Lexer) readString(ch byte) string {
+func (l *Lexer) readString(ch rune) string {
 	l.readChar()
 
-	// Strings like "" or ''
+	// Empty strings case such as "" or ''
 	if l.ch == ch {
 		l.readChar()
 		return ""
 	}
 
-	position := l.position // currently at string's first letter
+	result := ""
 
-	for l.peekChar() != ch && l.peekChar() != 0 {
+	for {
+		if isEscapedChar(l.ch) {
+			result += escapedCharResult(ch, l.peekChar())
+			l.readChar()
+		} else {
+			result += string(l.ch)
+		}
 		l.readChar()
+
+		if l.ch == ch || l.peekChar() == 0 {
+			break
+		}
 	}
 
-	if l.peekChar() == 0 {
-		l.readChar()
-		return ""
-	}
+	// fmt.Println(l.ch) <- Currently at string's last character
+	l.readChar() // move to string's latter quote
 
-	l.readChar()                           // currently at string's last letter
-	result := l.input[position:l.position] // get full string
-	l.readChar()                           // move to string's later quote
 	return result
 }
 
-func (l *Lexer) readSymbol() string {
+func (l *Lexer) readSymbol() []rune {
 	l.readChar()
 
 	position := l.position // currently at string's first letter
@@ -351,7 +356,7 @@ func (l *Lexer) readSymbol() string {
 	return result
 }
 
-func (l *Lexer) absorbComment() string {
+func (l *Lexer) absorbComment() []rune {
 	p := l.position
 	for l.ch != '\n' && l.ch != 0 {
 		l.readChar()
@@ -371,7 +376,7 @@ func (l *Lexer) readChar() {
 	l.readPosition++
 }
 
-func (l *Lexer) peekChar() byte {
+func (l *Lexer) peekChar() rune {
 	if l.readPosition >= len(l.input) {
 		return 0
 	}
@@ -380,18 +385,55 @@ func (l *Lexer) peekChar() byte {
 	// Peek shouldn't increment positions.
 }
 
-func isDigit(ch byte) bool {
+func isDigit(ch rune) bool {
 	return '0' <= ch && ch <= '9'
 }
 
-func isLetter(ch byte) bool {
+func isLetter(ch rune) bool {
 	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
 }
 
-func isInstanceVariable(ch byte) bool {
+func isInstanceVariable(ch rune) bool {
 	return ch == '@'
 }
 
-func newToken(tokenType token.Type, ch byte, line int) token.Token {
+func isEscapedChar(ch rune) bool {
+	return ch == '\\'
+}
+
+func escapedCharResult(quotedChar rune, peeked rune) string {
+	if quotedChar == '"' {
+		switch peeked {
+		case 'n':
+			return "\n"
+		case 't':
+			return "\t"
+		case 'v':
+			return "\v"
+		case 'f':
+			return "\f"
+		case 'r':
+			return "\r"
+		case '\\':
+			return "\\"
+		case '"':
+			return "\""
+		case '\'':
+			return "'"
+		default:
+			return "\\" + string(peeked)
+		}
+	}
+	switch peeked {
+	case '"':
+		return "\\\""
+	case '\'':
+		return "'"
+	default:
+		return "\\" + string(peeked)
+	}
+}
+
+func newToken(tokenType token.Type, ch rune, line int) token.Token {
 	return token.Token{Type: tokenType, Literal: string(ch), Line: line}
 }

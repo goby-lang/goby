@@ -256,11 +256,16 @@ func (p *Parser) parseHashPair(pairs map[string]ast.Expression) {
 	var key string
 	var value ast.Expression
 
-	if !p.expectPeek(token.Ident) {
+	p.nextToken()
+
+	switch p.curToken.Type {
+	case token.Ident:
+		key = p.parseIdentifier().(ast.Variable).ReturnValue()
+	case token.Constant:
+		key = p.parseIdentifier().(ast.Variable).ReturnValue()
+	default:
 		return
 	}
-
-	key = p.parseIdentifier().(*ast.Identifier).Value
 
 	if !p.expectPeek(token.Colon) {
 		return

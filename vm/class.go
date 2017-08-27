@@ -428,6 +428,29 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
+			Name: "&&",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
+					}
+
+					switch arg := args[0].(type) {
+					case *BooleanObject:
+						if arg == TRUE {
+							return TRUE
+						}
+
+						return FALSE
+					case *NullObject:
+						return FALSE
+					default:
+						return TRUE
+					}
+				}
+			},
+		},
+		{
 			// Loads the given Goby library name without extension (mainly for modules), returning `true`
 			// if successful and `false` if the feature is already loaded.
 			//
@@ -976,6 +999,30 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
+			Name: "extend",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					var class *RClass
+					module, ok := args[0].(*RClass)
+
+					if !ok {
+						return t.vm.initErrorObject(TypeError, "Expect argument to be a module. got=%v", args[0].Class().Name)
+					}
+
+					class = receiver.SingletonClass()
+
+					if class.alreadyInherit(module) {
+						return class
+					}
+
+					module.superClass = class.superClass
+					class.superClass = module
+
+					return class
+				}
+			},
+		},
+		{
 			// Returns the name of the class (receiver).
 			//
 			// ```ruby
@@ -1030,10 +1077,6 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 
 					if !ok {
 						return t.unsupportedMethodError("#new", receiver)
-					}
-
-					if class.pseudoSuperClass.isModule {
-						return t.vm.initErrorObject(InternalError, "Module inheritance is not supported: %s", class.pseudoSuperClass.Name)
 					}
 
 					instance := class.initializeInstance()

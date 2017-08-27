@@ -81,7 +81,12 @@ reset:
 
 	println("Goby", version, fortune(), fortune(), fortune())
 
-	ivm := newIVM()
+	ivm, err := newIVM()
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 
 	for {
 		igb, err = readIgb(igb, err)
@@ -187,10 +192,7 @@ reset:
 			program, perr = ivm.p.ParseProgram()
 
 			if perr != nil {
-				if !perr.IsEOF() {
-					fmt.Println(perr.Message)
-				}
-				println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
+				handleParserError(perr, igb)
 				continue
 			}
 
@@ -201,6 +203,12 @@ reset:
 
 		if igb.sm.Is(readyToExec) {
 			println(prompt(igb.indents) + igb.lines)
+
+			if perr != nil {
+				handleParserError(perr, igb)
+				continue
+			}
+
 			instructions := ivm.g.GenerateInstructions(program.Statements)
 			ivm.v.REPLExec(instructions)
 
@@ -219,6 +227,15 @@ reset:
 			//}
 			igb.cmds = nil
 		}
+	}
+}
+
+func handleParserError(e *parser.Error, igb *iGb) {
+	if e != nil {
+		if !e.IsEOF() {
+			fmt.Println(e.Message)
+		}
+		println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
 	}
 }
 
@@ -251,9 +268,14 @@ func newIgb() *iGb {
 
 //
 // newIVM initializes iVM.
-func newIVM() iVM {
-	ivm := iVM{}
-	ivm.v = vm.New(os.Getenv("GOBY_ROOT"), []string{})
+func newIVM() (ivm iVM, err error) {
+	ivm = iVM{}
+	v, err := vm.New(os.Getenv("GOBY_ROOT"), []string{})
+
+	if err != nil {
+		return ivm, err
+	}
+	ivm.v = v
 	ivm.v.SetClassISIndexTable("")
 	ivm.v.SetMethodISIndexTable("")
 	ivm.v.InitForREPL()
@@ -265,7 +287,7 @@ func newIVM() iVM {
 	ivm.g = bytecode.NewGenerator()
 	ivm.g.REPL = true
 	ivm.g.InitTopLevelScope(program)
-	return ivm
+	return ivm, nil
 }
 
 // readIgb fetches one line from input, with helps of Readline lib.

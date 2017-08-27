@@ -18,7 +18,7 @@ func TestHashClassSuperclass(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -27,11 +27,11 @@ func TestHashClassSuperclass(t *testing.T) {
 
 func TestEvalHashExpression(t *testing.T) {
 	input := `
-	{ foo: 123, bar: "test", baz: true }
+	{ foo: 123, bar: "test", Baz: true }
 	`
 
 	v := initTestVM()
-	evaluated := v.testEval(t, input)
+	evaluated := v.testEval(t, input, getFilename())
 
 	h, ok := evaluated.(*HashObject)
 	if !ok {
@@ -44,7 +44,7 @@ func TestEvalHashExpression(t *testing.T) {
 			testIntegerObject(t, 0, value, 123)
 		case "bar":
 			testStringObject(t, 0, value, "test")
-		case "baz":
+		case "Baz":
 			testBooleanObject(t, 0, value, true)
 		}
 	}
@@ -120,7 +120,7 @@ func TestHashAccessOperation(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -128,20 +128,16 @@ func TestHashAccessOperation(t *testing.T) {
 }
 
 func TestHashAccessOperationFail(t *testing.T) {
-	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
-	}{
-		{`{ a: 1, b: 2 }[]`, ArgumentError, "ArgumentError: Expect 1 argument. got: 0"},
-		{`{ a: 1, b: 2 }[true]`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
-		{`{ a: 1, b: 2 }[true] = 1`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
+	testsFail := []errorTestCase{
+		{`{ a: 1, b: 2 }[]`, "ArgumentError: Expect 1 argument. got: 0", 1},
+		{`{ a: 1, b: 2 }[true]`, "TypeError: Expect argument to be String. got: Boolean", 1},
+		{`{ a: 1, b: 2 }[true] = 1`, "TypeError: Expect argument to be String. got: Boolean", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -184,7 +180,7 @@ func TestHashComparisonOperation(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -197,7 +193,7 @@ func TestHashClearMethod(t *testing.T) {
 	`
 
 	v := initTestVM()
-	evaluated := v.testEval(t, input)
+	evaluated := v.testEval(t, input, getFilename())
 
 	h, ok := evaluated.(*HashObject)
 	if !ok {
@@ -211,19 +207,15 @@ func TestHashClearMethod(t *testing.T) {
 }
 
 func TestHashClearMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
-	}{
-		{`{ a: 1, b: 2 }.clear(123)`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1"},
-		{`{ a: 1, b: 2 }.clear(true, { hello: "World" })`, ArgumentError, "ArgumentError: Expect 0 argument. got: 2"},
+	testsFail := []errorTestCase{
+		{`{ a: 1, b: 2 }.clear(123)`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`{ a: 1, b: 2 }.clear(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -260,7 +252,7 @@ func TestHashEachKeyMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		testArrayObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -268,27 +260,19 @@ func TestHashEachKeyMethod(t *testing.T) {
 }
 
 func TestHashEachKeyMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input       string
-		errType     string
-		errMsg      string
-		expectedCfp int
-	}{
-		{`
-		{ a: 1, b: 2, c: 3 }.each_key("Hello") do |key|
+	testsFail := []errorTestCase{
+		{`{ a: 1, b: 2, c: 3 }.each_key("Hello") do |key|
 		  puts key
 		end
-		`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1", 2},
-		{`
-		{ a: 1, b: 2, c: 3 }.each_key
-		`, InternalError, "InternalError: Can't yield without a block", 1},
+		`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`{ a: 1, b: 2, c: 3 }.each_key`, "InternalError: Can't yield without a block", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		v.checkCFP(t, i, tt.expectedCfp)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -317,7 +301,7 @@ func TestHashEachValueMethod(t *testing.T) {
 
 	for i, tt := range hashTests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		testArrayObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -352,7 +336,7 @@ func TestHashEachValueMethod(t *testing.T) {
 
 	for i, tt := range normalTests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -360,27 +344,19 @@ func TestHashEachValueMethod(t *testing.T) {
 }
 
 func TestHashEachValueMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input       string
-		errType     string
-		errMsg      string
-		expectedCfp int
-	}{
-		{`
-		{ a: 1, b: 2, c: 3 }.each_value("Hello") do |value|
+	testsFail := []errorTestCase{
+		{`{ a: 1, b: 2, c: 3 }.each_value("Hello") do |value|
 		  puts value
 		end
-		`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1", 2},
-		{`
-		{ a: 1, b: 2, c: 3 }.each_value
-		`, InternalError, "InternalError: Can't yield without a block", 1},
+		`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`{ a: 1, b: 2, c: 3 }.each_value`, "InternalError: Can't yield without a block", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		v.checkCFP(t, i, tt.expectedCfp)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -396,7 +372,7 @@ func TestHashEmptyMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -404,19 +380,15 @@ func TestHashEmptyMethod(t *testing.T) {
 }
 
 func TestHashEmptyMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
-	}{
-		{`{ a: 1, b: 2 }.empty?(123)`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1"},
-		{`{ a: 1, b: 2 }.empty?(true, { hello: "World" })`, ArgumentError, "ArgumentError: Expect 0 argument. got: 2"},
+	testsFail := []errorTestCase{
+		{`{ a: 1, b: 2 }.empty?(123)`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`{ a: 1, b: 2 }.empty?(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -443,7 +415,7 @@ func TestHashEqualMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -451,19 +423,15 @@ func TestHashEqualMethod(t *testing.T) {
 }
 
 func TestHashEqualMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
-	}{
-		{`{ a: 1, b: 2 }.eql?`, ArgumentError, "ArgumentError: Expect 1 argument. got: 0"},
-		{`{ a: 1, b: 2 }.eql?(true, { hello: "World" })`, ArgumentError, "ArgumentError: Expect 1 argument. got: 2"},
+	testsFail := []errorTestCase{
+		{`{ a: 1, b: 2 }.eql?`, "ArgumentError: Expect 1 argument. got: 0", 1},
+		{`{ a: 1, b: 2 }.eql?(true, { hello: "World" })`, "ArgumentError: Expect 1 argument. got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -514,7 +482,7 @@ func TestHashDeleteMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -522,21 +490,17 @@ func TestHashDeleteMethod(t *testing.T) {
 }
 
 func TestHashDeleteMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
-	}{
-		{`{ a: 1, b: "Hello", c: true }.delete`, ArgumentError, "ArgumentError: Expect 1 argument. got: 0"},
-		{`{ a: 1, b: "Hello", c: true }.delete("a", "b")`, ArgumentError, "ArgumentError: Expect 1 argument. got: 2"},
-		{`{ a: 1, b: "Hello", c: true }.delete(123)`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
-		{`{ a: 1, b: "Hello", c: true }.delete(true)`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
+	testsFail := []errorTestCase{
+		{`{ a: 1, b: "Hello", c: true }.delete`, "ArgumentError: Expect 1 argument. got: 0", 1},
+		{`{ a: 1, b: "Hello", c: true }.delete("a", "b")`, "ArgumentError: Expect 1 argument. got: 2", 1},
+		{`{ a: 1, b: "Hello", c: true }.delete(123)`, "TypeError: Expect argument to be String. got: Integer", 1},
+		{`{ a: 1, b: "Hello", c: true }.delete(true)`, "TypeError: Expect argument to be String. got: Boolean", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -553,7 +517,7 @@ func TestHashHasKeyMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -561,21 +525,17 @@ func TestHashHasKeyMethod(t *testing.T) {
 }
 
 func TestHashHasKeyMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
-	}{
-		{`{ a: 1, b: 2 }.has_key?`, ArgumentError, "ArgumentError: Expect 1 argument. got: 0"},
-		{`{ a: 1, b: 2 }.has_key?(true, { hello: "World" })`, ArgumentError, "ArgumentError: Expect 1 argument. got: 2"},
-		{`{ a: 1, b: 2 }.has_key?(true)`, TypeError, "TypeError: Expect argument to be String. got: Boolean"},
-		{`{ a: 1, b: 2 }.has_key?(123)`, TypeError, "TypeError: Expect argument to be String. got: Integer"},
+	testsFail := []errorTestCase{
+		{`{ a: 1, b: 2 }.has_key?`, "ArgumentError: Expect 1 argument. got: 0", 1},
+		{`{ a: 1, b: 2 }.has_key?(true, { hello: "World" })`, "ArgumentError: Expect 1 argument. got: 2", 1},
+		{`{ a: 1, b: 2 }.has_key?(true)`, "TypeError: Expect argument to be String. got: Boolean", 1},
+		{`{ a: 1, b: 2 }.has_key?(123)`, "TypeError: Expect argument to be String. got: Integer", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -597,7 +557,7 @@ func TestHashHasValueMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -605,19 +565,15 @@ func TestHashHasValueMethod(t *testing.T) {
 }
 
 func TestHashHasValueMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
-	}{
-		{`{ a: 1, b: 2 }.has_value?`, ArgumentError, "ArgumentError: Expect 1 argument. got: 0"},
-		{`{ a: 1, b: 2 }.has_value?(true, { hello: "World" })`, ArgumentError, "ArgumentError: Expect 1 argument. got: 2"},
+	testsFail := []errorTestCase{
+		{`{ a: 1, b: 2 }.has_value?`, "ArgumentError: Expect 1 argument. got: 0", 1},
+		{`{ a: 1, b: 2 }.has_value?(true, { hello: "World" })`, "ArgumentError: Expect 1 argument. got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -629,7 +585,7 @@ func TestHashKeysMethod(t *testing.T) {
 	`
 
 	v := initTestVM()
-	evaluated := v.testEval(t, input)
+	evaluated := v.testEval(t, input, getFilename())
 
 	arr, ok := evaluated.(*ArrayObject)
 	if !ok {
@@ -652,19 +608,15 @@ func TestHashKeysMethod(t *testing.T) {
 }
 
 func TestHashKeysMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
-	}{
-		{`{ a: 1, b: 2 }.keys(123)`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1"},
-		{`{ a: 1, b: 2 }.keys(true, { hello: "World" })`, ArgumentError, "ArgumentError: Expect 0 argument. got: 2"},
+	testsFail := []errorTestCase{
+		{`{ a: 1, b: 2 }.keys(123)`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`{ a: 1, b: 2 }.keys(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -685,7 +637,7 @@ func TestHashLengthMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -693,19 +645,15 @@ func TestHashLengthMethod(t *testing.T) {
 }
 
 func TestHashLengthMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
-	}{
-		{`{ a: 1, b: 2 }.length(123)`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1"},
-		{`{ a: 1, b: 2 }.length(true, { hello: "World" })`, ArgumentError, "ArgumentError: Expect 0 argument. got: 2"},
+	testsFail := []errorTestCase{
+		{`{ a: 1, b: 2 }.length(123)`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`{ a: 1, b: 2 }.length(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -762,7 +710,7 @@ func TestHashMapValuesMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -770,27 +718,19 @@ func TestHashMapValuesMethod(t *testing.T) {
 }
 
 func TestHashMapValuesMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input       string
-		errType     string
-		errMsg      string
-		expectedCfp int
-	}{
-		{`
-		{ a: 1, b: 2, c: 3 }.map_values("Hello") do |value|
+	testsFail := []errorTestCase{
+		{`{ a: 1, b: 2, c: 3 }.map_values("Hello") do |value|
 		  value * 3
 		end
-		`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1", 2},
-		{`
-		{ a: 1, b: 2, c: 3 }.map_values
-		`, InternalError, "InternalError: Can't yield without a block", 1},
+		`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`{ a: 1, b: 2, c: 3 }.map_values`, "InternalError: Can't yield without a block", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		v.checkCFP(t, i, tt.expectedCfp)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -803,7 +743,7 @@ func TestHashMergeMethod(t *testing.T) {
 
 	for i, value := range input {
 		v := initTestVM()
-		evaluated := v.testEval(t, value)
+		evaluated := v.testEval(t, value, getFilename())
 
 		h, ok := evaluated.(*HashObject)
 		if !ok {
@@ -829,20 +769,16 @@ func TestHashMergeMethod(t *testing.T) {
 }
 
 func TestHashMergeMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
-	}{
-		{`{ a: 1, b: 2 }.merge`, ArgumentError, "ArgumentError: Expect at least 1 argument. got: 0"},
-		{`{ a: 1, b: 2 }.merge(true, { hello: "World" })`, TypeError, "TypeError: Expect argument to be Hash. got: Boolean"},
-		{`{ a: 1, b: 2 }.merge({ hello: "World" }, 123, "Hello")`, TypeError, "TypeError: Expect argument to be Hash. got: Integer"},
+	testsFail := []errorTestCase{
+		{`{ a: 1, b: 2 }.merge`, "ArgumentError: Expect at least 1 argument. got: 0", 1},
+		{`{ a: 1, b: 2 }.merge(true, { hello: "World" })`, "TypeError: Expect argument to be Hash. got: Boolean", 1},
+		{`{ a: 1, b: 2 }.merge({ hello: "World" }, 123, "Hello")`, "TypeError: Expect argument to be Hash. got: Integer", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -862,7 +798,7 @@ func TestHashSortedKeysMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		testArrayObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -870,19 +806,15 @@ func TestHashSortedKeysMethod(t *testing.T) {
 }
 
 func TestHashSortedKeysMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
-	}{
-		{`{ a: 1, b: 2 }.sorted_keys(123)`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1"},
-		{`{ a: 1, b: 2 }.sorted_keys(true, { hello: "World" })`, ArgumentError, "ArgumentError: Expect 0 argument. got: 2"},
+	testsFail := []errorTestCase{
+		{`{ a: 1, b: 2 }.sorted_keys(123)`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`{ a: 1, b: 2 }.sorted_keys(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -903,7 +835,7 @@ func TestHashToArrayMethod(t *testing.T) {
 
 	for i, tt := range testsSortedArray {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		testArrayObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -914,7 +846,7 @@ func TestHashToArrayMethod(t *testing.T) {
 	`
 
 	v := initTestVM()
-	evaluated := v.testEval(t, input)
+	evaluated := v.testEval(t, input, getFilename())
 
 	arr, ok := evaluated.(*ArrayObject)
 	if !ok {
@@ -945,19 +877,15 @@ func TestHashToArrayMethod(t *testing.T) {
 }
 
 func TestHashToArrayMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
-	}{
-		{`{ a: 1, b: 2 }.to_a(true, { hello: "World" })`, ArgumentError, "ArgumentError: Expect 0..1 argument. got: 2"},
-		{`{ a: 1, b: 2 }.to_a(123)`, TypeError, "TypeError: Expect argument to be Boolean. got: Integer"},
+	testsFail := []errorTestCase{
+		{`{ a: 1, b: 2 }.to_a(true, { hello: "World" })`, "ArgumentError: Expect 0..1 argument. got: 2", 1},
+		{`{ a: 1, b: 2 }.to_a(123)`, "TypeError: Expect argument to be Boolean. got: Integer", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -996,7 +924,7 @@ func TestHashToJSONMethodWithArray(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		compareJSONResult(t, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -1046,7 +974,7 @@ func TestHashToJSONMethodWithNestedHash(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		compareJSONResult(t, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -1107,7 +1035,7 @@ func TestHashToJSONMethodWithBasicTypes(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		compareJSONResult(t, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -1115,19 +1043,15 @@ func TestHashToJSONMethodWithBasicTypes(t *testing.T) {
 }
 
 func TestHashToJSONMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
-	}{
-		{`{ a: 1, b: 2 }.to_json(123)`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1"},
-		{`{ a: 1, b: 2 }.to_json(true, { hello: "World" })`, ArgumentError, "ArgumentError: Expect 0 argument. got: 2"},
+	testsFail := []errorTestCase{
+		{`{ a: 1, b: 2 }.to_json(123)`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`{ a: 1, b: 2 }.to_json(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -1145,7 +1069,7 @@ func TestHashToStringMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -1153,19 +1077,15 @@ func TestHashToStringMethod(t *testing.T) {
 }
 
 func TestHashToStringMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
-	}{
-		{`{ a: 1, b: 2 }.to_s(123)`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1"},
-		{`{ a: 1, b: 2 }.to_s(true, { hello: "World" })`, ArgumentError, "ArgumentError: Expect 0 argument. got: 2"},
+	testsFail := []errorTestCase{
+		{`{ a: 1, b: 2 }.to_s(123)`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`{ a: 1, b: 2 }.to_s(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -1222,7 +1142,7 @@ func TestHashTransformValuesMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -1230,27 +1150,19 @@ func TestHashTransformValuesMethod(t *testing.T) {
 }
 
 func TestHashTransformValuesMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input       string
-		errType     string
-		errMsg      string
-		expectedCfp int
-	}{
-		{`
-		{ a: 1, b: 2, c: 3 }.transform_values("Hello") do |value|
+	testsFail := []errorTestCase{
+		{`{ a: 1, b: 2, c: 3 }.transform_values("Hello") do |value|
 		  value * 3
 		end
-		`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1", 2},
-		{`
-		{ a: 1, b: 2, c: 3 }.transform_values
-		`, InternalError, "InternalError: Can't yield without a block", 1},
+		`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`{ a: 1, b: 2, c: 3 }.transform_values`, "InternalError: Can't yield without a block", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
-		v.checkCFP(t, i, tt.expectedCfp)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -1261,7 +1173,7 @@ func TestHashValuesMethod(t *testing.T) {
 	`
 
 	v := initTestVM()
-	evaluated := v.testEval(t, input)
+	evaluated := v.testEval(t, input, getFilename())
 
 	arr, ok := evaluated.(*ArrayObject)
 	if !ok {
@@ -1287,19 +1199,15 @@ func TestHashValuesMethod(t *testing.T) {
 }
 
 func TestHashValuesMethodFail(t *testing.T) {
-	testsFail := []struct {
-		input   string
-		errType string
-		errMsg  string
-	}{
-		{`{ a: 1, b: 2 }.values(123)`, ArgumentError, "ArgumentError: Expect 0 argument. got: 1"},
-		{`{ a: 1, b: 2 }.values(true, { hello: "World" })`, ArgumentError, "ArgumentError: Expect 0 argument. got: 2"},
+	testsFail := []errorTestCase{
+		{`{ a: 1, b: 2 }.values(123)`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`{ a: 1, b: 2 }.values(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
-		checkError(t, i, evaluated, tt.errType, tt.errMsg)
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}

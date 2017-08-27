@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"fmt"
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"strings"
 )
@@ -17,9 +18,10 @@ type action struct {
 }
 
 type instruction struct {
-	action *action
-	Params []interface{}
-	Line   int
+	action     *action
+	Params     []interface{}
+	Line       int
+	sourceLine int
 }
 
 type instructionSet struct {
@@ -29,9 +31,10 @@ type instructionSet struct {
 	argTypes     []int
 }
 
-func (is *instructionSet) define(line int, a *action, params ...interface{}) {
+func (is *instructionSet) define(line int, a *action, params ...interface{}) *instruction {
 	i := &instruction{action: a, Params: params, Line: line}
 	is.instructions = append(is.instructions, i)
+	return i
 }
 
 var builtInActions = map[operationType]*action{
@@ -208,6 +211,7 @@ var builtInActions = map[operationType]*action{
 
 			if !ok {
 				t.returnError(TypeError, "Expect stack top's value to be an Array when executing 'expandarray' instruction.")
+				return
 			}
 
 			elems := []Object{}
@@ -320,6 +324,7 @@ var builtInActions = map[operationType]*action{
 
 			if !ok {
 				t.returnError(InternalError, "Can't get method %s's instruction set.", methodName)
+				return
 			}
 
 			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.topLevelClass(methodClass)}}
@@ -342,14 +347,16 @@ var builtInActions = map[operationType]*action{
 			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.topLevelClass(methodClass)}}
 
 			v := t.stack.pop().Target
-			v.SingletonClass().Methods.set(methodName, method)
-			// TODO: Support something like:
-			// ```
-			// f = Foo.new
-			// def f.bar
-			//   10
-			// end
-			// ```
+
+			switch v := v.(type) {
+			case *RClass:
+				v.SingletonClass().Methods.set(methodName, method)
+			default:
+				singletonClass := t.vm.createRClass(fmt.Sprintf("#<Class:#<%s:%s>>", v.Class().Name, v.id()))
+				singletonClass.Methods.set(methodName, method)
+				singletonClass.isSingleton = true
+				v.SetSingletonClass(singletonClass)
+			}
 		},
 	},
 	bytecode.DefClass: {
@@ -371,6 +378,12 @@ var builtInActions = map[operationType]*action{
 
 					if !ok {
 						t.returnError(InternalError, "Constant %s is not a class. got=%s", superClassName, string(superClass.Target.Class().ReturnName()))
+						return
+					}
+
+					if inheritedClass.isModule {
+						t.returnError(InternalError, "Module inheritance is not supported: %s", inheritedClass.Name)
+						return
 					}
 
 					class.inherits(inheritedClass)
@@ -404,7 +417,7 @@ var builtInActions = map[operationType]*action{
 			if method == nil {
 				err := t.vm.initErrorObject(UndefinedMethodError, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
 				t.stack.set(receiverPr, &Pointer{Target: err})
-				t.sp = receiverPr + 1
+				t.sp = argPr
 				return
 			}
 
@@ -412,9 +425,9 @@ var builtInActions = map[operationType]*action{
 
 			switch m := method.(type) {
 			case *MethodObject:
-				t.evalMethodObject(receiver, m, receiverPr, argCount, argPr, blockFrame)
+				t.evalMethodObject(receiver, m, receiverPr, argCount, blockFrame)
 			case *BuiltInMethodObject:
-				t.evalBuiltInMethod(receiver, m, receiverPr, argCount, argPr, blockFrame)
+				t.evalBuiltInMethod(receiver, m, receiverPr, argCount, blockFrame)
 			case *Error:
 				t.returnError(InternalError, m.toString())
 			}
@@ -430,6 +443,7 @@ var builtInActions = map[operationType]*action{
 
 			if cf.blockFrame == nil {
 				t.returnError(InternalError, "Can't yield without a block")
+				return
 			}
 
 			blockFrame := cf.blockFrame

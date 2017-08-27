@@ -14,7 +14,7 @@ func (i *instruction) inspect() string {
 	for _, param := range i.Params {
 		params = append(params, fmt.Sprint(param))
 	}
-	return fmt.Sprintf("%s: %s", i.action.name, strings.Join(params, ", "))
+	return fmt.Sprintf("%s: %s. source line: %d", i.action.name, strings.Join(params, ", "), i.sourceLine)
 }
 
 func (is *instructionSet) inspect() string {

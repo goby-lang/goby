@@ -38,17 +38,17 @@ func main() {
 		os.Exit(0)
 	}
 
-	filepath := flag.Arg(0)
+	fp := flag.Arg(0)
 
-	if filepath == "" {
+	if fp == "" {
 		flag.Usage()
 		os.Exit(0)
 	}
 
 	args := flag.Args()[1:]
 
-	dir, _, fileExt := extractFileInfo(filepath)
-	file, ok := readFile(filepath)
+	dir, _, fileExt := extractFileInfo(fp)
+	file, ok := readFile(fp)
 
 	if !ok {
 		return
@@ -63,8 +63,21 @@ func main() {
 			return
 		}
 
-		v := vm.New(dir, args)
-		v.ExecInstructions(instructionSets, filepath)
+		v, err := vm.New(dir, args)
+
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+
+		fp, err := filepath.Abs(fp)
+
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+
+		v.ExecInstructions(instructionSets, fp)
 	default:
 		fmt.Printf("Unknown file extension: %s", fileExt)
 	}

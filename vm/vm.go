@@ -8,11 +8,19 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 )
 
 // Version stores current Goby version
-const Version = "0.0.9"
+const Version = "0.1.1"
+
+// These are the enums for marking parser's mode, which decides whether it should pop unused values.
+const (
+	NormalMode int = iota
+	REPLMode
+	TestMode
+)
 
 type isIndexTable struct {
 	Data map[string]int
@@ -63,11 +71,13 @@ type VM struct {
 	channelObjectMap *objectMap
 
 	sync.Mutex
+
+	mode int
 }
 
 // New initializes a vm to initialize state and returns it.
-func New(fileDir string, args []string) *VM {
-	vm := &VM{args: args}
+func New(fileDir string, args []string) (vm *VM, e error) {
+	vm = &VM{args: args}
 	vm.mainThread = vm.newThread()
 
 	vm.initConstants()
@@ -87,7 +97,21 @@ func New(fileDir string, args []string) *VM {
 	gobyRoot := os.Getenv("GOBY_ROOT")
 
 	if len(gobyRoot) == 0 {
-		vm.projectRoot = fmt.Sprintf("/usr/local/Cellar/goby/%s/", Version)
+		vm.projectRoot = fmt.Sprintf("/usr/local/Cellar/goby/%s/e", Version)
+
+		_, err := os.Stat(vm.projectRoot)
+
+		if err != nil {
+			path, _ := filepath.Abs("$GOPATH/src/github.com/goby-lang/goby/e")
+			_, err = os.Stat(path)
+
+			if err != nil {
+				e = fmt.Errorf("You haven't set $GOBY_ROOT properly")
+				return nil, e
+			}
+
+			vm.projectRoot = path
+		}
 	} else {
 		vm.projectRoot = gobyRoot
 	}
@@ -95,7 +119,7 @@ func New(fileDir string, args []string) *VM {
 	vm.mainObj = vm.initMainObj()
 	vm.channelObjectMap = &objectMap{store: map[int]Object{}}
 
-	return vm
+	return
 }
 
 func (vm *VM) newThread() *thread {
@@ -183,6 +207,15 @@ func (vm *VM) initConstants() {
 	}
 
 	vm.objectClass.constants["ARGV"] = &Pointer{Target: vm.initArrayObject(args)}
+
+	envs := map[string]Object{}
+
+	for _, e := range os.Environ() {
+		pair := strings.Split(e, "=")
+		envs[pair[0]] = vm.initStringObject(pair[1])
+	}
+
+	vm.objectClass.constants["ENV"] = &Pointer{Target: vm.initHashObject(envs)}
 }
 
 func (vm *VM) topLevelClass(cn string) *RClass {

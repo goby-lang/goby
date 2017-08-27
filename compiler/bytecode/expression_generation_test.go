@@ -243,9 +243,11 @@ func TestMultipleVariableAssignmentCompilation(t *testing.T) {
 4 send foo 0
 5 expand_array 3
 6 setlocal 0 0
-7 setinstancevariable @b
-8 setlocal 0 1
-9 leave
+7 pop
+8 setinstancevariable @b
+9 pop
+10 setlocal 0 1
+11 leave
 `
 
 	bytecode := compileToBytecode(input)

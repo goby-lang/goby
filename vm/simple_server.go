@@ -51,6 +51,7 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					path := args[0].(*StringObject).value
 					method := args[1].(*StringObject).value
+
 					router.HandleFunc(path, newHandler(t, blockFrame)).Methods(method)
 
 					return receiver
@@ -99,6 +100,10 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 
 					fileRoot, serveStatic := server.InstanceVariables.get("@file_root")
 
+					router.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+						log.Printf("%s %s %s %d\n", r.Method, r.URL.Path, r.Proto, 404)
+					})
+
 					if serveStatic && fileRoot.Class() != t.vm.objectClass.getClassConstant(nullClass) {
 						fr := fileRoot.(*StringObject).value
 						currentDir, _ := os.Getwd()
@@ -127,6 +132,7 @@ func newHandler(t *thread, blockFrame *callFrame) func(http.ResponseWriter, *htt
 		// Go creates one goroutine per request, so we also need to create a new Goby thread for every request.
 		thread := t.vm.newThread()
 		res := httpResponseClass.initializeInstance()
+
 		req := initRequest(t, w, r)
 		result := thread.builtInMethodYield(blockFrame, req, res)
 
@@ -165,8 +171,16 @@ func initRequest(t *thread, w http.ResponseWriter, req *http.Request) *RObject {
 
 	for k, v := range m {
 		varName := "@" + toSnakeCase(k)
-		reqObj.InstanceVariables.set(varName, t.vm.initObjectFromGoType(v))
+		reqObj.instanceVariableSet(varName, t.vm.initObjectFromGoType(v))
 	}
+
+	vars := map[string]Object{}
+
+	for k, v := range mux.Vars(req) {
+		vars[k] = t.vm.initStringObject(v)
+	}
+
+	reqObj.instanceVariableSet("@params", t.vm.initHashObject(vars))
 
 	return reqObj
 }

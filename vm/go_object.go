@@ -76,13 +76,38 @@ func convertToGoFuncArgs(args []Object) ([]interface{}, error) {
 		v, ok := arg.(builtInType)
 
 		if ok {
-			if integer, ok := v.(*IntegerObject); ok {
-				switch integer.flag {
-				case integer64:
-					funcArgs = append(funcArgs, int64(integer.value))
+			switch v := v.(type) {
+			case *IntegerObject:
+				switch v.flag {
+				case f64:
+					funcArgs = append(funcArgs, float64(v.value))
 					continue
-				case integer32:
-					funcArgs = append(funcArgs, int32(integer.value))
+				case f32:
+					funcArgs = append(funcArgs, float32(v.value))
+					continue
+				case ui64:
+					funcArgs = append(funcArgs, uint64(v.value))
+					continue
+				case ui32:
+					funcArgs = append(funcArgs, uint32(v.value))
+					continue
+				case ui16:
+					funcArgs = append(funcArgs, uint16(v.value))
+					continue
+				case ui8:
+					funcArgs = append(funcArgs, uint8(v.value))
+					continue
+				case i64:
+					funcArgs = append(funcArgs, int64(v.value))
+					continue
+				case i32:
+					funcArgs = append(funcArgs, int32(v.value))
+					continue
+				case i16:
+					funcArgs = append(funcArgs, int16(v.value))
+					continue
+				case i8:
+					funcArgs = append(funcArgs, int8(v.value))
 					continue
 				}
 			}

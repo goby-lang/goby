@@ -17,7 +17,7 @@ func TestCallingGoObjectFunctionWithReturnValue(t *testing.T) {
 	`
 
 	v := initTestVM()
-	evaluated := v.testEval(t, input)
+	evaluated := v.testEval(t, input, getFilename())
 	checkExpected(t, 0, evaluated, "xyz!")
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
@@ -36,7 +36,7 @@ func TestCallingGoObjectFunctionWithReturnError(t *testing.T) {
 	`
 
 	v := initTestVM()
-	evaluated := v.testEval(t, input)
+	evaluated := v.testEval(t, input, getFilename())
 	checkExpected(t, 0, evaluated, nil)
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
@@ -54,7 +54,7 @@ func TestCallingGoObjectFuncWithInt64(t *testing.T) {
 	`
 
 	v := initTestVM()
-	evaluated := v.testEval(t, input)
+	evaluated := v.testEval(t, input, getFilename())
 	checkExpected(t, 0, evaluated, 110)
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
@@ -72,7 +72,7 @@ func TestCallingGoObjectFuncWithGoObject(t *testing.T) {
 	`
 
 	v := initTestVM()
-	evaluated := v.testEval(t, input)
+	evaluated := v.testEval(t, input, getFilename())
 	checkExpected(t, 0, evaluated, "xyz")
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)

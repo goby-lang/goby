@@ -21,7 +21,7 @@ func TestServerInitialization(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input)
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -51,7 +51,7 @@ func TestSetupResponseDefaultValue(t *testing.T) {
 }
 
 func TestInitRequest(t *testing.T) {
-	v := New("./", []string{})
+	v := initTestVM()
 	reader := strings.NewReader("Hello World")
 	r := initRequest(v.mainThread, httptest.NewRecorder(), httptest.NewRequest("GET", "https://google.com/path", reader))
 

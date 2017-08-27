@@ -10,10 +10,9 @@ import (
 )
 
 func (vm *VM) initStringObject(value string) *StringObject {
-	replacer := strings.NewReplacer("\\n", "\n", "\\r", "\r", "\\t", "\t", "\\v", "\v", "\\f", "\f", "\\\\", "\\")
 	return &StringObject{
 		baseObj: &baseObj{class: vm.topLevelClass(stringClass)},
-		value:   replacer.Replace(value),
+		value:   value,
 	}
 }
 
@@ -54,6 +53,16 @@ func (s *StringObject) Value() interface{} {
 func builtInStringClassMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 		{
+			// The String.fmt implements formatted I/O with functions analogous to C's printf and scanf
+			// Currently only support plain "%s" formatting
+			// TODO: Support other kind of formatting such as %f, %v ... etc
+			//
+			// ```ruby
+			// String.fmt("Hello! %s Lang!", "Goby")                    # => "Hello! Goby Lang!"
+			// String.fmt("I love to eat %s and %s!", "Sushi", "Ramen") # => "I love to eat Sushi and Ramen"
+			// ```
+			//
+			// @return [String]
 			Name: "fmt",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -1344,6 +1353,15 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 				}
 			},
 		},
+		{
+			Name: "to_bytes",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					r := receiver.(*StringObject)
+					return t.vm.initGoObject([]byte(r.value))
+				}
+			},
+		},
 	}
 }
 
@@ -1356,7 +1374,7 @@ func (s *StringObject) toString() string {
 
 // toJSON converts the receiver into JSON string.
 func (s *StringObject) toJSON() string {
-	return "\"" + s.value + "\""
+	return strconv.Quote(s.value)
 }
 
 func (s *StringObject) equal(e *StringObject) bool {

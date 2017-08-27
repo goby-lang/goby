@@ -32,7 +32,6 @@ func (p *Parser) parseStatement() ast.Statement {
 			// In REPL mode everything should return a value.
 			if p.Mode == REPLMode {
 				exp.Expression.MarkAsExp()
-
 			} else {
 				exp.Expression.MarkAsStmt()
 			}
@@ -52,7 +51,11 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 	if p.peekTokenIs(token.Dot) {
 		switch p.curToken.Type {
 		case token.Ident:
-			stmt.Receiver = &ast.Identifier{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
+			stmt.Receiver = p.parseIdentifier()
+		case token.InstanceVariable:
+			stmt.Receiver = p.parseInstanceVariable()
+		case token.Constant:
+			stmt.Receiver = p.parseConstant()
 		case token.Self:
 			stmt.Receiver = &ast.SelfExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
 		default:

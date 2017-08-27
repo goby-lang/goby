@@ -57,6 +57,41 @@ func builtInJSONClassMethods() []*BuiltInMethodObject {
 				}
 			},
 		},
+		{
+			Name: "validate",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+					}
+
+					j, ok := args[0].(*StringObject)
+
+					if !ok {
+						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
+					}
+
+					var obj jsonObj
+					var objs []jsonObj
+
+					jsonString := j.value
+
+					err := json.Unmarshal([]byte(jsonString), &obj)
+
+					if err != nil {
+						err = json.Unmarshal([]byte(jsonString), &objs)
+
+						if err != nil {
+							return FALSE
+						}
+
+						return TRUE
+					}
+
+					return TRUE
+				}
+			},
+		},
 	}
 }
 

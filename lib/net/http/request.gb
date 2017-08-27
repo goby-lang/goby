@@ -1,7 +1,7 @@
 module Net
   class HTTP
     class Request
-      attr_accessor :method, :protocol, :body, :content_length, :transfer_encoding, :host, :path, :url
+      attr_accessor :method, :protocol, :body, :content_length, :transfer_encoding, :host, :path, :url, :params
       attr_reader   :headers
 
       def initialize(headers = {})

@@ -6,36 +6,37 @@ import (
 )
 
 func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, scope *scope, table *localTable) {
+	sourceLine := exp.Line()
 	switch exp := exp.(type) {
 	case *ast.Constant:
-		is.define(GetConstant, exp.Value, fmt.Sprint(exp.IsNamespace))
+		is.define(GetConstant, sourceLine, exp.Value, fmt.Sprint(exp.IsNamespace))
 	case *ast.InstanceVariable:
-		is.define(GetInstanceVariable, exp.Value)
+		is.define(GetInstanceVariable, sourceLine, exp.Value)
 	case *ast.IntegerLiteral:
-		is.define(PutObject, fmt.Sprint(exp.Value))
+		is.define(PutObject, sourceLine, fmt.Sprint(exp.Value))
 	case *ast.StringLiteral:
-		is.define(PutString, exp.Value)
+		is.define(PutString, sourceLine, exp.Value)
 	case *ast.BooleanExpression:
-		is.define(PutObject, fmt.Sprint(exp.Value))
+		is.define(PutObject, sourceLine, fmt.Sprint(exp.Value))
 	case *ast.NilExpression:
-		is.define(PutNull)
+		is.define(PutNull, sourceLine)
 	case *ast.RangeExpression:
 		g.compileExpression(is, exp.Start, scope, table)
 		g.compileExpression(is, exp.End, scope, table)
-		is.define(NewRange, 0)
+		is.define(NewRange, sourceLine, 0)
 	case *ast.ArrayExpression:
 		for _, elem := range exp.Elements {
 			g.compileExpression(is, elem, scope, table)
 		}
-		is.define(NewArray, len(exp.Elements))
+		is.define(NewArray, sourceLine, len(exp.Elements))
 	case *ast.HashExpression:
 		for key, value := range exp.Data {
-			is.define(PutString, key)
+			is.define(PutString, sourceLine, key)
 			g.compileExpression(is, value, scope, table)
 		}
-		is.define(NewHash, len(exp.Data)*2)
+		is.define(NewHash, sourceLine, len(exp.Data)*2)
 	case *ast.SelfExpression:
-		is.define(PutSelf)
+		is.define(PutSelf, sourceLine)
 	case *ast.PrefixExpression:
 		g.compilePrefixExpression(is, exp, scope, table)
 	case *ast.InfixExpression:
@@ -57,23 +58,23 @@ func (g *Generator) compileIdentifier(is *InstructionSet, exp *ast.Identifier, s
 	index, depth, ok := table.getLCL(exp.Value, table.depth)
 
 	if ok {
-		is.define(GetLocal, depth, index)
+		is.define(GetLocal, exp.Line(), depth, index)
 		return
 	}
 
 	// otherwise it's a method call
-	is.define(PutSelf)
-	is.define(Send, exp.Value, 0)
+	is.define(PutSelf, exp.Line())
+	is.define(Send, exp.Line(), exp.Value, 0)
 }
 
 func (g *Generator) compileYieldExpression(is *InstructionSet, exp *ast.YieldExpression, scope *scope, table *localTable) {
-	is.define(PutSelf)
+	is.define(PutSelf, exp.Line())
 
 	for _, arg := range exp.Arguments {
 		g.compileExpression(is, arg, scope, table)
 	}
 
-	is.define(InvokeBlock, len(exp.Arguments))
+	is.define(InvokeBlock, exp.Line(), len(exp.Arguments))
 }
 
 func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpression, scope *scope, table *localTable) {
@@ -90,17 +91,17 @@ func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpre
 		blockIndex := g.blockCounter
 		g.blockCounter++
 		g.compileBlockArgExpression(blockIndex, exp, scope, newTable)
-		is.define(Send, exp.Method, len(exp.Arguments), fmt.Sprintf("block:%d", blockIndex))
+		is.define(Send, exp.Line(), exp.Method, len(exp.Arguments), fmt.Sprintf("block:%d", blockIndex))
 		return
 	}
-	is.define(Send, exp.Method, len(exp.Arguments))
+	is.define(Send, exp.Line(), exp.Method, len(exp.Arguments))
 }
 
 func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.AssignExpression, scope *scope, table *localTable) {
 	g.compileExpression(is, exp.Value, scope, table)
 
 	if len(exp.Variables) > 1 {
-		is.define(ExpandArray, len(exp.Variables))
+		is.define(ExpandArray, exp.Line(), len(exp.Variables))
 	}
 
 	for i, v := range exp.Variables {
@@ -109,15 +110,15 @@ func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.AssignE
 			index, depth := table.setLCL(name.Value, table.depth)
 
 			if exp.Optioned != 0 {
-				is.define(SetLocal, depth, index, exp.Optioned)
+				is.define(SetLocal, exp.Line(), depth, index, exp.Optioned)
 				return
 			}
 
-			is.define(SetLocal, depth, index)
+			is.define(SetLocal, exp.Line(), depth, index)
 		case *ast.InstanceVariable:
-			is.define(SetInstanceVariable, name.Value)
+			is.define(SetInstanceVariable, exp.Line(), name.Value)
 		case *ast.Constant:
-			is.define(SetConstant, name.Value)
+			is.define(SetConstant, exp.Line(), name.Value)
 		}
 
 		/*
@@ -128,8 +129,9 @@ func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.AssignE
 
 			Here we only pop '2', and the statement compilation will add another pop to pop '1'
 		*/
-		if exp.IsStmt() && !g.REPL && i != len(exp.Variables)-1 {
-			is.define(Pop)
+
+		if i != len(exp.Variables)-1 {
+			is.define(Pop, exp.Line())
 		}
 	}
 }
@@ -144,7 +146,7 @@ func (g *Generator) compileBlockArgExpression(index int, exp *ast.CallExpression
 	}
 
 	g.compileCodeBlock(is, exp.Block, scope, table)
-	g.endInstructions(is)
+	g.endInstructions(is, exp.Line())
 	g.instructionSets = append(g.instructionSets, is)
 }
 
@@ -155,17 +157,17 @@ func (g *Generator) compileIfExpression(is *InstructionSet, exp *ast.IfExpressio
 		anchorConditional := &anchor{}
 
 		g.compileExpression(is, c.Condition, scope, table)
-		is.define(BranchUnless, anchorConditional)
+		is.define(BranchUnless, exp.Line(), anchorConditional)
 
 		g.compileCodeBlock(is, c.Consequence, scope, table)
 		anchorConditional.line = is.count + 1
-		is.define(Jump, anchorLast)
+		is.define(Jump, exp.Line(), anchorLast)
 	}
 
 	if exp.Alternative == nil {
 		// jump over the `putnil` in false case
 		anchorLast.line = is.count + 1
-		is.define(PutNull)
+		is.define(PutNull, exp.Line())
 
 		return
 	}
@@ -179,11 +181,11 @@ func (g *Generator) compilePrefixExpression(is *InstructionSet, exp *ast.PrefixE
 	switch exp.Operator {
 	case "!":
 		g.compileExpression(is, exp.Right, scope, table)
-		is.define(Send, exp.Operator, 0)
+		is.define(Send, exp.Line(), exp.Operator, 0)
 	case "-":
-		is.define(PutObject, 0)
+		is.define(PutObject, exp.Line(), 0)
 		g.compileExpression(is, exp.Right, scope, table)
-		is.define(Send, exp.Operator, 1)
+		is.define(Send, exp.Line(), exp.Operator, 1)
 	}
 }
 
@@ -192,6 +194,6 @@ func (g *Generator) compileInfixExpression(is *InstructionSet, node *ast.InfixEx
 	g.compileExpression(is, node.Right, scope, table)
 
 	if node.Operator != "::" {
-		is.define(Send, node.Operator, "1")
+		is.define(Send, node.Line(), node.Operator, "1")
 	}
 }
