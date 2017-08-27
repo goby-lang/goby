@@ -197,19 +197,52 @@ func TestDefStatement(t *testing.T) {
 	testIntegerLiteral(t, secondExpressionStmt.Expression, 123)
 }
 
-func TestDefStatementFailWithTheSameParams(t *testing.T) {
-	input := `
-	def add(x, y, x)
-	  x + y
-	end
-	`
+func TestDefStatementFailWithDuplicateArgumentName(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`
+		def add(x, y, x)
+			x + y
+		end
+		`, "Duplicate argument name: \"x\". Line: 1"},
+		{`
+		def add(a, b = 1, b)
+			a + b
+		end
+		`, "Duplicate argument name: \"b\". Line: 1"},
+		{`
+		def add(a, b = [1, 2], b)
+			a + b
+		end
+		`, "Duplicate argument name: \"b\". Line: 1"},
+		{`
+		def add(a, b = [1, 2], b = [3, 4], c)
+			a + b
+		end
+		`, "Duplicate argument name: \"b\". Line: 1"},
+		{`
+		def add(a, b = 1, b = 2)
+			a + b
+		end
+		`, "Duplicate argument name: \"b\". Line: 1"},
 
-	l := lexer.New(input)
-	p := New(l)
-	_, err := p.ParseProgram()
 
-	if err == nil {
-		t.Fatalf("expect not to allow parameters with the same name")
+	}
+
+	for i, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		_, err := p.ParseProgram()
+
+		if err == nil {
+			t.Fatalf("At case %d expect not to allow duplicate argument name", i)
+		}
+
+		if err.Message != tt.expected {
+			t.Fatalf("At case %d expect error message to be:\n  %s. got: \n%s", i, tt.expected, err.Message)
+		}
 	}
 }
 

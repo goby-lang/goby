@@ -119,7 +119,7 @@ func (p *Parser) parseParameters() []ast.Expression {
 		param := p.parseExpression(NORMAL)
 
 		if contains(params, param) {
-			p.error = &Error{Message: fmt.Sprintf("Duplicate argument name: \"%s\". Line: %d", param.TokenLiteral(), p.curToken.Line), errType: SyntaxError}
+			p.error = &Error{Message: fmt.Sprintf("Duplicate argument name: \"%s\". Line: %d", getLiteral(param), p.curToken.Line), errType: SyntaxError}
 		}
 		params = append(params, param)
 	}
