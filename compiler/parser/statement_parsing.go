@@ -114,6 +114,10 @@ func (p *Parser) parseParameters() []ast.Expression {
 		p.nextToken()
 		p.nextToken()
 		param := p.parseExpression(NORMAL)
+
+		if contains(params, param) {
+			p.error = &Error{Message: fmt.Sprintf("Duplicate argument name: \"%s\". Line: %d", param.TokenLiteral(), p.curToken.Line), errType: SyntaxError}
+		}
 		params = append(params, param)
 	}
 
@@ -235,4 +239,23 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 	ws.Body = p.parseBlockStatement()
 
 	return ws
+}
+
+func contains(arr []ast.Expression, elm ast.Expression) bool {
+	for _, e := range arr {
+		if getLiteral(elm) == getLiteral(e) {
+			return true
+		}
+	}
+	return false
+}
+
+func getLiteral(exp ast.Expression) string {
+	assignExp, ok := exp.(*ast.AssignExpression)
+
+	if ok {
+		return assignExp.Variables[0].TokenLiteral()
+	}
+
+	return exp.TokenLiteral()
 }

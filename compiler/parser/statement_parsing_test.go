@@ -197,6 +197,22 @@ func TestDefStatement(t *testing.T) {
 	testIntegerLiteral(t, secondExpressionStmt.Expression, 123)
 }
 
+func TestDefStatementFailWithTheSameParams(t *testing.T) {
+	input := `
+	def add(x, y, x)
+	  x + y
+	end
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+	_, err := p.ParseProgram()
+
+	if err == nil {
+		t.Fatalf("expect not to allow parameters with the same name")
+	}
+}
+
 func TestDefStatementWithYield(t *testing.T) {
 	input := `
 	def foo

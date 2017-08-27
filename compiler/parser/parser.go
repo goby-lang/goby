@@ -23,6 +23,8 @@ const (
 	MethodDefinitionError
 	// InvalidAssignmentError means user assigns value to wrong type of expressions
 	InvalidAssignmentError
+	// SyntaxError means there's a grammatical in the source code
+	SyntaxError
 )
 
 // Error represents parser's parsing error
