@@ -118,7 +118,7 @@ func (p *Parser) parseParameters() []ast.Expression {
 		p.nextToken()
 		param := p.parseExpression(NORMAL)
 
-		if containsArg(params, param) {
+		if paramDuplicated(params, param) {
 			p.error = &Error{Message: fmt.Sprintf("Duplicate argument name: \"%s\". Line: %d", getArgName(param), p.curToken.Line), errType: SyntaxError}
 		}
 		params = append(params, param)
@@ -244,7 +244,7 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 	return ws
 }
 
-func containsArg(params []ast.Expression, param ast.Expression) bool {
+func paramDuplicated(params []ast.Expression, param ast.Expression) bool {
 	for _, p := range params {
 		if getArgName(param) == getArgName(p) {
 			return true
