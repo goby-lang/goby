@@ -1,7 +1,10 @@
 {
 	"ImportPath": "github.com/goby-lang/goby",
-	"GoVersion": "go1.8",
+	"GoVersion": "go1.9",
 	"GodepVersion": "v79",
+	"Packages": [
+		"./..."
+	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/chzyer/readline",
@@ -44,6 +47,16 @@
 		{
 			"ImportPath": "github.com/looplab/fsm",
 			"Rev": "bcc3636384ce80a109a6039432b30ff5b82476ee"
+		},
+		{
+			"ImportPath": "github.com/mattn/go-colorable",
+			"Comment": "v0.0.9-4-g6df6d4d",
+			"Rev": "6df6d4d004b64986bbb0d1b25945f42b44787e90"
+		},
+		{
+			"ImportPath": "github.com/mattn/go-isatty",
+			"Comment": "v0.0.2",
+			"Rev": "fc9e8d8ef48496124e79ae0df75490096eccf6fe"
 		},
 		{
 			"ImportPath": "github.com/pkg/profile",
