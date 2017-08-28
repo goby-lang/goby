@@ -4,11 +4,39 @@ import (
 	"testing"
 	//"net/http/httptest"
 	//"net/http"
-	"net/http"
+	"fmt"
 	"io/ioutil"
+	"net/http"
 )
 
 func TestHTTPObject(t *testing.T) {
+
+	c := make(chan bool, 1)
+
+	//server to test off of
+	go func() {
+		m := http.NewServeMux()
+
+		m.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+
+			if r.Method == http.MethodPost {
+				b, err := ioutil.ReadAll(r.Body)
+				if err != nil {
+					panic(err)
+				}
+				fmt.Fprintf(w, "POST %s", b)
+			} else {
+				fmt.Fprint(w, "GET Hello World")
+			}
+
+		})
+
+		c <- true
+
+		http.ListenAndServe(":3000", m)
+	}()
+
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -26,34 +54,8 @@ func TestHTTPObject(t *testing.T) {
 		`, "POST Hi Again"},
 	}
 
-	c := make(chan bool, 1)
-
-	//server to test off of
-	go func() {
-		m := http.NewServeMux()
-
-		m.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusOK)
-
-			if r.Method == http.MethodPost {
-				b, err := ioutil.ReadAll(r.Body)
-				if err != nil {
-					panic(err)
-				}
-				w.Write([]byte(r.Method + " " + string(b)))
-			} else {
-				w.Write([]byte(r.Method + " Hello World"))
-			}
-
-		})
-
-		c <- true
-
-		http.ListenAndServe(":3000", m)
-	}()
-
 	//block until server is ready
-	<- c
+	<-c
 
 	for i, tt := range tests {
 		v := initTestVM()
@@ -63,4 +65,3 @@ func TestHTTPObject(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
-

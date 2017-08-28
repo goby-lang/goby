@@ -3,8 +3,8 @@ package vm
 import (
 	"io/ioutil"
 	"net/http"
-	"strings"
 	"strconv"
+	"strings"
 )
 
 var (
