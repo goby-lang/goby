@@ -354,6 +354,9 @@ func prompt(s int) string {
 
 // fortune is just a fun item to show slot machine: receiving rep-digit would imply your fortune ;-)
 func fortune() string {
+	if runtime.GOOS == "windows" {
+		return ""
+	}
 	var randSrc = rand.NewSource(time.Now().UnixNano())
 	s := strings.Split(emojis, "")
 	l := len(s)
