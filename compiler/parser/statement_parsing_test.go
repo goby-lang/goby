@@ -227,8 +227,6 @@ func TestDefStatementFailWithDuplicateArgumentName(t *testing.T) {
 			a + b
 		end
 		`, "Duplicate argument name: \"b\". Line: 1"},
-
-
 	}
 
 	for i, tt := range tests {
