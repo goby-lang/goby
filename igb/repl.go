@@ -6,6 +6,8 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -15,6 +17,7 @@ import (
 	"github.com/goby-lang/goby/compiler/parser"
 	"github.com/goby-lang/goby/vm"
 	"github.com/looplab/fsm"
+	"github.com/mattn/go-colorable"
 )
 
 const (
@@ -55,6 +58,20 @@ type iVM struct {
 	g *bytecode.Generator
 }
 
+var out io.Writer
+
+func init() {
+	if runtime.GOOS == "windows" {
+		out = colorable.NewColorableStderr()
+	} else {
+		out = os.Stderr
+	}
+}
+
+func println(s ...string) {
+	out.Write([]byte(strings.Join(s, " ") + "\n"))
+}
+
 // StartIgb starts goby's REPL.
 func StartIgb(version string) {
 reset:
@@ -63,7 +80,7 @@ reset:
 
 	igb.rl, err = readline.NewEx(&readline.Config{
 		Prompt:              prompt1,
-		HistoryFile:         "/tmp/readline_goby.tmp",
+		HistoryFile:         filepath.Join(os.TempDir(), "readline_goby.tmp"),
 		AutoComplete:        igb.completer,
 		InterruptPrompt:     interrupt,
 		EOFPrompt:           exit,
