@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"strconv"
 )
 
 var (
@@ -67,6 +68,35 @@ func builtinHTTPClassMethods() []*BuiltInMethodObject {
 					}
 
 					resp, err := http.Get(domain + path)
+
+					if err != nil {
+						return t.vm.initErrorObject(InternalError, err.Error())
+					}
+
+					content, err := ioutil.ReadAll(resp.Body)
+					resp.Body.Close()
+
+					if err != nil {
+						return t.vm.initErrorObject(InternalError, err.Error())
+					}
+
+					return t.vm.initStringObject(string(content))
+				}
+			},
+		}, {
+			// Sends a GET request to the target and returns the HTTP response as a string.
+			Name: "post",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 3 {
+						return t.vm.initErrorObject(ArgumentError, "Expect 3 arguments. got=%v", strconv.Itoa(len(args)))
+					}
+
+					url := args[0].(*StringObject).value
+					contentType := args[1].(*StringObject).value
+					body := args[2].(*StringObject).value
+
+					resp, err := http.Post(url, contentType, strings.NewReader(body))
 
 					if err != nil {
 						return t.vm.initErrorObject(InternalError, err.Error())
