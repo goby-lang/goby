@@ -97,6 +97,11 @@ func TestHTTPObjectFail(t *testing.T) {
 
 		Net::HTTP.post("http://127.0.0.1:3000/error", "text/plain", "Let me down")
 		`, "InternalError: 404 Not Found", 4},
+		{`
+		require "net/http"
+
+		Net::HTTP.post("http://127.0.0.1:3001", "text/plain", "Let me down")
+		`, "InternalError: Post http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: getsockopt: connection refused", 4},
 	}
 
 	//block until server is ready
