@@ -32,9 +32,9 @@ func newISIndexTable() *isIndexTable {
 
 type isTable map[string][]*instructionSet
 
-type filename string
+type filename = string
 
-type errorMessage string
+type errorMessage = string
 
 var standardLibraries = map[string]func(*VM){
 	"file":              initFileClass,
@@ -82,10 +82,10 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 
 	vm.initConstants()
 	vm.methodISIndexTables = map[filename]*isIndexTable{
-		filename(fileDir): newISIndexTable(),
+		fileDir: newISIndexTable(),
 	}
 	vm.classISIndexTables = map[filename]*isIndexTable{
-		filename(fileDir): newISIndexTable(),
+		fileDir: newISIndexTable(),
 	}
 	vm.blockTables = make(map[filename]map[string]*instructionSet)
 	vm.isTables = map[setType]isTable{
@@ -117,7 +117,7 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 	}
 
 	vm.mainObj = vm.initMainObj()
-	vm.channelObjectMap = &objectMap{store: map[int]Object{}}
+	vm.channelObjectMap = &objectMap{store: &sync.Map{}}
 
 	return
 }
@@ -134,8 +134,7 @@ func (vm *VM) newThread() *thread {
 
 // ExecInstructions accepts a sequence of bytecodes and use vm to evaluate them.
 func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) {
-	filename := filename(fn)
-	p := newInstructionTranslator(filename)
+	p := newInstructionTranslator(fn)
 	p.vm = vm
 	p.transferInstructionSets(sets)
 

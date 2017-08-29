@@ -5,7 +5,7 @@ SLEEP=0.5
 set -e
 echo "" > coverage.txt
 
-for d in $(go list ./... | grep -v vendor); do
+for d in $(go list ./...); do
     if [ $d == "github.com/goby-lang/goby/vm" ]; then
         # Test vm's code without running race detection because that breaks plugin tests.
         # This can generate full coverage report of vm package.

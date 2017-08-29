@@ -13,15 +13,11 @@ func (vm *VM) initChannelClass() *RClass {
 }
 
 type objectMap struct {
-	store map[int]Object
-	sync.RWMutex
+	store *sync.Map
 }
 
 func (m *objectMap) storeObj(obj Object) int {
-	m.Lock()
-	defer m.Unlock()
-
-	m.store[obj.id()] = obj
+	m.store.Store(obj.id(), obj)
 
 	return obj.id()
 }
@@ -29,10 +25,8 @@ func (m *objectMap) storeObj(obj Object) int {
 // storeObj store objects into the container map
 // and update containerCount at the same time
 func (m *objectMap) retrieveObj(num int) Object {
-	m.Lock()
-
-	defer m.Unlock()
-	return m.store[num]
+	obj, _ := m.store.Load(num)
+	return obj.(Object)
 }
 
 // ChannelObject represents a goby channel, which carries a golang channel
