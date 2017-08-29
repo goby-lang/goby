@@ -3,6 +3,8 @@ package vm
 import (
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"path"
 	"strconv"
 	"strings"
 )
@@ -55,22 +57,26 @@ func builtinHTTPClassMethods() []*BuiltInMethodObject {
 			Name: "get",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					var path string
 
-					domain := args[0].(*StringObject).value
+					uri, err := url.Parse(args[0].(*StringObject).value)
 
 					if len(args) > 1 {
-						path = args[1].(*StringObject).value
+						var arr []string
+
+						for _, v := range args[1:] {
+							arr = append(arr, v.(*StringObject).value)
+						}
+
+						uri.Path = path.Join(arr...)
 					}
 
-					if !strings.HasPrefix(path, "/") {
-						path = "/" + path
-					}
-
-					resp, err := http.Get(domain + path)
+					resp, err := http.Get(uri.String())
 
 					if err != nil {
 						return t.vm.initErrorObject(InternalError, err.Error())
+					}
+					if resp.StatusCode != http.StatusOK {
+						return t.vm.initErrorObject(InternalError, resp.Status)
 					}
 
 					content, err := ioutil.ReadAll(resp.Body)
@@ -84,7 +90,7 @@ func builtinHTTPClassMethods() []*BuiltInMethodObject {
 				}
 			},
 		}, {
-			// Sends a GET request to the target and returns the HTTP response as a string.
+			// Sends a POST request to the target with type header and body. Returns the HTTP response as a string.
 			Name: "post",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -92,14 +98,22 @@ func builtinHTTPClassMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(ArgumentError, "Expect 3 arguments. got=%v", strconv.Itoa(len(args)))
 					}
 
-					url := args[0].(*StringObject).value
+					uri, err := url.Parse(args[0].(*StringObject).value)
+					if err != nil {
+						return t.vm.initErrorObject(ArgumentError, err.Error())
+					}
+
 					contentType := args[1].(*StringObject).value
+
 					body := args[2].(*StringObject).value
 
-					resp, err := http.Post(url, contentType, strings.NewReader(body))
+					resp, err := http.Post(uri.String(), contentType, strings.NewReader(body))
 
 					if err != nil {
 						return t.vm.initErrorObject(InternalError, err.Error())
+					}
+					if resp.StatusCode != http.StatusOK {
+						return t.vm.initErrorObject(InternalError, resp.Status)
 					}
 
 					content, err := ioutil.ReadAll(resp.Body)
