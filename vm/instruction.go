@@ -8,9 +8,9 @@ import (
 
 type operation func(t *thread, cf *callFrame, args ...interface{})
 
-type operationType string
+type operationType = string
 
-type setType string
+type setType = string
 
 type action struct {
 	name      string
