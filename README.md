@@ -19,7 +19,7 @@ One of our goal is to provide web developers a sort of small and handy environme
 - [Plugin system](https://goby-lang.gitbooks.io/goby/content/plugin-system.html) that can load existing Go packages dynamically (Only for Linux by now)
 - Accessing Go objects from Goby directly
 
-> Note: Goby had been formerly known as "Rooby", which was renamed in May 2017.
+> Note: Goby had formerly been known as "Rooby", which was renamed in May 2017.
 
 ## Table of contents
 
@@ -50,13 +50,13 @@ Goby has several aspects: language specification, design of compiler and vm, imp
 
 ----------
 
-**Language**: Class-based, straight-ahead object-oriented script language. Syntax is influenced by Ruby language (and by Go a bit), but has been **condensed and simplified** (and slightly modified) to keep Goby VM simple and concise. Several aspects of Ruby such as meta-programming (known as 'magic'), special variables with `$`, or like that, have been dropped for now, but note that we might resurrect some of them with a different form or implementation in the future.
+**Language**: Class-based, straight-ahead object-oriented script language. Syntax is influenced by Ruby language (and by Go a bit), but has been **condensed and simplified** (and slightly modified) to keep Goby VM simple and concise. Several aspects of Ruby such as meta-programming (known as 'magic'), special variables with `$`, have been dropped for now, but note that we might resurrect some of them with a different form or implementation in the future.
 
 **Class**: Single inheritance. Module is supported for mixin with `#include` or `#extend`. Defining singleton class and singleton method are also supported. Goby has two kinds of class internally: native class and standard class. **Native class** (or builtin class) provides fundamental classes such as `Array` or `String`. `Object` class is a superclass of any other native/standard classes including `Class` class. `Class` class contains most common methods such as `#puts`. **Standard class** (or standard library) can be loaded via `require` and provides additional methods. Standard classes are often split internal Go code and external Goby code in order to make implementation easier. Both kinds of class are transparent to Goby developers and can be overridden by child classes. Any classes including `Class` class are under `Object` class. 
 
-**Compiler**: Consists of **AST**, **lexer**, **parser**, and **token**. Pretty conventional and should be familiar to language creators. These components are all written in 100% pure Go, instead of using conventional static yacc/lex/bison conversion with a mess of ad-hoc macros. This makes Goby's codes far smaller, concise, and legible. You can inspect, maintain, or improve Goby codes more easily, being free from pains like C/C++ era. 
+**Compiler**: Consists of **AST**, **lexer**, **parser**, and **token**, which of the structure is pretty conventional and should be familiar to language creators. These components are all written in 100% pure Go, instead of using conventional static yacc/lex/bison conversion with a mess of ad-hoc macros. This makes Goby's codes far smaller, concise, and legible. You can inspect, maintain, or improve Goby codes more easily, being free from pains like C/C++ era. 
 
-**VM**: YARV-conscious, including **stack** and **call_frame**, as well as containing Goby's native classes, plus some standard library and additional components. All are written in Go as well.
+**VM**: YARV-conscious, including **stack** and **call_frame**, as well as containing Goby's native classes and some standard library and additional components. All are written in Go as well.
 
 **Implementation**: Built-in monolithic Go binary executable which equips several native features such as a robust **thread/channel** mechanism powered by goroutine, a very new experimental [**Plugin system**](https://goby-lang.gitbooks.io/goby/content/plugin-system.html) to manage existing Go packages dynamically from Goby codes, **igb** (REPL) powered by readline package. Goby contains some standard or third-party Go packages, but the dependency to them is not high. These packages contain **no CGO** codes (at least by now) thus cross-compile for any OS environments that Go supports should work fine. 
 
@@ -97,7 +97,7 @@ Perhaps Goby should be far easier for Rubyists to comprehend. You can use Ruby's
 - Constant
     - Starts with uppercase like `Var` or `VAR`
     - global if defined on top-level 
-    - **not reentrant**
+    - **not reentrant** by assignment, but still permits redefining class/module
     - (special variables with `$` are unsupported)
 - Methods 
     - Evaluation with arguments
@@ -152,7 +152,7 @@ written in Go and Goby.
 
 ## Installation
 
-Confirmed Goby runs on Mac OS and Linux for now. Try Windows and let us know the result.
+Confirmed Goby runs on Mac OS and Linux for now. Try Goby on Windows and let us know the result.
 
 ### A. Via Homebrew (binary installation for Mac OS)
 
@@ -170,9 +170,9 @@ In the case, `$GOBY_ROOT` is automatically configured.
 Try this if you'd like to contribute Goby! Skip 1 if you already have Golang in your environment.
 
 1. Prepare Golang environment
-    1-1. Install Golang
-    1-2. Make sure `$GOPATH` in your shell's config file( like .bashrc) is correct
-    1-3. Add you `$GOPATH/bin` to `$PATH`
+    - Install Golang
+    - Make sure `$GOPATH` in your shell's config file( like .bashrc) is correct
+    - Add you `$GOPATH/bin` to `$PATH`
 2. Run `go get github.com/goby-lang/goby`
 3. Set the Goby project's exact root path `$GOBY_ROOT` manually, which should be:
 

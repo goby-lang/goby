@@ -29,7 +29,7 @@ func newInstructionTranslator(file filename) *instructionTranslator {
 }
 
 func (it *instructionTranslator) setMetadata(is *instructionSet, set *bytecode.InstructionSet) {
-	t := setType(set.SetType())
+	t := set.SetType()
 	n := set.Name()
 
 	is.name = n
@@ -81,7 +81,7 @@ func (it *instructionTranslator) transferInstructionSet(iss []*instructionSet, s
 // transferInstruction transfer a bytecode.Instruction into an vm instruction and append it into given instruction set.
 func (it *instructionTranslator) transferInstruction(is *instructionSet, i *bytecode.Instruction) {
 	var params []interface{}
-	act := operationType(i.Action)
+	act := i.Action
 
 	action := builtInActions[act]
 

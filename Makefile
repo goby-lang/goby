@@ -1,9 +1,9 @@
 GOFMT ?= gofmt -s
-GOFILES := find . -name "*.go" -type f
+GOFILES := $(shell find . -name "*.go" -type f -not -path "./vendor/*")
 
 .PHONY: fmt
 fmt:
-	$(GOFILES) | xargs $(GOFMT) -w
+	$(GOFMT) -w $(GOFILES)
 
 .PHONY: build
 build:
