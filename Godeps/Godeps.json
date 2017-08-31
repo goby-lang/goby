@@ -46,6 +46,16 @@
 			"Rev": "bcc3636384ce80a109a6039432b30ff5b82476ee"
 		},
 		{
+			"ImportPath": "github.com/mattn/go-colorable",
+			"Comment": "v0.0.8-12-g6df6d4d",
+			"Rev": "6df6d4d004b64986bbb0d1b25945f42b44787e90"
+		},
+		{
+			"ImportPath": "github.com/mattn/go-isatty",
+			"Comment": "v0.0.2",
+			"Rev": "fc9e8d8ef48496124e79ae0df75490096eccf6fe"
+		},
+		{
 			"ImportPath": "github.com/pkg/profile",
 			"Comment": "v1.2.0-9-g06b9068",
 			"Rev": "06b906832ed0e32302a942b63b6c5f8359034d26"
