@@ -33,6 +33,18 @@ func (m *MethodObject) toJSON() string {
 	return m.toString()
 }
 
+func (m *MethodObject) argTypes() []int {
+	return m.instructionSet.argTypes
+}
+
+func (m *MethodObject) lastArgType() int{
+	if len(m.argTypes()) > 0 {
+		return m.argTypes()[len(m.argTypes())-1]
+	}
+
+	return -1
+}
+
 // BuiltInMethodObject represents methods defined in go.
 type BuiltInMethodObject struct {
 	*baseObj
