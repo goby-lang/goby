@@ -122,6 +122,24 @@ func TestArgumentError(t *testing.T) {
 		{`"1234567890".include? "123", Class, String`,
 			"ArgumentError: Expect 1 argument. got=3",
 			1},
+		{`def foo(a, *b)
+		end
+
+		foo
+		`, "ArgumentError: Expect at least 1 args for method 'foo'. got: 0",
+			4},
+		{`def foo(a, b, *c)
+		end
+
+		foo(10)
+		`, "ArgumentError: Expect at least 2 args for method 'foo'. got: 1",
+			4},
+		{`def foo(a, b = 10, *c)
+		end
+
+		foo
+		`, "ArgumentError: Expect at least 1 args for method 'foo'. got: 0",
+			4},
 	}
 
 	for i, tt := range tests {
