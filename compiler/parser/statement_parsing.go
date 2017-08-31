@@ -90,6 +90,13 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 		} else {
 			params = p.parseParameters()
 
+			if p.peekTokenIs(token.Asterisk) {
+				p.nextToken()
+				if p.expectPeek(token.Ident) {
+					stmt.SplatParameter = p.parseIdentifier().(*ast.Identifier)
+				}
+			}
+
 			if !p.expectPeek(token.RParen) {
 				return nil
 			}
@@ -115,7 +122,13 @@ func (p *Parser) parseParameters() []ast.Expression {
 
 	for p.peekTokenIs(token.Comma) {
 		p.nextToken()
+
+		if p.peekTokenIs(token.Asterisk) {
+			break
+		}
+
 		p.nextToken()
+
 		param := p.parseExpression(NORMAL)
 
 		if paramDuplicated(params, param) {
