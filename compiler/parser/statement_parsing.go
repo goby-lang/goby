@@ -83,23 +83,38 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 	if p.peekTokenIs(token.LParen) {
 		p.nextToken()
 
-		// empty params
-		if p.peekTokenIs(token.RParen) {
-			p.nextToken()
+		switch p.peekToken.Type {
+		// def foo()
+		case token.RParen:
 			params = []ast.Expression{}
-		} else {
+		// def foo(*c)
+		case token.Asterisk:
+			p.nextToken()
+			if p.expectPeek(token.Ident) {
+				param := p.parseExpression(NORMAL)
+				stmt.SplatParameter = param.(*ast.Identifier)
+			}
+		// def foo(a, .....)
+		default:
 			params = p.parseParameters()
 
+			// def(a, b, *c)
 			if p.peekTokenIs(token.Asterisk) {
 				p.nextToken()
 				if p.expectPeek(token.Ident) {
-					stmt.SplatParameter = p.parseIdentifier().(*ast.Identifier)
+					param := p.parseExpression(NORMAL)
+
+					if paramDuplicated(params, param) {
+						p.error = &Error{Message: fmt.Sprintf("Duplicate argument name: \"%s\". Line: %d", getArgName(param), p.curToken.Line), errType: SyntaxError}
+					}
+
+					stmt.SplatParameter = param.(*ast.Identifier)
 				}
 			}
+		}
 
-			if !p.expectPeek(token.RParen) {
-				return nil
-			}
+		if !p.expectPeek(token.RParen) {
+			return nil
 		}
 	} else {
 		params = []ast.Expression{}
