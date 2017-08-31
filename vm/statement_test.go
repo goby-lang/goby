@@ -166,6 +166,17 @@ func TestDefStatement(t *testing.T) {
 
 		foo(10, 20, 25)
 		`, 55},
+		{`
+		def foo(*a)
+		  r = 0
+		  a.each do |i|
+		    r += i
+		  end
+		  r
+		end
+
+		foo(10, 20, 30)
+		`, 60},
 	}
 
 	for i, tt := range tests {
