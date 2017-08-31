@@ -145,7 +145,7 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 		}
 	}
 
-	if argC > method.argc {
+	if argC > method.argc && method.instructionSet.argTypes[len(method.instructionSet.argTypes)-1] != bytecode.SplatArg {
 		e := t.vm.initErrorObject(ArgumentError, "Expect at most %d args for method '%s'. got: %d", method.argc, method.Name, argC)
 		t.stack.set(receiverPr, &Pointer{Target: e})
 		t.sp = argPr
@@ -189,16 +189,26 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 	if minimumArgNumber < argC {
 		// Fill arguments with default value from beginning
 		for i, argType := range method.instructionSet.argTypes {
-			if argType != bytecode.NormalArg {
+			if argType != bytecode.NormalArg && argType != bytecode.SplatArg {
 				c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
 				argIndex++
 			}
 
 			// If argument index equals argument count means we already assigned all arguments
-			if argIndex == argC {
+			if argIndex == argC || argType == bytecode.SplatArg {
 				break
 			}
 		}
+	}
+
+	if len(method.instructionSet.argTypes) > 0 && (method.instructionSet.argTypes[len(method.instructionSet.argTypes)-1] == bytecode.SplatArg) {
+		elems := []Object{}
+		for argIndex < argC {
+			elems = append(elems, t.stack.Data[argPr+argIndex].Target)
+			argIndex++
+		}
+
+		c.insertLCL(len(method.instructionSet.argTypes)-1, 0, t.vm.initArrayObject(elems))
 	}
 
 	c.blockFrame = blockFrame
