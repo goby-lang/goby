@@ -72,10 +72,10 @@ func builtinHTTPClassMethods() []*BuiltInMethodObject {
 					}
 
 					resp, err := http.Get(uri.String())
-
 					if err != nil {
 						return t.vm.initErrorObject(errors.InternalError, err.Error())
 					}
+
 					if resp.StatusCode != http.StatusOK {
 						return t.vm.initErrorObject(errors.InternalError, resp.Status)
 					}
@@ -99,17 +99,14 @@ func builtinHTTPClassMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(errors.ArgumentError, "Expect 3 arguments. got=%v", strconv.Itoa(len(args)))
 					}
 
-					uri, err := url.Parse(args[0].(*StringObject).value)
-					if err != nil {
-						return t.vm.initErrorObject(errors.ArgumentError, err.Error())
-					}
+
+					host := args[0].(*StringObject).value
 
 					contentType := args[1].(*StringObject).value
 
 					body := args[2].(*StringObject).value
 
-					resp, err := http.Post(uri.String(), contentType, strings.NewReader(body))
-
+					resp, err := http.Post(host, contentType, strings.NewReader(body))
 					if err != nil {
 						return t.vm.initErrorObject(errors.InternalError, err.Error())
 					}
