@@ -10,6 +10,7 @@ import (
 const (
 	NormalArg int = iota
 	OptionedArg
+	SplatArg
 )
 
 func (g *Generator) compileStatements(stmts []ast.Statement, scope *scope, table *localTable) {
@@ -175,6 +176,11 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 		}
 
 		newIS.argTypes = append(newIS.argTypes, argType)
+	}
+
+	if stmt.SplatParameter != nil {
+		scope.localTable.setLCL(stmt.SplatParameter.Value, scope.localTable.depth)
+		newIS.argTypes = append(newIS.argTypes, SplatArg)
 	}
 
 	if len(stmt.BlockStatement.Statements) == 0 {

@@ -99,6 +99,7 @@ type DefStatement struct {
 	Name           *Identifier
 	Receiver       Expression
 	Parameters     []Expression
+	SplatParameter *Identifier
 	BlockStatement *BlockStatement
 }
 
