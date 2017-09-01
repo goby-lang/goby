@@ -582,6 +582,120 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
+			// Split and loop through the string byte
+			//
+			// ```ruby
+			// "Sushi 🍣".each_byte do |byte|
+			//   puts byte
+			// end
+			// # => 83  # "S"
+			// # => 117 # "u"
+			// # => 115 # "s"
+			// # => 104 # "h"
+			// # => 105 # "i"
+			// # => 32  # " "
+			// # => 240 # "\xF0"
+			// # => 159 # "\x9F"
+			// # => 141 # "\x8D"
+			// # => 163 # "\xA3"
+			// ```
+			//
+			// @return [String]
+			Name: "each_byte",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(ArgumentError, "Expect 0 argument. got=%d", len(args))
+					}
+
+					if blockFrame == nil {
+						return t.vm.initErrorObject(InternalError, CantYieldWithoutBlockFormat)
+					}
+
+					str := receiver.(*StringObject).value
+
+					for _, byte := range []byte(str) {
+						t.builtInMethodYield(blockFrame, t.vm.initIntegerObject(int(byte)))
+					}
+
+					return t.vm.initStringObject(str)
+				}
+			},
+		},
+		{
+			// Split and loop through the string characters
+			//
+			// ```ruby
+			// "Sushi 🍣".each_char do |char|
+			//   puts char
+			// end
+			// # => "S"
+			// # => "u"
+			// # => "s"
+			// # => "h"
+			// # => "i"
+			// # => " "
+			// # => "🍣"
+			// ```
+			//
+			// @return [String]
+			Name: "each_char",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(ArgumentError, "Expect 0 argument. got=%d", len(args))
+					}
+
+					if blockFrame == nil {
+						return t.vm.initErrorObject(InternalError, CantYieldWithoutBlockFormat)
+					}
+
+					str := receiver.(*StringObject).value
+
+					for _, char := range []rune(str) {
+						t.builtInMethodYield(blockFrame, t.vm.initStringObject(string(char)))
+					}
+
+					return t.vm.initStringObject(str)
+				}
+			},
+		},
+		{
+			// Split and loop through the string segment split by the newline escaped character
+			//
+			// ```ruby
+			// "Hello\nWorld\nGoby".each_line do |line|
+			//   puts line
+			// end
+			// # => "Hello"
+			// # => "World"
+			// # => "Goby"
+			// ```
+			//
+			// @return [String]
+			Name: "each_line",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(ArgumentError, "Expect 0 argument. got=%d", len(args))
+					}
+
+					if blockFrame == nil {
+						return t.vm.initErrorObject(InternalError, CantYieldWithoutBlockFormat)
+					}
+
+					str := receiver.(*StringObject).value
+					lineArray := strings.Split(str, "\n")
+
+					for _, line := range lineArray {
+						t.builtInMethodYield(blockFrame, t.vm.initStringObject(line))
+					}
+
+					return t.vm.initStringObject(str)
+				}
+			},
+		},
+		{
 			// Returns true if string is empty value
 			//
 			// ```ruby
