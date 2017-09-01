@@ -79,6 +79,7 @@ func TestArrayComparisonOperation(t *testing.T) {
 		evaluated := vm.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
 	}
 }
 
@@ -156,6 +157,7 @@ func TestArrayIndex(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -203,6 +205,7 @@ func TestArrayAtMethod(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -226,6 +229,7 @@ func TestArrayClearMethod(t *testing.T) {
 		evaluated := vm.testEval(t, tt.input, getFilename())
 		testArrayObject(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
 	}
 }
 
@@ -253,6 +257,7 @@ func TestArrayConcatMethod(t *testing.T) {
 		evaluated := vm.testEval(t, tt.input, getFilename())
 		testArrayObject(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
 	}
 }
 
@@ -319,6 +324,7 @@ func TestArrayCountMethod(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -358,6 +364,7 @@ func TestArrayEachMethod(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -380,6 +387,7 @@ func TestArrayEachIndexMethod(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -453,6 +461,7 @@ func TestArrayFirstMethod(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		testArrayObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -496,6 +505,7 @@ func TestArrayFlattenMethod(t *testing.T) {
 		evaluated := vm.testEval(t, tt.input, getFilename())
 		testArrayObject(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
 	}
 }
 
@@ -539,6 +549,7 @@ func TestArrayJoinMethod(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i,1)
 	}
 }
 
@@ -594,6 +605,7 @@ func TestArrayLastMethod(t *testing.T) {
 		evaluated := vm.testEval(t, tt.input, getFilename())
 		testArrayObject(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
 	}
 }
 
@@ -609,6 +621,7 @@ func TestArrayLastMethodFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -867,7 +880,6 @@ func TestArrayRotateMethodFail(t *testing.T) {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -951,7 +963,6 @@ func TestArrayShiftMethodFail(t *testing.T) {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
