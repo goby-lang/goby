@@ -104,7 +104,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
-			Name: "exist",
+			Name: "exist?",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					filename := args[0].(*StringObject).value

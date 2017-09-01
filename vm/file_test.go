@@ -93,7 +93,7 @@ func TestFileDeleteMethod(t *testing.T) {
 
 		File.open("/tmp/out.txt", "w", 0755)
 		File.delete("/tmp/out.txt")
-		File.exist("/tmp/out.txt")
+		File.exist?("/tmp/out.txt")
 		`, false},
 	}
 
@@ -192,7 +192,7 @@ func TestFileWriteMethod(t *testing.T) {
 		require "file"
 
 		File.open("/tmp/out.txt", "w", 0755)
-		File.exist("/tmp/out.txt")
+		File.exist?("/tmp/out.txt")
 		`, true},
 	}
 
