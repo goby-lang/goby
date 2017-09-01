@@ -37,7 +37,7 @@ func (m *MethodObject) argTypes() []int {
 	return m.instructionSet.argTypes
 }
 
-func (m *MethodObject) lastArgType() int{
+func (m *MethodObject) lastArgType() int {
 	if len(m.argTypes()) > 0 {
 		return m.argTypes()[len(m.argTypes())-1]
 	}

@@ -68,33 +68,12 @@ func TestDefStatement(t *testing.T) {
 		foo(20)
 		`, 30},
 		{`
-		def foo(x = 100, y)
-		  x + y
-		end
-
-		foo(20)
-		`, 120},
-		{`
 		def foo(x, y=10)
 		  x + y
 		end
 
 		foo(100)
 		`, 110},
-		{`
-		def foo(x=10, y, z)
-		  x + y + z
-		end
-
-		foo(10, 20)
-		`, 40},
-		{`
-		def foo(x=10, y=11, z)
-		  x + y + z
-		end
-
-		foo(10, 20)
-		`, 41},
 		{`
 		def foo(x=10, y=11, z=12)
 		  x + y + z

@@ -129,6 +129,42 @@ func (p *Parser) parseParameters() []ast.Expression {
 		params = append(params, param)
 	}
 
+	/*
+		0 means previous arg is normal argument
+		1 means previous arg is optioned argument
+		2 means previous arg is splat argument
+	*/
+	argState := 0
+
+	for _, param := range params {
+		switch exp := param.(type) {
+		case *ast.Identifier:
+			switch argState {
+			case 1:
+				p.error = &Error{Message: fmt.Sprintf("Normal argument %s should be defined before optioned argument. Line: %d", exp.Value, p.curToken.Line), errType: SyntaxError}
+				break
+			case 2:
+				p.error = &Error{Message: fmt.Sprintf("Normal argument %s should be defined before splat argument. Line: %d", exp.Value, p.curToken.Line), errType: SyntaxError}
+				break
+			}
+		case *ast.AssignExpression:
+			switch argState {
+			case 2:
+				p.error = &Error{Message: fmt.Sprintf("Optioned argument \"%s\" should be defined before splat argument. Line: %d", exp.String(), p.curToken.Line), errType: SyntaxError}
+				break
+			}
+			argState = 1
+		case *ast.PrefixExpression:
+			switch argState {
+			case 2:
+				p.error = &Error{Message: fmt.Sprintf("Can't define splat argument more than once. Line: %d", p.curToken.Line), errType: SyntaxError}
+				break
+			}
+
+			argState = 2
+		}
+	}
+
 	p.fsm.Event(backToNormal)
 	return params
 }
