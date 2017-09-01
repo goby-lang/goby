@@ -84,33 +84,10 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 		p.nextToken()
 
 		switch p.peekToken.Type {
-		// def foo()
 		case token.RParen:
 			params = []ast.Expression{}
-		// def foo(*c)
-		case token.Asterisk:
-			p.nextToken()
-			if p.expectPeek(token.Ident) {
-				param := p.parseExpression(NORMAL)
-				stmt.SplatParameter = param.(*ast.Identifier)
-			}
-		// def foo(a, .....)
 		default:
 			params = p.parseParameters()
-
-			// def(a, b, *c)
-			if p.peekTokenIs(token.Asterisk) {
-				p.nextToken()
-				if p.expectPeek(token.Ident) {
-					param := p.parseExpression(NORMAL)
-
-					if paramDuplicated(params, param) {
-						p.error = &Error{Message: fmt.Sprintf("Duplicate argument name: \"%s\". Line: %d", getArgName(param), p.curToken.Line), errType: SyntaxError}
-					}
-
-					stmt.SplatParameter = param.(*ast.Identifier)
-				}
-			}
 		}
 
 		if !p.expectPeek(token.RParen) {
@@ -137,12 +114,12 @@ func (p *Parser) parseParameters() []ast.Expression {
 
 	for p.peekTokenIs(token.Comma) {
 		p.nextToken()
+		p.nextToken()
 
-		if p.peekTokenIs(token.Asterisk) {
+		if p.curTokenIs(token.Asterisk) && !p.peekTokenIs(token.Ident) {
+			p.expectPeek(token.Ident)
 			break
 		}
-
-		p.nextToken()
 
 		param := p.parseExpression(NORMAL)
 
