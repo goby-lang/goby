@@ -122,12 +122,16 @@ func (p *Parser) parseParameters() []ast.Expression {
 		}
 
 		param := p.parseExpression(NORMAL)
-
-		if paramDuplicated(params, param) {
-			p.error = &Error{Message: fmt.Sprintf("Duplicate argument name: \"%s\". Line: %d", getArgName(param), p.curToken.Line), errType: SyntaxError}
-		}
 		params = append(params, param)
 	}
+
+	p.checkMethodParameters(params)
+
+	p.fsm.Event(backToNormal)
+	return params
+}
+
+func (p *Parser) checkMethodParameters(params []ast.Expression) {
 
 	/*
 		0 means previous arg is normal argument
@@ -136,37 +140,42 @@ func (p *Parser) parseParameters() []ast.Expression {
 	*/
 	argState := 0
 
+	checkedParams := []ast.Expression{}
+
 	for _, param := range params {
 		switch exp := param.(type) {
 		case *ast.Identifier:
 			switch argState {
 			case 1:
-				p.error = &Error{Message: fmt.Sprintf("Normal argument %s should be defined before optioned argument. Line: %d", exp.Value, p.curToken.Line), errType: SyntaxError}
-				break
+				p.error = &Error{Message: fmt.Sprintf("Normal argument \"%s\" should be defined before optioned argument. Line: %d", exp.Value, p.curToken.Line), errType: SyntaxError}
 			case 2:
-				p.error = &Error{Message: fmt.Sprintf("Normal argument %s should be defined before splat argument. Line: %d", exp.Value, p.curToken.Line), errType: SyntaxError}
-				break
+				p.error = &Error{Message: fmt.Sprintf("Normal argument \"%s\" should be defined before splat argument. Line: %d", exp.Value, p.curToken.Line), errType: SyntaxError}
 			}
 		case *ast.AssignExpression:
 			switch argState {
 			case 2:
 				p.error = &Error{Message: fmt.Sprintf("Optioned argument \"%s\" should be defined before splat argument. Line: %d", exp.String(), p.curToken.Line), errType: SyntaxError}
-				break
 			}
 			argState = 1
 		case *ast.PrefixExpression:
 			switch argState {
 			case 2:
 				p.error = &Error{Message: fmt.Sprintf("Can't define splat argument more than once. Line: %d", p.curToken.Line), errType: SyntaxError}
-				break
 			}
 
 			argState = 2
 		}
-	}
 
-	p.fsm.Event(backToNormal)
-	return params
+		if p.error != nil {
+			break
+		}
+
+		if paramDuplicated(checkedParams, param) {
+			p.error = &Error{Message: fmt.Sprintf("Duplicate argument name: \"%s\". Line: %d", getArgName(param), p.curToken.Line), errType: SyntaxError}
+		} else {
+			checkedParams = append(checkedParams, param)
+		}
+	}
 }
 
 func (p *Parser) parseClassStatement() *ast.ClassStatement {
