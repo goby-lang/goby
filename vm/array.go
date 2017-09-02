@@ -25,6 +25,7 @@ func (vm *VM) initArrayClass() *RClass {
 type ArrayObject struct {
 	*baseObj
 	Elements []Object
+	splat    bool
 }
 
 func (a *ArrayObject) Value() interface{} {

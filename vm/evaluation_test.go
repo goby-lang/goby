@@ -313,6 +313,104 @@ func TestMethodCall(t *testing.T) {
 	}
 }
 
+func TestMethodCallWithSplatArgument(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		def foo(a, b)
+		  a + b
+		end
+
+		foo(*[4,6])
+		`, 10},
+		{`
+		def foo(a, b)
+		  a + b
+		end
+
+		a = [4,6]
+		foo(*a)
+		`, 10},
+		{`
+		def foo(a, b, c)
+		  a + b + c
+		end
+
+		foo(4, *[6,5])
+		`, 15},
+		{`
+		def foo(a, b, c)
+		  a + b + c
+		end
+
+		a = [6, 5]
+		foo(4, *a)
+		`, 15},
+		{`
+		def foo(a, b)
+		  a + b
+		end
+
+		foo(*4, 6)
+		`, 10},
+		{`
+		def foo(a, b)
+		  a + b
+		end
+
+		foo(*4, *6)
+		`, 10},
+		{`
+		def foo(a, b, c)
+		  a + b + c
+		end
+
+		def bar(*arr)
+		  foo(*arr)
+		end
+
+		bar(2, 3, 5)
+		`, 10},
+		{`
+		def foo(a, b, c)
+		  a + b + c
+		end
+
+		def bar(a, *arr)
+		  a + foo(*arr)
+		end
+
+		bar(1, 2, 3, 5)
+		`, 11},
+		{`
+		def foo(a, b, c)
+		  a + b + c
+		end
+
+		def bar(a = 10, *arr)
+		  a + foo(*arr)
+		end
+
+		bar(1, 2, 3, 5)
+		`, 11},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+		}
+
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestMethodCallWithBlockArgument(t *testing.T) {
 	tests := []struct {
 		input    string
