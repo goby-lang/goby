@@ -232,6 +232,19 @@ var builtInActions = map[operationType]*action{
 			}
 		},
 	},
+	bytecode.SplatArray: {
+		name: bytecode.SplatArray,
+		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+			obj := t.stack.top().Target
+			arr, ok := obj.(*ArrayObject)
+
+			if !ok {
+				return
+			}
+
+			arr.splat = true
+		},
+	},
 	bytecode.NewHash: {
 		name: bytecode.NewHash,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
@@ -408,6 +421,17 @@ var builtInActions = map[operationType]*action{
 
 			methodName := args[0].(string)
 			argCount := args[1].(int)
+
+			if arr, ok := t.stack.top().Target.(*ArrayObject); ok && arr.splat {
+				// Pop array
+				t.stack.pop()
+				// Can't count array self, only the number of array elements
+				argCount = argCount - 1 + len(arr.Elements)
+				for _, elem := range arr.Elements {
+					t.stack.push(&Pointer{Target: elem})
+				}
+			}
+
 			argPr := t.sp - argCount
 			receiverPr := argPr - 1
 			receiver := t.stack.Data[receiverPr].Target
