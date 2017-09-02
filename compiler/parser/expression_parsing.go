@@ -53,8 +53,8 @@ const (
 	_ int = iota
 	LOWEST
 	NORMAL
-	ASSIGN
 	LOGIC
+	ASSIGN
 	RANGE
 	EQUALS
 	COMPARE
