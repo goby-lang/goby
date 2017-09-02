@@ -173,14 +173,16 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 			argType = OptionedArg
 			exp.Optioned = 1
 			g.compileAssignExpression(newIS, exp, scope, scope.localTable)
+		case *ast.PrefixExpression:
+			if exp.Operator != "*" {
+				continue
+			}
+			argType = SplatArg
+			ident := exp.Right.(*ast.Identifier)
+			scope.localTable.setLCL(ident.Value, scope.localTable.depth)
 		}
 
 		newIS.argTypes = append(newIS.argTypes, argType)
-	}
-
-	if stmt.SplatParameter != nil {
-		scope.localTable.setLCL(stmt.SplatParameter.Value, scope.localTable.depth)
-		newIS.argTypes = append(newIS.argTypes, SplatArg)
 	}
 
 	if len(stmt.BlockStatement.Statements) == 0 {

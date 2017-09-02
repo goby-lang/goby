@@ -197,7 +197,7 @@ func TestDefStatement(t *testing.T) {
 	testIntegerLiteral(t, secondExpressionStmt.Expression, 123)
 }
 
-func TestDefStatementFailWithDuplicateArgumentName(t *testing.T) {
+func TestDefStatementArgumentDefinitionError(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected string
@@ -208,17 +208,12 @@ func TestDefStatementFailWithDuplicateArgumentName(t *testing.T) {
 		end
 		`, "Duplicate argument name: \"x\". Line: 1"},
 		{`
-		def add(a, b = 1, b)
+		def add(a, b, b = [1, 2])
 			a + b
 		end
 		`, "Duplicate argument name: \"b\". Line: 1"},
 		{`
-		def add(a, b = [1, 2], b)
-			a + b
-		end
-		`, "Duplicate argument name: \"b\". Line: 1"},
-		{`
-		def add(a, b = [1, 2], b = [3, 4], c)
+		def add(a, b = [1, 2], b = [3, 4])
 			a + b
 		end
 		`, "Duplicate argument name: \"b\". Line: 1"},
@@ -227,6 +222,31 @@ func TestDefStatementFailWithDuplicateArgumentName(t *testing.T) {
 			a + b
 		end
 		`, "Duplicate argument name: \"b\". Line: 1"},
+		{`
+		def add(a = 1, b)
+			a + b
+		end
+		`, "Normal argument \"b\" should be defined before optioned argument. Line: 1"},
+		{`
+		def add(a = 1, b, c)
+			a + b
+		end
+		`, "Normal argument \"b\" should be defined before optioned argument. Line: 1"},
+		{`
+		def add(*a, b)
+			a + b
+		end
+		`, "Normal argument \"b\" should be defined before splat argument. Line: 1"},
+		{`
+		def add(*a, b = 1, c)
+			a + b
+		end
+		`, "Optioned argument \"b = 1\" should be defined before splat argument. Line: 1"},
+		{`
+		def add(*a, *b, c)
+			a + b
+		end
+		`, "Can't define splat argument more than once. Line: 1"},
 	}
 
 	for i, tt := range tests {
