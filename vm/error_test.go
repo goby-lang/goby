@@ -140,6 +140,15 @@ func TestArgumentError(t *testing.T) {
 		foo
 		`, "ArgumentError: Expect at least 1 args for method 'foo'. got: 0",
 			4},
+		{`def foo(a, b, c)
+		  a + b + c
+		end
+
+		arr = [1, 2, 3, 5]
+		foo(*arr)
+		`,
+			"ArgumentError: Expect at most 3 args for method 'foo'. got: 4",
+			6},
 	}
 
 	for i, tt := range tests {
