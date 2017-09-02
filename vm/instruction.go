@@ -44,6 +44,13 @@ var builtInActions = map[operationType]*action{
 			t.stack.pop()
 		},
 	},
+	bytecode.Dup: {
+		name: bytecode.Dup,
+		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+			obj := t.stack.top().Target
+			t.stack.push(&Pointer{Target: obj})
+		},
+	},
 	bytecode.PutObject: {
 		name: bytecode.PutObject,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {

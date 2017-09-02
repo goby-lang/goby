@@ -40,6 +40,7 @@ const (
 	Send                = "send"
 	InvokeBlock         = "invokeblock"
 	Pop                 = "pop"
+	Dup                 = "dup"
 	Leave               = "leave"
 )
 
