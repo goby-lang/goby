@@ -193,10 +193,33 @@ func (g *Generator) compilePrefixExpression(is *InstructionSet, exp *ast.PrefixE
 }
 
 func (g *Generator) compileInfixExpression(is *InstructionSet, node *ast.InfixExpression, scope *scope, table *localTable) {
-	g.compileExpression(is, node.Left, scope, table)
-	g.compileExpression(is, node.Right, scope, table)
+	switch node.Operator {
+	case "::":
+		g.compileExpression(is, node.Left, scope, table)
+		g.compileExpression(is, node.Right, scope, table)
+	case "&&":
+		andAnchor := &anchor{}
 
-	if node.Operator != "::" {
+		g.compileExpression(is, node.Left, scope, table)
+		is.define(Dup, node.Line())
+		is.define(BranchUnless, node.Line(), andAnchor)
+		is.define(Pop, node.Line())
+		g.compileExpression(is, node.Right, scope, table)
+		andAnchor.line = len(is.Instructions)
+
+	case "||":
+		andAnchor := &anchor{}
+
+		g.compileExpression(is, node.Left, scope, table)
+		is.define(Dup, node.Line())
+		is.define(BranchIf, node.Line(), andAnchor)
+		is.define(Pop, node.Line())
+		g.compileExpression(is, node.Right, scope, table)
+		andAnchor.line = len(is.Instructions)
+
+	default:
+		g.compileExpression(is, node.Left, scope, table)
+		g.compileExpression(is, node.Right, scope, table)
 		is.define(Send, node.Line(), node.Operator, "1")
 	}
 }

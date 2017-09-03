@@ -64,44 +64,6 @@ func builtInNullInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
-			// Returns the right value because nil as the receiver in the OR operation is considered as false value
-			//
-			// ```ruby
-			// a = nil; a ||= 123;       a; # => 123
-			// a = nil; a ||= "string";  a; # => "string"
-			// a = nil; a ||= false;     a; # => false
-			// a = nil; a ||= (1..4);    a; # => 1..4
-			// a = nil; a ||= { b: 1 };  a; # => { b: 1 }
-			// a = nil; a ||= Object;    a; # => Object
-			// a = nil; a ||= [1, 2, 3]; a; # => [1, 2, 3]
-			// a = nil; a ||= nil;       a; # => nil
-			// a = nil; a ||= nil || 1;  a; # => 1
-			// a = nil; a ||= 1 || nil;  a; # => 1
-			// ```
-			//
-			// @return [Object]
-			Name: "||",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 1 {
-						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
-					}
-					return args[0]
-				}
-			},
-		},
-		{
-			Name: "&&",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 1 {
-						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
-					}
-					return FALSE
-				}
-			},
-		},
-		{
 			Name: "to_i",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {

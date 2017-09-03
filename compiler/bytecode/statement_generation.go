@@ -30,7 +30,8 @@ func (g *Generator) compileStatement(is *InstructionSet, statement ast.Statement
 	case *ast.ExpressionStatement:
 		if !g.REPL && stmt.Expression.IsStmt() {
 			switch stmt.Expression.(type) {
-			case *ast.AssignExpression, *ast.IfExpression, *ast.Identifier, *ast.CallExpression, *ast.YieldExpression:
+			// These expressions still need to be executed because they might have side effect
+			case *ast.AssignExpression, *ast.IfExpression, *ast.Identifier, *ast.CallExpression, *ast.YieldExpression, *ast.InfixExpression:
 				g.compileExpression(is, stmt.Expression, scope, table)
 				is.define(Pop, statement.Line())
 			}

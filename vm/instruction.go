@@ -44,6 +44,13 @@ var builtInActions = map[operationType]*action{
 			t.stack.pop()
 		},
 	},
+	bytecode.Dup: {
+		name: bytecode.Dup,
+		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+			obj := t.stack.top().Target
+			t.stack.push(&Pointer{Target: obj})
+		},
+	},
 	bytecode.PutObject: {
 		name: bytecode.PutObject,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
@@ -292,15 +299,19 @@ var builtInActions = map[operationType]*action{
 			v := t.stack.pop()
 			bool, isBool := v.Target.(*BooleanObject)
 
-			if isBool {
-				if !bool.value {
-					return
-				}
-
-				line := args[0].(int)
-				cf.pc = line
+			if isBool && !bool.value {
 				return
 			}
+
+			_, isNull := v.Target.(*NullObject)
+
+			if isNull {
+				return
+			}
+
+			line := args[0].(int)
+			cf.pc = line
+			return
 		},
 	},
 	bytecode.Jump: {
