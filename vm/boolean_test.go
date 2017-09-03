@@ -137,6 +137,18 @@ func TestBooleanLogicalExpression(t *testing.T) {
 		false || true && a = 10
 		a
 		`, 10},
+		{`
+		a = false || 10
+		a
+		`, 10},
+		{`
+		a = nil || 10
+		a
+		`, 10},
+		{`
+		a = true || 10
+		a
+		`, true},
 	}
 
 	for i, tt := range tests {

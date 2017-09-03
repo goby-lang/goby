@@ -1,9 +1,9 @@
 package vm
 
 import (
+	"fmt"
 	"os"
 	"sync"
-	"fmt"
 )
 
 type stack struct {
