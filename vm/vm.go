@@ -97,12 +97,12 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 	gobyRoot := os.Getenv("GOBY_ROOT")
 
 	if len(gobyRoot) == 0 {
-		vm.projectRoot = fmt.Sprintf("/usr/local/Cellar/goby/%s/e", Version)
+		vm.projectRoot = fmt.Sprintf("/usr/local/Cellar/goby/%s", Version)
 
 		_, err := os.Stat(vm.projectRoot)
 
 		if err != nil {
-			path, _ := filepath.Abs("$GOPATH/src/github.com/goby-lang/goby/e")
+			path, _ := filepath.Abs("$GOPATH/src/github.com/goby-lang/goby")
 			_, err = os.Stat(path)
 
 			if err != nil {
