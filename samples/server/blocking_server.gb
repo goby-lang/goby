@@ -6,7 +6,7 @@ server = Net::SimpleServer.new("3000")
 
 i = 0
 
-server.mount("/") do |req, res|
+server.get("/") do |req, res|
   puts(i)
   i = i+1
 
