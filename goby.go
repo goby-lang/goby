@@ -40,7 +40,7 @@ func main() {
 
 	fp := flag.Arg(0)
 
-	if fp == "" {
+	if fp == "" || !strings.Contains(fp, ".") {
 		flag.Usage()
 		os.Exit(0)
 	}
