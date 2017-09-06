@@ -14,13 +14,21 @@ var fileModeTable = map[string]int{
 	"w+": syscall.O_RDWR,
 }
 
-func initFileClass(vm *VM) {
-	fc := vm.initializeClass("File", false)
+func (vm *VM) initFileClass() *RClass {
+	fc := vm.initializeClass(fileClass, false)
 	fc.setBuiltInMethods(builtinFileClassMethods(), true)
 	fc.setBuiltInMethods(builtinFileInstanceMethods(), false)
-	vm.objectClass.setClassConstant(fc)
 
-	vm.execGobyLib("file.gb")
+	vm.libFiles = append(vm.libFiles, "file.gb")
+
+	return fc
+}
+
+func (vm *VM) initFileObject(f *os.File) *FileObject {
+	return &FileObject{
+		baseObj: &baseObj{class: vm.topLevelClass(fileClass)},
+		File:    f,
+	}
 }
 
 // FileObject is a special type that contains file pointer so we can keep track on target file.
@@ -207,7 +215,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 					}
 
 					// TODO: Refactor this class retrieval mess
-					fileObj := &FileObject{File: f, baseObj: &baseObj{class: t.vm.topLevelClass("File")}}
+					fileObj := &FileObject{File: f, baseObj: &baseObj{class: t.vm.topLevelClass(fileClass)}}
 
 					return fileObj
 				}
