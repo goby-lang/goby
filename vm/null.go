@@ -1,6 +1,9 @@
 package vm
 
-import "github.com/goby-lang/goby/vm/errors"
+import (
+	"github.com/goby-lang/goby/vm/classes"
+	"github.com/goby-lang/goby/vm/errors"
+)
 
 var (
 	// NULL represents Goby's null objects.
@@ -8,7 +11,7 @@ var (
 )
 
 func (vm *VM) initNullClass() *RClass {
-	nc := vm.initializeClass(nullClass, false)
+	nc := vm.initializeClass(classes.NullClass, false)
 	nc.setBuiltInMethods(builtInNullInstanceMethods(), false)
 	nc.setBuiltInMethods(builtInNullClassMethods(), true)
 	NULL = &NullObject{baseObj: &baseObj{class: nc}}

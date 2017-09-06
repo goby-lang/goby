@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
 	"regexp"
 	"strconv"
@@ -12,13 +13,13 @@ import (
 
 func (vm *VM) initStringObject(value string) *StringObject {
 	return &StringObject{
-		baseObj: &baseObj{class: vm.topLevelClass(stringClass)},
+		baseObj: &baseObj{class: vm.topLevelClass(classes.StringClass)},
 		value:   value,
 	}
 }
 
 func (vm *VM) initStringClass() *RClass {
-	sc := vm.initializeClass(stringClass, false)
+	sc := vm.initializeClass(classes.StringClass, false)
 	sc.setBuiltInMethods(builtinStringInstanceMethods(), false)
 	sc.setBuiltInMethods(builtInStringClassMethods(), true)
 	return sc
@@ -74,7 +75,7 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 					formatObj, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					format := formatObj.value
@@ -126,7 +127,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := r.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, r.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, r.Class().Name)
 					}
 
 					rightValue := right.value
@@ -151,7 +152,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := r.(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, integerClass, r.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, r.Class().Name)
 					}
 
 					if right.value < 0 {
@@ -185,7 +186,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := r.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, r.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, r.Class().Name)
 					}
 
 					rightValue := right.value
@@ -215,7 +216,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := r.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, r.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, r.Class().Name)
 					}
 
 					rightValue := right.value
@@ -279,7 +280,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					right, ok := r.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, r.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, r.Class().Name)
 					}
 
 					rightValue := right.value
@@ -352,7 +353,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					index, ok := i.(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, integerClass, i.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, i.Class().Name)
 					}
 
 					indexValue := index.value
@@ -401,7 +402,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					index, ok := i.(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, integerClass, i.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, i.Class().Name)
 					}
 
 					indexValue := index.value
@@ -415,7 +416,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					replaceStr, ok := r.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, r.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, r.Class().Name)
 					}
 					replaceStrValue := replaceStr.value
 
@@ -504,7 +505,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					concatStr, ok := c.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, c.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, c.Class().Name)
 					}
 
 					return t.vm.initStringObject(str + concatStr.value)
@@ -556,7 +557,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					deleteStr, ok := d.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, d.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, d.Class().Name)
 					}
 
 					return t.vm.initStringObject(strings.Replace(str, deleteStr.value, "", -1))
@@ -741,7 +742,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					compareStr, ok := c.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, c.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, c.Class().Name)
 					}
 
 					compareStrValue := compareStr.value
@@ -851,7 +852,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					includeStr, ok := i.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, i.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, i.Class().Name)
 					}
 
 					if strings.Contains(str, includeStr.value) {
@@ -891,7 +892,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					index, ok := i.(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, integerClass, i.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, i.Class().Name)
 					}
 
 					indexValue := index.value
@@ -1028,7 +1029,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					replaceStr, ok := r.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, r.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, r.Class().Name)
 					}
 
 					return t.vm.initStringObject(replaceStr.value)
@@ -1278,7 +1279,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					seperator, ok := s.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, s.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, s.Class().Name)
 					}
 
 					str := receiver.(*StringObject).value
@@ -1316,7 +1317,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					compareStr, ok := c.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, c.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, c.Class().Name)
 					}
 
 					compareStrValue := compareStr.value

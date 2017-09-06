@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+	"github.com/goby-lang/goby/vm/classes"
 )
 
 var (
@@ -12,7 +13,7 @@ var (
 )
 
 func (vm *VM) initBoolClass() *RClass {
-	b := vm.initializeClass(booleanClass, false)
+	b := vm.initializeClass(classes.BooleanClass, false)
 	b.setBuiltInMethods(builtinBooleanInstanceMethods(), false)
 	b.setBuiltInMethods(builtInBooleanClassMethods(), true)
 

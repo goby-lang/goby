@@ -2,28 +2,12 @@ package vm
 
 import (
 	"fmt"
+	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
 	"io/ioutil"
 	"path"
 	"reflect"
 	"time"
-)
-
-const (
-	objectClass   = "Object"
-	classClass    = "Class"
-	integerClass  = "Integer"
-	stringClass   = "String"
-	arrayClass    = "Array"
-	hashClass     = "Hash"
-	booleanClass  = "Boolean"
-	nullClass     = "Null"
-	channelClass  = "Channel"
-	rangeClass    = "Range"
-	methodClass   = "method"
-	pluginClass   = "Plugin"
-	goObjectClass = "GoObject"
-	fileClass     = "File"
 )
 
 // initializeClass is a common function for vm, which initializes and returns
@@ -41,7 +25,7 @@ func (vm *VM) initializeClass(name string, isModule bool) *RClass {
 
 func (vm *VM) createRClass(className string) *RClass {
 	objectClass := vm.objectClass
-	classClass := vm.topLevelClass(classClass)
+	classClass := vm.topLevelClass(classes.ClassClass)
 
 	return &RClass{
 		Name:             className,
@@ -56,7 +40,7 @@ func (vm *VM) createRClass(className string) *RClass {
 
 func initClassClass() *RClass {
 	classClass := &RClass{
-		Name:      classClass,
+		Name:      classes.ClassClass,
 		Methods:   newEnvironment(),
 		constants: make(map[string]*Pointer),
 		baseObj:   &baseObj{},
@@ -81,7 +65,7 @@ func initClassClass() *RClass {
 
 func initObjectClass(c *RClass) *RClass {
 	objectClass := &RClass{
-		Name:      objectClass,
+		Name:      classes.ObjectClass,
 		Methods:   newEnvironment(),
 		constants: make(map[string]*Pointer),
 		baseObj:   &baseObj{class: c},
@@ -183,7 +167,7 @@ func (c *RClass) lookupMethod(methodName string) Object {
 
 	if !ok {
 		if c.superClass != nil && c.superClass != c {
-			if c.Name == classClass {
+			if c.Name == classes.ClassClass {
 				return nil
 			}
 
@@ -204,7 +188,7 @@ func (c *RClass) lookupConstant(constName string, findInScope bool) *Pointer {
 			return c.scope.lookupConstant(constName, true)
 		}
 
-		if c.superClass != nil && c.Name != objectClass {
+		if c.superClass != nil && c.Name != classes.ObjectClass {
 			return c.superClass.lookupConstant(constName, false)
 		}
 
@@ -234,7 +218,7 @@ func (c *RClass) alreadyInherit(constant *RClass) bool {
 		return true
 	}
 
-	if c.superClass.Name == objectClass {
+	if c.superClass.Name == classes.ObjectClass {
 		return false
 	}
 
@@ -660,7 +644,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 					gobyClass, ok := c.(*RClass)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classClass, c.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.ClassClass, c.Class().Name)
 					}
 
 					receiverClass := receiver.Class()
@@ -670,7 +654,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 							return TRUE
 						}
 
-						if receiverClass.Name == objectClass {
+						if receiverClass.Name == classes.ObjectClass {
 							break
 						}
 
@@ -710,7 +694,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 					arg, isStr := args[0].(*StringObject)
 
 					if !isStr {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					obj, ok := receiver.instanceVariableGet(arg.value)
@@ -735,7 +719,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 					obj := args[1]
 
 					if !isStr {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					receiver.instanceVariableSet(argName.value, obj)

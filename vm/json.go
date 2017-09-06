@@ -2,6 +2,7 @@ package vm
 
 import (
 	"encoding/json"
+	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
 	"strconv"
 )
@@ -28,7 +29,7 @@ func builtInJSONClassMethods() []*BuiltInMethodObject {
 					j, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					var obj jsonObj
@@ -69,7 +70,7 @@ func builtInJSONClassMethods() []*BuiltInMethodObject {
 					j, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					var obj jsonObj

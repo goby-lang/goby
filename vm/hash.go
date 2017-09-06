@@ -3,6 +3,7 @@ package vm
 import (
 	"bytes"
 	"fmt"
+	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
 	"reflect"
 	"sort"
@@ -11,15 +12,15 @@ import (
 
 func (vm *VM) initHashObject(pairs map[string]Object) *HashObject {
 	return &HashObject{
-		baseObj: &baseObj{class: vm.topLevelClass(hashClass)},
+		baseObj: &baseObj{class: vm.topLevelClass(classes.HashClass)},
 		Pairs:   pairs,
 	}
 }
 
 func (vm *VM) initHashClass() *RClass {
-	hc := vm.initializeClass(hashClass, false)
+	hc := vm.initializeClass(classes.HashClass, false)
 	hc.setBuiltInMethods(builtinHashInstanceMethods(), false)
-	hc.setBuiltInMethods(builtInHashClassMethods(), true)
+	hc.setBuiltInMethods(builtinHashClassMethods(), true)
 	return hc
 }
 
@@ -137,7 +138,7 @@ func generateJSONFromPair(key string, v Object) string {
 	return out.String()
 }
 
-func builtInHashClassMethods() []*BuiltInMethodObject {
+func builtinHashClassMethods() []*BuiltInMethodObject {
 	return []*BuiltInMethodObject{
 		{
 			Name: "new",
@@ -177,7 +178,7 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 					key, ok := i.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, i.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, i.Class().Name)
 					}
 
 					h := receiver.(*HashObject)
@@ -223,7 +224,7 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 					key, ok := k.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, k.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, k.Class().Name)
 					}
 
 					h := receiver.(*HashObject)
@@ -405,7 +406,7 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 					deleteKey, ok := d.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, d.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, d.Class().Name)
 					}
 
 					deleteKeyValue := deleteKey.value
@@ -442,7 +443,7 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 					input, ok := i.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, i.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, i.Class().Name)
 					}
 
 					if _, ok := h.Pairs[input.value]; ok {
@@ -589,7 +590,7 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 					for _, obj := range args {
 						hashObj, ok := obj.(*HashObject)
 						if !ok {
-							return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, hashClass, obj.Class().Name)
+							return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.HashClass, obj.Class().Name)
 						}
 						for k, v := range hashObj.Pairs {
 							result[k] = v
@@ -663,7 +664,7 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 						s := args[0]
 						st, ok := s.(*BooleanObject)
 						if !ok {
-							return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, booleanClass, s.Class().Name)
+							return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.BooleanClass, s.Class().Name)
 						}
 						sorted = st.value
 					}

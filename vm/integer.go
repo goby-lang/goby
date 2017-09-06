@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
 	"math"
 	"strconv"
@@ -29,14 +30,14 @@ const (
 
 func (vm *VM) initIntegerObject(value int) *IntegerObject {
 	return &IntegerObject{
-		baseObj: &baseObj{class: vm.topLevelClass(integerClass)},
+		baseObj: &baseObj{class: vm.topLevelClass(classes.IntegerClass)},
 		value:   value,
 		flag:    i,
 	}
 }
 
 func (vm *VM) initIntegerClass() *RClass {
-	ic := vm.initializeClass(integerClass, false)
+	ic := vm.initializeClass(classes.IntegerClass, false)
 	ic.setBuiltInMethods(builtinIntegerInstanceMethods(), false)
 	ic.setBuiltInMethods(builtInIntegerClassMethods(), true)
 	return ic
@@ -103,7 +104,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 						return err
 					}
 
@@ -127,7 +128,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 						return err
 					}
 
@@ -151,7 +152,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 						return err
 					}
 
@@ -175,7 +176,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 						return err
 					}
 
@@ -199,7 +200,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 						return err
 					}
 
@@ -224,7 +225,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 						return err
 					}
 
@@ -249,7 +250,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 						return err
 					}
 
@@ -279,7 +280,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 						return err
 					}
 
@@ -309,7 +310,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 						return err
 					}
 
@@ -339,7 +340,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 						return err
 					}
 
@@ -370,7 +371,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					right, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 						return err
 					}
 

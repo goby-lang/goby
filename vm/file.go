@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
 	"io/ioutil"
 	"os"
@@ -16,7 +17,7 @@ var fileModeTable = map[string]int{
 }
 
 func (vm *VM) initFileClass() *RClass {
-	fc := vm.initializeClass(fileClass, false)
+	fc := vm.initializeClass(classes.FileClass, false)
 	fc.setBuiltInMethods(builtinFileClassMethods(), true)
 	fc.setBuiltInMethods(builtinFileInstanceMethods(), false)
 
@@ -27,7 +28,7 @@ func (vm *VM) initFileClass() *RClass {
 
 func (vm *VM) initFileObject(f *os.File) *FileObject {
 	return &FileObject{
-		baseObj: &baseObj{class: vm.topLevelClass(fileClass)},
+		baseObj: &baseObj{class: vm.topLevelClass(classes.FileClass)},
 		File:    f,
 	}
 }
@@ -216,7 +217,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 					}
 
 					// TODO: Refactor this class retrieval mess
-					fileObj := &FileObject{File: f, baseObj: &baseObj{class: t.vm.topLevelClass(fileClass)}}
+					fileObj := &FileObject{File: f, baseObj: &baseObj{class: t.vm.topLevelClass(classes.FileClass)}}
 
 					return fileObj
 				}

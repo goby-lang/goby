@@ -2,19 +2,20 @@ package vm
 
 import (
 	"bytes"
+	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
 	"strings"
 )
 
 func (vm *VM) initArrayObject(elements []Object) *ArrayObject {
 	return &ArrayObject{
-		baseObj:  &baseObj{class: vm.topLevelClass(arrayClass)},
+		baseObj:  &baseObj{class: vm.topLevelClass(classes.ArrayClass)},
 		Elements: elements,
 	}
 }
 
 func (vm *VM) initArrayClass() *RClass {
-	ac := vm.initializeClass(arrayClass, false)
+	ac := vm.initializeClass(classes.ArrayClass, false)
 	ac.setBuiltInMethods(builtinArrayInstanceMethods(), false)
 	ac.setBuiltInMethods(builtInArrayClassMethods(), true)
 	return ac
@@ -169,7 +170,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 					index, ok := i.(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 					}
 
 					arr := receiver.(*ArrayObject)
@@ -216,7 +217,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 					indexValue := index.value
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 					}
 
 					arr := receiver.(*ArrayObject)
@@ -268,7 +269,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 					index, ok := i.(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 					}
 
 					arr := receiver.(*ArrayObject)
@@ -327,7 +328,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 						addAr, ok := arg.(*ArrayObject)
 
 						if !ok {
-							return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, arrayClass, arg.Class().Name)
+							return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.ArrayClass, arg.Class().Name)
 						}
 
 						for _, el := range addAr.Elements {
@@ -509,7 +510,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 					arg, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 					}
 
 					if arg.value < 1 {
@@ -570,7 +571,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 						arg, ok := args[0].(*StringObject)
 
 						if !ok {
-							return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
+							return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 						}
 
 						sep = arg.value
@@ -606,7 +607,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 					arg, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 					}
 
 					if arg.value < 1 {
@@ -779,7 +780,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 					if len(args) != 0 {
 						arg, ok := args[0].(*IntegerObject)
 						if !ok {
-							return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, integerClass, args[0].Class().Name)
+							return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 						}
 						rotate = arg.value
 					}

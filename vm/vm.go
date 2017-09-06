@@ -5,6 +5,7 @@ import (
 	"github.com/goby-lang/goby/compiler"
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/compiler/parser"
+	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
 	"io/ioutil"
 	"os"
@@ -175,7 +176,7 @@ func (vm *VM) SetMethodISIndexTable(fn filename) {
 func (vm *VM) initMainObj() *RObject {
 	obj := vm.objectClass.initializeInstance()
 	singletonClass := vm.initializeClass(fmt.Sprintf("#<Class:%s>", obj.toString()), false)
-	singletonClass.Methods.set("include", vm.topLevelClass(classClass).lookupMethod("include"))
+	singletonClass.Methods.set("include", vm.topLevelClass(classes.ClassClass).lookupMethod("include"))
 	obj.singletonClass = singletonClass
 
 	return obj
@@ -185,7 +186,7 @@ func (vm *VM) initConstants() {
 	// Init Class and Object
 	cClass := initClassClass()
 	vm.objectClass = initObjectClass(cClass)
-	vm.topLevelClass(objectClass).setClassConstant(cClass)
+	vm.topLevelClass(classes.ObjectClass).setClassConstant(cClass)
 
 	// Init builtin classes
 	builtInClasses := []*RClass{
@@ -232,7 +233,7 @@ func (vm *VM) initConstants() {
 func (vm *VM) topLevelClass(cn string) *RClass {
 	objClass := vm.objectClass
 
-	if cn == objectClass {
+	if cn == classes.ObjectClass {
 		return objClass
 	}
 
@@ -331,7 +332,7 @@ func (vm *VM) lookupConstant(cf *callFrame, constName string) (constant *Pointer
 		constant = vm.objectClass.constants[constName]
 	}
 
-	if constName == objectClass {
+	if constName == classes.ObjectClass {
 		constant = &Pointer{Target: vm.objectClass}
 	}
 

@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
 	"github.com/st0012/metago"
 	"os"
@@ -13,11 +14,11 @@ import (
 )
 
 func (vm *VM) initPluginObject(fn string, p *plugin.Plugin) *PluginObject {
-	return &PluginObject{fn: fn, plugin: p, baseObj: &baseObj{class: vm.topLevelClass(pluginClass)}}
+	return &PluginObject{fn: fn, plugin: p, baseObj: &baseObj{class: vm.topLevelClass(classes.PluginClass)}}
 }
 
 func initPluginClass(vm *VM) {
-	pc := vm.initializeClass(pluginClass, false)
+	pc := vm.initializeClass(classes.PluginClass, false)
 	pc.setBuiltInMethods(builtinPluginClassMethods(), true)
 	pc.setBuiltInMethods(builtinPluginInstanceMethods(), false)
 	vm.objectClass.setClassConstant(pc)
@@ -133,7 +134,7 @@ func builtinPluginClassMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, "String", args[0].Class().Name)
 					}
 
-					return &PluginObject{fn: name.value, baseObj: &baseObj{class: t.vm.topLevelClass(pluginClass), InstanceVariables: newEnvironment()}}
+					return &PluginObject{fn: name.value, baseObj: &baseObj{class: t.vm.topLevelClass(classes.PluginClass), InstanceVariables: newEnvironment()}}
 				}
 			},
 		},
@@ -221,7 +222,7 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 					s, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					funcName := s.value

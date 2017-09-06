@@ -2,19 +2,20 @@ package vm
 
 import (
 	"fmt"
+	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
 )
 
 func (vm *VM) initRangeObject(start, end int) *RangeObject {
 	return &RangeObject{
-		baseObj: &baseObj{class: vm.topLevelClass(rangeClass)},
+		baseObj: &baseObj{class: vm.topLevelClass(classes.RangeClass)},
 		Start:   start,
 		End:     end,
 	}
 }
 
 func (vm *VM) initRangeClass() *RClass {
-	rc := vm.initializeClass(rangeClass, false)
+	rc := vm.initializeClass(classes.RangeClass, false)
 	rc.setBuiltInMethods(builtInRangeInstanceMethods(), false)
 	rc.setBuiltInMethods(builtInRangeClassMethods(), true)
 	return rc

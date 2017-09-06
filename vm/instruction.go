@@ -3,6 +3,7 @@ package vm
 import (
 	"fmt"
 	"github.com/goby-lang/goby/compiler/bytecode"
+	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
 	"strings"
 )
@@ -352,7 +353,7 @@ var builtInActions = map[operationType]*action{
 				return
 			}
 
-			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.topLevelClass(methodClass)}}
+			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.topLevelClass(classes.MethodClass)}}
 
 			v := t.stack.pop().Target
 			switch self := v.(type) {
@@ -369,7 +370,7 @@ var builtInActions = map[operationType]*action{
 			argCount := args[0].(int)
 			methodName := t.stack.pop().Target.(*StringObject).value
 			is, _ := t.getMethodIS(methodName, cf.instructionSet.filename)
-			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.topLevelClass(methodClass)}}
+			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.topLevelClass(classes.MethodClass)}}
 
 			v := t.stack.pop().Target
 

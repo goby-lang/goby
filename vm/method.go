@@ -3,10 +3,11 @@ package vm
 import (
 	"bytes"
 	"fmt"
+	"github.com/goby-lang/goby/vm/classes"
 )
 
 func (vm *VM) initMethodClass() *RClass {
-	return vm.initializeClass(methodClass, false)
+	return vm.initializeClass(classes.MethodClass, false)
 }
 
 type builtinMethodBody func(*thread, []Object, *callFrame) Object
