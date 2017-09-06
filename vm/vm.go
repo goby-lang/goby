@@ -5,6 +5,7 @@ import (
 	"github.com/goby-lang/goby/compiler"
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/compiler/parser"
+	"github.com/goby-lang/goby/vm/errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -342,7 +343,7 @@ func (vm *VM) execGobyLib(libName string) {
 	file, err := ioutil.ReadFile(libPath)
 
 	if err != nil {
-		vm.mainThread.returnError(InternalError, err.Error())
+		vm.mainThread.returnError(errors.InternalError, err.Error())
 	}
 
 	vm.execRequiredFile(libPath, file)

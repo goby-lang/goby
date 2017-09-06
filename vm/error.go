@@ -2,23 +2,7 @@ package vm
 
 import (
 	"fmt"
-)
-
-const (
-	// InternalError is the default error type
-	InternalError = "InternalError"
-	// ArgumentError is for an argument-related error
-	ArgumentError = "ArgumentError"
-	// NameError is for a constant-related error
-	NameError = "NameError"
-	// TypeError is for a type-related error
-	TypeError = "TypeError"
-	// UndefinedMethodError is for an undefined-method error
-	UndefinedMethodError = "UndefinedMethodError"
-	// UnsupportedMethodError is for an intentionally unsupported-method error
-	UnsupportedMethodError = "UnsupportedMethodError"
-	// ConstantAlreadyInitializedError means user re-declares twice
-	ConstantAlreadyInitializedError = "ConstantAlreadyInitializedError"
+	"github.com/goby-lang/goby/vm/errors"
 )
 
 func (vm *VM) initErrorObject(errorType, format string, args ...interface{}) *Error {
@@ -43,22 +27,13 @@ func (vm *VM) initErrorObject(errorType, format string, args ...interface{}) *Er
 }
 
 func (vm *VM) initErrorClasses() {
-	errTypes := []string{InternalError, ArgumentError, NameError, TypeError, UndefinedMethodError, UnsupportedMethodError, ConstantAlreadyInitializedError}
+	errTypes := []string{errors.InternalError, errors.ArgumentError, errors.NameError, errors.TypeError, errors.UndefinedMethodError, errors.UnsupportedMethodError, errors.ConstantAlreadyInitializedError}
 
 	for _, errType := range errTypes {
 		c := vm.initializeClass(errType, false)
 		vm.objectClass.setClassConstant(c)
 	}
 }
-
-/*
-	Here defines different error message formats for different types of errors
-*/
-const (
-	WrongNumberOfArgumentFormat = "Expect %d arguments. got: %d"
-	WrongArgumentTypeFormat     = "Expect argument to be %s. got: %s"
-	CantYieldWithoutBlockFormat = "Can't yield without a block"
-)
 
 // Error class is actually a special struct to hold internal error types with messages.
 // Goby developers need not to take care of the struct.

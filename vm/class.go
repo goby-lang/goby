@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+	"github.com/goby-lang/goby/vm/errors"
 	"io/ioutil"
 	"path"
 	"reflect"
@@ -423,7 +424,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 					initFunc, ok := standardLibraries[libName]
 
 					if !ok {
-						return t.vm.initErrorObject(InternalError, "Can't require \"%s\"", libName)
+						return t.vm.initErrorObject(errors.InternalError, "Can't require \"%s\"", libName)
 					}
 
 					initFunc(t.vm)
@@ -455,7 +456,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 					file, err := ioutil.ReadFile(filepath + ".gb")
 
 					if err != nil {
-						return t.vm.initErrorObject(InternalError, err.Error())
+						return t.vm.initErrorObject(errors.InternalError, err.Error())
 					}
 
 					t.vm.execRequiredFile(filepath, file)
@@ -555,7 +556,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got: %d", len(args))
 					}
 
 					int := args[0].(*IntegerObject)
@@ -615,7 +616,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if blockFrame == nil {
-						t.vm.initErrorObject(InternalError, CantYieldWithoutBlockFormat)
+						t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
 					}
 
 					newT := t.vm.newThread()
@@ -652,14 +653,14 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got: %d", len(args))
 					}
 
 					c := args[0]
 					gobyClass, ok := c.(*RClass)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, classClass, c.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classClass, c.Class().Name)
 					}
 
 					receiverClass := receiver.Class()
@@ -696,7 +697,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(ArgumentError, "Expect 0 argument. got: %d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
 					}
 					return FALSE
 				}
@@ -709,7 +710,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 					arg, isStr := args[0].(*StringObject)
 
 					if !isStr {
-						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
 					}
 
 					obj, ok := receiver.instanceVariableGet(arg.value)
@@ -727,14 +728,14 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 2 {
-						return t.vm.initErrorObject(ArgumentError, "Expect 2 arguments. got: %d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 2 arguments. got: %d", len(args))
 					}
 
 					argName, isStr := args[0].(*StringObject)
 					obj := args[1]
 
 					if !isStr {
-						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
 					}
 
 					receiver.instanceVariableSet(argName.value, obj)
@@ -923,7 +924,7 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 					module, ok := args[0].(*RClass)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect argument to be a module. got=%v", args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, "Expect argument to be a module. got=%v", args[0].Class().Name)
 					}
 
 					switch r := receiver.(type) {
@@ -952,7 +953,7 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 					module, ok := args[0].(*RClass)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, "Expect argument to be a module. got=%v", args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, "Expect argument to be a module. got=%v", args[0].Class().Name)
 					}
 
 					class = receiver.SingletonClass()
@@ -982,13 +983,13 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(ArgumentError, "Expect 0 argument. got: %d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
 					}
 
 					n, ok := receiver.(*RClass)
 
 					if !ok {
-						return t.vm.initErrorObject(UndefinedMethodError, "Undefined Method '%s' for %s", "#name", receiver.toString())
+						return t.vm.initErrorObject(errors.UndefinedMethodError, "Undefined Method '%s' for %s", "#name", receiver.toString())
 					}
 
 					name := n.ReturnName()
@@ -1069,13 +1070,13 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(ArgumentError, "Expect 0 argument. got: %d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
 					}
 
 					c, ok := receiver.(*RClass)
 
 					if !ok {
-						return t.vm.initErrorObject(UndefinedMethodError, "Undefined Method '%s' for %s", "#superclass", receiver.toString())
+						return t.vm.initErrorObject(errors.UndefinedMethodError, "Undefined Method '%s' for %s", "#superclass", receiver.toString())
 					}
 
 					superClass := c.returnSuperClass()

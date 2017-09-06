@@ -1,5 +1,7 @@
 package vm
 
+import "github.com/goby-lang/goby/vm/errors"
+
 var (
 	// NULL represents Goby's null objects.
 	NULL *NullObject
@@ -91,7 +93,7 @@ func builtInNullInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got: %d", len(args))
 					}
 
 					if _, ok := args[0].(*NullObject); ok {
@@ -113,7 +115,7 @@ func builtInNullInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got: %d", len(args))
 					}
 
 					if _, ok := args[0].(*NullObject); !ok {
@@ -135,7 +137,7 @@ func builtInNullInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(ArgumentError, "Expect 0 argument. got: %d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
 					}
 					return TRUE
 				}

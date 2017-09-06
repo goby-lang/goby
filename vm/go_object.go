@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+	"github.com/goby-lang/goby/vm/errors"
 	"github.com/st0012/metago"
 )
 
@@ -49,7 +50,7 @@ func builtinGoInstanceMethods() []*BuiltInMethodObject {
 					s, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
 					}
 
 					funcName := s.value
@@ -58,7 +59,7 @@ func builtinGoInstanceMethods() []*BuiltInMethodObject {
 					funcArgs, err := convertToGoFuncArgs(args[1:])
 
 					if err != nil {
-						t.vm.initErrorObject(TypeError, err.Error())
+						t.vm.initErrorObject(errors.TypeError, err.Error())
 					}
 
 					result := metago.CallFunc(r.data, funcName, funcArgs...)

@@ -3,6 +3,7 @@ package vm
 import (
 	"fmt"
 	"github.com/goby-lang/goby/compiler/bytecode"
+	"github.com/goby-lang/goby/vm/errors"
 	"strings"
 )
 
@@ -65,7 +66,7 @@ var builtInActions = map[operationType]*action{
 			c := t.vm.lookupConstant(cf, constName)
 
 			if c == nil {
-				err := t.vm.initErrorObject(NameError, "uninitialized constant %s", constName)
+				err := t.vm.initErrorObject(errors.NameError, "uninitialized constant %s", constName)
 				t.stack.push(&Pointer{Target: err})
 				return
 			}
@@ -178,7 +179,7 @@ var builtInActions = map[operationType]*action{
 			v := t.stack.pop()
 
 			if c != nil {
-				err := t.vm.initErrorObject(ConstantAlreadyInitializedError, "Constant %s already been initialized. Can't assign value to a constant twice.", constName)
+				err := t.vm.initErrorObject(errors.ConstantAlreadyInitializedError, "Constant %s already been initialized. Can't assign value to a constant twice.", constName)
 				t.stack.push(&Pointer{Target: err})
 				return
 			}
@@ -217,7 +218,7 @@ var builtInActions = map[operationType]*action{
 			arr, ok := t.stack.pop().Target.(*ArrayObject)
 
 			if !ok {
-				t.returnError(TypeError, "Expect stack top's value to be an Array when executing 'expandarray' instruction.")
+				t.returnError(errors.TypeError, "Expect stack top's value to be an Array when executing 'expandarray' instruction.")
 				return
 			}
 
@@ -347,7 +348,7 @@ var builtInActions = map[operationType]*action{
 			is, ok := t.getMethodIS(methodName, cf.instructionSet.filename)
 
 			if !ok {
-				t.returnError(InternalError, "Can't get method %s's instruction set.", methodName)
+				t.returnError(errors.InternalError, "Can't get method %s's instruction set.", methodName)
 				return
 			}
 
@@ -401,12 +402,12 @@ var builtInActions = map[operationType]*action{
 					inheritedClass, ok := superClass.Target.(*RClass)
 
 					if !ok {
-						t.returnError(InternalError, "Constant %s is not a class. got=%s", superClassName, string(superClass.Target.Class().ReturnName()))
+						t.returnError(errors.InternalError, "Constant %s is not a class. got=%s", superClassName, string(superClass.Target.Class().ReturnName()))
 						return
 					}
 
 					if inheritedClass.isModule {
-						t.returnError(InternalError, "Module inheritance is not supported: %s", inheritedClass.Name)
+						t.returnError(errors.InternalError, "Module inheritance is not supported: %s", inheritedClass.Name)
 						return
 					}
 
@@ -450,7 +451,7 @@ var builtInActions = map[operationType]*action{
 			method = receiver.findMethod(methodName)
 
 			if method == nil {
-				err := t.vm.initErrorObject(UndefinedMethodError, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
+				err := t.vm.initErrorObject(errors.UndefinedMethodError, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
 				t.stack.set(receiverPr, &Pointer{Target: err})
 				t.sp = argPr
 				return
@@ -464,7 +465,7 @@ var builtInActions = map[operationType]*action{
 			case *BuiltInMethodObject:
 				t.evalBuiltInMethod(receiver, m, receiverPr, argCount, blockFrame)
 			case *Error:
-				t.returnError(InternalError, m.toString())
+				t.returnError(errors.InternalError, m.toString())
 			}
 		},
 	},
@@ -477,7 +478,7 @@ var builtInActions = map[operationType]*action{
 			receiver := t.stack.Data[receiverPr].Target
 
 			if cf.blockFrame == nil {
-				t.returnError(InternalError, "Can't yield without a block")
+				t.returnError(errors.InternalError, "Can't yield without a block")
 				return
 			}
 
