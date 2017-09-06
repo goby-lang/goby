@@ -184,7 +184,7 @@ $GOPATH/src/github.com/goby-lang/goby
 
 1. Run `goby -v` to see the version.
 2. Run `goby -i` to launch igb REPL.
-3. Type `require "file"` in igb.
+3. Type `require "uri"` in igb.
 
 FYI: You can just run `brew test goby` to check Homebrew installation.
 
