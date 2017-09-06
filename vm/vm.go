@@ -2,14 +2,15 @@ package vm
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/compiler"
-	"github.com/goby-lang/goby/compiler/bytecode"
-	"github.com/goby-lang/goby/compiler/parser"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/goby-lang/goby/compiler"
+	"github.com/goby-lang/goby/compiler/bytecode"
+	"github.com/goby-lang/goby/compiler/parser"
 )
 
 // Version stores current Goby version
@@ -195,6 +196,7 @@ func (vm *VM) initConstants() {
 		vm.initArrayClass(),
 		vm.initHashClass(),
 		vm.initRangeClass(),
+		vm.initRegexpClass(),
 		vm.initMethodClass(),
 		vm.initChannelClass(),
 		vm.initGoClass(),
