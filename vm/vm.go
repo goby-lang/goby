@@ -228,6 +228,9 @@ func (vm *VM) initConstants() {
 	}
 
 	vm.objectClass.constants["ENV"] = &Pointer{Target: vm.initHashObject(envs)}
+	vm.objectClass.constants["STDOUT"] = &Pointer{Target: vm.initFileObject(os.Stdout)}
+	vm.objectClass.constants["STDERR"] = &Pointer{Target: vm.initFileObject(os.Stderr)}
+	vm.objectClass.constants["STDERR"] = &Pointer{Target: vm.initFileObject(os.Stderr)}
 }
 
 func (vm *VM) topLevelClass(cn string) *RClass {
