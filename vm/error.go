@@ -19,6 +19,11 @@ const (
 	UnsupportedMethodError = "UnsupportedMethodError"
 	// ConstantAlreadyInitializedError means user re-declares twice
 	ConstantAlreadyInitializedError = "ConstantAlreadyInitializedError"
+	//HTTPError is for general errors returned from http functions
+	HTTPError = "HTTP Error"
+	//HTTPResponseError is for non 200 responses in general contexts
+	//ex Net::HTTP.post()
+	HTTPResponseError = "HTTP Response Error"
 )
 
 func (vm *VM) initErrorObject(errorType, format string, args ...interface{}) *Error {
