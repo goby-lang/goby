@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"bufio"
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
 	"io/ioutil"
@@ -298,14 +299,25 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject {
 			Name: "read",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					var result string
+					var f []byte
+					var err error
+
 					file := receiver.(*FileObject).File
-					data, err := ioutil.ReadFile(file.Name())
+
+					if file.Name() == "/dev/stdin" {
+						reader := bufio.NewReader(os.Stdin)
+						result, err = reader.ReadString('\n')
+					} else {
+						f, err = ioutil.ReadFile(file.Name())
+						result = string(f)
+					}
 
 					if err != nil {
 						return t.vm.initErrorObject(errors.InternalError, err.Error())
 					}
 
-					return t.vm.initStringObject(string(data))
+					return t.vm.initStringObject(result)
 				}
 			},
 		},
