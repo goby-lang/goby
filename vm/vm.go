@@ -37,7 +37,6 @@ type filename = string
 type errorMessage = string
 
 var standardLibraries = map[string]func(*VM){
-	"file":              initFileClass,
 	"net/http":          initHTTPClass,
 	"net/simple_server": initSimpleServerClass,
 	"uri":               initURIClass,
@@ -73,6 +72,8 @@ type VM struct {
 	sync.Mutex
 
 	mode int
+
+	libFiles []string
 }
 
 // New initializes a vm to initialize state and returns it.
@@ -80,7 +81,6 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 	vm = &VM{args: args}
 	vm.mainThread = vm.newThread()
 
-	vm.initConstants()
 	vm.methodISIndexTables = map[filename]*isIndexTable{
 		fileDir: newISIndexTable(),
 	}
@@ -116,8 +116,13 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 		vm.projectRoot = gobyRoot
 	}
 
+	vm.initConstants()
 	vm.mainObj = vm.initMainObj()
 	vm.channelObjectMap = &objectMap{store: &sync.Map{}}
+
+	for _, fn := range vm.libFiles {
+		vm.execGobyLib(fn)
+	}
 
 	return
 }
@@ -176,10 +181,12 @@ func (vm *VM) initMainObj() *RObject {
 }
 
 func (vm *VM) initConstants() {
+	// Init Class and Object
 	cClass := initClassClass()
 	vm.objectClass = initObjectClass(cClass)
 	vm.topLevelClass(objectClass).setClassConstant(cClass)
 
+	// Init builtin classes
 	builtInClasses := []*RClass{
 		vm.initIntegerClass(),
 		vm.initStringClass(),
@@ -191,14 +198,17 @@ func (vm *VM) initConstants() {
 		vm.initMethodClass(),
 		vm.initChannelClass(),
 		vm.initGoClass(),
+		vm.initFileClass(),
 	}
 
+	// Init error classes
 	vm.initErrorClasses()
 
 	for _, c := range builtInClasses {
 		vm.objectClass.setClassConstant(c)
 	}
 
+	// Init ARGV
 	args := []Object{}
 
 	for _, arg := range vm.args {
@@ -207,6 +217,7 @@ func (vm *VM) initConstants() {
 
 	vm.objectClass.constants["ARGV"] = &Pointer{Target: vm.initArrayObject(args)}
 
+	// Init ENV
 	envs := map[string]Object{}
 
 	for _, e := range os.Environ() {
