@@ -2,6 +2,7 @@ package vm
 
 import (
 	"github.com/goby-lang/goby/compiler/bytecode"
+	"github.com/goby-lang/goby/vm/errors"
 	"strings"
 )
 
@@ -147,14 +148,14 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 	}
 
 	if argC > method.argc && method.lastArgType() != bytecode.SplatArg {
-		e := t.vm.initErrorObject(ArgumentError, "Expect at most %d args for method '%s'. got: %d", method.argc, method.Name, argC)
+		e := t.vm.initErrorObject(errors.ArgumentError, "Expect at most %d args for method '%s'. got: %d", method.argc, method.Name, argC)
 		t.stack.set(receiverPr, &Pointer{Target: e})
 		t.sp = argPr
 		return
 	}
 
 	if minimumArgNumber > argC {
-		e := t.vm.initErrorObject(ArgumentError, "Expect at least %d args for method '%s'. got: %d", minimumArgNumber, method.Name, argC)
+		e := t.vm.initErrorObject(errors.ArgumentError, "Expect at least %d args for method '%s'. got: %d", minimumArgNumber, method.Name, argC)
 		t.stack.set(receiverPr, &Pointer{Target: e})
 		t.sp = argPr
 		return
@@ -226,5 +227,5 @@ func (t *thread) returnError(errorType, format string, args ...interface{}) {
 }
 
 func (t *thread) unsupportedMethodError(methodName string, receiver Object) *Error {
-	return t.vm.initErrorObject(UnsupportedMethodError, "Unsupported Method %s for %+v", methodName, receiver.toString())
+	return t.vm.initErrorObject(errors.UnsupportedMethodError, "Unsupported Method %s for %+v", methodName, receiver.toString())
 }

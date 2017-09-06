@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"github.com/goby-lang/goby/vm/errors"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -73,17 +74,17 @@ func builtinHTTPClassMethods() []*BuiltInMethodObject {
 					resp, err := http.Get(uri.String())
 
 					if err != nil {
-						return t.vm.initErrorObject(InternalError, err.Error())
+						return t.vm.initErrorObject(errors.InternalError, err.Error())
 					}
 					if resp.StatusCode != http.StatusOK {
-						return t.vm.initErrorObject(InternalError, resp.Status)
+						return t.vm.initErrorObject(errors.InternalError, resp.Status)
 					}
 
 					content, err := ioutil.ReadAll(resp.Body)
 					resp.Body.Close()
 
 					if err != nil {
-						return t.vm.initErrorObject(InternalError, err.Error())
+						return t.vm.initErrorObject(errors.InternalError, err.Error())
 					}
 
 					return t.vm.initStringObject(string(content))
@@ -95,12 +96,12 @@ func builtinHTTPClassMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 3 {
-						return t.vm.initErrorObject(ArgumentError, "Expect 3 arguments. got=%v", strconv.Itoa(len(args)))
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 3 arguments. got=%v", strconv.Itoa(len(args)))
 					}
 
 					uri, err := url.Parse(args[0].(*StringObject).value)
 					if err != nil {
-						return t.vm.initErrorObject(ArgumentError, err.Error())
+						return t.vm.initErrorObject(errors.ArgumentError, err.Error())
 					}
 
 					contentType := args[1].(*StringObject).value
@@ -110,17 +111,17 @@ func builtinHTTPClassMethods() []*BuiltInMethodObject {
 					resp, err := http.Post(uri.String(), contentType, strings.NewReader(body))
 
 					if err != nil {
-						return t.vm.initErrorObject(InternalError, err.Error())
+						return t.vm.initErrorObject(errors.InternalError, err.Error())
 					}
 					if resp.StatusCode != http.StatusOK {
-						return t.vm.initErrorObject(InternalError, resp.Status)
+						return t.vm.initErrorObject(errors.InternalError, resp.Status)
 					}
 
 					content, err := ioutil.ReadAll(resp.Body)
 					resp.Body.Close()
 
 					if err != nil {
-						return t.vm.initErrorObject(InternalError, err.Error())
+						return t.vm.initErrorObject(errors.InternalError, err.Error())
 					}
 
 					return t.vm.initStringObject(string(content))
