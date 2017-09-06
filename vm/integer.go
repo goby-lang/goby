@@ -1,11 +1,26 @@
 package vm
 
 import (
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
 	"math"
 	"strconv"
+
+	"github.com/goby-lang/goby/vm/classes"
+	"github.com/goby-lang/goby/vm/errors"
 )
+
+// IntegerObject represents number objects which can bring into mathematical calculations.
+//
+// ```ruby
+// 1 + 1 # => 2
+// 2 * 2 # => 4
+// ```
+//
+// - `Integer.new` is not supported.
+type IntegerObject struct {
+	*baseObj
+	value int
+	flag  int
+}
 
 /*
 This is enum defined for integer's flag
@@ -28,54 +43,9 @@ const (
 	f64
 )
 
-func (vm *VM) initIntegerObject(value int) *IntegerObject {
-	return &IntegerObject{
-		baseObj: &baseObj{class: vm.topLevelClass(classes.IntegerClass)},
-		value:   value,
-		flag:    i,
-	}
-}
-
-func (vm *VM) initIntegerClass() *RClass {
-	ic := vm.initializeClass(classes.IntegerClass, false)
-	ic.setBuiltInMethods(builtinIntegerInstanceMethods(), false)
-	ic.setBuiltInMethods(builtInIntegerClassMethods(), true)
-	return ic
-}
-
-// IntegerObject represents number objects which can bring into mathematical calculations.
-//
-// ```ruby
-// 1 + 1 # => 2
-// 2 * 2 # => 4
-// ```
-//
-// - `Integer.new` is not supported.
-type IntegerObject struct {
-	*baseObj
-	value int
-	flag  int
-}
-
-func (i *IntegerObject) Value() interface{} {
-	return i.value
-}
-
-// Polymorphic helper functions -----------------------------------------
-func (i *IntegerObject) toString() string {
-	return strconv.Itoa(i.value)
-}
-
-func (i *IntegerObject) toJSON() string {
-	return i.toString()
-}
-
-func (i *IntegerObject) equal(e *IntegerObject) bool {
-	return i.value == e.value
-}
-
-func builtInIntegerClassMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Class methods --------------------------------------------------------
+func builtinIntegerClassMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			Name: "new",
 			Fn: func(receiver Object) builtinMethodBody {
@@ -87,8 +57,9 @@ func builtInIntegerClassMethods() []*BuiltInMethodObject {
 	}
 }
 
-func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Instance methods -----------------------------------------------------
+func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			// Returns the sum of self and another Integer.
 			//
@@ -576,7 +547,7 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 					}
 
 					for i := 0; i < n.value; i++ {
-						t.builtInMethodYield(blockFrame, t.vm.initIntegerObject(i))
+						t.builtinMethodYield(blockFrame, t.vm.initIntegerObject(i))
 					}
 
 					return n
@@ -716,4 +687,45 @@ func builtinIntegerInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
+}
+
+// Internal functions ===================================================
+
+// Functions for initialization -----------------------------------------
+
+func (vm *VM) initIntegerObject(value int) *IntegerObject {
+	return &IntegerObject{
+		baseObj: &baseObj{class: vm.topLevelClass(classes.IntegerClass)},
+		value:   value,
+		flag:    i,
+	}
+}
+
+func (vm *VM) initIntegerClass() *RClass {
+	ic := vm.initializeClass(classes.IntegerClass, false)
+	ic.setBuiltinMethods(builtinIntegerInstanceMethods(), false)
+	ic.setBuiltinMethods(builtinIntegerClassMethods(), true)
+	return ic
+}
+
+// Polymorphic helper functions -----------------------------------------
+
+// Returns the object
+func (i *IntegerObject) Value() interface{} {
+	return i.value
+}
+
+// Returns the object's name as the string format
+func (i *IntegerObject) toString() string {
+	return strconv.Itoa(i.value)
+}
+
+// Alias of toString
+func (i *IntegerObject) toJSON() string {
+	return i.toString()
+}
+
+// Check if the integer values between receiver and argument are equal
+func (i *IntegerObject) equal(e *IntegerObject) bool {
+	return i.value == e.value
 }

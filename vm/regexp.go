@@ -4,6 +4,8 @@ import (
 	"strconv"
 
 	"github.com/dlclark/regexp2"
+	"github.com/goby-lang/goby/vm/classes"
+	"github.com/goby-lang/goby/vm/errors"
 )
 
 // RegexpObject represents regexp instances, which of the type is actually string.
@@ -43,13 +45,13 @@ func (vm *VM) initRegexpObject(regexp string) *RegexpObject {
 		return nil
 	}
 	return &RegexpObject{
-		baseObj: &baseObj{class: vm.topLevelClass(regexpClass)},
+		baseObj: &baseObj{class: vm.topLevelClass(classes.RegexpClass)},
 		Regexp:  r,
 	}
 }
 
 func (vm *VM) initRegexpClass() *RClass {
-	rc := vm.initializeClass(regexpClass, false)
+	rc := vm.initializeClass(classes.RegexpClass, false)
 	rc.setBuiltInMethods(builtinRegexpInstanceMethods(), false)
 	rc.setBuiltInMethods(builtInRegexpClassMethods(), true)
 	return rc
@@ -63,7 +65,7 @@ func builtInRegexpClassMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					r := t.vm.initRegexpObject(args[0].toString())
 					if r == nil {
-						return t.vm.initErrorObject(ArgumentError, "Invalid regexp: %v", args[0].toString())
+						return t.vm.initErrorObject(errors.ArgumentError, "Invalid regexp: %v", args[0].toString())
 					}
 					return r
 				}
@@ -91,7 +93,7 @@ func builtinRegexpInstanceMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					if len(args) != 1 {
-						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
 					re := receiver.(*RegexpObject).Regexp

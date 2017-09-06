@@ -3,14 +3,9 @@ package vm
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/goby-lang/goby/vm/classes"
 )
-
-func (vm *VM) initMethodClass() *RClass {
-	return vm.initializeClass(classes.MethodClass, false)
-}
-
-type builtinMethodBody func(*thread, []Object, *callFrame) Object
 
 // MethodObject represents methods defined using goby.
 type MethodObject struct {
@@ -18,6 +13,14 @@ type MethodObject struct {
 	Name           string
 	instructionSet *instructionSet
 	argc           int
+}
+
+// Internal functions ===================================================
+
+// Functions for initialization -----------------------------------------
+
+func (vm *VM) initMethodClass() *RClass {
+	return vm.initializeClass(classes.MethodClass, false)
 }
 
 // Polymorphic helper functions -----------------------------------------
@@ -46,18 +49,25 @@ func (m *MethodObject) lastArgType() int {
 	return -1
 }
 
-// BuiltInMethodObject represents methods defined in go.
-type BuiltInMethodObject struct {
+//  BuiltinMethodObject =================================================
+
+// BuiltinMethodObject represents methods defined in go.
+type BuiltinMethodObject struct {
 	*baseObj
 	Name string
 	Fn   func(receiver Object) builtinMethodBody
 }
 
+type builtinMethodBody func(*thread, []Object, *callFrame) Object
+
 // Polymorphic helper functions -----------------------------------------
-func (bim *BuiltInMethodObject) toString() string {
-	return "<BuiltInMethod: " + bim.Name + ">"
+
+// Returns the object's name as the string format
+func (bim *BuiltinMethodObject) toString() string {
+	return "<BuiltinMethod: " + bim.Name + ">"
 }
 
-func (bim *BuiltInMethodObject) toJSON() string {
+// Alias of toString
+func (bim *BuiltinMethodObject) toJSON() string {
 	return bim.toString()
 }
