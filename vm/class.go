@@ -22,6 +22,7 @@ const (
 	methodClass   = "method"
 	pluginClass   = "Plugin"
 	goObjectClass = "GoObject"
+	fileClass     = "File"
 )
 
 // initializeClass is a common function for vm, which initializes and returns

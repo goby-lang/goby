@@ -490,15 +490,16 @@ func TestRequireRelative(t *testing.T) {
 	v.checkSP(t, 0, 1)
 }
 
-func TestRequireSuccess(t *testing.T) {
+func TestRequireStandardLibSuccess(t *testing.T) {
 	input := `
-	require "file"
+	require "uri"
 
-	File.extname("foo.rb")
+	u = URI.parse("http://example.com")
+	u.scheme
 	`
 	v := initTestVM()
 	evaluated := v.testEval(t, input, getFilename())
-	checkExpected(t, 0, evaluated, ".rb")
+	checkExpected(t, 0, evaluated, "http")
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
 }
