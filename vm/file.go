@@ -1,6 +1,9 @@
 package vm
 
 import (
+	"bufio"
+	"github.com/goby-lang/goby/vm/classes"
+	"github.com/goby-lang/goby/vm/errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -14,13 +17,21 @@ var fileModeTable = map[string]int{
 	"w+": syscall.O_RDWR,
 }
 
-func initFileClass(vm *VM) {
-	fc := vm.initializeClass("File", false)
+func (vm *VM) initFileClass() *RClass {
+	fc := vm.initializeClass(classes.FileClass, false)
 	fc.setBuiltInMethods(builtinFileClassMethods(), true)
 	fc.setBuiltInMethods(builtinFileInstanceMethods(), false)
-	vm.objectClass.setClassConstant(fc)
 
-	vm.execGobyLib("file.gb")
+	vm.libFiles = append(vm.libFiles, "file.gb")
+
+	return fc
+}
+
+func (vm *VM) initFileObject(f *os.File) *FileObject {
+	return &FileObject{
+		baseObj: &baseObj{class: vm.topLevelClass(classes.FileClass)},
+		File:    f,
+	}
 }
 
 // FileObject is a special type that contains file pointer so we can keep track on target file.
@@ -78,7 +89,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 
 						err := os.Chmod(filename, os.FileMode(uint32(filemod)))
 						if err != nil {
-							return t.vm.initErrorObject(InternalError, err.Error())
+							return t.vm.initErrorObject(errors.InternalError, err.Error())
 						}
 					}
 
@@ -95,7 +106,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 						err := os.Remove(filename)
 
 						if err != nil {
-							return t.vm.initErrorObject(InternalError, err.Error())
+							return t.vm.initErrorObject(errors.InternalError, err.Error())
 						}
 					}
 
@@ -104,7 +115,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
-			Name: "exist",
+			Name: "exist?",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					filename := args[0].(*StringObject).value
@@ -170,7 +181,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 					var perm os.FileMode
 
 					if len(args) < 1 {
-						return t.vm.initErrorObject(InternalError, "Expect at least a filename to open file")
+						return t.vm.initErrorObject(errors.InternalError, "Expect at least a filename to open file")
 					}
 
 					if len(args) >= 1 {
@@ -183,7 +194,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 							md, ok := fileModeTable[m]
 
 							if !ok {
-								return t.vm.initErrorObject(InternalError, "Unknown file mode: %s", m)
+								return t.vm.initErrorObject(errors.InternalError, "Unknown file mode: %s", m)
 							}
 
 							if md == syscall.O_RDWR || md == syscall.O_WRONLY {
@@ -203,11 +214,11 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 					f, err := os.OpenFile(fn, mode, perm)
 
 					if err != nil {
-						return t.vm.initErrorObject(InternalError, err.Error())
+						return t.vm.initErrorObject(errors.InternalError, err.Error())
 					}
 
 					// TODO: Refactor this class retrieval mess
-					fileObj := &FileObject{File: f, baseObj: &baseObj{class: t.vm.topLevelClass("File")}}
+					fileObj := &FileObject{File: f, baseObj: &baseObj{class: t.vm.topLevelClass(classes.FileClass)}}
 
 					return fileObj
 				}
@@ -231,7 +242,7 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 
 					fileStats, err := os.Stat(filename)
 					if err != nil {
-						return t.vm.initErrorObject(InternalError, err.Error())
+						return t.vm.initErrorObject(errors.InternalError, err.Error())
 					}
 
 					return t.vm.initIntegerObject(int(fileStats.Size()))
@@ -288,14 +299,25 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject {
 			Name: "read",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					file := receiver.(*FileObject).File
-					data, err := ioutil.ReadFile(file.Name())
+					var result string
+					var f []byte
+					var err error
 
-					if err != nil {
-						return t.vm.initErrorObject(InternalError, err.Error())
+					file := receiver.(*FileObject).File
+
+					if file.Name() == "/dev/stdin" {
+						reader := bufio.NewReader(os.Stdin)
+						result, err = reader.ReadString('\n')
+					} else {
+						f, err = ioutil.ReadFile(file.Name())
+						result = string(f)
 					}
 
-					return t.vm.initStringObject(string(data))
+					if err != nil {
+						return t.vm.initErrorObject(errors.InternalError, err.Error())
+					}
+
+					return t.vm.initStringObject(result)
 				}
 			},
 		},
@@ -313,7 +335,7 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject {
 
 					fileStats, err := os.Stat(file.Name())
 					if err != nil {
-						return t.vm.initErrorObject(InternalError, err.Error())
+						return t.vm.initErrorObject(errors.InternalError, err.Error())
 					}
 
 					return t.vm.initIntegerObject(int(fileStats.Size()))
@@ -329,7 +351,7 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject {
 					length, err := file.Write([]byte(data))
 
 					if err != nil {
-						return t.vm.initErrorObject(InternalError, err.Error())
+						return t.vm.initErrorObject(errors.InternalError, err.Error())
 					}
 
 					return t.vm.initIntegerObject(length)

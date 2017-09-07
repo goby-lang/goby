@@ -3,10 +3,11 @@ package vm
 import (
 	"bytes"
 	"fmt"
+	"github.com/goby-lang/goby/vm/classes"
 )
 
 func (vm *VM) initMethodClass() *RClass {
-	return vm.initializeClass(methodClass, false)
+	return vm.initializeClass(classes.MethodClass, false)
 }
 
 type builtinMethodBody func(*thread, []Object, *callFrame) Object
@@ -31,6 +32,18 @@ func (m *MethodObject) toString() string {
 
 func (m *MethodObject) toJSON() string {
 	return m.toString()
+}
+
+func (m *MethodObject) argTypes() []int {
+	return m.instructionSet.argTypes
+}
+
+func (m *MethodObject) lastArgType() int {
+	if len(m.argTypes()) > 0 {
+		return m.argTypes()[len(m.argTypes())-1]
+	}
+
+	return -1
 }
 
 // BuiltInMethodObject represents methods defined in go.

@@ -1,17 +1,21 @@
 package vm
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/goby-lang/goby/vm/classes"
+	"github.com/goby-lang/goby/vm/errors"
+)
 
 func (vm *VM) initRangeObject(start, end int) *RangeObject {
 	return &RangeObject{
-		baseObj: &baseObj{class: vm.topLevelClass(rangeClass)},
+		baseObj: &baseObj{class: vm.topLevelClass(classes.RangeClass)},
 		Start:   start,
 		End:     end,
 	}
 }
 
 func (vm *VM) initRangeClass() *RClass {
-	rc := vm.initializeClass(rangeClass, false)
+	rc := vm.initializeClass(classes.RangeClass, false)
 	rc.setBuiltInMethods(builtInRangeInstanceMethods(), false)
 	rc.setBuiltInMethods(builtInRangeClassMethods(), true)
 	return rc
@@ -225,7 +229,7 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 								end = mid - 1
 							}
 						default:
-							return t.vm.initErrorObject(TypeError, "Expect Integer or Boolean type. got=%s", r.Class().Name)
+							return t.vm.initErrorObject(errors.TypeError, "Expect Integer or Boolean type. got=%s", r.Class().Name)
 						}
 					}
 				}
@@ -260,7 +264,7 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 					ran := receiver.(*RangeObject)
 
 					if blockFrame == nil {
-						return t.vm.initErrorObject(InternalError, CantYieldWithoutBlockFormat)
+						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
 					}
 
 					if ran.Start <= ran.End {
@@ -408,7 +412,7 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 					ran := receiver.(*RangeObject)
 
 					if blockFrame == nil {
-						return t.vm.initErrorObject(InternalError, CantYieldWithoutBlockFormat)
+						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
 					}
 
 					stepValue := args[0].(*IntegerObject).value

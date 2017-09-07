@@ -431,6 +431,153 @@ func TestStringDowncaseMethod(t *testing.T) {
 	}
 }
 
+func TestStringEachByteMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+		arr = []
+		"Hello\nWorld".each_byte do |byte|
+		  arr.push(byte)
+		end
+		arr
+		`, []interface{}{72, 101, 108, 108, 111, 10, 87, 111, 114, 108, 100}},
+		{`
+		arr = []
+		"Sushi 🍣".each_byte do |byte|
+		  arr.push(byte)
+		end
+		arr
+		`, []interface{}{83, 117, 115, 104, 105, 32, 240, 159, 141, 163}},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testArrayObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestStringEachByteMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`
+		"Taipei".each_byte(101) do |byte|
+		  puts byte
+		end
+		`, "ArgumentError: Expect 0 argument. got=1", 2},
+		{`"Taipei".each_byte`, "InternalError: Can't yield without a block", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestStringEachCharMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+		arr = []
+		"Hello\nWorld".each_char do |char|
+		  arr.push(char)
+		end
+		arr
+		`, []interface{}{"H", "e", "l", "l", "o", "\n", "W", "o", "r", "l", "d"}},
+		{`
+		arr = []
+		"Sushi 🍣".each_char do |char|
+		  arr.push(char)
+		end
+		arr
+		`, []interface{}{"S", "u", "s", "h", "i", " ", "🍣"}},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testArrayObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestStringEachCharMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`
+		"Taipei".each_char(101) do |char|
+		  puts char
+		end
+		`, "ArgumentError: Expect 0 argument. got=1", 2},
+		{`"Taipei".each_char`, "InternalError: Can't yield without a block", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestStringEachLineMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+		arr = []
+		"Hello\nWorld\nGoby".each_line do |line|
+		  arr.push(line)
+		end
+		arr
+		`, []interface{}{"Hello", "World", "Goby"}},
+		{`
+		arr = []
+		"Max\vwell\nAlex\fius".each_line do |line|
+		  arr.push(line)
+		end
+		arr
+		`, []interface{}{"Max\vwell", "Alex\fius"}},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testArrayObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestStringEachLineMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`
+		"Taipei".each_line(101) do |line|
+		  puts line
+		end
+		`, "ArgumentError: Expect 0 argument. got=1", 2},
+		{`"Taipei".each_line`, "InternalError: Can't yield without a block", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestStringEndWithMethod(t *testing.T) {
 	tests := []struct {
 		input    string

@@ -2,6 +2,7 @@ package vm
 
 import (
 	"github.com/goby-lang/goby/compiler/bytecode"
+	"github.com/goby-lang/goby/vm/errors"
 	"strings"
 )
 
@@ -138,22 +139,23 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 	c.self = receiver
 	argPr := receiverPr + 1
 	minimumArgNumber := 0
+	argTypesCount := len(method.argTypes())
 
-	for _, at := range method.instructionSet.argTypes {
+	for _, at := range method.argTypes() {
 		if at == bytecode.NormalArg {
 			minimumArgNumber++
 		}
 	}
 
-	if argC > method.argc {
-		e := t.vm.initErrorObject(ArgumentError, "Expect at most %d args for method '%s'. got: %d", method.argc, method.Name, argC)
+	if argC > method.argc && method.lastArgType() != bytecode.SplatArg {
+		e := t.vm.initErrorObject(errors.ArgumentError, "Expect at most %d args for method '%s'. got: %d", method.argc, method.Name, argC)
 		t.stack.set(receiverPr, &Pointer{Target: e})
 		t.sp = argPr
 		return
 	}
 
 	if minimumArgNumber > argC {
-		e := t.vm.initErrorObject(ArgumentError, "Expect at least %d args for method '%s'. got: %d", minimumArgNumber, method.Name, argC)
+		e := t.vm.initErrorObject(errors.ArgumentError, "Expect at least %d args for method '%s'. got: %d", minimumArgNumber, method.Name, argC)
 		t.stack.set(receiverPr, &Pointer{Target: e})
 		t.sp = argPr
 		return
@@ -161,7 +163,7 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 
 	argIndex := 0
 
-	for i, argType := range method.instructionSet.argTypes {
+	for i, argType := range method.argTypes() {
 		if argType == bytecode.NormalArg {
 			c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
 			argIndex++
@@ -188,17 +190,27 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 
 	if minimumArgNumber < argC {
 		// Fill arguments with default value from beginning
-		for i, argType := range method.instructionSet.argTypes {
-			if argType != bytecode.NormalArg {
+		for i, argType := range method.argTypes() {
+			if argType != bytecode.NormalArg && argType != bytecode.SplatArg {
 				c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
 				argIndex++
 			}
 
 			// If argument index equals argument count means we already assigned all arguments
-			if argIndex == argC {
+			if argIndex == argC || argType == bytecode.SplatArg {
 				break
 			}
 		}
+	}
+
+	if argTypesCount > 0 && method.lastArgType() == bytecode.SplatArg {
+		elems := []Object{}
+		for argIndex < argC {
+			elems = append(elems, t.stack.Data[argPr+argIndex].Target)
+			argIndex++
+		}
+
+		c.insertLCL(len(method.argTypes())-1, 0, t.vm.initArrayObject(elems))
 	}
 
 	c.blockFrame = blockFrame
@@ -215,5 +227,5 @@ func (t *thread) returnError(errorType, format string, args ...interface{}) {
 }
 
 func (t *thread) unsupportedMethodError(methodName string, receiver Object) *Error {
-	return t.vm.initErrorObject(UnsupportedMethodError, "Unsupported Method %s for %+v", methodName, receiver.toString())
+	return t.vm.initErrorObject(errors.UnsupportedMethodError, "Unsupported Method %s for %+v", methodName, receiver.toString())
 }

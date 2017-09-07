@@ -28,6 +28,7 @@ const (
 	PutNull             = "putnil"
 	NewArray            = "newarray"
 	ExpandArray         = "expand_array"
+	SplatArray          = "splat_array"
 	NewHash             = "newhash"
 	NewRange            = "newrange"
 	BranchUnless        = "branchunless"
@@ -39,6 +40,7 @@ const (
 	Send                = "send"
 	InvokeBlock         = "invokeblock"
 	Pop                 = "pop"
+	Dup                 = "dup"
 	Leave               = "leave"
 )
 

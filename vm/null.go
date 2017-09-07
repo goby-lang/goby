@@ -1,12 +1,17 @@
 package vm
 
+import (
+	"github.com/goby-lang/goby/vm/classes"
+	"github.com/goby-lang/goby/vm/errors"
+)
+
 var (
 	// NULL represents Goby's null objects.
 	NULL *NullObject
 )
 
 func (vm *VM) initNullClass() *RClass {
-	nc := vm.initializeClass(nullClass, false)
+	nc := vm.initializeClass(classes.NullClass, false)
 	nc.setBuiltInMethods(builtInNullInstanceMethods(), false)
 	nc.setBuiltInMethods(builtInNullClassMethods(), true)
 	NULL = &NullObject{baseObj: &baseObj{class: nc}}
@@ -64,44 +69,6 @@ func builtInNullInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 		{
-			// Returns the right value because nil as the receiver in the OR operation is considered as false value
-			//
-			// ```ruby
-			// a = nil; a ||= 123;       a; # => 123
-			// a = nil; a ||= "string";  a; # => "string"
-			// a = nil; a ||= false;     a; # => false
-			// a = nil; a ||= (1..4);    a; # => 1..4
-			// a = nil; a ||= { b: 1 };  a; # => { b: 1 }
-			// a = nil; a ||= Object;    a; # => Object
-			// a = nil; a ||= [1, 2, 3]; a; # => [1, 2, 3]
-			// a = nil; a ||= nil;       a; # => nil
-			// a = nil; a ||= nil || 1;  a; # => 1
-			// a = nil; a ||= 1 || nil;  a; # => 1
-			// ```
-			//
-			// @return [Object]
-			Name: "||",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 1 {
-						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
-					}
-					return args[0]
-				}
-			},
-		},
-		{
-			Name: "&&",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 1 {
-						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
-					}
-					return FALSE
-				}
-			},
-		},
-		{
 			Name: "to_i",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -129,7 +96,7 @@ func builtInNullInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got: %d", len(args))
 					}
 
 					if _, ok := args[0].(*NullObject); ok {
@@ -151,7 +118,7 @@ func builtInNullInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got: %d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got: %d", len(args))
 					}
 
 					if _, ok := args[0].(*NullObject); !ok {
@@ -173,7 +140,7 @@ func builtInNullInstanceMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(ArgumentError, "Expect 0 argument. got: %d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
 					}
 					return TRUE
 				}

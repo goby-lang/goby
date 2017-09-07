@@ -2,6 +2,8 @@ package vm
 
 import (
 	"encoding/json"
+	"github.com/goby-lang/goby/vm/classes"
+	"github.com/goby-lang/goby/vm/errors"
 	"strconv"
 )
 
@@ -21,13 +23,13 @@ func builtInJSONClassMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
 					j, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					var obj jsonObj
@@ -41,7 +43,7 @@ func builtInJSONClassMethods() []*BuiltInMethodObject {
 						err = json.Unmarshal([]byte(jsonString), &objs)
 
 						if err != nil {
-							return t.vm.initErrorObject(InternalError, "Can't parse string %s as json: %s", jsonString, err.Error())
+							return t.vm.initErrorObject(errors.InternalError, "Can't parse string %s as json: %s", jsonString, err.Error())
 						}
 
 						var objects []Object
@@ -62,13 +64,13 @@ func builtInJSONClassMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(ArgumentError, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
 					j, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					var obj jsonObj

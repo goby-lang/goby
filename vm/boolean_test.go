@@ -78,7 +78,7 @@ func TestBooleanComparison(t *testing.T) {
 func TestBooleanLogicalExpression(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected bool
+		expected interface{}
 	}{
 		{"true && true", true},
 		{"false && true", false},
@@ -97,6 +97,58 @@ func TestBooleanLogicalExpression(t *testing.T) {
 		`, true},
 		{"(false || true) && (\"string\" == \"string\")", true},
 		{"((10 > 3) && (3 < 4)) || ((10 == 10) || false)", true},
+		{`
+		a = 0
+
+		# a = 10 shouldn't be executed
+		false && a = 10
+		a
+		`, 0},
+		{`
+		a = 0
+
+		# a = 10 shouldn't be executed
+		nil && a = 10
+		a
+		`, 0},
+		{`
+		a = 0
+
+		# a = 10 should be executed
+		true && a = 10
+		a
+		`, 10},
+		{`
+		a = 0
+
+		# a = 10 should be executed
+		false || a = 10
+		a
+		`, 10},
+		{`
+		a = 0
+
+		# a = 10 shouldn't be executed
+		true || a = 10
+		a
+		`, 0},
+		{`
+		a = 0
+		false || true && a = 10
+		a
+		`, 10},
+		{`
+		a = false || 10
+		a
+		`, 10},
+		{`
+		a = nil || 10
+		a
+		`, 10},
+		{`
+		a = true || 10
+		a
+		`, true},
 	}
 
 	for i, tt := range tests {

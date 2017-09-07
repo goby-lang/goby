@@ -83,16 +83,15 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 	if p.peekTokenIs(token.LParen) {
 		p.nextToken()
 
-		// empty params
-		if p.peekTokenIs(token.RParen) {
-			p.nextToken()
+		switch p.peekToken.Type {
+		case token.RParen:
 			params = []ast.Expression{}
-		} else {
+		default:
 			params = p.parseParameters()
+		}
 
-			if !p.expectPeek(token.RParen) {
-				return nil
-			}
+		if !p.expectPeek(token.RParen) {
+			return nil
 		}
 	} else {
 		params = []ast.Expression{}
@@ -116,16 +115,67 @@ func (p *Parser) parseParameters() []ast.Expression {
 	for p.peekTokenIs(token.Comma) {
 		p.nextToken()
 		p.nextToken()
-		param := p.parseExpression(NORMAL)
 
-		if paramDuplicated(params, param) {
-			p.error = &Error{Message: fmt.Sprintf("Duplicate argument name: \"%s\". Line: %d", getArgName(param), p.curToken.Line), errType: SyntaxError}
+		if p.curTokenIs(token.Asterisk) && !p.peekTokenIs(token.Ident) {
+			p.expectPeek(token.Ident)
+			break
 		}
+
+		param := p.parseExpression(NORMAL)
 		params = append(params, param)
 	}
 
+	p.checkMethodParameters(params)
+
 	p.fsm.Event(backToNormal)
 	return params
+}
+
+func (p *Parser) checkMethodParameters(params []ast.Expression) {
+
+	/*
+		0 means previous arg is normal argument
+		1 means previous arg is optioned argument
+		2 means previous arg is splat argument
+	*/
+	argState := 0
+
+	checkedParams := []ast.Expression{}
+
+	for _, param := range params {
+		switch exp := param.(type) {
+		case *ast.Identifier:
+			switch argState {
+			case 1:
+				p.error = &Error{Message: fmt.Sprintf("Normal argument \"%s\" should be defined before optioned argument. Line: %d", exp.Value, p.curToken.Line), errType: SyntaxError}
+			case 2:
+				p.error = &Error{Message: fmt.Sprintf("Normal argument \"%s\" should be defined before splat argument. Line: %d", exp.Value, p.curToken.Line), errType: SyntaxError}
+			}
+		case *ast.AssignExpression:
+			switch argState {
+			case 2:
+				p.error = &Error{Message: fmt.Sprintf("Optioned argument \"%s\" should be defined before splat argument. Line: %d", exp.String(), p.curToken.Line), errType: SyntaxError}
+			}
+			argState = 1
+		case *ast.PrefixExpression:
+			switch argState {
+			case 2:
+				p.error = &Error{Message: fmt.Sprintf("Can't define splat argument more than once. Line: %d", p.curToken.Line), errType: SyntaxError}
+			}
+
+			argState = 2
+		}
+
+		if p.error != nil {
+			break
+		}
+
+		if paramDuplicated(checkedParams, param) {
+			p.error = &Error{Message: fmt.Sprintf("Duplicate argument name: \"%s\". Line: %d", getArgName(param), p.curToken.Line), errType: SyntaxError}
+		} else {
+			checkedParams = append(checkedParams, param)
+		}
+	}
 }
 
 func (p *Parser) parseClassStatement() *ast.ClassStatement {

@@ -10,6 +10,7 @@ import (
 const (
 	NormalArg int = iota
 	OptionedArg
+	SplatArg
 )
 
 func (g *Generator) compileStatements(stmts []ast.Statement, scope *scope, table *localTable) {
@@ -28,11 +29,8 @@ func (g *Generator) compileStatement(is *InstructionSet, statement ast.Statement
 	switch stmt := statement.(type) {
 	case *ast.ExpressionStatement:
 		if !g.REPL && stmt.Expression.IsStmt() {
-			switch stmt.Expression.(type) {
-			case *ast.AssignExpression, *ast.IfExpression, *ast.Identifier, *ast.CallExpression, *ast.YieldExpression:
-				g.compileExpression(is, stmt.Expression, scope, table)
-				is.define(Pop, statement.Line())
-			}
+			g.compileExpression(is, stmt.Expression, scope, table)
+			is.define(Pop, statement.Line())
 
 			return
 		}
@@ -172,6 +170,13 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 			argType = OptionedArg
 			exp.Optioned = 1
 			g.compileAssignExpression(newIS, exp, scope, scope.localTable)
+		case *ast.PrefixExpression:
+			if exp.Operator != "*" {
+				continue
+			}
+			argType = SplatArg
+			ident := exp.Right.(*ast.Identifier)
+			scope.localTable.setLCL(ident.Value, scope.localTable.depth)
 		}
 
 		newIS.argTypes = append(newIS.argTypes, argType)

@@ -2,6 +2,7 @@ package vm
 
 import (
 	"github.com/fatih/structs"
+	"github.com/goby-lang/goby/vm/classes"
 	"github.com/gorilla/mux"
 	"io"
 	"io/ioutil"
@@ -104,7 +105,7 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 						log.Printf("%s %s %s %d\n", r.Method, r.URL.Path, r.Proto, 404)
 					})
 
-					if serveStatic && fileRoot.Class() != t.vm.objectClass.getClassConstant(nullClass) {
+					if serveStatic && fileRoot.Class() != t.vm.objectClass.getClassConstant(classes.NullClass) {
 						fr := fileRoot.(*StringObject).value
 						currentDir, _ := os.Getwd()
 						fp := filepath.Join(currentDir, fr)

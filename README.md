@@ -170,7 +170,7 @@ In the case, `$GOBY_ROOT` is automatically configured.
 Try this if you'd like to contribute Goby! Skip 1 if you already have Golang in your environment.
 
 1. Prepare Golang environment
-    - Install Golang
+    - Install Golang >= 1.9
     - Make sure `$GOPATH` in your shell's config file( like .bashrc) is correct
     - Add you `$GOPATH/bin` to `$PATH`
 2. Run `go get github.com/goby-lang/goby`
@@ -184,7 +184,7 @@ $GOPATH/src/github.com/goby-lang/goby
 
 1. Run `goby -v` to see the version.
 2. Run `goby -i` to launch igb REPL.
-3. Type `require "file"` in igb.
+3. Type `require "uri"` in igb.
 
 FYI: You can just run `brew test goby` to check Homebrew installation.
 

@@ -2,6 +2,8 @@ package vm
 
 import (
 	"fmt"
+	"github.com/goby-lang/goby/vm/classes"
+	"github.com/goby-lang/goby/vm/errors"
 	"github.com/st0012/metago"
 	"os"
 	"os/exec"
@@ -12,11 +14,11 @@ import (
 )
 
 func (vm *VM) initPluginObject(fn string, p *plugin.Plugin) *PluginObject {
-	return &PluginObject{fn: fn, plugin: p, baseObj: &baseObj{class: vm.topLevelClass(pluginClass)}}
+	return &PluginObject{fn: fn, plugin: p, baseObj: &baseObj{class: vm.topLevelClass(classes.PluginClass)}}
 }
 
 func initPluginClass(vm *VM) {
-	pc := vm.initializeClass(pluginClass, false)
+	pc := vm.initializeClass(classes.PluginClass, false)
 	pc.setBuiltInMethods(builtinPluginClassMethods(), true)
 	pc.setBuiltInMethods(builtinPluginInstanceMethods(), false)
 	vm.objectClass.setClassConstant(pc)
@@ -123,16 +125,16 @@ func builtinPluginClassMethods() []*BuiltInMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(ArgumentError, WrongNumberOfArgumentFormat, 1, len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, errors.WrongNumberOfArgumentFormat, 1, len(args))
 					}
 
 					name, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, "String", args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, "String", args[0].Class().Name)
 					}
 
-					return &PluginObject{fn: name.value, baseObj: &baseObj{class: t.vm.topLevelClass(pluginClass), InstanceVariables: newEnvironment()}}
+					return &PluginObject{fn: name.value, baseObj: &baseObj{class: t.vm.topLevelClass(classes.PluginClass), InstanceVariables: newEnvironment()}}
 				}
 			},
 		},
@@ -148,7 +150,7 @@ func builtinPluginClassMethods() []*BuiltInMethodObject {
 					p, err := compileAndOpenPlugin(soName, pkgPath)
 
 					if err != nil {
-						return t.vm.initErrorObject(InternalError, err.Error())
+						return t.vm.initErrorObject(errors.InternalError, err.Error())
 					}
 
 					return t.vm.initPluginObject(pkgPath, p)
@@ -177,7 +179,7 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 					ok, err := fileExists(pluginDir)
 
 					if err != nil {
-						return t.vm.initErrorObject(InternalError, err.Error())
+						return t.vm.initErrorObject(errors.InternalError, err.Error())
 					}
 
 					if !ok {
@@ -194,7 +196,7 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 					file, err := os.OpenFile(fn+".go", os.O_RDWR|os.O_CREATE, 0755)
 
 					if err != nil {
-						return t.vm.initErrorObject(InternalError, "Error when creating plugin: %s", err.Error())
+						return t.vm.initErrorObject(errors.InternalError, "Error when creating plugin: %s", err.Error())
 					}
 
 					file.WriteString(pluginContent)
@@ -204,7 +206,7 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 					p, err := compileAndOpenPlugin(soName, file.Name())
 
 					if err != nil {
-						t.vm.initErrorObject(InternalError, err.Error())
+						t.vm.initErrorObject(errors.InternalError, err.Error())
 					}
 
 					r.plugin = p
@@ -220,7 +222,7 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 					s, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(TypeError, WrongArgumentTypeFormat, stringClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					funcName := s.value
@@ -229,13 +231,13 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 					f, err := p.Lookup(funcName)
 
 					if err != nil {
-						return t.vm.initErrorObject(InternalError, err.Error())
+						return t.vm.initErrorObject(errors.InternalError, err.Error())
 					}
 
 					funcArgs, err := convertToGoFuncArgs(args[1:])
 
 					if err != nil {
-						t.vm.initErrorObject(TypeError, err.Error())
+						t.vm.initErrorObject(errors.TypeError, err.Error())
 					}
 
 					funcValue := reflect.ValueOf(f)

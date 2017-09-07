@@ -357,6 +357,11 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 
 	precedence := p.curPrecedence()
 	p.nextToken()
+
+	if exp.Operator == "||" || exp.Operator == "&&" {
+		precedence = NORMAL
+	}
+
 	exp.Right = p.parseExpression(precedence)
 
 	return exp

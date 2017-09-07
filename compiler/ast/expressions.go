@@ -160,11 +160,9 @@ func (ae *AssignExpression) String() string {
 		variables = append(variables, v.String())
 	}
 
-	out.WriteString("(")
 	out.WriteString(strings.Join(variables, ", "))
 	out.WriteString(" = ")
 	out.WriteString(ae.Value.String())
-	out.WriteString(")")
 
 	return out.String()
 }

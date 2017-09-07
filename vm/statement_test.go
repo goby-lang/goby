@@ -68,33 +68,12 @@ func TestDefStatement(t *testing.T) {
 		foo(20)
 		`, 30},
 		{`
-		def foo(x = 100, y)
-		  x + y
-		end
-
-		foo(20)
-		`, 120},
-		{`
 		def foo(x, y=10)
 		  x + y
 		end
 
 		foo(100)
 		`, 110},
-		{`
-		def foo(x=10, y, z)
-		  x + y + z
-		end
-
-		foo(10, 20)
-		`, 40},
-		{`
-		def foo(x=10, y=11, z)
-		  x + y + z
-		end
-
-		foo(10, 20)
-		`, 41},
 		{`
 		def foo(x=10, y=11, z=12)
 		  x + y + z
@@ -136,6 +115,47 @@ func TestDefStatement(t *testing.T) {
 
 		a.foo
 		`, 10},
+		{`
+		def foo(a, *b)
+		  b.each do |i|
+		    a = a + i
+		  end
+		  a
+		end
+
+		foo(10, 15, 20)
+		`, 45},
+		{`
+		def foo(a, b, *c)
+		  c.each do |i|
+		    a = a + i
+		  end
+		  a + b
+		end
+
+		foo(10, 15, 20, 25)
+		`, 70},
+		{`
+		def foo(a, b = 15, *c)
+		  c.each do |i|
+		    a = a + i
+		  end
+		  a + b
+		end
+
+		foo(10, 20, 25)
+		`, 55},
+		{`
+		def foo(*a)
+		  r = 0
+		  a.each do |i|
+		    r += i
+		  end
+		  r
+		end
+
+		foo(10, 20, 30)
+		`, 60},
 	}
 
 	for i, tt := range tests {

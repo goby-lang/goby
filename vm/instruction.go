@@ -3,6 +3,8 @@ package vm
 import (
 	"fmt"
 	"github.com/goby-lang/goby/compiler/bytecode"
+	"github.com/goby-lang/goby/vm/classes"
+	"github.com/goby-lang/goby/vm/errors"
 	"strings"
 )
 
@@ -44,6 +46,13 @@ var builtInActions = map[operationType]*action{
 			t.stack.pop()
 		},
 	},
+	bytecode.Dup: {
+		name: bytecode.Dup,
+		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+			obj := t.stack.top().Target
+			t.stack.push(&Pointer{Target: obj})
+		},
+	},
 	bytecode.PutObject: {
 		name: bytecode.PutObject,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
@@ -58,7 +67,7 @@ var builtInActions = map[operationType]*action{
 			c := t.vm.lookupConstant(cf, constName)
 
 			if c == nil {
-				err := t.vm.initErrorObject(NameError, "uninitialized constant %s", constName)
+				err := t.vm.initErrorObject(errors.NameError, "uninitialized constant %s", constName)
 				t.stack.push(&Pointer{Target: err})
 				return
 			}
@@ -171,7 +180,7 @@ var builtInActions = map[operationType]*action{
 			v := t.stack.pop()
 
 			if c != nil {
-				err := t.vm.initErrorObject(ConstantAlreadyInitializedError, "Constant %s already been initialized. Can't assign value to a constant twice.", constName)
+				err := t.vm.initErrorObject(errors.ConstantAlreadyInitializedError, "Constant %s already been initialized. Can't assign value to a constant twice.", constName)
 				t.stack.push(&Pointer{Target: err})
 				return
 			}
@@ -210,7 +219,7 @@ var builtInActions = map[operationType]*action{
 			arr, ok := t.stack.pop().Target.(*ArrayObject)
 
 			if !ok {
-				t.returnError(TypeError, "Expect stack top's value to be an Array when executing 'expandarray' instruction.")
+				t.returnError(errors.TypeError, "Expect stack top's value to be an Array when executing 'expandarray' instruction.")
 				return
 			}
 
@@ -230,6 +239,19 @@ var builtInActions = map[operationType]*action{
 			for _, elem := range elems {
 				t.stack.push(&Pointer{Target: elem})
 			}
+		},
+	},
+	bytecode.SplatArray: {
+		name: bytecode.SplatArray,
+		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+			obj := t.stack.top().Target
+			arr, ok := obj.(*ArrayObject)
+
+			if !ok {
+				return
+			}
+
+			arr.splat = true
 		},
 	},
 	bytecode.NewHash: {
@@ -279,15 +301,19 @@ var builtInActions = map[operationType]*action{
 			v := t.stack.pop()
 			bool, isBool := v.Target.(*BooleanObject)
 
-			if isBool {
-				if !bool.value {
-					return
-				}
-
-				line := args[0].(int)
-				cf.pc = line
+			if isBool && !bool.value {
 				return
 			}
+
+			_, isNull := v.Target.(*NullObject)
+
+			if isNull {
+				return
+			}
+
+			line := args[0].(int)
+			cf.pc = line
+			return
 		},
 	},
 	bytecode.Jump: {
@@ -323,11 +349,11 @@ var builtInActions = map[operationType]*action{
 			is, ok := t.getMethodIS(methodName, cf.instructionSet.filename)
 
 			if !ok {
-				t.returnError(InternalError, "Can't get method %s's instruction set.", methodName)
+				t.returnError(errors.InternalError, "Can't get method %s's instruction set.", methodName)
 				return
 			}
 
-			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.topLevelClass(methodClass)}}
+			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.topLevelClass(classes.MethodClass)}}
 
 			v := t.stack.pop().Target
 			switch self := v.(type) {
@@ -344,7 +370,7 @@ var builtInActions = map[operationType]*action{
 			argCount := args[0].(int)
 			methodName := t.stack.pop().Target.(*StringObject).value
 			is, _ := t.getMethodIS(methodName, cf.instructionSet.filename)
-			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.topLevelClass(methodClass)}}
+			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.topLevelClass(classes.MethodClass)}}
 
 			v := t.stack.pop().Target
 
@@ -377,12 +403,12 @@ var builtInActions = map[operationType]*action{
 					inheritedClass, ok := superClass.Target.(*RClass)
 
 					if !ok {
-						t.returnError(InternalError, "Constant %s is not a class. got=%s", superClassName, string(superClass.Target.Class().ReturnName()))
+						t.returnError(errors.InternalError, "Constant %s is not a class. got=%s", superClassName, string(superClass.Target.Class().ReturnName()))
 						return
 					}
 
 					if inheritedClass.isModule {
-						t.returnError(InternalError, "Module inheritance is not supported: %s", inheritedClass.Name)
+						t.returnError(errors.InternalError, "Module inheritance is not supported: %s", inheritedClass.Name)
 						return
 					}
 
@@ -408,6 +434,17 @@ var builtInActions = map[operationType]*action{
 
 			methodName := args[0].(string)
 			argCount := args[1].(int)
+
+			if arr, ok := t.stack.top().Target.(*ArrayObject); ok && arr.splat {
+				// Pop array
+				t.stack.pop()
+				// Can't count array self, only the number of array elements
+				argCount = argCount - 1 + len(arr.Elements)
+				for _, elem := range arr.Elements {
+					t.stack.push(&Pointer{Target: elem})
+				}
+			}
+
 			argPr := t.sp - argCount
 			receiverPr := argPr - 1
 			receiver := t.stack.Data[receiverPr].Target
@@ -415,7 +452,7 @@ var builtInActions = map[operationType]*action{
 			method = receiver.findMethod(methodName)
 
 			if method == nil {
-				err := t.vm.initErrorObject(UndefinedMethodError, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
+				err := t.vm.initErrorObject(errors.UndefinedMethodError, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
 				t.stack.set(receiverPr, &Pointer{Target: err})
 				t.sp = argPr
 				return
@@ -429,7 +466,7 @@ var builtInActions = map[operationType]*action{
 			case *BuiltInMethodObject:
 				t.evalBuiltInMethod(receiver, m, receiverPr, argCount, blockFrame)
 			case *Error:
-				t.returnError(InternalError, m.toString())
+				t.returnError(errors.InternalError, m.toString())
 			}
 		},
 	},
@@ -442,7 +479,7 @@ var builtInActions = map[operationType]*action{
 			receiver := t.stack.Data[receiverPr].Target
 
 			if cf.blockFrame == nil {
-				t.returnError(InternalError, "Can't yield without a block")
+				t.returnError(errors.InternalError, "Can't yield without a block")
 				return
 			}
 

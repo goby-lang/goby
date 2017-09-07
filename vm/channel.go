@@ -2,11 +2,12 @@ package vm
 
 import (
 	"fmt"
+	"github.com/goby-lang/goby/vm/classes"
 	"sync"
 )
 
 func (vm *VM) initChannelClass() *RClass {
-	class := vm.initializeClass(channelClass, false)
+	class := vm.initializeClass(classes.ChannelClass, false)
 	class.setBuiltInMethods(builtinChannelClassMethods(), true)
 	class.setBuiltInMethods(builtinChannelInstanceMethods(), false)
 	return class
@@ -59,7 +60,7 @@ func builtinChannelClassMethods() []*BuiltInMethodObject {
 			Name: "new",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					c := &ChannelObject{baseObj: &baseObj{class: t.vm.topLevelClass(channelClass)}, Chan: make(chan int)}
+					c := &ChannelObject{baseObj: &baseObj{class: t.vm.topLevelClass(classes.ChannelClass)}, Chan: make(chan int)}
 					return c
 				}
 			},

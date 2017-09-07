@@ -5,34 +5,6 @@ import (
 	"testing"
 )
 
-func TestLocalVariableAccessCompilation(t *testing.T) {
-	input := `
-	a = 10
-	a = 100
-	b = 5
-	(b * a + 100) / 2
-	foo # This should be a method lookup
-	`
-	expected := `
-<ProgramStart>
-0 putobject 10
-1 setlocal 0 0
-2 pop
-3 putobject 100
-4 setlocal 0 0
-5 pop
-6 putobject 5
-7 setlocal 0 1
-8 pop
-9 putself
-10 send foo 0
-11 leave
-`
-
-	bytecode := compileToBytecode(input)
-	compareBytecode(t, bytecode, expected)
-}
-
 func TestIfExpressionWithoutAlternativeCompilation(t *testing.T) {
 	input := `
 	a = 10
@@ -474,23 +446,25 @@ func TestUnusedExpressionRemoval(t *testing.T) {
 0 putobject 0
 1 setlocal 0 0
 2 pop
-3 jump 12
+3 jump 14
 4 putnil
 5 pop
-6 jump 12
-7 getlocal 0 0
-8 putobject 1
-9 send + 1
-10 setlocal 0 0
-11 pop
-12 getlocal 0 0
-13 putobject 100
-14 send < 1
-15 branchif 7
-16 putnil
-17 pop
-18 getlocal 0 0
-19 leave
+6 jump 14
+7 putobject 10
+8 pop
+9 getlocal 0 0
+10 putobject 1
+11 send + 1
+12 setlocal 0 0
+13 pop
+14 getlocal 0 0
+15 putobject 100
+16 send < 1
+17 branchif 7
+18 putnil
+19 pop
+20 getlocal 0 0
+21 leave
 `
 
 	bytecode := compileToBytecode(input)

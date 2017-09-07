@@ -1,0 +1,4 @@
+puts "Type your name"
+
+name = STDIN.read
+puts("Your name is " + name)

@@ -5,6 +5,8 @@ import (
 	"github.com/goby-lang/goby/compiler"
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/compiler/parser"
+	"github.com/goby-lang/goby/vm/classes"
+	"github.com/goby-lang/goby/vm/errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -13,7 +15,7 @@ import (
 )
 
 // Version stores current Goby version
-const Version = "0.1.1"
+const Version = "0.1.2"
 
 // These are the enums for marking parser's mode, which decides whether it should pop unused values.
 const (
@@ -37,7 +39,6 @@ type filename = string
 type errorMessage = string
 
 var standardLibraries = map[string]func(*VM){
-	"file":              initFileClass,
 	"net/http":          initHTTPClass,
 	"net/simple_server": initSimpleServerClass,
 	"uri":               initURIClass,
@@ -73,6 +74,8 @@ type VM struct {
 	sync.Mutex
 
 	mode int
+
+	libFiles []string
 }
 
 // New initializes a vm to initialize state and returns it.
@@ -80,7 +83,6 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 	vm = &VM{args: args}
 	vm.mainThread = vm.newThread()
 
-	vm.initConstants()
 	vm.methodISIndexTables = map[filename]*isIndexTable{
 		fileDir: newISIndexTable(),
 	}
@@ -97,12 +99,12 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 	gobyRoot := os.Getenv("GOBY_ROOT")
 
 	if len(gobyRoot) == 0 {
-		vm.projectRoot = fmt.Sprintf("/usr/local/Cellar/goby/%s/e", Version)
+		vm.projectRoot = fmt.Sprintf("/usr/local/Cellar/goby/%s", Version)
 
 		_, err := os.Stat(vm.projectRoot)
 
 		if err != nil {
-			path, _ := filepath.Abs("$GOPATH/src/github.com/goby-lang/goby/e")
+			path, _ := filepath.Abs("$GOPATH/src/github.com/goby-lang/goby")
 			_, err = os.Stat(path)
 
 			if err != nil {
@@ -116,8 +118,13 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 		vm.projectRoot = gobyRoot
 	}
 
+	vm.initConstants()
 	vm.mainObj = vm.initMainObj()
 	vm.channelObjectMap = &objectMap{store: &sync.Map{}}
+
+	for _, fn := range vm.libFiles {
+		vm.execGobyLib(fn)
+	}
 
 	return
 }
@@ -169,17 +176,19 @@ func (vm *VM) SetMethodISIndexTable(fn filename) {
 func (vm *VM) initMainObj() *RObject {
 	obj := vm.objectClass.initializeInstance()
 	singletonClass := vm.initializeClass(fmt.Sprintf("#<Class:%s>", obj.toString()), false)
-	singletonClass.Methods.set("include", vm.topLevelClass(classClass).lookupMethod("include"))
+	singletonClass.Methods.set("include", vm.topLevelClass(classes.ClassClass).lookupMethod("include"))
 	obj.singletonClass = singletonClass
 
 	return obj
 }
 
 func (vm *VM) initConstants() {
+	// Init Class and Object
 	cClass := initClassClass()
 	vm.objectClass = initObjectClass(cClass)
-	vm.topLevelClass(objectClass).setClassConstant(cClass)
+	vm.topLevelClass(classes.ObjectClass).setClassConstant(cClass)
 
+	// Init builtin classes
 	builtInClasses := []*RClass{
 		vm.initIntegerClass(),
 		vm.initStringClass(),
@@ -191,14 +200,17 @@ func (vm *VM) initConstants() {
 		vm.initMethodClass(),
 		vm.initChannelClass(),
 		vm.initGoClass(),
+		vm.initFileClass(),
 	}
 
+	// Init error classes
 	vm.initErrorClasses()
 
 	for _, c := range builtInClasses {
 		vm.objectClass.setClassConstant(c)
 	}
 
+	// Init ARGV
 	args := []Object{}
 
 	for _, arg := range vm.args {
@@ -207,6 +219,7 @@ func (vm *VM) initConstants() {
 
 	vm.objectClass.constants["ARGV"] = &Pointer{Target: vm.initArrayObject(args)}
 
+	// Init ENV
 	envs := map[string]Object{}
 
 	for _, e := range os.Environ() {
@@ -215,12 +228,15 @@ func (vm *VM) initConstants() {
 	}
 
 	vm.objectClass.constants["ENV"] = &Pointer{Target: vm.initHashObject(envs)}
+	vm.objectClass.constants["STDOUT"] = &Pointer{Target: vm.initFileObject(os.Stdout)}
+	vm.objectClass.constants["STDERR"] = &Pointer{Target: vm.initFileObject(os.Stderr)}
+	vm.objectClass.constants["STDIN"] = &Pointer{Target: vm.initFileObject(os.Stdin)}
 }
 
 func (vm *VM) topLevelClass(cn string) *RClass {
 	objClass := vm.objectClass
 
-	if cn == objectClass {
+	if cn == classes.ObjectClass {
 		return objClass
 	}
 
@@ -319,7 +335,7 @@ func (vm *VM) lookupConstant(cf *callFrame, constName string) (constant *Pointer
 		constant = vm.objectClass.constants[constName]
 	}
 
-	if constName == objectClass {
+	if constName == classes.ObjectClass {
 		constant = &Pointer{Target: vm.objectClass}
 	}
 
@@ -331,7 +347,7 @@ func (vm *VM) execGobyLib(libName string) {
 	file, err := ioutil.ReadFile(libPath)
 
 	if err != nil {
-		vm.mainThread.returnError(InternalError, err.Error())
+		vm.mainThread.returnError(errors.InternalError, err.Error())
 	}
 
 	vm.execRequiredFile(libPath, file)
