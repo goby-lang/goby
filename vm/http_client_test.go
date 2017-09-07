@@ -1,13 +1,6 @@
 package vm
 
-import (
-	"testing"
-	//"net/http/httptest"
-	//"net/http"
-	"fmt"
-	"io/ioutil"
-	"net/http"
-)
+import "testing"
 
 func TestHTTPClientObject(t *testing.T) {
 
@@ -27,13 +20,25 @@ func TestHTTPClientObject(t *testing.T) {
 
 		c = Net::HTTP::Client.new
 
-		c.send do |req|
-			req.
+		res = c.send do |req|
+			req.url = "http://127.0.0.1:3000/index"
+			req.method = "GET"
+		end
+
+		res.body
 		`, "GET Hello World"},
 		{`
 		require "net/http"
 
-		Net::HTTP.post("http://127.0.0.1:3000/index", "text/plain", "Hi Again")
+		c = Net::HTTP::Client.new
+
+		res = c.send do |req|
+			req.url = "http://127.0.0.1:3000/index"
+			req.method = "POST"
+			req.body = "Hi Again"
+		end
+
+		res.body
 		`, "POST Hi Again"},
 	}
 
@@ -48,7 +53,7 @@ func TestHTTPClientObject(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
-
+/*
 func TestHTTPClientObjectFail(t *testing.T) {
 	//blocking channel
 	c := make(chan bool, 1)
@@ -85,3 +90,4 @@ func TestHTTPClientObjectFail(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+*/

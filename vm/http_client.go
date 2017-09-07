@@ -7,6 +7,7 @@ import (
 	"strings"
 	"fmt"
 	"io/ioutil"
+	gerrors "github.com/goby-lang/goby/vm/errors"
 )
 
 func builtinHTTPClientClassMethods() []*BuiltInMethodObject {
@@ -20,7 +21,7 @@ func builtinHTTPClientClassMethods() []*BuiltInMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					if len(args) != 0 {
-						return t.vm.initErrorObject(ArgumentError, "Expect 0 arguments. got=%v", strconv.Itoa(len(args)))
+						return t.vm.initErrorObject(gerrors.ArgumentError, "Expect 0 arguments. got=%v", strconv.Itoa(len(args)))
 
 					}
 
@@ -36,17 +37,17 @@ func builtinHTTPClientClassMethods() []*BuiltInMethodObject {
 
 					goReq, err := requestGobyToGo(req)
 					if err != nil {
-						return t.vm.initErrorObject(ArgumentError, "Could not parse request object %v", req)
+						return t.vm.initErrorObject(gerrors.ArgumentError, "Could not parse request object %s", err.Error())
 					}
 
 					resp, err := goClient.Do(goReq)
 					if err != nil {
-						return t.vm.initErrorObject(HTTPResponseError, "Could not get response: %s", err.Error())
+						return t.vm.initErrorObject(gerrors.InternalError, "Could not get response: %s", err.Error())
 					}
 
 					gobyResp, err := responseGoToGoby(t, resp)
 					if err != nil {
-						return t.vm.initErrorObject(HTTPError, "Could not read response: %s", err.Error())
+						return t.vm.initErrorObject(gerrors.InternalError, "Could not read response: %s", err.Error())
 					}
 
 					return gobyResp
@@ -58,26 +59,25 @@ func builtinHTTPClientClassMethods() []*BuiltInMethodObject {
 
 func requestGobyToGo(gobyReq *RObject) (*http.Request, error) {
 	//:method, :protocol, :body, :content_length, :transfer_encoding, :host, :path, :url, :params
-	uObj, ok := gobyReq.instanceVariableGet("url")
-Er:
+	uObj, ok := gobyReq.instanceVariableGet("@url")
 	if !ok {
-		return nil, errors.New("could not parse paramehters")
+		return nil, errors.New("could not get url")
 	}
 
 	u := uObj.(*StringObject).value
 
-	methodObj, ok := gobyReq.instanceVariableGet("method")
+	methodObj, ok := gobyReq.instanceVariableGet("@method")
 	if !ok {
-		goto Er
+		return nil, errors.New("could not get method")
 	}
 
 	method := methodObj.(*StringObject).value
 
 	var body string
-	if method == "GET" || method== "HEAD" {
-		bodyObj, ok := gobyReq.instanceVariableGet("body")
+	if !(method == "GET" || method== "HEAD") {
+		bodyObj, ok := gobyReq.instanceVariableGet("@body")
 		if !ok {
-			goto Er
+			return nil, errors.New("could not get body")
 		}
 
 		body = bodyObj.(*StringObject).value
@@ -98,11 +98,11 @@ func responseGoToGoby(t *thread, goResp *http.Response) (*RObject, error) {
 		return nil, err
 	}
 
-	gobyResp.instanceVariableSet("body", t.vm.initStringObject(string(body)))
-	gobyResp.instanceVariableSet("status_code", t.vm.initObjectFromGoType(goResp.StatusCode))
-	gobyResp.instanceVariableSet("status", t.vm.initObjectFromGoType(goResp.Status))
-	gobyResp.instanceVariableSet("protocol", t.vm.initObjectFromGoType(goResp.Proto))
-	gobyResp.instanceVariableSet("transfer_encoding", t.vm.initObjectFromGoType(goResp.TransferEncoding))
+	gobyResp.instanceVariableSet("@body", t.vm.initStringObject(string(body)))
+	gobyResp.instanceVariableSet("@status_code", t.vm.initObjectFromGoType(goResp.StatusCode))
+	gobyResp.instanceVariableSet("@status", t.vm.initObjectFromGoType(goResp.Status))
+	gobyResp.instanceVariableSet("@protocol", t.vm.initObjectFromGoType(goResp.Proto))
+	gobyResp.instanceVariableSet("@transfer_encoding", t.vm.initObjectFromGoType(goResp.TransferEncoding))
 
 
 	underHeaders := map[string]Object{}
@@ -111,7 +111,7 @@ func responseGoToGoby(t *thread, goResp *http.Response) (*RObject, error) {
 		underHeaders[k] = t.vm.initObjectFromGoType(v)
 	}
 
-	gobyResp.instanceVariableSet("headers", t.vm.initHashObject(underHeaders))
+	gobyResp.instanceVariableSet("@headers", t.vm.initHashObject(underHeaders))
 
 
 	return gobyResp, nil
