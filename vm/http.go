@@ -13,6 +13,7 @@ import (
 var (
 	httpRequestClass  *RClass
 	httpResponseClass *RClass
+	httpClientClass *RClass
 )
 
 func initHTTPClass(vm *VM) {
@@ -21,12 +22,14 @@ func initHTTPClass(vm *VM) {
 	http.setBuiltInMethods(builtinHTTPClassMethods(), true)
 	initRequestClass(vm, http)
 	initResponseClass(vm, http)
+	initClientClass(vm, http)
 
 	net.setClassConstant(http)
 
 	// Use Goby code to extend request and response classes.
 	vm.execGobyLib("net/http/response.gb")
 	vm.execGobyLib("net/http/request.gb")
+	vm.execGobyLib("net/http/client.gb")
 }
 
 func initRequestClass(vm *VM, hc *RClass) *RClass {
@@ -45,10 +48,20 @@ func initResponseClass(vm *VM, hc *RClass) *RClass {
 	hc.setClassConstant(responseClass)
 	builtinHTTPResponseInstanceMethods := []*BuiltInMethodObject{}
 
-	responseClass.setBuiltInMethods(builtinHTTPResponseInstanceMethods, false)
+	responseClass.setBuiltInMethods(builtinHTTPResponseInstanceMethods, true)
 
 	httpResponseClass = responseClass
 	return responseClass
+}
+
+func initClientClass(vm *VM, hc *RClass) *RClass {
+	clientClass := vm.initializeClass("Client", false)
+	hc.setClassConstant(clientClass)
+
+	clientClass.setBuiltInMethods(builtinHTTPClientClassMethods(), false)
+
+	httpClientClass = clientClass
+	return clientClass
 }
 
 func builtinHTTPClassMethods() []*BuiltInMethodObject {
@@ -119,6 +132,35 @@ func builtinHTTPClassMethods() []*BuiltInMethodObject {
 
 					if err != nil {
 						return t.vm.initErrorObject(errors.InternalError, err.Error())
+					}
+
+					return t.vm.initStringObject(string(content))
+				}
+			},
+		}, {
+			// Sends a POST request to the target with type header and body. Returns the HTTP response as a string.
+			Name: "head",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(ArgumentError, "Expect 1 arguments. got=%v", strconv.Itoa(len(args)))
+					}
+
+					host := args[0].(*StringObject).value
+
+					resp, err := http.Head(host)
+					if err != nil {
+						return t.vm.initErrorObject(HTTPError, err.Error())
+					}
+					if resp.StatusCode != http.StatusOK {
+						return t.vm.initErrorObject(HTTPResponseError, resp.Status)
+					}
+
+					content, err := ioutil.ReadAll(resp.Body)
+					resp.Body.Close()
+
+					if err != nil {
+						return t.vm.initErrorObject(InternalError, err.Error())
 					}
 
 					return t.vm.initStringObject(string(content))
