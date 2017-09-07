@@ -2,100 +2,14 @@ package vm
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
 	"io/ioutil"
 	"path"
 	"reflect"
 	"time"
+
+	"github.com/goby-lang/goby/vm/classes"
+	"github.com/goby-lang/goby/vm/errors"
 )
-
-// initializeClass is a common function for vm, which initializes and returns
-// a class instance with given class name.
-func (vm *VM) initializeClass(name string, isModule bool) *RClass {
-	class := vm.createRClass(name)
-	class.isModule = isModule
-	singletonClass := vm.createRClass(fmt.Sprintf("#<Class:%s>", name))
-	singletonClass.isSingleton = true
-	class.singletonClass = singletonClass
-	class.inherits(vm.objectClass)
-
-	return class
-}
-
-func (vm *VM) createRClass(className string) *RClass {
-	objectClass := vm.objectClass
-	classClass := vm.topLevelClass(classes.ClassClass)
-
-	return &RClass{
-		Name:             className,
-		Methods:          newEnvironment(),
-		pseudoSuperClass: objectClass,
-		superClass:       objectClass,
-		constants:        make(map[string]*Pointer),
-		isModule:         false,
-		baseObj:          &baseObj{class: classClass, InstanceVariables: newEnvironment()},
-	}
-}
-
-func initClassClass() *RClass {
-	classClass := &RClass{
-		Name:      classes.ClassClass,
-		Methods:   newEnvironment(),
-		constants: make(map[string]*Pointer),
-		baseObj:   &baseObj{},
-	}
-
-	singletonClass := &RClass{
-		Name:        "#<Class:Class>",
-		Methods:     newEnvironment(),
-		constants:   make(map[string]*Pointer),
-		isModule:    false,
-		baseObj:     &baseObj{class: classClass, InstanceVariables: newEnvironment()},
-		isSingleton: true,
-	}
-
-	classClass.class = classClass
-	classClass.singletonClass = singletonClass
-
-	classClass.setBuiltinMethods(builtinClassClassMethods(), true)
-
-	return classClass
-}
-
-func initObjectClass(c *RClass) *RClass {
-	objectClass := &RClass{
-		Name:      classes.ObjectClass,
-		Methods:   newEnvironment(),
-		constants: make(map[string]*Pointer),
-		baseObj:   &baseObj{class: c},
-	}
-
-	singletonClass := &RClass{
-		Name:        "#<Class:Object>",
-		Methods:     newEnvironment(),
-		constants:   make(map[string]*Pointer),
-		isModule:    false,
-		baseObj:     &baseObj{class: c, InstanceVariables: newEnvironment()},
-		isSingleton: true,
-		superClass:  c,
-	}
-
-	objectClass.singletonClass = singletonClass
-	objectClass.superClass = objectClass
-	objectClass.pseudoSuperClass = objectClass
-	c.inherits(objectClass)
-
-	objectClass.setBuiltinMethods(builtinCommonInstanceMethods(), true)
-	objectClass.setBuiltinMethods(builtinCommonInstanceMethods(), false)
-
-	return objectClass
-}
-
-type builtinType interface {
-	Value() interface{}
-	Object
-}
 
 // RClass represents normal (not built in) class object
 type RClass struct {
@@ -116,195 +30,359 @@ type RClass struct {
 	*baseObj
 }
 
-// ReturnName returns the name of the class
-func (c *RClass) ReturnName() string {
-	return c.Name
+type builtinType interface {
+	Value() interface{}
+	Object
 }
 
-// Polymorphic helper functions -----------------------------------------
+// Class methods --------------------------------------------------------
+func builtinClassCommonClassMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
+		{
+			// Creates instance variables and corresponding methods that return the value of
+			// each instance variable and assign an argument to each instance variable.
+			// Only string literal can be used for now.
+			//
+			// ```ruby
+			// class Foo
+			//   attr_accessor("bar", "buz")
+			// end
+			// ```
+			// is equivalent to:
+			//
+			// ```ruby
+			// class Foo
+			//   def bar
+			//     @bar
+			//   end
+			//   def buz
+			//     @buz
+			//   end
+			//   def bar=(val)
+			//     @bar = val
+			//   end
+			//   def buz=(val)
+			//     @buz = val
+			//   end
+			// end
+			// ```
+			//
+			// @param *args [String] One or more quoted method names for 'getter/setter'
+			// @return [Null]
+			Name: "attr_accessor",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					r := receiver.(*RClass)
+					r.setAttrAccessor(args)
 
-// TODO: Singleton class's inspect() should also mark if it's a singleton class explicitly.
-func (c *RClass) toString() string {
-	return c.Name
-}
-
-func (c *RClass) toJSON() string {
-	return c.toString()
-}
-
-// Common internal helper functions -------------------------------------
-func (c *RClass) inherits(sc *RClass) {
-	c.superClass = sc
-	c.pseudoSuperClass = sc
-	c.singletonClass.superClass = sc.singletonClass
-	c.singletonClass.pseudoSuperClass = sc.singletonClass
-}
-
-func (c *RClass) setBuiltinMethods(methodList []*BuiltinMethodObject, classMethods bool) {
-	for _, m := range methodList {
-		c.Methods.set(m.Name, m)
-	}
-
-	if classMethods {
-		for _, m := range methodList {
-			c.singletonClass.Methods.set(m.Name, m)
-		}
-	}
-}
-
-func (c *RClass) findMethod(methodName string) (method Object) {
-	if c.isSingleton {
-		method = c.superClass.lookupMethod(methodName)
-	} else {
-		method = c.SingletonClass().lookupMethod(methodName)
-	}
-
-	return
-}
-
-func (c *RClass) lookupMethod(methodName string) Object {
-	method, ok := c.Methods.get(methodName)
-
-	if !ok {
-		if c.superClass != nil && c.superClass != c {
-			if c.Name == classes.ClassClass {
-				return nil
-			}
-
-			return c.superClass.lookupMethod(methodName)
-		}
-
-		return nil
-	}
-
-	return method
-}
-
-func (c *RClass) lookupConstant(constName string, findInScope bool) *Pointer {
-	constant, ok := c.constants[constName]
-
-	if !ok {
-		if findInScope && c.scope != nil {
-			return c.scope.lookupConstant(constName, true)
-		}
-
-		if c.superClass != nil && c.Name != classes.ObjectClass {
-			return c.superClass.lookupConstant(constName, false)
-		}
-
-		return nil
-	}
-
-	return constant
-}
-
-func (c *RClass) setClassConstant(constant *RClass) {
-	c.constants[constant.Name] = &Pointer{Target: constant}
-}
-
-func (c *RClass) getClassConstant(constName string) (class *RClass) {
-	t := c.constants[constName].Target
-	class, ok := t.(*RClass)
-
-	if ok {
-		return
-	}
-
-	panic(constName + " is not a class.")
-}
-
-func (c *RClass) alreadyInherit(constant *RClass) bool {
-	if c.superClass == constant {
-		return true
-	}
-
-	if c.superClass.Name == classes.ObjectClass {
-		return false
-	}
-
-	return c.superClass.alreadyInherit(constant)
-}
-
-func (c *RClass) returnSuperClass() *RClass {
-	return c.pseudoSuperClass
-}
-
-func (c *RClass) initializeInstance() *RObject {
-	instance := &RObject{baseObj: &baseObj{class: c, InstanceVariables: newEnvironment()}}
-
-	return instance
-}
-
-func (c *RClass) setAttrWriter(args interface{}) {
-
-	switch args := args.(type) {
-	case []Object:
-		for _, attr := range args {
-			attrName := attr.(*StringObject).value
-			c.Methods.set(attrName+"=", generateAttrWriteMethod(attrName))
-		}
-	case []string:
-		for _, attrName := range args {
-			c.Methods.set(attrName+"=", generateAttrWriteMethod(attrName))
-		}
-	}
-
-}
-
-func (c *RClass) setAttrReader(args interface{}) {
-	switch args := args.(type) {
-	case []Object:
-		for _, attr := range args {
-			attrName := attr.(*StringObject).value
-			c.Methods.set(attrName, generateAttrReadMethod(attrName))
-		}
-	case []string:
-		for _, attrName := range args {
-			c.Methods.set(attrName, generateAttrReadMethod(attrName))
-		}
-	case string:
-		c.Methods.set(args, generateAttrReadMethod(args))
-	}
-
-}
-
-func (c *RClass) setAttrAccessor(args interface{}) {
-	c.setAttrReader(args)
-	c.setAttrWriter(args)
-}
-
-// Other helper functions -----------------------------------------------
-func generateAttrWriteMethod(attrName string) *BuiltinMethodObject {
-	return &BuiltinMethodObject{
-		Name: attrName + "=",
-		Fn: func(receiver Object) builtinMethodBody {
-			return func(t *thread, args []Object, blockFrame *callFrame) Object {
-				v := receiver.instanceVariableSet("@"+attrName, args[0])
-				return v
-			}
-		},
-	}
-}
-
-func generateAttrReadMethod(attrName string) *BuiltinMethodObject {
-	return &BuiltinMethodObject{
-		Name: attrName,
-		Fn: func(receiver Object) builtinMethodBody {
-			return func(t *thread, args []Object, blockFrame *callFrame) Object {
-				v, ok := receiver.instanceVariableGet("@" + attrName)
-
-				if ok {
-					return v
+					return r
 				}
+			},
+		},
+		{
+			// Creates instance variables and corresponding methods that return the value of each
+			// instance variable.
+			//
+			// Only string literal can be used for now.
+			//
+			// ```ruby
+			// class Foo
+			//   attr_reader("bar", "buz")
+			// end
+			// ```
+			// is equivalent to:
+			//
+			// ```ruby
+			// class Foo
+			//   def bar
+			//     @bar
+			//   end
+			//   def buz
+			//     @buz
+			//   end
+			// end
+			// ```
+			//
+			// @param *args [String] One or more quoted method names for 'getter'
+			// @return [Null]
+			Name: "attr_reader",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					r := receiver.(*RClass)
+					r.setAttrReader(args)
 
-				return NULL
-			}
+					return r
+				}
+			},
+		},
+		{
+			// Creates instance variables and corresponding methods that assign an argument to each
+			// instance variable. No return value.
+			//
+			// Only string literal can be used for now.
+			//
+			// ```ruby
+			// class Foo
+			//   attr_writer("bar", "buz")
+			// end
+			// ```
+			// is equivalent to:
+			//
+			// ```ruby
+			// class Foo
+			//   def bar=(val)
+			//     @bar = val
+			//   end
+			//   def buz=(val)
+			//     @buz = val
+			//   end
+			// end
+			// ```
+			//
+			// @param *args [String] One or more quoted method names for 'setter'
+			// @return [Null]
+			Name: "attr_writer",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					r := receiver.(*RClass)
+					r.setAttrWriter(args)
+
+					return r
+				}
+			},
+		},
+		{
+			// Includes a module for mixin, which inherits only methods and constants from the module.
+			// The included module is inserted into the path of the inheritance tree, between the class
+			// and the superclass so that the methods of the module is prioritized to superclasses.
+			//
+			// The order of `include` affects: the modules that included later are prioritized.
+			// If multiple modules include the same methods, the method will only come from
+			// the last included module.
+			//
+			// ```ruby
+			// module Foo
+			// def ten
+			//    10
+			// end
+			// end
+			//
+			// module Bar
+			//   def ten
+			//     "ten"
+			//   end
+			// end
+			//
+			// class Baz
+			//   include(Foo)
+			//   include(Bar) # method `ten` is only included from this module
+			// end
+			//
+			// a = Baz.new
+			// puts(a.ten) # => ten (overriden)
+			// ```
+			//
+			// **Note**:
+			//
+			// You cannot use string literal, or pass two or more arguments to `include`.
+			//
+			// ```ruby
+			//   include("Foo")    # => error
+			//   include(Foo, Bar) # => error
+			// ```
+			//
+			// Including modules into built-in classes such as String are not supported:
+			//
+			// ```ruby
+			// module Foo
+			//   def ten
+			//     10
+			//   end
+			// end
+			// class String
+			//   include(Foo) # => error
+			// end
+			// ```
+			//
+			// @param module [Class] Module name to include
+			// @return [Null]
+			Name: "include",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					var class *RClass
+					module, ok := args[0].(*RClass)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, "Expect argument to be a module. got=%v", args[0].Class().Name)
+					}
+
+					switch r := receiver.(type) {
+					case *RClass:
+						class = r
+					default:
+						class = r.SingletonClass()
+					}
+
+					if class.alreadyInherit(module) {
+						return class
+					}
+
+					module.superClass = class.superClass
+					class.superClass = module
+
+					return class
+				}
+			},
+		},
+		{
+			Name: "extend",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					var class *RClass
+					module, ok := args[0].(*RClass)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, "Expect argument to be a module. got=%v", args[0].Class().Name)
+					}
+
+					class = receiver.SingletonClass()
+
+					if class.alreadyInherit(module) {
+						return class
+					}
+
+					module.superClass = class.superClass
+					class.superClass = module
+
+					return class
+				}
+			},
+		},
+		{
+			// Returns the name of the class (receiver).
+			//
+			// ```ruby
+			// puts(Array.name)  # => Array
+			// puts(Class.name)  # => Class
+			// puts(Object.name) # => Object
+			// ```
+			// @param class [Class] Receiver
+			// @return [String] Converted receiver name
+			Name: "name",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
+					}
+
+					n, ok := receiver.(*RClass)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.UndefinedMethodError, "Undefined Method '%s' for %s", "#name", receiver.toString())
+					}
+
+					name := n.ReturnName()
+					nameString := t.vm.initStringObject(name)
+					return nameString
+				}
+			},
+		},
+		{
+			// Creates and returns a new anonymous class from a receiver.
+			// You can use any classes you defined as the receiver:
+			//
+			// ```ruby
+			// class Foo
+			// end
+			// a = Foo.new
+			// ```
+			//
+			// Note that the built-in classes such as Class or String are not open for creating instances
+			// and you can't call `new` against them.
+			//
+			// ```ruby
+			// a = Class.new  # => error
+			// a = String.new # => error
+			// ```
+			// @param class [Class] Receiver
+			// @return [Object] Created object
+			Name: "new",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					class, ok := receiver.(*RClass)
+
+					if !ok {
+						return t.unsupportedMethodError("#new", receiver)
+					}
+
+					instance := class.initializeInstance()
+					initMethod := class.lookupMethod("initialize")
+
+					if initMethod != nil {
+						instance.InitializeMethod = initMethod.(*MethodObject)
+					}
+
+					return instance
+				}
+			},
+		},
+		{
+			// Returns the superclass object of the receiver.
+			//
+			// ```ruby
+			// puts(Array.superclass)  # => <Class:Object>
+			// puts(String.superclass) # => <Class:Object>
+			//
+			// class Foo;end
+			// class Bar < Foo
+			// end
+			// puts(Foo.superclass)    # => <Class:Object>
+			// puts(Bar.superclass)    # => <Class:Foo>
+			// ```
+			//
+			// **Note**: the following is not supported:
+			//
+			// - Class class
+			//
+			// - Object class
+			//
+			// - instance objects or object literals
+			//
+			// ```ruby
+			// puts("string".superclass) # => error
+			// puts(Class.superclass)    # => error
+			// puts(Object.superclass)   # => error
+			// ```
+			// @param class [Class] Receiver
+			// @return [Object] Superclass object of the receiver
+			Name: "superclass",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
+					}
+
+					c, ok := receiver.(*RClass)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.UndefinedMethodError, "Undefined Method '%s' for %s", "#superclass", receiver.toString())
+					}
+
+					superClass := c.returnSuperClass()
+
+					if superClass == nil {
+						return NULL
+					}
+
+					return superClass
+				}
+			},
 		},
 	}
 }
 
-// Built in methods
-func builtinCommonInstanceMethods() []*BuiltinMethodObject {
+// Instance methods -----------------------------------------------------
+func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "singleton_class",
@@ -731,347 +809,278 @@ func builtinCommonInstanceMethods() []*BuiltinMethodObject {
 	}
 }
 
-func builtinClassClassMethods() []*BuiltinMethodObject {
-	return []*BuiltinMethodObject{
-		{
-			// Creates instance variables and corresponding methods that return the value of
-			// each instance variable and assign an argument to each instance variable.
-			// Only string literal can be used for now.
-			//
-			// ```ruby
-			// class Foo
-			//   attr_accessor("bar", "buz")
-			// end
-			// ```
-			// is equivalent to:
-			//
-			// ```ruby
-			// class Foo
-			//   def bar
-			//     @bar
-			//   end
-			//   def buz
-			//     @buz
-			//   end
-			//   def bar=(val)
-			//     @bar = val
-			//   end
-			//   def buz=(val)
-			//     @buz = val
-			//   end
-			// end
-			// ```
-			//
-			// @param *args [String] One or more quoted method names for 'getter/setter'
-			// @return [Null]
-			Name: "attr_accessor",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					r := receiver.(*RClass)
-					r.setAttrAccessor(args)
+// Internal functions ===================================================
 
-					return r
-				}
-			},
+// Functions for initialization -----------------------------------------
+
+// initializeClass is a common function for vm, which initializes and returns
+// a class instance with given class name.
+func (vm *VM) initializeClass(name string, isModule bool) *RClass {
+	class := vm.createRClass(name)
+	class.isModule = isModule
+	singletonClass := vm.createRClass(fmt.Sprintf("#<Class:%s>", name))
+	singletonClass.isSingleton = true
+	class.singletonClass = singletonClass
+	class.inherits(vm.objectClass)
+
+	return class
+}
+
+func (vm *VM) createRClass(className string) *RClass {
+	objectClass := vm.objectClass
+	classClass := vm.topLevelClass(classes.ClassClass)
+
+	return &RClass{
+		Name:             className,
+		Methods:          newEnvironment(),
+		pseudoSuperClass: objectClass,
+		superClass:       objectClass,
+		constants:        make(map[string]*Pointer),
+		isModule:         false,
+		baseObj:          &baseObj{class: classClass, InstanceVariables: newEnvironment()},
+	}
+}
+
+func initClassClass() *RClass {
+	classClass := &RClass{
+		Name:      classes.ClassClass,
+		Methods:   newEnvironment(),
+		constants: make(map[string]*Pointer),
+		baseObj:   &baseObj{},
+	}
+
+	singletonClass := &RClass{
+		Name:        "#<Class:Class>",
+		Methods:     newEnvironment(),
+		constants:   make(map[string]*Pointer),
+		isModule:    false,
+		baseObj:     &baseObj{class: classClass, InstanceVariables: newEnvironment()},
+		isSingleton: true,
+	}
+
+	classClass.class = classClass
+	classClass.singletonClass = singletonClass
+
+	classClass.setBuiltinMethods(builtinClassCommonClassMethods(), true)
+
+	return classClass
+}
+
+func initObjectClass(c *RClass) *RClass {
+	objectClass := &RClass{
+		Name:      classes.ObjectClass,
+		Methods:   newEnvironment(),
+		constants: make(map[string]*Pointer),
+		baseObj:   &baseObj{class: c},
+	}
+
+	singletonClass := &RClass{
+		Name:        "#<Class:Object>",
+		Methods:     newEnvironment(),
+		constants:   make(map[string]*Pointer),
+		isModule:    false,
+		baseObj:     &baseObj{class: c, InstanceVariables: newEnvironment()},
+		isSingleton: true,
+		superClass:  c,
+	}
+
+	objectClass.singletonClass = singletonClass
+	objectClass.superClass = objectClass
+	objectClass.pseudoSuperClass = objectClass
+	c.inherits(objectClass)
+
+	objectClass.setBuiltinMethods(builtinClassCommonInstanceMethods(), true)
+	objectClass.setBuiltinMethods(builtinClassCommonInstanceMethods(), false)
+
+	return objectClass
+}
+
+// Polymorphic helper functions -----------------------------------------
+
+// TODO: Remove the redundant functions
+// Returns the object's name as the string format
+func (c *RClass) ReturnName() string {
+	return c.Name
+}
+
+// TODO: Singleton class's inspect() should also mark if it's a singleton class explicitly.
+// Returns the object's name as the string format
+func (c *RClass) toString() string {
+	return c.Name
+}
+
+// Alias of toString
+func (c *RClass) toJSON() string {
+	return c.toString()
+}
+
+func (c *RClass) inherits(sc *RClass) {
+	c.superClass = sc
+	c.pseudoSuperClass = sc
+	c.singletonClass.superClass = sc.singletonClass
+	c.singletonClass.pseudoSuperClass = sc.singletonClass
+}
+
+func (c *RClass) setBuiltinMethods(methodList []*BuiltinMethodObject, classMethods bool) {
+	for _, m := range methodList {
+		c.Methods.set(m.Name, m)
+	}
+
+	if classMethods {
+		for _, m := range methodList {
+			c.singletonClass.Methods.set(m.Name, m)
+		}
+	}
+}
+
+func (c *RClass) findMethod(methodName string) (method Object) {
+	if c.isSingleton {
+		method = c.superClass.lookupMethod(methodName)
+	} else {
+		method = c.SingletonClass().lookupMethod(methodName)
+	}
+
+	return
+}
+
+func (c *RClass) lookupMethod(methodName string) Object {
+	method, ok := c.Methods.get(methodName)
+
+	if !ok {
+		if c.superClass != nil && c.superClass != c {
+			if c.Name == classes.ClassClass {
+				return nil
+			}
+
+			return c.superClass.lookupMethod(methodName)
+		}
+
+		return nil
+	}
+
+	return method
+}
+
+func (c *RClass) lookupConstant(constName string, findInScope bool) *Pointer {
+	constant, ok := c.constants[constName]
+
+	if !ok {
+		if findInScope && c.scope != nil {
+			return c.scope.lookupConstant(constName, true)
+		}
+
+		if c.superClass != nil && c.Name != classes.ObjectClass {
+			return c.superClass.lookupConstant(constName, false)
+		}
+
+		return nil
+	}
+
+	return constant
+}
+
+func (c *RClass) setClassConstant(constant *RClass) {
+	c.constants[constant.Name] = &Pointer{Target: constant}
+}
+
+func (c *RClass) getClassConstant(constName string) (class *RClass) {
+	t := c.constants[constName].Target
+	class, ok := t.(*RClass)
+
+	if ok {
+		return
+	}
+
+	panic(constName + " is not a class.")
+}
+
+func (c *RClass) alreadyInherit(constant *RClass) bool {
+	if c.superClass == constant {
+		return true
+	}
+
+	if c.superClass.Name == classes.ObjectClass {
+		return false
+	}
+
+	return c.superClass.alreadyInherit(constant)
+}
+
+func (c *RClass) returnSuperClass() *RClass {
+	return c.pseudoSuperClass
+}
+
+func (c *RClass) initializeInstance() *RObject {
+	instance := &RObject{baseObj: &baseObj{class: c, InstanceVariables: newEnvironment()}}
+
+	return instance
+}
+
+func (c *RClass) setAttrWriter(args interface{}) {
+
+	switch args := args.(type) {
+	case []Object:
+		for _, attr := range args {
+			attrName := attr.(*StringObject).value
+			c.Methods.set(attrName+"=", generateAttrWriteMethod(attrName))
+		}
+	case []string:
+		for _, attrName := range args {
+			c.Methods.set(attrName+"=", generateAttrWriteMethod(attrName))
+		}
+	}
+
+}
+
+func (c *RClass) setAttrReader(args interface{}) {
+	switch args := args.(type) {
+	case []Object:
+		for _, attr := range args {
+			attrName := attr.(*StringObject).value
+			c.Methods.set(attrName, generateAttrReadMethod(attrName))
+		}
+	case []string:
+		for _, attrName := range args {
+			c.Methods.set(attrName, generateAttrReadMethod(attrName))
+		}
+	case string:
+		c.Methods.set(args, generateAttrReadMethod(args))
+	}
+
+}
+
+func (c *RClass) setAttrAccessor(args interface{}) {
+	c.setAttrReader(args)
+	c.setAttrWriter(args)
+}
+
+// Other helper functions -----------------------------------------------
+
+func generateAttrWriteMethod(attrName string) *BuiltinMethodObject {
+	return &BuiltinMethodObject{
+		Name: attrName + "=",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				v := receiver.instanceVariableSet("@"+attrName, args[0])
+				return v
+			}
 		},
-		{
-			// Creates instance variables and corresponding methods that return the value of each
-			// instance variable.
-			//
-			// Only string literal can be used for now.
-			//
-			// ```ruby
-			// class Foo
-			//   attr_reader("bar", "buz")
-			// end
-			// ```
-			// is equivalent to:
-			//
-			// ```ruby
-			// class Foo
-			//   def bar
-			//     @bar
-			//   end
-			//   def buz
-			//     @buz
-			//   end
-			// end
-			// ```
-			//
-			// @param *args [String] One or more quoted method names for 'getter'
-			// @return [Null]
-			Name: "attr_reader",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					r := receiver.(*RClass)
-					r.setAttrReader(args)
+	}
+}
 
-					return r
+func generateAttrReadMethod(attrName string) *BuiltinMethodObject {
+	return &BuiltinMethodObject{
+		Name: attrName,
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				v, ok := receiver.instanceVariableGet("@" + attrName)
+
+				if ok {
+					return v
 				}
-			},
-		},
-		{
-			// Creates instance variables and corresponding methods that assign an argument to each
-			// instance variable. No return value.
-			//
-			// Only string literal can be used for now.
-			//
-			// ```ruby
-			// class Foo
-			//   attr_writer("bar", "buz")
-			// end
-			// ```
-			// is equivalent to:
-			//
-			// ```ruby
-			// class Foo
-			//   def bar=(val)
-			//     @bar = val
-			//   end
-			//   def buz=(val)
-			//     @buz = val
-			//   end
-			// end
-			// ```
-			//
-			// @param *args [String] One or more quoted method names for 'setter'
-			// @return [Null]
-			Name: "attr_writer",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					r := receiver.(*RClass)
-					r.setAttrWriter(args)
 
-					return r
-				}
-			},
-		},
-		{
-			// Includes a module for mixin, which inherits only methods and constants from the module.
-			// The included module is inserted into the path of the inheritance tree, between the class
-			// and the superclass so that the methods of the module is prioritized to superclasses.
-			//
-			// The order of `include` affects: the modules that included later are prioritized.
-			// If multiple modules include the same methods, the method will only come from
-			// the last included module.
-			//
-			// ```ruby
-			// module Foo
-			// def ten
-			//    10
-			// end
-			// end
-			//
-			// module Bar
-			//   def ten
-			//     "ten"
-			//   end
-			// end
-			//
-			// class Baz
-			//   include(Foo)
-			//   include(Bar) # method `ten` is only included from this module
-			// end
-			//
-			// a = Baz.new
-			// puts(a.ten) # => ten (overriden)
-			// ```
-			//
-			// **Note**:
-			//
-			// You cannot use string literal, or pass two or more arguments to `include`.
-			//
-			// ```ruby
-			//   include("Foo")    # => error
-			//   include(Foo, Bar) # => error
-			// ```
-			//
-			// Including modules into built-in classes such as String are not supported:
-			//
-			// ```ruby
-			// module Foo
-			//   def ten
-			//     10
-			//   end
-			// end
-			// class String
-			//   include(Foo) # => error
-			// end
-			// ```
-			//
-			// @param module [Class] Module name to include
-			// @return [Null]
-			Name: "include",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					var class *RClass
-					module, ok := args[0].(*RClass)
-
-					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, "Expect argument to be a module. got=%v", args[0].Class().Name)
-					}
-
-					switch r := receiver.(type) {
-					case *RClass:
-						class = r
-					default:
-						class = r.SingletonClass()
-					}
-
-					if class.alreadyInherit(module) {
-						return class
-					}
-
-					module.superClass = class.superClass
-					class.superClass = module
-
-					return class
-				}
-			},
-		},
-		{
-			Name: "extend",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					var class *RClass
-					module, ok := args[0].(*RClass)
-
-					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, "Expect argument to be a module. got=%v", args[0].Class().Name)
-					}
-
-					class = receiver.SingletonClass()
-
-					if class.alreadyInherit(module) {
-						return class
-					}
-
-					module.superClass = class.superClass
-					class.superClass = module
-
-					return class
-				}
-			},
-		},
-		{
-			// Returns the name of the class (receiver).
-			//
-			// ```ruby
-			// puts(Array.name)  # => Array
-			// puts(Class.name)  # => Class
-			// puts(Object.name) # => Object
-			// ```
-			// @param class [Class] Receiver
-			// @return [String] Converted receiver name
-			Name: "name",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
-					}
-
-					n, ok := receiver.(*RClass)
-
-					if !ok {
-						return t.vm.initErrorObject(errors.UndefinedMethodError, "Undefined Method '%s' for %s", "#name", receiver.toString())
-					}
-
-					name := n.ReturnName()
-					nameString := t.vm.initStringObject(name)
-					return nameString
-				}
-			},
-		},
-		{
-			// Creates and returns a new anonymous class from a receiver.
-			// You can use any classes you defined as the receiver:
-			//
-			// ```ruby
-			// class Foo
-			// end
-			// a = Foo.new
-			// ```
-			//
-			// Note that the built-in classes such as Class or String are not open for creating instances
-			// and you can't call `new` against them.
-			//
-			// ```ruby
-			// a = Class.new  # => error
-			// a = String.new # => error
-			// ```
-			// @param class [Class] Receiver
-			// @return [Object] Created object
-			Name: "new",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					class, ok := receiver.(*RClass)
-
-					if !ok {
-						return t.unsupportedMethodError("#new", receiver)
-					}
-
-					instance := class.initializeInstance()
-					initMethod := class.lookupMethod("initialize")
-
-					if initMethod != nil {
-						instance.InitializeMethod = initMethod.(*MethodObject)
-					}
-
-					return instance
-				}
-			},
-		},
-		{
-			// Returns the superclass object of the receiver.
-			//
-			// ```ruby
-			// puts(Array.superclass)  # => <Class:Object>
-			// puts(String.superclass) # => <Class:Object>
-			//
-			// class Foo;end
-			// class Bar < Foo
-			// end
-			// puts(Foo.superclass)    # => <Class:Object>
-			// puts(Bar.superclass)    # => <Class:Foo>
-			// ```
-			//
-			// **Note**: the following is not supported:
-			//
-			// - Class class
-			//
-			// - Object class
-			//
-			// - instance objects or object literals
-			//
-			// ```ruby
-			// puts("string".superclass) # => error
-			// puts(Class.superclass)    # => error
-			// puts(Object.superclass)   # => error
-			// ```
-			// @param class [Class] Receiver
-			// @return [Object] Superclass object of the receiver
-			Name: "superclass",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
-					}
-
-					c, ok := receiver.(*RClass)
-
-					if !ok {
-						return t.vm.initErrorObject(errors.UndefinedMethodError, "Undefined Method '%s' for %s", "#superclass", receiver.toString())
-					}
-
-					superClass := c.returnSuperClass()
-
-					if superClass == nil {
-						return NULL
-					}
-
-					return superClass
-				}
-			},
+				return NULL
+			}
 		},
 	}
 }
