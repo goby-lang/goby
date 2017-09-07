@@ -83,7 +83,7 @@ func (it *instructionTranslator) transferInstruction(is *instructionSet, i *byte
 	var params []interface{}
 	act := i.Action
 
-	action := builtInActions[act]
+	action := builtinActions[act]
 
 	if action == nil {
 		panic(fmt.Sprintf("Unknown command: %s. line: %d", act, i.Line()))

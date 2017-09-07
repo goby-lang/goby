@@ -5,19 +5,6 @@ import (
 	"github.com/goby-lang/goby/vm/errors"
 )
 
-var (
-	// NULL represents Goby's null objects.
-	NULL *NullObject
-)
-
-func (vm *VM) initNullClass() *RClass {
-	nc := vm.initializeClass(classes.NullClass, false)
-	nc.setBuiltInMethods(builtInNullInstanceMethods(), false)
-	nc.setBuiltInMethods(builtInNullClassMethods(), true)
-	NULL = &NullObject{baseObj: &baseObj{class: nc}}
-	return nc
-}
-
 // NullObject (`nil`) represents the null value in Goby.
 // `nil` is convert into `null` when exported to JSON format.
 // - `Null.new` is not supported.
@@ -25,20 +12,14 @@ type NullObject struct {
 	*baseObj
 }
 
-func (n *NullObject) Value() interface{} {
-	return nil
-}
+var (
+	// NULL represents Goby's null objects.
+	NULL *NullObject
+)
 
-func (n *NullObject) toString() string {
-	return "nil"
-}
-
-func (n *NullObject) toJSON() string {
-	return "null"
-}
-
-func builtInNullClassMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Class methods --------------------------------------------------------
+func builtinNullClassMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			Name: "new",
 			Fn: func(receiver Object) builtinMethodBody {
@@ -50,8 +31,9 @@ func builtInNullClassMethods() []*BuiltInMethodObject {
 	}
 }
 
-func builtInNullInstanceMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Instance methods -----------------------------------------------------
+func builtinNullInstanceMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			// Returns true: the flipped boolean value of nil object.
 			//
@@ -147,4 +129,33 @@ func builtInNullInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
+}
+
+// Internal functions ===================================================
+
+// Functions for initialization -----------------------------------------
+
+func (vm *VM) initNullClass() *RClass {
+	nc := vm.initializeClass(classes.NullClass, false)
+	nc.setBuiltinMethods(builtinNullInstanceMethods(), false)
+	nc.setBuiltinMethods(builtinNullClassMethods(), true)
+	NULL = &NullObject{baseObj: &baseObj{class: nc}}
+	return nc
+}
+
+// Polymorphic helper functions -----------------------------------------
+
+// Returns the object
+func (n *NullObject) Value() interface{} {
+	return nil
+}
+
+// Returns the object's name as the string format
+func (n *NullObject) toString() string {
+	return "nil"
+}
+
+// Alias of toString
+func (n *NullObject) toJSON() string {
+	return "null"
 }

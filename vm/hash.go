@@ -3,26 +3,13 @@ package vm
 import (
 	"bytes"
 	"fmt"
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
 	"reflect"
 	"sort"
 	"strings"
+
+	"github.com/goby-lang/goby/vm/classes"
+	"github.com/goby-lang/goby/vm/errors"
 )
-
-func (vm *VM) initHashObject(pairs map[string]Object) *HashObject {
-	return &HashObject{
-		baseObj: &baseObj{class: vm.topLevelClass(classes.HashClass)},
-		Pairs:   pairs,
-	}
-}
-
-func (vm *VM) initHashClass() *RClass {
-	hc := vm.initializeClass(classes.HashClass, false)
-	hc.setBuiltInMethods(builtinHashInstanceMethods(), false)
-	hc.setBuiltInMethods(builtinHashClassMethods(), true)
-	return hc
-}
 
 // HashObject represents hash instances
 // Hash is a collection of key-value pair, which works like a dictionary.
@@ -57,89 +44,9 @@ type HashObject struct {
 	Pairs map[string]Object
 }
 
-func (h *HashObject) Value() interface{} {
-	return h.Pairs
-}
-
-// Polymorphic helper functions -----------------------------------------
-func (h *HashObject) toString() string {
-	var out bytes.Buffer
-	var pairs []string
-
-	for _, key := range h.sortedKeys() {
-		// TODO: Improve this conditional statement
-		if _, isString := h.Pairs[key].(*StringObject); isString {
-			pairs = append(pairs, fmt.Sprintf("%s: \"%s\"", key, h.Pairs[key].toString()))
-		} else {
-			pairs = append(pairs, fmt.Sprintf("%s: %s", key, h.Pairs[key].toString()))
-		}
-	}
-
-	out.WriteString("{ ")
-	out.WriteString(strings.Join(pairs, ", "))
-	out.WriteString(" }")
-
-	return out.String()
-}
-
-func (h *HashObject) toJSON() string {
-	var out bytes.Buffer
-	var values []string
-	pairs := h.Pairs
-	out.WriteString("{")
-
-	for key, value := range pairs {
-		values = append(values, generateJSONFromPair(key, value))
-	}
-
-	out.WriteString(strings.Join(values, ","))
-	out.WriteString("}")
-	return out.String()
-}
-
-func (h *HashObject) length() int {
-	return len(h.Pairs)
-}
-
-func (h *HashObject) sortedKeys() []string {
-	var arr []string
-	for k := range h.Pairs {
-		arr = append(arr, k)
-	}
-	sort.Strings(arr)
-	return arr
-}
-
-func (h *HashObject) copy() Object {
-	elems := map[string]Object{}
-
-	for k, v := range h.Pairs {
-		elems[k] = v
-	}
-
-	newHash := &HashObject{
-		baseObj: &baseObj{class: h.class},
-		Pairs:   elems,
-	}
-
-	return newHash
-}
-
-// Other helper functions ----------------------------------------------
-func generateJSONFromPair(key string, v Object) string {
-	var data string
-	var out bytes.Buffer
-
-	out.WriteString(data)
-	out.WriteString("\"" + key + "\"")
-	out.WriteString(":")
-	out.WriteString(v.toJSON())
-
-	return out.String()
-}
-
-func builtinHashClassMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Class methods --------------------------------------------------------
+func builtinHashClassMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			Name: "new",
 			Fn: func(receiver Object) builtinMethodBody {
@@ -151,8 +58,9 @@ func builtinHashClassMethods() []*BuiltInMethodObject {
 	}
 }
 
-func builtinHashInstanceMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Instance methods -----------------------------------------------------
+func builtinHashInstanceMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			// Retrieves the value (object) that corresponds to the key specified.
 			// Returns `nil` when specifying a nonexistent key.
@@ -288,7 +196,7 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 					for _, k := range keys {
 						obj := t.vm.initStringObject(k)
 						arrOfKeys = append(arrOfKeys, obj)
-						t.builtInMethodYield(blockFrame, obj)
+						t.builtinMethodYield(blockFrame, obj)
 					}
 
 					return t.vm.initArrayObject(arrOfKeys)
@@ -328,7 +236,7 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 					for _, k := range keys {
 						value := h.Pairs[k]
 						arrOfValues = append(arrOfValues, value)
-						t.builtInMethodYield(blockFrame, value)
+						t.builtinMethodYield(blockFrame, value)
 					}
 
 					return t.vm.initArrayObject(arrOfValues)
@@ -557,7 +465,7 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 
 					h := receiver.(*HashObject)
 					for k, v := range h.Pairs {
-						result := t.builtInMethodYield(blockFrame, v)
+						result := t.builtinMethodYield(blockFrame, v)
 						h.Pairs[k] = result.Target
 					}
 					return h
@@ -762,7 +670,7 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 					h := receiver.(*HashObject)
 					resultHash := make(map[string]Object)
 					for k, v := range h.Pairs {
-						result := t.builtInMethodYield(blockFrame, v)
+						result := t.builtinMethodYield(blockFrame, v)
 						resultHash[k] = result.Target
 					}
 					return t.vm.initHashObject(resultHash)
@@ -795,4 +703,112 @@ func builtinHashInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
+}
+
+// Internal functions ===================================================
+
+// Functions for initialization -----------------------------------------
+
+func (vm *VM) initHashObject(pairs map[string]Object) *HashObject {
+	return &HashObject{
+		baseObj: &baseObj{class: vm.topLevelClass(classes.HashClass)},
+		Pairs:   pairs,
+	}
+}
+
+func (vm *VM) initHashClass() *RClass {
+	hc := vm.initializeClass(classes.HashClass, false)
+	hc.setBuiltinMethods(builtinHashInstanceMethods(), false)
+	hc.setBuiltinMethods(builtinHashClassMethods(), true)
+	return hc
+}
+
+// Polymorphic helper functions -----------------------------------------
+
+// Returns the object
+func (h *HashObject) Value() interface{} {
+	return h.Pairs
+}
+
+// Returns the object's name as the string format
+func (h *HashObject) toString() string {
+	var out bytes.Buffer
+	var pairs []string
+
+	for _, key := range h.sortedKeys() {
+		// TODO: Improve this conditional statement
+		if _, isString := h.Pairs[key].(*StringObject); isString {
+			pairs = append(pairs, fmt.Sprintf("%s: \"%s\"", key, h.Pairs[key].toString()))
+		} else {
+			pairs = append(pairs, fmt.Sprintf("%s: %s", key, h.Pairs[key].toString()))
+		}
+	}
+
+	out.WriteString("{ ")
+	out.WriteString(strings.Join(pairs, ", "))
+	out.WriteString(" }")
+
+	return out.String()
+}
+
+// Returns the object's name as the JSON string format
+func (h *HashObject) toJSON() string {
+	var out bytes.Buffer
+	var values []string
+	pairs := h.Pairs
+	out.WriteString("{")
+
+	for key, value := range pairs {
+		values = append(values, generateJSONFromPair(key, value))
+	}
+
+	out.WriteString(strings.Join(values, ","))
+	out.WriteString("}")
+	return out.String()
+}
+
+// Returns the length of the hash
+func (h *HashObject) length() int {
+	return len(h.Pairs)
+}
+
+// Returns the sorted keys of the hash
+func (h *HashObject) sortedKeys() []string {
+	var arr []string
+	for k := range h.Pairs {
+		arr = append(arr, k)
+	}
+	sort.Strings(arr)
+	return arr
+}
+
+// Returns the duplicate of the Hash object
+func (h *HashObject) copy() Object {
+	elems := map[string]Object{}
+
+	for k, v := range h.Pairs {
+		elems[k] = v
+	}
+
+	newHash := &HashObject{
+		baseObj: &baseObj{class: h.class},
+		Pairs:   elems,
+	}
+
+	return newHash
+}
+
+// Other helper functions ----------------------------------------------
+
+// Return the JSON style strings of the Hash object
+func generateJSONFromPair(key string, v Object) string {
+	var data string
+	var out bytes.Buffer
+
+	out.WriteString(data)
+	out.WriteString("\"" + key + "\"")
+	out.WriteString(":")
+	out.WriteString(v.toJSON())
+
+	return out.String()
 }

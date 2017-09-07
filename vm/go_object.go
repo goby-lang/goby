@@ -2,22 +2,11 @@ package vm
 
 import (
 	"fmt"
+
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
 	"github.com/st0012/metago"
 )
-
-func (vm *VM) initGoObject(d interface{}) *GoObject {
-	return &GoObject{data: d, baseObj: &baseObj{class: vm.topLevelClass(classes.GoObjectClass)}}
-}
-
-func (vm *VM) initGoClass() *RClass {
-	sc := vm.initializeClass(classes.GoObjectClass, false)
-	sc.setBuiltInMethods(builtinGoClassMethods(), true)
-	sc.setBuiltInMethods(builtinGoInstanceMethods(), false)
-	vm.objectClass.setClassConstant(sc)
-	return sc
-}
 
 // GoObject ...
 type GoObject struct {
@@ -25,25 +14,14 @@ type GoObject struct {
 	data interface{}
 }
 
-// Polymorphic helper functions -----------------------------------------
-func (s *GoObject) toString() string {
-	return fmt.Sprintf("<GoObject: %p>", s)
+// Class methods --------------------------------------------------------
+func builtinGoClassMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{}
 }
 
-func (s *GoObject) toJSON() string {
-	return s.toString()
-}
-
-func (s *GoObject) Value() interface{} {
-	return s.data
-}
-
-func builtinGoClassMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{}
-}
-
-func builtinGoInstanceMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Instance methods -----------------------------------------------------
+func builtinGoInstanceMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			Name: "go_func",
 			Fn: func(receiver Object) builtinMethodBody {
@@ -71,11 +49,42 @@ func builtinGoInstanceMethods() []*BuiltInMethodObject {
 	}
 }
 
+// Internal functions ===================================================
+
+// Functions for initialization -----------------------------------------
+
+func (vm *VM) initGoObject(d interface{}) *GoObject {
+	return &GoObject{data: d, baseObj: &baseObj{class: vm.topLevelClass(classes.GoObjectClass)}}
+}
+
+func (vm *VM) initGoClass() *RClass {
+	sc := vm.initializeClass(classes.GoObjectClass, false)
+	sc.setBuiltinMethods(builtinGoClassMethods(), true)
+	sc.setBuiltinMethods(builtinGoInstanceMethods(), false)
+	vm.objectClass.setClassConstant(sc)
+	return sc
+}
+
+// Polymorphic helper functions -----------------------------------------
+
+func (s *GoObject) Value() interface{} {
+	return s.data
+}
+func (s *GoObject) toString() string {
+	return fmt.Sprintf("<GoObject: %p>", s)
+}
+
+func (s *GoObject) toJSON() string {
+	return s.toString()
+}
+
+// Other helper functions -----------------------------------------------
+
 func convertToGoFuncArgs(args []Object) ([]interface{}, error) {
 	funcArgs := []interface{}{}
 
 	for _, arg := range args {
-		v, ok := arg.(builtInType)
+		v, ok := arg.(builtinType)
 
 		if ok {
 			switch v := v.(type) {

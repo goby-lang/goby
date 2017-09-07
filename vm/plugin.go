@@ -2,42 +2,17 @@ package vm
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
-	"github.com/st0012/metago"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"plugin"
 	"reflect"
 	"strings"
+
+	"github.com/goby-lang/goby/vm/classes"
+	"github.com/goby-lang/goby/vm/errors"
+	"github.com/st0012/metago"
 )
-
-func (vm *VM) initPluginObject(fn string, p *plugin.Plugin) *PluginObject {
-	return &PluginObject{fn: fn, plugin: p, baseObj: &baseObj{class: vm.topLevelClass(classes.PluginClass)}}
-}
-
-func initPluginClass(vm *VM) {
-	pc := vm.initializeClass(classes.PluginClass, false)
-	pc.setBuiltInMethods(builtinPluginClassMethods(), true)
-	pc.setBuiltInMethods(builtinPluginInstanceMethods(), false)
-	vm.objectClass.setClassConstant(pc)
-
-	vm.execGobyLib("plugin.gb")
-}
-
-type pluginContext struct {
-	pkgs  []*pkg
-	funcs []*function
-}
-
-func (c *pluginContext) importPkg(prefix, name string) {
-	c.pkgs = append(c.pkgs, &pkg{Prefix: prefix, Name: name})
-}
-
-func (c *pluginContext) addFunc(prefix, name string) {
-	c.funcs = append(c.funcs, &function{Prefix: prefix, Name: name})
-}
 
 // PluginObject is a special type that contains a Go's plugin
 type PluginObject struct {
@@ -46,80 +21,9 @@ type PluginObject struct {
 	plugin *plugin.Plugin
 }
 
-// Polymorphic helper functions -----------------------------------------
-func (p *PluginObject) toString() string {
-	return "<Plugin: " + p.fn + ">"
-}
-
-func (p *PluginObject) toJSON() string {
-	return p.toString()
-}
-
-func setPluginContext(context Object) *pluginContext {
-	pc := &pluginContext{pkgs: []*pkg{}, funcs: []*function{}}
-
-	funcs, _ := context.instanceVariableGet("@functions")
-	pkgs, _ := context.instanceVariableGet("@packages")
-
-	fs := funcs.(*ArrayObject)
-	ps := pkgs.(*ArrayObject)
-
-	for _, f := range fs.Elements {
-		fInfos := f.(*HashObject)
-		prefix := fInfos.Pairs["prefix"].(*StringObject).value
-		name := fInfos.Pairs["name"].(*StringObject).value
-
-		pc.addFunc(prefix, name)
-	}
-
-	for _, p := range ps.Elements {
-		pInfos := p.(*HashObject)
-		prefix := pInfos.Pairs["prefix"].(*StringObject).value
-		name := pInfos.Pairs["name"].(*StringObject).value
-
-		pc.importPkg(prefix, name)
-	}
-
-	return pc
-}
-
-// exists returns whether the given file or directory exists or not
-func fileExists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return true, err
-}
-
-func compileAndOpenPlugin(soName, fileName string) (*plugin.Plugin, error) {
-	// Open plugin first
-	p, err := plugin.Open(soName)
-
-	// If there's any issue open a plugin, assume it's not well compiled
-	if err != nil {
-		cmd := exec.Command("go", "build", "-buildmode=plugin", "-o", soName, fileName)
-		out, err := cmd.CombinedOutput()
-
-		if err != nil {
-			return nil, fmt.Errorf("Error: %s from %s", string(out), strings.Join(cmd.Args, " "))
-		}
-
-		p, err = plugin.Open(soName)
-
-		if err != nil {
-			return nil, fmt.Errorf("Error occurs when open %s package: %s", soName, err.Error())
-		}
-	}
-
-	return p, nil
-}
-
-func builtinPluginClassMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Class methods --------------------------------------------------------
+func builtinPluginClassMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			Name: "new",
 			Fn: func(receiver Object) builtinMethodBody {
@@ -160,8 +64,9 @@ func builtinPluginClassMethods() []*BuiltInMethodObject {
 	}
 }
 
-func builtinPluginInstanceMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Instance methods -----------------------------------------------------
+func builtinPluginInstanceMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			Name: "compile",
 			Fn: func(receiver Object) builtinMethodBody {
@@ -255,4 +160,115 @@ func builtinPluginInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
+}
+
+// Internal functions ===================================================
+
+// Functions for initialization -----------------------------------------
+
+func (vm *VM) initPluginObject(fn string, p *plugin.Plugin) *PluginObject {
+	return &PluginObject{fn: fn, plugin: p, baseObj: &baseObj{class: vm.topLevelClass(classes.PluginClass)}}
+}
+
+func initPluginClass(vm *VM) {
+	pc := vm.initializeClass(classes.PluginClass, false)
+	pc.setBuiltinMethods(builtinPluginClassMethods(), true)
+	pc.setBuiltinMethods(builtinPluginInstanceMethods(), false)
+	vm.objectClass.setClassConstant(pc)
+
+	vm.execGobyLib("plugin.gb")
+}
+
+// Polymorphic helper functions -----------------------------------------
+
+// Returns the object's name as the string format
+func (p *PluginObject) toString() string {
+	return "<Plugin: " + p.fn + ">"
+}
+
+// Alias of toString
+func (p *PluginObject) toJSON() string {
+	return p.toString()
+}
+
+// Other helper functions -----------------------------------------------
+
+func setPluginContext(context Object) *pluginContext {
+	pc := &pluginContext{pkgs: []*pkg{}, funcs: []*function{}}
+
+	funcs, _ := context.instanceVariableGet("@functions")
+	pkgs, _ := context.instanceVariableGet("@packages")
+
+	fs := funcs.(*ArrayObject)
+	ps := pkgs.(*ArrayObject)
+
+	for _, f := range fs.Elements {
+		fInfos := f.(*HashObject)
+		prefix := fInfos.Pairs["prefix"].(*StringObject).value
+		name := fInfos.Pairs["name"].(*StringObject).value
+
+		pc.addFunc(prefix, name)
+	}
+
+	for _, p := range ps.Elements {
+		pInfos := p.(*HashObject)
+		prefix := pInfos.Pairs["prefix"].(*StringObject).value
+		name := pInfos.Pairs["name"].(*StringObject).value
+
+		pc.importPkg(prefix, name)
+	}
+
+	return pc
+}
+
+// exists returns whether the given file or directory exists or not
+func fileExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return true, err
+}
+
+func compileAndOpenPlugin(soName, fileName string) (*plugin.Plugin, error) {
+	// Open plugin first
+	p, err := plugin.Open(soName)
+
+	// If there's any issue open a plugin, assume it's not well compiled
+	if err != nil {
+		cmd := exec.Command("go", "build", "-buildmode=plugin", "-o", soName, fileName)
+		out, err := cmd.CombinedOutput()
+
+		if err != nil {
+			return nil, fmt.Errorf("Error: %s from %s", string(out), strings.Join(cmd.Args, " "))
+		}
+
+		p, err = plugin.Open(soName)
+
+		if err != nil {
+			return nil, fmt.Errorf("Error occurs when open %s package: %s", soName, err.Error())
+		}
+	}
+
+	return p, nil
+}
+
+// Plugin context =======================================================
+
+type pluginContext struct {
+	pkgs  []*pkg
+	funcs []*function
+}
+
+// Polymorphic helper functions -----------------------------------------
+
+func (c *pluginContext) importPkg(prefix, name string) {
+	c.pkgs = append(c.pkgs, &pkg{Prefix: prefix, Name: name})
+}
+
+func (c *pluginContext) addFunc(prefix, name string) {
+	c.funcs = append(c.funcs, &function{Prefix: prefix, Name: name})
 }

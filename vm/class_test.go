@@ -204,7 +204,7 @@ func TestDefClassMethod(t *testing.T) {
 	}
 }
 
-func TestBuiltInClassMonkeyPatching(t *testing.T) {
+func TestBuiltinClassMonkeyPatching(t *testing.T) {
 	input := `
 	class String
 	  def buz

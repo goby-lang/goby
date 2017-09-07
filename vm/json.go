@@ -2,22 +2,17 @@ package vm
 
 import (
 	"encoding/json"
+	"strconv"
+
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
-	"strconv"
 )
 
 type jsonObj map[string]interface{}
 
-func initJSONClass(vm *VM) {
-	class := vm.initializeClass("JSON", false)
-	class.setBuiltInMethods(builtInJSONClassMethods(), true)
-	class.setBuiltInMethods(builtInJSONInstanceMethods(), false)
-	vm.objectClass.setClassConstant(class)
-}
-
-func builtInJSONClassMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Class methods --------------------------------------------------------
+func builtinJSONClassMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			Name: "parse",
 			Fn: func(receiver Object) builtinMethodBody {
@@ -97,10 +92,23 @@ func builtInJSONClassMethods() []*BuiltInMethodObject {
 	}
 }
 
-func builtInJSONInstanceMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{}
+// Instance methods -----------------------------------------------------
+func builtinJSONInstanceMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{}
 }
 
+// Internal functions ===================================================
+
+// Functions for initialization -----------------------------------------
+
+func initJSONClass(vm *VM) {
+	class := vm.initializeClass("JSON", false)
+	class.setBuiltinMethods(builtinJSONClassMethods(), true)
+	class.setBuiltinMethods(builtinJSONInstanceMethods(), false)
+	vm.objectClass.setClassConstant(class)
+}
+
+// Polymorphic helper functions -----------------------------------------
 func (v *VM) convertJSONToHashObj(j jsonObj) Object {
 	objectMap := map[string]Object{}
 
@@ -128,7 +136,7 @@ func (v *VM) convertJSONToHashObj(j jsonObj) Object {
 			}
 
 			objectMap[key] = v.initArrayObject(objs)
-		// Single json object
+			// Single json object
 		case map[string]interface{}:
 			objectMap[key] = v.convertJSONToHashObj(jsonValue)
 		default:

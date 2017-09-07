@@ -58,7 +58,7 @@ func initClassClass() *RClass {
 	classClass.class = classClass
 	classClass.singletonClass = singletonClass
 
-	classClass.setBuiltInMethods(builtinClassClassMethods(), true)
+	classClass.setBuiltinMethods(builtinClassClassMethods(), true)
 
 	return classClass
 }
@@ -86,13 +86,13 @@ func initObjectClass(c *RClass) *RClass {
 	objectClass.pseudoSuperClass = objectClass
 	c.inherits(objectClass)
 
-	objectClass.setBuiltInMethods(builtinCommonInstanceMethods(), true)
-	objectClass.setBuiltInMethods(builtinCommonInstanceMethods(), false)
+	objectClass.setBuiltinMethods(builtinCommonInstanceMethods(), true)
+	objectClass.setBuiltinMethods(builtinCommonInstanceMethods(), false)
 
 	return objectClass
 }
 
-type builtInType interface {
+type builtinType interface {
 	Value() interface{}
 	Object
 }
@@ -140,7 +140,7 @@ func (c *RClass) inherits(sc *RClass) {
 	c.singletonClass.pseudoSuperClass = sc.singletonClass
 }
 
-func (c *RClass) setBuiltInMethods(methodList []*BuiltInMethodObject, classMethods bool) {
+func (c *RClass) setBuiltinMethods(methodList []*BuiltinMethodObject, classMethods bool) {
 	for _, m := range methodList {
 		c.Methods.set(m.Name, m)
 	}
@@ -274,8 +274,8 @@ func (c *RClass) setAttrAccessor(args interface{}) {
 }
 
 // Other helper functions -----------------------------------------------
-func generateAttrWriteMethod(attrName string) *BuiltInMethodObject {
-	return &BuiltInMethodObject{
+func generateAttrWriteMethod(attrName string) *BuiltinMethodObject {
+	return &BuiltinMethodObject{
 		Name: attrName + "=",
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -286,8 +286,8 @@ func generateAttrWriteMethod(attrName string) *BuiltInMethodObject {
 	}
 }
 
-func generateAttrReadMethod(attrName string) *BuiltInMethodObject {
-	return &BuiltInMethodObject{
+func generateAttrReadMethod(attrName string) *BuiltinMethodObject {
+	return &BuiltinMethodObject{
 		Name: attrName,
 		Fn: func(receiver Object) builtinMethodBody {
 			return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -304,8 +304,8 @@ func generateAttrReadMethod(attrName string) *BuiltInMethodObject {
 }
 
 // Built in methods
-func builtinCommonInstanceMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+func builtinCommonInstanceMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			Name: "singleton_class",
 			Fn: func(receiver Object) builtinMethodBody {
@@ -606,7 +606,7 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 					newT := t.vm.newThread()
 
 					go func() {
-						newT.builtInMethodYield(blockFrame, args...)
+						newT.builtinMethodYield(blockFrame, args...)
 					}()
 
 					// We need to pop this frame from main thread manually,
@@ -731,8 +731,8 @@ func builtinCommonInstanceMethods() []*BuiltInMethodObject {
 	}
 }
 
-func builtinClassClassMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+func builtinClassClassMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			// Creates instance variables and corresponding methods that return the value of
 			// each instance variable and assign an argument to each instance variable.
