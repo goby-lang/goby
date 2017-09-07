@@ -40,6 +40,18 @@ func TestHTTPClientObject(t *testing.T) {
 
 		res.body
 		`, "POST Hi Again"},
+		{`
+		require "net/http"
+
+		c = Net::HTTP::Client.new
+
+		res = c.send do |req|
+			req.url = "http://127.0.0.1:3000/error"
+			req.method = "GET"
+		end
+
+		res.status_code
+		`, 404},
 	}
 
 	//block until server is ready
@@ -53,34 +65,26 @@ func TestHTTPClientObject(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
-/*
-func TestHTTPClientObjectFail(t *testing.T) {
-	//blocking channel
-	c := make(chan bool, 1)
 
-	//server to test off of
-	go startTestServer(c)
+func TestHTTPClientObjectFail(t *testing.T) {
 
 	testsFail := []errorTestCase{
 		{`
 		require "net/http"
 
-		Net::HTTP::Client.new("http://127.0.0.1:3000/error")
-		`, "InternalError: 404 Not Found", 4},
-		{`
-		require "net/http"
+		c = Net::HTTP::Client.new
 
-		Net::HTTP.post("http://127.0.0.1:3000/error", "text/plain", "Let me down")
-		`, "InternalError: 404 Not Found", 4},
-		{`
-		require "net/http"
+		res = c.send do |req|
+			req.url = "http://127.0.0.1:3001"
+			req.method = "GET"
+		end
 
-		Net::HTTP.post("http://127.0.0.1:3001", "text/plain", "Let me down")
-		`, "InternalError: Post http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: getsockopt: connection refused", 4},
+		res
+		`, "InternalError: Could not get response: Get http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: getsockopt: connection refused", 6},
 	}
 
 	//block until server is ready
-	<-c
+	//<-c
 
 	for i, tt := range testsFail {
 		v := initTestVM()
@@ -90,4 +94,3 @@ func TestHTTPClientObjectFail(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
-*/

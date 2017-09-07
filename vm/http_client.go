@@ -37,17 +37,18 @@ func builtinHTTPClientClassMethods() []*BuiltInMethodObject {
 
 					goReq, err := requestGobyToGo(req)
 					if err != nil {
-						return t.vm.initErrorObject(gerrors.ArgumentError, "Could not parse request object %s", err.Error())
+						return t.vm.initErrorObject(gerrors.ArgumentError, "Request object incomplete object %s", err)
 					}
 
 					resp, err := goClient.Do(goReq)
 					if err != nil {
-						return t.vm.initErrorObject(gerrors.InternalError, "Could not get response: %s", err.Error())
+						fmt.Println("do error: ", err)
+						return t.vm.initErrorObject(gerrors.InternalError, "Could not get response: %s", err)
 					}
 
 					gobyResp, err := responseGoToGoby(t, resp)
 					if err != nil {
-						return t.vm.initErrorObject(gerrors.InternalError, "Could not read response: %s", err.Error())
+						return t.vm.initErrorObject(gerrors.InternalError, "Could not read response: %s", err)
 					}
 
 					return gobyResp
