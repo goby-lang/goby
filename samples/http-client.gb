@@ -1,3 +1,10 @@
+require "net/http"
 
+c = Net::HTTP::Client.new
 
-puts("hello")
+res = c.send do |req|
+  req.url = "https://google.com"
+  req.method = "GET"
+end
+
+puts res.body
