@@ -9,8 +9,8 @@ import (
 
 func initDBClass(vm *VM) {
 	pg := vm.initializeClass("DB", false)
-	pg.setBuiltInMethods(builtInDBClassMethods(), true)
-	pg.setBuiltInMethods(builtInDBInstanceMethods(), false)
+	pg.setBuiltinMethods(builtinDBClassMethods(), true)
+	pg.setBuiltinMethods(builtinDBInstanceMethods(), false)
 	vm.objectClass.setClassConstant(pg)
 
 	vm.execGobyLib("db.gb")
@@ -33,8 +33,8 @@ func getDBConn(t *thread, receiver Object) (*sqlx.DB, error) {
 	return conn, nil
 }
 
-func builtInDBClassMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+func builtinDBClassMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			// The get_connection method returns a connection object which requires the name of the driver
 			// and the source which specifies the parameter including the name of the database and the
@@ -90,8 +90,8 @@ func builtInDBClassMethods() []*BuiltInMethodObject {
 	}
 }
 
-func builtInDBInstanceMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+func builtinDBInstanceMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			// The close method closes the connection of the DB instance
 			//
@@ -144,7 +144,7 @@ func builtInDBInstanceMethods() []*BuiltInMethodObject {
 					execArgs := []interface{}{}
 
 					for _, arg := range args[1:] {
-						execArgs = append(execArgs, arg.(builtInType).Value())
+						execArgs = append(execArgs, arg.(builtinType).Value())
 					}
 
 					_, err = conn.Exec(queryString, execArgs...)
@@ -202,7 +202,7 @@ func builtInDBInstanceMethods() []*BuiltInMethodObject {
 					execArgs := []interface{}{}
 
 					for _, arg := range args[1:] {
-						execArgs = append(execArgs, arg.(builtInType).Value())
+						execArgs = append(execArgs, arg.(builtinType).Value())
 					}
 
 					// The reason I implement this way: https://github.com/lib/pq/issues/24
@@ -265,7 +265,7 @@ func builtInDBInstanceMethods() []*BuiltInMethodObject {
 					execArgs := []interface{}{}
 
 					for _, arg := range args[1:] {
-						execArgs = append(execArgs, arg.(builtInType).Value())
+						execArgs = append(execArgs, arg.(builtinType).Value())
 					}
 
 					rows, err := conn.Queryx(queryString, execArgs...)

@@ -2,33 +2,10 @@ package vm
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/vm/classes"
 	"sync"
+
+	"github.com/goby-lang/goby/vm/classes"
 )
-
-func (vm *VM) initChannelClass() *RClass {
-	class := vm.initializeClass(classes.ChannelClass, false)
-	class.setBuiltInMethods(builtinChannelClassMethods(), true)
-	class.setBuiltInMethods(builtinChannelInstanceMethods(), false)
-	return class
-}
-
-type objectMap struct {
-	store *sync.Map
-}
-
-func (m *objectMap) storeObj(obj Object) int {
-	m.store.Store(obj.id(), obj)
-
-	return obj.id()
-}
-
-// storeObj store objects into the container map
-// and update containerCount at the same time
-func (m *objectMap) retrieveObj(num int) Object {
-	obj, _ := m.store.Load(num)
-	return obj.(Object)
-}
 
 // ChannelObject represents a goby channel, which carries a golang channel
 type ChannelObject struct {
@@ -36,26 +13,9 @@ type ChannelObject struct {
 	Chan chan int
 }
 
-func (co *ChannelObject) Value() interface{} {
-	return co.Chan
-}
-
-// Polymorphic helper functions -----------------------------------------
-func (co *ChannelObject) toString() string {
-	return fmt.Sprintf("<Channel: %p>", co.Chan)
-}
-
-func (co *ChannelObject) toJSON() string {
-	return co.toString()
-}
-
-func (co *ChannelObject) copy() Object {
-	newC := &ChannelObject{baseObj: &baseObj{class: co.class}, Chan: make(chan int)}
-	return newC
-}
-
-func builtinChannelClassMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Class methods --------------------------------------------------------
+func builtinChannelClassMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			Name: "new",
 			Fn: func(receiver Object) builtinMethodBody {
@@ -68,8 +28,9 @@ func builtinChannelClassMethods() []*BuiltInMethodObject {
 	}
 }
 
-func builtinChannelInstanceMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Instance methods -----------------------------------------------------
+func builtinChannelInstanceMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			Name: "close",
 			Fn: func(receiver Object) builtinMethodBody {
@@ -109,4 +70,60 @@ func builtinChannelInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
+}
+
+// Internal functions ===================================================
+
+// Functions for initialization -----------------------------------------
+
+func (vm *VM) initChannelClass() *RClass {
+	class := vm.initializeClass(classes.ChannelClass, false)
+	class.setBuiltinMethods(builtinChannelClassMethods(), true)
+	class.setBuiltinMethods(builtinChannelInstanceMethods(), false)
+	return class
+}
+
+// Polymorphic helper functions -----------------------------------------
+
+// Returns the object
+func (co *ChannelObject) Value() interface{} {
+	return co.Chan
+}
+
+// Returns the object's name as the string format
+func (co *ChannelObject) toString() string {
+	return fmt.Sprintf("<Channel: %p>", co.Chan)
+}
+
+// Alias of toString
+func (co *ChannelObject) toJSON() string {
+	return co.toString()
+}
+
+// Returns the duplicate of the Array object
+func (co *ChannelObject) copy() Object {
+	newC := &ChannelObject{baseObj: &baseObj{class: co.class}, Chan: make(chan int)}
+	return newC
+}
+
+// objectMap ==========================================================
+
+type objectMap struct {
+	store *sync.Map
+}
+
+// Polymorphic helper functions -----------------------------------------
+
+// storeObj store objects into the container map
+// and update containerCount at the same time
+func (m *objectMap) storeObj(obj Object) int {
+	m.store.Store(obj.id(), obj)
+
+	return obj.id()
+}
+
+// retrieveObj returns the objects with the number specified
+func (m *objectMap) retrieveObj(num int) Object {
+	obj, _ := m.store.Load(num)
+	return obj.(Object)
 }

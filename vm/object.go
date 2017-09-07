@@ -18,21 +18,15 @@ type Object interface {
 	instanceVariableSet(string, Object) Object
 }
 
-// Pointer is used to point to an object. Variables should hold pointer instead of holding a object directly.
-type Pointer struct {
-	Target      Object
-	isNamespace bool
-}
-
-func (p *Pointer) returnClass() *RClass {
-	return p.Target.(*RClass)
-}
+// baseObj ==============================================================
 
 type baseObj struct {
 	class             *RClass
 	singletonClass    *RClass
 	InstanceVariables *environment
 }
+
+// Polymorphic helper functions -----------------------------------------
 
 // Class will return object's class
 func (b *baseObj) Class() *RClass {
@@ -88,6 +82,20 @@ func (b *baseObj) id() int {
 	return int(r)
 }
 
+// Pointer ==============================================================
+
+// Pointer is used to point to an object. Variables should hold pointer instead of holding a object directly.
+type Pointer struct {
+	Target      Object
+	isNamespace bool
+}
+
+func (p *Pointer) returnClass() *RClass {
+	return p.Target.(*RClass)
+}
+
+// RObject ==============================================================
+
 // RObject represents any non built-in class's instance.
 type RObject struct {
 	*baseObj
@@ -95,10 +103,13 @@ type RObject struct {
 }
 
 // Polymorphic helper functions -----------------------------------------
+
+// Returns the object's name as the string format
 func (ro *RObject) toString() string {
 	return "<Instance of: " + ro.class.Name + ">"
 }
 
+// Alias of toString
 func (ro *RObject) toJSON() string {
 	return ro.toString()
 }

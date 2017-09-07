@@ -39,7 +39,7 @@ func (is *instructionSet) define(line int, a *action, params ...interface{}) *in
 	return i
 }
 
-var builtInActions = map[operationType]*action{
+var builtinActions = map[operationType]*action{
 	bytecode.Pop: {
 		name: bytecode.Pop,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
@@ -463,8 +463,8 @@ var builtInActions = map[operationType]*action{
 			switch m := method.(type) {
 			case *MethodObject:
 				t.evalMethodObject(receiver, m, receiverPr, argCount, blockFrame)
-			case *BuiltInMethodObject:
-				t.evalBuiltInMethod(receiver, m, receiverPr, argCount, blockFrame)
+			case *BuiltinMethodObject:
+				t.evalBuiltinMethod(receiver, m, receiverPr, argCount, blockFrame)
 			case *Error:
 				t.returnError(errors.InternalError, m.toString())
 			}

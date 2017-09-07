@@ -12,6 +12,16 @@
 			"Rev": "41eea22f717c616615e1e59aa06cf831f9901f35"
 		},
 		{
+			"ImportPath": "github.com/dlclark/regexp2",
+			"Comment": "v1.1.6",
+			"Rev": "487489b64fb796de2e55f4e8a4ad1e145f80e957"
+		},
+		{
+			"ImportPath": "github.com/dlclark/regexp2/syntax",
+			"Comment": "v1.1.6",
+			"Rev": "487489b64fb796de2e55f4e8a4ad1e145f80e957"
+		},
+		{
 			"ImportPath": "github.com/fatih/structs",
 			"Comment": "v1.0-2-g74a29b9",
 			"Rev": "74a29b9fac7397d933f47e33eba94d2d83a464a2"

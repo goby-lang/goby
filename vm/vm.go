@@ -189,7 +189,7 @@ func (vm *VM) initConstants() {
 	vm.topLevelClass(classes.ObjectClass).setClassConstant(cClass)
 
 	// Init builtin classes
-	builtInClasses := []*RClass{
+	builtinClasses := []*RClass{
 		vm.initIntegerClass(),
 		vm.initStringClass(),
 		vm.initBoolClass(),
@@ -197,6 +197,7 @@ func (vm *VM) initConstants() {
 		vm.initArrayClass(),
 		vm.initHashClass(),
 		vm.initRangeClass(),
+		vm.initRegexpClass(),
 		vm.initMethodClass(),
 		vm.initChannelClass(),
 		vm.initGoClass(),
@@ -206,7 +207,7 @@ func (vm *VM) initConstants() {
 	// Init error classes
 	vm.initErrorClasses()
 
-	for _, c := range builtInClasses {
+	for _, c := range builtinClasses {
 		vm.objectClass.setClassConstant(c)
 	}
 

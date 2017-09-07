@@ -2,28 +2,15 @@ package vm
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
 	"regexp"
 	"strconv"
 	"strings"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/goby-lang/goby/vm/classes"
+	"github.com/goby-lang/goby/vm/errors"
 )
-
-func (vm *VM) initStringObject(value string) *StringObject {
-	return &StringObject{
-		baseObj: &baseObj{class: vm.topLevelClass(classes.StringClass)},
-		value:   value,
-	}
-}
-
-func (vm *VM) initStringClass() *RClass {
-	sc := vm.initializeClass(classes.StringClass, false)
-	sc.setBuiltInMethods(builtinStringInstanceMethods(), false)
-	sc.setBuiltInMethods(builtInStringClassMethods(), true)
-	return sc
-}
 
 // StringObject represents string instances
 // String object holds and manipulates a sequence of characters.
@@ -48,12 +35,9 @@ type StringObject struct {
 	value string
 }
 
-func (s *StringObject) Value() interface{} {
-	return s.value
-}
-
-func builtInStringClassMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Class methods --------------------------------------------------------
+func builtinStringClassMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			// The String.fmt implements formatted I/O with functions analogous to C's printf and scanf
 			// Currently only support plain "%s" formatting
@@ -107,8 +91,9 @@ func builtInStringClassMethods() []*BuiltInMethodObject {
 	}
 }
 
-func builtinStringInstanceMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Instance methods -----------------------------------------------------
+func builtinStringInstanceMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 
 		{
 			// Returns the concatenation of self and another String
@@ -617,7 +602,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					str := receiver.(*StringObject).value
 
 					for _, byte := range []byte(str) {
-						t.builtInMethodYield(blockFrame, t.vm.initIntegerObject(int(byte)))
+						t.builtinMethodYield(blockFrame, t.vm.initIntegerObject(int(byte)))
 					}
 
 					return t.vm.initStringObject(str)
@@ -655,7 +640,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					str := receiver.(*StringObject).value
 
 					for _, char := range []rune(str) {
-						t.builtInMethodYield(blockFrame, t.vm.initStringObject(string(char)))
+						t.builtinMethodYield(blockFrame, t.vm.initStringObject(string(char)))
 					}
 
 					return t.vm.initStringObject(str)
@@ -690,7 +675,7 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 					lineArray := strings.Split(str, "\n")
 
 					for _, line := range lineArray {
-						t.builtInMethodYield(blockFrame, t.vm.initStringObject(line))
+						t.builtinMethodYield(blockFrame, t.vm.initStringObject(line))
 					}
 
 					return t.vm.initStringObject(str)
@@ -1481,7 +1466,30 @@ func builtinStringInstanceMethods() []*BuiltInMethodObject {
 	}
 }
 
+// Internal functions ===================================================
+
+// Functions for initialization -----------------------------------------
+
+func (vm *VM) initStringObject(value string) *StringObject {
+	return &StringObject{
+		baseObj: &baseObj{class: vm.topLevelClass(classes.StringClass)},
+		value:   value,
+	}
+}
+
+func (vm *VM) initStringClass() *RClass {
+	sc := vm.initializeClass(classes.StringClass, false)
+	sc.setBuiltinMethods(builtinStringInstanceMethods(), false)
+	sc.setBuiltinMethods(builtinStringClassMethods(), true)
+	return sc
+}
+
 // Polymorphic helper functions -----------------------------------------
+
+// Returns the object
+func (s *StringObject) Value() interface{} {
+	return s.value
+}
 
 // toString just returns the value of string.
 func (s *StringObject) toString() string {
@@ -1493,6 +1501,7 @@ func (s *StringObject) toJSON() string {
 	return strconv.Quote(s.value)
 }
 
+// Returns true if the String values between receiver and parameter are equal
 func (s *StringObject) equal(e *StringObject) bool {
 	return s.value == e.value
 }
