@@ -1,39 +1,15 @@
 package vm
 
 import (
-	"github.com/goby-lang/goby/vm/errors"
 	"net/url"
 	"strconv"
+
+	"github.com/goby-lang/goby/vm/errors"
 )
 
-func initURIClass(vm *VM) {
-	uri := vm.initializeClass("URI", true)
-	http := vm.initializeClass("HTTP", false)
-	https := vm.initializeClass("HTTPS", false)
-	https.superClass = http
-	https.pseudoSuperClass = http
-	uri.setClassConstant(http)
-	uri.setClassConstant(https)
-	uri.setBuiltInMethods(builtinURIClassMethods(), true)
-
-	attrs := []Object{
-		vm.initStringObject("host"),
-		vm.initStringObject("path"),
-		vm.initStringObject("port"),
-		vm.initStringObject("query"),
-		vm.initStringObject("scheme"),
-		vm.initStringObject("user"),
-		vm.initStringObject("password"),
-	}
-
-	http.setAttrReader(attrs)
-	http.setAttrWriter(attrs)
-
-	vm.objectClass.setClassConstant(uri)
-}
-
-func builtinURIClassMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Class methods --------------------------------------------------------
+func builtinURIClassMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			// Returns a Net::HTTP or Net::HTTPS's instance (depends on the url scheme).
 			//
@@ -126,4 +102,34 @@ func builtinURIClassMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
+}
+
+// Internal functions ===================================================
+
+// Functions for initialization -----------------------------------------
+
+func initURIClass(vm *VM) {
+	uri := vm.initializeClass("URI", true)
+	http := vm.initializeClass("HTTP", false)
+	https := vm.initializeClass("HTTPS", false)
+	https.superClass = http
+	https.pseudoSuperClass = http
+	uri.setClassConstant(http)
+	uri.setClassConstant(https)
+	uri.setBuiltinMethods(builtinURIClassMethods(), true)
+
+	attrs := []Object{
+		vm.initStringObject("host"),
+		vm.initStringObject("path"),
+		vm.initStringObject("port"),
+		vm.initStringObject("query"),
+		vm.initStringObject("scheme"),
+		vm.initStringObject("user"),
+		vm.initStringObject("password"),
+	}
+
+	http.setAttrReader(attrs)
+	http.setAttrWriter(attrs)
+
+	vm.objectClass.setClassConstant(uri)
 }

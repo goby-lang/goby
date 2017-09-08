@@ -2,24 +2,10 @@ package vm
 
 import (
 	"fmt"
+
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
 )
-
-func (vm *VM) initRangeObject(start, end int) *RangeObject {
-	return &RangeObject{
-		baseObj: &baseObj{class: vm.topLevelClass(classes.RangeClass)},
-		Start:   start,
-		End:     end,
-	}
-}
-
-func (vm *VM) initRangeClass() *RClass {
-	rc := vm.initializeClass(classes.RangeClass, false)
-	rc.setBuiltInMethods(builtInRangeInstanceMethods(), false)
-	rc.setBuiltInMethods(builtInRangeClassMethods(), true)
-	return rc
-}
 
 // RangeObject is the built in range class
 // Range represents an interval: a set of values from the beginning to the end specified.
@@ -47,17 +33,9 @@ type RangeObject struct {
 	End   int
 }
 
-// Polymorphic helper functions -----------------------------------------
-func (ro *RangeObject) toString() string {
-	return fmt.Sprintf("(%d..%d)", ro.Start, ro.End)
-}
-
-func (ro *RangeObject) toJSON() string {
-	return ro.toString()
-}
-
-func builtInRangeClassMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Class methods --------------------------------------------------------
+func builtinRangeClassMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			Name: "new",
 			Fn: func(receiver Object) builtinMethodBody {
@@ -69,8 +47,9 @@ func builtInRangeClassMethods() []*BuiltInMethodObject {
 	}
 }
 
-func builtInRangeInstanceMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Instance methods -----------------------------------------------------
+func builtinRangeInstanceMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			// Returns a Boolean of compared two ranges
 			//
@@ -192,7 +171,7 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 							mid++
 						}
 
-						result := t.builtInMethodYield(blockFrame, t.vm.initIntegerObject(mid))
+						result := t.builtinMethodYield(blockFrame, t.vm.initIntegerObject(mid))
 
 						switch r := result.Target.(type) {
 						case *BooleanObject:
@@ -270,12 +249,12 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 					if ran.Start <= ran.End {
 						for i := ran.Start; i <= ran.End; i++ {
 							obj := t.vm.initIntegerObject(i)
-							t.builtInMethodYield(blockFrame, obj)
+							t.builtinMethodYield(blockFrame, obj)
 						}
 					} else {
 						for i := ran.End; i <= ran.Start; i++ {
 							obj := t.vm.initIntegerObject(i)
-							t.builtInMethodYield(blockFrame, obj)
+							t.builtinMethodYield(blockFrame, obj)
 						}
 					}
 					return ran
@@ -426,7 +405,7 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 					if ran.End >= ran.Start {
 						for i := ran.Start; i <= ran.End; i += stepValue {
 							obj := t.vm.initIntegerObject(i)
-							t.builtInMethodYield(blockFrame, obj)
+							t.builtinMethodYield(blockFrame, obj)
 						}
 
 						return ran
@@ -489,4 +468,35 @@ func builtInRangeInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
+}
+
+// Internal functions ===================================================
+
+// Functions for initialization -----------------------------------------
+
+func (vm *VM) initRangeObject(start, end int) *RangeObject {
+	return &RangeObject{
+		baseObj: &baseObj{class: vm.topLevelClass(classes.RangeClass)},
+		Start:   start,
+		End:     end,
+	}
+}
+
+func (vm *VM) initRangeClass() *RClass {
+	rc := vm.initializeClass(classes.RangeClass, false)
+	rc.setBuiltinMethods(builtinRangeInstanceMethods(), false)
+	rc.setBuiltinMethods(builtinRangeClassMethods(), true)
+	return rc
+}
+
+// Polymorphic helper functions -----------------------------------------
+
+// Returns the object's name
+func (ro *RangeObject) toString() string {
+	return fmt.Sprintf("(%d..%d)", ro.Start, ro.End)
+}
+
+// Alias of toString
+func (ro *RangeObject) toJSON() string {
+	return ro.toString()
 }

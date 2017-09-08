@@ -1,9 +1,6 @@
 package vm
 
 import (
-	"github.com/fatih/structs"
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/gorilla/mux"
 	"io"
 	"io/ioutil"
 	"log"
@@ -12,13 +9,11 @@ import (
 	"os/signal"
 	"path/filepath"
 	"unicode"
-)
 
-type response struct {
-	status      int
-	body        string
-	contentType string
-}
+	"github.com/fatih/structs"
+	"github.com/goby-lang/goby/vm/classes"
+	"github.com/gorilla/mux"
+)
 
 type request struct {
 	Method           string
@@ -32,20 +27,17 @@ type request struct {
 	TransferEncoding []string
 }
 
-func initSimpleServerClass(vm *VM) {
-	initHTTPClass(vm)
-	net := vm.loadConstant("Net", true)
-	simpleServer := vm.initializeClass("SimpleServer", false)
-	simpleServer.setBuiltInMethods(builtinSimpleServerInstanceMethods(), false)
-	net.setClassConstant(simpleServer)
-
-	vm.execGobyLib("net/simple_server.gb")
+type response struct {
+	status      int
+	body        string
+	contentType string
 }
 
-func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
+// Instance methods -----------------------------------------------------
+func builtinSimpleServerInstanceMethods() []*BuiltinMethodObject {
 	router := mux.NewRouter()
 
-	return []*BuiltInMethodObject{
+	return []*BuiltinMethodObject{
 		{
 			Name: "mount",
 			Fn: func(receiver Object) builtinMethodBody {
@@ -128,6 +120,22 @@ func builtinSimpleServerInstanceMethods() []*BuiltInMethodObject {
 	}
 }
 
+// Internal functions ===================================================
+
+// Functions for initialization -----------------------------------------
+
+func initSimpleServerClass(vm *VM) {
+	initHTTPClass(vm)
+	net := vm.loadConstant("Net", true)
+	simpleServer := vm.initializeClass("SimpleServer", false)
+	simpleServer.setBuiltinMethods(builtinSimpleServerInstanceMethods(), false)
+	net.setClassConstant(simpleServer)
+
+	vm.execGobyLib("net/simple_server.gb")
+}
+
+// Other helper functions -----------------------------------------------
+
 func newHandler(t *thread, blockFrame *callFrame) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Go creates one goroutine per request, so we also need to create a new Goby thread for every request.
@@ -135,7 +143,7 @@ func newHandler(t *thread, blockFrame *callFrame) func(http.ResponseWriter, *htt
 		res := httpResponseClass.initializeInstance()
 
 		req := initRequest(t, w, r)
-		result := thread.builtInMethodYield(blockFrame, req, res)
+		result := thread.builtinMethodYield(blockFrame, req, res)
 
 		if err, ok := result.Target.(*Error); ok {
 			log.Printf("Error: %s", err.Message)

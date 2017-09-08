@@ -1,13 +1,14 @@
 package vm
 
 import (
-	"github.com/goby-lang/goby/vm/errors"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path"
 	"strconv"
 	"strings"
+
+	"github.com/goby-lang/goby/vm/errors"
 )
 
 var (
@@ -15,44 +16,9 @@ var (
 	httpResponseClass *RClass
 )
 
-func initHTTPClass(vm *VM) {
-	net := vm.loadConstant("Net", true)
-	http := vm.initializeClass("HTTP", false)
-	http.setBuiltInMethods(builtinHTTPClassMethods(), true)
-	initRequestClass(vm, http)
-	initResponseClass(vm, http)
-
-	net.setClassConstant(http)
-
-	// Use Goby code to extend request and response classes.
-	vm.execGobyLib("net/http/response.gb")
-	vm.execGobyLib("net/http/request.gb")
-}
-
-func initRequestClass(vm *VM, hc *RClass) *RClass {
-	requestClass := vm.initializeClass("Request", false)
-	hc.setClassConstant(requestClass)
-	builtinHTTPRequestInstanceMethods := []*BuiltInMethodObject{}
-
-	requestClass.setBuiltInMethods(builtinHTTPRequestInstanceMethods, false)
-
-	httpRequestClass = requestClass
-	return requestClass
-}
-
-func initResponseClass(vm *VM, hc *RClass) *RClass {
-	responseClass := vm.initializeClass("Response", false)
-	hc.setClassConstant(responseClass)
-	builtinHTTPResponseInstanceMethods := []*BuiltInMethodObject{}
-
-	responseClass.setBuiltInMethods(builtinHTTPResponseInstanceMethods, false)
-
-	httpResponseClass = responseClass
-	return responseClass
-}
-
-func builtinHTTPClassMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Class methods --------------------------------------------------------
+func builtinHTTPClassMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			// Sends a GET request to the target and returns the HTTP response as a string.
 			Name: "get",
@@ -129,4 +95,44 @@ func builtinHTTPClassMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
+}
+
+// Internal functions ===================================================
+
+// Functions for initialization -----------------------------------------
+
+func initHTTPClass(vm *VM) {
+	net := vm.loadConstant("Net", true)
+	http := vm.initializeClass("HTTP", false)
+	http.setBuiltinMethods(builtinHTTPClassMethods(), true)
+	initRequestClass(vm, http)
+	initResponseClass(vm, http)
+
+	net.setClassConstant(http)
+
+	// Use Goby code to extend request and response classes.
+	vm.execGobyLib("net/http/response.gb")
+	vm.execGobyLib("net/http/request.gb")
+}
+
+func initRequestClass(vm *VM, hc *RClass) *RClass {
+	requestClass := vm.initializeClass("Request", false)
+	hc.setClassConstant(requestClass)
+	builtinHTTPRequestInstanceMethods := []*BuiltinMethodObject{}
+
+	requestClass.setBuiltinMethods(builtinHTTPRequestInstanceMethods, false)
+
+	httpRequestClass = requestClass
+	return requestClass
+}
+
+func initResponseClass(vm *VM, hc *RClass) *RClass {
+	responseClass := vm.initializeClass("Response", false)
+	hc.setClassConstant(responseClass)
+	builtinHTTPResponseInstanceMethods := []*BuiltinMethodObject{}
+
+	responseClass.setBuiltinMethods(builtinHTTPResponseInstanceMethods, false)
+
+	httpResponseClass = responseClass
+	return responseClass
 }

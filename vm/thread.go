@@ -68,7 +68,7 @@ func (t *thread) execInstruction(cf *callFrame, i *instruction) {
 	i.action.operation(t, cf, i.Params...)
 }
 
-func (t *thread) builtInMethodYield(blockFrame *callFrame, args ...Object) *Pointer {
+func (t *thread) builtinMethodYield(blockFrame *callFrame, args ...Object) *Pointer {
 	c := newCallFrame(blockFrame.instructionSet)
 	c.blockFrame = blockFrame
 	c.ep = blockFrame.ep
@@ -112,7 +112,7 @@ func (t *thread) retrieveBlock(cf *callFrame, args []interface{}) (blockFrame *c
 	return
 }
 
-func (t *thread) evalBuiltInMethod(receiver Object, method *BuiltInMethodObject, receiverPr, argCount int, blockFrame *callFrame) {
+func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPr, argCount int, blockFrame *callFrame) {
 	methodBody := method.Fn(receiver)
 	args := []Object{}
 	argPr := receiverPr + 1

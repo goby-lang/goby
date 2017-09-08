@@ -2,100 +2,14 @@ package vm
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
 	"io/ioutil"
 	"path"
 	"reflect"
 	"time"
+
+	"github.com/goby-lang/goby/vm/classes"
+	"github.com/goby-lang/goby/vm/errors"
 )
-
-// initializeClass is a common function for vm, which initializes and returns
-// a class instance with given class name.
-func (vm *VM) initializeClass(name string, isModule bool) *RClass {
-	class := vm.createRClass(name)
-	class.isModule = isModule
-	singletonClass := vm.createRClass(fmt.Sprintf("#<Class:%s>", name))
-	singletonClass.isSingleton = true
-	class.singletonClass = singletonClass
-	class.inherits(vm.objectClass)
-
-	return class
-}
-
-func (vm *VM) createRClass(className string) *RClass {
-	objectClass := vm.objectClass
-	classClass := vm.topLevelClass(classes.ClassClass)
-
-	return &RClass{
-		Name:             className,
-		Methods:          newEnvironment(),
-		pseudoSuperClass: objectClass,
-		superClass:       objectClass,
-		constants:        make(map[string]*Pointer),
-		isModule:         false,
-		baseObj:          &baseObj{class: classClass, InstanceVariables: newEnvironment()},
-	}
-}
-
-func initClassClass() *RClass {
-	classClass := &RClass{
-		Name:      classes.ClassClass,
-		Methods:   newEnvironment(),
-		constants: make(map[string]*Pointer),
-		baseObj:   &baseObj{},
-	}
-
-	singletonClass := &RClass{
-		Name:        "#<Class:Class>",
-		Methods:     newEnvironment(),
-		constants:   make(map[string]*Pointer),
-		isModule:    false,
-		baseObj:     &baseObj{class: classClass, InstanceVariables: newEnvironment()},
-		isSingleton: true,
-	}
-
-	classClass.class = classClass
-	classClass.singletonClass = singletonClass
-
-	classClass.setBuiltInMethods(builtinClassClassMethods(), true)
-
-	return classClass
-}
-
-func initObjectClass(c *RClass) *RClass {
-	objectClass := &RClass{
-		Name:      classes.ObjectClass,
-		Methods:   newEnvironment(),
-		constants: make(map[string]*Pointer),
-		baseObj:   &baseObj{class: c},
-	}
-
-	singletonClass := &RClass{
-		Name:        "#<Class:Object>",
-		Methods:     newEnvironment(),
-		constants:   make(map[string]*Pointer),
-		isModule:    false,
-		baseObj:     &baseObj{class: c, InstanceVariables: newEnvironment()},
-		isSingleton: true,
-		superClass:  c,
-	}
-
-	objectClass.singletonClass = singletonClass
-	objectClass.superClass = objectClass
-	objectClass.pseudoSuperClass = objectClass
-	c.inherits(objectClass)
-
-	objectClass.setBuiltInMethods(builtinCommonInstanceMethods(), true)
-	objectClass.setBuiltInMethods(builtinCommonInstanceMethods(), false)
-
-	return objectClass
-}
-
-type builtInType interface {
-	Value() interface{}
-	Object
-}
 
 // RClass represents normal (not built in) class object
 type RClass struct {
@@ -116,623 +30,14 @@ type RClass struct {
 	*baseObj
 }
 
-// ReturnName returns the name of the class
-func (c *RClass) ReturnName() string {
-	return c.Name
+type builtinType interface {
+	Value() interface{}
+	Object
 }
 
-// Polymorphic helper functions -----------------------------------------
-
-// TODO: Singleton class's inspect() should also mark if it's a singleton class explicitly.
-func (c *RClass) toString() string {
-	return c.Name
-}
-
-func (c *RClass) toJSON() string {
-	return c.toString()
-}
-
-// Common internal helper functions -------------------------------------
-func (c *RClass) inherits(sc *RClass) {
-	c.superClass = sc
-	c.pseudoSuperClass = sc
-	c.singletonClass.superClass = sc.singletonClass
-	c.singletonClass.pseudoSuperClass = sc.singletonClass
-}
-
-func (c *RClass) setBuiltInMethods(methodList []*BuiltInMethodObject, classMethods bool) {
-	for _, m := range methodList {
-		c.Methods.set(m.Name, m)
-	}
-
-	if classMethods {
-		for _, m := range methodList {
-			c.singletonClass.Methods.set(m.Name, m)
-		}
-	}
-}
-
-func (c *RClass) findMethod(methodName string) (method Object) {
-	if c.isSingleton {
-		method = c.superClass.lookupMethod(methodName)
-	} else {
-		method = c.SingletonClass().lookupMethod(methodName)
-	}
-
-	return
-}
-
-func (c *RClass) lookupMethod(methodName string) Object {
-	method, ok := c.Methods.get(methodName)
-
-	if !ok {
-		if c.superClass != nil && c.superClass != c {
-			if c.Name == classes.ClassClass {
-				return nil
-			}
-
-			return c.superClass.lookupMethod(methodName)
-		}
-
-		return nil
-	}
-
-	return method
-}
-
-func (c *RClass) lookupConstant(constName string, findInScope bool) *Pointer {
-	constant, ok := c.constants[constName]
-
-	if !ok {
-		if findInScope && c.scope != nil {
-			return c.scope.lookupConstant(constName, true)
-		}
-
-		if c.superClass != nil && c.Name != classes.ObjectClass {
-			return c.superClass.lookupConstant(constName, false)
-		}
-
-		return nil
-	}
-
-	return constant
-}
-
-func (c *RClass) setClassConstant(constant *RClass) {
-	c.constants[constant.Name] = &Pointer{Target: constant}
-}
-
-func (c *RClass) getClassConstant(constName string) (class *RClass) {
-	t := c.constants[constName].Target
-	class, ok := t.(*RClass)
-
-	if ok {
-		return
-	}
-
-	panic(constName + " is not a class.")
-}
-
-func (c *RClass) alreadyInherit(constant *RClass) bool {
-	if c.superClass == constant {
-		return true
-	}
-
-	if c.superClass.Name == classes.ObjectClass {
-		return false
-	}
-
-	return c.superClass.alreadyInherit(constant)
-}
-
-func (c *RClass) returnSuperClass() *RClass {
-	return c.pseudoSuperClass
-}
-
-func (c *RClass) initializeInstance() *RObject {
-	instance := &RObject{baseObj: &baseObj{class: c, InstanceVariables: newEnvironment()}}
-
-	return instance
-}
-
-func (c *RClass) setAttrWriter(args interface{}) {
-
-	switch args := args.(type) {
-	case []Object:
-		for _, attr := range args {
-			attrName := attr.(*StringObject).value
-			c.Methods.set(attrName+"=", generateAttrWriteMethod(attrName))
-		}
-	case []string:
-		for _, attrName := range args {
-			c.Methods.set(attrName+"=", generateAttrWriteMethod(attrName))
-		}
-	}
-
-}
-
-func (c *RClass) setAttrReader(args interface{}) {
-	switch args := args.(type) {
-	case []Object:
-		for _, attr := range args {
-			attrName := attr.(*StringObject).value
-			c.Methods.set(attrName, generateAttrReadMethod(attrName))
-		}
-	case []string:
-		for _, attrName := range args {
-			c.Methods.set(attrName, generateAttrReadMethod(attrName))
-		}
-	case string:
-		c.Methods.set(args, generateAttrReadMethod(args))
-	}
-
-}
-
-func (c *RClass) setAttrAccessor(args interface{}) {
-	c.setAttrReader(args)
-	c.setAttrWriter(args)
-}
-
-// Other helper functions -----------------------------------------------
-func generateAttrWriteMethod(attrName string) *BuiltInMethodObject {
-	return &BuiltInMethodObject{
-		Name: attrName + "=",
-		Fn: func(receiver Object) builtinMethodBody {
-			return func(t *thread, args []Object, blockFrame *callFrame) Object {
-				v := receiver.instanceVariableSet("@"+attrName, args[0])
-				return v
-			}
-		},
-	}
-}
-
-func generateAttrReadMethod(attrName string) *BuiltInMethodObject {
-	return &BuiltInMethodObject{
-		Name: attrName,
-		Fn: func(receiver Object) builtinMethodBody {
-			return func(t *thread, args []Object, blockFrame *callFrame) Object {
-				v, ok := receiver.instanceVariableGet("@" + attrName)
-
-				if ok {
-					return v
-				}
-
-				return NULL
-			}
-		},
-	}
-}
-
-// Built in methods
-func builtinCommonInstanceMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
-		{
-			Name: "singleton_class",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					return receiver.SingletonClass()
-				}
-			},
-		},
-		{
-			// General method for comparing equalty of the objects
-			//
-			// ```ruby
-			// 123 == 123   # => true
-			// 123 == "123" # => false
-			//
-			// # Hash will not concern about the key-value pair order
-			// { a: 1, b: 2 } == { a: 1, b: 2 } # => true
-			// { a: 1, b: 2 } == { b: 2, a: 1 } # => true
-			//
-			// # Hash key will be override if the key duplicated
-			// { a: 1, b: 2 } == { a: 2, b: 2, a: 1 } # => true
-			// { a: 1, b: 2 } == { a: 1, b: 2, a: 2 } # => false
-			//
-			// # Array will concern about the order of the elements
-			// [1, 2, 3] == [1, 2, 3] # => true
-			// [1, 2, 3] == [3, 2, 1] # => false
-			// ```
-			//
-			// @return [@boolean]
-			Name: "==",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					className := receiver.Class().Name
-					compareClassName := args[0].Class().Name
-
-					if className == compareClassName && reflect.DeepEqual(receiver, args[0]) {
-						return TRUE
-					}
-					return FALSE
-				}
-			},
-		}, {
-			// General method for comparing inequalty of the objects
-			//
-			// ```ruby
-			// 123 != 123   # => false
-			// 123 != "123" # => true
-			//
-			// # Hash will not concern about the key-value pair order
-			// { a: 1, b: 2 } != { a: 1, b: 2 } # => false
-			// { a: 1, b: 2 } != { b: 2, a: 1 } # => false
-			//
-			// # Hash key will be override if the key duplicated
-			// { a: 1, b: 2 } != { a: 2, b: 2, a: 1 } # => false
-			// { a: 1, b: 2 } != { a: 1, b: 2, a: 2 } # => true
-			//
-			// # Array will concern about the order of the elements
-			// [1, 2, 3] != [1, 2, 3] # => false
-			// [1, 2, 3] != [3, 2, 1] # => true
-			// ```
-			//
-			// @return [@boolean]
-			Name: "!=",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					className := receiver.Class().Name
-					compareClassName := args[0].Class().Name
-
-					if className == compareClassName && reflect.DeepEqual(receiver, args[0]) {
-						return FALSE
-					}
-					return TRUE
-				}
-			},
-		},
-		{
-			// Loads the given Goby library name without extension (mainly for modules), returning `true`
-			// if successful and `false` if the feature is already loaded.
-			//
-			// Currently, only the following embedded Goby libraries are targeted:
-			//
-			// - "file"
-			// - "net/http"
-			// - "net/simple_server"
-			// - "uri"
-			//
-			// ```ruby
-			// require("file")
-			// File.extname("foo.rb")
-			// ```
-			//
-			// TBD: the load paths for `require`
-			//
-			// @param filename [String] Quoted file name of the library, without extension
-			// @return [Boolean] Result of loading module
-			Name: "require",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					libName := args[0].(*StringObject).value
-					initFunc, ok := standardLibraries[libName]
-
-					if !ok {
-						return t.vm.initErrorObject(errors.InternalError, "Can't require \"%s\"", libName)
-					}
-
-					initFunc(t.vm)
-
-					return TRUE
-				}
-			},
-		},
-		{
-			// Loads the Goby library (mainly for modules) from the given local path plus name
-			// without extension from the current directory, returning `true` if successful,
-			// and `false` if the feature is already loaded.
-			//
-			// ```ruby
-			// require_relative("../test_fixtures/require_test/foo")
-			// fifty = Foo.bar(5)
-			// ```
-			//
-			// @param path/name [String] Quoted file path to library plus name, without extension
-			// @return [Boolean] Result of loading module
-			Name: "require_relative",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					callerDir := path.Dir(t.vm.currentFilePath())
-					filepath := args[0].(*StringObject).value
-
-					filepath = path.Join(callerDir, filepath)
-
-					file, err := ioutil.ReadFile(filepath + ".gb")
-
-					if err != nil {
-						return t.vm.initErrorObject(errors.InternalError, err.Error())
-					}
-
-					t.vm.execRequiredFile(filepath, file)
-
-					return TRUE
-				}
-			},
-		},
-		{
-			// Puts string literals or objects into stdout with a tailing line feed, converting into String
-			// if needed.
-			//
-			// ```ruby
-			// puts("foo", "bar")
-			// # => foo
-			// # => bar
-			// puts("baz", String.name)
-			// # => baz
-			// # => String
-			// puts("foo" + "bar")
-			// # => foobar
-			// ```
-			// TODO: interpolation is needed to be implemented.
-			//
-			// @param *args [Class] String literals, or other objects that can be converted into String.
-			// @return [Null]
-			Name: "puts",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					for _, arg := range args {
-						fmt.Println(arg.toString())
-					}
-
-					return NULL
-				}
-			},
-		},
-		{
-			// Returns the class of the object. Receiver cannot be omitted.
-			//
-			// FYI: You can convert the class into String with `#name`.
-			//
-			// ```ruby
-			// puts(100.class)         # => <Class:Integer>
-			// puts(100.class.name)    # => Integer
-			// puts("123".class)       # => <Class:String>
-			// puts("123".class.name)  # => String
-			// ```
-			//
-			// @param object [Object] Receiver (required)
-			// @return [Class] The class of the receiver
-			Name: "class",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					switch r := receiver.(type) {
-					case Object:
-						return r.Class()
-					default:
-						return &Error{Message: "Can't call class on %T" + string(r.Class().ReturnName())}
-					}
-				}
-			},
-		},
-		{
-			// Inverts the boolean value.
-			//
-			// ```ruby
-			// !true  # => false
-			// !false # => true
-			// ```
-			//
-			// @param object [Object] object that return boolean value to invert
-			// @return [Object] Inverted boolean value
-			Name: "!",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					return FALSE
-				}
-			},
-		},
-		{
-			// Suspends the current thread for duration (sec).
-			//
-			// **Note:** currently, parameter cannot be omitted, and only Integer can be specified.
-			//
-			// ```ruby
-			// a = sleep(2)
-			// puts(a)     # => 2
-			// ```
-			//
-			// @param sec [Integer] time to wait in sec
-			// @return [Integer] actual time slept in sec
-			Name: "sleep",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got: %d", len(args))
-					}
-
-					int := args[0].(*IntegerObject)
-					seconds := int.value
-					time.Sleep(time.Duration(seconds) * time.Second)
-					return int
-				}
-			},
-		},
-		{
-			// Returns object's string representation.
-			// @param n/a []
-			// @return [String] Object's string representation.
-			Name: "to_s",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					return t.vm.initStringObject(receiver.toString())
-				}
-			},
-		},
-		{
-			// Returns true if a block is given in the current context and `yield` is ready to call.
-			//
-			// **Note:** The method name does not end with '?' because the sign is unavalable in Goby for now.
-			//
-			// ```ruby
-			// class File
-			//   def self.open(filename, mode, perm)
-			//     file = new(filename, mode, perm)
-			//
-			//     if block_given?
-			//       yield(file)
-			//     end
-			//
-			//     file.close
-			//   end
-			// end
-			// ```
-			//
-			// @param n/a []
-			// @return [Boolean] true/false
-			Name: "block_given?",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					cf := t.callFrameStack.top()
-
-					if cf.blockFrame == nil {
-						return FALSE
-					}
-
-					return TRUE
-				}
-			},
-		},
-		{
-			Name: "thread",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if blockFrame == nil {
-						t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
-					}
-
-					newT := t.vm.newThread()
-
-					go func() {
-						newT.builtInMethodYield(blockFrame, args...)
-					}()
-
-					// We need to pop this frame from main thread manually,
-					// because the block's 'leave' instruction is running on other process
-					t.callFrameStack.pop()
-
-					return NULL
-				}
-			},
-		},
-		{
-			// Returns true if Object class is equal to the input argument class
-			//
-			// ```ruby
-			// "Hello".is_a?(String)            # => true
-			// 123.is_a?(Integer)               # => true
-			// [1, true, "String"].is_a?(Array) # => true
-			// { a: 1, b: 2 }.is_a?(Hash)       # => true
-			// "Hello".is_a?(Integer)           # => false
-			// 123.is_a?(Range)                 # => false
-			// (2..4).is_a?(Hash)               # => false
-			// nil.is_a?(Integer)               # => false
-			// ```
-			//
-			// @param n/a []
-			// @return [Boolean]
-			Name: "is_a?",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got: %d", len(args))
-					}
-
-					c := args[0]
-					gobyClass, ok := c.(*RClass)
-
-					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.ClassClass, c.Class().Name)
-					}
-
-					receiverClass := receiver.Class()
-
-					for {
-						if receiverClass.Name == gobyClass.Name {
-							return TRUE
-						}
-
-						if receiverClass.Name == classes.ObjectClass {
-							break
-						}
-
-						receiverClass = receiverClass.superClass
-					}
-					return FALSE
-				}
-			},
-		},
-		{
-			// Returns true if Object is nil
-			//
-			// ```ruby
-			// 123.nil?            # => false
-			// "String".nil?       # => false
-			// { a: 1, b: 2 }.nil? # => false
-			// (3..5).nil?         # => false
-			// nil.nil?            # => true  (See the implementation of Null#nil? in vm/null.go file)
-			// ```
-			//
-			// @param n/a []
-			// @return [Boolean]
-			Name: "nil?",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
-					}
-					return FALSE
-				}
-			},
-		},
-		{
-			Name: "instance_variable_get",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					arg, isStr := args[0].(*StringObject)
-
-					if !isStr {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
-					}
-
-					obj, ok := receiver.instanceVariableGet(arg.value)
-
-					if !ok {
-						return NULL
-					}
-
-					return obj
-				}
-			},
-		},
-		{
-			Name: "instance_variable_set",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 2 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 2 arguments. got: %d", len(args))
-					}
-
-					argName, isStr := args[0].(*StringObject)
-					obj := args[1]
-
-					if !isStr {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
-					}
-
-					receiver.instanceVariableSet(argName.value, obj)
-
-					return obj
-				}
-			},
-		},
-	}
-}
-
-func builtinClassClassMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Class methods --------------------------------------------------------
+func builtinClassCommonClassMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			// Creates instance variables and corresponding methods that return the value of
 			// each instance variable and assign an argument to each instance variable.
@@ -1072,6 +377,710 @@ func builtinClassClassMethods() []*BuiltInMethodObject {
 					return superClass
 				}
 			},
+		},
+	}
+}
+
+// Instance methods -----------------------------------------------------
+func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
+		{
+			Name: "singleton_class",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					return receiver.SingletonClass()
+				}
+			},
+		},
+		{
+			// General method for comparing equalty of the objects
+			//
+			// ```ruby
+			// 123 == 123   # => true
+			// 123 == "123" # => false
+			//
+			// # Hash will not concern about the key-value pair order
+			// { a: 1, b: 2 } == { a: 1, b: 2 } # => true
+			// { a: 1, b: 2 } == { b: 2, a: 1 } # => true
+			//
+			// # Hash key will be override if the key duplicated
+			// { a: 1, b: 2 } == { a: 2, b: 2, a: 1 } # => true
+			// { a: 1, b: 2 } == { a: 1, b: 2, a: 2 } # => false
+			//
+			// # Array will concern about the order of the elements
+			// [1, 2, 3] == [1, 2, 3] # => true
+			// [1, 2, 3] == [3, 2, 1] # => false
+			// ```
+			//
+			// @return [@boolean]
+			Name: "==",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					className := receiver.Class().Name
+					compareClassName := args[0].Class().Name
+
+					if className == compareClassName && reflect.DeepEqual(receiver, args[0]) {
+						return TRUE
+					}
+					return FALSE
+				}
+			},
+		}, {
+			// General method for comparing inequalty of the objects
+			//
+			// ```ruby
+			// 123 != 123   # => false
+			// 123 != "123" # => true
+			//
+			// # Hash will not concern about the key-value pair order
+			// { a: 1, b: 2 } != { a: 1, b: 2 } # => false
+			// { a: 1, b: 2 } != { b: 2, a: 1 } # => false
+			//
+			// # Hash key will be override if the key duplicated
+			// { a: 1, b: 2 } != { a: 2, b: 2, a: 1 } # => false
+			// { a: 1, b: 2 } != { a: 1, b: 2, a: 2 } # => true
+			//
+			// # Array will concern about the order of the elements
+			// [1, 2, 3] != [1, 2, 3] # => false
+			// [1, 2, 3] != [3, 2, 1] # => true
+			// ```
+			//
+			// @return [@boolean]
+			Name: "!=",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					className := receiver.Class().Name
+					compareClassName := args[0].Class().Name
+
+					if className == compareClassName && reflect.DeepEqual(receiver, args[0]) {
+						return FALSE
+					}
+					return TRUE
+				}
+			},
+		},
+		{
+			// Loads the given Goby library name without extension (mainly for modules), returning `true`
+			// if successful and `false` if the feature is already loaded.
+			//
+			// Currently, only the following embedded Goby libraries are targeted:
+			//
+			// - "file"
+			// - "net/http"
+			// - "net/simple_server"
+			// - "uri"
+			//
+			// ```ruby
+			// require("file")
+			// File.extname("foo.rb")
+			// ```
+			//
+			// TBD: the load paths for `require`
+			//
+			// @param filename [String] Quoted file name of the library, without extension
+			// @return [Boolean] Result of loading module
+			Name: "require",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					libName := args[0].(*StringObject).value
+					initFunc, ok := standardLibraries[libName]
+
+					if !ok {
+						return t.vm.initErrorObject(errors.InternalError, "Can't require \"%s\"", libName)
+					}
+
+					initFunc(t.vm)
+
+					return TRUE
+				}
+			},
+		},
+		{
+			// Loads the Goby library (mainly for modules) from the given local path plus name
+			// without extension from the current directory, returning `true` if successful,
+			// and `false` if the feature is already loaded.
+			//
+			// ```ruby
+			// require_relative("../test_fixtures/require_test/foo")
+			// fifty = Foo.bar(5)
+			// ```
+			//
+			// @param path/name [String] Quoted file path to library plus name, without extension
+			// @return [Boolean] Result of loading module
+			Name: "require_relative",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					callerDir := path.Dir(t.vm.currentFilePath())
+					filepath := args[0].(*StringObject).value
+
+					filepath = path.Join(callerDir, filepath)
+
+					file, err := ioutil.ReadFile(filepath + ".gb")
+
+					if err != nil {
+						return t.vm.initErrorObject(errors.InternalError, err.Error())
+					}
+
+					t.vm.execRequiredFile(filepath, file)
+
+					return TRUE
+				}
+			},
+		},
+		{
+			// Puts string literals or objects into stdout with a tailing line feed, converting into String
+			// if needed.
+			//
+			// ```ruby
+			// puts("foo", "bar")
+			// # => foo
+			// # => bar
+			// puts("baz", String.name)
+			// # => baz
+			// # => String
+			// puts("foo" + "bar")
+			// # => foobar
+			// ```
+			// TODO: interpolation is needed to be implemented.
+			//
+			// @param *args [Class] String literals, or other objects that can be converted into String.
+			// @return [Null]
+			Name: "puts",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					for _, arg := range args {
+						fmt.Println(arg.toString())
+					}
+
+					return NULL
+				}
+			},
+		},
+		{
+			// Returns the class of the object. Receiver cannot be omitted.
+			//
+			// FYI: You can convert the class into String with `#name`.
+			//
+			// ```ruby
+			// puts(100.class)         # => <Class:Integer>
+			// puts(100.class.name)    # => Integer
+			// puts("123".class)       # => <Class:String>
+			// puts("123".class.name)  # => String
+			// ```
+			//
+			// @param object [Object] Receiver (required)
+			// @return [Class] The class of the receiver
+			Name: "class",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					switch r := receiver.(type) {
+					case Object:
+						return r.Class()
+					default:
+						return &Error{Message: "Can't call class on %T" + string(r.Class().ReturnName())}
+					}
+				}
+			},
+		},
+		{
+			// Inverts the boolean value.
+			//
+			// ```ruby
+			// !true  # => false
+			// !false # => true
+			// ```
+			//
+			// @param object [Object] object that return boolean value to invert
+			// @return [Object] Inverted boolean value
+			Name: "!",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					return FALSE
+				}
+			},
+		},
+		{
+			// Suspends the current thread for duration (sec).
+			//
+			// **Note:** currently, parameter cannot be omitted, and only Integer can be specified.
+			//
+			// ```ruby
+			// a = sleep(2)
+			// puts(a)     # => 2
+			// ```
+			//
+			// @param sec [Integer] time to wait in sec
+			// @return [Integer] actual time slept in sec
+			Name: "sleep",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got: %d", len(args))
+					}
+
+					int := args[0].(*IntegerObject)
+					seconds := int.value
+					time.Sleep(time.Duration(seconds) * time.Second)
+					return int
+				}
+			},
+		},
+		{
+			// Returns object's string representation.
+			// @param n/a []
+			// @return [String] Object's string representation.
+			Name: "to_s",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					return t.vm.initStringObject(receiver.toString())
+				}
+			},
+		},
+		{
+			// Returns true if a block is given in the current context and `yield` is ready to call.
+			//
+			// **Note:** The method name does not end with '?' because the sign is unavalable in Goby for now.
+			//
+			// ```ruby
+			// class File
+			//   def self.open(filename, mode, perm)
+			//     file = new(filename, mode, perm)
+			//
+			//     if block_given?
+			//       yield(file)
+			//     end
+			//
+			//     file.close
+			//   end
+			// end
+			// ```
+			//
+			// @param n/a []
+			// @return [Boolean] true/false
+			Name: "block_given?",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					cf := t.callFrameStack.top()
+
+					if cf.blockFrame == nil {
+						return FALSE
+					}
+
+					return TRUE
+				}
+			},
+		},
+		{
+			Name: "thread",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if blockFrame == nil {
+						t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
+					}
+
+					newT := t.vm.newThread()
+
+					go func() {
+						newT.builtinMethodYield(blockFrame, args...)
+					}()
+
+					// We need to pop this frame from main thread manually,
+					// because the block's 'leave' instruction is running on other process
+					t.callFrameStack.pop()
+
+					return NULL
+				}
+			},
+		},
+		{
+			// Returns true if Object class is equal to the input argument class
+			//
+			// ```ruby
+			// "Hello".is_a?(String)            # => true
+			// 123.is_a?(Integer)               # => true
+			// [1, true, "String"].is_a?(Array) # => true
+			// { a: 1, b: 2 }.is_a?(Hash)       # => true
+			// "Hello".is_a?(Integer)           # => false
+			// 123.is_a?(Range)                 # => false
+			// (2..4).is_a?(Hash)               # => false
+			// nil.is_a?(Integer)               # => false
+			// ```
+			//
+			// @param n/a []
+			// @return [Boolean]
+			Name: "is_a?",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got: %d", len(args))
+					}
+
+					c := args[0]
+					gobyClass, ok := c.(*RClass)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.ClassClass, c.Class().Name)
+					}
+
+					receiverClass := receiver.Class()
+
+					for {
+						if receiverClass.Name == gobyClass.Name {
+							return TRUE
+						}
+
+						if receiverClass.Name == classes.ObjectClass {
+							break
+						}
+
+						receiverClass = receiverClass.superClass
+					}
+					return FALSE
+				}
+			},
+		},
+		{
+			// Returns true if Object is nil
+			//
+			// ```ruby
+			// 123.nil?            # => false
+			// "String".nil?       # => false
+			// { a: 1, b: 2 }.nil? # => false
+			// (3..5).nil?         # => false
+			// nil.nil?            # => true  (See the implementation of Null#nil? in vm/null.go file)
+			// ```
+			//
+			// @param n/a []
+			// @return [Boolean]
+			Name: "nil?",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
+					}
+					return FALSE
+				}
+			},
+		},
+		{
+			Name: "instance_variable_get",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					arg, isStr := args[0].(*StringObject)
+
+					if !isStr {
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+					}
+
+					obj, ok := receiver.instanceVariableGet(arg.value)
+
+					if !ok {
+						return NULL
+					}
+
+					return obj
+				}
+			},
+		},
+		{
+			Name: "instance_variable_set",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 2 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 2 arguments. got: %d", len(args))
+					}
+
+					argName, isStr := args[0].(*StringObject)
+					obj := args[1]
+
+					if !isStr {
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+					}
+
+					receiver.instanceVariableSet(argName.value, obj)
+
+					return obj
+				}
+			},
+		},
+	}
+}
+
+// Internal functions ===================================================
+
+// Functions for initialization -----------------------------------------
+
+// initializeClass is a common function for vm, which initializes and returns
+// a class instance with given class name.
+func (vm *VM) initializeClass(name string, isModule bool) *RClass {
+	class := vm.createRClass(name)
+	class.isModule = isModule
+	singletonClass := vm.createRClass(fmt.Sprintf("#<Class:%s>", name))
+	singletonClass.isSingleton = true
+	class.singletonClass = singletonClass
+	class.inherits(vm.objectClass)
+
+	return class
+}
+
+func (vm *VM) createRClass(className string) *RClass {
+	objectClass := vm.objectClass
+	classClass := vm.topLevelClass(classes.ClassClass)
+
+	return &RClass{
+		Name:             className,
+		Methods:          newEnvironment(),
+		pseudoSuperClass: objectClass,
+		superClass:       objectClass,
+		constants:        make(map[string]*Pointer),
+		isModule:         false,
+		baseObj:          &baseObj{class: classClass, InstanceVariables: newEnvironment()},
+	}
+}
+
+func initClassClass() *RClass {
+	classClass := &RClass{
+		Name:      classes.ClassClass,
+		Methods:   newEnvironment(),
+		constants: make(map[string]*Pointer),
+		baseObj:   &baseObj{},
+	}
+
+	singletonClass := &RClass{
+		Name:        "#<Class:Class>",
+		Methods:     newEnvironment(),
+		constants:   make(map[string]*Pointer),
+		isModule:    false,
+		baseObj:     &baseObj{class: classClass, InstanceVariables: newEnvironment()},
+		isSingleton: true,
+	}
+
+	classClass.class = classClass
+	classClass.singletonClass = singletonClass
+
+	classClass.setBuiltinMethods(builtinClassCommonClassMethods(), true)
+
+	return classClass
+}
+
+func initObjectClass(c *RClass) *RClass {
+	objectClass := &RClass{
+		Name:      classes.ObjectClass,
+		Methods:   newEnvironment(),
+		constants: make(map[string]*Pointer),
+		baseObj:   &baseObj{class: c},
+	}
+
+	singletonClass := &RClass{
+		Name:        "#<Class:Object>",
+		Methods:     newEnvironment(),
+		constants:   make(map[string]*Pointer),
+		isModule:    false,
+		baseObj:     &baseObj{class: c, InstanceVariables: newEnvironment()},
+		isSingleton: true,
+		superClass:  c,
+	}
+
+	objectClass.singletonClass = singletonClass
+	objectClass.superClass = objectClass
+	objectClass.pseudoSuperClass = objectClass
+	c.inherits(objectClass)
+
+	objectClass.setBuiltinMethods(builtinClassCommonInstanceMethods(), true)
+	objectClass.setBuiltinMethods(builtinClassCommonInstanceMethods(), false)
+
+	return objectClass
+}
+
+// Polymorphic helper functions -----------------------------------------
+
+// TODO: Remove the redundant functions
+// Returns the object's name as the string format
+func (c *RClass) ReturnName() string {
+	return c.Name
+}
+
+// TODO: Singleton class's inspect() should also mark if it's a singleton class explicitly.
+// Returns the object's name as the string format
+func (c *RClass) toString() string {
+	return c.Name
+}
+
+// Alias of toString
+func (c *RClass) toJSON() string {
+	return c.toString()
+}
+
+func (c *RClass) inherits(sc *RClass) {
+	c.superClass = sc
+	c.pseudoSuperClass = sc
+	c.singletonClass.superClass = sc.singletonClass
+	c.singletonClass.pseudoSuperClass = sc.singletonClass
+}
+
+func (c *RClass) setBuiltinMethods(methodList []*BuiltinMethodObject, classMethods bool) {
+	for _, m := range methodList {
+		c.Methods.set(m.Name, m)
+	}
+
+	if classMethods {
+		for _, m := range methodList {
+			c.singletonClass.Methods.set(m.Name, m)
+		}
+	}
+}
+
+func (c *RClass) findMethod(methodName string) (method Object) {
+	if c.isSingleton {
+		method = c.superClass.lookupMethod(methodName)
+	} else {
+		method = c.SingletonClass().lookupMethod(methodName)
+	}
+
+	return
+}
+
+func (c *RClass) lookupMethod(methodName string) Object {
+	method, ok := c.Methods.get(methodName)
+
+	if !ok {
+		if c.superClass != nil && c.superClass != c {
+			if c.Name == classes.ClassClass {
+				return nil
+			}
+
+			return c.superClass.lookupMethod(methodName)
+		}
+
+		return nil
+	}
+
+	return method
+}
+
+func (c *RClass) lookupConstant(constName string, findInScope bool) *Pointer {
+	constant, ok := c.constants[constName]
+
+	if !ok {
+		if findInScope && c.scope != nil {
+			return c.scope.lookupConstant(constName, true)
+		}
+
+		if c.superClass != nil && c.Name != classes.ObjectClass {
+			return c.superClass.lookupConstant(constName, false)
+		}
+
+		return nil
+	}
+
+	return constant
+}
+
+func (c *RClass) setClassConstant(constant *RClass) {
+	c.constants[constant.Name] = &Pointer{Target: constant}
+}
+
+func (c *RClass) getClassConstant(constName string) (class *RClass) {
+	t := c.constants[constName].Target
+	class, ok := t.(*RClass)
+
+	if ok {
+		return
+	}
+
+	panic(constName + " is not a class.")
+}
+
+func (c *RClass) alreadyInherit(constant *RClass) bool {
+	if c.superClass == constant {
+		return true
+	}
+
+	if c.superClass.Name == classes.ObjectClass {
+		return false
+	}
+
+	return c.superClass.alreadyInherit(constant)
+}
+
+func (c *RClass) returnSuperClass() *RClass {
+	return c.pseudoSuperClass
+}
+
+func (c *RClass) initializeInstance() *RObject {
+	instance := &RObject{baseObj: &baseObj{class: c, InstanceVariables: newEnvironment()}}
+
+	return instance
+}
+
+func (c *RClass) setAttrWriter(args interface{}) {
+
+	switch args := args.(type) {
+	case []Object:
+		for _, attr := range args {
+			attrName := attr.(*StringObject).value
+			c.Methods.set(attrName+"=", generateAttrWriteMethod(attrName))
+		}
+	case []string:
+		for _, attrName := range args {
+			c.Methods.set(attrName+"=", generateAttrWriteMethod(attrName))
+		}
+	}
+
+}
+
+func (c *RClass) setAttrReader(args interface{}) {
+	switch args := args.(type) {
+	case []Object:
+		for _, attr := range args {
+			attrName := attr.(*StringObject).value
+			c.Methods.set(attrName, generateAttrReadMethod(attrName))
+		}
+	case []string:
+		for _, attrName := range args {
+			c.Methods.set(attrName, generateAttrReadMethod(attrName))
+		}
+	case string:
+		c.Methods.set(args, generateAttrReadMethod(args))
+	}
+
+}
+
+func (c *RClass) setAttrAccessor(args interface{}) {
+	c.setAttrReader(args)
+	c.setAttrWriter(args)
+}
+
+// Other helper functions -----------------------------------------------
+
+func generateAttrWriteMethod(attrName string) *BuiltinMethodObject {
+	return &BuiltinMethodObject{
+		Name: attrName + "=",
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				v := receiver.instanceVariableSet("@"+attrName, args[0])
+				return v
+			}
+		},
+	}
+}
+
+func generateAttrReadMethod(attrName string) *BuiltinMethodObject {
+	return &BuiltinMethodObject{
+		Name: attrName,
+		Fn: func(receiver Object) builtinMethodBody {
+			return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				v, ok := receiver.instanceVariableGet("@" + attrName)
+
+				if ok {
+					return v
+				}
+
+				return NULL
+			}
 		},
 	}
 }
