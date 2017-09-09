@@ -1,13 +1,13 @@
 package vm
 
 import (
-	"strconv"
-	"net/http"
 	"errors"
-	"strings"
 	"fmt"
-	"io/ioutil"
 	gerrors "github.com/goby-lang/goby/vm/errors"
+	"io/ioutil"
+	"net/http"
+	"strconv"
+	"strings"
 )
 
 func builtinHTTPClientClassMethods() []*BuiltInMethodObject {
@@ -33,7 +33,6 @@ func builtinHTTPClientClassMethods() []*BuiltInMethodObject {
 						fmt.Printf("Error: %s", err.Message)
 						return err //a Error object
 					}
-
 
 					goReq, err := requestGobyToGo(req)
 					if err != nil {
@@ -69,16 +68,16 @@ func requestGobyToGo(gobyReq *RObject) (*http.Request, error) {
 
 	methodObj, ok := gobyReq.instanceVariableGet("@method")
 	if !ok {
-		return nil, errors.New("could not get method")
+		return nil, fmt.Errorf("could not get method")
 	}
 
 	method := methodObj.(*StringObject).value
 
 	var body string
-	if !(method == "GET" || method== "HEAD") {
+	if !(method == "GET" || method == "HEAD") {
 		bodyObj, ok := gobyReq.instanceVariableGet("@body")
 		if !ok {
-			return nil, errors.New("could not get body")
+			return nil, fmt.Errorf("could not get body")
 		}
 
 		body = bodyObj.(*StringObject).value
@@ -92,7 +91,7 @@ func responseGoToGoby(t *thread, goResp *http.Response) (*RObject, error) {
 	gobyResp := httpResponseClass.initializeInstance()
 
 	//attr_accessor :body, :status, :status_code, :protocol, :transfer_encoding, :http_version, :request_http_version, :request
-//attr_reader :headers
+	//attr_reader :headers
 
 	body, err := ioutil.ReadAll(goResp.Body)
 	if err != nil {
@@ -105,7 +104,6 @@ func responseGoToGoby(t *thread, goResp *http.Response) (*RObject, error) {
 	gobyResp.instanceVariableSet("@protocol", t.vm.initObjectFromGoType(goResp.Proto))
 	gobyResp.instanceVariableSet("@transfer_encoding", t.vm.initObjectFromGoType(goResp.TransferEncoding))
 
-
 	underHeaders := map[string]Object{}
 
 	for k, v := range goResp.Header {
@@ -113,7 +111,6 @@ func responseGoToGoby(t *thread, goResp *http.Response) (*RObject, error) {
 	}
 
 	gobyResp.instanceVariableSet("@headers", t.vm.initHashObject(underHeaders))
-
 
 	return gobyResp, nil
 }

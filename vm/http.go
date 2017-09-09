@@ -13,7 +13,7 @@ import (
 var (
 	httpRequestClass  *RClass
 	httpResponseClass *RClass
-	httpClientClass *RClass
+	httpClientClass   *RClass
 )
 
 func initHTTPClass(vm *VM) {
@@ -47,7 +47,7 @@ func initResponseClass(vm *VM, hc *RClass) *RClass {
 	hc.setClassConstant(responseClass)
 	builtinHTTPResponseInstanceMethods := []*BuiltInMethodObject{}
 
-	responseClass.setBuiltInMethods(builtinHTTPResponseInstanceMethods, true)
+	responseClass.setBuiltInMethods(builtinHTTPResponseInstanceMethods, false)
 
 	httpResponseClass = responseClass
 	return responseClass
@@ -70,14 +70,22 @@ func builtinHTTPClassMethods() []*BuiltInMethodObject {
 			Name: "get",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					arg0, ok := args[0].(*StringObject)
+					if !ok {
+						return t.vm.initErrorObject(errors.ArgumentError, "Argument 0 must be a string")
+					}
 
-					uri, err := url.Parse(args[0].(*StringObject).value)
+					uri, err := url.Parse(arg0.value)
 
 					if len(args) > 1 {
 						var arr []string
 
 						for _, v := range args[1:] {
-							arr = append(arr, v.(*StringObject).value)
+							argn, ok := v.(*StringObject)
+							if !ok {
+								return t.vm.initErrorObject(errors.ArgumentError, "Splat arguments must be a string")
+							}
+							arr = append(arr, argn.value)
 						}
 
 						uri.Path = path.Join(arr...)
@@ -111,11 +119,23 @@ func builtinHTTPClassMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(errors.ArgumentError, "Expect 3 arguments. got=%v", strconv.Itoa(len(args)))
 					}
 
-					host := args[0].(*StringObject).value
+					arg0, ok := args[0].(*StringObject)
+					if !ok {
+						return t.vm.initErrorObject(errors.ArgumentError, "Argument 0 must be a string")
+					}
+					host := arg0.value
 
-					contentType := args[1].(*StringObject).value
+					arg1, ok := args[1].(*StringObject)
+					if !ok {
+						return t.vm.initErrorObject(errors.ArgumentError, "Argument 1 must be a string")
+					}
+					contentType := arg1.value
 
-					body := args[2].(*StringObject).value
+					arg2, ok := args[2].(*StringObject)
+					if !ok {
+						return t.vm.initErrorObject(errors.ArgumentError, "Argument 2 must be a string")
+					}
+					body := arg2.value
 
 					resp, err := http.Post(host, contentType, strings.NewReader(body))
 					if err != nil {
@@ -144,14 +164,17 @@ func builtinHTTPClassMethods() []*BuiltInMethodObject {
 						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 arguments. got=%v", strconv.Itoa(len(args)))
 					}
 
-					host := args[0].(*StringObject).value
+					host, ok := args[0].(*StringObject)
+					if !ok {
+						return t.vm.initErrorObject(errors.ArgumentError, "Argument 0 must be a string")
+					}
 
-					_, err := http.Head(host)
+					_, err := http.Head(host.value)
 					if err != nil {
 						return t.vm.initErrorObject(errors.InternalError, err.Error())
 					}
 
-					//TODO: make return value a map
+					//TODO: make return value a map of headers
 					return t.vm.initStringObject("")
 				}
 			},
