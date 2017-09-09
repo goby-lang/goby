@@ -112,6 +112,68 @@ func (t *thread) retrieveBlock(cf *callFrame, args []interface{}) (blockFrame *c
 	return
 }
 
+func (t *thread) sendMethod(methodName string, argCount int, blockFrame *callFrame) {
+	var method Object
+
+	if arr, ok := t.stack.top().Target.(*ArrayObject); ok && arr.splat {
+		// Pop array
+		t.stack.pop()
+		// Can't count array self, only the number of array elements
+		argCount = argCount - 1 + len(arr.Elements)
+		for _, elem := range arr.Elements {
+			t.stack.push(&Pointer{Target: elem})
+		}
+	}
+
+	argPr := t.sp - argCount
+	receiverPr := argPr - 1
+	receiver := t.stack.Data[receiverPr].Target
+
+	/*
+		Because send method adds additional object (method name) to the stack.
+		So we need to move down real arguments like
+
+		---------------
+		Foo (*vm.RClass) 0
+		bar (*vm.StringObject) 1
+		5 (*vm.IntegerObject) 2
+		---------------
+
+		To
+
+		-----------
+		Foo (*vm.RClass) 0
+		5 (*vm.IntegerObject) 1
+		---------
+
+		This also means we need to minus one on argument count and stack pointer
+	*/
+	for i := 0; i < argCount-1; i++ {
+		t.stack.Data[argPr+i] = t.stack.Data[argPr+i+1]
+	}
+
+	argCount--
+	t.sp--
+
+	method = receiver.findMethod(methodName)
+
+	if method == nil {
+		err := t.vm.initErrorObject(errors.UndefinedMethodError, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
+		t.stack.set(receiverPr, &Pointer{Target: err})
+		t.sp = argPr
+		return
+	}
+
+	switch m := method.(type) {
+	case *MethodObject:
+		t.evalMethodObject(receiver, m, receiverPr, argCount, blockFrame)
+	case *BuiltinMethodObject:
+		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, blockFrame)
+	case *Error:
+		t.returnError(errors.InternalError, m.toString())
+	}
+}
+
 func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPr, argCount int, blockFrame *callFrame) {
 	methodBody := method.Fn(receiver)
 	args := []Object{}

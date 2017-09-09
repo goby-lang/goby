@@ -170,11 +170,27 @@ func TestCustomClassConstructor(t *testing.T) {
 	v.checkSP(t, 0, 1)
 }
 
-func TestDefClassMethod(t *testing.T) {
+func TestSendMethod(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected int
+		expected interface{}
 	}{
+		{`
+		def foo
+		  10
+		end
+
+		send(:foo)
+		`, 10},
+		{`
+		class Foo
+		  def bar
+		    10
+		  end
+		end
+
+		Foo.new.send(:bar)
+		`, 10},
 		{`
 		class Foo
 		  def self.bar
@@ -182,17 +198,42 @@ func TestDefClassMethod(t *testing.T) {
 		  end
 		end
 
-		Foo.bar
+		Foo.send(:bar)
 		`, 10},
 		{`
-		module Foo
-		  def self.bar
-		    10
+		def foo(x)
+		  10 + x
+		end
+
+		send(:foo, 5)
+		`, 15},
+		{`
+		class Foo
+		  def bar(x)
+		    10 + x
 		  end
 		end
 
-		Foo.bar
-		`, 10},
+		Foo.new.send(:bar, 5)
+		`, 15},
+		{`
+		class Foo
+		  def self.bar(x)
+		    10 + x
+		  end
+		end
+
+		Foo.send(:bar, 5)
+		`, 15},
+		{`
+		class Math
+		  def self.add(x, y)
+		    x + y
+		  end
+		end
+
+		Math.send(:add, 10, 15)
+		`, 25},
 	}
 
 	for i, tt := range tests {
