@@ -147,6 +147,7 @@ func initHTTPClass(vm *VM) {
 	http.setBuiltinMethods(builtinHTTPClassMethods(), true)
 	initRequestClass(vm, http)
 	initResponseClass(vm, http)
+	initClientClass(vm, http)
 
 	net.setClassConstant(http)
 
