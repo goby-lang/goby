@@ -181,7 +181,7 @@ func initClientClass(vm *VM, hc *RClass) *RClass {
 	clientClass := vm.initializeClass("Client", false)
 	hc.setClassConstant(clientClass)
 
-	clientClass.setBuiltinMethods(builtinHTTPClientClassMethods(), false)
+	clientClass.setBuiltinMethods(builtinHTTPClientInstanceMethods(), false)
 
 	httpClientClass = clientClass
 	return clientClass

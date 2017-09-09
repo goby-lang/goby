@@ -10,10 +10,11 @@ import (
 	"strings"
 )
 
-func builtinHTTPClientClassMethods() []*BuiltInMethodObject {
+// Instance methods --------------------------------------------------------
+func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 	goClient := http.DefaultClient
 
-	return []*BuiltInMethodObject{
+	return []*BuiltinMethodObject{
 		{
 			// Sends a GET request to the target and returns the HTTP response as a string.
 			Name: "send",
@@ -27,7 +28,7 @@ func builtinHTTPClientClassMethods() []*BuiltInMethodObject {
 
 					req := httpRequestClass.initializeInstance()
 
-					result := t.builtInMethodYield(blockFrame, req)
+					result := t.builtinMethodYield(blockFrame, req)
 
 					if err, ok := result.Target.(*Error); ok {
 						fmt.Printf("Error: %s", err.Message)
@@ -86,6 +87,8 @@ func requestGobyToGo(gobyReq *RObject) (*http.Request, error) {
 	return http.NewRequest(method, u, strings.NewReader(body))
 
 }
+
+// Other helper functions -----------------------------------------------
 
 func responseGoToGoby(t *thread, goResp *http.Response) (*RObject, error) {
 	gobyResp := httpResponseClass.initializeInstance()
