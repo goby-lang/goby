@@ -2,24 +2,11 @@ package vm
 
 import (
 	"bytes"
+	"strings"
+
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
-	"strings"
 )
-
-func (vm *VM) initArrayObject(elements []Object) *ArrayObject {
-	return &ArrayObject{
-		baseObj:  &baseObj{class: vm.topLevelClass(classes.ArrayClass)},
-		Elements: elements,
-	}
-}
-
-func (vm *VM) initArrayClass() *RClass {
-	ac := vm.initializeClass(classes.ArrayClass, false)
-	ac.setBuiltInMethods(builtinArrayInstanceMethods(), false)
-	ac.setBuiltInMethods(builtInArrayClassMethods(), true)
-	return ac
-}
 
 // ArrayObject represents instance from Array class.
 // An array is a collection of different objects that are ordered and indexed.
@@ -30,109 +17,9 @@ type ArrayObject struct {
 	splat    bool
 }
 
-func (a *ArrayObject) Value() interface{} {
-	return a.Elements
-}
-
-// Polymorphic helper functions -----------------------------------------
-func (a *ArrayObject) toString() string {
-	var out bytes.Buffer
-
-	elements := []string{}
-	for _, e := range a.Elements {
-		_, isString := e.(*StringObject)
-		if isString {
-			elements = append(elements, "\""+e.toString()+"\"")
-		} else {
-			elements = append(elements, e.toString())
-		}
-	}
-
-	out.WriteString("[")
-	out.WriteString(strings.Join(elements, ", "))
-	out.WriteString("]")
-
-	return out.String()
-}
-
-func (a *ArrayObject) toJSON() string {
-	var out bytes.Buffer
-	elements := []string{}
-	for _, e := range a.Elements {
-		elements = append(elements, e.toJSON())
-	}
-
-	out.WriteString("[")
-	out.WriteString(strings.Join(elements, ", "))
-	out.WriteString("]")
-
-	return out.String()
-}
-
-// flatten returns a array of Objects that is one-dimensional flattening of Elements
-func (a *ArrayObject) flatten() []Object {
-	var result []Object
-
-	for _, e := range a.Elements {
-		arr, isArray := e.(*ArrayObject)
-		if isArray {
-			result = append(result, arr.flatten()...)
-		} else {
-			result = append(result, e)
-		}
-	}
-
-	return result
-}
-
-// length returns the length of array's elements
-func (a *ArrayObject) length() int {
-	return len(a.Elements)
-}
-
-// pop removes the last element in the array and returns it
-func (a *ArrayObject) pop() Object {
-	if len(a.Elements) < 1 {
-		return NULL
-	}
-
-	value := a.Elements[len(a.Elements)-1]
-	a.Elements = a.Elements[:len(a.Elements)-1]
-	return value
-}
-
-// push appends given object into array and returns the array object
-func (a *ArrayObject) push(objs []Object) *ArrayObject {
-	a.Elements = append(a.Elements, objs...)
-	return a
-}
-
-// shift removes the first element in the array and returns it
-func (a *ArrayObject) shift() Object {
-	if len(a.Elements) < 1 {
-		return NULL
-	}
-
-	value := a.Elements[0]
-	a.Elements = a.Elements[1:]
-	return value
-}
-
-func (a *ArrayObject) copy() Object {
-	elems := make([]Object, len(a.Elements))
-
-	copy(elems, a.Elements)
-
-	newArr := &ArrayObject{
-		baseObj:  &baseObj{class: a.class},
-		Elements: elems,
-	}
-
-	return newArr
-}
-
-func builtInArrayClassMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Class methods --------------------------------------------------------
+func builtinArrayClassMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			Name: "new",
 			Fn: func(receiver Object) builtinMethodBody {
@@ -144,8 +31,9 @@ func builtInArrayClassMethods() []*BuiltInMethodObject {
 	}
 }
 
-func builtinArrayInstanceMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Instance methods -----------------------------------------------------
+func builtinArrayInstanceMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			// Retrieves an object in an array using Integer index.
 			// The index starts from 0. It returns `null` if the given index is bigger than its size.
@@ -364,7 +252,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 
 					if blockFrame != nil {
 						for _, obj := range arr.Elements {
-							result := t.builtInMethodYield(blockFrame, obj)
+							result := t.builtinMethodYield(blockFrame, obj)
 							if result.Target.(*BooleanObject).value {
 								count++
 							}
@@ -434,7 +322,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 					arr := receiver.(*ArrayObject)
 
 					for _, obj := range arr.Elements {
-						t.builtInMethodYield(blockFrame, obj)
+						t.builtinMethodYield(blockFrame, obj)
 					}
 					return arr
 				}
@@ -455,7 +343,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 					arr := receiver.(*ArrayObject)
 
 					for i := range arr.Elements {
-						t.builtInMethodYield(blockFrame, t.vm.initIntegerObject(i))
+						t.builtinMethodYield(blockFrame, t.vm.initIntegerObject(i))
 					}
 					return arr
 				}
@@ -663,7 +551,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 					}
 
 					for i, obj := range arr.Elements {
-						result := t.builtInMethodYield(blockFrame, obj)
+						result := t.builtinMethodYield(blockFrame, obj)
 						elements[i] = result.Target
 					}
 
@@ -746,7 +634,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 					}
 
 					for i := start; i < len(arr.Elements); i++ {
-						result := t.builtInMethodYield(blockFrame, prev, arr.Elements[i])
+						result := t.builtinMethodYield(blockFrame, prev, arr.Elements[i])
 						prev = result.Target
 					}
 
@@ -817,7 +705,7 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 					}
 
 					for _, obj := range arr.Elements {
-						result := t.builtInMethodYield(blockFrame, obj)
+						result := t.builtinMethodYield(blockFrame, obj)
 						if result.Target.(*BooleanObject).value {
 							elements = append(elements, obj)
 						}
@@ -848,4 +736,128 @@ func builtinArrayInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
+}
+
+// Internal functions ===================================================
+
+// Functions for initialization -----------------------------------------
+
+func (vm *VM) initArrayObject(elements []Object) *ArrayObject {
+	return &ArrayObject{
+		baseObj:  &baseObj{class: vm.topLevelClass(classes.ArrayClass)},
+		Elements: elements,
+	}
+}
+
+func (vm *VM) initArrayClass() *RClass {
+	ac := vm.initializeClass(classes.ArrayClass, false)
+	ac.setBuiltinMethods(builtinArrayInstanceMethods(), false)
+	ac.setBuiltinMethods(builtinArrayClassMethods(), true)
+	return ac
+}
+
+// Polymorphic helper functions -----------------------------------------
+
+// Returns the elements from the object
+func (a *ArrayObject) Value() interface{} {
+	return a.Elements
+}
+
+// Returns the object's elements as the string format
+func (a *ArrayObject) toString() string {
+	var out bytes.Buffer
+
+	elements := []string{}
+	for _, e := range a.Elements {
+		_, isString := e.(*StringObject)
+		if isString {
+			elements = append(elements, "\""+e.toString()+"\"")
+		} else {
+			elements = append(elements, e.toString())
+		}
+	}
+
+	out.WriteString("[")
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteString("]")
+
+	return out.String()
+}
+
+// Returns the object's elements as the JSON string format
+func (a *ArrayObject) toJSON() string {
+	var out bytes.Buffer
+	elements := []string{}
+	for _, e := range a.Elements {
+		elements = append(elements, e.toJSON())
+	}
+
+	out.WriteString("[")
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteString("]")
+
+	return out.String()
+}
+
+// flatten returns a array of Objects that is one-dimensional flattening of Elements
+func (a *ArrayObject) flatten() []Object {
+	var result []Object
+
+	for _, e := range a.Elements {
+		arr, isArray := e.(*ArrayObject)
+		if isArray {
+			result = append(result, arr.flatten()...)
+		} else {
+			result = append(result, e)
+		}
+	}
+
+	return result
+}
+
+// length returns the length of array's elements
+func (a *ArrayObject) length() int {
+	return len(a.Elements)
+}
+
+// pop removes the last element in the array and returns it
+func (a *ArrayObject) pop() Object {
+	if len(a.Elements) < 1 {
+		return NULL
+	}
+
+	value := a.Elements[len(a.Elements)-1]
+	a.Elements = a.Elements[:len(a.Elements)-1]
+	return value
+}
+
+// push appends given object into array and returns the array object
+func (a *ArrayObject) push(objs []Object) *ArrayObject {
+	a.Elements = append(a.Elements, objs...)
+	return a
+}
+
+// shift removes the first element in the array and returns it
+func (a *ArrayObject) shift() Object {
+	if len(a.Elements) < 1 {
+		return NULL
+	}
+
+	value := a.Elements[0]
+	a.Elements = a.Elements[1:]
+	return value
+}
+
+// Returns the duplicate of the Array object
+func (a *ArrayObject) copy() Object {
+	elems := make([]Object, len(a.Elements))
+
+	copy(elems, a.Elements)
+
+	newArr := &ArrayObject{
+		baseObj:  &baseObj{class: a.class},
+		Elements: elems,
+	}
+
+	return newArr
 }

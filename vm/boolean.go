@@ -2,26 +2,9 @@ package vm
 
 import (
 	"fmt"
+
 	"github.com/goby-lang/goby/vm/classes"
 )
-
-var (
-	// TRUE is shared boolean object that represents true
-	TRUE *BooleanObject
-	// FALSE is shared boolean object that represents false
-	FALSE *BooleanObject
-)
-
-func (vm *VM) initBoolClass() *RClass {
-	b := vm.initializeClass(classes.BooleanClass, false)
-	b.setBuiltInMethods(builtinBooleanInstanceMethods(), false)
-	b.setBuiltInMethods(builtInBooleanClassMethods(), true)
-
-	TRUE = &BooleanObject{value: true, baseObj: &baseObj{class: b}}
-	FALSE = &BooleanObject{value: false, baseObj: &baseObj{class: b}}
-
-	return b
-}
 
 // BooleanObject represents boolean object in goby.
 // It includes `true` and `FALSE` which represents logically true and false value.
@@ -31,25 +14,16 @@ type BooleanObject struct {
 	value bool
 }
 
-func (b *BooleanObject) Value() interface{} {
-	return b.value
-}
+var (
+	// TRUE is shared boolean object that represents true
+	TRUE *BooleanObject
+	// FALSE is shared boolean object that represents false
+	FALSE *BooleanObject
+)
 
-// Polymorphic helper functions -----------------------------------------
-func (b *BooleanObject) toString() string {
-	return fmt.Sprintf("%t", b.value)
-}
-
-func (b *BooleanObject) toJSON() string {
-	return b.toString()
-}
-
-func (b *BooleanObject) equal(e *BooleanObject) bool {
-	return b.value == e.value
-}
-
-func builtInBooleanClassMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Class methods --------------------------------------------------------
+func builtinBooleanClassMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			Name: "new",
 			Fn: func(receiver Object) builtinMethodBody {
@@ -61,8 +35,9 @@ func builtInBooleanClassMethods() []*BuiltInMethodObject {
 	}
 }
 
-func builtinBooleanInstanceMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Instance methods -----------------------------------------------------
+func builtinBooleanInstanceMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			// Returns true if the receiver equals to the argument.
 			//
@@ -125,4 +100,41 @@ func builtinBooleanInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
+}
+
+// Internal functions ===================================================
+
+// Functions for initialization -----------------------------------------
+
+func (vm *VM) initBoolClass() *RClass {
+	b := vm.initializeClass(classes.BooleanClass, false)
+	b.setBuiltinMethods(builtinBooleanInstanceMethods(), false)
+	b.setBuiltinMethods(builtinBooleanClassMethods(), true)
+
+	TRUE = &BooleanObject{value: true, baseObj: &baseObj{class: b}}
+	FALSE = &BooleanObject{value: false, baseObj: &baseObj{class: b}}
+
+	return b
+}
+
+// Polymorphic helper functions -----------------------------------------
+
+// Returns the object
+func (b *BooleanObject) Value() interface{} {
+	return b.value
+}
+
+// Returns the object's name as the string format
+func (b *BooleanObject) toString() string {
+	return fmt.Sprintf("%t", b.value)
+}
+
+// Alias of toString
+func (b *BooleanObject) toJSON() string {
+	return b.toString()
+}
+
+// Returns true if the Boolean values between receiver and parameter are equal
+func (b *BooleanObject) equal(e *BooleanObject) bool {
+	return b.value == e.value
 }

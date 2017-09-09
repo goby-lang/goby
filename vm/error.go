@@ -2,8 +2,32 @@ package vm
 
 import (
 	"fmt"
+
 	"github.com/goby-lang/goby/vm/errors"
 )
+
+// Error class is actually a special struct to hold internal error types with messages.
+// Goby developers need not to take care of the struct.
+// Goby maintainers should consider using the appropriate error type.
+// Cannot create instances of Error class, or inherit Error class.
+//
+// The type of internal errors:
+//
+// * `InternalError`: default error type
+// * `ArgumentError`: an argument-related error
+// * `NameError`: a constant-related error
+// * `TypeError`: a type-related error
+// * `UndefinedMethodError`: undefined-method error
+// * `UnsupportedMethodError`: intentionally unsupported-method error
+//
+type Error struct {
+	*baseObj
+	Message string
+}
+
+// Internal functions ===================================================
+
+// Functions for initialization -----------------------------------------
 
 func (vm *VM) initErrorObject(errorType, format string, args ...interface{}) *Error {
 	errClass := vm.objectClass.getClassConstant(errorType)
@@ -35,30 +59,14 @@ func (vm *VM) initErrorClasses() {
 	}
 }
 
-// Error class is actually a special struct to hold internal error types with messages.
-// Goby developers need not to take care of the struct.
-// Goby maintainers should consider using the appropriate error type.
-// Cannot create instances of Error class, or inherit Error class.
-//
-// The type of internal errors:
-//
-// * `InternalError`: default error type
-// * `ArgumentError`: an argument-related error
-// * `NameError`: a constant-related error
-// * `TypeError`: a type-related error
-// * `UndefinedMethodError`: undefined-method error
-// * `UnsupportedMethodError`: intentionally unsupported-method error
-//
-type Error struct {
-	*baseObj
-	Message string
-}
-
 // Polymorphic helper functions -----------------------------------------
+
+// Returns the object's name as the string format
 func (e *Error) toString() string {
 	return "ERROR: " + e.Message
 }
 
+// Alias of toString
 func (e *Error) toJSON() string {
 	return e.toString()
 }

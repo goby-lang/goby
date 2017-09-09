@@ -2,13 +2,20 @@ package vm
 
 import (
 	"bufio"
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"syscall"
+
+	"github.com/goby-lang/goby/vm/classes"
+	"github.com/goby-lang/goby/vm/errors"
 )
+
+// FileObject is a special type that contains file pointer so we can keep track on target file.
+type FileObject struct {
+	*baseObj
+	File *os.File
+}
 
 var fileModeTable = map[string]int{
 	"r":  syscall.O_RDONLY,
@@ -17,40 +24,9 @@ var fileModeTable = map[string]int{
 	"w+": syscall.O_RDWR,
 }
 
-func (vm *VM) initFileClass() *RClass {
-	fc := vm.initializeClass(classes.FileClass, false)
-	fc.setBuiltInMethods(builtinFileClassMethods(), true)
-	fc.setBuiltInMethods(builtinFileInstanceMethods(), false)
-
-	vm.libFiles = append(vm.libFiles, "file.gb")
-
-	return fc
-}
-
-func (vm *VM) initFileObject(f *os.File) *FileObject {
-	return &FileObject{
-		baseObj: &baseObj{class: vm.topLevelClass(classes.FileClass)},
-		File:    f,
-	}
-}
-
-// FileObject is a special type that contains file pointer so we can keep track on target file.
-type FileObject struct {
-	*baseObj
-	File *os.File
-}
-
-// Polymorphic helper functions -----------------------------------------
-func (f *FileObject) toString() string {
-	return "<File: " + f.File.Name() + ">"
-}
-
-func (f *FileObject) toJSON() string {
-	return f.toString()
-}
-
-func builtinFileClassMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Class methods --------------------------------------------------------
+func builtinFileClassMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			// Returns the last element from path.
 			//
@@ -273,8 +249,9 @@ func builtinFileClassMethods() []*BuiltInMethodObject {
 	}
 }
 
-func builtinFileInstanceMethods() []*BuiltInMethodObject {
-	return []*BuiltInMethodObject{
+// Instance methods -----------------------------------------------------
+func builtinFileInstanceMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
 		{
 			Name: "close",
 			Fn: func(receiver Object) builtinMethodBody {
@@ -359,4 +336,37 @@ func builtinFileInstanceMethods() []*BuiltInMethodObject {
 			},
 		},
 	}
+}
+
+// Internal functions ===================================================
+
+// Functions for initialization -----------------------------------------
+
+func (vm *VM) initFileObject(f *os.File) *FileObject {
+	return &FileObject{
+		baseObj: &baseObj{class: vm.topLevelClass(classes.FileClass)},
+		File:    f,
+	}
+}
+
+func (vm *VM) initFileClass() *RClass {
+	fc := vm.initializeClass(classes.FileClass, false)
+	fc.setBuiltinMethods(builtinFileClassMethods(), true)
+	fc.setBuiltinMethods(builtinFileInstanceMethods(), false)
+
+	vm.libFiles = append(vm.libFiles, "file.gb")
+
+	return fc
+}
+
+// Polymorphic helper functions -----------------------------------------
+
+// Returns the object's name as the string format
+func (f *FileObject) toString() string {
+	return "<File: " + f.File.Name() + ">"
+}
+
+// Alias of toString
+func (f *FileObject) toJSON() string {
+	return f.toString()
 }
