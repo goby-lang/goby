@@ -319,7 +319,6 @@ func TestWhileStatement(t *testing.T) {
 		{
 			`
 			i = 10
-
 			while i < 0 do
 			  i = i + 1
 			end
@@ -366,6 +365,26 @@ func TestWhileStatement(t *testing.T) {
 		end
 		a[4]
 		`, 6},
+		// These are regression tests for #396
+		// Which should prevent parser from peeking the do keyword and consider identifier as method call
+		{`
+		i = 0
+		l = 10
+		while i < l do
+		  i += 1
+		end
+
+		i
+		`, 10},
+		{`
+		f = false
+		i = 0
+		while f do
+		  i += 1
+		end
+
+		i
+		`, 0},
 	}
 
 	for i, tt := range tests {
