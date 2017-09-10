@@ -18,11 +18,8 @@ func TestHTTPClientObject(t *testing.T) {
 		{`
 		require "net/http"
 
-		c = Net::HTTP::Client.new
-
-		res = c.send do |req|
-			req.url = "http://127.0.0.1:3000/index"
-			req.method = "GET"
+		res = Net::HTTP.start do |client|
+			res = client.get("http://127.0.0.1:3000/index")
 		end
 
 		res.body
@@ -30,12 +27,8 @@ func TestHTTPClientObject(t *testing.T) {
 		{`
 		require "net/http"
 
-		c = Net::HTTP::Client.new
-
-		res = c.send do |req|
-			req.url = "http://127.0.0.1:3000/index"
-			req.method = "POST"
-			req.body = "Hi Again"
+		res = Net::HTTP.start do |client|
+			client.post("http://127.0.0.1:3000/index", "text/plain", "Hi Again")
 		end
 
 		res.body
@@ -43,11 +36,8 @@ func TestHTTPClientObject(t *testing.T) {
 		{`
 		require "net/http"
 
-		c = Net::HTTP::Client.new
-
-		res = c.send do |req|
-			req.url = "http://127.0.0.1:3000/error"
-			req.method = "GET"
+		res = Net::HTTP.start do |client|
+			client.get("http://127.0.0.1:3000/error")
 		end
 
 		res.status_code
@@ -72,25 +62,19 @@ func TestHTTPClientObjectFail(t *testing.T) {
 		{`
 		require "net/http"
 
-		c = Net::HTTP::Client.new
-
-		res = c.send do |req|
-			req.url = "http://127.0.0.1:3001"
-			req.method = "GET"
+		res = Net::HTTP.start do |client|
+			client.get("http://127.0.0.1:3001")
 		end
 
 		res
-		`, "HTTPError: Could not complete request, Get http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: getsockopt: connection refused", 6},
+		`, "HTTPError: Could not complete request, Get http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: getsockopt: connection refused", 5},
 	}
-
-	//block until server is ready
-	//<-c
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 3)
 		v.checkSP(t, i, 1)
 	}
 }

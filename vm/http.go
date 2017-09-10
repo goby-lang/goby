@@ -140,6 +140,27 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 					return ret
 				}
 			},
+		}, {
+			// Sends a GET request to the target and returns the HTTP response as a string.
+			Name: "start",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 arguments. got=%v", strconv.Itoa(len(args)))
+					}
+
+					gobyClient := httpClientClass.initializeInstance()
+
+					result := t.builtinMethodYield(blockFrame, gobyClient)
+
+					if err, ok := result.Target.(*Error); ok {
+						return err //an Error object
+					}
+
+					return result.Target
+				}
+			},
 		},
 	}
 }
