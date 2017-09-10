@@ -725,12 +725,12 @@ func (vm *VM) initHashClass() *RClass {
 
 // Polymorphic helper functions -----------------------------------------
 
-// `Value` returns the object
+// Value returns the object
 func (h *HashObject) Value() interface{} {
 	return h.Pairs
 }
 
-// `toString` returns the object's name as the string format
+// toString returns the object's name as the string format
 func (h *HashObject) toString() string {
 	var out bytes.Buffer
 	var pairs []string
@@ -751,7 +751,7 @@ func (h *HashObject) toString() string {
 	return out.String()
 }
 
-// `toJSON` returns the object's name as the JSON string format
+// toJSON returns the object's name as the JSON string format
 func (h *HashObject) toJSON() string {
 	var out bytes.Buffer
 	var values []string

@@ -119,22 +119,22 @@ func (vm *VM) initBoolClass() *RClass {
 
 // Polymorphic helper functions -----------------------------------------
 
-// `Value` returns the object
+// Value returns the object
 func (b *BooleanObject) Value() interface{} {
 	return b.value
 }
 
-// `toString` returns the object's name as the string format
+// toString returns the object's name as the string format
 func (b *BooleanObject) toString() string {
 	return fmt.Sprintf("%t", b.value)
 }
 
-// `toJSON` just delegates to `toString`
+// toJSON just delegates to `toString`
 func (b *BooleanObject) toJSON() string {
 	return b.toString()
 }
 
-// `equal` returns true if the Boolean values between receiver and parameter are equal
+// equal returns true if the Boolean values between receiver and parameter are equal
 func (b *BooleanObject) equal(e *BooleanObject) bool {
 	return b.value == e.value
 }

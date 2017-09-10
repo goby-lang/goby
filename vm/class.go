@@ -899,19 +899,19 @@ func initObjectClass(c *RClass) *RClass {
 
 // TODO: Remove the redundant functions
 
-// `ReturnName` returns the object's name as the string format
+// ReturnName returns the object's name as the string format
 func (c *RClass) ReturnName() string {
 	return c.Name
 }
 
 // TODO: Singleton class's inspect() should also mark if it's a singleton class explicitly.
 
-// `toString` returns the object's name as the string format
+// toString returns the object's name as the string format
 func (c *RClass) toString() string {
 	return c.Name
 }
 
-// `toJSON` just delegates to `toString`
+// toJSON just delegates to `toString`
 func (c *RClass) toJSON() string {
 	return c.toString()
 }

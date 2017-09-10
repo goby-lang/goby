@@ -145,17 +145,17 @@ func (vm *VM) initNullClass() *RClass {
 
 // Polymorphic helper functions -----------------------------------------
 
-// `Value` returns the object
+// Value returns the object
 func (n *NullObject) Value() interface{} {
 	return nil
 }
 
-// `toString` returns the object's name as the string format
+// toString returns the object's name as the string format
 func (n *NullObject) toString() string {
 	return "nil"
 }
 
-// `toJSON` just delegates to `toString`
+// toJSON just delegates to toString
 func (n *NullObject) toJSON() string {
 	return "null"
 }

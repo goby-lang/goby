@@ -710,22 +710,22 @@ func (vm *VM) initIntegerClass() *RClass {
 
 // Polymorphic helper functions -----------------------------------------
 
-// `Value` returns the object
+// Value returns the object
 func (i *IntegerObject) Value() interface{} {
 	return i.value
 }
 
-// `toString` returns the object's name as the string format
+// toString returns the object's name as the string format
 func (i *IntegerObject) toString() string {
 	return strconv.Itoa(i.value)
 }
 
-// `toJSON` just delegates to `toString`
+// toJSON just delegates to toString
 func (i *IntegerObject) toJSON() string {
 	return i.toString()
 }
 
-// `equal` checks if the integer values between receiver and argument are equal
+// equal checks if the integer values between receiver and argument are equal
 func (i *IntegerObject) equal(e *IntegerObject) bool {
 	return i.value == e.value
 }

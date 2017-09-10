@@ -62,12 +62,12 @@ type builtinMethodBody func(*thread, []Object, *callFrame) Object
 
 // Polymorphic helper functions -----------------------------------------
 
-// `toString` returns the object's name as the string format
+// toString returns the object's name as the string format
 func (bim *BuiltinMethodObject) toString() string {
 	return "<BuiltinMethod: " + bim.Name + ">"
 }
 
-// `toJSON` just delegates to `toString`
+// toJSON just delegates to `toString`
 func (bim *BuiltinMethodObject) toJSON() string {
 	return bim.toString()
 }

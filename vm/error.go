@@ -61,12 +61,12 @@ func (vm *VM) initErrorClasses() {
 
 // Polymorphic helper functions -----------------------------------------
 
-// `toString` returns the object's name as the string format
+// toString returns the object's name as the string format
 func (e *Error) toString() string {
 	return "ERROR: " + e.Message
 }
 
-// `toJSON` just delegates to `toString`
+// toJSON just delegates to `toString`
 func (e *Error) toJSON() string {
 	return e.toString()
 }

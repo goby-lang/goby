@@ -1486,22 +1486,22 @@ func (vm *VM) initStringClass() *RClass {
 
 // Polymorphic helper functions -----------------------------------------
 
-// `Value` returns the object
+// Value returns the object
 func (s *StringObject) Value() interface{} {
 	return s.value
 }
 
-// `toString` returns the object's name as the string format
+// toString returns the object's name as the string format
 func (s *StringObject) toString() string {
 	return s.value
 }
 
-// `toJSON` just delegates to `toString`
+// toJSON just delegates to toString
 func (s *StringObject) toJSON() string {
 	return strconv.Quote(s.value)
 }
 
-// `equal` returns true if the String values between receiver and parameter are equal
+// equal returns true if the String values between receiver and parameter are equal
 func (s *StringObject) equal(e *StringObject) bool {
 	return s.value == e.value
 }

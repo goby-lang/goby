@@ -361,12 +361,12 @@ func (vm *VM) initFileClass() *RClass {
 
 // Polymorphic helper functions -----------------------------------------
 
-// `toString` returns the object's name as the string format
+// toString returns the object's name as the string format
 func (f *FileObject) toString() string {
 	return "<File: " + f.File.Name() + ">"
 }
 
-// `toJSON` just delegates to `toString`
+// toJSON just delegates to `toString`
 func (f *FileObject) toJSON() string {
 	return f.toString()
 }

@@ -491,12 +491,12 @@ func (vm *VM) initRangeClass() *RClass {
 
 // Polymorphic helper functions -----------------------------------------
 
-// `toString` returns the object's name as the string format
+// toString returns the object's name as the string format
 func (ro *RangeObject) toString() string {
 	return fmt.Sprintf("(%d..%d)", ro.Start, ro.End)
 }
 
-// `toJSON` just delegates to `toString`
+// toJSON just delegates to toString
 func (ro *RangeObject) toJSON() string {
 	return ro.toString()
 }
