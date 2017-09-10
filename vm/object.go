@@ -104,12 +104,12 @@ type RObject struct {
 
 // Polymorphic helper functions -----------------------------------------
 
-// Returns the object's name as the string format
+// toString returns the object's name as the string format
 func (ro *RObject) toString() string {
 	return "<Instance of: " + ro.class.Name + ">"
 }
 
-// Alias of toString
+// toJSON just delegates to toString
 func (ro *RObject) toJSON() string {
 	return ro.toString()
 }
