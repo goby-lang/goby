@@ -27,7 +27,7 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					arg0, ok := args[0].(*StringObject)
 					if !ok {
-						return t.vm.initErrorObject(errors.ArgumentError, "Argument 0 must be a string")
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect argument 0 to be string, got: %s", args[0].Class().Name)
 					}
 
 					uri, err := url.Parse(arg0.value)
@@ -35,10 +35,10 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 					if len(args) > 1 {
 						var arr []string
 
-						for _, v := range args[1:] {
+						for i, v := range args[1:] {
 							argn, ok := v.(*StringObject)
 							if !ok {
-								return t.vm.initErrorObject(errors.ArgumentError, "Splat arguments must be a string")
+								return t.vm.initErrorObject(errors.ArgumentError, "Splat arguments must be a string, got: %s for argument %d", v.Class().Name, i)
 							}
 							arr = append(arr, argn.value)
 						}
@@ -48,12 +48,10 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 
 					resp, err := http.Get(uri.String())
 					if err != nil {
-						return t.vm.initErrorObject(errors.InternalError, err.Error())
+						return t.vm.initErrorObject(errors.HTTPError, "Could not complete request, %s", err)
 					}
-
 					if resp.StatusCode != http.StatusOK {
-						return t.vm.initErrorObject(errors.InternalError, resp.Status)
-					}
+						return t.vm.initErrorObject(errors.HTTPError, "Non-200 response, %s (%d)", resp.Status, resp.StatusCode)					}
 
 					content, err := ioutil.ReadAll(resp.Body)
 					resp.Body.Close()
@@ -71,34 +69,33 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 3 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 3 arguments. got=%v", strconv.Itoa(len(args)))
+						return t.vm.initErrorObject(errors.ArgumentError, errors.WrongNumberOfArgumentFormat,3, strconv.Itoa(len(args)))
 					}
 
 					arg0, ok := args[0].(*StringObject)
 					if !ok {
-						return t.vm.initErrorObject(errors.ArgumentError, "Argument 0 must be a string")
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect argument 0 to be string, got: %s", args[0].Class().Name)
 					}
 					host := arg0.value
 
 					arg1, ok := args[1].(*StringObject)
 					if !ok {
-						return t.vm.initErrorObject(errors.ArgumentError, "Argument 1 must be a string")
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect argument 1 to be string, got: %s", args[0].Class().Name)
 					}
 					contentType := arg1.value
 
 					arg2, ok := args[2].(*StringObject)
 					if !ok {
-						return t.vm.initErrorObject(errors.ArgumentError, "Argument 2 must be a string")
+						return t.vm.initErrorObject(errors.ArgumentError,  "Expect argument 0 to be string, got: %s", args[0].Class().Name)
 					}
 					body := arg2.value
 
 					resp, err := http.Post(host, contentType, strings.NewReader(body))
 					if err != nil {
-						return t.vm.initErrorObject(errors.InternalError, err.Error())
+						return t.vm.initErrorObject(errors.HTTPError, "Could not complete request, %s", err)
 					}
 					if resp.StatusCode != http.StatusOK {
-						return t.vm.initErrorObject(errors.InternalError, resp.Status)
-					}
+						return t.vm.initErrorObject(errors.HTTPError, "Non-200 response, %s (%d)", resp.Status, resp.StatusCode)					}
 
 					content, err := ioutil.ReadAll(resp.Body)
 					resp.Body.Close()
@@ -116,21 +113,28 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 arguments. got=%v", strconv.Itoa(len(args)))
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
 					host, ok := args[0].(*StringObject)
 					if !ok {
-						return t.vm.initErrorObject(errors.ArgumentError, "Argument 0 must be a string")
+						return t.vm.initErrorObject(errors.ArgumentError,  "Expect argument 0 to be string, got: %s", args[0].Class().Name)
 					}
 
-					_, err := http.Head(host.value)
+					resp, err := http.Head(host.value)
 					if err != nil {
-						return t.vm.initErrorObject(errors.InternalError, err.Error())
+						return t.vm.initErrorObject(errors.HTTPError, "Could not complete request, %s", err)
+					}
+					if resp.StatusCode != http.StatusOK {
+						return t.vm.initErrorObject(errors.HTTPError, "Non-200 response, %s (%d)", resp.Status, resp.StatusCode)					}
+
+					ret := t.vm.initHashObject(map[string]Object{})
+
+					for k, v := range resp.Header {
+						ret.Pairs[k] = t.vm.initStringObject(strings.Join(v, " "))
 					}
 
-					//TODO: make return value a map of headers
-					return t.vm.initStringObject("")
+					return ret
 				}
 			},
 		},

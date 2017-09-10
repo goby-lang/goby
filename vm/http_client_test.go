@@ -80,7 +80,7 @@ func TestHTTPClientObjectFail(t *testing.T) {
 		end
 
 		res
-		`, "InternalError: Could not get response: Get http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: getsockopt: connection refused", 6},
+		`, "HTTPError: Could not complete request, Get http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: getsockopt: connection refused", 6},
 	}
 
 	//block until server is ready

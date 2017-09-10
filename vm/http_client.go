@@ -1,9 +1,8 @@
 package vm
 
 import (
-	"errors"
 	"fmt"
-	gerrors "github.com/goby-lang/goby/vm/errors"
+	"github.com/goby-lang/goby/vm/errors"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -22,7 +21,7 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					if len(args) != 0 {
-						return t.vm.initErrorObject(gerrors.ArgumentError, "Expect 0 arguments. got=%v", strconv.Itoa(len(args)))
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 arguments. got=%v", strconv.Itoa(len(args)))
 
 					}
 
@@ -37,18 +36,17 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 
 					goReq, err := requestGobyToGo(req)
 					if err != nil {
-						return t.vm.initErrorObject(gerrors.ArgumentError, "Request object incomplete object %s", err)
+						return t.vm.initErrorObject(errors.ArgumentError, "Request object incomplete, %s", err)
 					}
 
 					resp, err := goClient.Do(goReq)
 					if err != nil {
-						fmt.Println("do error: ", err)
-						return t.vm.initErrorObject(gerrors.InternalError, "Could not get response: %s", err)
+						return t.vm.initErrorObject(errors.HTTPError, "Could not complete request, %s", err)
 					}
 
 					gobyResp, err := responseGoToGoby(t, resp)
 					if err != nil {
-						return t.vm.initErrorObject(gerrors.InternalError, "Could not read response: %s", err)
+						return t.vm.initErrorObject(errors.InternalError, "Could not read response: %s", err)
 					}
 
 					return gobyResp
@@ -62,7 +60,7 @@ func requestGobyToGo(gobyReq *RObject) (*http.Request, error) {
 	//:method, :protocol, :body, :content_length, :transfer_encoding, :host, :path, :url, :params
 	uObj, ok := gobyReq.instanceVariableGet("@url")
 	if !ok {
-		return nil, errors.New("could not get url")
+		return nil, fmt.Errorf("could not get url")
 	}
 
 	u := uObj.(*StringObject).value
