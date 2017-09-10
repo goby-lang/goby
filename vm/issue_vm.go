@@ -1,13 +1,13 @@
 package vm
 
 import (
+	"bufio"
 	"fmt"
 	"os"
-	"bufio"
 	"runtime"
 )
 
-func InitIssueReportVM (dir string, args []string) (*VM, error) {
+func InitIssueReportVM(dir string, args []string) (*VM, error) {
 	v, err := New(dir, args)
 	v.mode = TestMode
 
@@ -22,7 +22,6 @@ func PrintError(v *VM) {
 	}
 	fmt.Printf("# Help! %s\n", err.Type)
 	fmt.Println(err.Message)
-
 
 	fmt.Printf("### Goby version\n%s\n", Version)
 	fmt.Printf("### Go version\n%s\n", runtime.Version())
@@ -51,12 +50,12 @@ func PrintError(v *VM) {
 	scanner.Split(bufio.ScanLines)
 
 	currLine := 0
-	for ; currLine < line - 20; currLine ++ {
+	for ; currLine < line-20; currLine++ {
 		scanner.Scan()
 	}
 
 	fmt.Println("``` ruby")
-	for ; currLine < line + 20 && scanner.Scan(); currLine ++ {
+	for ; currLine < line+20 && scanner.Scan(); currLine++ {
 		fmt.Printf("%s\n", scanner.Text())
 	}
 	fmt.Println("```\n")

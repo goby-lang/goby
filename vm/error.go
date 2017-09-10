@@ -23,7 +23,7 @@ import (
 type Error struct {
 	*baseObj
 	Message string
-	Type string
+	Type    string
 }
 
 // Internal functions ===================================================
@@ -48,7 +48,7 @@ func (vm *VM) initErrorObject(errorType, format string, args ...interface{}) *Er
 		baseObj: &baseObj{class: errClass},
 		// Add 1 to source line because it's zero indexed
 		Message: fmt.Sprintf("%s. At %s:%d", fmt.Sprintf(errorType+": "+format, args...), cf.instructionSet.filename, i.sourceLine+1),
-		Type: errorType,
+		Type:    errorType,
 	}
 }
 
