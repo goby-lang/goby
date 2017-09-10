@@ -21,6 +21,7 @@ func main() {
 	profileOptionPtr := flag.Bool("p", false, "Profile program execution")
 	versionOptionPtr := flag.Bool("v", false, "Show current Goby version")
 	interactiveOptionPtr := flag.Bool("i", false, "Run interactive goby")
+	issueOptionPtr := flag.Bool("e", false, "Run interactive goby")
 
 	flag.Parse()
 
@@ -63,7 +64,15 @@ func main() {
 			return
 		}
 
-		v, err := vm.New(dir, args)
+		var v *vm.VM
+
+		if *issueOptionPtr {
+			fmt.Println("Will report first issue...\n")
+			v, err = vm.InitIssueReportVM(dir, args)
+			defer vm.PrintError(v)
+		} else {
+			v, err = vm.New(dir, args)
+		}
 
 		if err != nil {
 			fmt.Println(err.Error())
