@@ -51,7 +51,8 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.HTTPError, "Could not complete request, %s", err)
 					}
 					if resp.StatusCode != http.StatusOK {
-						return t.vm.initErrorObject(errors.HTTPError, "Non-200 response, %s (%d)", resp.Status, resp.StatusCode)					}
+						return t.vm.initErrorObject(errors.HTTPError, "Non-200 response, %s (%d)", resp.Status, resp.StatusCode)
+					}
 
 					content, err := ioutil.ReadAll(resp.Body)
 					resp.Body.Close()
@@ -69,7 +70,7 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 3 {
-						return t.vm.initErrorObject(errors.ArgumentError, errors.WrongNumberOfArgumentFormat,3, strconv.Itoa(len(args)))
+						return t.vm.initErrorObject(errors.ArgumentError, errors.WrongNumberOfArgumentFormat, 3, strconv.Itoa(len(args)))
 					}
 
 					arg0, ok := args[0].(*StringObject)
@@ -86,7 +87,7 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 
 					arg2, ok := args[2].(*StringObject)
 					if !ok {
-						return t.vm.initErrorObject(errors.ArgumentError,  "Expect argument 0 to be string, got: %s", args[0].Class().Name)
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect argument 0 to be string, got: %s", args[0].Class().Name)
 					}
 					body := arg2.value
 
@@ -95,7 +96,8 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.HTTPError, "Could not complete request, %s", err)
 					}
 					if resp.StatusCode != http.StatusOK {
-						return t.vm.initErrorObject(errors.HTTPError, "Non-200 response, %s (%d)", resp.Status, resp.StatusCode)					}
+						return t.vm.initErrorObject(errors.HTTPError, "Non-200 response, %s (%d)", resp.Status, resp.StatusCode)
+					}
 
 					content, err := ioutil.ReadAll(resp.Body)
 					resp.Body.Close()
@@ -118,7 +120,7 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 
 					host, ok := args[0].(*StringObject)
 					if !ok {
-						return t.vm.initErrorObject(errors.ArgumentError,  "Expect argument 0 to be string, got: %s", args[0].Class().Name)
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect argument 0 to be string, got: %s", args[0].Class().Name)
 					}
 
 					resp, err := http.Head(host.value)
@@ -126,7 +128,8 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.HTTPError, "Could not complete request, %s", err)
 					}
 					if resp.StatusCode != http.StatusOK {
-						return t.vm.initErrorObject(errors.HTTPError, "Non-200 response, %s (%d)", resp.Status, resp.StatusCode)					}
+						return t.vm.initErrorObject(errors.HTTPError, "Non-200 response, %s (%d)", resp.Status, resp.StatusCode)
+					}
 
 					ret := t.vm.initHashObject(map[string]Object{})
 
