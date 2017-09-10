@@ -85,22 +85,22 @@ func (vm *VM) initChannelClass() *RClass {
 
 // Polymorphic helper functions -----------------------------------------
 
-// Returns the object
+// `Value` returns the object
 func (co *ChannelObject) Value() interface{} {
 	return co.Chan
 }
 
-// Returns the object's name as the string format
+// `toString` returns the object's name as the string format
 func (co *ChannelObject) toString() string {
 	return fmt.Sprintf("<Channel: %p>", co.Chan)
 }
 
-// Alias of toString
+// `toJSON` just delegates to `toString`
 func (co *ChannelObject) toJSON() string {
 	return co.toString()
 }
 
-// Returns the duplicate of the Array object
+// `copy` returns the duplicate of the Array object
 func (co *ChannelObject) copy() Object {
 	newC := &ChannelObject{baseObj: &baseObj{class: co.class}, Chan: make(chan int)}
 	return newC
@@ -114,7 +114,7 @@ type objectMap struct {
 
 // Polymorphic helper functions -----------------------------------------
 
-// storeObj store objects into the container map
+// `storeObj` stores objects into the container map
 // and update containerCount at the same time
 func (m *objectMap) storeObj(obj Object) int {
 	m.store.Store(obj.id(), obj)
@@ -122,7 +122,7 @@ func (m *objectMap) storeObj(obj Object) int {
 	return obj.id()
 }
 
-// retrieveObj returns the objects with the number specified
+// `retrieveObj` returns the objects with the number specified
 func (m *objectMap) retrieveObj(num int) Object {
 	obj, _ := m.store.Load(num)
 	return obj.(Object)

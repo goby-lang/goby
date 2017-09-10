@@ -758,12 +758,12 @@ func (vm *VM) initArrayClass() *RClass {
 
 // Polymorphic helper functions -----------------------------------------
 
-// Returns the elements from the object
+// `Value` returns the elements from the object
 func (a *ArrayObject) Value() interface{} {
 	return a.Elements
 }
 
-// Returns the object's elements as the string format
+//`toString` returns the object's elements as the string format
 func (a *ArrayObject) toString() string {
 	var out bytes.Buffer
 
@@ -784,7 +784,7 @@ func (a *ArrayObject) toString() string {
 	return out.String()
 }
 
-// Returns the object's elements as the JSON string format
+// `toJSON` returns the object's elements as the JSON string format
 func (a *ArrayObject) toJSON() string {
 	var out bytes.Buffer
 	elements := []string{}
@@ -799,7 +799,7 @@ func (a *ArrayObject) toJSON() string {
 	return out.String()
 }
 
-// flatten returns a array of Objects that is one-dimensional flattening of Elements
+// `flatten` returns a array of Objects that is one-dimensional flattening of Elements
 func (a *ArrayObject) flatten() []Object {
 	var result []Object
 
@@ -815,12 +815,12 @@ func (a *ArrayObject) flatten() []Object {
 	return result
 }
 
-// length returns the length of array's elements
+// `length` returns the length of array's elements
 func (a *ArrayObject) length() int {
 	return len(a.Elements)
 }
 
-// pop removes the last element in the array and returns it
+// `pop` removes the last element in the array and returns it
 func (a *ArrayObject) pop() Object {
 	if len(a.Elements) < 1 {
 		return NULL
@@ -831,13 +831,13 @@ func (a *ArrayObject) pop() Object {
 	return value
 }
 
-// push appends given object into array and returns the array object
+// `push` appends given object into array and returns the array object
 func (a *ArrayObject) push(objs []Object) *ArrayObject {
 	a.Elements = append(a.Elements, objs...)
 	return a
 }
 
-// shift removes the first element in the array and returns it
+// `shift` removes the first element in the array and returns it
 func (a *ArrayObject) shift() Object {
 	if len(a.Elements) < 1 {
 		return NULL
@@ -848,7 +848,7 @@ func (a *ArrayObject) shift() Object {
 	return value
 }
 
-// Returns the duplicate of the Array object
+// `copy` returns the duplicate of the Array object
 func (a *ArrayObject) copy() Object {
 	elems := make([]Object, len(a.Elements))
 

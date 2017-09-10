@@ -109,6 +109,7 @@ func initJSONClass(vm *VM) {
 }
 
 // Polymorphic helper functions -----------------------------------------
+
 func (v *VM) convertJSONToHashObj(j jsonObj) Object {
 	objectMap := map[string]Object{}
 
