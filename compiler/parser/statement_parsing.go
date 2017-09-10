@@ -281,7 +281,14 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 	p.nextToken()
 	// Prevent expression's method call to consume while's block as argument.
 	p.acceptBlock = false
+
+	oldState := p.fsm.Current()
+	p.fsm.Event(parseFuncCall)
+
 	ws.Condition = p.parseExpression(NORMAL)
+
+	event, _ := eventTable[oldState]
+	p.fsm.Event(event)
 	p.acceptBlock = true
 	p.nextToken()
 
