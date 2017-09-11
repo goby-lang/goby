@@ -181,12 +181,12 @@ func initPluginClass(vm *VM) {
 
 // Polymorphic helper functions -----------------------------------------
 
-// Returns the object's name as the string format
+// toString returns the object's name as the string format
 func (p *PluginObject) toString() string {
 	return "<Plugin: " + p.fn + ">"
 }
 
-// Alias of toString
+// toJSON just delegates to toString
 func (p *PluginObject) toJSON() string {
 	return p.toString()
 }
@@ -221,7 +221,7 @@ func setPluginContext(context Object) *pluginContext {
 	return pc
 }
 
-// exists returns whether the given file or directory exists or not
+// fileExists returns whether the given file or directory exists or not
 func fileExists(path string) (bool, error) {
 	_, err := os.Stat(path)
 	if err == nil {

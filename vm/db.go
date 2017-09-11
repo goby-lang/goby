@@ -2,37 +2,13 @@ package vm
 
 import (
 	"fmt"
+
 	"github.com/goby-lang/goby/vm/errors"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
-func initDBClass(vm *VM) {
-	pg := vm.initializeClass("DB", false)
-	pg.setBuiltinMethods(builtinDBClassMethods(), true)
-	pg.setBuiltinMethods(builtinDBInstanceMethods(), false)
-	vm.objectClass.setClassConstant(pg)
-
-	vm.execGobyLib("db.gb")
-}
-
-func getDBConn(t *thread, receiver Object) (*sqlx.DB, error) {
-	connection, _ := receiver.instanceVariableGet("@connection")
-	connObj, _ := connection.instanceVariableGet("@conn_obj")
-
-	if connObj == NULL {
-		return nil, fmt.Errorf("DB connection is nil")
-	}
-
-	conn, ok := connObj.(*GoObject).data.(*sqlx.DB)
-
-	if !ok {
-		return nil, fmt.Errorf("Connection is not *sql.DB")
-	}
-
-	return conn, nil
-}
-
+// Class methods --------------------------------------------------------
 func builtinDBClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
@@ -90,6 +66,7 @@ func builtinDBClassMethods() []*BuiltinMethodObject {
 	}
 }
 
+// Instance methods -----------------------------------------------------
 func builtinDBInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
@@ -300,4 +277,36 @@ func builtinDBInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 	}
+}
+
+// Internal functions ===================================================
+
+// Functions for initialization -----------------------------------------
+
+func initDBClass(vm *VM) {
+	pg := vm.initializeClass("DB", false)
+	pg.setBuiltinMethods(builtinDBClassMethods(), true)
+	pg.setBuiltinMethods(builtinDBInstanceMethods(), false)
+	vm.objectClass.setClassConstant(pg)
+
+	vm.execGobyLib("db.gb")
+}
+
+// Other helper functions -----------------------------------------------
+
+func getDBConn(t *thread, receiver Object) (*sqlx.DB, error) {
+	connection, _ := receiver.instanceVariableGet("@connection")
+	connObj, _ := connection.instanceVariableGet("@conn_obj")
+
+	if connObj == NULL {
+		return nil, fmt.Errorf("DB connection is nil")
+	}
+
+	conn, ok := connObj.(*GoObject).data.(*sqlx.DB)
+
+	if !ok {
+		return nil, fmt.Errorf("Connection is not *sql.DB")
+	}
+
+	return conn, nil
 }
