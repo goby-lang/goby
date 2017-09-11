@@ -8,7 +8,7 @@ import (
 )
 
 
-//IssueReportVM initializes a vm in test mode for issue reporting
+// InitIssueReportVM initializes a vm in test mode for issue reporting
 func InitIssueReportVM(dir string, args []string) (*VM, error) {
 	v, err := New(dir, args)
 	v.mode = TestMode
@@ -16,7 +16,7 @@ func InitIssueReportVM(dir string, args []string) (*VM, error) {
 	return v, err
 }
 
-//PrintError prints an error report string given a vm which evaluated to and Error object
+// PrintError prints an error report string given a vm which evaluated to and Error object
 func PrintError(v *VM) {
 	eval := v.mainThread.stack.top().Target
 	err, ok := eval.(*Error)
