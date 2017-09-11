@@ -15,7 +15,7 @@ install:
 
 .PHONY: test
 test:
-	./test.sh
+	go test ./...
 
 .PHONY: clean
 clean:
