@@ -26,7 +26,9 @@ If you are very interested in `Goby` or planning contribute `Goby` frequently, p
 
 #### If you want to propose a feature, just open an issue with `[feature request]` prefix on title.
 
-**Note**: Before sending PR, you should perform `make test` on the root directory of the project to perform all tests (`go test` works only against goby.go file and will be incomplete for the test).
+**Note**:
+  - Before sending PR, you should perform `make test` on the root directory of the project to perform all tests (`go test` works only against goby.go file and will be incomplete for the test).
+  - DB library tests requires Postgresql to be opened and export port `5432`
 
 
 ## Setup Environment
