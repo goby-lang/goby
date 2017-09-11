@@ -446,25 +446,20 @@ func TestUnusedExpressionRemoval(t *testing.T) {
 0 putobject 0
 1 setlocal 0 0
 2 pop
-3 jump 14
-4 putnil
+3 jump 11
+4 putobject 10
 5 pop
-6 jump 14
-7 putobject 10
-8 pop
-9 getlocal 0 0
-10 putobject 1
-11 send + 1
-12 setlocal 0 0
-13 pop
-14 getlocal 0 0
-15 putobject 100
-16 send < 1
-17 branchif 7
-18 putnil
-19 pop
-20 getlocal 0 0
-21 leave
+6 getlocal 0 0
+7 putobject 1
+8 send + 1
+9 setlocal 0 0
+10 pop
+11 getlocal 0 0
+12 putobject 100
+13 send < 1
+14 branchif 4
+15 getlocal 0 0
+16 leave
 `
 
 	bytecode := compileToBytecode(input)
