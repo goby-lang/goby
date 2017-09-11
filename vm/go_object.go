@@ -67,13 +67,17 @@ func (vm *VM) initGoClass() *RClass {
 
 // Polymorphic helper functions -----------------------------------------
 
+// Value returns the object
 func (s *GoObject) Value() interface{} {
 	return s.data
 }
+
+// toString returns the object's name as the string format
 func (s *GoObject) toString() string {
 	return fmt.Sprintf("<GoObject: %p>", s)
 }
 
+// toJSON just delegates to toString
 func (s *GoObject) toJSON() string {
 	return s.toString()
 }

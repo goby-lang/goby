@@ -758,12 +758,12 @@ func (vm *VM) initArrayClass() *RClass {
 
 // Polymorphic helper functions -----------------------------------------
 
-// Returns the elements from the object
+// Value returns the elements from the object
 func (a *ArrayObject) Value() interface{} {
 	return a.Elements
 }
 
-// Returns the object's elements as the string format
+// toString returns the object's elements as the string format
 func (a *ArrayObject) toString() string {
 	var out bytes.Buffer
 
@@ -784,7 +784,7 @@ func (a *ArrayObject) toString() string {
 	return out.String()
 }
 
-// Returns the object's elements as the JSON string format
+// toJSON returns the object's elements as the JSON string format
 func (a *ArrayObject) toJSON() string {
 	var out bytes.Buffer
 	elements := []string{}
@@ -848,7 +848,7 @@ func (a *ArrayObject) shift() Object {
 	return value
 }
 
-// Returns the duplicate of the Array object
+// copy returns the duplicate of the Array object
 func (a *ArrayObject) copy() Object {
 	elems := make([]Object, len(a.Elements))
 

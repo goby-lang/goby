@@ -674,11 +674,31 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			Name: "send",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) < 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, "no method name given")
+					}
+
+					name, ok := args[0].(*StringObject)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+					}
+
+					t.sendMethod(name.value, len(args), blockFrame)
+
+					return t.stack.top().Target
+				}
+			},
+		},
+		{
 			Name: "thread",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if blockFrame == nil {
-						t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
+						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
 					}
 
 					newT := t.vm.newThread()
@@ -898,18 +918,20 @@ func initObjectClass(c *RClass) *RClass {
 // Polymorphic helper functions -----------------------------------------
 
 // TODO: Remove the redundant functions
-// Returns the object's name as the string format
+
+// ReturnName returns the object's name as the string format
 func (c *RClass) ReturnName() string {
 	return c.Name
 }
 
 // TODO: Singleton class's inspect() should also mark if it's a singleton class explicitly.
-// Returns the object's name as the string format
+
+// toString returns the object's name as the string format
 func (c *RClass) toString() string {
 	return c.Name
 }
 
-// Alias of toString
+// toJSON just delegates to `toString`
 func (c *RClass) toJSON() string {
 	return c.toString()
 }
