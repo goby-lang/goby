@@ -11,13 +11,14 @@ import (
 )
 
 // Instance methods --------------------------------------------------------
+
 func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 	//TODO: cookie jar
 	goClient := http.DefaultClient
 
 	return []*BuiltinMethodObject{
 		{
-			// Sends a GET request to the target and returns the HTTP response as a string.
+			// Sends a GET request to the target and returns a `Net::HTTP::Response` object.
 			Name: "get",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -44,7 +45,7 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		}, {
-			// Sends a GET request to the target and returns the HTTP response as a string.
+			// Sends a POST request to the target and returns a `Net::HTTP::Response` object.
 			Name: "post",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -83,7 +84,7 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		}, {
-			// Sends a GET request to the target and returns the HTTP response as a string.
+			// Sends a HEAD request to the target and returns a `Net::HTTP::Response` object.
 			Name: "head",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -110,7 +111,7 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		}, {
-			// Sends a GET request to the target and returns the HTTP response as a string.
+			// Returns a blank `Net::HTTP::Request` object to be sent with the`exec` method
 			Name: "request",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -118,6 +119,7 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		}, {
+			// Sends a passed `Net::HTTP::Request` object and returns a `Net::HTTP::Response` object
 			Name: "exec",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -152,6 +154,22 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 	}
 }
 
+// Internal functions ===================================================
+
+// Functions for initialization -----------------------------------------
+
+func initClientClass(vm *VM, hc *RClass) *RClass {
+	clientClass := vm.initializeClass("Client", false)
+	hc.setClassConstant(clientClass)
+
+	clientClass.setBuiltinMethods(builtinHTTPClientInstanceMethods(), false)
+
+	httpClientClass = clientClass
+	return clientClass
+}
+
+// Other helper functions -----------------------------------------------
+
 func requestGobyToGo(gobyReq Object) (*http.Request, error) {
 	//:method, :protocol, :body, :content_length, :transfer_encoding, :host, :path, :url, :params
 	uObj, ok := gobyReq.instanceVariableGet("@url")
@@ -181,8 +199,6 @@ func requestGobyToGo(gobyReq Object) (*http.Request, error) {
 	return http.NewRequest(method, u, strings.NewReader(body))
 
 }
-
-// Other helper functions -----------------------------------------------
 
 func responseGoToGoby(t *thread, goResp *http.Response) (Object, error) {
 	gobyResp := httpResponseClass.initializeInstance()

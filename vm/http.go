@@ -21,7 +21,7 @@ var (
 func builtinHTTPClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
-			// Sends a GET request to the target and returns the HTTP response as a string.
+			// Sends a GET request to the target and returns the HTTP response as a string. Will error on non-200 responses, for more control over http requests look at the `start` method.
 			Name: "get",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -65,7 +65,7 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 				}
 			},
 		}, {
-			// Sends a POST request to the target with type header and body. Returns the HTTP response as a string.
+			// Sends a POST request to the target with type header and body. Returns the HTTP response as a string. Will error on non-200 responses, for more control over http requests look at the `start` method.
 			Name: "post",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -110,7 +110,7 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 				}
 			},
 		}, {
-			// Sends a HEAD request to the target with type header and body. Returns the HTTP response as a string.
+			// Sends a HEAD request to the target with type header and body. Returns the HTTP response as a string. Will error on non-200 responses, for more control over http requests look at the `start` method.
 			Name: "head",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -141,7 +141,7 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 				}
 			},
 		}, {
-			// Sends a GET request to the target and returns the HTTP response as a string.
+			// Starts an HTTP client. This method requires a block which takes a Net::HTTP::Client object. The return value of this method is the last evaluated value of the provided block.
 			Name: "start",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
@@ -204,14 +204,4 @@ func initResponseClass(vm *VM, hc *RClass) *RClass {
 
 	httpResponseClass = responseClass
 	return responseClass
-}
-
-func initClientClass(vm *VM, hc *RClass) *RClass {
-	clientClass := vm.initializeClass("Client", false)
-	hc.setClassConstant(clientClass)
-
-	clientClass.setBuiltinMethods(builtinHTTPClientInstanceMethods(), false)
-
-	httpClientClass = clientClass
-	return clientClass
 }
