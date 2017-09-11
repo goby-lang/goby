@@ -1091,7 +1091,7 @@ func TestArrayUnshiftMethod(t *testing.T) {
 			a = []
 			a.unshift("foo")
 			a.unshift(1, 2)
-			a[0, 3]
+			a[0]
 			`, 1},
 		{
 			`
@@ -1105,7 +1105,7 @@ func TestArrayUnshiftMethod(t *testing.T) {
 			a = []
 			a.unshift("foo")
 			a.unshift(1, 2)
-			a[1]
+			a[2]
 			`, "foo"},
 	}
 
