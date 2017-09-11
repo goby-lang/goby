@@ -1,0 +1,7 @@
+# run this file with the -e flag to test goby's issue reporting feature
+
+oops
+
+def hello
+  puts 'hello world'
+end
