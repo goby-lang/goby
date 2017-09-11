@@ -1117,4 +1117,3 @@ func TestArrayUnshiftMethod(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
-

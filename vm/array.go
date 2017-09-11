@@ -883,4 +883,3 @@ func (a *ArrayObject) unshift(objs []Object) *ArrayObject {
 	a.Elements = append(objs, a.Elements...)
 	return a
 }
-
