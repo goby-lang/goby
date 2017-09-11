@@ -735,6 +735,22 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		},
+		{
+			// Inserts the specified element in the first position of the array.
+			//
+			// ```ruby
+			// a = [1, 2]
+			// a.unshift(0) # => [0, 1, 2]
+			// a       # => [0, 1, 2]
+			// ```
+			Name: "unshift",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					arr := receiver.(*ArrayObject)
+					return arr.unshift(args)
+				}
+			},
+		},
 	}
 }
 
@@ -861,3 +877,10 @@ func (a *ArrayObject) copy() Object {
 
 	return newArr
 }
+
+// unshift inserts an element in the first position of the array
+func (a *ArrayObject) unshift(objs []Object) *ArrayObject {
+	a.Elements = append(objs, a.Elements...)
+	return a
+}
+

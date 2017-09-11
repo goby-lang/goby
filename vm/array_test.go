@@ -1062,3 +1062,59 @@ func TestArrayShiftMethodFail(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
+func TestArrayUnshiftMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			`
+			a = [1, 2, 3]
+			a.unshift(0)
+			a[0]
+			`, 0},
+		{
+			`
+			a = [1, 2, 3]
+			a.unshift(0)
+			a.length
+			`, 4},
+		{
+			`
+			a = []
+			a.unshift(nil)
+			a[0]
+			`, nil},
+		{
+			`
+			a = []
+			a.unshift("foo")
+			a.unshift(1, 2)
+			a[0, 3]
+			`, 1},
+		{
+			`
+			a = []
+			a.unshift("foo")
+			a.unshift(1, 2)
+			a[1]
+			`, 2},
+		{
+			`
+			a = []
+			a.unshift("foo")
+			a.unshift(1, 2)
+			a[1]
+			`, "foo"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
