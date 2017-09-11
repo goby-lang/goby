@@ -377,6 +377,92 @@ func TestArrayCountMethodFail(t *testing.T) {
 	}
 }
 
+func TestArrayDeleteAtMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+			[].delete_at(1)
+		`, nil},
+		{`
+			[1, 2, 10, 5].delete_at(2)
+		`, 10},
+		{`
+			[1, "a", 10, 5].delete_at(1)
+		`, "a"},
+		{`
+			[1, "a", 10, 5].delete_at(4)
+		`, nil},
+		{`
+			[1, "a", 10, 5].delete_at(-2)
+		`, 10},
+		{`
+			[1, "a", 10, 5].delete_at(-5)
+		`, nil},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+
+	testsArray := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+			a = [1, 2, 10, 5]
+			a.delete_at(2)
+			a
+
+		`, []interface{}{1, 2, 5}},
+		{`
+			a = [1, "a", 10, 5]
+			a.delete_at(4)
+			a
+		`, []interface{}{1, "a", 10, 5}},
+		{`
+			a = [1, "a", 10, 5]
+			a.delete_at(-2)
+			a
+		`, []interface{}{1, "a", 5}},
+		{`
+			a = [1, "a", 10, 5]
+			a.delete_at(-5)
+			a
+		`, []interface{}{1, "a", 10, 5}},
+	}
+
+	for i, tt := range testsArray {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input, getFilename())
+		testArrayObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayDeleteAtMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`[1, 2, 3].delete_at`, "ArgumentError: Expect 1 argument. got=0", 1},
+		{`[1, 2, 3].delete_at(2, 3)`, "ArgumentError: Expect 1 argument. got=2", 1},
+		{`[1, 2, 3].delete_at(true)`, "TypeError: Expect argument to be Integer. got: Boolean", 1},
+		{`[1, 2, 3].delete_at(1..3)`, "TypeError: Expect argument to be Integer. got: Range", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayEachMethod(t *testing.T) {
 	tests := []struct {
 		input    string

@@ -296,6 +296,64 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Deletes the element at the given position.
+			// Returns the removed element.
+			// The index is 0-based; nil is returned when using an out of bounds index.
+			//
+			// ```ruby
+			// a = ["a", "b", "c"]
+			// a.delete_at(1) # => "b"
+			// a.delete_at(-1) # => "c"
+			// a       # => ["a"]
+			// ```
+			Name: "delete_at",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%d", len(args))
+					}
+
+					i := args[0]
+					index, ok := i.(*IntegerObject)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+					}
+
+					arr := receiver.(*ArrayObject)
+					arrLength := len(arr.Elements)
+
+					// exit cases
+
+					if arrLength == 0 {
+						return NULL
+					} else if index.value >= len(arr.Elements) {
+						return NULL
+					} else if index.value < 0 && -index.value > arrLength {
+						return NULL
+					}
+
+					// normalize negative indexing
+
+					var normalizedIndex int
+
+					if index.value < 0 {
+						normalizedIndex = arrLength + index.value
+					} else {
+						normalizedIndex = index.value
+					}
+
+					// delete and slice
+
+					deletedValue := arr.Elements[normalizedIndex]
+
+					arr.Elements = append(arr.Elements[:normalizedIndex], arr.Elements[normalizedIndex+1:]...)
+
+					return deletedValue
+				}
+			},
+		},
+		{
 			// Loop through each element with the given block.
 			//
 			// ```ruby
