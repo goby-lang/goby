@@ -137,7 +137,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			// Retrieves an object in an array using the index argument.
-			// It raises an error if index out of range.
+			// The index is 0-based; nil is returned when trying to access the index out of bounds.
 			//
 			// ```ruby
 			// a = [1, 2, 3]
