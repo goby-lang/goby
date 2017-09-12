@@ -161,6 +161,50 @@ func TestArrayIndex(t *testing.T) {
 	}
 }
 
+func TestArrayPlusOperator(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		// Make sure the result is an entirely new array.
+		{`
+			a = [1, 2]
+			b = [3, 4]
+			c = a + b
+			a[0] = -1
+			b[0] = -1
+			c
+		`, []interface{}{1, 2, 3, 4}},
+		{`
+			a = []
+			b = []
+			a + b
+		`, []interface{}{}},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input, getFilename())
+		testArrayObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayPlusOperatorFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`[1, 2] + true`, "TypeError: Expect argument to be Array. got: Boolean", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayAtMethod(t *testing.T) {
 	tests := []struct {
 		input    string

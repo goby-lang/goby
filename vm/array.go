@@ -79,6 +79,37 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Returns a new array built by concatenating the two arrays together to produce a third array.
+			//
+			// ```ruby
+			// a = [1, 2]
+			// b + [3, 4]  # => [1, 2, 4, 4]
+			// ```
+			Name: "+",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 arguments. got=%d", len(args))
+					}
+
+					otherArrayArg := args[0]
+					otherArray, ok := otherArrayArg.(*ArrayObject)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.ArrayClass, args[0].Class().Name)
+					}
+
+					selfArray := receiver.(*ArrayObject)
+
+					newArrayelements := append(selfArray.Elements, otherArray.Elements...)
+
+					newArray := t.vm.initArrayObject(newArrayelements)
+
+					return newArray
+				}
+			},
+		},
+		{
 			// Assigns value to an array. It requires an index and a value as argument.
 			// The array will expand if the assigned index is bigger than its size.
 			// Returns the assigned value.
