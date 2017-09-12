@@ -741,7 +741,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// ```ruby
 			// a = [1, 2]
 			// a.unshift(0) # => [0, 1, 2]
-			// a       # => [0, 1, 2]
+			// a            # => [0, 1, 2]
 			// ```
 			Name: "unshift",
 			Fn: func(receiver Object) builtinMethodBody {
