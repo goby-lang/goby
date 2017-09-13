@@ -160,6 +160,10 @@ func (p *Parser) parseSelfExpression() ast.Expression {
 }
 
 func (p *Parser) parseIdentifier() ast.Expression {
+	if p.fsm.Is(parsingMethodParam) && p.peekTokenIs(token.Colon) {
+		return p.parseKeywordArgumentsExpression()
+	}
+
 	return &ast.Identifier{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
 }
 
@@ -274,6 +278,63 @@ func (p *Parser) parseHashPair(pairs map[string]ast.Expression) {
 	p.nextToken()
 	value = p.parseExpression(NORMAL)
 	pairs[key] = value
+}
+
+func (p *Parser) parseKeywordArgumentsExpression() ast.Expression {
+	hash := &ast.HashExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
+	hash.Data = p.parseKeywordArguments()
+	return hash
+}
+
+func (p *Parser) parseKeywordArguments() map[string]ast.Expression {
+	pairs := map[string]ast.Expression{}
+
+	if p.peekTokenIs(token.RParen) {
+		p.nextToken() // ')'
+		return pairs
+	}
+
+	p.parseKeywordArgument(pairs)
+
+	for p.peekTokenIs(token.Comma) {
+		p.nextToken()
+
+		p.parseKeywordArgument(pairs)
+	}
+
+	if !p.peekTokenIs(token.RParen) {
+		return nil
+	}
+
+	return pairs
+}
+
+func (p *Parser) parseKeywordArgument(pairs map[string]ast.Expression) {
+	var key string
+
+	p.nextToken()
+
+	switch p.curToken.Type {
+	case token.Ident:
+		key = p.parseIdentifier().(ast.Variable).ReturnValue()
+	case token.Constant:
+		key = p.parseIdentifier().(ast.Variable).ReturnValue()
+	default:
+		return
+	}
+
+	if !p.expectPeek(token.Colon) {
+		return
+	}
+
+	p.nextToken()
+
+	// Keyword argument without default value
+	if p.peekTokenIs(token.Comma) || p.peekTokenIs(token.RParen){
+		pairs[key] = nil
+	} else {
+		pairs[key] = p.parseExpression(NORMAL)
+	}
 }
 
 func (p *Parser) parseArrayExpression() ast.Expression {

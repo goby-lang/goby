@@ -197,6 +197,32 @@ func TestDefStatement(t *testing.T) {
 	testIntegerLiteral(t, secondExpressionStmt.Expression, 123)
 }
 
+func TestDefStatementArgument(t *testing.T) {
+	input := `
+	def add(x:, y: 2)
+	end
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatal(err.Message)
+	}
+
+	firstStmt := program.Statements[0].(*ast.DefStatement)
+	h, ok := firstStmt.Parameters[0].(*ast.HashExpression)
+
+	if !ok {
+		t.Fatalf("program.Statments[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	if h.Data["x"] != nil {
+		t.Fatalf("x should be nil. got=%T", h.Data["x"])
+	}
+}
+
 func TestDefStatementArgumentDefinitionError(t *testing.T) {
 	tests := []struct {
 		input    string
