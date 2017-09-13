@@ -840,6 +840,43 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		},
+		{
+			// Returns an array containing the elements in self corresponding to the given indexes.
+			//
+			// ```ruby
+			// a = ["a", "b", "c"]
+			// a.values_at(1)     # => ["b"]
+			// a.values_at(-1, 3) # => ["c", nil]
+			// a.values_at()      # => []
+			// ```
+			Name: "values_at",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					arr := receiver.(*ArrayObject)
+					var elements = make([]Object, len(args))
+
+					for i, arg := range args {
+						index, ok := arg.(*IntegerObject)
+
+						if !ok {
+							return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, arg.Class().Name)
+						}
+
+						if index.value >= len(arr.Elements) {
+							elements[i] = NULL
+						} else if index.value < 0 && -index.value > len(arr.Elements) {
+							elements[i] = NULL
+						} else if index.value < 0 {
+							elements[i] = arr.Elements[len(arr.Elements) + index.value]
+						} else {
+							elements[i] = arr.Elements[index.value]
+						}
+					}
+
+					return t.vm.initArrayObject(elements)
+				}
+			},
+		},
 	}
 }
 
