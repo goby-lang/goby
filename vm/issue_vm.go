@@ -7,7 +7,6 @@ import (
 	"runtime"
 )
 
-
 // InitIssueReportVM initializes a vm in test mode for issue reporting
 func InitIssueReportVM(dir string, args []string) (*VM, error) {
 	v, err := New(dir, args)
