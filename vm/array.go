@@ -834,6 +834,47 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Same as #each, but traverses self in reverse order.
+			//
+			// ```ruby
+			// a = ["a", "b", "c"]
+			//
+			// a.each do |e|
+			//   puts(e + e)
+			// end
+			// # => "cc"
+			// # => "bb"
+			// # => "aa"
+			// ```
+			Name: "reverse_each",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got=%d", len(args))
+					}
+
+					if blockFrame == nil {
+						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
+					}
+
+					arr := receiver.(*ArrayObject)
+
+					// If it's an empty array, pop the block's call frame
+					if len(arr.Elements) == 0 {
+						t.callFrameStack.pop()
+					}
+
+					reversedArr := arr.reverse()
+
+					for _, obj := range reversedArr.Elements {
+						t.builtinMethodYield(blockFrame, obj)
+					}
+
+					return reversedArr
+				}
+			},
+		},
+		{
 			// Returns a new array by putting the desired element as the first element.
 			// Use integer index as an argument to retrieve the element.
 			//
