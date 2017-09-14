@@ -206,8 +206,8 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 
 						booleanResult, isResultBoolean := result.Target.(*BooleanObject)
 
-     				if isResultBoolean {
-     					if booleanResult.value {
+						if isResultBoolean {
+							if booleanResult.value {
 								return TRUE
 							}
 						} else if result.Target != NULL {
