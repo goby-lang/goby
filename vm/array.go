@@ -282,6 +282,10 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if blockFrame != nil {
+						if len(arr.Elements) == 0 {
+							t.callFrameStack.pop()
+						}
+
 						for _, obj := range arr.Elements {
 							result := t.builtinMethodYield(blockFrame, obj)
 							if result.Target.(*BooleanObject).value {
@@ -410,6 +414,11 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 
 					arr := receiver.(*ArrayObject)
 
+					// If it's an empty array, pop the block's call frame
+					if len(arr.Elements) == 0 {
+						t.callFrameStack.pop()
+					}
+
 					for _, obj := range arr.Elements {
 						t.builtinMethodYield(blockFrame, obj)
 					}
@@ -430,6 +439,11 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					arr := receiver.(*ArrayObject)
+
+					// If it's an empty array, pop the block's call frame
+					if len(arr.Elements) == 0 {
+						t.callFrameStack.pop()
+					}
 
 					for i := range arr.Elements {
 						t.builtinMethodYield(blockFrame, t.vm.initIntegerObject(i))
@@ -639,6 +653,11 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
 					}
 
+					// If it's an empty array, pop the block's call frame
+					if len(arr.Elements) == 0 {
+						t.callFrameStack.pop()
+					}
+
 					for i, obj := range arr.Elements {
 						result := t.builtinMethodYield(blockFrame, obj)
 						elements[i] = result.Target
@@ -708,6 +727,11 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					arr := receiver.(*ArrayObject)
 					if blockFrame == nil {
 						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
+					}
+
+					// If it's an empty array, pop the block's call frame
+					if len(arr.Elements) == 0 {
+						t.callFrameStack.pop()
 					}
 
 					var prev Object
@@ -791,6 +815,11 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 
 					if blockFrame == nil {
 						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
+					}
+
+					// If it's an empty array, pop the block's call frame
+					if len(arr.Elements) == 0 {
+						t.callFrameStack.pop()
 					}
 
 					for _, obj := range arr.Elements {

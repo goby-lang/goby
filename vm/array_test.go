@@ -393,6 +393,11 @@ func TestArrayCountMethod(t *testing.T) {
 			i.size > 1
 		end
 		`, 3},
+		{`
+		[].count do |i|
+			i.size > 1
+		end
+		`, 0},
 	}
 
 	for i, tt := range tests {
@@ -519,6 +524,13 @@ func TestArrayEachMethod(t *testing.T) {
 		end
 		sum
 		`, 15},
+		{`
+		sum = 0
+		[].each do |i|
+		  sum += i
+		end
+		sum
+		`, 0},
 	}
 
 	for i, tt := range tests {
@@ -561,6 +573,13 @@ func TestArrayEachIndexMethod(t *testing.T) {
 		end
 		sum
 		`, 10},
+		{`
+		sum = 0
+		[].each_index do |i|
+			sum += i
+		end
+		sum
+		`, 0},
 	}
 
 	for i, tt := range tests {
@@ -923,6 +942,10 @@ func TestArrayMapMethod(t *testing.T) {
 			i + "1"
 		end
 		`, []interface{}{"11", "sss1", "qwe1"}},
+		{`
+		[].map do |i|
+		end
+		`, []interface{}{}},
 	}
 
 	for i, tt := range tests {
@@ -1036,6 +1059,11 @@ func TestArrayReduceMethod(t *testing.T) {
 			prev + s
 		end
 		`, "Yes, this is a test!"},
+		{`
+		[].reduce("foo") do |i|
+			true
+		end
+		`, "foo"},
 	}
 
 	for i, tt := range tests {
@@ -1133,6 +1161,11 @@ func TestArraySelectMethod(t *testing.T) {
 			i == "test"
 		end
 		`, []interface{}{"test", "test"}},
+		{`
+		[].select do |i|
+			true
+		end
+		`, []interface{}{}},
 	}
 
 	for i, tt := range tests {
