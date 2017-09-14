@@ -201,6 +201,10 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
 					}
 
+					if len(arr.Elements) == 0 {
+						t.callFrameStack.pop()
+					}
+
 					for _, obj := range arr.Elements {
 						result := t.builtinMethodYield(blockFrame, obj)
 

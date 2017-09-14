@@ -230,22 +230,6 @@ func TestArrayAnyMethod(t *testing.T) {
 			  nil
 			end
 		`, false},
-	}
-
-	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestArrayAnyMethodBlockNotCalled(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
 		{`
 			[].any? do |e|
 			  true
@@ -257,7 +241,7 @@ func TestArrayAnyMethodBlockNotCalled(t *testing.T) {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
 }
