@@ -248,6 +248,13 @@ func TestHashEachKeyMethod(t *testing.T) {
 			end
 			arr
 		`, []interface{}{"a", "b", "c"}},
+		{`
+			arr = []
+			{}.each_key do |key|
+			  arr.push(key)
+			end
+			arr
+		`, []interface{}{}},
 	}
 
 	for i, tt := range tests {
@@ -297,6 +304,11 @@ func TestHashEachValueMethod(t *testing.T) {
 			  # Empty Block
 			end
 		`, []interface{}{true, 123}},
+		{`
+			{}.each_value do |v|
+			  # Empty Block
+			end
+		`, []interface{}{}},
 	}
 
 	for i, tt := range hashTests {
@@ -332,6 +344,13 @@ func TestHashEachValueMethod(t *testing.T) {
 			end
 			string
 			`, "Hello World Goby Lang "},
+		{`
+			string = ""
+			{}.each_value do |v|
+			  string = string + v + " "
+			end
+			string
+			`, ""},
 	}
 
 	for i, tt := range normalTests {
@@ -706,6 +725,13 @@ func TestHashMapValuesMethod(t *testing.T) {
 		end
 		result["c"]
 		`, 9},
+		{`
+		h = {}
+		result = h.map_values do |v|
+		  v * 3
+		end
+		result["c"]
+		`, nil},
 	}
 
 	for i, tt := range tests {
@@ -1138,6 +1164,13 @@ func TestHashTransformValuesMethod(t *testing.T) {
 		end
 		result["c"]
 		`, 9},
+		{`
+		h = {}
+		result = h.transform_values do |v|
+		  v * 3
+		end
+		result["c"]
+		`, nil},
 	}
 
 	for i, tt := range tests {
