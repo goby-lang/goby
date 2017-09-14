@@ -3,8 +3,14 @@ engines:
     enabled: true
   golint:
     enabled: true
+    exclude_paths:
+      - "vm/instruction.go"
+      - "vm/vm.go"
   gofmt:
     enabled: true
+    exclude_paths:
+      - "vm/instruction.go"
+      - "vm/vm.go"
 
 exclude_paths:
   - "Godeps"
