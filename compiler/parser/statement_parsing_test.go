@@ -199,7 +199,7 @@ func TestDefStatement(t *testing.T) {
 
 func TestDefStatementArgument(t *testing.T) {
 	input := `
-	def add(x:, y: 2)
+	def add(x:, y:, z: 123)
 	end
 	`
 
@@ -221,6 +221,12 @@ func TestDefStatementArgument(t *testing.T) {
 	if h.Data["x"] != nil {
 		t.Fatalf("x should be nil. got=%T", h.Data["x"])
 	}
+
+	if h.Data["y"] != nil {
+		t.Fatalf("x should be nil. got=%T", h.Data["y"])
+	}
+
+	testIntegerLiteral(t, h.Data["z"], 123)
 }
 
 func TestDefStatementArgumentDefinitionError(t *testing.T) {

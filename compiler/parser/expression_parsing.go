@@ -160,12 +160,10 @@ func (p *Parser) parseSelfExpression() ast.Expression {
 }
 
 func (p *Parser) parseIdentifier() ast.Expression {
-	if p.fsm.Is(parsingMethodParam) && p.peekTokenIs(token.Colon) {
-		return p.parseKeywordArgumentsExpression()
-	}
-
 	return &ast.Identifier{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
 }
+
+
 
 func (p *Parser) parseConstant() ast.Expression {
 	c := &ast.Constant{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
@@ -327,12 +325,11 @@ func (p *Parser) parseKeywordArgument(pairs map[string]ast.Expression) {
 		return
 	}
 
-	p.nextToken()
-
 	// Keyword argument without default value
 	if p.peekTokenIs(token.Comma) || p.peekTokenIs(token.RParen){
 		pairs[key] = nil
 	} else {
+		p.nextToken()
 		pairs[key] = p.parseExpression(NORMAL)
 	}
 }
