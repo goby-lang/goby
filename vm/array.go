@@ -50,31 +50,8 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			Name: "[]",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 arguments. got=%d", len(args))
-					}
-
-					i := args[0]
-					index, ok := i.(*IntegerObject)
-
-					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
-					}
-
 					arr := receiver.(*ArrayObject)
-					arrLength := len(arr.Elements)
-
-					if int(index.value) < 0 {
-						if -int(index.value) > arrLength {
-							return NULL
-						}
-						calculatedIndex := arrLength + int(index.value)
-						return arr.Elements[calculatedIndex]
-					} else if int(index.value) >= arrLength {
-						return NULL
-					}
-
-					return arr.Elements[index.value]
+					return arr.index(t, args, blockFrame)
 				}
 			},
 		},
@@ -237,31 +214,8 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			Name: "at",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%d", len(args))
-					}
-
-					i := args[0]
-					index, ok := i.(*IntegerObject)
-
-					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
-					}
-
 					arr := receiver.(*ArrayObject)
-
-					if index.value < 0 {
-						if -index.value > len(arr.Elements) {
-							return NULL
-						}
-						return arr.Elements[len(arr.Elements)+index.value]
-					}
-
-					if len(arr.Elements) == 0 || int(index.value) >= len(arr.Elements) {
-						return NULL
-					}
-
-					return arr.Elements[index.value]
+					return arr.index(t, args, blockFrame)
 				}
 			},
 		},
@@ -988,6 +942,34 @@ func (a *ArrayObject) toJSON() string {
 	out.WriteString("]")
 
 	return out.String()
+}
+
+// Retrieves an object in an array using Integer index; common to `[]` and `at()`.
+func (a *ArrayObject) index(t *thread, args []Object, blockFrame *callFrame) Object {
+	if len(args) != 1 {
+		return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 arguments. got=%d", len(args))
+	}
+
+	i := args[0]
+	index, ok := i.(*IntegerObject)
+
+	if !ok {
+		return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+	}
+
+	aLength := len(a.Elements)
+
+	if int(index.value) < 0 {
+		if -int(index.value) > aLength {
+			return NULL
+		}
+		calculatedIndex := aLength + int(index.value)
+		return a.Elements[calculatedIndex]
+	} else if int(index.value) >= aLength {
+		return NULL
+	}
+
+	return a.Elements[index.value]
 }
 
 // flatten returns a array of Objects that is one-dimensional flattening of Elements
