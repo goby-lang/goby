@@ -1151,6 +1151,30 @@ func TestArrayReduceMethodFail(t *testing.T) {
 	}
 }
 
+func TestArrayReverseMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+		a = [1, 2, 3]
+		a.reverse
+		`, []interface{}{3, 2, 1}},
+		{`
+		a = []
+		a.reverse
+		`, []interface{}{}},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testArrayObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayRotateMethod(t *testing.T) {
 	tests := []struct {
 		input    string

@@ -813,6 +813,27 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Returns a new array containing self‘s elements in reverse order.
+			//
+			// ```ruby
+			// a = [1, 2, 7]
+			//
+			// a.reverse # => [7, 2, 1]
+			// ```
+			Name: "reverse",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 arguments. got=%d", len(args))
+					}
+
+					arr := receiver.(*ArrayObject)
+
+					return arr.reverse()
+				}
+			},
+		},
+		{
 			// Returns a new array by putting the desired element as the first element.
 			// Use integer index as an argument to retrieve the element.
 			//
@@ -1026,6 +1047,23 @@ func (a *ArrayObject) pop() Object {
 func (a *ArrayObject) push(objs []Object) *ArrayObject {
 	a.Elements = append(a.Elements, objs...)
 	return a
+}
+
+// returns a reversed copy of the passed array
+func (a *ArrayObject) reverse() *ArrayObject {
+	arrLen := len(a.Elements)
+	reversedArrElems := make([]Object, arrLen)
+
+	for i, element := range a.Elements {
+		reversedArrElems[arrLen - i - 1] = element
+	}
+
+	newArr := &ArrayObject{
+		baseObj:  &baseObj{class: a.class},
+		Elements: reversedArrElems,
+	}
+
+	return newArr
 }
 
 // shift removes the first element in the array and returns it
