@@ -1268,6 +1268,11 @@ func TestArrayValuesAtMethod(t *testing.T) {
 			a = ["a", "b", "c"]
 			a.values_at()
 			`, []interface{}{}},
+		{
+			`
+			a = []
+			a.values_at(1, -1)
+			`, []interface{}{nil, nil}},
 	}
 
 	for i, tt := range tests {
