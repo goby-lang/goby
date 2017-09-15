@@ -51,7 +51,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					arr := receiver.(*ArrayObject)
-					return arr.index(t, args, blockFrame)
+					return arr.index(t, args)
 				}
 			},
 		},
@@ -215,7 +215,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					arr := receiver.(*ArrayObject)
-					return arr.index(t, args, blockFrame)
+					return arr.index(t, args)
 				}
 			},
 		},
@@ -945,7 +945,7 @@ func (a *ArrayObject) toJSON() string {
 }
 
 // Retrieves an object in an array using Integer index; common to `[]` and `at()`.
-func (a *ArrayObject) index(t *thread, args []Object, blockFrame *callFrame) Object {
+func (a *ArrayObject) index(t *thread, args []Object) Object {
 	if len(args) != 1 {
 		return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 arguments. got=%d", len(args))
 	}
