@@ -167,6 +167,63 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Passes each element of the collection to the given block. The method returns true if
+			// the block ever returns a value other than false or nil
+			//
+			// ```ruby
+			// a = [1, 2, 3]
+			//
+			// a.any? do |e|
+			//   e == 2
+			// end            # => true
+			// a.any? do |e|
+			//   e
+			// end            # => true
+			// a.any? do |e|
+			//   e == 5
+			// end            # => false
+			// a.any? do |e|
+			//   nil
+			// end            # => false
+			//
+			// a = []
+			//
+			// a.any? do |e|
+			//   true
+			// end            # => false
+			// ```
+			Name: "any?",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					arr := receiver.(*ArrayObject)
+
+					if blockFrame == nil {
+						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
+					}
+
+					if len(arr.Elements) == 0 {
+						t.callFrameStack.pop()
+					}
+
+					for _, obj := range arr.Elements {
+						result := t.builtinMethodYield(blockFrame, obj)
+
+						booleanResult, isResultBoolean := result.Target.(*BooleanObject)
+
+						if isResultBoolean {
+							if booleanResult.value {
+								return TRUE
+							}
+						} else if result.Target != NULL {
+							return TRUE
+						}
+					}
+
+					return FALSE
+				}
+			},
+		},
+		{
 			// Retrieves an object in an array using the index argument.
 			// The index is 0-based; nil is returned when trying to access the index out of bounds.
 			//

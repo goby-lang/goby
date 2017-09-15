@@ -205,6 +205,61 @@ func TestArrayPlusOperatorFail(t *testing.T) {
 	}
 }
 
+func TestArrayAnyMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+			[1, 2, 3].any? do |e|
+			  e == 2
+			end
+		`, true},
+		{`
+			[1, 2, 3].any? do |e|
+			  e
+			end
+		`, true},
+		{`
+			[1, 2, 3].any? do |e|
+			  e == 5
+			end
+		`, false},
+		{`
+			[1, 2, 3].any? do |e|
+			  nil
+			end
+		`, false},
+		{`
+			[].any? do |e|
+			  true
+			end
+		`, false},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayAnyMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`[].any?`, "InternalError: Can't yield without a block", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayAtMethod(t *testing.T) {
 	tests := []struct {
 		input    string
