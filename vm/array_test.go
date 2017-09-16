@@ -1207,9 +1207,9 @@ func TestArrayReverseEachMethod(t *testing.T) {
 
 func TestArrayReverseEachMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`['M', 'A'].each`, "InternalError: Can't yield without a block", 1},
+		{`['M', 'A'].reverse_each`, "InternalError: Can't yield without a block", 1},
 		{`
-		['T', 'A'].each(101) do |char|
+		['T', 'A'].reverse_each(101) do |char|
 		  puts char
 		end
 		`, "ArgumentError: Expect 0 argument. got=1", 2},
