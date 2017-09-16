@@ -310,8 +310,8 @@ func TestArrayAtMethod(t *testing.T) {
 
 func TestArrayAtMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2, 3].at`, "ArgumentError: Expect 1 argument. got=0", 1},
-		{`[1, 2, 3].at(2, 3)`, "ArgumentError: Expect 1 argument. got=2", 1},
+		{`[1, 2, 3].at`, "ArgumentError: Expect 1 arguments. got=0", 1},
+		{`[1, 2, 3].at(2, 3)`, "ArgumentError: Expect 1 arguments. got=2", 1},
 		{`[1, 2, 3].at(true)`, "TypeError: Expect argument to be Integer. got: Boolean", 1},
 		{`[1, 2, 3].at(1..3)`, "TypeError: Expect argument to be Integer. got: Range", 1},
 	}
@@ -1408,3 +1408,56 @@ func TestArrayUnshiftMethod(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
+func TestArrayValuesAtMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{
+			`
+			a = ["a", "b", "c"]
+			a.values_at(1)
+			`, []interface{}{"b"}},
+		{
+			`
+			a = ["a", "b", "c"]
+			a.values_at(-1, 3)
+			`, []interface{}{"c", nil}},
+		{
+			`
+			a = ["a", "b", "c"]
+			a.values_at()
+			`, []interface{}{}},
+		{
+			`
+			a = []
+			a.values_at(1, -1)
+			`, []interface{}{nil, nil}},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testArrayObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayValuesAtMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`a = ["a", "b", "c"]
+			a.values_at("-")
+		`, "TypeError: Expect argument to be Integer. got: String", 2},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
