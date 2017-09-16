@@ -198,35 +198,40 @@ func TestDefStatement(t *testing.T) {
 }
 
 func TestDefStatementArgument(t *testing.T) {
-	input := `
-	def add(x:, y:, z: 123)
-	end
-	`
-
-	l := lexer.New(input)
-	p := New(l)
-	program, err := p.ParseProgram()
-
-	if err != nil {
-		t.Fatal(err.Message)
+	tests := []struct {
+		input    string
+		expected map[string] int
+	}{
+		{`
+		def add(x: 123, y: 456, z: 789)
+		end
+		`, map[string]int {
+			"x": 123,
+			"y": 456,
+			"z": 789,
+		} },
 	}
 
-	firstStmt := program.Statements[0].(*ast.DefStatement)
-	h, ok := firstStmt.Parameters[0].(*ast.HashExpression)
+	for i, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program, err := p.ParseProgram()
 
-	if !ok {
-		t.Fatalf("program.Statments[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+		if err != nil {
+			t.Fatalf("At case %d " + err.Message, i)
+		}
+
+		firstStmt := program.Statements[0].(*ast.DefStatement)
+		h, ok := firstStmt.Parameters[0].(*ast.HashExpression)
+
+		if !ok {
+			t.Fatalf("At case %d program.Statments[0] is not ast.HashExpression. got=%T", i, program.Statements[0])
+		}
+
+		for k, v := range tt.expected {
+			testIntegerLiteral(t, h.Data[k], v)
+		}
 	}
-
-	if h.Data["x"] != nil {
-		t.Fatalf("x should be nil. got=%T", h.Data["x"])
-	}
-
-	if h.Data["y"] != nil {
-		t.Fatalf("x should be nil. got=%T", h.Data["y"])
-	}
-
-	testIntegerLiteral(t, h.Data["z"], 123)
 }
 
 func TestDefStatementArgumentDefinitionError(t *testing.T) {
