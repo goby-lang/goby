@@ -296,12 +296,7 @@ func (p *Parser) parseKeywordArguments() map[string]ast.Expression {
 
 	for p.peekTokenIs(token.Comma) {
 		p.nextToken()
-
 		p.parseKeywordArgument(pairs)
-	}
-
-	if !p.peekTokenIs(token.RParen) {
-		return nil
 	}
 
 	return pairs
@@ -310,7 +305,9 @@ func (p *Parser) parseKeywordArguments() map[string]ast.Expression {
 func (p *Parser) parseKeywordArgument(pairs map[string]ast.Expression) {
 	var key string
 
-	p.nextToken()
+	if p.curTokenIs(token.Comma) {
+		p.nextToken()
+	}
 
 	switch p.curToken.Type {
 	case token.Ident:
@@ -325,11 +322,12 @@ func (p *Parser) parseKeywordArgument(pairs map[string]ast.Expression) {
 		return
 	}
 
+	p.nextToken()
+
 	// Keyword argument without default value
-	if p.peekTokenIs(token.Comma) || p.peekTokenIs(token.RParen){
+	if p.curTokenIs(token.Comma) || p.curTokenIs(token.RParen){
 		pairs[key] = nil
 	} else {
-		p.nextToken()
 		pairs[key] = p.parseExpression(NORMAL)
 	}
 }
