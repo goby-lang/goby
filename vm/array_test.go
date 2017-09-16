@@ -205,6 +205,61 @@ func TestArrayPlusOperatorFail(t *testing.T) {
 	}
 }
 
+func TestArrayAnyMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+			[1, 2, 3].any? do |e|
+			  e == 2
+			end
+		`, true},
+		{`
+			[1, 2, 3].any? do |e|
+			  e
+			end
+		`, true},
+		{`
+			[1, 2, 3].any? do |e|
+			  e == 5
+			end
+		`, false},
+		{`
+			[1, 2, 3].any? do |e|
+			  nil
+			end
+		`, false},
+		{`
+			[].any? do |e|
+			  true
+			end
+		`, false},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayAnyMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`[].any?`, "InternalError: Can't yield without a block", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayAtMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -255,8 +310,8 @@ func TestArrayAtMethod(t *testing.T) {
 
 func TestArrayAtMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2, 3].at`, "ArgumentError: Expect 1 argument. got=0", 1},
-		{`[1, 2, 3].at(2, 3)`, "ArgumentError: Expect 1 argument. got=2", 1},
+		{`[1, 2, 3].at`, "ArgumentError: Expect 1 arguments. got=0", 1},
+		{`[1, 2, 3].at(2, 3)`, "ArgumentError: Expect 1 arguments. got=2", 1},
 		{`[1, 2, 3].at(true)`, "TypeError: Expect argument to be Integer. got: Boolean", 1},
 		{`[1, 2, 3].at(1..3)`, "TypeError: Expect argument to be Integer. got: Range", 1},
 	}
@@ -393,6 +448,11 @@ func TestArrayCountMethod(t *testing.T) {
 			i.size > 1
 		end
 		`, 3},
+		{`
+		[].count do |i|
+			i.size > 1
+		end
+		`, 0},
 	}
 
 	for i, tt := range tests {
@@ -519,6 +579,13 @@ func TestArrayEachMethod(t *testing.T) {
 		end
 		sum
 		`, 15},
+		{`
+		sum = 0
+		[].each do |i|
+		  sum += i
+		end
+		sum
+		`, 0},
 	}
 
 	for i, tt := range tests {
@@ -561,6 +628,13 @@ func TestArrayEachIndexMethod(t *testing.T) {
 		end
 		sum
 		`, 10},
+		{`
+		sum = 0
+		[].each_index do |i|
+			sum += i
+		end
+		sum
+		`, 0},
 	}
 
 	for i, tt := range tests {
@@ -923,6 +997,10 @@ func TestArrayMapMethod(t *testing.T) {
 			i + "1"
 		end
 		`, []interface{}{"11", "sss1", "qwe1"}},
+		{`
+		[].map do |i|
+		end
+		`, []interface{}{}},
 	}
 
 	for i, tt := range tests {
@@ -1036,6 +1114,11 @@ func TestArrayReduceMethod(t *testing.T) {
 			prev + s
 		end
 		`, "Yes, this is a test!"},
+		{`
+		[].reduce("foo") do |i|
+			true
+		end
+		`, "foo"},
 	}
 
 	for i, tt := range tests {
@@ -1064,6 +1147,30 @@ func TestArrayReduceMethodFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayReverseMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+		a = [1, 2, 3]
+		a.reverse
+		`, []interface{}{3, 2, 1}},
+		{`
+		a = []
+		a.reverse
+		`, []interface{}{}},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testArrayObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -1133,6 +1240,11 @@ func TestArraySelectMethod(t *testing.T) {
 			i == "test"
 		end
 		`, []interface{}{"test", "test"}},
+		{`
+		[].select do |i|
+			true
+		end
+		`, []interface{}{}},
 	}
 
 	for i, tt := range tests {

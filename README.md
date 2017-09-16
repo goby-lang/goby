@@ -184,6 +184,10 @@ Try this if you'd like to contribute Goby! Skip 1 if you already have Golang in 
 $GOPATH/src/github.com/goby-lang/goby
 ```
 
+### C. Installation on a clean Linux environment
+
+For installing both Go and Goby on a clean Linux environment, see the [wiki page](https://github.com/goby-lang/goby/wiki/Linux-Go-and-Goby-setup).
+
 ### Verifying Goby installation
 
 1. Run `goby -v` to see the version.
