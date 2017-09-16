@@ -2,7 +2,7 @@ def f(from)
   i = 0
   while i < 3 do
     puts(from + ": " + i.to_s)
-    i++
+    i += 1
   end
 end
 
