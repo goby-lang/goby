@@ -1175,6 +1175,55 @@ func TestArrayReverseMethod(t *testing.T) {
 	}
 }
 
+func TestArrayReverseEachMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`
+		str = ""
+		["a", "b", "c"].reverse_each do |char|
+		  str += char
+		end
+		str
+		`, "cba"},
+		{`
+		str = ""
+		[].reverse_each do |i|
+		  str += char
+		end
+		str
+		`, ""},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayReverseEachMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`['M', 'A'].reverse_each`, "InternalError: Can't yield without a block", 1},
+		{`
+		['T', 'A'].reverse_each(101) do |char|
+		  puts char
+		end
+		`, "ArgumentError: Expect 0 argument. got=1", 2},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayRotateMethod(t *testing.T) {
 	tests := []struct {
 		input    string
