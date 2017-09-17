@@ -37,6 +37,28 @@ func TestHTTPClientObject(t *testing.T) {
 		require "net/http"
 
 		res = Net::HTTP.start do |client|
+			r = client.request()
+			r.url = "http://127.0.0.1:3000/index"
+			r.method = "POST"
+			r.body = "Another way of doing it"
+			client.exec(r)
+		end
+
+		res.body
+		`, "POST Another way of doing it"},
+		{`
+		require "net/http"
+
+		res = Net::HTTP.start do |client|
+			client.head("http://127.0.0.1:3000/index")
+		end
+
+		res.status_code
+		`, 200},
+		{`
+		require "net/http"
+
+		res = Net::HTTP.start do |client|
 			client.get("http://127.0.0.1:3000/error")
 		end
 
