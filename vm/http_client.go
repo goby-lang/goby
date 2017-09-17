@@ -13,7 +13,7 @@ import (
 // Instance methods --------------------------------------------------------
 
 func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
-	//TODO: cookie jar
+	//TODO: cookie jar and mutable client
 	goClient := http.DefaultClient
 
 	return []*BuiltinMethodObject{

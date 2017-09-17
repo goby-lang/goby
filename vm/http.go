@@ -70,7 +70,7 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 3 {
-						return t.vm.initErrorObject(errors.ArgumentError, errors.WrongNumberOfArgumentFormat, 3, strconv.Itoa(len(args)))
+						return t.vm.initErrorObject(errors.ArgumentError, errors.WrongNumberOfArgumentFormat, 3, len(args))
 					}
 
 					arg0, ok := args[0].(*StringObject)
@@ -87,7 +87,7 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 
 					arg2, ok := args[2].(*StringObject)
 					if !ok {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect argument 0 to be string, got: %s", args[0].Class().Name)
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect argument 2 to be string, got: %s", args[0].Class().Name)
 					}
 					body := arg2.value
 
@@ -114,16 +114,28 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 			Name: "head",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
-					}
-
-					host, ok := args[0].(*StringObject)
+					arg0, ok := args[0].(*StringObject)
 					if !ok {
 						return t.vm.initErrorObject(errors.ArgumentError, "Expect argument 0 to be string, got: %s", args[0].Class().Name)
 					}
 
-					resp, err := http.Head(host.value)
+					uri, err := url.Parse(arg0.value)
+
+					if len(args) > 1 {
+						var arr []string
+
+						for i, v := range args[1:] {
+							argn, ok := v.(*StringObject)
+							if !ok {
+								return t.vm.initErrorObject(errors.ArgumentError, "Splat arguments must be a string, got: %s for argument %d", v.Class().Name, i)
+							}
+							arr = append(arr, argn.value)
+						}
+
+						uri.Path = path.Join(arr...)
+					}
+
+					resp, err := http.Head(uri.String())
 					if err != nil {
 						return t.vm.initErrorObject(errors.HTTPError, "Could not complete request, %s", err)
 					}
