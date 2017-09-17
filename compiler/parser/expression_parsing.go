@@ -288,7 +288,6 @@ func (p *Parser) parseKeywordArguments() map[string]ast.Expression {
 	pairs := map[string]ast.Expression{}
 
 	if p.peekTokenIs(token.RParen) {
-		p.nextToken() // ')'
 		return pairs
 	}
 
@@ -322,12 +321,11 @@ func (p *Parser) parseKeywordArgument(pairs map[string]ast.Expression) {
 		return
 	}
 
-	p.nextToken()
-
 	// Keyword argument without default value
-	if p.curTokenIs(token.Comma) || p.curTokenIs(token.RParen){
+	if p.peekTokenIs(token.Comma) || p.peekTokenIs(token.RParen){
 		pairs[key] = nil
 	} else {
+		p.nextToken()
 		pairs[key] = p.parseExpression(NORMAL)
 	}
 }
