@@ -241,8 +241,64 @@ func TestSimpleKeywordArgument(t *testing.T) {
 			t.Fatalf("At case %d program.Statments[0] is not ast.HashExpression. got=%T", i, program.Statements[0])
 		}
 
-		for k, v := range tt.expected {
-			testIntegerLiteral(t, h.Data[k], v)
+		for k, expected := range tt.expected {
+			testIntegerLiteral(t, h.Data[k], expected)
+		}
+	}
+}
+
+func TestKeywordArgumentWithNoDefaultValue(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected map[string] interface{}
+	}{
+		{`
+		def add(x:)
+		end
+		`, map[string]interface{} {
+			"x": nil,
+		} },
+		{`
+		def add(x: 111, y:)
+		end
+		`, map[string]interface{} {
+			"x": 111,
+			"y": nil,
+		} },
+		{`
+		def add(x: 111, y:, z:)
+		end
+		`, map[string]interface{} {
+			"x": 111,
+			"y": nil,
+			"z": nil,
+		} },
+	}
+
+	for i, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program, err := p.ParseProgram()
+
+		if err != nil {
+			t.Fatalf("At case %d " + err.Message, i)
+		}
+
+		firstStmt := program.Statements[0].(*ast.DefStatement)
+		h, ok := firstStmt.Parameters[0].(*ast.HashExpression)
+
+		if !ok {
+			t.Fatalf("At case %d program.Statments[0] is not ast.HashExpression. got=%T", i, program.Statements[0])
+		}
+
+		for k, expected := range tt.expected {
+			if expected == nil {
+				if h.Data[k] != nil {
+					t.Fatalf("At case %d h.Data[%T] is not nil. got=%T", i, k, h.Data[k])
+				}
+			} else {
+				testIntegerLiteral(t, h.Data[k], expected.(int))
+			}
 		}
 	}
 }
