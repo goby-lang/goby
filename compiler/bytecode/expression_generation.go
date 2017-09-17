@@ -159,7 +159,12 @@ func (g *Generator) compileIfExpression(is *InstructionSet, exp *ast.IfExpressio
 		g.compileExpression(is, c.Condition, scope, table)
 		is.define(BranchUnless, exp.Line(), anchorConditional)
 
-		g.compileCodeBlock(is, c.Consequence, scope, table)
+		if c.Consequence.IsEmpty() {
+			is.define(PutNull, exp.Line())
+		} else {
+			g.compileCodeBlock(is, c.Consequence, scope, table)
+		}
+
 		anchorConditional.line = is.count + 1
 		is.define(Jump, exp.Line(), anchorLast)
 	}

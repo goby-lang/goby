@@ -1609,6 +1609,23 @@ func TestIfExpressionEvaluation(t *testing.T) {
 			  14
 			end
 		`, 11},
+		{`
+		if false; end
+		`, nil},
+		{`
+		if true; end
+		`, nil},
+		{`
+		if false
+		elsif true
+		end
+		`, nil},
+		{`
+		if true
+		elsif true
+		  10
+		end
+		`, nil},
 	}
 
 	for i, tt := range tests {
