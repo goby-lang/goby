@@ -303,6 +303,47 @@ func TestKeywordArgumentWithNoDefaultValue(t *testing.T) {
 	}
 }
 
+func TestKeywordArgumentWithNormalArgument(t *testing.T) {
+	input := `
+	def add(a, b, c, d: 123, e:, f: 12345)
+	end
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatalf(err.Message)
+	}
+
+	firstStmt := program.Statements[0].(*ast.DefStatement)
+
+	for i, v := range []string{"a", "b", "c"} {
+		testLiteralExpression(t, firstStmt.Parameters[i], v)
+	}
+
+	h, ok := firstStmt.Parameters[3].(*ast.HashExpression)
+
+	if !ok {
+		t.Fatalf("Program.Statments[3] is not ast.HashExpression. got=%T", program.Statements[0])
+	}
+
+	for k, expected := range map[string]interface{} {
+		"d": 123,
+		"e": nil,
+		"f": 12345,
+	} {
+		if expected == nil {
+			if h.Data[k] != nil {
+				t.Fatalf("h.Data[%T] is not nil. got=%T", k, h.Data[k])
+			}
+		} else {
+			testIntegerLiteral(t, h.Data[k], expected.(int))
+		}
+	}
+}
+
 func TestDefStatementArgumentDefinitionError(t *testing.T) {
 	tests := []struct {
 		input    string
