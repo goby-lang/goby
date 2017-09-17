@@ -197,18 +197,31 @@ func TestDefStatement(t *testing.T) {
 	testIntegerLiteral(t, secondExpressionStmt.Expression, 123)
 }
 
-func TestDefStatementArgument(t *testing.T) {
+func TestSimpleKeywordArgument(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected map[string] int
 	}{
 		{`
-		def add(x: 123, y: 456, z: 789)
+		def add(x: 111)
 		end
 		`, map[string]int {
-			"x": 123,
-			"y": 456,
-			"z": 789,
+			"x": 111,
+		} },
+		{`
+		def add(x: 111, y: 222)
+		end
+		`, map[string]int {
+			"x": 111,
+			"y": 222,
+		} },
+		{`
+		def add(x: 111, y: 222, z: 333)
+		end
+		`, map[string]int {
+			"x": 111,
+			"y": 222,
+			"z": 333,
 		} },
 	}
 
