@@ -161,6 +161,105 @@ func TestArrayIndex(t *testing.T) {
 	}
 }
 
+func TestArrayPlusOperator(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		// Make sure the result is an entirely new array.
+		{`
+			a = [1, 2]
+			b = [3, 4]
+			c = a + b
+			a[0] = -1
+			b[0] = -1
+			c
+		`, []interface{}{1, 2, 3, 4}},
+		{`
+			a = []
+			b = []
+			a + b
+		`, []interface{}{}},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input, getFilename())
+		testArrayObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayPlusOperatorFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`[1, 2] + true`, "TypeError: Expect argument to be Array. got: Boolean", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayAnyMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+			[1, 2, 3].any? do |e|
+			  e == 2
+			end
+		`, true},
+		{`
+			[1, 2, 3].any? do |e|
+			  e
+			end
+		`, true},
+		{`
+			[1, 2, 3].any? do |e|
+			  e == 5
+			end
+		`, false},
+		{`
+			[1, 2, 3].any? do |e|
+			  nil
+			end
+		`, false},
+		{`
+			[].any? do |e|
+			  true
+			end
+		`, false},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayAnyMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`[].any?`, "InternalError: Can't yield without a block", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayAtMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -211,8 +310,8 @@ func TestArrayAtMethod(t *testing.T) {
 
 func TestArrayAtMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2, 3].at`, "ArgumentError: Expect 1 argument. got=0", 1},
-		{`[1, 2, 3].at(2, 3)`, "ArgumentError: Expect 1 argument. got=2", 1},
+		{`[1, 2, 3].at`, "ArgumentError: Expect 1 arguments. got=0", 1},
+		{`[1, 2, 3].at(2, 3)`, "ArgumentError: Expect 1 arguments. got=2", 1},
 		{`[1, 2, 3].at(true)`, "TypeError: Expect argument to be Integer. got: Boolean", 1},
 		{`[1, 2, 3].at(1..3)`, "TypeError: Expect argument to be Integer. got: Range", 1},
 	}
@@ -349,6 +448,11 @@ func TestArrayCountMethod(t *testing.T) {
 			i.size > 1
 		end
 		`, 3},
+		{`
+		[].count do |i|
+			i.size > 1
+		end
+		`, 0},
 	}
 
 	for i, tt := range tests {
@@ -377,6 +481,92 @@ func TestArrayCountMethodFail(t *testing.T) {
 	}
 }
 
+func TestArrayDeleteAtMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+			[].delete_at(1)
+		`, nil},
+		{`
+			[1, 2, 10, 5].delete_at(2)
+		`, 10},
+		{`
+			[1, "a", 10, 5].delete_at(1)
+		`, "a"},
+		{`
+			[1, "a", 10, 5].delete_at(4)
+		`, nil},
+		{`
+			[1, "a", 10, 5].delete_at(-2)
+		`, 10},
+		{`
+			[1, "a", 10, 5].delete_at(-5)
+		`, nil},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+
+	testsArray := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+			a = [1, 2, 10, 5]
+			a.delete_at(2)
+			a
+
+		`, []interface{}{1, 2, 5}},
+		{`
+			a = [1, "a", 10, 5]
+			a.delete_at(4)
+			a
+		`, []interface{}{1, "a", 10, 5}},
+		{`
+			a = [1, "a", 10, 5]
+			a.delete_at(-2)
+			a
+		`, []interface{}{1, "a", 5}},
+		{`
+			a = [1, "a", 10, 5]
+			a.delete_at(-5)
+			a
+		`, []interface{}{1, "a", 10, 5}},
+	}
+
+	for i, tt := range testsArray {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input, getFilename())
+		testArrayObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayDeleteAtMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`[1, 2, 3].delete_at`, "ArgumentError: Expect 1 argument. got=0", 1},
+		{`[1, 2, 3].delete_at(2, 3)`, "ArgumentError: Expect 1 argument. got=2", 1},
+		{`[1, 2, 3].delete_at(true)`, "TypeError: Expect argument to be Integer. got: Boolean", 1},
+		{`[1, 2, 3].delete_at(1..3)`, "TypeError: Expect argument to be Integer. got: Range", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayEachMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -389,6 +579,13 @@ func TestArrayEachMethod(t *testing.T) {
 		end
 		sum
 		`, 15},
+		{`
+		sum = 0
+		[].each do |i|
+		  sum += i
+		end
+		sum
+		`, 0},
 	}
 
 	for i, tt := range tests {
@@ -431,6 +628,13 @@ func TestArrayEachIndexMethod(t *testing.T) {
 		end
 		sum
 		`, 10},
+		{`
+		sum = 0
+		[].each_index do |i|
+			sum += i
+		end
+		sum
+		`, 0},
 	}
 
 	for i, tt := range tests {
@@ -793,6 +997,10 @@ func TestArrayMapMethod(t *testing.T) {
 			i + "1"
 		end
 		`, []interface{}{"11", "sss1", "qwe1"}},
+		{`
+		[].map do |i|
+		end
+		`, []interface{}{}},
 	}
 
 	for i, tt := range tests {
@@ -906,6 +1114,11 @@ func TestArrayReduceMethod(t *testing.T) {
 			prev + s
 		end
 		`, "Yes, this is a test!"},
+		{`
+		[].reduce("foo") do |i|
+			true
+		end
+		`, "foo"},
 	}
 
 	for i, tt := range tests {
@@ -927,6 +1140,79 @@ func TestArrayReduceMethodFail(t *testing.T) {
 			prev + n
 		end
 		`, "ArgumentError: Expect 0 or 1 argument. got=2", 2},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayReverseMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+		a = [1, 2, 3]
+		a.reverse
+		`, []interface{}{3, 2, 1}},
+		{`
+		a = []
+		a.reverse
+		`, []interface{}{}},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testArrayObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayReverseEachMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`
+		str = ""
+		["a", "b", "c"].reverse_each do |char|
+		  str += char
+		end
+		str
+		`, "cba"},
+		{`
+		str = ""
+		[].reverse_each do |i|
+		  str += char
+		end
+		str
+		`, ""},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayReverseEachMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`['M', 'A'].reverse_each`, "InternalError: Can't yield without a block", 1},
+		{`
+		['T', 'A'].reverse_each(101) do |char|
+		  puts char
+		end
+		`, "ArgumentError: Expect 0 argument. got=1", 2},
 	}
 
 	for i, tt := range testsFail {
@@ -1003,6 +1289,11 @@ func TestArraySelectMethod(t *testing.T) {
 			i == "test"
 		end
 		`, []interface{}{"test", "test"}},
+		{`
+		[].select do |i|
+			true
+		end
+		`, []interface{}{}},
 	}
 
 	for i, tt := range tests {
@@ -1052,6 +1343,113 @@ func TestArrayShiftMethodFail(t *testing.T) {
 		`,
 			"ArgumentError: Expect 0 argument. got=4",
 			2},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayUnshiftMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			`
+			a = [1, 2, 3]
+			a.unshift(0)
+			a[0]
+			`, 0},
+		{
+			`
+			a = [1, 2, 3]
+			a.unshift(0)
+			a.length
+			`, 4},
+		{
+			`
+			a = []
+			a.unshift(nil)
+			a[0]
+			`, nil},
+		{
+			`
+			a = []
+			a.unshift("foo")
+			a.unshift(1, 2)
+			a[0]
+			`, 1},
+		{
+			`
+			a = []
+			a.unshift("foo")
+			a.unshift(1, 2)
+			a[1]
+			`, 2},
+		{
+			`
+			a = []
+			a.unshift("foo")
+			a.unshift(1, 2)
+			a[2]
+			`, "foo"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayValuesAtMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{
+			`
+			a = ["a", "b", "c"]
+			a.values_at(1)
+			`, []interface{}{"b"}},
+		{
+			`
+			a = ["a", "b", "c"]
+			a.values_at(-1, 3)
+			`, []interface{}{"c", nil}},
+		{
+			`
+			a = ["a", "b", "c"]
+			a.values_at()
+			`, []interface{}{}},
+		{
+			`
+			a = []
+			a.values_at(1, -1)
+			`, []interface{}{nil, nil}},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testArrayObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayValuesAtMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`a = ["a", "b", "c"]
+			a.values_at("-")
+		`, "TypeError: Expect argument to be Integer. got: String", 2},
 	}
 
 	for i, tt := range testsFail {

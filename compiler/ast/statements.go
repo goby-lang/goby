@@ -198,6 +198,9 @@ func (bs *BlockStatement) String() string {
 
 	return out.String()
 }
+func (bs *BlockStatement) IsEmpty() bool {
+	return len(bs.Statements) == 0
+}
 
 // KeepLastValue prevents block's last expression statement to be popped.
 func (bs *BlockStatement) KeepLastValue() {

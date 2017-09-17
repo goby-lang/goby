@@ -190,6 +190,11 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					h := receiver.(*HashObject)
+
+					if len(h.Pairs) == 0 {
+						t.callFrameStack.pop()
+					}
+
 					keys := h.sortedKeys()
 					var arrOfKeys []Object
 
@@ -230,6 +235,11 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					h := receiver.(*HashObject)
+
+					if len(h.Pairs) == 0 {
+						t.callFrameStack.pop()
+					}
+
 					keys := h.sortedKeys()
 					var arrOfValues []Object
 
@@ -464,6 +474,11 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					h := receiver.(*HashObject)
+
+					if len(h.Pairs) == 0 {
+						t.callFrameStack.pop()
+					}
+
 					for k, v := range h.Pairs {
 						result := t.builtinMethodYield(blockFrame, v)
 						h.Pairs[k] = result.Target
@@ -668,6 +683,11 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					h := receiver.(*HashObject)
+
+					if len(h.Pairs) == 0 {
+						t.callFrameStack.pop()
+					}
+
 					resultHash := make(map[string]Object)
 					for k, v := range h.Pairs {
 						result := t.builtinMethodYield(blockFrame, v)

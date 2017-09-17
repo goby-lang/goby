@@ -72,10 +72,6 @@ func (g *Generator) compileWhileStmt(is *InstructionSet, stmt *ast.WhileStatemen
 
 	is.define(Jump, stmt.Line(), anchor1)
 
-	is.define(PutNull, stmt.Line())
-	is.define(Pop, stmt.Line())
-	is.define(Jump, stmt.Line(), anchor1)
-
 	anchor2 := &anchor{is.count}
 
 	scope.anchors["next"] = anchor1
@@ -88,8 +84,6 @@ func (g *Generator) compileWhileStmt(is *InstructionSet, stmt *ast.WhileStatemen
 	g.compileExpression(is, stmt.Condition, scope, table)
 
 	is.define(BranchIf, stmt.Line(), anchor2)
-	is.define(PutNull, stmt.Line())
-	is.define(Pop, stmt.Line())
 
 	breakAnchor.line = is.count
 }

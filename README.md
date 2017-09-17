@@ -84,25 +84,29 @@ Perhaps Goby should be far easier for Rubyists to comprehend. You can use Ruby's
     - Constructor
     - Class/instance method
     - Class
-        - Inheritance
-        - Singleton class is now supported
+        - Can be inherited with `<`
+        - Singleton class
+        - `#send` **new!**
     - `self`
-- Module
-    - `#include`
-    - `#extend`
-    - `::` for namespace
-- Variable: starts with lowercase letter like 'var`
+- Module for supporting mixin
+    - `#include` for instance methods
+    - `#extend` for class methods
+    - `::` for delimiting namespaces
+- Variable: starts with lowercase letter like `var`
     - Local variable
     - Instance variable
 - Constant
     - Starts with uppercase like `Var` or `VAR`
-    - global if defined on top-level 
+    - Global if defined on top-level
     - **not reentrant** by assignment, but still permits redefining class/module
     - (special variables with `$` are unsupported)
-- Methods 
-    - Evaluation with arguments
-    - Evaluation without arguments
-    - Evaluation with block (closure)
+- Methods
+    - Definition: order of parameter is determined:
+        1. normal params (ex: `a`, `b`)
+        2. opt params (ex: `ary=[]`, `hs={}`)
+        3. splat params (ex: `*sp`) for compatibility with Go functions
+    - Evaluation with/without arguments
+    - Evaluation with a block (closure)
     - Defining singleton methods
 - Block
     - `do` - `end`
@@ -111,7 +115,7 @@ Perhaps Goby should be far easier for Rubyists to comprehend. You can use Ruby's
     - `while`
 - IO
     - `#puts`
-    - `ARGV`
+    - `ARGV`, `STDIN`, `STDOUT`, `STDERR`, `ENV` constants
 - Import files
     - `require` (Just for standard libraries by now)
     - `require_relative`
@@ -134,6 +138,7 @@ Written in Go.
 - `Range`
 - `URI`
 - `Channel`
+- `File` (Changed from loadable class)
 - `GoObject` (provides `#go_func` that wraps pure Go objects or pointers for interaction)
 
 ### Standard library
@@ -141,7 +146,6 @@ Written in Go.
 written in Go and Goby.
 
 - Loadable class
-    - `File`
     - `DB` (only for PostgreSQL by now)
     - `Plugin`
 - Loadable module
@@ -179,6 +183,10 @@ Try this if you'd like to contribute Goby! Skip 1 if you already have Golang in 
 ```
 $GOPATH/src/github.com/goby-lang/goby
 ```
+
+### C. Installation on a clean Linux environment
+
+For installing both Go and Goby on a clean Linux environment, see the [wiki page](https://github.com/goby-lang/goby/wiki/Linux-Go-and-Goby-setup).
 
 ### Verifying Goby installation
 

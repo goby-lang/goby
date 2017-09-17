@@ -50,31 +50,39 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			Name: "[]",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					arr := receiver.(*ArrayObject)
+					return arr.index(t, args)
+				}
+			},
+		},
+		{
+			// Returns a new array built by concatenating the two arrays together to produce a third array.
+			//
+			// ```ruby
+			// a = [1, 2]
+			// b + [3, 4]  # => [1, 2, 4, 4]
+			// ```
+			Name: "+",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 1 {
 						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 arguments. got=%d", len(args))
 					}
 
-					i := args[0]
-					index, ok := i.(*IntegerObject)
+					otherArrayArg := args[0]
+					otherArray, ok := otherArrayArg.(*ArrayObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.ArrayClass, args[0].Class().Name)
 					}
 
-					arr := receiver.(*ArrayObject)
-					arrLength := len(arr.Elements)
+					selfArray := receiver.(*ArrayObject)
 
-					if int(index.value) < 0 {
-						if -int(index.value) > arrLength {
-							return NULL
-						}
-						calculatedIndex := arrLength + int(index.value)
-						return arr.Elements[calculatedIndex]
-					} else if int(index.value) >= arrLength {
-						return NULL
-					}
+					newArrayelements := append(selfArray.Elements, otherArray.Elements...)
 
-					return arr.Elements[index.value]
+					newArray := t.vm.initArrayObject(newArrayelements)
+
+					return newArray
 				}
 			},
 		},
@@ -136,8 +144,65 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Passes each element of the collection to the given block. The method returns true if
+			// the block ever returns a value other than false or nil
+			//
+			// ```ruby
+			// a = [1, 2, 3]
+			//
+			// a.any? do |e|
+			//   e == 2
+			// end            # => true
+			// a.any? do |e|
+			//   e
+			// end            # => true
+			// a.any? do |e|
+			//   e == 5
+			// end            # => false
+			// a.any? do |e|
+			//   nil
+			// end            # => false
+			//
+			// a = []
+			//
+			// a.any? do |e|
+			//   true
+			// end            # => false
+			// ```
+			Name: "any?",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					arr := receiver.(*ArrayObject)
+
+					if blockFrame == nil {
+						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
+					}
+
+					if len(arr.Elements) == 0 {
+						t.callFrameStack.pop()
+					}
+
+					for _, obj := range arr.Elements {
+						result := t.builtinMethodYield(blockFrame, obj)
+
+						booleanResult, isResultBoolean := result.Target.(*BooleanObject)
+
+						if isResultBoolean {
+							if booleanResult.value {
+								return TRUE
+							}
+						} else if result.Target != NULL {
+							return TRUE
+						}
+					}
+
+					return FALSE
+				}
+			},
+		},
+		{
 			// Retrieves an object in an array using the index argument.
-			// It raises an error if index out of range.
+			// The index is 0-based; nil is returned when trying to access the index out of bounds.
 			//
 			// ```ruby
 			// a = [1, 2, 3]
@@ -149,31 +214,8 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			Name: "at",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%d", len(args))
-					}
-
-					i := args[0]
-					index, ok := i.(*IntegerObject)
-
-					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
-					}
-
 					arr := receiver.(*ArrayObject)
-
-					if index.value < 0 {
-						if -index.value > len(arr.Elements) {
-							return NULL
-						}
-						return arr.Elements[len(arr.Elements)+index.value]
-					}
-
-					if len(arr.Elements) == 0 || int(index.value) >= len(arr.Elements) {
-						return NULL
-					}
-
-					return arr.Elements[index.value]
+					return arr.index(t, args)
 				}
 			},
 		},
@@ -251,6 +293,10 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if blockFrame != nil {
+						if len(arr.Elements) == 0 {
+							t.callFrameStack.pop()
+						}
+
 						for _, obj := range arr.Elements {
 							result := t.builtinMethodYield(blockFrame, obj)
 							if result.Target.(*BooleanObject).value {
@@ -296,6 +342,64 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Deletes the element at the given position.
+			// Returns the removed element.
+			// The index is 0-based; nil is returned when using an out of bounds index.
+			//
+			// ```ruby
+			// a = ["a", "b", "c"]
+			// a.delete_at(1) # => "b"
+			// a.delete_at(-1) # => "c"
+			// a       # => ["a"]
+			// ```
+			Name: "delete_at",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%d", len(args))
+					}
+
+					i := args[0]
+					index, ok := i.(*IntegerObject)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+					}
+
+					arr := receiver.(*ArrayObject)
+					arrLength := len(arr.Elements)
+
+					// exit cases
+
+					if arrLength == 0 {
+						return NULL
+					} else if index.value >= len(arr.Elements) {
+						return NULL
+					} else if index.value < 0 && -index.value > arrLength {
+						return NULL
+					}
+
+					// normalize negative indexing
+
+					var normalizedIndex int
+
+					if index.value < 0 {
+						normalizedIndex = arrLength + index.value
+					} else {
+						normalizedIndex = index.value
+					}
+
+					// delete and slice
+
+					deletedValue := arr.Elements[normalizedIndex]
+
+					arr.Elements = append(arr.Elements[:normalizedIndex], arr.Elements[normalizedIndex+1:]...)
+
+					return deletedValue
+				}
+			},
+		},
+		{
 			// Loop through each element with the given block.
 			//
 			// ```ruby
@@ -321,6 +425,11 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 
 					arr := receiver.(*ArrayObject)
 
+					// If it's an empty array, pop the block's call frame
+					if len(arr.Elements) == 0 {
+						t.callFrameStack.pop()
+					}
+
 					for _, obj := range arr.Elements {
 						t.builtinMethodYield(blockFrame, obj)
 					}
@@ -341,6 +450,11 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					arr := receiver.(*ArrayObject)
+
+					// If it's an empty array, pop the block's call frame
+					if len(arr.Elements) == 0 {
+						t.callFrameStack.pop()
+					}
 
 					for i := range arr.Elements {
 						t.builtinMethodYield(blockFrame, t.vm.initIntegerObject(i))
@@ -550,6 +664,11 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
 					}
 
+					// If it's an empty array, pop the block's call frame
+					if len(arr.Elements) == 0 {
+						t.callFrameStack.pop()
+					}
+
 					for i, obj := range arr.Elements {
 						result := t.builtinMethodYield(blockFrame, obj)
 						elements[i] = result.Target
@@ -621,6 +740,11 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
 					}
 
+					// If it's an empty array, pop the block's call frame
+					if len(arr.Elements) == 0 {
+						t.callFrameStack.pop()
+					}
+
 					var prev Object
 					var start int
 					if len(args) == 0 {
@@ -639,6 +763,68 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					return prev
+				}
+			},
+		},
+		{
+			// Returns a new array containing self‘s elements in reverse order.
+			//
+			// ```ruby
+			// a = [1, 2, 7]
+			//
+			// a.reverse # => [7, 2, 1]
+			// ```
+			Name: "reverse",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 arguments. got=%d", len(args))
+					}
+
+					arr := receiver.(*ArrayObject)
+
+					return arr.reverse()
+				}
+			},
+		},
+		{
+			// Same as #each, but traverses self in reverse order.
+			//
+			// ```ruby
+			// a = ["a", "b", "c"]
+			//
+			// a.each do |e|
+			//   puts(e + e)
+			// end
+			// # => "cc"
+			// # => "bb"
+			// # => "aa"
+			// ```
+			Name: "reverse_each",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got=%d", len(args))
+					}
+
+					if blockFrame == nil {
+						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
+					}
+
+					arr := receiver.(*ArrayObject)
+
+					// If it's an empty array, pop the block's call frame
+					if len(arr.Elements) == 0 {
+						t.callFrameStack.pop()
+					}
+
+					reversedArr := arr.reverse()
+
+					for _, obj := range reversedArr.Elements {
+						t.builtinMethodYield(blockFrame, obj)
+					}
+
+					return reversedArr
 				}
 			},
 		},
@@ -704,6 +890,11 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
 					}
 
+					// If it's an empty array, pop the block's call frame
+					if len(arr.Elements) == 0 {
+						t.callFrameStack.pop()
+					}
+
 					for _, obj := range arr.Elements {
 						result := t.builtinMethodYield(blockFrame, obj)
 						if result.Target.(*BooleanObject).value {
@@ -732,6 +923,59 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 
 					arr := receiver.(*ArrayObject)
 					return arr.shift()
+				}
+			},
+		},
+		{
+			// Inserts the specified element in the first position of the array.
+			//
+			// ```ruby
+			// a = [1, 2]
+			// a.unshift(0) # => [0, 1, 2]
+			// a            # => [0, 1, 2]
+			// ```
+			Name: "unshift",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					arr := receiver.(*ArrayObject)
+					return arr.unshift(args)
+				}
+			},
+		},
+		{
+			// Returns an array containing the elements in self corresponding to the given indexes.
+			//
+			// ```ruby
+			// a = ["a", "b", "c"]
+			// a.values_at(1)     # => ["b"]
+			// a.values_at(-1, 3) # => ["c", nil]
+			// a.values_at()      # => []
+			// ```
+			Name: "values_at",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					arr := receiver.(*ArrayObject)
+					var elements = make([]Object, len(args))
+
+					for i, arg := range args {
+						index, ok := arg.(*IntegerObject)
+
+						if !ok {
+							return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, arg.Class().Name)
+						}
+
+						if index.value >= len(arr.Elements) {
+							elements[i] = NULL
+						} else if index.value < 0 && -index.value > len(arr.Elements) {
+							elements[i] = NULL
+						} else if index.value < 0 {
+							elements[i] = arr.Elements[len(arr.Elements)+index.value]
+						} else {
+							elements[i] = arr.Elements[index.value]
+						}
+					}
+
+					return t.vm.initArrayObject(elements)
 				}
 			},
 		},
@@ -799,6 +1043,34 @@ func (a *ArrayObject) toJSON() string {
 	return out.String()
 }
 
+// Retrieves an object in an array using Integer index; common to `[]` and `at()`.
+func (a *ArrayObject) index(t *thread, args []Object) Object {
+	if len(args) != 1 {
+		return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 arguments. got=%d", len(args))
+	}
+
+	i := args[0]
+	index, ok := i.(*IntegerObject)
+
+	if !ok {
+		return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+	}
+
+	aLength := len(a.Elements)
+
+	if int(index.value) < 0 {
+		if -int(index.value) > aLength {
+			return NULL
+		}
+		calculatedIndex := aLength + int(index.value)
+		return a.Elements[calculatedIndex]
+	} else if int(index.value) >= aLength {
+		return NULL
+	}
+
+	return a.Elements[index.value]
+}
+
 // flatten returns a array of Objects that is one-dimensional flattening of Elements
 func (a *ArrayObject) flatten() []Object {
 	var result []Object
@@ -837,6 +1109,23 @@ func (a *ArrayObject) push(objs []Object) *ArrayObject {
 	return a
 }
 
+// returns a reversed copy of the passed array
+func (a *ArrayObject) reverse() *ArrayObject {
+	arrLen := len(a.Elements)
+	reversedArrElems := make([]Object, arrLen)
+
+	for i, element := range a.Elements {
+		reversedArrElems[arrLen-i-1] = element
+	}
+
+	newArr := &ArrayObject{
+		baseObj:  &baseObj{class: a.class},
+		Elements: reversedArrElems,
+	}
+
+	return newArr
+}
+
 // shift removes the first element in the array and returns it
 func (a *ArrayObject) shift() Object {
 	if len(a.Elements) < 1 {
@@ -860,4 +1149,10 @@ func (a *ArrayObject) copy() Object {
 	}
 
 	return newArr
+}
+
+// unshift inserts an element in the first position of the array
+func (a *ArrayObject) unshift(objs []Object) *ArrayObject {
+	a.Elements = append(objs, a.Elements...)
+	return a
 }
