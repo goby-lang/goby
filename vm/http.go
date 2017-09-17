@@ -110,7 +110,7 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 				}
 			},
 		}, {
-			// Sends a HEAD request to the target with type header and body. Returns the HTTP response as a string. Will error on non-200 responses, for more control over http requests look at the `start` method.
+			// Sends a HEAD request to the target with type header and body. Returns the HTTP headers as a map[string]string. Will error on non-200 responses, for more control over http requests look at the `start` method.
 			Name: "head",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {

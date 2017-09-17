@@ -69,8 +69,8 @@ func TestHTTPObject(t *testing.T) {
 		require "net/http"
 
 		res = Net::HTTP.head("http://127.0.0.1:3000/index")
-		res.status
-		`, "OK"},
+		res["Content-Length"]
+		`, "15"},
 	}
 
 	//block until server is ready
