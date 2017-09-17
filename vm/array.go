@@ -969,7 +969,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						} else if index.value < 0 && -index.value > len(arr.Elements) {
 							elements[i] = NULL
 						} else if index.value < 0 {
-							elements[i] = arr.Elements[len(arr.Elements) + index.value]
+							elements[i] = arr.Elements[len(arr.Elements)+index.value]
 						} else {
 							elements[i] = arr.Elements[index.value]
 						}
@@ -1115,7 +1115,7 @@ func (a *ArrayObject) reverse() *ArrayObject {
 	reversedArrElems := make([]Object, arrLen)
 
 	for i, element := range a.Elements {
-		reversedArrElems[arrLen - i - 1] = element
+		reversedArrElems[arrLen-i-1] = element
 	}
 
 	newArr := &ArrayObject{
