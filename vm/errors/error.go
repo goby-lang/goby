@@ -15,6 +15,8 @@ const (
 	UnsupportedMethodError = "UnsupportedMethodError"
 	// ConstantAlreadyInitializedError means user re-declares twice
 	ConstantAlreadyInitializedError = "ConstantAlreadyInitializedError"
+	// HTTPError is returned when when a request fails to return a proper response
+	HTTPError = "HTTPError"
 )
 
 /*
