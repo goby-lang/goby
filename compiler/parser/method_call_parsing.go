@@ -61,7 +61,7 @@ func (p *Parser) parseCallExpressionWithReceiver(receiver ast.Expression) ast.Ex
 		exp.Method = exp.Method + "="
 		p.nextToken()
 		p.nextToken()
-		exp.Arguments = append(exp.Arguments, p.parseExpression(NORMAL))
+		exp.Arguments = append(exp.Arguments, p.parseCallArgument())
 	default:
 		if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { // p.foo x, y, z || p.foo x
 			p.nextToken()
@@ -103,15 +103,26 @@ func (p *Parser) parseCallArgumentsWithParens() []ast.Expression {
 func (p *Parser) parseCallArguments() []ast.Expression {
 	args := []ast.Expression{}
 
-	args = append(args, p.parseExpression(NORMAL))
+	args = append(args, p.parseCallArgument())
 
 	for p.peekTokenIs(token.Comma) {
 		p.nextToken() // ","
 		p.nextToken() // start of next expression
-		args = append(args, p.parseExpression(NORMAL))
+		args = append(args, p.parseCallArgument())
 	}
 
 	return args
+}
+
+func (p *Parser) parseCallArgument() ast.Expression {
+	switch {
+	case p.curTokenIs(token.Asterisk):
+		return p.parsePrefixExpression()
+	case p.peekTokenIs(token.Colon):
+		return p.parseKeywordArgumentsExpression()
+	default:
+		return p.parseExpression(NORMAL)
+	}
 }
 
 func (p *Parser) parseBlockArgument(exp *ast.CallExpression) {
