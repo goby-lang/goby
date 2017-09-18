@@ -167,6 +167,7 @@ func (p *Parser) checkMethodParameters(params []ast.Expression) {
 			case 2:
 				p.error = &Error{Message: fmt.Sprintf("Optioned argument \"%s\" should be defined before splat argument. Line: %d", exp.String(), p.curToken.Line), errType: SyntaxError}
 			}
+
 			argState = 1
 		case *ast.PrefixExpression:
 			switch argState {
