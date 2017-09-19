@@ -686,6 +686,15 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		},
+		{
+			Name: "ptr",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					r := receiver.(*IntegerObject)
+					return t.vm.initGoObject(&r.value)
+				}
+			},
+		},
 	}
 }
 
