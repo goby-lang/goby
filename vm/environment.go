@@ -1,5 +1,7 @@
 package vm
 
+import "sort"
+
 func newEnvironment() *environment {
 	s := make(map[string]Object)
 	return &environment{store: s}
@@ -17,4 +19,13 @@ func (e *environment) get(name string) (Object, bool) {
 func (e *environment) set(name string, val Object) Object {
 	e.store[name] = val
 	return val
+}
+
+func (e *environment) names() []string {
+	keys := []string{}
+	for key := range e.store {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	return keys
 }

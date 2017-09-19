@@ -826,6 +826,28 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		},
+		{
+			Name: "methods",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					methods := []interface{}{}
+					set := map[string]interface{}{}
+					klasses := receiver.Class().ancestors()
+					if receiver.SingletonClass() != nil {
+						klasses = append([]*RClass{receiver.SingletonClass()}, klasses...)
+					}
+					for _, klass := range klasses {
+						for _, name := range klass.Methods.names() {
+							if set[name] == nil {
+								set[name] = true
+								methods = append(methods, name)
+							}
+						}
+					}
+					return t.vm.initObjectFromGoType(methods)
+				}
+			},
+		},
 	}
 }
 
@@ -1074,6 +1096,19 @@ func (c *RClass) setAttrReader(args interface{}) {
 func (c *RClass) setAttrAccessor(args interface{}) {
 	c.setAttrReader(args)
 	c.setAttrWriter(args)
+}
+
+func (c *RClass) ancestors() []*RClass {
+	klasses := []*RClass{c}
+	for {
+		if c.Name == classes.ObjectClass {
+			break
+		}
+		c = c.superClass
+		klasses = append(klasses, c)
+	}
+
+	return klasses
 }
 
 // Other helper functions -----------------------------------------------
