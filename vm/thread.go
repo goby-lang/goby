@@ -203,13 +203,14 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 	minimumArgNumber := 0
 	argTypesCount := len(method.argTypes())
 
+	// TODO: Should modify here, since if every keyword arguments given default value. you do not have to give keyword arguments
 	for _, at := range method.argTypes() {
-		if at == bytecode.NormalArg {
+		if at == bytecode.NormalArg || at == bytecode.KeywordArg {
 			minimumArgNumber++
 		}
 	}
 
-	if argC > method.argc && method.lastArgType() != bytecode.SplatArg {
+	if argC > method.argc && method.isSplatArgIncluded() {
 		e := t.vm.initErrorObject(errors.ArgumentError, "Expect at most %d args for method '%s'. got: %d", method.argc, method.Name, argC)
 		t.stack.set(receiverPr, &Pointer{Target: e})
 		t.sp = argPr
@@ -265,7 +266,7 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 		}
 	}
 
-	if argTypesCount > 0 && method.lastArgType() == bytecode.SplatArg {
+	if argTypesCount > 0 && method.isSplatArgIncluded() && !method.isKeywordArgIncluded() {
 		elems := []Object{}
 		for argIndex < argC {
 			elems = append(elems, t.stack.Data[argPr+argIndex].Target)
@@ -273,6 +274,20 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 		}
 
 		c.insertLCL(len(method.argTypes())-1, 0, t.vm.initArrayObject(elems))
+	}
+
+	if argTypesCount > 0 && !method.isSplatArgIncluded() && method.isKeywordArgIncluded() {
+		for i, argType := range method.argTypes() {
+			if argType == bytecode.KeywordArg {
+				c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
+				argIndex++
+			}
+		}
+	}
+
+	// TODO: Implement this
+	if argTypesCount > 0 && method.isSplatArgIncluded() && method.isKeywordArgIncluded() {
+
 	}
 
 	c.blockFrame = blockFrame

@@ -305,6 +305,37 @@ func TestMethodDefWithDefaultValueArgument(t *testing.T) {
 	compareBytecode(t, bytecode, expected)
 }
 
+func TestMethodDefWithKeywordArgument(t *testing.T) {
+	input := `
+	def foo(x: 111, y: 222)
+	  x + y
+	end
+
+	foo()
+	`
+
+	expected := `
+<Def:foo>
+0 putobject 10
+1 setlocal 0 1 1
+2 getlocal 0 0
+3 getlocal 0 1
+4 send + 1
+5 leave
+<ProgramStart>
+0 putself
+1 putstring foo
+2 def_method 2
+3 putself
+4 putobject 100
+5 send foo 1
+6 leave
+`
+
+	bytecode := compileToBytecode(input)
+	compareBytecode(t, bytecode, expected)
+}
+
 func compileToBytecode(input string) string {
 	l := lexer.New(input)
 	p := parser.New(l)
