@@ -997,6 +997,7 @@ func (vm *VM) initArrayClass() *RClass {
 	ac := vm.initializeClass(classes.ArrayClass, false)
 	ac.setBuiltinMethods(builtinArrayInstanceMethods(), false)
 	ac.setBuiltinMethods(builtinArrayClassMethods(), true)
+	vm.libFiles = append(vm.libFiles, "array.gb")
 	return ac
 }
 

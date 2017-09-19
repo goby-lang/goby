@@ -1,0 +1,7 @@
+class Array
+  def include?(x)
+    any? do |i|
+      i == x
+    end
+  end
+end
