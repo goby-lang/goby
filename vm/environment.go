@@ -2,19 +2,15 @@ package vm
 
 func newEnvironment() *environment {
 	s := make(map[string]Object)
-	return &environment{store: s, outer: nil}
+	return &environment{store: s}
 }
 
 type environment struct {
 	store map[string]Object
-	outer *environment
 }
 
 func (e *environment) get(name string) (Object, bool) {
 	obj, ok := e.store[name]
-	if !ok && e.outer != nil {
-		obj, ok = e.outer.get(name)
-	}
 	return obj, ok
 }
 
