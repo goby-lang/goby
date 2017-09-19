@@ -11,6 +11,7 @@ const (
 	NormalArg int = iota
 	OptionedArg
 	SplatArg
+	KeywordArg
 )
 
 func (g *Generator) compileStatements(stmts []ast.Statement, scope *scope, table *localTable) {
@@ -155,25 +156,33 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 	newIS.isType = MethodDef
 
 	for i := 0; i < len(stmt.Parameters); i++ {
-		var argType int
 		switch exp := stmt.Parameters[i].(type) {
 		case *ast.Identifier:
-			argType = NormalArg
 			scope.localTable.setLCL(exp.Value, scope.localTable.depth)
+
+			newIS.argTypes = append(newIS.argTypes, NormalArg)
 		case *ast.AssignExpression:
-			argType = OptionedArg
 			exp.Optioned = 1
 			g.compileAssignExpression(newIS, exp, scope, scope.localTable)
+
+			newIS.argTypes = append(newIS.argTypes, OptionedArg)
 		case *ast.PrefixExpression:
 			if exp.Operator != "*" {
 				continue
 			}
-			argType = SplatArg
 			ident := exp.Right.(*ast.Identifier)
 			scope.localTable.setLCL(ident.Value, scope.localTable.depth)
-		}
 
-		newIS.argTypes = append(newIS.argTypes, argType)
+			newIS.argTypes = append(newIS.argTypes, SplatArg)
+		case *ast.HashExpression:
+			for key, exp := range exp.Data {
+				g.compileExpression(newIS, exp, scope, scope.localTable)
+				index, depth := scope.localTable.setLCL(key, scope.localTable.depth)
+				newIS.define(SetLocal, exp.Line(), depth, index, 1)
+
+				newIS.argTypes = append(newIS.argTypes, KeywordArg)
+			}
+		}
 	}
 
 	if len(stmt.BlockStatement.Statements) == 0 {

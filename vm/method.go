@@ -3,8 +3,8 @@ package vm
 import (
 	"bytes"
 	"fmt"
-
 	"github.com/goby-lang/goby/vm/classes"
+	"github.com/goby-lang/goby/compiler/bytecode"
 )
 
 // MethodObject represents methods defined using goby.
@@ -47,6 +47,26 @@ func (m *MethodObject) lastArgType() int {
 	}
 
 	return -1
+}
+
+func (m *MethodObject) isSplatArgIncluded() bool {
+	for _, argType := range m.argTypes() {
+		if argType == bytecode.SplatArg {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (m *MethodObject) isKeywordArgIncluded() bool {
+	for _, argType := range m.argTypes() {
+		if argType == bytecode.KeywordArg {
+			return true
+		}
+	}
+
+	return false
 }
 
 //  BuiltinMethodObject =================================================
