@@ -61,7 +61,7 @@ func (m *MethodObject) isSplatArgIncluded() bool {
 
 func (m *MethodObject) isKeywordArgIncluded() bool {
 	for _, argType := range m.argTypes() {
-		if argType == bytecode.KeywordArg {
+		if argType == bytecode.OptionalKeywordArg || argType == bytecode.RequiredKeywordArg {
 			return true
 		}
 	}

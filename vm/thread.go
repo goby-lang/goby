@@ -203,14 +203,13 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 	minimumArgNumber := 0
 	argTypesCount := len(method.argTypes())
 
-	// TODO: Should modify here, since if every keyword arguments given default value. you do not have to give keyword arguments
 	for _, at := range method.argTypes() {
-		if at == bytecode.NormalArg || at == bytecode.KeywordArg {
+		if at == bytecode.NormalArg || at == bytecode.RequiredKeywordArg {
 			minimumArgNumber++
 		}
 	}
 
-	if argC > method.argc && method.isSplatArgIncluded() {
+	if argC > method.argc && !method.isSplatArgIncluded() {
 		e := t.vm.initErrorObject(errors.ArgumentError, "Expect at most %d args for method '%s'. got: %d", method.argc, method.Name, argC)
 		t.stack.set(receiverPr, &Pointer{Target: e})
 		t.sp = argPr
@@ -254,7 +253,7 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 	if minimumArgNumber < argC {
 		// Fill arguments with default value from beginning
 		for i, argType := range method.argTypes() {
-			if argType != bytecode.NormalArg && argType != bytecode.SplatArg {
+			if argType == bytecode.OptionedArg {
 				c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
 				argIndex++
 			}
@@ -278,9 +277,13 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 
 	if argTypesCount > 0 && !method.isSplatArgIncluded() && method.isKeywordArgIncluded() {
 		for i, argType := range method.argTypes() {
-			if argType == bytecode.KeywordArg {
-				c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
-				argIndex++
+			if argType == bytecode.RequiredKeywordArg || argType == bytecode.OptionalKeywordArg {
+				h := t.stack.Data[argPr+argIndex].Target.(*HashObject)
+
+				for _, data := range h.Pairs {
+					c.insertLCL(i, 0, data)
+					argIndex++
+				}
 			}
 		}
 	}
