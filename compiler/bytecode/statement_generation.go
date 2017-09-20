@@ -11,7 +11,8 @@ const (
 	NormalArg int = iota
 	OptionedArg
 	SplatArg
-	KeywordArg
+	RequiredKeywordArg
+	OptionalKeywordArg
 )
 
 func (g *Generator) compileStatements(stmts []ast.Statement, scope *scope, table *localTable) {
@@ -176,11 +177,18 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 			newIS.argTypes = append(newIS.argTypes, SplatArg)
 		case *ast.HashExpression:
 			for key, exp := range exp.Data {
-				g.compileExpression(newIS, exp, scope, scope.localTable)
-				index, depth := scope.localTable.setLCL(key, scope.localTable.depth)
-				newIS.define(SetLocal, exp.Line(), depth, index, 1)
+				var argType int
 
-				newIS.argTypes = append(newIS.argTypes, KeywordArg)
+				if exp == nil {
+					argType = RequiredKeywordArg
+				} else {
+					g.compileExpression(newIS, exp, scope, scope.localTable)
+					index, depth := scope.localTable.setLCL(key, scope.localTable.depth)
+					newIS.define(SetLocal, exp.Line(), depth, index, 1)
+					argType = OptionalKeywordArg
+				}
+
+				newIS.argTypes = append(newIS.argTypes, argType)
 			}
 		}
 	}

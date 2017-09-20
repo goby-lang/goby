@@ -156,6 +156,20 @@ func TestDefStatement(t *testing.T) {
 
 		foo(10, 20, 30)
 		`, 60},
+		{`
+		def foo(a:20)
+		  a
+		end
+
+		foo(a:10)
+		`, 10},
+		{`
+		def foo(a:20)
+		  a
+		end
+
+		foo
+		`, 20},
 	}
 
 	for i, tt := range tests {
