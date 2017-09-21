@@ -258,6 +258,15 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 				argIndex++
 			}
 
+			if argType == bytecode.RequiredKeywordArg || argType == bytecode.OptionalKeywordArg {
+				h := t.stack.Data[argPr+argIndex].Target.(*HashObject)
+
+				for _, data := range h.Pairs {
+					c.insertLCL(i, 0, data)
+					argIndex++
+				}
+			}
+
 			// If argument index equals argument count means we already assigned all arguments
 			if argIndex == argC || argType == bytecode.SplatArg {
 				break
@@ -273,19 +282,6 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 		}
 
 		c.insertLCL(len(method.argTypes())-1, 0, t.vm.initArrayObject(elems))
-	}
-
-	if argTypesCount > 0 && !method.isSplatArgIncluded() && method.isKeywordArgIncluded() {
-		for i, argType := range method.argTypes() {
-			if argType == bytecode.RequiredKeywordArg || argType == bytecode.OptionalKeywordArg {
-				h := t.stack.Data[argPr+argIndex].Target.(*HashObject)
-
-				for _, data := range h.Pairs {
-					c.insertLCL(i, 0, data)
-					argIndex++
-				}
-			}
-		}
 	}
 
 	// TODO: Implement this
