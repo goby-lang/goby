@@ -830,7 +830,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			Name: "methods",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					methods := []interface{}{}
+					methods := []Object{}
 					set := map[string]interface{}{}
 					klasses := receiver.Class().ancestors()
 					if receiver.SingletonClass() != nil {
@@ -840,11 +840,11 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 						for _, name := range klass.Methods.names() {
 							if set[name] == nil {
 								set[name] = true
-								methods = append(methods, name)
+								methods = append(methods, t.vm.initStringObject(name))
 							}
 						}
 					}
-					return t.vm.initObjectFromGoType(methods)
+					return t.vm.initArrayObject(methods)
 				}
 			},
 		},
