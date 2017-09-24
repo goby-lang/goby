@@ -146,6 +146,57 @@ func TestClassInstanceVariable(t *testing.T) {
 	}
 }
 
+func TestMethods(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{`
+		class C
+		  def hola
+		  end
+
+		  def hi
+		  end
+		end
+		C.new.methods.first(2) == ["hi", "hola"]
+		`, true},
+		{`
+		class C
+		  def hi
+		  end
+		end
+		class D < C
+		  def hola
+		  end
+		end
+		D.new.methods.first(2) == ["hola", "hi"]
+		`, true},
+		{`
+		class C
+		  def hi
+		  end
+		end
+		c = C.new
+		def c.hola
+		end
+		c.methods.first(2) == ["hola", "hi"]
+		`, true},
+		{`
+		class C
+		end
+		C.new.methods.include?("to_s")
+		`, true},
+	}
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestCustomClassConstructor(t *testing.T) {
 	input := `
 		class Foo
