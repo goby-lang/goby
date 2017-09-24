@@ -378,6 +378,25 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 				}
 			},
 		},
+		{
+			Name: "ancestors",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					c, ok := receiver.(*RClass)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.UndefinedMethodError, "Undefined Method '%s' for %s", "#ancestors", receiver.toString())
+					}
+
+					a := c.ancestors()
+					ancestors := make([]Object, len(a))
+					for i := range a {
+						ancestors[i] = a[i]
+					}
+					return t.vm.initArrayObject(ancestors)
+				}
+			},
+		},
 	}
 }
 
