@@ -11,6 +11,7 @@ func TestRegexpClassSuperclass(t *testing.T) {
 	}{
 		{`Regexp.class.name`, "Class"},
 		{`Regexp.superclass.name`, "Object"},
+		{`Regexp.ancestors.to_s`, "[Regexp, Object]"},
 	}
 
 	for i, tt := range tests {
