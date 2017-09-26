@@ -32,7 +32,9 @@ import (
 //
 // - Currently, manipulations are based upon Golang's Unicode manipulations.
 // - Currently, UTF-8 encoding is assumed based upon Golang's string manipulation, but the encoding is not actually specified(TBD).
-// - `Regexp.new` is supported.
+// - `Regexp.new` is exceptionally supported.
+//
+// **To Goby maintainers**: avoid using Go's standard regexp package (slow and not rich). Consider the faster `Trim` or `Split` etc in Go's "strings" package first, or just use the dlclark/regexp2 instead.
 // ToDo: Regexp literals with '/.../'
 type RegexpObject struct {
 	*baseObj
