@@ -173,10 +173,25 @@ func (vm *VM) SetMethodISIndexTable(fn filename) {
 	vm.methodISIndexTables[fn] = newISIndexTable()
 }
 
+// main object singleton methods -----------------------------------------------------
+func builtinMainObjSingletonMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
+		{
+			Name: "to_s",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(thread *thread, objects []Object, frame *callFrame) Object {
+					return thread.vm.initStringObject("main")
+				}
+			},
+		},
+	}
+}
+
 func (vm *VM) initMainObj() *RObject {
 	obj := vm.objectClass.initializeInstance()
 	singletonClass := vm.initializeClass(fmt.Sprintf("#<Class:%s>", obj.toString()), false)
 	singletonClass.Methods.set("include", vm.topLevelClass(classes.ClassClass).lookupMethod("include"))
+	singletonClass.setBuiltinMethods(builtinMainObjSingletonMethods(), false)
 	obj.singletonClass = singletonClass
 
 	return obj
