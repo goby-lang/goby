@@ -56,6 +56,34 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Repetition — returns a new array built by concatenating the specified number of copies
+			// of `self`.
+			//
+			// ```ruby
+			// a = [1, 2, 3]
+			// a * 2   # => [1, 2, 3, 1, 2, 3]
+			// a * ',' # => "1,2,3"
+			// ```
+			Name: "*",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 arguments. got=%d", len(args))
+					}
+
+					arr := receiver.(*ArrayObject)
+
+					copiesNumber, ok := args[0].(*IntegerObject)
+
+					if ok {
+						return arr.concatenateCopies(t, copiesNumber)
+					} else {
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+					}
+				}
+			},
+		},
+		{
 			// Returns a new array built by concatenating the two arrays together to produce a third array.
 			//
 			// ```ruby
@@ -1042,6 +1070,18 @@ func (a *ArrayObject) toJSON() string {
 	out.WriteString("]")
 
 	return out.String()
+}
+
+// concatenateCopies returns a array composed of N copies of the array
+func (a *ArrayObject) concatenateCopies(t *thread, n *IntegerObject) Object {
+	aLen := len(a.Elements)
+	result := make([]Object, 0, aLen*n.value)
+
+	for i := 0; i < n.value; i++ {
+		result = append(result, a.Elements...)
+	}
+
+	return t.vm.initArrayObject(result)
 }
 
 // Retrieves an object in an array using Integer index; common to `[]` and `at()`.
