@@ -75,11 +75,11 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 
 					copiesNumber, ok := args[0].(*IntegerObject)
 
-					if ok {
-						return arr.concatenateCopies(t, copiesNumber)
-					} else {
+					if ! ok {
 						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 					}
+
+					return arr.concatenateCopies(t, copiesNumber)
 				}
 			},
 		},
