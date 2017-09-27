@@ -15,12 +15,12 @@ type GoObject struct {
 }
 
 // Class methods --------------------------------------------------------
-func builtinGoClassMethods() []*BuiltinMethodObject {
+func builtinGoObjectClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{}
 }
 
 // Instance methods -----------------------------------------------------
-func builtinGoInstanceMethods() []*BuiltinMethodObject {
+func builtinGoObjectInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "go_func",
@@ -59,8 +59,8 @@ func (vm *VM) initGoObject(d interface{}) *GoObject {
 
 func (vm *VM) initGoClass() *RClass {
 	sc := vm.initializeClass(classes.GoObjectClass, false)
-	sc.setBuiltinMethods(builtinGoClassMethods(), true)
-	sc.setBuiltinMethods(builtinGoInstanceMethods(), false)
+	sc.setBuiltinMethods(builtinGoObjectClassMethods(), true)
+	sc.setBuiltinMethods(builtinGoObjectInstanceMethods(), false)
 	vm.objectClass.setClassConstant(sc)
 	return sc
 }
