@@ -15,4 +15,5 @@ const (
 	PluginClass   = "Plugin"
 	GoObjectClass = "GoObject"
 	FileClass     = "File"
+	GoMapClass    = "GoMap"
 )

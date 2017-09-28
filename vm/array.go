@@ -75,7 +75,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 
 					copiesNumber, ok := args[0].(*IntegerObject)
 
-					if ! ok {
+					if !ok {
 						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 					}
 

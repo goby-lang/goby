@@ -201,6 +201,7 @@ func (vm *VM) initConstants() {
 		vm.initChannelClass(),
 		vm.initGoClass(),
 		vm.initFileClass(),
+		vm.initGoMapClass(),
 	}
 
 	// Init error classes
