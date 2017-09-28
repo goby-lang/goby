@@ -37,6 +37,11 @@ func (m *MethodObject) toJSON() string {
 	return m.toString()
 }
 
+// Value returns method object's string format
+func (m *MethodObject) Value() interface{} {
+	return m.toString()
+}
+
 func (m *MethodObject) argTypes() []int {
 	return m.instructionSet.argTypes
 }
@@ -70,4 +75,9 @@ func (bim *BuiltinMethodObject) toString() string {
 // toJSON just delegates to `toString`
 func (bim *BuiltinMethodObject) toJSON() string {
 	return bim.toString()
+}
+
+// Value returns builtin method object's function
+func (bim *BuiltinMethodObject) Value() interface{} {
+	return bim.Fn
 }

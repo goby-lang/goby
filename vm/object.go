@@ -8,6 +8,7 @@ import (
 // Object represents all objects in Goby, including Array, Integer or even Method and Error.
 type Object interface {
 	Class() *RClass
+	Value() interface{}
 	SingletonClass() *RClass
 	SetSingletonClass(*RClass)
 	findMethod(string) Object
@@ -111,5 +112,10 @@ func (ro *RObject) toString() string {
 
 // toJSON just delegates to toString
 func (ro *RObject) toJSON() string {
+	return ro.toString()
+}
+
+// Value returns object's string format
+func (ro *RObject) Value() interface{} {
 	return ro.toString()
 }

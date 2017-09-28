@@ -64,7 +64,7 @@ func builtinGoMapInstanceMethods() []*BuiltinMethodObject {
 					pairs := map[string]Object{}
 
 					for k, obj := range m.data {
-						pairs[k] = obj.(Object)
+						pairs[k] = t.vm.initObjectFromGoType(obj)
 
 					}
 

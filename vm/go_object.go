@@ -88,49 +88,42 @@ func convertToGoFuncArgs(args []Object) ([]interface{}, error) {
 	funcArgs := []interface{}{}
 
 	for _, arg := range args {
-		v, ok := arg.(builtinType)
-
-		if ok {
-			switch v := v.(type) {
-			case *IntegerObject:
-				switch v.flag {
-				case f64:
-					funcArgs = append(funcArgs, float64(v.value))
-					continue
-				case f32:
-					funcArgs = append(funcArgs, float32(v.value))
-					continue
-				case ui64:
-					funcArgs = append(funcArgs, uint64(v.value))
-					continue
-				case ui32:
-					funcArgs = append(funcArgs, uint32(v.value))
-					continue
-				case ui16:
-					funcArgs = append(funcArgs, uint16(v.value))
-					continue
-				case ui8:
-					funcArgs = append(funcArgs, uint8(v.value))
-					continue
-				case i64:
-					funcArgs = append(funcArgs, int64(v.value))
-					continue
-				case i32:
-					funcArgs = append(funcArgs, int32(v.value))
-					continue
-				case i16:
-					funcArgs = append(funcArgs, int16(v.value))
-					continue
-				case i8:
-					funcArgs = append(funcArgs, int8(v.value))
-					continue
-				}
+		switch v := arg.(type) {
+		case *IntegerObject:
+			switch v.flag {
+			case f64:
+				funcArgs = append(funcArgs, float64(v.value))
+				continue
+			case f32:
+				funcArgs = append(funcArgs, float32(v.value))
+				continue
+			case ui64:
+				funcArgs = append(funcArgs, uint64(v.value))
+				continue
+			case ui32:
+				funcArgs = append(funcArgs, uint32(v.value))
+				continue
+			case ui16:
+				funcArgs = append(funcArgs, uint16(v.value))
+				continue
+			case ui8:
+				funcArgs = append(funcArgs, uint8(v.value))
+				continue
+			case i64:
+				funcArgs = append(funcArgs, int64(v.value))
+				continue
+			case i32:
+				funcArgs = append(funcArgs, int32(v.value))
+				continue
+			case i16:
+				funcArgs = append(funcArgs, int16(v.value))
+				continue
+			case i8:
+				funcArgs = append(funcArgs, int8(v.value))
+				continue
 			}
 
-			funcArgs = append(funcArgs, v.Value())
-		} else {
-			err := fmt.Errorf("Can't pass %s type object when calling go function", arg.Class().Name)
-			return nil, err
+			funcArgs = append(funcArgs, arg.Value())
 		}
 	}
 

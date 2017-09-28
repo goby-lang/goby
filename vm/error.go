@@ -72,3 +72,7 @@ func (e *Error) toString() string {
 func (e *Error) toJSON() string {
 	return e.toString()
 }
+
+func (e *Error) Value() interface{} {
+	return e.Message
+}
