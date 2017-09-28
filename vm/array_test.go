@@ -161,6 +161,54 @@ func TestArrayIndex(t *testing.T) {
 	}
 }
 
+func TestArrayStarOperator(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+			a = [1, 2, 3]
+			a * 2
+		`, []interface{}{1, 2, 3, 1, 2, 3}},
+		// Make sure the result is an entirely new array.
+		{`
+			a = [1, 2, 3]
+			(a * 2)[0] = -1
+			a
+		`, []interface{}{1, 2, 3}},
+		{`
+			a = [1, 2, 3]
+			a * 0
+		`, []interface{}{}},
+		{`
+			a = []
+			a * 2
+		`, []interface{}{}},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input, getFilename())
+		testArrayObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayStarOperatorFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`[1, 2] * nil`, "TypeError: Expect argument to be Integer. got: Null", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayPlusOperator(t *testing.T) {
 	tests := []struct {
 		input    string
