@@ -72,6 +72,32 @@ func builtinGoMapInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		},
+		{
+			Name: "get",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got: %d", len(args))
+					}
+
+					key, ok := args[0].(*StringObject)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+					}
+
+					m := receiver.(*GoMap).data
+
+					result, ok := m[key.value]
+
+					if !ok {
+						return NULL
+					}
+
+					return result.(Object)
+				}
+			},
+		},
 	}
 }
 

@@ -44,3 +44,28 @@ func TestGoMapInitWithHash(t *testing.T) {
 
 	testStringObject(t, 0, b, "bar")
 }
+
+func TestGoMapGetMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		h = { foo: "bar" }
+		m = GoMap.new(h)
+		m.get("foo")
+		`, "bar"},
+		{`
+		m = GoMap.new
+		m.get("foo")
+		`, nil},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
