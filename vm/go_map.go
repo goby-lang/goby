@@ -38,7 +38,7 @@ func builtinGoMapClassMethods() []*BuiltinMethodObject {
 					}
 
 					for k, v := range hash.Pairs {
-						m[k] = v
+						m[k] = v.Value()
 					}
 
 					return t.vm.initGoMap(m)
@@ -94,7 +94,13 @@ func builtinGoMapInstanceMethods() []*BuiltinMethodObject {
 						return NULL
 					}
 
-					return result.(Object)
+					obj, ok := result.(Object)
+
+					if !ok {
+						obj = t.vm.initObjectFromGoType(result)
+					}
+
+					return obj
 				}
 			},
 		},

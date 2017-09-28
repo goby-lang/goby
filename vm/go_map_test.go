@@ -40,9 +40,9 @@ func TestGoMapInitWithHash(t *testing.T) {
 		t.Fatal("Expect object's data to contains \"foo\" key")
 	}
 
-	b := bar.(*StringObject)
-
-	testStringObject(t, 0, b, "bar")
+	if bar.(string) != "bar" {
+		t.Fatal("Expect \"foo\" key has Go's \"bar\" string")
+	}
 }
 
 func TestGoMapGetMethod(t *testing.T) {
