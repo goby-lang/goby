@@ -16,5 +16,6 @@ const (
 	PluginClass   = "Plugin"
 	GoObjectClass = "GoObject"
 	FileClass     = "File"
-	RegexpClass   = "Regexp")
+	RegexpClass   = "Regexp"
 	GoMapClass    = "GoMap"
+)
