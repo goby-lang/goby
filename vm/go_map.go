@@ -55,16 +55,16 @@ func builtinGoMapInstanceMethods() []*BuiltinMethodObject {
 			Name: "to_hash",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if blockFrame == nil {
-						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
 					}
 
 					m := receiver.(*GoMap)
 
 					pairs := map[string]Object{}
 
-					for k, v := range m.data {
-						pairs[k] = t.vm.initObjectFromGoType(v)
+					for k, obj := range m.data {
+						pairs[k] = obj.(Object)
 
 					}
 
@@ -95,6 +95,28 @@ func builtinGoMapInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					return result.(Object)
+				}
+			},
+		},
+		{
+			Name: "set",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 2 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 2 argument. got: %d", len(args))
+					}
+
+					key, ok := args[0].(*StringObject)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+					}
+
+					m := receiver.(*GoMap).data
+
+					m[key.value] = args[1]
+
+					return args[1]
 				}
 			},
 		},

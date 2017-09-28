@@ -69,3 +69,51 @@ func TestGoMapGetMethod(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
+func TestGoMapSetMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		m = GoMap.new
+		m.set("foo", "bar")
+		m.get("foo")
+		`, "bar"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestGoMapToHashMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		h = { foo: "bar" }
+		m = GoMap.new(h)
+		h2 = m.to_hash
+		h2[:foo]
+		`, "bar"},
+		{`
+		m = GoMap.new
+		h = m.to_hash
+		h[:foo]
+		`, nil},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
