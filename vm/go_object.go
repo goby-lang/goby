@@ -122,9 +122,9 @@ func convertToGoFuncArgs(args []Object) ([]interface{}, error) {
 				funcArgs = append(funcArgs, int8(v.value))
 				continue
 			}
-
-			funcArgs = append(funcArgs, arg.Value())
 		}
+
+		funcArgs = append(funcArgs, arg.Value())
 	}
 
 	return funcArgs, nil
