@@ -255,6 +255,51 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Calls block once for each key in the hash (in sorted key order), passing the
+			// key-value pair as parameters.
+			// Returns `self`.
+			//
+			// ```Ruby
+			// h = { b: "2", a: 1 }
+			// h.each do |k, v|
+			//   puts k.to_s + "->" + v.to_s
+			// end
+			// # => a->1
+			// # => b->2
+			// ```
+			//
+			// @return [Hash]
+			Name: "each",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 arguments. got: %d", len(args))
+					}
+
+					if blockFrame == nil {
+						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
+					}
+
+					h := receiver.(*HashObject)
+
+					if len(h.Pairs) == 0 {
+						t.callFrameStack.pop()
+					} else {
+						keys := h.sortedKeys()
+
+						for _, k := range keys {
+							v := h.Pairs[k]
+							strK := t.vm.initStringObject(k)
+
+							t.builtinMethodYield(blockFrame, strK, v)
+						}
+					}
+
+					return h
+				}
+			},
+		},
+		{
 			// Loop through keys of the hash with given block frame. It also returns array of
 			// keys in alphabetical order.
 			//

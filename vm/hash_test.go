@@ -325,6 +325,51 @@ func TestHashDigMethodFail(t *testing.T) {
 	}
 }
 
+func TestHashEachMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected [][]interface{}
+	}{
+		// return value
+		{`
+			{ b: "2", a: 1 }.each do end.to_a(true)
+		`, [][]interface{}{{"a", 1}, {"b", "2"}}},
+		// block yielding
+		{`
+			output = []
+			h = { b: "2", a: 1 }
+			h.each do |k, v|
+				output.push([k, v])
+			end
+			output
+		`, [][]interface{}{{"a", 1}, {"b", "2"}}},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testBidimensionalArrayObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestHashEachMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`{ a: 1, b: 2}.each("Hello") do end
+		`, "ArgumentError: Expect 0 arguments. got: 1", 1},
+		{`{ a: 1, b: 2}.each`, "InternalError: Can't yield without a block", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestHashEachKeyMethod(t *testing.T) {
 	tests := []struct {
 		input    string
