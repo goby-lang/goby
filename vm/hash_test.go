@@ -380,6 +380,101 @@ func TestHashEachValueMethodFail(t *testing.T) {
 	}
 }
 
+func TestHashEachMethod(t *testing.T) {
+	hashTests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+			{ b: "Hello", c: 123, a: true }.each do |v|
+			  # Empty Block
+			end
+		`, []interface{}{true, "Hello", 123}},
+		{`
+			{ a: "Hello", b: 123, a: true }.each do |v|
+			  # Empty Block
+			end
+		`, []interface{}{true, 123}},
+		{`
+			{}.each_value do |v|
+			  # Empty Block
+			end
+		`, []interface{}{}},
+	}
+
+	for i, tt := range hashTests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testArrayObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+
+	normalTests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+			sum = 0
+			keys = ''
+			{ a: 1, b: 2, c: 3, d: 4, e: 5 }.each do |k, v|
+			  keys = keys + k
+			  sum = sum + v
+			end
+			keys + ' ' + sum.to_s
+			`, "abcde 15"},
+		{`
+			sum = 0
+			keys = ''
+			{ a: 1, b: 2, a: 3, b: 4, a: 5 }.each do |k, v|
+			  keys = keys + k
+			  sum = sum + v
+			end
+			keys + ' ' + sum.to_s
+			`, "ab 9"},
+		{`
+			string = ""
+			{ a: "Hello", b: "World", c: "Goby", d: "Lang" }.each do |k, v|
+			  string = string + k + ":" + v + " "
+			end
+			string
+			`, "a:Hello b:World c:Goby d:Lang "},
+		{`
+			string = ""
+			{}.each do |k, v|
+			  string = string + k + v + " "
+			end
+			string
+			`, ""},
+	}
+
+	for i, tt := range normalTests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestHashMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`{ a: 1, b: 2, c: 3 }.each("Hello") do |key|
+		  puts key
+		end
+		`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`{ a: 1, b: 2, c: 3 }.each`, "InternalError: Can't yield without a block", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestHashEmptyMethod(t *testing.T) {
 	tests := []struct {
 		input    string
