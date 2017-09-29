@@ -343,6 +343,10 @@ func TestHashEachMethod(t *testing.T) {
 			end
 			output
 		`, [][]interface{}{{"a", 1}, {"b", "2"}}},
+		// empty hash
+		{`
+			{ }.each do end.to_a
+		`, [][]interface{}{}},
 	}
 
 	for i, tt := range tests {
