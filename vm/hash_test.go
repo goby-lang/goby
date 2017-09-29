@@ -187,6 +187,62 @@ func TestHashComparisonOperation(t *testing.T) {
 	}
 }
 
+func TestHashAnyMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+      { a: 1, b: 2 }.any? do |k, v|
+        v == 2
+      end
+		`, true},
+		{`
+      { a: 1, b: 2 }.any? do |k, v|
+        v
+      end
+		`, true},
+		{`
+      { a: 1, b: 2 }.any? do |k, v|
+        v == 5
+      end
+		`, false},
+		{`
+      { a: 1, b: 2 }.any? do |k, v|
+        nil
+      end
+		`, false},
+		{`
+      { }.any? do |k, v|
+        true
+      end
+		`, false},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestHashAnyMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`{  }.any?(123) do end`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`{  }.any?`, "InternalError: Can't yield without a block", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestHashClearMethod(t *testing.T) {
 	input := `
 	{ foo: 123, bar: "test", baz: true }.clear
