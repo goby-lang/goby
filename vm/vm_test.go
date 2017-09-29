@@ -305,6 +305,14 @@ func testHashObject(t *testing.T, index int, objectResult Object, expected map[s
 	return true
 }
 
+// Testing API like testArrayObject(), but performed on bidimensional arrays.
+//
+// Input example:
+//
+//		evaluated = '[["a", 1], ["b", "2"]]'
+//		expected = [][]interface{}{{"a", 1}, {"b", "2"}}
+//		testBidimensionalArrayObject(t, i, evaluated, expected)
+//
 func testBidimensionalArrayObject(t *testing.T, index int, obj Object, expected [][]interface{}) bool {
 	result, ok := obj.(*ArrayObject)
 	if !ok {
