@@ -200,29 +200,29 @@ func TestDefStatement(t *testing.T) {
 func TestSimpleKeywordArgument(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected map[string] int
+		expected map[string]int
 	}{
 		{`
 		def add(x: 111)
 		end
-		`, map[string]int {
+		`, map[string]int{
 			"x": 111,
-		} },
+		}},
 		{`
 		def add(x: 111, y: 222)
 		end
-		`, map[string]int {
+		`, map[string]int{
 			"x": 111,
 			"y": 222,
-		} },
+		}},
 		{`
 		def add(x: 111, y: 222, z: 333)
 		end
-		`, map[string]int {
+		`, map[string]int{
 			"x": 111,
 			"y": 222,
 			"z": 333,
-		} },
+		}},
 	}
 
 	for i, tt := range tests {
@@ -231,7 +231,7 @@ func TestSimpleKeywordArgument(t *testing.T) {
 		program, err := p.ParseProgram()
 
 		if err != nil {
-			t.Fatalf("At case %d " + err.Message, i)
+			t.Fatalf("At case %d "+err.Message, i)
 		}
 
 		firstStmt := program.Statements[0].(*ast.DefStatement)
@@ -250,29 +250,29 @@ func TestSimpleKeywordArgument(t *testing.T) {
 func TestKeywordArgumentWithNoDefaultValue(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected map[string] interface{}
+		expected map[string]interface{}
 	}{
 		{`
 		def add(x:)
 		end
-		`, map[string]interface{} {
+		`, map[string]interface{}{
 			"x": nil,
-		} },
+		}},
 		{`
 		def add(x: 111, y:)
 		end
-		`, map[string]interface{} {
+		`, map[string]interface{}{
 			"x": 111,
 			"y": nil,
-		} },
+		}},
 		{`
 		def add(x: 111, y:, z:)
 		end
-		`, map[string]interface{} {
+		`, map[string]interface{}{
 			"x": 111,
 			"y": nil,
 			"z": nil,
-		} },
+		}},
 	}
 
 	for i, tt := range tests {
@@ -281,7 +281,7 @@ func TestKeywordArgumentWithNoDefaultValue(t *testing.T) {
 		program, err := p.ParseProgram()
 
 		if err != nil {
-			t.Fatalf("At case %d " + err.Message, i)
+			t.Fatalf("At case %d "+err.Message, i)
 		}
 
 		firstStmt := program.Statements[0].(*ast.DefStatement)
