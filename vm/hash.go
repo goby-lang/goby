@@ -254,6 +254,50 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Loop through key and values of the hash with given block frame. It also returns array of
+			// values of the hash in the alphabetical order of its key
+			//
+			// ```Ruby
+			// h = { c: 1, b: 2, a: 3 }
+			// h.each do |k, v|
+			//   puts(k + " " + v.to_s)
+			// end
+			// # => a 1
+			// # => b 2
+			// # => c 3
+			// ```
+			//
+			Name: "each",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
+					}
+
+					if blockFrame == nil {
+						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
+					}
+
+					h := receiver.(*HashObject)
+
+					if len(h.Pairs) == 0 {
+						t.callFrameStack.pop()
+					}
+
+					keys := h.sortedKeys()
+					var arrOfValues []Object
+
+					for _, k := range keys {
+						value := h.Pairs[k]
+						arrOfValues = append(arrOfValues, value)
+						t.builtinMethodYield(blockFrame, t.vm.initStringObject(k), value)
+					}
+
+					return t.vm.initArrayObject(arrOfValues)
+				}
+			},
+		},
+		{
 			// Returns true if hash has no key-value pairs
 			//
 			// ```Ruby
