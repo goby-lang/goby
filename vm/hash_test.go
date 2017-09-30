@@ -831,6 +831,66 @@ func TestHashSortedKeysMethod(t *testing.T) {
 	}
 }
 
+func TestHashSelectMethod(t *testing.T) {
+	testsSortedArray := []struct {
+		input    string
+		expected map[string]interface{}
+	}{
+		{`
+			{ a: 1, b: 2 }.select do |k, v|
+			  v == 2
+			end
+		`, map[string]interface{}{"b": 2}},
+		{`
+			{ a: 1, b: 2 }.select do |k, v|
+			  5
+			end
+		`, map[string]interface{}{ "a": 1, "b": 2 }},
+		{`
+			{ a: 1, b: 2 }.select do |k, v|
+			  nil
+			end
+		`, map[string]interface{}{}},
+		{`
+			{ a: 1, b: 2 }.select do |k, v|
+			  false
+			end
+		`, map[string]interface{}{}},
+		{`
+			{ }.select do end
+		`, map[string]interface{}{}},
+		// non-destructivity specification
+		{`
+			source = { a: 1, b: 2 }
+			source.select do |k, v| true end
+			source
+		`, map[string]interface{}{ "a": 1, "b": 2 }},
+	}
+
+	for i, tt := range testsSortedArray {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testHashObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestHashSelectMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`{ }.select(123) do end`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`{ }.select`, "InternalError: Can't yield without a block", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestHashSortedKeysMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`{ a: 1, b: 2 }.sorted_keys(123)`, "ArgumentError: Expect 0 argument. got: 1", 1},
