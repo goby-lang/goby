@@ -328,12 +328,30 @@ func TestHashDigMethodFail(t *testing.T) {
 func TestHashEachMethod(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected [][]interface{}
+		expected map[string]interface{}
 	}{
 		// return value
 		{`
-			{ b: "2", a: 1 }.each do end.to_a(true)
-		`, [][]interface{}{{"a", 1}, {"b", "2"}}},
+			{ b: "2", a: 1 }.each do end
+		`, map[string]interface{}{"a": 1, "b": "2"}},
+		// empty hash
+		{`
+			{ }.each do end
+		`, map[string]interface{}{}},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testHashObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+
+	tests2 := []struct {
+		input    string
+		expected [][]interface{}
+	}{
 		// block yielding
 		{`
 			output = []
@@ -343,13 +361,9 @@ func TestHashEachMethod(t *testing.T) {
 			end
 			output
 		`, [][]interface{}{{"a", 1}, {"b", "2"}}},
-		// empty hash
-		{`
-			{ }.each do end.to_a
-		`, [][]interface{}{}},
 	}
 
-	for i, tt := range tests {
+	for i, tt := range tests2 {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		testBidimensionalArrayObject(t, i, evaluated, tt.expected)
