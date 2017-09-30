@@ -722,6 +722,40 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		},
+		{
+			// Return an array containing the values associated with the given keys.
+			//
+			// ```Ruby
+			// { a: 1, b: "2" }.values_at("a", "c") # => [1, nil]
+			// ```
+			//
+			// @return [Boolean]
+			Name: "values_at",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					hash := receiver.(*HashObject)
+					var result []Object
+
+					for _, objectKey := range args {
+						stringObjectKey, ok := objectKey.(*StringObject)
+
+						if !ok {
+							return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, objectKey.Class().Name)
+						}
+
+						value, ok := hash.Pairs[stringObjectKey.value]
+
+						if !ok {
+							value = NULL
+						}
+
+						result = append(result, value)
+					}
+
+					return t.vm.initArrayObject(result)
+				}
+			},
+		},
 	}
 }
 
