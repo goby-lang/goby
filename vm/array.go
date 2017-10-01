@@ -412,6 +412,32 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Extracts the nested value specified by the sequence of idx objects by calling `dig` at
+			// each step, returning nil if any intermediate step is nil.
+			//
+			// ```Ruby
+			// [1 , 2].dig(-2)      # => 1
+			// [[], 2].dig(0, 1)    # => nil
+			// [[], 2].dig(0, 1, 2) # => nil
+			// [1, 2].dig(0, 1)     # => TypeError: Expect target to be Diggable
+			// ```
+			//
+			// @return [Object]
+			Name: "dig",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) == 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expected 1+ arguments, got 0")
+					}
+
+					array := receiver.(*ArrayObject)
+					value := array.dig(t, args)
+
+					return value
+				}
+			},
+		},
+		{
 			// Loop through each element with the given block.
 			//
 			// ```ruby
@@ -1066,6 +1092,37 @@ func (a *ArrayObject) concatenateCopies(t *thread, n *IntegerObject) Object {
 	}
 
 	return t.vm.initArrayObject(result)
+}
+
+// recursive indexed access - see ArrayObject#dig documentation.
+func (a *ArrayObject) dig(t *thread, keys []Object) Object {
+	currentKey := keys[0]
+	intCurrentKey, ok := currentKey.(*IntegerObject)
+
+	if !ok {
+		return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, currentKey.Class().Name)
+	} else {
+		normalizedIndex := a.normalizeIndex(intCurrentKey)
+
+		if normalizedIndex == -1 {
+			return NULL
+		} else {
+		  nextKeys := keys[1:]
+			currentValue := a.Elements[normalizedIndex]
+
+			if len(nextKeys) == 0 {
+				return currentValue
+			} else {
+				diggableCurrentValue, ok := currentValue.(Diggable)
+
+				if !ok {
+					return t.vm.initErrorObject(errors.TypeError, "Expect target to be Diggable, got %s", currentValue.Class().Name)
+				} else {
+					return diggableCurrentValue.dig(t, nextKeys)
+				}
+			}
+		}
+	}
 }
 
 // Retrieves an object in an array using Integer index; common to `[]` and `at()`.
