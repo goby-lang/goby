@@ -143,6 +143,68 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Passes each (key, value) pair  of the collection to the given block. The method returns
+			// true if the block ever returns a value other than false or nil.
+			//
+			// ```ruby
+			// a = { a: 1, b: 2 }
+			//
+			// a.any? do |k, v|
+			//   v == 2
+			// end            # => true
+			// a.any? do |k, v|
+			//   v
+			// end            # => true
+			// a.any? do |k, v|
+			//   v == 5
+			// end            # => false
+			// a.any? do |k, v|
+			//   nil
+			// end            # => false
+			//
+			// a = {}
+			//
+			// a.any? do |k, v|
+			//   true
+			// end            # => false
+			// ```
+			Name: "any?",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
+					}
+
+					if blockFrame == nil {
+						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
+					}
+
+					hash := receiver.(*HashObject)
+
+					if len(hash.Pairs) == 0 {
+						t.callFrameStack.pop()
+					}
+
+					for stringKey, value := range hash.Pairs {
+						objectKey := t.vm.initStringObject(stringKey)
+						result := t.builtinMethodYield(blockFrame, objectKey, value)
+
+						booleanResult, isResultBoolean := result.Target.(*BooleanObject)
+
+						if isResultBoolean {
+							if booleanResult.value {
+								return TRUE
+							}
+						} else if result.Target != NULL {
+							return TRUE
+						}
+					}
+
+					return FALSE
+				}
+			},
+		},
+		{
 			// Returns empty hash (no key-value pairs)
 			//
 			// ```Ruby
@@ -158,7 +220,11 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
 					}
 
-					return t.vm.initHashObject(make(map[string]Object))
+					h := receiver.(*HashObject)
+
+					h.Pairs = make(map[string]Object)
+
+					return h
 				}
 			},
 		},
