@@ -395,26 +395,10 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					arr := receiver.(*ArrayObject)
-					arrLength := len(arr.Elements)
+					normalizedIndex := arr.normalizeIndex(index)
 
-					// exit cases
-
-					if arrLength == 0 {
+					if normalizedIndex == -1 {
 						return NULL
-					} else if index.value >= len(arr.Elements) {
-						return NULL
-					} else if index.value < 0 && -index.value > arrLength {
-						return NULL
-					}
-
-					// normalize negative indexing
-
-					var normalizedIndex int
-
-					if index.value < 0 {
-						normalizedIndex = arrLength + index.value
-					} else {
-						normalizedIndex = index.value
 					}
 
 					// delete and slice
@@ -1097,19 +1081,13 @@ func (a *ArrayObject) index(t *thread, args []Object) Object {
 		return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 	}
 
-	aLength := len(a.Elements)
+	normalizedIndex := a.normalizeIndex(index)
 
-	if int(index.value) < 0 {
-		if -int(index.value) > aLength {
-			return NULL
-		}
-		calculatedIndex := aLength + int(index.value)
-		return a.Elements[calculatedIndex]
-	} else if int(index.value) >= aLength {
+	if normalizedIndex == -1 {
 		return NULL
+	} else {
+		return a.Elements[normalizedIndex]
 	}
-
-	return a.Elements[index.value]
 }
 
 // flatten returns a array of Objects that is one-dimensional flattening of Elements
@@ -1131,6 +1109,32 @@ func (a *ArrayObject) flatten() []Object {
 // length returns the length of array's elements
 func (a *ArrayObject) length() int {
 	return len(a.Elements)
+}
+
+// normalizes the index to the Ruby-style:
+//
+// 1. if the index is between o and the index length, returns the index
+// 2. if it's a negative value (within bounds), returns the normalized positive version
+// 3. if it's out of bounds (either positive or negative), returns -1
+func (a *ArrayObject) normalizeIndex(objectIndex *IntegerObject) int {
+	aLength := len(a.Elements)
+	index := objectIndex.value
+
+	// out of bounds
+
+	if index >= aLength {
+		return -1
+	} else if index < 0 && -index > aLength {
+		return -1
+	}
+
+	// within bounds
+
+	if index < 0 {
+		return aLength + index
+	} else {
+		return index
+	}
 }
 
 // pop removes the last element in the array and returns it
