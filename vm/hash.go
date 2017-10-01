@@ -304,6 +304,90 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Remove the key from the hash if key exist
+			//
+			// ```Ruby
+			// h = { a: 1, b: 2, c: 3 }
+			// h.delete("b") # =>  { a: 1, c: 3 }
+			// ```
+			//
+			// @return [Hash]
+			Name: "delete",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got: %d", len(args))
+					}
+
+					h := receiver.(*HashObject)
+					d := args[0]
+					deleteKey, ok := d.(*StringObject)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, d.Class().Name)
+					}
+
+					deleteKeyValue := deleteKey.value
+					if _, ok := h.Pairs[deleteKeyValue]; ok {
+						delete(h.Pairs, deleteKeyValue)
+					}
+					return h
+				}
+			},
+		},
+		{
+			// Deletes every key-value pair from the hash for which block evalutates to anything except
+			// false and nil.
+			//
+			// Returns the hash.
+			//
+			// ```Ruby
+			// { a: 1, b: 2}.delete_if do |k, v| v == 1 end # =>  { b: 2 }
+			// { a: 1, b: 2}.delete_if do |k, v| 5 end      # =>  { }
+			// { a: 1, b: 2}.delete_if do |k, v| false end  # =>  { a: 1, b: 2}
+			// { a: 1, b: 2}.delete_if do |k, v| nil end    # =>  { a: 1, b: 2}
+			// ```
+			//
+			// @return [Hash]
+			Name: "delete_if",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
+					}
+
+					if blockFrame == nil {
+						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
+					}
+
+					hash := receiver.(*HashObject)
+
+					if len(hash.Pairs) == 0 {
+						t.callFrameStack.pop()
+					}
+
+					// Note that from the Go specification, https://golang.org/ref/spec#For_statements,
+					// it's safe to delete elements from a Map, while iterating it.
+					for stringKey, value := range hash.Pairs {
+						objectKey := t.vm.initStringObject(stringKey)
+						result := t.builtinMethodYield(blockFrame, objectKey, value)
+
+						booleanResult, isResultBoolean := result.Target.(*BooleanObject)
+
+						if isResultBoolean {
+							if booleanResult.value {
+								delete(hash.Pairs, stringKey)
+							}
+						} else if result.Target != NULL {
+							delete(hash.Pairs, stringKey)
+						}
+					}
+
+					return hash
+				}
+			},
+		},
+		{
 			// Extracts the nested value specified by the sequence of idx objects by calling `dig` at
 			// each step, returning nil if any intermediate step is nil.
 			//
@@ -512,90 +596,6 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 						return TRUE
 					}
 					return FALSE
-				}
-			},
-		},
-		{
-			// Remove the key from the hash if key exist
-			//
-			// ```Ruby
-			// h = { a: 1, b: 2, c: 3 }
-			// h.delete("b") # =>  { a: 1, c: 3 }
-			// ```
-			//
-			// @return [Hash]
-			Name: "delete",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got: %d", len(args))
-					}
-
-					h := receiver.(*HashObject)
-					d := args[0]
-					deleteKey, ok := d.(*StringObject)
-
-					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, d.Class().Name)
-					}
-
-					deleteKeyValue := deleteKey.value
-					if _, ok := h.Pairs[deleteKeyValue]; ok {
-						delete(h.Pairs, deleteKeyValue)
-					}
-					return h
-				}
-			},
-		},
-		{
-			// Deletes every key-value pair from the hash for which block evalutates to anything except
-			// false and nil.
-			//
-			// Returns the hash.
-			//
-			// ```Ruby
-			// { a: 1, b: 2}.delete_if do |k, v| v == 1 end # =>  { b: 2 }
-			// { a: 1, b: 2}.delete_if do |k, v| 5 end      # =>  { }
-			// { a: 1, b: 2}.delete_if do |k, v| false end  # =>  { a: 1, b: 2}
-			// { a: 1, b: 2}.delete_if do |k, v| nil end    # =>  { a: 1, b: 2}
-			// ```
-			//
-			// @return [Hash]
-			Name: "delete_if",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
-					}
-
-					if blockFrame == nil {
-						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
-					}
-
-					hash := receiver.(*HashObject)
-
-					if len(hash.Pairs) == 0 {
-						t.callFrameStack.pop()
-					}
-
-					// Note that from the Go specification, https://golang.org/ref/spec#For_statements,
-					// it's safe to delete elements from a Map, while iterating it.
-					for stringKey, value := range hash.Pairs {
-						objectKey := t.vm.initStringObject(stringKey)
-						result := t.builtinMethodYield(blockFrame, objectKey, value)
-
-						booleanResult, isResultBoolean := result.Target.(*BooleanObject)
-
-						if isResultBoolean {
-							if booleanResult.value {
-								delete(hash.Pairs, stringKey)
-							}
-						} else if result.Target != NULL {
-							delete(hash.Pairs, stringKey)
-						}
-					}
-
-					return hash
 				}
 			},
 		},
