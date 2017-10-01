@@ -1101,28 +1101,28 @@ func (a *ArrayObject) dig(t *thread, keys []Object) Object {
 
 	if !ok {
 		return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, currentKey.Class().Name)
-	} else {
-		normalizedIndex := a.normalizeIndex(intCurrentKey)
-
-		if normalizedIndex == -1 {
-			return NULL
-		} else {
-		  nextKeys := keys[1:]
-			currentValue := a.Elements[normalizedIndex]
-
-			if len(nextKeys) == 0 {
-				return currentValue
-			} else {
-				diggableCurrentValue, ok := currentValue.(Diggable)
-
-				if !ok {
-					return t.vm.initErrorObject(errors.TypeError, "Expect target to be Diggable, got %s", currentValue.Class().Name)
-				} else {
-					return diggableCurrentValue.dig(t, nextKeys)
-				}
-			}
-		}
 	}
+
+	normalizedIndex := a.normalizeIndex(intCurrentKey)
+
+	if normalizedIndex == -1 {
+		return NULL
+	}
+
+  nextKeys := keys[1:]
+	currentValue := a.Elements[normalizedIndex]
+
+	if len(nextKeys) == 0 {
+		return currentValue
+	}
+
+	diggableCurrentValue, ok := currentValue.(Diggable)
+
+	if !ok {
+		return t.vm.initErrorObject(errors.TypeError, "Expect target to be Diggable, got %s", currentValue.Class().Name)
+	}
+
+	return diggableCurrentValue.dig(t, nextKeys)
 }
 
 // Retrieves an object in an array using Integer index; common to `[]` and `at()`.
@@ -1142,9 +1142,9 @@ func (a *ArrayObject) index(t *thread, args []Object) Object {
 
 	if normalizedIndex == -1 {
 		return NULL
-	} else {
-		return a.Elements[normalizedIndex]
 	}
+
+	return a.Elements[normalizedIndex]
 }
 
 // flatten returns a array of Objects that is one-dimensional flattening of Elements
@@ -1181,7 +1181,9 @@ func (a *ArrayObject) normalizeIndex(objectIndex *IntegerObject) int {
 
 	if index >= aLength {
 		return -1
-	} else if index < 0 && -index > aLength {
+	}
+
+	if index < 0 && -index > aLength {
 		return -1
 	}
 
@@ -1189,9 +1191,9 @@ func (a *ArrayObject) normalizeIndex(objectIndex *IntegerObject) int {
 
 	if index < 0 {
 		return aLength + index
-	} else {
-		return index
 	}
+
+	return index
 }
 
 // pop removes the last element in the array and returns it

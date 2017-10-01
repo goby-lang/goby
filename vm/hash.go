@@ -851,26 +851,26 @@ func (h *HashObject) dig(t *thread, keys []Object) Object {
 
 	if !ok {
 		return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, currentKey.Class().Name)
-	} else {
-		nextKeys := keys[1:]
-		currentValue, ok := h.Pairs[stringCurrentKey.value]
-
-		if !ok {
-			return NULL
-		} else {
-			if len(nextKeys) == 0 {
-				return currentValue
-			} else {
-				diggableCurrentValue, ok := currentValue.(Diggable)
-
-				if !ok {
-					return t.vm.initErrorObject(errors.TypeError, "Expect target to be Diggable, got %s", currentValue.Class().Name)
-				} else {
-					return diggableCurrentValue.dig(t, nextKeys)
-				}
-			}
-		}
 	}
+
+	nextKeys := keys[1:]
+	currentValue, ok := h.Pairs[stringCurrentKey.value]
+
+	if !ok {
+		return NULL
+	}
+
+	if len(nextKeys) == 0 {
+		return currentValue
+	}
+
+	diggableCurrentValue, ok := currentValue.(Diggable)
+
+	if !ok {
+		return t.vm.initErrorObject(errors.TypeError, "Expect target to be Diggable, got %s", currentValue.Class().Name)
+	}
+
+	return diggableCurrentValue.dig(t, nextKeys)
 }
 
 // Other helper functions ----------------------------------------------
