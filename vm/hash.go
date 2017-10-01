@@ -220,7 +220,11 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
 					}
 
-					return t.vm.initHashObject(make(map[string]Object))
+					h := receiver.(*HashObject)
+
+					h.Pairs = make(map[string]Object)
+
+					return h
 				}
 			},
 		},

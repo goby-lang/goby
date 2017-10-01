@@ -244,22 +244,30 @@ func TestHashAnyMethodFail(t *testing.T) {
 }
 
 func TestHashClearMethod(t *testing.T) {
-	input := `
-	{ foo: 123, bar: "test", baz: true }.clear
-	`
+	tests := []struct {
+		input    string
+		expected map[string]interface{}
+	}{
+		// object modification
+		{`
+			hash = { foo: 123, bar: "test" }
+			hash.clear
+			hash
+		`, map[string]interface{}{}},
 
-	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
-
-	h, ok := evaluated.(*HashObject)
-	if !ok {
-		t.Fatalf("Expect evaluated value to be a hash. got: %T", evaluated)
-	} else if h.length() != 0 {
-		t.Fatalf("Expect length of pairs of hash to be 0. got: %v", h.length())
+		// return value
+		{`
+			{ foo: 123, bar: "test" }.clear
+		`, map[string]interface{}{}},
 	}
 
-	v.checkCFP(t, 0, 0)
-	v.checkSP(t, 0, 1)
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testHashObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
 }
 
 func TestHashClearMethodFail(t *testing.T) {
