@@ -35,7 +35,7 @@ import (
 // - `Regexp.new` is exceptionally supported.
 //
 // **To Goby maintainers**: avoid using Go's standard regexp package (slow and not rich). Consider the faster `Trim` or `Split` etc in Go's "strings" package first, or just use the dlclark/regexp2 instead.
-// ToDo: Regexp literals with '/.../'
+// ToDo: Regexp literals with '/.../' and match operator `=~`
 type RegexpObject struct {
 	*baseObj
 	Regexp *regexp2.Regexp
