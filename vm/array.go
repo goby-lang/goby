@@ -1109,7 +1109,7 @@ func (a *ArrayObject) dig(t *thread, keys []Object) Object {
 		return NULL
 	}
 
-  nextKeys := keys[1:]
+	nextKeys := keys[1:]
 	currentValue := a.Elements[normalizedIndex]
 
 	if len(nextKeys) == 0 {

@@ -1066,7 +1066,7 @@ func TestHashSelectMethod(t *testing.T) {
 			{ a: 1, b: 2 }.select do |k, v|
 			  5
 			end
-		`, map[string]interface{}{ "a": 1, "b": 2 }},
+		`, map[string]interface{}{"a": 1, "b": 2}},
 		{`
 			{ a: 1, b: 2 }.select do |k, v|
 			  nil
@@ -1085,7 +1085,7 @@ func TestHashSelectMethod(t *testing.T) {
 			source = { a: 1, b: 2 }
 			source.select do |k, v| true end
 			source
-		`, map[string]interface{}{ "a": 1, "b": 2 }},
+		`, map[string]interface{}{"a": 1, "b": 2}},
 	}
 
 	for i, tt := range testsSortedArray {
