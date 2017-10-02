@@ -839,6 +839,48 @@ func TestHashEqualMethodFail(t *testing.T) {
 	}
 }
 
+func TestHashFetchMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`
+			{ spaghetti: "eat" }.fetch("spaghetti")
+		`, "eat"},
+		{`
+			{ spaghetti: "eat" }.fetch("pizza", "not eat")
+		`, "not eat"},
+		{`
+			{ spaghetti: "eat" }.fetch("pizza") do |el| "eat " + el end
+		`, "eat pizza"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestHashFetchMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`{ spaghetti: "eat" }.fetch()`, "ArgumentError: Expected 1 or 2 arguments, got 0", 1},
+		{`{ spaghetti: "eat" }.fetch("a", "b", "c")`, "ArgumentError: Expected 1 or 2 arguments, got 3", 1},
+		{`{ spaghetti: "eat" }.fetch("a", "b") do end`, "ArgumentError: The default argument can't be passed along with a block", 1},
+		{`{ spaghetti: "eat" }.fetch("pizza")`, "ArgumentError: The value was not found, and no block has been provided", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestHashHasKeyMethod(t *testing.T) {
 	tests := []struct {
 		input    string

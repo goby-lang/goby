@@ -600,6 +600,59 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Returns a value from the hash for the given key. If the key can’t be found, there are several
+			// options: With no other arguments, it will raise an ArgumentError exception; if default is
+			// given, then that will be returned; if the optional code block is specified, then that will be
+			// run and its result returned.
+			//
+			// ```Ruby
+			// h = { "spaghetti" => "eat" }
+			// h.fetch("spaghetti")                     #=> "eat"
+			// h.fetch("pizza")                         #=> ArgumentError
+			// h.fetch("pizza", "not eat")              #=> "not eat"
+			// h.fetch("pizza") do |el| "eat " + el end #=> "eat pizza"
+			// ```
+			//
+			// @return [Object]
+			Name: "fetch",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if !(len(args) == 1 || len(args) == 2) {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expected 1 or 2 arguments, got %d", len(args))
+					} else if len(args) == 2 && blockFrame != nil {
+						return t.vm.initErrorObject(errors.ArgumentError, "The default argument can't be passed along with a block")
+					}
+
+					hash := receiver.(*HashObject)
+					key, ok := args[0].(*StringObject)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, key.Class().Name)
+					}
+
+					value, ok := hash.Pairs[key.value]
+
+					if ok {
+						if blockFrame != nil {
+							t.callFrameStack.pop()
+						}
+
+						return value
+					}
+
+					if len(args) == 2 {
+						return args[1]
+					}
+
+					if blockFrame != nil {
+						return t.builtinMethodYield(blockFrame, key).Target
+					}
+
+					return t.vm.initErrorObject(errors.ArgumentError, "The value was not found, and no block has been provided")
+				}
+			},
+		},
+		{
 			// Returns true if the key exist in the hash. Currently, it can only input string
 			// type object.
 			//
