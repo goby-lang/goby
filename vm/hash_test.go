@@ -285,6 +285,109 @@ func TestHashClearMethodFail(t *testing.T) {
 	}
 }
 
+func TestHashDigMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+			{ a: 1, b: 2 }.dig(:a)
+		`, 1},
+		{`
+			{ a: {}, b: 2 }.dig(:a, :b)
+		`, nil},
+		{`
+			{ a: {}, b: 2 }.dig(:a, :b, :c)
+		`, nil},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestHashDigMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`{ a: [], b: 2 }.dig`, "ArgumentError: Expected 1+ arguments, got 0", 1},
+		{`{ a: 1, b: 2 }.dig(:a, :b)`, "TypeError: Expect target to be Diggable, got Integer", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestHashEachMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected map[string]interface{}
+	}{
+		// return value
+		{`
+			{ b: "2", a: 1 }.each do end
+		`, map[string]interface{}{"a": 1, "b": "2"}},
+		// empty hash
+		{`
+			{ }.each do end
+		`, map[string]interface{}{}},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testHashObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+
+	tests2 := []struct {
+		input    string
+		expected [][]interface{}
+	}{
+		// block yielding
+		{`
+			output = []
+			h = { b: "2", a: 1 }
+			h.each do |k, v|
+				output.push([k, v])
+			end
+			output
+		`, [][]interface{}{{"a", 1}, {"b", "2"}}},
+	}
+
+	for i, tt := range tests2 {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testBidimensionalArrayObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestHashEachMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`{ a: 1, b: 2}.each("Hello") do end
+		`, "ArgumentError: Expect 0 arguments. got: 1", 1},
+		{`{ a: 1, b: 2}.each`, "InternalError: Can't yield without a block", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestHashEachKeyMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -949,6 +1052,66 @@ func TestHashSortedKeysMethod(t *testing.T) {
 	}
 }
 
+func TestHashSelectMethod(t *testing.T) {
+	testsSortedArray := []struct {
+		input    string
+		expected map[string]interface{}
+	}{
+		{`
+			{ a: 1, b: 2 }.select do |k, v|
+			  v == 2
+			end
+		`, map[string]interface{}{"b": 2}},
+		{`
+			{ a: 1, b: 2 }.select do |k, v|
+			  5
+			end
+		`, map[string]interface{}{ "a": 1, "b": 2 }},
+		{`
+			{ a: 1, b: 2 }.select do |k, v|
+			  nil
+			end
+		`, map[string]interface{}{}},
+		{`
+			{ a: 1, b: 2 }.select do |k, v|
+			  false
+			end
+		`, map[string]interface{}{}},
+		{`
+			{ }.select do end
+		`, map[string]interface{}{}},
+		// non-destructivity specification
+		{`
+			source = { a: 1, b: 2 }
+			source.select do |k, v| true end
+			source
+		`, map[string]interface{}{ "a": 1, "b": 2 }},
+	}
+
+	for i, tt := range testsSortedArray {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testHashObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestHashSelectMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`{ }.select(123) do end`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`{ }.select`, "InternalError: Can't yield without a block", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestHashSortedKeysMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`{ a: 1, b: 2 }.sorted_keys(123)`, "ArgumentError: Expect 0 argument. got: 1", 1},
@@ -1353,6 +1516,45 @@ func TestHashValuesMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`{ a: 1, b: 2 }.values(123)`, "ArgumentError: Expect 0 argument. got: 1", 1},
 		{`{ a: 1, b: 2 }.values(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestHashValuesAtMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+		{ a: 1, b: "2" }.values_at("a", "c")
+		`, []interface{}{1, nil}},
+		{`
+		{ a: 1, b: "2" }.values_at()
+		`, []interface{}{}},
+		{`
+		{}.values_at("a")
+		`, []interface{}{nil}},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testArrayObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestHashValuesAtMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`{ a: 1, b: 2 }.values_at(123)`, "TypeError: Expect argument to be String. got: Integer", 1},
 	}
 
 	for i, tt := range testsFail {

@@ -30,3 +30,4 @@ goby
 
 *.gbbc
 coverage.txt
+.DS_Store

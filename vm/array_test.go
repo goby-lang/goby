@@ -83,6 +83,49 @@ func TestArrayComparisonOperation(t *testing.T) {
 	}
 }
 
+func TestArrayDigMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+			[1 , 2].dig(-2)
+		`, 1},
+		{`
+			[{a: 3} , 2].dig(0, :a)
+		`, 3},
+		{`
+			[[], 2].dig(0, 1)
+		`, nil},
+		{`
+			[[], 2].dig(0, 1, 2)
+		`, nil},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayDigMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`[1, 2].dig`, "ArgumentError: Expected 1+ arguments, got 0", 1},
+		{`[1, 2].dig(0, 1)`, "TypeError: Expect target to be Diggable, got Integer", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayIndex(t *testing.T) {
 	tests := []struct {
 		input    string
