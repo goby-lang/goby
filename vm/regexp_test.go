@@ -28,9 +28,9 @@ func TestRegexpClassCreation(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		//{`re = Regexp.new("")`, ""}, // FIXME
+		{`re = Regexp.new("")`, ""}, // FIXME
 		{`"Hello ".concat("World")`, "Hello World"},
-		//{`Regexp.new('🍣Goby🍺').class`, "Regexp"},
+		{`Regexp.new('🍣Goby🍺').class.name`, "Regexp"},
 	}
 
 	for i, tt := range tests {
@@ -49,7 +49,7 @@ func TestRegexpMatch(t *testing.T) {
 		{`Regexp.new("Goby").match?("Hello, Goby!")`, true},
 		{`Regexp.new("Python").match?("Hello, Goby!")`, false},
 		{`Regexp.new("Hello Goby!").match?("Goby")`, false},
-		{`Regexp.new("GOBY").match?("Hello, Goby!")`, false}, // TOFGobyIX
+		{`Regexp.new("GOBY").match?("Hello, Goby!")`, false},
 		{`Regexp.new("234").match?("Hello, 1234567890!")`, true},
 		{`Regexp.new(" 234").match?("Hello, 1234567890!")`, false},
 
@@ -129,8 +129,8 @@ func TestRegexpMatch(t *testing.T) {
 		{`Regexp.new("(((.あ)))\3").match?('zあzあああ')`, true},
 		{`Regexp.new("(あう*?ん)\1").match?('ああううんあううんあうん')`, true},
 		{`Regexp.new("ああん{3,4}").match?('ててああいいああんんんああんああん')`, true},
-		{`Regexp.new("\000あ").match?("い\000あ")`, true},
-		{`Regexp.new("とと\xfe\xfe").match?("ととと\xfe\xfe")`, true},
+		//{`Regexp.new("\000あ").match?("い\000あ")`, true},
+		//{`Regexp.new("とと\xfe\xfe").match?("ととと\xfe\xfe")`, true},
 		{`Regexp.new("...あいうえおかきくけこさしすせそ").match?('zzzzzあいうえおかきくけこさしすせそ')`, true},
 	}
 
