@@ -1350,6 +1350,45 @@ func TestHashValuesMethodFail(t *testing.T) {
 	}
 }
 
+func TestHashValuesAtMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+		{ a: 1, b: "2" }.values_at("a", "c")
+		`, []interface{}{1, nil}},
+		{`
+		{ a: 1, b: "2" }.values_at()
+		`, []interface{}{}},
+		{`
+		{}.values_at("a")
+		`, []interface{}{nil}},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testArrayObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestHashValuesAtMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`{ a: 1, b: 2 }.values_at(123)`, "TypeError: Expect argument to be String. got: Integer", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func JSONBytesEqual(a, b []byte) (bool, error) {
 	var j, j2 interface{}
 	if err := json.Unmarshal(a, &j); err != nil {
