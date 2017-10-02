@@ -175,20 +175,16 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 			scope.localTable.setLCL(ident.Value, scope.localTable.depth)
 
 			newIS.argTypes = append(newIS.argTypes, SplatArg)
-		case *ast.HashExpression:
-			for key, exp := range exp.Data {
-				var argType int
+		case *ast.PairExpression:
+			key := exp.Key.(*ast.Identifier)
 
-				if exp == nil {
-					argType = RequiredKeywordArg
-				} else {
-					g.compileExpression(newIS, exp, scope, scope.localTable)
-					index, depth := scope.localTable.setLCL(key, scope.localTable.depth)
-					newIS.define(SetLocal, exp.Line(), depth, index, 1)
-					argType = OptionalKeywordArg
-				}
-
-				newIS.argTypes = append(newIS.argTypes, argType)
+			if exp.Value != nil {
+				g.compileExpression(newIS, exp.Value, scope, scope.localTable)
+				index, depth := scope.localTable.setLCL(key.Value, scope.localTable.depth)
+				newIS.define(SetLocal, exp.Line(), depth, index, 1)
+				newIS.argTypes = append(newIS.argTypes, OptionalKeywordArg)
+			} else {
+				newIS.argTypes = append(newIS.argTypes, RequiredKeywordArg)
 			}
 		}
 	}
