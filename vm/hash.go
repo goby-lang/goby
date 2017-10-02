@@ -617,6 +617,63 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Returns a new hash consisting of entries for which the block does not return false
+			// or nil.
+			//
+			// ```ruby
+			// a = { a: 1, b: 2 }
+			//
+			// a.select do |k, v|
+			//   v == 2
+			// end            # => { a: 1 }
+			// a.select do |k, v|
+			//   5
+			// end            # => { a: 1, b: 2 }
+			// a.select do |k, v|
+			//   nil
+			// end            # => { }
+			// a.select do |k, v|
+			//   false
+			// end            # => { }
+			// ```
+			Name: "select",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
+					}
+
+					if blockFrame == nil {
+						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
+					}
+
+					sourceHash := receiver.(*HashObject)
+					destinationPairs := map[string]Object{}
+
+					if len(sourceHash.Pairs) == 0 {
+						t.callFrameStack.pop()
+					}
+
+					for stringKey, value := range sourceHash.Pairs {
+						objectKey := t.vm.initStringObject(stringKey)
+						result := t.builtinMethodYield(blockFrame, objectKey, value)
+
+						booleanResult, isResultBoolean := result.Target.(*BooleanObject)
+
+						if isResultBoolean {
+							if booleanResult.value {
+								destinationPairs[stringKey] = value
+							}
+						} else if result.Target != NULL {
+							destinationPairs[stringKey] = value
+						}
+					}
+
+					return t.vm.initHashObject(destinationPairs)
+				}
+			},
+		},
+		{
 			// Returns an array of keys (in arbitrary order)
 			//
 			// ```Ruby
