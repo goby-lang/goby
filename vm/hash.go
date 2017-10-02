@@ -229,6 +229,32 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Extracts the nested value specified by the sequence of idx objects by calling `dig` at
+			// each step, returning nil if any intermediate step is nil.
+			//
+			// ```Ruby
+			// { a: 1 , b: 2 }.dig(:a)         # => 1
+			// { a: {}, b: 2 }.dig(:a, :b)     # => nil
+			// { a: {}, b: 2 }.dig(:a, :b, :c) # => nil
+			// { a: 1, b: 2 }.dig(:a, :b)      # => TypeError: Expect target to be Diggable
+			// ```
+			//
+			// @return [Object]
+			Name: "dig",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) == 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expected 1+ arguments, got 0")
+					}
+
+					hash := receiver.(*HashObject)
+					value := hash.dig(t, args)
+
+					return value
+				}
+			},
+		},
+		{
 			// Loop through keys of the hash with given block frame. It also returns array of
 			// keys in alphabetical order.
 			//
@@ -882,6 +908,35 @@ func (h *HashObject) copy() Object {
 	}
 
 	return newHash
+}
+
+// recursive indexed access - see ArrayObject#dig documentation.
+func (h *HashObject) dig(t *thread, keys []Object) Object {
+	currentKey := keys[0]
+	stringCurrentKey, ok := currentKey.(*StringObject)
+
+	if !ok {
+		return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, currentKey.Class().Name)
+	}
+
+	nextKeys := keys[1:]
+	currentValue, ok := h.Pairs[stringCurrentKey.value]
+
+	if !ok {
+		return NULL
+	}
+
+	if len(nextKeys) == 0 {
+		return currentValue
+	}
+
+	diggableCurrentValue, ok := currentValue.(Diggable)
+
+	if !ok {
+		return t.vm.initErrorObject(errors.TypeError, "Expect target to be Diggable, got %s", currentValue.Class().Name)
+	}
+
+	return diggableCurrentValue.dig(t, nextKeys)
 }
 
 // Other helper functions ----------------------------------------------

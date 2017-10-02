@@ -285,6 +285,46 @@ func TestHashClearMethodFail(t *testing.T) {
 	}
 }
 
+func TestHashDigMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+			{ a: 1, b: 2 }.dig(:a)
+		`, 1},
+		{`
+			{ a: {}, b: 2 }.dig(:a, :b)
+		`, nil},
+		{`
+			{ a: {}, b: 2 }.dig(:a, :b, :c)
+		`, nil},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestHashDigMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`{ a: [], b: 2 }.dig`, "ArgumentError: Expected 1+ arguments, got 0", 1},
+		{`{ a: 1, b: 2 }.dig(:a, :b)`, "TypeError: Expect target to be Diggable, got Integer", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestHashEachKeyMethod(t *testing.T) {
 	tests := []struct {
 		input    string
