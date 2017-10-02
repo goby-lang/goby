@@ -881,6 +881,44 @@ func TestHashFetchMethodFail(t *testing.T) {
 	}
 }
 
+func TestHashFetchValuesMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+      { cat: "feline", dog: "canine", cow: "bovine" }.fetch_values("cow", "cat")
+		`, []interface{}{"bovine", "feline"}},
+		{`
+      { cat: "feline", dog: "canine", cow: "bovine" }.fetch_values("cow", "bird") do |k| k.upcase end
+		`, []interface{}{"bovine", "BIRD"}},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testArrayObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestHashFetchValuesMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`{ cat: "feline" }.fetch_values()`, "ArgumentError: Expected 1+ arguments, got 0", 1, 1},
+		{`{ cat: "feline" }.fetch_values(1)`, "TypeError: Expect argument to be String. got: Integer", 1, 1},
+		{`{ cat: "feline" }.fetch_values("dog")`, "ArgumentError: There is no value for the key `dog`, and no block has been provided", 1, 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestHashHasKeyMethod(t *testing.T) {
 	tests := []struct {
 		input    string
