@@ -187,29 +187,133 @@ func TestHashComparisonOperation(t *testing.T) {
 	}
 }
 
-func TestHashClearMethod(t *testing.T) {
-	input := `
-	{ foo: 123, bar: "test", baz: true }.clear
-	`
-
-	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
-
-	h, ok := evaluated.(*HashObject)
-	if !ok {
-		t.Fatalf("Expect evaluated value to be a hash. got: %T", evaluated)
-	} else if h.length() != 0 {
-		t.Fatalf("Expect length of pairs of hash to be 0. got: %v", h.length())
+func TestHashAnyMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+      { a: 1, b: 2 }.any? do |k, v|
+        v == 2
+      end
+		`, true},
+		{`
+      { a: 1, b: 2 }.any? do |k, v|
+        v
+      end
+		`, true},
+		{`
+      { a: 1, b: 2 }.any? do |k, v|
+        v == 5
+      end
+		`, false},
+		{`
+      { a: 1, b: 2 }.any? do |k, v|
+        nil
+      end
+		`, false},
+		{`
+      { }.any? do |k, v|
+        true
+      end
+		`, false},
 	}
 
-	v.checkCFP(t, 0, 0)
-	v.checkSP(t, 0, 1)
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestHashAnyMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`{  }.any?(123) do end`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`{  }.any?`, "InternalError: Can't yield without a block", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestHashClearMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected map[string]interface{}
+	}{
+		// object modification
+		{`
+			hash = { foo: 123, bar: "test" }
+			hash.clear
+			hash
+		`, map[string]interface{}{}},
+
+		// return value
+		{`
+			{ foo: 123, bar: "test" }.clear
+		`, map[string]interface{}{}},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testHashObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
 }
 
 func TestHashClearMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`{ a: 1, b: 2 }.clear(123)`, "ArgumentError: Expect 0 argument. got: 1", 1},
 		{`{ a: 1, b: 2 }.clear(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestHashDigMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+			{ a: 1, b: 2 }.dig(:a)
+		`, 1},
+		{`
+			{ a: {}, b: 2 }.dig(:a, :b)
+		`, nil},
+		{`
+			{ a: {}, b: 2 }.dig(:a, :b, :c)
+		`, nil},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestHashDigMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`{ a: [], b: 2 }.dig`, "ArgumentError: Expected 1+ arguments, got 0", 1},
+		{`{ a: 1, b: 2 }.dig(:a, :b)`, "TypeError: Expect target to be Diggable, got Integer", 1},
 	}
 
 	for i, tt := range testsFail {

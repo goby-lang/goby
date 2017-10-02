@@ -276,6 +276,35 @@ func testArrayObject(t *testing.T, index int, obj Object, expected []interface{}
 	return true
 }
 
+// Tests a Hash Object, with a few limitations:
+//
+// - the tested hash must be shallow (no nested objects as values);
+// - the test hash must have strings as keys;
+// - the error message won't mention the key - only the value.
+//
+// The second limitation is currently the only Hash format in Goby, anyway.
+//
+func testHashObject(t *testing.T, index int, objectResult Object, expected map[string]interface{}) bool {
+	result, ok := objectResult.(*HashObject)
+
+	if !ok {
+		t.Errorf("At test case %d: result is not Hash. got=%T", index, objectResult)
+		return false
+	}
+
+	if len(result.Pairs) != len(expected) {
+		t.Errorf("Unexpected result size. Expected %d, got=%d", len(expected), len(result.Pairs))
+	}
+
+	for expectedKey, expectedValue := range expected {
+		resultValue := result.Pairs[expectedKey]
+
+		checkExpected(t, i, resultValue, expectedValue)
+	}
+
+	return true
+}
+
 func checkExpected(t *testing.T, i int, evaluated Object, expected interface{}) {
 	if isError(evaluated) {
 		t.Errorf("At test case %d: %s", i, evaluated.toString())
