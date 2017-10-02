@@ -46,6 +46,7 @@ var precedence = map[token.Type]int{
 	token.PlusEq:             ASSIGN,
 	token.MinusEq:            ASSIGN,
 	token.OrEq:               ASSIGN,
+	token.Colon:              ASSIGN,
 }
 
 // Constants for denoting precedence
@@ -274,6 +275,21 @@ func (p *Parser) parseHashPair(pairs map[string]ast.Expression) {
 	p.nextToken()
 	value = p.parseExpression(NORMAL)
 	pairs[key] = value
+}
+
+func (p *Parser) parsePairExpression(key ast.Expression) ast.Expression {
+	exp := &ast.PairExpression{BaseNode: &ast.BaseNode{Token: p.curToken}, Key: key}
+
+	if p.peekTokenIs(token.Comma) {
+		return exp
+	}
+
+	p.nextToken()
+	value := p.parseExpression(NORMAL)
+
+	exp.Value = value
+
+	return exp
 }
 
 func (p *Parser) parseArrayExpression() ast.Expression {
