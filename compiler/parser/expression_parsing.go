@@ -280,7 +280,7 @@ func (p *Parser) parseHashPair(pairs map[string]ast.Expression) {
 func (p *Parser) parsePairExpression(key ast.Expression) ast.Expression {
 	exp := &ast.PairExpression{BaseNode: &ast.BaseNode{Token: p.curToken}, Key: key}
 
-	if p.peekTokenIs(token.Comma) {
+	if p.peekTokenIs(token.Comma) || p.peekTokenIs(token.RParen) {
 		return exp
 	}
 
