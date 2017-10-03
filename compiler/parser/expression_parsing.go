@@ -491,6 +491,52 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	return ie
 }
 
+func (p *Parser) parseCaseExpression() ast.Expression {
+	ie := &ast.CaseExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
+	// parse if and elsif expressions
+	ie.Conditionals = p.parseCaseConditionals()
+
+	// curToken is now ELSE or RBRACE
+	if p.curTokenIs(token.Else) {
+		ie.Alternative = p.parseBlockStatement()
+		ie.Alternative.KeepLastValue()
+	}
+
+	return ie
+}
+
+func (p *Parser) parseCaseConditionals() []*ast.ConditionalExpression {
+	p.nextToken()
+	base := p.parseExpression(NORMAL)
+
+	p.expectPeek(token.When)
+	ce := []*ast.ConditionalExpression{}
+
+	for p.curTokenIs(token.When) {
+		ce = append(ce, p.parseCaseConditional(base))
+	}
+
+	return ce
+}
+
+func (p *Parser) parseCaseConditional(base ast.Expression) *ast.ConditionalExpression {
+	ce := &ast.ConditionalExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
+	p.nextToken()
+
+	right := p.parseExpression(NORMAL)
+	ce.Condition = &ast.InfixExpression{
+		BaseNode: &ast.BaseNode{Token: p.curToken},
+		Left:     base,
+		Operator: token.Eq,
+		Right:    right,
+	}
+
+	ce.Consequence = p.parseBlockStatement()
+	ce.Consequence.KeepLastValue()
+
+	return ce
+}
+
 func (p *Parser) parseConditionalExpressions() []*ast.ConditionalExpression {
 	// first conditional expression should start with if
 	cs := []*ast.ConditionalExpression{p.parseConditionalExpression()}

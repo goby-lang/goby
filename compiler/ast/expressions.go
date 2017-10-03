@@ -233,6 +233,42 @@ func (ie *IfExpression) String() string {
 	return out.String()
 }
 
+type CaseExpression struct {
+	*BaseNode
+	Conditionals []*ConditionalExpression
+	Alternative  *BlockStatement
+}
+
+func (ie *CaseExpression) expressionNode() {}
+func (ie *CaseExpression) TokenLiteral() string {
+	return ie.Token.Literal
+}
+func (ie *CaseExpression) String() string {
+	var out bytes.Buffer
+
+	for i, c := range ie.Conditionals {
+		if i == 0 {
+			out.WriteString("if")
+			out.WriteString(" ")
+		} else {
+			out.WriteString("elsif")
+			out.WriteString(" ")
+		}
+
+		out.WriteString(c.String())
+	}
+
+	if ie.Alternative != nil {
+		out.WriteString("\n")
+		out.WriteString("else\n")
+		out.WriteString(ie.Alternative.String())
+	}
+
+	out.WriteString("\nend")
+
+	return out.String()
+}
+
 // ConditionalExpression represents if or elsif expression
 type ConditionalExpression struct {
 	*BaseNode
