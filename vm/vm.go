@@ -191,6 +191,7 @@ func (vm *VM) initConstants() {
 	// Init builtin classes
 	builtinClasses := []*RClass{
 		vm.initIntegerClass(),
+		vm.initFloatClass(),
 		vm.initStringClass(),
 		vm.initBoolClass(),
 		vm.initNullClass(),

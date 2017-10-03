@@ -63,6 +63,11 @@ func TestStringConversion(t *testing.T) {
 		{`" \t123".to_i`, 123},
 		{`"123string123".to_i`, 123},
 		{`"string123".to_i`, 0},
+		{`"123.5".to_f`, 123.5},
+		{`".5".to_f`, 0.5},
+		{`"  123.5".to_f`, 123.5},
+		{`"3.5e2".to_f`, 350.0},
+		{`"3.5ef".to_f`, 0.0},
 		{`
 		  arr = "Goby".to_a
 		  arr[0]

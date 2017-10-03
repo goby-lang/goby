@@ -4,6 +4,7 @@ const (
 	ObjectClass   = "Object"
 	ClassClass    = "Class"
 	IntegerClass  = "Integer"
+	FloatClass    = "Float"
 	StringClass   = "String"
 	ArrayClass    = "Array"
 	HashClass     = "Hash"

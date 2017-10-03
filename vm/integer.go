@@ -440,6 +440,22 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		},
+		// Returns the `Float` conversion of self.
+		//
+		// ```Ruby
+		// 100.to_f # => '100.0'.to_f
+		// ```
+		// @return [Float]
+		{
+			Name: "to_f",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					r := receiver.(*IntegerObject)
+					newFloat := t.vm.initFloatObject(float64(r.value))
+					return newFloat
+				}
+			},
+		},
 		{
 			// Returns self.
 			//

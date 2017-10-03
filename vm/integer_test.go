@@ -145,6 +145,7 @@ func TestIntegerConversion(t *testing.T) {
 		expected interface{}
 	}{
 		{`100.to_i`, 100},
+		{`100.to_f`, 100.0},
 		{`100.to_s`, "100"},
 	}
 

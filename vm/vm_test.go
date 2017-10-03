@@ -209,6 +209,24 @@ func testIntegerObject(t *testing.T, i int, obj Object, expected int) bool {
 	}
 }
 
+func testFloatObject(t *testing.T, i int, obj Object, expected float64) bool {
+	switch result := obj.(type) {
+	case *FloatObject:
+		if result.value != expected {
+			t.Errorf("At test case %d: object has wrong value. expect=%d, got=%d", i, expected, result.value)
+			return false
+		}
+
+		return true
+	case *Error:
+		t.Errorf("At test case %d: %s", i, result.Message)
+		return false
+	default:
+		t.Errorf("At test case %d: object is not Float. got=%T (%+v).", i, obj, obj)
+		return false
+	}
+}
+
 func testNullObject(t *testing.T, i int, obj Object) bool {
 	switch result := obj.(type) {
 	case *NullObject:
@@ -343,6 +361,8 @@ func checkExpected(t *testing.T, i int, evaluated Object, expected interface{}) 
 	switch expected := expected.(type) {
 	case int:
 		testIntegerObject(t, i, evaluated, expected)
+	case float64:
+		testFloatObject(t, i, evaluated, expected)
 	case string:
 		testStringObject(t, i, evaluated, expected)
 	case bool:
