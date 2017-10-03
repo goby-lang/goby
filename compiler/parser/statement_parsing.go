@@ -109,7 +109,7 @@ func (p *Parser) parseParameters() []ast.Expression {
 	params := []ast.Expression{}
 
 	p.nextToken()
-	param := p.parseExpression(NORMAL)
+	param := p.parseParameter()
 	params = append(params, param)
 
 	for p.peekTokenIs(token.Comma) {
@@ -121,7 +121,7 @@ func (p *Parser) parseParameters() []ast.Expression {
 			break
 		}
 
-		param := p.parseExpression(NORMAL)
+		param := p.parseParameter()
 		params = append(params, param)
 	}
 
@@ -129,6 +129,17 @@ func (p *Parser) parseParameters() []ast.Expression {
 
 	p.fsm.Event(backToNormal)
 	return params
+}
+
+func (p *Parser) parseParameter() ast.Expression {
+	switch {
+	case p.curTokenIs(token.Asterisk):
+		return p.parsePrefixExpression()
+	case p.peekTokenIs(token.Colon):
+		return p.parseKeywordArgumentsExpression()
+	default:
+		return p.parseExpression(NORMAL)
+	}
 }
 
 func (p *Parser) checkMethodParameters(params []ast.Expression) {
@@ -156,6 +167,7 @@ func (p *Parser) checkMethodParameters(params []ast.Expression) {
 			case 2:
 				p.error = &Error{Message: fmt.Sprintf("Optioned argument \"%s\" should be defined before splat argument. Line: %d", exp.String(), p.curToken.Line), errType: SyntaxError}
 			}
+
 			argState = 1
 		case *ast.PrefixExpression:
 			switch argState {

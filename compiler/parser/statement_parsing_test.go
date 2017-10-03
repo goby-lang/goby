@@ -197,6 +197,204 @@ func TestDefStatement(t *testing.T) {
 	testIntegerLiteral(t, secondExpressionStmt.Expression, 123)
 }
 
+func TestSimpleKeywordArgument(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected map[string] int
+	}{
+		{`
+		def add(x: 111)
+		end
+		`, map[string]int {
+			"x": 111,
+		} },
+		{`
+		def add(x: 111, y: 222)
+		end
+		`, map[string]int {
+			"x": 111,
+			"y": 222,
+		} },
+		{`
+		def add(x: 111, y: 222, z: 333)
+		end
+		`, map[string]int {
+			"x": 111,
+			"y": 222,
+			"z": 333,
+		} },
+	}
+
+	for i, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program, err := p.ParseProgram()
+
+		if err != nil {
+			t.Fatalf("At case %d " + err.Message, i)
+		}
+
+		firstStmt := program.Statements[0].(*ast.DefStatement)
+		h, ok := firstStmt.Parameters[0].(*ast.HashExpression)
+
+		if !ok {
+			t.Fatalf("At case %d program.Statments[0] is not ast.HashExpression. got=%T", i, program.Statements[0])
+		}
+
+		for k, expected := range tt.expected {
+			testIntegerLiteral(t, h.Data[k], expected)
+		}
+	}
+}
+
+func TestKeywordArgumentWithNoDefaultValue(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected map[string] interface{}
+	}{
+		{`
+		def add(x:)
+		end
+		`, map[string]interface{} {
+			"x": nil,
+		} },
+		{`
+		def add(x: 111, y:)
+		end
+		`, map[string]interface{} {
+			"x": 111,
+			"y": nil,
+		} },
+		{`
+		def add(x: 111, y:, z:)
+		end
+		`, map[string]interface{} {
+			"x": 111,
+			"y": nil,
+			"z": nil,
+		} },
+	}
+
+	for i, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program, err := p.ParseProgram()
+
+		if err != nil {
+			t.Fatalf("At case %d " + err.Message, i)
+		}
+
+		firstStmt := program.Statements[0].(*ast.DefStatement)
+		h, ok := firstStmt.Parameters[0].(*ast.HashExpression)
+
+		if !ok {
+			t.Fatalf("At case %d program.Statments[0] is not ast.HashExpression. got=%T", i, program.Statements[0])
+		}
+
+		for k, expected := range tt.expected {
+			if expected == nil {
+				if h.Data[k] != nil {
+					t.Fatalf("At case %d h.Data[%T] is not nil. got=%T", i, k, h.Data[k])
+				}
+			} else {
+				testIntegerLiteral(t, h.Data[k], expected.(int))
+			}
+		}
+	}
+}
+
+func TestKeywordArgumentWithNormalArgument(t *testing.T) {
+	input := `
+	def add(a, b, c, d: 123, e:, f: 12345)
+	end
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatalf(err.Message)
+	}
+
+	firstStmt := program.Statements[0].(*ast.DefStatement)
+
+	for i, v := range []string{"a", "b", "c"} {
+		testLiteralExpression(t, firstStmt.Parameters[i], v)
+	}
+
+	h, ok := firstStmt.Parameters[3].(*ast.HashExpression)
+
+	if !ok {
+		t.Fatalf("Program.Statments[3] is not ast.HashExpression. got=%T", program.Statements[0])
+	}
+
+	for k, expected := range map[string]interface{} {
+		"d": 123,
+		"e": nil,
+		"f": 12345,
+	} {
+		if expected == nil {
+			if h.Data[k] != nil {
+				t.Fatalf("h.Data[%T] is not nil. got=%T", k, h.Data[k])
+			}
+		} else {
+			testIntegerLiteral(t, h.Data[k], expected.(int))
+		}
+	}
+}
+
+func TestKeywordArgumentWithSplatArgument(t *testing.T) {
+	input := `
+	def add(a, b, *c, d: 123, e:, f: 12345)
+	end
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatalf(err.Message)
+	}
+
+	firstStmt := program.Statements[0].(*ast.DefStatement)
+
+	for i, v := range []string{"a", "b"} {
+		testLiteralExpression(t, firstStmt.Parameters[i], v)
+	}
+
+	s, ok := firstStmt.Parameters[2].(*ast.PrefixExpression)
+	if !ok {
+		t.Fatalf("Program.Statments[2] is not ast.PrefixExpression. got=%T", firstStmt.Parameters[2])
+	}
+
+	if s.Operator != token.Asterisk {
+		t.Fatalf("Program.Statments[2]'s Operator is not token.Asterisk. got=%T", s.Operator)
+	}
+
+	testIdentifier(t, s.Right, "c")
+
+	h, ok := firstStmt.Parameters[3].(*ast.HashExpression)
+	if !ok {
+		t.Fatalf("Program.Statments[3] is not ast.HashExpression. got=%T", firstStmt.Parameters[3])
+	}
+
+	for k, expected := range map[string]interface{} {
+		"d": 123,
+		"e": nil,
+		"f": 12345,
+	} {
+		if expected == nil {
+			if h.Data[k] != nil {
+				t.Fatalf("h.Data[%T] is not nil. got=%T", k, h.Data[k])
+			}
+		} else {
+			testIntegerLiteral(t, h.Data[k], expected.(int))
+		}
+	}
+}
+
 func TestDefStatementArgumentDefinitionError(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -247,6 +445,16 @@ func TestDefStatementArgumentDefinitionError(t *testing.T) {
 			a + b
 		end
 		`, "Can't define splat argument more than once. Line: 1"},
+		{`
+		def add(a:, b)
+			a + b
+		end
+		`, "expected next token to be :, got ) instead. Line: 1"},
+		{`
+		def add(a:, b = 1, c)
+			a + b
+		end
+		`, "expected next token to be ), got = instead. Line: 1"},
 	}
 
 	for i, tt := range tests {
@@ -255,7 +463,7 @@ func TestDefStatementArgumentDefinitionError(t *testing.T) {
 		_, err := p.ParseProgram()
 
 		if err == nil {
-			t.Fatalf("At case %d expect not to allow duplicate argument name", i)
+			t.Fatalf("At case %d expect to have at least one error", i)
 		}
 
 		if err.Message != tt.expected {
