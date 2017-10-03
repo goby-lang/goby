@@ -42,6 +42,9 @@ import (
 type HashObject struct {
 	*baseObj
 	Pairs map[string]Object
+
+	// See `[]` and `[]=` for the operational explanation of the default value.
+	Default Object
 }
 
 // Class methods --------------------------------------------------------
@@ -63,7 +66,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			// Retrieves the value (object) that corresponds to the key specified.
-			// Returns `nil` when specifying a nonexistent key.
+			// When a key doesn't exist, `nil` is returned, or the default, if set.
 			//
 			// ```Ruby
 			// h = { a: 1, b: "2", c: [1, 2, 3], d: { k: 'v' } }
@@ -71,6 +74,14 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// h['b'] #=> "2"
 			// h['c'] #=> [1, 2, 3]
 			// h['d'] #=> { k: 'v' }
+			//
+			// h = { a: 1 }
+			// h['c']        #=> nil
+			// h.default = 0
+			// h['c']        #=> 0
+			// h             #=> { a: 1 }
+			// h['d'] += 2
+			// h             #=> { a: 1, d: 2 }
 			// ```
 			//
 			// @return [Object]
@@ -91,13 +102,13 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 
 					h := receiver.(*HashObject)
 
-					if len(h.Pairs) == 0 {
-						return NULL
-					}
-
 					value, ok := h.Pairs[key.value]
 
 					if !ok {
+						if h.Default != nil {
+							return h.Default
+						}
+
 						return NULL
 					}
 
@@ -225,6 +236,70 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					h.Pairs = make(map[string]Object)
 
 					return h
+				}
+			},
+		},
+		{
+			// Return the default value of this Hash.
+			//
+			// ```Ruby
+			// h = { a: 1 }
+			// h.default     #=> nil
+			// h.default = 2
+			// h.default     #=> 2
+			// ```
+			//
+			// @return [Object]
+			Name: "default",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expected 0 argument, got: %d", len(args))
+					}
+
+					hash := receiver.(*HashObject)
+
+					if hash.Default == nil {
+						return NULL
+					}
+
+					return hash.Default
+				}
+			},
+		},
+		{
+			// Set the default value of this Hash.
+			// Arrays/Hashes are not accepted, since they're unsafe.
+			//
+			// ```Ruby
+			// h = { a: 1 }
+			// h['c']         #=> nil
+			// h.default = 2
+			// h['c']         #=> 2
+			// h.default = [] #=> ArgumentError
+			// ```
+			//
+			// @return [Object]
+			Name: "default=",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expected 1 argument, got %d", len(args))
+					}
+
+					// Arrays and Hashes are generally a mistake, since a single instance would be used for all the accesses
+					// via default.
+					switch args[0].(type) {
+					case *HashObject, *ArrayObject:
+						return t.vm.initErrorObject(errors.ArgumentError, "Arrays and Hashes are not accepted as default values")
+					}
+
+					hash := receiver.(*HashObject)
+					hashDefault := args[0]
+
+					hash.Default = hashDefault
+
+					return hashDefault
 				}
 			},
 		},
