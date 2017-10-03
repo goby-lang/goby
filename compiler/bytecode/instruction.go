@@ -93,11 +93,29 @@ type InstructionSet struct {
 	isType       string
 	Instructions []*Instruction
 	count        int
-	argTypes     []int
+	argTypes     *ArgSet
+}
+
+type ArgSet struct {
+	names []string
+	types []int
+	count int
+}
+
+func (as *ArgSet) Types() []int {
+	return as.types
+}
+
+func (as *ArgSet) Names() []string {
+	return as.names
+}
+
+func (as *ArgSet) Count() int {
+	return as.count
 }
 
 // ArgTypes returns enums that represents each argument's type
-func (is *InstructionSet) ArgTypes() []int {
+func (is *InstructionSet) ArgTypes() *ArgSet {
 	return is.argTypes
 }
 
@@ -107,7 +125,7 @@ func (is *InstructionSet) Name() string {
 }
 
 // SetType returns instruction's type
-func (is *InstructionSet) SetType() string {
+func (is *InstructionSet) Type() string {
 	return is.isType
 }
 

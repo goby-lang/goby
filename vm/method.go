@@ -43,15 +43,7 @@ func (m *MethodObject) Value() interface{} {
 }
 
 func (m *MethodObject) argTypes() []int {
-	return m.instructionSet.argTypes
-}
-
-func (m *MethodObject) lastArgType() int {
-	if len(m.argTypes()) > 0 {
-		return m.argTypes()[len(m.argTypes())-1]
-	}
-
-	return -1
+	return m.instructionSet.argTypes.Types()
 }
 
 func (m *MethodObject) isSplatArgIncluded() bool {
