@@ -451,6 +451,11 @@ func (f *FloatObject) Value() interface{} {
 	return f.value
 }
 
+// Numeric interface
+func (f *FloatObject) floatValue() float64 {
+	return f.value
+}
+
 // toString returns the object's value as the string format, in non
 // exponential format (straight number, without exponent `E<exp>`).
 func (f *FloatObject) toString() string {

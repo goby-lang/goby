@@ -740,6 +740,11 @@ func (i *IntegerObject) Value() interface{} {
 	return i.value
 }
 
+// Numeric interface
+func (i *IntegerObject) floatValue() float64 {
+	return float64(i.value)
+}
+
 // toString returns the object's name as the string format
 func (i *IntegerObject) toString() string {
 	return strconv.Itoa(i.value)
