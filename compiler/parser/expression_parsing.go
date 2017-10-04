@@ -504,7 +504,7 @@ func (p *Parser) parseCaseExpression() ast.Expression {
 
 	return ie
 }
-
+// Case Statement forms if statement when parsing it
 func (p *Parser) parseCaseConditionals() []*ast.ConditionalExpression {
 	p.nextToken()
 	base := p.parseExpression(NORMAL)
@@ -523,18 +523,22 @@ func (p *Parser) parseCaseConditional(base ast.Expression) *ast.ConditionalExpre
 	ce := &ast.ConditionalExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
 	p.nextToken()
 
+	ce.Condition = p.formInfixForCaseConditional(base)
+	ce.Consequence = p.parseBlockStatement()
+	ce.Consequence.KeepLastValue()
+
+	return ce
+}
+
+func (p *Parser) formInfixForCaseConditional(base ast.Expression) *ast.InfixExpression {
 	right := p.parseExpression(NORMAL)
-	ce.Condition = &ast.InfixExpression{
+
+	return &ast.InfixExpression{
 		BaseNode: &ast.BaseNode{Token: p.curToken},
 		Left:     base,
 		Operator: token.Eq,
 		Right:    right,
 	}
-
-	ce.Consequence = p.parseBlockStatement()
-	ce.Consequence.KeepLastValue()
-
-	return ce
 }
 
 func (p *Parser) parseConditionalExpressions() []*ast.ConditionalExpression {
