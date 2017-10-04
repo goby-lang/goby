@@ -67,6 +67,7 @@ func (ae *ArrayExpression) String() string {
 	return out.String()
 }
 
+// PairExpression represents a key/value pair in method parameters or arguments
 type PairExpression struct {
 	*BaseNode
 	Key   Expression
@@ -74,9 +75,13 @@ type PairExpression struct {
 }
 
 func (pe *PairExpression) expressionNode() {}
+
+// TokenLiteral .....
 func (pe *PairExpression) TokenLiteral() string {
 	return pe.Token.Literal
 }
+
+// String .....
 func (pe *PairExpression) String() string {
 	if pe.Value == nil {
 		return fmt.Sprintf("%s:", pe.Key.String())
