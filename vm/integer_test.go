@@ -61,10 +61,10 @@ func TestIntegerArithmeticOperation(t *testing.T) {
 
 func TestIntegerArithmeticOperationFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`1 + "p"`, "TypeError: Expect argument to be Integer. got: String", 1},
-		{`1 - "m"`, "TypeError: Expect argument to be Integer. got: String", 1},
-		{`1 ** "p"`, "TypeError: Expect argument to be Integer. got: String", 1},
-		{`1 / "t"`, "TypeError: Expect argument to be Integer. got: String", 1},
+		{`1 + "p"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`1 - "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`1 ** "p"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`1 / "t"`, "TypeError: Expect argument to be Numeric. got: String", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -123,11 +123,11 @@ func TestIntegerComparison(t *testing.T) {
 
 func TestIntegerComparisonFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`1 > "m"`, "TypeError: Expect argument to be Integer. got: String", 1},
-		{`1 >= "m"`, "TypeError: Expect argument to be Integer. got: String", 1},
-		{`1 < "m"`, "TypeError: Expect argument to be Integer. got: String", 1},
-		{`1 <= "m"`, "TypeError: Expect argument to be Integer. got: String", 1},
-		{`1 <=> "m"`, "TypeError: Expect argument to be Integer. got: String", 1},
+		{`1 > "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`1 >= "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`1 < "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`1 <= "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`1 <=> "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
 	}
 
 	for i, tt := range testsFail {
