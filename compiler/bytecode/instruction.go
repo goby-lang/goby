@@ -96,22 +96,20 @@ type InstructionSet struct {
 	argTypes     *ArgSet
 }
 
+// ArgSet stores the metadata of a method definition's parameters.
 type ArgSet struct {
 	names []string
 	types []int
-	count int
 }
 
+// Types are the getter method of *ArgSet's types attribute
 func (as *ArgSet) Types() []int {
 	return as.types
 }
 
+// Names are the getter method of *ArgSet's names attribute
 func (as *ArgSet) Names() []string {
 	return as.names
-}
-
-func (as *ArgSet) Count() int {
-	return as.count
 }
 
 // ArgTypes returns enums that represents each argument's type
