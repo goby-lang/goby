@@ -22,32 +22,39 @@ func TestIntegerClassSuperclass(t *testing.T) {
 	}
 }
 
-func TestIntegerArithmeticOperation(t *testing.T) {
+func TestIntegerArithmeticOperationWithInteger(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
 	}{
-		{`1 + 2`, 3},
-		{`10 + 0`, 10},
-		{`22 - 10`, 12},
-		{`2 - 10`, -8},
-		{`5 * 20`, 100},
-		{`4 % 2`, 0},
-		{`10 % 3`, 1},
-		{`6 % 4`, 2},
-		{`25 / 5`, 5},
-		{`25 > 5`, true},
-		{`4 > 6`, false},
-		{`-5 < -4`, true},
-		{`100 < 81`, false},
-		{`5 ** 4`, 625},
-		{`25 / 5`, 5},
-		{`1 / 1 + 1`, 2},
-		{`0 / (1 + 1000)`, 0},
-		{`5 ** (3 * 2) + 21`, 15646},
-		{`(3 - 1) ** 4 / 2`, 8},
-		{`(25 / 5 + 5) * 3`, 30},
-		{`(25 / 5 + 5) * 2`, 20},
+		{`13  +  3`,  16},
+		{`13  -  3`,  10},
+		{`13  *  3`,  39},
+		{`13  %  3`,  1},
+		{`13  /  3`,  4},
+		{`13  ** 3`,  2197},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestIntegerArithmeticOperationWithFloat(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`13  +  '3.5'.to_f`,  16.5},
+		{`13  -  '3.5'.to_f`,  9.5},
+		{`13  *  '3.5'.to_f`,  45.5},
+		{`13  %  '3.5'.to_f`,  2.5},
+		{`13  /  '6.5'.to_f`,  2.0},
+		{`4   ** '3.5'.to_f`,  128.0},
 	}
 
 	for i, tt := range tests {
@@ -76,40 +83,57 @@ func TestIntegerArithmeticOperationFail(t *testing.T) {
 	}
 }
 
-func TestIntegerComparison(t *testing.T) {
+func TestIntegerComparisonWithInteger(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
 	}{
-		{`25 > 5`, true},
-		{`4 > 6`, false},
-		{`-5 < -4`, true},
-		{`100 < 81`, false},
-		{`25 > 5`, true},
-		{`4 > 6`, false},
-		{`4 >= 4`, true},
-		{`2 >= 5`, false},
-		{`-5 < -4`, true},
-		{`100 < 81`, false},
-		{`10 <= 10`, true},
-		{`10 <= 0`, false},
-		{`10 <=> 0`, 1},
-		{`1 <=> 2`, -1},
-		{`4 <=> 4`, 0},
-		{`123 == 123`, true},
-		{`123 == 124`, false},
-		{`123 == "123"`, false},
-		{`123 == (1..3)`, false},
-		{`123 == { a: 1, b: 2 }`, false},
-		{`123 == [1, "String", true, 2..5]`, false},
-		{`123 == Integer`, false},
-		{`123 != 123`, false},
-		{`123 != 124`, true},
-		{`123 != "123"`, true},
-		{`123 != (1..3)`, true},
-		{`123 != { a: 1, b: 2 }`, true},
-		{`123 != [1, "String", true, 2..5]`, true},
-		{`123 != Integer`, true},
+		{`1 >   2`,  false},
+		{`2 >   1`,  true},
+		{`3 >   3`,  false},
+		{`1 <   2`,  true},
+		{`2 <   1`,  false},
+		{`3 <   3`,  false},
+		{`1 >=  2`,  false},
+		{`2 >=  1`,  true},
+		{`3 >=  3`,  true},
+		{`1 <=  2`,  true},
+		{`2 <=  1`,  false},
+		{`3 <=  3`,  true},
+		{`1 <=> 2`,  -1},
+		{`2 <=> 1`,  1},
+		{`3 <=> 3`,  0},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestIntegerComparisonWithFloat(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`1 >   '2'.to_f`,  false},
+		{`2 >   '1'.to_f`,  true},
+		{`3 >   '3'.to_f`,  false},
+		{`1 <   '2'.to_f`,  true},
+		{`2 <   '1'.to_f`,  false},
+		{`3 <   '3'.to_f`,  false},
+		{`1 >=  '2'.to_f`,  false},
+		{`2 >=  '1'.to_f`,  true},
+		{`3 >=  '3'.to_f`,  true},
+		{`1 <=  '2'.to_f`,  true},
+		{`2 <=  '1'.to_f`,  false},
+		{`3 <=  '3'.to_f`,  true},
+		{`1 <=> '2'.to_f`,  -1},
+		{`2 <=> '1'.to_f`,  1},
+		{`3 <=> '3'.to_f`,  0},
 	}
 
 	for i, tt := range tests {
@@ -135,6 +159,38 @@ func TestIntegerComparisonFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestIntegerEquality(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`4  ==  4`,            true},
+		{`4  ==  '4'.to_f`,     true},
+		{`4  ==  '5'.to_f`,     false},
+		{`4  ==  '4'`,          false},
+		{`4  ==  (1..3)`,       false},
+		{`4  ==  { a: 1 }`,     false},
+		{`4  ==  [1]`,          false},
+		{`4  ==  Float`,        false},
+		{`4  !=  4`,            false},
+		{`4  !=  '4'.to_f`,     false},
+		{`4  !=  '5'.to_f`,     true},
+		{`4  !=  '4'`,          true},
+		{`4  !=  (1..3)`,       true},
+		{`4  !=  { a: 1 }`,     true},
+		{`4  !=  [1]`,          true},
+		{`4  !=  Float`,        true},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
 }
