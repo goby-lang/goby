@@ -47,10 +47,10 @@ func TestFloatArithmeticOperation(t *testing.T) {
 
 func TestFloatArithmeticOperationFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`'1'.to_f + "p"`, "TypeError: Expect argument to be Float. got: String", 1},
-		{`'1'.to_f - "m"`, "TypeError: Expect argument to be Float. got: String", 1},
-		{`'1'.to_f ** "p"`, "TypeError: Expect argument to be Float. got: String", 1},
-		{`'1'.to_f / "t"`, "TypeError: Expect argument to be Float. got: String", 1},
+		{`'1'.to_f + "p"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`'1'.to_f - "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`'1'.to_f ** "p"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`'1'.to_f / "t"`, "TypeError: Expect argument to be Numeric. got: String", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -91,7 +91,7 @@ func TestFloatComparison(t *testing.T) {
 		{`'123.5'.to_f == Float`, false},
 		{`'123.5'.to_f != '123.5'.to_f`, false},
 		{`'123.5'.to_f != '124'.to_f`, true},
-		{`'123.5'.to_f != "'123'.to_f"`, true},
+		{`'123.5'.to_f != '123'.to_f`, true},
 		{`'123.5'.to_f != (1..3)`, true},
 		{`'123.5'.to_f != { a: '1'.to_f, b: '2'.to_f }`, true},
 		{`'123.5'.to_f != ['1'.to_f, "String", true, 2..5]`, true},
@@ -109,11 +109,11 @@ func TestFloatComparison(t *testing.T) {
 
 func TestFloatComparisonFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`'1'.to_f > "m"`, "TypeError: Expect argument to be Float. got: String", 1},
-		{`'1'.to_f >= "m"`, "TypeError: Expect argument to be Float. got: String", 1},
-		{`'1'.to_f < "m"`, "TypeError: Expect argument to be Float. got: String", 1},
-		{`'1'.to_f <= "m"`, "TypeError: Expect argument to be Float. got: String", 1},
-		{`'1'.to_f <=> "m"`, "TypeError: Expect argument to be Float. got: String", 1},
+		{`'1'.to_f > "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`'1'.to_f >= "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`'1'.to_f < "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`'1'.to_f <= "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`'1'.to_f <=> "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
 	}
 
 	for i, tt := range testsFail {

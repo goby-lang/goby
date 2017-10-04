@@ -12,8 +12,8 @@ import (
 // representation.
 //
 // ```ruby
-// '1.1'.to_f + '1.1'.to_f # => 2.2
-// '2.1'.to_f * '2.1'.to_f # => 4.41
+// 1.1 + 1.1 # => 2.2
+// 2.1 * 2.1 # => 4.41
 // ```
 //
 // - `Float.new` is not supported.
@@ -40,153 +40,157 @@ func builtinFloatClassMethods() []*BuiltinMethodObject {
 func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
-			// Returns the sum of self and another Float.
+			// Returns the sum of self and a Numeric.
 			//
 			// ```Ruby
-			// 1 + 2 # => 3
+			// 1.1 + 2 # => 3.1
 			// ```
 			// @return [Float]
 			Name: "+",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					objectRightValue, ok := args[0].(Numeric)
 
-					leftValue := receiver.(*FloatObject).value
-					right, ok := args[0].(*FloatObject)
+          if ! ok {
+            return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, "Numeric", args[0].Class().Name)
+          }
 
-					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.FloatClass, args[0].Class().Name)
-						return err
-					}
+          leftValue := receiver.(*FloatObject).value
+          rightValue := objectRightValue.floatValue()
 
-					rightValue := right.value
-					return t.vm.initFloatObject(leftValue + rightValue)
+					result := leftValue + rightValue
+
+					return t.vm.initFloatObject(result)
 				}
 			},
 		},
 		{
-			// Divides left hand operand by right hand operand and returns remainder.
+			// Returns the modulo between self and a Numeric.
 			//
 			// ```Ruby
-			// 5 % 2 # => 1
+			// 5.5 % 2 # => 1.5
 			// ```
 			// @return [Float]
 			Name: "%",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+          objectRightValue, ok := args[0].(Numeric)
 
-					leftValue := receiver.(*FloatObject).value
-					right, ok := args[0].(*FloatObject)
+          if ! ok {
+            return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, "Numeric", args[0].Class().Name)
+          }
 
-					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.FloatClass, args[0].Class().Name)
-						return err
-					}
+          leftValue := receiver.(*FloatObject).value
+          rightValue := objectRightValue.floatValue()
 
-					rightValue := right.value
 					result := math.Mod(leftValue, rightValue)
+
 					return t.vm.initFloatObject(result)
 				}
 			},
 		},
 		{
-			// Returns the subtraction of another Float from self.
+			// Returns the subtraction of a Numeric from self.
 			//
 			// ```Ruby
-			// 1 - 1 # => 0
+			// 1.5 - 1 # => 0.5
 			// ```
 			// @return [Float]
 			Name: "-",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+          objectRightValue, ok := args[0].(Numeric)
 
-					leftValue := receiver.(*FloatObject).value
-					right, ok := args[0].(*FloatObject)
+          if ! ok {
+            return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, "Numeric", args[0].Class().Name)
+          }
 
-					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.FloatClass, args[0].Class().Name)
-						return err
-					}
+          leftValue := receiver.(*FloatObject).value
+          rightValue := objectRightValue.floatValue()
 
-					rightValue := right.value
-					return t.vm.initFloatObject(leftValue - rightValue)
-				}
-			},
-		},
-		{
-			// Returns self multiplying another Float.
-			//
-			// ```Ruby
-			// 2 * 10 # => 20
-			// ```
-			// @return [Float]
-			Name: "*",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					result := leftValue - rightValue
 
-					leftValue := receiver.(*FloatObject).value
-					right, ok := args[0].(*FloatObject)
-
-					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.FloatClass, args[0].Class().Name)
-						return err
-					}
-
-					rightValue := right.value
-					return t.vm.initFloatObject(leftValue * rightValue)
-				}
-			},
-		},
-		{
-			// Returns self squaring another Float.
-			//
-			// ```Ruby
-			// 2 ** 8 # => 256
-			// ```
-			// @return [Float]
-			Name: "**",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					leftValue := receiver.(*FloatObject).value
-					right, ok := args[0].(*FloatObject)
-
-					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.FloatClass, args[0].Class().Name)
-						return err
-					}
-
-					rightValue := right.value
-					result := math.Pow(leftValue, rightValue)
 					return t.vm.initFloatObject(result)
 				}
 			},
 		},
 		{
-			// Returns self divided by another Float.
+			// Returns self multiplying a Numeric.
 			//
 			// ```Ruby
-			// 6 / 3 # => 2
+			// 2.5 * 10 # => 25.0
+			// ```
+			// @return [Float]
+			Name: "*",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+          objectRightValue, ok := args[0].(Numeric)
+
+          if ! ok {
+            return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, "Numeric", args[0].Class().Name)
+          }
+
+          leftValue := receiver.(*FloatObject).value
+          rightValue := objectRightValue.floatValue()
+
+					result := leftValue * rightValue
+
+					return t.vm.initFloatObject(result)
+				}
+			},
+		},
+		{
+			// Returns self squaring a Numeric.
+			//
+			// ```Ruby
+			// 4.0 ** 2.5 # => 32.0
+			// ```
+			// @return [Float]
+			Name: "**",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+          objectRightValue, ok := args[0].(Numeric)
+
+          if ! ok {
+            return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, "Numeric", args[0].Class().Name)
+          }
+
+          leftValue := receiver.(*FloatObject).value
+          rightValue := objectRightValue.floatValue()
+
+					result := math.Pow(leftValue, rightValue)
+
+					return t.vm.initFloatObject(result)
+				}
+			},
+		},
+		{
+			// Returns self divided by a Numeric.
+			//
+			// ```Ruby
+			// 7.5 / 3 # => 2.5
 			// ```
 			// @return [Float]
 			Name: "/",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+          objectRightValue, ok := args[0].(Numeric)
 
-					leftValue := receiver.(*FloatObject).value
-					right, ok := args[0].(*FloatObject)
+          if ! ok {
+            return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, "Numeric", args[0].Class().Name)
+          }
 
-					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.FloatClass, args[0].Class().Name)
-						return err
-					}
+          leftValue := receiver.(*FloatObject).value
+          rightValue := objectRightValue.floatValue()
 
-					rightValue := right.value
-					return t.vm.initFloatObject(leftValue / rightValue)
+					result := leftValue / rightValue
+
+					return t.vm.initFloatObject(result)
 				}
 			},
 		},
 		{
-			// Returns if self is larger than another Float.
+			// Returns if self is larger than a Numeric.
 			//
 			// ```Ruby
 			// 10 > -1 # => true
@@ -196,27 +200,23 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			Name: ">",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+          objectRightValue, ok := args[0].(Numeric)
 
-					leftValue := receiver.(*FloatObject).value
-					right, ok := args[0].(*FloatObject)
+          if ! ok {
+            return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, "Numeric", args[0].Class().Name)
+          }
 
-					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.FloatClass, args[0].Class().Name)
-						return err
-					}
+          leftValue := receiver.(*FloatObject).value
+          rightValue := objectRightValue.floatValue()
 
-					rightValue := right.value
+					result := leftValue > rightValue
 
-					if leftValue > rightValue {
-						return TRUE
-					}
-
-					return FALSE
+					return toBooleanObject(result)
 				}
 			},
 		},
 		{
-			// Returns if self is larger than or equals to another Float.
+			// Returns if self is larger than or equals to a Numeric.
 			//
 			// ```Ruby
 			// 2 >= 1 # => true
@@ -226,27 +226,23 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			Name: ">=",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+          objectRightValue, ok := args[0].(Numeric)
 
-					leftValue := receiver.(*FloatObject).value
-					right, ok := args[0].(*FloatObject)
+          if ! ok {
+            return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, "Numeric", args[0].Class().Name)
+          }
 
-					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.FloatClass, args[0].Class().Name)
-						return err
-					}
+          leftValue := receiver.(*FloatObject).value
+          rightValue := objectRightValue.floatValue()
 
-					rightValue := right.value
+					result := leftValue >= rightValue
 
-					if leftValue >= rightValue {
-						return TRUE
-					}
-
-					return FALSE
+					return toBooleanObject(result)
 				}
 			},
 		},
 		{
-			// Returns if self is smaller than another Float.
+			// Returns if self is smaller than a Numeric.
 			//
 			// ```Ruby
 			// 1 < 3 # => true
@@ -256,27 +252,23 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			Name: "<",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+          objectRightValue, ok := args[0].(Numeric)
 
-					leftValue := receiver.(*FloatObject).value
-					right, ok := args[0].(*FloatObject)
+          if ! ok {
+            return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, "Numeric", args[0].Class().Name)
+          }
 
-					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.FloatClass, args[0].Class().Name)
-						return err
-					}
+          leftValue := receiver.(*FloatObject).value
+          rightValue := objectRightValue.floatValue()
 
-					rightValue := right.value
+					result := leftValue < rightValue
 
-					if leftValue < rightValue {
-						return TRUE
-					}
-
-					return FALSE
+					return toBooleanObject(result)
 				}
 			},
 		},
 		{
-			// Returns if self is smaller than or equals to another Float.
+			// Returns if self is smaller than or equals to a Numeric.
 			//
 			// ```Ruby
 			// 1 <= 3 # => true
@@ -286,47 +278,41 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			Name: "<=",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+          objectRightValue, ok := args[0].(Numeric)
 
-					leftValue := receiver.(*FloatObject).value
-					right, ok := args[0].(*FloatObject)
+          if ! ok {
+            return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, "Numeric", args[0].Class().Name)
+          }
 
-					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.FloatClass, args[0].Class().Name)
-						return err
-					}
+          leftValue := receiver.(*FloatObject).value
+          rightValue := objectRightValue.floatValue()
 
-					rightValue := right.value
+					result := leftValue <= rightValue
 
-					if leftValue <= rightValue {
-						return TRUE
-					}
-
-					return FALSE
+					return toBooleanObject(result)
 				}
 			},
 		},
 		{
-			// Returns 1 if self is larger than the incoming Float, -1 if smaller. Otherwise 0.
+			// Returns 1 if self is larger than a Numeric, -1 if smaller. Otherwise 0.
 			//
 			// ```Ruby
-			// 1 <=> 3 # => -1
-			// 1 <=> 1 # => 0
-			// 3 <=> 1 # => 1
+			// 1.5 <=> 3 # => -1
+			// 1.0 <=> 1 # => 0
+			// 3.5 <=> 1 # => 1
 			// ```
 			// @return [Float]
 			Name: "<=>",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+          objectRightValue, ok := args[0].(Numeric)
 
-					leftValue := receiver.(*FloatObject).value
-					right, ok := args[0].(*FloatObject)
+          if ! ok {
+            return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, "Numeric", args[0].Class().Name)
+          }
 
-					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.FloatClass, args[0].Class().Name)
-						return err
-					}
-
-					rightValue := right.value
+          leftValue := receiver.(*FloatObject).value
+          rightValue := objectRightValue.floatValue()
 
 					if leftValue < rightValue {
 						return t.vm.initIntegerObject(-1)
@@ -340,60 +326,60 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns if self is equal to another Float.
+			// Returns if self is equal to an Object.
+			// If the Object is a Numeric, a comparison is performed, otherwise, the
+			// result is always false.
 			//
 			// ```Ruby
-			// 1 == 3 # => false
-			// 1 == 1 # => true
+			// 1.0 == 3     # => false
+			// 1.0 == 1     # => true
+			// 1.0 == '1.0' # => false
 			// ```
 			// @return [Boolean]
 			Name: "==",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+          objectRightValue, ok := args[0].(Numeric)
 
-					leftValue := receiver.(*FloatObject).value
-					right, ok := args[0].(*FloatObject)
+          if ! ok {
+            return FALSE
+          }
 
-					if !ok {
-						return FALSE
-					}
+          leftValue := receiver.(*FloatObject).value
+          rightValue := objectRightValue.floatValue()
 
-					rightValue := right.value
+					result := leftValue == rightValue
 
-					if leftValue == rightValue {
-						return TRUE
-					}
-
-					return FALSE
+					return toBooleanObject(result)
 				}
 			},
 		},
 		{
-			// Returns if self is not equal to another Float.
+			// Returns if self is not equal to an Object.
+			// If the Object is a Numeric, a comparison is performed, otherwise, the
+			// result is always true.
 			//
 			// ```Ruby
-			// 1 != 3 # => true
-			// 1 != 1 # => false
+			// 1.0 != 3     # => true
+			// 1.0 != 1     # => false
+			// 1.0 != '1.0' # => true
 			// ```
 			// @return [Boolean]
 			Name: "!=",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+          objectRightValue, ok := args[0].(Numeric)
 
-					leftValue := receiver.(*FloatObject).value
-					right, ok := args[0].(*FloatObject)
+          if ! ok {
+            return TRUE
+          }
 
-					if !ok {
-						return TRUE
-					}
+          leftValue := receiver.(*FloatObject).value
+          rightValue := objectRightValue.floatValue()
 
-					rightValue := right.value
+					result := leftValue != rightValue
 
-					if leftValue != rightValue {
-						return TRUE
-					}
-
-					return FALSE
+					return toBooleanObject(result)
 				}
 			},
 		},
@@ -401,7 +387,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// Returns the `Integer` representation of self.
 			//
 			// ```Ruby
-			// '100.1'.to_f.to_i # => 100
+			// 100.1.to_i # => 100
 			// ```
 			// @return [Integer]
 			Name: "to_i",
