@@ -565,7 +565,6 @@ func (p *Parser) formCaseCondition(base ast.Expression) *ast.InfixExpression {
 
 	if p.peekTokenIs(token.Then) {
 		p.nextToken()
-		p.nextToken()
 	}
 
 	return infix

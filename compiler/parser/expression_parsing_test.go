@@ -585,12 +585,12 @@ func TestIfExpression(t *testing.T) {
 func TestCaseExpression(t *testing.T) {
 	input := `
 	case 2
-	when 0, 10, 100 then
-	  '0 or 10 or 100'
+	when 0 then
+	  0 + 0
 	when 1
-	  '1'
-	when 2
-	  '2'
+	  1 + 1
+	else
+	  2 + 2
 	end
 	`
 
@@ -620,8 +620,8 @@ func TestCaseExpression(t *testing.T) {
 
 	cs := exp.Conditionals
 
-	if len(cs) != 3 {
-		t.Fatalf("expect the length of conditionals to be 3. got=%d", len(cs))
+	if len(cs) != 2 {
+		t.Fatalf("expect the length of conditionals to be 2. got=%d", len(cs))
 	}
 
 	c0 := cs[0]
@@ -664,35 +664,15 @@ func TestCaseExpression(t *testing.T) {
 		return
 	}
 
-	c2 := cs[2]
-
-	if !testInfixExpression(t, c2.Condition, 2, "==", 2) {
-		return
-	}
-
-	if len(c2.Consequence.Statements) != 1 {
-		t.Errorf("should be only one consequence. got=%d\n", len(c2.Consequence.Statements))
-	}
-
-	consequence2, ok := c2.Consequence.Statements[0].(*ast.ExpressionStatement)
+	alternative, ok := exp.Alternative.Statements[0].(*ast.ExpressionStatement)
 
 	if !ok {
-		t.Errorf("expect consequence should be an expression statement. got=%T", c2.Consequence.Statements[0])
+		t.Errorf("expect alternative should be an expression statement. got=%T", exp.Alternative.Statements[0])
 	}
 
-	if !testInfixExpression(t, consequence2.Expression, 2, "+", 2) {
+	if !testInfixExpression(t, alternative.Expression, 2, "+", 2) {
 		return
 	}
-
-	//alternative, ok := exp.Alternative.Statements[0].(*ast.ExpressionStatement)
-	//
-	//if !ok {
-	//	t.Errorf("expect alternative should be an expression statement. got=%T", exp.Alternative.Statements[0])
-	//}
-	//
-	//if !testInfixExpression(t, alternative.Expression, "y", "+", 4) {
-	//	return
-	//}
 }
 
 
