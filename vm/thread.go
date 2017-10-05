@@ -4,7 +4,6 @@ import (
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/vm/errors"
 	"strings"
-	"fmt"
 )
 
 type thread struct {
@@ -66,7 +65,6 @@ func (t *thread) hasError() (string, bool) {
 func (t *thread) execInstruction(cf *callFrame, i *instruction) {
 	cf.pc++
 
-	fmt.Println(i.inspect())
 	i.action.operation(t, cf, i.Params...)
 }
 
@@ -226,35 +224,19 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 
 	argIndex := 0
 
-	for i, argType := range method.argTypes() {
-		if argType == bytecode.NormalArg {
-			c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
-			argIndex++
-		}
-	}
-
-	/*
-	 def foo(a = 10, b = 11, c); end
-
-	 foo(1, 2)
-
-	 In the above example, method foo's minimum argument number is 1 (`c`).
-	 And the given argument number is 2.
-
-	 So we first assign arguments to those doesn't have a default value (`c` in this example).
-	 And then we assign the rest of given values from first parameter, so `a` would be assigned 2.
-
-	 Result:
-
-	 a == 2
-	 b == 11
-	 c == 1
-	*/
-
+	// If given arguments is more than the normal arguments.
+	// It might mean we have optioned argument been override.
+	// Or we have some keyword arguments
 	if minimumArgNumber < argC {
 		keywordIndex := 0
 		// Fill arguments with default value from beginning
 		for i, argType := range method.argTypes() {
+			// Deal with normal arguments first
+			if argType == bytecode.NormalArg {
+				c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
+				argIndex++
+			}
+
 			if argType == bytecode.OptionedArg {
 				c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
 				argIndex++
@@ -277,9 +259,16 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 				break
 			}
 		}
+	} else {
+		for i, argType := range method.argTypes() {
+			if argType == bytecode.NormalArg {
+				c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
+				argIndex++
+			}
+		}
 	}
 
-	if argTypesCount > 0 && method.isSplatArgIncluded() && !method.isKeywordArgIncluded() {
+	if argTypesCount > 0 && method.isSplatArgIncluded() {
 		elems := []Object{}
 		for argIndex < argC {
 			elems = append(elems, t.stack.Data[argPr+argIndex].Target)

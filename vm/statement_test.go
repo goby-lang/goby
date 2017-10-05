@@ -274,10 +274,29 @@ func TestDefStatementWithKeywordArgument(t *testing.T) {
 
 		foo(b: 20, a: 10, 40, 100)
 		`, 50},
-		// We should forbidden this
-		// ```ruby
-		// foo(b: 20, 40, a: 10, 100)
-		// ```
+		//{`
+		//def foo(bar, foo = 100, a:, b:)
+		//  a - b + foo - bar
+		//end
+		//
+		//foo(b: 20, a: 10, 40)
+		//`, 50},
+
+		// Add splat arguments
+		{`
+		def foo(bar, foo, a:, b:, *args)
+		  a - b + foo - bar + *args[1]
+		end
+
+		foo(b: 20, a: 10, 40, 100, "foo", 50)
+		`, 100},
+		{`
+		def foo(bar, foo, a:, b:, *args)
+		  a - b + foo - bar + *args[1]
+		end
+
+		foo(b: 20, a: 10, 40, 100, "foo", 50)
+		`, 100},
 	}
 
 	for i, tt := range tests {
