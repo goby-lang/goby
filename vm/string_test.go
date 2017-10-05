@@ -60,6 +60,7 @@ func TestStringConversion(t *testing.T) {
 		{`'\'Maxwell\''.to_s`, "'Maxwell'"},
 		{`"123".to_i`, 123},
 		{`"string".to_i`, 0},
+		{`" \t123".to_i`, 123},
 		{`"123string123".to_i`, 123},
 		{`"string123".to_i`, 0},
 		{`
