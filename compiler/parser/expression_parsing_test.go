@@ -585,12 +585,12 @@ func TestIfExpression(t *testing.T) {
 func TestCaseExpression(t *testing.T) {
 	input := `
 	case 2
-	when 0
-	  0 + 0
+	when 0, 10, 100 then
+	  '0 or 10 or 100'
 	when 1
-	  1 + 1
+	  '1'
 	when 2
-	  2 + 2
+	  '2'
 	end
 	`
 

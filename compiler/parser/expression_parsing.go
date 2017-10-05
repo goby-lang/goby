@@ -504,7 +504,27 @@ func (p *Parser) parseCaseExpression() ast.Expression {
 
 	return ie
 }
-// Case Statement forms if statement when parsing it
+
+// Case expression forms if statement when parsing it
+//
+// ex.
+// case 1
+// when 0, 1
+//  '0 or 1'
+// else
+//  'else'
+// end
+//
+// is the same with if expression below
+//
+// if 1 == 0 || 1 == 1
+//  '0 or 1'
+// else
+//  'else'
+// end
+//
+// TODO Implement '===' method and replace '==' to '===' in Case expression
+
 func (p *Parser) parseCaseConditionals() []*ast.ConditionalExpression {
 	p.nextToken()
 	base := p.parseExpression(NORMAL)
@@ -523,20 +543,39 @@ func (p *Parser) parseCaseConditional(base ast.Expression) *ast.ConditionalExpre
 	ce := &ast.ConditionalExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
 	p.nextToken()
 
-	ce.Condition = p.formInfixForCaseConditional(base)
+	ce.Condition = p.formCaseCondition(base)
 	ce.Consequence = p.parseBlockStatement()
 	ce.Consequence.KeepLastValue()
 
 	return ce
 }
 
-func (p *Parser) formInfixForCaseConditional(base ast.Expression) *ast.InfixExpression {
-	right := p.parseExpression(NORMAL)
+func (p *Parser) formCaseCondition(base ast.Expression) *ast.InfixExpression {
+	first := p.parseExpression(NORMAL)
+	infix := p.formInfixExpression(base, token.Eq, first)
 
+	for p.peekTokenIs(token.Comma) {
+		p.nextToken()
+		p.nextToken()
+
+		right := p.parseExpression(NORMAL)
+		rightInfix := p.formInfixExpression(base, token.Eq, right)
+		infix = p.formInfixExpression(infix, token.Or, rightInfix)
+	}
+
+	if p.peekTokenIs(token.Then) {
+		p.nextToken()
+		p.nextToken()
+	}
+
+	return infix
+}
+
+func (p *Parser) formInfixExpression(left ast.Expression, operator string, right ast.Expression) *ast.InfixExpression {
 	return &ast.InfixExpression{
 		BaseNode: &ast.BaseNode{Token: p.curToken},
-		Left:     base,
-		Operator: token.Eq,
+		Left:     left,
+		Operator: operator,
 		Right:    right,
 	}
 }
