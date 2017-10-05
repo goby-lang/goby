@@ -3,7 +3,7 @@ package vm
 import (
 	"bytes"
 	"fmt"
-
+	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/vm/classes"
 )
 
@@ -43,15 +43,27 @@ func (m *MethodObject) Value() interface{} {
 }
 
 func (m *MethodObject) argTypes() []int {
-	return m.instructionSet.argTypes
+	return m.instructionSet.argTypes.Types()
 }
 
-func (m *MethodObject) lastArgType() int {
-	if len(m.argTypes()) > 0 {
-		return m.argTypes()[len(m.argTypes())-1]
+func (m *MethodObject) isSplatArgIncluded() bool {
+	for _, argType := range m.argTypes() {
+		if argType == bytecode.SplatArg {
+			return true
+		}
 	}
 
-	return -1
+	return false
+}
+
+func (m *MethodObject) isKeywordArgIncluded() bool {
+	for _, argType := range m.argTypes() {
+		if argType == bytecode.OptionalKeywordArg || argType == bytecode.RequiredKeywordArg {
+			return true
+		}
+	}
+
+	return false
 }
 
 //  BuiltinMethodObject =================================================

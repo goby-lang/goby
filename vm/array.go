@@ -395,26 +395,10 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					arr := receiver.(*ArrayObject)
-					arrLength := len(arr.Elements)
+					normalizedIndex := arr.normalizeIndex(index)
 
-					// exit cases
-
-					if arrLength == 0 {
+					if normalizedIndex == -1 {
 						return NULL
-					} else if index.value >= len(arr.Elements) {
-						return NULL
-					} else if index.value < 0 && -index.value > arrLength {
-						return NULL
-					}
-
-					// normalize negative indexing
-
-					var normalizedIndex int
-
-					if index.value < 0 {
-						normalizedIndex = arrLength + index.value
-					} else {
-						normalizedIndex = index.value
 					}
 
 					// delete and slice
@@ -424,6 +408,32 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					arr.Elements = append(arr.Elements[:normalizedIndex], arr.Elements[normalizedIndex+1:]...)
 
 					return deletedValue
+				}
+			},
+		},
+		{
+			// Extracts the nested value specified by the sequence of idx objects by calling `dig` at
+			// each step, returning nil if any intermediate step is nil.
+			//
+			// ```Ruby
+			// [1 , 2].dig(-2)      # => 1
+			// [[], 2].dig(0, 1)    # => nil
+			// [[], 2].dig(0, 1, 2) # => nil
+			// [1, 2].dig(0, 1)     # => TypeError: Expect target to be Diggable
+			// ```
+			//
+			// @return [Object]
+			Name: "dig",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) == 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expected 1+ arguments, got 0")
+					}
+
+					array := receiver.(*ArrayObject)
+					value := array.dig(t, args)
+
+					return value
 				}
 			},
 		},
@@ -1084,6 +1094,37 @@ func (a *ArrayObject) concatenateCopies(t *thread, n *IntegerObject) Object {
 	return t.vm.initArrayObject(result)
 }
 
+// recursive indexed access - see ArrayObject#dig documentation.
+func (a *ArrayObject) dig(t *thread, keys []Object) Object {
+	currentKey := keys[0]
+	intCurrentKey, ok := currentKey.(*IntegerObject)
+
+	if !ok {
+		return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, currentKey.Class().Name)
+	}
+
+	normalizedIndex := a.normalizeIndex(intCurrentKey)
+
+	if normalizedIndex == -1 {
+		return NULL
+	}
+
+	nextKeys := keys[1:]
+	currentValue := a.Elements[normalizedIndex]
+
+	if len(nextKeys) == 0 {
+		return currentValue
+	}
+
+	diggableCurrentValue, ok := currentValue.(Diggable)
+
+	if !ok {
+		return t.vm.initErrorObject(errors.TypeError, "Expect target to be Diggable, got %s", currentValue.Class().Name)
+	}
+
+	return diggableCurrentValue.dig(t, nextKeys)
+}
+
 // Retrieves an object in an array using Integer index; common to `[]` and `at()`.
 func (a *ArrayObject) index(t *thread, args []Object) Object {
 	if len(args) != 1 {
@@ -1097,19 +1138,13 @@ func (a *ArrayObject) index(t *thread, args []Object) Object {
 		return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 	}
 
-	aLength := len(a.Elements)
+	normalizedIndex := a.normalizeIndex(index)
 
-	if int(index.value) < 0 {
-		if -int(index.value) > aLength {
-			return NULL
-		}
-		calculatedIndex := aLength + int(index.value)
-		return a.Elements[calculatedIndex]
-	} else if int(index.value) >= aLength {
+	if normalizedIndex == -1 {
 		return NULL
 	}
 
-	return a.Elements[index.value]
+	return a.Elements[normalizedIndex]
 }
 
 // flatten returns a array of Objects that is one-dimensional flattening of Elements
@@ -1131,6 +1166,34 @@ func (a *ArrayObject) flatten() []Object {
 // length returns the length of array's elements
 func (a *ArrayObject) length() int {
 	return len(a.Elements)
+}
+
+// normalizes the index to the Ruby-style:
+//
+// 1. if the index is between o and the index length, returns the index
+// 2. if it's a negative value (within bounds), returns the normalized positive version
+// 3. if it's out of bounds (either positive or negative), returns -1
+func (a *ArrayObject) normalizeIndex(objectIndex *IntegerObject) int {
+	aLength := len(a.Elements)
+	index := objectIndex.value
+
+	// out of bounds
+
+	if index >= aLength {
+		return -1
+	}
+
+	if index < 0 && -index > aLength {
+		return -1
+	}
+
+	// within bounds
+
+	if index < 0 {
+		return aLength + index
+	}
+
+	return index
 }
 
 // pop removes the last element in the array and returns it

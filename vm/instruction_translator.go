@@ -29,7 +29,7 @@ func newInstructionTranslator(file filename) *instructionTranslator {
 }
 
 func (it *instructionTranslator) setMetadata(is *instructionSet, set *bytecode.InstructionSet) {
-	t := set.SetType()
+	t := set.Type()
 	n := set.Name()
 
 	is.name = n

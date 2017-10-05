@@ -143,6 +143,68 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Passes each (key, value) pair  of the collection to the given block. The method returns
+			// true if the block ever returns a value other than false or nil.
+			//
+			// ```ruby
+			// a = { a: 1, b: 2 }
+			//
+			// a.any? do |k, v|
+			//   v == 2
+			// end            # => true
+			// a.any? do |k, v|
+			//   v
+			// end            # => true
+			// a.any? do |k, v|
+			//   v == 5
+			// end            # => false
+			// a.any? do |k, v|
+			//   nil
+			// end            # => false
+			//
+			// a = {}
+			//
+			// a.any? do |k, v|
+			//   true
+			// end            # => false
+			// ```
+			Name: "any?",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
+					}
+
+					if blockFrame == nil {
+						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
+					}
+
+					hash := receiver.(*HashObject)
+
+					if len(hash.Pairs) == 0 {
+						t.callFrameStack.pop()
+					}
+
+					for stringKey, value := range hash.Pairs {
+						objectKey := t.vm.initStringObject(stringKey)
+						result := t.builtinMethodYield(blockFrame, objectKey, value)
+
+						booleanResult, isResultBoolean := result.Target.(*BooleanObject)
+
+						if isResultBoolean {
+							if booleanResult.value {
+								return TRUE
+							}
+						} else if result.Target != NULL {
+							return TRUE
+						}
+					}
+
+					return FALSE
+				}
+			},
+		},
+		{
 			// Returns empty hash (no key-value pairs)
 			//
 			// ```Ruby
@@ -158,7 +220,82 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
 					}
 
-					return t.vm.initHashObject(make(map[string]Object))
+					h := receiver.(*HashObject)
+
+					h.Pairs = make(map[string]Object)
+
+					return h
+				}
+			},
+		},
+		{
+			// Extracts the nested value specified by the sequence of idx objects by calling `dig` at
+			// each step, returning nil if any intermediate step is nil.
+			//
+			// ```Ruby
+			// { a: 1 , b: 2 }.dig(:a)         # => 1
+			// { a: {}, b: 2 }.dig(:a, :b)     # => nil
+			// { a: {}, b: 2 }.dig(:a, :b, :c) # => nil
+			// { a: 1, b: 2 }.dig(:a, :b)      # => TypeError: Expect target to be Diggable
+			// ```
+			//
+			// @return [Object]
+			Name: "dig",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) == 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expected 1+ arguments, got 0")
+					}
+
+					hash := receiver.(*HashObject)
+					value := hash.dig(t, args)
+
+					return value
+				}
+			},
+		},
+		{
+			// Calls block once for each key in the hash (in sorted key order), passing the
+			// key-value pair as parameters.
+			// Returns `self`.
+			//
+			// ```Ruby
+			// h = { b: "2", a: 1 }
+			// h.each do |k, v|
+			//   puts k.to_s + "->" + v.to_s
+			// end
+			// # => a->1
+			// # => b->2
+			// ```
+			//
+			// @return [Hash]
+			Name: "each",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 arguments. got: %d", len(args))
+					}
+
+					if blockFrame == nil {
+						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
+					}
+
+					h := receiver.(*HashObject)
+
+					if len(h.Pairs) == 0 {
+						t.callFrameStack.pop()
+					} else {
+						keys := h.sortedKeys()
+
+						for _, k := range keys {
+							v := h.Pairs[k]
+							strK := t.vm.initStringObject(k)
+
+							t.builtinMethodYield(blockFrame, strK, v)
+						}
+					}
+
+					return h
 				}
 			},
 		},
@@ -332,6 +469,58 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 						delete(h.Pairs, deleteKeyValue)
 					}
 					return h
+				}
+			},
+		},
+		{
+			// Deletes every key-value pair from the hash for which block evalutates to anything except
+			// false and nil.
+			//
+			// Returns the hash.
+			//
+			// ```Ruby
+			// { a: 1, b: 2}.delete_if do |k, v| v == 1 end # =>  { b: 2 }
+			// { a: 1, b: 2}.delete_if do |k, v| 5 end      # =>  { }
+			// { a: 1, b: 2}.delete_if do |k, v| false end  # =>  { a: 1, b: 2}
+			// { a: 1, b: 2}.delete_if do |k, v| nil end    # =>  { a: 1, b: 2}
+			// ```
+			//
+			// @return [Hash]
+			Name: "delete_if",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
+					}
+
+					if blockFrame == nil {
+						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
+					}
+
+					hash := receiver.(*HashObject)
+
+					if len(hash.Pairs) == 0 {
+						t.callFrameStack.pop()
+					}
+
+					// Note that from the Go specification, https://golang.org/ref/spec#For_statements,
+					// it's safe to delete elements from a Map, while iterating it.
+					for stringKey, value := range hash.Pairs {
+						objectKey := t.vm.initStringObject(stringKey)
+						result := t.builtinMethodYield(blockFrame, objectKey, value)
+
+						booleanResult, isResultBoolean := result.Target.(*BooleanObject)
+
+						if isResultBoolean {
+							if booleanResult.value {
+								delete(hash.Pairs, stringKey)
+							}
+						} else if result.Target != NULL {
+							delete(hash.Pairs, stringKey)
+						}
+					}
+
+					return hash
 				}
 			},
 		},
@@ -577,6 +766,63 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Returns a new hash consisting of entries for which the block does not return false
+			// or nil.
+			//
+			// ```ruby
+			// a = { a: 1, b: 2 }
+			//
+			// a.select do |k, v|
+			//   v == 2
+			// end            # => { a: 1 }
+			// a.select do |k, v|
+			//   5
+			// end            # => { a: 1, b: 2 }
+			// a.select do |k, v|
+			//   nil
+			// end            # => { }
+			// a.select do |k, v|
+			//   false
+			// end            # => { }
+			// ```
+			Name: "select",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
+					}
+
+					if blockFrame == nil {
+						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
+					}
+
+					sourceHash := receiver.(*HashObject)
+					destinationPairs := map[string]Object{}
+
+					if len(sourceHash.Pairs) == 0 {
+						t.callFrameStack.pop()
+					}
+
+					for stringKey, value := range sourceHash.Pairs {
+						objectKey := t.vm.initStringObject(stringKey)
+						result := t.builtinMethodYield(blockFrame, objectKey, value)
+
+						booleanResult, isResultBoolean := result.Target.(*BooleanObject)
+
+						if isResultBoolean {
+							if booleanResult.value {
+								destinationPairs[stringKey] = value
+							}
+						} else if result.Target != NULL {
+							destinationPairs[stringKey] = value
+						}
+					}
+
+					return t.vm.initHashObject(destinationPairs)
+				}
+			},
+		},
+		{
 			// Returns an array of keys (in arbitrary order)
 			//
 			// ```Ruby
@@ -774,6 +1020,40 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		},
+		{
+			// Return an array containing the values associated with the given keys.
+			//
+			// ```Ruby
+			// { a: 1, b: "2" }.values_at("a", "c") # => [1, nil]
+			// ```
+			//
+			// @return [Boolean]
+			Name: "values_at",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					hash := receiver.(*HashObject)
+					var result []Object
+
+					for _, objectKey := range args {
+						stringObjectKey, ok := objectKey.(*StringObject)
+
+						if !ok {
+							return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, objectKey.Class().Name)
+						}
+
+						value, ok := hash.Pairs[stringObjectKey.value]
+
+						if !ok {
+							value = NULL
+						}
+
+						result = append(result, value)
+					}
+
+					return t.vm.initArrayObject(result)
+				}
+			},
+		},
 	}
 }
 
@@ -868,6 +1148,35 @@ func (h *HashObject) copy() Object {
 	}
 
 	return newHash
+}
+
+// recursive indexed access - see ArrayObject#dig documentation.
+func (h *HashObject) dig(t *thread, keys []Object) Object {
+	currentKey := keys[0]
+	stringCurrentKey, ok := currentKey.(*StringObject)
+
+	if !ok {
+		return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, currentKey.Class().Name)
+	}
+
+	nextKeys := keys[1:]
+	currentValue, ok := h.Pairs[stringCurrentKey.value]
+
+	if !ok {
+		return NULL
+	}
+
+	if len(nextKeys) == 0 {
+		return currentValue
+	}
+
+	diggableCurrentValue, ok := currentValue.(Diggable)
+
+	if !ok {
+		return t.vm.initErrorObject(errors.TypeError, "Expect target to be Diggable, got %s", currentValue.Class().Name)
+	}
+
+	return diggableCurrentValue.dig(t, nextKeys)
 }
 
 // Other helper functions ----------------------------------------------
