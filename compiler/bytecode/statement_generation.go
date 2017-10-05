@@ -11,6 +11,8 @@ const (
 	NormalArg int = iota
 	OptionedArg
 	SplatArg
+	RequiredKeywordArg
+	OptionalKeywordArg
 )
 
 func (g *Generator) compileStatements(stmts []ast.Statement, scope *scope, table *localTable) {
@@ -150,30 +152,56 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 	scope = newScope(stmt)
 
 	// compile method definition's content
-	newIS := &InstructionSet{}
-	newIS.name = stmt.Name.Value
-	newIS.isType = MethodDef
+	newIS := &InstructionSet{
+		name:   stmt.Name.Value,
+		isType: MethodDef,
+		argTypes: &ArgSet{
+			names: make([]string, len(stmt.Parameters)),
+			types: make([]int, len(stmt.Parameters)),
+		},
+	}
 
 	for i := 0; i < len(stmt.Parameters); i++ {
-		var argType int
 		switch exp := stmt.Parameters[i].(type) {
 		case *ast.Identifier:
-			argType = NormalArg
 			scope.localTable.setLCL(exp.Value, scope.localTable.depth)
+
+			newIS.argTypes.names[i] = exp.Value
+			newIS.argTypes.types[i] = NormalArg
 		case *ast.AssignExpression:
-			argType = OptionedArg
 			exp.Optioned = 1
+
+			v := exp.Variables[0]
+			varName := v.(*ast.Identifier)
 			g.compileAssignExpression(newIS, exp, scope, scope.localTable)
+
+			newIS.argTypes.names[i] = varName.Value
+			newIS.argTypes.types[i] = OptionedArg
 		case *ast.PrefixExpression:
 			if exp.Operator != "*" {
 				continue
 			}
-			argType = SplatArg
 			ident := exp.Right.(*ast.Identifier)
 			scope.localTable.setLCL(ident.Value, scope.localTable.depth)
-		}
 
-		newIS.argTypes = append(newIS.argTypes, argType)
+			newIS.argTypes.names[i] = ident.Value
+			newIS.argTypes.types[i] = SplatArg
+		case *ast.PairExpression:
+
+			key := exp.Key.(*ast.Identifier)
+
+			if exp.Value != nil {
+				g.compileExpression(newIS, exp.Value, scope, scope.localTable)
+				index, depth := scope.localTable.setLCL(key.Value, scope.localTable.depth)
+				newIS.define(SetLocal, exp.Line(), depth, index, 1)
+
+				newIS.argTypes.names[i] = key.Value
+				newIS.argTypes.types[i] = OptionalKeywordArg
+			} else {
+				newIS.argTypes.names[i] = key.Value
+				newIS.argTypes.types[i] = RequiredKeywordArg
+			}
+		}
 	}
 
 	if len(stmt.BlockStatement.Statements) == 0 {
