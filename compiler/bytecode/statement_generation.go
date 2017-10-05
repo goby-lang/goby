@@ -187,12 +187,11 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 			newIS.argTypes.names[i] = ident.Value
 			newIS.argTypes.types[i] = SplatArg
 		case *ast.PairExpression:
-
 			key := exp.Key.(*ast.Identifier)
+			index, depth := scope.localTable.setLCL(key.Value, scope.localTable.depth)
 
 			if exp.Value != nil {
 				g.compileExpression(newIS, exp.Value, scope, scope.localTable)
-				index, depth := scope.localTable.setLCL(key.Value, scope.localTable.depth)
 				newIS.define(SetLocal, exp.Line(), depth, index, 1)
 
 				newIS.argTypes.names[i] = key.Value

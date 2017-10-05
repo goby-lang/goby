@@ -317,5 +317,10 @@ func getArgName(exp ast.Expression) string {
 		return assignExp.Variables[0].TokenLiteral()
 	}
 
+	switch exp := exp.(type) {
+	case *ast.PairExpression:
+		return exp.Key.(*ast.Identifier).Value
+	}
+
 	return exp.TokenLiteral()
 }

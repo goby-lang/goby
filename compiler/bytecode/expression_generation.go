@@ -38,6 +38,8 @@ func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, sc
 		is.define(NewHash, sourceLine, len(exp.Data)*2)
 	case *ast.SelfExpression:
 		is.define(PutSelf, sourceLine)
+	case *ast.PairExpression:
+		g.compileExpression(is, exp.Value, scope, table)
 	case *ast.PrefixExpression:
 		g.compilePrefixExpression(is, exp, scope, table)
 	case *ast.InfixExpression:

@@ -112,6 +112,16 @@ func (as *ArgSet) Names() []string {
 	return as.names
 }
 
+func (as *ArgSet) FindIndex(name string) int {
+	for i, n := range as.names {
+		if n == name {
+			return i
+		}
+	}
+
+	return -1
+}
+
 // ArgTypes returns enums that represents each argument's type
 func (is *InstructionSet) ArgTypes() *ArgSet {
 	return is.argTypes

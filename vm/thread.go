@@ -4,6 +4,7 @@ import (
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/vm/errors"
 	"strings"
+	"fmt"
 )
 
 type thread struct {
@@ -65,6 +66,7 @@ func (t *thread) hasError() (string, bool) {
 func (t *thread) execInstruction(cf *callFrame, i *instruction) {
 	cf.pc++
 
+	fmt.Println(i.inspect())
 	i.action.operation(t, cf, i.Params...)
 }
 
@@ -165,15 +167,15 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *callFra
 
 	switch m := method.(type) {
 	case *MethodObject:
-		t.evalMethodObject(receiver, m, receiverPr, argCount, blockFrame)
+		t.evalMethodObject(receiver, m, receiverPr, argCount, []string{}, blockFrame)
 	case *BuiltinMethodObject:
-		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, blockFrame)
+		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, []string{}, blockFrame)
 	case *Error:
 		t.returnError(errors.InternalError, m.toString())
 	}
 }
 
-func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPr, argCount int, blockFrame *callFrame) {
+func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPr, argCount int, keywords []string, blockFrame *callFrame) {
 	methodBody := method.Fn(receiver)
 	args := []Object{}
 	argPr := receiverPr + 1
@@ -188,14 +190,14 @@ func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 	if method.Name == "new" && ok {
 		instance, ok := evaluated.(*RObject)
 		if ok && instance.InitializeMethod != nil {
-			t.evalMethodObject(instance, instance.InitializeMethod, receiverPr, argCount, blockFrame)
+			t.evalMethodObject(instance, instance.InitializeMethod, receiverPr, argCount, keywords, blockFrame)
 		}
 	}
 	t.stack.set(receiverPr, &Pointer{Target: evaluated})
 	t.sp = argPr
 }
 
-func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receiverPr, argC int, blockFrame *callFrame) {
+func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receiverPr, argC int, keywords []string, blockFrame *callFrame) {
 	c := newCallFrame(method.instructionSet)
 	c.self = receiver
 	argPr := receiverPr + 1
@@ -203,7 +205,7 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 	argTypesCount := len(method.argTypes())
 
 	for _, at := range method.argTypes() {
-		if at == bytecode.NormalArg || at == bytecode.RequiredKeywordArg {
+		if at == bytecode.NormalArg {
 			minimumArgNumber++
 		}
 	}
@@ -250,6 +252,7 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 	*/
 
 	if minimumArgNumber < argC {
+		keywordIndex := 0
 		// Fill arguments with default value from beginning
 		for i, argType := range method.argTypes() {
 			if argType == bytecode.OptionedArg {
@@ -258,10 +261,13 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 			}
 
 			if argType == bytecode.RequiredKeywordArg || argType == bytecode.OptionalKeywordArg {
-				h := t.stack.Data[argPr+argIndex].Target.(*HashObject)
+				keyword := keywords[keywordIndex]
 
-				for _, data := range h.Pairs {
-					c.insertLCL(i, 0, data)
+				index := method.instructionSet.argTypes.FindIndex(keyword)
+
+				if index != -1 {
+					c.insertLCL(index, 0, t.stack.Data[argPr+argIndex].Target)
+					keywordIndex++
 					argIndex++
 				}
 			}
