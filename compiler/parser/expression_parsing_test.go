@@ -314,6 +314,22 @@ func TestIntegerLiteralExpression(t *testing.T) {
 	testIntegerLiteral(t, literal, 5)
 }
 
+func TestIntegerLiteralExpressionFail(t *testing.T) {
+	input := `9223372036854775808;`
+
+	l := lexer.New(input)
+	p := New(l)
+	_, err := p.ParseProgram()
+
+	if err == nil {
+		t.Fatal("Expected Integer literal parsing error")
+	} else if p.error.Message != "could not parse \"9223372036854775808\" as integer. Line: 0" {
+		t.Fatalf("Unexpected parsing error: %s", p.error.Message)
+	}
+
+	// "could not parse 9223372036854775808 as integer. Line: 1"
+}
+
 func TestStringLiteralExpression(t *testing.T) {
 	tests := []struct {
 		input    string
