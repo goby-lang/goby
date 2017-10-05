@@ -515,7 +515,6 @@ func (p *Parser) parseCaseExpression() ast.Expression {
 	ie := &ast.IfExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
 	ie.Conditionals = p.parseCaseConditionals()
 
-	// curToken is now ELSE or RBRACE
 	if p.curTokenIs(token.Else) {
 		ie.Alternative = p.parseBlockStatement()
 		ie.Alternative.KeepLastValue()

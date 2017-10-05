@@ -1657,12 +1657,38 @@ func TestCaseExpressionEvaluation(t *testing.T) {
 		},
 		{
 			`
+			case 2 + 0
+			when 0
+			  0
+			when 1
+			  1
+			when 2
+			  2
+			end
+			`,
+			2,
+		},
+		{
+			`
 			case 2
 			when 0 then
 			  0
 			when 1 then
 			  1
 			when 2 then
+			  2
+			end
+			`,
+			2,
+		},
+		{
+			`
+			case 2
+			when 0 then
+			  0
+			when 1 then
+			  1
+			else
 			  2
 			end
 			`,
@@ -1693,6 +1719,19 @@ func TestCaseExpressionEvaluation(t *testing.T) {
 			end
 			`,
 			1,
+		},
+		{
+			`
+			case 0
+			when 0
+			  0
+			when 0, 0, 0
+			  1
+			else
+			  2
+			end
+			`,
+			0,
 		},
 	}
 
