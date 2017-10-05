@@ -88,12 +88,11 @@ func (t *thread) retrieveBlock(cf *callFrame, args []interface{}) (blockFrame *c
 	var blockName string
 	var hasBlock bool
 
-	if len(args) > 2 {
+	blockFlag := args[2].(string)
+
+	if len(blockFlag) != 0 {
 		hasBlock = true
-		blockFlag := args[2].(string)
 		blockName = strings.Split(blockFlag, ":")[1]
-	} else {
-		hasBlock = false
 	}
 
 	if hasBlock {

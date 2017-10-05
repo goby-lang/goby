@@ -3,6 +3,7 @@ package bytecode
 import (
 	"fmt"
 	"github.com/goby-lang/goby/compiler/ast"
+	"strings"
 )
 
 func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, scope *scope, table *localTable) {
@@ -64,7 +65,7 @@ func (g *Generator) compileIdentifier(is *InstructionSet, exp *ast.Identifier, s
 
 	// otherwise it's a method call
 	is.define(PutSelf, exp.Line())
-	is.define(Send, exp.Line(), exp.Value, 0)
+	is.define(Send, exp.Line(), exp.Value, 0, "")
 }
 
 func (g *Generator) compileYieldExpression(is *InstructionSet, exp *ast.YieldExpression, scope *scope, table *localTable) {
@@ -79,10 +80,17 @@ func (g *Generator) compileYieldExpression(is *InstructionSet, exp *ast.YieldExp
 
 func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpression, scope *scope, table *localTable) {
 	g.compileExpression(is, exp.Receiver, scope, table)
+	keywordArgs := []string{}
 
 	for _, arg := range exp.Arguments {
+		if keywordArg, ok := arg.(*ast.PairExpression); ok {
+			keywordArgs = append(keywordArgs, keywordArg.Key.(*ast.Identifier).Value)
+		}
+
 		g.compileExpression(is, arg, scope, table)
 	}
+
+	keywordInfo := strings.Join(keywordArgs, ":")
 
 	if exp.Block != nil {
 		// Inside block should be one level deeper than outside
@@ -91,10 +99,10 @@ func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpre
 		blockIndex := g.blockCounter
 		g.blockCounter++
 		g.compileBlockArgExpression(blockIndex, exp, scope, newTable)
-		is.define(Send, exp.Line(), exp.Method, len(exp.Arguments), fmt.Sprintf("block:%d", blockIndex))
+		is.define(Send, exp.Line(), exp.Method, len(exp.Arguments), fmt.Sprintf("block:%d", blockIndex), keywordInfo)
 		return
 	}
-	is.define(Send, exp.Line(), exp.Method, len(exp.Arguments))
+	is.define(Send, exp.Line(), exp.Method, len(exp.Arguments), "", keywordInfo)
 }
 
 func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.AssignExpression, scope *scope, table *localTable) {
@@ -186,14 +194,14 @@ func (g *Generator) compilePrefixExpression(is *InstructionSet, exp *ast.PrefixE
 	switch exp.Operator {
 	case "!":
 		g.compileExpression(is, exp.Right, scope, table)
-		is.define(Send, exp.Line(), exp.Operator, 0)
+		is.define(Send, exp.Line(), exp.Operator, 0, "")
 	case "*":
 		g.compileExpression(is, exp.Right, scope, table)
 		is.define(SplatArray, exp.Line())
 	case "-":
 		is.define(PutObject, exp.Line(), 0)
 		g.compileExpression(is, exp.Right, scope, table)
-		is.define(Send, exp.Line(), exp.Operator, 1)
+		is.define(Send, exp.Line(), exp.Operator, 1, "")
 	}
 }
 
@@ -225,6 +233,6 @@ func (g *Generator) compileInfixExpression(is *InstructionSet, node *ast.InfixEx
 	default:
 		g.compileExpression(is, node.Left, scope, table)
 		g.compileExpression(is, node.Right, scope, table)
-		is.define(Send, node.Line(), node.Operator, "1")
+		is.define(Send, node.Line(), node.Operator, "1", "")
 	}
 }
