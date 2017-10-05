@@ -491,20 +491,6 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	return ie
 }
 
-func (p *Parser) parseCaseExpression() ast.Expression {
-	ie := &ast.CaseExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
-	// parse if and elsif expressions
-	ie.Conditionals = p.parseCaseConditionals()
-
-	// curToken is now ELSE or RBRACE
-	if p.curTokenIs(token.Else) {
-		ie.Alternative = p.parseBlockStatement()
-		ie.Alternative.KeepLastValue()
-	}
-
-	return ie
-}
-
 // Case expression forms if statement when parsing it
 //
 // ex.
@@ -524,6 +510,19 @@ func (p *Parser) parseCaseExpression() ast.Expression {
 // end
 //
 // TODO Implement '===' method and replace '==' to '===' in Case expression
+
+func (p *Parser) parseCaseExpression() ast.Expression {
+	ie := &ast.IfExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
+	ie.Conditionals = p.parseCaseConditionals()
+
+	// curToken is now ELSE or RBRACE
+	if p.curTokenIs(token.Else) {
+		ie.Alternative = p.parseBlockStatement()
+		ie.Alternative.KeepLastValue()
+	}
+
+	return ie
+}
 
 func (p *Parser) parseCaseConditionals() []*ast.ConditionalExpression {
 	p.nextToken()

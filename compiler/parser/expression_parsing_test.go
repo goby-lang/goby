@@ -612,7 +612,7 @@ func TestCaseExpression(t *testing.T) {
 		t.Fatalf("expect program.Statements[0] to be *ast.ExpressionStatement. got=%T", program.Statements[0])
 	}
 
-	exp, ok := stmt.Expression.(*ast.CaseExpression)
+	exp, ok := stmt.Expression.(*ast.IfExpression)
 
 	if !ok {
 		t.Fatalf("expect statement to be an CaseExpression. got=%T", stmt.Expression)
