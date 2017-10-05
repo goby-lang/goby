@@ -93,11 +93,27 @@ type InstructionSet struct {
 	isType       string
 	Instructions []*Instruction
 	count        int
-	argTypes     []int
+	argTypes     *ArgSet
+}
+
+// ArgSet stores the metadata of a method definition's parameters.
+type ArgSet struct {
+	names []string
+	types []int
+}
+
+// Types are the getter method of *ArgSet's types attribute
+func (as *ArgSet) Types() []int {
+	return as.types
+}
+
+// Names are the getter method of *ArgSet's names attribute
+func (as *ArgSet) Names() []string {
+	return as.names
 }
 
 // ArgTypes returns enums that represents each argument's type
-func (is *InstructionSet) ArgTypes() []int {
+func (is *InstructionSet) ArgTypes() *ArgSet {
 	return is.argTypes
 }
 
@@ -107,7 +123,7 @@ func (is *InstructionSet) Name() string {
 }
 
 // SetType returns instruction's type
-func (is *InstructionSet) SetType() string {
+func (is *InstructionSet) Type() string {
 	return is.isType
 }
 
