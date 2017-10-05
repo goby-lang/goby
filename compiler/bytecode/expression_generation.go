@@ -79,9 +79,13 @@ func (g *Generator) compileYieldExpression(is *InstructionSet, exp *ast.YieldExp
 }
 
 func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpression, scope *scope, table *localTable) {
-	g.compileExpression(is, exp.Receiver, scope, table)
-	keywordArgs := []string{}
+	var blockInfo string
+	var keywordArgs []string
 
+	// Compile receiver
+	g.compileExpression(is, exp.Receiver, scope, table)
+
+	// Compile arguments
 	for _, arg := range exp.Arguments {
 		if keywordArg, ok := arg.(*ast.PairExpression); ok {
 			keywordArgs = append(keywordArgs, keywordArg.Key.(*ast.Identifier).Value)
@@ -92,17 +96,18 @@ func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpre
 
 	keywordInfo := strings.Join(keywordArgs, ":")
 
+	// Compile block
 	if exp.Block != nil {
 		// Inside block should be one level deeper than outside
 		newTable := newLocalTable(table.depth + 1)
 		newTable.upper = table
 		blockIndex := g.blockCounter
+		blockInfo = fmt.Sprintf("block:%d", blockIndex)
 		g.blockCounter++
 		g.compileBlockArgExpression(blockIndex, exp, scope, newTable)
-		is.define(Send, exp.Line(), exp.Method, len(exp.Arguments), fmt.Sprintf("block:%d", blockIndex), keywordInfo)
-		return
 	}
-	is.define(Send, exp.Line(), exp.Method, len(exp.Arguments), "", keywordInfo)
+
+	is.define(Send, exp.Line(), exp.Method, len(exp.Arguments), blockInfo, keywordInfo)
 }
 
 func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.AssignExpression, scope *scope, table *localTable) {
