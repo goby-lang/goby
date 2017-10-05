@@ -1383,8 +1383,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// Returns the result of converting self to Integer
 			//
 			// ```ruby
-			// "123".to_i # => 123
-			// "3d print".to_i # => 3
+			// "123".to_i       # => 123
+			// "3d print".to_i  # => 3
+			// "  321".to_i     # => 321
 			// "some text".to_i # => 0
 			// ```
 			//
@@ -1404,7 +1405,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					for _, char := range str {
 						if unicode.IsDigit(char) {
 							digits += string(char)
-						} else {
+						} else if unicode.IsSpace(char) && len(digits) == 0 {
+							// do nothing; allow trailing spaces
+					  } else {
 							break
 						}
 					}
