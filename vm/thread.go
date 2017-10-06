@@ -222,20 +222,39 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 		return
 	}
 
+	// argIndex + argPr == current argument's position
 	argIndex := 0
-	lastArgIndex := -1
 
 	// If given arguments is more than the normal arguments.
 	// It might mean we have optioned argument been override.
 	// Or we have some keyword arguments
 	if minimumArgNumber < argC {
-		// Fill arguments with default value from beginning
+		// This is only for normal/optioned arguments
+		lastArgIndex := -1
+
 		for i, argType := range method.argTypes() {
 			// Deal with normal arguments first
 			if argType == bytecode.NormalArg || argType == bytecode.OptionedArg {
+				/*
+					Find first usable value as normal argument, for example:
+
+					```ruby
+					  def foo(x, y:); end
+
+					  foo(y: 100, 10)
+					```
+
+					In the example we can see that 'x' is the first parameter,
+					but in the method call it's the second argument.
+
+					This loop is for skipping other types of arguments and get the correct argument index.
+				*/
 				for argIndex, at := range argSet.Types() {
-					if lastArgIndex < argIndex && (at == bytecode.NormalArg || at== bytecode.OptionedArg) {
+					if lastArgIndex < argIndex && (at == bytecode.NormalArg || at == bytecode.OptionedArg) {
 						c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
+
+						// Store latest index value (and compare them to current argument index)
+						// This is to make sure we won't get same argument's index twice.
 						lastArgIndex = argIndex
 						break
 					}
