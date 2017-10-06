@@ -73,7 +73,7 @@ func (it *instructionTranslator) transferInstructionSet(iss []*instructionSet, s
 		it.transferInstruction(is, i)
 	}
 
-	is.argTypes = set.ArgTypes()
+	is.paramTypes = set.ArgTypes()
 
 	iss = append(iss, is)
 }

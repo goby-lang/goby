@@ -200,9 +200,9 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 	c.self = receiver
 	argPr := receiverPr + 1
 	minimumArgNumber := 0
-	argTypesCount := len(method.argTypes())
+	argTypesCount := len(method.paramTypes())
 
-	for _, at := range method.argTypes() {
+	for _, at := range method.paramTypes() {
 		if at == bytecode.NormalArg {
 			minimumArgNumber++
 		}
@@ -232,9 +232,9 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 		// This is only for normal/optioned arguments
 		lastArgIndex := -1
 
-		for i, argType := range method.argTypes() {
+		for paramIndex, paramType := range method.paramTypes() {
 			// Deal with normal arguments first
-			if argType == bytecode.NormalArg || argType == bytecode.OptionedArg {
+			if paramType == bytecode.NormalArg || paramType == bytecode.OptionedArg {
 				/*
 					Find first usable value as normal argument, for example:
 
@@ -251,7 +251,7 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 				*/
 				for argIndex, at := range argSet.Types() {
 					if lastArgIndex < argIndex && (at == bytecode.NormalArg || at == bytecode.OptionedArg) {
-						c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
+						c.insertLCL(paramIndex, 0, t.stack.Data[argPr+argIndex].Target)
 
 						// Store latest index value (and compare them to current argument index)
 						// This is to make sure we won't get same argument's index twice.
@@ -261,35 +261,35 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 				}
 			}
 
-			if argType == bytecode.RequiredKeywordArg {
-				argName := method.instructionSet.argTypes.Names()[i]
-				argIndex := argSet.FindIndex(argName)
+			if paramType == bytecode.RequiredKeywordArg {
+				paramName := method.instructionSet.paramTypes.Names()[paramIndex]
+				argIndex := argSet.FindIndex(paramName)
 
 				if argIndex != -1 {
-					c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
+					c.insertLCL(paramIndex, 0, t.stack.Data[argPr+argIndex].Target)
 				} else {
-					t.vm.initErrorObject("Method %s requires key argument %s", method.Name, argName)
+					t.vm.initErrorObject("Method %s requires key argument %s", method.Name, paramName)
 				}
 			}
 
-			if argType == bytecode.OptionalKeywordArg {
-				argName := method.instructionSet.argTypes.Names()[i]
+			if paramType == bytecode.OptionalKeywordArg {
+				argName := method.instructionSet.paramTypes.Names()[paramIndex]
 				argIndex := argSet.FindIndex(argName)
 
 				if argIndex != -1 {
-					c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
+					c.insertLCL(paramIndex, 0, t.stack.Data[argPr+argIndex].Target)
 				}
 			}
 
 			// If argument index equals argument count means we already assigned all arguments
-			if argIndex == argC || argType == bytecode.SplatArg {
-				argIndex = i
+			if argIndex == argC || paramType == bytecode.SplatArg {
+				argIndex = paramIndex
 				break
 			}
 		}
 	} else {
-		for i, argType := range method.argTypes() {
-			if argType == bytecode.NormalArg {
+		for i, paramType := range method.paramTypes() {
+			if paramType == bytecode.NormalArg {
 				c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
 				argIndex++
 			}
@@ -303,7 +303,7 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 			argIndex++
 		}
 
-		c.insertLCL(len(method.argTypes())-1, 0, t.vm.initArrayObject(elems))
+		c.insertLCL(len(method.paramTypes())-1, 0, t.vm.initArrayObject(elems))
 	}
 
 	// TODO: Implement this
