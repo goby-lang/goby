@@ -66,6 +66,28 @@ func TestIntegerArithmeticOperationWithFloat(t *testing.T) {
 	}
 }
 
+func TestIntegerArithmeticOperationsPriority(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+    {`1 / 1 + 1`,         2},
+    {`0 / (1 + 1000)`,    0},
+    {`5 ** (3 * 2) + 21`, 15646},
+    {`(3 - 1) ** 4 / 2`,  8},
+    {`(25 / 5 + 5) * 3`,  30},
+    {`(25 / 5 + 5) * 2`,  20},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestIntegerArithmeticOperationFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`1 + "p"`, "TypeError: Expect argument to be Numeric. got: String", 1},
