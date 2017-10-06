@@ -185,8 +185,9 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 
 	value, err := strconv.ParseInt(lit.TokenLiteral(), 0, 64)
 	if err != nil {
-		msg := fmt.Sprintf("could not parse %q as integer", lit.TokenLiteral())
-		panic(msg)
+		msg := fmt.Sprintf("could not parse %q as integer. Line: %d", lit.TokenLiteral(), p.curToken.Line)
+		p.error = &Error{Message: msg, errType: SyntaxError}
+		return nil
 	}
 
 	lit.Value = int(value)
