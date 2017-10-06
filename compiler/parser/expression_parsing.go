@@ -509,21 +509,24 @@ func (p *Parser) parseIfExpression() ast.Expression {
 
 // Case expression forms if statement when parsing it
 //
-// ex.
+// ```ruby
 // case 1
 // when 0, 1
 //  '0 or 1'
 // else
 //  'else'
 // end
+// ```
 //
 // is the same with if expression below
 //
+// ```ruby
 // if 1 == 0 || 1 == 1
 //  '0 or 1'
 // else
 //  'else'
 // end
+// ```
 //
 // TODO Implement '===' method and replace '==' to '===' in Case expression
 
