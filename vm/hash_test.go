@@ -127,6 +127,58 @@ func TestHashAccessOperation(t *testing.T) {
 	}
 }
 
+func TestHashAccessWithDefaultOperation(t *testing.T) {
+	valueTests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+			h = {}
+			h.default = 0
+			h['c']
+		`, 0},
+		{`
+			h = {}
+			h.default = 0
+			h['d'] += 2
+			h['d']
+		`, 2},
+	}
+
+	for i, tt := range valueTests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+
+	hashTests := []struct {
+		input    string
+		expected map[string]interface{}
+	}{
+		{`
+			h = {}
+			h.default = 0
+			h
+		`, map[string]interface{}{}},
+		{`
+			h = {}
+			h.default = 0
+			h['d'] += 2
+			h
+		`, map[string]interface{}{"d": 2}},
+	}
+
+	for i, tt := range hashTests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testHashObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestHashAccessOperationFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`{ a: 1, b: 2 }[]`, "ArgumentError: Expect 1 argument. got: 0", 1},
@@ -274,6 +326,47 @@ func TestHashClearMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`{ a: 1, b: 2 }.clear(123)`, "ArgumentError: Expect 0 argument. got: 1", 1},
 		{`{ a: 1, b: 2 }.clear(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestHashDefaultOperation(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+			h = {}
+			h.default
+		`, nil},
+		{`
+			h = {}
+			h.default = 0
+			h.default
+		`, 0},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestHashDefaultSetOperationFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`{ }.default = *[1, 2]`, "ArgumentError: Expected 1 argument, got 2", 1},
+		{`{ }.default = []`, "ArgumentError: Arrays and Hashes are not accepted as default values", 1},
+		{`{ }.default = {}`, "ArgumentError: Arrays and Hashes are not accepted as default values", 1},
 	}
 
 	for i, tt := range testsFail {
