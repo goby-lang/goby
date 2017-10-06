@@ -24,6 +24,7 @@ type instruction struct {
 	Params     []interface{}
 	Line       int
 	sourceLine int
+	argSet     *bytecode.ArgSet
 }
 
 type instructionSet struct {
@@ -431,14 +432,10 @@ var builtinActions = map[operationType]*action{
 		name: bytecode.Send,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
 			var method Object
-			var keywords []string
 
 			methodName := args[0].(string)
 			argCount := args[1].(int)
-
-			if len(args) > 3 {
-				keywords = strings.Split(args[3].(string), ":")
-			}
+			argSet := args[3].(*bytecode.ArgSet)
 
 			if arr, ok := t.stack.top().Target.(*ArrayObject); ok && arr.splat {
 				// Pop array
@@ -467,9 +464,9 @@ var builtinActions = map[operationType]*action{
 
 			switch m := method.(type) {
 			case *MethodObject:
-				t.evalMethodObject(receiver, m, receiverPr, argCount, keywords, blockFrame)
+				t.evalMethodObject(receiver, m, receiverPr, argCount, argSet, blockFrame)
 			case *BuiltinMethodObject:
-				t.evalBuiltinMethod(receiver, m, receiverPr, argCount, keywords, blockFrame)
+				t.evalBuiltinMethod(receiver, m, receiverPr, argCount, argSet, blockFrame)
 			case *Error:
 				t.returnError(errors.InternalError, m.toString())
 			}

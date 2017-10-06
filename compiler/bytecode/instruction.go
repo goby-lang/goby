@@ -51,6 +51,7 @@ type Instruction struct {
 	line       int
 	anchor     *anchor
 	sourceLine int
+	ArgSet     *ArgSet
 }
 
 // AnchorLine returns instruction anchor's line number if it has an anchor
@@ -142,7 +143,7 @@ func (is *InstructionSet) Type() string {
 	return is.isType
 }
 
-func (is *InstructionSet) define(action string, sourceLine int, params ...interface{}) {
+func (is *InstructionSet) define(action string, sourceLine int, params ...interface{}) *Instruction {
 	ps := []string{}
 	i := &Instruction{Action: action, Params: ps, line: is.count, sourceLine: sourceLine}
 	for _, param := range params {
@@ -162,6 +163,7 @@ func (is *InstructionSet) define(action string, sourceLine int, params ...interf
 
 	is.Instructions = append(is.Instructions, i)
 	is.count++
+	return i
 }
 
 func (is *InstructionSet) compile() string {

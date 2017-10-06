@@ -100,6 +100,11 @@ func (it *instructionTranslator) transferInstruction(is *instructionSet, i *byte
 		}
 
 		params = append(params, line)
+	case bytecode.Send:
+		for _, param := range i.Params {
+			params = append(params, it.parseParam(param))
+		}
+		params = append(params, i.ArgSet)
 	default:
 		for _, param := range i.Params {
 			params = append(params, it.parseParam(param))

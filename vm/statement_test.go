@@ -274,13 +274,13 @@ func TestDefStatementWithKeywordArgument(t *testing.T) {
 
 		foo(b: 20, a: 10, 40, 100)
 		`, 50},
-		//{`
-		//def foo(bar, foo = 100, a:, b:)
-		//  a - b + foo - bar
-		//end
-		//
-		//foo(b: 20, a: 10, 40)
-		//`, 50},
+		{`
+		def foo(bar, foo = 100, a:, b:)
+		  a - b + foo - bar
+		end
+
+		foo(b: 20, a: 10, 40)
+		`, 50},
 
 		// Add splat arguments
 		{`

@@ -165,15 +165,15 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *callFra
 
 	switch m := method.(type) {
 	case *MethodObject:
-		t.evalMethodObject(receiver, m, receiverPr, argCount, []string{}, blockFrame)
+		t.evalMethodObject(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame)
 	case *BuiltinMethodObject:
-		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, []string{}, blockFrame)
+		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame)
 	case *Error:
 		t.returnError(errors.InternalError, m.toString())
 	}
 }
 
-func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPr, argCount int, keywords []string, blockFrame *callFrame) {
+func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPr, argCount int, argSet *bytecode.ArgSet, blockFrame *callFrame) {
 	methodBody := method.Fn(receiver)
 	args := []Object{}
 	argPr := receiverPr + 1
@@ -188,14 +188,14 @@ func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 	if method.Name == "new" && ok {
 		instance, ok := evaluated.(*RObject)
 		if ok && instance.InitializeMethod != nil {
-			t.evalMethodObject(instance, instance.InitializeMethod, receiverPr, argCount, keywords, blockFrame)
+			t.evalMethodObject(instance, instance.InitializeMethod, receiverPr, argCount, argSet, blockFrame)
 		}
 	}
 	t.stack.set(receiverPr, &Pointer{Target: evaluated})
 	t.sp = argPr
 }
 
-func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receiverPr, argC int, keywords []string, blockFrame *callFrame) {
+func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receiverPr, argC int, argSet *bytecode.ArgSet, blockFrame *callFrame) {
 	c := newCallFrame(method.instructionSet)
 	c.self = receiver
 	argPr := receiverPr + 1
@@ -223,39 +223,48 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 	}
 
 	argIndex := 0
+	lastArgIndex := -1
 
 	// If given arguments is more than the normal arguments.
 	// It might mean we have optioned argument been override.
 	// Or we have some keyword arguments
 	if minimumArgNumber < argC {
-		keywordIndex := 0
 		// Fill arguments with default value from beginning
 		for i, argType := range method.argTypes() {
 			// Deal with normal arguments first
-			if argType == bytecode.NormalArg {
-				c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
-				argIndex++
+			if argType == bytecode.NormalArg || argType == bytecode.OptionedArg {
+				for argIndex, at := range argSet.Types() {
+					if lastArgIndex < argIndex && (at == bytecode.NormalArg || at== bytecode.OptionedArg) {
+						c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
+						lastArgIndex = argIndex
+						break
+					}
+				}
 			}
 
-			if argType == bytecode.OptionedArg {
-				c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
-				argIndex++
+			if argType == bytecode.RequiredKeywordArg {
+				argName := method.instructionSet.argTypes.Names()[i]
+				argIndex := argSet.FindIndex(argName)
+
+				if argIndex != -1 {
+					c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
+				} else {
+					t.vm.initErrorObject("Method %s requires key argument %s", method.Name, argName)
+				}
 			}
 
-			if argType == bytecode.RequiredKeywordArg || argType == bytecode.OptionalKeywordArg {
-				keyword := keywords[keywordIndex]
+			if argType == bytecode.OptionalKeywordArg {
+				argName := method.instructionSet.argTypes.Names()[i]
+				argIndex := argSet.FindIndex(argName)
 
-				index := method.instructionSet.argTypes.FindIndex(keyword)
-
-				if index != -1 {
-					c.insertLCL(index, 0, t.stack.Data[argPr+argIndex].Target)
-					keywordIndex++
-					argIndex++
+				if argIndex != -1 {
+					c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
 				}
 			}
 
 			// If argument index equals argument count means we already assigned all arguments
 			if argIndex == argC || argType == bytecode.SplatArg {
+				argIndex = i
 				break
 			}
 		}

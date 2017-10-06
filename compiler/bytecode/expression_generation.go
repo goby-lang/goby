@@ -3,7 +3,6 @@ package bytecode
 import (
 	"fmt"
 	"github.com/goby-lang/goby/compiler/ast"
-	"strings"
 )
 
 func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, scope *scope, table *localTable) {
@@ -82,21 +81,37 @@ func (g *Generator) compileYieldExpression(is *InstructionSet, exp *ast.YieldExp
 
 func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpression, scope *scope, table *localTable) {
 	var blockInfo string
-	var keywordArgs []string
+	argSet := &ArgSet{
+		names: make([]string, len(exp.Arguments)),
+		types: make([]int, len(exp.Arguments)),
+	}
 
 	// Compile receiver
 	g.compileExpression(is, exp.Receiver, scope, table)
 
 	// Compile arguments
-	for _, arg := range exp.Arguments {
-		if keywordArg, ok := arg.(*ast.PairExpression); ok {
-			keywordArgs = append(keywordArgs, keywordArg.Key.(*ast.Identifier).Value)
+	for i, arg := range exp.Arguments {
+		switch arg := arg.(type) {
+		case *ast.Identifier:
+			argSet.setArg(i, arg.Value, NormalArg)
+		case *ast.AssignExpression:
+			varName := arg.Variables[0].(*ast.Identifier)
+			argSet.setArg(i, varName.Value, OptionedArg)
+		case *ast.PairExpression:
+			key := arg.Key.(*ast.Identifier)
+
+			if arg.Value == nil {
+				argSet.setArg(i, key.Value, RequiredKeywordArg)
+			} else {
+				argSet.setArg(i, key.Value, OptionalKeywordArg)
+			}
+		case *ast.PrefixExpression:
+			ident := arg.Right.(*ast.Identifier)
+			argSet.setArg(i, ident.Value, SplatArg)
 		}
 
 		g.compileExpression(is, arg, scope, table)
 	}
-
-	keywordInfo := strings.Join(keywordArgs, ":")
 
 	// Compile block
 	if exp.Block != nil {
@@ -109,7 +124,8 @@ func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpre
 		g.compileBlockArgExpression(blockIndex, exp, scope, newTable)
 	}
 
-	is.define(Send, exp.Line(), exp.Method, len(exp.Arguments), blockInfo, keywordInfo)
+	i := is.define(Send, exp.Line(), exp.Method, len(exp.Arguments), blockInfo)
+	i.ArgSet = argSet
 }
 
 func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.AssignExpression, scope *scope, table *localTable) {
