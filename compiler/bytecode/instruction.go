@@ -122,6 +122,11 @@ func (as *ArgSet) FindIndex(name string) int {
 	return -1
 }
 
+func (as *ArgSet) setArg(index int, name string, argType int) {
+	as.names[index] = name
+	as.types[index] = argType
+}
+
 // ArgTypes returns enums that represents each argument's type
 func (is *InstructionSet) ArgTypes() *ArgSet {
 	return is.argTypes
