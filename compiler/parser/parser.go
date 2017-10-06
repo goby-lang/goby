@@ -125,6 +125,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.Bang, p.parsePrefixExpression)
 	p.registerPrefix(token.LParen, p.parseGroupedExpression)
 	p.registerPrefix(token.If, p.parseIfExpression)
+	p.registerPrefix(token.Case, p.parseCaseExpression)
 	p.registerPrefix(token.Self, p.parseSelfExpression)
 	p.registerPrefix(token.LBracket, p.parseArrayExpression)
 	p.registerPrefix(token.LBrace, p.parseHashExpression)

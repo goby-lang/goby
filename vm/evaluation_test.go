@@ -1637,6 +1637,113 @@ func TestIfExpressionEvaluation(t *testing.T) {
 	}
 }
 
+func TestCaseExpressionEvaluation(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			`
+			case 2
+			when 0
+			  0
+			when 1
+			  1
+			when 2
+			  2
+			end
+			`,
+			2,
+		},
+		{
+			`
+			case 2 + 0
+			when 0
+			  0
+			when 1
+			  1
+			when 2
+			  2
+			end
+			`,
+			2,
+		},
+		{
+			`
+			case 2
+			when 0 then
+			  0
+			when 1 then
+			  1
+			when 2 then
+			  2
+			end
+			`,
+			2,
+		},
+		{
+			`
+			case 2
+			when 0 then
+			  0
+			when 1 then
+			  1
+			else
+			  2
+			end
+			`,
+			2,
+		},
+		{
+			`
+			case 2
+			when 0 + 0
+			  0
+			when 1 + 0
+			  1
+			when 2 + 0
+			  2
+			end
+			`,
+			2,
+		},
+		{
+			`
+			case 9
+			when 0, 1, 2, 3, 4, 5
+			  0
+			when 6, 7, 7 + 1, 7 + 2 then
+			  1
+			when 10, 11, 12
+			  2
+			end
+			`,
+			1,
+		},
+		{
+			`
+			case 0
+			when 0
+			  0
+			when 0, 0, 0
+			  1
+			else
+			  2
+			end
+			`,
+			0,
+		},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestClassInheritance(t *testing.T) {
 	input := `
 		class Bar

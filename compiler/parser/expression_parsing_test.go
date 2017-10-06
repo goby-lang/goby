@@ -597,6 +597,102 @@ func TestIfExpression(t *testing.T) {
 	}
 }
 
+
+func TestCaseExpression(t *testing.T) {
+	input := `
+	case 2
+	when 0 then
+	  0 + 0
+	when 1
+	  1 + 1
+	else
+	  2 + 2
+	end
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatal(err.Message)
+	}
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("expect program's statements to be 1. got=%d", len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+
+	if !ok {
+		t.Fatalf("expect program.Statements[0] to be *ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	exp, ok := stmt.Expression.(*ast.IfExpression)
+
+	if !ok {
+		t.Fatalf("expect statement to be an CaseExpression. got=%T", stmt.Expression)
+	}
+
+	cs := exp.Conditionals
+
+	if len(cs) != 2 {
+		t.Fatalf("expect the length of conditionals to be 2. got=%d", len(cs))
+	}
+
+	c0 := cs[0]
+
+	if !testInfixExpression(t, c0.Condition, 2, "==", 0) {
+		return
+	}
+
+	if len(c0.Consequence.Statements) != 1 {
+		t.Errorf("should be only one consequence. got=%d\n", len(c0.Consequence.Statements))
+	}
+
+	consequence0, ok := c0.Consequence.Statements[0].(*ast.ExpressionStatement)
+
+	if !ok {
+		t.Errorf("expect consequence should be an expression statement. got=%T", c0.Consequence.Statements[0])
+	}
+
+	if !testInfixExpression(t, consequence0.Expression, 0, "+", 0) {
+		return
+	}
+
+	c1 := cs[1]
+
+	if !testInfixExpression(t, c1.Condition, 2, "==", 1) {
+		return
+	}
+
+	if len(c1.Consequence.Statements) != 1 {
+		t.Errorf("should be only one consequence. got=%d\n", len(c1.Consequence.Statements))
+	}
+
+	consequence1, ok := c1.Consequence.Statements[0].(*ast.ExpressionStatement)
+
+	if !ok {
+		t.Errorf("expect consequence should be an expression statement. got=%T", c1.Consequence.Statements[0])
+	}
+
+	if !testInfixExpression(t, consequence1.Expression, 1, "+", 1) {
+		return
+	}
+
+	alternative, ok := exp.Alternative.Statements[0].(*ast.ExpressionStatement)
+
+	if !ok {
+		t.Errorf("expect alternative should be an expression statement. got=%T", exp.Alternative.Statements[0])
+	}
+
+	if !testInfixExpression(t, alternative.Expression, 2, "+", 2) {
+		return
+	}
+}
+
+
+
 func TestMethodParameterParsing(t *testing.T) {
 	tests := []struct {
 		input          string
