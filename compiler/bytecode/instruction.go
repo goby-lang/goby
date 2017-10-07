@@ -78,6 +78,14 @@ func (i *Instruction) compile() string {
 		return fmt.Sprintf("%d %s %d\n", i.line, i.Action, i.anchor.line)
 	}
 	if len(i.Params) > 0 {
+		lastParam := i.Params[len(i.Params)-1]
+
+		// If the send action doesn't have a block (block info), we'll have a trailing space after join.
+		// So we need to remove that empty string element
+		if i.Action == Send && len(lastParam) == 0 {
+			return fmt.Sprintf("%d %s %s\n", i.line, i.Action, strings.Join(i.Params[:len(i.Params)-1], " "))
+		}
+
 		return fmt.Sprintf("%d %s %s\n", i.line, i.Action, strings.Join(i.Params, " "))
 	}
 
