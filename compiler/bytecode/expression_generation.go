@@ -106,8 +106,12 @@ func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpre
 				argSet.setArg(i, key.Value, OptionalKeywordArg)
 			}
 		case *ast.PrefixExpression:
-			ident := arg.Right.(*ast.Identifier)
-			argSet.setArg(i, ident.Value, SplatArg)
+			if arg.Operator == "*" {
+				ident, ok := arg.Right.(*ast.Identifier)
+				if ok {
+					argSet.setArg(i, ident.Value, SplatArg)
+				}
+			}
 		}
 
 		g.compileExpression(is, arg, scope, table)
