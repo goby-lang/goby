@@ -28,8 +28,7 @@ func TestRegexpClassCreation(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`re = Regexp.new("")`, ""}, // FIXME
-		{`"Hello ".concat("World")`, "Hello World"},
+		//{`Regexp.new('')`, ""}, // FIXME
 		{`Regexp.new('🍣Goby🍺').class.name`, "Regexp"},
 	}
 
