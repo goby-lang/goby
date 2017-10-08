@@ -204,12 +204,12 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 	argTypesCount := len(method.argTypes())
 
 	for _, at := range method.argTypes() {
-		if at == bytecode.NormalArg {
+		if at == bytecode.NormalArg || at == bytecode.RequiredKeywordArg {
 			minimumArgNumber++
 		}
 	}
 
-	if argC > method.argc && method.lastArgType() != bytecode.SplatArg {
+	if argC > method.argc && !method.isSplatArgIncluded() {
 		e := t.vm.initErrorObject(errors.ArgumentError, "Expect at most %d args for method '%s'. got: %d", method.argc, method.Name, argC)
 		t.stack.set(receiverPr, &Pointer{Target: e})
 		t.sp = argPr
@@ -253,9 +253,18 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 	if minimumArgNumber < argC {
 		// Fill arguments with default value from beginning
 		for i, argType := range method.argTypes() {
-			if argType != bytecode.NormalArg && argType != bytecode.SplatArg {
+			if argType == bytecode.OptionedArg {
 				c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
 				argIndex++
+			}
+
+			if argType == bytecode.RequiredKeywordArg || argType == bytecode.OptionalKeywordArg {
+				h := t.stack.Data[argPr+argIndex].Target.(*HashObject)
+
+				for _, data := range h.Pairs {
+					c.insertLCL(i, 0, data)
+					argIndex++
+				}
 			}
 
 			// If argument index equals argument count means we already assigned all arguments
@@ -265,7 +274,7 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 		}
 	}
 
-	if argTypesCount > 0 && method.lastArgType() == bytecode.SplatArg {
+	if argTypesCount > 0 && method.isSplatArgIncluded() && !method.isKeywordArgIncluded() {
 		elems := []Object{}
 		for argIndex < argC {
 			elems = append(elems, t.stack.Data[argPr+argIndex].Target)
@@ -273,6 +282,11 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 		}
 
 		c.insertLCL(len(method.argTypes())-1, 0, t.vm.initArrayObject(elems))
+	}
+
+	// TODO: Implement this
+	if argTypesCount > 0 && method.isSplatArgIncluded() && method.isKeywordArgIncluded() {
+
 	}
 
 	c.blockFrame = blockFrame

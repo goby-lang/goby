@@ -120,6 +120,15 @@ func (vm *VM) initBoolClass() *RClass {
 // Polymorphic helper functions -----------------------------------------
 
 // Value returns the object
+func toBooleanObject(value bool) *BooleanObject {
+	if value {
+		return TRUE
+	}
+
+	return FALSE
+}
+
+// Value returns the object
 func (b *BooleanObject) Value() interface{} {
 	return b.value
 }

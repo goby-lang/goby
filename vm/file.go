@@ -370,3 +370,8 @@ func (f *FileObject) toString() string {
 func (f *FileObject) toJSON() string {
 	return f.toString()
 }
+
+// Value returns file object's string format
+func (f *FileObject) Value() interface{} {
+	return f.File
+}

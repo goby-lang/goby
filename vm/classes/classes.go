@@ -4,6 +4,7 @@ const (
 	ObjectClass   = "Object"
 	ClassClass    = "Class"
 	IntegerClass  = "Integer"
+	FloatClass    = "Float"
 	StringClass   = "String"
 	ArrayClass    = "Array"
 	HashClass     = "Hash"
@@ -15,4 +16,5 @@ const (
 	PluginClass   = "Plugin"
 	GoObjectClass = "GoObject"
 	FileClass     = "File"
+	GoMapClass    = "GoMap"
 )

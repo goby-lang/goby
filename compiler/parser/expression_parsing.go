@@ -46,6 +46,7 @@ var precedence = map[token.Type]int{
 	token.PlusEq:             ASSIGN,
 	token.MinusEq:            ASSIGN,
 	token.OrEq:               ASSIGN,
+	token.Colon:              ASSIGN,
 }
 
 // Constants for denoting precedence
@@ -184,8 +185,9 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 
 	value, err := strconv.ParseInt(lit.TokenLiteral(), 0, 64)
 	if err != nil {
-		msg := fmt.Sprintf("could not parse %q as integer", lit.TokenLiteral())
-		panic(msg)
+		msg := fmt.Sprintf("could not parse %q as integer. Line: %d", lit.TokenLiteral(), p.curToken.Line)
+		p.error = &Error{Message: msg, errType: SyntaxError}
+		return nil
 	}
 
 	lit.Value = int(value)
@@ -274,6 +276,21 @@ func (p *Parser) parseHashPair(pairs map[string]ast.Expression) {
 	p.nextToken()
 	value = p.parseExpression(NORMAL)
 	pairs[key] = value
+}
+
+func (p *Parser) parsePairExpression(key ast.Expression) ast.Expression {
+	exp := &ast.PairExpression{BaseNode: &ast.BaseNode{Token: p.curToken}, Key: key}
+
+	if p.peekTokenIs(token.Comma) || p.peekTokenIs(token.RParen) {
+		return exp
+	}
+
+	p.nextToken()
+	value := p.parseExpression(NORMAL)
+
+	exp.Value = value
+
+	return exp
 }
 
 func (p *Parser) parseArrayExpression() ast.Expression {
@@ -489,6 +506,95 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	}
 
 	return ie
+}
+
+// Case expression forms if statement when parsing it
+//
+// ```ruby
+// case 1
+// when 0, 1
+//  '0 or 1'
+// else
+//  'else'
+// end
+// ```
+//
+// is the same with if expression below
+//
+// ```ruby
+// if 1 == 0 || 1 == 1
+//  '0 or 1'
+// else
+//  'else'
+// end
+// ```
+//
+// TODO Implement '===' method and replace '==' to '===' in Case expression
+
+func (p *Parser) parseCaseExpression() ast.Expression {
+	ie := &ast.IfExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
+	ie.Conditionals = p.parseCaseConditionals()
+
+	if p.curTokenIs(token.Else) {
+		ie.Alternative = p.parseBlockStatement()
+		ie.Alternative.KeepLastValue()
+	}
+
+	return ie
+}
+
+func (p *Parser) parseCaseConditionals() []*ast.ConditionalExpression {
+	p.nextToken()
+	base := p.parseExpression(NORMAL)
+
+	p.expectPeek(token.When)
+	ce := []*ast.ConditionalExpression{}
+
+	for p.curTokenIs(token.When) {
+		ce = append(ce, p.parseCaseConditional(base))
+	}
+
+	return ce
+}
+
+func (p *Parser) parseCaseConditional(base ast.Expression) *ast.ConditionalExpression {
+	ce := &ast.ConditionalExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
+	p.nextToken()
+
+	ce.Condition = p.formCaseCondition(base)
+	ce.Consequence = p.parseBlockStatement()
+	ce.Consequence.KeepLastValue()
+
+	return ce
+}
+
+func (p *Parser) formCaseCondition(base ast.Expression) *ast.InfixExpression {
+	first := p.parseExpression(NORMAL)
+	infix := p.formInfixExpression(base, token.Eq, first)
+
+	for p.peekTokenIs(token.Comma) {
+		p.nextToken()
+		p.nextToken()
+
+		right := p.parseExpression(NORMAL)
+		rightInfix := p.formInfixExpression(base, token.Eq, right)
+		infix = p.formInfixExpression(infix, token.Or, rightInfix)
+	}
+
+	if p.peekTokenIs(token.Then) {
+		p.nextToken()
+	}
+
+	return infix
+}
+
+func (p *Parser) formInfixExpression(left ast.Expression, operator string, right ast.Expression) *ast.InfixExpression {
+	return &ast.InfixExpression{
+		BaseNode: &ast.BaseNode{Token: p.curToken},
+		Left:     left,
+		Operator: operator,
+		Right:    right,
+	}
 }
 
 func (p *Parser) parseConditionalExpressions() []*ast.ConditionalExpression {

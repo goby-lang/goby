@@ -121,7 +121,7 @@ func builtinDBInstanceMethods() []*BuiltinMethodObject {
 					execArgs := []interface{}{}
 
 					for _, arg := range args[1:] {
-						execArgs = append(execArgs, arg.(builtinType).Value())
+						execArgs = append(execArgs, arg.Value())
 					}
 
 					_, err = conn.Exec(queryString, execArgs...)
@@ -179,7 +179,7 @@ func builtinDBInstanceMethods() []*BuiltinMethodObject {
 					execArgs := []interface{}{}
 
 					for _, arg := range args[1:] {
-						execArgs = append(execArgs, arg.(builtinType).Value())
+						execArgs = append(execArgs, arg.Value())
 					}
 
 					// The reason I implement this way: https://github.com/lib/pq/issues/24
@@ -242,7 +242,7 @@ func builtinDBInstanceMethods() []*BuiltinMethodObject {
 					execArgs := []interface{}{}
 
 					for _, arg := range args[1:] {
-						execArgs = append(execArgs, arg.(builtinType).Value())
+						execArgs = append(execArgs, arg.Value())
 					}
 
 					rows, err := conn.Queryx(queryString, execArgs...)

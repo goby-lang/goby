@@ -1380,11 +1380,48 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Returns the result of converting self to Float.
+			// Unexpected characters will cause a 0.0 value, except trailing whitespace,
+			// which is ignored.
+			//
+			// ```ruby
+			// "123.5".to_f     # => 123.5
+			// ".5".to_f      	# => 0.5
+			// "  3.5".to_f     # => 3.5
+			// "3.5e2".to_f     # => 350
+			// "3.5ef".to_f     # => 0
+			// ```
+			//
+			// @return [Float]
+			Name: "to_f",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					str := receiver.(*StringObject).value
+
+					for i, char := range str {
+						if ! unicode.IsSpace(char) {
+							str = str[i:]
+							break
+						}
+					}
+
+					parsedStr, err := strconv.ParseFloat(str, 64)
+
+					if err != nil {
+						return t.vm.initFloatObject(0)
+					}
+
+					return t.vm.initFloatObject(parsedStr)
+				}
+			},
+		},
+		{
 			// Returns the result of converting self to Integer
 			//
 			// ```ruby
-			// "123".to_i # => 123
-			// "3d print".to_i # => 3
+			// "123".to_i       # => 123
+			// "3d print".to_i  # => 3
+			// "  321".to_i     # => 321
 			// "some text".to_i # => 0
 			// ```
 			//
@@ -1404,7 +1441,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					for _, char := range str {
 						if unicode.IsDigit(char) {
 							digits += string(char)
-						} else {
+						} else if unicode.IsSpace(char) && len(digits) == 0 {
+							// do nothing; allow trailing spaces
+					  } else {
 							break
 						}
 					}

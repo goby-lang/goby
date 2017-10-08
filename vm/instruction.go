@@ -30,7 +30,7 @@ type instructionSet struct {
 	name         string
 	instructions []*instruction
 	filename     filename
-	argTypes     []int
+	argTypes     *bytecode.ArgSet
 }
 
 func (is *instructionSet) define(line int, a *action, params ...interface{}) *instruction {

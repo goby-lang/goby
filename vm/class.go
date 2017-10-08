@@ -30,11 +30,6 @@ type RClass struct {
 	*baseObj
 }
 
-type builtinType interface {
-	Value() interface{}
-	Object
-}
-
 // Class methods --------------------------------------------------------
 func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
@@ -975,6 +970,11 @@ func (c *RClass) toString() string {
 // toJSON just delegates to `toString`
 func (c *RClass) toJSON() string {
 	return c.toString()
+}
+
+// Value returns class itself
+func (c *RClass) Value() interface{} {
+	return c
 }
 
 func (c *RClass) inherits(sc *RClass) {

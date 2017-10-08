@@ -206,6 +206,7 @@ func (vm *VM) initConstants() {
 	// Init builtin classes
 	builtinClasses := []*RClass{
 		vm.initIntegerClass(),
+		vm.initFloatClass(),
 		vm.initStringClass(),
 		vm.initBoolClass(),
 		vm.initNullClass(),
@@ -216,6 +217,7 @@ func (vm *VM) initConstants() {
 		vm.initChannelClass(),
 		vm.initGoClass(),
 		vm.initFileClass(),
+		vm.initGoMapClass(),
 	}
 
 	// Init error classes

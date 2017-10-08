@@ -500,3 +500,8 @@ func (ro *RangeObject) toString() string {
 func (ro *RangeObject) toJSON() string {
 	return ro.toString()
 }
+
+// Value returns range object's string format
+func (ro *RangeObject) Value() interface{} {
+	return ro.toString()
+}

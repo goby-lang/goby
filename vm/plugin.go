@@ -191,6 +191,11 @@ func (p *PluginObject) toJSON() string {
 	return p.toString()
 }
 
+// Value returns plugin object's string format
+func (p *PluginObject) Value() interface{} {
+	return p.plugin
+}
+
 // Other helper functions -----------------------------------------------
 
 func setPluginContext(context Object) *pluginContext {

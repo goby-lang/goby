@@ -3,7 +3,7 @@ package vm
 import (
 	"bytes"
 	"fmt"
-
+	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/vm/classes"
 )
 
@@ -37,16 +37,33 @@ func (m *MethodObject) toJSON() string {
 	return m.toString()
 }
 
-func (m *MethodObject) argTypes() []int {
-	return m.instructionSet.argTypes
+// Value returns method object's string format
+func (m *MethodObject) Value() interface{} {
+	return m.toString()
 }
 
-func (m *MethodObject) lastArgType() int {
-	if len(m.argTypes()) > 0 {
-		return m.argTypes()[len(m.argTypes())-1]
+func (m *MethodObject) argTypes() []int {
+	return m.instructionSet.argTypes.Types()
+}
+
+func (m *MethodObject) isSplatArgIncluded() bool {
+	for _, argType := range m.argTypes() {
+		if argType == bytecode.SplatArg {
+			return true
+		}
 	}
 
-	return -1
+	return false
+}
+
+func (m *MethodObject) isKeywordArgIncluded() bool {
+	for _, argType := range m.argTypes() {
+		if argType == bytecode.OptionalKeywordArg || argType == bytecode.RequiredKeywordArg {
+			return true
+		}
+	}
+
+	return false
 }
 
 //  BuiltinMethodObject =================================================
@@ -70,4 +87,9 @@ func (bim *BuiltinMethodObject) toString() string {
 // toJSON just delegates to `toString`
 func (bim *BuiltinMethodObject) toJSON() string {
 	return bim.toString()
+}
+
+// Value returns builtin method object's function
+func (bim *BuiltinMethodObject) Value() interface{} {
+	return bim.Fn
 }
