@@ -136,7 +136,8 @@ func (p *Parser) checkMethodParameters(params []ast.Expression) {
 	/*
 		0 means previous arg is normal argument
 		1 means previous arg is optioned argument
-		2 means previous arg is splat argument
+		2 means previous arg is keyword argument
+		3 means previous arg is splat argument
 	*/
 	argState := 0
 
@@ -149,21 +150,30 @@ func (p *Parser) checkMethodParameters(params []ast.Expression) {
 			case 1:
 				p.error = &Error{Message: fmt.Sprintf("Normal argument \"%s\" should be defined before optioned argument. Line: %d", exp.Value, p.curToken.Line), errType: SyntaxError}
 			case 2:
+				p.error = &Error{Message: fmt.Sprintf("Normal argument \"%s\" should be defined before keyword argument. Line: %d", exp.Value, p.curToken.Line), errType: SyntaxError}
+			case 3:
 				p.error = &Error{Message: fmt.Sprintf("Normal argument \"%s\" should be defined before splat argument. Line: %d", exp.Value, p.curToken.Line), errType: SyntaxError}
 			}
 		case *ast.AssignExpression:
 			switch argState {
 			case 2:
+				p.error = &Error{Message: fmt.Sprintf("Optioned argument \"%s\" should be defined before keyword argument. Line: %d", exp.Value, p.curToken.Line), errType: SyntaxError}
+			case 3:
 				p.error = &Error{Message: fmt.Sprintf("Optioned argument \"%s\" should be defined before splat argument. Line: %d", exp.String(), p.curToken.Line), errType: SyntaxError}
 			}
 			argState = 1
+		case *ast.PairExpression:
+			switch argState {
+			case 3:
+				p.error = &Error{Message: fmt.Sprintf("Keyword argument \"%s\" should be defined before splat argument. Line: %d", exp.String(), p.curToken.Line), errType: SyntaxError}
+			}
+			argState = 2
 		case *ast.PrefixExpression:
 			switch argState {
-			case 2:
+			case 3:
 				p.error = &Error{Message: fmt.Sprintf("Can't define splat argument more than once. Line: %d", p.curToken.Line), errType: SyntaxError}
 			}
-
-			argState = 2
+			argState = 3
 		}
 
 		if p.error != nil {
