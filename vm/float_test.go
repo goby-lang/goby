@@ -27,12 +27,12 @@ func TestFloatArithmeticOperationWithFloat(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-    {`'13.5'.to_f  +  '3.2'.to_f`,  16.7},
-    {`'13.5'.to_f  -  '3.2'.to_f`,  10.3},
-    {`'13.5'.to_f  *  '3.2'.to_f`,  43.2},
-    {`'13.5'.to_f  %  '3.75'.to_f`, 2.25},
-    {`'13.5'.to_f  /  '3.75'.to_f`, 3.6},
-    {`'16.0'.to_f  ** '3.5'.to_f`,  16384.0},
+		{`'13.5'.to_f  +  '3.2'.to_f`, 16.7},
+		{`'13.5'.to_f  -  '3.2'.to_f`, 10.3},
+		{`'13.5'.to_f  *  '3.2'.to_f`, 43.2},
+		{`'13.5'.to_f  %  '3.75'.to_f`, 2.25},
+		{`'13.5'.to_f  /  '3.75'.to_f`, 3.6},
+		{`'16.0'.to_f  ** '3.5'.to_f`, 16384.0},
 	}
 
 	for i, tt := range tests {
@@ -49,12 +49,12 @@ func TestFloatArithmeticOperationWithInteger(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-    {`'13.5'.to_f  +  3`, 16.5},
-    {`'13.5'.to_f  -  3`, 10.5},
-    {`'13.5'.to_f  *  3`, 40.5},
-    {`'13.5'.to_f  %  3`, 1.5},
-    {`'13.5'.to_f  /  3`, 4.5},
-    {`'13.5'.to_f  ** 3`, 2460.375},
+		{`'13.5'.to_f  +  3`, 16.5},
+		{`'13.5'.to_f  -  3`, 10.5},
+		{`'13.5'.to_f  *  3`, 40.5},
+		{`'13.5'.to_f  %  3`, 1.5},
+		{`'13.5'.to_f  /  3`, 4.5},
+		{`'13.5'.to_f  ** 3`, 2460.375},
 	}
 
 	for i, tt := range tests {
@@ -88,21 +88,21 @@ func TestFloatComparisonWithFloat(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-    {`'1.5'.to_f >   '2.5'.to_f`,  false},
-    {`'2.5'.to_f >   '1.5'.to_f`,  true},
-    {`'3.5'.to_f >   '3.5'.to_f`,  false},
-    {`'1.5'.to_f <   '2.5'.to_f`,  true},
-    {`'2.5'.to_f <   '1.5'.to_f`,  false},
-    {`'3.5'.to_f <   '3.5'.to_f`,  false},
-    {`'1.5'.to_f >=  '2.5'.to_f`,  false},
-    {`'2.5'.to_f >=  '1.5'.to_f`,  true},
-    {`'3.5'.to_f >=  '3.5'.to_f`,  true},
-    {`'1.5'.to_f <=  '2.5'.to_f`,  true},
-    {`'2.5'.to_f <=  '1.5'.to_f`,  false},
-    {`'3.5'.to_f <=  '3.5'.to_f`,  true},
-    {`'1.5'.to_f <=> '2.5'.to_f`,  -1},
-    {`'2.5'.to_f <=> '1.5'.to_f`,  1},
-    {`'3.5'.to_f <=> '3.5'.to_f`,  0},
+		{`'1.5'.to_f >   '2.5'.to_f`, false},
+		{`'2.5'.to_f >   '1.5'.to_f`, true},
+		{`'3.5'.to_f >   '3.5'.to_f`, false},
+		{`'1.5'.to_f <   '2.5'.to_f`, true},
+		{`'2.5'.to_f <   '1.5'.to_f`, false},
+		{`'3.5'.to_f <   '3.5'.to_f`, false},
+		{`'1.5'.to_f >=  '2.5'.to_f`, false},
+		{`'2.5'.to_f >=  '1.5'.to_f`, true},
+		{`'3.5'.to_f >=  '3.5'.to_f`, true},
+		{`'1.5'.to_f <=  '2.5'.to_f`, true},
+		{`'2.5'.to_f <=  '1.5'.to_f`, false},
+		{`'3.5'.to_f <=  '3.5'.to_f`, true},
+		{`'1.5'.to_f <=> '2.5'.to_f`, -1},
+		{`'2.5'.to_f <=> '1.5'.to_f`, 1},
+		{`'3.5'.to_f <=> '3.5'.to_f`, 0},
 	}
 
 	for i, tt := range tests {
@@ -119,21 +119,21 @@ func TestFloatComparisonWithInteger(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-    {`'1'.to_f >   2`,  false},
-    {`'2'.to_f >   1`,  true},
-    {`'3'.to_f >   3`,  false},
-    {`'1'.to_f <   2`,  true},
-    {`'2'.to_f <   1`,  false},
-    {`'3'.to_f <   3`,  false},
-    {`'1'.to_f >=  2`,  false},
-    {`'2'.to_f >=  1`,  true},
-    {`'3'.to_f >=  3`,  true},
-    {`'1'.to_f <=  2`,  true},
-    {`'2'.to_f <=  1`,  false},
-    {`'3'.to_f <=  3`,  true},
-    {`'1'.to_f <=> 2`,  -1},
-    {`'2'.to_f <=> 1`,  1},
-    {`'3'.to_f <=> 3`,  0},
+		{`'1'.to_f >   2`, false},
+		{`'2'.to_f >   1`, true},
+		{`'3'.to_f >   3`, false},
+		{`'1'.to_f <   2`, true},
+		{`'2'.to_f <   1`, false},
+		{`'3'.to_f <   3`, false},
+		{`'1'.to_f >=  2`, false},
+		{`'2'.to_f >=  1`, true},
+		{`'3'.to_f >=  3`, true},
+		{`'1'.to_f <=  2`, true},
+		{`'2'.to_f <=  1`, false},
+		{`'3'.to_f <=  3`, true},
+		{`'1'.to_f <=> 2`, -1},
+		{`'2'.to_f <=> 1`, 1},
+		{`'3'.to_f <=> 3`, 0},
 	}
 
 	for i, tt := range tests {
@@ -169,21 +169,21 @@ func TestFloatEquality(t *testing.T) {
 		expected interface{}
 	}{
 		{`'123.5'.to_f  ==  '123.5'.to_f`, true},
-		{`'123'.to_f    ==  123`,          true},
-		{`'123.5'.to_f  ==  '124'.to_f`,   false},
-		{`'123.5'.to_f  ==  "123.5"`,      false},
-		{`'123.5'.to_f  ==  (1..3)`,       false},
-		{`'123.5'.to_f  ==  { a: 1 }`,     false},
-		{`'123.5'.to_f  ==  [1]`,          false},
-		{`'123.5'.to_f  ==  Float`,        false},
+		{`'123'.to_f    ==  123`, true},
+		{`'123.5'.to_f  ==  '124'.to_f`, false},
+		{`'123.5'.to_f  ==  "123.5"`, false},
+		{`'123.5'.to_f  ==  (1..3)`, false},
+		{`'123.5'.to_f  ==  { a: 1 }`, false},
+		{`'123.5'.to_f  ==  [1]`, false},
+		{`'123.5'.to_f  ==  Float`, false},
 		{`'123.5'.to_f  !=  '123.5'.to_f`, false},
-		{`'123.5'.to_f  !=  123`,          true},
-		{`'123.5'.to_f  !=  '124'.to_f`,   true},
-		{`'123.5'.to_f  !=  "123.5"`,      true},
-		{`'123.5'.to_f  !=  (1..3)`,       true},
-		{`'123.5'.to_f  !=  { a: 1 }`,     true},
-		{`'123.5'.to_f  !=  [1]`,          true},
-		{`'123.5'.to_f  !=  Float`,        true},
+		{`'123.5'.to_f  !=  123`, true},
+		{`'123.5'.to_f  !=  '124'.to_f`, true},
+		{`'123.5'.to_f  !=  "123.5"`, true},
+		{`'123.5'.to_f  !=  (1..3)`, true},
+		{`'123.5'.to_f  !=  { a: 1 }`, true},
+		{`'123.5'.to_f  !=  [1]`, true},
+		{`'123.5'.to_f  !=  Float`, true},
 	}
 
 	for i, tt := range tests {

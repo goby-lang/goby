@@ -1399,7 +1399,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					str := receiver.(*StringObject).value
 
 					for i, char := range str {
-						if ! unicode.IsSpace(char) {
+						if !unicode.IsSpace(char) {
 							str = str[i:]
 							break
 						}
@@ -1443,7 +1443,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 							digits += string(char)
 						} else if unicode.IsSpace(char) && len(digits) == 0 {
 							// do nothing; allow trailing spaces
-					  } else {
+						} else {
 							break
 						}
 					}

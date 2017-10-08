@@ -237,7 +237,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					rightNumeric, ok := args[0].(Numeric)
 
-					if ! ok {
+					if !ok {
 						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, "Numeric", args[0].Class().Name)
 					}
 
@@ -289,7 +289,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			Name: "!=",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					result := ! receiver.(*FloatObject).equalityTest(args[0])
+					result := !receiver.(*FloatObject).equalityTest(args[0])
 
 					return toBooleanObject(result)
 				}
@@ -358,7 +358,7 @@ func (f *FloatObject) floatValue() float64 {
 func (f *FloatObject) arithmeticOperation(t *thread, rightObject Object, operation func(leftValue float64, rightValue float64) float64) Object {
 	rightNumeric, ok := rightObject.(Numeric)
 
-	if ! ok {
+	if !ok {
 		return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
 	}
 
@@ -375,7 +375,7 @@ func (f *FloatObject) arithmeticOperation(t *thread, rightObject Object, operati
 func (f *FloatObject) equalityTest(rightObject Object) bool {
 	rightNumeric, ok := rightObject.(Numeric)
 
-	if ! ok {
+	if !ok {
 		return false
 	}
 
@@ -389,7 +389,7 @@ func (f *FloatObject) equalityTest(rightObject Object) bool {
 func (f *FloatObject) numericComparison(t *thread, rightObject Object, operation func(leftValue float64, rightValue float64) bool) Object {
 	rightNumeric, ok := rightObject.(Numeric)
 
-	if ! ok {
+	if !ok {
 		return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
 	}
 

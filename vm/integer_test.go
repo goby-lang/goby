@@ -27,12 +27,12 @@ func TestIntegerArithmeticOperationWithInteger(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`13  +  3`,  16},
-		{`13  -  3`,  10},
-		{`13  *  3`,  39},
-		{`13  %  3`,  1},
-		{`13  /  3`,  4},
-		{`13  ** 3`,  2197},
+		{`13  +  3`, 16},
+		{`13  -  3`, 10},
+		{`13  *  3`, 39},
+		{`13  %  3`, 1},
+		{`13  /  3`, 4},
+		{`13  ** 3`, 2197},
 	}
 
 	for i, tt := range tests {
@@ -49,12 +49,12 @@ func TestIntegerArithmeticOperationWithFloat(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`13  +  '3.5'.to_f`,  16.5},
-		{`13  -  '3.5'.to_f`,  9.5},
-		{`13  *  '3.5'.to_f`,  45.5},
-		{`13  %  '3.5'.to_f`,  2.5},
-		{`13  /  '6.5'.to_f`,  2.0},
-		{`4   ** '3.5'.to_f`,  128.0},
+		{`13  +  '3.5'.to_f`, 16.5},
+		{`13  -  '3.5'.to_f`, 9.5},
+		{`13  *  '3.5'.to_f`, 45.5},
+		{`13  %  '3.5'.to_f`, 2.5},
+		{`13  /  '6.5'.to_f`, 2.0},
+		{`4   ** '3.5'.to_f`, 128.0},
 	}
 
 	for i, tt := range tests {
@@ -71,12 +71,12 @@ func TestIntegerArithmeticOperationsPriority(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-    {`1 / 1 + 1`,         2},
-    {`0 / (1 + 1000)`,    0},
-    {`5 ** (3 * 2) + 21`, 15646},
-    {`(3 - 1) ** 4 / 2`,  8},
-    {`(25 / 5 + 5) * 3`,  30},
-    {`(25 / 5 + 5) * 2`,  20},
+		{`1 / 1 + 1`, 2},
+		{`0 / (1 + 1000)`, 0},
+		{`5 ** (3 * 2) + 21`, 15646},
+		{`(3 - 1) ** 4 / 2`, 8},
+		{`(25 / 5 + 5) * 3`, 30},
+		{`(25 / 5 + 5) * 2`, 20},
 	}
 
 	for i, tt := range tests {
@@ -110,21 +110,21 @@ func TestIntegerComparisonWithInteger(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`1 >   2`,  false},
-		{`2 >   1`,  true},
-		{`3 >   3`,  false},
-		{`1 <   2`,  true},
-		{`2 <   1`,  false},
-		{`3 <   3`,  false},
-		{`1 >=  2`,  false},
-		{`2 >=  1`,  true},
-		{`3 >=  3`,  true},
-		{`1 <=  2`,  true},
-		{`2 <=  1`,  false},
-		{`3 <=  3`,  true},
-		{`1 <=> 2`,  -1},
-		{`2 <=> 1`,  1},
-		{`3 <=> 3`,  0},
+		{`1 >   2`, false},
+		{`2 >   1`, true},
+		{`3 >   3`, false},
+		{`1 <   2`, true},
+		{`2 <   1`, false},
+		{`3 <   3`, false},
+		{`1 >=  2`, false},
+		{`2 >=  1`, true},
+		{`3 >=  3`, true},
+		{`1 <=  2`, true},
+		{`2 <=  1`, false},
+		{`3 <=  3`, true},
+		{`1 <=> 2`, -1},
+		{`2 <=> 1`, 1},
+		{`3 <=> 3`, 0},
 	}
 
 	for i, tt := range tests {
@@ -141,21 +141,21 @@ func TestIntegerComparisonWithFloat(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`1 >   '2'.to_f`,  false},
-		{`2 >   '1'.to_f`,  true},
-		{`3 >   '3'.to_f`,  false},
-		{`1 <   '2'.to_f`,  true},
-		{`2 <   '1'.to_f`,  false},
-		{`3 <   '3'.to_f`,  false},
-		{`1 >=  '2'.to_f`,  false},
-		{`2 >=  '1'.to_f`,  true},
-		{`3 >=  '3'.to_f`,  true},
-		{`1 <=  '2'.to_f`,  true},
-		{`2 <=  '1'.to_f`,  false},
-		{`3 <=  '3'.to_f`,  true},
-		{`1 <=> '2'.to_f`,  -1},
-		{`2 <=> '1'.to_f`,  1},
-		{`3 <=> '3'.to_f`,  0},
+		{`1 >   '2'.to_f`, false},
+		{`2 >   '1'.to_f`, true},
+		{`3 >   '3'.to_f`, false},
+		{`1 <   '2'.to_f`, true},
+		{`2 <   '1'.to_f`, false},
+		{`3 <   '3'.to_f`, false},
+		{`1 >=  '2'.to_f`, false},
+		{`2 >=  '1'.to_f`, true},
+		{`3 >=  '3'.to_f`, true},
+		{`1 <=  '2'.to_f`, true},
+		{`2 <=  '1'.to_f`, false},
+		{`3 <=  '3'.to_f`, true},
+		{`1 <=> '2'.to_f`, -1},
+		{`2 <=> '1'.to_f`, 1},
+		{`3 <=> '3'.to_f`, 0},
 	}
 
 	for i, tt := range tests {
@@ -190,22 +190,22 @@ func TestIntegerEquality(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`4  ==  4`,            true},
-		{`4  ==  '4'.to_f`,     true},
-		{`4  ==  '5'.to_f`,     false},
-		{`4  ==  '4'`,          false},
-		{`4  ==  (1..3)`,       false},
-		{`4  ==  { a: 1 }`,     false},
-		{`4  ==  [1]`,          false},
-		{`4  ==  Float`,        false},
-		{`4  !=  4`,            false},
-		{`4  !=  '4'.to_f`,     false},
-		{`4  !=  '5'.to_f`,     true},
-		{`4  !=  '4'`,          true},
-		{`4  !=  (1..3)`,       true},
-		{`4  !=  { a: 1 }`,     true},
-		{`4  !=  [1]`,          true},
-		{`4  !=  Float`,        true},
+		{`4  ==  4`, true},
+		{`4  ==  '4'.to_f`, true},
+		{`4  ==  '5'.to_f`, false},
+		{`4  ==  '4'`, false},
+		{`4  ==  (1..3)`, false},
+		{`4  ==  { a: 1 }`, false},
+		{`4  ==  [1]`, false},
+		{`4  ==  Float`, false},
+		{`4  !=  4`, false},
+		{`4  !=  '4'.to_f`, false},
+		{`4  !=  '5'.to_f`, true},
+		{`4  !=  '4'`, true},
+		{`4  !=  (1..3)`, true},
+		{`4  !=  { a: 1 }`, true},
+		{`4  !=  [1]`, true},
+		{`4  !=  Float`, true},
 	}
 
 	for i, tt := range tests {

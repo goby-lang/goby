@@ -597,7 +597,6 @@ func TestIfExpression(t *testing.T) {
 	}
 }
 
-
 func TestCaseExpression(t *testing.T) {
 	input := `
 	case 2
@@ -690,8 +689,6 @@ func TestCaseExpression(t *testing.T) {
 		return
 	}
 }
-
-
 
 func TestMethodParameterParsing(t *testing.T) {
 	tests := []struct {
