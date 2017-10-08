@@ -88,12 +88,11 @@ func (t *thread) retrieveBlock(cf *callFrame, args []interface{}) (blockFrame *c
 	var blockName string
 	var hasBlock bool
 
-	if len(args) > 2 {
+	blockFlag := args[2].(string)
+
+	if len(blockFlag) != 0 {
 		hasBlock = true
-		blockFlag := args[2].(string)
 		blockName = strings.Split(blockFlag, ":")[1]
-	} else {
-		hasBlock = false
 	}
 
 	if hasBlock {
@@ -166,15 +165,15 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *callFra
 
 	switch m := method.(type) {
 	case *MethodObject:
-		t.evalMethodObject(receiver, m, receiverPr, argCount, blockFrame)
+		t.evalMethodObject(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame)
 	case *BuiltinMethodObject:
-		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, blockFrame)
+		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame)
 	case *Error:
 		t.returnError(errors.InternalError, m.toString())
 	}
 }
 
-func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPr, argCount int, blockFrame *callFrame) {
+func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPr, argCount int, argSet *bytecode.ArgSet, blockFrame *callFrame) {
 	methodBody := method.Fn(receiver)
 	args := []Object{}
 	argPr := receiverPr + 1
@@ -189,22 +188,22 @@ func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 	if method.Name == "new" && ok {
 		instance, ok := evaluated.(*RObject)
 		if ok && instance.InitializeMethod != nil {
-			t.evalMethodObject(instance, instance.InitializeMethod, receiverPr, argCount, blockFrame)
+			t.evalMethodObject(instance, instance.InitializeMethod, receiverPr, argCount, argSet, blockFrame)
 		}
 	}
 	t.stack.set(receiverPr, &Pointer{Target: evaluated})
 	t.sp = argPr
 }
 
-func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receiverPr, argC int, blockFrame *callFrame) {
+func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receiverPr, argC int, argSet *bytecode.ArgSet, blockFrame *callFrame) {
 	c := newCallFrame(method.instructionSet)
 	c.self = receiver
 	argPr := receiverPr + 1
 	minimumArgNumber := 0
-	argTypesCount := len(method.argTypes())
+	argTypesCount := len(method.paramTypes())
 
-	for _, at := range method.argTypes() {
-		if at == bytecode.NormalArg || at == bytecode.RequiredKeywordArg {
+	for _, at := range method.paramTypes() {
+		if at == bytecode.NormalArg {
 			minimumArgNumber++
 		}
 	}
@@ -223,65 +222,88 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 		return
 	}
 
+	// argIndex + argPr == current argument's position
 	argIndex := 0
 
-	for i, argType := range method.argTypes() {
-		if argType == bytecode.NormalArg {
-			c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
-			argIndex++
-		}
-	}
-
-	/*
-	 def foo(a = 10, b = 11, c); end
-
-	 foo(1, 2)
-
-	 In the above example, method foo's minimum argument number is 1 (`c`).
-	 And the given argument number is 2.
-
-	 So we first assign arguments to those doesn't have a default value (`c` in this example).
-	 And then we assign the rest of given values from first parameter, so `a` would be assigned 2.
-
-	 Result:
-
-	 a == 2
-	 b == 11
-	 c == 1
-	*/
-
+	// If given arguments is more than the normal arguments.
+	// It might mean we have optioned argument been override.
+	// Or we have some keyword arguments
 	if minimumArgNumber < argC {
-		// Fill arguments with default value from beginning
-		for i, argType := range method.argTypes() {
-			if argType == bytecode.OptionedArg {
-				c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
-				argIndex++
+		// This is only for normal/optioned arguments
+		lastArgIndex := -1
+
+		for paramIndex, paramType := range method.paramTypes() {
+			// Deal with normal arguments first
+			if paramType == bytecode.NormalArg || paramType == bytecode.OptionedArg {
+				/*
+					Find first usable value as normal argument, for example:
+
+					```ruby
+					  def foo(x, y:); end
+
+					  foo(y: 100, 10)
+					```
+
+					In the example we can see that 'x' is the first parameter,
+					but in the method call it's the second argument.
+
+					This loop is for skipping other types of arguments and get the correct argument index.
+				*/
+				for argIndex, at := range argSet.Types() {
+					if lastArgIndex < argIndex && (at == bytecode.NormalArg || at == bytecode.OptionedArg) {
+						c.insertLCL(paramIndex, 0, t.stack.Data[argPr+argIndex].Target)
+
+						// Store latest index value (and compare them to current argument index)
+						// This is to make sure we won't get same argument's index twice.
+						lastArgIndex = argIndex
+						break
+					}
+				}
 			}
 
-			if argType == bytecode.RequiredKeywordArg || argType == bytecode.OptionalKeywordArg {
-				h := t.stack.Data[argPr+argIndex].Target.(*HashObject)
+			if paramType == bytecode.RequiredKeywordArg {
+				paramName := method.instructionSet.paramTypes.Names()[paramIndex]
+				argIndex := argSet.FindIndex(paramName)
 
-				for _, data := range h.Pairs {
-					c.insertLCL(i, 0, data)
-					argIndex++
+				if argIndex != -1 {
+					c.insertLCL(paramIndex, 0, t.stack.Data[argPr+argIndex].Target)
+				} else {
+					t.vm.initErrorObject("Method %s requires key argument %s", method.Name, paramName)
+				}
+			}
+
+			if paramType == bytecode.OptionalKeywordArg {
+				argName := method.instructionSet.paramTypes.Names()[paramIndex]
+				argIndex := argSet.FindIndex(argName)
+
+				if argIndex != -1 {
+					c.insertLCL(paramIndex, 0, t.stack.Data[argPr+argIndex].Target)
 				}
 			}
 
 			// If argument index equals argument count means we already assigned all arguments
-			if argIndex == argC || argType == bytecode.SplatArg {
+			if argIndex == argC || paramType == bytecode.SplatArg {
+				argIndex = paramIndex
 				break
+			}
+		}
+	} else {
+		for i, paramType := range method.paramTypes() {
+			if paramType == bytecode.NormalArg {
+				c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
+				argIndex++
 			}
 		}
 	}
 
-	if argTypesCount > 0 && method.isSplatArgIncluded() && !method.isKeywordArgIncluded() {
+	if argTypesCount > 0 && method.isSplatArgIncluded() {
 		elems := []Object{}
 		for argIndex < argC {
 			elems = append(elems, t.stack.Data[argPr+argIndex].Target)
 			argIndex++
 		}
 
-		c.insertLCL(len(method.argTypes())-1, 0, t.vm.initArrayObject(elems))
+		c.insertLCL(len(method.paramTypes())-1, 0, t.vm.initArrayObject(elems))
 	}
 
 	// TODO: Implement this

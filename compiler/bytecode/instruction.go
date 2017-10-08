@@ -51,6 +51,7 @@ type Instruction struct {
 	line       int
 	anchor     *anchor
 	sourceLine int
+	ArgSet     *ArgSet
 }
 
 // AnchorLine returns instruction anchor's line number if it has an anchor
@@ -77,6 +78,14 @@ func (i *Instruction) compile() string {
 		return fmt.Sprintf("%d %s %d\n", i.line, i.Action, i.anchor.line)
 	}
 	if len(i.Params) > 0 {
+		lastParam := i.Params[len(i.Params)-1]
+
+		// If the send action doesn't have a block (block info), we'll have a trailing space after join.
+		// So we need to remove that empty string element
+		if i.Action == Send && len(lastParam) == 0 {
+			return fmt.Sprintf("%d %s %s\n", i.line, i.Action, strings.Join(i.Params[:len(i.Params)-1], " "))
+		}
+
 		return fmt.Sprintf("%d %s %s\n", i.line, i.Action, strings.Join(i.Params, " "))
 	}
 
@@ -112,6 +121,21 @@ func (as *ArgSet) Names() []string {
 	return as.names
 }
 
+func (as *ArgSet) FindIndex(name string) int {
+	for i, n := range as.names {
+		if n == name {
+			return i
+		}
+	}
+
+	return -1
+}
+
+func (as *ArgSet) setArg(index int, name string, argType int) {
+	as.names[index] = name
+	as.types[index] = argType
+}
+
 // ArgTypes returns enums that represents each argument's type
 func (is *InstructionSet) ArgTypes() *ArgSet {
 	return is.argTypes
@@ -127,7 +151,7 @@ func (is *InstructionSet) Type() string {
 	return is.isType
 }
 
-func (is *InstructionSet) define(action string, sourceLine int, params ...interface{}) {
+func (is *InstructionSet) define(action string, sourceLine int, params ...interface{}) *Instruction {
 	ps := []string{}
 	i := &Instruction{Action: action, Params: ps, line: is.count, sourceLine: sourceLine}
 	for _, param := range params {
@@ -147,6 +171,7 @@ func (is *InstructionSet) define(action string, sourceLine int, params ...interf
 
 	is.Instructions = append(is.Instructions, i)
 	is.count++
+	return i
 }
 
 func (is *InstructionSet) compile() string {

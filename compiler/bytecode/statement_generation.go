@@ -166,8 +166,7 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 		case *ast.Identifier:
 			scope.localTable.setLCL(exp.Value, scope.localTable.depth)
 
-			newIS.argTypes.names[i] = exp.Value
-			newIS.argTypes.types[i] = NormalArg
+			newIS.argTypes.setArg(i, exp.Value, NormalArg)
 		case *ast.AssignExpression:
 			exp.Optioned = 1
 
@@ -175,8 +174,7 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 			varName := v.(*ast.Identifier)
 			g.compileAssignExpression(newIS, exp, scope, scope.localTable)
 
-			newIS.argTypes.names[i] = varName.Value
-			newIS.argTypes.types[i] = OptionedArg
+			newIS.argTypes.setArg(i, varName.Value, OptionedArg)
 		case *ast.PrefixExpression:
 			if exp.Operator != "*" {
 				continue
@@ -184,22 +182,17 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 			ident := exp.Right.(*ast.Identifier)
 			scope.localTable.setLCL(ident.Value, scope.localTable.depth)
 
-			newIS.argTypes.names[i] = ident.Value
-			newIS.argTypes.types[i] = SplatArg
+			newIS.argTypes.setArg(i, ident.Value, SplatArg)
 		case *ast.PairExpression:
-
 			key := exp.Key.(*ast.Identifier)
+			index, depth := scope.localTable.setLCL(key.Value, scope.localTable.depth)
 
 			if exp.Value != nil {
 				g.compileExpression(newIS, exp.Value, scope, scope.localTable)
-				index, depth := scope.localTable.setLCL(key.Value, scope.localTable.depth)
 				newIS.define(SetLocal, exp.Line(), depth, index, 1)
-
-				newIS.argTypes.names[i] = key.Value
-				newIS.argTypes.types[i] = OptionalKeywordArg
+				newIS.argTypes.setArg(i, key.Value, OptionalKeywordArg)
 			} else {
-				newIS.argTypes.names[i] = key.Value
-				newIS.argTypes.types[i] = RequiredKeywordArg
+				newIS.argTypes.setArg(i, key.Value, RequiredKeywordArg)
 			}
 		}
 	}

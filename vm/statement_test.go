@@ -115,6 +115,23 @@ func TestDefStatement(t *testing.T) {
 
 		a.foo
 		`, 10},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestDefStatementWithSplatArgument(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+
 		{`
 		def foo(a, *b)
 		  b.each do |i|
@@ -156,20 +173,130 @@ func TestDefStatement(t *testing.T) {
 
 		foo(10, 20, 30)
 		`, 60},
-		//{`
-		//def foo(a:20)
-		//  a
-		//end
-		//
-		//foo(a:10)
-		//`, 10},
-		//{`
-		//def foo(a:20)
-		//  a
-		//end
-		//
-		//foo
-		//`, 20},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestDefStatementWithKeywordArgument(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		def foo(a:)
+		  a
+		end
+
+		foo(a:10)
+		`, 10},
+		{`
+		def foo(a: 20)
+		  a
+		end
+
+		foo
+		`, 20},
+		{`
+		def foo(a: 20)
+		  a
+		end
+
+		foo(a: 10)
+		`, 10},
+		{`
+		def foo(a:, b:)
+		  a - b
+		end
+
+		foo(a:10, b: 20)
+		`, -10},
+		{`
+		def foo(a: 10, b:)
+		  a - b
+		end
+
+		foo(b: 20)
+		`, -10},
+		{`
+		def foo(a:, b: 20)
+		  a - b
+		end
+
+		foo(a: 10)
+		`, -10},
+		{`
+		def foo(a:, b:)
+		  a - b
+		end
+
+		foo(b:10, a: 20)
+		`, 10},
+		{`
+		def foo(foo, a:, b:)
+		  a - b + foo
+		end
+
+		foo(100, a:10, b: 20)
+		`, 90},
+		{`
+		def foo(foo, a: 10, b:)
+		  a - b + foo
+		end
+
+		foo(100, b: 20)
+		`, 90},
+		// Two normal arguments plus two keyword arguments
+		{`
+		def foo(bar, foo, a:, b:)
+		  a - b + foo - bar
+		end
+
+		foo(40, 100, a:10, b: 20)
+		`, 50},
+		{`
+		def foo(bar, foo, a:, b:)
+		  a - b + foo - bar
+		end
+
+		foo(40, 100, b: 20, a: 10)
+		`, 50},
+		{`
+		def foo(bar, foo, a:, b:)
+		  a - b + foo - bar
+		end
+
+		foo(b: 20, a: 10, 40, 100)
+		`, 50},
+		{`
+		def foo(bar, foo = 100, a:, b:)
+		  a - b + foo - bar
+		end
+
+		foo(b: 20, a: 10, 40)
+		`, 50},
+
+		// Add splat arguments
+		{`
+		def foo(bar, foo, a:, b:, *args)
+		  a - b + foo - bar + *args[1]
+		end
+
+		foo(b: 20, a: 10, 40, 100, "foo", 50)
+		`, 100},
+		{`
+		def foo(bar, foo, a:, b:, *args)
+		  a - b + foo - bar + *args[1]
+		end
+
+		foo(b: 20, a: 10, 40, 100, "foo", 50)
+		`, 100},
 	}
 
 	for i, tt := range tests {

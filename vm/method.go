@@ -42,12 +42,12 @@ func (m *MethodObject) Value() interface{} {
 	return m.toString()
 }
 
-func (m *MethodObject) argTypes() []int {
-	return m.instructionSet.argTypes.Types()
+func (m *MethodObject) paramTypes() []int {
+	return m.instructionSet.paramTypes.Types()
 }
 
 func (m *MethodObject) isSplatArgIncluded() bool {
-	for _, argType := range m.argTypes() {
+	for _, argType := range m.paramTypes() {
 		if argType == bytecode.SplatArg {
 			return true
 		}
@@ -57,7 +57,7 @@ func (m *MethodObject) isSplatArgIncluded() bool {
 }
 
 func (m *MethodObject) isKeywordArgIncluded() bool {
-	for _, argType := range m.argTypes() {
+	for _, argType := range m.paramTypes() {
 		if argType == bytecode.OptionalKeywordArg || argType == bytecode.RequiredKeywordArg {
 			return true
 		}

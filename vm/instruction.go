@@ -24,13 +24,14 @@ type instruction struct {
 	Params     []interface{}
 	Line       int
 	sourceLine int
+	argSet     *bytecode.ArgSet
 }
 
 type instructionSet struct {
 	name         string
 	instructions []*instruction
 	filename     filename
-	argTypes     *bytecode.ArgSet
+	paramTypes   *bytecode.ArgSet
 }
 
 func (is *instructionSet) define(line int, a *action, params ...interface{}) *instruction {
@@ -434,6 +435,7 @@ var builtinActions = map[operationType]*action{
 
 			methodName := args[0].(string)
 			argCount := args[1].(int)
+			argSet := args[3].(*bytecode.ArgSet)
 
 			if arr, ok := t.stack.top().Target.(*ArrayObject); ok && arr.splat {
 				// Pop array
@@ -462,9 +464,9 @@ var builtinActions = map[operationType]*action{
 
 			switch m := method.(type) {
 			case *MethodObject:
-				t.evalMethodObject(receiver, m, receiverPr, argCount, blockFrame)
+				t.evalMethodObject(receiver, m, receiverPr, argCount, argSet, blockFrame)
 			case *BuiltinMethodObject:
-				t.evalBuiltinMethod(receiver, m, receiverPr, argCount, blockFrame)
+				t.evalBuiltinMethod(receiver, m, receiverPr, argCount, argSet, blockFrame)
 			case *Error:
 				t.returnError(errors.InternalError, m.toString())
 			}

@@ -37,6 +37,8 @@ func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, sc
 		is.define(NewHash, sourceLine, len(exp.Data)*2)
 	case *ast.SelfExpression:
 		is.define(PutSelf, sourceLine)
+	case *ast.PairExpression:
+		g.compileExpression(is, exp.Value, scope, table)
 	case *ast.PrefixExpression:
 		g.compilePrefixExpression(is, exp, scope, table)
 	case *ast.InfixExpression:
@@ -64,7 +66,7 @@ func (g *Generator) compileIdentifier(is *InstructionSet, exp *ast.Identifier, s
 
 	// otherwise it's a method call
 	is.define(PutSelf, exp.Line())
-	is.define(Send, exp.Line(), exp.Value, 0)
+	is.define(Send, exp.Line(), exp.Value, 0, "")
 }
 
 func (g *Generator) compileYieldExpression(is *InstructionSet, exp *ast.YieldExpression, scope *scope, table *localTable) {
@@ -78,23 +80,56 @@ func (g *Generator) compileYieldExpression(is *InstructionSet, exp *ast.YieldExp
 }
 
 func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpression, scope *scope, table *localTable) {
+	var blockInfo string
+	argSet := &ArgSet{
+		names: make([]string, len(exp.Arguments)),
+		types: make([]int, len(exp.Arguments)),
+	}
+
+	// Compile receiver
 	g.compileExpression(is, exp.Receiver, scope, table)
 
-	for _, arg := range exp.Arguments {
+	// Compile arguments
+	for i, arg := range exp.Arguments {
+		switch arg := arg.(type) {
+		case *ast.Identifier:
+			argSet.setArg(i, arg.Value, NormalArg)
+		case *ast.AssignExpression:
+			varName := arg.Variables[0].(*ast.Identifier)
+			argSet.setArg(i, varName.Value, OptionedArg)
+		case *ast.PairExpression:
+			key := arg.Key.(*ast.Identifier)
+
+			if arg.Value == nil {
+				argSet.setArg(i, key.Value, RequiredKeywordArg)
+			} else {
+				argSet.setArg(i, key.Value, OptionalKeywordArg)
+			}
+		case *ast.PrefixExpression:
+			if arg.Operator == "*" {
+				ident, ok := arg.Right.(*ast.Identifier)
+				if ok {
+					argSet.setArg(i, ident.Value, SplatArg)
+				}
+			}
+		}
+
 		g.compileExpression(is, arg, scope, table)
 	}
 
+	// Compile block
 	if exp.Block != nil {
 		// Inside block should be one level deeper than outside
 		newTable := newLocalTable(table.depth + 1)
 		newTable.upper = table
 		blockIndex := g.blockCounter
+		blockInfo = fmt.Sprintf("block:%d", blockIndex)
 		g.blockCounter++
 		g.compileBlockArgExpression(blockIndex, exp, scope, newTable)
-		is.define(Send, exp.Line(), exp.Method, len(exp.Arguments), fmt.Sprintf("block:%d", blockIndex))
-		return
 	}
-	is.define(Send, exp.Line(), exp.Method, len(exp.Arguments))
+
+	i := is.define(Send, exp.Line(), exp.Method, len(exp.Arguments), blockInfo)
+	i.ArgSet = argSet
 }
 
 func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.AssignExpression, scope *scope, table *localTable) {
@@ -186,14 +221,14 @@ func (g *Generator) compilePrefixExpression(is *InstructionSet, exp *ast.PrefixE
 	switch exp.Operator {
 	case "!":
 		g.compileExpression(is, exp.Right, scope, table)
-		is.define(Send, exp.Line(), exp.Operator, 0)
+		is.define(Send, exp.Line(), exp.Operator, 0, "")
 	case "*":
 		g.compileExpression(is, exp.Right, scope, table)
 		is.define(SplatArray, exp.Line())
 	case "-":
 		is.define(PutObject, exp.Line(), 0)
 		g.compileExpression(is, exp.Right, scope, table)
-		is.define(Send, exp.Line(), exp.Operator, 1)
+		is.define(Send, exp.Line(), exp.Operator, 1, "")
 	}
 }
 
@@ -225,6 +260,6 @@ func (g *Generator) compileInfixExpression(is *InstructionSet, node *ast.InfixEx
 	default:
 		g.compileExpression(is, node.Left, scope, table)
 		g.compileExpression(is, node.Right, scope, table)
-		is.define(Send, node.Line(), node.Operator, "1")
+		is.define(Send, node.Line(), node.Operator, "1", "")
 	}
 }
