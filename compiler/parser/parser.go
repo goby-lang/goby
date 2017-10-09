@@ -25,6 +25,8 @@ const (
 	InvalidAssignmentError
 	// SyntaxError means there's a grammatical in the source code
 	SyntaxError
+	// ArgumentError means there's a method parameter's definition error
+	ArgumentError
 )
 
 // Error represents parser's parsing error
@@ -68,6 +70,12 @@ const (
 	NormalMode int = iota
 	REPLMode
 	TestMode
+
+	NormalArg
+	OptionedArg
+	SplatArg
+	RequiredKeywordArg
+	OptionalKeywordArg
 )
 
 // These are state machine's events
@@ -91,6 +99,14 @@ var eventTable = map[string]string{
 	parsingFuncCall:    parseFuncCall,
 	parsingMethodParam: parseMethodParam,
 	parsingAssignment:  parseAssignment,
+}
+
+var argTable = map[int]string{
+	NormalArg:          "Normal argument",
+	OptionedArg:        "Optioned argument",
+	RequiredKeywordArg: "Keyword argument",
+	OptionalKeywordArg: "Optioned keyword argument",
+	SplatArg:           "Splat argument",
 }
 
 // New initializes a parser and returns it
@@ -268,6 +284,12 @@ func (p *Parser) noPrefixParseFnError(t token.Type) {
 	} else {
 		p.error = &Error{Message: msg, errType: UnexpectedTokenError}
 	}
+}
+
+func newArgumentError(formerArgType, laterArgType int, argLiteral string, line int) *Error {
+	formerArg := argTable[formerArgType]
+	laterArg := argTable[laterArgType]
+	return &Error{Message: fmt.Sprintf("%s \"%s\" should be defined before %s. Line: %d", formerArg, argLiteral, laterArg, line), errType: ArgumentError}
 }
 
 func (p *Parser) peekTokenAtSameLine() bool {
