@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/goby-lang/goby/compiler/ast"
 	"github.com/goby-lang/goby/compiler/token"
@@ -180,99 +179,9 @@ func (p *Parser) parseInstanceVariable() ast.Expression {
 	return &ast.InstanceVariable{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
 }
 
-func (p *Parser) parseIntegerLiteral() ast.Expression {
-	lit := &ast.IntegerLiteral{BaseNode: &ast.BaseNode{Token: p.curToken}}
-
-	value, err := strconv.ParseInt(lit.TokenLiteral(), 0, 64)
-	if err != nil {
-		p.error = newTypeParsingError(lit.TokenLiteral(), "integer", p.curToken.Line)
-		return nil
-	}
-
-	lit.Value = int(value)
-
-	return lit
-}
-
-func (p *Parser) parseStringLiteral() ast.Expression {
-	lit := &ast.StringLiteral{BaseNode: &ast.BaseNode{Token: p.curToken}}
-	lit.Value = p.curToken.Literal
-
-	return lit
-}
-
-func (p *Parser) parseBooleanLiteral() ast.Expression {
-	lit := &ast.BooleanExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
-
-	value, err := strconv.ParseBool(lit.TokenLiteral())
-	if err != nil {
-		p.error = newTypeParsingError(lit.TokenLiteral(), "boolean", p.curToken.Line)
-		return nil
-	}
-
-	lit.Value = value
-
-	return lit
-}
-
-func (p *Parser) parseNilExpression() ast.Expression {
-	return &ast.NilExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
-}
-
 func (p *Parser) parsePostfixExpression(receiver ast.Expression) ast.Expression {
 	arguments := []ast.Expression{}
 	return &ast.CallExpression{BaseNode: &ast.BaseNode{Token: p.curToken}, Receiver: receiver, Method: p.curToken.Literal, Arguments: arguments}
-}
-
-func (p *Parser) parseHashExpression() ast.Expression {
-	hash := &ast.HashExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
-	hash.Data = p.parseHashPairs()
-	return hash
-}
-
-func (p *Parser) parseHashPairs() map[string]ast.Expression {
-	pairs := map[string]ast.Expression{}
-
-	if p.peekTokenIs(token.RBrace) {
-		p.nextToken() // '}'
-		return pairs
-	}
-
-	p.parseHashPair(pairs)
-
-	for p.peekTokenIs(token.Comma) {
-		p.nextToken()
-
-		p.parseHashPair(pairs)
-	}
-
-	if !p.expectPeek(token.RBrace) {
-		return nil
-	}
-
-	return pairs
-}
-
-func (p *Parser) parseHashPair(pairs map[string]ast.Expression) {
-	var key string
-	var value ast.Expression
-
-	p.nextToken()
-
-	switch p.curToken.Type {
-	case token.Constant, token.Ident:
-		key = p.parseIdentifier().(ast.Variable).ReturnValue()
-	default:
-		return
-	}
-
-	if !p.expectPeek(token.Colon) {
-		return
-	}
-
-	p.nextToken()
-	value = p.parseExpression(NORMAL)
-	pairs[key] = value
 }
 
 func (p *Parser) parsePairExpression(key ast.Expression) ast.Expression {
@@ -288,12 +197,6 @@ func (p *Parser) parsePairExpression(key ast.Expression) ast.Expression {
 	exp.Value = value
 
 	return exp
-}
-
-func (p *Parser) parseArrayExpression() ast.Expression {
-	arr := &ast.ArrayExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
-	arr.Elements = p.parseArrayElements()
-	return arr
 }
 
 func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
@@ -325,30 +228,6 @@ func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
 	return callExpression
 }
 
-func (p *Parser) parseArrayElements() []ast.Expression {
-	elems := []ast.Expression{}
-
-	if p.peekTokenIs(token.RBracket) {
-		p.nextToken() // ']'
-		return elems
-	}
-
-	p.nextToken() // start of first expression
-	elems = append(elems, p.parseExpression(NORMAL))
-
-	for p.peekTokenIs(token.Comma) {
-		p.nextToken() // ","
-		p.nextToken() // start of next expression
-		elems = append(elems, p.parseExpression(NORMAL))
-	}
-
-	if !p.expectPeek(token.RBracket) {
-		return nil
-	}
-
-	return elems
-}
-
 func (p *Parser) parsePrefixExpression() ast.Expression {
 	pe := &ast.PrefixExpression{
 		BaseNode: &ast.BaseNode{Token: p.curToken},
@@ -363,22 +242,16 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 }
 
 func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
-	exp := &ast.InfixExpression{
-		BaseNode: &ast.BaseNode{Token: p.curToken},
-		Left:     left,
-		Operator: p.curToken.Literal,
-	}
-
+	operator := p.curToken
 	precedence := p.curPrecedence()
-	p.nextToken()
 
-	if exp.Operator == "||" || exp.Operator == "&&" {
+	if operator.Literal == "||" || operator.Literal == "&&" {
 		precedence = NORMAL
 	}
 
-	exp.Right = p.parseExpression(precedence)
+	p.nextToken()
 
-	return exp
+	return newInfixExpression(left, operator, p.parseExpression(precedence))
 }
 
 func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
@@ -467,12 +340,7 @@ func (p *Parser) expandAssignmentValue(value ast.Expression) ast.Expression {
 
 		p.nextToken()
 
-		return &ast.InfixExpression{
-			BaseNode: &ast.BaseNode{Token: infixOperator},
-			Left:     value,
-			Operator: infixOperator.Literal,
-			Right:    p.parseExpression(LOWEST),
-		}
+		return newInfixExpression(value, infixOperator, p.parseExpression(LOWEST))
 	default:
 		p.peekError(p.curToken.Type)
 		return nil
@@ -491,15 +359,6 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 	return exp
 }
 
-func (p *Parser) formInfixExpression(left ast.Expression, operator string, right ast.Expression) *ast.InfixExpression {
-	return &ast.InfixExpression{
-		BaseNode: &ast.BaseNode{Token: p.curToken},
-		Left:     left,
-		Operator: operator,
-		Right:    right,
-	}
-}
-
 func (p *Parser) parseYieldExpression() ast.Expression {
 	ye := &ast.YieldExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
 
@@ -514,19 +373,6 @@ func (p *Parser) parseYieldExpression() ast.Expression {
 	}
 
 	return ye
-}
-
-func (p *Parser) parseRangeExpression(left ast.Expression) ast.Expression {
-	exp := &ast.RangeExpression{
-		BaseNode: &ast.BaseNode{Token: p.curToken},
-		Start:    left,
-	}
-
-	precedence := p.curPrecedence()
-	p.nextToken()
-	exp.End = p.parseExpression(precedence)
-
-	return exp
 }
 
 func (p *Parser) parseMultiVariables(left ast.Expression) ast.Expression {
@@ -566,4 +412,13 @@ func (p *Parser) parseMultiVariables(left ast.Expression) ast.Expression {
 
 	result := &ast.MultiVariableExpression{Variables: vars}
 	return result
+}
+
+func newInfixExpression(left ast.Expression, operator token.Token, right ast.Expression) *ast.InfixExpression {
+	return &ast.InfixExpression{
+		BaseNode: &ast.BaseNode{Token: operator},
+		Left:     left,
+		Operator: operator.Literal,
+		Right:    right,
+	}
 }
