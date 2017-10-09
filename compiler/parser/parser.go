@@ -147,18 +147,16 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.LBrace, p.parseHashExpression)
 	p.registerPrefix(token.Semicolon, p.parseSemicolon)
 	p.registerPrefix(token.Yield, p.parseYieldExpression)
-	p.registerPrefix(token.Asterisk, p.parsePrefixExpression)
 
 	p.infixParseFns = make(map[token.Type]infixParseFn)
 	p.registerInfix(token.Plus, p.parseInfixExpression)
 	p.registerInfix(token.PlusEq, p.parseAssignExpression)
-	p.registerInfix(token.Modulo, p.parseInfixExpression)
 	p.registerInfix(token.Minus, p.parseInfixExpression)
 	p.registerInfix(token.MinusEq, p.parseAssignExpression)
+	p.registerInfix(token.Modulo, p.parseInfixExpression)
 	p.registerInfix(token.Slash, p.parseInfixExpression)
-	p.registerInfix(token.Eq, p.parseInfixExpression)
-	p.registerInfix(token.Asterisk, p.parseInfixExpression)
 	p.registerInfix(token.Pow, p.parseInfixExpression)
+	p.registerInfix(token.Eq, p.parseInfixExpression)
 	p.registerInfix(token.NotEq, p.parseInfixExpression)
 	p.registerInfix(token.LT, p.parseInfixExpression)
 	p.registerInfix(token.LTE, p.parseInfixExpression)
@@ -176,6 +174,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.LParen, p.parseCallExpressionWithoutReceiver)
 	p.registerInfix(token.LBracket, p.parseIndexExpression)
 	p.registerInfix(token.Colon, p.parsePairExpression)
+	p.registerInfix(token.Asterisk, p.parseInfixExpression)
 
 	return p
 }
@@ -192,19 +191,15 @@ func (p *Parser) ParseProgram() (*ast.Program, *Error) {
 	for !p.curTokenIs(token.EOF) {
 		stmt := p.parseStatement()
 
-		if stmt != nil {
-			program.Statements = append(program.Statements, stmt)
-		} else {
-			if p.error != nil {
-				return nil, p.error
-			}
-		}
-
-		p.nextToken()
-
 		if p.error != nil {
 			return nil, p.error
 		}
+
+		if stmt != nil {
+			program.Statements = append(program.Statements, stmt)
+		}
+
+		p.nextToken()
 	}
 
 	if p.Mode == TestMode {
