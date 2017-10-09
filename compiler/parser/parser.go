@@ -165,8 +165,6 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.GT, p.parseInfixExpression)
 	p.registerInfix(token.GTE, p.parseInfixExpression)
 	p.registerInfix(token.COMP, p.parseInfixExpression)
-	p.registerInfix(token.Incr, p.parsePostfixExpression)
-	p.registerInfix(token.Decr, p.parsePostfixExpression)
 	p.registerInfix(token.And, p.parseInfixExpression)
 	p.registerInfix(token.Or, p.parseInfixExpression)
 	p.registerInfix(token.OrEq, p.parseAssignExpression)

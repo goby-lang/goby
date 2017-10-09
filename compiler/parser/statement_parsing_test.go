@@ -237,7 +237,7 @@ func TestWhileStatement(t *testing.T) {
 	input := `
 	while i < a.length do
 	  puts(i)
-	  i++
+	  i += 1
 	end
 	`
 
@@ -279,7 +279,6 @@ func TestWhileStatement(t *testing.T) {
 	testIdentifier(t, firstCall.Arguments[0], "i")
 
 	secondStmt := block.Statements[1].(*ast.ExpressionStatement)
-	secondCall := secondStmt.Expression.(*ast.CallExpression)
-	testIdentifier(t, secondCall.Receiver, "i")
-	testMethodName(t, secondCall, "++")
+	secondCall := secondStmt.Expression.(*ast.AssignExpression)
+	testIdentifier(t, secondCall.Variables[0], "i")
 }

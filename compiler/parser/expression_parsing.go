@@ -179,11 +179,6 @@ func (p *Parser) parseInstanceVariable() ast.Expression {
 	return &ast.InstanceVariable{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
 }
 
-func (p *Parser) parsePostfixExpression(receiver ast.Expression) ast.Expression {
-	arguments := []ast.Expression{}
-	return &ast.CallExpression{BaseNode: &ast.BaseNode{Token: p.curToken}, Receiver: receiver, Method: p.curToken.Literal, Arguments: arguments}
-}
-
 func (p *Parser) parsePairExpression(key ast.Expression) ast.Expression {
 	exp := &ast.PairExpression{BaseNode: &ast.BaseNode{Token: p.curToken}, Key: key}
 
