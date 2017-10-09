@@ -258,10 +258,10 @@ func TestBooleanCompilation(t *testing.T) {
 `
 	expected := `
 <ProgramStart>
-0 putobject true
+0 putboolean true
 1 setlocal 0 0
 2 pop
-3 putobject false
+3 putboolean false
 4 setlocal 0 1
 5 pop
 6 getlocal 0 0

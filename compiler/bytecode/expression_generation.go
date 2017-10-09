@@ -17,7 +17,7 @@ func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, sc
 	case *ast.StringLiteral:
 		is.define(PutString, sourceLine, exp.Value)
 	case *ast.BooleanExpression:
-		is.define(PutObject, sourceLine, fmt.Sprint(exp.Value))
+		is.define(PutBoolean, sourceLine, fmt.Sprint(exp.Value))
 	case *ast.NilExpression:
 		is.define(PutNull, sourceLine)
 	case *ast.RangeExpression:

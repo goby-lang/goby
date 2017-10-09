@@ -54,6 +54,13 @@ var builtinActions = map[operationType]*action{
 			t.stack.push(&Pointer{Target: obj})
 		},
 	},
+	bytecode.PutBoolean: {
+		name: bytecode.PutObject,
+		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+			object := t.vm.initObjectFromGoType(args[0])
+			t.stack.push(&Pointer{Target: object})
+		},
+	},
 	bytecode.PutObject: {
 		name: bytecode.PutObject,
 		operation: func(t *thread, cf *callFrame, args ...interface{}) {
@@ -577,20 +584,9 @@ func (vm *VM) initObjectFromGoType(value interface{}) Object {
 
 		return vm.initStringObject(string(bytes))
 	case string:
-		switch v {
-		case "true":
-			return TRUE
-		case "false":
-			return FALSE
-		default:
-			return vm.initStringObject(v)
-		}
+		return vm.initStringObject(v)
 	case bool:
-		if v {
-			return TRUE
-		}
-
-		return FALSE
+		return toBooleanObject(v)
 	case []interface{}:
 		var objs []Object
 
