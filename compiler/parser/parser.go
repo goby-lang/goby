@@ -271,9 +271,13 @@ func (p *Parser) registerInfix(tokenType token.Type, fn infixParseFn) {
 	p.infixParseFns[tokenType] = fn
 }
 
+func (p *Parser) peekTokenAtSameLine() bool {
+	return p.curToken.Line == p.peekToken.Line && p.peekToken.Type != token.EOF
+}
+
 func (p *Parser) peekError(t token.Type) {
 	msg := fmt.Sprintf("expected next token to be %s, got %s instead. Line: %d", t, p.peekToken.Type, p.peekToken.Line)
-	p.error = &Error{Message: msg, errType: WrongTokenError}
+	p.error = &Error{Message: msg, errType: UnexpectedTokenError}
 }
 
 func (p *Parser) noPrefixParseFnError(t token.Type) {
@@ -292,6 +296,7 @@ func newArgumentError(formerArgType, laterArgType int, argLiteral string, line i
 	return &Error{Message: fmt.Sprintf("%s \"%s\" should be defined before %s. Line: %d", formerArg, argLiteral, laterArg, line), errType: ArgumentError}
 }
 
-func (p *Parser) peekTokenAtSameLine() bool {
-	return p.curToken.Line == p.peekToken.Line && p.peekToken.Type != token.EOF
+func newTypeParsingError(tokenLiteral, targetType string, line int) *Error {
+	msg := fmt.Sprintf("could not parse %q as %s. Line: %d", tokenLiteral, targetType, line)
+	return &Error{Message: msg, errType: SyntaxError}
 }

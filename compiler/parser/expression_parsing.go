@@ -185,8 +185,7 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 
 	value, err := strconv.ParseInt(lit.TokenLiteral(), 0, 64)
 	if err != nil {
-		msg := fmt.Sprintf("could not parse %q as integer. Line: %d", lit.TokenLiteral(), p.curToken.Line)
-		p.error = &Error{Message: msg, errType: SyntaxError}
+		p.error = newTypeParsingError(lit.TokenLiteral(), "integer", p.curToken.Line)
 		return nil
 	}
 
@@ -207,8 +206,8 @@ func (p *Parser) parseBooleanLiteral() ast.Expression {
 
 	value, err := strconv.ParseBool(lit.TokenLiteral())
 	if err != nil {
-		msg := fmt.Sprintf("could not parse %q as boolean", lit.TokenLiteral())
-		panic(msg)
+		p.error = newTypeParsingError(lit.TokenLiteral(), "boolean", p.curToken.Line)
+		return nil
 	}
 
 	lit.Value = value
@@ -261,9 +260,7 @@ func (p *Parser) parseHashPair(pairs map[string]ast.Expression) {
 	p.nextToken()
 
 	switch p.curToken.Type {
-	case token.Ident:
-		key = p.parseIdentifier().(ast.Variable).ReturnValue()
-	case token.Constant:
+	case token.Constant, token.Ident:
 		key = p.parseIdentifier().(ast.Variable).ReturnValue()
 	default:
 		return
@@ -477,7 +474,7 @@ func (p *Parser) expandAssignmentValue(value ast.Expression) ast.Expression {
 			Right:    p.parseExpression(LOWEST),
 		}
 	default:
-		p.error = &Error{errType: UnexpectedTokenError, Message: fmt.Sprintf("Unexpect token '%s' for assgin expression", p.curToken.Literal)}
+		p.peekError(p.curToken.Type)
 		return nil
 	}
 }
