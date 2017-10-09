@@ -7,20 +7,30 @@ import (
 func TestReturnStatementEvaluation(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected int
+		expected interface{}
 	}{
-		{
-			`
-	class Foo
-	  def self.bar
-	    return 100
-	    10
-	  end
-	end
+		{`
+			def bar
+			  return 100
+			  10
+			end
 
-	Foo.bar
+
+			bar
 			`,
 			100,
+		},
+		{
+			`
+			def bar
+			  return
+			  10
+			end
+
+
+			bar
+			`,
+			nil,
 		},
 	}
 
@@ -218,7 +228,7 @@ func TestDefStatementWithKeywordArgument(t *testing.T) {
 		foo(a:10, b: 20)
 		`, -10},
 		{`
-		def foo(a: 10, b:)
+		def foo(b:, a: 10)
 		  a - b
 		end
 
@@ -246,12 +256,12 @@ func TestDefStatementWithKeywordArgument(t *testing.T) {
 		foo(100, a:10, b: 20)
 		`, 90},
 		{`
-		def foo(foo, a: 10, b:)
+		def foo(foo, a:, b: 10)
 		  a - b + foo
 		end
 
-		foo(100, b: 20)
-		`, 90},
+		foo(100, a: 20)
+		`, 110},
 		// Two normal arguments plus two keyword arguments
 		{`
 		def foo(bar, foo, a:, b:)

@@ -139,7 +139,7 @@ func (p *Parser) checkMethodParameters(params []ast.Expression) {
 		2 means previous arg is keyword argument
 		3 means previous arg is splat argument
 	*/
-	argState := 0
+	argState := NormalArg
 
 	checkedParams := []ast.Expression{}
 
@@ -147,33 +147,49 @@ func (p *Parser) checkMethodParameters(params []ast.Expression) {
 		switch exp := param.(type) {
 		case *ast.Identifier:
 			switch argState {
-			case 1:
-				p.error = &Error{Message: fmt.Sprintf("Normal argument \"%s\" should be defined before optioned argument. Line: %d", exp.Value, p.curToken.Line), errType: SyntaxError}
-			case 2:
-				p.error = &Error{Message: fmt.Sprintf("Normal argument \"%s\" should be defined before keyword argument. Line: %d", exp.Value, p.curToken.Line), errType: SyntaxError}
-			case 3:
-				p.error = &Error{Message: fmt.Sprintf("Normal argument \"%s\" should be defined before splat argument. Line: %d", exp.Value, p.curToken.Line), errType: SyntaxError}
+			case OptionedArg:
+				p.error = newArgumentError(NormalArg, OptionedArg, exp.Value, p.curToken.Line)
+			case RequiredKeywordArg:
+				p.error = newArgumentError(NormalArg, RequiredKeywordArg, exp.Value, p.curToken.Line)
+			case OptionalKeywordArg:
+				p.error = newArgumentError(NormalArg, OptionalKeywordArg, exp.Value, p.curToken.Line)
+			case SplatArg:
+				p.error = newArgumentError(NormalArg, SplatArg, exp.Value, p.curToken.Line)
 			}
 		case *ast.AssignExpression:
 			switch argState {
-			case 2:
-				p.error = &Error{Message: fmt.Sprintf("Optioned argument \"%s\" should be defined before keyword argument. Line: %d", exp.Value, p.curToken.Line), errType: SyntaxError}
-			case 3:
-				p.error = &Error{Message: fmt.Sprintf("Optioned argument \"%s\" should be defined before splat argument. Line: %d", exp.String(), p.curToken.Line), errType: SyntaxError}
+			case RequiredKeywordArg:
+				p.error = newArgumentError(OptionedArg, RequiredKeywordArg, exp.String(), p.curToken.Line)
+			case OptionalKeywordArg:
+				p.error = newArgumentError(OptionedArg, OptionalKeywordArg, exp.String(), p.curToken.Line)
+			case SplatArg:
+				p.error = newArgumentError(OptionedArg, SplatArg, exp.String(), p.curToken.Line)
 			}
-			argState = 1
+			argState = OptionedArg
 		case *ast.PairExpression:
-			switch argState {
-			case 3:
-				p.error = &Error{Message: fmt.Sprintf("Keyword argument \"%s\" should be defined before splat argument. Line: %d", exp.String(), p.curToken.Line), errType: SyntaxError}
+			if exp.Value == nil {
+				switch argState {
+				case OptionalKeywordArg:
+					p.error = newArgumentError(RequiredKeywordArg, OptionalKeywordArg, exp.String(), p.curToken.Line)
+				case SplatArg:
+					p.error = newArgumentError(RequiredKeywordArg, SplatArg, exp.String(), p.curToken.Line)
+				}
+
+				argState = RequiredKeywordArg
+			} else {
+				switch argState {
+				case SplatArg:
+					p.error = newArgumentError(OptionalKeywordArg, SplatArg, exp.String(), p.curToken.Line)
+				}
+
+				argState = OptionalKeywordArg
 			}
-			argState = 2
 		case *ast.PrefixExpression:
 			switch argState {
-			case 3:
-				p.error = &Error{Message: fmt.Sprintf("Can't define splat argument more than once. Line: %d", p.curToken.Line), errType: SyntaxError}
+			case SplatArg:
+				p.error = &Error{Message: fmt.Sprintf("Can't define splat argument more than once. Line: %d", p.curToken.Line), errType: ArgumentError}
 			}
-			argState = 3
+			argState = SplatArg
 		}
 
 		if p.error != nil {
@@ -181,7 +197,7 @@ func (p *Parser) checkMethodParameters(params []ast.Expression) {
 		}
 
 		if paramDuplicated(checkedParams, param) {
-			p.error = &Error{Message: fmt.Sprintf("Duplicate argument name: \"%s\". Line: %d", getArgName(param), p.curToken.Line), errType: SyntaxError}
+			p.error = &Error{Message: fmt.Sprintf("Duplicate argument name: \"%s\". Line: %d", getArgName(param), p.curToken.Line), errType: ArgumentError}
 		} else {
 			checkedParams = append(checkedParams, param)
 		}
@@ -232,13 +248,15 @@ func (p *Parser) parseModuleStatement() *ast.ModuleStatement {
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	stmt := &ast.ReturnStatement{BaseNode: &ast.BaseNode{Token: p.curToken}}
 
+	if !p.peekTokenAtSameLine() {
+		null := &ast.NilExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
+		stmt.ReturnValue = null
+		return stmt
+	}
+
 	p.nextToken()
 
 	stmt.ReturnValue = p.parseExpression(NORMAL)
-
-	if p.peekTokenIs(token.Semicolon) {
-		p.nextToken()
-	}
 
 	return stmt
 }
