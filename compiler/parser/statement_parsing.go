@@ -248,13 +248,15 @@ func (p *Parser) parseModuleStatement() *ast.ModuleStatement {
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	stmt := &ast.ReturnStatement{BaseNode: &ast.BaseNode{Token: p.curToken}}
 
+	if !p.peekTokenAtSameLine() {
+		null := &ast.NilExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
+		stmt.ReturnValue = null
+		return stmt
+	}
+
 	p.nextToken()
 
 	stmt.ReturnValue = p.parseExpression(NORMAL)
-
-	if p.peekTokenIs(token.Semicolon) {
-		p.nextToken()
-	}
 
 	return stmt
 }

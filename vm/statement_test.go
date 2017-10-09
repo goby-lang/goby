@@ -7,20 +7,30 @@ import (
 func TestReturnStatementEvaluation(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected int
+		expected interface{}
 	}{
-		{
-			`
-	class Foo
-	  def self.bar
-	    return 100
-	    10
-	  end
-	end
+		{`
+			def bar
+			  return 100
+			  10
+			end
 
-	Foo.bar
+
+			bar
 			`,
 			100,
+		},
+		{
+			`
+			def bar
+			  return
+			  10
+			end
+
+
+			bar
+			`,
+			nil,
 		},
 	}
 
