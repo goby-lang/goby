@@ -155,6 +155,34 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	return leftExp
 }
 
+func (p *Parser) parseGroupedExpression() ast.Expression {
+	p.nextToken()
+
+	exp := p.parseExpression(NORMAL)
+
+	if !p.expectPeek(token.RParen) {
+		return nil
+	}
+
+	return exp
+}
+
+func (p *Parser) parseYieldExpression() ast.Expression {
+	ye := &ast.YieldExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
+
+	if p.peekTokenIs(token.LParen) {
+		p.nextToken()
+		ye.Arguments = p.parseCallArgumentsWithParens()
+	}
+
+	if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { // yield 123
+		p.nextToken()
+		ye.Arguments = p.parseCallArguments()
+	}
+
+	return ye
+}
+
 func (p *Parser) parseSelfExpression() ast.Expression {
 	return &ast.SelfExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
 }
@@ -312,64 +340,6 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 	return exp
 }
 
-func (p *Parser) expandAssignmentValue(value ast.Expression) ast.Expression {
-	switch p.curToken.Type {
-	case token.Assign:
-		precedence := p.curPrecedence()
-		p.nextToken()
-		return p.parseExpression(precedence)
-	case token.MinusEq, token.PlusEq, token.OrEq:
-		// Syntax Surgar: Assignment with operator case
-		infixOperator := token.Token{Line: p.curToken.Line}
-		switch p.curToken.Type {
-		case token.PlusEq:
-			infixOperator.Type = token.Plus
-			infixOperator.Literal = "+"
-		case token.MinusEq:
-			infixOperator.Type = token.Minus
-			infixOperator.Literal = "-"
-		case token.OrEq:
-			infixOperator.Type = token.Or
-			infixOperator.Literal = "||"
-		}
-
-		p.nextToken()
-
-		return newInfixExpression(value, infixOperator, p.parseExpression(LOWEST))
-	default:
-		p.peekError(p.curToken.Type)
-		return nil
-	}
-}
-
-func (p *Parser) parseGroupedExpression() ast.Expression {
-	p.nextToken()
-
-	exp := p.parseExpression(NORMAL)
-
-	if !p.expectPeek(token.RParen) {
-		return nil
-	}
-
-	return exp
-}
-
-func (p *Parser) parseYieldExpression() ast.Expression {
-	ye := &ast.YieldExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
-
-	if p.peekTokenIs(token.LParen) {
-		p.nextToken()
-		ye.Arguments = p.parseCallArgumentsWithParens()
-	}
-
-	if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { // yield 123
-		p.nextToken()
-		ye.Arguments = p.parseCallArguments()
-	}
-
-	return ye
-}
-
 func (p *Parser) parseMultiVariables(left ast.Expression) ast.Expression {
 	var1, ok := left.(ast.Variable)
 
@@ -407,6 +377,36 @@ func (p *Parser) parseMultiVariables(left ast.Expression) ast.Expression {
 
 	result := &ast.MultiVariableExpression{Variables: vars}
 	return result
+}
+
+func (p *Parser) expandAssignmentValue(value ast.Expression) ast.Expression {
+	switch p.curToken.Type {
+	case token.Assign:
+		precedence := p.curPrecedence()
+		p.nextToken()
+		return p.parseExpression(precedence)
+	case token.MinusEq, token.PlusEq, token.OrEq:
+		// Syntax Surgar: Assignment with operator case
+		infixOperator := token.Token{Line: p.curToken.Line}
+		switch p.curToken.Type {
+		case token.PlusEq:
+			infixOperator.Type = token.Plus
+			infixOperator.Literal = "+"
+		case token.MinusEq:
+			infixOperator.Type = token.Minus
+			infixOperator.Literal = "-"
+		case token.OrEq:
+			infixOperator.Type = token.Or
+			infixOperator.Literal = "||"
+		}
+
+		p.nextToken()
+
+		return newInfixExpression(value, infixOperator, p.parseExpression(LOWEST))
+	default:
+		p.peekError(p.curToken.Type)
+		return nil
+	}
 }
 
 func newInfixExpression(left ast.Expression, operator token.Token, right ast.Expression) *ast.InfixExpression {
