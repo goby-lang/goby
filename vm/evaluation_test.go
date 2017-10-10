@@ -1733,6 +1733,62 @@ func TestCaseExpressionEvaluation(t *testing.T) {
 			`,
 			0,
 		},
+		{
+			`
+			a = 10
+			b = 10
+			case a
+			when b * 3 * 3, 2 + 4 + b
+			  0
+			when b
+			  1
+			else
+			  2
+			end
+			`,
+			1,
+		},
+		{
+			`
+			a = 10
+			b = 20
+			case a
+			when b * 3 * 3, 2 + 4 + b
+			  0
+			when b - 10, b + 10
+			  1
+			else
+			  2
+			end
+			`,
+			1,
+		},
+		{
+			`
+			case false
+			when true || true
+			  0
+			when false || false
+			  1
+			else
+			  2
+			end
+			`,
+			1,
+		},
+		{
+			`
+			case [1, 2, 3]
+			when [1, 2], [2, 3], [1, 3]
+			  0
+			when [2, 3, 4], [1, 2, 3]
+			  1
+			else
+			  2
+			end
+			`,
+			1,
+		},
 	}
 
 	for i, tt := range tests {
