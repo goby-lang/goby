@@ -64,12 +64,56 @@ func builtinRegexpInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 
 		{
+			// Returns true if the two regexp patterns are exactly the same, or returns false if not.
+			// If comparing with non Regexp class, just returns false.
+			//
+			// ```ruby
+			// r1 = Regexp.new("goby[0-9]+")
+			// r2 = Regexp.new("goby[0-9]+")
+			// r3 = Regexp.new("Goby[0-9]+")
+			//
+			// r1 == r2   # => true
+			// r1 == r2   # => false
+			// ```
+			//
+			// @param regexp [Regexp]
+			// @return [Boolean]
+			Name: "==",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					var rv string
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+					}
+
+					lv := receiver.(*RegexpObject).Value()
+					arg := args[0]
+
+					if n := arg.Class().Name; n == "Regexp" {
+						rv = arg.toString()
+					} else {
+						if n != "String" {
+							rv = arg.toString()
+						} else {
+							return FALSE
+						}
+					}
+
+					if lv == rv {
+						return TRUE
+					}
+					return FALSE
+				}
+			},
+		},
+		{
 			// Returns boolean value to indicate the result of regexp match with the string given.
 			//
 			// ```ruby
 			// r = Regexp.new("o")
-			// r.match("pow")  # => true
-			// r.match("gee")  # => false
+			// r.match?("pow")  # => true
+			// r.match?("gee")  # => false
 			// ```
 			//
 			// @param string [String]
