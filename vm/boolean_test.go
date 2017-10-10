@@ -23,10 +23,12 @@ func TestBooleanClassSuperclass(t *testing.T) {
 func TestEvalBooleanExpression(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected bool
+		expected interface{}
 	}{
 		{"true", true},
 		{"false", false},
+		{"'true'", "true"},
+		{"'false'", "false"},
 	}
 
 	for i, tt := range tests {
@@ -53,6 +55,8 @@ func TestBooleanComparison(t *testing.T) {
 		{"1 != 2", true},
 		{"true == true", true},
 		{"false == false", true},
+		{"'true' == true", false},
+		{"'false' == false", false},
 		{"true == false", false},
 		{"true != false", true},
 		{"false != true", true},
@@ -90,7 +94,10 @@ func TestBooleanLogicalExpression(t *testing.T) {
 		{"false || false", false},
 		{"100 > 10 && true == false", false},
 		{"true && true == true", true},
-		{"true && true == true", true},
+		{"true && 1", 1},
+		{"false && 1", false},
+		{"'true' && 1", 1},
+		{"'false' && 1", 1},
 		{`
 		h = {}
 		h && true

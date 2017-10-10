@@ -22,6 +22,7 @@ const (
 	SetLocal            = "setlocal"
 	SetConstant         = "setconstant"
 	SetInstanceVariable = "setinstancevariable"
+	PutBoolean          = "putboolean"
 	PutString           = "putstring"
 	PutSelf             = "putself"
 	PutObject           = "putobject"
@@ -161,6 +162,8 @@ func (is *InstructionSet) define(action string, sourceLine int, params ...interf
 		case *anchor:
 			i.anchor = p
 		case int:
+			ps = append(ps, fmt.Sprint(p))
+		case bool:
 			ps = append(ps, fmt.Sprint(p))
 		}
 	}
