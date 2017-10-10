@@ -40,6 +40,33 @@ func TestRegexpClassCreation(t *testing.T) {
 	}
 }
 
+func TestRegexpDoubleEqual(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`Regexp.new('🍣Goby[0-9]+🍺') == Regexp.new('🍣Goby[0-9]+🍺')`, true},
+		{`Regexp.new('🍣Goby[0-9]+🍺') == Regexp.new('🍣Goby[a-z]+🍺')`, false},
+		{`Regexp.new('🍣Goby[0-9]+🍺') == "🍣Goby[0-9]+🍺"`, true},
+		{`Regexp.new('🍣Goby[0-9]+🍺') == "🍣Goby[0-9]🍺"`, false},
+		{`Regexp.new('🍣Goby[0-9]+🍺') == ["🍣Goby[0-9]+🍺"]`, false},
+		{`Regexp.new('🍣Goby[0-9]+🍺') == { key: "🍣Goby[0-9]+🍺" }`, false},
+		{`Regexp.new('🍣Goby[0-9]+🍺') == 1192`, false},
+		{`Regexp.new('🍣Goby[0-9]+🍺') == '3.14'.to_f`, false},
+		{`Regexp.new('🍣Goby[0-9]+🍺') == true`, false},
+		{`Regexp.new('🍣Goby[0-9]+🍺') == false`, false},
+		{`Regexp.new('🍣Goby[0-9]+🍺') == nil`, false},
+		//{ `"Goby[0-9]" == Regexp.new("Goby[0-9]")`, true} TODO: needs changes in String's `==` method
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+	}
+}
+
 func TestRegexpMatch(t *testing.T) {
 	tests := []struct {
 		input    string

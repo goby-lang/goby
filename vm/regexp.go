@@ -90,14 +90,10 @@ func builtinRegexpInstanceMethods() []*BuiltinMethodObject {
 					lv := receiver.(*RegexpObject).Value()
 					arg := args[0]
 
-					if n := arg.Class().Name; n == "Regexp" {
+					if n := arg.Class().Name; n == "Regexp" || n == "String" {
 						rv = arg.toString()
 					} else {
-						if n != "String" {
-							rv = arg.toString()
-						} else {
-							return FALSE
-						}
+						return FALSE
 					}
 
 					if lv == rv {
