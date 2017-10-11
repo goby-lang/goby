@@ -98,7 +98,7 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 	}
 
 	stmt.Parameters = params
-	stmt.BlockStatement = p.parseBlockStatement()
+	stmt.BlockStatement = p.parseBlockStatement(token.End)
 	stmt.BlockStatement.KeepLastValue()
 
 	return stmt
@@ -227,7 +227,7 @@ func (p *Parser) parseClassStatement() *ast.ClassStatement {
 		}
 	}
 
-	stmt.Body = p.parseBlockStatement()
+	stmt.Body = p.parseBlockStatement(token.End)
 
 	return stmt
 }
@@ -240,7 +240,7 @@ func (p *Parser) parseModuleStatement() *ast.ModuleStatement {
 	}
 
 	stmt.Name = &ast.Constant{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
-	stmt.Body = p.parseBlockStatement()
+	stmt.Body = p.parseBlockStatement(token.End)
 
 	return stmt
 }
@@ -274,7 +274,7 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	return stmt
 }
 
-func (p *Parser) parseBlockStatement() *ast.BlockStatement {
+func (p *Parser) parseBlockStatement(endTokens ...token.Type) *ast.BlockStatement {
 
 	// curToken is '{'
 	bs := &ast.BlockStatement{BaseNode: &ast.BaseNode{Token: p.curToken}}
@@ -286,7 +286,13 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 		p.nextToken()
 	}
 
-	for !p.curTokenIs(token.End) && !p.curTokenIs(token.Else) && !p.curTokenIs(token.ElsIf) && !p.curTokenIs(token.When) {
+OuterLoop:
+	for {
+		for _, t := range endTokens {
+			if p.curTokenIs(t) {
+				break OuterLoop
+			}
+		}
 
 		if p.curTokenIs(token.EOF) {
 			p.error = &Error{Message: "Unexpected EOF", errType: EndOfFileError}
@@ -324,7 +330,7 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 		p.nextToken()
 	}
 
-	ws.Body = p.parseBlockStatement()
+	ws.Body = p.parseBlockStatement(token.End)
 
 	return ws
 }
