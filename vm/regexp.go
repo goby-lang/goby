@@ -104,7 +104,7 @@ func builtinRegexpInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns boolean value to indicate the result of regexp match with the string given.
+			// Returns boolean value to indicate the result of regexp match with the string given. The methods evaluates a String object.
 			//
 			// ```ruby
 			// r = Regexp.new("o")
@@ -122,8 +122,15 @@ func builtinRegexpInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
+					r := args[0]
+					input, ok := r.(*StringObject)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, r.Class().Name)
+					}
+
 					re := receiver.(*RegexpObject).Regexp
-					m, _ := re.MatchString(args[0].toString())
+					m, _ := re.MatchString(input.value)
 					if m {
 						return TRUE
 					}
