@@ -48,6 +48,10 @@ func builtInRegexpClassMethods() []*BuiltinMethodObject {
 			Name: "new",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+					}
+
 					r := t.vm.initRegexpObject(args[0].toString())
 					if r == nil {
 						return t.vm.initErrorObject(errors.ArgumentError, "Invalid regexp: %v", args[0].toString())
