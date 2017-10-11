@@ -195,6 +195,20 @@ func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 	t.sp = argPr
 }
 
+func (t *thread) reportArgumentError(idealArgNumber int, methodName string, exactArgNumber int, receiverPtr int) {
+	var message string
+
+	if idealArgNumber > exactArgNumber {
+		message = "Expect at least %d args for method '%s'. got: %d"
+	} else {
+		message = "Expect at most %d args for method '%s'. got: %d"
+	}
+
+	e := t.vm.initErrorObject(errors.ArgumentError, message, idealArgNumber, methodName, exactArgNumber)
+	t.stack.set(receiverPtr, &Pointer{Target: e})
+	t.sp = receiverPtr + 1
+}
+
 func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receiverPr, argC int, argSet *bytecode.ArgSet, blockFrame *callFrame) {
 	c := newCallFrame(method.instructionSet)
 	c.self = receiver
@@ -209,16 +223,12 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 	}
 
 	if argC > method.argc && !method.isSplatArgIncluded() {
-		e := t.vm.initErrorObject(errors.ArgumentError, "Expect at most %d args for method '%s'. got: %d", method.argc, method.Name, argC)
-		t.stack.set(receiverPr, &Pointer{Target: e})
-		t.sp = argPr
+		t.reportArgumentError(method.argc, method.Name, argC, receiverPr)
 		return
 	}
 
 	if minimumArgNumber > argC {
-		e := t.vm.initErrorObject(errors.ArgumentError, "Expect at least %d args for method '%s'. got: %d", minimumArgNumber, method.Name, argC)
-		t.stack.set(receiverPr, &Pointer{Target: e})
-		t.sp = argPr
+		t.reportArgumentError(minimumArgNumber, method.Name, argC, receiverPr)
 		return
 	}
 
