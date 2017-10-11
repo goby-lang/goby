@@ -160,6 +160,75 @@ func TestArgumentError(t *testing.T) {
 	}
 }
 
+func TestKeywordArgumentError(t *testing.T) {
+	tests := []errorTestCase{
+		{`def foo(x:)
+		  x
+		end
+
+		foo
+		`,
+			"ArgumentError: Method foo requires key argument x",
+			5},
+		{`def foo
+		  10
+		end
+
+		foo(y: 1)
+		`,
+			"ArgumentError: Expect at most 0 args for method 'foo'. got: 1",
+			5},
+		{`def foo(x)
+		  x
+		end
+
+		foo(y: 1)
+		`,
+			"ArgumentError: unknown key y for method foo",
+			5},
+		{`def foo(x = 10)
+		  x
+		end
+
+		foo(y: 1)
+		`,
+			"ArgumentError: unknown key y for method foo",
+			5},
+		{`def foo(x:)
+		  x
+		end
+
+		foo(y: 1)
+		`,
+			"ArgumentError: Method foo requires key argument x",
+			5},
+		{`def foo(x: 10)
+		  x
+		end
+
+		foo(y: 1)
+		`,
+			"ArgumentError: unknown key y for method foo",
+			5},
+		{`def foo(x: 10)
+		  x
+		end
+
+		foo(y: 1, x: 100)
+		`,
+			"ArgumentError: Expect at most 1 args for method 'foo'. got: 2",
+			5},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestConstantAlreadyInitializedError(t *testing.T) {
 	tests := []errorTestCase{
 		{`Foo = 10
@@ -188,7 +257,7 @@ func TestConstantAlreadyInitializedError(t *testing.T) {
 func checkError(t *testing.T, index int, evaluated Object, expectedErrMsg, fn string, line int) {
 	err, ok := evaluated.(*Error)
 	if !ok {
-		t.Errorf("At test case %d: Expect Error. got=%T (%+v)", index, evaluated, evaluated)
+		t.Fatalf("At test case %d: Expect Error. got=%T (%+v)", index, evaluated, evaluated)
 	}
 
 	expectedErrMsg = fmt.Sprintf("%s. At %s:%d", expectedErrMsg, fn, line)

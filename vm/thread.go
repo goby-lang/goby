@@ -165,7 +165,8 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *callFra
 
 	switch m := method.(type) {
 	case *MethodObject:
-		t.evalMethodObject(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame)
+		callObj := newCallObject(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame)
+		t.evalMethodObject(callObj)
 	case *BuiltinMethodObject:
 		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame)
 	case *Error:
@@ -188,135 +189,89 @@ func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 	if method.Name == "new" && ok {
 		instance, ok := evaluated.(*RObject)
 		if ok && instance.InitializeMethod != nil {
-			t.evalMethodObject(instance, instance.InitializeMethod, receiverPr, argCount, argSet, blockFrame)
+			callObj := newCallObject(instance, instance.InitializeMethod, receiverPr, argCount, argSet, blockFrame)
+			t.evalMethodObject(callObj)
 		}
 	}
 	t.stack.set(receiverPr, &Pointer{Target: evaluated})
 	t.sp = argPr
 }
 
-func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receiverPr, argC int, argSet *bytecode.ArgSet, blockFrame *callFrame) {
-	c := newCallFrame(method.instructionSet)
-	c.self = receiver
-	argPr := receiverPr + 1
-	minimumArgNumber := 0
-	argTypesCount := len(method.paramTypes())
+func (t *thread) reportArgumentError(idealArgNumber int, methodName string, exactArgNumber int, receiverPtr int) {
+	var message string
 
-	for _, at := range method.paramTypes() {
-		if at == bytecode.NormalArg {
-			minimumArgNumber++
+	if idealArgNumber > exactArgNumber {
+		message = "Expect at least %d args for method '%s'. got: %d"
+	} else {
+		message = "Expect at most %d args for method '%s'. got: %d"
+	}
+
+	e := t.vm.initErrorObject(errors.ArgumentError, message, idealArgNumber, methodName, exactArgNumber)
+	t.stack.set(receiverPtr, &Pointer{Target: e})
+	t.sp = receiverPtr + 1
+}
+
+func (t *thread) evalMethodObject(call *callObject) {
+	normalParamsCount := call.normalParamsCount()
+	paramTypes := call.paramTypes()
+	paramsCount := len(call.paramTypes())
+	stack := t.stack.Data
+
+	if call.argCount > paramsCount && !call.method.isSplatArgIncluded() {
+		t.reportArgumentError(paramsCount, call.methodName(), call.argCount, call.receiverPtr)
+		return
+	}
+
+	if normalParamsCount > call.argCount {
+		t.reportArgumentError(normalParamsCount, call.methodName(), call.argCount, call.receiverPtr)
+		return
+	}
+
+	// Check if arguments include all the required keys before assign keyword arguments
+	for paramIndex, paramType := range paramTypes {
+		switch paramType {
+		case bytecode.RequiredKeywordArg:
+			paramName := call.paramNames()[paramIndex]
+			if _, ok := call.hasKeywordArgument(paramName); !ok {
+				e := t.vm.initErrorObject(errors.ArgumentError, "Method %s requires key argument %s", call.methodName(), paramName)
+				t.stack.set(call.receiverPtr, &Pointer{Target: e})
+				t.sp = call.argPtr()
+				return
+			}
 		}
 	}
 
-	if argC > method.argc && !method.isSplatArgIncluded() {
-		e := t.vm.initErrorObject(errors.ArgumentError, "Expect at most %d args for method '%s'. got: %d", method.argc, method.Name, argC)
-		t.stack.set(receiverPr, &Pointer{Target: e})
-		t.sp = argPr
+	err := call.assignKeywordArguments(stack)
+
+	if err != nil {
+		e := t.vm.initErrorObject(errors.ArgumentError, err.Error())
+		t.stack.set(call.receiverPtr, &Pointer{Target: e})
+		t.sp = call.argPtr()
 		return
 	}
-
-	if minimumArgNumber > argC {
-		e := t.vm.initErrorObject(errors.ArgumentError, "Expect at least %d args for method '%s'. got: %d", minimumArgNumber, method.Name, argC)
-		t.stack.set(receiverPr, &Pointer{Target: e})
-		t.sp = argPr
-		return
-	}
-
-	// argIndex + argPr == current argument's position
-	argIndex := 0
 
 	// If given arguments is more than the normal arguments.
 	// It might mean we have optioned argument been override.
 	// Or we have some keyword arguments
-	if minimumArgNumber < argC {
-		// This is only for normal/optioned arguments
-		lastArgIndex := -1
-
-		for paramIndex, paramType := range method.paramTypes() {
-			// Deal with normal arguments first
-			if paramType == bytecode.NormalArg || paramType == bytecode.OptionedArg {
-				/*
-					Find first usable value as normal argument, for example:
-
-					```ruby
-					  def foo(x, y:); end
-
-					  foo(y: 100, 10)
-					```
-
-					In the example we can see that 'x' is the first parameter,
-					but in the method call it's the second argument.
-
-					This loop is for skipping other types of arguments and get the correct argument index.
-				*/
-				for argIndex, at := range argSet.Types() {
-					if lastArgIndex < argIndex && (at == bytecode.NormalArg || at == bytecode.OptionedArg) {
-						c.insertLCL(paramIndex, 0, t.stack.Data[argPr+argIndex].Target)
-
-						// Store latest index value (and compare them to current argument index)
-						// This is to make sure we won't get same argument's index twice.
-						lastArgIndex = argIndex
-						break
-					}
-				}
-			}
-
-			if paramType == bytecode.RequiredKeywordArg {
-				paramName := method.instructionSet.paramTypes.Names()[paramIndex]
-				argIndex := argSet.FindIndex(paramName)
-
-				if argIndex != -1 {
-					c.insertLCL(paramIndex, 0, t.stack.Data[argPr+argIndex].Target)
-				} else {
-					t.vm.initErrorObject("Method %s requires key argument %s", method.Name, paramName)
-				}
-			}
-
-			if paramType == bytecode.OptionalKeywordArg {
-				argName := method.instructionSet.paramTypes.Names()[paramIndex]
-				argIndex := argSet.FindIndex(argName)
-
-				if argIndex != -1 {
-					c.insertLCL(paramIndex, 0, t.stack.Data[argPr+argIndex].Target)
-				}
-			}
-
-			// If argument index equals argument count means we already assigned all arguments
-			if argIndex == argC || paramType == bytecode.SplatArg {
-				argIndex = paramIndex
-				break
+	if normalParamsCount < call.argCount {
+		for paramIndex, paramType := range paramTypes {
+			switch paramType {
+			case bytecode.NormalArg, bytecode.OptionedArg:
+				call.assignNormalAndOptionedArguments(paramIndex, stack)
+			case bytecode.SplatArg:
+				call.argIndex = paramIndex
+				call.assignSplatArgument(stack, t.vm.initArrayObject([]Object{}))
 			}
 		}
 	} else {
-		for i, paramType := range method.paramTypes() {
-			if paramType == bytecode.NormalArg {
-				c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
-				argIndex++
-			}
-		}
+		call.assignNormalArguments(stack)
 	}
 
-	if argTypesCount > 0 && method.isSplatArgIncluded() {
-		elems := []Object{}
-		for argIndex < argC {
-			elems = append(elems, t.stack.Data[argPr+argIndex].Target)
-			argIndex++
-		}
-
-		c.insertLCL(len(method.paramTypes())-1, 0, t.vm.initArrayObject(elems))
-	}
-
-	// TODO: Implement this
-	if argTypesCount > 0 && method.isSplatArgIncluded() && method.isKeywordArgIncluded() {
-
-	}
-
-	c.blockFrame = blockFrame
-	t.callFrameStack.push(c)
+	t.callFrameStack.push(call.callFrame)
 	t.startFromTopFrame()
 
-	t.stack.set(receiverPr, t.stack.top())
-	t.sp = argPr
+	t.stack.set(call.receiverPtr, t.stack.top())
+	t.sp = call.argPtr()
 }
 
 func (t *thread) returnError(errorType, format string, args ...interface{}) {
