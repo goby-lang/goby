@@ -47,7 +47,7 @@ func TestRegexpDoubleEqual(t *testing.T) {
 	}{
 		{`Regexp.new('🍣Goby[0-9]+🍺') == Regexp.new('🍣Goby[0-9]+🍺')`, true},
 		{`Regexp.new('🍣Goby[0-9]+🍺') == Regexp.new('🍣Goby[a-z]+🍺')`, false},
-		{`Regexp.new('🍣Goby[0-9]+🍺') == "🍣Goby[0-9]+🍺"`, true},
+		{`Regexp.new('🍣Goby[0-9]+🍺') == "🍣Goby[0-9]+🍺"`, false},
 		{`Regexp.new('🍣Goby[0-9]+🍺') == "🍣Goby[0-9]🍺"`, false},
 		{`Regexp.new('🍣Goby[0-9]+🍺') == ["🍣Goby[0-9]+🍺"]`, false},
 		{`Regexp.new('🍣Goby[0-9]+🍺') == { key: "🍣Goby[0-9]+🍺" }`, false},
@@ -56,7 +56,7 @@ func TestRegexpDoubleEqual(t *testing.T) {
 		{`Regexp.new('🍣Goby[0-9]+🍺') == true`, false},
 		{`Regexp.new('🍣Goby[0-9]+🍺') == false`, false},
 		{`Regexp.new('🍣Goby[0-9]+🍺') == nil`, false},
-		//{ `"Goby[0-9]" == Regexp.new("Goby[0-9]")`, true} TODO: needs changes in String's `==` method
+		{`"Goby[0-9]" == Regexp.new("Goby[0-9]")`, false},
 	}
 
 	for i, tt := range tests {
