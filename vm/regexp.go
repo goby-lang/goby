@@ -82,21 +82,18 @@ func builtinRegexpInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-					var rv string
 					if len(args) != 1 {
 						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
-					lv := receiver.(*RegexpObject).Value()
-					arg := args[0]
-
-					if n := arg.Class().Name; n == "Regexp" || n == "String" {
-						rv = arg.toString()
-					} else {
+					right, ok := args[0].(*RegexpObject)
+					if !ok {
 						return FALSE
 					}
 
-					if lv == rv {
+					left := receiver.(*RegexpObject)
+
+					if left.Value() == right.Value() {
 						return TRUE
 					}
 					return FALSE
@@ -122,11 +119,10 @@ func builtinRegexpInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
-					r := args[0]
-					input, ok := r.(*StringObject)
-
+					arg := args[0]
+					input, ok := arg.(*StringObject)
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, r.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, arg.Class().Name)
 					}
 
 					re := receiver.(*RegexpObject).Regexp
