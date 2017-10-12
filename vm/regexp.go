@@ -52,6 +52,11 @@ func builtInRegexpClassMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
+					arg, ok := args[0].(*StringObject)
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, arg.Class().Name)
+					}
+
 					r := t.vm.initRegexpObject(args[0].toString())
 					if r == nil {
 						return t.vm.initErrorObject(errors.ArgumentError, "Invalid regexp: %v", args[0].toString())
