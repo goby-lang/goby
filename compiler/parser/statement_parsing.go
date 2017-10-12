@@ -286,11 +286,11 @@ func (p *Parser) parseBlockStatement(endTokens ...token.Type) *ast.BlockStatemen
 		p.nextToken()
 	}
 
-OuterLoop:
+ParseBlockLoop:
 	for {
 		for _, t := range endTokens {
 			if p.curTokenIs(t) {
-				break OuterLoop
+				break ParseBlockLoop
 			}
 		}
 
