@@ -246,6 +246,44 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Matches the receiver with a Regexp
+			//
+			// ```ruby
+			// "pizza" =~ Regex.new("zz")  # => 2
+			// "pizza" =~ Regex.new("OH!") # => nil
+			// ```
+			//
+			// @return [Integer]
+			Name: "=~",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%d", len(args))
+					}
+
+					arg := args[0]
+
+					regexp, ok := arg.(*RegexpObject)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.RegexpClass, arg.Class().Name)
+					}
+
+					text := receiver.(*StringObject).value
+
+					match, _ := regexp.Regexp.FindStringMatch(text)
+
+					if match == nil {
+						return NULL
+					}
+
+					position := match.Groups()[0].Captures[0].Index
+
+					return t.vm.initIntegerObject(position)
+				}
+			},
+		},
+		{
 			// Returns a Integer. If first string is less than second string returns -1, if equal to returns 0, if greater returns 1
 			//
 			//
