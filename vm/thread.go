@@ -271,23 +271,17 @@ func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receive
 				}
 			}
 
-			if paramType == bytecode.RequiredKeywordArg {
+			if paramType == bytecode.RequiredKeywordArg || paramType == bytecode.OptionalKeywordArg  {
 				paramName := method.instructionSet.paramTypes.Names()[paramIndex]
 				argIndex := argSet.FindIndex(paramName)
 
 				if argIndex != -1 {
 					c.insertLCL(paramIndex, 0, t.stack.Data[argPr+argIndex].Target)
-				} else {
-					t.vm.initErrorObject("Method %s requires key argument %s", method.Name, paramName)
-				}
-			}
-
-			if paramType == bytecode.OptionalKeywordArg {
-				argName := method.instructionSet.paramTypes.Names()[paramIndex]
-				argIndex := argSet.FindIndex(argName)
-
-				if argIndex != -1 {
-					c.insertLCL(paramIndex, 0, t.stack.Data[argPr+argIndex].Target)
+				} else if paramType == bytecode.RequiredKeywordArg {
+					e := t.vm.initErrorObject(errors.ArgumentError, "Method %s requires key argument %s", method.Name, paramName)
+					t.stack.set(receiverPr, &Pointer{Target: e})
+					t.sp = receiverPr + 1
+					return
 				}
 			}
 
