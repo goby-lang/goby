@@ -33,7 +33,7 @@ func (p *Parser) parseCaseExpression() ast.Expression {
 	ie.Conditionals = p.parseCaseConditionals()
 
 	if p.curTokenIs(token.Else) {
-		ie.Alternative = p.parseBlockStatement()
+		ie.Alternative = p.parseBlockStatement(token.End)
 		ie.Alternative.KeepLastValue()
 	}
 
@@ -60,7 +60,7 @@ func (p *Parser) parseCaseConditional(base ast.Expression) *ast.ConditionalExpre
 	p.nextToken()
 
 	ce.Condition = p.parseCaseCondition(base)
-	ce.Consequence = p.parseBlockStatement()
+	ce.Consequence = p.parseBlockStatement(token.When, token.Else, token.End)
 	ce.Consequence.KeepLastValue()
 
 	return ce
@@ -93,7 +93,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 
 	// curToken is now ELSE or RBRACE
 	if p.curTokenIs(token.Else) {
-		ie.Alternative = p.parseBlockStatement()
+		ie.Alternative = p.parseBlockStatement(token.End)
 		ie.Alternative.KeepLastValue()
 	}
 
@@ -116,8 +116,7 @@ func (p *Parser) parseConditionalExpression() *ast.ConditionalExpression {
 	ce := &ast.ConditionalExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
 	p.nextToken()
 	ce.Condition = p.parseExpression(NORMAL)
-
-	ce.Consequence = p.parseBlockStatement()
+	ce.Consequence = p.parseBlockStatement(token.ElsIf, token.Else, token.End)
 	ce.Consequence.KeepLastValue()
 
 	return ce
