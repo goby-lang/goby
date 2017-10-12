@@ -140,6 +140,7 @@ Written in Go.
 - `Channel`
 - `File` (Changed from loadable class)
 - `GoObject` (provides `#go_func` that wraps pure Go objects or pointers for interaction)
+- `Regexp`
 
 ### Standard library
 
