@@ -93,3 +93,43 @@ func (bim *BuiltinMethodObject) toJSON() string {
 func (bim *BuiltinMethodObject) Value() interface{} {
 	return bim.Fn
 }
+
+type callObject struct {
+	receiver    Object
+	method      *MethodObject
+	receiverPtr int
+	argCount    int
+	argSet      *bytecode.ArgSet
+	blockFrame  *callFrame
+}
+
+func newCallObject(receiver Object, method *MethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *callFrame) *callObject {
+	return &callObject{
+		receiver:    receiver,
+		method:      method,
+		receiverPtr: receiverPtr,
+		argCount:    argCount,
+		argSet:      argSet,
+		blockFrame:  blockFrame,
+	}
+}
+
+func (co *callObject) InstructionSet() *instructionSet {
+	return co.method.instructionSet
+}
+
+func (co *callObject) ParamTypes() []int {
+	return co.InstructionSet().paramTypes.Types()
+}
+
+func (co *callObject) ParamNames() []string {
+	return co.InstructionSet().paramTypes.Names()
+}
+
+func (co *callObject) ArgTypes() []int {
+	return co.argSet.Types()
+}
+
+func (co *callObject) MethodName() string {
+	return co.method.Name
+}
