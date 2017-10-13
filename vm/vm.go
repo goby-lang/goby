@@ -218,6 +218,7 @@ func (vm *VM) initConstants() {
 		vm.initGoClass(),
 		vm.initFileClass(),
 		vm.initRegexpClass(),
+		vm.initMatchDataClass(),
 		vm.initGoMapClass(),
 	}
 
