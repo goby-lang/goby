@@ -143,6 +143,45 @@ func builtinRegexpInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		},
+		{
+			// Replaces all the matched receiver regexp patterns in the first argument(target) with the second argument(replacement), and then returns the String object as the result.
+			//
+			// ```ruby
+			// r = Regexp.new("(?<![abc])def(?=xyz)")
+			// r.replace("defabcdefdefxyzabcxdefxyzmdefxyz", "GGG") #=> "defabcdefGGGxyzabcxGGGxyzmGGGxyz"
+			// ```
+			//
+			// @param target [String], replacement [String]
+			// @return [String]
+			Name: "replace",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					if len(args) != 2 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 2 argument. got=%v", strconv.Itoa(len(args)))
+					}
+
+					re := receiver.(*RegexpObject).Regexp
+
+					target, ok := args[0].(*StringObject)
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+					}
+
+					new, ok := args[1].(*StringObject)
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+					}
+
+					result, err := re.Replace(target.toString(), new.toString(), -1, -1)
+					if err != nil {
+						return t.vm.initErrorObject(errors.InternalError, "Regexp replace failed: %v", err)
+					}
+
+					return t.vm.initStringObject(result)
+				}
+			},
+		},
 	}
 }
 
