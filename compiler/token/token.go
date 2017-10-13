@@ -39,11 +39,12 @@ const (
 	OrEq     = "||="
 	Modulo   = "%"
 
-	LT   = "<"
-	LTE  = "<="
-	GT   = ">"
-	GTE  = ">="
-	COMP = "<=>"
+	Match = "=~"
+	LT    = "<"
+	LTE   = "<="
+	GT    = ">"
+	GTE   = ">="
+	COMP  = "<=>"
 
 	Comma     = ","
 	Semicolon = ";"

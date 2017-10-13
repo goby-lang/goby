@@ -21,6 +21,7 @@ var arguments = map[token.Type]bool{
 var precedence = map[token.Type]int{
 	token.Eq:                 EQUALS,
 	token.NotEq:              EQUALS,
+	token.Match:              COMPARE,
 	token.LT:                 COMPARE,
 	token.LTE:                COMPARE,
 	token.GT:                 COMPARE,

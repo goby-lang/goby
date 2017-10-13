@@ -217,6 +217,38 @@ func TestStringComparisonFail(t *testing.T) {
 	}
 }
 
+func TestStringMatch(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`"abc" =~ Regexp.new("bc")`, 1},
+		{`"abc" =~ Regexp.new("d")`, nil},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestStringMatchFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`"abc" =~ *[1, 2]`, "ArgumentError: Expect 1 argument. got=2", 1},
+		{`"abc" =~ 'a'`, "TypeError: Expect argument to be Regexp. got: String", 1},
+	}
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestStringOperation(t *testing.T) {
 	tests := []struct {
 		input    string
