@@ -1,2 +1,6 @@
 
 _ = "foo"
+
+a, _, c = [1, 2, 3]
+puts c # prints 3
+puts _ # undefined method error
