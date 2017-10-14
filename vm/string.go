@@ -84,7 +84,7 @@ func builtinStringClassMethods() []*BuiltinMethodObject {
 			Name: "new",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					return t.unsupportedMethodError("#new", receiver)
+					return t.initUnsupportedMethodError("#new", receiver)
 				}
 			},
 		},

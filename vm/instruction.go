@@ -227,7 +227,7 @@ var builtinActions = map[operationType]*action{
 			arr, ok := t.stack.pop().Target.(*ArrayObject)
 
 			if !ok {
-				t.returnError(errors.TypeError, "Expect stack top's value to be an Array when executing 'expandarray' instruction.")
+				t.pushErrorObject(errors.TypeError, "Expect stack top's value to be an Array when executing 'expandarray' instruction.")
 				return
 			}
 
@@ -357,7 +357,7 @@ var builtinActions = map[operationType]*action{
 			is, ok := t.getMethodIS(methodName, cf.instructionSet.filename)
 
 			if !ok {
-				t.returnError(errors.InternalError, "Can't get method %s's instruction set.", methodName)
+				t.pushErrorObject(errors.InternalError, "Can't get method %s's instruction set.", methodName)
 				return
 			}
 
@@ -411,12 +411,12 @@ var builtinActions = map[operationType]*action{
 					inheritedClass, ok := superClass.Target.(*RClass)
 
 					if !ok {
-						t.returnError(errors.InternalError, "Constant %s is not a class. got=%s", superClassName, string(superClass.Target.Class().ReturnName()))
+						t.pushErrorObject(errors.InternalError, "Constant %s is not a class. got=%s", superClassName, string(superClass.Target.Class().ReturnName()))
 						return
 					}
 
 					if inheritedClass.isModule {
-						t.returnError(errors.InternalError, "Module inheritance is not supported: %s", inheritedClass.Name)
+						t.pushErrorObject(errors.InternalError, "Module inheritance is not supported: %s", inheritedClass.Name)
 						return
 					}
 
@@ -476,7 +476,7 @@ var builtinActions = map[operationType]*action{
 			case *BuiltinMethodObject:
 				t.evalBuiltinMethod(receiver, m, receiverPr, argCount, argSet, blockFrame)
 			case *Error:
-				t.returnError(errors.InternalError, m.toString())
+				t.pushErrorObject(errors.InternalError, m.toString())
 			}
 		},
 	},
@@ -489,7 +489,7 @@ var builtinActions = map[operationType]*action{
 			receiver := t.stack.Data[receiverPr].Target
 
 			if cf.blockFrame == nil {
-				t.returnError(errors.InternalError, "Can't yield without a block")
+				t.pushErrorObject(errors.InternalError, "Can't yield without a block")
 				return
 			}
 
