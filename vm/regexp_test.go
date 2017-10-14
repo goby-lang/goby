@@ -67,7 +67,7 @@ func TestRegexpDoubleEqual(t *testing.T) {
 	}
 }
 
-func TestRegexpMatch(t *testing.T) {
+func TestRegexpMatchQuestionMark(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -166,5 +166,20 @@ func TestRegexpMatch(t *testing.T) {
 		checkExpected(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
 		vm.checkSP(t, i, 1)
+	}
+}
+
+func TestRegexpMatchQuestionMarkFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`Regexp.new("abc").match?('a', 'b')`, "ArgumentError: Expect 1 argument. got=2", 1},
+		{`Regexp.new("abc").match?(1)`, "TypeError: Expect argument to be String. got: Integer", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
 	}
 }

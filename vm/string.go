@@ -1031,6 +1031,43 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Returns the matching data of the regex with the given string.
+			//
+			// ```ruby
+			// 'pow'.match(Regexp.new("o")) # => #<MatchData "o">
+			// 'pow'.match(Regexp.new("x")) # => nil
+			// ```
+			//
+			// @param string [String]
+			// @return [MatchData]
+			Name: "match",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%d", len(args))
+					}
+
+					arg := args[0]
+					regexpObj, ok := arg.(*RegexpObject)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.RegexpClass, arg.Class().Name)
+					}
+
+					regexp := regexpObj.Regexp
+					text := receiver.(*StringObject).value
+
+					match, _ := regexp.FindStringMatch(text)
+
+					if match == nil {
+						return NULL
+					}
+
+					return t.vm.initMatchDataObject(match, regexp.String(), text)
+				}
+			},
+		},
+		{
 			// Return a string replaced by the input string
 			//
 			// ```ruby

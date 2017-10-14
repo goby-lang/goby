@@ -1,8 +1,6 @@
 package vm
 
 import (
-	"strconv"
-
 	"github.com/dlclark/regexp2"
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
@@ -49,7 +47,7 @@ func builtInRegexpClassMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%d", len(args))
 					}
 
 					arg, ok := args[0].(*StringObject)
@@ -92,7 +90,7 @@ func builtinRegexpInstanceMethods() []*BuiltinMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%d", len(args))
 					}
 
 					right, ok := args[0].(*RegexpObject)
@@ -125,7 +123,7 @@ func builtinRegexpInstanceMethods() []*BuiltinMethodObject {
 				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%d", len(args))
 					}
 
 					arg := args[0]
@@ -136,10 +134,8 @@ func builtinRegexpInstanceMethods() []*BuiltinMethodObject {
 
 					re := receiver.(*RegexpObject).Regexp
 					m, _ := re.MatchString(input.value)
-					if m {
-						return TRUE
-					}
-					return FALSE
+
+					return toBooleanObject(m)
 				}
 			},
 		},
