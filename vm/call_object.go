@@ -1,6 +1,9 @@
 package vm
 
-import "github.com/goby-lang/goby/compiler/bytecode"
+import (
+	"fmt"
+	"github.com/goby-lang/goby/compiler/bytecode"
+)
 
 type callObject struct {
 	method       *MethodObject
@@ -92,13 +95,18 @@ func (co *callObject) assignNormalAndOptionedArguments(paramIndex int, stack []*
 	}
 }
 
-func (co *callObject) assignKeywordArguments(paramIndex int, stack []*Pointer) (paramName string, success bool) {
-	paramName = co.paramNames()[paramIndex]
-	argIndex := co.argSet.FindIndex(paramName)
+func (co *callObject) assignKeywordArguments(stack []*Pointer) (err error) {
+	for argIndex, argType := range co.argTypes() {
+		if argType == bytecode.RequiredKeywordArg || argType == bytecode.OptionalKeywordArg {
+			argName := co.argSet.Names()[argIndex]
+			paramIndex, ok := co.hasKeywordParam(argName)
 
-	if argIndex != -1 {
-		co.callFrame.insertLCL(paramIndex, 0, stack[co.argPtr()+argIndex].Target)
-		success = true
+			if ok {
+				co.callFrame.insertLCL(paramIndex, 0, stack[co.argPtr()+argIndex].Target)
+			} else {
+				err = fmt.Errorf("unknown key %s for method %s", argName, co.methodName())
+			}
+		}
 	}
 
 	return
@@ -113,6 +121,31 @@ func (co *callObject) assignSplatArgument(stack []*Pointer, arr *ArrayObject) {
 	}
 
 	co.callFrame.insertLCL(index, 0, arr)
+}
+
+func (co *callObject) hasKeywordParam(name string) (index int, result bool) {
+	for paramIndex, paramType := range co.paramTypes() {
+		paramName := co.paramNames()[paramIndex]
+
+		if paramName == name && (paramType == bytecode.RequiredKeywordArg || paramType == bytecode.OptionalKeywordArg) {
+			index = paramIndex
+			result = true
+			return
+		}
+	}
+
+	return
+}
+
+func (co *callObject) hasKeywordArgument() (result bool) {
+	for _, paramType := range co.argTypes() {
+		if paramType == bytecode.RequiredKeywordArg || paramType == bytecode.OptionalKeywordArg {
+			result = true
+			return
+		}
+	}
+
+	return
 }
 
 func (co *callObject) minimumArgNumber() (n int) {
