@@ -170,7 +170,7 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *callFra
 	case *BuiltinMethodObject:
 		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame)
 	case *Error:
-		t.returnError(errors.InternalError, m.toString())
+		t.pushErrorObject(errors.InternalError, m.toString())
 	}
 }
 
@@ -274,11 +274,11 @@ func (t *thread) evalMethodObject(call *callObject) {
 	t.sp = call.argPtr()
 }
 
-func (t *thread) returnError(errorType, format string, args ...interface{}) {
+func (t *thread) pushErrorObject(errorType, format string, args ...interface{}) {
 	err := t.vm.initErrorObject(errorType, format, args...)
 	t.stack.push(&Pointer{Target: err})
 }
 
-func (t *thread) unsupportedMethodError(methodName string, receiver Object) *Error {
+func (t *thread) initUnsupportedMethodError(methodName string, receiver Object) *Error {
 	return t.vm.initErrorObject(errors.UnsupportedMethodError, "Unsupported Method %s for %+v", methodName, receiver.toString())
 }
