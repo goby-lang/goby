@@ -212,19 +212,11 @@ func (t *thread) reportArgumentError(idealArgNumber int, methodName string, exac
 }
 
 func (t *thread) evalMethodObject(call *callObject) {
-	c := newCallFrame(call.InstructionSet())
-	c.self = call.receiver
-	argPr := call.receiverPtr + 1
-	minimumArgNumber := 0
+	minimumArgNumber := call.minimumArgNumber()
 	paramTypes := call.ParamTypes()
 	paramsCount := len(call.ParamTypes())
 	argTypesCount := len(paramTypes)
-
-	for _, at := range paramTypes {
-		if at == bytecode.NormalArg {
-			minimumArgNumber++
-		}
-	}
+	stack := t.stack.Data
 
 	if call.argCount > paramsCount && !call.method.isSplatArgIncluded() {
 		t.reportArgumentError(paramsCount, call.MethodName(), call.argCount, call.receiverPtr)
@@ -236,82 +228,39 @@ func (t *thread) evalMethodObject(call *callObject) {
 		return
 	}
 
-	// argIndex + argPr == current argument's position
-	argIndex := 0
-
 	// If given arguments is more than the normal arguments.
 	// It might mean we have optioned argument been override.
 	// Or we have some keyword arguments
 	if minimumArgNumber < call.argCount {
-		// This is only for normal/optioned arguments
-		lastArgIndex := -1
-
 		for paramIndex, paramType := range paramTypes {
 			// Deal with normal arguments first
 			if paramType == bytecode.NormalArg || paramType == bytecode.OptionedArg {
-				/*
-					Find first usable value as normal argument, for example:
-
-					```ruby
-					  def foo(x, y:); end
-
-					  foo(y: 100, 10)
-					```
-
-					In the example we can see that 'x' is the first parameter,
-					but in the method call it's the second argument.
-
-					This loop is for skipping other types of arguments and get the correct argument index.
-				*/
-				for argIndex, at := range call.ArgTypes() {
-					if lastArgIndex < argIndex && (at == bytecode.NormalArg || at == bytecode.OptionedArg) {
-						c.insertLCL(paramIndex, 0, t.stack.Data[argPr+argIndex].Target)
-
-						// Store latest index value (and compare them to current argument index)
-						// This is to make sure we won't get same argument's index twice.
-						lastArgIndex = argIndex
-						break
-					}
-				}
+				call.assignNormalAndOptionedArguments(paramIndex, stack)
 			}
 
 			if paramType == bytecode.RequiredKeywordArg || paramType == bytecode.OptionalKeywordArg {
-				paramName := call.ParamNames()[paramIndex]
-				argIndex := call.argSet.FindIndex(paramName)
+				paramName, success := call.assignKeywordArguments(paramIndex, stack)
 
-				if argIndex != -1 {
-					c.insertLCL(paramIndex, 0, t.stack.Data[argPr+argIndex].Target)
-				} else if paramType == bytecode.RequiredKeywordArg {
+				if !success && paramType == bytecode.RequiredKeywordArg {
 					e := t.vm.initErrorObject(errors.ArgumentError, "Method %s requires key argument %s", call.MethodName(), paramName)
 					t.stack.set(call.receiverPtr, &Pointer{Target: e})
-					t.sp = argPr
+					t.sp = call.argPtr
 					return
 				}
 			}
 
 			// If argument index equals argument count means we already assigned all arguments
-			if argIndex == call.argCount || paramType == bytecode.SplatArg {
-				argIndex = paramIndex
+			if call.argIndex == call.argCount || paramType == bytecode.SplatArg {
+				call.argIndex = paramIndex
 				break
 			}
 		}
 	} else {
-		for i, paramType := range paramTypes {
-			if paramType == bytecode.NormalArg {
-				c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
-				argIndex++
-			}
-		}
+		call.assignNormalArguments(stack)
 	}
 
 	if argTypesCount > 0 && call.method.isSplatArgIncluded() {
-		elems := []Object{}
-		for argIndex < call.argCount {
-			elems = append(elems, t.stack.Data[argPr+argIndex].Target)
-			argIndex++
-		}
-
-		c.insertLCL(paramsCount-1, 0, t.vm.initArrayObject(elems))
+		call.assignSplatArgument(stack, t.vm.initArrayObject([]Object{}))
 	}
 
 	// TODO: Implement this
@@ -319,12 +268,11 @@ func (t *thread) evalMethodObject(call *callObject) {
 
 	}
 
-	c.blockFrame = call.blockFrame
-	t.callFrameStack.push(c)
+	t.callFrameStack.push(call.callFrame)
 	t.startFromTopFrame()
 
 	t.stack.set(call.receiverPtr, t.stack.top())
-	t.sp = argPr
+	t.sp = call.argPtr
 }
 
 func (t *thread) returnError(errorType, format string, args ...interface{}) {
