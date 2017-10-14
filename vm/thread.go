@@ -212,10 +212,9 @@ func (t *thread) reportArgumentError(idealArgNumber int, methodName string, exac
 }
 
 func (t *thread) evalMethodObject(call *callObject) {
-	minimumArgNumber := call.minimumArgNumber()
+	normalParamsCount := call.normalParamsCount()
 	paramTypes := call.paramTypes()
 	paramsCount := len(call.paramTypes())
-	argTypesCount := len(paramTypes)
 	stack := t.stack.Data
 
 	if call.argCount > paramsCount && !call.method.isSplatArgIncluded() {
@@ -223,15 +222,38 @@ func (t *thread) evalMethodObject(call *callObject) {
 		return
 	}
 
-	if minimumArgNumber > call.argCount {
-		t.reportArgumentError(minimumArgNumber, call.methodName(), call.argCount, call.receiverPtr)
+	if normalParamsCount > call.argCount {
+		t.reportArgumentError(normalParamsCount, call.methodName(), call.argCount, call.receiverPtr)
+		return
+	}
+
+	// Check if arguments include all the required keys before assign keyword arguments
+	for paramIndex, paramType := range paramTypes {
+		switch paramType {
+		case bytecode.RequiredKeywordArg:
+			paramName := call.paramNames()[paramIndex]
+			if _, ok := call.hasKeywordArgument(paramName); !ok {
+				e := t.vm.initErrorObject(errors.ArgumentError, "Method %s requires key argument %s", call.methodName(), paramName)
+				t.stack.set(call.receiverPtr, &Pointer{Target: e})
+				t.sp = call.argPtr()
+				return
+			}
+		}
+	}
+
+	err := call.assignKeywordArguments(stack)
+
+	if err != nil {
+		e := t.vm.initErrorObject(errors.ArgumentError, err.Error())
+		t.stack.set(call.receiverPtr, &Pointer{Target: e})
+		t.sp = call.argPtr()
 		return
 	}
 
 	// If given arguments is more than the normal arguments.
 	// It might mean we have optioned argument been override.
 	// Or we have some keyword arguments
-	if minimumArgNumber < call.argCount {
+	if normalParamsCount < call.argCount {
 		for paramIndex, paramType := range paramTypes {
 			switch paramType {
 			case bytecode.NormalArg, bytecode.OptionedArg:
@@ -241,24 +263,8 @@ func (t *thread) evalMethodObject(call *callObject) {
 				call.assignSplatArgument(stack, t.vm.initArrayObject([]Object{}))
 			}
 		}
-
-		if call.hasKeywordArgument() {
-			err := call.assignKeywordArguments(stack)
-
-			if err != nil {
-				e := t.vm.initErrorObject(errors.ArgumentError, err.Error())
-				t.stack.set(call.receiverPtr, &Pointer{Target: e})
-				t.sp = call.argPtr()
-				return
-			}
-		}
 	} else {
 		call.assignNormalArguments(stack)
-	}
-
-	// TODO: Implement this
-	if argTypesCount > 0 && call.method.isSplatArgIncluded() && call.method.isKeywordArgIncluded() {
-
 	}
 
 	t.callFrameStack.push(call.callFrame)
