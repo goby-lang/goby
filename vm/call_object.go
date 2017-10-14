@@ -48,6 +48,10 @@ func (co *callObject) methodName() string {
 }
 
 func (co *callObject) argTypes() []int {
+	if co.argSet == nil {
+		return []int{}
+	}
+
 	return co.argSet.Types()
 }
 
@@ -137,9 +141,12 @@ func (co *callObject) hasKeywordParam(name string) (index int, result bool) {
 	return
 }
 
-func (co *callObject) hasKeywordArgument() (result bool) {
-	for _, paramType := range co.argTypes() {
-		if paramType == bytecode.RequiredKeywordArg || paramType == bytecode.OptionalKeywordArg {
+func (co *callObject) hasKeywordArgument(name string) (index int, result bool) {
+	for argIndex, argType := range co.argTypes() {
+		argName := co.argSet.Names()[argIndex]
+
+		if argName == name && (argType == bytecode.RequiredKeywordArg || argType == bytecode.OptionalKeywordArg) {
+			index = argIndex
 			result = true
 			return
 		}
@@ -148,8 +155,18 @@ func (co *callObject) hasKeywordArgument() (result bool) {
 	return
 }
 
-func (co *callObject) minimumArgNumber() (n int) {
+func (co *callObject) normalParamsCount() (n int) {
 	for _, at := range co.paramTypes() {
+		if at == bytecode.NormalArg {
+			n++
+		}
+	}
+
+	return
+}
+
+func (co *callObject) normalArgsCount() (n int) {
+	for _, at := range co.argTypes() {
 		if at == bytecode.NormalArg {
 			n++
 		}

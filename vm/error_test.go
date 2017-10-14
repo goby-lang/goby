@@ -162,6 +162,14 @@ func TestArgumentError(t *testing.T) {
 
 func TestKeywordArgumentError(t *testing.T) {
 	tests := []errorTestCase{
+		{`def foo(x:)
+		  x
+		end
+
+		foo
+		`,
+			"ArgumentError: Method foo requires key argument x",
+			5},
 		{`def foo
 		  10
 		end
@@ -170,14 +178,14 @@ func TestKeywordArgumentError(t *testing.T) {
 		`,
 			"ArgumentError: Expect at most 0 args for method 'foo'. got: 1",
 			5},
-		//{`def foo(x)
-		//  x
-		//end
-		//
-		//foo(y: 1)
-		//`,
-		//	"ArgumentError: Unknown key y for method foo",
-		//	5},
+		{`def foo(x)
+		  x
+		end
+
+		foo(y: 1)
+		`,
+			"ArgumentError: unknown key y for method foo",
+			5},
 		{`def foo(x = 10)
 		  x
 		end
@@ -185,6 +193,30 @@ func TestKeywordArgumentError(t *testing.T) {
 		foo(y: 1)
 		`,
 			"ArgumentError: unknown key y for method foo",
+			5},
+		{`def foo(x:)
+		  x
+		end
+
+		foo(y: 1)
+		`,
+			"ArgumentError: Method foo requires key argument x",
+			5},
+		{`def foo(x: 10)
+		  x
+		end
+
+		foo(y: 1)
+		`,
+			"ArgumentError: unknown key y for method foo",
+			5},
+		{`def foo(x: 10)
+		  x
+		end
+
+		foo(y: 1, x: 100)
+		`,
+			"ArgumentError: Expect at most 1 args for method 'foo'. got: 2",
 			5},
 	}
 
