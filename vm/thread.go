@@ -233,34 +233,27 @@ func (t *thread) evalMethodObject(call *callObject) {
 	// Or we have some keyword arguments
 	if minimumArgNumber < call.argCount {
 		for paramIndex, paramType := range paramTypes {
-			// Deal with normal arguments first
-			if paramType == bytecode.NormalArg || paramType == bytecode.OptionedArg {
+			switch paramType {
+			case bytecode.NormalArg, bytecode.OptionedArg:
 				call.assignNormalAndOptionedArguments(paramIndex, stack)
-			}
-
-			if paramType == bytecode.RequiredKeywordArg || paramType == bytecode.OptionalKeywordArg {
-				paramName, success := call.assignKeywordArguments(paramIndex, stack)
-
-				if !success && paramType == bytecode.RequiredKeywordArg {
-					e := t.vm.initErrorObject(errors.ArgumentError, "Method %s requires key argument %s", call.methodName(), paramName)
-					t.stack.set(call.receiverPtr, &Pointer{Target: e})
-					t.sp = call.argPtr()
-					return
-				}
-			}
-
-			// If argument index equals argument count means we already assigned all arguments
-			if call.argIndex == call.argCount || paramType == bytecode.SplatArg {
+			case bytecode.SplatArg:
 				call.argIndex = paramIndex
-				break
+				call.assignSplatArgument(stack, t.vm.initArrayObject([]Object{}))
+			}
+		}
+
+		if call.hasKeywordArgument() {
+			err := call.assignKeywordArguments(stack)
+
+			if err != nil {
+				e := t.vm.initErrorObject(errors.ArgumentError, err.Error())
+				t.stack.set(call.receiverPtr, &Pointer{Target: e})
+				t.sp = call.argPtr()
+				return
 			}
 		}
 	} else {
 		call.assignNormalArguments(stack)
-	}
-
-	if argTypesCount > 0 && call.method.isSplatArgIncluded() {
-		call.assignSplatArgument(stack, t.vm.initArrayObject([]Object{}))
 	}
 
 	// TODO: Implement this
