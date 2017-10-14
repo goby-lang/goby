@@ -9,6 +9,7 @@ func TestIfExpressionWithoutAlternativeCompilation(t *testing.T) {
 	input := `
 	a = 10
 	b = 5
+	_ = 15
 	if a > b
 	  c = 10
 	end
@@ -24,19 +25,21 @@ func TestIfExpressionWithoutAlternativeCompilation(t *testing.T) {
 3 putobject 5
 4 setlocal 0 1
 5 pop
-6 getlocal 0 0
-7 getlocal 0 1
-8 send > 1
-9 branchunless 13
-10 putobject 10
-11 setlocal 0 2
-12 jump 14
-13 putnil
-14 pop
-15 getlocal 0 2
-16 putobject 1
-17 send + 1
-18 leave
+6 putobject 15
+7 pop
+8 getlocal 0 0
+9 getlocal 0 1
+10 send > 1
+11 branchunless 15
+12 putobject 10
+13 setlocal 0 2
+14 jump 16
+15 putnil
+16 pop
+17 getlocal 0 2
+18 putobject 1
+19 send + 1
+20 leave
 `
 
 	bytecode := compileToBytecode(input)
@@ -198,6 +201,7 @@ func TestMultipleVariableAssignmentCompilation(t *testing.T) {
 	end
 
 	a, @b, c = foo
+	a, _, c = foo
 	`
 
 	expected := `
@@ -219,7 +223,15 @@ func TestMultipleVariableAssignmentCompilation(t *testing.T) {
 8 setinstancevariable @b
 9 pop
 10 setlocal 0 1
-11 leave
+11 pop
+12 putself
+13 send foo 0
+14 expand_array 3
+15 setlocal 0 0
+16 pop
+17 pop
+18 setlocal 0 1
+19 leave
 `
 
 	bytecode := compileToBytecode(input)
