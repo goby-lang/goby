@@ -213,18 +213,18 @@ func (t *thread) reportArgumentError(idealArgNumber int, methodName string, exac
 
 func (t *thread) evalMethodObject(call *callObject) {
 	minimumArgNumber := call.minimumArgNumber()
-	paramTypes := call.ParamTypes()
-	paramsCount := len(call.ParamTypes())
+	paramTypes := call.paramTypes()
+	paramsCount := len(call.paramTypes())
 	argTypesCount := len(paramTypes)
 	stack := t.stack.Data
 
 	if call.argCount > paramsCount && !call.method.isSplatArgIncluded() {
-		t.reportArgumentError(paramsCount, call.MethodName(), call.argCount, call.receiverPtr)
+		t.reportArgumentError(paramsCount, call.methodName(), call.argCount, call.receiverPtr)
 		return
 	}
 
 	if minimumArgNumber > call.argCount {
-		t.reportArgumentError(minimumArgNumber, call.MethodName(), call.argCount, call.receiverPtr)
+		t.reportArgumentError(minimumArgNumber, call.methodName(), call.argCount, call.receiverPtr)
 		return
 	}
 
@@ -242,9 +242,9 @@ func (t *thread) evalMethodObject(call *callObject) {
 				paramName, success := call.assignKeywordArguments(paramIndex, stack)
 
 				if !success && paramType == bytecode.RequiredKeywordArg {
-					e := t.vm.initErrorObject(errors.ArgumentError, "Method %s requires key argument %s", call.MethodName(), paramName)
+					e := t.vm.initErrorObject(errors.ArgumentError, "Method %s requires key argument %s", call.methodName(), paramName)
 					t.stack.set(call.receiverPtr, &Pointer{Target: e})
-					t.sp = call.argPtr
+					t.sp = call.argPtr()
 					return
 				}
 			}
@@ -272,7 +272,7 @@ func (t *thread) evalMethodObject(call *callObject) {
 	t.startFromTopFrame()
 
 	t.stack.set(call.receiverPtr, t.stack.top())
-	t.sp = call.argPtr
+	t.sp = call.argPtr()
 }
 
 func (t *thread) returnError(errorType, format string, args ...interface{}) {
