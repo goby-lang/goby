@@ -28,8 +28,17 @@ func TestVM_REPLExec(t *testing.T) {
 				a, b = [3, 6]
 				a + b
 				`,
-			}, 9},
-		{
+			},
+			9,
+		}, {
+			[]string{
+				`
+				a, _, c = [1, 2, 3]
+				c
+				`,
+			},
+			3,
+		}, {
 			[]string{`
 def foo(x)
   yield(x + 10)
