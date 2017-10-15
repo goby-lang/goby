@@ -140,27 +140,24 @@ func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.AssignE
 	}
 
 	for i, v := range exp.Variables {
-		if v.TokenLiteral() == "_" {
-			//skip assignment
-			goto L
-		}
+		if v.TokenLiteral() != "_" {
 
-		switch name := v.(type) {
-		case *ast.Identifier:
-			index, depth := table.setLCL(name.Value, table.depth)
+			switch name := v.(type) {
+			case *ast.Identifier:
+				index, depth := table.setLCL(name.Value, table.depth)
 
-			if exp.Optioned != 0 {
-				is.define(SetLocal, exp.Line(), depth, index, exp.Optioned)
-				return
+				if exp.Optioned != 0 {
+					is.define(SetLocal, exp.Line(), depth, index, exp.Optioned)
+					return
+				}
+
+				is.define(SetLocal, exp.Line(), depth, index)
+			case *ast.InstanceVariable:
+				is.define(SetInstanceVariable, exp.Line(), name.Value)
+			case *ast.Constant:
+				is.define(SetConstant, exp.Line(), name.Value)
 			}
-
-			is.define(SetLocal, exp.Line(), depth, index)
-		case *ast.InstanceVariable:
-			is.define(SetInstanceVariable, exp.Line(), name.Value)
-		case *ast.Constant:
-			is.define(SetConstant, exp.Line(), name.Value)
 		}
-	L:
 		/*
 			Keep last value so we can have value to pop
 
