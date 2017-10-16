@@ -69,7 +69,7 @@ func (t *thread) execInstruction(cf *normalCallFrame, i *instruction) {
 }
 
 func (t *thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object) *Pointer {
-	c := newCallFrame(blockFrame.instructionSet)
+	c := newNormalCallFrame(blockFrame.instructionSet)
 	c.blockFrame = blockFrame
 	c.ep = blockFrame.ep
 	c.self = blockFrame.self
@@ -98,7 +98,7 @@ func (t *thread) retrieveBlock(cf *normalCallFrame, args []interface{}) (blockFr
 	if hasBlock {
 		block := t.getBlock(blockName, cf.instructionSet.filename)
 
-		c := newCallFrame(block)
+		c := newNormalCallFrame(block)
 		c.isBlock = true
 		c.ep = cf
 		c.self = cf.self

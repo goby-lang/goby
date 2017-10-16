@@ -28,6 +28,13 @@ func (is *instructionSet) inspect() string {
 	return out.String()
 }
 
+func (cf *goMethodCallFrame) inspect() string {
+	if cf.ep != nil {
+		return fmt.Sprintf("Name: %s. is block: %t. ep: %d", cf.method.Name, cf.isBlock, len(cf.ep.locals))
+	}
+	return fmt.Sprintf("Name: %s. is block: %t", cf.method.Name, cf.isBlock)
+}
+
 func (cf *normalCallFrame) inspect() string {
 	if cf.ep != nil {
 		return fmt.Sprintf("Name: %s. is block: %t. ep: %d", cf.instructionSet.name, cf.isBlock, len(cf.ep.locals))

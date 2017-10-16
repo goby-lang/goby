@@ -157,7 +157,7 @@ func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) {
 	vm.SetClassISIndexTable(p.filename)
 	vm.SetMethodISIndexTable(p.filename)
 
-	cf := newCallFrame(p.program)
+	cf := newNormalCallFrame(p.program)
 	cf.self = vm.mainObj
 	vm.mainThread.callFrameStack.push(cf)
 	vm.startFromTopFrame()

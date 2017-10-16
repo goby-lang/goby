@@ -16,7 +16,7 @@ type callObject struct {
 }
 
 func newCallObject(receiver Object, method *MethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame) *callObject {
-	cf := newCallFrame(method.instructionSet)
+	cf := newNormalCallFrame(method.instructionSet)
 	cf.self = receiver
 	cf.blockFrame = blockFrame
 
