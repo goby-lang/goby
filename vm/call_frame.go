@@ -1,6 +1,8 @@
 package vm
 
-import "sync"
+import (
+	"sync"
+)
 
 type callFrameStack struct {
 	callFrames []callFrame
@@ -20,6 +22,14 @@ type baseFrame struct {
 }
 
 type callFrame interface {
+	// Getters
+	Self() Object
+	BlockFrame() *normalCallFrame
+	IsBlock() bool
+	EP() *normalCallFrame
+	Locals() []*Pointer
+	LocalPtr() int
+
 	getLCL(index, depth int) *Pointer
 	insertLCL(index, depth int, value Object)
 	storeConstant(constName string, constant interface{}) *Pointer
@@ -29,7 +39,8 @@ type callFrame interface {
 
 type goMethodCallFrame struct {
 	*baseFrame
-	method *BuiltinMethodObject
+	method builtinMethodBody
+	name   string
 }
 
 type normalCallFrame struct {
@@ -37,6 +48,30 @@ type normalCallFrame struct {
 	instructionSet *instructionSet
 	// program counter
 	pc int
+}
+
+func (b *baseFrame) Self() Object {
+	return b.self
+}
+
+func (b *baseFrame) BlockFrame() *normalCallFrame {
+	return b.blockFrame
+}
+
+func (b *baseFrame) IsBlock() bool {
+	return b.isBlock
+}
+
+func (b *baseFrame) EP() *normalCallFrame {
+	return b.ep
+}
+
+func (b *baseFrame) Locals() []*Pointer {
+	return b.locals
+}
+
+func (b *baseFrame) LocalPtr() int {
+	return b.lPr
 }
 
 // We use lock on every local variable retrieval and insertion.
@@ -143,33 +178,21 @@ func (cfs *callFrameStack) pop() callFrame {
 	cf = cfs.callFrames[cfs.thread.cfp]
 	cfs.callFrames[cfs.thread.cfp] = nil
 
-	switch cf := cf.(type) {
-	case *normalCallFrame:
-		return cf
-	default:
-		return nil
-	}
+	return cf
 }
 
 func (cfs *callFrameStack) top() callFrame {
-	var topFrame callFrame
-
 	if cfs.thread.cfp > 0 {
-		topFrame = cfs.callFrames[cfs.thread.cfp-1]
-	}
-
-	switch f := topFrame.(type) {
-	case *normalCallFrame:
-		return f
+		return cfs.callFrames[cfs.thread.cfp-1]
 	}
 
 	return nil
 }
 
 func newNormalCallFrame(is *instructionSet) *normalCallFrame {
-	return &normalCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 100), lPr: 0}, instructionSet: is, pc: 0}
+	return &normalCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 15), lPr: 0}, instructionSet: is, pc: 0}
 }
 
-func newGoMethodCallFrame(m *BuiltinMethodObject) *goMethodCallFrame {
-	return &goMethodCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 100), lPr: 0}, method: m}
+func newGoMethodCallFrame(m builtinMethodBody, n string) *goMethodCallFrame {
+	return &goMethodCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 15), lPr: 0}, method: m, name: n}
 }

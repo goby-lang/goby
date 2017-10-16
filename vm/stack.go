@@ -20,7 +20,12 @@ func (s *stack) set(index int, pointer *Pointer) {
 
 	if err, ok := pointer.Target.(*Error); ok {
 		cf := t.callFrameStack.top()
-		cf.pc = len(cf.instructionSet.instructions)
+
+		// Stop program
+		switch cf := cf.(type) {
+		case *normalCallFrame:
+			cf.pc = len(cf.instructionSet.instructions)
+		}
 
 		if t.vm.mode == NormalMode {
 			if t.isMainThread() {
@@ -50,7 +55,11 @@ func (s *stack) push(v *Pointer) {
 	if err, ok := v.Target.(*Error); ok {
 		t := s.thread
 		cf := t.callFrameStack.top()
-		cf.pc = len(cf.instructionSet.instructions)
+		// Stop program
+		switch cf := cf.(type) {
+		case *normalCallFrame:
+			cf.pc = len(cf.instructionSet.instructions)
+		}
 
 		if t.vm.mode == NormalMode {
 			if t.isMainThread() {
