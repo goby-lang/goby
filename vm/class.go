@@ -677,9 +677,9 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			Name: "block_given?",
 			Fn: func(receiver Object) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
-					cf := t.callFrameStack.top()
+					cf := t.callFrameStack.callFrames[t.cfp-2]
 
-					if cf.blockFrame == nil {
+					if cf.BlockFrame() == nil {
 						return FALSE
 					}
 

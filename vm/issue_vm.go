@@ -35,14 +35,8 @@ func PrintError(v *VM) {
 	t := v.mainThread
 	cf := t.callFrameStack.top()
 
-	// If program counter is 0 means we need to trace back to previous call frame
-	if cf.pc == 0 {
-		t.callFrameStack.pop()
-		cf = t.callFrameStack.top()
-	}
-
-	file := cf.instructionSet.filename
-	line := cf.instructionSet.instructions[cf.pc-1].Line
+	file := cf.FileName()
+	line := cf.SourceLine()
 
 	// Print lines in file surrounding error in markdown code block
 	f, osErr := os.Open(string(file))

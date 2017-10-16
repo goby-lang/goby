@@ -34,11 +34,11 @@ func (vm *VM) REPLExec(sets []*bytecode.InstructionSet) {
 	oldFrame := vm.mainThread.callFrameStack.pop()
 	cf := newNormalCallFrame(p.program)
 	cf.self = vm.mainObj
-	cf.locals = oldFrame.locals
-	cf.ep = oldFrame.ep
-	cf.isBlock = oldFrame.isBlock
-	cf.self = oldFrame.self
-	cf.lPr = oldFrame.lPr
+	cf.locals = oldFrame.Locals()
+	cf.ep = oldFrame.EP()
+	cf.isBlock = oldFrame.IsBlock()
+	cf.self = oldFrame.Self()
+	cf.lPr = oldFrame.LocalPtr()
 	vm.mainThread.callFrameStack.push(cf)
 	vm.startFromTopFrame()
 }
