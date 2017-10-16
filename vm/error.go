@@ -36,20 +36,33 @@ func (vm *VM) initErrorObject(errorType, format string, args ...interface{}) *Er
 	t := vm.mainThread
 	cf := t.callFrameStack.top()
 
-	// If program counter is 0 means we need to trace back to previous call frame
-	if cf.pc == 0 {
-		t.callFrameStack.pop()
-		cf = t.callFrameStack.top()
+	switch cf := cf.(type) {
+	case *normalCallFrame:
+		// If program counter is 0 means we need to trace back to previous call frame
+		if cf.pc == 0 {
+			t.callFrameStack.pop()
+			cf = t.callFrameStack.top().(*normalCallFrame)
+		}
+
+		i := cf.instructionSet.instructions[cf.pc-1]
+
+		return &Error{
+			baseObj: &baseObj{class: errClass},
+			// Add 1 to source line because it's zero indexed
+			Message: fmt.Sprintf("%s. At %s:%d", fmt.Sprintf(errorType+": "+format, args...), cf.instructionSet.filename, i.sourceLine+1),
+			Type:    errorType,
+		}
+	case *goMethodCallFrame:
+		return &Error{
+			baseObj: &baseObj{class: errClass},
+			// Add 1 to source line because it's zero indexed
+			Message: fmt.Sprintf("%s. At %s", fmt.Sprintf(errorType+": "+format, args...), cf.name),
+			Type:    errorType,
+		}
+	default:
+		return nil
 	}
 
-	i := cf.instructionSet.instructions[cf.pc-1]
-
-	return &Error{
-		baseObj: &baseObj{class: errClass},
-		// Add 1 to source line because it's zero indexed
-		Message: fmt.Sprintf("%s. At %s:%d", fmt.Sprintf(errorType+": "+format, args...), cf.instructionSet.filename, i.sourceLine+1),
-		Type:    errorType,
-	}
 }
 
 func (vm *VM) initErrorClasses() {

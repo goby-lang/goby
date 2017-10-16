@@ -40,13 +40,27 @@ func (t *thread) startFromTopFrame() {
 	t.evalCallFrame(cf)
 }
 
-func (t *thread) evalCallFrame(cf *normalCallFrame) {
-	for cf.pc < len(cf.instructionSet.instructions) {
-		i := cf.instructionSet.instructions[cf.pc]
-		t.execInstruction(cf, i)
-		if _, yes := t.hasError(); yes {
-			return
+func (t *thread) evalCallFrame(cf callFrame) {
+	switch cf := cf.(type) {
+	case *normalCallFrame:
+		for cf.pc < len(cf.instructionSet.instructions) {
+			i := cf.instructionSet.instructions[cf.pc]
+			t.execInstruction(cf, i)
+			if _, yes := t.hasError(); yes {
+				return
+			}
 		}
+	case *goMethodCallFrame:
+		args := []Object{}
+
+		for _, obj := range cf.locals {
+			if obj != nil {
+				args = append(args, obj.Target)
+			}
+		}
+		result := cf.method(t, args, cf.blockFrame)
+		t.stack.push(&Pointer{Target: result})
+		t.callFrameStack.pop()
 	}
 }
 
@@ -54,7 +68,9 @@ func (t *thread) hasError() (string, bool) {
 	var hasError bool
 	var msg string
 	if t.stack.top() != nil {
-		if err, ok := t.stack.top().Target.(*Error); ok {
+		top := t.stack.top().Target
+		err, ok := top.(*Error)
+		if ok {
 			hasError = true
 			msg = err.Message
 		}
@@ -174,27 +190,30 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 	}
 }
 
-func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame) {
-	methodBody := method.Fn(receiver)
-	args := []Object{}
-	argPr := receiverPr + 1
+func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame) {
+	cf := newGoMethodCallFrame(method.Fn(receiver), method.Name)
+	cf.blockFrame = blockFrame
+	argPtr := receiverPtr + 1
 
 	for i := 0; i < argCount; i++ {
-		args = append(args, t.stack.Data[argPr+i].Target)
+		cf.locals = append(cf.locals, t.stack.Data[argPtr+i])
 	}
 
-	evaluated := methodBody(t, args, blockFrame)
+	t.callFrameStack.push(cf)
+	t.startFromTopFrame()
+	evaluated := t.stack.top()
 
 	_, ok := receiver.(*RClass)
 	if method.Name == "new" && ok {
-		instance, ok := evaluated.(*RObject)
+		instance, ok := evaluated.Target.(*RObject)
 		if ok && instance.InitializeMethod != nil {
-			callObj := newCallObject(instance, instance.InitializeMethod, receiverPr, argCount, argSet, blockFrame)
+			callObj := newCallObject(instance, instance.InitializeMethod, receiverPtr, argCount, argSet, blockFrame)
 			t.evalMethodObject(callObj)
 		}
 	}
-	t.stack.set(receiverPr, &Pointer{Target: evaluated})
-	t.sp = argPr
+
+	t.stack.set(receiverPtr, evaluated)
+	t.sp = argPtr
 }
 
 func (t *thread) reportArgumentError(idealArgNumber int, methodName string, exactArgNumber int, receiverPtr int) {

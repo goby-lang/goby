@@ -679,7 +679,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					cf := t.callFrameStack.top()
 
-					if cf.blockFrame == nil {
+					if cf.BlockFrame() == nil {
 						return FALSE
 					}
 

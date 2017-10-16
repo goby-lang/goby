@@ -540,10 +540,14 @@ var builtinActions = map[operationType]*action{
 	bytecode.Leave: {
 		name: bytecode.Leave,
 		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
-			//fmt.Println(t.callFrameStack.inspect())
-			//fmt.Println("Before leave--------------------------------")
-			cf = t.callFrameStack.pop()
-			cf.pc = len(cf.instructionSet.instructions)
+			frame := t.callFrameStack.pop()
+			normalFrame, ok := frame.(*normalCallFrame)
+
+			if !ok {
+				return
+			}
+
+			normalFrame.pc = len(normalFrame.instructionSet.instructions)
 			//fmt.Println(t.callFrameStack.inspect())
 
 			/*
@@ -556,9 +560,9 @@ var builtinActions = map[operationType]*action{
 				Main frame
 			*/
 			topFrame := t.callFrameStack.top()
-			if topFrame != nil && topFrame.isBlock {
-				cf = t.callFrameStack.pop()
-				cf.pc = len(cf.instructionSet.instructions)
+			if topFrame != nil && topFrame.IsBlock() {
+				normalFrame = t.callFrameStack.pop().(*normalCallFrame)
+				normalFrame.pc = len(normalFrame.instructionSet.instructions)
 			}
 		},
 	},
