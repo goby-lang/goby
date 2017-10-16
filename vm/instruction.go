@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-type operation func(t *thread, cf *callFrame, args ...interface{})
+type operation func(t *thread, cf *normalCallFrame, args ...interface{})
 
 type operationType = string
 
@@ -43,34 +43,34 @@ func (is *instructionSet) define(line int, a *action, params ...interface{}) *in
 var builtinActions = map[operationType]*action{
 	bytecode.Pop: {
 		name: bytecode.Pop,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			t.stack.pop()
 		},
 	},
 	bytecode.Dup: {
 		name: bytecode.Dup,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			obj := t.stack.top().Target
 			t.stack.push(&Pointer{Target: obj})
 		},
 	},
 	bytecode.PutBoolean: {
 		name: bytecode.PutObject,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			object := t.vm.initObjectFromGoType(args[0])
 			t.stack.push(&Pointer{Target: object})
 		},
 	},
 	bytecode.PutObject: {
 		name: bytecode.PutObject,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			object := t.vm.initObjectFromGoType(args[0])
 			t.stack.push(&Pointer{Target: object})
 		},
 	},
 	bytecode.GetConstant: {
 		name: bytecode.GetConstant,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			constName := args[0].(string)
 			c := t.vm.lookupConstant(cf, constName)
 
@@ -91,7 +91,7 @@ var builtinActions = map[operationType]*action{
 	},
 	bytecode.GetLocal: {
 		name: bytecode.GetLocal,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			depth := args[0].(int)
 			index := args[1].(int)
 
@@ -107,7 +107,7 @@ var builtinActions = map[operationType]*action{
 	},
 	bytecode.GetInstanceVariable: {
 		name: bytecode.GetInstanceVariable,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			variableName := args[0].(string)
 			v, ok := cf.self.instanceVariableGet(variableName)
 			if !ok {
@@ -121,7 +121,7 @@ var builtinActions = map[operationType]*action{
 	},
 	bytecode.SetInstanceVariable: {
 		name: bytecode.SetInstanceVariable,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			variableName := args[0].(string)
 			p := t.stack.pop()
 			cf.self.instanceVariableSet(variableName, p.Target)
@@ -144,7 +144,7 @@ var builtinActions = map[operationType]*action{
 	},
 	bytecode.SetLocal: {
 		name: bytecode.SetLocal,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			var optioned bool
 			p := t.stack.pop()
 			depth := args[0].(int)
@@ -182,7 +182,7 @@ var builtinActions = map[operationType]*action{
 	},
 	bytecode.SetConstant: {
 		name: bytecode.SetConstant,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			constName := args[0].(string)
 			c := t.vm.lookupConstant(cf, constName)
 			v := t.stack.pop()
@@ -198,7 +198,7 @@ var builtinActions = map[operationType]*action{
 	},
 	bytecode.NewRange: {
 		name: bytecode.NewRange,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			rangeEnd := t.stack.pop().Target.(*IntegerObject).value
 			rangeStart := t.stack.pop().Target.(*IntegerObject).value
 
@@ -207,7 +207,7 @@ var builtinActions = map[operationType]*action{
 	},
 	bytecode.NewArray: {
 		name: bytecode.NewArray,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			elems := []Object{}
 
@@ -222,7 +222,7 @@ var builtinActions = map[operationType]*action{
 	},
 	bytecode.ExpandArray: {
 		name: bytecode.ExpandArray,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			arrLength := args[0].(int)
 			arr, ok := t.stack.pop().Target.(*ArrayObject)
 
@@ -251,7 +251,7 @@ var builtinActions = map[operationType]*action{
 	},
 	bytecode.SplatArray: {
 		name: bytecode.SplatArray,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			obj := t.stack.top().Target
 			arr, ok := obj.(*ArrayObject)
 
@@ -264,7 +264,7 @@ var builtinActions = map[operationType]*action{
 	},
 	bytecode.NewHash: {
 		name: bytecode.NewHash,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			pairs := map[string]Object{}
 
@@ -280,7 +280,7 @@ var builtinActions = map[operationType]*action{
 	},
 	bytecode.BranchUnless: {
 		name: bytecode.BranchUnless,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			v := t.stack.pop()
 			bool, isBool := v.Target.(*BooleanObject)
 
@@ -305,7 +305,7 @@ var builtinActions = map[operationType]*action{
 	},
 	bytecode.BranchIf: {
 		name: bytecode.BranchIf,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			v := t.stack.pop()
 			bool, isBool := v.Target.(*BooleanObject)
 
@@ -326,32 +326,32 @@ var builtinActions = map[operationType]*action{
 	},
 	bytecode.Jump: {
 		name: bytecode.Jump,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			cf.pc = args[0].(int)
 		},
 	},
 	bytecode.PutSelf: {
 		name: bytecode.PutSelf,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			t.stack.push(&Pointer{Target: cf.self})
 		},
 	},
 	bytecode.PutString: {
 		name: bytecode.PutString,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			object := t.vm.initObjectFromGoType(args[0])
 			t.stack.push(&Pointer{Target: object})
 		},
 	},
 	bytecode.PutNull: {
 		name: bytecode.PutNull,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			t.stack.push(&Pointer{Target: NULL})
 		},
 	},
 	bytecode.DefMethod: {
 		name: bytecode.DefMethod,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			methodName := t.stack.pop().Target.(*StringObject).value
 			is, ok := t.getMethodIS(methodName, cf.instructionSet.filename)
@@ -374,7 +374,7 @@ var builtinActions = map[operationType]*action{
 	},
 	bytecode.DefSingletonMethod: {
 		name: bytecode.DefSingletonMethod,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			methodName := t.stack.pop().Target.(*StringObject).value
 			is, _ := t.getMethodIS(methodName, cf.instructionSet.filename)
@@ -395,7 +395,7 @@ var builtinActions = map[operationType]*action{
 	},
 	bytecode.DefClass: {
 		name: bytecode.DefClass,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			subject := strings.Split(args[0].(string), ":")
 			subjectType, subjectName := subject[0], subject[1]
 
@@ -427,7 +427,7 @@ var builtinActions = map[operationType]*action{
 			is := t.getClassIS(subjectName, cf.instructionSet.filename)
 
 			t.stack.pop()
-			c := newCallFrame(is)
+			c := newNormalCallFrame(is)
 			c.self = classPtr.Target
 			t.callFrameStack.push(c)
 			t.startFromTopFrame()
@@ -437,7 +437,7 @@ var builtinActions = map[operationType]*action{
 	},
 	bytecode.Send: {
 		name: bytecode.Send,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			var method Object
 
 			methodName := args[0].(string)
@@ -482,7 +482,7 @@ var builtinActions = map[operationType]*action{
 	},
 	bytecode.InvokeBlock: {
 		name: bytecode.InvokeBlock,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			argPr := t.sp - argCount
 			receiverPr := argPr - 1
@@ -521,7 +521,7 @@ var builtinActions = map[operationType]*action{
 				blockFrame = cf.blockFrame.ep.blockFrame
 			}
 
-			c := newCallFrame(blockFrame.instructionSet)
+			c := newNormalCallFrame(blockFrame.instructionSet)
 			c.blockFrame = blockFrame
 			c.ep = blockFrame.ep
 			c.self = receiver
@@ -539,7 +539,7 @@ var builtinActions = map[operationType]*action{
 	},
 	bytecode.Leave: {
 		name: bytecode.Leave,
-		operation: func(t *thread, cf *callFrame, args ...interface{}) {
+		operation: func(t *thread, cf *normalCallFrame, args ...interface{}) {
 			//fmt.Println(t.callFrameStack.inspect())
 			//fmt.Println("Before leave--------------------------------")
 			cf = t.callFrameStack.pop()

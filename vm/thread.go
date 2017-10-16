@@ -40,7 +40,7 @@ func (t *thread) startFromTopFrame() {
 	t.evalCallFrame(cf)
 }
 
-func (t *thread) evalCallFrame(cf *callFrame) {
+func (t *thread) evalCallFrame(cf *normalCallFrame) {
 	for cf.pc < len(cf.instructionSet.instructions) {
 		i := cf.instructionSet.instructions[cf.pc]
 		t.execInstruction(cf, i)
@@ -62,14 +62,14 @@ func (t *thread) hasError() (string, bool) {
 	return msg, hasError
 }
 
-func (t *thread) execInstruction(cf *callFrame, i *instruction) {
+func (t *thread) execInstruction(cf *normalCallFrame, i *instruction) {
 	cf.pc++
 
 	i.action.operation(t, cf, i.Params...)
 }
 
-func (t *thread) builtinMethodYield(blockFrame *callFrame, args ...Object) *Pointer {
-	c := newCallFrame(blockFrame.instructionSet)
+func (t *thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object) *Pointer {
+	c := newNormalCallFrame(blockFrame.instructionSet)
 	c.blockFrame = blockFrame
 	c.ep = blockFrame.ep
 	c.self = blockFrame.self
@@ -84,7 +84,7 @@ func (t *thread) builtinMethodYield(blockFrame *callFrame, args ...Object) *Poin
 	return t.stack.top()
 }
 
-func (t *thread) retrieveBlock(cf *callFrame, args []interface{}) (blockFrame *callFrame) {
+func (t *thread) retrieveBlock(cf *normalCallFrame, args []interface{}) (blockFrame *normalCallFrame) {
 	var blockName string
 	var hasBlock bool
 
@@ -98,7 +98,7 @@ func (t *thread) retrieveBlock(cf *callFrame, args []interface{}) (blockFrame *c
 	if hasBlock {
 		block := t.getBlock(blockName, cf.instructionSet.filename)
 
-		c := newCallFrame(block)
+		c := newNormalCallFrame(block)
 		c.isBlock = true
 		c.ep = cf
 		c.self = cf.self
@@ -111,7 +111,7 @@ func (t *thread) retrieveBlock(cf *callFrame, args []interface{}) (blockFrame *c
 	return
 }
 
-func (t *thread) sendMethod(methodName string, argCount int, blockFrame *callFrame) {
+func (t *thread) sendMethod(methodName string, argCount int, blockFrame *normalCallFrame) {
 	var method Object
 
 	if arr, ok := t.stack.top().Target.(*ArrayObject); ok && arr.splat {
@@ -174,7 +174,7 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *callFra
 	}
 }
 
-func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPr, argCount int, argSet *bytecode.ArgSet, blockFrame *callFrame) {
+func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame) {
 	methodBody := method.Fn(receiver)
 	args := []Object{}
 	argPr := receiverPr + 1
