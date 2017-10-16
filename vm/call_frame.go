@@ -3,8 +3,16 @@ package vm
 import "sync"
 
 type callFrameStack struct {
-	callFrames []*normalCallFrame
+	callFrames []callFrame
 	thread     *thread
+}
+
+type callFrame interface {
+	getLCL(index, depth int) *Pointer
+	insertLCL(index, depth int, value Object)
+	storeConstant(constName string, constant interface{}) *Pointer
+	lookupConstant(constName string) *Pointer
+	inspect() string
 }
 
 type normalCallFrame struct {
@@ -113,6 +121,8 @@ func (cfs *callFrameStack) push(cf *normalCallFrame) {
 }
 
 func (cfs *callFrameStack) pop() *normalCallFrame {
+	var cf callFrame
+
 	if len(cfs.callFrames) < 1 {
 		panic("Nothing to pop!")
 	}
@@ -121,14 +131,27 @@ func (cfs *callFrameStack) pop() *normalCallFrame {
 		cfs.thread.cfp--
 	}
 
-	cf := cfs.callFrames[cfs.thread.cfp]
+	cf = cfs.callFrames[cfs.thread.cfp]
 	cfs.callFrames[cfs.thread.cfp] = nil
-	return cf
+
+	switch cf := cf.(type) {
+	case *normalCallFrame:
+		return cf
+	default:
+		return nil
+	}
 }
 
 func (cfs *callFrameStack) top() *normalCallFrame {
+	var topFrame callFrame
+
 	if cfs.thread.cfp > 0 {
-		return cfs.callFrames[cfs.thread.cfp-1]
+		topFrame = cfs.callFrames[cfs.thread.cfp-1]
+	}
+
+	switch f := topFrame.(type) {
+	case *normalCallFrame:
+		return f
 	}
 
 	return nil
