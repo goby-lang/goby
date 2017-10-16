@@ -21,7 +21,7 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 			// Sends a GET request to the target and returns a `Net::HTTP::Response` object.
 			Name: "get",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
 						return t.vm.initErrorObject(errors.ArgumentError, errors.WrongNumberOfArgumentFormat, 1, len(args))
 					}
@@ -48,7 +48,7 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 			// Sends a POST request to the target and returns a `Net::HTTP::Response` object.
 			Name: "post",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 3 {
 						return t.vm.initErrorObject(errors.ArgumentError, errors.WrongNumberOfArgumentFormat, 3, len(args))
 					}
@@ -87,7 +87,7 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 			// Sends a HEAD request to the target and returns a `Net::HTTP::Response` object.
 			Name: "head",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
 						return t.vm.initErrorObject(errors.ArgumentError, errors.WrongNumberOfArgumentFormat, 1, len(args))
 					}
@@ -114,7 +114,7 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 			// Returns a blank `Net::HTTP::Request` object to be sent with the`exec` method
 			Name: "request",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					return httpRequestClass.initializeInstance()
 				}
 			},
@@ -122,7 +122,7 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 			// Sends a passed `Net::HTTP::Request` object and returns a `Net::HTTP::Response` object
 			Name: "exec",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
 						return t.vm.initErrorObject(errors.ArgumentError, errors.WrongNumberOfArgumentFormat, 1, len(args))
 					}

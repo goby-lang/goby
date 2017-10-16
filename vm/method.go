@@ -75,7 +75,7 @@ type BuiltinMethodObject struct {
 	Fn   func(receiver Object) builtinMethodBody
 }
 
-type builtinMethodBody func(*thread, []Object, *callFrame) Object
+type builtinMethodBody func(*thread, []Object, *normalCallFrame) Object
 
 // Polymorphic helper functions -----------------------------------------
 

@@ -45,7 +45,7 @@ func builtInRegexpClassMethods() []*BuiltinMethodObject {
 		{
 			Name: "new",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
 						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%d", len(args))
 					}
@@ -87,7 +87,7 @@ func builtinRegexpInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "==",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					if len(args) != 1 {
 						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%d", len(args))
@@ -120,7 +120,7 @@ func builtinRegexpInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "match?",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					if len(args) != 1 {
 						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%d", len(args))

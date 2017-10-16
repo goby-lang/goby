@@ -131,7 +131,7 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 
 func (vm *VM) newThread() *thread {
 	s := &stack{RWMutex: new(sync.RWMutex)}
-	cfs := &callFrameStack{callFrames: []*callFrame{}}
+	cfs := &callFrameStack{callFrames: []*normalCallFrame{}}
 	t := &thread{stack: s, callFrameStack: cfs, sp: 0, cfp: 0}
 	s.thread = t
 	cfs.thread = t
@@ -179,7 +179,7 @@ func builtinMainObjSingletonMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_s",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(thread *thread, objects []Object, frame *callFrame) Object {
+				return func(thread *thread, objects []Object, frame *normalCallFrame) Object {
 					return thread.vm.initStringObject("main")
 				}
 			},
@@ -328,7 +328,7 @@ func (vm *VM) loadConstant(name string, isModule bool) *RClass {
 	return c
 }
 
-func (vm *VM) lookupConstant(cf *callFrame, constName string) (constant *Pointer) {
+func (vm *VM) lookupConstant(cf *normalCallFrame, constName string) (constant *Pointer) {
 	var namespace *RClass
 	var hasNamespace bool
 

@@ -3,22 +3,22 @@ package vm
 import "sync"
 
 type callFrameStack struct {
-	callFrames []*callFrame
+	callFrames []*normalCallFrame
 	thread     *thread
 }
 
-type callFrame struct {
+type normalCallFrame struct {
 	instructionSet *instructionSet
 	// program counter
 	pc int
 	// environment pointer, points to the call frame we want to get locals from
-	ep     *callFrame
+	ep     *normalCallFrame
 	self   Object
 	locals []*Pointer
 	// local pointer
 	lPr        int
 	isBlock    bool
-	blockFrame *callFrame
+	blockFrame *normalCallFrame
 	sync.RWMutex
 }
 
@@ -26,7 +26,7 @@ type callFrame struct {
 // The main scenario is when multiple threads want to access local variables outside it's block
 // Since they share same block frame, they will all access to that frame's locals.
 // TODO: Find a better way to fix this, or prevent thread from accessing outside locals.
-func (cf *callFrame) getLCL(index, depth int) *Pointer {
+func (cf *normalCallFrame) getLCL(index, depth int) *Pointer {
 	if depth == 0 {
 		cf.RLock()
 
@@ -38,7 +38,7 @@ func (cf *callFrame) getLCL(index, depth int) *Pointer {
 	return cf.blockFrame.ep.getLCL(index, depth-1)
 }
 
-func (cf *callFrame) insertLCL(index, depth int, value Object) {
+func (cf *normalCallFrame) insertLCL(index, depth int, value Object) {
 	existedLCL := cf.getLCL(index, depth)
 
 	if existedLCL != nil {
@@ -59,7 +59,7 @@ func (cf *callFrame) insertLCL(index, depth int, value Object) {
 	}
 }
 
-func (cf *callFrame) storeConstant(constName string, constant interface{}) *Pointer {
+func (cf *normalCallFrame) storeConstant(constName string, constant interface{}) *Pointer {
 	var ptr *Pointer
 
 	switch c := constant.(type) {
@@ -84,7 +84,7 @@ func (cf *callFrame) storeConstant(constName string, constant interface{}) *Poin
 	return ptr
 }
 
-func (cf *callFrame) lookupConstant(constName string) *Pointer {
+func (cf *normalCallFrame) lookupConstant(constName string) *Pointer {
 	var c *Pointer
 
 	switch scope := cf.self.(type) {
@@ -98,7 +98,7 @@ func (cf *callFrame) lookupConstant(constName string) *Pointer {
 	return c
 }
 
-func (cfs *callFrameStack) push(cf *callFrame) {
+func (cfs *callFrameStack) push(cf *normalCallFrame) {
 	if cf == nil {
 		panic("Callframe can't be nil!")
 	}
@@ -112,7 +112,7 @@ func (cfs *callFrameStack) push(cf *callFrame) {
 	cfs.thread.cfp++
 }
 
-func (cfs *callFrameStack) pop() *callFrame {
+func (cfs *callFrameStack) pop() *normalCallFrame {
 	if len(cfs.callFrames) < 1 {
 		panic("Nothing to pop!")
 	}
@@ -126,7 +126,7 @@ func (cfs *callFrameStack) pop() *callFrame {
 	return cf
 }
 
-func (cfs *callFrameStack) top() *callFrame {
+func (cfs *callFrameStack) top() *normalCallFrame {
 	if cfs.thread.cfp > 0 {
 		return cfs.callFrames[cfs.thread.cfp-1]
 	}
@@ -134,6 +134,6 @@ func (cfs *callFrameStack) top() *callFrame {
 	return nil
 }
 
-func newCallFrame(is *instructionSet) *callFrame {
-	return &callFrame{locals: make([]*Pointer, 100), instructionSet: is, pc: 0, lPr: 0}
+func newCallFrame(is *instructionSet) *normalCallFrame {
+	return &normalCallFrame{locals: make([]*Pointer, 100), instructionSet: is, pc: 0, lPr: 0}
 }
