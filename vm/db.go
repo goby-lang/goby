@@ -35,7 +35,7 @@ func builtinDBClassMethods() []*BuiltinMethodObject {
 			//
 			Name: "get_connection",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 2 {
 						return t.vm.initErrorObject(errors.ArgumentError, errors.WrongNumberOfArgumentFormat, 2, len(args))
 					}
@@ -84,7 +84,7 @@ func builtinDBInstanceMethods() []*BuiltinMethodObject {
 			//
 			Name: "close",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					conn, err := getDBConn(t, receiver)
 
 					if err != nil {
@@ -106,7 +106,7 @@ func builtinDBInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "run",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) < 1 {
 						return t.vm.initErrorObject(errors.ArgumentError, "Expect at least 1 argument.")
 					}
@@ -164,7 +164,7 @@ func builtinDBInstanceMethods() []*BuiltinMethodObject {
 			//
 			Name: "exec",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) < 1 {
 						return t.vm.initErrorObject(errors.ArgumentError, "Expect at least 1 argument.")
 					}
@@ -227,7 +227,7 @@ func builtinDBInstanceMethods() []*BuiltinMethodObject {
 			//
 			Name: "query",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) < 1 {
 						return t.vm.initErrorObject(errors.ArgumentError, "Expect at least 1 argument.")
 					}

@@ -24,7 +24,7 @@ func builtinGoMapClassMethods() []*BuiltinMethodObject {
 			// @return [GoMap]
 			Name: "new",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					m := make(map[string]interface{})
 
 					if len(args) == 0 {
@@ -54,7 +54,7 @@ func builtinGoMapInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_hash",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
 						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
 					}
@@ -75,7 +75,7 @@ func builtinGoMapInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "get",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
 						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got: %d", len(args))
 					}
@@ -107,7 +107,7 @@ func builtinGoMapInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "set",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 2 {
 						return t.vm.initErrorObject(errors.ArgumentError, "Expect 2 argument. got: %d", len(args))
 					}

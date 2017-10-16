@@ -12,10 +12,10 @@ type callObject struct {
 	argSet       *bytecode.ArgSet
 	argIndex     int
 	lastArgIndex int
-	callFrame    *callFrame
+	callFrame    *normalCallFrame
 }
 
-func newCallObject(receiver Object, method *MethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *callFrame) *callObject {
+func newCallObject(receiver Object, method *MethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame) *callObject {
 	cf := newCallFrame(method.instructionSet)
 	cf.self = receiver
 	cf.blockFrame = blockFrame

@@ -49,7 +49,7 @@ func builtinIntegerClassMethods() []*BuiltinMethodObject {
 		{
 			Name: "new",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					return t.initUnsupportedMethodError("#new", receiver)
 				}
 			},
@@ -69,7 +69,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [Numeric]
 			Name: "+",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					intOperation := func(leftValue int, rightValue int) int {
 						return leftValue + rightValue
 					}
@@ -90,7 +90,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [Numeric]
 			Name: "%",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					intOperation := func(leftValue int, rightValue int) int {
 						return leftValue % rightValue
 					}
@@ -111,7 +111,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [Numeric]
 			Name: "-",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					intOperation := func(leftValue int, rightValue int) int {
 						return leftValue - rightValue
 					}
@@ -132,7 +132,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [Numeric]
 			Name: "*",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					intOperation := func(leftValue int, rightValue int) int {
 						return leftValue * rightValue
 					}
@@ -153,7 +153,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [Numeric]
 			Name: "**",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					intOperation := func(leftValue int, rightValue int) int {
 						return int(math.Pow(float64(leftValue), float64(rightValue)))
 					}
@@ -174,7 +174,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [Numeric]
 			Name: "/",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					intOperation := func(leftValue int, rightValue int) int {
 						return leftValue / rightValue
 					}
@@ -196,7 +196,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: ">",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					intComparison := func(leftValue int, rightValue int) bool {
 						return leftValue > rightValue
 					}
@@ -218,7 +218,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: ">=",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					intComparison := func(leftValue int, rightValue int) bool {
 						return leftValue >= rightValue
 					}
@@ -240,7 +240,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "<",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					intComparison := func(leftValue int, rightValue int) bool {
 						return leftValue < rightValue
 					}
@@ -262,7 +262,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "<=",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					intComparison := func(leftValue int, rightValue int) bool {
 						return leftValue <= rightValue
 					}
@@ -285,7 +285,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			Name: "<=>",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					rightObject := args[0]
 
 					switch rightObject.(type) {
@@ -332,7 +332,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "==",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					result := receiver.(*IntegerObject).equalityTest(args[0])
 
 					return toBooleanObject(result)
@@ -352,7 +352,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "!=",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					result := !receiver.(*IntegerObject).equalityTest(args[0])
 
 					return toBooleanObject(result)
@@ -369,7 +369,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "even?",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					i := receiver.(*IntegerObject)
 					even := i.value%2 == 0
@@ -391,7 +391,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_f",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newFloat := t.vm.initFloatObject(float64(r.value))
 					return newFloat
@@ -407,7 +407,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			Name: "to_i",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					return receiver
 				}
 			},
@@ -421,7 +421,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "to_s",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					int := receiver.(*IntegerObject)
 
@@ -438,7 +438,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			Name: "next",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					i := receiver.(*IntegerObject)
 					return t.vm.initIntegerObject(i.value + 1)
 				}
@@ -454,7 +454,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "odd?",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					i := receiver.(*IntegerObject)
 					odd := i.value%2 != 0
@@ -475,7 +475,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			Name: "pred",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					i := receiver.(*IntegerObject)
 					return t.vm.initIntegerObject(i.value - 1)
 				}
@@ -493,7 +493,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			Name: "times",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					n := receiver.(*IntegerObject)
 
 					if n.value < 0 {
@@ -515,7 +515,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_int",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newInt := t.vm.initIntegerObject(r.value)
 					newInt.flag = i
@@ -526,7 +526,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_int8",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newInt := t.vm.initIntegerObject(r.value)
 					newInt.flag = i8
@@ -537,7 +537,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_int16",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newInt := t.vm.initIntegerObject(r.value)
 					newInt.flag = i16
@@ -548,7 +548,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_int32",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newInt := t.vm.initIntegerObject(r.value)
 					newInt.flag = i32
@@ -559,7 +559,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_int64",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newInt := t.vm.initIntegerObject(r.value)
 					newInt.flag = i64
@@ -570,7 +570,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_uint",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newInt := t.vm.initIntegerObject(r.value)
 					newInt.flag = ui
@@ -581,7 +581,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_uint8",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newInt := t.vm.initIntegerObject(r.value)
 					newInt.flag = ui8
@@ -592,7 +592,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_uint16",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newInt := t.vm.initIntegerObject(r.value)
 					newInt.flag = ui16
@@ -603,7 +603,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_uint32",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newInt := t.vm.initIntegerObject(r.value)
 					newInt.flag = ui32
@@ -614,7 +614,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_uint64",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newInt := t.vm.initIntegerObject(r.value)
 					newInt.flag = ui64
@@ -625,7 +625,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_float32",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newInt := t.vm.initIntegerObject(r.value)
 					newInt.flag = f32
@@ -636,7 +636,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_float64",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newInt := t.vm.initIntegerObject(r.value)
 					newInt.flag = f64
@@ -647,7 +647,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "ptr",
 			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					return t.vm.initGoObject(&r.value)
 				}
