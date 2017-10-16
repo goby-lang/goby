@@ -11,7 +11,7 @@ func (vm *VM) InitForREPL() {
 	vm.SetMethodISIndexTable("")
 
 	// REPL should maintain a base call frame so that the whole program won't exit
-	cf := newCallFrame(&instructionSet{name: "REPL base"})
+	cf := newNormalCallFrame(&instructionSet{name: "REPL base"})
 	cf.self = vm.mainObj
 	vm.mode = REPLMode
 	vm.mainThread.callFrameStack.push(cf)
@@ -32,7 +32,7 @@ func (vm *VM) REPLExec(sets []*bytecode.InstructionSet) {
 	vm.blockTables[p.filename] = p.blockTable
 
 	oldFrame := vm.mainThread.callFrameStack.pop()
-	cf := newCallFrame(p.program)
+	cf := newNormalCallFrame(p.program)
 	cf.self = vm.mainObj
 	cf.locals = oldFrame.locals
 	cf.ep = oldFrame.ep
