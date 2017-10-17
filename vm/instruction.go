@@ -427,7 +427,7 @@ var builtinActions = map[operationType]*action{
 			is := t.getClassIS(subjectName, cf.instructionSet.filename)
 
 			t.stack.pop()
-			c := newNormalCallFrame(is)
+			c := newNormalCallFrame(is, cf.FileName())
 			c.self = classPtr.Target
 			t.callFrameStack.push(c)
 			t.startFromTopFrame()
@@ -443,6 +443,7 @@ var builtinActions = map[operationType]*action{
 			methodName := args[0].(string)
 			argCount := args[1].(int)
 			argSet := args[3].(*bytecode.ArgSet)
+			sourceLine := args[4].(int)
 
 			if arr, ok := t.stack.top().Target.(*ArrayObject); ok && arr.splat {
 				// Pop array
@@ -471,10 +472,10 @@ var builtinActions = map[operationType]*action{
 
 			switch m := method.(type) {
 			case *MethodObject:
-				callObj := newCallObject(receiver, m, receiverPr, argCount, argSet, blockFrame)
+				callObj := newCallObject(receiver, m, receiverPr, argCount, argSet, blockFrame, sourceLine, cf.fileName)
 				t.evalMethodObject(callObj)
 			case *BuiltinMethodObject:
-				t.evalBuiltinMethod(receiver, m, receiverPr, argCount, argSet, blockFrame)
+				t.evalBuiltinMethod(receiver, m, receiverPr, argCount, argSet, blockFrame, sourceLine, cf.fileName)
 			case *Error:
 				t.pushErrorObject(errors.InternalError, m.toString())
 			}
@@ -521,7 +522,7 @@ var builtinActions = map[operationType]*action{
 				blockFrame = cf.blockFrame.ep.blockFrame
 			}
 
-			c := newNormalCallFrame(blockFrame.instructionSet)
+			c := newNormalCallFrame(blockFrame.instructionSet, blockFrame.instructionSet.filename)
 			c.blockFrame = blockFrame
 			c.ep = blockFrame.ep
 			c.self = receiver

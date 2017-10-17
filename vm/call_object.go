@@ -15,10 +15,11 @@ type callObject struct {
 	callFrame    *normalCallFrame
 }
 
-func newCallObject(receiver Object, method *MethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame) *callObject {
-	cf := newNormalCallFrame(method.instructionSet)
+func newCallObject(receiver Object, method *MethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame, sourceLine int, fileName string) *callObject {
+	cf := newNormalCallFrame(method.instructionSet, fileName)
 	cf.self = receiver
 	cf.blockFrame = blockFrame
+	cf.sourceLine = sourceLine
 
 	return &callObject{
 		method:      method,

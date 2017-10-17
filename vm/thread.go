@@ -114,7 +114,7 @@ func (t *thread) execInstruction(cf *normalCallFrame, i *instruction) {
 }
 
 func (t *thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object) *Pointer {
-	c := newNormalCallFrame(blockFrame.instructionSet)
+	c := newNormalCallFrame(blockFrame.instructionSet, blockFrame.FileName())
 	c.blockFrame = blockFrame
 	c.ep = blockFrame.ep
 	c.self = blockFrame.self
@@ -143,7 +143,7 @@ func (t *thread) retrieveBlock(cf *normalCallFrame, args []interface{}) (blockFr
 	if hasBlock {
 		block := t.getBlock(blockName, cf.instructionSet.filename)
 
-		c := newNormalCallFrame(block)
+		c := newNormalCallFrame(block, cf.instructionSet.filename)
 		c.isBlock = true
 		c.ep = cf
 		c.self = cf.self
@@ -208,19 +208,22 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 		return
 	}
 
+	sendCallFrame := t.callFrameStack.top()
+
 	switch m := method.(type) {
 	case *MethodObject:
-		callObj := newCallObject(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame)
+		callObj := newCallObject(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, sendCallFrame.SourceLine(), sendCallFrame.FileName())
 		t.evalMethodObject(callObj)
 	case *BuiltinMethodObject:
-		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame)
+		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, sendCallFrame.SourceLine(), sendCallFrame.FileName())
 	case *Error:
 		t.pushErrorObject(errors.InternalError, m.toString())
 	}
 }
 
-func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame) {
-	cf := newGoMethodCallFrame(method.Fn(receiver), method.Name)
+func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame, sourceLine int, fileName string) {
+	cf := newGoMethodCallFrame(method.Fn(receiver), method.Name, fileName)
+	cf.sourceLine = sourceLine
 	cf.blockFrame = blockFrame
 	argPtr := receiverPtr + 1
 
@@ -236,7 +239,7 @@ func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 	if method.Name == "new" && ok {
 		instance, ok := evaluated.Target.(*RObject)
 		if ok && instance.InitializeMethod != nil {
-			callObj := newCallObject(instance, instance.InitializeMethod, receiverPtr, argCount, argSet, blockFrame)
+			callObj := newCallObject(instance, instance.InitializeMethod, receiverPtr, argCount, argSet, blockFrame, sourceLine, fileName)
 			t.evalMethodObject(callObj)
 		}
 	}
