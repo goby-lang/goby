@@ -157,9 +157,9 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 			//
 			// ```ruby
 			// module Foo
-			// def ten
-			//    10
-			// end
+			//   def ten
+			//     10
+			//   end
 			// end
 			//
 			// module Bar
@@ -174,7 +174,7 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 			// end
 			//
 			// a = Baz.new
-			// puts(a.ten) # => ten (overriden)
+			// puts(a.ten) # => ten (overridden)
 			// ```
 			//
 			// **Note**:
