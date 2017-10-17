@@ -19,6 +19,8 @@ type baseFrame struct {
 	isBlock    bool
 	blockFrame *normalCallFrame
 	sync.RWMutex
+	sourceLine int
+	fileName   string
 }
 
 type callFrame interface {
@@ -29,6 +31,8 @@ type callFrame interface {
 	EP() *normalCallFrame
 	Locals() []*Pointer
 	LocalPtr() int
+	SourceLine() int
+	FileName() string
 
 	getLCL(index, depth int) *Pointer
 	insertLCL(index, depth int, value Object)
@@ -39,8 +43,8 @@ type callFrame interface {
 
 type goMethodCallFrame struct {
 	*baseFrame
-	method builtinMethodBody
-	name   string
+	method     builtinMethodBody
+	name       string
 }
 
 type normalCallFrame struct {
@@ -72,6 +76,14 @@ func (b *baseFrame) Locals() []*Pointer {
 
 func (b *baseFrame) LocalPtr() int {
 	return b.lPr
+}
+
+func (b *baseFrame) SourceLine() int {
+	return b.sourceLine
+}
+
+func (b *baseFrame) FileName() string {
+	return b.fileName
 }
 
 // We use lock on every local variable retrieval and insertion.

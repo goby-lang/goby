@@ -179,19 +179,23 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 		return
 	}
 
+	sendCallFrame := t.callFrameStack.top()
+
 	switch m := method.(type) {
 	case *MethodObject:
-		callObj := newCallObject(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame)
+		callObj := newCallObject(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, sendCallFrame.SourceLine(), sendCallFrame.FileName())
 		t.evalMethodObject(callObj)
 	case *BuiltinMethodObject:
-		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame)
+		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, sendCallFrame.SourceLine(), sendCallFrame.FileName())
 	case *Error:
 		t.pushErrorObject(errors.InternalError, m.toString())
 	}
 }
 
-func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame) {
+func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame, sourceLine int, fileName string) {
 	cf := newGoMethodCallFrame(method.Fn(receiver), method.Name)
+	cf.sourceLine = sourceLine
+	cf.fileName = fileName
 	cf.blockFrame = blockFrame
 	argPtr := receiverPtr + 1
 
@@ -207,7 +211,7 @@ func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 	if method.Name == "new" && ok {
 		instance, ok := evaluated.Target.(*RObject)
 		if ok && instance.InitializeMethod != nil {
-			callObj := newCallObject(instance, instance.InitializeMethod, receiverPtr, argCount, argSet, blockFrame)
+			callObj := newCallObject(instance, instance.InitializeMethod, receiverPtr, argCount, argSet, blockFrame, sourceLine, fileName)
 			t.evalMethodObject(callObj)
 		}
 	}

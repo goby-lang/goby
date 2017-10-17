@@ -44,25 +44,24 @@ func (vm *VM) initErrorObject(errorType, format string, args ...interface{}) *Er
 			cf = t.callFrameStack.top().(*normalCallFrame)
 		}
 
-		i := cf.instructionSet.instructions[cf.pc-1]
-
 		return &Error{
 			baseObj: &baseObj{class: errClass},
 			// Add 1 to source line because it's zero indexed
-			Message: fmt.Sprintf("%s. At %s:%d", fmt.Sprintf(errorType+": "+format, args...), cf.instructionSet.filename, i.sourceLine+1),
+			Message: fmt.Sprintf("%s. At %s:%d", fmt.Sprintf(errorType+": "+format, args...), cf.fileName, cf.sourceLine+1),
 			Type:    errorType,
 		}
 	case *goMethodCallFrame:
-		return &Error{
-			baseObj: &baseObj{class: errClass},
-			// Add 1 to source line because it's zero indexed
-			Message: fmt.Sprintf("%s. At %s", fmt.Sprintf(errorType+": "+format, args...), cf.name),
-			Type:    errorType,
-		}
+		t.callFrameStack.pop()
 	default:
 		return nil
 	}
 
+	return &Error{
+		baseObj: &baseObj{class: errClass},
+		// Add 1 to source line because it's zero indexed
+		Message: fmt.Sprintf("%s. At %s:%d", fmt.Sprintf(errorType+": "+format, args...), cf.FileName(), cf.SourceLine()),
+		Type:    errorType,
+	}
 }
 
 func (vm *VM) initErrorClasses() {

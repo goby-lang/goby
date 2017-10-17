@@ -443,6 +443,8 @@ var builtinActions = map[operationType]*action{
 			methodName := args[0].(string)
 			argCount := args[1].(int)
 			argSet := args[3].(*bytecode.ArgSet)
+			sourceLine := args[4].(int)
+			fileName := args[5].(string)
 
 			if arr, ok := t.stack.top().Target.(*ArrayObject); ok && arr.splat {
 				// Pop array
@@ -471,10 +473,10 @@ var builtinActions = map[operationType]*action{
 
 			switch m := method.(type) {
 			case *MethodObject:
-				callObj := newCallObject(receiver, m, receiverPr, argCount, argSet, blockFrame)
+				callObj := newCallObject(receiver, m, receiverPr, argCount, argSet, blockFrame, sourceLine, fileName)
 				t.evalMethodObject(callObj)
 			case *BuiltinMethodObject:
-				t.evalBuiltinMethod(receiver, m, receiverPr, argCount, argSet, blockFrame)
+				t.evalBuiltinMethod(receiver, m, receiverPr, argCount, argSet, blockFrame, sourceLine, fileName)
 			case *Error:
 				t.pushErrorObject(errors.InternalError, m.toString())
 			}
