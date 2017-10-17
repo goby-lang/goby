@@ -1866,6 +1866,10 @@ func TestMultiVarAssignment(t *testing.T) {
 		b
 		`,
 			2},
+		{`
+		_, b = [1, 2]
+		b
+		`, 2},
 
 		{`
 		a, b, c = [1, 2, 3]
@@ -2014,6 +2018,27 @@ func TestRemoveUnusedExpression(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestUnusedVariableFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`
+		_ = 1
+		_
+		`, "UndefinedMethodError: Undefined Method '_' for <Instance of: Object>", 3},
+		{`
+		_, b = [1, 2]
+		_
+		`, "UndefinedMethodError: Undefined Method '_' for <Instance of: Object>", 3},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
 }
