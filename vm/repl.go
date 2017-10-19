@@ -7,11 +7,11 @@ import "github.com/goby-lang/goby/compiler/bytecode"
 // - Set vm to REPL mode
 // - Create and push main object frame
 func (vm *VM) InitForREPL() {
-	vm.SetClassISIndexTable("")
-	vm.SetMethodISIndexTable("")
+	vm.SetClassISIndexTable("REPL")
+	vm.SetMethodISIndexTable("REPL")
 
 	// REPL should maintain a base call frame so that the whole program won't exit
-	cf := newNormalCallFrame(&instructionSet{name: "REPL base"})
+	cf := newNormalCallFrame(&instructionSet{name: "REPL base"}, "REPL")
 	cf.self = vm.mainObj
 	vm.mode = REPLMode
 	vm.mainThread.callFrameStack.push(cf)
@@ -19,7 +19,7 @@ func (vm *VM) InitForREPL() {
 
 // REPLExec executes instructions differently from normal program execution.
 func (vm *VM) REPLExec(sets []*bytecode.InstructionSet) {
-	p := newInstructionTranslator("")
+	p := newInstructionTranslator("REPL")
 	p.vm = vm
 	p.transferInstructionSets(sets)
 
@@ -32,7 +32,7 @@ func (vm *VM) REPLExec(sets []*bytecode.InstructionSet) {
 	vm.blockTables[p.filename] = p.blockTable
 
 	oldFrame := vm.mainThread.callFrameStack.pop()
-	cf := newNormalCallFrame(p.program)
+	cf := newNormalCallFrame(p.program, p.filename)
 	cf.self = vm.mainObj
 	cf.locals = oldFrame.Locals()
 	cf.ep = oldFrame.EP()
