@@ -120,7 +120,6 @@ func (it *instructionTranslator) transferInstruction(is *instructionSet, i *byte
 		}
 		params = append(params, i.ArgSet)
 		params = append(params, i.SourceLine()+1)
-		params = append(params, is.filename)
 	default:
 		for _, param := range i.Params {
 			params = append(params, it.parseParam(param))
