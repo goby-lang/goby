@@ -173,7 +173,7 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 	method = receiver.findMethod(methodName)
 
 	if method == nil {
-		err := t.vm.initErrorObject(errors.UndefinedMethodError, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
+		err := t.vm.initErrorObject(errors.UndefinedMethodError, instruction, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
 		t.stack.set(receiverPr, &Pointer{Target: err})
 		t.sp = argPr
 		return
@@ -184,11 +184,11 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 	switch m := method.(type) {
 	case *MethodObject:
 		callObj := newCallObject(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, sendCallFrame.SourceLine(), sendCallFrame.FileName())
-		t.evalMethodObject(callObj)
+		t.evalMethodObject(callObj, instruction)
 	case *BuiltinMethodObject:
 		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, instruction, sendCallFrame.FileName())
 	case *Error:
-		t.pushErrorObject(errors.InternalError, m.toString())
+		t.pushErrorObject(errors.InternalError, instruction, m.toString())
 	}
 }
 
@@ -211,7 +211,7 @@ func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 		instance, ok := evaluated.Target.(*RObject)
 		if ok && instance.InitializeMethod != nil {
 			callObj := newCallObject(instance, instance.InitializeMethod, receiverPtr, argCount, argSet, blockFrame, instruction.sourceLine, fileName)
-			t.evalMethodObject(callObj)
+			t.evalMethodObject(callObj, instruction)
 		}
 	}
 
@@ -219,7 +219,7 @@ func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 	t.sp = argPtr
 }
 
-func (t *thread) reportArgumentError(idealArgNumber int, methodName string, exactArgNumber int, receiverPtr int) {
+func (t *thread) reportArgumentError(instruction *instruction, idealArgNumber int, methodName string, exactArgNumber int, receiverPtr int) {
 	var message string
 
 	if idealArgNumber > exactArgNumber {
@@ -228,24 +228,25 @@ func (t *thread) reportArgumentError(idealArgNumber int, methodName string, exac
 		message = "Expect at most %d args for method '%s'. got: %d"
 	}
 
-	e := t.vm.initErrorObject(errors.ArgumentError, message, idealArgNumber, methodName, exactArgNumber)
+	e := t.vm.initErrorObject(errors.ArgumentError, instruction, message, idealArgNumber, methodName, exactArgNumber)
 	t.stack.set(receiverPtr, &Pointer{Target: e})
 	t.sp = receiverPtr + 1
 }
 
-func (t *thread) evalMethodObject(call *callObject) {
+// TODO: Move instruction into call object
+func (t *thread) evalMethodObject(call *callObject, instruction *instruction) {
 	normalParamsCount := call.normalParamsCount()
 	paramTypes := call.paramTypes()
 	paramsCount := len(call.paramTypes())
 	stack := t.stack.Data
 
 	if call.argCount > paramsCount && !call.method.isSplatArgIncluded() {
-		t.reportArgumentError(paramsCount, call.methodName(), call.argCount, call.receiverPtr)
+		t.reportArgumentError(instruction, paramsCount, call.methodName(), call.argCount, call.receiverPtr)
 		return
 	}
 
 	if normalParamsCount > call.argCount {
-		t.reportArgumentError(normalParamsCount, call.methodName(), call.argCount, call.receiverPtr)
+		t.reportArgumentError(instruction, normalParamsCount, call.methodName(), call.argCount, call.receiverPtr)
 		return
 	}
 
@@ -255,7 +256,7 @@ func (t *thread) evalMethodObject(call *callObject) {
 		case bytecode.RequiredKeywordArg:
 			paramName := call.paramNames()[paramIndex]
 			if _, ok := call.hasKeywordArgument(paramName); !ok {
-				e := t.vm.initErrorObject(errors.ArgumentError, "Method %s requires key argument %s", call.methodName(), paramName)
+				e := t.vm.initErrorObject(errors.ArgumentError, instruction, "Method %s requires key argument %s", call.methodName(), paramName)
 				t.stack.set(call.receiverPtr, &Pointer{Target: e})
 				t.sp = call.argPtr()
 				return
@@ -266,7 +267,7 @@ func (t *thread) evalMethodObject(call *callObject) {
 	err := call.assignKeywordArguments(stack)
 
 	if err != nil {
-		e := t.vm.initErrorObject(errors.ArgumentError, err.Error())
+		e := t.vm.initErrorObject(errors.ArgumentError, instruction, err.Error())
 		t.stack.set(call.receiverPtr, &Pointer{Target: e})
 		t.sp = call.argPtr()
 		return
@@ -296,11 +297,11 @@ func (t *thread) evalMethodObject(call *callObject) {
 	t.sp = call.argPtr()
 }
 
-func (t *thread) pushErrorObject(errorType, format string, args ...interface{}) {
-	err := t.vm.initErrorObject(errorType, format, args...)
+func (t *thread) pushErrorObject(errorType string, instruction *instruction, format string, args ...interface{}) {
+	err := t.vm.initErrorObject(errorType, instruction, format, args...)
 	t.stack.push(&Pointer{Target: err})
 }
 
-func (t *thread) initUnsupportedMethodError(methodName string, receiver Object) *Error {
-	return t.vm.initErrorObject(errors.UnsupportedMethodError, "Unsupported Method %s for %+v", methodName, receiver.toString())
+func (t *thread) initUnsupportedMethodError(instruction *instruction, methodName string, receiver Object) *Error {
+	return t.vm.initErrorObject(errors.UnsupportedMethodError, instruction, "Unsupported Method %s for %+v", methodName, receiver.toString())
 }
