@@ -19,6 +19,19 @@ func (il *IntegerLiteral) String() string {
 	return il.Token.Literal
 }
 
+type FloatLiteral struct {
+	*BaseNode
+	Value float64
+}
+
+func (il *FloatLiteral) expressionNode() {}
+func (il *FloatLiteral) TokenLiteral() string {
+	return il.Token.Literal
+}
+func (il *FloatLiteral) String() string {
+	return il.Token.Literal
+}
+
 type StringLiteral struct {
 	*BaseNode
 	Value string

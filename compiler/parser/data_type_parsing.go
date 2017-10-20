@@ -20,6 +20,22 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	return lit
 }
 
+func (p *Parser) parseFloatLiteral(receiver ast.Expression) ast.Expression {
+	p.nextToken()
+	floatLiteral := receiver.String() + "." + p.curToken.Literal
+
+	floatTok := token.Token{Type: token.Float, Literal: floatLiteral, Line: p.curToken.Line}
+	lit := &ast.FloatLiteral{BaseNode: &ast.BaseNode{Token: floatTok}}
+	value, err := strconv.ParseFloat(lit.TokenLiteral(), 64)
+	if err != nil {
+		p.error = newTypeParsingError(lit.TokenLiteral(), "float", p.curToken.Line)
+		return nil
+	}
+	lit.Value = float64(value)
+
+	return lit
+}
+
 func (p *Parser) parseStringLiteral() ast.Expression {
 	lit := &ast.StringLiteral{BaseNode: &ast.BaseNode{Token: p.curToken}}
 	lit.Value = p.curToken.Literal

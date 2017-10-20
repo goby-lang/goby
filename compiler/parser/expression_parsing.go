@@ -388,6 +388,18 @@ func (p *Parser) parseMultiVariables(left ast.Expression) ast.Expression {
 	return result
 }
 
+func (p *Parser) parseDotExpression(receiver ast.Expression) ast.Expression {
+	_, ok := receiver.(*ast.IntegerLiteral)
+
+	if ok && p.peekTokenIs(token.Int) {
+		// When both receiver & caller are integer => Float
+		return p.parseFloatLiteral(receiver)
+	} else {
+		// Normal call method expression with receiver
+		return p.parseCallExpressionWithReceiver(receiver)
+	}
+}
+
 func (p *Parser) expandAssignmentValue(value ast.Expression) ast.Expression {
 	switch p.curToken.Type {
 	case token.Assign:
