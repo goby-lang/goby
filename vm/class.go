@@ -208,7 +208,7 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 					module, ok := args[0].(*RClass)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, "Expect argument to be a module. got=%v", args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, instruction, "Expect argument to be a module. got=%v", args[0].Class().Name)
 					}
 
 					switch r := receiver.(type) {
@@ -237,7 +237,7 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 					module, ok := args[0].(*RClass)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, "Expect argument to be a module. got=%v", args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, instruction, "Expect argument to be a module. got=%v", args[0].Class().Name)
 					}
 
 					class = receiver.SingletonClass()
@@ -267,13 +267,13 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, instruction, "Expect 0 argument. got: %d", len(args))
 					}
 
 					n, ok := receiver.(*RClass)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.UndefinedMethodError, "Undefined Method '%s' for %s", "#name", receiver.toString())
+						return t.vm.initErrorObject(errors.UndefinedMethodError, instruction, "Undefined Method '%s' for %s", "#name", receiver.toString())
 					}
 
 					name := n.ReturnName()
@@ -307,7 +307,7 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 					class, ok := receiver.(*RClass)
 
 					if !ok {
-						return t.initUnsupportedMethodError("#new", receiver)
+						return t.initUnsupportedMethodError(instruction, "#new", receiver)
 					}
 
 					instance := class.initializeInstance()
@@ -354,13 +354,13 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, instruction, "Expect 0 argument. got: %d", len(args))
 					}
 
 					c, ok := receiver.(*RClass)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.UndefinedMethodError, "Undefined Method '%s' for %s", "#superclass", receiver.toString())
+						return t.vm.initErrorObject(errors.UndefinedMethodError, instruction, "Undefined Method '%s' for %s", "#superclass", receiver.toString())
 					}
 
 					superClass := c.returnSuperClass()
@@ -380,7 +380,7 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 					c, ok := receiver.(*RClass)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.UndefinedMethodError, "Undefined Method '%s' for %s", "#ancestors", receiver.toString())
+						return t.vm.initErrorObject(errors.UndefinedMethodError, instruction, "Undefined Method '%s' for %s", "#ancestors", receiver.toString())
 					}
 
 					a := c.ancestors()
@@ -500,7 +500,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 					initFunc, ok := standardLibraries[libName]
 
 					if !ok {
-						return t.vm.initErrorObject(errors.InternalError, "Can't require \"%s\"", libName)
+						return t.vm.initErrorObject(errors.InternalError, instruction, "Can't require \"%s\"", libName)
 					}
 
 					initFunc(t.vm)
@@ -532,7 +532,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 					file, err := ioutil.ReadFile(filepath + ".gb")
 
 					if err != nil {
-						return t.vm.initErrorObject(errors.InternalError, err.Error())
+						return t.vm.initErrorObject(errors.InternalError, instruction, err.Error())
 					}
 
 					t.vm.execRequiredFile(filepath, file)
@@ -632,7 +632,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got: %d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, instruction, "Expect 1 argument. got: %d", len(args))
 					}
 
 					int := args[0].(*IntegerObject)
@@ -692,13 +692,13 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) < 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, "no method name given")
+						return t.vm.initErrorObject(errors.ArgumentError, instruction, "no method name given")
 					}
 
 					name, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, instruction, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					t.sendMethod(name.value, len(args), blockFrame, instruction)
@@ -712,7 +712,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if blockFrame == nil {
-						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
+						return t.vm.initErrorObject(errors.InternalError, instruction, errors.CantYieldWithoutBlockFormat)
 					}
 
 					newT := t.vm.newThread()
@@ -749,14 +749,14 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got: %d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, instruction, "Expect 1 argument. got: %d", len(args))
 					}
 
 					c := args[0]
 					gobyClass, ok := c.(*RClass)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.ClassClass, c.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, instruction, errors.WrongArgumentTypeFormat, classes.ClassClass, c.Class().Name)
 					}
 
 					receiverClass := receiver.Class()
@@ -793,7 +793,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, instruction, "Expect 0 argument. got: %d", len(args))
 					}
 					return FALSE
 				}
@@ -806,7 +806,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 					arg, isStr := args[0].(*StringObject)
 
 					if !isStr {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, instruction, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					obj, ok := receiver.instanceVariableGet(arg.value)
@@ -824,14 +824,14 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 2 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 2 arguments. got: %d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, instruction, "Expect 2 arguments. got: %d", len(args))
 					}
 
 					argName, isStr := args[0].(*StringObject)
 					obj := args[1]
 
 					if !isStr {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, instruction, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					receiver.instanceVariableSet(argName.value, obj)
