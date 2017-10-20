@@ -47,17 +47,17 @@ func builtInRegexpClassMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, instruction, "Expect 1 argument. got=%d", len(args))
 					}
 
 					arg, ok := args[0].(*StringObject)
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, arg.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, instruction, errors.WrongArgumentTypeFormat, classes.StringClass, arg.Class().Name)
 					}
 
 					r := t.vm.initRegexpObject(args[0].toString())
 					if r == nil {
-						return t.vm.initErrorObject(errors.ArgumentError, "Invalid regexp: %v", args[0].toString())
+						return t.vm.initErrorObject(errors.ArgumentError, instruction, "Invalid regexp: %v", args[0].toString())
 					}
 					return r
 				}
@@ -90,7 +90,7 @@ func builtinRegexpInstanceMethods() []*BuiltinMethodObject {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, instruction, "Expect 1 argument. got=%d", len(args))
 					}
 
 					right, ok := args[0].(*RegexpObject)
@@ -123,13 +123,13 @@ func builtinRegexpInstanceMethods() []*BuiltinMethodObject {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, instruction, "Expect 1 argument. got=%d", len(args))
 					}
 
 					arg := args[0]
 					input, ok := arg.(*StringObject)
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, arg.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, instruction, errors.WrongArgumentTypeFormat, classes.StringClass, arg.Class().Name)
 					}
 
 					re := receiver.(*RegexpObject).Regexp
