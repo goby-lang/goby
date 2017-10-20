@@ -81,7 +81,7 @@ func (t *thread) hasError() (string, bool) {
 func (t *thread) execInstruction(cf *normalCallFrame, i *instruction) {
 	cf.pc++
 
-	i.action.operation(t, cf, i.Params...)
+	i.action.operation(t, i, cf, i.Params...)
 }
 
 func (t *thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object) *Pointer {

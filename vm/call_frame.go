@@ -43,8 +43,8 @@ type callFrame interface {
 
 type goMethodCallFrame struct {
 	*baseFrame
-	method     builtinMethodBody
-	name       string
+	method builtinMethodBody
+	name   string
 }
 
 type normalCallFrame struct {
