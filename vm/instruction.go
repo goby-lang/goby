@@ -474,7 +474,7 @@ var builtinActions = map[operationType]*action{
 				callObj := newCallObject(receiver, m, receiverPr, argCount, argSet, blockFrame, i.sourceLine, cf.fileName)
 				t.evalMethodObject(callObj)
 			case *BuiltinMethodObject:
-				t.evalBuiltinMethod(receiver, m, receiverPr, argCount, argSet, blockFrame, i.sourceLine, cf.fileName)
+				t.evalBuiltinMethod(receiver, m, receiverPr, argCount, argSet, blockFrame, i, cf.fileName)
 			case *Error:
 				t.pushErrorObject(errors.InternalError, m.toString())
 			}

@@ -127,7 +127,7 @@ func (t *thread) retrieveBlock(cf *normalCallFrame, args []interface{}) (blockFr
 	return
 }
 
-func (t *thread) sendMethod(methodName string, argCount int, blockFrame *normalCallFrame) {
+func (t *thread) sendMethod(methodName string, argCount int, blockFrame *normalCallFrame, instruction *instruction) {
 	var method Object
 
 	if arr, ok := t.stack.top().Target.(*ArrayObject); ok && arr.splat {
@@ -186,15 +186,15 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 		callObj := newCallObject(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, sendCallFrame.SourceLine(), sendCallFrame.FileName())
 		t.evalMethodObject(callObj)
 	case *BuiltinMethodObject:
-		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, sendCallFrame.SourceLine(), sendCallFrame.FileName())
+		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, instruction, sendCallFrame.FileName())
 	case *Error:
 		t.pushErrorObject(errors.InternalError, m.toString())
 	}
 }
 
-func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame, sourceLine int, fileName string) {
-	cf := newGoMethodCallFrame(method.Fn(receiver), method.Name, fileName)
-	cf.sourceLine = sourceLine
+func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame, instruction *instruction, fileName string) {
+	cf := newGoMethodCallFrame(method.Fn(receiver, instruction), method.Name, fileName)
+	cf.sourceLine = instruction.sourceLine
 	cf.blockFrame = blockFrame
 	argPtr := receiverPtr + 1
 
@@ -210,7 +210,7 @@ func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 	if method.Name == "new" && ok {
 		instance, ok := evaluated.Target.(*RObject)
 		if ok && instance.InitializeMethod != nil {
-			callObj := newCallObject(instance, instance.InitializeMethod, receiverPtr, argCount, argSet, blockFrame, sourceLine, fileName)
+			callObj := newCallObject(instance, instance.InitializeMethod, receiverPtr, argCount, argSet, blockFrame, instruction.sourceLine, fileName)
 			t.evalMethodObject(callObj)
 		}
 	}

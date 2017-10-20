@@ -26,7 +26,7 @@ func builtinBooleanClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "new",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					return t.initUnsupportedMethodError("#new", receiver)
 				}
@@ -47,7 +47,7 @@ func builtinBooleanInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Boolean]
 			Name: "==",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					if receiver == args[0] {
@@ -67,7 +67,7 @@ func builtinBooleanInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Boolean]
 			Name: "!=",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					if receiver != args[0] {
@@ -86,7 +86,7 @@ func builtinBooleanInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Boolean]
 			Name: "!",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					rightValue := receiver.(*BooleanObject).value

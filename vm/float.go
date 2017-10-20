@@ -27,7 +27,7 @@ func builtinFloatClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "new",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					return t.initUnsupportedMethodError("#new", receiver)
 				}
@@ -47,7 +47,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Float]
 			Name: "+",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					operation := func(leftValue float64, rightValue float64) float64 {
 						return leftValue + rightValue
@@ -65,7 +65,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Float]
 			Name: "%",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					operation := func(leftValue float64, rightValue float64) float64 {
 						return math.Mod(leftValue, rightValue)
@@ -83,7 +83,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Float]
 			Name: "-",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					operation := func(leftValue float64, rightValue float64) float64 {
 						return leftValue - rightValue
@@ -101,7 +101,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Float]
 			Name: "*",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					operation := func(leftValue float64, rightValue float64) float64 {
 						return leftValue * rightValue
@@ -119,7 +119,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Float]
 			Name: "**",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					operation := func(leftValue float64, rightValue float64) float64 {
 						return math.Pow(leftValue, rightValue)
@@ -137,7 +137,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Float]
 			Name: "/",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					operation := func(leftValue float64, rightValue float64) float64 {
 						return leftValue / rightValue
@@ -156,7 +156,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Boolean]
 			Name: ">",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					operation := func(leftValue float64, rightValue float64) bool {
 						return leftValue > rightValue
@@ -175,7 +175,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Boolean]
 			Name: ">=",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					operation := func(leftValue float64, rightValue float64) bool {
 						return leftValue >= rightValue
@@ -194,7 +194,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Boolean]
 			Name: "<",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					operation := func(leftValue float64, rightValue float64) bool {
 						return leftValue < rightValue
@@ -213,7 +213,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Boolean]
 			Name: "<=",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					operation := func(leftValue float64, rightValue float64) bool {
 						return leftValue <= rightValue
@@ -233,7 +233,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Float]
 			Name: "<=>",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					rightNumeric, ok := args[0].(Numeric)
 
@@ -267,7 +267,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Boolean]
 			Name: "==",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					result := receiver.(*FloatObject).equalityTest(args[0])
 
@@ -287,7 +287,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Boolean]
 			Name: "!=",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					result := !receiver.(*FloatObject).equalityTest(args[0])
 
@@ -303,7 +303,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Integer]
 			Name: "to_i",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*FloatObject)
 					newInt := t.vm.initIntegerObject(int(r.value))
@@ -314,7 +314,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "ptr",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*FloatObject)
 					return t.vm.initGoObject(&r.value)

@@ -26,7 +26,7 @@ func builtinPluginClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "new",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
 						return t.vm.initErrorObject(errors.ArgumentError, errors.WrongNumberOfArgumentFormat, 1, len(args))
@@ -44,7 +44,7 @@ func builtinPluginClassMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "use",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					pkgPath := args[0].(*StringObject).value
 					_, pkgName := filepath.Split(pkgPath)
@@ -69,7 +69,7 @@ func builtinPluginInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "compile",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*PluginObject)
 					context, ok := receiver.instanceVariableGet("@context")
@@ -122,7 +122,7 @@ func builtinPluginInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "go_func",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					s, ok := args[0].(*StringObject)
 

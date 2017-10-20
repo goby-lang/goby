@@ -36,7 +36,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 			// @param filepath [String]
 			// @return [String]
 			Name: "basename",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					filename := args[0].(*StringObject).value
 					return t.vm.initStringObject(filepath.Base(filename))
@@ -54,7 +54,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 			// @param filename [String]
 			// @return [Integer]
 			Name: "chmod",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					filemod := args[0].(*IntegerObject).value
 					for i := 1; i < len(args); i++ {
@@ -75,7 +75,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "delete",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					for _, arg := range args {
 						filename := arg.(*StringObject).value
@@ -92,7 +92,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "exist?",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					filename := args[0].(*StringObject).value
 					_, err := os.Stat(filename)
@@ -114,7 +114,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 			// @param filename [String]
 			// @return [String]
 			Name: "extname",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					filename := args[0].(*StringObject).value
 					return t.vm.initStringObject(filepath.Ext(filename))
@@ -129,7 +129,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [String]
 			Name: "join",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					var elements []string
 					for i := 0; i < len(args); i++ {
@@ -150,7 +150,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 			// @param filename [String]
 			// @return [File]
 			Name: "new",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					var fn string
 					var mode int
@@ -209,7 +209,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 			// @param filename [String]
 			// @return [Integer]
 			Name: "size",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					filename := args[0].(*StringObject).value
 					if !filepath.IsAbs(filename) {
@@ -234,7 +234,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 			// @param filepath [String]
 			// @return [Array]
 			Name: "split",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					filename := args[0].(*StringObject).value
 					dir, file := filepath.Split(filename)
@@ -254,7 +254,7 @@ func builtinFileInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "close",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					file := receiver.(*FileObject).File
 					file.Close()
@@ -265,7 +265,7 @@ func builtinFileInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "name",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					name := receiver.(*FileObject).File.Name()
 					return t.vm.initStringObject(name)
@@ -274,7 +274,7 @@ func builtinFileInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "read",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					var result string
 					var f []byte
@@ -306,7 +306,7 @@ func builtinFileInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Integer]
 			Name: "size",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					file := receiver.(*FileObject).File
 
@@ -321,7 +321,7 @@ func builtinFileInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "write",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					file := receiver.(*FileObject).File
 					data := args[0].(*StringObject).value
