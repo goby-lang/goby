@@ -40,7 +40,7 @@ func builtinSimpleServerInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "mount",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					path := args[0].(*StringObject).value
 					method := args[1].(*StringObject).value
@@ -53,7 +53,7 @@ func builtinSimpleServerInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "static",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					prefix := args[0].(*StringObject).value
 					fileName := args[1].(*StringObject).value
@@ -65,7 +65,7 @@ func builtinSimpleServerInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "start",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					var port string
 					var serveStatic bool

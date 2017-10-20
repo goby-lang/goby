@@ -34,7 +34,7 @@ func builtinDBClassMethods() []*BuiltinMethodObject {
 			// @return [Object]
 			//
 			Name: "get_connection",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 2 {
 						return t.vm.initErrorObject(errors.ArgumentError, errors.WrongNumberOfArgumentFormat, 2, len(args))
@@ -83,7 +83,7 @@ func builtinDBInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			//
 			Name: "close",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					conn, err := getDBConn(t, receiver)
 
@@ -105,7 +105,7 @@ func builtinDBInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "run",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) < 1 {
 						return t.vm.initErrorObject(errors.ArgumentError, "Expect at least 1 argument.")
@@ -163,7 +163,7 @@ func builtinDBInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			//
 			Name: "exec",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) < 1 {
 						return t.vm.initErrorObject(errors.ArgumentError, "Expect at least 1 argument.")
@@ -226,7 +226,7 @@ func builtinDBInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			//
 			Name: "query",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) < 1 {
 						return t.vm.initErrorObject(errors.ArgumentError, "Expect at least 1 argument.")

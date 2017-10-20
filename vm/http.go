@@ -23,7 +23,7 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 		{
 			// Sends a GET request to the target and returns the HTTP response as a string. Will error on non-200 responses, for more control over http requests look at the `start` method.
 			Name: "get",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					arg0, ok := args[0].(*StringObject)
 					if !ok {
@@ -67,7 +67,7 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 		}, {
 			// Sends a POST request to the target with type header and body. Returns the HTTP response as a string. Will error on non-200 responses, for more control over http requests look at the `start` method.
 			Name: "post",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 3 {
 						return t.vm.initErrorObject(errors.ArgumentError, errors.WrongNumberOfArgumentFormat, 3, len(args))
@@ -112,7 +112,7 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 		}, {
 			// Sends a HEAD request to the target with type header and body. Returns the HTTP headers as a map[string]string. Will error on non-200 responses, for more control over http requests look at the `start` method.
 			Name: "head",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					arg0, ok := args[0].(*StringObject)
 					if !ok {
@@ -155,7 +155,7 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 		}, {
 			// Starts an HTTP client. This method requires a block which takes a Net::HTTP::Client object. The return value of this method is the last evaluated value of the provided block.
 			Name: "start",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					if len(args) != 0 {
