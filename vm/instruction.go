@@ -541,29 +541,8 @@ var builtinActions = map[operationType]*action{
 		name: bytecode.Leave,
 		operation: func(t *thread, i *instruction, cf *normalCallFrame, args ...interface{}) {
 			frame := t.callFrameStack.pop()
-			normalFrame, ok := frame.(*normalCallFrame)
-
-			if !ok {
-				return
-			}
-
+			normalFrame := frame.(*normalCallFrame)
 			normalFrame.pc = len(normalFrame.instructionSet.instructions)
-			//fmt.Println(t.callFrameStack.inspect())
-
-			/*
-				Remove top frame if it's a block frame
-
-				Block execution frame <- This was popped when executing leave
-				---------------------
-				Block frame           <- So this frame is useless
-				---------------------
-				Main frame
-			*/
-			topFrame := t.callFrameStack.top()
-			if topFrame != nil && topFrame.IsBlock() {
-				normalFrame = t.callFrameStack.pop().(*normalCallFrame)
-				normalFrame.pc = len(normalFrame.instructionSet.instructions)
-			}
 		},
 	},
 }

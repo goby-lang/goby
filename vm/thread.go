@@ -62,6 +62,35 @@ func (t *thread) evalCallFrame(cf callFrame) {
 		t.stack.push(&Pointer{Target: result})
 		t.callFrameStack.pop()
 	}
+
+	t.removeUselessBlockFrame(cf)
+}
+
+/*
+	Remove top frame if it's a block frame
+
+	Block execution frame <- This was popped after callframe is executed
+	---------------------
+	Block frame           <- So this frame is useless
+	---------------------
+	Main frame
+*/
+
+func (t *thread) removeUselessBlockFrame(frame callFrame) {
+	switch frame.(type) {
+	case *normalCallFrame:
+		topFrame := t.callFrameStack.top()
+		if topFrame != nil && topFrame.IsBlock() {
+			normalFrame := t.callFrameStack.pop().(*normalCallFrame)
+			normalFrame.pc = len(normalFrame.instructionSet.instructions)
+		}
+	case *goMethodCallFrame:
+		topFrame := t.callFrameStack.top()
+
+		if topFrame != nil && topFrame.IsBlock() {
+			t.callFrameStack.pop()
+		}
+	}
 }
 
 func (t *thread) hasError() (string, bool) {
