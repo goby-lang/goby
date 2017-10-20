@@ -21,7 +21,7 @@ func builtinURIClassMethods() []*BuiltinMethodObject {
 			// u.path # => "/"
 			// ```
 			Name: "parse",
-			Fn: func(receiver Object) builtinMethodBody {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					uri := args[0].(*StringObject).value
 					uriModule := t.vm.topLevelClass("URI")
