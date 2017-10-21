@@ -471,7 +471,7 @@ var builtinActions = map[operationType]*action{
 
 			switch m := method.(type) {
 			case *MethodObject:
-				callObj := newCallObject(receiver, m, receiverPr, argCount, argSet, blockFrame, i.sourceLine, cf.fileName)
+				callObj := newCallObject(receiver, m, receiverPr, argCount, argSet, blockFrame, i.sourceLine)
 				t.evalMethodObject(callObj, i)
 			case *BuiltinMethodObject:
 				t.evalBuiltinMethod(receiver, m, receiverPr, argCount, argSet, blockFrame, i, cf.fileName)
