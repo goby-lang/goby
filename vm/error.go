@@ -22,8 +22,9 @@ import (
 //
 type Error struct {
 	*baseObj
-	Message string
-	Type    string
+	message     string
+	stackTraces string
+	Type        string
 }
 
 // Internal functions ===================================================
@@ -60,7 +61,7 @@ func (vm *VM) initErrorObject(errorType string, sourceLine int, format string, a
 	return &Error{
 		baseObj: &baseObj{class: errClass},
 		// Add 1 to source line because it's zero indexed
-		Message: msg,
+		message: msg,
 		Type:    errorType,
 	}
 }
@@ -78,7 +79,7 @@ func (vm *VM) initErrorClasses() {
 
 // toString returns the object's name as the string format
 func (e *Error) toString() string {
-	return "ERROR: " + e.Message
+	return e.Message()
 }
 
 // toJSON just delegates to `toString`
@@ -87,5 +88,9 @@ func (e *Error) toJSON() string {
 }
 
 func (e *Error) Value() interface{} {
-	return e.Message
+	return e.message
+}
+
+func (e *Error) Message() string {
+	return e.stackTraces + e.message
 }

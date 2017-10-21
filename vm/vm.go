@@ -406,5 +406,5 @@ func (vm *VM) execRequiredFile(filepath string, file []byte) {
 }
 
 func newError(format string, args ...interface{}) *Error {
-	return &Error{Message: fmt.Sprintf(format, args...)}
+	return &Error{message: fmt.Sprintf(format, args...)}
 }

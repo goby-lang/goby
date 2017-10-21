@@ -304,7 +304,7 @@ func TestMethodCall(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 
 		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+			t.Fatalf("got Error: %s", evaluated.(*Error).message)
 		}
 
 		checkExpected(t, i, evaluated, tt.expected)
@@ -402,7 +402,7 @@ func TestMethodCallWithSplatArgument(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 
 		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+			t.Fatalf("got Error: %s", evaluated.(*Error).message)
 		}
 
 		checkExpected(t, i, evaluated, tt.expected)
@@ -901,7 +901,7 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 
 		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+			t.Fatalf("got Error: %s", evaluated.(*Error).message)
 		}
 
 		checkExpected(t, i, evaluated, tt.expected)
@@ -1057,7 +1057,7 @@ func TestInstanceMethodCall(t *testing.T) {
 	evaluated := v.testEval(t, input, getFilename())
 
 	if isError(evaluated) {
-		t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+		t.Fatalf("got Error: %s", evaluated.(*Error).message)
 	}
 
 	result, ok := evaluated.(*IntegerObject)
@@ -1213,7 +1213,7 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 
 		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+			t.Fatalf("got Error: %s", evaluated.(*Error).message)
 		}
 
 		checkExpected(t, i, evaluated, tt.expected)
@@ -1286,7 +1286,7 @@ func TestInstanceVariableEvaluation(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 
 		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+			t.Fatalf("got Error: %s", evaluated.(*Error).message)
 		}
 
 		checkExpected(t, i, evaluated, tt.expected)

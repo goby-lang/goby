@@ -149,6 +149,19 @@ func TestArgumentError(t *testing.T) {
 		`,
 			"ArgumentError: Expect at most 3 args for method 'foo'. got: 4",
 			6, 1},
+		{`def foo(a, b, c)
+		  a + b + c
+		end
+
+		def bar
+		  arr = [1, 2, 3, 5]
+		  foo(*arr)
+		end
+
+		bar
+		`,
+			"ArgumentError: Expect at most 3 args for method 'foo'. got: 4",
+			6, 1},
 	}
 
 	for i, tt := range tests {
@@ -261,7 +274,7 @@ func checkError(t *testing.T, index int, evaluated Object, expectedErrMsg, fn st
 	}
 
 	expectedErrMsg = fmt.Sprintf("%s. At %s:%d", expectedErrMsg, fn, line)
-	if err.Message != expectedErrMsg {
-		t.Fatalf("At test case %d: Expect error message to be:\n  %s. got: \n%s", index, expectedErrMsg, err.Message)
+	if err.message != expectedErrMsg {
+		t.Fatalf("At test case %d: Expect error message to be:\n  %s. got: \n%s", index, expectedErrMsg, err.Message())
 	}
 }
