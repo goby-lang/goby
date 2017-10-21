@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/goby-lang/goby/vm/errors"
+	"strings"
 )
 
 // Error class is actually a special struct to hold internal error types with messages.
@@ -23,7 +24,7 @@ import (
 type Error struct {
 	*baseObj
 	message     string
-	stackTraces string
+	stackTraces []string
 	Type        string
 }
 
@@ -61,8 +62,9 @@ func (vm *VM) initErrorObject(errorType string, sourceLine int, format string, a
 	return &Error{
 		baseObj: &baseObj{class: errClass},
 		// Add 1 to source line because it's zero indexed
-		message: msg,
-		Type:    errorType,
+		message:     msg,
+		stackTraces: []string{fmt.Sprintf("from: %s:%d", cf.FileName(), sourceLine)},
+		Type:        errorType,
 	}
 }
 
@@ -92,5 +94,5 @@ func (e *Error) Value() interface{} {
 }
 
 func (e *Error) Message() string {
-	return e.stackTraces + e.message
+	return strings.Join(e.stackTraces, "\n") + "\n" + e.message
 }
