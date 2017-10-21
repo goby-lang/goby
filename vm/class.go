@@ -593,7 +593,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 					case Object:
 						return r.Class()
 					default:
-						return &Error{Message: "Can't call class on %T" + string(r.Class().ReturnName())}
+						return &Error{message: "Can't call class on %T" + string(r.Class().ReturnName())}
 					}
 				}
 			},

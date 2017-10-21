@@ -6,6 +6,7 @@ import (
 	"github.com/goby-lang/goby/vm/errors"
 	"os"
 	"strings"
+	"bytes"
 )
 
 type thread struct {
@@ -114,6 +115,8 @@ func (t *thread) hasError() (hasError bool) {
 }
 
 func (t *thread) reportErrorAndStop(err *Error) {
+	var stackTraces bytes.Buffer
+
 	cf := t.callFrameStack.top()
 	// Stop program
 	switch cf := cf.(type) {
@@ -121,9 +124,16 @@ func (t *thread) reportErrorAndStop(err *Error) {
 		cf.pc = len(cf.instructionSet.instructions)
 	}
 
+	for i := 0; i < t.cfp-1; i++ {
+		stackTraces.WriteString(t.callFrameStack.callFrames[i].FileName())
+		stackTraces.WriteString("\n")
+	}
+
+	err.stackTraces = stackTraces.String()
+
 	if t.vm.mode == NormalMode {
 		if t.isMainThread() {
-			fmt.Println(err.Message)
+			fmt.Println(err.Message())
 			os.Exit(1)
 		}
 	}
