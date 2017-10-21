@@ -60,6 +60,10 @@ func (t *thread) evalCallFrame(cf callFrame) {
 		}
 		result := cf.method(t, args, cf.blockFrame)
 		t.stack.push(&Pointer{Target: result})
+
+		if _, yes := t.hasError(); yes {
+			return
+		}
 		t.callFrameStack.pop()
 	}
 
@@ -110,7 +114,11 @@ func (t *thread) hasError() (string, bool) {
 func (t *thread) execInstruction(cf *normalCallFrame, i *instruction) {
 	cf.pc++
 
+	//fmt.Println(t.callFrameStack.inspect())
+	//fmt.Println(i.inspect())
 	i.action.operation(t, i, cf, i.Params...)
+	//fmt.Println("============================")
+	//fmt.Println(t.callFrameStack.inspect())
 }
 
 func (t *thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object) *Pointer {
@@ -212,7 +220,7 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 
 	switch m := method.(type) {
 	case *MethodObject:
-		callObj := newCallObject(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, sendCallFrame.SourceLine(), sendCallFrame.FileName())
+		callObj := newCallObject(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, sendCallFrame.SourceLine())
 		t.evalMethodObject(callObj, instruction)
 	case *BuiltinMethodObject:
 		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, instruction, sendCallFrame.FileName())
@@ -239,7 +247,7 @@ func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 	if method.Name == "new" && ok {
 		instance, ok := evaluated.Target.(*RObject)
 		if ok && instance.InitializeMethod != nil {
-			callObj := newCallObject(instance, instance.InitializeMethod, receiverPtr, argCount, argSet, blockFrame, instruction.sourceLine, fileName)
+			callObj := newCallObject(instance, instance.InitializeMethod, receiverPtr, argCount, argSet, blockFrame, instruction.sourceLine)
 			t.evalMethodObject(callObj, instruction)
 		}
 	}
