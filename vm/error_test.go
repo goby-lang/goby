@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -173,6 +174,41 @@ func TestArgumentError(t *testing.T) {
 	}
 }
 
+func TestStackTraces(t *testing.T) {
+	tests := []struct {
+		input          string
+		expectedMsg    string
+		expectedTraces []string
+	}{
+		{`def foo(a, b, c)
+		  a + b + c
+		end
+
+		def bar
+		  arr = [1, 2, 3, 5]
+		  foo(*arr)
+		end
+
+		bar
+		`,
+			"ArgumentError: Expect at most 3 args for method 'foo'. got: 4",
+			[]string{
+				fmt.Sprintf("from %s:7", getFilename()),
+				fmt.Sprintf("from %s:10", getFilename()),
+			},
+		},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expectedMsg)
+		checkErrorTraces(t, i, evaluated, tt.expectedTraces)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestKeywordArgumentError(t *testing.T) {
 	tests := []errorTestCase{
 		{`def foo(x:)
@@ -276,5 +312,31 @@ func checkError(t *testing.T, index int, evaluated Object, expectedErrMsg, fn st
 	expectedErrMsg = fmt.Sprintf("%s. At %s:%d", expectedErrMsg, fn, line)
 	if err.message != expectedErrMsg {
 		t.Fatalf("At test case %d: Expect error message to be:\n  %s. got: \n%s", index, expectedErrMsg, err.Message())
+	}
+}
+
+func checkErrorMsg(t *testing.T, index int, evaluated Object, expectedErrMsg string) {
+	err, ok := evaluated.(*Error)
+	if !ok {
+		t.Fatalf("At test case %d: Expect Error. got=%T (%+v)", index, evaluated, evaluated)
+	}
+
+	fmt.Println(err.Message())
+	if err.message != expectedErrMsg {
+		t.Fatalf("At test case %d: Expect error message to be:\n  %s. got: \n%s", index, expectedErrMsg, err.message)
+	}
+}
+
+func checkErrorTraces(t *testing.T, index int, evaluated Object, expectedTraces []string) {
+	err, ok := evaluated.(*Error)
+	if !ok {
+		t.Fatalf("At test case %d: Expect Error. got=%T (%+v)", index, evaluated, evaluated)
+	}
+
+	joinedExpectedTraces := strings.Join(expectedTraces, "\n")
+	joinedTraces := strings.Join(err.stackTraces, "\n")
+
+	if joinedTraces != joinedTraces {
+		t.Fatalf("At test case %d: Expect traces to be:\n  %s. got: \n%s", index, joinedExpectedTraces, joinedTraces)
 	}
 }
