@@ -1,8 +1,10 @@
 package vm
 
 import (
+	"fmt"
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/vm/errors"
+	"os"
 	"strings"
 )
 
@@ -46,7 +48,7 @@ func (t *thread) evalCallFrame(cf callFrame) {
 		for cf.pc < len(cf.instructionSet.instructions) {
 			i := cf.instructionSet.instructions[cf.pc]
 			t.execInstruction(cf, i)
-			if _, yes := t.hasError(); yes {
+			if t.hasError() {
 				return
 			}
 		}
@@ -61,7 +63,7 @@ func (t *thread) evalCallFrame(cf callFrame) {
 		result := cf.method(t, args, cf.blockFrame)
 		t.stack.push(&Pointer{Target: result})
 
-		if _, yes := t.hasError(); yes {
+		if t.hasError() {
 			return
 		}
 		t.callFrameStack.pop()
@@ -97,18 +99,34 @@ func (t *thread) removeUselessBlockFrame(frame callFrame) {
 	}
 }
 
-func (t *thread) hasError() (string, bool) {
-	var hasError bool
-	var msg string
+func (t *thread) hasError() (hasError bool) {
 	if t.stack.top() != nil {
 		top := t.stack.top().Target
-		err, ok := top.(*Error)
-		if ok {
-			hasError = true
-			msg = err.Message
+		err, hasError := top.(*Error)
+
+		if hasError {
+			t.reportErrorAndStop(err)
+		}
+		return hasError
+	}
+
+	return
+}
+
+func (t *thread) reportErrorAndStop(err *Error) {
+	cf := t.callFrameStack.top()
+	// Stop program
+	switch cf := cf.(type) {
+	case *normalCallFrame:
+		cf.pc = len(cf.instructionSet.instructions)
+	}
+
+	if t.vm.mode == NormalMode {
+		if t.isMainThread() {
+			fmt.Println(err.Message)
+			os.Exit(1)
 		}
 	}
-	return msg, hasError
 }
 
 func (t *thread) execInstruction(cf *normalCallFrame, i *instruction) {
