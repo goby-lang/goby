@@ -269,13 +269,7 @@ func (vm *VM) startFromTopFrame() {
 
 func (vm *VM) currentFilePath() string {
 	frame := vm.mainThread.callFrameStack.top()
-
-	switch cf := frame.(type) {
-	case *normalCallFrame:
-		return cf.instructionSet.filename
-	default:
-		return ""
-	}
+	return frame.FileName()
 }
 
 func (vm *VM) getBlock(name string, filename filename) *instructionSet {
