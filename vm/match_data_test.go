@@ -43,15 +43,15 @@ func TestMatchDataCaptures(t *testing.T) {
 
 func TestMatchDataCapturesFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`'a1bca2'.match(1, 2)`, "ArgumentError: Expect 1 argument. got=2", 1},
-		{`'a1bca2'.match('a.')`, "TypeError: Expect argument to be Regexp. got: String", 1},
+		{`'a1bca2'.match(1, 2)`, "ArgumentError: Expect 1 argument. got=2", 1, 1},
+		{`'a1bca2'.match('a.')`, "TypeError: Expect argument to be Regexp. got: String", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -77,14 +77,14 @@ func TestMatchDataToA(t *testing.T) {
 
 func TestMatchDataToAFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`'a1bca2'.match(Regexp.new('a.')).to_a(1)`, "ArgumentError: Expect 0 argument. got=1", 1},
+		{`'a1bca2'.match(Regexp.new('a.')).to_a(1)`, "ArgumentError: Expect 0 argument. got=1", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }

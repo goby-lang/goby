@@ -12,9 +12,10 @@ import (
 )
 
 type errorTestCase struct {
-	input     string
-	expected  string
-	errorLine int
+	input       string
+	expected    string
+	errorLine   int
+	expectedCFP int
 }
 
 func TestVM_REPLExec(t *testing.T) {
