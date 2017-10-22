@@ -103,9 +103,14 @@ func (t *thread) reportErrorAndStop() {
 	top := t.stack.top().Target
 	err := top.(*Error)
 
-	for i := 0; i < t.cfp-1; i++ {
-		msg := fmt.Sprintf("%s:%d", t.callFrameStack.callFrames[i].FileName(), t.callFrameStack.callFrames[i].SourceLine())
-		err.stackTraces = append(err.stackTraces, msg)
+	if !err.storedTraces {
+		for i := t.cfp - 1; i > 0; i-- {
+			frame := t.callFrameStack.callFrames[i]
+			msg := fmt.Sprintf("from %s:%d", frame.FileName(), frame.SourceLine())
+			err.stackTraces = append(err.stackTraces, msg)
+		}
+
+		err.storedTraces = true
 	}
 
 	if t.vm.mode == NormalMode {
@@ -127,7 +132,7 @@ func (t *thread) execInstruction(cf *normalCallFrame, i *instruction) {
 }
 
 func (t *thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object) *Pointer {
-	c := newNormalCallFrame(blockFrame.instructionSet, blockFrame.FileName())
+	c := newNormalCallFrame(blockFrame.instructionSet, blockFrame.FileName(), blockFrame.sourceLine)
 	c.blockFrame = blockFrame
 	c.ep = blockFrame.ep
 	c.self = blockFrame.self
@@ -142,7 +147,7 @@ func (t *thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object)
 	return t.stack.top()
 }
 
-func (t *thread) retrieveBlock(fileName, blockFlag string) (blockFrame *normalCallFrame) {
+func (t *thread) retrieveBlock(fileName, blockFlag string, sourceLine int) (blockFrame *normalCallFrame) {
 	var blockName string
 	var hasBlock bool
 
@@ -154,7 +159,7 @@ func (t *thread) retrieveBlock(fileName, blockFlag string) (blockFrame *normalCa
 	if hasBlock {
 		block := t.getBlock(blockName, fileName)
 
-		c := newNormalCallFrame(block, fileName)
+		c := newNormalCallFrame(block, fileName, sourceLine)
 		c.isBlock = true
 		blockFrame = c
 	}
@@ -224,7 +229,7 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 }
 
 func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame, sourceLine int, fileName string) {
-	cf := newGoMethodCallFrame(method.Fn(receiver, sourceLine), method.Name, fileName)
+	cf := newGoMethodCallFrame(method.Fn(receiver, sourceLine), method.Name, fileName, sourceLine)
 	cf.sourceLine = sourceLine
 	cf.blockFrame = blockFrame
 	argPtr := receiverPtr + 1

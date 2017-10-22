@@ -179,6 +179,7 @@ func TestStackTraces(t *testing.T) {
 		input          string
 		expectedMsg    string
 		expectedTraces []string
+		expectedCFP    int
 	}{
 		{`def foo(a, b, c)
 		  a + b + c
@@ -196,6 +197,30 @@ func TestStackTraces(t *testing.T) {
 				fmt.Sprintf("from %s:7", getFilename()),
 				fmt.Sprintf("from %s:10", getFilename()),
 			},
+			2,
+		},
+		{`def foo(a, b, c)
+		  a + b + c
+		end
+
+		def bar
+		  arr = [1, 2, 3, 5]
+		  foo(*arr)
+		end
+
+		def baz
+		  bar
+		end
+
+		baz
+		`,
+			"ArgumentError: Expect at most 3 args for method 'foo'. got: 4",
+			[]string{
+				fmt.Sprintf("from %s:7", getFilename()),
+				fmt.Sprintf("from %s:11", getFilename()),
+				fmt.Sprintf("from %s:14", getFilename()),
+			},
+			3,
 		},
 	}
 
@@ -204,7 +229,7 @@ func TestStackTraces(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkErrorMsg(t, i, evaluated, tt.expectedMsg)
 		checkErrorTraces(t, i, evaluated, tt.expectedTraces)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -321,7 +346,6 @@ func checkErrorMsg(t *testing.T, index int, evaluated Object, expectedErrMsg str
 		t.Fatalf("At test case %d: Expect Error. got=%T (%+v)", index, evaluated, evaluated)
 	}
 
-	fmt.Println(err.Message())
 	if err.message != expectedErrMsg {
 		t.Fatalf("At test case %d: Expect error message to be:\n  %s. got: \n%s", index, expectedErrMsg, err.message)
 	}
@@ -336,7 +360,7 @@ func checkErrorTraces(t *testing.T, index int, evaluated Object, expectedTraces 
 	joinedExpectedTraces := strings.Join(expectedTraces, "\n")
 	joinedTraces := strings.Join(err.stackTraces, "\n")
 
-	if joinedTraces != joinedTraces {
-		t.Fatalf("At test case %d: Expect traces to be:\n  %s. got: \n%s", index, joinedExpectedTraces, joinedTraces)
+	if joinedTraces != joinedExpectedTraces {
+		t.Fatalf("At test case %d: Expect traces to be:\n%s \n got: \n%s", index, joinedExpectedTraces, joinedTraces)
 	}
 }

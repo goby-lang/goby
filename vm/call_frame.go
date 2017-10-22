@@ -212,10 +212,10 @@ func (cfs *callFrameStack) top() callFrame {
 	return nil
 }
 
-func newNormalCallFrame(is *instructionSet, filename string) *normalCallFrame {
-	return &normalCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 15), lPr: 0, fileName: filename}, instructionSet: is, pc: 0}
+func newNormalCallFrame(is *instructionSet, filename string, sourceLine int) *normalCallFrame {
+	return &normalCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 15), lPr: 0, fileName: filename, sourceLine: sourceLine}, instructionSet: is, pc: 0}
 }
 
-func newGoMethodCallFrame(m builtinMethodBody, n, filename string) *goMethodCallFrame {
-	return &goMethodCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 15), lPr: 0, fileName: filename}, method: m, name: n}
+func newGoMethodCallFrame(m builtinMethodBody, n, filename string, sourceLine int) *goMethodCallFrame {
+	return &goMethodCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 15), lPr: 0, fileName: filename, sourceLine: sourceLine}, method: m, name: n}
 }

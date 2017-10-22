@@ -23,9 +23,10 @@ import (
 //
 type Error struct {
 	*baseObj
-	message     string
-	stackTraces []string
-	Type        string
+	message      string
+	stackTraces  []string
+	storedTraces bool
+	Type         string
 }
 
 // Internal functions ===================================================
@@ -93,6 +94,7 @@ func (e *Error) Value() interface{} {
 	return e.message
 }
 
+// Message prints the error's message and its stack traces
 func (e *Error) Message() string {
-	return strings.Join(e.stackTraces, "\n") + "\n" + e.message
+	return e.message + "\n" + strings.Join(e.stackTraces, "\n")
 }
