@@ -45,7 +45,7 @@ func (t *thread) startFromTopFrame() {
 func (t *thread) evalCallFrame(cf callFrame) {
 	switch cf := cf.(type) {
 	case *normalCallFrame:
-		for cf.pc < len(cf.instructionSet.instructions) {
+		for cf.pc < cf.instructionsCount() {
 			i := cf.instructionSet.instructions[cf.pc]
 			t.execInstruction(cf, i)
 			if t.hasError() {
@@ -83,19 +83,10 @@ func (t *thread) evalCallFrame(cf callFrame) {
 */
 
 func (t *thread) removeUselessBlockFrame(frame callFrame) {
-	switch frame.(type) {
-	case *normalCallFrame:
-		topFrame := t.callFrameStack.top()
-		if topFrame != nil && topFrame.IsBlock() {
-			normalFrame := t.callFrameStack.pop().(*normalCallFrame)
-			normalFrame.pc = len(normalFrame.instructionSet.instructions)
-		}
-	case *goMethodCallFrame:
-		topFrame := t.callFrameStack.top()
+	topFrame := t.callFrameStack.top()
 
-		if topFrame != nil && topFrame.IsBlock() {
-			t.callFrameStack.pop()
-		}
+	if topFrame != nil && topFrame.IsBlock() {
+		t.callFrameStack.pop().stopExecution()
 	}
 }
 
@@ -115,11 +106,7 @@ func (t *thread) hasError() (hasError bool) {
 
 func (t *thread) reportErrorAndStop(err *Error) {
 	cf := t.callFrameStack.top()
-	// Stop program
-	switch cf := cf.(type) {
-	case *normalCallFrame:
-		cf.pc = len(cf.instructionSet.instructions)
-	}
+	cf.stopExecution()
 
 	if t.vm.mode == NormalMode {
 		if t.isMainThread() {

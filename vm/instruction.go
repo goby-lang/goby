@@ -354,7 +354,7 @@ var builtinActions = map[operationType]*action{
 		operation: func(t *thread, i *instruction, cf *normalCallFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			methodName := t.stack.pop().Target.(*StringObject).value
-			is, ok := t.getMethodIS(methodName, cf.instructionSet.filename)
+			is, ok := t.getMethodIS(methodName, cf.FileName())
 
 			if !ok {
 				t.pushErrorObject(errors.InternalError, i, "Can't get method %s's instruction set.", methodName)
@@ -377,7 +377,7 @@ var builtinActions = map[operationType]*action{
 		operation: func(t *thread, i *instruction, cf *normalCallFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			methodName := t.stack.pop().Target.(*StringObject).value
-			is, _ := t.getMethodIS(methodName, cf.instructionSet.filename)
+			is, _ := t.getMethodIS(methodName, cf.FileName())
 			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.topLevelClass(classes.MethodClass)}}
 
 			v := t.stack.pop().Target
@@ -424,7 +424,7 @@ var builtinActions = map[operationType]*action{
 				}
 			}
 
-			is := t.getClassIS(subjectName, cf.instructionSet.filename)
+			is := t.getClassIS(subjectName, cf.FileName())
 
 			t.stack.pop()
 			c := newNormalCallFrame(is, cf.FileName())
@@ -442,12 +442,14 @@ var builtinActions = map[operationType]*action{
 
 			methodName := args[0].(string)
 			argCount := args[1].(int)
+			blockFlag := args[2].(string)
 			argSet := args[3].(*bytecode.ArgSet)
 
+			// Deal with splat arguments
 			if arr, ok := t.stack.top().Target.(*ArrayObject); ok && arr.splat {
 				// Pop array
 				t.stack.pop()
-				// Can't count array self, only the number of array elements
+				// Can't count array itself, only the number of array elements
 				argCount = argCount - 1 + len(arr.Elements)
 				for _, elem := range arr.Elements {
 					t.stack.push(&Pointer{Target: elem})
@@ -458,6 +460,7 @@ var builtinActions = map[operationType]*action{
 			receiverPr := argPr - 1
 			receiver := t.stack.Data[receiverPr].Target
 
+			// Find Method
 			method = receiver.findMethod(methodName)
 
 			if method == nil {
@@ -467,7 +470,14 @@ var builtinActions = map[operationType]*action{
 				return
 			}
 
-			blockFrame := t.retrieveBlock(cf, args)
+			// Find Block
+			blockFrame := t.retrieveBlock(cf.FileName(), blockFlag)
+
+			if blockFrame != nil {
+				blockFrame.ep = cf
+				blockFrame.self = cf.self
+				t.callFrameStack.push(blockFrame)
+			}
 
 			switch m := method.(type) {
 			case *MethodObject:
@@ -521,7 +531,7 @@ var builtinActions = map[operationType]*action{
 				blockFrame = cf.blockFrame.ep.blockFrame
 			}
 
-			c := newNormalCallFrame(blockFrame.instructionSet, blockFrame.instructionSet.filename)
+			c := newNormalCallFrame(blockFrame.instructionSet, blockFrame.FileName())
 			c.blockFrame = blockFrame
 			c.ep = blockFrame.ep
 			c.self = receiver
@@ -540,9 +550,8 @@ var builtinActions = map[operationType]*action{
 	bytecode.Leave: {
 		name: bytecode.Leave,
 		operation: func(t *thread, i *instruction, cf *normalCallFrame, args ...interface{}) {
-			frame := t.callFrameStack.pop()
-			normalFrame := frame.(*normalCallFrame)
-			normalFrame.pc = len(normalFrame.instructionSet.instructions)
+			t.callFrameStack.pop()
+			cf.stopExecution()
 		},
 	},
 }

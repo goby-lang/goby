@@ -39,6 +39,7 @@ type callFrame interface {
 	storeConstant(constName string, constant interface{}) *Pointer
 	lookupConstant(constName string) *Pointer
 	inspect() string
+	stopExecution()
 }
 
 type goMethodCallFrame struct {
@@ -47,11 +48,21 @@ type goMethodCallFrame struct {
 	name   string
 }
 
+func (cf *goMethodCallFrame) stopExecution() {}
+
 type normalCallFrame struct {
 	*baseFrame
 	instructionSet *instructionSet
 	// program counter
 	pc int
+}
+
+func (n *normalCallFrame) instructionsCount() int {
+	return len(n.instructionSet.instructions)
+}
+
+func (n *normalCallFrame) stopExecution() {
+	n.pc = n.instructionsCount()
 }
 
 func (b *baseFrame) Self() Object {
