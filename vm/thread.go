@@ -121,9 +121,14 @@ func (t *thread) reportErrorAndStop(err *Error) {
 		cf.pc = len(cf.instructionSet.instructions)
 	}
 
-	for i := 0; i < t.cfp-1; i++ {
-		msg := fmt.Sprintf("%s:%d", t.callFrameStack.callFrames[i].FileName(), t.callFrameStack.callFrames[i].SourceLine())
-		err.stackTraces = append(err.stackTraces, msg)
+	if !err.storedTraces {
+		for i := 1; i < t.cfp; i++ {
+			frame := t.callFrameStack.callFrames[i]
+			msg := fmt.Sprintf("from %s:%d", frame.FileName(), frame.SourceLine())
+			err.stackTraces = append(err.stackTraces, msg)
+		}
+
+		err.storedTraces = true
 	}
 
 	if t.vm.mode == NormalMode {
@@ -145,7 +150,7 @@ func (t *thread) execInstruction(cf *normalCallFrame, i *instruction) {
 }
 
 func (t *thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object) *Pointer {
-	c := newNormalCallFrame(blockFrame.instructionSet, blockFrame.FileName())
+	c := newNormalCallFrame(blockFrame.instructionSet, blockFrame.FileName(), blockFrame.sourceLine)
 	c.blockFrame = blockFrame
 	c.ep = blockFrame.ep
 	c.self = blockFrame.self
@@ -174,7 +179,7 @@ func (t *thread) retrieveBlock(cf *normalCallFrame, args []interface{}) (blockFr
 	if hasBlock {
 		block := t.getBlock(blockName, cf.instructionSet.filename)
 
-		c := newNormalCallFrame(block, cf.instructionSet.filename)
+		c := newNormalCallFrame(block, cf.instructionSet.filename, cf.sourceLine)
 		c.isBlock = true
 		c.ep = cf
 		c.self = cf.self
@@ -253,8 +258,7 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 }
 
 func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame, instruction *instruction, fileName string) {
-	cf := newGoMethodCallFrame(method.Fn(receiver, instruction), method.Name, fileName)
-	cf.sourceLine = instruction.sourceLine
+	cf := newGoMethodCallFrame(method.Fn(receiver, instruction), method.Name, fileName, instruction.sourceLine)
 	cf.blockFrame = blockFrame
 	argPtr := receiverPtr + 1
 

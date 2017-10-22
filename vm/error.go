@@ -23,9 +23,10 @@ import (
 //
 type Error struct {
 	*baseObj
-	message     string
-	stackTraces []string
-	Type        string
+	message      string
+	stackTraces  []string
+	storedTraces bool
+	Type         string
 }
 
 // Internal functions ===================================================
@@ -53,7 +54,7 @@ func (vm *VM) initErrorObject(errorType string, instruction *instruction, format
 		baseObj: &baseObj{class: errClass},
 		// Add 1 to source line because it's zero indexed
 		message:     fmt.Sprintf(errorType+": "+format, args...),
-		stackTraces: []string{fmt.Sprintf("from: %s:%d", cf.FileName(), instruction.sourceLine)},
+		stackTraces: []string{fmt.Sprintf("from %s:%d", cf.FileName(), instruction.sourceLine)},
 		Type:        errorType,
 	}
 }

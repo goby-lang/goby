@@ -427,7 +427,7 @@ var builtinActions = map[operationType]*action{
 			is := t.getClassIS(subjectName, cf.instructionSet.filename)
 
 			t.stack.pop()
-			c := newNormalCallFrame(is, cf.FileName())
+			c := newNormalCallFrame(is, cf.FileName(), i.sourceLine)
 			c.self = classPtr.Target
 			t.callFrameStack.push(c)
 			t.startFromTopFrame()
@@ -521,7 +521,7 @@ var builtinActions = map[operationType]*action{
 				blockFrame = cf.blockFrame.ep.blockFrame
 			}
 
-			c := newNormalCallFrame(blockFrame.instructionSet, blockFrame.instructionSet.filename)
+			c := newNormalCallFrame(blockFrame.instructionSet, blockFrame.instructionSet.filename, i.sourceLine)
 			c.blockFrame = blockFrame
 			c.ep = blockFrame.ep
 			c.self = receiver
