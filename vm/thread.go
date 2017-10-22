@@ -155,11 +155,9 @@ func (t *thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object)
 	return t.stack.top()
 }
 
-func (t *thread) retrieveBlock(cf *normalCallFrame, args []interface{}) (blockFrame *normalCallFrame) {
+func (t *thread) retrieveBlock(fileName, blockFlag string) (blockFrame *normalCallFrame) {
 	var blockName string
 	var hasBlock bool
-
-	blockFlag := args[2].(string)
 
 	if len(blockFlag) != 0 {
 		hasBlock = true
@@ -167,15 +165,10 @@ func (t *thread) retrieveBlock(cf *normalCallFrame, args []interface{}) (blockFr
 	}
 
 	if hasBlock {
-		block := t.getBlock(blockName, cf.instructionSet.filename)
+		block := t.getBlock(blockName, fileName)
 
-		c := newNormalCallFrame(block, cf.instructionSet.filename)
+		c := newNormalCallFrame(block, fileName)
 		c.isBlock = true
-		c.ep = cf
-		c.self = cf.self
-
-		t.callFrameStack.push(c)
-
 		blockFrame = c
 	}
 
