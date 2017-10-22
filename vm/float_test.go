@@ -68,17 +68,17 @@ func TestFloatArithmeticOperationWithInteger(t *testing.T) {
 
 func TestFloatArithmeticOperationFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`'1'.to_f + "p"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`'1'.to_f - "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`'1'.to_f ** "p"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`'1'.to_f / "t"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`'1'.to_f + "p"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
+		{`'1'.to_f - "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
+		{`'1'.to_f ** "p"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
+		{`'1'.to_f / "t"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -147,18 +147,18 @@ func TestFloatComparisonWithInteger(t *testing.T) {
 
 func TestFloatComparisonFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`'1'.to_f > "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`'1'.to_f >= "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`'1'.to_f < "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`'1'.to_f <= "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`'1'.to_f <=> "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`'1'.to_f > "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
+		{`'1'.to_f >= "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
+		{`'1'.to_f < "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
+		{`'1'.to_f <= "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
+		{`'1'.to_f <=> "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
