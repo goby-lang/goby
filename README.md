@@ -229,6 +229,7 @@ See the [guideline](https://github.com/goby-lang/goby/blob/master/CONTRIBUTING.m
 - @st0012
 - @hachi8833
 - @Maxwell-Alexius
+- @saveriomiroddi
 
 ## Designer
 - [steward379](https://dribbble.com/steward379)
