@@ -203,13 +203,13 @@ func TestRangeBsearchMethodFail(t *testing.T) {
 		(0..4).bsearch do |i|
 			"Binary Search"
 		end
-		`, "TypeError: Expect Integer or Boolean type. got=String", 2},
+		`, "TypeError: Expect Integer or Boolean type. got=String", 2, 2},
 	}
 
 	for i, tt := range testsFail {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }

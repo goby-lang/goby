@@ -15,16 +15,16 @@ func builtinJSONClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "parse",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+						return t.vm.initErrorObject(errors.ArgumentError, instruction, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
 					j, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, instruction, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					var obj jsonObj
@@ -38,7 +38,7 @@ func builtinJSONClassMethods() []*BuiltinMethodObject {
 						err = json.Unmarshal([]byte(jsonString), &objs)
 
 						if err != nil {
-							return t.vm.initErrorObject(errors.InternalError, "Can't parse string %s as json: %s", jsonString, err.Error())
+							return t.vm.initErrorObject(errors.InternalError, instruction, "Can't parse string %s as json: %s", jsonString, err.Error())
 						}
 
 						var objects []Object
@@ -56,16 +56,16 @@ func builtinJSONClassMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "validate",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+						return t.vm.initErrorObject(errors.ArgumentError, instruction, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
 					j, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, instruction, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					var obj jsonObj

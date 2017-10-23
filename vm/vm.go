@@ -131,7 +131,7 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 
 func (vm *VM) newThread() *thread {
 	s := &stack{RWMutex: new(sync.RWMutex)}
-	cfs := &callFrameStack{callFrames: []*callFrame{}}
+	cfs := &callFrameStack{callFrames: []callFrame{}}
 	t := &thread{stack: s, callFrameStack: cfs, sp: 0, cfp: 0}
 	s.thread = t
 	cfs.thread = t
@@ -141,23 +141,23 @@ func (vm *VM) newThread() *thread {
 
 // ExecInstructions accepts a sequence of bytecodes and use vm to evaluate them.
 func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) {
-	p := newInstructionTranslator(fn)
-	p.vm = vm
-	p.transferInstructionSets(sets)
+	translator := newInstructionTranslator(fn)
+	translator.vm = vm
+	translator.transferInstructionSets(sets)
 
 	// Keep instruction set table updated after parsed new files.
 	// TODO: Find more efficient way to do this.
-	for setType, table := range p.setTable {
+	for setType, table := range translator.setTable {
 		for name, is := range table {
 			vm.isTables[setType][name] = is
 		}
 	}
 
-	vm.blockTables[p.filename] = p.blockTable
-	vm.SetClassISIndexTable(p.filename)
-	vm.SetMethodISIndexTable(p.filename)
+	vm.blockTables[translator.filename] = translator.blockTable
+	vm.SetClassISIndexTable(translator.filename)
+	vm.SetMethodISIndexTable(translator.filename)
 
-	cf := newCallFrame(p.program)
+	cf := newNormalCallFrame(translator.program, translator.filename)
 	cf.self = vm.mainObj
 	vm.mainThread.callFrameStack.push(cf)
 	vm.startFromTopFrame()
@@ -178,8 +178,8 @@ func builtinMainObjSingletonMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "to_s",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(thread *thread, objects []Object, frame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(thread *thread, objects []Object, frame *normalCallFrame) Object {
 					return thread.vm.initStringObject("main")
 				}
 			},
@@ -268,7 +268,8 @@ func (vm *VM) startFromTopFrame() {
 }
 
 func (vm *VM) currentFilePath() string {
-	return string(vm.mainThread.callFrameStack.top().instructionSet.filename)
+	frame := vm.mainThread.callFrameStack.top()
+	return frame.FileName()
 }
 
 func (vm *VM) getBlock(name string, filename filename) *instructionSet {
@@ -328,7 +329,7 @@ func (vm *VM) loadConstant(name string, isModule bool) *RClass {
 	return c
 }
 
-func (vm *VM) lookupConstant(cf *callFrame, constName string) (constant *Pointer) {
+func (vm *VM) lookupConstant(cf callFrame, constName string) (constant *Pointer) {
 	var namespace *RClass
 	var hasNamespace bool
 
@@ -366,7 +367,7 @@ func (vm *VM) execGobyLib(libName string) {
 	file, err := ioutil.ReadFile(libPath)
 
 	if err != nil {
-		vm.mainThread.returnError(errors.InternalError, err.Error())
+		vm.mainThread.pushErrorObject(errors.InternalError, nil, err.Error())
 	}
 
 	vm.execRequiredFile(libPath, file)

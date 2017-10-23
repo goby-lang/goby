@@ -171,15 +171,15 @@ func TestRegexpMatchQuestionMark(t *testing.T) {
 
 func TestRegexpMatchQuestionMarkFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`Regexp.new("abc").match?('a', 'b')`, "ArgumentError: Expect 1 argument. got=2", 1},
-		{`Regexp.new("abc").match?(1)`, "TypeError: Expect argument to be String. got: Integer", 1},
+		{`Regexp.new("abc").match?('a', 'b')`, "ArgumentError: Expect 1 argument. got=2", 1, 1},
+		{`Regexp.new("abc").match?(1)`, "TypeError: Expect argument to be String. got: Integer", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }

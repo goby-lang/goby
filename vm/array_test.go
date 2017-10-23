@@ -113,15 +113,15 @@ func TestArrayDigMethod(t *testing.T) {
 
 func TestArrayDigMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2].dig`, "ArgumentError: Expected 1+ arguments, got 0", 1},
-		{`[1, 2].dig(0, 1)`, "TypeError: Expect target to be Diggable, got Integer", 1},
+		{`[1, 2].dig`, "ArgumentError: Expected 1+ arguments, got 0", 1, 1},
+		{`[1, 2].dig(0, 1)`, "TypeError: Expect target to be Diggable, got Integer", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -240,14 +240,14 @@ func TestArrayStarOperator(t *testing.T) {
 
 func TestArrayStarOperatorFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2] * nil`, "TypeError: Expect argument to be Integer. got: Null", 1},
+		{`[1, 2] * nil`, "TypeError: Expect argument to be Integer. got: Null", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -284,14 +284,14 @@ func TestArrayPlusOperator(t *testing.T) {
 
 func TestArrayPlusOperatorFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2] + true`, "TypeError: Expect argument to be Array. got: Boolean", 1},
+		{`[1, 2] + true`, "TypeError: Expect argument to be Array. got: Boolean", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -339,14 +339,14 @@ func TestArrayAnyMethod(t *testing.T) {
 
 func TestArrayAnyMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[].any?`, "InternalError: Can't yield without a block", 1},
+		{`[].any?`, "InternalError: Can't yield without a block", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -401,17 +401,17 @@ func TestArrayAtMethod(t *testing.T) {
 
 func TestArrayAtMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2, 3].at`, "ArgumentError: Expect 1 arguments. got=0", 1},
-		{`[1, 2, 3].at(2, 3)`, "ArgumentError: Expect 1 arguments. got=2", 1},
-		{`[1, 2, 3].at(true)`, "TypeError: Expect argument to be Integer. got: Boolean", 1},
-		{`[1, 2, 3].at(1..3)`, "TypeError: Expect argument to be Integer. got: Range", 1},
+		{`[1, 2, 3].at`, "ArgumentError: Expect 1 arguments. got=0", 1, 1},
+		{`[1, 2, 3].at(2, 3)`, "ArgumentError: Expect 1 arguments. got=2", 1, 1},
+		{`[1, 2, 3].at(true)`, "TypeError: Expect argument to be Integer. got: Boolean", 1, 1},
+		{`[1, 2, 3].at(1..3)`, "TypeError: Expect argument to be Integer. got: Range", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -442,15 +442,15 @@ func TestArrayClearMethod(t *testing.T) {
 
 func TestArrayClearMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`['Maxwell', 'Alexius'].clear(123)`, "ArgumentError: Expect 0 argument. got=1", 1},
-		{`['Taipei', 101].clear(1, 0, 1)`, "ArgumentError: Expect 0 argument. got=3", 1},
+		{`['Maxwell', 'Alexius'].clear(123)`, "ArgumentError: Expect 0 argument. got=1", 1, 1},
+		{`['Taipei', 101].clear(1, 0, 1)`, "ArgumentError: Expect 0 argument. got=3", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -487,17 +487,17 @@ func TestArrayConcatMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = [1, 2]
 		a.concat(3)
-		`, "TypeError: Expect argument to be Array. got: Integer", 2},
+		`, "TypeError: Expect argument to be Array. got: Integer", 2, 1},
 		{`a = []
 		a.concat("a")
-		`, "TypeError: Expect argument to be Array. got: String", 2},
+		`, "TypeError: Expect argument to be Array. got: String", 2, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -560,14 +560,14 @@ func TestArrayCountMethodFail(t *testing.T) {
 		{
 			`a = [1, 2]
 		a.count(3, 3)
-		`, "ArgumentError: Expect 1 argument, got=2", 2},
+		`, "ArgumentError: Expect 1 argument, got=2", 2, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -643,17 +643,17 @@ func TestArrayDeleteAtMethod(t *testing.T) {
 
 func TestArrayDeleteAtMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2, 3].delete_at`, "ArgumentError: Expect 1 argument. got=0", 1},
-		{`[1, 2, 3].delete_at(2, 3)`, "ArgumentError: Expect 1 argument. got=2", 1},
-		{`[1, 2, 3].delete_at(true)`, "TypeError: Expect argument to be Integer. got: Boolean", 1},
-		{`[1, 2, 3].delete_at(1..3)`, "TypeError: Expect argument to be Integer. got: Range", 1},
+		{`[1, 2, 3].delete_at`, "ArgumentError: Expect 1 argument. got=0", 1, 1},
+		{`[1, 2, 3].delete_at(2, 3)`, "ArgumentError: Expect 1 argument. got=2", 1, 1},
+		{`[1, 2, 3].delete_at(true)`, "TypeError: Expect argument to be Integer. got: Boolean", 1, 1},
+		{`[1, 2, 3].delete_at(1..3)`, "TypeError: Expect argument to be Integer. got: Range", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -690,19 +690,19 @@ func TestArrayEachMethod(t *testing.T) {
 
 func TestArrayEachMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`['M', 'A', 'X', 'W', 'E', 'L', 'L'].each`, "InternalError: Can't yield without a block", 1},
+		{`['M', 'A', 'X', 'W', 'E', 'L', 'L'].each`, "InternalError: Can't yield without a block", 1, 1},
 		{`
 		['T', 'A', 'I', 'P', 'E', 'I'].each(101) do |char|
 		  puts char
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 2},
+		`, "ArgumentError: Expect 0 argument. got=1", 2, 2},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -739,19 +739,19 @@ func TestArrayEachIndexMethod(t *testing.T) {
 
 func TestArrayEachIndexMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`['M', 'A', 'X', 'W', 'E', 'L', 'L'].each_index`, "InternalError: Can't yield without a block", 1},
+		{`['M', 'A', 'X', 'W', 'E', 'L', 'L'].each_index`, "InternalError: Can't yield without a block", 1, 1},
 		{`
 		['T', 'A', 'I', 'P', 'E', 'I'].each_index(101) do |char|
 		  puts char
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 2},
+		`, "ArgumentError: Expect 0 argument. got=1", 2, 2},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -791,15 +791,15 @@ func TestArrayEmptyMethod(t *testing.T) {
 
 func TestArrayEmptyMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2, 3].empty?(123)`, "ArgumentError: Expect 0 argument. got=1", 1},
-		{`['T', 'A', 'I', 'P', 'E', 'I'].empty?(1, 0, 1)`, "ArgumentError: Expect 0 argument. got=3", 1},
+		{`[1, 2, 3].empty?(123)`, "ArgumentError: Expect 0 argument. got=1", 1, 1},
+		{`['T', 'A', 'I', 'P', 'E', 'I'].empty?(1, 0, 1)`, "ArgumentError: Expect 0 argument. got=3", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -855,20 +855,20 @@ func TestArrayFirstMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = [1, 2]
 		a.first("a")
-		`, "TypeError: Expect argument to be Integer. got: String", 2},
+		`, "TypeError: Expect argument to be Integer. got: String", 2, 1},
 		{`a = [1, 2]
 		a.first(1, 2, 3)
-		`, "ArgumentError: Expect 0..1 argument. got=3", 2},
+		`, "ArgumentError: Expect 0..1 argument. got=3", 2, 1},
 		{`a = [1, 2]
 		a.first(-1)
-		`, "ArgumentError: Expect argument to be positive value. got=-1", 2},
+		`, "ArgumentError: Expect argument to be positive value. got=-1", 2, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -905,14 +905,14 @@ func TestArrayFlattenMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = [1, 2]
 		a.flatten(1)
-		`, "ArgumentError: Expect 0 argument. got=1", 2},
+		`, "ArgumentError: Expect 0 argument. got=1", 2, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -949,17 +949,17 @@ func TestArrayJoinMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = [1, 2]
 		a.join(",", "-")
-		`, "ArgumentError: Expect 0 or 1 argument. got=2", 2},
+		`, "ArgumentError: Expect 0 or 1 argument. got=2", 2, 1},
 		{`a = [1, 2]
 		a.join(1)
-		`, "TypeError: Expect argument to be String. got: Integer", 2},
+		`, "TypeError: Expect argument to be String. got: Integer", 2, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -1000,20 +1000,20 @@ func TestArrayLastMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = [1, 2]
 		a.last("l")
-		`, "TypeError: Expect argument to be Integer. got: String", 2},
+		`, "TypeError: Expect argument to be Integer. got: String", 2, 1},
 		{`a = [1, 2]
 		a.last(1, 2, 3)
-		`, "ArgumentError: Expect 0..1 argument. got=3", 2},
+		`, "ArgumentError: Expect 0..1 argument. got=3", 2, 1},
 		{`a = [1, 2]
 		a.last(-1)
-		`, "ArgumentError: Expect argument to be positive value. got=-1", 2},
+		`, "ArgumentError: Expect argument to be positive value. got=-1", 2, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -1053,14 +1053,14 @@ func TestArrayLengthMethod(t *testing.T) {
 
 func TestArrayLengthMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2, 3].length(10)`, "ArgumentError: Expect 0 argument. got=1", 1},
+		{`[1, 2, 3].length(10)`, "ArgumentError: Expect 0 argument. got=1", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -1225,19 +1225,19 @@ func TestArrayReduceMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = [1, 2]
 		a.reduce(1)
-		`, "InternalError: Can't yield without a block", 2},
+		`, "InternalError: Can't yield without a block", 2, 1},
 		{`a = [1, 2]
 		a.reduce(1, 2) do |prev, n|
 			prev + n
 		end
-		`, "ArgumentError: Expect 0 or 1 argument. got=2", 2},
+		`, "ArgumentError: Expect 0 or 1 argument. got=2", 2, 2},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -1298,19 +1298,19 @@ func TestArrayReverseEachMethod(t *testing.T) {
 
 func TestArrayReverseEachMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`['M', 'A'].reverse_each`, "InternalError: Can't yield without a block", 1},
+		{`['M', 'A'].reverse_each`, "InternalError: Can't yield without a block", 1, 1},
 		{`
 		['T', 'A'].reverse_each(101) do |char|
 		  puts char
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 2},
+		`, "ArgumentError: Expect 0 argument. got=1", 2, 2},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -1343,16 +1343,16 @@ func TestArrayRotateMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = [1, 2]
 		a.rotate("a")
-		`, "TypeError: Expect argument to be Integer. got: String", 2},
+		`, "TypeError: Expect argument to be Integer. got: String", 2, 1},
 		{`a = [1, 2]
-		a.rotate(1, 2, 3)`, "ArgumentError: Expect 0..1 argument. got=3", 2},
+		a.rotate(1, 2, 3)`, "ArgumentError: Expect 0..1 argument. got=3", 2, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -1433,14 +1433,14 @@ func TestArrayShiftMethodFail(t *testing.T) {
 		a.shift(3, 3, 4, 5)
 		`,
 			"ArgumentError: Expect 0 argument. got=4",
-			2},
+			2, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -1540,14 +1540,14 @@ func TestArrayValuesAtMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = ["a", "b", "c"]
 			a.values_at("-")
-		`, "TypeError: Expect argument to be Integer. got: String", 2},
+		`, "TypeError: Expect argument to be Integer. got: String", 2, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }

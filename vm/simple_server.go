@@ -40,8 +40,8 @@ func builtinSimpleServerInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "mount",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					path := args[0].(*StringObject).value
 					method := args[1].(*StringObject).value
 
@@ -53,8 +53,8 @@ func builtinSimpleServerInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "static",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					prefix := args[0].(*StringObject).value
 					fileName := args[1].(*StringObject).value
 					router.PathPrefix(prefix).Handler(http.StripPrefix(prefix, http.FileServer(http.Dir(fileName))))
@@ -65,8 +65,8 @@ func builtinSimpleServerInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "start",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					var port string
 					var serveStatic bool
 					server := receiver.(*RObject)
@@ -136,7 +136,7 @@ func initSimpleServerClass(vm *VM) {
 
 // Other helper functions -----------------------------------------------
 
-func newHandler(t *thread, blockFrame *callFrame) func(http.ResponseWriter, *http.Request) {
+func newHandler(t *thread, blockFrame *normalCallFrame) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Go creates one goroutine per request, so we also need to create a new Goby thread for every request.
 		thread := t.vm.newThread()

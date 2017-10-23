@@ -2027,11 +2027,11 @@ func TestUnusedVariableFail(t *testing.T) {
 		{`
 		_ = 1
 		_
-		`, "UndefinedMethodError: Undefined Method '_' for <Instance of: Object>", 3},
+		`, "UndefinedMethodError: Undefined Method '_' for <Instance of: Object>", 3, 1},
 		{`
 		_, b = [1, 2]
 		_
-		`, "UndefinedMethodError: Undefined Method '_' for <Instance of: Object>", 3},
+		`, "UndefinedMethodError: Undefined Method '_' for <Instance of: Object>", 3, 1},
 	}
 
 	for i, tt := range testsFail {

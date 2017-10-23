@@ -24,12 +24,12 @@ func builtinGoObjectInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "go_func",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					s, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, instruction, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					funcName := s.value
@@ -38,7 +38,7 @@ func builtinGoObjectInstanceMethods() []*BuiltinMethodObject {
 					funcArgs, err := convertToGoFuncArgs(args[1:])
 
 					if err != nil {
-						t.vm.initErrorObject(errors.TypeError, err.Error())
+						t.vm.initErrorObject(errors.TypeError, instruction, err.Error())
 					}
 
 					result := metago.CallFunc(r.data, funcName, funcArgs...)

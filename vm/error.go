@@ -30,24 +30,33 @@ type Error struct {
 
 // Functions for initialization -----------------------------------------
 
-func (vm *VM) initErrorObject(errorType, format string, args ...interface{}) *Error {
+func (vm *VM) initErrorObject(errorType string, instruction *instruction, format string, args ...interface{}) *Error {
 	errClass := vm.objectClass.getClassConstant(errorType)
 
 	t := vm.mainThread
 	cf := t.callFrameStack.top()
 
-	// If program counter is 0 means we need to trace back to previous call frame
-	if cf.pc == 0 {
+	switch cf := cf.(type) {
+	case *normalCallFrame:
+		// If program counter is 0 means we need to trace back to previous call frame
+		if cf.pc == 0 {
+			t.callFrameStack.pop()
+			cf = t.callFrameStack.top().(*normalCallFrame)
+		}
+	case *goMethodCallFrame:
 		t.callFrameStack.pop()
-		cf = t.callFrameStack.top()
 	}
 
-	i := cf.instructionSet.instructions[cf.pc-1]
+	msg := fmt.Sprintf("%s. At %s:%d", fmt.Sprintf(errorType+": "+format, args...), cf.FileName(), instruction.sourceLine)
+
+	if instruction == nil {
+		msg = fmt.Sprintf("%s. At %s", fmt.Sprintf(errorType+": "+format, args...), cf.FileName())
+	}
 
 	return &Error{
 		baseObj: &baseObj{class: errClass},
 		// Add 1 to source line because it's zero indexed
-		Message: fmt.Sprintf("%s. At %s:%d", fmt.Sprintf(errorType+": "+format, args...), cf.instructionSet.filename, i.sourceLine+1),
+		Message: msg,
 		Type:    errorType,
 	}
 }
