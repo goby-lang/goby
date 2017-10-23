@@ -45,6 +45,7 @@ var standardLibraries = map[string]func(*VM){
 	"db":                initDBClass,
 	"plugin":            initPluginClass,
 	"json":              initJSONClass,
+	"concurrent_hash":   initConcurrentHashClass,
 }
 
 // VM represents a stack based virtual machine.
@@ -212,7 +213,6 @@ func (vm *VM) initConstants() {
 		vm.initNullClass(),
 		vm.initArrayClass(),
 		vm.initHashClass(),
-		vm.initConcurrentHashClass(),
 		vm.initRangeClass(),
 		vm.initMethodClass(),
 		vm.initChannelClass(),

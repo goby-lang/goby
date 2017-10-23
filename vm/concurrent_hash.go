@@ -108,11 +108,11 @@ func (vm *VM) initConcurrentHashObject(internalHash *HashObject) *ConcurrentHash
 	}
 }
 
-func (vm *VM) initConcurrentHashClass() *RClass {
+func initConcurrentHashClass(vm *VM) {
 	chc := vm.initializeClass(classes.ConcurrentHashClass, false)
 	chc.setBuiltinMethods(builtinConcurrentHashInstanceMethods(), false)
 	chc.setBuiltinMethods(builtinConcurrentHashClassMethods(), true)
-	return chc
+	vm.objectClass.setClassConstant(chc)
 }
 
 // Object interface functions -------------------------------------------

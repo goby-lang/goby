@@ -18,7 +18,7 @@ func TestConcurrentHashClassSuperclass(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -36,7 +36,7 @@ func TestConcurrentHashClassNew(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		testConcurrentHashObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -45,13 +45,13 @@ func TestConcurrentHashClassNew(t *testing.T) {
 
 func TestConcurrentHashClassNewFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new(true)`, "TypeError: Expect argument to be Hash. got: Boolean", 1},
-		{`ConcurrentHash.new(1, 2)`, "ArgumentError: Expect 0 or 1 arguments, got 2", 1},
+		{`ConcurrentHash.new(true)`, "TypeError: Expect argument to be Hash. got: Boolean", 3},
+		{`ConcurrentHash.new(1, 2)`, "ArgumentError: Expect 0 or 1 arguments, got 2", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -64,7 +64,7 @@ func TestEvalConcurrentHashExpression(t *testing.T) {
 	`
 
 	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
+	evaluated := v.testEvalWithRequire(t, input, getFilename(), "concurrent_hash")
 
 	h, ok := evaluated.(*ConcurrentHashObject)
 	if !ok {
@@ -153,7 +153,7 @@ func TestConcurrentHashAccessOperation(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -180,7 +180,7 @@ func TestConcurrentHashAccessWithDefaultOperation(t *testing.T) {
 
 	for i, tt := range valueTests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -205,7 +205,7 @@ func TestConcurrentHashAccessWithDefaultOperation(t *testing.T) {
 
 	for i, tt := range hashTests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		testConcurrentHashObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -214,14 +214,14 @@ func TestConcurrentHashAccessWithDefaultOperation(t *testing.T) {
 
 func TestConcurrentHashAccessOperationFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2 })[]`, "ArgumentError: Expect 1 argument. got: 0", 1},
-		{`ConcurrentHash.new({ a: 1, b: 2 })[true]`, "TypeError: Expect argument to be String. got: Boolean", 1},
-		{`ConcurrentHash.new({ a: 1, b: 2 })[true] = 1`, "TypeError: Expect argument to be String. got: Boolean", 1},
+		{`ConcurrentHash.new({ a: 1, b: 2 })[]`, "ArgumentError: Expect 1 argument. got: 0", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 })[true]`, "TypeError: Expect argument to be String. got: Boolean", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 })[true] = 1`, "TypeError: Expect argument to be String. got: Boolean", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -265,7 +265,7 @@ func TestConcurrentHashComparisonOperation(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -306,7 +306,7 @@ func TestConcurrentHashAnyMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -315,13 +315,13 @@ func TestConcurrentHashAnyMethod(t *testing.T) {
 
 func TestConcurrentHashAnyMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({  }).any?(123) do end`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`ConcurrentHash.new({  }).any?`, "InternalError: Can't yield without a block", 1},
+		{`ConcurrentHash.new({  }).any?(123) do end`, "ArgumentError: Expect 0 argument. got: 1", 3},
+		{`ConcurrentHash.new({  }).any?`, "InternalError: Can't yield without a block", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -348,7 +348,7 @@ func TestConcurrentHashClearMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		testConcurrentHashObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -357,13 +357,13 @@ func TestConcurrentHashClearMethod(t *testing.T) {
 
 func TestConcurrentHashClearMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2 }).clear(123)`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).clear(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 1},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).clear(123)`, "ArgumentError: Expect 0 argument. got: 1", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).clear(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -388,7 +388,7 @@ func TestConcurrentHashDefaultOperation(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -397,14 +397,14 @@ func TestConcurrentHashDefaultOperation(t *testing.T) {
 
 func TestConcurrentHashDefaultSetOperationFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ }).default = *[1, 2]`, "ArgumentError: Expected 1 argument, got 2", 1},
-		{`ConcurrentHash.new({ }).default = []`, "ArgumentError: Arrays and Hashes are not accepted as default values", 1},
-		{`ConcurrentHash.new({ }).default = {}`, "ArgumentError: Arrays and Hashes are not accepted as default values", 1},
+		{`ConcurrentHash.new({ }).default = *[1, 2]`, "ArgumentError: Expected 1 argument, got 2", 3},
+		{`ConcurrentHash.new({ }).default = []`, "ArgumentError: Arrays and Hashes are not accepted as default values", 3},
+		{`ConcurrentHash.new({ }).default = {}`, "ArgumentError: Arrays and Hashes are not accepted as default values", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -456,7 +456,7 @@ func TestConcurrentHashDeleteMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -465,15 +465,15 @@ func TestConcurrentHashDeleteMethod(t *testing.T) {
 
 func TestConcurrentHashDeleteMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: "Hello", c: true }).delete`, "ArgumentError: Expect 1 argument. got: 0", 1},
-		{`ConcurrentHash.new({ a: 1, b: "Hello", c: true }).delete("a", "b")`, "ArgumentError: Expect 1 argument. got: 2", 1},
-		{`ConcurrentHash.new({ a: 1, b: "Hello", c: true }).delete(123)`, "TypeError: Expect argument to be String. got: Integer", 1},
-		{`ConcurrentHash.new({ a: 1, b: "Hello", c: true }).delete(true)`, "TypeError: Expect argument to be String. got: Boolean", 1},
+		{`ConcurrentHash.new({ a: 1, b: "Hello", c: true }).delete`, "ArgumentError: Expect 1 argument. got: 0", 3},
+		{`ConcurrentHash.new({ a: 1, b: "Hello", c: true }).delete("a", "b")`, "ArgumentError: Expect 1 argument. got: 2", 3},
+		{`ConcurrentHash.new({ a: 1, b: "Hello", c: true }).delete(123)`, "TypeError: Expect argument to be String. got: Integer", 3},
+		{`ConcurrentHash.new({ a: 1, b: "Hello", c: true }).delete(true)`, "TypeError: Expect argument to be String. got: Boolean", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -512,7 +512,7 @@ func TestConcurrentHashDeleteIfMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		testConcurrentHashObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -521,13 +521,13 @@ func TestConcurrentHashDeleteIfMethod(t *testing.T) {
 
 func TestConcurrentHashDeleteIfMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ }).delete_if(123) do end`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`ConcurrentHash.new({ }).delete_if`, "InternalError: Can't yield without a block", 1},
+		{`ConcurrentHash.new({ }).delete_if(123) do end`, "ArgumentError: Expect 0 argument. got: 1", 3},
+		{`ConcurrentHash.new({ }).delete_if`, "InternalError: Can't yield without a block", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -552,7 +552,7 @@ func TestConcurrentHashDigMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -561,13 +561,13 @@ func TestConcurrentHashDigMethod(t *testing.T) {
 
 func TestConcurrentHashDigMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: [], b: 2 }).dig`, "ArgumentError: Expected 1+ arguments, got 0", 1},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).dig(:a, :b)`, "TypeError: Expect target to be Diggable, got Integer", 1},
+		{`ConcurrentHash.new({ a: [], b: 2 }).dig`, "ArgumentError: Expected 1+ arguments, got 0", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).dig(:a, :b)`, "TypeError: Expect target to be Diggable, got Integer", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -591,7 +591,7 @@ func TestConcurrentHashEachMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		testConcurrentHashObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -614,7 +614,7 @@ func TestConcurrentHashEachMethod(t *testing.T) {
 
 	for i, tt := range tests2 {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		testBidimensionalArrayObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -624,13 +624,13 @@ func TestConcurrentHashEachMethod(t *testing.T) {
 func TestConcurrentHashEachMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`ConcurrentHash.new({ a: 1, b: 2}).each("Hello") do end
-		`, "ArgumentError: Expect 0 arguments. got: 1", 1},
-		{`ConcurrentHash.new({ a: 1, b: 2}).each`, "InternalError: Can't yield without a block", 1},
+		`, "ArgumentError: Expect 0 arguments. got: 1", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2}).each`, "InternalError: Can't yield without a block", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -675,7 +675,7 @@ func TestConcurrentHashEachKeyMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		testArrayObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -687,13 +687,13 @@ func TestConcurrentHashEachKeyMethodFail(t *testing.T) {
 		{`ConcurrentHash.new({ a: 1, b: 2, c: 3 }).each_key("Hello") do |key|
 		  puts key
 		end
-		`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`ConcurrentHash.new({ a: 1, b: 2, c: 3 }).each_key`, "InternalError: Can't yield without a block", 1},
+		`, "ArgumentError: Expect 0 argument. got: 1", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2, c: 3 }).each_key`, "InternalError: Can't yield without a block", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -729,7 +729,7 @@ func TestConcurrentHashEachValueMethod(t *testing.T) {
 
 	for i, tt := range hashTests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		testArrayObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -771,7 +771,7 @@ func TestConcurrentHashEachValueMethod(t *testing.T) {
 
 	for i, tt := range normalTests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -783,13 +783,13 @@ func TestConcurrentHashEachValueMethodFail(t *testing.T) {
 		{`ConcurrentHash.new({ a: 1, b: 2, c: 3 }).each_value("Hello") do |value|
 		  puts value
 		end
-		`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`ConcurrentHash.new({ a: 1, b: 2, c: 3 }).each_value`, "InternalError: Can't yield without a block", 1},
+		`, "ArgumentError: Expect 0 argument. got: 1", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2, c: 3 }).each_value`, "InternalError: Can't yield without a block", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -807,7 +807,7 @@ func TestConcurrentHashEmptyMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -816,13 +816,13 @@ func TestConcurrentHashEmptyMethod(t *testing.T) {
 
 func TestConcurrentHashEmptyMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2 }).empty?(123)`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).empty?(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 1},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).empty?(123)`, "ArgumentError: Expect 0 argument. got: 1", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).empty?(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -850,7 +850,7 @@ func TestConcurrentHashEqualMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -859,13 +859,13 @@ func TestConcurrentHashEqualMethod(t *testing.T) {
 
 func TestConcurrentHashEqualMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2 }).eql?`, "ArgumentError: Expect 1 argument. got: 0", 1},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).eql?(true, { hello: "World" })`, "ArgumentError: Expect 1 argument. got: 2", 1},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).eql?`, "ArgumentError: Expect 1 argument. got: 0", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).eql?(true, { hello: "World" })`, "ArgumentError: Expect 1 argument. got: 2", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -890,7 +890,7 @@ func TestConcurrentHashFetchMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -899,15 +899,15 @@ func TestConcurrentHashFetchMethod(t *testing.T) {
 
 func TestConcurrentHashFetchMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ spaghetti: "eat" }).fetch()`, "ArgumentError: Expected 1 or 2 arguments, got 0", 1},
-		{`ConcurrentHash.new({ spaghetti: "eat" }).fetch("a", "b", "c")`, "ArgumentError: Expected 1 or 2 arguments, got 3", 1},
-		{`ConcurrentHash.new({ spaghetti: "eat" }).fetch("a", "b") do end`, "ArgumentError: The default argument can't be passed along with a block", 1},
-		{`ConcurrentHash.new({ spaghetti: "eat" }).fetch("pizza")`, "ArgumentError: The value was not found, and no block has been provided", 1},
+		{`ConcurrentHash.new({ spaghetti: "eat" }).fetch()`, "ArgumentError: Expected 1 or 2 arguments, got 0", 3},
+		{`ConcurrentHash.new({ spaghetti: "eat" }).fetch("a", "b", "c")`, "ArgumentError: Expected 1 or 2 arguments, got 3", 3},
+		{`ConcurrentHash.new({ spaghetti: "eat" }).fetch("a", "b") do end`, "ArgumentError: The default argument can't be passed along with a block", 3},
+		{`ConcurrentHash.new({ spaghetti: "eat" }).fetch("pizza")`, "ArgumentError: The value was not found, and no block has been provided", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -925,7 +925,7 @@ func TestConcurrentHashHasKeyMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -934,15 +934,15 @@ func TestConcurrentHashHasKeyMethod(t *testing.T) {
 
 func TestConcurrentHashHasKeyMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2 }).has_key?`, "ArgumentError: Expect 1 argument. got: 0", 1},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).has_key?(true, { hello: "World" })`, "ArgumentError: Expect 1 argument. got: 2", 1},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).has_key?(true)`, "TypeError: Expect argument to be String. got: Boolean", 1},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).has_key?(123)`, "TypeError: Expect argument to be String. got: Integer", 1},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).has_key?`, "ArgumentError: Expect 1 argument. got: 0", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).has_key?(true, { hello: "World" })`, "ArgumentError: Expect 1 argument. got: 2", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).has_key?(true)`, "TypeError: Expect argument to be String. got: Boolean", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).has_key?(123)`, "TypeError: Expect argument to be String. got: Integer", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -965,7 +965,7 @@ func TestConcurrentHashHasValueMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -974,13 +974,13 @@ func TestConcurrentHashHasValueMethod(t *testing.T) {
 
 func TestConcurrentHashHasValueMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2 }).has_value?`, "ArgumentError: Expect 1 argument. got: 0", 1},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).has_value?(true, { hello: "World" })`, "ArgumentError: Expect 1 argument. got: 2", 1},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).has_value?`, "ArgumentError: Expect 1 argument. got: 0", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).has_value?(true, { hello: "World" })`, "ArgumentError: Expect 1 argument. got: 2", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -993,7 +993,7 @@ func TestConcurrentHashKeysMethod(t *testing.T) {
 	`
 
 	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
+	evaluated := v.testEvalWithRequire(t, input, getFilename(), "concurrent_hash")
 
 	arr, ok := evaluated.(*ArrayObject)
 	if !ok {
@@ -1017,13 +1017,13 @@ func TestConcurrentHashKeysMethod(t *testing.T) {
 
 func TestConcurrentHashKeysMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2 }).keys(123)`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).keys(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 1},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).keys(123)`, "ArgumentError: Expect 0 argument. got: 1", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).keys(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -1045,7 +1045,7 @@ func TestConcurrentHashLengthMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -1054,13 +1054,13 @@ func TestConcurrentHashLengthMethod(t *testing.T) {
 
 func TestConcurrentHashLengthMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2 }).length(123)`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).length(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 1},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).length(123)`, "ArgumentError: Expect 0 argument. got: 1", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).length(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -1125,7 +1125,7 @@ func TestConcurrentHashMapValuesMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -1137,13 +1137,13 @@ func TestConcurrentHashMapValuesMethodFail(t *testing.T) {
 		{`ConcurrentHash.new({ a: 1, b: 2, c: 3 }).map_values("Hello") do |value|
 		  value * 3
 		end
-		`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`ConcurrentHash.new({ a: 1, b: 2, c: 3 }).map_values`, "InternalError: Can't yield without a block", 1},
+		`, "ArgumentError: Expect 0 argument. got: 1", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2, c: 3 }).map_values`, "InternalError: Can't yield without a block", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -1158,7 +1158,7 @@ func TestConcurrentHashMergeMethod(t *testing.T) {
 
 	for i, value := range input {
 		v := initTestVM()
-		evaluated := v.testEval(t, value, getFilename())
+		evaluated := v.testEvalWithRequire(t, value, getFilename(), "concurrent_hash")
 
 		h, ok := evaluated.(*ConcurrentHashObject)
 		if !ok {
@@ -1185,14 +1185,14 @@ func TestConcurrentHashMergeMethod(t *testing.T) {
 
 func TestConcurrentHashMergeMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2 }).merge`, "ArgumentError: Expect at least 1 argument. got: 0", 1},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).merge(true, { hello: "World" })`, "TypeError: Expect argument to be Hash. got: Boolean", 1},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).merge({ hello: "World" }, 123, "Hello")`, "TypeError: Expect argument to be Hash. got: Integer", 1},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).merge`, "ArgumentError: Expect at least 1 argument. got: 0", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).merge(true, { hello: "World" })`, "TypeError: Expect argument to be Hash. got: Boolean", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).merge({ hello: "World" }, 123, "Hello")`, "TypeError: Expect argument to be Hash. got: Integer", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -1213,7 +1213,7 @@ func TestConcurrentHashSortedKeysMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		testArrayObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -1258,7 +1258,7 @@ func TestConcurrentHashSelectMethod(t *testing.T) {
 
 	for i, tt := range testsSortedArray {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		testConcurrentHashObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -1267,13 +1267,13 @@ func TestConcurrentHashSelectMethod(t *testing.T) {
 
 func TestConcurrentHashSelectMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ }).select(123) do end`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`ConcurrentHash.new({ }).select`, "InternalError: Can't yield without a block", 1},
+		{`ConcurrentHash.new({ }).select(123) do end`, "ArgumentError: Expect 0 argument. got: 1", 3},
+		{`ConcurrentHash.new({ }).select`, "InternalError: Can't yield without a block", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -1282,13 +1282,13 @@ func TestConcurrentHashSelectMethodFail(t *testing.T) {
 
 func TestConcurrentHashSortedKeysMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2 }).sorted_keys(123)`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).sorted_keys(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 1},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).sorted_keys(123)`, "ArgumentError: Expect 0 argument. got: 1", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).sorted_keys(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -1310,7 +1310,7 @@ func TestConcurrentHashToArrayMethod(t *testing.T) {
 
 	for i, tt := range testsSortedArray {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		testArrayObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -1321,7 +1321,7 @@ func TestConcurrentHashToArrayMethod(t *testing.T) {
 	`
 
 	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
+	evaluated := v.testEvalWithRequire(t, input, getFilename(), "concurrent_hash")
 
 	arr, ok := evaluated.(*ArrayObject)
 	if !ok {
@@ -1353,13 +1353,13 @@ func TestConcurrentHashToArrayMethod(t *testing.T) {
 
 func TestConcurrentHashToArrayMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2 }).to_a(true, { hello: "World" })`, "ArgumentError: Expect 0..1 argument. got: 2", 1},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).to_a(123)`, "TypeError: Expect argument to be Boolean. got: Integer", 1},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).to_a(true, { hello: "World" })`, "ArgumentError: Expect 0..1 argument. got: 2", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).to_a(123)`, "TypeError: Expect argument to be Boolean. got: Integer", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -1399,7 +1399,7 @@ func TestConcurrentHashToJSONMethodWithArray(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		compareJSONResult(t, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -1449,7 +1449,7 @@ func TestConcurrentHashToJSONMethodWithNestedHash(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		compareJSONResult(t, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -1510,7 +1510,7 @@ func TestConcurrentHashToJSONMethodWithBasicTypes(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		compareJSONResult(t, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -1519,13 +1519,13 @@ func TestConcurrentHashToJSONMethodWithBasicTypes(t *testing.T) {
 
 func TestConcurrentHashToJSONMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2 }).to_json(123)`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).to_json(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 1},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).to_json(123)`, "ArgumentError: Expect 0 argument. got: 1", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).to_json(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -1544,7 +1544,7 @@ func TestConcurrentHashToStringMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -1553,13 +1553,13 @@ func TestConcurrentHashToStringMethod(t *testing.T) {
 
 func TestConcurrentHashToStringMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2 }).to_s(123)`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).to_s(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 1},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).to_s(123)`, "ArgumentError: Expect 0 argument. got: 1", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).to_s(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -1624,7 +1624,7 @@ func TestConcurrentHashTransformValuesMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -1636,13 +1636,13 @@ func TestConcurrentHashTransformValuesMethodFail(t *testing.T) {
 		{`ConcurrentHash.new({ a: 1, b: 2, c: 3 }).transform_values("Hello") do |value|
 		  value * 3
 		end
-		`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`ConcurrentHash.new({ a: 1, b: 2, c: 3 }).transform_values`, "InternalError: Can't yield without a block", 1},
+		`, "ArgumentError: Expect 0 argument. got: 1", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2, c: 3 }).transform_values`, "InternalError: Can't yield without a block", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -1655,7 +1655,7 @@ func TestConcurrentHashValuesMethod(t *testing.T) {
 	`
 
 	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
+	evaluated := v.testEvalWithRequire(t, input, getFilename(), "concurrent_hash")
 
 	arr, ok := evaluated.(*ArrayObject)
 	if !ok {
@@ -1682,13 +1682,13 @@ func TestConcurrentHashValuesMethod(t *testing.T) {
 
 func TestConcurrentHashValuesMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2 }).values(123)`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).values(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 1},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).values(123)`, "ArgumentError: Expect 0 argument. got: 1", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).values(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -1713,7 +1713,7 @@ func TestConcurrentHashValuesAtMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		testArrayObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -1722,12 +1722,12 @@ func TestConcurrentHashValuesAtMethod(t *testing.T) {
 
 func TestConcurrentHashValuesAtMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2 }).values_at(123)`, "TypeError: Expect argument to be String. got: Integer", 1},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).values_at(123)`, "TypeError: Expect argument to be String. got: Integer", 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
