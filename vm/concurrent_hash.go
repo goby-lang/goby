@@ -1,59 +1,39 @@
 package vm
 
 import (
+	"bytes"
+	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
 )
 
-// Pseudo-constant definition of the forwarded methods, mapped to a boolean representing the
-// requirement for a write lock (true) or read lock (false)
-var ConcurrentHashMethodsForwardingTable = map[string]bool{
-	"[]": false,
-	"[]=": true,
-	"any?": false,
-	"clear": true,
-	"default": false,
-	"default=": true,
-	"delete": true,
-	"delete_if": true,
-	"dig": false,
-	"each": false,
-	"each_key": false,
-	"each_value": false,
-	"empty?": false,
-	"eql?": false,
-	"fetch": false,
-	"has_key?": false,
-	"has_value?": false,
-	"keys": false,
-	"length": false,
-	"map_values": false,
-	"merge": false,
-	"select": false,
-	"sorted_keys": false,
-	"to_a": false,
-	"to_json": false,
-	"to_s": false,
-	"transform_values": false,
-	"values": false,
-	"values_at": false,
-}
-
-// ConcurrentHashObject is a thread-safe Hash.
+// Implementation of thread-safe associative arrays (Hash).
 //
-// The current design is the simplest possible, via a R/W mutex; if/when performance will be a
-// concern, it's trivial to write more sophisticated implementations, since the logic is entirely
-// encapsulated.
+// The implementation internally uses Go's `sync.Map` type, with some advantages and disadvantages:
 //
-// The class is current a subclass of HashObject internally, but an Object direct subclass at
-// user level.
+// - it is highly performant and predictable for a certain pattern of usage (`concurrent loops with keys that are stable over time, and either few steady-state stores, or stores localized to one goroutine per key.`); performance and predictability in other conditions are unspecified;
+// - iterations are non-deterministic; during iterations, keys may not be included;
+// - size can't be retrieved;
+// - for the reasons above, the Hash APIs implemented are minimal.
+//
+// For details, see https://golang.org/pkg/sync/#Map.
+//
+// Concurrent hashes are instantiated via `new()`:
+//
+//     ConcurrentHash.new()
+//     ConcurrentHash.new({"a": 1, "b": 2})
+//
+// ```ruby
+// hash = ConcurrentHash.new({ "a": 1, "b": 2 })
+// has["a"]  # => 1
+// ```
+//
 type ConcurrentHashObject struct {
 	*baseObj
-	InternalHash *HashObject
-
-	sync.RWMutex
+	internalMap sync.Map
 }
 
 // Class methods --------------------------------------------------------
@@ -68,17 +48,17 @@ func builtinConcurrentHashClassMethods() []*BuiltinMethodObject {
 					}
 
 					if len(args) == 0 {
-						return t.vm.initConcurrentHashObject(t.vm.initHashObject(make(map[string]Object)))
-					} else {
-						arg := args[0]
-						hashArg, ok := arg.(*HashObject)
-
-						if !ok {
-							return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.HashClass, arg.Class().Name)
-						}
-
-						return t.vm.initConcurrentHashObject(hashArg)
+						return t.vm.initConcurrentHashObject(make(map[string]Object))
 					}
+
+					arg := args[0]
+					hashArg, ok := arg.(*HashObject)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.HashClass, arg.Class().Name)
+					}
+
+					return t.vm.initConcurrentHashObject(hashArg.Pairs)
 				}
 			},
 		},
@@ -87,24 +67,257 @@ func builtinConcurrentHashClassMethods() []*BuiltinMethodObject {
 
 // Instance methods -----------------------------------------------------
 func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
-	methodDefinitions := []*BuiltinMethodObject{}
+	return []*BuiltinMethodObject{
+		{
+			// Retrieves the value (object) that corresponds to the key specified.
+			// When a key doesn't exist, `nil` is returned, or the default, if set.
+			//
+			// ```Ruby
+			// h = ConcurrentHash.new({ a: 1, b: "2" })
+			// h['a'] #=> 1
+			// h['b'] #=> "2"
+			// h['c'] #=> nil
+			// ```
+			//
+			// @return [Object]
+			Name: "[]",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
 
-	for methodName, requireWriteLock := range ConcurrentHashMethodsForwardingTable {
-		methodFunction := DefineForwardedConcurrentHashMethod(methodName, requireWriteLock)
-		methodDefinitions = append(methodDefinitions, methodFunction)
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got: %d", len(args))
+					}
+
+					i := args[0]
+					key, ok := i.(*StringObject)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, i.Class().Name)
+					}
+
+					h := receiver.(*ConcurrentHashObject)
+
+					value, ok := h.internalMap.Load(key.value)
+
+					if !ok {
+						return NULL
+					}
+
+					return value.(Object)
+				}
+			},
+		},
+		{
+			// Associates the value given by `value` with the key given by `key`.
+			// Returns the `value`.
+			//
+			// ```Ruby
+			// h = ConcurrentHash.new{ a: 1, b: "2" })
+			// h['a'] = 2          #=> 2
+			// h                   #=> { a: 2, b: "2" }
+			// ```
+			//
+			// @return [Object] The value
+			Name: "[]=",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+
+					// First arg is index
+					// Second arg is assigned value
+					if len(args) != 2 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 2 arguments. got: %d", len(args))
+					}
+
+					k := args[0]
+					key, ok := k.(*StringObject)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, k.Class().Name)
+					}
+
+					h := receiver.(*ConcurrentHashObject)
+					h.internalMap.Store(key.value, args[1])
+
+					return args[1]
+				}
+			},
+		},
+		{
+			// Remove the key from the hash if key exist.
+			//
+			// ```Ruby
+			// h = ConcurrentHash.new({ a: 1, b: 2, c: 3 })
+			// h.delete("b") # => NULL
+			// h             # => { a: 1, c: 3 }
+			// ```
+			//
+			// @return [NULL]
+			Name: "delete",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got: %d", len(args))
+					}
+
+					h := receiver.(*ConcurrentHashObject)
+					d := args[0]
+					deleteKeyObject, ok := d.(*StringObject)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, d.Class().Name)
+					}
+
+					h.internalMap.Delete(deleteKeyObject.value)
+
+					return NULL
+				}
+			},
+		},
+		{
+			// Calls block once for each key in the hash (in sorted key order), passing the
+			// key-value pair as parameters.
+			// Note that iteration is not deterministic under all circumstances; see
+			// https://golang.org/pkg/sync/#Map.
+			//
+			// ```Ruby
+			// h = ConcurrentHash.new({ b: "2", a: 1 })
+			// h.each do |k, v|
+			//   puts k.to_s + "->" + v.to_s
+			// end
+			// # => a->1
+			// # => b->2
+			// ```
+			//
+			// @return [Hash] self
+			Name: "each",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if blockFrame == nil {
+						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
+					}
+
+					if len(args) != 0 {
+						t.callFrameStack.pop()
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 arguments. got: %d", len(args))
+					}
+
+					hash := receiver.(*ConcurrentHashObject)
+					framePopped := false
+
+					iterator := func(key, value interface{}) bool {
+						keyObject := t.vm.initStringObject(key.(string))
+
+						t.builtinMethodYield(blockFrame, keyObject, value.(Object))
+
+						framePopped = true
+
+						return true
+					}
+
+					hash.internalMap.Range(iterator)
+
+					if !framePopped {
+						t.callFrameStack.pop()
+					}
+
+					return hash
+				}
+			},
+		},
+		{
+			// Returns true if the key exist in the hash.
+			//
+			// ```Ruby
+			// h = ConcurrentHash.new({ a: 1, b: "2" })
+			// h.has_key?("a") # => true
+			// h.has_key?("e") # => false
+			// ```
+			//
+			// @return [Boolean]
+			Name: "has_key?",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 1 argument. got: %d", len(args))
+					}
+
+					h := receiver.(*ConcurrentHashObject)
+					i := args[0]
+					input, ok := i.(*StringObject)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.StringClass, i.Class().Name)
+					}
+
+					if _, ok := h.internalMap.Load(input.value); ok {
+						return TRUE
+					}
+
+					return FALSE
+				}
+			},
+		},
+		{
+			// Returns json that is corresponding to the hash.
+			// Basically just like Hash#to_json in Rails but currently doesn't support options.
+			//
+			// ```Ruby
+			// h = ConcurrentHash.new({ a: 1, b: 2 })
+			// h.to_json #=> {"a":1,"b":2}
+			// ```
+			//
+			// @return [String]
+			Name: "to_json",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
+					}
+
+					r := receiver.(*ConcurrentHashObject)
+					return t.vm.initStringObject(r.toJSON())
+				}
+			},
+		},
+		{
+			// Returns json that is corresponding to the hash.
+			// Basically just like Hash#to_json in Rails but currently doesn't support options.
+			//
+			// ```Ruby
+			// h = { a: 1, b: "2"}
+			// h.to_s #=> "{ a: 1, b: \"2\" }"
+			// ```
+			//
+			// @return [String]
+			Name: "to_s",
+			Fn: func(receiver Object) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, "Expect 0 argument. got: %d", len(args))
+					}
+
+					h := receiver.(*ConcurrentHashObject)
+					return t.vm.initStringObject(h.toString())
+				}
+			},
+		},
 	}
-
-	return methodDefinitions
 }
 
 // Internal functions ===================================================
 
 // Functions for initialization -----------------------------------------
 
-func (vm *VM) initConcurrentHashObject(internalHash *HashObject) *ConcurrentHashObject {
+func (vm *VM) initConcurrentHashObject(pairs map[string]Object) *ConcurrentHashObject {
+	var internalMap sync.Map
+
+	for key, value := range pairs {
+		internalMap.Store(key, value)
+	}
+
 	return &ConcurrentHashObject{
 		baseObj: &baseObj{class: vm.topLevelClass(classes.ConcurrentHashClass)},
-		InternalHash: internalHash,
+		internalMap: internalMap,
 	}
 }
 
@@ -115,54 +328,57 @@ func initConcurrentHashClass(vm *VM) {
 	vm.objectClass.setClassConstant(chc)
 }
 
-// Object interface functions -------------------------------------------
+// Polymorphic helper functions -----------------------------------------
 
-// toJSON returns the object's name as the JSON string format
-func (chc *ConcurrentHashObject) toJSON() string {
-	return chc.InternalHash.toJSON()
+// Value returns the object
+func (h *ConcurrentHashObject) Value() interface{} {
+	return h.internalMap
 }
 
 // toString returns the object's name as the string format
-func (chc *ConcurrentHashObject) toString() string {
-	return chc.InternalHash.toString()
-}
+func (h *ConcurrentHashObject) toString() string {
+	var out bytes.Buffer
+	var pairs []string
 
-// Value returns the object
-func (chc *ConcurrentHashObject) Value() interface{} {
-	return chc.InternalHash.Pairs
-}
+	iterator := func(key, value interface{}) bool {
+		var template string
 
-// Helper functions -----------------------------------------------------
+		switch value.(type) {
+		case *StringObject:
+			template = "%s: \"%s\""
+		default:
+			template = "%s: %s"
+		}
 
-func DefineForwardedConcurrentHashMethod(methodName string, requireWriteLock bool) *BuiltinMethodObject {
-	return &BuiltinMethodObject {
-		Name: methodName,
-		Fn: func(receiver Object) builtinMethodBody {
-			return func(t *thread, args []Object, blockFrame *callFrame) Object {
-				concurrentHash := receiver.(*ConcurrentHashObject)
-				hashMethodObject := concurrentHash.InternalHash.findMethod(methodName).(*BuiltinMethodObject)
+		pairs = append(pairs, fmt.Sprintf(template, key, value.(Object).toString()))
 
-				if requireWriteLock {
-					concurrentHash.Lock()
-				} else {
-					concurrentHash.RLock()
-				}
-
-				result := hashMethodObject.Fn(concurrentHash.InternalHash)(t, args, blockFrame)
-
-				if requireWriteLock {
-					concurrentHash.Unlock()
-				} else {
-					concurrentHash.RUnlock()
-				}
-
-				switch result.(type) {
-				case *HashObject:
-					return t.vm.initConcurrentHashObject(result.(*HashObject))
-				default:
-					return result
-				}
-			}
-		},
+		return true
 	}
+
+	h.internalMap.Range(iterator)
+
+	out.WriteString("{ ")
+	out.WriteString(strings.Join(pairs, ", "))
+	out.WriteString(" }")
+
+	return out.String()
+}
+
+// toJSON returns the object's name as the JSON string format
+func (h *ConcurrentHashObject) toJSON() string {
+	var out bytes.Buffer
+	var values []string
+	out.WriteString("{")
+
+	iterator := func(key, value interface{}) bool {
+		values = append(values, generateJSONFromPair(key.(string), value.(Object)))
+
+		return true
+	}
+
+	h.internalMap.Range(iterator)
+
+	out.WriteString(strings.Join(values, ","))
+	out.WriteString("}")
+	return out.String()
 }

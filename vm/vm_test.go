@@ -320,7 +320,16 @@ func testConcurrentHashObject(t *testing.T, index int, objectResult Object, expe
 		return false
 	}
 
-	return _checkHashPairs(t, result.InternalHash.Pairs, expected)
+	pairs := make(map[string]Object)
+
+	iterator := func(key, value interface{}) bool {
+		pairs[key.(string)] = value.(Object)
+		return true
+	}
+
+	result.internalMap.Range(iterator)
+
+	return _checkHashPairs(t, pairs, expected)
 }
 
 // Tests a Hash Object, with a few limitations:
