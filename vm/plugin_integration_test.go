@@ -11,8 +11,6 @@ func TestCallingPluginFunction(t *testing.T) {
 	skipPluginTestIfEnvNotSet(t)
 
 	input := `
-	require "plugin"
-
 	p = Plugin.use "../test_fixtures/import_test/plugin/plugin.go"
 	p.go_func("Foo", "!")
 	p.go_func("Baz")
@@ -22,7 +20,7 @@ func TestCallingPluginFunction(t *testing.T) {
 	// We don't test the result here for two reasons:
 	// - If it doesn't work it'll returns error or panic
 	// - It's hard to test a plugin obj
-	v.testEval(t, input, getFilename())
+	v.testEvalWithRequire(t, input, getFilename(), "plugin")
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
 }
@@ -31,14 +29,12 @@ func TestCallingPluginFunctionWithReturnValue(t *testing.T) {
 	skipPluginTestIfEnvNotSet(t)
 
 	input := `
-	require "plugin"
-
 	p = Plugin.use "../test_fixtures/import_test/plugin/plugin.go"
 	p.go_func("Bar")
 	`
 
 	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
+	evaluated := v.testEvalWithRequire(t, input, getFilename(), "plugin")
 	checkExpected(t, 0, evaluated, "Bar")
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
@@ -48,14 +44,12 @@ func TestCallingLibFuncFromPlugin(t *testing.T) {
 	skipPluginTestIfEnvNotSet(t)
 
 	input := `
-	require "plugin"
-
 	p = Plugin.use "../test_fixtures/import_test/plugin/plugin.go"
 	p.go_func("ReturnLibName")
 	`
 
 	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
+	evaluated := v.testEvalWithRequire(t, input, getFilename(), "plugin")
 	checkExpected(t, 0, evaluated, "lib")
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
@@ -65,8 +59,6 @@ func TestPluginGeneration(t *testing.T) {
 	skipPluginTestIfEnvNotSet(t)
 
 	input := `
-	require "plugin"
-
 	p = Plugin.generate("db") do |p|
 	  p.import_pkg("", "database/sql")
 	  p.import_pkg("_", "github.com/lib/pq")
@@ -79,7 +71,7 @@ func TestPluginGeneration(t *testing.T) {
 	`
 
 	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
+	evaluated := v.testEvalWithRequire(t, input, getFilename(), "plugin")
 	checkExpected(t, 0, evaluated, true)
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)

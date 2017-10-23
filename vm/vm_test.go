@@ -187,6 +187,12 @@ func (v *VM) testEval(t *testing.T, input, filepath string) Object {
 	return v.mainThread.stack.top().Target
 }
 
+func (v *VM) testEvalWithRequire(t *testing.T, input, filepath string, require string) Object {
+	preparedInput := fmt.Sprintf("require \"%s\"\n\n", require) + input
+
+	return v.testEval(t, preparedInput, filepath)
+}
+
 func (v *VM) checkCFP(t *testing.T, index, expectedCFP int) {
 	if v.mainThread.cfp != expectedCFP {
 		t.Errorf("At case %d expect main thread's cfp to be %d. got: %d", index, expectedCFP, v.mainThread.cfp)

@@ -12,8 +12,6 @@ func TestServerInitialization(t *testing.T) {
 		expected interface{}
 	}{
 		{`
-		require "net/simple_server"
-
 		s = Net::SimpleServer.new(4000)
 		s.port
 		`, 4000},
@@ -21,7 +19,7 @@ func TestServerInitialization(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "net/simple_server")
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)

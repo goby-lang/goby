@@ -56,18 +56,12 @@ func TestHTTPObject(t *testing.T) {
 	}{
 		//test get request
 		{`
-		require "net/http"
-
 		Net::HTTP.get("http://127.0.0.1:3000/index")
 		`, "GET Hello World"},
 		{`
-		require "net/http"
-
 		Net::HTTP.post("http://127.0.0.1:3000/index", "text/plain", "Hi Again")
 		`, "POST Hi Again"},
 		{`
-		require "net/http"
-
 		res = Net::HTTP.head("http://127.0.0.1:3000/index")
 		res["Content-Length"]
 		`, "15"},
@@ -78,7 +72,7 @@ func TestHTTPObject(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "net/http")
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -95,68 +89,44 @@ func TestHTTPObjectFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		//HTTPErrors for get()
 		{`
-		require "net/http"
-
 		Net::HTTP.get("http://127.0.0.1:3000/error")
 		`, "HTTPError: Non-200 response, 404 Not Found (404)", 4, 1},
 		{`
-		require "net/http"
-
 		Net::HTTP.get("http://127.0.0.1:3001")
 		`, "HTTPError: Could not complete request, Get http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: getsockopt: connection refused", 4, 1},
 		//Argument errors for get()
 		{`
-		require "net/http"
-
 		Net::HTTP.get(42)
 		`, "ArgumentError: Expect argument 0 to be string, got: Integer", 4, 1},
 		{`
-		require "net/http"
-
 		Net::HTTP.get("http://127.0.0.1:3000/error", 40, 2)
 		`, "ArgumentError: Splat arguments must be a string, got: Integer for argument 0", 4, 1},
 		//HTTPErrors for post()
 		{`
-		require "net/http"
-
 		Net::HTTP.post("http://127.0.0.1:3000/error", "text/plain", "Let me down")
 		`, "HTTPError: Non-200 response, 404 Not Found (404)", 4, 1},
 		{`
-		require "net/http"
-
 		Net::HTTP.post("http://127.0.0.1:3001", "text/plain", "Let me down")
 		`, "HTTPError: Could not complete request, Post http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: getsockopt: connection refused", 4, 1},
 		//Argument errors for post()
 		{`
-		require "net/http"
-
 		Net::HTTP.post("http://127.0.0.1:3001", "text/plain", "Let me down", "again")
 		`, "ArgumentError: Expect 3 arguments. got: 4", 4, 1},
 		{`
-		require "net/http"
-
 		Net::HTTP.post(42, "text/plain", "Let me down")
 		`, "ArgumentError: Expect argument 0 to be string, got: Integer", 4, 1},
 		//HTTPErrors for head()
 		{`
-		require "net/http"
-
 		Net::HTTP.head("http://127.0.0.1:3000/error")
 		`, "HTTPError: Non-200 response, 404 Not Found (404)", 4, 1},
 		{`
-		require "net/http"
-
 		Net::HTTP.head("http://127.0.0.1:3001")
 		`, "HTTPError: Could not complete request, Head http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: getsockopt: connection refused", 4, 1},
 		//Argument errors for head()
 		{`
-		require "net/http"
-
 		Net::HTTP.head(42)
 		`, "ArgumentError: Expect argument 0 to be string, got: Integer", 4, 1},
 		{`
-		require "net/http"
-
 		Net::HTTP.head("http://127.0.0.1:3000/error", 40, 2)
 		`, "ArgumentError: Splat arguments must be a string, got: Integer for argument 0", 4, 1},
 	}
@@ -166,7 +136,7 @@ func TestHTTPObjectFail(t *testing.T) {
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "net/http")
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)

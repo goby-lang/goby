@@ -10,8 +10,6 @@ func TestPluginInitialization(t *testing.T) {
 		expected interface{}
 	}{
 		{`
-		require "plugin"
-
 		p = Plugin.config("db") do |c|
 		  c.import_pkg("", "database/sql")
 		  c.link_function("sql", "Open")
@@ -21,8 +19,6 @@ func TestPluginInitialization(t *testing.T) {
 		c.packages.first[:name]
 	`, "database/sql"},
 		{`
-		require "plugin"
-
 		p = Plugin.config("db") do |c|
 		  c.import_pkg("", "database/sql")
 		  c.link_function("sql", "Open")
@@ -32,8 +28,6 @@ func TestPluginInitialization(t *testing.T) {
 		c.functions.first[:prefix]
 	`, "sql"},
 		{`
-		require "plugin"
-
 		p = Plugin.config("db") do |c|
 		  c.import_pkg("", "database/sql")
 		  c.link_function("sql", "Open")
@@ -46,7 +40,7 @@ func TestPluginInitialization(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "plugin")
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
