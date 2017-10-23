@@ -44,8 +44,8 @@ func TestConcurrentHashClassNew(t *testing.T) {
 
 func TestConcurrentHashClassNewFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new(true)`, "TypeError: Expect argument to be Hash. got: Boolean", 3},
-		{`ConcurrentHash.new(1, 2)`, "ArgumentError: Expect 0 or 1 arguments, got 2", 3},
+		{`ConcurrentHash.new(true)`, "TypeError: Expect argument to be Hash. got: Boolean", 3, 3},
+		{`ConcurrentHash.new(1, 2)`, "ArgumentError: Expect 0 or 1 arguments, got 2", 3, 3},
 	}
 
 	for i, tt := range testsFail {
@@ -165,9 +165,9 @@ func TestConcurrentHashAccessOperation(t *testing.T) {
 
 func TestConcurrentHashAccessOperationFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2 })[]`, "ArgumentError: Expect 1 argument. got: 0", 3},
-		{`ConcurrentHash.new({ a: 1, b: 2 })[true]`, "TypeError: Expect argument to be String. got: Boolean", 3},
-		{`ConcurrentHash.new({ a: 1, b: 2 })[true] = 1`, "TypeError: Expect argument to be String. got: Boolean", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 })[]`, "ArgumentError: Expect 1 argument. got: 0", 3, 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 })[true]`, "TypeError: Expect argument to be String. got: Boolean", 3, 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 })[true] = 1`, "TypeError: Expect argument to be String. got: Boolean", 3, 3},
 	}
 
 	for i, tt := range testsFail {
@@ -242,10 +242,10 @@ func TestConcurrentHashDeleteMethod(t *testing.T) {
 
 func TestConcurrentHashDeleteMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: "Hello", c: true }).delete`, "ArgumentError: Expect 1 argument. got: 0", 3},
-		{`ConcurrentHash.new({ a: 1, b: "Hello", c: true }).delete("a", "b")`, "ArgumentError: Expect 1 argument. got: 2", 3},
-		{`ConcurrentHash.new({ a: 1, b: "Hello", c: true }).delete(123)`, "TypeError: Expect argument to be String. got: Integer", 3},
-		{`ConcurrentHash.new({ a: 1, b: "Hello", c: true }).delete(true)`, "TypeError: Expect argument to be String. got: Boolean", 3},
+		{`ConcurrentHash.new({ a: 1, b: "Hello", c: true }).delete`, "ArgumentError: Expect 1 argument. got: 0", 3, 3},
+		{`ConcurrentHash.new({ a: 1, b: "Hello", c: true }).delete("a", "b")`, "ArgumentError: Expect 1 argument. got: 2", 3, 3},
+		{`ConcurrentHash.new({ a: 1, b: "Hello", c: true }).delete(123)`, "TypeError: Expect argument to be String. got: Integer", 3, 3},
+		{`ConcurrentHash.new({ a: 1, b: "Hello", c: true }).delete(true)`, "TypeError: Expect argument to be String. got: Boolean", 3, 3},
 	}
 
 	for i, tt := range testsFail {
@@ -306,8 +306,8 @@ func TestConcurrentHashEachMethod(t *testing.T) {
 
 func TestConcurrentHashEachMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2}).each("Hello") do end`, "ArgumentError: Expect 0 arguments. got: 1", 3},
-		{`ConcurrentHash.new({ a: 1, b: 2}).each`, "InternalError: Can't yield without a block", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2}).each("Hello") do end`, "ArgumentError: Expect 0 arguments. got: 1", 3, 3},
+		{`ConcurrentHash.new({ a: 1, b: 2}).each`, "InternalError: Can't yield without a block", 3, 3},
 	}
 
 	for i, tt := range testsFail {
@@ -339,10 +339,10 @@ func TestConcurrentHashHasKeyMethod(t *testing.T) {
 
 func TestConcurrentHashHasKeyMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2 }).has_key?`, "ArgumentError: Expect 1 argument. got: 0", 3},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).has_key?(true, { hello: "World" })`, "ArgumentError: Expect 1 argument. got: 2", 3},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).has_key?(true)`, "TypeError: Expect argument to be String. got: Boolean", 3},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).has_key?(123)`, "TypeError: Expect argument to be String. got: Integer", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).has_key?`, "ArgumentError: Expect 1 argument. got: 0", 3, 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).has_key?(true, { hello: "World" })`, "ArgumentError: Expect 1 argument. got: 2", 3, 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).has_key?(true)`, "TypeError: Expect argument to be String. got: Boolean", 3, 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).has_key?(123)`, "TypeError: Expect argument to be String. got: Integer", 3, 3},
 	}
 
 	for i, tt := range testsFail {
@@ -507,8 +507,8 @@ func TestConcurrentHashToJSONMethodWithBasicTypes(t *testing.T) {
 
 func TestConcurrentHashToJSONMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2 }).to_json(123)`, "ArgumentError: Expect 0 argument. got: 1", 3},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).to_json(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).to_json(123)`, "ArgumentError: Expect 0 argument. got: 1", 3, 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).to_json(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 3, 3},
 	}
 
 	for i, tt := range testsFail {
@@ -540,8 +540,8 @@ func TestConcurrentHashToStringMethod(t *testing.T) {
 
 func TestConcurrentHashToStringMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2 }).to_s(123)`, "ArgumentError: Expect 0 argument. got: 1", 3},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).to_s(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).to_s(123)`, "ArgumentError: Expect 0 argument. got: 1", 3, 3},
+		{`ConcurrentHash.new({ a: 1, b: 2 }).to_s(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 3, 3},
 	}
 
 	for i, tt := range testsFail {
