@@ -1,8 +1,6 @@
 package vm
 
 import (
-	"encoding/json"
-	"reflect"
 	"testing"
 )
 
@@ -11,13 +9,19 @@ func TestConcurrentHashClassSuperclass(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{`ConcurrentHash.class.name`, "Class"},
-		{`ConcurrentHash.superclass.name`, "Object"},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.class.name
+		`, "Class"},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.superclass.name
+		`, "Object"},
 	}
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -29,13 +33,19 @@ func TestConcurrentHashClassNew(t *testing.T) {
 		input    string
 		expected map[string]interface{}
 	}{
-		{`ConcurrentHash.new`, map[string]interface{}{}},
-		{`ConcurrentHash.new({a: 1, b: 2})`, map[string]interface{}{"a": 1, "b": 2}},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new
+		`, map[string]interface{}{}},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new({a: 1, b: 2})
+		`, map[string]interface{}{"a": 1, "b": 2}},
 	}
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		testConcurrentHashObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -44,13 +54,19 @@ func TestConcurrentHashClassNew(t *testing.T) {
 
 func TestConcurrentHashClassNewFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new(true)`, "TypeError: Expect argument to be Hash. got: Boolean", 3, 3},
-		{`ConcurrentHash.new(1, 2)`, "ArgumentError: Expect 0 or 1 arguments, got 2", 3, 3},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new(true)
+		`, "TypeError: Expect argument to be Hash. got: Boolean", 3, 3},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new(1, 2)
+		`, "ArgumentError: Expect 0 or 1 arguments, got 2", 3, 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -59,11 +75,12 @@ func TestConcurrentHashClassNewFail(t *testing.T) {
 
 func TestEvalConcurrentHashExpression(t *testing.T) {
 	input := `
-	ConcurrentHash.new({ foo: 123, bar: "test", Baz: true })
+	require 'concurrent/hash'
+	Concurrent::Hash.new({ foo: 123, bar: "test", Baz: true })
 	`
 
 	v := initTestVM()
-	evaluated := v.testEvalWithRequire(t, input, getFilename(), "concurrent_hash")
+	evaluated := v.testEval(t, input, getFilename())
 
 	h, ok := evaluated.(*ConcurrentHashObject)
 	if !ok {
@@ -95,68 +112,83 @@ func TestConcurrentHashAccessOperation(t *testing.T) {
 		expected interface{}
 	}{
 		{`
-			ConcurrentHash.new({})[:foo]
+		require 'concurrent/hash'
+		Concurrent::Hash.new({})[:foo]
 		`, nil},
 		{`
-			ConcurrentHash.new({})[:foo123]
+		require 'concurrent/hash'
+		Concurrent::Hash.new({})[:foo123]
 		`, nil},
 		{`
-			ConcurrentHash.new({ foo123: 100 })[:foo123]
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ foo123: 100 })[:foo123]
 		`, 100},
 		{`
-			{}["foo"]
+		require 'concurrent/hash'
+		{}["foo"]
 		`, nil},
 		{`
-			ConcurrentHash.new({ bar: "foo" })[:bar]
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ bar: "foo" })[:bar]
 		`, "foo"},
 		{`
-			ConcurrentHash.new({ bar: "foo" })["bar"]
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ bar: "foo" })["bar"]
 		`, "foo"},
 		{`
-			ConcurrentHash.new({ foo: 2, bar: "foo" })[:foo]
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ foo: 2, bar: "foo" })[:foo]
 		`, 2},
 		{`
-			ConcurrentHash.new({ foo: 2, bar: "foo" })["foo"]
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ foo: 2, bar: "foo" })["foo"]
 		`, 2},
 		{`
-			h = ConcurrentHash.new({ bar: "Foo" })
-			h["bar"]
+		require 'concurrent/hash'
+		h = Concurrent::Hash.new({ bar: "Foo" })
+		h["bar"]
 		`, "Foo"},
 		{`
-			h = ConcurrentHash.new({ bar: 1, foo: 2 })
-			h["foo"] = h["bar"]
-			h["foo"]
+		require 'concurrent/hash'
+		h = Concurrent::Hash.new({ bar: 1, foo: 2 })
+		h["foo"] = h["bar"]
+		h["foo"]
 
 		`, 1},
 		{`
-			h = ConcurrentHash.new({})
-			h["foo"] = 100
-			h["foo"]
+		require 'concurrent/hash'
+		h = Concurrent::Hash.new({})
+		h["foo"] = 100
+		h["foo"]
 		`, 100},
 		{`
-			h = ConcurrentHash.new({})
-			h["foo"] = ConcurrentHash.new({ bar: 100 })
-			h["foo"]["bar"]
+		require 'concurrent/hash'
+		h = Concurrent::Hash.new({})
+		h["foo"] = Concurrent::Hash.new({ bar: 100 })
+		h["foo"]["bar"]
 		`, 100},
 		{`
-			h = ConcurrentHash.new({ foo: { bar: [1, 2, 3] }})
-			h["foo"]["bar"][0] + h["foo"]["bar"][1]
+		require 'concurrent/hash'
+		h = Concurrent::Hash.new({ foo: { bar: [1, 2, 3] }})
+		h["foo"]["bar"][0] + h["foo"]["bar"][1]
 		`, 3},
 		{`
-			h = ConcurrentHash.new({})
-			h["foo"] = 100
-			h["bar"]
+		require 'concurrent/hash'
+		h = Concurrent::Hash.new({})
+		h["foo"] = 100
+		h["bar"]
 		`, nil},
 		{`
-			h = ConcurrentHash.new({ foo: 1, bar: 5, baz: 10 })
-			h["foo"] = h["bar"] * h["baz"]
-			h["foo"]
+		require 'concurrent/hash'
+		h = Concurrent::Hash.new({ foo: 1, bar: 5, baz: 10 })
+		h["foo"] = h["bar"] * h["baz"]
+		h["foo"]
 		`, 50},
 	}
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -165,14 +197,20 @@ func TestConcurrentHashAccessOperation(t *testing.T) {
 
 func TestConcurrentHashAccessOperationFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2 })[]`, "ArgumentError: Expect 1 argument. got: 0", 3, 3},
-		{`ConcurrentHash.new({ a: 1, b: 2 })[true]`, "TypeError: Expect argument to be String. got: Boolean", 3, 3},
-		{`ConcurrentHash.new({ a: 1, b: 2 })[true] = 1`, "TypeError: Expect argument to be String. got: Boolean", 3, 3},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: 1, b: 2 })[]`, "ArgumentError: Expect 1 argument. got: 0", 3, 3},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: 1, b: 2 })[true]`, "TypeError: Expect argument to be String. got: Boolean", 3, 3},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: 1, b: 2 })[true] = 1`, "TypeError: Expect argument to be String. got: Boolean", 3, 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -185,47 +223,56 @@ func TestConcurrentHashDeleteMethod(t *testing.T) {
 		expected interface{}
 	}{
 		{`
-		h = ConcurrentHash.new({ a: 1, b: "Hello", c: true })
+		require 'concurrent/hash'
+		h = Concurrent::Hash.new({ a: 1, b: "Hello", c: true })
 		h.delete("a")
 		h["a"]
 		`, nil},
 		{`
-		h = ConcurrentHash.new({ a: 1, b: "Hello", c: true })
+		require 'concurrent/hash'
+		h = Concurrent::Hash.new({ a: 1, b: "Hello", c: true })
 		h.delete("a")
 		h["b"]
 		`, "Hello"},
 		{`
-		h = ConcurrentHash.new({ a: 1, b: "Hello", c: true })
+		require 'concurrent/hash'
+		h = Concurrent::Hash.new({ a: 1, b: "Hello", c: true })
 		h.delete("a")
 		h["c"]
 		`, true},
 		{`
-		h = ConcurrentHash.new({ a: 1, b: "Hello", c: true })
+		require 'concurrent/hash'
+		h = Concurrent::Hash.new({ a: 1, b: "Hello", c: true })
 		h.delete("b")
 		h["a"]
 		`, 1},
 		{`
-		h = ConcurrentHash.new({ a: 1, b: "Hello", c: true })
+		require 'concurrent/hash'
+		h = Concurrent::Hash.new({ a: 1, b: "Hello", c: true })
 		h.delete("b")
 		h["b"]
 		`, nil},
 		{`
-		h = ConcurrentHash.new({ a: 1, b: "Hello", c: true })
+		require 'concurrent/hash'
+		h = Concurrent::Hash.new({ a: 1, b: "Hello", c: true })
 		h.delete("b")
 		h["c"]
 		`, true},
 		{`
-		h = ConcurrentHash.new({ a: 1, b: "Hello", c: true })
+		require 'concurrent/hash'
+		h = Concurrent::Hash.new({ a: 1, b: "Hello", c: true })
 		h.delete("c")
 		h["a"]
 		`, 1},
 		{`
-		h = ConcurrentHash.new({ a: 1, b: "Hello", c: true })
+		require 'concurrent/hash'
+		h = Concurrent::Hash.new({ a: 1, b: "Hello", c: true })
 		h.delete("c")
 		h["b"]
 		`, "Hello"},
 		{`
-		h = ConcurrentHash.new({ a: 1, b: "Hello", c: true })
+		require 'concurrent/hash'
+		h = Concurrent::Hash.new({ a: 1, b: "Hello", c: true })
 		h.delete("c")
 		h["c"]
 		`, nil},
@@ -233,7 +280,7 @@ func TestConcurrentHashDeleteMethod(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -242,15 +289,23 @@ func TestConcurrentHashDeleteMethod(t *testing.T) {
 
 func TestConcurrentHashDeleteMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: "Hello", c: true }).delete`, "ArgumentError: Expect 1 argument. got: 0", 3, 3},
-		{`ConcurrentHash.new({ a: 1, b: "Hello", c: true }).delete("a", "b")`, "ArgumentError: Expect 1 argument. got: 2", 3, 3},
-		{`ConcurrentHash.new({ a: 1, b: "Hello", c: true }).delete(123)`, "TypeError: Expect argument to be String. got: Integer", 3, 3},
-		{`ConcurrentHash.new({ a: 1, b: "Hello", c: true }).delete(true)`, "TypeError: Expect argument to be String. got: Boolean", 3, 3},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: 1, b: "Hello", c: true }).delete`, "ArgumentError: Expect 1 argument. got: 0", 3, 3},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: 1, b: "Hello", c: true }).delete("a", "b")`, "ArgumentError: Expect 1 argument. got: 2", 3, 3},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: 1, b: "Hello", c: true }).delete(123)`, "TypeError: Expect argument to be String. got: Integer", 3, 3},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: 1, b: "Hello", c: true }).delete(true)`, "TypeError: Expect argument to be String. got: Boolean", 3, 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -264,17 +319,19 @@ func TestConcurrentHashEachMethod(t *testing.T) {
 	}{
 		// return value
 		{`
-			ConcurrentHash.new({ b: "2" }).each do end
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ b: "2" }).each do end
 		`, map[string]interface{}{"b": "2"}},
 		// empty hash
 		{`
-			ConcurrentHash.new({ }).each do end
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ }).each do end
 		`, map[string]interface{}{}},
 	}
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		testConcurrentHashObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -286,18 +343,19 @@ func TestConcurrentHashEachMethod(t *testing.T) {
 	}{
 		// block yielding
 		{`
-			output = []
-			h = ConcurrentHash.new({ b: "2" })
-			h.each do |k, v|
-				output.push([k, v])
-			end
-			output
+		require 'concurrent/hash'
+		output = []
+		h = Concurrent::Hash.new({ b: "2" })
+		h.each do |k, v|
+			output.push([k, v])
+		end
+		output
 		`, [][]interface{}{{"b", "2"}}},
 	}
 
 	for i, tt := range tests2 {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		testBidimensionalArrayObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -306,13 +364,17 @@ func TestConcurrentHashEachMethod(t *testing.T) {
 
 func TestConcurrentHashEachMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2}).each("Hello") do end`, "ArgumentError: Expect 0 arguments. got: 1", 3, 3},
-		{`ConcurrentHash.new({ a: 1, b: 2}).each`, "InternalError: Can't yield without a block", 3, 3},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: 1, b: 2}).each("Hello") do end`, "ArgumentError: Expect 0 arguments. got: 1", 3, 3},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: 1, b: 2}).each`, "InternalError: Can't yield without a block", 3, 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -324,13 +386,17 @@ func TestConcurrentHashHasKeyMethod(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`ConcurrentHash.new({ a: "Hello", b: 123, c: true }).has_key?("a")`, true},
-		{`ConcurrentHash.new({ a: "Hello", b: 123, c: true }).has_key?("d")`, false},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: "Hello", b: 123, c: true }).has_key?("a")`, true},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: "Hello", b: 123, c: true }).has_key?("d")`, false},
 	}
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -339,15 +405,23 @@ func TestConcurrentHashHasKeyMethod(t *testing.T) {
 
 func TestConcurrentHashHasKeyMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2 }).has_key?`, "ArgumentError: Expect 1 argument. got: 0", 3, 3},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).has_key?(true, { hello: "World" })`, "ArgumentError: Expect 1 argument. got: 2", 3, 3},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).has_key?(true)`, "TypeError: Expect argument to be String. got: Boolean", 3, 3},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).has_key?(123)`, "TypeError: Expect argument to be String. got: Integer", 3, 3},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: 1, b: 2 }).has_key?`, "ArgumentError: Expect 1 argument. got: 0", 3, 3},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: 1, b: 2 }).has_key?(true, { hello: "World" })`, "ArgumentError: Expect 1 argument. got: 2", 3, 3},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: 1, b: 2 }).has_key?(true)`, "TypeError: Expect argument to be String. got: Boolean", 3, 3},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: 1, b: 2 }).has_key?(123)`, "TypeError: Expect argument to be String. got: Integer", 3, 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -360,7 +434,8 @@ func TestConcurrentHashToJSONMethodWithArray(t *testing.T) {
 		expected interface{}
 	}{
 		{`
-		ConcurrentHash.new({ a: 1, b: [1, "2", true]}).to_json
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: 1, b: [1, "2", true]}).to_json
 		`, struct {
 			A int           `json:"a"`
 			B []interface{} `json:"b"`
@@ -369,7 +444,8 @@ func TestConcurrentHashToJSONMethodWithArray(t *testing.T) {
 			B: []interface{}{1, "2", true},
 		}},
 		{`
-		ConcurrentHash.new({ a: 1, b: [1, "2", [4, 5, nil], { foo: "bar" }]}).to_json
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: 1, b: [1, "2", [4, 5, nil], { foo: "bar" }]}).to_json
 		`, struct {
 			A int           `json:"a"`
 			B []interface{} `json:"b"`
@@ -387,7 +463,7 @@ func TestConcurrentHashToJSONMethodWithArray(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		compareJSONResult(t, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -400,7 +476,8 @@ func TestConcurrentHashToJSONMethodWithNestedHash(t *testing.T) {
 		expected interface{}
 	}{
 		{`
-		ConcurrentHash.new({ a: 1, b: { c: 2 }}).to_json
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: 1, b: { c: 2 }}).to_json
 		`, struct {
 			A int `json:"a"`
 			B struct {
@@ -413,7 +490,8 @@ func TestConcurrentHashToJSONMethodWithNestedHash(t *testing.T) {
 			}{C: 2},
 		}},
 		{`
-		ConcurrentHash.new({ a: 1, b: { c: 2, d: { e: "foo" }}}).to_json
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: 1, b: { c: 2, d: { e: "foo" }}}).to_json
 		`, struct {
 			A int `json:"a"`
 			B struct {
@@ -437,7 +515,7 @@ func TestConcurrentHashToJSONMethodWithNestedHash(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		compareJSONResult(t, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -450,10 +528,12 @@ func TestConcurrentHashToJSONMethodWithBasicTypes(t *testing.T) {
 		expected interface{}
 	}{
 		{`
-		{}.to_json
+		require 'concurrent/hash'
+		Concurrent::Hash.new.to_json
 		`, struct{}{}},
 		{`
-		ConcurrentHash.new({ a: 1, b: 2 }).to_json
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: 1, b: 2 }).to_json
 		`, struct {
 			A int `json:"a"`
 			B int `json:"b"`
@@ -462,7 +542,8 @@ func TestConcurrentHashToJSONMethodWithBasicTypes(t *testing.T) {
 			2,
 		}},
 		{`
-		ConcurrentHash.new({ foo: "bar", b: 2 }).to_json
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ foo: "bar", b: 2 }).to_json
 		`, struct {
 			Foo string `json:"foo"`
 			B   int    `json:"b"`
@@ -471,7 +552,8 @@ func TestConcurrentHashToJSONMethodWithBasicTypes(t *testing.T) {
 			2,
 		}},
 		{`
-		ConcurrentHash.new({ foo: "bar", b: 2, boolean: true }).to_json
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ foo: "bar", b: 2, boolean: true }).to_json
 		`, struct {
 			Foo     string `json:"foo"`
 			B       int    `json:"b"`
@@ -482,7 +564,8 @@ func TestConcurrentHashToJSONMethodWithBasicTypes(t *testing.T) {
 			true,
 		}},
 		{`
-		ConcurrentHash.new({ foo: "bar", b: 2, boolean: true, nothing: nil }).to_json
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ foo: "bar", b: 2, boolean: true, nothing: nil }).to_json
 		`, struct {
 			Foo     string      `json:"foo"`
 			B       int         `json:"b"`
@@ -498,7 +581,7 @@ func TestConcurrentHashToJSONMethodWithBasicTypes(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		compareJSONResult(t, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -507,13 +590,17 @@ func TestConcurrentHashToJSONMethodWithBasicTypes(t *testing.T) {
 
 func TestConcurrentHashToJSONMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2 }).to_json(123)`, "ArgumentError: Expect 0 argument. got: 1", 3, 3},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).to_json(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 3, 3},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: 1, b: 2 }).to_json(123)`, "ArgumentError: Expect 0 argument. got: 1", 3, 3},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: 1, b: 2 }).to_json(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 3, 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
@@ -525,13 +612,17 @@ func TestConcurrentHashToStringMethod(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`ConcurrentHash.new({ a: 1 }).to_s`, "{ a: 1 }"},
-		{`ConcurrentHash.new({ b: "Hello" }).to_s`, "{ b: \"Hello\" }"},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: 1 }).to_s`, "{ a: 1 }"},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ b: "Hello" }).to_s`, "{ b: \"Hello\" }"},
 	}
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -540,13 +631,17 @@ func TestConcurrentHashToStringMethod(t *testing.T) {
 
 func TestConcurrentHashToStringMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`ConcurrentHash.new({ a: 1, b: 2 }).to_s(123)`, "ArgumentError: Expect 0 argument. got: 1", 3, 3},
-		{`ConcurrentHash.new({ a: 1, b: 2 }).to_s(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 3, 3},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: 1, b: 2 }).to_s(123)`, "ArgumentError: Expect 0 argument. got: 1", 3, 3},
+		{`
+		require 'concurrent/hash'
+		Concurrent::Hash.new({ a: 1, b: 2 }).to_s(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 3, 3},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "concurrent_hash")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)

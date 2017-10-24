@@ -8,7 +8,6 @@ const (
 	StringClass         = "String"
 	ArrayClass          = "Array"
 	HashClass           = "Hash"
-	ConcurrentHashClass = "ConcurrentHash"
 	BooleanClass        = "Boolean"
 	NullClass           = "Null"
 	ChannelClass        = "Channel"

@@ -21,14 +21,10 @@ import (
 //
 // For details, see https://golang.org/pkg/sync/#Map.
 //
-// Concurrent hashes are instantiated via `new()`:
-//
-//     ConcurrentHash.new()
-//     ConcurrentHash.new({"a": 1, "b": 2})
-//
 // ```ruby
-// hash = ConcurrentHash.new({ "a": 1, "b": 2 })
-// has["a"]  # => 1
+// require 'concurrent/hash'
+// hash = Concurrent::Hash.new({ "a": 1, "b": 2 })
+// hash["a"]  # => 1
 // ```
 //
 type ConcurrentHashObject struct {
@@ -73,7 +69,7 @@ func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
 			// When a key doesn't exist, `nil` is returned, or the default, if set.
 			//
 			// ```Ruby
-			// h = ConcurrentHash.new({ a: 1, b: "2" })
+			// h = Concurrent::Hash.new({ a: 1, b: "2" })
 			// h['a'] #=> 1
 			// h['b'] #=> "2"
 			// h['c'] #=> nil
@@ -112,7 +108,7 @@ func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
 			// Returns the `value`.
 			//
 			// ```Ruby
-			// h = ConcurrentHash.new{ a: 1, b: "2" })
+			// h = Concurrent::Hash.new{ a: 1, b: "2" })
 			// h['a'] = 2          #=> 2
 			// h                   #=> { a: 2, b: "2" }
 			// ```
@@ -146,7 +142,7 @@ func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
 			// Remove the key from the hash if key exist.
 			//
 			// ```Ruby
-			// h = ConcurrentHash.new({ a: 1, b: 2, c: 3 })
+			// h = Concurrent::Hash.new({ a: 1, b: 2, c: 3 })
 			// h.delete("b") # => NULL
 			// h             # => { a: 1, c: 3 }
 			// ```
@@ -180,7 +176,7 @@ func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
 			// https://golang.org/pkg/sync/#Map.
 			//
 			// ```Ruby
-			// h = ConcurrentHash.new({ b: "2", a: 1 })
+			// h = Concurrent::Hash.new({ b: "2", a: 1 })
 			// h.each do |k, v|
 			//   puts k.to_s + "->" + v.to_s
 			// end
@@ -228,7 +224,7 @@ func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
 			// Returns true if the key exist in the hash.
 			//
 			// ```Ruby
-			// h = ConcurrentHash.new({ a: 1, b: "2" })
+			// h = Concurrent::Hash.new({ a: 1, b: "2" })
 			// h.has_key?("a") # => true
 			// h.has_key?("e") # => false
 			// ```
@@ -262,7 +258,7 @@ func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
 			// Basically just like Hash#to_json in Rails but currently doesn't support options.
 			//
 			// ```Ruby
-			// h = ConcurrentHash.new({ a: 1, b: 2 })
+			// h = Concurrent::Hash.new({ a: 1, b: 2 })
 			// h.to_json #=> {"a":1,"b":2}
 			// ```
 			//
@@ -284,7 +280,7 @@ func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
 			// Basically just like Hash#to_json in Rails but currently doesn't support options.
 			//
 			// ```Ruby
-			// h = { a: 1, b: "2"}
+			// h = Concurrent::Hash.new({ a: 1, b: "2"})
 			// h.to_s #=> "{ a: 1, b: \"2\" }"
 			// ```
 			//
@@ -315,17 +311,23 @@ func (vm *VM) initConcurrentHashObject(pairs map[string]Object) *ConcurrentHashO
 		internalMap.Store(key, value)
 	}
 
+	concurrent := vm.loadConstant("Concurrent", true)
+	hash := concurrent.getClassConstant("Hash")
+
 	return &ConcurrentHashObject{
-		baseObj: &baseObj{class: vm.topLevelClass(classes.ConcurrentHashClass)},
+		baseObj: &baseObj{class: hash},
 		internalMap: internalMap,
 	}
 }
 
 func initConcurrentHashClass(vm *VM) {
-	chc := vm.initializeClass(classes.ConcurrentHashClass, false)
-	chc.setBuiltinMethods(builtinConcurrentHashInstanceMethods(), false)
-	chc.setBuiltinMethods(builtinConcurrentHashClassMethods(), true)
-	vm.objectClass.setClassConstant(chc)
+	concurrent := vm.loadConstant("Concurrent", true)
+	hash := vm.initializeClass("Hash", false)
+
+	hash.setBuiltinMethods(builtinConcurrentHashInstanceMethods(), false)
+	hash.setBuiltinMethods(builtinConcurrentHashClassMethods(), true)
+
+	concurrent.setClassConstant(hash)
 }
 
 // Polymorphic helper functions -----------------------------------------
