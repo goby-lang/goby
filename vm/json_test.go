@@ -8,22 +8,26 @@ func TestJSONValidateMethod(t *testing.T) {
 		expected interface{}
 	}{
 		{`
+		require "json"
 		JSON.validate('{"Name": "Stan"}')
 	`, true},
 		{`
+		require "json"
 		JSON.validate('{"Name": "Stan}')
 	`, false},
 		{`
+		require "json"
 		JSON.validate('{"Name": Stan}')
 	`, false},
 		{`
+		require "json"
 		JSON.validate('{Name: "Stan"')
 	`, false},
 	}
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "json")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -36,12 +40,15 @@ func TestJSONObjectParsing(t *testing.T) {
 		expected interface{}
 	}{
 		{`
+		require "json"
 		h = JSON.parse('{"Name": "Stan"}')
 		h["Name"]`, "Stan"},
 		{`
+		require "json"
 		h = JSON.parse('{"Age": 23}')
 		h["Age"]`, 23},
 		{`
+		require "json"
 		h = JSON.parse('
 		  {
 			"Project": {
@@ -51,6 +58,7 @@ func TestJSONObjectParsing(t *testing.T) {
 		')
 		h["Project"]["Name"]`, "Goby"},
 		{`
+		require "json"
 		h = JSON.parse('
 		  {
 			"Project": {
@@ -64,7 +72,7 @@ func TestJSONObjectParsing(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "json")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -77,14 +85,17 @@ func TestJSONObjectArrayParsing(t *testing.T) {
 		expected interface{}
 	}{
 		{`
+		require "json"
 		a = JSON.parse('[{"Name": "Stan"}]')
 		h = a.first
 		h["Name"]`, "Stan"},
 		{`
+		require "json"
 		a = JSON.parse('[{"Age": 23}]')
 		h = a.first
 		h["Age"]`, 23},
 		{`
+		require "json"
 		a = JSON.parse('
 		  [{
 			"Projects": [{
@@ -95,6 +106,7 @@ func TestJSONObjectArrayParsing(t *testing.T) {
 		h = a.first
 		h["Projects"][0]["Name"]`, "Goby"},
 		{`
+		require "json"
 		a = JSON.parse('
 		  [{
 			"Projects": [{
@@ -109,7 +121,7 @@ func TestJSONObjectArrayParsing(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "json")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)

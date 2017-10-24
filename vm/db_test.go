@@ -34,11 +34,15 @@ func TestPGConnectionPing(t *testing.T) {
 		expected interface{}
 	}{
 		{`
+			require "db"
+
 			db = DB.open("postgres", "user=postgres sslmode=disable")
 			db.ping
 			`,
 			true},
 		{`
+			require "db"
+
 			db = DB.open("postgres", "user=test sslmode=disable")
 			db.ping
 			`,
@@ -47,7 +51,7 @@ func TestPGConnectionPing(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "db")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -60,6 +64,8 @@ func TestDBClose(t *testing.T) {
 		expected interface{}
 	}{
 		{`
+			require "db"
+
 			db = DB.open("postgres", "user=postgres sslmode=disable")
 			first_ping = db.ping # This should be successful
 
@@ -73,7 +79,7 @@ func TestDBClose(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "db")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -82,6 +88,8 @@ func TestDBClose(t *testing.T) {
 
 func TestDBRun(t *testing.T) {
 	input := `
+	require "db"
+
 	db = DB.open("postgres", "user=postgres dbname=goby_test sslmode=disable")
 	db.run("create table if not exists test_items (
 	  id   serial primary key,
@@ -97,7 +105,7 @@ func TestDBRun(t *testing.T) {
 	`
 
 	v := initTestVM()
-	evaluated := v.testEvalWithRequire(t, input, getFilename(), "db")
+	evaluated := v.testEval(t, input, getFilename())
 	checkExpected(t, 0, evaluated, true)
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
@@ -112,6 +120,8 @@ func TestDBExec(t *testing.T) {
 	}{
 		// Insert and query
 		{`
+			require "db"
+
 			db = DB.open("postgres", "user=postgres dbname=goby_test sslmode=disable")
 			id = db.exec("INSERT INTO users (name, age) VALUES ('Stan', 23)")
 			results = db.query("SELECT * FROM users WHERE id = $1", id)
@@ -120,6 +130,8 @@ func TestDBExec(t *testing.T) {
 			"Stan"},
 		// Insert and delete
 		{`
+			require "db"
+
 			db = DB.open("postgres", "user=postgres dbname=goby_test sslmode=disable")
 			id = db.exec("INSERT INTO users (name, age) VALUES ('Stan', 23)")
 			db.exec("DELETE FROM users WHERE id = $1", id)
@@ -129,6 +141,8 @@ func TestDBExec(t *testing.T) {
 			false},
 		// Insert and update and query
 		{`
+			require "db"
+
 			db = DB.open("postgres", "user=postgres dbname=goby_test sslmode=disable")
 			id = db.exec("INSERT INTO users (name, age) VALUES ('John', 20)")
 			id2 = db.exec("UPDATE users SET age=10 WHERE id = $1", id)
@@ -141,7 +155,7 @@ func TestDBExec(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "db")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)

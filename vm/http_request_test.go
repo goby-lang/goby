@@ -13,12 +13,16 @@ func TestHTTPRequestObject(t *testing.T) {
 		expected interface{}
 	}{
 		{`
+		require "net/http"
+
 		req = Net::HTTP::Request.new
 		req.method = "GET"
 
 		req.method
 		`, "GET"},
 		{`
+		require "net/http"
+
 		req = Net::HTTP::Request.new
 		req.set_header("Content-Type", "text/plain")
 
@@ -28,7 +32,7 @@ func TestHTTPRequestObject(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "net/http")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)

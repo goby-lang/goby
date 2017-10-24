@@ -16,6 +16,8 @@ func TestHTTPClientObject(t *testing.T) {
 	}{
 		//test get request
 		{`
+		require "net/http"
+
 		res = Net::HTTP.start do |client|
 			res = client.get("http://127.0.0.1:3000/index")
 		end
@@ -23,6 +25,8 @@ func TestHTTPClientObject(t *testing.T) {
 		res.body
 		`, "GET Hello World"},
 		{`
+		require "net/http"
+
 		res = Net::HTTP.start do |client|
 			client.post("http://127.0.0.1:3000/index", "text/plain", "Hi Again")
 		end
@@ -30,6 +34,8 @@ func TestHTTPClientObject(t *testing.T) {
 		res.body
 		`, "POST Hi Again"},
 		{`
+		require "net/http"
+
 		res = Net::HTTP.start do |client|
 			r = client.request()
 			r.url = "http://127.0.0.1:3000/index"
@@ -41,6 +47,8 @@ func TestHTTPClientObject(t *testing.T) {
 		res.body
 		`, "POST Another way of doing it"},
 		{`
+		require "net/http"
+
 		res = Net::HTTP.start do |client|
 			client.head("http://127.0.0.1:3000/index")
 		end
@@ -48,6 +56,8 @@ func TestHTTPClientObject(t *testing.T) {
 		res.status_code
 		`, 200},
 		{`
+		require "net/http"
+
 		res = Net::HTTP.start do |client|
 			client.get("http://127.0.0.1:3000/error")
 		end
@@ -61,7 +71,7 @@ func TestHTTPClientObject(t *testing.T) {
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "net/http")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
@@ -72,6 +82,8 @@ func TestHTTPClientObjectFail(t *testing.T) {
 
 	testsFail := []errorTestCase{
 		{`
+		require "net/http"
+
 		res = Net::HTTP.start do |client|
 			client.get("http://127.0.0.1:3001")
 		end
@@ -79,6 +91,8 @@ func TestHTTPClientObjectFail(t *testing.T) {
 		res
 		`, "HTTPError: Could not complete request, Get http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: getsockopt: connection refused", 5, 4},
 		{`
+		require "net/http"
+
 		res = Net::HTTP.start do |client|
 			client.get("http://127.0.0.1:3001")
 		end
@@ -89,7 +103,7 @@ func TestHTTPClientObjectFail(t *testing.T) {
 
 	for i, tt := range testsFail {
 		v := initTestVM()
-		evaluated := v.testEvalWithRequire(t, tt.input, getFilename(), "net/http")
+		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)

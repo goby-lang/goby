@@ -9,6 +9,8 @@ import (
 
 func TestHTTPResponseObject(t *testing.T) {
 	input := `
+	require "net/http"
+
 	res = Net::HTTP::Response.new
 
 	res.body = "test"
@@ -18,7 +20,7 @@ func TestHTTPResponseObject(t *testing.T) {
 	`
 
 	v := initTestVM()
-	evaluated := v.testEvalWithRequire(t, input, getFilename(), "net/http")
+	evaluated := v.testEval(t, input, getFilename())
 	checkExpected(t, 0, evaluated, "test")
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
@@ -33,11 +35,13 @@ func TestNormalGetResponse(t *testing.T) {
 	defer ts.Close()
 
 	testScript := fmt.Sprintf(`
+require "net/http"
+
 Net::HTTP.get("%s")
 `, ts.URL)
 
 	v := initTestVM()
-	evaluated := v.testEvalWithRequire(t, testScript, getFilename(), "net/http")
+	evaluated := v.testEval(t, testScript, getFilename())
 	checkExpected(t, 0, evaluated, expected)
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
@@ -57,11 +61,13 @@ func TestNormalGetResponseWithPath(t *testing.T) {
 	defer ts.Close()
 
 	testScript := fmt.Sprintf(`
+require "net/http"
+
 Net::HTTP.get("%s", "path")
 `, ts.URL)
 
 	v := initTestVM()
-	evaluated := v.testEvalWithRequire(t, testScript, getFilename(), "net/http")
+	evaluated := v.testEval(t, testScript, getFilename())
 	checkExpected(t, 0, evaluated, expected)
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
