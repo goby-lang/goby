@@ -552,35 +552,3 @@ func TestConcurrentHashToStringMethodFail(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
-
-func ConcurrentHashJSONBytesEqual(a, b []byte) (bool, error) {
-	var j, j2 interface{}
-	if err := json.Unmarshal(a, &j); err != nil {
-		return false, err
-	}
-	if err := json.Unmarshal(b, &j2); err != nil {
-		return false, err
-	}
-	return reflect.DeepEqual(j2, j), nil
-}
-
-// We can't compare string directly because the key/value's order might change and we can't control it.
-func ConcurrentHashcompareJSONResult(t *testing.T, evaluated Object, exp interface{}) {
-	expected, err := json.Marshal(exp)
-
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	s := evaluated.(*StringObject).value
-
-	r, err := JSONBytesEqual([]byte(s), expected)
-
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	if !r {
-		t.Fatalf("Expect json:\n%s \n\n got: %s", string(expected), s)
-	}
-}
