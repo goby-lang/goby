@@ -954,6 +954,60 @@ func TestHashHasValueMethodFail(t *testing.T) {
 	}
 }
 
+func TestHashKeepIfMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected map[string]interface{}
+	}{
+		// Since the method returns the hash itself, for compactness we perform the
+		// tests on the return value, but we still make sure, with the first test,
+		// that the hash itself is modified.
+		{`
+			hash = { a: 1, b: 2 }
+			hash.keep_if do |k, v| v == 1 end
+			hash
+		`, map[string]interface{}{"a": 1}},
+		{`
+			{ a: 1, b: 2 }.keep_if do |k, v| v == 1 end
+		`, map[string]interface{}{"a": 1}},
+		{`
+			{ a: 1, b: 2 }.keep_if do |k, v| 5 end
+		`, map[string]interface{}{"a": 1, "b": 2}},
+		{`
+			{ a: 1, b: 2 }.keep_if do |k, v| false end
+		`, map[string]interface{}{}},
+		{`
+			{ a: 1, b: 2 }.keep_if do |k, v| nil end
+		`, map[string]interface{}{}},
+		{`
+			{ }.keep_if do |k, v| true end
+		`, map[string]interface{}{}},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testHashObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestHashKeepIfMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`{ }.keep_if(123) do end`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`{ }.keep_if`, "InternalError: Can't yield without a block", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestHashKeysMethod(t *testing.T) {
 	input := `
 	{ foo: 123, bar: "test", baz: true }.keys
