@@ -5,8 +5,8 @@ import (
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
-	"strings"
 	"strconv"
+	"strings"
 )
 
 type operation func(t *thread, sourceLine int, cf *normalCallFrame, args ...interface{})
@@ -342,10 +342,10 @@ var builtinActions = map[operationType]*action{
 	bytecode.PutFloat: {
 		name: bytecode.PutFloat,
 		operation: func(t *thread, i *instruction, cf *normalCallFrame, args ...interface{}) {
-			var value float64;
+			var value float64
 			switch argValue := args[0].(type) {
 			case string:
-				value, _ = strconv.ParseFloat(argValue,64)
+				value, _ = strconv.ParseFloat(argValue, 64)
 			case int:
 				value = float64(argValue)
 			}
