@@ -49,12 +49,12 @@ func TestFloatArithmeticOperationWithInteger(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`13.5.to_f  +  3`, 16.5},
-		{`13.5.to_f  -  3`, 10.5},
-		{`13.5.to_f  *  3`, 40.5},
-		{`13.5.to_f  %  3`, 1.5},
-		{`13.5.to_f  /  3`, 4.5},
-		{`13.5.to_f  ** 3`, 2460.375},
+		{`13.5  +  3`, 16.5},
+		{`13.5  -  3`, 10.5},
+		{`13.5  *  3`, 40.5},
+		{`13.5  %  3`, 1.5},
+		{`13.5  /  3`, 4.5},
+		{`13.5  ** 3`, 2460.375},
 	}
 
 	for i, tt := range tests {

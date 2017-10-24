@@ -24,6 +24,7 @@ const (
 	SetInstanceVariable = "setinstancevariable"
 	PutBoolean          = "putboolean"
 	PutString           = "putstring"
+	PutFloat            = "putfloat"
 	PutSelf             = "putself"
 	PutObject           = "putobject"
 	PutNull             = "putnil"

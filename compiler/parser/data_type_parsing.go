@@ -32,7 +32,6 @@ func (p *Parser) parseFloatLiteral(receiver ast.Expression) ast.Expression {
 		return nil
 	}
 	lit.Value = float64(value)
-
 	return lit
 }
 
