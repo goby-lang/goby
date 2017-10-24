@@ -44,6 +44,18 @@ func (it *instructionTranslator) setMetadata(is *instructionSet, set *bytecode.I
 	}
 }
 
+func (it *instructionTranslator) parseBooleanParam(param string) bool {
+	boolValue, err := strconv.ParseBool(param)
+
+	// Can happen only in case of programmatic error, as the `param` value
+	// is the string version of a boolean.
+	if err != nil {
+		panic(fmt.Sprintf("Unknown boolean value: %s", param))
+	}
+
+	return boolValue
+}
+
 func (it *instructionTranslator) parseParam(param string) interface{} {
 	integer, e := strconv.ParseInt(param, 0, 64)
 	if e != nil {
@@ -73,7 +85,7 @@ func (it *instructionTranslator) transferInstructionSet(iss []*instructionSet, s
 		it.transferInstruction(is, i)
 	}
 
-	is.argTypes = set.ArgTypes()
+	is.paramTypes = set.ArgTypes()
 
 	iss = append(iss, is)
 }
@@ -90,6 +102,8 @@ func (it *instructionTranslator) transferInstruction(is *instructionSet, i *byte
 	}
 
 	switch act {
+	case bytecode.PutBoolean:
+		params = append(params, it.parseBooleanParam(i.Params[0]))
 	case bytecode.PutString:
 		params = append(params, i.Params[0])
 	case bytecode.BranchUnless, bytecode.BranchIf, bytecode.Jump:
@@ -100,6 +114,11 @@ func (it *instructionTranslator) transferInstruction(is *instructionSet, i *byte
 		}
 
 		params = append(params, line)
+	case bytecode.Send:
+		for _, param := range i.Params {
+			params = append(params, it.parseParam(param))
+		}
+		params = append(params, i.ArgSet)
 	default:
 		for _, param := range i.Params {
 			params = append(params, it.parseParam(param))
@@ -107,5 +126,5 @@ func (it *instructionTranslator) transferInstruction(is *instructionSet, i *byte
 	}
 
 	vmI := is.define(i.Line(), action, params...)
-	vmI.sourceLine = i.SourceLine()
+	vmI.sourceLine = i.SourceLine() + 1
 }

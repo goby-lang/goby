@@ -141,6 +141,6 @@ func (p *Parser) parseBlockArgument(exp *ast.CallExpression) {
 		exp.BlockArguments = params
 	}
 
-	exp.Block = p.parseBlockStatement()
+	exp.Block = p.parseBlockStatement(token.End)
 	exp.Block.KeepLastValue()
 }

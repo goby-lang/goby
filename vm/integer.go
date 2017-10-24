@@ -48,9 +48,9 @@ func builtinIntegerClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "new",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					return t.unsupportedMethodError("#new", receiver)
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					return t.initUnsupportedMethodError(instruction, "#new", receiver)
 				}
 			},
 		},
@@ -61,26 +61,23 @@ func builtinIntegerClassMethods() []*BuiltinMethodObject {
 func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
-			// Returns the sum of self and another Integer.
+			// Returns the sum of self and another Numeric.
 			//
 			// ```Ruby
 			// 1 + 2 # => 3
 			// ```
-			// @return [Integer]
+			// @return [Numeric]
 			Name: "+",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					leftValue := receiver.(*IntegerObject).value
-					right, ok := args[0].(*IntegerObject)
-
-					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
-						return err
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					intOperation := func(leftValue int, rightValue int) int {
+						return leftValue + rightValue
+					}
+					floatOperation := func(leftValue float64, rightValue float64) float64 {
+						return leftValue + rightValue
 					}
 
-					rightValue := right.value
-					return t.vm.initIntegerObject(leftValue + rightValue)
+					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, instruction)
 				}
 			},
 		},
@@ -90,123 +87,107 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// ```Ruby
 			// 5 % 2 # => 1
 			// ```
-			// @return [Integer]
+			// @return [Numeric]
 			Name: "%",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					leftValue := receiver.(*IntegerObject).value
-					right, ok := args[0].(*IntegerObject)
-
-					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
-						return err
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					intOperation := func(leftValue int, rightValue int) int {
+						return leftValue % rightValue
+					}
+					floatOperation := func(leftValue float64, rightValue float64) float64 {
+						return math.Mod(leftValue, rightValue)
 					}
 
-					rightValue := right.value
-					return t.vm.initIntegerObject(leftValue % rightValue)
+					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, instruction)
 				}
 			},
 		},
 		{
-			// Returns the subtraction of another Integer from self.
+			// Returns the subtraction of another Numeric from self.
 			//
 			// ```Ruby
 			// 1 - 1 # => 0
 			// ```
-			// @return [Integer]
+			// @return [Numeric]
 			Name: "-",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					leftValue := receiver.(*IntegerObject).value
-					right, ok := args[0].(*IntegerObject)
-
-					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
-						return err
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					intOperation := func(leftValue int, rightValue int) int {
+						return leftValue - rightValue
+					}
+					floatOperation := func(leftValue float64, rightValue float64) float64 {
+						return leftValue - rightValue
 					}
 
-					rightValue := right.value
-					return t.vm.initIntegerObject(leftValue - rightValue)
+					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, instruction)
 				}
 			},
 		},
 		{
-			// Returns self multiplying another Integer.
+			// Returns self multiplying another Numeric.
 			//
 			// ```Ruby
 			// 2 * 10 # => 20
 			// ```
-			// @return [Integer]
+			// @return [Numeric]
 			Name: "*",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					leftValue := receiver.(*IntegerObject).value
-					right, ok := args[0].(*IntegerObject)
-
-					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
-						return err
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					intOperation := func(leftValue int, rightValue int) int {
+						return leftValue * rightValue
+					}
+					floatOperation := func(leftValue float64, rightValue float64) float64 {
+						return leftValue * rightValue
 					}
 
-					rightValue := right.value
-					return t.vm.initIntegerObject(leftValue * rightValue)
+					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, instruction)
 				}
 			},
 		},
 		{
-			// Returns self squaring another Integer.
+			// Returns self squaring another Numeric.
 			//
 			// ```Ruby
 			// 2 ** 8 # => 256
 			// ```
-			// @return [Integer]
+			// @return [Numeric]
 			Name: "**",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					leftValue := receiver.(*IntegerObject).value
-					right, ok := args[0].(*IntegerObject)
-
-					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
-						return err
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					intOperation := func(leftValue int, rightValue int) int {
+						return int(math.Pow(float64(leftValue), float64(rightValue)))
+					}
+					floatOperation := func(leftValue float64, rightValue float64) float64 {
+						return math.Pow(leftValue, rightValue)
 					}
 
-					rightValue := right.value
-					result := math.Pow(float64(leftValue), float64(rightValue))
-					return t.vm.initIntegerObject(int(result))
+					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, instruction)
 				}
 			},
 		},
 		{
-			// Returns self divided by another Integer.
+			// Returns self divided by another Numeric.
 			//
 			// ```Ruby
 			// 6 / 3 # => 2
 			// ```
-			// @return [Integer]
+			// @return [Numeric]
 			Name: "/",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					leftValue := receiver.(*IntegerObject).value
-					right, ok := args[0].(*IntegerObject)
-
-					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
-						return err
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					intOperation := func(leftValue int, rightValue int) int {
+						return leftValue / rightValue
+					}
+					floatOperation := func(leftValue float64, rightValue float64) float64 {
+						return leftValue / rightValue
 					}
 
-					rightValue := right.value
-					return t.vm.initIntegerObject(leftValue / rightValue)
+					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, instruction)
 				}
 			},
 		},
 		{
-			// Returns if self is larger than another Integer.
+			// Returns if self is larger than another Numeric.
 			//
 			// ```Ruby
 			// 10 > -1 # => true
@@ -214,29 +195,21 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Boolean]
 			Name: ">",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					leftValue := receiver.(*IntegerObject).value
-					right, ok := args[0].(*IntegerObject)
-
-					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
-						return err
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					intComparison := func(leftValue int, rightValue int) bool {
+						return leftValue > rightValue
+					}
+					floatComparison := func(leftValue float64, rightValue float64) bool {
+						return leftValue > rightValue
 					}
 
-					rightValue := right.value
-
-					if leftValue > rightValue {
-						return TRUE
-					}
-
-					return FALSE
+					return receiver.(*IntegerObject).numericComparison(t, args[0], intComparison, floatComparison, instruction)
 				}
 			},
 		},
 		{
-			// Returns if self is larger than or equals to another Integer.
+			// Returns if self is larger than or equals to another Numeric.
 			//
 			// ```Ruby
 			// 2 >= 1 # => true
@@ -244,29 +217,21 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Boolean]
 			Name: ">=",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					leftValue := receiver.(*IntegerObject).value
-					right, ok := args[0].(*IntegerObject)
-
-					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
-						return err
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					intComparison := func(leftValue int, rightValue int) bool {
+						return leftValue >= rightValue
+					}
+					floatComparison := func(leftValue float64, rightValue float64) bool {
+						return leftValue >= rightValue
 					}
 
-					rightValue := right.value
-
-					if leftValue >= rightValue {
-						return TRUE
-					}
-
-					return FALSE
+					return receiver.(*IntegerObject).numericComparison(t, args[0], intComparison, floatComparison, instruction)
 				}
 			},
 		},
 		{
-			// Returns if self is smaller than another Integer.
+			// Returns if self is smaller than another Numeric.
 			//
 			// ```Ruby
 			// 1 < 3 # => true
@@ -274,29 +239,21 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Boolean]
 			Name: "<",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					leftValue := receiver.(*IntegerObject).value
-					right, ok := args[0].(*IntegerObject)
-
-					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
-						return err
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					intComparison := func(leftValue int, rightValue int) bool {
+						return leftValue < rightValue
+					}
+					floatComparison := func(leftValue float64, rightValue float64) bool {
+						return leftValue < rightValue
 					}
 
-					rightValue := right.value
-
-					if leftValue < rightValue {
-						return TRUE
-					}
-
-					return FALSE
+					return receiver.(*IntegerObject).numericComparison(t, args[0], intComparison, floatComparison, instruction)
 				}
 			},
 		},
 		{
-			// Returns if self is smaller than or equals to another Integer.
+			// Returns if self is smaller than or equals to another Numeric.
 			//
 			// ```Ruby
 			// 1 <= 3 # => true
@@ -304,29 +261,21 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Boolean]
 			Name: "<=",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-
-					leftValue := receiver.(*IntegerObject).value
-					right, ok := args[0].(*IntegerObject)
-
-					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
-						return err
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					intComparison := func(leftValue int, rightValue int) bool {
+						return leftValue <= rightValue
+					}
+					floatComparison := func(leftValue float64, rightValue float64) bool {
+						return leftValue <= rightValue
 					}
 
-					rightValue := right.value
-
-					if leftValue <= rightValue {
-						return TRUE
-					}
-
-					return FALSE
+					return receiver.(*IntegerObject).numericComparison(t, args[0], intComparison, floatComparison, instruction)
 				}
 			},
 		},
 		{
-			// Returns 1 if self is larger than the incoming Integer, -1 if smaller. Otherwise 0.
+			// Returns 1 if self is larger than the incoming Numeric, -1 if smaller. Otherwise 0.
 			//
 			// ```Ruby
 			// 1 <=> 3 # => -1
@@ -335,85 +284,78 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Integer]
 			Name: "<=>",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					rightObject := args[0]
 
-					leftValue := receiver.(*IntegerObject).value
-					right, ok := args[0].(*IntegerObject)
+					switch rightObject.(type) {
+					case *IntegerObject:
+						leftValue := receiver.(*IntegerObject).value
+						rightValue := rightObject.(*IntegerObject).value
 
-					if !ok {
-						err := t.vm.initErrorObject(errors.TypeError, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
-						return err
+						if leftValue < rightValue {
+							return t.vm.initIntegerObject(-1)
+						}
+						if leftValue > rightValue {
+							return t.vm.initIntegerObject(1)
+						}
+
+						return t.vm.initIntegerObject(0)
+					case *FloatObject:
+						leftValue := float64(receiver.(*IntegerObject).value)
+						rightValue := rightObject.(*FloatObject).value
+
+						if leftValue < rightValue {
+							return t.vm.initIntegerObject(-1)
+						}
+						if leftValue > rightValue {
+							return t.vm.initIntegerObject(1)
+						}
+
+						return t.vm.initIntegerObject(0)
+					default:
+						return t.vm.initErrorObject(errors.TypeError, instruction, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
 					}
-
-					rightValue := right.value
-
-					if leftValue < rightValue {
-						return t.vm.initIntegerObject(-1)
-					}
-					if leftValue > rightValue {
-						return t.vm.initIntegerObject(1)
-					}
-
-					return t.vm.initIntegerObject(0)
 				}
 			},
 		},
 		{
-			// Returns if self is equal to another Integer.
+			// Returns if self is equal to an Object.
+			// If the Object is a Numeric, a comparison is performed, otherwise, the
+			// result is always false.
 			//
 			// ```Ruby
-			// 1 == 3 # => false
-			// 1 == 1 # => true
+			// 1 == 3   # => false
+			// 1 == 1   # => true
+			// 1 == '1' # => false
 			// ```
 			// @return [Boolean]
 			Name: "==",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					result := receiver.(*IntegerObject).equalityTest(args[0])
 
-					leftValue := receiver.(*IntegerObject).value
-					right, ok := args[0].(*IntegerObject)
-
-					if !ok {
-						return FALSE
-					}
-
-					rightValue := right.value
-
-					if leftValue == rightValue {
-						return TRUE
-					}
-
-					return FALSE
+					return toBooleanObject(result)
 				}
 			},
 		},
 		{
-			// Returns if self is not equal to another Integer.
+			// Returns if self is not equal to an Object.
+			// If the Object is a Numeric, a comparison is performed, otherwise, the
+			// result is always true.
 			//
 			// ```Ruby
-			// 1 != 3 # => true
-			// 1 != 1 # => false
+			// 1 != 3   # => true
+			// 1 != 1   # => false
+			// 1 != '1' # => true
 			// ```
 			// @return [Boolean]
 			Name: "!=",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					result := !receiver.(*IntegerObject).equalityTest(args[0])
 
-					leftValue := receiver.(*IntegerObject).value
-					right, ok := args[0].(*IntegerObject)
-
-					if !ok {
-						return TRUE
-					}
-
-					rightValue := right.value
-
-					if leftValue != rightValue {
-						return TRUE
-					}
-
-					return FALSE
+					return toBooleanObject(result)
 				}
 			},
 		},
@@ -426,8 +368,8 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Boolean]
 			Name: "even?",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					i := receiver.(*IntegerObject)
 					even := i.value%2 == 0
@@ -440,6 +382,22 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		},
+		// Returns the `Float` conversion of self.
+		//
+		// ```Ruby
+		// 100.to_f # => '100.0'.to_f
+		// ```
+		// @return [Float]
+		{
+			Name: "to_f",
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					r := receiver.(*IntegerObject)
+					newFloat := t.vm.initFloatObject(float64(r.value))
+					return newFloat
+				}
+			},
+		},
 		{
 			// Returns self.
 			//
@@ -448,8 +406,8 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Integer]
 			Name: "to_i",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					return receiver
 				}
 			},
@@ -462,8 +420,8 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [String]
 			Name: "to_s",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					int := receiver.(*IntegerObject)
 
@@ -479,8 +437,8 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Integer]
 			Name: "next",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					i := receiver.(*IntegerObject)
 					return t.vm.initIntegerObject(i.value + 1)
 				}
@@ -495,8 +453,8 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Boolean]
 			Name: "odd?",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					i := receiver.(*IntegerObject)
 					odd := i.value%2 != 0
@@ -516,8 +474,8 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Integer]
 			Name: "pred",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					i := receiver.(*IntegerObject)
 					return t.vm.initIntegerObject(i.value - 1)
 				}
@@ -534,16 +492,16 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// a # => 3
 			// ```
 			Name: "times",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					n := receiver.(*IntegerObject)
 
 					if n.value < 0 {
-						return t.vm.initErrorObject(errors.InternalError, "Expect integer greater than or equal 0. got: %d", n.value)
+						return t.vm.initErrorObject(errors.InternalError, instruction, "Expect integer greater than or equal 0. got: %d", n.value)
 					}
 
 					if blockFrame == nil {
-						return t.vm.initErrorObject(errors.InternalError, errors.CantYieldWithoutBlockFormat)
+						return t.vm.initErrorObject(errors.InternalError, instruction, errors.CantYieldWithoutBlockFormat)
 					}
 
 					for i := 0; i < n.value; i++ {
@@ -556,8 +514,8 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "to_int",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newInt := t.vm.initIntegerObject(r.value)
 					newInt.flag = i
@@ -567,8 +525,8 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "to_int8",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newInt := t.vm.initIntegerObject(r.value)
 					newInt.flag = i8
@@ -578,8 +536,8 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "to_int16",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newInt := t.vm.initIntegerObject(r.value)
 					newInt.flag = i16
@@ -589,8 +547,8 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "to_int32",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newInt := t.vm.initIntegerObject(r.value)
 					newInt.flag = i32
@@ -600,8 +558,8 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "to_int64",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newInt := t.vm.initIntegerObject(r.value)
 					newInt.flag = i64
@@ -611,8 +569,8 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "to_uint",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newInt := t.vm.initIntegerObject(r.value)
 					newInt.flag = ui
@@ -622,8 +580,8 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "to_uint8",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newInt := t.vm.initIntegerObject(r.value)
 					newInt.flag = ui8
@@ -633,8 +591,8 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "to_uint16",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newInt := t.vm.initIntegerObject(r.value)
 					newInt.flag = ui16
@@ -644,8 +602,8 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "to_uint32",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newInt := t.vm.initIntegerObject(r.value)
 					newInt.flag = ui32
@@ -655,8 +613,8 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "to_uint64",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newInt := t.vm.initIntegerObject(r.value)
 					newInt.flag = ui64
@@ -666,8 +624,8 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "to_float32",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newInt := t.vm.initIntegerObject(r.value)
 					newInt.flag = f32
@@ -677,8 +635,8 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "to_float64",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					newInt := t.vm.initIntegerObject(r.value)
 					newInt.flag = f64
@@ -688,8 +646,8 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "ptr",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*IntegerObject)
 					return t.vm.initGoObject(&r.value)
 				}
@@ -722,6 +680,91 @@ func (vm *VM) initIntegerClass() *RClass {
 // Value returns the object
 func (i *IntegerObject) Value() interface{} {
 	return i.value
+}
+
+// Numeric interface
+func (i *IntegerObject) floatValue() float64 {
+	return float64(i.value)
+}
+
+// TODO: Remove instruction argument
+// Apply the passed arithmetic operation, while performing type conversion.
+func (i *IntegerObject) arithmeticOperation(
+	t *thread,
+	rightObject Object,
+	intOperation func(leftValue int, rightValue int) int,
+	floatOperation func(leftValue float64, rightValue float64) float64,
+	instruction *instruction,
+) Object {
+	switch rightObject.(type) {
+	case *IntegerObject:
+		leftValue := i.value
+		rightValue := rightObject.(*IntegerObject).value
+
+		result := intOperation(leftValue, rightValue)
+
+		return t.vm.initIntegerObject(result)
+	case *FloatObject:
+		leftValue := float64(i.value)
+		rightValue := rightObject.(*FloatObject).value
+
+		result := floatOperation(leftValue, rightValue)
+
+		return t.vm.initFloatObject(result)
+	default:
+		return t.vm.initErrorObject(errors.TypeError, instruction, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
+	}
+}
+
+// Apply an equality test, returning true if the objects are considered equal,
+// and false otherwise.
+// See comment on numericComparison().
+func (i *IntegerObject) equalityTest(rightObject Object) bool {
+	switch rightObject.(type) {
+	case *IntegerObject:
+		leftValue := i.value
+		rightValue := rightObject.(*IntegerObject).value
+
+		return leftValue == rightValue
+	case *FloatObject:
+		leftValue := i.floatValue()
+		rightValue := rightObject.(*FloatObject).value
+
+		return leftValue == rightValue
+	default:
+		return false
+	}
+}
+
+// TODO: Remove instruction argument
+// Apply the passed numeric comparison, while performing type conversion.
+// 64-bit floats cover all the 32-bit integers, but since int is defined
+// as *at least* 32 bit, we use two separate functions for safety.
+func (i *IntegerObject) numericComparison(
+	t *thread,
+	rightObject Object,
+	intComparison func(leftValue int, rightValue int) bool,
+	floatComparison func(leftValue float64, rightValue float64) bool,
+	instruction *instruction,
+) Object {
+	switch rightObject.(type) {
+	case *IntegerObject:
+		leftValue := i.value
+		rightValue := rightObject.(*IntegerObject).value
+
+		result := intComparison(leftValue, rightValue)
+
+		return toBooleanObject(result)
+	case *FloatObject:
+		leftValue := i.floatValue()
+		rightValue := rightObject.(*FloatObject).value
+
+		result := floatComparison(leftValue, rightValue)
+
+		return toBooleanObject(result)
+	default:
+		return t.vm.initErrorObject(errors.TypeError, instruction, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
+	}
 }
 
 // toString returns the object's name as the string format

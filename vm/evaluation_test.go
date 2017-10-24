@@ -1637,6 +1637,199 @@ func TestIfExpressionEvaluation(t *testing.T) {
 	}
 }
 
+func TestCaseExpressionEvaluation(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			`
+			case 2
+			when 0
+			  0
+			when 1
+			  1
+			when 2
+			  2
+			end
+			`,
+			2,
+		},
+		{
+			`
+			case 2 + 0
+			when 0
+			  0
+			when 1
+			  1
+			when 2
+			  2
+			end
+			`,
+			2,
+		},
+		{
+			`
+			case 2
+			when 0 then
+			  0
+			when 1 then
+			  1
+			when 2 then
+			  2
+			end
+			`,
+			2,
+		},
+		{
+			`
+			case 2
+			when 0 then
+			  0
+			when 1 then
+			  1
+			else
+			  2
+			end
+			`,
+			2,
+		},
+		{
+			`
+			case 2
+			when 0 + 0
+			  0
+			when 1 + 0
+			  1
+			when 2 + 0
+			  2
+			end
+			`,
+			2,
+		},
+		{
+			`
+			case 9
+			when 0, 1, 2, 3, 4, 5
+			  0
+			when 6, 7, 7 + 1, 7 + 2 then
+			  1
+			when 10, 11, 12
+			  2
+			end
+			`,
+			1,
+		},
+		{
+			`
+			case 0
+			when 0
+			  0
+			when 0, 0, 0
+			  1
+			else
+			  2
+			end
+			`,
+			0,
+		},
+		{
+			`
+			a = 10
+			b = 10
+			case a
+			when b * 3 * 3, 2 + 4 + b
+			  0
+			when b
+			  1
+			else
+			  2
+			end
+			`,
+			1,
+		},
+		{
+			`
+			a = 10
+			b = 20
+			case a
+			when b * 3 * 3, 2 + 4 + b
+			  0
+			when b - 10, b + 10
+			  1
+			else
+			  2
+			end
+			`,
+			1,
+		},
+		{
+			`
+			case false
+			when true || true
+			  0
+			when false || false
+			  1
+			else
+			  2
+			end
+			`,
+			1,
+		},
+		{
+			`
+			case [1, 2, 3]
+			when [1, 2], [2, 3], [1, 3]
+			  0
+			when [2, 3, 4], [1, 2, 3]
+			  1
+			else
+			  2
+			end
+			`,
+			1,
+		},
+		{
+			`
+			case 1 + 1 + 3
+			when [1, 2], [2, 3]
+			  0
+			when [2, 3, 4], [1, 2, 3, 4]
+			  1
+			else
+			  case true && false
+			  when [1, 2, 4], 1 + 3 * 4 == 16
+
+			    a = 1 * 3 + 5
+			    b = 4 * 3 * 5
+			    case a
+			    when 1, [2, 4, 5], b, true
+			      2
+			    when b - 52, b + 10
+			      3
+			    else
+			      4
+			    end
+			  when true || true || true || (false || true)
+			    5
+			  else
+			    6
+			  end
+			end
+			`,
+			3,
+		},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestClassInheritance(t *testing.T) {
 	input := `
 		class Bar
@@ -1673,6 +1866,10 @@ func TestMultiVarAssignment(t *testing.T) {
 		b
 		`,
 			2},
+		{`
+		_, b = [1, 2]
+		b
+		`, 2},
 
 		{`
 		a, b, c = [1, 2, 3]
@@ -1821,6 +2018,27 @@ func TestRemoveUnusedExpression(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestUnusedVariableFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`
+		_ = 1
+		_
+		`, "UndefinedMethodError: Undefined Method '_' for <Instance of: Object>", 3, 1},
+		{`
+		_, b = [1, 2]
+		_
+		`, "UndefinedMethodError: Undefined Method '_' for <Instance of: Object>", 3, 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
 }

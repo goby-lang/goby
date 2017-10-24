@@ -25,6 +25,8 @@ const (
 	InvalidAssignmentError
 	// SyntaxError means there's a grammatical in the source code
 	SyntaxError
+	// ArgumentError means there's a method parameter's definition error
+	ArgumentError
 )
 
 // Error represents parser's parsing error
@@ -68,6 +70,12 @@ const (
 	NormalMode int = iota
 	REPLMode
 	TestMode
+
+	NormalArg
+	OptionedArg
+	SplatArg
+	RequiredKeywordArg
+	OptionalKeywordArg
 )
 
 // These are state machine's events
@@ -91,6 +99,14 @@ var eventTable = map[string]string{
 	parsingFuncCall:    parseFuncCall,
 	parsingMethodParam: parseMethodParam,
 	parsingAssignment:  parseAssignment,
+}
+
+var argTable = map[int]string{
+	NormalArg:          "Normal argument",
+	OptionedArg:        "Optioned argument",
+	RequiredKeywordArg: "Keyword argument",
+	OptionalKeywordArg: "Optioned keyword argument",
+	SplatArg:           "Splat argument",
 }
 
 // New initializes a parser and returns it
@@ -125,31 +141,29 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.Bang, p.parsePrefixExpression)
 	p.registerPrefix(token.LParen, p.parseGroupedExpression)
 	p.registerPrefix(token.If, p.parseIfExpression)
+	p.registerPrefix(token.Case, p.parseCaseExpression)
 	p.registerPrefix(token.Self, p.parseSelfExpression)
 	p.registerPrefix(token.LBracket, p.parseArrayExpression)
 	p.registerPrefix(token.LBrace, p.parseHashExpression)
 	p.registerPrefix(token.Semicolon, p.parseSemicolon)
 	p.registerPrefix(token.Yield, p.parseYieldExpression)
-	p.registerPrefix(token.Asterisk, p.parsePrefixExpression)
 
 	p.infixParseFns = make(map[token.Type]infixParseFn)
 	p.registerInfix(token.Plus, p.parseInfixExpression)
 	p.registerInfix(token.PlusEq, p.parseAssignExpression)
-	p.registerInfix(token.Modulo, p.parseInfixExpression)
 	p.registerInfix(token.Minus, p.parseInfixExpression)
 	p.registerInfix(token.MinusEq, p.parseAssignExpression)
+	p.registerInfix(token.Modulo, p.parseInfixExpression)
 	p.registerInfix(token.Slash, p.parseInfixExpression)
-	p.registerInfix(token.Eq, p.parseInfixExpression)
-	p.registerInfix(token.Asterisk, p.parseInfixExpression)
 	p.registerInfix(token.Pow, p.parseInfixExpression)
+	p.registerInfix(token.Eq, p.parseInfixExpression)
 	p.registerInfix(token.NotEq, p.parseInfixExpression)
+	p.registerInfix(token.Match, p.parseInfixExpression)
 	p.registerInfix(token.LT, p.parseInfixExpression)
 	p.registerInfix(token.LTE, p.parseInfixExpression)
 	p.registerInfix(token.GT, p.parseInfixExpression)
 	p.registerInfix(token.GTE, p.parseInfixExpression)
 	p.registerInfix(token.COMP, p.parseInfixExpression)
-	p.registerInfix(token.Incr, p.parsePostfixExpression)
-	p.registerInfix(token.Decr, p.parsePostfixExpression)
 	p.registerInfix(token.And, p.parseInfixExpression)
 	p.registerInfix(token.Or, p.parseInfixExpression)
 	p.registerInfix(token.OrEq, p.parseAssignExpression)
@@ -161,6 +175,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.LParen, p.parseCallExpressionWithoutReceiver)
 	p.registerInfix(token.LBracket, p.parseIndexExpression)
 	p.registerInfix(token.Colon, p.parsePairExpression)
+	p.registerInfix(token.Asterisk, p.parseInfixExpression)
 
 	return p
 }
@@ -177,19 +192,15 @@ func (p *Parser) ParseProgram() (*ast.Program, *Error) {
 	for !p.curTokenIs(token.EOF) {
 		stmt := p.parseStatement()
 
-		if stmt != nil {
-			program.Statements = append(program.Statements, stmt)
-		} else {
-			if p.error != nil {
-				return nil, p.error
-			}
-		}
-
-		p.nextToken()
-
 		if p.error != nil {
 			return nil, p.error
 		}
+
+		if stmt != nil {
+			program.Statements = append(program.Statements, stmt)
+		}
+
+		p.nextToken()
 	}
 
 	if p.Mode == TestMode {
@@ -254,9 +265,13 @@ func (p *Parser) registerInfix(tokenType token.Type, fn infixParseFn) {
 	p.infixParseFns[tokenType] = fn
 }
 
+func (p *Parser) peekTokenAtSameLine() bool {
+	return p.curToken.Line == p.peekToken.Line && p.peekToken.Type != token.EOF
+}
+
 func (p *Parser) peekError(t token.Type) {
 	msg := fmt.Sprintf("expected next token to be %s, got %s instead. Line: %d", t, p.peekToken.Type, p.peekToken.Line)
-	p.error = &Error{Message: msg, errType: WrongTokenError}
+	p.error = &Error{Message: msg, errType: UnexpectedTokenError}
 }
 
 func (p *Parser) noPrefixParseFnError(t token.Type) {
@@ -269,6 +284,13 @@ func (p *Parser) noPrefixParseFnError(t token.Type) {
 	}
 }
 
-func (p *Parser) peekTokenAtSameLine() bool {
-	return p.curToken.Line == p.peekToken.Line && p.peekToken.Type != token.EOF
+func newArgumentError(formerArgType, laterArgType int, argLiteral string, line int) *Error {
+	formerArg := argTable[formerArgType]
+	laterArg := argTable[laterArgType]
+	return &Error{Message: fmt.Sprintf("%s \"%s\" should be defined before %s. Line: %d", formerArg, argLiteral, laterArg, line), errType: ArgumentError}
+}
+
+func newTypeParsingError(tokenLiteral, targetType string, line int) *Error {
+	msg := fmt.Sprintf("could not parse %q as %s. Line: %d", tokenLiteral, targetType, line)
+	return &Error{Message: msg, errType: SyntaxError}
 }

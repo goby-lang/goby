@@ -1,8 +1,10 @@
 package vm
 
 import (
+	"fmt"
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/vm/errors"
+	"os"
 	"strings"
 )
 
@@ -40,36 +42,92 @@ func (t *thread) startFromTopFrame() {
 	t.evalCallFrame(cf)
 }
 
-func (t *thread) evalCallFrame(cf *callFrame) {
-	for cf.pc < len(cf.instructionSet.instructions) {
-		i := cf.instructionSet.instructions[cf.pc]
-		t.execInstruction(cf, i)
-		if _, yes := t.hasError(); yes {
+func (t *thread) evalCallFrame(cf callFrame) {
+	switch cf := cf.(type) {
+	case *normalCallFrame:
+		for cf.pc < cf.instructionsCount() {
+			i := cf.instructionSet.instructions[cf.pc]
+			t.execInstruction(cf, i)
+			if t.hasError() {
+				return
+			}
+		}
+	case *goMethodCallFrame:
+		args := []Object{}
+
+		for _, obj := range cf.locals {
+			if obj != nil {
+				args = append(args, obj.Target)
+			}
+		}
+		result := cf.method(t, args, cf.blockFrame)
+		t.stack.push(&Pointer{Target: result})
+
+		if t.hasError() {
 			return
 		}
+		t.callFrameStack.pop()
+	}
+
+	t.removeUselessBlockFrame(cf)
+}
+
+/*
+	Remove top frame if it's a block frame
+
+	Block execution frame <- This was popped after callframe is executed
+	---------------------
+	Block frame           <- So this frame is useless
+	---------------------
+	Main frame
+*/
+
+func (t *thread) removeUselessBlockFrame(frame callFrame) {
+	topFrame := t.callFrameStack.top()
+
+	if topFrame != nil && topFrame.IsBlock() {
+		t.callFrameStack.pop().stopExecution()
 	}
 }
 
-func (t *thread) hasError() (string, bool) {
-	var hasError bool
-	var msg string
+func (t *thread) hasError() (hasError bool) {
 	if t.stack.top() != nil {
-		if err, ok := t.stack.top().Target.(*Error); ok {
-			hasError = true
-			msg = err.Message
+		top := t.stack.top().Target
+		err, hasError := top.(*Error)
+
+		if hasError {
+			t.reportErrorAndStop(err)
+		}
+		return hasError
+	}
+
+	return
+}
+
+func (t *thread) reportErrorAndStop(err *Error) {
+	cf := t.callFrameStack.top()
+	cf.stopExecution()
+
+	if t.vm.mode == NormalMode {
+		if t.isMainThread() {
+			fmt.Println(err.Message)
+			os.Exit(1)
 		}
 	}
-	return msg, hasError
 }
 
-func (t *thread) execInstruction(cf *callFrame, i *instruction) {
+func (t *thread) execInstruction(cf *normalCallFrame, i *instruction) {
 	cf.pc++
 
-	i.action.operation(t, cf, i.Params...)
+	//fmt.Println(t.callFrameStack.inspect())
+	//fmt.Println(i.inspect())
+	i.action.operation(t, i, cf, i.Params...)
+	//fmt.Println("============================")
+	//fmt.Println(t.callFrameStack.inspect())
 }
 
-func (t *thread) builtinMethodYield(blockFrame *callFrame, args ...Object) *Pointer {
-	c := newCallFrame(blockFrame.instructionSet)
+func (t *thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object) *Pointer {
+	c := newNormalCallFrame(blockFrame.instructionSet, blockFrame.FileName())
 	c.blockFrame = blockFrame
 	c.ep = blockFrame.ep
 	c.self = blockFrame.self
@@ -84,35 +142,27 @@ func (t *thread) builtinMethodYield(blockFrame *callFrame, args ...Object) *Poin
 	return t.stack.top()
 }
 
-func (t *thread) retrieveBlock(cf *callFrame, args []interface{}) (blockFrame *callFrame) {
+func (t *thread) retrieveBlock(fileName, blockFlag string) (blockFrame *normalCallFrame) {
 	var blockName string
 	var hasBlock bool
 
-	if len(args) > 2 {
+	if len(blockFlag) != 0 {
 		hasBlock = true
-		blockFlag := args[2].(string)
 		blockName = strings.Split(blockFlag, ":")[1]
-	} else {
-		hasBlock = false
 	}
 
 	if hasBlock {
-		block := t.getBlock(blockName, cf.instructionSet.filename)
+		block := t.getBlock(blockName, fileName)
 
-		c := newCallFrame(block)
+		c := newNormalCallFrame(block, fileName)
 		c.isBlock = true
-		c.ep = cf
-		c.self = cf.self
-
-		t.callFrameStack.push(c)
-
 		blockFrame = c
 	}
 
 	return
 }
 
-func (t *thread) sendMethod(methodName string, argCount int, blockFrame *callFrame) {
+func (t *thread) sendMethod(methodName string, argCount int, blockFrame *normalCallFrame, instruction *instruction) {
 	var method Object
 
 	if arr, ok := t.stack.top().Target.(*ArrayObject); ok && arr.splat {
@@ -158,150 +208,135 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *callFra
 	method = receiver.findMethod(methodName)
 
 	if method == nil {
-		err := t.vm.initErrorObject(errors.UndefinedMethodError, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
+		err := t.vm.initErrorObject(errors.UndefinedMethodError, instruction, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
 		t.stack.set(receiverPr, &Pointer{Target: err})
 		t.sp = argPr
 		return
 	}
 
+	sendCallFrame := t.callFrameStack.top()
+
 	switch m := method.(type) {
 	case *MethodObject:
-		t.evalMethodObject(receiver, m, receiverPr, argCount, blockFrame)
+		callObj := newCallObject(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, sendCallFrame.SourceLine())
+		t.evalMethodObject(callObj, instruction)
 	case *BuiltinMethodObject:
-		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, blockFrame)
+		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, instruction, sendCallFrame.FileName())
 	case *Error:
-		t.returnError(errors.InternalError, m.toString())
+		t.pushErrorObject(errors.InternalError, instruction, m.toString())
 	}
 }
 
-func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPr, argCount int, blockFrame *callFrame) {
-	methodBody := method.Fn(receiver)
-	args := []Object{}
-	argPr := receiverPr + 1
+func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame, instruction *instruction, fileName string) {
+	cf := newGoMethodCallFrame(method.Fn(receiver, instruction), method.Name, fileName)
+	cf.sourceLine = instruction.sourceLine
+	cf.blockFrame = blockFrame
+	argPtr := receiverPtr + 1
 
 	for i := 0; i < argCount; i++ {
-		args = append(args, t.stack.Data[argPr+i].Target)
+		cf.locals = append(cf.locals, t.stack.Data[argPtr+i])
 	}
 
-	evaluated := methodBody(t, args, blockFrame)
+	t.callFrameStack.push(cf)
+	t.startFromTopFrame()
+	evaluated := t.stack.top()
 
 	_, ok := receiver.(*RClass)
 	if method.Name == "new" && ok {
-		instance, ok := evaluated.(*RObject)
+		instance, ok := evaluated.Target.(*RObject)
 		if ok && instance.InitializeMethod != nil {
-			t.evalMethodObject(instance, instance.InitializeMethod, receiverPr, argCount, blockFrame)
+			callObj := newCallObject(instance, instance.InitializeMethod, receiverPtr, argCount, argSet, blockFrame, instruction.sourceLine)
+			t.evalMethodObject(callObj, instruction)
 		}
 	}
-	t.stack.set(receiverPr, &Pointer{Target: evaluated})
-	t.sp = argPr
+
+	t.stack.set(receiverPtr, evaluated)
+	t.sp = argPtr
 }
 
-func (t *thread) evalMethodObject(receiver Object, method *MethodObject, receiverPr, argC int, blockFrame *callFrame) {
-	c := newCallFrame(method.instructionSet)
-	c.self = receiver
-	argPr := receiverPr + 1
-	minimumArgNumber := 0
-	argTypesCount := len(method.argTypes())
+func (t *thread) reportArgumentError(instruction *instruction, idealArgNumber int, methodName string, exactArgNumber int, receiverPtr int) {
+	var message string
 
-	for _, at := range method.argTypes() {
-		if at == bytecode.NormalArg || at == bytecode.RequiredKeywordArg {
-			minimumArgNumber++
-		}
+	if idealArgNumber > exactArgNumber {
+		message = "Expect at least %d args for method '%s'. got: %d"
+	} else {
+		message = "Expect at most %d args for method '%s'. got: %d"
 	}
 
-	if argC > method.argc && !method.isSplatArgIncluded() {
-		e := t.vm.initErrorObject(errors.ArgumentError, "Expect at most %d args for method '%s'. got: %d", method.argc, method.Name, argC)
-		t.stack.set(receiverPr, &Pointer{Target: e})
-		t.sp = argPr
+	e := t.vm.initErrorObject(errors.ArgumentError, instruction, message, idealArgNumber, methodName, exactArgNumber)
+	t.stack.set(receiverPtr, &Pointer{Target: e})
+	t.sp = receiverPtr + 1
+}
+
+// TODO: Move instruction into call object
+func (t *thread) evalMethodObject(call *callObject, instruction *instruction) {
+	normalParamsCount := call.normalParamsCount()
+	paramTypes := call.paramTypes()
+	paramsCount := len(call.paramTypes())
+	stack := t.stack.Data
+
+	if call.argCount > paramsCount && !call.method.isSplatArgIncluded() {
+		t.reportArgumentError(instruction, paramsCount, call.methodName(), call.argCount, call.receiverPtr)
 		return
 	}
 
-	if minimumArgNumber > argC {
-		e := t.vm.initErrorObject(errors.ArgumentError, "Expect at least %d args for method '%s'. got: %d", minimumArgNumber, method.Name, argC)
-		t.stack.set(receiverPr, &Pointer{Target: e})
-		t.sp = argPr
+	if normalParamsCount > call.argCount {
+		t.reportArgumentError(instruction, normalParamsCount, call.methodName(), call.argCount, call.receiverPtr)
 		return
 	}
 
-	argIndex := 0
-
-	for i, argType := range method.argTypes() {
-		if argType == bytecode.NormalArg {
-			c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
-			argIndex++
-		}
-	}
-
-	/*
-	 def foo(a = 10, b = 11, c); end
-
-	 foo(1, 2)
-
-	 In the above example, method foo's minimum argument number is 1 (`c`).
-	 And the given argument number is 2.
-
-	 So we first assign arguments to those doesn't have a default value (`c` in this example).
-	 And then we assign the rest of given values from first parameter, so `a` would be assigned 2.
-
-	 Result:
-
-	 a == 2
-	 b == 11
-	 c == 1
-	*/
-
-	if minimumArgNumber < argC {
-		// Fill arguments with default value from beginning
-		for i, argType := range method.argTypes() {
-			if argType == bytecode.OptionedArg {
-				c.insertLCL(i, 0, t.stack.Data[argPr+argIndex].Target)
-				argIndex++
-			}
-
-			if argType == bytecode.RequiredKeywordArg || argType == bytecode.OptionalKeywordArg {
-				h := t.stack.Data[argPr+argIndex].Target.(*HashObject)
-
-				for _, data := range h.Pairs {
-					c.insertLCL(i, 0, data)
-					argIndex++
-				}
-			}
-
-			// If argument index equals argument count means we already assigned all arguments
-			if argIndex == argC || argType == bytecode.SplatArg {
-				break
+	// Check if arguments include all the required keys before assign keyword arguments
+	for paramIndex, paramType := range paramTypes {
+		switch paramType {
+		case bytecode.RequiredKeywordArg:
+			paramName := call.paramNames()[paramIndex]
+			if _, ok := call.hasKeywordArgument(paramName); !ok {
+				e := t.vm.initErrorObject(errors.ArgumentError, instruction, "Method %s requires key argument %s", call.methodName(), paramName)
+				t.stack.set(call.receiverPtr, &Pointer{Target: e})
+				t.sp = call.argPtr()
+				return
 			}
 		}
 	}
 
-	if argTypesCount > 0 && method.isSplatArgIncluded() && !method.isKeywordArgIncluded() {
-		elems := []Object{}
-		for argIndex < argC {
-			elems = append(elems, t.stack.Data[argPr+argIndex].Target)
-			argIndex++
+	err := call.assignKeywordArguments(stack)
+
+	if err != nil {
+		e := t.vm.initErrorObject(errors.ArgumentError, instruction, err.Error())
+		t.stack.set(call.receiverPtr, &Pointer{Target: e})
+		t.sp = call.argPtr()
+		return
+	}
+
+	// If given arguments is more than the normal arguments.
+	// It might mean we have optioned argument been override.
+	// Or we have some keyword arguments
+	if normalParamsCount < call.argCount {
+		for paramIndex, paramType := range paramTypes {
+			switch paramType {
+			case bytecode.NormalArg, bytecode.OptionedArg:
+				call.assignNormalAndOptionedArguments(paramIndex, stack)
+			case bytecode.SplatArg:
+				call.argIndex = paramIndex
+				call.assignSplatArgument(stack, t.vm.initArrayObject([]Object{}))
+			}
 		}
-
-		c.insertLCL(len(method.argTypes())-1, 0, t.vm.initArrayObject(elems))
+	} else {
+		call.assignNormalArguments(stack)
 	}
 
-	// TODO: Implement this
-	if argTypesCount > 0 && method.isSplatArgIncluded() && method.isKeywordArgIncluded() {
-
-	}
-
-	c.blockFrame = blockFrame
-	t.callFrameStack.push(c)
+	t.callFrameStack.push(call.callFrame)
 	t.startFromTopFrame()
 
-	t.stack.set(receiverPr, t.stack.top())
-	t.sp = argPr
+	t.stack.set(call.receiverPtr, t.stack.top())
+	t.sp = call.argPtr()
 }
 
-func (t *thread) returnError(errorType, format string, args ...interface{}) {
-	err := t.vm.initErrorObject(errorType, format, args...)
+func (t *thread) pushErrorObject(errorType string, instruction *instruction, format string, args ...interface{}) {
+	err := t.vm.initErrorObject(errorType, instruction, format, args...)
 	t.stack.push(&Pointer{Target: err})
 }
 
-func (t *thread) unsupportedMethodError(methodName string, receiver Object) *Error {
-	return t.vm.initErrorObject(errors.UnsupportedMethodError, "Unsupported Method %s for %+v", methodName, receiver.toString())
+func (t *thread) initUnsupportedMethodError(instruction *instruction, methodName string, receiver Object) *Error {
+	return t.vm.initErrorObject(errors.UnsupportedMethodError, instruction, "Unsupported Method %s for %+v", methodName, receiver.toString())
 }

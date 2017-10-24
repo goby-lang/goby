@@ -26,9 +26,9 @@ func builtinBooleanClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "new",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
-					return t.unsupportedMethodError("#new", receiver)
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					return t.initUnsupportedMethodError(instruction, "#new", receiver)
 				}
 			},
 		},
@@ -47,8 +47,8 @@ func builtinBooleanInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Boolean]
 			Name: "==",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					if receiver == args[0] {
 						return TRUE
@@ -67,8 +67,8 @@ func builtinBooleanInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Boolean]
 			Name: "!=",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					if receiver != args[0] {
 						return TRUE
@@ -86,8 +86,8 @@ func builtinBooleanInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Boolean]
 			Name: "!",
-			Fn: func(receiver Object) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *callFrame) Object {
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					rightValue := receiver.(*BooleanObject).value
 
@@ -118,6 +118,15 @@ func (vm *VM) initBoolClass() *RClass {
 }
 
 // Polymorphic helper functions -----------------------------------------
+
+// Value returns the object
+func toBooleanObject(value bool) *BooleanObject {
+	if value {
+		return TRUE
+	}
+
+	return FALSE
+}
 
 // Value returns the object
 func (b *BooleanObject) Value() interface{} {

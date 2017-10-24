@@ -140,6 +140,7 @@ Written in Go.
 - `Channel`
 - `File` (Changed from loadable class)
 - `GoObject` (provides `#go_func` that wraps pure Go objects or pointers for interaction)
+- `Regexp`
 
 ### Standard library
 
@@ -200,7 +201,7 @@ FYI: You can just run `brew test goby` to check Homebrew installation.
 
 ### Using Docker
 
-Goby has official [docker image](https://cloud.docker.com/app/gobylang/repository/docker/gobylang/goby/general) as well. You can try the [Plugin System](https://goby-lang.gitbooks.io/goby/content/plugin-system.html) using docker.
+Goby has official [docker image](https://hub.docker.com/r/gobylang/goby/) as well. You can try the [Plugin System](https://goby-lang.gitbooks.io/goby/content/plugin-system.html) using docker.
 
 ## Sample codes
 
@@ -228,6 +229,7 @@ See the [guideline](https://github.com/goby-lang/goby/blob/master/CONTRIBUTING.m
 - @st0012
 - @hachi8833
 - @Maxwell-Alexius
+- @saveriomiroddi
 
 ## Designer
 - [steward379](https://dribbble.com/steward379)

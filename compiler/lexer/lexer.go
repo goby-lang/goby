@@ -55,6 +55,10 @@ func (l *Lexer) NextToken() token.Token {
 			currentByte := l.ch
 			l.readChar()
 			tok = token.Token{Type: token.Eq, Literal: string(currentByte) + string(l.ch), Line: l.line}
+		} else if l.peekChar() == '~' {
+			currentByte := l.ch
+			l.readChar()
+			tok = token.Token{Type: token.Match, Literal: string(currentByte) + string(l.ch), Line: l.line}
 		} else {
 			tok = newToken(token.Assign, l.ch, l.line)
 		}

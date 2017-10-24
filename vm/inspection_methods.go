@@ -28,11 +28,15 @@ func (is *instructionSet) inspect() string {
 	return out.String()
 }
 
-func (cf *callFrame) inspect() string {
+func (cf *goMethodCallFrame) inspect() string {
+	return fmt.Sprintf("Go method frame. File name: %s. Method name: %s.", cf.FileName(), cf.name)
+}
+
+func (cf *normalCallFrame) inspect() string {
 	if cf.ep != nil {
-		return fmt.Sprintf("Name: %s. is block: %t. ep: %d", cf.instructionSet.name, cf.isBlock, len(cf.ep.locals))
+		return fmt.Sprintf("Normal frame. File name: %s. IS name: %s. is block: %t. ep: %d", cf.FileName(), cf.instructionSet.name, cf.isBlock, len(cf.ep.locals))
 	}
-	return fmt.Sprintf("Name: %s. is block: %t", cf.instructionSet.name, cf.isBlock)
+	return fmt.Sprintf("Normal frame. File name: %s. IS name: %s. is block: %t", cf.FileName(), cf.instructionSet.name, cf.isBlock)
 }
 
 func (cfs *callFrameStack) inspect() string {
