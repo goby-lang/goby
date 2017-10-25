@@ -10,7 +10,7 @@ import (
 	"github.com/goby-lang/goby/vm/errors"
 )
 
-// Implementation of thread-safe associative arrays (Hash).
+// ConcurrentHashObject is an implementation of thread-safe associative arrays (Hash).
 //
 // The implementation internally uses Go's `sync.Map` type, with some advantages and disadvantages:
 //
