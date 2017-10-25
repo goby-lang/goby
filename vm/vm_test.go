@@ -304,6 +304,28 @@ func testArrayObject(t *testing.T, index int, obj Object, expected []interface{}
 	return true
 }
 
+// Same as testHashObject(), but expects a ConcurrentHash.
+//
+func testConcurrentHashObject(t *testing.T, index int, objectResult Object, expected map[string]interface{}) bool {
+	result, ok := objectResult.(*ConcurrentHashObject)
+
+	if !ok {
+		t.Errorf("At test case %d: result is not ConcurrentHash. got=%T", index, objectResult)
+		return false
+	}
+
+	pairs := make(map[string]Object)
+
+	iterator := func(key, value interface{}) bool {
+		pairs[key.(string)] = value.(Object)
+		return true
+	}
+
+	result.internalMap.Range(iterator)
+
+	return _checkHashPairs(t, pairs, expected)
+}
+
 // Tests a Hash Object, with a few limitations:
 //
 // - the tested hash must be shallow (no nested objects as values);
@@ -320,17 +342,7 @@ func testHashObject(t *testing.T, index int, objectResult Object, expected map[s
 		return false
 	}
 
-	if len(result.Pairs) != len(expected) {
-		t.Errorf("Unexpected result size. Expected %d, got=%d", len(expected), len(result.Pairs))
-	}
-
-	for expectedKey, expectedValue := range expected {
-		resultValue := result.Pairs[expectedKey]
-
-		checkExpected(t, i, resultValue, expectedValue)
-	}
-
-	return true
+	return _checkHashPairs(t, result.Pairs, expected)
 }
 
 // Testing API like testArrayObject(), but performed on bidimensional arrays.
@@ -395,4 +407,20 @@ func isError(obj Object) bool {
 func getFilename() string {
 	_, filename, _, _ := runtime.Caller(1)
 	return filename
+}
+
+// Internal helpers -----------------------------------------------------
+
+func _checkHashPairs(t *testing.T, actual map[string]Object, expected map[string]interface{}) bool {
+	if len(actual) != len(expected) {
+		t.Errorf("Unexpected result size. Expected %d, got=%d", len(expected), len(actual))
+	}
+
+	for expectedKey, expectedValue := range expected {
+		resultValue := actual[expectedKey]
+
+		checkExpected(t, i, resultValue, expectedValue)
+	}
+
+	return true
 }
