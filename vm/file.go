@@ -36,7 +36,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 			// @param filepath [String]
 			// @return [String]
 			Name: "basename",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					filename := args[0].(*StringObject).value
 					return t.vm.initStringObject(filepath.Base(filename))
@@ -54,7 +54,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 			// @param filename [String]
 			// @return [Integer]
 			Name: "chmod",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					filemod := args[0].(*IntegerObject).value
 					for i := 1; i < len(args); i++ {
@@ -65,7 +65,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 
 						err := os.Chmod(filename, os.FileMode(uint32(filemod)))
 						if err != nil {
-							return t.vm.initErrorObject(errors.InternalError, instruction.sourceLine, err.Error())
+							return t.vm.initErrorObject(errors.InternalError, sourceLine, err.Error())
 						}
 					}
 
@@ -75,14 +75,14 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "delete",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					for _, arg := range args {
 						filename := arg.(*StringObject).value
 						err := os.Remove(filename)
 
 						if err != nil {
-							return t.vm.initErrorObject(errors.InternalError, instruction.sourceLine, err.Error())
+							return t.vm.initErrorObject(errors.InternalError, sourceLine, err.Error())
 						}
 					}
 
@@ -92,7 +92,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "exist?",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					filename := args[0].(*StringObject).value
 					_, err := os.Stat(filename)
@@ -114,7 +114,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 			// @param filename [String]
 			// @return [String]
 			Name: "extname",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					filename := args[0].(*StringObject).value
 					return t.vm.initStringObject(filepath.Ext(filename))
@@ -129,7 +129,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [String]
 			Name: "join",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					var elements []string
 					for i := 0; i < len(args); i++ {
@@ -150,14 +150,14 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 			// @param filename [String]
 			// @return [File]
 			Name: "new",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					var fn string
 					var mode int
 					var perm os.FileMode
 
 					if len(args) < 1 {
-						return t.vm.initErrorObject(errors.InternalError, instruction.sourceLine, "Expect at least a filename to open file")
+						return t.vm.initErrorObject(errors.InternalError, sourceLine, "Expect at least a filename to open file")
 					}
 
 					if len(args) >= 1 {
@@ -170,7 +170,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 							md, ok := fileModeTable[m]
 
 							if !ok {
-								return t.vm.initErrorObject(errors.InternalError, instruction.sourceLine, "Unknown file mode: %s", m)
+								return t.vm.initErrorObject(errors.InternalError, sourceLine, "Unknown file mode: %s", m)
 							}
 
 							if md == syscall.O_RDWR || md == syscall.O_WRONLY {
@@ -190,7 +190,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 					f, err := os.OpenFile(fn, mode, perm)
 
 					if err != nil {
-						return t.vm.initErrorObject(errors.InternalError, instruction.sourceLine, err.Error())
+						return t.vm.initErrorObject(errors.InternalError, sourceLine, err.Error())
 					}
 
 					// TODO: Refactor this class retrieval mess
@@ -209,7 +209,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 			// @param filename [String]
 			// @return [Integer]
 			Name: "size",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					filename := args[0].(*StringObject).value
 					if !filepath.IsAbs(filename) {
@@ -218,7 +218,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 
 					fileStats, err := os.Stat(filename)
 					if err != nil {
-						return t.vm.initErrorObject(errors.InternalError, instruction.sourceLine, err.Error())
+						return t.vm.initErrorObject(errors.InternalError, sourceLine, err.Error())
 					}
 
 					return t.vm.initIntegerObject(int(fileStats.Size()))
@@ -234,7 +234,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 			// @param filepath [String]
 			// @return [Array]
 			Name: "split",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					filename := args[0].(*StringObject).value
 					dir, file := filepath.Split(filename)
@@ -254,7 +254,7 @@ func builtinFileInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "close",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					file := receiver.(*FileObject).File
 					file.Close()
@@ -265,7 +265,7 @@ func builtinFileInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "name",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					name := receiver.(*FileObject).File.Name()
 					return t.vm.initStringObject(name)
@@ -274,7 +274,7 @@ func builtinFileInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "read",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					var result string
 					var f []byte
@@ -291,7 +291,7 @@ func builtinFileInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if err != nil {
-						return t.vm.initErrorObject(errors.InternalError, instruction.sourceLine, err.Error())
+						return t.vm.initErrorObject(errors.InternalError, sourceLine, err.Error())
 					}
 
 					return t.vm.initStringObject(result)
@@ -306,13 +306,13 @@ func builtinFileInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Integer]
 			Name: "size",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					file := receiver.(*FileObject).File
 
 					fileStats, err := os.Stat(file.Name())
 					if err != nil {
-						return t.vm.initErrorObject(errors.InternalError, instruction.sourceLine, err.Error())
+						return t.vm.initErrorObject(errors.InternalError, sourceLine, err.Error())
 					}
 
 					return t.vm.initIntegerObject(int(fileStats.Size()))
@@ -321,14 +321,14 @@ func builtinFileInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "write",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					file := receiver.(*FileObject).File
 					data := args[0].(*StringObject).value
 					length, err := file.Write([]byte(data))
 
 					if err != nil {
-						return t.vm.initErrorObject(errors.InternalError, instruction.sourceLine, err.Error())
+						return t.vm.initErrorObject(errors.InternalError, sourceLine, err.Error())
 					}
 
 					return t.vm.initIntegerObject(length)

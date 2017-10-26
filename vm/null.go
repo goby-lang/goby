@@ -22,9 +22,9 @@ func builtinNullClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "new",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.initUnsupportedMethodError(instruction.sourceLine, "#new", receiver)
+					return t.initUnsupportedMethodError(sourceLine, "#new", receiver)
 				}
 			},
 		},
@@ -43,7 +43,7 @@ func builtinNullInstanceMethods() []*BuiltinMethodObject {
 			// # => true
 			// ```
 			Name: "!",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					return TRUE
@@ -52,7 +52,7 @@ func builtinNullInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "to_i",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					return t.vm.initIntegerObject(0)
 				}
@@ -60,7 +60,7 @@ func builtinNullInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "to_s",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					return t.vm.initStringObject("")
 				}
@@ -75,10 +75,10 @@ func builtinNullInstanceMethods() []*BuiltinMethodObject {
 			// # => true
 			// ```
 			Name: "==",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, instruction.sourceLine, "Expect 1 argument. got: %d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
 					}
 
 					if _, ok := args[0].(*NullObject); ok {
@@ -97,10 +97,10 @@ func builtinNullInstanceMethods() []*BuiltinMethodObject {
 			// # => false
 			// ```
 			Name: "!=",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, instruction.sourceLine, "Expect 1 argument. got: %d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
 					}
 
 					if _, ok := args[0].(*NullObject); !ok {
@@ -119,10 +119,10 @@ func builtinNullInstanceMethods() []*BuiltinMethodObject {
 			// # => true
 			// ```
 			Name: "nil?",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, instruction.sourceLine, "Expect 0 argument. got: %d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
 					}
 					return TRUE
 				}

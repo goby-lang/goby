@@ -23,7 +23,7 @@ func builtinGoMapClassMethods() []*BuiltinMethodObject {
 			//
 			// @return [GoMap]
 			Name: "new",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					m := make(map[string]interface{})
 
@@ -34,7 +34,7 @@ func builtinGoMapClassMethods() []*BuiltinMethodObject {
 					hash, ok := args[0].(*HashObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, instruction.sourceLine, errors.WrongArgumentTypeFormat, classes.HashClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.HashClass, args[0].Class().Name)
 					}
 
 					for k, v := range hash.Pairs {
@@ -53,10 +53,10 @@ func builtinGoMapInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "to_hash",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, instruction.sourceLine, "Expect 0 argument. got: %d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
 					}
 
 					m := receiver.(*GoMap)
@@ -74,16 +74,16 @@ func builtinGoMapInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "get",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, instruction.sourceLine, "Expect 1 argument. got: %d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
 					}
 
 					key, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, instruction.sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					m := receiver.(*GoMap).data
@@ -106,16 +106,16 @@ func builtinGoMapInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "set",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 2 {
-						return t.vm.initErrorObject(errors.ArgumentError, instruction.sourceLine, "Expect 2 argument. got: %d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 2 argument. got: %d", len(args))
 					}
 
 					key, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, instruction.sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					m := receiver.(*GoMap).data
