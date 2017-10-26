@@ -18,13 +18,13 @@ func builtinJSONClassMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, instruction, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+						return t.vm.initErrorObject(errors.ArgumentError, instruction.sourceLine, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
 					j, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, instruction, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, instruction.sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					var obj jsonObj
@@ -38,7 +38,7 @@ func builtinJSONClassMethods() []*BuiltinMethodObject {
 						err = json.Unmarshal([]byte(jsonString), &objs)
 
 						if err != nil {
-							return t.vm.initErrorObject(errors.InternalError, instruction, "Can't parse string %s as json: %s", jsonString, err.Error())
+							return t.vm.initErrorObject(errors.InternalError, instruction.sourceLine, "Can't parse string %s as json: %s", jsonString, err.Error())
 						}
 
 						var objects []Object
@@ -59,13 +59,13 @@ func builtinJSONClassMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, instruction, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+						return t.vm.initErrorObject(errors.ArgumentError, instruction.sourceLine, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
 					j, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, instruction, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, instruction.sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					var obj jsonObj

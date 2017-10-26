@@ -208,7 +208,7 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 	method = receiver.findMethod(methodName)
 
 	if method == nil {
-		err := t.vm.initErrorObject(errors.UndefinedMethodError, instruction, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
+		err := t.vm.initErrorObject(errors.UndefinedMethodError, instruction.sourceLine, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
 		t.stack.set(receiverPr, &Pointer{Target: err})
 		t.sp = argPr
 		return
@@ -223,7 +223,7 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 	case *BuiltinMethodObject:
 		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, instruction, sendCallFrame.FileName())
 	case *Error:
-		t.pushErrorObject(errors.InternalError, instruction, m.toString())
+		t.pushErrorObject(errors.InternalError, instruction.sourceLine, m.toString())
 	}
 }
 
@@ -254,7 +254,7 @@ func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 	t.sp = argPtr
 }
 
-func (t *thread) reportArgumentError(instruction *instruction, idealArgNumber int, methodName string, exactArgNumber int, receiverPtr int) {
+func (t *thread) reportArgumentError(sourceLine, idealArgNumber int, methodName string, exactArgNumber int, receiverPtr int) {
 	var message string
 
 	if idealArgNumber > exactArgNumber {
@@ -263,7 +263,7 @@ func (t *thread) reportArgumentError(instruction *instruction, idealArgNumber in
 		message = "Expect at most %d args for method '%s'. got: %d"
 	}
 
-	e := t.vm.initErrorObject(errors.ArgumentError, instruction, message, idealArgNumber, methodName, exactArgNumber)
+	e := t.vm.initErrorObject(errors.ArgumentError, sourceLine, message, idealArgNumber, methodName, exactArgNumber)
 	t.stack.set(receiverPtr, &Pointer{Target: e})
 	t.sp = receiverPtr + 1
 }
@@ -276,12 +276,12 @@ func (t *thread) evalMethodObject(call *callObject, instruction *instruction) {
 	stack := t.stack.Data
 
 	if call.argCount > paramsCount && !call.method.isSplatArgIncluded() {
-		t.reportArgumentError(instruction, paramsCount, call.methodName(), call.argCount, call.receiverPtr)
+		t.reportArgumentError(instruction.sourceLine, paramsCount, call.methodName(), call.argCount, call.receiverPtr)
 		return
 	}
 
 	if normalParamsCount > call.argCount {
-		t.reportArgumentError(instruction, normalParamsCount, call.methodName(), call.argCount, call.receiverPtr)
+		t.reportArgumentError(instruction.sourceLine, normalParamsCount, call.methodName(), call.argCount, call.receiverPtr)
 		return
 	}
 
@@ -291,7 +291,7 @@ func (t *thread) evalMethodObject(call *callObject, instruction *instruction) {
 		case bytecode.RequiredKeywordArg:
 			paramName := call.paramNames()[paramIndex]
 			if _, ok := call.hasKeywordArgument(paramName); !ok {
-				e := t.vm.initErrorObject(errors.ArgumentError, instruction, "Method %s requires key argument %s", call.methodName(), paramName)
+				e := t.vm.initErrorObject(errors.ArgumentError, instruction.sourceLine, "Method %s requires key argument %s", call.methodName(), paramName)
 				t.stack.set(call.receiverPtr, &Pointer{Target: e})
 				t.sp = call.argPtr()
 				return
@@ -302,7 +302,7 @@ func (t *thread) evalMethodObject(call *callObject, instruction *instruction) {
 	err := call.assignKeywordArguments(stack)
 
 	if err != nil {
-		e := t.vm.initErrorObject(errors.ArgumentError, instruction, err.Error())
+		e := t.vm.initErrorObject(errors.ArgumentError, instruction.sourceLine, err.Error())
 		t.stack.set(call.receiverPtr, &Pointer{Target: e})
 		t.sp = call.argPtr()
 		return
@@ -332,11 +332,11 @@ func (t *thread) evalMethodObject(call *callObject, instruction *instruction) {
 	t.sp = call.argPtr()
 }
 
-func (t *thread) pushErrorObject(errorType string, instruction *instruction, format string, args ...interface{}) {
-	err := t.vm.initErrorObject(errorType, instruction, format, args...)
+func (t *thread) pushErrorObject(errorType string, sourceLine int, format string, args ...interface{}) {
+	err := t.vm.initErrorObject(errorType, sourceLine, format, args...)
 	t.stack.push(&Pointer{Target: err})
 }
 
-func (t *thread) initUnsupportedMethodError(instruction *instruction, methodName string, receiver Object) *Error {
-	return t.vm.initErrorObject(errors.UnsupportedMethodError, instruction, "Unsupported Method %s for %+v", methodName, receiver.toString())
+func (t *thread) initUnsupportedMethodError(sourceLine int, methodName string, receiver Object) *Error {
+	return t.vm.initErrorObject(errors.UnsupportedMethodError, sourceLine, "Unsupported Method %s for %+v", methodName, receiver.toString())
 }

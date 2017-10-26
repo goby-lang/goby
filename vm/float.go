@@ -29,7 +29,7 @@ func builtinFloatClassMethods() []*BuiltinMethodObject {
 			Name: "new",
 			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.initUnsupportedMethodError(instruction, "#new", receiver)
+					return t.initUnsupportedMethodError(instruction.sourceLine, "#new", receiver)
 				}
 			},
 		},
@@ -238,7 +238,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 					rightNumeric, ok := args[0].(Numeric)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, instruction, errors.WrongArgumentTypeFormat, "Numeric", args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, instruction.sourceLine, errors.WrongArgumentTypeFormat, "Numeric", args[0].Class().Name)
 					}
 
 					leftValue := receiver.(*FloatObject).value
@@ -360,7 +360,7 @@ func (f *FloatObject) arithmeticOperation(t *thread, rightObject Object, operati
 	rightNumeric, ok := rightObject.(Numeric)
 
 	if !ok {
-		return t.vm.initErrorObject(errors.TypeError, instruction, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
+		return t.vm.initErrorObject(errors.TypeError, instruction.sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
 	}
 
 	leftValue := f.value
@@ -392,7 +392,7 @@ func (f *FloatObject) numericComparison(t *thread, rightObject Object, operation
 	rightNumeric, ok := rightObject.(Numeric)
 
 	if !ok {
-		return t.vm.initErrorObject(errors.TypeError, instruction, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
+		return t.vm.initErrorObject(errors.TypeError, instruction.sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
 	}
 
 	leftValue := f.value

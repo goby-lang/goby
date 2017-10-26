@@ -50,7 +50,7 @@ func builtinIntegerClassMethods() []*BuiltinMethodObject {
 			Name: "new",
 			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.initUnsupportedMethodError(instruction, "#new", receiver)
+					return t.initUnsupportedMethodError(instruction.sourceLine, "#new", receiver)
 				}
 			},
 		},
@@ -77,7 +77,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 						return leftValue + rightValue
 					}
 
-					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, instruction)
+					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, instruction.sourceLine)
 				}
 			},
 		},
@@ -98,7 +98,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 						return math.Mod(leftValue, rightValue)
 					}
 
-					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, instruction)
+					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, instruction.sourceLine)
 				}
 			},
 		},
@@ -119,7 +119,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 						return leftValue - rightValue
 					}
 
-					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, instruction)
+					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, instruction.sourceLine)
 				}
 			},
 		},
@@ -140,7 +140,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 						return leftValue * rightValue
 					}
 
-					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, instruction)
+					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, instruction.sourceLine)
 				}
 			},
 		},
@@ -161,7 +161,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 						return math.Pow(leftValue, rightValue)
 					}
 
-					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, instruction)
+					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, instruction.sourceLine)
 				}
 			},
 		},
@@ -182,7 +182,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 						return leftValue / rightValue
 					}
 
-					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, instruction)
+					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, instruction.sourceLine)
 				}
 			},
 		},
@@ -204,7 +204,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 						return leftValue > rightValue
 					}
 
-					return receiver.(*IntegerObject).numericComparison(t, args[0], intComparison, floatComparison, instruction)
+					return receiver.(*IntegerObject).numericComparison(t, args[0], intComparison, floatComparison, instruction.sourceLine)
 				}
 			},
 		},
@@ -226,7 +226,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 						return leftValue >= rightValue
 					}
 
-					return receiver.(*IntegerObject).numericComparison(t, args[0], intComparison, floatComparison, instruction)
+					return receiver.(*IntegerObject).numericComparison(t, args[0], intComparison, floatComparison, instruction.sourceLine)
 				}
 			},
 		},
@@ -248,7 +248,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 						return leftValue < rightValue
 					}
 
-					return receiver.(*IntegerObject).numericComparison(t, args[0], intComparison, floatComparison, instruction)
+					return receiver.(*IntegerObject).numericComparison(t, args[0], intComparison, floatComparison, instruction.sourceLine)
 				}
 			},
 		},
@@ -270,7 +270,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 						return leftValue <= rightValue
 					}
 
-					return receiver.(*IntegerObject).numericComparison(t, args[0], intComparison, floatComparison, instruction)
+					return receiver.(*IntegerObject).numericComparison(t, args[0], intComparison, floatComparison, instruction.sourceLine)
 				}
 			},
 		},
@@ -314,7 +314,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 
 						return t.vm.initIntegerObject(0)
 					default:
-						return t.vm.initErrorObject(errors.TypeError, instruction, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, instruction.sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
 					}
 				}
 			},
@@ -497,11 +497,11 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 					n := receiver.(*IntegerObject)
 
 					if n.value < 0 {
-						return t.vm.initErrorObject(errors.InternalError, instruction, "Expect integer greater than or equal 0. got: %d", n.value)
+						return t.vm.initErrorObject(errors.InternalError, instruction.sourceLine, "Expect integer greater than or equal 0. got: %d", n.value)
 					}
 
 					if blockFrame == nil {
-						return t.vm.initErrorObject(errors.InternalError, instruction, errors.CantYieldWithoutBlockFormat)
+						return t.vm.initErrorObject(errors.InternalError, instruction.sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 
 					for i := 0; i < n.value; i++ {
@@ -694,7 +694,7 @@ func (i *IntegerObject) arithmeticOperation(
 	rightObject Object,
 	intOperation func(leftValue int, rightValue int) int,
 	floatOperation func(leftValue float64, rightValue float64) float64,
-	instruction *instruction,
+	sourceLine int,
 ) Object {
 	switch rightObject.(type) {
 	case *IntegerObject:
@@ -712,7 +712,7 @@ func (i *IntegerObject) arithmeticOperation(
 
 		return t.vm.initFloatObject(result)
 	default:
-		return t.vm.initErrorObject(errors.TypeError, instruction, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
+		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
 	}
 }
 
@@ -745,7 +745,7 @@ func (i *IntegerObject) numericComparison(
 	rightObject Object,
 	intComparison func(leftValue int, rightValue int) bool,
 	floatComparison func(leftValue float64, rightValue float64) bool,
-	instruction *instruction,
+	sourceLine int,
 ) Object {
 	switch rightObject.(type) {
 	case *IntegerObject:
@@ -763,7 +763,7 @@ func (i *IntegerObject) numericComparison(
 
 		return toBooleanObject(result)
 	default:
-		return t.vm.initErrorObject(errors.TypeError, instruction, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
+		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
 	}
 }
 

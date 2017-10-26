@@ -75,7 +75,7 @@ var builtinActions = map[operationType]*action{
 			c := t.vm.lookupConstant(cf, constName)
 
 			if c == nil {
-				err := t.vm.initErrorObject(errors.NameError, i, "uninitialized constant %s", constName)
+				err := t.vm.initErrorObject(errors.NameError, i.sourceLine, "uninitialized constant %s", constName)
 				t.stack.push(&Pointer{Target: err})
 				return
 			}
@@ -188,7 +188,7 @@ var builtinActions = map[operationType]*action{
 			v := t.stack.pop()
 
 			if c != nil {
-				err := t.vm.initErrorObject(errors.ConstantAlreadyInitializedError, i, "Constant %s already been initialized. Can't assign value to a constant twice.", constName)
+				err := t.vm.initErrorObject(errors.ConstantAlreadyInitializedError, i.sourceLine, "Constant %s already been initialized. Can't assign value to a constant twice.", constName)
 				t.stack.push(&Pointer{Target: err})
 				return
 			}
@@ -227,7 +227,7 @@ var builtinActions = map[operationType]*action{
 			arr, ok := t.stack.pop().Target.(*ArrayObject)
 
 			if !ok {
-				t.pushErrorObject(errors.TypeError, i, "Expect stack top's value to be an Array when executing 'expandarray' instruction.")
+				t.pushErrorObject(errors.TypeError, i.sourceLine, "Expect stack top's value to be an Array when executing 'expandarray' instruction.")
 				return
 			}
 
@@ -357,7 +357,7 @@ var builtinActions = map[operationType]*action{
 			is, ok := t.getMethodIS(methodName, cf.FileName())
 
 			if !ok {
-				t.pushErrorObject(errors.InternalError, i, "Can't get method %s's instruction set.", methodName)
+				t.pushErrorObject(errors.InternalError, i.sourceLine, "Can't get method %s's instruction set.", methodName)
 				return
 			}
 
@@ -411,12 +411,12 @@ var builtinActions = map[operationType]*action{
 					inheritedClass, ok := superClass.Target.(*RClass)
 
 					if !ok {
-						t.pushErrorObject(errors.InternalError, i, "Constant %s is not a class. got=%s", superClassName, string(superClass.Target.Class().ReturnName()))
+						t.pushErrorObject(errors.InternalError, i.sourceLine, "Constant %s is not a class. got=%s", superClassName, string(superClass.Target.Class().ReturnName()))
 						return
 					}
 
 					if inheritedClass.isModule {
-						t.pushErrorObject(errors.InternalError, i, "Module inheritance is not supported: %s", inheritedClass.Name)
+						t.pushErrorObject(errors.InternalError, i.sourceLine, "Module inheritance is not supported: %s", inheritedClass.Name)
 						return
 					}
 
@@ -464,7 +464,7 @@ var builtinActions = map[operationType]*action{
 			method = receiver.findMethod(methodName)
 
 			if method == nil {
-				err := t.vm.initErrorObject(errors.UndefinedMethodError, i, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
+				err := t.vm.initErrorObject(errors.UndefinedMethodError, i.sourceLine, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
 				t.stack.set(receiverPr, &Pointer{Target: err})
 				t.sp = argPr
 				return
@@ -486,7 +486,7 @@ var builtinActions = map[operationType]*action{
 			case *BuiltinMethodObject:
 				t.evalBuiltinMethod(receiver, m, receiverPr, argCount, argSet, blockFrame, i, cf.fileName)
 			case *Error:
-				t.pushErrorObject(errors.InternalError, i, m.toString())
+				t.pushErrorObject(errors.InternalError, i.sourceLine, m.toString())
 			}
 		},
 	},
@@ -499,7 +499,7 @@ var builtinActions = map[operationType]*action{
 			receiver := t.stack.Data[receiverPr].Target
 
 			if cf.blockFrame == nil {
-				t.pushErrorObject(errors.InternalError, i, "Can't yield without a block")
+				t.pushErrorObject(errors.InternalError, i.sourceLine, "Can't yield without a block")
 				return
 			}
 

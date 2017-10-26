@@ -40,7 +40,7 @@ func builtinRangeClassMethods() []*BuiltinMethodObject {
 			Name: "new",
 			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.initUnsupportedMethodError(instruction, "#new", receiver)
+					return t.initUnsupportedMethodError(instruction.sourceLine, "#new", receiver)
 				}
 			},
 		},
@@ -208,7 +208,7 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 								end = mid - 1
 							}
 						default:
-							return t.vm.initErrorObject(errors.TypeError, instruction, "Expect Integer or Boolean type. got=%s", r.Class().Name)
+							return t.vm.initErrorObject(errors.TypeError, instruction.sourceLine, "Expect Integer or Boolean type. got=%s", r.Class().Name)
 						}
 					}
 				}
@@ -243,7 +243,7 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 					ran := receiver.(*RangeObject)
 
 					if blockFrame == nil {
-						return t.vm.initErrorObject(errors.InternalError, instruction, errors.CantYieldWithoutBlockFormat)
+						return t.vm.initErrorObject(errors.InternalError, instruction.sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 
 					if ran.Start <= ran.End {
@@ -391,7 +391,7 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 					ran := receiver.(*RangeObject)
 
 					if blockFrame == nil {
-						return t.vm.initErrorObject(errors.InternalError, instruction, errors.CantYieldWithoutBlockFormat)
+						return t.vm.initErrorObject(errors.InternalError, instruction.sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 
 					stepValue := args[0].(*IntegerObject).value
