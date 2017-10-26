@@ -54,17 +54,11 @@ func (vm *VM) initErrorObject(errorType string, sourceLine int, format string, a
 		t.callFrameStack.pop()
 	}
 
-	msg := fmt.Sprintf("%s. At %s:%d", fmt.Sprintf(errorType+": "+format, args...), cf.FileName(), sourceLine)
-
-	if sourceLine == -1 {
-		msg = fmt.Sprintf("%s. At %s", fmt.Sprintf(errorType+": "+format, args...), cf.FileName())
-	}
-
 	return &Error{
 		baseObj: &baseObj{class: errClass},
 		// Add 1 to source line because it's zero indexed
-		message:     msg,
-		stackTraces: []string{fmt.Sprintf("from: %s:%d", cf.FileName(), sourceLine)},
+		message:     fmt.Sprintf(errorType+": "+format, args...),
+		stackTraces: []string{fmt.Sprintf("from %s:%d", cf.FileName(), sourceLine)},
 		Type:        errorType,
 	}
 }

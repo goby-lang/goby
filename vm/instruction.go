@@ -465,6 +465,7 @@ var builtinActions = map[operationType]*action{
 			if blockFrame != nil {
 				blockFrame.ep = cf
 				blockFrame.self = cf.self
+				blockFrame.sourceLine = sourceLine
 				t.callFrameStack.push(blockFrame)
 			}
 
@@ -523,6 +524,7 @@ var builtinActions = map[operationType]*action{
 			c.blockFrame = blockFrame
 			c.ep = blockFrame.ep
 			c.self = receiver
+			c.isBlock = true
 
 			for i := 0; i < argCount; i++ {
 				c.locals[i] = t.stack.Data[argPr+i]

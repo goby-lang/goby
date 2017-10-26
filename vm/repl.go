@@ -37,6 +37,7 @@ func (vm *VM) REPLExec(sets []*bytecode.InstructionSet) {
 	cf.locals = oldFrame.Locals()
 	cf.ep = oldFrame.EP()
 	cf.isBlock = oldFrame.IsBlock()
+	cf.isSourceBlock = oldFrame.IsSourceBlock()
 	cf.self = oldFrame.Self()
 	cf.lPr = oldFrame.LocalPtr()
 	vm.mainThread.callFrameStack.push(cf)

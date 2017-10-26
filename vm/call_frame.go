@@ -17,6 +17,7 @@ type baseFrame struct {
 	// local pointer
 	lPr        int
 	isBlock    bool
+	isSourceBlock bool
 	blockFrame *normalCallFrame
 	sync.RWMutex
 	sourceLine int
@@ -28,6 +29,7 @@ type callFrame interface {
 	Self() Object
 	BlockFrame() *normalCallFrame
 	IsBlock() bool
+	IsSourceBlock() bool
 	EP() *normalCallFrame
 	Locals() []*Pointer
 	LocalPtr() int
@@ -75,6 +77,10 @@ func (b *baseFrame) BlockFrame() *normalCallFrame {
 
 func (b *baseFrame) IsBlock() bool {
 	return b.isBlock
+}
+
+func (b *baseFrame) IsSourceBlock() bool {
+	return b.isSourceBlock
 }
 
 func (b *baseFrame) EP() *normalCallFrame {

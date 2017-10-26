@@ -67,7 +67,7 @@ func (t *thread) evalCallFrame(cf callFrame) {
 		t.stack.push(&Pointer{Target: result})
 
 		if err, ok := result.(*Error); ok {
-			panic(err.Message)
+			panic(err.Message())
 		}
 		t.callFrameStack.pop()
 	}
@@ -88,7 +88,7 @@ func (t *thread) evalCallFrame(cf callFrame) {
 func (t *thread) removeUselessBlockFrame(frame callFrame) {
 	topFrame := t.callFrameStack.top()
 
-	if topFrame != nil && topFrame.IsBlock() {
+	if topFrame != nil && topFrame.IsSourceBlock() {
 		t.callFrameStack.pop().stopExecution()
 	}
 }
@@ -106,6 +106,11 @@ func (t *thread) reportErrorAndStop() {
 	if !err.storedTraces {
 		for i := t.cfp - 1; i > 0; i-- {
 			frame := t.callFrameStack.callFrames[i]
+
+			if frame.IsBlock() {
+				continue
+			}
+
 			msg := fmt.Sprintf("from %s:%d", frame.FileName(), frame.SourceLine())
 			err.stackTraces = append(err.stackTraces, msg)
 		}
@@ -113,9 +118,10 @@ func (t *thread) reportErrorAndStop() {
 		err.storedTraces = true
 	}
 
+	panic(err)
+
 	if t.vm.mode == NormalMode {
 		if t.isMainThread() {
-			fmt.Println(err.Message())
 			os.Exit(1)
 		}
 	}
@@ -136,6 +142,8 @@ func (t *thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object)
 	c.blockFrame = blockFrame
 	c.ep = blockFrame.ep
 	c.self = blockFrame.self
+	c.sourceLine = blockFrame.SourceLine()
+	c.isBlock = true
 
 	for i := 0; i < len(args); i++ {
 		c.insertLCL(i, 0, args[i])
@@ -160,6 +168,7 @@ func (t *thread) retrieveBlock(fileName, blockFlag string, sourceLine int) (bloc
 		block := t.getBlock(blockName, fileName)
 
 		c := newNormalCallFrame(block, fileName, sourceLine)
+		c.isSourceBlock = true
 		c.isBlock = true
 		blockFrame = c
 	}
@@ -255,7 +264,7 @@ func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 	t.sp = argPtr
 
 	if err, ok := evaluated.Target.(*Error); ok {
-		panic(err.Message)
+		panic(err.Message())
 	}
 }
 
@@ -332,12 +341,12 @@ func (t *thread) reportArgumentError(sourceLine, idealArgNumber int, methodName 
 func (t *thread) pushErrorObject(errorType string, sourceLine int, format string, args ...interface{}) {
 	err := t.vm.initErrorObject(errorType, sourceLine, format, args...)
 	t.stack.push(&Pointer{Target: err})
-	panic(err.Message)
+	panic(err.Message())
 }
 
 func (t *thread) setErrorObject(receiverPtr, sp int, errorType string, sourceLine int, format string, args ...interface{}) {
 	err := t.vm.initErrorObject(errorType, sourceLine, format, args...)
 	t.stack.set(receiverPtr, &Pointer{Target: err})
 	t.sp = sp
-	panic(err.Message)
+	panic(err.Message())
 }
