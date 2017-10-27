@@ -341,7 +341,7 @@ var builtinActions = map[operationType]*action{
 	},
 	bytecode.PutFloat: {
 		name: bytecode.PutFloat,
-		operation: func(t *thread, i *instruction, cf *normalCallFrame, args ...interface{}) {
+		operation: func(t *thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			var value float64
 			switch argValue := args[0].(type) {
 			case string:
