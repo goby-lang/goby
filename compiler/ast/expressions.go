@@ -6,28 +6,38 @@ import (
 	"strings"
 )
 
+// Define the integer literal which contains the node expression and its value
 type IntegerLiteral struct {
 	*BaseNode
 	Value int
 }
 
 func (il *IntegerLiteral) expressionNode() {}
+
+// Get the literal of the Integer type token
 func (il *IntegerLiteral) TokenLiteral() string {
 	return il.Token.Literal
 }
+
+// Get the string format of the Integer type token
 func (il *IntegerLiteral) String() string {
 	return il.Token.Literal
 }
 
+// Define the float literal which contains the node expression and its value
 type FloatLiteral struct {
 	*BaseNode
 	Value float64
 }
 
 func (il *FloatLiteral) expressionNode() {}
+
+// Get the literal of the Float type token
 func (il *FloatLiteral) TokenLiteral() string {
 	return il.Token.Literal
 }
+
+// Get the string format of the Float type token
 func (il *FloatLiteral) String() string {
 	return il.Token.Literal
 }
@@ -37,10 +47,15 @@ type StringLiteral struct {
 	Value string
 }
 
+// Define the string literal which contains the node expression and its value
 func (sl *StringLiteral) expressionNode() {}
+
+// Get the literal of the String type token
 func (sl *StringLiteral) TokenLiteral() string {
 	return sl.Token.Literal
 }
+
+// Get the string format of the String type token
 func (sl *StringLiteral) String() string {
 	var out bytes.Buffer
 
@@ -50,15 +65,20 @@ func (sl *StringLiteral) String() string {
 	return out.String()
 }
 
+// Define the array literal which contains the node expression and its value
 type ArrayExpression struct {
 	*BaseNode
 	Elements []Expression
 }
 
 func (ae *ArrayExpression) expressionNode() {}
+
+// Get the literal of the Array type token
 func (ae *ArrayExpression) TokenLiteral() string {
 	return ae.Token.Literal
 }
+
+// Get the string format of the Array type token
 func (ae *ArrayExpression) String() string {
 	var out bytes.Buffer
 
@@ -103,15 +123,20 @@ func (pe *PairExpression) String() string {
 	return fmt.Sprintf("%s: %s", pe.Key.String(), pe.Value.String())
 }
 
+// Define the hash expression literal which contains the node expression and its value
 type HashExpression struct {
 	*BaseNode
 	Data map[string]Expression
 }
 
 func (he *HashExpression) expressionNode() {}
+
+// Get the literal of the Hash type token
 func (he *HashExpression) TokenLiteral() string {
 	return he.Token.Literal
 }
+
+// Get the string format of the Hash type token
 func (he *HashExpression) String() string {
 	var out bytes.Buffer
 	var pairs []string
@@ -203,15 +228,20 @@ func (ae *AssignExpression) String() string {
 	return out.String()
 }
 
+// Define the boolean expression literal which contains the node expression and its value
 type BooleanExpression struct {
 	*BaseNode
 	Value bool
 }
 
 func (b *BooleanExpression) expressionNode() {}
+
+// Get the literal of the Boolean type token
 func (b *BooleanExpression) TokenLiteral() string {
 	return b.Token.Literal
 }
+
+// Get the string format of the Boolean type token
 func (b *BooleanExpression) String() string {
 	return b.Token.Literal
 }
@@ -380,6 +410,7 @@ func (ye *YieldExpression) String() string {
 	return out.String()
 }
 
+// Define the range expression literal which contains the node expression and its start/end value
 type RangeExpression struct {
 	*BaseNode
 	Start Expression
@@ -387,9 +418,13 @@ type RangeExpression struct {
 }
 
 func (re *RangeExpression) expressionNode() {}
+
+// Get the literal of the Range type token
 func (re *RangeExpression) TokenLiteral() string {
 	return re.Token.Literal
 }
+
+// Get the string format of the Range type token
 func (re *RangeExpression) String() string {
 	var out bytes.Buffer
 

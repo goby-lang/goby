@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"github.com/goby-lang/goby/compiler/ast"
 	"github.com/goby-lang/goby/compiler/token"
 	"strconv"
@@ -20,11 +21,15 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	return lit
 }
 
-func (p *Parser) parseFloatLiteral(receiver ast.Expression) ast.Expression {
+func (p *Parser) parseFloatLiteral(integerPart ast.Expression) ast.Expression {
+	// Get the fractional part of the token
 	p.nextToken()
-	floatLiteral := receiver.String() + "." + p.curToken.Literal
 
-	floatTok := token.Token{Type: token.Float, Literal: floatLiteral, Line: p.curToken.Line}
+	floatTok := token.Token{
+		Type:    token.Float,
+		Literal: fmt.Sprintf("%s.%s", integerPart.String(), p.curToken.Literal),
+		Line:    p.curToken.Line,
+	}
 	lit := &ast.FloatLiteral{BaseNode: &ast.BaseNode{Token: floatTok}}
 	value, err := strconv.ParseFloat(lit.TokenLiteral(), 64)
 	if err != nil {
