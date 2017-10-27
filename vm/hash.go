@@ -653,6 +653,113 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Returns a value from the hash for the given key. If the key can’t be found, there are several
+			// options: With no other arguments, it will raise an ArgumentError exception; if default is
+			// given, then that will be returned; if the optional code block is specified, then that will be
+			// run and its result returned.
+			//
+			// ```Ruby
+			// h = { "spaghetti" => "eat" }
+			// h.fetch("spaghetti")                     #=> "eat"
+			// h.fetch("pizza")                         #=> ArgumentError
+			// h.fetch("pizza", "not eat")              #=> "not eat"
+			// h.fetch("pizza") do |el| "eat " + el end #=> "eat pizza"
+			// ```
+			//
+			// @return [Object]
+			Name: "fetch",
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					if !(len(args) == 1 || len(args) == 2) {
+						return t.vm.initErrorObject(errors.ArgumentError, instruction, "Expected 1 or 2 arguments, got %d", len(args))
+					} else if len(args) == 2 && blockFrame != nil {
+						return t.vm.initErrorObject(errors.ArgumentError, instruction, "The default argument can't be passed along with a block")
+					}
+
+					hash := receiver.(*HashObject)
+					key, ok := args[0].(*StringObject)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, instruction, errors.WrongArgumentTypeFormat, classes.StringClass, key.Class().Name)
+					}
+
+					value, ok := hash.Pairs[key.value]
+
+					if ok {
+						if blockFrame != nil {
+							t.callFrameStack.pop()
+						}
+
+						return value
+					}
+
+					if len(args) == 2 {
+						return args[1]
+					}
+
+					if blockFrame != nil {
+						return t.builtinMethodYield(blockFrame, key).Target
+					}
+
+					return t.vm.initErrorObject(errors.ArgumentError, instruction, "The value was not found, and no block has been provided")
+				}
+			},
+		},
+		{
+			// Returns an array containing the values associated with the given keys but also raises
+			// ArgumentError when one of keys can’t be found.
+			//
+			// ```Ruby
+			// h = { cat: "feline", dog: "canine", cow: "bovine" }
+			//
+			// h.fetch_values("cow", "cat")                      #=> ["bovine", "feline"]
+			// h.fetch_values("cow", "bird")                     # raises ArgumentError
+			// h.fetch_values("cow", "bird") do |k| k.upcase end #=> ["bovine", "BIRD"]
+			// ```
+			//
+			// @return [ArrayObject]
+			Name: "fetch_values",
+			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					if len(args) == 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, instruction, "Expected 1+ arguments, got 0")
+					}
+
+					values := make([]Object, len(args))
+
+					hash := receiver.(*HashObject)
+					blockFramePopped := false
+
+					for index, objectKey := range args {
+						stringKey, ok := objectKey.(*StringObject)
+
+						if !ok {
+							return t.vm.initErrorObject(errors.TypeError, instruction, errors.WrongArgumentTypeFormat, classes.StringClass, objectKey.Class().Name)
+						}
+
+						value, ok := hash.Pairs[stringKey.value]
+
+						if !ok {
+							if blockFrame != nil {
+								value = t.builtinMethodYield(blockFrame, objectKey).Target
+								blockFramePopped = true
+							} else {
+								return t.vm.initErrorObject(errors.ArgumentError, instruction, "There is no value for the key `%s`, and no block has been provided", stringKey.value)
+							}
+						}
+
+						values[index] = value
+					}
+
+					if blockFrame != nil && ! blockFramePopped {
+						t.callFrameStack.pop()
+					}
+
+					return t.vm.initArrayObject(values)
+				}
+			},
+		},
+		{
 			// Returns true if the key exist in the hash. Currently, it can only input string
 			// type object.
 			//

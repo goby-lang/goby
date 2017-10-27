@@ -611,30 +611,30 @@ func TestHashEachKeyMethod(t *testing.T) {
 	}{
 		{`
 			{ a: "Hello", b: "World", c: "Goby" }.each_key do |key|
-			  # Empty Block
+				# Empty Block
 			end
 		`, []interface{}{"a", "b", "c"}},
 		{`
 			{ b: "Hello", c: "World", a: "Goby" }.each_key do |key|
-			  # Empty Block
+				# Empty Block
 			end
 		`, []interface{}{"a", "b", "c"}},
 		{`
 			{ b: "Hello", c: "World", b: "Goby" }.each_key do |key|
-			  # Empty Block
+				# Empty Block
 			end
 		`, []interface{}{"b", "c"}},
 		{`
 			arr = []
 			{ a: "Hello", b: "World", c: "Goby" }.each_key do |key|
-			  arr.push(key)
+				arr.push(key)
 			end
 			arr
 		`, []interface{}{"a", "b", "c"}},
 		{`
 			arr = []
 			{}.each_key do |key|
-			  arr.push(key)
+				arr.push(key)
 			end
 			arr
 		`, []interface{}{}},
@@ -652,7 +652,7 @@ func TestHashEachKeyMethod(t *testing.T) {
 func TestHashEachKeyMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`{ a: 1, b: 2, c: 3 }.each_key("Hello") do |key|
-		  puts key
+			puts key
 		end
 		`, "ArgumentError: Expect 0 argument. got: 1", 1, 2},
 		{`{ a: 1, b: 2, c: 3 }.each_key`, "InternalError: Can't yield without a block", 1, 1},
@@ -674,22 +674,22 @@ func TestHashEachValueMethod(t *testing.T) {
 	}{
 		{`
 			{ a: "Hello", b: 123, c: true }.each_value do |v|
-			  # Empty Block
+				# Empty Block
 			end
 		`, []interface{}{"Hello", 123, true}},
 		{`
 			{ b: "Hello", c: 123, a: true }.each_value do |v|
-			  # Empty Block
+				# Empty Block
 			end
 		`, []interface{}{true, "Hello", 123}},
 		{`
 			{ a: "Hello", b: 123, a: true }.each_value do |v|
-			  # Empty Block
+				# Empty Block
 			end
 		`, []interface{}{true, 123}},
 		{`
 			{}.each_value do |v|
-			  # Empty Block
+				# Empty Block
 			end
 		`, []interface{}{}},
 	}
@@ -709,28 +709,28 @@ func TestHashEachValueMethod(t *testing.T) {
 		{`
 			sum = 0
 			{ a: 1, b: 2, c: 3, d: 4, e: 5 }.each_value do |v|
-			  sum = sum + v
+				sum = sum + v
 			end
 			sum
 			`, 15},
 		{`
 			sum = 0
 			{ a: 1, b: 2, a: 3, b: 4, a: 5 }.each_value do |v|
-			  sum = sum + v
+				sum = sum + v
 			end
 			sum
 			`, 9},
 		{`
 			string = ""
 			{ a: "Hello", b: "World", c: "Goby", d: "Lang" }.each_value do |v|
-			  string = string + v + " "
+				string = string + v + " "
 			end
 			string
 			`, "Hello World Goby Lang "},
 		{`
 			string = ""
 			{}.each_value do |v|
-			  string = string + v + " "
+				string = string + v + " "
 			end
 			string
 			`, ""},
@@ -748,7 +748,7 @@ func TestHashEachValueMethod(t *testing.T) {
 func TestHashEachValueMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`{ a: 1, b: 2, c: 3 }.each_value("Hello") do |value|
-		  puts value
+			puts value
 		end
 		`, "ArgumentError: Expect 0 argument. got: 1", 1, 2},
 		{`{ a: 1, b: 2, c: 3 }.each_value`, "InternalError: Can't yield without a block", 1, 1},
@@ -877,6 +877,44 @@ func TestHashFetchMethodFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestHashFetchValuesMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+      { cat: "feline", dog: "canine", cow: "bovine" }.fetch_values("cow", "cat")
+		`, []interface{}{"bovine", "feline"}},
+		{`
+      { cat: "feline", dog: "canine", cow: "bovine" }.fetch_values("cow", "bird") do |k| k.upcase end
+		`, []interface{}{"bovine", "BIRD"}},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testArrayObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestHashFetchValuesMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`{ cat: "feline" }.fetch_values()`, "ArgumentError: Expected 1+ arguments, got 0", 1, 1},
+		{`{ cat: "feline" }.fetch_values(1)`, "TypeError: Expect argument to be String. got: Integer", 1, 1},
+		{`{ cat: "feline" }.fetch_values("dog")`, "ArgumentError: There is no value for the key `dog`, and no block has been provided", 1, 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -1042,49 +1080,49 @@ func TestHashMapValuesMethod(t *testing.T) {
 		{`
 		h = { a: 1, b: 2, c: 3 }
 		result = h.map_values do |v|
-		  v * 3
+			v * 3
 		end
 		h["a"]
 		`, 3},
 		{`
 		h = { a: 1, b: 2, c: 3 }
 		result = h.map_values do |v|
-		  v * 3
+			v * 3
 		end
 		h["b"]
 		`, 6},
 		{`
 		h = { a: 1, b: 2, c: 3 }
 		result = h.map_values do |v|
-		  v * 3
+			v * 3
 		end
 		h["c"]
 		`, 9},
 		{`
 		h = { a: 1, b: 2, c: 3 }
 		result = h.map_values do |v|
-		  v * 3
+			v * 3
 		end
 		result["a"]
 		`, 3},
 		{`
 		h = { a: 1, b: 2, c: 3 }
 		result = h.map_values do |v|
-		  v * 3
+			v * 3
 		end
 		result["b"]
 		`, 6},
 		{`
 		h = { a: 1, b: 2, c: 3 }
 		result = h.map_values do |v|
-		  v * 3
+			v * 3
 		end
 		result["c"]
 		`, 9},
 		{`
 		h = {}
 		result = h.map_values do |v|
-		  v * 3
+			v * 3
 		end
 		result["c"]
 		`, nil},
@@ -1102,7 +1140,7 @@ func TestHashMapValuesMethod(t *testing.T) {
 func TestHashMapValuesMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`{ a: 1, b: 2, c: 3 }.map_values("Hello") do |value|
-		  value * 3
+			value * 3
 		end
 		`, "ArgumentError: Expect 0 argument. got: 1", 1, 2},
 		{`{ a: 1, b: 2, c: 3 }.map_values`, "InternalError: Can't yield without a block", 1, 1},
@@ -1541,49 +1579,49 @@ func TestHashTransformValuesMethod(t *testing.T) {
 		{`
 		h = { a: 1, b: 2, c: 3 }
 		result = h.transform_values do |v|
-		  v * 3
+			v * 3
 		end
 		h["a"]
 		`, 1},
 		{`
 		h = { a: 1, b: 2, c: 3 }
 		result = h.transform_values do |v|
-		  v * 3
+			v * 3
 		end
 		h["b"]
 		`, 2},
 		{`
 		h = { a: 1, b: 2, c: 3 }
 		result = h.transform_values do |v|
-		  v * 3
+			v * 3
 		end
 		h["c"]
 		`, 3},
 		{`
 		h = { a: 1, b: 2, c: 3 }
 		result = h.transform_values do |v|
-		  v * 3
+			v * 3
 		end
 		result["a"]
 		`, 3},
 		{`
 		h = { a: 1, b: 2, c: 3 }
 		result = h.transform_values do |v|
-		  v * 3
+			v * 3
 		end
 		result["b"]
 		`, 6},
 		{`
 		h = { a: 1, b: 2, c: 3 }
 		result = h.transform_values do |v|
-		  v * 3
+			v * 3
 		end
 		result["c"]
 		`, 9},
 		{`
 		h = {}
 		result = h.transform_values do |v|
-		  v * 3
+			v * 3
 		end
 		result["c"]
 		`, nil},
@@ -1601,7 +1639,7 @@ func TestHashTransformValuesMethod(t *testing.T) {
 func TestHashTransformValuesMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`{ a: 1, b: 2, c: 3 }.transform_values("Hello") do |value|
-		  value * 3
+			value * 3
 		end
 		`, "ArgumentError: Expect 0 argument. got: 1", 1, 2},
 		{`{ a: 1, b: 2, c: 3 }.transform_values`, "InternalError: Can't yield without a block", 1, 1},
