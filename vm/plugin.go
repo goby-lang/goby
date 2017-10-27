@@ -26,16 +26,16 @@ func builtinPluginClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "new",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, instruction, errors.WrongNumberOfArgumentFormat, 1, len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 1, len(args))
 					}
 
 					name, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, instruction, errors.WrongArgumentTypeFormat, "String", args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "String", args[0].Class().Name)
 					}
 
 					return &PluginObject{fn: name.value, baseObj: &baseObj{class: t.vm.topLevelClass(classes.PluginClass), InstanceVariables: newEnvironment()}}
@@ -44,7 +44,7 @@ func builtinPluginClassMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "use",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					pkgPath := args[0].(*StringObject).value
 					_, pkgName := filepath.Split(pkgPath)
@@ -54,7 +54,7 @@ func builtinPluginClassMethods() []*BuiltinMethodObject {
 					p, err := compileAndOpenPlugin(soName, pkgPath)
 
 					if err != nil {
-						return t.vm.initErrorObject(errors.InternalError, instruction, err.Error())
+						return t.vm.initErrorObject(errors.InternalError, sourceLine, err.Error())
 					}
 
 					return t.vm.initPluginObject(pkgPath, p)
@@ -69,7 +69,7 @@ func builtinPluginInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "compile",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*PluginObject)
 					context, ok := receiver.instanceVariableGet("@context")
@@ -84,7 +84,7 @@ func builtinPluginInstanceMethods() []*BuiltinMethodObject {
 					ok, err := fileExists(pluginDir)
 
 					if err != nil {
-						return t.vm.initErrorObject(errors.InternalError, instruction, err.Error())
+						return t.vm.initErrorObject(errors.InternalError, sourceLine, err.Error())
 					}
 
 					if !ok {
@@ -101,7 +101,7 @@ func builtinPluginInstanceMethods() []*BuiltinMethodObject {
 					file, err := os.OpenFile(fn+".go", os.O_RDWR|os.O_CREATE, 0755)
 
 					if err != nil {
-						return t.vm.initErrorObject(errors.InternalError, instruction, "Error when creating plugin: %s", err.Error())
+						return t.vm.initErrorObject(errors.InternalError, sourceLine, "Error when creating plugin: %s", err.Error())
 					}
 
 					file.WriteString(pluginContent)
@@ -111,7 +111,7 @@ func builtinPluginInstanceMethods() []*BuiltinMethodObject {
 					p, err := compileAndOpenPlugin(soName, file.Name())
 
 					if err != nil {
-						t.vm.initErrorObject(errors.InternalError, instruction, err.Error())
+						t.vm.initErrorObject(errors.InternalError, sourceLine, err.Error())
 					}
 
 					r.plugin = p
@@ -122,12 +122,12 @@ func builtinPluginInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "go_func",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					s, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, instruction, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					funcName := s.value
@@ -136,13 +136,13 @@ func builtinPluginInstanceMethods() []*BuiltinMethodObject {
 					f, err := p.Lookup(funcName)
 
 					if err != nil {
-						return t.vm.initErrorObject(errors.InternalError, instruction, err.Error())
+						return t.vm.initErrorObject(errors.InternalError, sourceLine, err.Error())
 					}
 
 					funcArgs, err := convertToGoFuncArgs(args[1:])
 
 					if err != nil {
-						t.vm.initErrorObject(errors.TypeError, instruction, err.Error())
+						t.vm.initErrorObject(errors.TypeError, sourceLine, err.Error())
 					}
 
 					funcValue := reflect.ValueOf(f)

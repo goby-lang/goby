@@ -18,7 +18,7 @@ func builtinChannelClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "new",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					c := &ChannelObject{baseObj: &baseObj{class: t.vm.topLevelClass(classes.ChannelClass)}, Chan: make(chan int)}
 					return c
@@ -33,7 +33,7 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "close",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					c := receiver.(*ChannelObject)
 
@@ -45,7 +45,7 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "deliver",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					id := t.vm.channelObjectMap.storeObj(args[0])
 
@@ -59,7 +59,7 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			Name: "receive",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					c := receiver.(*ChannelObject)
 

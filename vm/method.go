@@ -72,7 +72,7 @@ func (m *MethodObject) isKeywordArgIncluded() bool {
 type BuiltinMethodObject struct {
 	*baseObj
 	Name string
-	Fn   func(receiver Object, instruction *instruction) builtinMethodBody
+	Fn   func(receiver Object, sourceLine int) builtinMethodBody
 }
 
 type builtinMethodBody func(*thread, []Object, *normalCallFrame) Object

@@ -30,7 +30,7 @@ type Error struct {
 
 // Functions for initialization -----------------------------------------
 
-func (vm *VM) initErrorObject(errorType string, instruction *instruction, format string, args ...interface{}) *Error {
+func (vm *VM) initErrorObject(errorType string, sourceLine int, format string, args ...interface{}) *Error {
 	errClass := vm.objectClass.getClassConstant(errorType)
 
 	t := vm.mainThread
@@ -47,9 +47,9 @@ func (vm *VM) initErrorObject(errorType string, instruction *instruction, format
 		t.callFrameStack.pop()
 	}
 
-	msg := fmt.Sprintf("%s. At %s:%d", fmt.Sprintf(errorType+": "+format, args...), cf.FileName(), instruction.sourceLine)
+	msg := fmt.Sprintf("%s. At %s:%d", fmt.Sprintf(errorType+": "+format, args...), cf.FileName(), sourceLine)
 
-	if instruction == nil {
+	if sourceLine == -1 {
 		msg = fmt.Sprintf("%s. At %s", fmt.Sprintf(errorType+": "+format, args...), cf.FileName())
 	}
 

@@ -21,14 +21,14 @@ func builtinURIClassMethods() []*BuiltinMethodObject {
 			// u.path # => "/"
 			// ```
 			Name: "parse",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					uri := args[0].(*StringObject).value
 					uriModule := t.vm.topLevelClass("URI")
 					u, err := url.Parse(uri)
 
 					if err != nil {
-						return t.vm.initErrorObject(errors.InternalError, instruction, err.Error())
+						return t.vm.initErrorObject(errors.InternalError, sourceLine, err.Error())
 					}
 
 					uriAttrs := map[string]Object{
@@ -56,7 +56,7 @@ func builtinURIClassMethods() []*BuiltinMethodObject {
 						p, err := strconv.ParseInt(u.Port(), 0, 64)
 
 						if err != nil {
-							return t.vm.initErrorObject(errors.InternalError, instruction, err.Error())
+							return t.vm.initErrorObject(errors.InternalError, sourceLine, err.Error())
 						}
 
 						uriAttrs["@port"] = t.vm.initIntegerObject(int(p))

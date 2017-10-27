@@ -30,9 +30,9 @@ func builtInMatchDataClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "new",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.initUnsupportedMethodError(instruction, "#new", receiver)
+					return t.initUnsupportedMethodError(sourceLine, "#new", receiver)
 				}
 			},
 		},
@@ -53,10 +53,10 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Array]
 			Name: "captures",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, instruction, "Expect 0 argument. got=%d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 					}
 
 					matchData, _ := receiver.(*MatchDataObject)
@@ -84,10 +84,10 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Array]
 			Name: "to_a",
-			Fn: func(receiver Object, instruction *instruction) builtinMethodBody {
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, instruction, "Expect 0 argument. got=%d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 					}
 
 					matchData, _ := receiver.(*MatchDataObject)
