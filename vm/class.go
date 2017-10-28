@@ -701,7 +701,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
-					t.sendMethod(name.value, len(args), blockFrame, sourceLine)
+					t.sendMethod(name.value, len(args)-1, blockFrame, sourceLine)
 
 					return t.stack.top().Target
 				}

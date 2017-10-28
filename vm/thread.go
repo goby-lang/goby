@@ -169,13 +169,13 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 		// Pop array
 		t.stack.pop()
 		// Can't count array self, only the number of array elements
-		argCount = argCount - 1 + len(arr.Elements)
+		argCount = argCount + len(arr.Elements)
 		for _, elem := range arr.Elements {
 			t.stack.push(&Pointer{Target: elem})
 		}
 	}
 
-	argPr := t.sp - argCount
+	argPr := t.sp - argCount - 1
 	receiverPr := argPr - 1
 	receiver := t.stack.Data[receiverPr].Target
 
@@ -198,11 +198,10 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 
 		This also means we need to minus one on argument count and stack pointer
 	*/
-	for i := 0; i < argCount-1; i++ {
+	for i := 0; i < argCount; i++ {
 		t.stack.Data[argPr+i] = t.stack.Data[argPr+i+1]
 	}
 
-	argCount--
 	t.sp--
 
 	method = receiver.findMethod(methodName)
