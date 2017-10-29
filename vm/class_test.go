@@ -317,6 +317,15 @@ func TestSendMethod(t *testing.T) {
 
 		Math.send(:add, 10, 15)
 		`, 25},
+		{`
+		class Foo
+		  def bar(x, y)
+		    yield x, y
+		  end
+		end
+		a = Foo.new
+		a.send(:bar, 7, 8) do |i, j| i * j; end
+		`, 56},
 	}
 
 	for i, tt := range tests {
