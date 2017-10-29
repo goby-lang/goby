@@ -56,10 +56,21 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			Name: "[]",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 arguments. got=%d", len(args))
+					}
+
+					i := args[0]
+					index, ok := i.(*IntegerObject)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+					}
+
 					arr := receiver.(*ArrayObject)
 
 					method := func() Object {
-						return arr.index(t, args, sourceLine)
+						return arr.index(index)
 					}
 
 					return arr.executeWithLock(NoArrayLock, method)
@@ -253,8 +264,20 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			Name: "at",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 arguments. got=%d", len(args))
+					}
+
+					i := args[0]
+					index, ok := i.(*IntegerObject)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+					}
+
 					arr := receiver.(*ArrayObject)
-					return arr.index(t, args, sourceLine)
+
+					return arr.index(index)
 				}
 			},
 		},
@@ -1143,18 +1166,7 @@ func (a *ArrayObject) dig(t *thread, keys []Object, sourceLine int) Object {
 }
 
 // Retrieves an object in an array using Integer index; common to `[]` and `at()`.
-func (a *ArrayObject) index(t *thread, args []Object, sourceLine int) Object {
-	if len(args) != 1 {
-		return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 arguments. got=%d", len(args))
-	}
-
-	i := args[0]
-	index, ok := i.(*IntegerObject)
-
-	if !ok {
-		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
-	}
-
+func (a *ArrayObject) index(index *IntegerObject) Object {
 	normalizedIndex := a.normalizeIndex(index)
 
 	if normalizedIndex == -1 {
