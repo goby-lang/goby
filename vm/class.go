@@ -660,6 +660,9 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			Name: "instance_variable_get",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 arguments. got: %d", len(args))
+					}
 					arg, isStr := args[0].(*StringObject)
 
 					if !isStr {

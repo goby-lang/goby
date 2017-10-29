@@ -146,6 +146,54 @@ func TestClassInstanceVariable(t *testing.T) {
 	}
 }
 
+func TestClassInstanceVariableFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`
+		class Bar
+		  @foo = 1
+		end
+
+		Bar.instance_variable_get
+		`, "ArgumentError: Expect 1 arguments. got: 0", 6, 1},
+		{`
+		class Bar
+		  @foo = 1
+		end
+
+		Bar.instance_variable_get("@foo", 2)
+		`, "ArgumentError: Expect 1 arguments. got: 2", 6, 1},
+		{`
+		class Bar
+		  @foo = 1
+		end
+
+		Bar.instance_variable_set
+				`, "ArgumentError: Expect 2 arguments. got: 0", 6, 1},
+		{`
+		class Bar
+		  @foo = 1
+		end
+
+		Bar.instance_variable_set("@bar")
+				`, "ArgumentError: Expect 2 arguments. got: 1", 6, 1},
+		{`
+		class Bar
+		  @foo = 1
+		end
+
+		Bar.instance_variable_set("@bar", 2, 3)
+				`, "ArgumentError: Expect 2 arguments. got: 3", 6, 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestMethods(t *testing.T) {
 	tests := []struct {
 		input    string
