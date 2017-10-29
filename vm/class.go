@@ -34,6 +34,38 @@ type RClass struct {
 func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
+			// Returns an array that contains ancestor classes/modules of the receiver,
+			// left to right.
+			//
+			// ```ruby
+			// String.ancestors #=> [String, Object]
+			//
+			// module Foo
+			//   def bar
+			//     42
+			//   end
+			// end
+			//
+			// class Bar
+			//   include Foo
+			// end
+			//
+			// Bar.ancestors
+			// #=> [Bar, Foo, Object]
+			//
+			// # you need `#singleton_class` to show the 'extended' modules
+			// class Baz
+			//   extend Foo
+			// end
+			//
+			// Baz.singleton_class.ancestors
+			// #=> [#<Class:Baz>, Foo, #<Class:Object>, Class, Object]
+			// Baz.ancestors          # Foo is hidden
+			// #=> [Baz, Object]
+			// ```
+			//
+			// @param class [Class] Receiver
+			// @return [Array]
 			Name: "ancestors",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -165,6 +197,33 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 				}
 			},
 		},
+		// Inserts a module as a singleton class to make the module's methods class methods.
+		// You can see the extended module by using `singleton_class.ancestors`
+		//
+		// ```ruby
+		// String.ancestors #=> [String, Object]
+		//
+		// module Foo
+		//   def bar
+		//     42
+		//   end
+		// end
+		//
+		// class Bar
+		//   extend Foo
+		// end
+		//
+		// Bar.bar   #=> 42
+		//
+		// Bar.singleton_class.ancestors
+		// #=> [#<Class:Bar>, Foo, #<Class:Object>, Class, Object]
+		//
+		// Bar.ancestors           # Foo is hidden
+		// #=> [Bar, Object]
+		// ```
+		//
+		// @param module [Class] Module name to extend
+		// @return [Null]
 		{
 			Name: "extend",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -216,8 +275,11 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 			//   include(Bar) # method `ten` is only included from this module
 			// end
 			//
+			// Baz.ancestors
+			// [Baz, Bar, Foo, Object]   # Bar is prioritized to Foo
+			//
 			// a = Baz.new
-			// puts(a.ten) # => ten (overridden)
+			// puts(a.ten) # => ten      # overridden
 			// ```
 			//
 			// **Note**:
@@ -227,19 +289,6 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 			// ```ruby
 			//   include("Foo")    # => error
 			//   include(Foo, Bar) # => error
-			// ```
-			//
-			// Including modules into built-in classes such as String are not supported:
-			//
-			// ```ruby
-			// module Foo
-			//   def ten
-			//     10
-			//   end
-			// end
-			// class String
-			//   include(Foo) # => error
-			// end
 			// ```
 			//
 			// @param module [Class] Module name to include
@@ -311,11 +360,10 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 			// a = Foo.new
 			// ```
 			//
-			// Note that the built-in classes such as Class or String are not open for creating instances
+			// Note that the built-in classes such as String are not open for creating instances
 			// and you can't call `new` against them.
 			//
 			// ```ruby
-			// a = Class.new  # => error
 			// a = String.new # => error
 			// ```
 			// @param class [Class] Receiver
@@ -451,7 +499,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// General method for comparing inequalty of the objects
+			// General method for comparing inequality of the objects
 			//
 			// ```ruby
 			// 123 != 123   # => false
@@ -470,7 +518,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			// [1, 2, 3] != [3, 2, 1] # => true
 			// ```
 			//
-			// @return [@boolean]
+			// @return [Boolean]
 			Name: "!=",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -487,7 +535,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 		{
 			// Returns true if a block is given in the current context and `yield` is ready to call.
 			//
-			// **Note:** The method name does not end with '?' because the sign is unavalable in Goby for now.
+			// **Note:** The method name does not end with '?' because the sign is unavailable in Goby for now.
 			//
 			// ```ruby
 			// class File
@@ -592,6 +640,22 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		},
+		// Returns the value of the instance variable.
+		// Only string literal with `@` is supported.
+		//
+		// ```ruby
+		// class Foo
+		//   def initialize
+		//     @bar = 99
+		//   end
+		// end
+		//
+		// a = Foo.new
+		// a.instance_variable_get("@bar")   #=> 99
+		// ```
+		//
+		// @param string [String]
+		// @return [Object], value
 		{
 			Name: "instance_variable_get",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -613,6 +677,22 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Updates the specified instance variable with the value provided
+			// Only string literal with `@` is supported for specifying an instance variable.
+			//
+			// ```ruby
+			// class Foo
+			//   def initialize
+			//     @bar = 99
+			//   end
+			// end
+			//
+			// a = Foo.new
+			// a.instance_variable_set("@bar", 42)
+			// ```
+			//
+			// @param string [String], value [Object]
+			// @return [Object] value
 			Name: "instance_variable_set",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -633,6 +713,15 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		},
+		// Returns an array that contains the method names of the receiver.
+		//
+		// ```ruby
+		// Class.methods
+		// ["ancestors", "attr_accessor", "attr_reader", "attr_writer", "extend", "include", "name", "new", "superclass", "!", "!=", "==", "block_given?", "class", "instance_variable_get", "instance_variable_set", "is_a?", "methods", "nil?", "puts", "require", "require_relative", "send", "singleton_class", "sleep", "thread", "to_s"]
+		// ```
+		//
+		// @param class [Class] Receiver
+		// @return [Array]
 		{
 			Name: "methods",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -775,6 +864,41 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		},
+		// Invoke the specified instance method or class method.
+		// - Method name should be either a symbol or String (required).
+		// - You can pass one or more arguments (option).
+		// - A block can also be provided (option).
+		//
+		//
+		// ```ruby
+		// class Foo
+		//   def self.bar
+		//     10
+		//   end
+		// end
+		//
+		// Foo.send(:bar)  #=> 10
+		//
+		// class Math
+		//   def self.add(x, y)
+		//     x + y
+		//   end
+		// end
+		//
+		// Math.send(:add, 10, 15) #=> 25
+		//
+		// class Foo
+		//   def bar(x, y)
+		//     yield x, y
+		//   end
+		// end
+		// a = Foo.new
+		//
+		// a.send(:bar, 7, 8) do |i, j| i * j; end   #=> 56
+		// ```
+		//
+		// @param name [String/symbol], args [Object], block
+		// @return [Object]
 		{
 			Name: "send",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -796,6 +920,20 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Returns the singleton class object of the receiver class.
+			//
+			// ```ruby
+			// class Foo
+			// end
+			//
+			// Foo.singleton_class
+			// #=> #<Class:Foo>
+			// Foo.singleton_class.ancestors
+			// #=> [#<Class:Foo>, #<Class:Object>, Class, Object]
+			// ```
+			//
+			// @param class [Class] receiver
+			// @return [Object] singleton class
 			Name: "singleton_class",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
