@@ -17,6 +17,12 @@ type ArrayObject struct {
 	splat    bool
 }
 
+const (
+	ReadArrayLock = iota
+	WriteArrayLock
+	NoArrayLock                // included for consistency, but not used
+)
+
 // Class methods --------------------------------------------------------
 func builtinArrayClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
@@ -51,7 +57,12 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					arr := receiver.(*ArrayObject)
-					return arr.index(t, args, sourceLine)
+
+					method := func() Object {
+						return arr.index(t, args, sourceLine)
+					}
+
+					return arr.executeWithLock(NoArrayLock, method)
 				}
 			},
 		},
@@ -1080,6 +1091,12 @@ func (a *ArrayObject) toJSON() string {
 	out.WriteString("]")
 
 	return out.String()
+}
+
+// Polimorphic method for performing locking. For this class, no locks are held;
+// see ConcurrentArrayObject for the other case.
+func (ao *ArrayObject) executeWithLock(arrayType int, method func() Object) Object {
+	return method()
 }
 
 // concatenateCopies returns a array composed of N copies of the array
