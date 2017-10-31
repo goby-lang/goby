@@ -2,7 +2,6 @@ package vm
 
 import (
 	"fmt"
-	"regexp"
 	"strconv"
 	"strings"
 	"unicode"
@@ -68,9 +67,8 @@ func builtinStringClassMethods() []*BuiltinMethodObject {
 					for _, arg := range args[1:] {
 						arguments = append(arguments, arg.toString())
 					}
-					re := regexp.MustCompile(`\%s{1}`)
 
-					count := len(re.FindAllString(format, -1))
+					count := strings.Count(format, "%s")
 
 					if len(args[1:]) != count {
 						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect %d string arguments. got=%d", count, len(args[1:]))
@@ -813,7 +811,6 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// TODO: Implement String#gsub When RegexObject Implemented
 			// Returns a copy of str with the all occurrences of pattern substituted for the second argument.
 			// The pattern is typically a String or Regexp (Not implemented yet); if given as a String, any
 			// regular expression metacharacters it contains will be interpreted literally, e.g. '\\d' will
