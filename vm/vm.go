@@ -45,6 +45,7 @@ var standardLibraries = map[string]func(*VM){
 	"db":                initDBClass,
 	"plugin":            initPluginClass,
 	"json":              initJSONClass,
+	"concurrent/array":  initConcurrentArrayClass,
 	"concurrent/hash":   initConcurrentHashClass,
 }
 

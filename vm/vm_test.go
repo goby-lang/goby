@@ -304,6 +304,25 @@ func testArrayObject(t *testing.T, index int, obj Object, expected []interface{}
 	return true
 }
 
+// Same as testHashObject(), but expects a ConcurrentArray.
+func testConcurrentArrayObject(t *testing.T, index int, obj Object, expected []interface{}) bool {
+	result, ok := obj.(*ConcurrentArrayObject)
+	if !ok {
+		t.Errorf("At test case %d: object is not Array. got=%T (%+v)", index, obj, obj)
+		return false
+	}
+
+	if len(result.InternalArray.Elements) != len(expected) {
+		t.Errorf("Don't equals length of array. Expect %d, got=%d", len(expected), len(result.InternalArray.Elements))
+	}
+
+	for i := 0; i < len(result.InternalArray.Elements); i++ {
+		checkExpected(t, i, result.InternalArray.Elements[i], expected[i])
+	}
+
+	return true
+}
+
 // Same as testHashObject(), but expects a ConcurrentHash.
 //
 func testConcurrentHashObject(t *testing.T, index int, objectResult Object, expected map[string]interface{}) bool {
