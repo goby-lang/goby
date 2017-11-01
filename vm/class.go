@@ -1024,10 +1024,23 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
 					}
 
-					int := args[0].(*IntegerObject)
-					seconds := int.value
-					time.Sleep(time.Duration(seconds) * time.Second)
-					return int
+					int, ok := args[0].(*IntegerObject)
+
+					if ok {
+						seconds := int.value
+						time.Sleep(time.Duration(seconds) * time.Second)
+						return int
+					}
+
+					float, ok := args[0].(*FloatObject)
+
+					if ok {
+						nanoseconds := int64(float.value * 1000000000)
+						time.Sleep(time.Duration(nanoseconds) * time.Nanosecond)
+						return float
+					}
+
+					return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", args[0].Class().Name)
 				}
 			},
 		},
