@@ -7,6 +7,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/dlclark/regexp2"
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
 )
@@ -1448,6 +1449,40 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					return t.vm.initArrayObject(elems)
+				}
+			},
+		},
+		{
+			// Converts a string of decimal number to Decimal object.
+			//
+			// ```ruby
+			// "3.14".to_d            # => 3.14
+			// "-0.7238943".to_d      # => -0.7238943
+			// "355/113".to_d         # => 3.14159292
+			// ```
+			//
+			// @return [String]
+			Name: "to_d",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%v", strconv.Itoa(len(args)))
+					}
+
+					str := receiver.(*StringObject).value
+
+					re := regexp2.MustCompile("[^0-9./\\-]", 0)
+					if r, _ := re.MatchString(str); r == true {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect numeric string. got=%v", str)
+					}
+
+					de, err := new(Decimal).SetString(str)
+					if err == false {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Invalid numeric string. got=%v", str)
+					}
+
+					return t.vm.initDecimalObject(de)
 				}
 			},
 		},

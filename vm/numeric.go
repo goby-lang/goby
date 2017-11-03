@@ -5,4 +5,5 @@ package vm
 // a convenient interface.
 type Numeric interface {
 	floatValue() float64
+	decimalValue() Decimal
 }
