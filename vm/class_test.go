@@ -990,3 +990,24 @@ func TestClassSingletonClassClassMethod(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
+func TestObjectId(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`a = nil.object_id; b = nil.object_id; a == b`, true},
+		{`a = true.object_id; b = true.object_id; a == b`, true},
+		{`a = false.object_id; b = false.object_id; a == b`, true},
+		{`a = 1.object_id; b = 1.object_id; a == b`, false},
+		{`a = "a".object_id; b = "a".object_id; a == b`, false},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
