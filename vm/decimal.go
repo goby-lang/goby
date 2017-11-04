@@ -335,6 +335,40 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Returns the denominator of the decimal value which contains Go's big.Rat type.
+			// The value does not contain a minus sign.
+			//
+			// ```Ruby
+			// a = "-355/113".to_d
+			// a.denominator #=> 113
+			// ```
+			//
+			// @return [String]
+			Name: "denominator",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					return t.vm.initIntegerObject(int(receiver.(*DecimalObject).value.Denom().Int64()))
+				}
+			},
+		},
+		{
+			// Returns the numerator of the decimal value which contains Go's big.Rat type.
+			// The value can contain a minus sign.
+			//
+			// ```Ruby
+			// a = "-355/113".to_d
+			// a.numerator #=> -355
+			// ```
+			//
+			// @return [String]
+			Name: "numerator",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					return t.vm.initIntegerObject(int(receiver.(*DecimalObject).value.Num().Int64()))
+				}
+			},
+		},
+		{
 			// Returns the decimal value with a string style.
 			// Maximum digit under the dots is 60, and a trailing 0 is always added.
 			// This is just to print the final value should not be used for recalculation.
