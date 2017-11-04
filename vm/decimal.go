@@ -343,11 +343,29 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			// a.denominator #=> 113
 			// ```
 			//
-			// @return [String]
+			// @return [int]
 			Name: "denominator",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					return t.vm.initIntegerObject(int(receiver.(*DecimalObject).value.Denom().Int64()))
+				}
+			},
+		},
+		{
+			// Inverses the numerator and the denominator of the decimal and returns it.
+			// Minus sign will move to the new numerator.
+			//
+			// ```Ruby
+			// a = "-355/113".to_d
+			// a.inverse.fraction #=> -113/355
+			// ```
+			//
+			// @return [Decimal]
+			Name: "inverse",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					d := receiver.(*DecimalObject).value
+					return t.vm.initDecimalObject(d.Inv(&d))
 				}
 			},
 		},
@@ -360,7 +378,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			// a.numerator #=> -355
 			// ```
 			//
-			// @return [String]
+			// @return [int]
 			Name: "numerator",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
