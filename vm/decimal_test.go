@@ -44,27 +44,52 @@ func TestDecimalArithmeticOperationWithDecimal(t *testing.T) {
 	}
 }
 
-//func TestDecimalArithmeticOperationWithInteger(t *testing.T) {
-//	tests := []struct {
-//		input    string
-//		expected interface{}
-//	}{
-//		{`'13.5'.to_d  +  3`, 16.5},
-//		{`'13.5'.to_d  -  3`, 10.5},
-//		{`'13.5'.to_d  *  3`, 40.5},
-//		{`'13.5'.to_d  %  3`, 1.5},
-//		{`'13.5'.to_d  /  3`, 4.5},
-//		{`'13.5'.to_d  ** 3`, 2460.375},
-//	}
-//
-//	for i, tt := range tests {
-//		v := initTestVM()
-//		evaluated := v.testEval(t, tt.input, getFilename())
-//		checkExpected(t, i, evaluated, tt.expected)
-//		v.checkCFP(t, i, 0)
-//		v.checkSP(t, i, 1)
-//	}
-//}
+func TestDecimalArithmeticOperationWithInteger(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`('13.5'.to_d  +  3).to_s`, "16.5"},
+		{`('13.5'.to_d  -  3).to_s`, "10.5"},
+		{`('13.5'.to_d  *  3).to_s`, "40.5"},
+		{`('13.5'.to_d  /  3).to_s`, "4.5"},
+		{`('13.5'.to_d  ** 3).to_s`, "2460.375"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestDecimalArithmeticOperationWithFloat(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`('16.1'.to_d  + "1.1".to_d).to_s`, "17.2"},
+		{`('16.1'.to_d  + "1.1".to_f).to_s`, "17.200000000000000088817841970012523233890533447265625"},
+		{`('16.1'.to_d  - "1.1".to_d).to_s`, "15"},
+		{`('16.1'.to_d  - "1.1".to_f).to_s`, "14.999999999999999911182158029987476766109466552734375"},
+		{`('16.1'.to_d  * "1.1".to_d).to_s`, "17.71"},
+		{`('16.1'.to_d  * "1.1".to_f).to_s`, "17.7100000000000014299672557172016240656375885009765625"},
+		{`('16.1'.to_d  / "1.1".to_d).to_s`, "14.636363636363636363636363636363636363636363636363636363636364"},
+		{`('16.1'.to_d  / "1.1".to_f).to_s`, "14.636363636363635181845243208924373053647177484459953103948567"},
+		{`('16.1'.to_d  ** "1.1".to_d).to_s`, "21.257317715840930105741790612228214740753173828125"},
+		{`('16.1'.to_d  ** "1.1".to_f).to_s`, "21.257317715840930105741790612228214740753173828125"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
 
 func TestDecimalArithmeticOperationFail(t *testing.T) {
 	testsFail := []errorTestCase{

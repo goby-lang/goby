@@ -485,10 +485,10 @@ func (d *DecimalObject) arithmeticOperation(
 	switch rightObject.(type) {
 	case *DecimalObject:
 		rightValue = &rightObject.(*DecimalObject).value
-	//case *IntegerObject:
-	//	rightValue = Decimal(new(Decimal).SetInt64(int64(rightObject.(*IntegerObject).value)))
-	//case *FloatObject:
-	//	rightValue = Decimal(new(Decimal).SetFloat64(float64(rightObject.(*FloatObject).value)))
+	case *IntegerObject:
+		rightValue = intToDecimal(rightObject)
+	case *FloatObject:
+		rightValue = floatToDecimal(rightObject)
 	default:
 		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
 	}
@@ -537,10 +537,10 @@ func (d *DecimalObject) numericComparison(
 	switch rightObject.(type) {
 	case *DecimalObject:
 		rightValue = &rightObject.(*DecimalObject).value
-		//case *IntegerObject:
-		//	rightValue = Decimal(new(Decimal).SetInt64(int64(rightObject.(*IntegerObject).value)))
-		//case *FloatObject:
-		//	rightValue = Decimal(new(Decimal).SetFloat64(float64(rightObject.(*FloatObject).value)))
+	case *IntegerObject:
+		rightValue = intToDecimal(rightObject)
+	case *FloatObject:
+		rightValue = floatToDecimal(rightObject)
 	default:
 		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
 	}
@@ -561,18 +561,18 @@ func (d *DecimalObject) rocketComparison(
 	var rightValue *Decimal
 	var result int
 
-	leftValue := &d.value
-
 	switch rightObject.(type) {
 	case *DecimalObject:
 		rightValue = &rightObject.(*DecimalObject).value
-		//case *IntegerObject:
-		//	rightValue = Decimal(new(Decimal).SetInt64(int64(rightObject.(*IntegerObject).value)))
-		//case *FloatObject:
-		//	rightValue = Decimal(new(Decimal).SetFloat64(float64(rightObject.(*FloatObject).value)))
+	case *IntegerObject:
+		rightValue = intToDecimal(rightObject)
+	case *FloatObject:
+		rightValue = floatToDecimal(rightObject)
 	default:
 		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
 	}
+
+	leftValue := &d.value
 	result = decimalOperation(leftValue, rightValue)
 	newInt := t.vm.initIntegerObject(result)
 	newInt.flag = i
@@ -590,4 +590,16 @@ func (d *DecimalObject) toString() string {
 // toJSON just delegates to toString
 func (d *DecimalObject) toJSON() string {
 	return d.toString()
+}
+
+// Other helper functions  ----------------------------------------------
+
+// intToDecimal converts int to Decimal
+func intToDecimal(i Object) *Decimal {
+	return new(Decimal).SetInt64(int64(i.(*IntegerObject).value))
+}
+
+// floatToDecimal converts int to Decimal
+func floatToDecimal(i Object) *Decimal {
+	return new(Decimal).SetFloat64(float64(i.(*FloatObject).value))
 }
