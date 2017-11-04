@@ -19,7 +19,7 @@ type Decimal = big.Rat
 // ```ruby
 // "3.14".to_d            # => 3.14
 // "-0.7238943".to_d      # => -0.7238943
-// "355/113".to_d         # => 3.14159292
+// "355/113".to_d         # => 3.1415929203539823008849557522123893805309734513274336283185840
 //
 // a = "1.1".to_d
 // b = "1.0".to_d
@@ -338,16 +338,17 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			// Returns a string with fraction format of the decimal.
 			// If the denominator is 1, '/1` is omitted.
 			// Minus sign will be preserved.
+			// (Actually, the internal rational number is always deducted)
 			//
 			// ```Ruby
 			// a = "-355/113".to_d
-			// a.deduct #=> -355/113
+			// a.reduction #=> -355/113
 			// b = "-331/1".to_d
-			// b.deduct #=> -331
+			// b.reduction #=> -331
 			// ```
 			//
 			// @return [String]
-			Name: "deduct",
+			Name: "reduction",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					return t.vm.initStringObject(receiver.(*DecimalObject).value.RatString())
@@ -428,7 +429,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			// Returns the decimal value with a string style.
-			// Maximum digit under the dots is 60, and a trailing 0 is always added.
+			// Maximum digit under the dots is 60.
 			// This is just to print the final value should not be used for recalculation.
 			//
 			// ```Ruby
@@ -502,7 +503,7 @@ func (d *DecimalObject) arithmeticOperation(
 	//case *FloatObject:
 	//	rightValue = Decimal(new(Decimal).SetFloat64(float64(rightObject.(*FloatObject).value)))
 	default:
-		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Decimal", rightObject.Class().Name)
+		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
 	}
 
 	leftValue := &d.value
@@ -554,7 +555,7 @@ func (d *DecimalObject) numericComparison(
 		//case *FloatObject:
 		//	rightValue = Decimal(new(Decimal).SetFloat64(float64(rightObject.(*FloatObject).value)))
 	default:
-		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Decimal", rightObject.Class().Name)
+		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
 	}
 
 	leftValue := &d.value
@@ -583,7 +584,7 @@ func (d *DecimalObject) rocketComparison(
 		//case *FloatObject:
 		//	rightValue = Decimal(new(Decimal).SetFloat64(float64(rightObject.(*FloatObject).value)))
 	default:
-		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Decimal", rightObject.Class().Name)
+		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
 	}
 	result = decimalOperation(leftValue, rightValue)
 	newInt := t.vm.initIntegerObject(result)
@@ -592,10 +593,11 @@ func (d *DecimalObject) rocketComparison(
 }
 
 // toString returns the object's approximate float value as the string format.
-// A trailing 0 is always added even no digits are left on the right side of the dot.
 func (d *DecimalObject) toString() string {
 	fs := d.value.FloatString(60)
-	return strings.TrimRight(fs, "0") + "0"
+	fs = strings.TrimRight(fs, "0")
+	fs = strings.TrimRight(fs, ".")
+	return fs
 }
 
 // toJSON just delegates to toString
