@@ -771,6 +771,17 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Returns object's unique id from Go's `receiver.id()`
+			// @param n/a []
+			// @return [Integer] Object's address
+			Name: "object_id",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					return t.vm.initIntegerObject(receiver.id())
+				}
+			},
+		},
+		{
 			// Puts string literals or objects into stdout with a tailing line feed, converting into String
 			// if needed.
 			//
