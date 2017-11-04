@@ -335,6 +335,26 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Returns a string with fraction format of the decimal.
+			// If the denominator is 1, '/1` is omitted.
+			// Minus sign will be preserved.
+			//
+			// ```Ruby
+			// a = "-355/113".to_d
+			// a.deduct #=> -355/113
+			// b = "-331/1".to_d
+			// b.deduct #=> -331
+			// ```
+			//
+			// @return [String]
+			Name: "deduct",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					return t.vm.initStringObject(receiver.(*DecimalObject).value.RatString())
+				}
+			},
+		},
+		{
 			// Returns the denominator of the decimal value which contains Go's big.Rat type.
 			// The value does not contain a minus sign.
 			//
@@ -348,6 +368,26 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					return t.vm.initIntegerObject(int(receiver.(*DecimalObject).value.Denom().Int64()))
+				}
+			},
+		},
+		{
+			// Returns a string with fraction format of the decimal.
+			// Even though the denominator is 1, fraction format is used.
+			// Minus sign will be preserved.
+			//
+			// ```Ruby
+			// a = "-355/113".to_d
+			// a.fraction #=> -355/113
+			// b = "-331/1".to_d
+			// b.fraction #=> -331/1
+			// ```
+			//
+			// @return [String]
+			Name: "fraction",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					return t.vm.initStringObject(receiver.(*DecimalObject).value.String())
 				}
 			},
 		},
