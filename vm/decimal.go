@@ -5,11 +5,14 @@ import (
 
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
+	"math"
 	"strings"
 )
 
 // A type alias for representing a decimal
 type Decimal = big.Rat
+type Int = big.Int
+type Float = big.Float
 
 // (Experiment)
 // DecimalObject represents a comparable decimal number using Go's Rat from math/big
@@ -69,24 +72,6 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		},
-		//	{
-		//		// Returns the modulo between self and a Numeric.
-		//		//
-		//		// ```Ruby
-		//		// 5.5 % 2 # => 1.5
-		//		// ```
-		//		// @return [Float]
-		//		Name: "%",
-		//		Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-		//			return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
-		//				operation := func(leftValue float64, rightValue float64) float64 {
-		//					return math.Mod(leftValue, rightValue)
-		//				}
-		//
-		//				return receiver.(*FloatObject).arithmeticOperation(t, args[0], operation, sourceLine)
-		//			}
-		//		},
-		//	},
 		{
 			// Returns the subtraction of a decimal from self.
 			//
@@ -123,24 +108,26 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		},
-		//	{
-		//		// Returns self squaring a decimal.
-		//		//
-		//		// ```Ruby
-		//		// 4.0 ** 2.5 # => 32.0
-		//		// ```
-		//		// @return [Float]
-		//		Name: "**",
-		//		Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-		//			return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
-		//				operation := func(leftValue float64, rightValue float64) float64 {
-		//					return math.Pow(leftValue, rightValue)
-		//				}
-		//
-		//				return receiver.(*FloatObject).arithmeticOperation(t, args[0], operation, sourceLine)
-		//			}
-		//		},
-		//	},
+		{
+			// Returns self squaring a decimal.
+			//
+			// ```Ruby
+			// 4.0 ** 2.5 # => 32.0
+			// ```
+			// @return [Decimal]
+			Name: "**",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					operation := func(leftValue *Decimal, rightValue *Decimal) *Decimal {
+						l, _ := leftValue.Float64()
+						r, _ := rightValue.Float64()
+						return new(Decimal).SetFloat64(math.Pow(l, r))
+					}
+
+					return receiver.(*DecimalObject).arithmeticOperation(t, args[0], operation, sourceLine)
+				}
+			},
+		},
 		{
 			// Returns self divided by a decimal.
 			//

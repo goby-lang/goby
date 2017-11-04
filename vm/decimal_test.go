@@ -31,9 +31,8 @@ func TestDecimalArithmeticOperationWithDecimal(t *testing.T) {
 		{`('13.5'.to_d  +  '3.2'.to_d).to_s`, "16.7"},
 		{`('13.5'.to_d  -  '3.2'.to_d).to_s`, "10.3"},
 		{`('13.5'.to_d  *  '3.2'.to_d).to_s`, "43.2"},
-		//{`'13.5'.to_d  %  '3.75'.to_d`, 2.25},
 		{`('13.5'.to_d  /  '3.75'.to_d).to_s`, "3.6"},
-		//{`'16.0'.to_d  ** '3.5'.to_d`, 16384.0},
+		{`('16.0'.to_d  ** '3.5'.to_d).to_s`, "16384"},
 	}
 
 	for i, tt := range tests {
@@ -71,7 +70,6 @@ func TestDecimalArithmeticOperationFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`'1'.to_d + "p"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
 		{`'1'.to_d - "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
-		//{`'1'.to_d ** "p"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
 		{`'1'.to_d / "t"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
 	}
 
