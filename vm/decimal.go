@@ -15,8 +15,9 @@ type Int = big.Int
 type Float = big.Float
 
 // (Experiment)
-// DecimalObject represents a comparable decimal number using Go's Rat from math/big
-// representation, which consists of a numerator and a denominator with arbitrary size.
+// DecimalObject represents a comparable decimal number using Go's Rational representation `big.Rat` from math/big package,
+// which consists of a numerator and a denominator with arbitrary size.
+// By using Decimal you can avoid errors on float type during calculations.
 // The numerator can be 0, but the denominator cannot be 0.
 //
 // ```ruby
@@ -24,11 +25,14 @@ type Float = big.Float
 // "-0.7238943".to_d      # => -0.7238943
 // "355/113".to_d         # => 3.1415929203539823008849557522123893805309734513274336283185840
 //
-// a = "1.1".to_d
-// b = "1.0".to_d
-// c = "0.1".to_d
-// a - b # => 0.1
-// a - b == c # => true
+// a = "16.1".to_d
+// b = "1.1".to_d
+// e = "17.2".to_d
+// a + b # => 0.1
+// a + b == e # => true
+//
+// ('16.1'.to_d  + "1.1".to_d).to_s #=> 17.2
+// ('16.1'.to_f  + "1.1".to_f).to_s #=> 17.200000000000003
 // ```
 //
 // - `Decimal.new` is not supported.
@@ -60,6 +64,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			// ```Ruby
 			// 1.1 + 2 # => 3.1
 			// ```
+			//
 			// @return [Decimal]
 			Name: "+",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -78,6 +83,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			// ```Ruby
 			// 1.5 - 1 # => 0.5
 			// ```
+			//
 			// @return [Decimal]
 			Name: "-",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -96,6 +102,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			// ```Ruby
 			// 2.5 * 10 # => 25.0
 			// ```
+			//
 			// @return [Decimal]
 			Name: "*",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -114,6 +121,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			// ```Ruby
 			// 4.0 ** 2.5 # => 32.0
 			// ```
+			//
 			// @return [Decimal]
 			Name: "**",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -134,6 +142,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			// ```Ruby
 			// 7.5 / 3 # => 2.5
 			// ```
+			//
 			// @return [Decimal]
 			Name: "/",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -155,6 +164,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			// a > b # => false
 			// b > a # => true
 			// ```
+			//
 			// @return [Boolean]
 			Name: ">",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -182,6 +192,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			// b >= a # => true
 			// a >= e # => true
 			// ```
+			//
 			// @return [Boolean]
 			Name: ">=",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -206,6 +217,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			// 1 < 3 # => true
 			// 1 < 1 # => false
 			// ```
+			//
 			// @return [Boolean]
 			Name: "<",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -229,6 +241,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			// 1 <= 3 # => true
 			// 1 <= 1 # => true
 			// ```
+			//
 			// @return [Boolean]
 			Name: "<=",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -257,6 +270,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			// 1.0 <=> 1 # => 0
 			// 3.5 <=> 1 # => 1
 			// ```
+			//
 			// @return [Integer]
 			Name: "<=>",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -279,6 +293,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			// 1.0 == 1     # => true
 			// 1.0 == '1.0' # => false
 			// ```
+			//
 			// @return [Boolean]
 			Name: "==",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -305,6 +320,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			// 1.0 != 1     # => false
 			// 1.0 != '1.0' # => true
 			// ```
+			//
 			// @return [Boolean]
 			Name: "!=",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -415,6 +431,40 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Returns Float object from Decimal object.
+			// In most case the number of digits in Float is shorter than the one in Decimal.
+			//
+			// ```Ruby
+			// a = "355/113".to_d
+			// a.to_s # => 3.1415929203539823008849557522123893805309734513274336283185840
+			// a.to_f # => 3.1415929203539825
+			// ```
+			//
+			// @return [Float]
+			Name: "to_f",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					return t.vm.initFloatObject(receiver.(*DecimalObject).FloatValue())
+				}
+			},
+		},
+		{
+			// Returns the truncated Integer object from Decimal object.
+			//
+			// ```Ruby
+			// a = "355/113".to_d
+			// a.to_i # => 3
+			// ```
+			//
+			// @return [Integer]
+			Name: "to_i",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					return t.vm.initIntegerObject(receiver.(*DecimalObject).IntegerValue())
+				}
+			},
+		},
+		{
 			// Returns the decimal value with a string style.
 			// Maximum digit under the dots is 60.
 			// This is just to print the final value should not be used for recalculation.
@@ -460,18 +510,22 @@ func (f *DecimalObject) Value() interface{} {
 	return f.value
 }
 
-//// Returns integer part of decimal
-//func (f *DecimalObject) IntegerValue() interface{} {
-//	return int(f.value)
-//}
-//
-//// Float interface
-//func (f *DecimalObject) FloatValue() float64 {
-//	x, _ := f.value.Float64()
-//	return x
-//}
+// Alias of Value()
+func (f *DecimalObject) DecimalValue() interface{} {
+	return f.Value()
+}
 
-// TODO: Remove instruction argument
+// Returns integer part of decimal
+func (f *DecimalObject) IntegerValue() int {
+	return int(f.FloatValue())
+}
+
+// Float interface
+func (f *DecimalObject) FloatValue() float64 {
+	x, _ := f.value.Float64()
+	return x
+}
+
 // Apply the passed arithmetic operation, while performing type conversion.
 func (d *DecimalObject) arithmeticOperation(
 	t *thread,
@@ -479,17 +533,10 @@ func (d *DecimalObject) arithmeticOperation(
 	decimalOperation func(leftValue *Decimal, rightValue *Decimal) *Decimal,
 	sourceLine int,
 ) Object {
-	var rightValue *Decimal
 	var result Decimal
 
-	switch rightObject.(type) {
-	case *DecimalObject:
-		rightValue = &rightObject.(*DecimalObject).value
-	case *IntegerObject:
-		rightValue = intToDecimal(rightObject)
-	case *FloatObject:
-		rightValue = floatToDecimal(rightObject)
-	default:
+	rightValue, ok := assertNumeric(rightObject)
+	if ok == false {
 		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
 	}
 
@@ -500,7 +547,6 @@ func (d *DecimalObject) arithmeticOperation(
 
 // Apply an equality test, returning true if the objects are considered equal,
 // and false otherwise.
-// TODO: Remove instruction argument
 func (d *DecimalObject) equalityTest(
 	t *thread,
 	rightObject Object,
@@ -523,7 +569,6 @@ func (d *DecimalObject) equalityTest(
 	return toBooleanObject(result)
 }
 
-// TODO: Remove instruction argument
 // Apply the passed numeric comparison, while performing type conversion.
 func (d *DecimalObject) numericComparison(
 	t *thread,
@@ -531,17 +576,10 @@ func (d *DecimalObject) numericComparison(
 	decimalOperation func(leftValue *Decimal, rightValue *Decimal) bool,
 	sourceLine int,
 ) Object {
-	var rightValue *Decimal
 	var result bool
 
-	switch rightObject.(type) {
-	case *DecimalObject:
-		rightValue = &rightObject.(*DecimalObject).value
-	case *IntegerObject:
-		rightValue = intToDecimal(rightObject)
-	case *FloatObject:
-		rightValue = floatToDecimal(rightObject)
-	default:
+	rightValue, ok := assertNumeric(rightObject)
+	if ok == false {
 		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
 	}
 
@@ -550,7 +588,6 @@ func (d *DecimalObject) numericComparison(
 	return toBooleanObject(result)
 }
 
-// TODO: Remove instruction argument
 // Apply the passed numeric comparison for rocket operator '<=>', while performing type conversion.
 func (d *DecimalObject) rocketComparison(
 	t *thread,
@@ -558,17 +595,10 @@ func (d *DecimalObject) rocketComparison(
 	decimalOperation func(leftValue *Decimal, rightValue *Decimal) int,
 	sourceLine int,
 ) Object {
-	var rightValue *Decimal
 	var result int
 
-	switch rightObject.(type) {
-	case *DecimalObject:
-		rightValue = &rightObject.(*DecimalObject).value
-	case *IntegerObject:
-		rightValue = intToDecimal(rightObject)
-	case *FloatObject:
-		rightValue = floatToDecimal(rightObject)
-	default:
+	rightValue, ok := assertNumeric(rightObject)
+	if ok == false {
 		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
 	}
 
@@ -593,6 +623,22 @@ func (d *DecimalObject) toJSON() string {
 }
 
 // Other helper functions  ----------------------------------------------
+
+// Type assertion for numeric
+func assertNumeric(n Object) (v *Decimal, result bool) {
+	result = true
+	switch n.(type) {
+	case *DecimalObject:
+		v = &n.(*DecimalObject).value
+	case *IntegerObject:
+		v = intToDecimal(n)
+	case *FloatObject:
+		v = floatToDecimal(n)
+	default:
+		result = false
+	}
+	return v, result
+}
 
 // intToDecimal converts int to Decimal
 func intToDecimal(i Object) *Decimal {

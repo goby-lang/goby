@@ -22,6 +22,48 @@ func TestDecimalClassSuperclass(t *testing.T) {
 	}
 }
 
+func TestDecimalConversionString(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`'13.5'.to_d.to_s`, "13.5"},
+		{`'13.5'.to_d.fraction`, "27/2"},
+		{`'13.5'.to_d.inverse.fraction`, "2/27"},
+		{`'20/40'.to_d.reduction`, "1/2"},
+		{`'40/20'.to_d.fraction`, "2/1"},
+		{`'40/20'.to_d.reduction`, "2"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestDecimalConversionNumeric(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`'-13.5'.to_d.to_i`, -13},
+		{`'-13.5'.to_d.to_f`, -13.5},
+		{`'-13.5'.to_d.numerator`, -27},
+		{`'-13.5'.to_d.denominator`, 2},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestDecimalArithmeticOperationWithDecimal(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -138,36 +180,36 @@ func TestDecimalComparisonWithFloat(t *testing.T) {
 	}
 }
 
-//func TestDecimalComparisonWithInteger(t *testing.T) {
-//	tests := []struct {
-//		input    string
-//		expected interface{}
-//	}{
-//		{`'1'.to_d >   2`, false},
-//		{`'2'.to_d >   1`, true},
-//		{`'3'.to_d >   3`, false},
-//		{`'1'.to_d <   2`, true},
-//		{`'2'.to_d <   1`, false},
-//		{`'3'.to_d <   3`, false},
-//		{`'1'.to_d >=  2`, false},
-//		{`'2'.to_d >=  1`, true},
-//		{`'3'.to_d >=  3`, true},
-//		{`'1'.to_d <=  2`, true},
-//		{`'2'.to_d <=  1`, false},
-//		{`'3'.to_d <=  3`, true},
-//		{`'1'.to_d <=> 2`, -1},
-//		{`'2'.to_d <=> 1`, 1},
-//		{`'3'.to_d <=> 3`, 0},
-//	}
-//
-//	for i, tt := range tests {
-//		v := initTestVM()
-//		evaluated := v.testEval(t, tt.input, getFilename())
-//		checkExpected(t, i, evaluated, tt.expected)
-//		v.checkCFP(t, i, 0)
-//		v.checkSP(t, i, 1)
-//	}
-//}
+func TestDecimalComparisonWithInteger(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`'1'.to_d >   2`, false},
+		{`'2'.to_d >   1`, true},
+		{`'3'.to_d >   3`, false},
+		{`'1'.to_d <   2`, true},
+		{`'2'.to_d <   1`, false},
+		{`'3'.to_d <   3`, false},
+		{`'1'.to_d >=  2`, false},
+		{`'2'.to_d >=  1`, true},
+		{`'3'.to_d >=  3`, true},
+		{`'1'.to_d <=  2`, true},
+		{`'2'.to_d <=  1`, false},
+		{`'3'.to_d <=  3`, true},
+		{`'1'.to_d <=> 2`, -1},
+		{`'2'.to_d <=> 1`, 1},
+		{`'3'.to_d <=> 3`, 0},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
 
 func TestDecimalComparisonFail(t *testing.T) {
 	testsFail := []errorTestCase{
