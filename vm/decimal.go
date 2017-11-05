@@ -360,6 +360,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			// Returns the denominator of the decimal value which contains Go's big.Rat type.
+			// The value is Decimal.
 			// The value does not contain a minus sign.
 			//
 			// ```Ruby
@@ -367,11 +368,11 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			// a.denominator #=> 113
 			// ```
 			//
-			// @return [int]
+			// @return [Decimal]
 			Name: "denominator",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.vm.initIntegerObject(int(receiver.(*DecimalObject).value.Denom().Int64()))
+					return t.vm.initDecimalObject(new(Decimal).SetInt(receiver.(*DecimalObject).value.Denom()))
 				}
 			},
 		},
@@ -415,6 +416,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			// Returns the numerator of the decimal value which contains Go's big.Rat type.
+			// The value is Decimal.
 			// The value can contain a minus sign.
 			//
 			// ```Ruby
@@ -422,11 +424,62 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			// a.numerator #=> -355
 			// ```
 			//
-			// @return [int]
+			// @return [Decimal]
 			Name: "numerator",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.vm.initIntegerObject(int(receiver.(*DecimalObject).value.Num().Int64()))
+					return t.vm.initDecimalObject(new(Decimal).SetInt(receiver.(*DecimalObject).value.Num()))
+				}
+			},
+		},
+		{
+			// Returns an array with two Decimal elements: numerator and denominator.
+			//
+			// ```ruby
+			// "129.30928304982039482039842".to_d.to_a
+			// # => [6465464152491019741019921, 50000000000000000000000]
+			// ```
+			//
+			// @return [Array]
+			Name: "to_a",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+
+					n := receiver.(*DecimalObject).value.Num()
+					d := receiver.(*DecimalObject).value.Denom()
+					elems := []Object{}
+
+					elems = append(elems, t.vm.initDecimalObject(new(Decimal).SetInt(n)))
+					elems = append(elems, t.vm.initDecimalObject(new(Decimal).SetInt(d)))
+
+					return t.vm.initArrayObject(elems)
+				}
+			},
+		},
+		{
+			// Returns an array with two integer elements: numerator and denominator.
+			// Big number can be be less accurate than `to_a`.
+			//
+			// ```ruby
+			// "-355.133".to_d.to_ai       # => [-133, 133]
+			//
+			// "129.30928304982039482039842".to_d.to_ai
+			// #=> [-8964879735843078383, -9123183826594430976]
+			// ```
+			//
+			// @return [Array]
+			Name: "to_ai",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+
+					n := int(receiver.(*DecimalObject).value.Num().Int64())
+					d := int(receiver.(*DecimalObject).value.Denom().Int64())
+					elems := []Object{}
+
+					elems = append(elems, t.vm.initIntegerObject(n))
+					elems = append(elems, t.vm.initIntegerObject(d))
+
+					return t.vm.initArrayObject(elems)
 				}
 			},
 		},
@@ -465,7 +518,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns the decimal value with a string style.
+			// Returns the float-converted decimal value with a string style.
 			// Maximum digit under the dots is 60.
 			// This is just to print the final value should not be used for recalculation.
 			//

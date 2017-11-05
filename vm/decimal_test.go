@@ -33,6 +33,10 @@ func TestDecimalConversionString(t *testing.T) {
 		{`'20/40'.to_d.reduction`, "1/2"},
 		{`'40/20'.to_d.fraction`, "2/1"},
 		{`'40/20'.to_d.reduction`, "2"},
+		{`'-13.5'.to_d.numerator.to_s`, "-27"},
+		{`'-13.5'.to_d.denominator.to_s`, "2"},
+		{`'129.30928304982039482039842'.to_d.numerator.to_s`, "6465464152491019741019921"},
+		{`'129.30928304982039482039842'.to_d.denominator.to_s`, "50000000000000000000000"},
 	}
 
 	for i, tt := range tests {
@@ -51,8 +55,6 @@ func TestDecimalConversionNumeric(t *testing.T) {
 	}{
 		{`'-13.5'.to_d.to_i`, -13},
 		{`'-13.5'.to_d.to_f`, -13.5},
-		{`'-13.5'.to_d.numerator`, -27},
-		{`'-13.5'.to_d.denominator`, 2},
 	}
 
 	for i, tt := range tests {
@@ -276,5 +278,55 @@ func TestDecimalConversions(t *testing.T) {
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayConversionWithDecimal(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`
+		"129.30928304982039482039842".to_d.to_a[0].to_s
+		`, "6465464152491019741019921"},
+		{`
+		"129.30928304982039482039842".to_d.to_a[1].to_s
+		`, "50000000000000000000000"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayConversionWithInteger(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+		"355/133".to_d.to_ai
+		`, []interface{}{355, 133}},
+		{`
+		"-355/133".to_d.to_ai
+		`, []interface{}{-355, 133}},
+		{`
+		"129.3".to_d.to_ai
+		`, []interface{}{1293, 10}},
+		{`
+		"129.30928304982039482039842".to_d.to_ai
+		`, []interface{}{-8964879735843078383, -9123183826594430976}},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input, getFilename())
+		testArrayObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
 	}
 }
