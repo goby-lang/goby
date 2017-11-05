@@ -364,3 +364,22 @@ func testLiteralExpression(
 	t.Errorf("type of exp not handled. got=%T", exp)
 	return false
 }
+
+// Makes sure to prohibit calling a capitalized method on toplevel
+func TestProhibitingCallingCapitalizedMethod(t *testing.T) {
+	input := `
+	Const()
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+	_, err := p.ParseProgram()
+
+	if err == nil {
+		t.Fatal("Calling a capitalized method on toplevel should be prohibited")
+	} else {
+		if err.Message != "cannot call CONSTANT with (. Line: 1" {
+			t.Fatal("Error should be: 'cannot call CONSTANT with (. Line: 1': ", err.Message)
+		}
+	}
+}
