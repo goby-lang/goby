@@ -996,11 +996,27 @@ func TestObjectId(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
+		// immutable objects
+		{`Object.new.object_id.is_a?(Integer)`, true},
 		{`a = nil.object_id; b = nil.object_id; a == b`, true},
 		{`a = true.object_id; b = true.object_id; a == b`, true},
 		{`a = false.object_id; b = false.object_id; a == b`, true},
+		{`CONSTANT=1; CONSTANT.object_id == CONSTANT.object_id`, true},
+		{`Class.object_id == Class.object_id`, true},
+		{`Object.object_id == Object.object_id`, true},
+		{`Integer.object_id == Integer.object_id`, true},
+		// mutable objects
 		{`a = 1.object_id; b = 1.object_id; a == b`, false},
 		{`a = "a".object_id; b = "a".object_id; a == b`, false},
+		{`a = 1.object_id; b = a; a.object_id == b.object_id`, true},
+		{`a = "a".object_id; b = a; a.object_id == b.object_id`, true},
+		{`a = 'a'.object_id; b = a; a.object_id == b.object_id`, true},
+		{`a = 1..100; b = a; a.object_id == b.object_id`, true},
+		{`a = "3.14".to_f; b = a; a.object_id == b.object_id`, true},
+		{`a = [1, 2, 3];b = a; a.object_id == b.object_id`, true},
+		{`a = {key: 2} ;b = a; a.object_id == b.object_id`, true},
+		{`a = :symbol ;b = a; a.object_id == b.object_id`, true},
+		{`a = Regexp.new("aa") ;b = a; a.object_id == b.object_id`, true},
 	}
 
 	for i, tt := range tests {
