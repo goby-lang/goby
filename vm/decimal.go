@@ -40,7 +40,7 @@ type Float = big.Float
 // - `Decimal.new` is not supported.
 type DecimalObject struct {
 	*baseObj
-	value Decimal
+	value *Decimal
 }
 
 // Class methods --------------------------------------------------------
@@ -50,7 +50,7 @@ func builtinDecimalClassMethods() []*BuiltinMethodObject {
 			Name: "new",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.initUnsupportedMethodError(sourceLine, "#new", receiver)
+					return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
 				}
 			},
 		},
@@ -473,7 +473,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					d := receiver.(*DecimalObject).value
-					return t.vm.initDecimalObject(d.Inv(&d))
+					return t.vm.initDecimalObject(d.Inv(d))
 				}
 			},
 		},
@@ -659,7 +659,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 func (vm *VM) initDecimalObject(value *Decimal) *DecimalObject {
 	return &DecimalObject{
 		baseObj: &baseObj{class: vm.topLevelClass(classes.DecimalClass)},
-		value:   *value,
+		value:   value,
 	}
 }
 
@@ -707,7 +707,7 @@ func (d *DecimalObject) arithmeticOperation(
 		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
 	}
 
-	leftValue := &d.value
+	leftValue := d.value
 	result = *decimalOperation(leftValue, rightValue)
 	return t.vm.initDecimalObject(&result)
 }
@@ -726,12 +726,12 @@ func (d *DecimalObject) equalityTest(
 
 	switch rightObject.(type) {
 	case *DecimalObject:
-		rightValue = &rightObject.(*DecimalObject).value
+		rightValue = rightObject.(*DecimalObject).value
 	default:
 		return toBooleanObject(nonInverse == false)
 	}
 
-	leftValue := &d.value
+	leftValue := d.value
 	result = decimalOperation(leftValue, rightValue)
 	return toBooleanObject(result)
 }
@@ -750,7 +750,7 @@ func (d *DecimalObject) numericComparison(
 		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
 	}
 
-	leftValue := &d.value
+	leftValue := d.value
 	result = decimalOperation(leftValue, rightValue)
 	return toBooleanObject(result)
 }
@@ -769,7 +769,7 @@ func (d *DecimalObject) rocketComparison(
 		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
 	}
 
-	leftValue := &d.value
+	leftValue := d.value
 	result = decimalOperation(leftValue, rightValue)
 	newInt := t.vm.initIntegerObject(result)
 	newInt.flag = i
@@ -796,7 +796,7 @@ func assertNumeric(n Object) (v *Decimal, result bool) {
 	result = true
 	switch n.(type) {
 	case *DecimalObject:
-		v = &n.(*DecimalObject).value
+		v = n.(*DecimalObject).value
 	case *IntegerObject:
 		v = intToDecimal(n)
 	case *FloatObject:

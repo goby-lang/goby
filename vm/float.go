@@ -296,6 +296,38 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Converts the Integer object into Decimal object and returns it.
+			// Each digit of the float is literally transferred to the corresponding digit
+			// of the Decimal, via a string representation of the float.
+			//
+			// ```Ruby
+			// "100.1".to_f.to_d # => 100.1
+			//
+			// a = "3.14159265358979".to_f
+			// b = a.to_d #=> 3.14159265358979
+			// ```
+			//
+			// @return [Decimal]
+			Name: "to_d",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%v", strconv.Itoa(len(args)))
+					}
+
+					fl := receiver.(*FloatObject).value
+					fs := strconv.FormatFloat(fl, 'f', -1, 64)
+					de, err := new(Decimal).SetString(fs)
+					if err == false {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Invalid numeric string. got=%v", fs)
+					}
+
+					return t.vm.initDecimalObject(de)
+				}
+			},
+		},
+		{
 			// Returns the `Integer` representation of self.
 			//
 			// ```Ruby

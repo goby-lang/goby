@@ -236,8 +236,9 @@ func TestDecimalEquality(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
+		{`'123'.to_d    ==  123`, false},
+		{`'123'.to_d.to_i    ==  123`, true},
 		{`'123.5'.to_d  ==  '123.5'.to_d`, true},
-		//{`'123'.to_d    ==  123`, true},
 		{`'123.5'.to_d  ==  '124'.to_d`, false},
 		{`'123.5'.to_d  ==  "123.5"`, false},
 		{`'123.5'.to_d  ==  (1..3)`, false},
@@ -263,13 +264,40 @@ func TestDecimalEquality(t *testing.T) {
 	}
 }
 
-func TestDecimalConversions(t *testing.T) {
+func TestDecimalToIntegerStringConversions(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
 	}{
-		//{`'100.3'.to_d.to_i`, 100},
+		{`'0.3'.to_d.to_s`, "0.3"},
+		{`'-0.3'.to_d.to_s`, "-0.3"},
 		{`'100.3'.to_d.to_s`, "100.3"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestDecimalToIntegerConversions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{`'0.3'.to_d.to_i`, 0},
+		{`'0.5'.to_d.to_i`, 0},
+		{`'0.9'.to_d.to_i`, 0},
+		{`'1.1'.to_d.to_i`, 1},
+		{`'-0.3'.to_d.to_i`, 0},
+		{`'-0.5'.to_d.to_i`, 0},
+		{`'-0.9'.to_d.to_i`, 0},
+		{`'-1.3'.to_d.to_i`, -1},
+		{`'100.3'.to_d.to_i`, 100},
+		{`'-100.3'.to_d.to_i`, -100},
 	}
 
 	for i, tt := range tests {
