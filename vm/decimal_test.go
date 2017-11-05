@@ -330,3 +330,59 @@ func TestArrayConversionWithInteger(t *testing.T) {
 		vm.checkSP(t, i, 1)
 	}
 }
+
+func TestHashConversionWithDecimal(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`
+		"129.3".to_d.to_h[:numerator].to_s
+		`, "1293"},
+		{`
+		"129.3".to_d.to_h[:denominator].to_s
+		`, "10"},
+		{`
+		"129.30928304982039482039842".to_d.to_h[:numerator].to_s
+		`, "6465464152491019741019921"},
+		{`
+		"129.30928304982039482039842".to_d.to_h[:denominator].to_s
+		`, "50000000000000000000000"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestHashConversionWithInteger(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`
+		"129.3".to_d.to_hi[:numerator].to_s
+		`, "1293"},
+		{`
+		"129.3".to_d.to_hi[:denominator].to_s
+		`, "10"},
+		{`
+		"129.30928304982039482039842".to_d.to_hi[:numerator].to_s
+		`, "-8964879735843078383"},
+		{`
+		"129.30928304982039482039842".to_d.to_hi[:denominator].to_s
+		`, "-9123183826594430976"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}

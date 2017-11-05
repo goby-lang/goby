@@ -18,7 +18,9 @@ type Float = big.Float
 // DecimalObject represents a comparable decimal number using Go's Rational representation `big.Rat` from math/big package,
 // which consists of a numerator and a denominator with arbitrary size.
 // By using Decimal you can avoid errors on float type during calculations.
+// To keep accuracy, avoid conversions until all calculations have been finished.
 // The numerator can be 0, but the denominator cannot be 0.
+// Using Decimal for loop counters or like that is not recommended (TBD).
 //
 // ```ruby
 // "3.14".to_d            # => 3.14
@@ -59,10 +61,14 @@ func builtinDecimalClassMethods() []*BuiltinMethodObject {
 func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
-			// Returns the sum of self and a decimal.
+			// Returns the sum of self and a numeric.
+			// If the second term is integer or float, they are converted into decimal and then perform calculation.
 			//
 			// ```Ruby
-			// 1.1 + 2 # => 3.1
+			// "1.1".to_d + "2.1".to_d # => 3.2
+			// "1.1".to_d + 2          # => 3.2
+			// "1.1".to_d + "2.1".to_f
+			// # => 3.200000000000000088817841970012523233890533447265625
 			// ```
 			//
 			// @return [Decimal]
@@ -79,9 +85,13 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			// Returns the subtraction of a decimal from self.
+			// If the second term is integer or float, they are converted into decimal and then perform calculation.
 			//
 			// ```Ruby
-			// 1.5 - 1 # => 0.5
+			// ("1.5".to_d) - "1.1".to_d   # => 0.4
+			// ("1.5".to_d) - 1            # => 0.5
+			// ("1.5".to_d) - "1.1".to_f   # => 0.4
+			// #=> 0.399999999999999911182158029987476766109466552734375
 			// ```
 			//
 			// @return [Decimal]
@@ -98,9 +108,13 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			// Returns self multiplying a decimal.
+			// If the second term is integer or float, they are converted into decimal and then perform calculation.
 			//
 			// ```Ruby
-			// 2.5 * 10 # => 25.0
+			// "2.5".to_d * "10.1".to_d     # => 25.25
+			// "2.5".to_d * 10              # => 25
+			// "2.5".to_d * "10.1".to_f
+			// #=> 25.24999999999999911182158029987476766109466552734375
 			// ```
 			//
 			// @return [Decimal]
@@ -117,9 +131,17 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			// Returns self squaring a decimal.
+			// If the second term is integer or float, they are converted into decimal and then perform calculation.
+			// Note that the calculation is via float64 (math.Pow) for now.
 			//
 			// ```Ruby
-			// 4.0 ** 2.5 # => 32.0
+			// "4.0".to_d ** "2.5".to_d     # => 32
+			// "4.0".to_d ** 2              # => 16
+			// "4.0".to_d ** "2.5".to_f     # => 32
+			// "4.0".to_d ** "2.1".to_d
+			// #=> 18.379173679952561570871694129891693592071533203125
+			// "4.0".to_d ** "2.1".to_f
+			// #=> 18.379173679952561570871694129891693592071533203125
 			// ```
 			//
 			// @return [Decimal]
@@ -138,9 +160,15 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			// Returns self divided by a decimal.
+			// If the second term is integer or float, they are converted into decimal and then perform calculation.
 			//
 			// ```Ruby
-			// 7.5 / 3 # => 2.5
+			// "7.5".to_d / "3.1".to_d.fraction      # => 75/31
+			// "7.5".to_d / "3.1".to_d
+			// # => 2.419354838709677419354838709677419354838709677419354838709677
+			// "7.5".to_d / 3                        # => 2.5
+			// "7.5".to_d / "3.1".to_f
+			// #=> 2.419354838709677350038104601967335570360611893758448172620333
 			// ```
 			//
 			// @return [Decimal]
@@ -157,12 +185,17 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			// Returns if self is larger than a decimal.
+			// If the second term is integer or float, they are converted into decimal and then perform calculation.
 			//
 			// ```Ruby
 			// a = "3.14".to_d
 			// b = "3.16".to_d
-			// a > b # => false
-			// b > a # => true
+			// a > b          # => false
+			// b > a          # => true
+			// a > 3          # => true
+			// a > 4          # => false
+			// a > "3.1".to_f # => true
+			// a > "3.2".to_f # => false
 			// ```
 			//
 			// @return [Boolean]
@@ -183,14 +216,19 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			// Returns if self is larger than or equals to a Numeric.
+			// If the second term is integer or float, they are converted into decimal and then perform calculation.
 			//
 			// ```Ruby
 			// a = "3.14".to_d
 			// b = "3.16".to_d
 			// e = "3.14".to_d
-			// a >= b # => false
-			// b >= a # => true
-			// a >= e # => true
+			// a >= b          # => false
+			// b >= a          # => true
+			// a >= e          # => true
+			// a >= 3          # => true
+			// a >= 4          # => false
+			// a >= "3.1".to_f # => true
+			// a >= "3.2".to_f # => false
 			// ```
 			//
 			// @return [Boolean]
@@ -212,10 +250,17 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			// Returns if self is smaller than a Numeric.
+			// If the second term is integer or float, they are converted into decimal and then perform calculation.
 			//
 			// ```Ruby
-			// 1 < 3 # => true
-			// 1 < 1 # => false
+			// a = "3.14".to_d
+			// b = "3.16".to_d
+			// a < b          # => true
+			// b < a          # => false
+			// a < 3          # => false
+			// a < 4          # => true
+			// a < "3.1".to_f # => false
+			// a < "3.2".to_f # => true
 			// ```
 			//
 			// @return [Boolean]
@@ -236,10 +281,19 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			// Returns if self is smaller than or equals to a decimal.
+			// If the second term is integer or float, they are converted into decimal and then perform calculation.
 			//
 			// ```Ruby
-			// 1 <= 3 # => true
-			// 1 <= 1 # => true
+			// a = "3.14".to_d
+			// b = "3.16".to_d
+			// e = "3.14".to_d
+			// a <= b          # => true
+			// b <= a          # => false
+			// a <= e          # => false
+			// a <= 3          # => false
+			// a <= 4          # => true
+			// a <= "3.1".to_f # => false
+			// a <= "3.2".to_f # => true
 			// ```
 			//
 			// @return [Boolean]
@@ -261,14 +315,15 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			// Returns 1 if self is larger than a Numeric, -1 if smaller. Otherwise 0.
-			// returns -1 if x < y
-			// returns 0 if x == 0 (including -0 == 0, -Infinity == +Infinity and vice versa
-			// returns 1 if x > 0
+			// If the second term is integer or float, they are converted into decimal and then perform calculation.
+			// x < y: -1
+			// x == y: 0 (including -0 == 0, -Infinity == +Infinity and vice versa)
+			// x > y: 1
 			//
 			// ```Ruby
-			// 1.5 <=> 3 # => -1
-			// 1.0 <=> 1 # => 0
-			// 3.5 <=> 1 # => 1
+			// "1.5".to_d <=> 3 # => -1
+			// "1.0".to_d <=> 1 # => 0
+			// "3.5".to_d <=> 1 # => 1
 			// ```
 			//
 			// @return [Integer]
@@ -285,13 +340,17 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			// Returns if self is equal to an Object.
-			// If the Object is a Numeric, a comparison is performed, otherwise, the
-			// result is always false.
+			// If the second term is integer or float, they are converted into decimal and then perform calculation.
+			// If the Object is not a Numeric the result is always false.
 			//
 			// ```Ruby
-			// 1.0 == 3     # => false
-			// 1.0 == 1     # => true
-			// 1.0 == '1.0' # => false
+			// "1.0".to_d == 3           # => false
+			// "1.0".to_d == 1           # => true
+			// "1.0".to_d == "1".to_d    # => true
+			// "1.0".to_d == "1".to_f    # => false
+			// "1.0".to_d == "1.0".to_f  # => false
+			// "1.0".to_d == 'str'       # => false
+			// "1.0".to_d == Array       # => false
 			// ```
 			//
 			// @return [Boolean]
@@ -312,13 +371,17 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			// Returns if self is not equal to an Object.
-			// If the Object is a Numeric, a comparison is performed, otherwise, the
-			// result is always true.
+			// If the second term is integer or float, they are converted into decimal and then perform calculation.
+			// If the Object is not a Numeric the result is always false.
 			//
 			// ```Ruby
-			// 1.0 != 3     # => true
-			// 1.0 != 1     # => false
-			// 1.0 != '1.0' # => true
+			// "1.0".to_d != 3           # => false
+			// "1.0".to_d != 1           # => true
+			// "1.0".to_d != "1".to_d    # => true
+			// "1.0".to_d != "1".to_f    # => false
+			// "1.0".to_d != "1.0".to_f  # => false
+			// "1.0".to_d != 'str'       # => false
+			// "1.0".to_d != Array       # => false
 			// ```
 			//
 			// @return [Boolean]
@@ -498,6 +561,57 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					return t.vm.initFloatObject(receiver.(*DecimalObject).FloatValue())
+				}
+			},
+		},
+		{
+			// Returns a hash with two keys (numerator and denominator) and their values.
+			// The values are Decimal.
+			//
+			// ```ruby
+			// "129.30928304982039482039842".to_d.to_h
+			// # => { numerator: 6465464152491019741019921, denominator: 50000000000000000000000 }
+			// ```
+			//
+			// @return [Hash]
+			Name: "to_h",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+
+					n := receiver.(*DecimalObject).value.Num()
+					d := receiver.(*DecimalObject).value.Denom()
+					h := make(map[string]Object)
+
+					h["denominator"] = t.vm.initDecimalObject(new(Decimal).SetInt(d))
+					h["numerator"] = t.vm.initDecimalObject(new(Decimal).SetInt(n))
+
+					return t.vm.initHashObject(h)
+				}
+			},
+		},
+		{
+			// Returns a hash with two keys (numerator and denominator) and their values.
+			// Returned values are integer, and big number can be be less accurate than `to_h`.
+			//
+			// ```ruby
+			// "129.3".to_d.to_hi   #=> { denominator: 10, numerator: 1293 }
+			// "129.30928304982039482039842".to_d.to_hi
+			// # => { numerator: -9123183826594430976, denominator: -8964879735843078383 }
+			// ```
+			//
+			// @return [Hash]
+			Name: "to_hi",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+
+					n := int(receiver.(*DecimalObject).value.Num().Int64())
+					d := int(receiver.(*DecimalObject).value.Denom().Int64())
+					h := make(map[string]Object)
+
+					h["denominator"] = t.vm.initIntegerObject(d)
+					h["numerator"] = t.vm.initIntegerObject(n)
+
+					return t.vm.initHashObject(h)
 				}
 			},
 		},
