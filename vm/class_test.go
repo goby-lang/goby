@@ -998,14 +998,19 @@ func TestObjectId(t *testing.T) {
 	}{
 		// immutable objects
 		{`Object.new.object_id.is_a?(Integer)`, true},
-		{`a = nil.object_id; b = nil.object_id; a == b`, true},
-		{`a = true.object_id; b = true.object_id; a == b`, true},
-		{`a = false.object_id; b = false.object_id; a == b`, true},
+		{`nil.object_id == nil.object_id`, true},
+		{`true.object_id == true.object_id`, true},
+		{`false.object_id == false.object_id`, true},
 		{`CONSTANT=1; CONSTANT.object_id == CONSTANT.object_id`, true},
+		{`ARGV.object_id == ARGV.object_id`, true},
+		{`STDIN.object_id == STDIN.object_id`, true},
+		{`STDOUT.object_id == STDOUT.object_id`, true},
+		{`STDERR.object_id == STDERR.object_id`, true},
+		{`ENV.object_id == ENV.object_id`, true},
 		{`Class.object_id == Class.object_id`, true},
 		{`Object.object_id == Object.object_id`, true},
 		{`Integer.object_id == Integer.object_id`, true},
-		// mutable objects
+		// other objects
 		{`a = 1.object_id; b = 1.object_id; a == b`, false},
 		{`a = "a".object_id; b = "a".object_id; a == b`, false},
 		{`a = 1.object_id; b = a; a.object_id == b.object_id`, true},
