@@ -78,6 +78,14 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		return nil
 	}
 
+	// Prohibit calling a capitalized method on toplevel:
+	if p.curTokenIs(token.Constant) && (p.fsm.Is(normal) || p.fsm.Is(parsingAssignment)) {
+		if p.peekTokenIs(token.LParen) {
+			p.callConstantError(p.curToken.Type)
+			return nil
+		}
+	}
+
 	/*
 		Parse method call without explicit receiver and doesn't have parens around arguments. Here's some examples:
 
