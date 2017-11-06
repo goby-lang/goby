@@ -294,3 +294,8 @@ func newTypeParsingError(tokenLiteral, targetType string, line int) *Error {
 	msg := fmt.Sprintf("could not parse %q as %s. Line: %d", tokenLiteral, targetType, line)
 	return &Error{Message: msg, errType: SyntaxError}
 }
+
+func (p *Parser) callConstantError(t token.Type) {
+	msg := fmt.Sprintf("cannot call %s with %s. Line: %d", t, p.peekToken.Type, p.peekToken.Line)
+	p.error = &Error{Message: msg, errType: UnexpectedTokenError}
+}
