@@ -41,31 +41,31 @@ One of our goal is to provide web developers a sort of small and handy environme
 
 ## Demo screen and sample Goby app
 
-<img src="http://i.imgur.com/9YrDZOR.gif" width="60%">
+<img src="https://i.imgur.com/1Le7nTe.gif" width="60%">
 
 **New!** Check-out our [sample app](http://sample.goby-lang.org) built with Goby. Source code is also available [here](https://github.com/goby-lang/sample-web-app).
 
 ## Aspects
 
-Goby has several aspects: language specification, design of compiler and vm, implementation (just one for now), library, and the whole of them. 
+Goby has several aspects: language specification, design of compiler and vm, implementation (just one for now), library, and the whole of them.
 
 ----------
 
 **Language**: Class-based, straight-ahead object-oriented script language. Syntax is influenced by Ruby language (and by Go a bit), but has been **condensed and simplified** (and slightly modified) to keep Goby VM simple and concise. Several aspects of Ruby such as meta-programming (known as 'magic'), special variables with `$`, have been dropped for now, but note that we might resurrect some of them with a different form or implementation in the future.
 
-**Class**: Single inheritance. Module is supported for mixin with `#include` or `#extend`. Defining singleton class and singleton method are also supported. Goby has two kinds of class internally: native class and standard class. **Native class** (or builtin class) provides fundamental classes such as `Array` or `String`. `Object` class is a superclass of any other native/standard classes including `Class` class. `Class` class contains most common methods such as `#puts`. **Standard class** (or standard library) can be loaded via `require` and provides additional methods. Standard classes are often split internal Go code and external Goby code in order to make implementation easier. Both kinds of class are transparent to Goby developers and can be overridden by child classes. Any classes including `Class` class are under `Object` class. 
+**Class**: Single inheritance. Module is supported for mixin with `#include` or `#extend`. Defining singleton class and singleton method are also supported. Goby has two kinds of class internally: native class and standard class. **Native class** (or builtin class) provides fundamental classes such as `Array` or `String`. `Object` class is a superclass of any other native/standard classes including `Class` class. `Class` class contains most common methods such as `#puts`. **Standard class** (or standard library) can be loaded via `require` and provides additional methods. Standard classes are often split internal Go code and external Goby code in order to make implementation easier. Both kinds of class are transparent to Goby developers and can be overridden by child classes. Any classes including `Class` class are under `Object` class.
 
-**Compiler**: Consists of **AST**, **lexer**, **parser**, and **token**, which of the structure is pretty conventional and should be familiar to language creators. These components are all written in 100% pure Go, instead of using conventional static yacc/lex/bison conversion with a mess of ad-hoc macros. This makes Goby's codes far smaller, concise, and legible. You can inspect, maintain, or improve Goby codes more easily, being free from pains like C/C++ era. 
+**Compiler**: Consists of **AST**, **lexer**, **parser**, and **token**, which of the structure is pretty conventional and should be familiar to language creators. These components are all written in 100% pure Go, instead of using conventional static yacc/lex/bison conversion with a mess of ad-hoc macros. This makes Goby's codes far smaller, concise, and legible. You can inspect, maintain, or improve Goby codes more easily, being free from pains like C/C++ era.
 
 **VM**: YARV-conscious, including **stack** and **call_frame**, as well as containing Goby's native classes and some standard library and additional components. All are written in Go as well.
 
-**Implementation**: Built-in monolithic Go binary executable which equips several native features such as a robust **thread/channel** mechanism powered by goroutine, a very new experimental [**Plugin system**](https://goby-lang.gitbooks.io/goby/content/plugin-system.html) to manage existing Go packages dynamically from Goby codes, **igb** (REPL) powered by readline package. Goby contains some standard or third-party Go packages, but the dependency to them is not high. These packages contain **no CGO** codes (at least by now) thus cross-compile for any OS environments that Go supports should work fine. 
+**Implementation**: Built-in monolithic Go binary executable which equips several native features such as a robust **thread/channel** mechanism powered by goroutine, a very new experimental [**Plugin system**](https://goby-lang.gitbooks.io/goby/content/plugin-system.html) to manage existing Go packages dynamically from Goby codes, **igb** (REPL) powered by readline package. Goby contains some standard or third-party Go packages, but the dependency to them is not high. These packages contain **no CGO** codes (at least by now) thus cross-compile for any OS environments that Go supports should work fine.
 
-**Library**: Provides some lean but sufficient standard libraries to support developers, including **threaded high-performance HTTP server**, **DB adapter**, **file** or **JSON**. Curiously, most of them are split into Go and Goby codes, and Goby codes are not within Goby executable but placed under lib directory as Goby script files. Of course you can create custom libraries and include them to your codes. Thanks to the flexibility of **Plugin system**, we expect that you can quickly import most of the existing Go packages to your Goby scripts without creating additional libraries from scratch in almost all cases. 
+**Library**: Provides some lean but sufficient standard libraries to support developers, including **threaded high-performance HTTP server**, **DB adapter**, **file** or **JSON**. Curiously, most of them are split into Go and Goby codes, and Goby codes are not within Goby executable but placed under lib directory as Goby script files. Of course you can create custom libraries and include them to your codes. Thanks to the flexibility of **Plugin system**, we expect that you can quickly import most of the existing Go packages to your Goby scripts without creating additional libraries from scratch in almost all cases.
 
 -----------
 
-**Let's improve Goby together!**: We are optimizing and expanding Goby all the time. Toward the first release, we've been focusing on implementing Goby first. 
+**Let's improve Goby together!**: We are optimizing and expanding Goby all the time. Toward the first release, we've been focusing on implementing Goby first.
 
 ### Features
 
@@ -78,7 +78,7 @@ Goby has several aspects: language specification, design of compiler and vm, imp
 ### Language
 
 Perhaps Goby should be far easier for Rubyists to comprehend. You can use Ruby's syntax highlighting for Goby as well😀
- 
+
 - Everything is object
 - Object and Class
     - Top level main object
@@ -126,7 +126,7 @@ Perhaps Goby should be far easier for Rubyists to comprehend. You can use Ruby's
     - See this sample: [One thousand threads](https://github.com/goby-lang/goby/blob/master/samples/one_thousand_threads.gb)
 
 ### Native class
- 
+
 Written in Go.
 
 - `Class`
@@ -139,22 +139,26 @@ Written in Go.
 - `Range`
 - `URI`
 - `Channel`
-- `File` (Changed from loadable class)
+- `File`
 - `GoObject` (provides `#go_func` that wraps pure Go objects or pointers for interaction)
 - `Regexp`
+- `MatchData` (to hold the result of regexp matching)
+- `Float`
 
 ### Standard library
 
 written in Go and Goby.
 
-- Loadable class
-    - `DB` (only for PostgreSQL by now)
-    - `Plugin`
-- Loadable module
-    - NET
-        - `Net::HTTP:Request`
-        - `Net::HTTP:Response`
-        - `Net::SimpleServer` (try [sample Goby app](http://sample.goby-lang.org) and [source](https://github.com/goby-lang/sample-web-app), or [sample code](https://github.com/goby-lang/goby/blob/master/samples/server.gb)!)
+- `Concurrent::Array`
+- `Concurrent::Hash`
+- `DB` (only for PostgreSQL by now)
+- `Plugin`
+- `JSON`
+- `Net::HTTP`
+- `Net::HTTP::Client`
+- `Net::HTTP::Request`
+- `Net::HTTP::Response`
+- `Net::SimpleServer` (try [sample Goby app](http://sample.goby-lang.org) and [source](https://github.com/goby-lang/sample-web-app), or [sample code](https://github.com/goby-lang/goby/blob/master/samples/server.gb)!)
 
 ## Installation
 
