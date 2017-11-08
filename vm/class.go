@@ -855,15 +855,8 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			// Loads the given Goby library name without extension (mainly for modules), returning `true`
 			// if successful and `false` if the feature is already loaded.
 			//
-			// Currently, only the following embedded Goby libraries are targeted:
-			//
-			// - "file"
-			// - "net/http"
-			// - "net/simple_server"
-			// - "uri"
-			//
 			// ```ruby
-			// require("file")
+			// require("db")
 			// File.extname("foo.rb")
 			// ```
 			//
