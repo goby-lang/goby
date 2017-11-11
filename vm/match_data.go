@@ -1,7 +1,6 @@
 package vm
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/dlclark/regexp2"
@@ -56,14 +55,13 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 					}
 					offset := 1
-					g := receiver.(*MatchDataObject).match.Groups()
-					n := len(g) - offset
+
+					g := receiver.(*MatchDataObject).match
+					n := len(g.Groups()) - offset
 					destCaptures := make([]Object, n, n)
 
-					for _, c := range g {
-						if c.Index != 0 {
-							destCaptures[c.Index-offset] = t.vm.initStringObject(c.String())
-						}
+					for i := 0; i < n; i++ {
+						destCaptures[i] = t.vm.initStringObject(g.GroupByNumber(i + offset).String())
 					}
 
 					return t.vm.initArrayObject(destCaptures)
@@ -88,12 +86,12 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 					}
 
-					g := receiver.(*MatchDataObject).match.Groups()
-					n := len(g)
+					g := receiver.(*MatchDataObject).match
+					n := len(g.Groups())
 					destCaptures := make([]Object, n, n)
 
-					for _, c := range g {
-						destCaptures[c.Index] = t.vm.initStringObject(c.String())
+					for i := 0; i < n; i++ {
+						destCaptures[i] = t.vm.initStringObject(g.GroupByNumber(i).String())
 					}
 
 					return t.vm.initArrayObject(destCaptures)
@@ -154,12 +152,9 @@ func (m *MatchDataObject) Value() interface{} {
 // returns a string representation of the object
 func (m *MatchDataObject) toString() string {
 	result := "#<MatchData"
-	result += fmt.Sprintf(" \"%s\"", m.match.Capture.String())
 
 	for _, c := range m.match.Groups() {
-		if c.Index != 0 {
-			result += fmt.Sprintf(" %d:\"%s\"", c.Index, c.String())
-		}
+		result += fmt.Sprintf(" %s:\"%s\"", c.Name, c.String())
 	}
 
 	result += ">"
@@ -169,15 +164,15 @@ func (m *MatchDataObject) toString() string {
 
 // returns a `{ captureNumber: captureValue }` JSON-encoded string
 func (m *MatchDataObject) toJSON() string {
-	capturesMap := make(map[int]string)
+	result := "{"
 
 	for _, c := range m.match.Groups() {
-		capturesMap[c.Index] = c.String()
+		result += fmt.Sprintf(" %s:\"%s\"", c.Name, c.String())
 	}
 
-	capturesJson, _ := json.Marshal(capturesMap)
+	result += "}"
 
-	return string(capturesJson)
+	return result
 }
 
 // equal checks if the string values between receiver and argument are equal
