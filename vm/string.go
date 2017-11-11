@@ -261,7 +261,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 
 					arg := args[0]
 
-					regexp, ok := arg.(*RegexpObject)
+					re, ok := arg.(*RegexpObject)
 
 					if !ok {
 						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.RegexpClass, arg.Class().Name)
@@ -269,7 +269,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 
 					text := receiver.(*StringObject).value
 
-					match, _ := regexp.Regexp.FindStringMatch(text)
+					match, _ := re.regexp.FindStringMatch(text)
 
 					if match == nil {
 						return NULL
@@ -1035,7 +1035,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// 'pow'.match(Regexp.new("x")) # => nil
 			// ```
 			//
-			// @param string [String]
+			// @param string [Regexp]
 			// @return [MatchData]
 			Name: "match",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -1051,16 +1051,16 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.RegexpClass, arg.Class().Name)
 					}
 
-					regexp := regexpObj.Regexp
+					re := regexpObj.regexp
 					text := receiver.(*StringObject).value
 
-					match, _ := regexp.FindStringMatch(text)
+					match, _ := re.FindStringMatch(text)
 
 					if match == nil {
 						return NULL
 					}
 
-					return t.vm.initMatchDataObject(match, regexp.String(), text)
+					return t.vm.initMatchDataObject(match, re.String(), text)
 				}
 			},
 		},
