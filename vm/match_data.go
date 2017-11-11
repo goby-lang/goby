@@ -102,6 +102,26 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		},
+		{
+			// Returns the length of the array; equivalent to `match.to_a.length`.
+			//
+			// ```ruby
+			// 'abcd'.match(Regexp.new('a(b)(c)')).length # => 3
+			// ```
+			// @return [Integer]
+			Name: "length",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+					}
+
+					matchData, _ := receiver.(*MatchDataObject)
+
+					return t.vm.initIntegerObject(len(matchData.captures))
+				}
+			},
+		},
 	}
 }
 
