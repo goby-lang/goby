@@ -277,6 +277,42 @@ func TestAncestors(t *testing.T) {
 	}
 }
 
+func TestClassLt(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{`
+		Object > Array
+		`, true},
+		{`
+		Array > Object
+		`, false},
+		{`
+		Object > Object
+		`, false},
+		{`
+		module M
+		end
+		class C
+		end
+		class C2 < C
+		  include M
+		end
+		class C3 < C2
+		end
+		M > C3
+		`, true},
+	}
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestCustomClassConstructor(t *testing.T) {
 	input := `
 		class Foo
