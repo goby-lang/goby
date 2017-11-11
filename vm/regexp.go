@@ -34,9 +34,10 @@ import (
 //
 // **To Goby maintainers**: avoid using Go's standard regexp package (slow and not rich). Consider the faster `Trim` or `Split` etc in Go's "strings" package first, or just use the dlclark/regexp2 instead.
 // ToDo: Regexp literals with '/.../'
+type Regexp = regexp2.Regexp
 type RegexpObject struct {
 	*baseObj
-	Regexp *regexp2.Regexp
+	regexp *Regexp
 }
 
 // Class methods --------------------------------------------------------
@@ -132,7 +133,7 @@ func builtinRegexpInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, arg.Class().Name)
 					}
 
-					re := receiver.(*RegexpObject).Regexp
+					re := receiver.(*RegexpObject).regexp
 					m, _ := re.MatchString(input.value)
 
 					return toBooleanObject(m)
@@ -153,7 +154,7 @@ func (vm *VM) initRegexpObject(regexp string) *RegexpObject {
 	}
 	return &RegexpObject{
 		baseObj: &baseObj{class: vm.topLevelClass(classes.RegexpClass)},
-		Regexp:  r,
+		regexp:  r,
 	}
 }
 
@@ -168,12 +169,12 @@ func (vm *VM) initRegexpClass() *RClass {
 
 // Value returns the object
 func (r *RegexpObject) Value() interface{} {
-	return r.toString()
+	return r.regexp.String()
 }
 
 // toString returns the object's name as the string format
 func (r *RegexpObject) toString() string {
-	return r.Regexp.String()
+	return r.regexp.String()
 }
 
 // toJSON just delegates to toString
