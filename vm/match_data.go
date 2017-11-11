@@ -3,7 +3,6 @@ package vm
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 
 	"github.com/dlclark/regexp2"
 	"github.com/goby-lang/goby/vm/classes"
@@ -17,12 +16,10 @@ import (
 // ```
 //
 // - `MatchData.new` is not supported.
+type Match = regexp2.Match
 type MatchDataObject struct {
 	*baseObj
-	captures  []string
-	positions []int
-	pattern   string // original regex
-	text      string // original text
+	match *Match
 }
 
 // Class methods --------------------------------------------------------
@@ -58,14 +55,15 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 					if len(args) != 0 {
 						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 					}
+					offset := 1
+					g := receiver.(*MatchDataObject).match.Groups()
+					n := len(g) - offset
+					destCaptures := make([]Object, n, n)
 
-					matchData, _ := receiver.(*MatchDataObject)
-
-					sourceCaptures := matchData.captures[1:]
-					destCaptures := make([]Object, len(sourceCaptures), len(sourceCaptures))
-
-					for i, capture := range sourceCaptures {
-						destCaptures[i] = t.vm.initStringObject(capture)
+					for _, c := range g {
+						if c.Index != 0 {
+							destCaptures[c.Index-offset] = t.vm.initStringObject(c.String())
+						}
 					}
 
 					return t.vm.initArrayObject(destCaptures)
@@ -90,12 +88,12 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 					}
 
-					matchData, _ := receiver.(*MatchDataObject)
+					g := receiver.(*MatchDataObject).match.Groups()
+					n := len(g)
+					destCaptures := make([]Object, n, n)
 
-					destCaptures := make([]Object, len(matchData.captures), len(matchData.captures))
-
-					for i, capture := range matchData.captures {
-						destCaptures[i] = t.vm.initStringObject(capture)
+					for _, c := range g {
+						destCaptures[c.Index] = t.vm.initStringObject(c.String())
 					}
 
 					return t.vm.initArrayObject(destCaptures)
@@ -132,24 +130,10 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 // Initializes a MatchDataObject from a Match object, and the original pattern/text.
 // Nothing prevents the programmer to pass pattern/text unrelated to the match, but this will
 // create an inconsistent MatchData object.
-func (vm *VM) initMatchDataObject(match *regexp2.Match, pattern, text string) *MatchDataObject {
-	captures := make([]string, len(match.Groups()), len(match.Groups()))
-	positions := make([]int, len(match.Groups()), len(match.Groups()))
-
-	for i, group := range match.Groups() {
-		// Using as reference the Ruby MatchData implementation, we have a crucial difference with this
-		// Go implementation; the former stores only the first capture when matching, while the latter
-		// stores all, and uses as reference the last.
-		captures[i] = group.Captures[0].String()
-		positions[i] = group.Captures[0].Index
-	}
-
+func (vm *VM) initMatchDataObject(match *Match, pattern, text string) *MatchDataObject {
 	return &MatchDataObject{
-		baseObj:   &baseObj{class: vm.topLevelClass(classes.MatchDataClass)},
-		captures:  captures,
-		positions: positions,
-		pattern:   pattern,
-		text:      text,
+		baseObj: &baseObj{class: vm.topLevelClass(classes.MatchDataClass)},
+		match:   match,
 	}
 }
 
@@ -170,12 +154,11 @@ func (m *MatchDataObject) Value() interface{} {
 // returns a string representation of the object
 func (m *MatchDataObject) toString() string {
 	result := "#<MatchData"
+	result += fmt.Sprintf(" \"%s\"", m.match.Capture.String())
 
-	for i, capture := range m.captures {
-		if i == 0 {
-			result += fmt.Sprintf(" \"%s\"", capture)
-		} else {
-			result += fmt.Sprintf(" %d:\"%s\"", i, capture)
+	for _, c := range m.match.Groups() {
+		if c.Index != 0 {
+			result += fmt.Sprintf(" %d:\"%s\"", c.Index, c.String())
 		}
 	}
 
@@ -188,8 +171,8 @@ func (m *MatchDataObject) toString() string {
 func (m *MatchDataObject) toJSON() string {
 	capturesMap := make(map[int]string)
 
-	for i, capture := range m.captures {
-		capturesMap[i] = capture
+	for _, c := range m.match.Groups() {
+		capturesMap[c.Index] = c.String()
 	}
 
 	capturesJson, _ := json.Marshal(capturesMap)
@@ -199,8 +182,5 @@ func (m *MatchDataObject) toJSON() string {
 
 // equal checks if the string values between receiver and argument are equal
 func (m *MatchDataObject) equal(other *MatchDataObject) bool {
-	return reflect.DeepEqual(m.captures, other.captures) &&
-		reflect.DeepEqual(m.positions, other.positions) &&
-		m.pattern == other.pattern &&
-		m.text == other.text
+	return m.match == other.match
 }
