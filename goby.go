@@ -21,7 +21,7 @@ func main() {
 	profileOptionPtr := flag.Bool("p", false, "Profile program execution")
 	versionOptionPtr := flag.Bool("v", false, "Show current Goby version")
 	interactiveOptionPtr := flag.Bool("i", false, "Run interactive goby")
-	issueOptionPtr := flag.Bool("e", false, "Run interactive goby")
+	issueOptionPtr := flag.Bool("e", false, "Generate reporting format")
 
 	flag.Parse()
 
