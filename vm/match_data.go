@@ -112,9 +112,9 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 					}
 
-					matchData, _ := receiver.(*MatchDataObject)
+					m := receiver.(*MatchDataObject).match
 
-					return t.vm.initIntegerObject(len(matchData.captures))
+					return t.vm.initIntegerObject(m.GroupCount())
 				}
 			},
 		},
