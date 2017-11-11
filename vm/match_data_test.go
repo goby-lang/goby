@@ -88,3 +88,36 @@ func TestMatchDataToAFail(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
+func TestMatchDataLengthMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{`'abc'.match(Regexp.new('(a)(b)c')).length`, 3},
+		{`'abc'.match(Regexp.new('(a)(b)(c)')).length`, 4},
+		{`'abc'.match(Regexp.new('abc')).length`, 1},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestMatchDataLengthMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`'abc'.match(Regexp.new('(a)(b)c')).length(1)`, "ArgumentError: Expect 0 argument. got=1", 1, 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
