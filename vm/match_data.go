@@ -46,7 +46,7 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 			// Returns the array of captures; equivalent to `match.to_a[1..-1]`.
 			//
 			// ```ruby
-			// c1, c2 = 'abcd'.match(Regexp.new('a(b)(c)'))
+			// c1, c2 = 'abcd'.match(Regexp.new('a(b)(c)')).captures
 			// c1    #=> "b"
 			// c2    #=> "c"
 			// ```
@@ -76,7 +76,7 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 			// Returns the array of captures.
 			//
 			// ```ruby
-			// c0, c1, c2 = 'abcd'.match(Regexp.new('a(b)(c)'))
+			// c0, c1, c2 = 'abcd'.match(Regexp.new('a(b)(c)')).to_a
 			// c0    #=> "abc"
 			// c1    #=> "b"
 			// c2    #=> "c"
