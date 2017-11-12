@@ -323,6 +323,20 @@ func TestClassGt(t *testing.T) {
 	}
 }
 
+func TestClassGtFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`Array > 1`, "TypeError: Expect argument to be a module. got=Integer", 1, 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestCustomClassConstructor(t *testing.T) {
 	input := `
 		class Foo
