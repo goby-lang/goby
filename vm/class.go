@@ -94,7 +94,7 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 			// ```
 			//
 			// @param module [Class]
-			// @return [Boolean]
+			// @return [Boolean, Null]
 			Name: ">",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -114,7 +114,14 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 						return FALSE
 					}
 
-					return toBooleanObject(module.alreadyInherit(c))
+					if module.alreadyInherit(c) {
+						return TRUE
+					}
+
+					if c.alreadyInherit(module) {
+						return FALSE
+					}
+					return NULL
 				}
 			},
 		},

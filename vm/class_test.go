@@ -277,7 +277,7 @@ func TestAncestors(t *testing.T) {
 	}
 }
 
-func TestClassLt(t *testing.T) {
+func TestClassGt(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected bool
@@ -292,6 +292,9 @@ func TestClassLt(t *testing.T) {
 		Object > Object
 		`, false},
 		{`
+		(Array > Hash).nil?
+		`, true},
+		{`
 		module M
 		end
 		class C
@@ -302,6 +305,13 @@ func TestClassLt(t *testing.T) {
 		class C3 < C2
 		end
 		M > C3
+		`, true},
+		{`
+		module M
+		end
+		class C
+		end
+		(M > C).nil?
 		`, true},
 	}
 	for i, tt := range tests {
