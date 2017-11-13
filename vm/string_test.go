@@ -901,7 +901,7 @@ func TestStringMatch(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`"Goby!!".match(Regexp.new("G(o)b(y)")).to_s`, "#<MatchData \"Goby\" 1:\"o\" 2:\"y\">"},
+		{`"Goby!!".match(Regexp.new("G(o)b(y)")).to_s`, "#<MatchData 0:\"Goby\" 1:\"o\" 2:\"y\">"},
 		{`"Ruby".match(Regexp.new("G(o)b(y)"))`, nil},
 	}
 

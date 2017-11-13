@@ -27,9 +27,9 @@ func TestMatchDataCaptures(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{`'a1bca2'.match(Regexp.new('a.')).to_s`, "#<MatchData \"a1\">"},
-		{`'a1bca2'.match(Regexp.new('(a.)')).to_s`, "#<MatchData \"a1\" 1:\"a1\">"},
-		{`'a1bca2'.match(Regexp.new('(a.)(b.)')).to_s`, "#<MatchData \"a1bc\" 1:\"a1\" 2:\"bc\">"},
+		{`'a1bca2'.match(Regexp.new('a.')).to_s`, "#<MatchData 0:\"a1\">"},
+		{`'a1bca2'.match(Regexp.new('(a.)')).to_s`, "#<MatchData 0:\"a1\" 1:\"a1\">"},
+		{`'a1bca2'.match(Regexp.new('(a.)(b.)')).to_s`, "#<MatchData 0:\"a1bc\" 1:\"a1\" 2:\"bc\">"},
 	}
 
 	for i, tt := range tests {
