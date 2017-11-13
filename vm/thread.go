@@ -249,18 +249,6 @@ func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 	}
 }
 
-func (t *thread) reportArgumentError(sourceLine, idealArgNumber int, methodName string, exactArgNumber int, receiverPtr int) {
-	var message string
-
-	if idealArgNumber > exactArgNumber {
-		message = "Expect at least %d args for method '%s'. got: %d"
-	} else {
-		message = "Expect at most %d args for method '%s'. got: %d"
-	}
-
-	t.setErrorObject(receiverPtr, receiverPtr + 1, errors.ArgumentError, sourceLine, message, idealArgNumber, methodName, exactArgNumber)
-}
-
 // TODO: Move instruction into call object
 func (t *thread) evalMethodObject(call *callObject, sourceLine int) {
 	normalParamsCount := call.normalParamsCount()
@@ -319,6 +307,18 @@ func (t *thread) evalMethodObject(call *callObject, sourceLine int) {
 	t.sp = call.argPtr()
 }
 
+func (t *thread) reportArgumentError(sourceLine, idealArgNumber int, methodName string, exactArgNumber int, receiverPtr int) {
+	var message string
+
+	if idealArgNumber > exactArgNumber {
+		message = "Expect at least %d args for method '%s'. got: %d"
+	} else {
+		message = "Expect at most %d args for method '%s'. got: %d"
+	}
+
+	t.setErrorObject(receiverPtr, receiverPtr + 1, errors.ArgumentError, sourceLine, message, idealArgNumber, methodName, exactArgNumber)
+}
+
 func (t *thread) pushErrorObject(errorType string, sourceLine int, format string, args ...interface{}) {
 	err := t.vm.initErrorObject(errorType, sourceLine, format, args...)
 	t.stack.push(&Pointer{Target: err})
@@ -331,8 +331,4 @@ func (t *thread) setErrorObject(receiverPtr, sp int, errorType string, sourceLin
 	t.stack.set(receiverPtr, &Pointer{Target: err})
 	t.sp = sp
 	panic(err.Message)
-}
-
-func (t *thread) initUnsupportedMethodError(sourceLine int, methodName string, receiver Object) *Error {
-	return t.vm.initErrorObject(errors.UnsupportedMethodError, sourceLine, "Unsupported Method %s for %+v", methodName, receiver.toString())
 }

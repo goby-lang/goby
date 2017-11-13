@@ -50,7 +50,7 @@ func builtinIntegerClassMethods() []*BuiltinMethodObject {
 			Name: "new",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.initUnsupportedMethodError(sourceLine, "#new", receiver)
+					return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
 				}
 			},
 		},
