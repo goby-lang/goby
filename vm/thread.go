@@ -43,14 +43,17 @@ func (t *thread) startFromTopFrame() {
 }
 
 func (t *thread) evalCallFrame(cf callFrame) {
+	defer func() {
+		if r := recover(); r != nil {
+			t.reportErrorAndStop()
+		}
+	}()
+
 	switch cf := cf.(type) {
 	case *normalCallFrame:
 		for cf.pc < cf.instructionsCount() {
 			i := cf.instructionSet.instructions[cf.pc]
 			t.execInstruction(cf, i)
-			if t.hasError() {
-				return
-			}
 		}
 	case *goMethodCallFrame:
 		args := []Object{}
@@ -63,8 +66,8 @@ func (t *thread) evalCallFrame(cf callFrame) {
 		result := cf.method(t, args, cf.blockFrame)
 		t.stack.push(&Pointer{Target: result})
 
-		if t.hasError() {
-			return
+		if err, ok := result.(*Error); ok {
+			panic(err.Message)
 		}
 		t.callFrameStack.pop()
 	}
@@ -90,23 +93,15 @@ func (t *thread) removeUselessBlockFrame(frame callFrame) {
 	}
 }
 
-func (t *thread) hasError() (hasError bool) {
-	if t.stack.top() != nil {
-		top := t.stack.top().Target
-		err, hasError := top.(*Error)
+func (t *thread) reportErrorAndStop() {
+	cf := t.callFrameStack.top()
 
-		if hasError {
-			t.reportErrorAndStop(err)
-		}
-		return hasError
+	if cf != nil {
+		cf.stopExecution()
 	}
 
-	return
-}
-
-func (t *thread) reportErrorAndStop(err *Error) {
-	cf := t.callFrameStack.top()
-	cf.stopExecution()
+	top := t.stack.top().Target
+	err := top.(*Error)
 
 	if t.vm.mode == NormalMode {
 		if t.isMainThread() {
@@ -207,10 +202,7 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 	method = receiver.findMethod(methodName)
 
 	if method == nil {
-		err := t.vm.initErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
-		t.stack.set(receiverPr, &Pointer{Target: err})
-		t.sp = argPr
-		return
+		t.setErrorObject(receiverPr, argPr, errors.UndefinedMethodError, sourceLine, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
 	}
 
 	sendCallFrame := t.callFrameStack.top()
@@ -251,20 +243,10 @@ func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 
 	t.stack.set(receiverPtr, evaluated)
 	t.sp = argPtr
-}
 
-func (t *thread) reportArgumentError(sourceLine, idealArgNumber int, methodName string, exactArgNumber int, receiverPtr int) {
-	var message string
-
-	if idealArgNumber > exactArgNumber {
-		message = "Expect at least %d args for method '%s'. got: %d"
-	} else {
-		message = "Expect at most %d args for method '%s'. got: %d"
+	if err, ok := evaluated.Target.(*Error); ok {
+		panic(err.Message)
 	}
-
-	e := t.vm.initErrorObject(errors.ArgumentError, sourceLine, message, idealArgNumber, methodName, exactArgNumber)
-	t.stack.set(receiverPtr, &Pointer{Target: e})
-	t.sp = receiverPtr + 1
 }
 
 // TODO: Move instruction into call object
@@ -290,10 +272,7 @@ func (t *thread) evalMethodObject(call *callObject, sourceLine int) {
 		case bytecode.RequiredKeywordArg:
 			paramName := call.paramNames()[paramIndex]
 			if _, ok := call.hasKeywordArgument(paramName); !ok {
-				e := t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Method %s requires key argument %s", call.methodName(), paramName)
-				t.stack.set(call.receiverPtr, &Pointer{Target: e})
-				t.sp = call.argPtr()
-				return
+				t.setErrorObject(call.receiverPtr, call.argPtr(), errors.ArgumentError, sourceLine, "Method %s requires key argument %s", call.methodName(), paramName)
 			}
 		}
 	}
@@ -301,10 +280,7 @@ func (t *thread) evalMethodObject(call *callObject, sourceLine int) {
 	err := call.assignKeywordArguments(stack)
 
 	if err != nil {
-		e := t.vm.initErrorObject(errors.ArgumentError, sourceLine, err.Error())
-		t.stack.set(call.receiverPtr, &Pointer{Target: e})
-		t.sp = call.argPtr()
-		return
+		t.setErrorObject(call.receiverPtr, call.argPtr(), errors.ArgumentError, sourceLine, err.Error())
 	}
 
 	// If given arguments is more than the normal arguments.
@@ -331,11 +307,28 @@ func (t *thread) evalMethodObject(call *callObject, sourceLine int) {
 	t.sp = call.argPtr()
 }
 
+func (t *thread) reportArgumentError(sourceLine, idealArgNumber int, methodName string, exactArgNumber int, receiverPtr int) {
+	var message string
+
+	if idealArgNumber > exactArgNumber {
+		message = "Expect at least %d args for method '%s'. got: %d"
+	} else {
+		message = "Expect at most %d args for method '%s'. got: %d"
+	}
+
+	t.setErrorObject(receiverPtr, receiverPtr + 1, errors.ArgumentError, sourceLine, message, idealArgNumber, methodName, exactArgNumber)
+}
+
 func (t *thread) pushErrorObject(errorType string, sourceLine int, format string, args ...interface{}) {
 	err := t.vm.initErrorObject(errorType, sourceLine, format, args...)
 	t.stack.push(&Pointer{Target: err})
+	panic(err.Message)
 }
 
-func (t *thread) initUnsupportedMethodError(sourceLine int, methodName string, receiver Object) *Error {
-	return t.vm.initErrorObject(errors.UnsupportedMethodError, sourceLine, "Unsupported Method %s for %+v", methodName, receiver.toString())
+
+func (t *thread) setErrorObject(receiverPtr, sp int, errorType string, sourceLine int, format string, args ...interface{}) {
+	err := t.vm.initErrorObject(errorType, sourceLine, format, args...)
+	t.stack.set(receiverPtr, &Pointer{Target: err})
+	t.sp = sp
+	panic(err.Message)
 }

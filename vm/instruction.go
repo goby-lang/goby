@@ -75,9 +75,7 @@ var builtinActions = map[operationType]*action{
 			c := t.vm.lookupConstant(cf, constName)
 
 			if c == nil {
-				err := t.vm.initErrorObject(errors.NameError, sourceLine, "uninitialized constant %s", constName)
-				t.stack.push(&Pointer{Target: err})
-				return
+				t.pushErrorObject(errors.NameError, sourceLine, "uninitialized constant %s", constName)
 			}
 
 			c.isNamespace = args[1].(string) == "true"
@@ -188,9 +186,7 @@ var builtinActions = map[operationType]*action{
 			v := t.stack.pop()
 
 			if c != nil {
-				err := t.vm.initErrorObject(errors.ConstantAlreadyInitializedError, sourceLine, "Constant %s already been initialized. Can't assign value to a constant twice.", constName)
-				t.stack.push(&Pointer{Target: err})
-				return
+				t.pushErrorObject(errors.ConstantAlreadyInitializedError, sourceLine, "Constant %s already been initialized. Can't assign value to a constant twice.", constName)
 			}
 
 			cf.storeConstant(constName, v)
@@ -228,7 +224,6 @@ var builtinActions = map[operationType]*action{
 
 			if !ok {
 				t.pushErrorObject(errors.TypeError, sourceLine, "Expect stack top's value to be an Array when executing 'expandarray' instruction.")
-				return
 			}
 
 			elems := []Object{}
@@ -358,7 +353,6 @@ var builtinActions = map[operationType]*action{
 
 			if !ok {
 				t.pushErrorObject(errors.InternalError, sourceLine, "Can't get method %s's instruction set.", methodName)
-				return
 			}
 
 			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.topLevelClass(classes.MethodClass)}}
@@ -412,12 +406,10 @@ var builtinActions = map[operationType]*action{
 
 					if !ok {
 						t.pushErrorObject(errors.InternalError, sourceLine, "Constant %s is not a class. got=%s", superClassName, string(superClass.Target.Class().ReturnName()))
-						return
 					}
 
 					if inheritedClass.isModule {
 						t.pushErrorObject(errors.InternalError, sourceLine, "Module inheritance is not supported: %s", inheritedClass.Name)
-						return
 					}
 
 					class.inherits(inheritedClass)
@@ -464,10 +456,7 @@ var builtinActions = map[operationType]*action{
 			method = receiver.findMethod(methodName)
 
 			if method == nil {
-				err := t.vm.initErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
-				t.stack.set(receiverPr, &Pointer{Target: err})
-				t.sp = argPr
-				return
+				t.setErrorObject(receiverPr, argPr, errors.UndefinedMethodError, sourceLine, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
 			}
 
 			// Find Block
@@ -500,7 +489,6 @@ var builtinActions = map[operationType]*action{
 
 			if cf.blockFrame == nil {
 				t.pushErrorObject(errors.InternalError, sourceLine, "Can't yield without a block")
-				return
 			}
 
 			blockFrame := cf.blockFrame

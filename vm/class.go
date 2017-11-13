@@ -415,7 +415,7 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 					class, ok := receiver.(*RClass)
 
 					if !ok {
-						return t.initUnsupportedMethodError(sourceLine, "#new", receiver)
+						return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
 					}
 
 					instance := class.initializeInstance()
