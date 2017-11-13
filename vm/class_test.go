@@ -277,6 +277,66 @@ func TestAncestors(t *testing.T) {
 	}
 }
 
+func TestClassGt(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{`
+		Object > Array
+		`, true},
+		{`
+		Array > Object
+		`, false},
+		{`
+		Object > Object
+		`, false},
+		{`
+		(Array > Hash).nil?
+		`, true},
+		{`
+		module M
+		end
+		class C
+		end
+		class C2 < C
+		  include M
+		end
+		class C3 < C2
+		end
+		M > C3
+		`, true},
+		{`
+		module M
+		end
+		class C
+		end
+		(M > C).nil?
+		`, true},
+	}
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestClassGtFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`Array > 1`, "TypeError: Expect argument to be a module. got=Integer", 1, 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestCustomClassConstructor(t *testing.T) {
 	input := `
 		class Foo
