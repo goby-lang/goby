@@ -30,6 +30,11 @@ type Error struct {
 
 // Functions for initialization -----------------------------------------
 
+
+func (vm *VM) initUnsupportedMethodError(sourceLine int, methodName string, receiver Object) *Error {
+	return vm.initErrorObject(errors.UnsupportedMethodError, sourceLine, "Unsupported Method %s for %+v", methodName, receiver.toString())
+}
+
 func (vm *VM) initErrorObject(errorType string, sourceLine int, format string, args ...interface{}) *Error {
 	errClass := vm.objectClass.getClassConstant(errorType)
 
