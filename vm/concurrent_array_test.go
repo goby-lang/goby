@@ -155,7 +155,7 @@ func TestConcurrentArrayComparisonOperation(t *testing.T) {
 		Concurrent::Array.new([1, { a: 1, b: 2 }, "Goby" ]) == Concurrent::Array.new([1, { a: 1, b: 2, c: 3 }, "Goby"])`, false}, // Array of hash has no order issue
 		{`
 		require 'concurrent/array'
-		Concurrent::Array.new([1, { a: 1, b: 2 }, "Goby" ]) == Concurrent::Array.new([1, { a: 2, b: 2, a: 1 }, "Goby"])`, true},  // Array of hash key will be overwritten if duplicated
+		Concurrent::Array.new([1, { a: 1, b: 2 }, "Goby" ]) == Concurrent::Array.new([1, { a: 2, b: 2, a: 1 }, "Goby"])`, true}, // Array of hash key will be overwritten if duplicated
 		{`
 		require 'concurrent/array'
 		Concurrent::Array.new([1, "String", true, 2..5]) == Integer`, false},
@@ -191,7 +191,7 @@ func TestConcurrentArrayComparisonOperation(t *testing.T) {
 		Concurrent::Array.new([1, { a: 1, b: 2 }, "Goby" ]) != Concurrent::Array.new([1, { b: 2, a: 1 }, "Goby"])`, false},
 		{`
 		require 'concurrent/array'
-		Concurrent::Array.new([1, { a: 1, b: 2 }, "Goby" ]) != Concurrent::Array.new([1, { a: 1, b: 2, c: 3 }, "Goby"])`, true},  // Array of hash has no order issue
+		Concurrent::Array.new([1, { a: 1, b: 2 }, "Goby" ]) != Concurrent::Array.new([1, { a: 1, b: 2, c: 3 }, "Goby"])`, true}, // Array of hash has no order issue
 		{`
 		require 'concurrent/array'
 		Concurrent::Array.new([1, { a: 1, b: 2 }, "Goby" ]) != Concurrent::Array.new([1, { a: 2, b: 2, a: 1 }, "Goby"])`, false}, // Array of hash key will be overwritten if duplicated

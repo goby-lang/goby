@@ -316,7 +316,7 @@ func (t *thread) reportArgumentError(sourceLine, idealArgNumber int, methodName 
 		message = "Expect at most %d args for method '%s'. got: %d"
 	}
 
-	t.setErrorObject(receiverPtr, receiverPtr + 1, errors.ArgumentError, sourceLine, message, idealArgNumber, methodName, exactArgNumber)
+	t.setErrorObject(receiverPtr, receiverPtr+1, errors.ArgumentError, sourceLine, message, idealArgNumber, methodName, exactArgNumber)
 }
 
 func (t *thread) pushErrorObject(errorType string, sourceLine int, format string, args ...interface{}) {
@@ -324,7 +324,6 @@ func (t *thread) pushErrorObject(errorType string, sourceLine int, format string
 	t.stack.push(&Pointer{Target: err})
 	panic(err.Message)
 }
-
 
 func (t *thread) setErrorObject(receiverPtr, sp int, errorType string, sourceLine int, format string, args ...interface{}) {
 	err := t.vm.initErrorObject(errorType, sourceLine, format, args...)

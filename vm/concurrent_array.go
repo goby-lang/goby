@@ -107,7 +107,7 @@ func (vm *VM) initConcurrentArrayObject(elements []Object) *ConcurrentArrayObjec
 	array := concurrent.getClassConstant("Array")
 
 	return &ConcurrentArrayObject{
-		baseObj:     &baseObj{class: array},
+		baseObj:       &baseObj{class: array},
 		InternalArray: vm.initArrayObject(elements[:]),
 	}
 }
@@ -121,7 +121,6 @@ func initConcurrentArrayClass(vm *VM) {
 
 	concurrent.setClassConstant(array)
 }
-
 
 // Object interface functions -------------------------------------------
 
@@ -155,8 +154,8 @@ func DefineForwardedConcurrentArrayMethod(methodName string, requireWriteLock bo
 					concurrentArray.RLock()
 				}
 
-        arrayMethodObject := concurrentArray.InternalArray.findMethod(methodName).(*BuiltinMethodObject)
-        result := arrayMethodObject.Fn(concurrentArray.InternalArray, sourceLine)(t, args, blockFrame)
+				arrayMethodObject := concurrentArray.InternalArray.findMethod(methodName).(*BuiltinMethodObject)
+				result := arrayMethodObject.Fn(concurrentArray.InternalArray, sourceLine)(t, args, blockFrame)
 
 				if requireWriteLock {
 					concurrentArray.Unlock()
@@ -166,7 +165,7 @@ func DefineForwardedConcurrentArrayMethod(methodName string, requireWriteLock bo
 
 				switch result.(type) {
 				case *ArrayObject:
-          return t.vm.initConcurrentArrayObject(result.(*ArrayObject).Elements)
+					return t.vm.initConcurrentArrayObject(result.(*ArrayObject).Elements)
 				default:
 					return result
 				}
