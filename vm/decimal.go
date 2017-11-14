@@ -520,33 +520,6 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns an array with two integer elements: numerator and denominator.
-			// Big number can be be less accurate than `to_a`.
-			//
-			// ```ruby
-			// "-355.133".to_d.to_ai       # => [-133, 133]
-			//
-			// "129.30928304982039482039842".to_d.to_ai
-			// #=> [-8964879735843078383, -9123183826594430976]
-			// ```
-			//
-			// @return [Array]
-			Name: "to_ai",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
-
-					n := int(receiver.(*DecimalObject).value.Num().Int64())
-					d := int(receiver.(*DecimalObject).value.Denom().Int64())
-					elems := []Object{}
-
-					elems = append(elems, t.vm.initIntegerObject(n))
-					elems = append(elems, t.vm.initIntegerObject(d))
-
-					return t.vm.initArrayObject(elems)
-				}
-			},
-		},
-		{
 			// Returns Float object from Decimal object.
 			// In most case the number of digits in Float is shorter than the one in Decimal.
 			//
@@ -561,57 +534,6 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					return t.vm.initFloatObject(receiver.(*DecimalObject).FloatValue())
-				}
-			},
-		},
-		{
-			// Returns a hash with two keys (numerator and denominator) and their values.
-			// The values are Decimal.
-			//
-			// ```ruby
-			// "129.30928304982039482039842".to_d.to_h
-			// # => { numerator: 6465464152491019741019921, denominator: 50000000000000000000000 }
-			// ```
-			//
-			// @return [Hash]
-			Name: "to_h",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
-
-					n := receiver.(*DecimalObject).value.Num()
-					d := receiver.(*DecimalObject).value.Denom()
-					h := make(map[string]Object)
-
-					h["denominator"] = t.vm.initDecimalObject(new(Decimal).SetInt(d))
-					h["numerator"] = t.vm.initDecimalObject(new(Decimal).SetInt(n))
-
-					return t.vm.initHashObject(h)
-				}
-			},
-		},
-		{
-			// Returns a hash with two keys (numerator and denominator) and their values.
-			// Returned values are integer, and big number can be be less accurate than `to_h`.
-			//
-			// ```ruby
-			// "129.3".to_d.to_hi   #=> { denominator: 10, numerator: 1293 }
-			// "129.30928304982039482039842".to_d.to_hi
-			// # => { numerator: -9123183826594430976, denominator: -8964879735843078383 }
-			// ```
-			//
-			// @return [Hash]
-			Name: "to_hi",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
-
-					n := int(receiver.(*DecimalObject).value.Num().Int64())
-					d := int(receiver.(*DecimalObject).value.Denom().Int64())
-					h := make(map[string]Object)
-
-					h["denominator"] = t.vm.initIntegerObject(d)
-					h["numerator"] = t.vm.initIntegerObject(n)
-
-					return t.vm.initHashObject(h)
 				}
 			},
 		},
