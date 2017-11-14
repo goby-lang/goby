@@ -37,6 +37,9 @@ func TestDecimalConversionString(t *testing.T) {
 		{`'-13.5'.to_d.denominator.to_s`, "2"},
 		{`'129.30928304982039482039842'.to_d.numerator.to_s`, "6465464152491019741019921"},
 		{`'129.30928304982039482039842'.to_d.denominator.to_s`, "50000000000000000000000"},
+		// The followings are permissible
+		{`'1.'.to_d.to_s`, "1"},
+		{`'.1'.to_d.to_s`, "0.1"},
 	}
 
 	for i, tt := range tests {
@@ -44,6 +47,27 @@ func TestDecimalConversionString(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestDecimalConversionFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`'1.1.1'.to_d`, "ArgumentError: Invalid numeric string. got=1.1.1", 1, 1},
+		{`'1/1/1'.to_d`, "ArgumentError: Invalid numeric string. got=1/1/1", 1, 1},
+		{`'1.1/1'.to_d`, "ArgumentError: Invalid numeric string. got=1.1/1", 1, 1},
+		{`'1/1.1'.to_d`, "ArgumentError: Invalid numeric string. got=1/1.1", 1, 1},
+		{`'1..1'.to_d`, "ArgumentError: Invalid numeric string. got=1..1", 1, 1},
+		{`'..1'.to_d`, "ArgumentError: Invalid numeric string. got=..1", 1, 1},
+		{`'1//1'.to_d`, "ArgumentError: Invalid numeric string. got=1//1", 1, 1},
+		{`'abc'.to_d`, "ArgumentError: Invalid numeric string. got=abc", 1, 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }

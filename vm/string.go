@@ -7,7 +7,6 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/dlclark/regexp2"
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
 )
@@ -1471,11 +1470,6 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					str := receiver.(*StringObject).value
-
-					re := regexp2.MustCompile("[^0-9./\\-]", 0)
-					if r, _ := re.MatchString(str); r == true {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect numeric string. got=%v", str)
-					}
 
 					de, err := new(Decimal).SetString(str)
 					if err == false {
