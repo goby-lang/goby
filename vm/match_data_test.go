@@ -30,6 +30,7 @@ func TestMatchDataCaptures(t *testing.T) {
 		{`'a1bca2'.match(Regexp.new('a.')).to_s`, "#<MatchData 0:\"a1\">"},
 		{`'a1bca2'.match(Regexp.new('(a.)')).to_s`, "#<MatchData 0:\"a1\" 1:\"a1\">"},
 		{`'a1bca2'.match(Regexp.new('(a.)(b.)')).to_s`, "#<MatchData 0:\"a1bc\" 1:\"a1\" 2:\"bc\">"},
+		{`'abcd'.match(Regexp.new('a(?<first>b)(?<second>c)')).to_s`, "#<MatchData 0:\"abc\" first:\"b\" second:\"c\">"},
 	}
 
 	for i, tt := range tests {
@@ -119,5 +120,24 @@ func TestMatchDataLengthMethodFail(t *testing.T) {
 		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
+	}
+}
+
+func TestMatchDataToH(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected map[string]interface{}
+	}{
+		{`'abcd'.match(Regexp.new('a.')).to_h`, map[string]interface{}{"0": "ab"}},
+		{`'abcd'.match(Regexp.new('a(b)(c)')).to_h`, map[string]interface{}{"0": "abc", "1": "b", "2": "c"}},
+		{`'abcd'.match(Regexp.new('a(?<first>b)(?<second>c)')).to_h`, map[string]interface{}{"0": "abc", "first": "b", "second": "c"}},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input, getFilename())
+		testHashObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
 	}
 }
