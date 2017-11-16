@@ -19,4 +19,5 @@ const (
 	RegexpClass    = "Regexp"
 	MatchDataClass = "MatchData"
 	GoMapClass     = "GoMap"
+	DecimalClass   = "Decimal"
 )

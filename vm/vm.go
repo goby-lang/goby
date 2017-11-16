@@ -222,6 +222,7 @@ func (vm *VM) initConstants() {
 		vm.initRegexpClass(),
 		vm.initMatchDataClass(),
 		vm.initGoMapClass(),
+		vm.initDecimalClass(),
 	}
 
 	// Init error classes

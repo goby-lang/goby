@@ -1452,6 +1452,35 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Converts a string of decimal number to Decimal object.
+			//
+			// ```ruby
+			// "3.14".to_d            # => 3.14
+			// "-0.7238943".to_d      # => -0.7238943
+			// "355/113".to_d         # => 3.14159292
+			// ```
+			//
+			// @return [String]
+			Name: "to_d",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%v", strconv.Itoa(len(args)))
+					}
+
+					str := receiver.(*StringObject).value
+
+					de, err := new(Decimal).SetString(str)
+					if err == false {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Invalid numeric string. got=%v", str)
+					}
+
+					return t.vm.initDecimalObject(de)
+				}
+			},
+		},
+		{
 			// Returns the result of converting self to Float.
 			// Unexpected characters will cause a 0.0 value, except trailing whitespace,
 			// which is ignored.
