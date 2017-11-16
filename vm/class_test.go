@@ -746,14 +746,19 @@ func TestRequireStandardLibSuccess(t *testing.T) {
 }
 
 func TestRequireFail(t *testing.T) {
-	input := `require "bar"`
-	expected := `InternalError: Can't require "bar"`
+	testsFail := []errorTestCase{
+		{`require "bar"`, `InternalError: Can't require "bar"`, 1, 1},
+		{`require "db", "json"`, `ArgumentError: Expect 1 argument. got: 2`, 1, 1},
+		{`require_relative "db", "json"`, `ArgumentError: Expect 1 argument. got: 2`, 1, 1},
+	}
 
-	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
-	checkError(t, 0, evaluated, expected, getFilename(), 1)
-	v.checkCFP(t, 0, 1)
-	v.checkSP(t, 0, 1)
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
 }
 
 func TestGeneralIsNilMethod(t *testing.T) {

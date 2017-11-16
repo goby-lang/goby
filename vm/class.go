@@ -855,15 +855,8 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			// Loads the given Goby library name without extension (mainly for modules), returning `true`
 			// if successful and `false` if the feature is already loaded.
 			//
-			// Currently, only the following embedded Goby libraries are targeted:
-			//
-			// - "file"
-			// - "net/http"
-			// - "net/simple_server"
-			// - "uri"
-			//
 			// ```ruby
-			// require("file")
+			// require("db")
 			// File.extname("foo.rb")
 			// ```
 			//
@@ -874,16 +867,24 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			Name: "require",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
-					libName := args[0].(*StringObject).value
-					initFunc, ok := standardLibraries[libName]
-
-					if !ok {
-						return t.vm.initErrorObject(errors.InternalError, sourceLine, "Can't require \"%s\"", libName)
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
 					}
+					switch args[0].(type) {
+					case *StringObject:
+						libName := args[0].(*StringObject).value
+						initFunc, ok := standardLibraries[libName]
 
-					initFunc(t.vm)
+						if !ok {
+							return t.vm.initErrorObject(errors.InternalError, sourceLine, "Can't require \"%s\"", libName)
+						}
 
-					return TRUE
+						initFunc(t.vm)
+
+						return TRUE
+					default:
+						return t.vm.initErrorObject(errors.InternalError, sourceLine, "Can't require \"%s\". Pass a string instead", args[0].(Object).Class().Name)
+					}
 				}
 			},
 		},
@@ -902,20 +903,28 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			Name: "require_relative",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
-					callerDir := path.Dir(t.vm.currentFilePath())
-					filepath := args[0].(*StringObject).value
-
-					filepath = path.Join(callerDir, filepath)
-
-					file, err := ioutil.ReadFile(filepath + ".gb")
-
-					if err != nil {
-						return t.vm.initErrorObject(errors.InternalError, sourceLine, err.Error())
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
 					}
+					switch args[0].(type) {
+					case *StringObject:
+						callerDir := path.Dir(t.vm.currentFilePath())
+						filepath := args[0].(*StringObject).value
 
-					t.vm.execRequiredFile(filepath, file)
+						filepath = path.Join(callerDir, filepath)
 
-					return TRUE
+						file, err := ioutil.ReadFile(filepath + ".gb")
+
+						if err != nil {
+							return t.vm.initErrorObject(errors.InternalError, sourceLine, err.Error())
+						}
+
+						t.vm.execRequiredFile(filepath, file)
+
+						return TRUE
+					default:
+						return t.vm.initErrorObject(errors.InternalError, sourceLine, "Can't require \"%s\". Pass a string instead", args[0].(Object).Class().Name)
+					}
 				}
 			},
 		},
