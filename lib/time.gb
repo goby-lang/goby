@@ -1,0 +1,9 @@
+# The Time class is just to extend Goby's native Time class (vm/time.go).
+
+class Time
+  # Alias of Time.new. The printed format is like the following:
+  # "2017-11-18 17:30:15.496004 +0900 JST m=+5.870407705"
+  def self.now
+    new
+  end
+end
