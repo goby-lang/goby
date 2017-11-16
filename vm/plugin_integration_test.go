@@ -86,7 +86,7 @@ func TestPluginGenerationNoRaceDetection(t *testing.T) {
 }
 
 func skipPluginTestIfEnvNotSet(t *testing.T) {
-	if os.Getenv("TEST_PLUGIN") == "" {
+	if os.Getenv("NO_RACE_DETECTION") == "" {
 		t.Skip("skipping plugin related tests")
 	}
 }

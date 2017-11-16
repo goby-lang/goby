@@ -11,7 +11,7 @@ for d in $(go list ./...); do
         # This can generate full coverage report of vm package.
         # Test that need to run without race detection include NoRaceDetection in the name,
         # otherwise, they will run twice (in the run below).
-        TEST_PLUGIN=true go test -coverprofile=profile.out -covermode=atomic $d -v -run NoRaceDetection
+        NO_RACE_DETECTION=true go test -coverprofile=profile.out -covermode=atomic $d -v -run NoRaceDetection
         if [ -f profile.out ]; then
           cat profile.out >> coverage.txt
           rm profile.out
