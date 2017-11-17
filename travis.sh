@@ -17,8 +17,12 @@ for d in $(go list ./...); do
           rm profile.out
         fi
 
-        # Then we test the race condition without plugin tests.
-        go test -race $d -v cover
+        # Then we test other tests with race detection
+        go test -race -coverprofile=profile.out -covermode=atomic $d -v
+        if [ -f profile.out ]; then
+          cat profile.out >> coverage.txt
+          rm profile.out
+        fi
         continue
     fi
     go test -race -coverprofile=profile.out -covermode=atomic $d
