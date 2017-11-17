@@ -9,9 +9,14 @@ import (
 )
 
 // MatchDataObject represents the match data returned by a regular expression matching operation.
+// You can use named-captures via `(?<name>)`.
 //
 // ```ruby
-// 'abcd'.match(Regexp.new('(b.)')) #=> #<MatchData "bc" 1:"bc">
+// 'abcd'.match(Regexp.new('(b.)'))
+// #=> #<MatchData 0:"bc" 1:"bc">
+//
+// 'abcd'.match(Regexp.new('a(?<first>b)(?<second>c)'))
+// #=> #<MatchData 0:"abc" first:"b" second:"c">
 // ```
 //
 // - `MatchData.new` is not supported.
@@ -95,6 +100,37 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					return t.vm.initArrayObject(destCaptures)
+				}
+			},
+		},
+		{
+			// Returns the hash of captures, including the whole matched text(`0:`).
+			// You can use named-capture as well.
+			//
+			// ```ruby
+			// h = 'abcd'.match(Regexp.new('a(b)(c)')).to_h
+			// puts h #=> { "0": "abc", "1": "b", "2": "c" }
+			//
+			// h = 'abcd'.match(Regexp.new('a(?<first>b)(?<second>c)')).to_h
+			// puts h #=> { "0": "abc", "first": "b", "second": "c" }
+			// ```
+			//
+			// @return [Hash]
+			Name: "to_h",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+					}
+
+					groups := receiver.(*MatchDataObject).match
+					result := make(map[string]Object)
+
+					for _, g := range groups.Groups() {
+						result[g.Name] = t.vm.initStringObject(g.String())
+					}
+
+					return t.vm.initHashObject(result)
 				}
 			},
 		},
