@@ -9,7 +9,7 @@
 [![Readme Score](http://readme-score-api.herokuapp.com/score.svg?url=goby-lang/goby)](http://clayallsopp.github.io/readme-score?url=goby-lang/goby)
 [![Snap Status](https://build.snapcraft.io/badge/goby-lang/goby.svg)](https://build.snapcraft.io/user/goby-lang/goby)
 
-**Goby** is an object-oriented interpreter language deeply inspired by **Ruby** as well as its core implementation by 100% pure **Go**. Moreover, it has standard libraries to provide several features such as the Plugin system. Note that we do not intend to reproduce whole of the honorable works of Ruby syntax/implementation/libraries. 
+**Goby** is an object-oriented interpreter language deeply inspired by **Ruby** as well as its core implementation by 100% pure **Go**. Moreover, it has standard libraries to provide several features such as the Plugin system. Note that we do not intend to reproduce whole of the honorable works of Ruby syntax/implementation/libraries.
 
 One of our goal is to provide web developers a sort of small and handy environment that mainly focusing on creating **API servers or microservices**. For this, Goby includes the following native features:
 
@@ -173,7 +173,7 @@ brew tap goby-lang/goby
 brew install goby
 ```
 
-In the case, `$GOBY_ROOT` is automatically configured. 
+In the case, `$GOBY_ROOT` is automatically configured.
 
 ### B. From Source
 
@@ -190,9 +190,9 @@ Try this if you'd like to contribute Goby! Skip 1 if you already have Golang in 
 $GOPATH/src/github.com/goby-lang/goby
 ```
 
-### C. Installation on a clean Linux environment
+### C. Installation on a Linux system
 
-For installing both Go and Goby on a clean Linux environment, see the [wiki page](https://github.com/goby-lang/goby/wiki/Linux-Go-and-Goby-setup).
+In order to install Go, Goby and PostgreSQL on a Linux system, see the [wiki page](https://github.com/goby-lang/goby/wiki/Setup-Go,-Goby-and-PostgreSQL-on-a-Linux-system).
 
 ### Verifying Goby installation
 
@@ -221,7 +221,7 @@ More sample Goby codes can be found in [sample directory](https://github.com/gob
 ## Documentation
 
 - [**User Manual (WIP)**](https://goby-lang.gitbooks.io/goby/content/)(Gitbooks)
-- [API Documentation](https://goby-lang.github.io/api.doc/) -- needs update the build script. See the [guide for API doc](https://github.com/goby-lang/api.doc#documenting-goby-code) if you'd like to contribute. 
+- [API Documentation](https://goby-lang.github.io/api.doc/) -- needs update the build script. See the [guide for API doc](https://github.com/goby-lang/api.doc#documenting-goby-code) if you'd like to contribute.
 
 ## Joining to Goby
 
