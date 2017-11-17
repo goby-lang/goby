@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestCallingPluginFunction(t *testing.T) {
+func TestCallingPluginFunctionNoRaceDetection(t *testing.T) {
 	skipPluginTestIfEnvNotSet(t)
 
 	input := `
@@ -27,7 +27,7 @@ func TestCallingPluginFunction(t *testing.T) {
 	v.checkSP(t, 0, 1)
 }
 
-func TestCallingPluginFunctionWithReturnValue(t *testing.T) {
+func TestCallingPluginFunctionWithReturnValueNoRaceDetection(t *testing.T) {
 	skipPluginTestIfEnvNotSet(t)
 
 	input := `
@@ -44,7 +44,7 @@ func TestCallingPluginFunctionWithReturnValue(t *testing.T) {
 	v.checkSP(t, 0, 1)
 }
 
-func TestCallingLibFuncFromPlugin(t *testing.T) {
+func TestCallingLibFuncFromPluginNoRaceDetection(t *testing.T) {
 	skipPluginTestIfEnvNotSet(t)
 
 	input := `
@@ -61,7 +61,7 @@ func TestCallingLibFuncFromPlugin(t *testing.T) {
 	v.checkSP(t, 0, 1)
 }
 
-func TestPluginGeneration(t *testing.T) {
+func TestPluginGenerationNoRaceDetection(t *testing.T) {
 	skipPluginTestIfEnvNotSet(t)
 
 	input := `
@@ -86,7 +86,7 @@ func TestPluginGeneration(t *testing.T) {
 }
 
 func skipPluginTestIfEnvNotSet(t *testing.T) {
-	if os.Getenv("TEST_PLUGIN") == "" {
+	if os.Getenv("NO_RACE_DETECTION") == "" {
 		t.Skip("skipping plugin related tests")
 	}
 }
