@@ -67,6 +67,12 @@ func builtinTimeInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			// Parses a string-format time/date/timezone and updates the Time object.
+			//
+			// ```Ruby
+			// Time.new.parse('2017-05-30') #=> 2017-05-30 00:00:00 +0000 UTC
+			// ```
+			//
+			// @return [Time]
 			Name: "parse",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -91,7 +97,17 @@ func builtinTimeInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Converts a Time object into a fixed-format string.
+			// Converts a Time object into a string format.
+			//
+			// ```Ruby
+			// Time.new('2017-05-30').to_s
+			// #=> "2017-05-30 00:00:00 +0000 UTC"
+			//
+			// Time.new.to_s
+			// #=> 2017-11-18 18:46:23.721956 +0900 JST m=+108.616754431
+			// ```
+			//
+			// @return [Time]
 			Name: "to_s",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
