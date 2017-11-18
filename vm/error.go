@@ -50,8 +50,6 @@ func (vm *VM) initErrorObject(errorType string, sourceLine int, format string, a
 			t.callFrameStack.pop()
 			cf = t.callFrameStack.top().(*normalCallFrame)
 		}
-	case *goMethodCallFrame:
-		t.callFrameStack.pop()
 	}
 
 	return &Error{

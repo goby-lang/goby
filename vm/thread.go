@@ -63,12 +63,12 @@ func (t *thread) evalCallFrame(cf callFrame) {
 				args = append(args, obj.Target)
 			}
 		}
+		//fmt.Println("-----------------------")
+		//fmt.Println(t.callFrameStack.inspect())
 		result := cf.method(t, args, cf.blockFrame)
 		t.stack.push(&Pointer{Target: result})
-
-		if err, ok := result.(*Error); ok {
-			panic(err.Message())
-		}
+		//fmt.Println(t.callFrameStack.inspect())
+		//fmt.Println("-----------------------")
 		t.callFrameStack.pop()
 	}
 
@@ -277,12 +277,10 @@ func (t *thread) evalMethodObject(call *callObject, sourceLine int) {
 
 	if call.argCount > paramsCount && !call.method.isSplatArgIncluded() {
 		t.reportArgumentError(sourceLine, paramsCount, call.methodName(), call.argCount, call.receiverPtr)
-		return
 	}
 
 	if normalParamsCount > call.argCount {
 		t.reportArgumentError(sourceLine, normalParamsCount, call.methodName(), call.argCount, call.receiverPtr)
-		return
 	}
 
 	// Check if arguments include all the required keys before assign keyword arguments
