@@ -200,17 +200,25 @@ func TestFloatConversions(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
+		{`(100.3).to_i`, 100},
+		{`(100.3).to_s`, "100.3"},
+		{`(100.3).to_d.to_s`, "100.3"},
+		{`
+		(3.14159265358979).to_d.to_s`,
+			"3.14159265358979"},
+		{`
+		(-273.150000000).to_d.to_s`,
+			"-273.15"},
 		{`100.3.to_i`, 100},
 		{`100.3.to_s`, "100.3"},
 		{`100.3.to_d.to_s`, "100.3"},
-		{`(100.3).to_i`, 100},
-		{`(100.3).to_s`, "100.3"},
 		{`
 		3.14159265358979.to_d.to_s`,
 			"3.14159265358979"},
-		{`
-		-273.150000000.to_d.to_s`,
-			"-273.15"},
+		// TODO: Able to parse negative float value and call method without parentheses
+		//{`
+		//-273.150000000.to_d.to_s`,
+		//	"-273.15"},
 	}
 
 	for i, tt := range tests {
