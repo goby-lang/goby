@@ -66,6 +66,31 @@ func builtinTimeClassMethods() []*BuiltinMethodObject {
 func builtinTimeInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
+			// Parses a string-format time/date/timezone and updates the Time object.
+			Name: "parse",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%d", len(args))
+					}
+
+					arg, ok := args[0].(*StringObject)
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, arg.Class().Name)
+					}
+
+					ts, err := parseTime(arg.toString())
+					if err != nil {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Invalid time format. got=%s", arg.value)
+					}
+
+					m := receiver.(*TimeObject)
+					m.value = ts
+					return m
+				}
+			},
+		},
+		{
 			// Converts a Time object into a fixed-format string.
 			Name: "to_s",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
