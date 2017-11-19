@@ -779,7 +779,7 @@ func TestConcurrentArrayEachMethodFail(t *testing.T) {
 		Concurrent::Array.new(['T', 'A', 'I', 'P', 'E', 'I']).each(101) do |char|
 			puts char
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 3, 2},
+		`, "ArgumentError: Expect 0 argument. got=1", 3, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -833,7 +833,7 @@ func TestConcurrentArrayEachIndexMethodFail(t *testing.T) {
 		Concurrent::Array.new(['T', 'A', 'I', 'P', 'E', 'I']).each_index(101) do |char|
 			puts char
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 3, 2},
+		`, "ArgumentError: Expect 0 argument. got=1", 3, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1373,7 +1373,7 @@ func TestConcurrentArrayReduceMethodFail(t *testing.T) {
 		a.reduce(1, 2) do |prev, n|
 			prev + n
 		end
-		`, "ArgumentError: Expect 0 or 1 argument. got=2", 4, 2},
+		`, "ArgumentError: Expect 0 or 1 argument. got=2", 4, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1453,7 +1453,7 @@ func TestConcurrentArrayReverseEachMethodFail(t *testing.T) {
 		Concurrent::Array.new(['T', 'A']).reverse_each(101) do |char|
 			puts char
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 3, 2},
+		`, "ArgumentError: Expect 0 argument. got=1", 3, 1},
 	}
 
 	for i, tt := range testsFail {

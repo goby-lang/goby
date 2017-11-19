@@ -695,7 +695,7 @@ func TestArrayEachMethodFail(t *testing.T) {
 		['T', 'A', 'I', 'P', 'E', 'I'].each(101) do |char|
 		  puts char
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 2, 2},
+		`, "ArgumentError: Expect 0 argument. got=1", 2, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -744,7 +744,7 @@ func TestArrayEachIndexMethodFail(t *testing.T) {
 		['T', 'A', 'I', 'P', 'E', 'I'].each_index(101) do |char|
 		  puts char
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 2, 2},
+		`, "ArgumentError: Expect 0 argument. got=1", 2, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1230,7 +1230,7 @@ func TestArrayReduceMethodFail(t *testing.T) {
 		a.reduce(1, 2) do |prev, n|
 			prev + n
 		end
-		`, "ArgumentError: Expect 0 or 1 argument. got=2", 2, 2},
+		`, "ArgumentError: Expect 0 or 1 argument. got=2", 2, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1303,7 +1303,7 @@ func TestArrayReverseEachMethodFail(t *testing.T) {
 		['T', 'A'].reverse_each(101) do |char|
 		  puts char
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 2, 2},
+		`, "ArgumentError: Expect 0 argument. got=1", 2, 1},
 	}
 
 	for i, tt := range testsFail {

@@ -203,7 +203,7 @@ func TestRangeBsearchMethodFail(t *testing.T) {
 		(0..4).bsearch do |i|
 			"Binary Search"
 		end
-		`, "TypeError: Expect Integer or Boolean type. got=String", 2, 2},
+		`, "TypeError: Expect Integer or Boolean type. got=String", 2, 1},
 	}
 
 	for i, tt := range testsFail {
