@@ -366,17 +366,17 @@ func TestConcurrentHashEachMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: 2}).each("Hello") do end`, "ArgumentError: Expect 0 arguments. got: 1", 3, 3},
+		Concurrent::Hash.new({ a: 1, b: 2}).each("Hello") do end`, "ArgumentError: Expect 0 arguments. got: 1", 3, 1},
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: 2}).each`, "InternalError: Can't yield without a block", 3, 3},
+		Concurrent::Hash.new({ a: 1, b: 2}).each`, "InternalError: Can't yield without a block", 3, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkErrorMsg(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
