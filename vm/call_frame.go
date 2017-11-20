@@ -15,10 +15,10 @@ type baseFrame struct {
 	self   Object
 	locals []*Pointer
 	// local pointer
-	lPr        int
-	isBlock    bool
+	lPr           int
+	isBlock       bool
 	isSourceBlock bool
-	blockFrame *normalCallFrame
+	blockFrame    *normalCallFrame
 	sync.RWMutex
 	sourceLine int
 	fileName   string

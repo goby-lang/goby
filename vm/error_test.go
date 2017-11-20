@@ -272,12 +272,12 @@ func TestStackTraces(t *testing.T) {
 			2,
 		},
 		/*
-		TODO: This case should have these stack traces:
-		from /Users/stanlow/projects/go/src/github.com/goby-lang/goby/vm/error_test.go:9
-		from /Users/stanlow/projects/go/src/github.com/goby-lang/goby/vm/error_test.go:2
-		from /Users/stanlow/projects/go/src/github.com/goby-lang/goby/vm/error_test.go:8
+			TODO: This case should have these stack traces:
+			from /Users/stanlow/projects/go/src/github.com/goby-lang/goby/vm/error_test.go:9
+			from /Users/stanlow/projects/go/src/github.com/goby-lang/goby/vm/error_test.go:2
+			from /Users/stanlow/projects/go/src/github.com/goby-lang/goby/vm/error_test.go:8
 
-		But currently we haven't been able to trace to the `yield` keyword.
+			But currently we haven't been able to trace to the `yield` keyword.
 		*/
 		{`def foo
 		  yield(10)

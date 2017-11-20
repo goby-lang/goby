@@ -1035,7 +1035,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 					float, ok := args[0].(*FloatObject)
 
 					if ok {
-						nanoseconds := int64(float.value * float64(time.Second / time.Nanosecond))
+						nanoseconds := int64(float.value * float64(time.Second/time.Nanosecond))
 						time.Sleep(time.Duration(nanoseconds) * time.Nanosecond)
 						return float
 					}
