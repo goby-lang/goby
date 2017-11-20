@@ -118,6 +118,11 @@ func (t *thread) reportErrorAndStop() {
 		err.storedTraces = true
 	}
 
+	if t.vm.mode == REPLMode {
+		fmt.Println(err.Message())
+		return
+	}
+
 	panic(err)
 
 	if t.vm.mode == NormalMode {
