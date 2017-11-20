@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 	"github.com/goby-lang/goby/vm"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
 	"testing"
-	"io"
 )
 
 func init() {
@@ -17,7 +17,6 @@ func init() {
 	if err != nil {
 		panic(fmt.Errorf("Goby not bulit"))
 	}
-
 	fmt.Println("Testing on prebuilt ./goby")
 
 	//cmd := exec.Command("go", "build", ".")
