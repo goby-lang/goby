@@ -182,7 +182,7 @@ var builtinActions = map[operationType]*action{
 		name: bytecode.SetConstant,
 		operation: func(t *thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			constName := args[0].(string)
-			c := t.vm.lookupConstant(cf, constName)
+			c := cf.lookupConstantInScope(constName)
 			v := t.stack.pop()
 
 			if c != nil {

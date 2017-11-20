@@ -354,7 +354,7 @@ func (vm *VM) lookupConstant(cf callFrame, constName string) (constant *Pointer)
 	}
 
 	if hasNamespace {
-		constant = namespace.lookupConstant(constName, true)
+		constant = namespace.lookupConstantInAllScope(constName)
 
 		if constant != nil {
 			return
