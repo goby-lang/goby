@@ -211,7 +211,7 @@ func testIntegerObject(t *testing.T, i int, obj Object, expected int) bool {
 
 		return true
 	case *Error:
-		t.Errorf("At test case %d: %s", i, result.Message)
+		t.Errorf("At test case %d: %s", i, result.Message())
 		return false
 	default:
 		t.Errorf("At test case %d: object is not Integer. got=%T (%+v).", i, obj, obj)
@@ -229,7 +229,7 @@ func testFloatObject(t *testing.T, i int, obj Object, expected float64) bool {
 
 		return true
 	case *Error:
-		t.Errorf("At test case %d: %s", i, result.Message)
+		t.Errorf("At test case %d: %s", i, result.Message())
 		return false
 	default:
 		t.Errorf("At test case %d: object is not Float. got=%T (%+v).", i, obj, obj)
@@ -242,7 +242,7 @@ func testNullObject(t *testing.T, i int, obj Object) bool {
 	case *NullObject:
 		return true
 	case *Error:
-		t.Errorf("At test case %d: %s", i, result.Message)
+		t.Errorf("At test case %d: %s", i, result.Message())
 		return false
 	default:
 		t.Errorf("At test case %d: object is not NULL. got=%T (%+v)", i, obj, obj)
@@ -260,7 +260,7 @@ func testStringObject(t *testing.T, i int, obj Object, expected string) bool {
 
 		return true
 	case *Error:
-		t.Errorf(result.Message)
+		t.Errorf(result.Message())
 		return false
 	default:
 		t.Errorf("At test case %d: object is not String. got=%T (%+v).", i, obj, obj)
@@ -278,7 +278,7 @@ func testBooleanObject(t *testing.T, i int, obj Object, expected bool) bool {
 
 		return true
 	case *Error:
-		t.Errorf(result.Message)
+		t.Errorf(result.Message())
 		return false
 	default:
 		t.Errorf("At test case %d: object is not Boolean. got=%T (%+v).", i, obj, obj)

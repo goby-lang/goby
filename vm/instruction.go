@@ -419,7 +419,7 @@ var builtinActions = map[operationType]*action{
 			is := t.getClassIS(subjectName, cf.FileName())
 
 			t.stack.pop()
-			c := newNormalCallFrame(is, cf.FileName())
+			c := newNormalCallFrame(is, cf.FileName(), sourceLine)
 			c.self = classPtr.Target
 			t.callFrameStack.push(c)
 			t.startFromTopFrame()
@@ -460,11 +460,12 @@ var builtinActions = map[operationType]*action{
 			}
 
 			// Find Block
-			blockFrame := t.retrieveBlock(cf.FileName(), blockFlag)
+			blockFrame := t.retrieveBlock(cf.FileName(), blockFlag, cf.SourceLine())
 
 			if blockFrame != nil {
 				blockFrame.ep = cf
 				blockFrame.self = cf.self
+				blockFrame.sourceLine = sourceLine
 				t.callFrameStack.push(blockFrame)
 			}
 
@@ -519,10 +520,11 @@ var builtinActions = map[operationType]*action{
 				blockFrame = cf.blockFrame.ep.blockFrame
 			}
 
-			c := newNormalCallFrame(blockFrame.instructionSet, blockFrame.FileName())
+			c := newNormalCallFrame(blockFrame.instructionSet, blockFrame.instructionSet.filename, sourceLine)
 			c.blockFrame = blockFrame
 			c.ep = blockFrame.ep
 			c.self = receiver
+			c.isBlock = true
 
 			for i := 0; i < argCount; i++ {
 				c.locals[i] = t.stack.Data[argPr+i]

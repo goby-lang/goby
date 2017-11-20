@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/goby-lang/goby/vm/errors"
+	"strings"
 )
 
 // Error class is actually a special struct to hold internal error types with messages.
@@ -22,8 +23,10 @@ import (
 //
 type Error struct {
 	*baseObj
-	Message string
-	Type    string
+	message      string
+	stackTraces  []string
+	storedTraces bool
+	Type         string
 }
 
 // Internal functions ===================================================
@@ -47,21 +50,14 @@ func (vm *VM) initErrorObject(errorType string, sourceLine int, format string, a
 			t.callFrameStack.pop()
 			cf = t.callFrameStack.top().(*normalCallFrame)
 		}
-	case *goMethodCallFrame:
-		t.callFrameStack.pop()
-	}
-
-	msg := fmt.Sprintf("%s. At %s:%d", fmt.Sprintf(errorType+": "+format, args...), cf.FileName(), sourceLine)
-
-	if sourceLine == -1 {
-		msg = fmt.Sprintf("%s. At %s", fmt.Sprintf(errorType+": "+format, args...), cf.FileName())
 	}
 
 	return &Error{
 		baseObj: &baseObj{class: errClass},
 		// Add 1 to source line because it's zero indexed
-		Message: msg,
-		Type:    errorType,
+		message:     fmt.Sprintf(errorType+": "+format, args...),
+		stackTraces: []string{fmt.Sprintf("from %s:%d", cf.FileName(), sourceLine)},
+		Type:        errorType,
 	}
 }
 
@@ -78,7 +74,7 @@ func (vm *VM) initErrorClasses() {
 
 // toString returns the object's name as the string format
 func (e *Error) toString() string {
-	return "ERROR: " + e.Message
+	return e.Message()
 }
 
 // toJSON just delegates to `toString`
@@ -87,5 +83,10 @@ func (e *Error) toJSON() string {
 }
 
 func (e *Error) Value() interface{} {
-	return e.Message
+	return e.message
+}
+
+// Message prints the error's message and its stack traces
+func (e *Error) Message() string {
+	return e.message + "\n" + strings.Join(e.stackTraces, "\n")
 }
