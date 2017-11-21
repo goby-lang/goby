@@ -119,7 +119,6 @@ func (t *thread) reportErrorAndStop() {
 	}
 
 	if t.vm.mode == REPLMode {
-		fmt.Println(err.Message())
 		return
 	}
 
