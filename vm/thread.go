@@ -118,10 +118,6 @@ func (t *thread) reportErrorAndStop() {
 		err.storedTraces = true
 	}
 
-	if t.vm.mode == REPLMode {
-		return
-	}
-
 	panic(err)
 
 	if t.vm.mode == NormalMode {

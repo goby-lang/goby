@@ -74,7 +74,7 @@ func (vm *VM) initErrorClasses() {
 
 // toString returns the object's name as the string format
 func (e *Error) toString() string {
-	return e.Message()
+	return e.message
 }
 
 // toJSON just delegates to `toString`
