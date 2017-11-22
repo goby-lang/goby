@@ -1,6 +1,9 @@
 package vm
 
-import "github.com/goby-lang/goby/compiler/bytecode"
+import (
+	"fmt"
+	"github.com/goby-lang/goby/compiler/bytecode"
+)
 
 // InitForREPL does following things:
 // - Initialize instruction sets' index tables
@@ -41,6 +44,15 @@ func (vm *VM) REPLExec(sets []*bytecode.InstructionSet) {
 	cf.self = oldFrame.Self()
 	cf.lPr = oldFrame.LocalPtr()
 	vm.mainThread.callFrameStack.push(cf)
+
+	defer func() {
+		_, ok := recover().(*Error)
+
+		if !ok && recover() != nil {
+			fmt.Printf("%v\n", recover())
+		}
+	}()
+
 	vm.startFromTopFrame()
 }
 
