@@ -18,7 +18,7 @@ func TestRWLockNewMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -29,13 +29,13 @@ func TestRWLockAcquireReadLockMethodFail(t *testing.T) {
 		{`
 		require 'concurrent/rw_lock'
 		Concurrent::RWLock.new.acquire_read_lock(5)
-		`, "ArgumentError: Expected 0 arguments, got 1", 3, 1},
+		`, "ArgumentError: Expected 0 arguments, got 1", 3, 0},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -52,8 +52,8 @@ func TestRWLockReleaseReadLockMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, tt.expectedCFP)
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -69,8 +69,8 @@ func TestRWLockAcquireWriteLockMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, tt.expectedCFP)
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -86,8 +86,8 @@ func TestRWLockReleaseWriteLockMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, tt.expectedCFP)
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -101,13 +101,13 @@ func TestRWLockWithReadLockMethodFail(t *testing.T) {
 		{`
 		require 'concurrent/rw_lock'
 		Concurrent::RWLock.new.with_read_lock(5) do end
-		`, "ArgumentError: Expected 0 arguments, got 1", 3, 1},
+		`, "ArgumentError: Expected 0 arguments, got 1", 3, 0},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -122,13 +122,13 @@ func TestRWLockWithWriteLockMethodFail(t *testing.T) {
 		{`
 		require 'concurrent/rw_lock'
 		Concurrent::RWLock.new.with_write_lock(5) do end
-		`, "ArgumentError: Expected 0 arguments, got 1", 3, 1},
+		`, "ArgumentError: Expected 0 arguments, got 1", 3, 0},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
