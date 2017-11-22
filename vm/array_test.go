@@ -120,7 +120,7 @@ func TestArrayDigMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -246,7 +246,7 @@ func TestArrayStarOperatorFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -290,7 +290,7 @@ func TestArrayPlusOperatorFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -345,7 +345,7 @@ func TestArrayAnyMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -410,7 +410,7 @@ func TestArrayAtMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -449,7 +449,7 @@ func TestArrayClearMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -496,7 +496,7 @@ func TestArrayConcatMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -566,7 +566,7 @@ func TestArrayCountMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -652,7 +652,7 @@ func TestArrayDeleteAtMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -695,13 +695,13 @@ func TestArrayEachMethodFail(t *testing.T) {
 		['T', 'A', 'I', 'P', 'E', 'I'].each(101) do |char|
 		  puts char
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 2, 2},
+		`, "ArgumentError: Expect 0 argument. got=1", 2, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -744,13 +744,13 @@ func TestArrayEachIndexMethodFail(t *testing.T) {
 		['T', 'A', 'I', 'P', 'E', 'I'].each_index(101) do |char|
 		  puts char
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 2, 2},
+		`, "ArgumentError: Expect 0 argument. got=1", 2, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -798,7 +798,7 @@ func TestArrayEmptyMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -867,7 +867,7 @@ func TestArrayFirstMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -911,7 +911,7 @@ func TestArrayFlattenMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -958,7 +958,7 @@ func TestArrayJoinMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -1012,7 +1012,7 @@ func TestArrayLastMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -1059,7 +1059,7 @@ func TestArrayLengthMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -1230,13 +1230,13 @@ func TestArrayReduceMethodFail(t *testing.T) {
 		a.reduce(1, 2) do |prev, n|
 			prev + n
 		end
-		`, "ArgumentError: Expect 0 or 1 argument. got=2", 2, 2},
+		`, "ArgumentError: Expect 0 or 1 argument. got=2", 2, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -1303,13 +1303,13 @@ func TestArrayReverseEachMethodFail(t *testing.T) {
 		['T', 'A'].reverse_each(101) do |char|
 		  puts char
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 2, 2},
+		`, "ArgumentError: Expect 0 argument. got=1", 2, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -1351,7 +1351,7 @@ func TestArrayRotateMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -1439,7 +1439,7 @@ func TestArrayShiftMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -1546,7 +1546,7 @@ func TestArrayValuesAtMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}

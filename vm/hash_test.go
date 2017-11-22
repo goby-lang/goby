@@ -189,7 +189,7 @@ func TestHashAccessOperationFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -282,14 +282,14 @@ func TestHashAnyMethod(t *testing.T) {
 
 func TestHashAnyMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{  }.any?(123) do end`, "ArgumentError: Expect 0 argument. got: 1", 1, 2},
+		{`{  }.any?(123) do end`, "ArgumentError: Expect 0 argument. got: 1", 1, 1},
 		{`{  }.any?`, "InternalError: Can't yield without a block", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -331,7 +331,7 @@ func TestHashClearMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -372,7 +372,7 @@ func TestHashDefaultSetOperationFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -441,7 +441,7 @@ func TestHashDeleteMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -488,14 +488,14 @@ func TestHashDeleteIfMethod(t *testing.T) {
 
 func TestHashDeleteIfMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ }.delete_if(123) do end`, "ArgumentError: Expect 0 argument. got: 1", 1, 2},
+		{`{ }.delete_if(123) do end`, "ArgumentError: Expect 0 argument. got: 1", 1, 1},
 		{`{ }.delete_if`, "InternalError: Can't yield without a block", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -535,7 +535,7 @@ func TestHashDigMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -591,14 +591,14 @@ func TestHashEachMethod(t *testing.T) {
 func TestHashEachMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`{ a: 1, b: 2}.each("Hello") do end
-		`, "ArgumentError: Expect 0 arguments. got: 1", 1, 2},
+		`, "ArgumentError: Expect 0 arguments. got: 1", 1, 1},
 		{`{ a: 1, b: 2}.each`, "InternalError: Can't yield without a block", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -654,14 +654,14 @@ func TestHashEachKeyMethodFail(t *testing.T) {
 		{`{ a: 1, b: 2, c: 3 }.each_key("Hello") do |key|
 			puts key
 		end
-		`, "ArgumentError: Expect 0 argument. got: 1", 1, 2},
+		`, "ArgumentError: Expect 0 argument. got: 1", 1, 1},
 		{`{ a: 1, b: 2, c: 3 }.each_key`, "InternalError: Can't yield without a block", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -750,14 +750,14 @@ func TestHashEachValueMethodFail(t *testing.T) {
 		{`{ a: 1, b: 2, c: 3 }.each_value("Hello") do |value|
 			puts value
 		end
-		`, "ArgumentError: Expect 0 argument. got: 1", 1, 2},
+		`, "ArgumentError: Expect 0 argument. got: 1", 1, 1},
 		{`{ a: 1, b: 2, c: 3 }.each_value`, "InternalError: Can't yield without a block", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -790,7 +790,7 @@ func TestHashEmptyMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -833,7 +833,7 @@ func TestHashEqualMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -868,14 +868,14 @@ func TestHashFetchMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`{ spaghetti: "eat" }.fetch()`, "ArgumentError: Expected 1 or 2 arguments, got 0", 1, 1},
 		{`{ spaghetti: "eat" }.fetch("a", "b", "c")`, "ArgumentError: Expected 1 or 2 arguments, got 3", 1, 1},
-		{`{ spaghetti: "eat" }.fetch("a", "b") do end`, "ArgumentError: The default argument can't be passed along with a block", 1, 2},
+		{`{ spaghetti: "eat" }.fetch("a", "b") do end`, "ArgumentError: The default argument can't be passed along with a block", 1, 1},
 		{`{ spaghetti: "eat" }.fetch("pizza")`, "ArgumentError: The value was not found, and no block has been provided", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -913,7 +913,7 @@ func TestHashFetchValuesMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -948,7 +948,7 @@ func TestHashHasKeyMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -986,7 +986,7 @@ func TestHashHasValueMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -1029,7 +1029,7 @@ func TestHashKeysMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -1066,7 +1066,7 @@ func TestHashLengthMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -1142,14 +1142,14 @@ func TestHashMapValuesMethodFail(t *testing.T) {
 		{`{ a: 1, b: 2, c: 3 }.map_values("Hello") do |value|
 			value * 3
 		end
-		`, "ArgumentError: Expect 0 argument. got: 1", 1, 2},
+		`, "ArgumentError: Expect 0 argument. got: 1", 1, 1},
 		{`{ a: 1, b: 2, c: 3 }.map_values`, "InternalError: Can't yield without a block", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -1198,7 +1198,7 @@ func TestHashMergeMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -1272,14 +1272,14 @@ func TestHashSelectMethod(t *testing.T) {
 
 func TestHashSelectMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ }.select(123) do end`, "ArgumentError: Expect 0 argument. got: 1", 1, 2},
+		{`{ }.select(123) do end`, "ArgumentError: Expect 0 argument. got: 1", 1, 1},
 		{`{ }.select`, "InternalError: Can't yield without a block", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -1294,7 +1294,7 @@ func TestHashSortedKeysMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -1365,7 +1365,7 @@ func TestHashToArrayMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -1531,7 +1531,7 @@ func TestHashToJSONMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -1565,7 +1565,7 @@ func TestHashToStringMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -1641,14 +1641,14 @@ func TestHashTransformValuesMethodFail(t *testing.T) {
 		{`{ a: 1, b: 2, c: 3 }.transform_values("Hello") do |value|
 			value * 3
 		end
-		`, "ArgumentError: Expect 0 argument. got: 1", 1, 2},
+		`, "ArgumentError: Expect 0 argument. got: 1", 1, 1},
 		{`{ a: 1, b: 2, c: 3 }.transform_values`, "InternalError: Can't yield without a block", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -1694,7 +1694,7 @@ func TestHashValuesMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -1733,7 +1733,7 @@ func TestHashValuesAtMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}

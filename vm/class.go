@@ -629,7 +629,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 					case Object:
 						return r.Class()
 					default:
-						return &Error{Message: "Can't call class on %T" + string(r.Class().ReturnName())}
+						return &Error{message: "Can't call class on %T" + string(r.Class().ReturnName())}
 					}
 				}
 			},
@@ -1024,10 +1024,23 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
 					}
 
-					int := args[0].(*IntegerObject)
-					seconds := int.value
-					time.Sleep(time.Duration(seconds) * time.Second)
-					return int
+					int, ok := args[0].(*IntegerObject)
+
+					if ok {
+						seconds := int.value
+						time.Sleep(time.Duration(seconds) * time.Second)
+						return int
+					}
+
+					float, ok := args[0].(*FloatObject)
+
+					if ok {
+						nanoseconds := int64(float.value * float64(time.Second/time.Nanosecond))
+						time.Sleep(time.Duration(nanoseconds) * time.Nanosecond)
+						return float
+					}
+
+					return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", args[0].Class().Name)
 				}
 			},
 		},
@@ -1226,16 +1239,32 @@ func (c *RClass) lookupMethod(methodName string) Object {
 	return method
 }
 
-func (c *RClass) lookupConstant(constName string, findInScope bool) *Pointer {
+func (c *RClass) lookupConstantInScope(constName string) *Pointer {
 	constant, ok := c.constants[constName]
 
 	if !ok {
-		if findInScope && c.scope != nil {
-			return c.scope.lookupConstant(constName, true)
+		if c.scope != nil {
+			return c.scope.lookupConstantInScope(constName)
 		}
 
+		return nil
+	}
+
+	return constant
+}
+
+func (c *RClass) lookupConstantInAllScope(constName string) *Pointer {
+	constant, ok := c.constants[constName]
+
+	if !ok {
+		if c.scope != nil {
+			return c.scope.lookupConstantInScope(constName)
+		}
+
+		// Finding constant in superclass means it's out of the scope
 		if c.superClass != nil && c.Name != classes.ObjectClass {
-			return c.superClass.lookupConstant(constName, false)
+			constant, _ = c.constants[constName]
+			return constant
 		}
 
 		return nil

@@ -193,7 +193,6 @@ func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if len(args) != 0 {
-						t.callFrameStack.pop()
 						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 arguments. got: %d", len(args))
 					}
 

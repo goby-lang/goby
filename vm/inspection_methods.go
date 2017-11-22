@@ -34,9 +34,9 @@ func (cf *goMethodCallFrame) inspect() string {
 
 func (cf *normalCallFrame) inspect() string {
 	if cf.ep != nil {
-		return fmt.Sprintf("Normal frame. File name: %s. IS name: %s. is block: %t. ep: %d", cf.FileName(), cf.instructionSet.name, cf.isBlock, len(cf.ep.locals))
+		return fmt.Sprintf("Normal frame. File name: %s. IS name: %s. is block: %t. ep: %d. source line: %d", cf.FileName(), cf.instructionSet.name, cf.isBlock, len(cf.ep.locals), cf.SourceLine())
 	}
-	return fmt.Sprintf("Normal frame. File name: %s. IS name: %s. is block: %t", cf.FileName(), cf.instructionSet.name, cf.isBlock)
+	return fmt.Sprintf("Normal frame. File name: %s. IS name: %s. is block: %t. source line: %d", cf.FileName(), cf.instructionSet.name, cf.isBlock, cf.SourceLine())
 }
 
 func (cfs *callFrameStack) inspect() string {

@@ -1,6 +1,9 @@
 package vm
 
-import "github.com/goby-lang/goby/compiler/bytecode"
+import (
+	"fmt"
+	"github.com/goby-lang/goby/compiler/bytecode"
+)
 
 // InitForREPL does following things:
 // - Initialize instruction sets' index tables
@@ -11,7 +14,7 @@ func (vm *VM) InitForREPL() {
 	vm.SetMethodISIndexTable("REPL")
 
 	// REPL should maintain a base call frame so that the whole program won't exit
-	cf := newNormalCallFrame(&instructionSet{name: "REPL base"}, "REPL")
+	cf := newNormalCallFrame(&instructionSet{name: "REPL base"}, "REPL", 1)
 	cf.self = vm.mainObj
 	vm.mode = REPLMode
 	vm.mainThread.callFrameStack.push(cf)
@@ -32,14 +35,24 @@ func (vm *VM) REPLExec(sets []*bytecode.InstructionSet) {
 	vm.blockTables[p.filename] = p.blockTable
 
 	oldFrame := vm.mainThread.callFrameStack.pop()
-	cf := newNormalCallFrame(p.program, p.filename)
+	cf := newNormalCallFrame(p.program, p.filename, oldFrame.SourceLine())
 	cf.self = vm.mainObj
 	cf.locals = oldFrame.Locals()
 	cf.ep = oldFrame.EP()
 	cf.isBlock = oldFrame.IsBlock()
+	cf.isSourceBlock = oldFrame.IsSourceBlock()
 	cf.self = oldFrame.Self()
 	cf.lPr = oldFrame.LocalPtr()
 	vm.mainThread.callFrameStack.push(cf)
+
+	defer func() {
+		_, ok := recover().(*Error)
+
+		if !ok && recover() != nil {
+			fmt.Printf("%v\n", recover())
+		}
+	}()
+
 	vm.startFromTopFrame()
 }
 

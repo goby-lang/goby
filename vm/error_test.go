@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -23,7 +24,7 @@ func TestErrorLineNumber(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -60,7 +61,7 @@ func TestUndefinedMethodError(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -80,66 +81,72 @@ func TestUnsupportedMethodError(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
 
 func TestArgumentError(t *testing.T) {
-	tests := []errorTestCase{
+	tests := []struct {
+		input       string
+		expected    string
+		errorLine   int
+		expectedCFP int
+		expectedSP  int
+	}{
 		{`def foo(x)
 		end
 
 		foo
 		`,
 			"ArgumentError: Expect at least 1 args for method 'foo'. got: 0",
-			4, 1},
+			4, 1, 1},
 		{`def foo(x)
 		end
 
 		foo(1, 2)
 		`,
 			"ArgumentError: Expect at most 1 args for method 'foo'. got: 2",
-			4, 1},
+			4, 1, 1},
 		{`def foo(x = 10)
 		end
 
 		foo(1, 2)
 		`,
 			"ArgumentError: Expect at most 1 args for method 'foo'. got: 2",
-			4, 1},
+			4, 1, 1},
 		{`def foo(x, y = 10)
 		end
 
 		foo(1, 2, 3)
 		`,
 			"ArgumentError: Expect at most 2 args for method 'foo'. got: 3",
-			4, 1},
+			4, 1, 1},
 		{`"1234567890".include? "123", Class`,
 			"ArgumentError: Expect 1 argument. got=2",
-			1, 1},
+			1, 1, 1},
 		{`"1234567890".include? "123", Class, String`,
 			"ArgumentError: Expect 1 argument. got=3",
-			1, 1},
+			1, 1, 1},
 		{`def foo(a, *b)
 		end
 
 		foo
 		`, "ArgumentError: Expect at least 1 args for method 'foo'. got: 0",
-			4, 1},
+			4, 1, 1},
 		{`def foo(a, b, *c)
 		end
 
 		foo(10)
 		`, "ArgumentError: Expect at least 2 args for method 'foo'. got: 1",
-			4, 1},
+			4, 1, 1},
 		{`def foo(a, b = 10, *c)
 		end
 
 		foo
 		`, "ArgumentError: Expect at least 1 args for method 'foo'. got: 0",
-			4, 1},
+			4, 1, 1},
 		{`def foo(a, b, c)
 		  a + b + c
 		end
@@ -148,15 +155,159 @@ func TestArgumentError(t *testing.T) {
 		foo(*arr)
 		`,
 			"ArgumentError: Expect at most 3 args for method 'foo'. got: 4",
-			6, 1},
+			6, 1, 1},
+		{`def foo(a, b, c)
+		  a + b + c
+		end
+
+		def bar
+		  arr = [1, 2, 3, 5]
+		  foo(*arr)
+		end
+
+		bar
+		`,
+			"ArgumentError: Expect at most 3 args for method 'foo'. got: 4",
+			// The two objects on the stack would be:
+			// - the receiver of bar, because that call haven't been finished
+			// - the error object
+			6, 2, 2},
+		{`def foo(a, b, c)
+		  a + b + c
+		end
+
+		def bar
+		  arr = [1, 2, 3, 5]
+		  foo(*arr)
+		end
+
+		def baz
+		  bar
+		end
+
+		baz
+		`,
+			"ArgumentError: Expect at most 3 args for method 'foo'. got: 4",
+			// The three objects on the stack would be:
+			// - the receiver of baz, because that call haven't been finished
+			// - the receiver of bar, because that call haven't been finished
+			// - the error object
+			6, 3, 3},
 	}
 
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
+		v.checkSP(t, i, tt.expectedSP)
+	}
+}
+
+func TestStackTraces(t *testing.T) {
+	tests := []struct {
+		input          string
+		expectedMsg    string
+		expectedTraces []string
+		expectedCFP    int
+		expectedSP     int
+	}{
+		{`def foo(a, b, c)
+		  a + b + c
+		end
+
+		def bar
+		  arr = [1, 2, 3, 5]
+		  foo(*arr)
+		end
+
+		bar
+		`,
+			"ArgumentError: Expect at most 3 args for method 'foo'. got: 4",
+			[]string{
+				fmt.Sprintf("from %s:7", getFilename()),
+				fmt.Sprintf("from %s:10", getFilename()),
+			},
+			2,
+			2,
+		},
+		{`def foo(a, b, c)
+		  a + b + c
+		end
+
+		def bar
+		  arr = [1, 2, 3, 5]
+		  foo(*arr)
+		end
+
+		def baz
+		  bar
+		end
+
+		baz
+		`,
+			"ArgumentError: Expect at most 3 args for method 'foo'. got: 4",
+			[]string{
+				fmt.Sprintf("from %s:7", getFilename()),
+				fmt.Sprintf("from %s:11", getFilename()),
+				fmt.Sprintf("from %s:14", getFilename()),
+			},
+			3,
+			3,
+		},
+		{`def foo
+		  10
+		end
+
+		[1, 2, 3].each do |i|
+		  foo(i)
+		end
+		`,
+			"ArgumentError: Expect at most 0 args for method 'foo'. got: 1",
+			[]string{
+				fmt.Sprintf("from %s:6", getFilename()),
+				fmt.Sprintf("from %s:5", getFilename()),
+			},
+			4,
+			2,
+		},
+		/*
+			TODO: This case should have these stack traces:
+			from /Users/stanlow/projects/go/src/github.com/goby-lang/goby/vm/error_test.go:9
+			from /Users/stanlow/projects/go/src/github.com/goby-lang/goby/vm/error_test.go:2
+			from /Users/stanlow/projects/go/src/github.com/goby-lang/goby/vm/error_test.go:8
+
+			But currently we haven't been able to trace to the `yield` keyword.
+		*/
+		{`def foo
+		  yield(10)
+		end
+
+		def bar
+		end
+
+		foo do |ten|
+		  bar(ten)
+		end
+		`,
+			"ArgumentError: Expect at most 0 args for method 'bar'. got: 1",
+			[]string{
+				fmt.Sprintf("from %s:9", getFilename()),
+				fmt.Sprintf("from %s:8", getFilename()),
+			},
+			4,
+			// receiver(mainObject), receiver, argument 10, errorObject
+			4,
+		},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expectedMsg)
+		checkErrorTraces(t, i, evaluated, tt.expectedTraces)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, tt.expectedSP)
 	}
 }
 
@@ -223,7 +374,7 @@ func TestKeywordArgumentError(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -248,7 +399,7 @@ func TestConstantAlreadyInitializedError(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -261,7 +412,32 @@ func checkError(t *testing.T, index int, evaluated Object, expectedErrMsg, fn st
 	}
 
 	expectedErrMsg = fmt.Sprintf("%s. At %s:%d", expectedErrMsg, fn, line)
-	if err.Message != expectedErrMsg {
-		t.Fatalf("At test case %d: Expect error message to be:\n  %s. got: \n%s", index, expectedErrMsg, err.Message)
+	if err.message != expectedErrMsg {
+		t.Fatalf("At test case %d: Expect error message to be:\n  %s. got: \n%s", index, expectedErrMsg, err.Message())
+	}
+}
+
+func checkErrorMsg(t *testing.T, index int, evaluated Object, expectedErrMsg string) {
+	err, ok := evaluated.(*Error)
+	if !ok {
+		t.Fatalf("At test case %d: Expect Error. got=%T (%+v)", index, evaluated, evaluated)
+	}
+
+	if err.message != expectedErrMsg {
+		t.Fatalf("At test case %d: Expect error message to be:\n  %s. got: \n%s", index, expectedErrMsg, err.message)
+	}
+}
+
+func checkErrorTraces(t *testing.T, index int, evaluated Object, expectedTraces []string) {
+	err, ok := evaluated.(*Error)
+	if !ok {
+		t.Fatalf("At test case %d: Expect Error. got=%T (%+v)", index, evaluated, evaluated)
+	}
+
+	joinedExpectedTraces := strings.Join(expectedTraces, "\n")
+	joinedTraces := strings.Join(err.stackTraces, "\n")
+
+	if joinedTraces != joinedExpectedTraces {
+		t.Fatalf("At test case %d: Expect traces to be:\n%s \n got: \n%s", index, joinedExpectedTraces, joinedTraces)
 	}
 }

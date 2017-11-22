@@ -160,9 +160,18 @@ func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) {
 	vm.SetClassISIndexTable(translator.filename)
 	vm.SetMethodISIndexTable(translator.filename)
 
-	cf := newNormalCallFrame(translator.program, translator.filename)
+	cf := newNormalCallFrame(translator.program, translator.filename, 1)
 	cf.self = vm.mainObj
 	vm.mainThread.callFrameStack.push(cf)
+
+	defer func() {
+		err, ok := recover().(*Error)
+
+		if ok && vm.mode == NormalMode {
+			fmt.Println(err.Message())
+		}
+	}()
+
 	vm.startFromTopFrame()
 }
 
@@ -346,7 +355,7 @@ func (vm *VM) lookupConstant(cf callFrame, constName string) (constant *Pointer)
 	}
 
 	if hasNamespace {
-		constant = namespace.lookupConstant(constName, true)
+		constant = namespace.lookupConstantInAllScope(constName)
 
 		if constant != nil {
 			return
@@ -407,5 +416,5 @@ func (vm *VM) execRequiredFile(filepath string, file []byte) {
 }
 
 func newError(format string, args ...interface{}) *Error {
-	return &Error{Message: fmt.Sprintf(format, args...)}
+	return &Error{message: fmt.Sprintf(format, args...)}
 }

@@ -94,6 +94,67 @@ func TestComment(t *testing.T) {
 	v.checkSP(t, 0, 1)
 }
 
+func TestConstantNamespace(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+		class Foo
+			VAL="Foo's constant value"
+			def foo
+ 				VAL
+ 			end
+ 		end
+ 		VAL="toplevel constant value"
+		a = [VAL, Foo::VAL, Foo.new.foo]
+		a
+		`, []interface{}{"toplevel constant value", "Foo's constant value", "Foo's constant value"}},
+		{`
+		VAL="toplevel constant value"
+		class Foo
+		 VAL="Foo's constant value"
+		 def foo
+		   VAL
+		 end
+		end
+		a = [VAL, Foo::VAL, Foo.new.foo]
+		a
+		`, []interface{}{"toplevel constant value", "Foo's constant value", "Foo's constant value"}},
+		{`
+		class Foo
+		 VAL="Foo's constant value"
+		 def foo
+		   VAL
+		 end
+		end
+		class VAL; end
+
+		a = [VAL.name, Foo::VAL, Foo.new.foo]
+		a
+		`, []interface{}{"VAL", "Foo's constant value", "Foo's constant value"}},
+		{`
+		class VAL; end
+		class Foo
+		 VAL="Foo's constant value"
+		 def foo
+		   VAL
+		 end
+		end
+		a = [VAL.name, Foo::VAL, Foo.new.foo]
+		a
+		`, []interface{}{"VAL", "Foo's constant value", "Foo's constant value"}},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input, getFilename())
+		testArrayObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
+	}
+}
+
 func TestMethodCall(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -304,7 +365,7 @@ func TestMethodCall(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 
 		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+			t.Fatalf("got Error: %s", evaluated.(*Error).message)
 		}
 
 		checkExpected(t, i, evaluated, tt.expected)
@@ -402,7 +463,7 @@ func TestMethodCallWithSplatArgument(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 
 		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+			t.Fatalf("got Error: %s", evaluated.(*Error).message)
 		}
 
 		checkExpected(t, i, evaluated, tt.expected)
@@ -901,7 +962,7 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 
 		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+			t.Fatalf("got Error: %s", evaluated.(*Error).message)
 		}
 
 		checkExpected(t, i, evaluated, tt.expected)
@@ -1057,7 +1118,7 @@ func TestInstanceMethodCall(t *testing.T) {
 	evaluated := v.testEval(t, input, getFilename())
 
 	if isError(evaluated) {
-		t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+		t.Fatalf("got Error: %s", evaluated.(*Error).message)
 	}
 
 	result, ok := evaluated.(*IntegerObject)
@@ -1213,7 +1274,7 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 
 		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+			t.Fatalf("got Error: %s", evaluated.(*Error).message)
 		}
 
 		checkExpected(t, i, evaluated, tt.expected)
@@ -1286,7 +1347,7 @@ func TestInstanceVariableEvaluation(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 
 		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*Error).Message)
+			t.Fatalf("got Error: %s", evaluated.(*Error).message)
 		}
 
 		checkExpected(t, i, evaluated, tt.expected)
@@ -2037,7 +2098,7 @@ func TestUnusedVariableFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
