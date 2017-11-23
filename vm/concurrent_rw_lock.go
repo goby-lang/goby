@@ -24,7 +24,7 @@ import (
 //
 type ConcurrentRWLockObject struct {
 	*baseObj
-	mutex    sync.RWMutex
+	mutex sync.RWMutex
 }
 
 // Class methods --------------------------------------------------------
@@ -70,7 +70,7 @@ func builtinConcurrentRWLockInstanceMethods() []*BuiltinMethodObject {
 
 					lockObject := receiver.(*ConcurrentRWLockObject)
 
-					lockObject.mutex.RLock();
+					lockObject.mutex.RLock()
 
 					return NULL
 				}
@@ -98,7 +98,7 @@ func builtinConcurrentRWLockInstanceMethods() []*BuiltinMethodObject {
 
 					lockObject := receiver.(*ConcurrentRWLockObject)
 
-					lockObject.mutex.Lock();
+					lockObject.mutex.Lock()
 
 					return NULL
 				}
@@ -126,7 +126,7 @@ func builtinConcurrentRWLockInstanceMethods() []*BuiltinMethodObject {
 
 					lockObject := receiver.(*ConcurrentRWLockObject)
 
-					lockObject.mutex.RUnlock();
+					lockObject.mutex.RUnlock()
 
 					return NULL
 				}
@@ -154,7 +154,7 @@ func builtinConcurrentRWLockInstanceMethods() []*BuiltinMethodObject {
 
 					lockObject := receiver.(*ConcurrentRWLockObject)
 
-					lockObject.mutex.Unlock();
+					lockObject.mutex.Unlock()
 
 					return NULL
 				}
@@ -187,11 +187,11 @@ func builtinConcurrentRWLockInstanceMethods() []*BuiltinMethodObject {
 
 					lockObject := receiver.(*ConcurrentRWLockObject)
 
-					lockObject.mutex.RLock();
+					lockObject.mutex.RLock()
 
 					blockReturnValue := t.builtinMethodYield(blockFrame).Target
 
-					lockObject.mutex.RUnlock();
+					lockObject.mutex.RUnlock()
 
 					return blockReturnValue
 				}
@@ -224,11 +224,11 @@ func builtinConcurrentRWLockInstanceMethods() []*BuiltinMethodObject {
 
 					lockObject := receiver.(*ConcurrentRWLockObject)
 
-					lockObject.mutex.Lock();
+					lockObject.mutex.Lock()
 
 					blockReturnValue := t.builtinMethodYield(blockFrame).Target
 
-					lockObject.mutex.Unlock();
+					lockObject.mutex.Unlock()
 
 					return blockReturnValue
 				}

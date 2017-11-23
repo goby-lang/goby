@@ -229,7 +229,7 @@ func TestRWLockWithWriteLockMethod(t *testing.T) {
 func TestRWLockAcquireAndReleaseLocksReadBlocksWriteNoRaceDetection(t *testing.T) {
 	skipRWLockTestIfRaceDetectionEnabled(t)
 
-  code := `
+	code := `
   require 'concurrent/rw_lock'
 
   lock = Concurrent::RWLock.new
@@ -255,13 +255,13 @@ func TestRWLockAcquireAndReleaseLocksReadBlocksWriteNoRaceDetection(t *testing.T
   end
   `
 
-  expected := "thread 1"
+	expected := "thread 1"
 
-  v := initTestVM()
-  evaluated := v.testEval(t, code, getFilename())
-  testStringObject(t, i, evaluated, expected)
-  v.checkCFP(t, i, 0)
-  v.checkSP(t, i, 1)
+	v := initTestVM()
+	evaluated := v.testEval(t, code, getFilename())
+	testStringObject(t, i, evaluated, expected)
+	v.checkCFP(t, i, 0)
+	v.checkSP(t, i, 1)
 }
 
 func TestRWLockWithReadLockReadBlocksWriteNoRaceDetection(t *testing.T) {
