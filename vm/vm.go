@@ -36,8 +36,6 @@ type isTable map[string][]*instructionSet
 
 type filename = string
 
-type errorMessage = string
-
 var standardLibraries = map[string]func(*VM){
 	"net/http":           initHTTPClass,
 	"net/simple_server":  initSimpleServerClass,
@@ -70,11 +68,7 @@ type VM struct {
 	// projectRoot is goby root's absolute path, which is $GOROOT/src/github.com/goby-lang/goby
 	projectRoot string
 
-	stackTraceCount int
-
 	channelObjectMap *objectMap
-
-	sync.Mutex
 
 	mode int
 
