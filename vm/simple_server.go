@@ -131,7 +131,7 @@ func initSimpleServerClass(vm *VM) {
 	simpleServer.setBuiltinMethods(builtinSimpleServerInstanceMethods(), false)
 	net.setClassConstant(simpleServer)
 
-	vm.execGobyLib("net/simple_server.gb")
+	vm.mainThread.execGobyLib("net/simple_server.gb")
 }
 
 // Other helper functions -----------------------------------------------

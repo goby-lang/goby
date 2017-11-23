@@ -192,8 +192,8 @@ func initHTTPClass(vm *VM) {
 	net.setClassConstant(http)
 
 	// Use Goby code to extend request and response classes.
-	vm.execGobyLib("net/http/response.gb")
-	vm.execGobyLib("net/http/request.gb")
+	vm.mainThread.execGobyLib("net/http/response.gb")
+	vm.mainThread.execGobyLib("net/http/request.gb")
 }
 
 func initRequestClass(vm *VM, hc *RClass) *RClass {

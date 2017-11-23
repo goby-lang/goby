@@ -176,7 +176,7 @@ func initPluginClass(vm *VM) {
 	pc.setBuiltinMethods(builtinPluginInstanceMethods(), false)
 	vm.objectClass.setClassConstant(pc)
 
-	vm.execGobyLib("plugin.gb")
+	vm.mainThread.execGobyLib("plugin.gb")
 }
 
 // Polymorphic helper functions -----------------------------------------

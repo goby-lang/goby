@@ -919,7 +919,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 							return t.vm.initErrorObject(errors.InternalError, sourceLine, err.Error())
 						}
 
-						t.vm.execRequiredFile(filepath, file)
+						t.execRequiredFile(filepath, file)
 
 						return TRUE
 					default:

@@ -289,7 +289,7 @@ func initDBClass(vm *VM) {
 	pg.setBuiltinMethods(builtinDBInstanceMethods(), false)
 	vm.objectClass.setClassConstant(pg)
 
-	vm.execGobyLib("db.gb")
+	vm.mainThread.execGobyLib("db.gb")
 }
 
 // Other helper functions -----------------------------------------------

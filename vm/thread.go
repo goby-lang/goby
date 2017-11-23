@@ -2,9 +2,13 @@ package vm
 
 import (
 	"fmt"
+	"github.com/goby-lang/goby/compiler"
 	"github.com/goby-lang/goby/compiler/bytecode"
+	"github.com/goby-lang/goby/compiler/parser"
 	"github.com/goby-lang/goby/vm/errors"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -26,15 +30,83 @@ func (t *thread) isMainThread() bool {
 }
 
 func (t *thread) getBlock(name string, filename filename) *instructionSet {
-	return t.vm.getBlock(name, filename)
+	// The "name" here is actually an index of block
+	// for example <Block:1>'s name is "1"
+	is, ok := t.vm.blockTables[filename][name]
+
+	if !ok {
+		panic(fmt.Sprintf("Can't find block %s", name))
+	}
+
+	return is
 }
 
 func (t *thread) getMethodIS(name string, filename filename) (*instructionSet, bool) {
-	return t.vm.getMethodIS(name, filename)
+	iss, ok := t.vm.isTables[bytecode.MethodDef][name]
+
+	if !ok {
+		return nil, false
+	}
+
+	is := iss[t.vm.methodISIndexTables[filename].Data[name]]
+
+	t.vm.methodISIndexTables[filename].Data[name]++
+
+	return is, ok
 }
 
 func (t *thread) getClassIS(name string, filename filename) *instructionSet {
-	return t.vm.getClassIS(name, filename)
+	iss, ok := t.vm.isTables[bytecode.ClassDef][name]
+
+	if !ok {
+		panic(fmt.Sprintf("Can't find class %s's instructions", name))
+	}
+
+	is := iss[t.vm.classISIndexTables[filename].Data[name]]
+
+	t.vm.classISIndexTables[filename].Data[name]++
+
+	return is
+}
+
+func (t *thread) execGobyLib(libName string) {
+	libPath := filepath.Join(t.vm.projectRoot, "lib", libName)
+	file, err := ioutil.ReadFile(libPath)
+
+	if err != nil {
+		t.vm.mainThread.pushErrorObject(errors.InternalError, -1, err.Error())
+	}
+
+	t.execRequiredFile(libPath, file)
+}
+
+func (t *thread) execRequiredFile(filepath string, file []byte) {
+	instructionSets, err := compiler.CompileToInstructions(string(file), parser.NormalMode)
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	oldMethodTable := isTable{}
+	oldClassTable := isTable{}
+
+	// Copy current file's instruction sets.
+	for name, is := range t.vm.isTables[bytecode.MethodDef] {
+		oldMethodTable[name] = is
+	}
+
+	for name, is := range t.vm.isTables[bytecode.ClassDef] {
+		oldClassTable[name] = is
+	}
+
+	// This creates new execution environments for required file, including new instruction set table.
+	// So we need to copy old instruction sets and restore them later, otherwise current program's instruction set would be overwrite.
+	t.vm.ExecInstructions(instructionSets, filepath)
+
+	// Restore instruction sets.
+	t.vm.isTables[bytecode.MethodDef] = oldMethodTable
+	t.vm.isTables[bytecode.ClassDef] = oldClassTable
 }
 
 func (t *thread) startFromTopFrame() {

@@ -53,7 +53,7 @@ func (vm *VM) REPLExec(sets []*bytecode.InstructionSet) {
 		}
 	}()
 
-	vm.startFromTopFrame()
+	vm.mainThread.startFromTopFrame()
 }
 
 // GetExecResult returns stack's top most value. Normally it's used in tests.
