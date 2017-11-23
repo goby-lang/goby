@@ -319,7 +319,3 @@ func (vm *VM) lookupConstant(cf callFrame, constName string) (constant *Pointer)
 
 	return
 }
-
-func newError(format string, args ...interface{}) *Error {
-	return &Error{message: fmt.Sprintf(format, args...)}
-}
