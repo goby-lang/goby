@@ -5,6 +5,7 @@ import (
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
+	"strconv"
 	"strings"
 )
 
@@ -338,6 +339,20 @@ var builtinActions = map[operationType]*action{
 			t.stack.push(&Pointer{Target: object})
 		},
 	},
+	bytecode.PutFloat: {
+		name: bytecode.PutFloat,
+		operation: func(t *thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
+			var value float64
+			switch argValue := args[0].(type) {
+			case string:
+				value, _ = strconv.ParseFloat(argValue, 64)
+			case int:
+				value = float64(argValue)
+			}
+			object := t.vm.initFloatObject(value)
+			t.stack.push(&Pointer{Target: object})
+		},
+	},
 	bytecode.PutNull: {
 		name: bytecode.PutNull,
 		operation: func(t *thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
@@ -557,7 +572,7 @@ func (vm *VM) initObjectFromGoType(value interface{}) Object {
 	case int32:
 		return vm.initIntegerObject(int(v))
 	case float64:
-		return vm.initIntegerObject(int(v))
+		return vm.initFloatObject(v)
 	case []uint8:
 		bytes := []byte{}
 

@@ -140,6 +140,14 @@ func (v *VM) convertJSONToHashObj(j jsonObj) Object {
 			// Single json object
 		case map[string]interface{}:
 			objectMap[key] = v.convertJSONToHashObj(jsonValue)
+		case float64:
+			// TODO: Find a better way to distinguish between Float & Integer because default GO JSON package
+			// TODO: support only for parsing float out regardless of integer or float type data of JSON value
+			if jsonValue == float64(int(jsonValue)) {
+				objectMap[key] = v.initIntegerObject(int(jsonValue))
+			} else {
+				objectMap[key] = v.initFloatObject(jsonValue)
+			}
 		default:
 			objectMap[key] = v.initObjectFromGoType(jsonValue)
 		}

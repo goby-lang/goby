@@ -14,6 +14,8 @@ func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, sc
 		is.define(GetInstanceVariable, sourceLine, exp.Value)
 	case *ast.IntegerLiteral:
 		is.define(PutObject, sourceLine, fmt.Sprint(exp.Value))
+	case *ast.FloatLiteral:
+		is.define(PutFloat, sourceLine, fmt.Sprint(exp.Value))
 	case *ast.StringLiteral:
 		is.define(PutString, sourceLine, exp.Value)
 	case *ast.BooleanExpression:

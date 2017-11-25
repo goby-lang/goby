@@ -2,10 +2,10 @@ package vm
 
 import (
 	"math"
-	"strconv"
 
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
+	"strconv"
 )
 
 // FloatObject represents an inexact real number using the native architecture's double-precision floating point
@@ -438,7 +438,7 @@ func (f *FloatObject) numericComparison(t *thread, rightObject Object, operation
 // toString returns the object's value as the string format, in non
 // exponential format (straight number, without exponent `E<exp>`).
 func (f *FloatObject) toString() string {
-	return strconv.FormatFloat(f.value, 'f', -1, 64)
+	return strconv.FormatFloat(f.value, 'f', -1, 64) // fmt.Sprintf("%f", f.value)
 }
 
 // toJSON just delegates to toString

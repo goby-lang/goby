@@ -19,6 +19,7 @@ const (
 	Ident            = "IDENT"
 	InstanceVariable = "INSTANCE_VAR"
 	Int              = "INT"
+	Float            = "FLOAT"
 	String           = "STRING"
 	Comment          = "COMMENT"
 

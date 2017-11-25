@@ -6,28 +6,57 @@ import (
 	"strings"
 )
 
+// IntegerLiteral contains the node expression and its value
 type IntegerLiteral struct {
 	*BaseNode
 	Value int
 }
 
 func (il *IntegerLiteral) expressionNode() {}
+
+// IntegerLiteral.TokenLiteral gets the Integer type token
 func (il *IntegerLiteral) TokenLiteral() string {
 	return il.Token.Literal
 }
+
+// IntegerLiteral.String gets the string format of the Integer type token
 func (il *IntegerLiteral) String() string {
 	return il.Token.Literal
 }
 
+// FloatLiteral contains the node expression and its value
+type FloatLiteral struct {
+	*BaseNode
+	Value float64
+}
+
+func (il *FloatLiteral) expressionNode() {}
+
+// FloatLiteral.TokenLiteral gets the literal of the Float type token
+func (il *FloatLiteral) TokenLiteral() string {
+	return il.Token.Literal
+}
+
+// FloatLiteral.String gets the string format of the Float type token
+func (il *FloatLiteral) String() string {
+	return il.Token.Literal
+}
+
+// StringLiteral contains the node expression and its value
 type StringLiteral struct {
 	*BaseNode
 	Value string
 }
 
+// Define the string literal which contains the node expression and its value
 func (sl *StringLiteral) expressionNode() {}
+
+// StringLiteral.TokenLiteral gets the literal of the String type token
 func (sl *StringLiteral) TokenLiteral() string {
 	return sl.Token.Literal
 }
+
+// StringLiteral.String gets the string format of the String type token
 func (sl *StringLiteral) String() string {
 	var out bytes.Buffer
 
@@ -37,15 +66,20 @@ func (sl *StringLiteral) String() string {
 	return out.String()
 }
 
+// ArrayExpression defines the array expression literal which contains the node expression and its value
 type ArrayExpression struct {
 	*BaseNode
 	Elements []Expression
 }
 
 func (ae *ArrayExpression) expressionNode() {}
+
+// ArrayExpression gets the literal of the Array type token
 func (ae *ArrayExpression) TokenLiteral() string {
 	return ae.Token.Literal
 }
+
+// ArrayExpression.String gets the string format of the Array type token
 func (ae *ArrayExpression) String() string {
 	var out bytes.Buffer
 
@@ -90,15 +124,20 @@ func (pe *PairExpression) String() string {
 	return fmt.Sprintf("%s: %s", pe.Key.String(), pe.Value.String())
 }
 
+// HashExpression defines the hash expression literal which contains the node expression and its value
 type HashExpression struct {
 	*BaseNode
 	Data map[string]Expression
 }
 
 func (he *HashExpression) expressionNode() {}
+
+// HashExpression.TokenLiteral gets the literal of the Hash type token
 func (he *HashExpression) TokenLiteral() string {
 	return he.Token.Literal
 }
+
+// HashExpression.String gets the string format of the Hash type token
 func (he *HashExpression) String() string {
 	var out bytes.Buffer
 	var pairs []string
@@ -190,15 +229,20 @@ func (ae *AssignExpression) String() string {
 	return out.String()
 }
 
+// BooleanExpression defines the boolean expression literal which contains the node expression and its value
 type BooleanExpression struct {
 	*BaseNode
 	Value bool
 }
 
 func (b *BooleanExpression) expressionNode() {}
+
+// BooleanExpression.TokenLiteral gets the literal of the Boolean type token
 func (b *BooleanExpression) TokenLiteral() string {
 	return b.Token.Literal
 }
+
+// BooleanExpression.String gets the string format of the Boolean type token
 func (b *BooleanExpression) String() string {
 	return b.Token.Literal
 }
@@ -367,6 +411,7 @@ func (ye *YieldExpression) String() string {
 	return out.String()
 }
 
+// RangeExpression defines the range expression literal which contains the node expression and its start/end value
 type RangeExpression struct {
 	*BaseNode
 	Start Expression
@@ -374,9 +419,13 @@ type RangeExpression struct {
 }
 
 func (re *RangeExpression) expressionNode() {}
+
+// RangeExpression.TokenLiteral gets the literal of the Range type token
 func (re *RangeExpression) TokenLiteral() string {
 	return re.Token.Literal
 }
+
+// RangeExpression.String gets the string format of the Range type token
 func (re *RangeExpression) String() string {
 	var out bytes.Buffer
 
