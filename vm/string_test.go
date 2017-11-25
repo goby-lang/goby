@@ -929,6 +929,43 @@ func TestStringReplaceMethodFail(t *testing.T) {
 	}
 }
 
+func TestStringReplaceOnceMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`"Ruby Lang Ruby Ruby".replace_once("Ru", "Go")`, "Goby Lang Ruby Ruby"},
+		{`"🍣Ruby🍣Lang Ruby".replace_once("Ru", "Go")`, "🍣Goby🍣Lang Ruby"},
+		{`re = Regexp.new("(Ru|ru)");"Ruby Lang ruby lang".replace_once(re, "Go")`, "Goby Lang ruby lang"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestStringReplaceOnceMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`"Invalid".replace_once`, "ArgumentError: Expect 2 arguments. got=0", 1, 1},
+		{`"Invalid".replace_once("string")`, "ArgumentError: Expect 2 arguments. got=1", 1, 1},
+		{`"Invalid".replace_once("string", "replace", true)`, "ArgumentError: Expect 2 arguments. got=3", 1, 1},
+		{`"Invalid".replace_once(true, "replacement")`, "TypeError: Expect pattern to be String or Regexp. got: Boolean", 1, 1},
+		{`"Invalid".replace_once("pattern", true)`, "TypeError: Expect replacement to be String. got: Boolean", 1, 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestStringReverseMethod(t *testing.T) {
 	tests := []struct {
 		input    string
