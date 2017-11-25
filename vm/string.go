@@ -1034,7 +1034,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// "Ruby Lang".replace("Ru", "Go")                # => "Goby Lang"
 			// "Hello 😊 Hello 😊 Hello".replace("😊", "🐟") # => "Hello 🐟 Hello 🐟 Hello"
 			//
-			// re = Regexp.new("(Ru|ru)"
+			// re = Regexp.new("(Ru|ru)")
 			// "Ruby Lang".replace(re, "Go")                # => "Goby Lang"
 			// ```
 			//
@@ -1062,6 +1062,54 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					case *RegexpObject:
 						pattern := args[0].(*RegexpObject)
 						result, err = pattern.regexp.Replace(target, replacement.value, 0, -1)
+						if err != nil {
+							return t.vm.initErrorObject(errors.TypeError, sourceLine, "Replacement failure with the Regexp. got: %s", args[0].Class().Name)
+						}
+					default:
+						return t.vm.initErrorObject(errors.TypeError, sourceLine, "Expect pattern to be String or Regexp. got: %s", args[0].Class().Name)
+					}
+
+					return t.vm.initStringObject(result)
+				}
+			},
+		},
+		{
+			// Returns a copy of string that substituted once with the pattern for the second argument.
+			// The pattern is typically a String or Regexp; if given as a String, any
+			// regular expression metacharacters it contains will be interpreted literally, e.g. '\\d' will
+			// match a backslash followed by ‘d’, instead of a digit.
+			//
+			// ```ruby
+			// "Ruby Lang Ruby lang".replace_once("Ru", "Go")                # => "Goby Lang Ruby Lang"
+			//
+			// re = Regexp.new("(Ru|ru)")
+			// "Ruby Lang ruby lang".replace_once(re, "Go")                # => "Goby Lang ruby lang"
+			// ```
+			//
+			// @param [String/Regexp] the old string or regexp, [String] the new string
+			// @return [String]
+			Name: "replace_once",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					if len(args) != 2 {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 2 arguments. got=%v", len(args))
+					}
+					r := args[1]
+					replacement, ok := r.(*StringObject)
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, sourceLine, "Expect replacement to be String. got: %s", r.Class().Name)
+					}
+
+					var result string
+					var err error
+					target := receiver.(*StringObject).value
+					switch args[0].(type) {
+					case *StringObject:
+						pattern := args[0].(*StringObject)
+						result = strings.Replace(target, pattern.value, replacement.value, 1)
+					case *RegexpObject:
+						pattern := args[0].(*RegexpObject)
+						result, err = pattern.regexp.Replace(target, replacement.value, 0, 1)
 						if err != nil {
 							return t.vm.initErrorObject(errors.TypeError, sourceLine, "Replacement failure with the Regexp. got: %s", args[0].Class().Name)
 						}
