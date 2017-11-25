@@ -358,6 +358,88 @@ func TestMethodCall(t *testing.T) {
 
 		Foo.new.bar
 		`, nil},
+		/*
+			These two cases is to prevent range value being treated as method argument.
+			See issue #532 for more info
+		*/
+		{`
+		def foo(k)
+		  b = "4".to_i
+		  (1..k).each do |x|
+			b += x
+		  end
+		  b
+		end
+
+		foo(2)
+		`, 7},
+		{`
+		def four
+		  4
+		end
+
+		def foo(k)
+		  b = four
+		  (1..k).each do |x|
+			b += x
+		  end
+		  b
+		end
+
+		foo(2)
+		`, 7},
+		{`
+		def foo(k)
+		  b = "4".to_i
+		  (1..k).each do |x|
+			b += x
+		  end
+		  b
+		end
+
+		foo(2)
+		`, 7},
+		{`
+		def foo(k)
+		  b = "4".to_i
+		  (k..10).each do |x|
+			b += x
+		  end
+		  b
+		end
+
+		foo(2)
+		`, 58},
+		{`
+		def four
+		  4
+		end
+
+		def foo(k)
+		  b = four
+		  (1..k).each do |x|
+			b += x
+		  end
+		  b
+		end
+
+		foo(2)
+		`, 7},
+		{`
+		def four
+		  4
+		end
+
+		def foo(k)
+		  b = four
+		  (k..10).each do |x|
+			b += x
+		  end
+		  b
+		end
+
+		foo(2)
+		`, 58},
 	}
 
 	for i, tt := range tests {
