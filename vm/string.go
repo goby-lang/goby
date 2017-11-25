@@ -1074,35 +1074,6 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Return a string replaced by the input string
-			//
-			// ```ruby
-			// "Hello".replace("World")          # => "World"
-			// "你好"replace("再見")              # => "再見"
-			// "Ruby\nLang".replace("Goby\nLang") # => "Goby Lang"
-			// "Hello😊".replace("World🐟")      # => "World🐟"
-			// ```
-			//
-			// @return [String]
-			Name: "replace",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
-					}
-
-					r := args[0]
-					replaceStr, ok := r.(*StringObject)
-
-					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, r.Class().Name)
-					}
-
-					return t.vm.initStringObject(replaceStr.value)
-				}
-			},
-		},
-		{
 			// Returns a new String with reverse order of self
 			// **Note:** the length is currently byte-based, instead of charcode-based.
 			//
