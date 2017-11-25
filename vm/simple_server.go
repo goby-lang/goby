@@ -131,7 +131,7 @@ func initSimpleServerClass(vm *VM) {
 	simpleServer.setBuiltinMethods(builtinSimpleServerInstanceMethods(), false)
 	net.setClassConstant(simpleServer)
 
-	vm.execGobyLib("net/simple_server.gb")
+	vm.mainThread.execGobyLib("net/simple_server.gb")
 }
 
 // Other helper functions -----------------------------------------------
@@ -146,7 +146,7 @@ func newHandler(t *thread, blockFrame *normalCallFrame) func(http.ResponseWriter
 		result := thread.builtinMethodYield(blockFrame, req, res)
 
 		if err, ok := result.Target.(*Error); ok {
-			log.Printf("Error: %s", err.Message)
+			log.Printf("Error: %s", err.message)
 			res.instanceVariableSet("@status", t.vm.initIntegerObject(500))
 		}
 

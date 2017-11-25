@@ -2,12 +2,8 @@ package vm
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/compiler"
 	"github.com/goby-lang/goby/compiler/bytecode"
-	"github.com/goby-lang/goby/compiler/parser"
 	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -36,17 +32,16 @@ type isTable map[string][]*instructionSet
 
 type filename = string
 
-type errorMessage = string
-
 var standardLibraries = map[string]func(*VM){
-	"net/http":          initHTTPClass,
-	"net/simple_server": initSimpleServerClass,
-	"uri":               initURIClass,
-	"db":                initDBClass,
-	"plugin":            initPluginClass,
-	"json":              initJSONClass,
-	"concurrent/array":  initConcurrentArrayClass,
-	"concurrent/hash":   initConcurrentHashClass,
+	"net/http":           initHTTPClass,
+	"net/simple_server":  initSimpleServerClass,
+	"uri":                initURIClass,
+	"db":                 initDBClass,
+	"plugin":             initPluginClass,
+	"json":               initJSONClass,
+	"concurrent/array":   initConcurrentArrayClass,
+	"concurrent/hash":    initConcurrentHashClass,
+	"concurrent/rw_lock": initConcurrentRWLockClass,
 }
 
 // VM represents a stack based virtual machine.
@@ -69,11 +64,7 @@ type VM struct {
 	// projectRoot is goby root's absolute path, which is $GOROOT/src/github.com/goby-lang/goby
 	projectRoot string
 
-	stackTraceCount int
-
 	channelObjectMap *objectMap
-
-	sync.Mutex
 
 	mode int
 
@@ -125,7 +116,7 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 	vm.channelObjectMap = &objectMap{store: &sync.Map{}}
 
 	for _, fn := range vm.libFiles {
-		vm.execGobyLib(fn)
+		vm.mainThread.execGobyLib(fn)
 	}
 
 	return
@@ -159,10 +150,19 @@ func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) {
 	vm.SetClassISIndexTable(translator.filename)
 	vm.SetMethodISIndexTable(translator.filename)
 
-	cf := newNormalCallFrame(translator.program, translator.filename)
+	cf := newNormalCallFrame(translator.program, translator.filename, 1)
 	cf.self = vm.mainObj
 	vm.mainThread.callFrameStack.push(cf)
-	vm.startFromTopFrame()
+
+	defer func() {
+		err, ok := recover().(*Error)
+
+		if ok && vm.mode == NormalMode {
+			fmt.Println(err.Message())
+		}
+	}()
+
+	vm.mainThread.startFromTopFrame()
 }
 
 // SetClassISIndexTable adds new instruction set's index table to vm.classISIndexTables
@@ -265,54 +265,9 @@ func (vm *VM) topLevelClass(cn string) *RClass {
 	return objClass.constants[cn].Target.(*RClass)
 }
 
-// Start evaluation from top most call frame
-func (vm *VM) startFromTopFrame() {
-	vm.mainThread.startFromTopFrame()
-}
-
 func (vm *VM) currentFilePath() string {
 	frame := vm.mainThread.callFrameStack.top()
 	return frame.FileName()
-}
-
-func (vm *VM) getBlock(name string, filename filename) *instructionSet {
-	// The "name" here is actually an index of block
-	// for example <Block:1>'s name is "1"
-	is, ok := vm.blockTables[filename][name]
-
-	if !ok {
-		panic(fmt.Sprintf("Can't find block %s", name))
-	}
-
-	return is
-}
-
-func (vm *VM) getMethodIS(name string, filename filename) (*instructionSet, bool) {
-	iss, ok := vm.isTables[bytecode.MethodDef][name]
-
-	if !ok {
-		return nil, false
-	}
-
-	is := iss[vm.methodISIndexTables[filename].Data[name]]
-
-	vm.methodISIndexTables[filename].Data[name]++
-
-	return is, ok
-}
-
-func (vm *VM) getClassIS(name string, filename filename) *instructionSet {
-	iss, ok := vm.isTables[bytecode.ClassDef][name]
-
-	if !ok {
-		panic(fmt.Sprintf("Can't find class %s's instructions", name))
-	}
-
-	is := iss[vm.classISIndexTables[filename].Data[name]]
-
-	vm.classISIndexTables[filename].Data[name]++
-
-	return is
 }
 
 // loadConstant makes sure we don't create a class twice.
@@ -345,7 +300,7 @@ func (vm *VM) lookupConstant(cf callFrame, constName string) (constant *Pointer)
 	}
 
 	if hasNamespace {
-		constant = namespace.lookupConstant(constName, true)
+		constant = namespace.lookupConstantInAllScope(constName)
 
 		if constant != nil {
 			return
@@ -363,48 +318,4 @@ func (vm *VM) lookupConstant(cf callFrame, constName string) (constant *Pointer)
 	}
 
 	return
-}
-
-func (vm *VM) execGobyLib(libName string) {
-	libPath := filepath.Join(vm.projectRoot, "lib", libName)
-	file, err := ioutil.ReadFile(libPath)
-
-	if err != nil {
-		vm.mainThread.pushErrorObject(errors.InternalError, -1, err.Error())
-	}
-
-	vm.execRequiredFile(libPath, file)
-}
-
-func (vm *VM) execRequiredFile(filepath string, file []byte) {
-	instructionSets, err := compiler.CompileToInstructions(string(file), parser.NormalMode)
-
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-
-	oldMethodTable := isTable{}
-	oldClassTable := isTable{}
-
-	// Copy current file's instruction sets.
-	for name, is := range vm.isTables[bytecode.MethodDef] {
-		oldMethodTable[name] = is
-	}
-
-	for name, is := range vm.isTables[bytecode.ClassDef] {
-		oldClassTable[name] = is
-	}
-
-	// This creates new execution environments for required file, including new instruction set table.
-	// So we need to copy old instruction sets and restore them later, otherwise current program's instruction set would be overwrite.
-	vm.ExecInstructions(instructionSets, filepath)
-
-	// Restore instruction sets.
-	vm.isTables[bytecode.MethodDef] = oldMethodTable
-	vm.isTables[bytecode.ClassDef] = oldClassTable
-}
-
-func newError(format string, args ...interface{}) *Error {
-	return &Error{Message: fmt.Sprintf(format, args...)}
 }

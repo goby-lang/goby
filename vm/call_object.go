@@ -16,10 +16,9 @@ type callObject struct {
 }
 
 func newCallObject(receiver Object, method *MethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame, sourceLine int) *callObject {
-	cf := newNormalCallFrame(method.instructionSet, method.instructionSet.filename)
+	cf := newNormalCallFrame(method.instructionSet, method.instructionSet.filename, sourceLine)
 	cf.self = receiver
 	cf.blockFrame = blockFrame
-	cf.sourceLine = sourceLine
 
 	return &callObject{
 		method:      method,

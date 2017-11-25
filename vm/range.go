@@ -396,9 +396,9 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 
 					stepValue := args[0].(*IntegerObject).value
 					if stepValue == 0 {
-						return newError("Step can't be 0")
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Step can't be 0")
 					} else if stepValue < 0 {
-						return newError("Step can't be negative")
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Step can't be negative")
 					}
 
 					// range end must greater or equal than range start to execute the block

@@ -15,9 +15,10 @@ type baseFrame struct {
 	self   Object
 	locals []*Pointer
 	// local pointer
-	lPr        int
-	isBlock    bool
-	blockFrame *normalCallFrame
+	lPr           int
+	isBlock       bool
+	isSourceBlock bool
+	blockFrame    *normalCallFrame
 	sync.RWMutex
 	sourceLine int
 	fileName   string
@@ -28,6 +29,7 @@ type callFrame interface {
 	Self() Object
 	BlockFrame() *normalCallFrame
 	IsBlock() bool
+	IsSourceBlock() bool
 	EP() *normalCallFrame
 	Locals() []*Pointer
 	LocalPtr() int
@@ -38,6 +40,7 @@ type callFrame interface {
 	insertLCL(index, depth int, value Object)
 	storeConstant(constName string, constant interface{}) *Pointer
 	lookupConstant(constName string) *Pointer
+	lookupConstantInScope(constName string) *Pointer
 	inspect() string
 	stopExecution()
 }
@@ -75,6 +78,10 @@ func (b *baseFrame) BlockFrame() *normalCallFrame {
 
 func (b *baseFrame) IsBlock() bool {
 	return b.isBlock
+}
+
+func (b *baseFrame) IsSourceBlock() bool {
+	return b.isSourceBlock
 }
 
 func (b *baseFrame) EP() *normalCallFrame {
@@ -164,10 +171,24 @@ func (b *baseFrame) lookupConstant(constName string) *Pointer {
 
 	switch scope := b.self.(type) {
 	case *RClass:
-		c = scope.lookupConstant(constName, true)
+		c = scope.lookupConstantInAllScope(constName)
 	default:
 		scopeClass := scope.Class()
-		c = scopeClass.lookupConstant(constName, true)
+		c = scopeClass.lookupConstantInAllScope(constName)
+	}
+
+	return c
+}
+
+func (b *baseFrame) lookupConstantInScope(constName string) *Pointer {
+	var c *Pointer
+
+	switch scope := b.self.(type) {
+	case *RClass:
+		c = scope.lookupConstantInScope(constName)
+	default:
+		scopeClass := scope.Class()
+		c = scopeClass.lookupConstantInScope(constName)
 	}
 
 	return c
@@ -212,10 +233,10 @@ func (cfs *callFrameStack) top() callFrame {
 	return nil
 }
 
-func newNormalCallFrame(is *instructionSet, filename string) *normalCallFrame {
-	return &normalCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 15), lPr: 0, fileName: filename}, instructionSet: is, pc: 0}
+func newNormalCallFrame(is *instructionSet, filename string, sourceLine int) *normalCallFrame {
+	return &normalCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 15), lPr: 0, fileName: filename, sourceLine: sourceLine}, instructionSet: is, pc: 0}
 }
 
-func newGoMethodCallFrame(m builtinMethodBody, n, filename string) *goMethodCallFrame {
-	return &goMethodCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 15), lPr: 0, fileName: filename}, method: m, name: n}
+func newGoMethodCallFrame(m builtinMethodBody, n, filename string, sourceLine int) *goMethodCallFrame {
+	return &goMethodCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 15), lPr: 0, fileName: filename, sourceLine: sourceLine}, method: m, name: n}
 }

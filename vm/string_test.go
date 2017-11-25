@@ -211,7 +211,7 @@ func TestStringComparisonFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -243,7 +243,7 @@ func TestStringMatchOperatorFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -309,7 +309,7 @@ func TestStringOperationFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -388,7 +388,7 @@ func TestStringConcatenateMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -443,7 +443,7 @@ func TestStringDeleteMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -505,14 +505,14 @@ func TestStringEachByteMethodFail(t *testing.T) {
 		"Taipei".each_byte(101) do |byte|
 		  puts byte
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 2, 2},
+		`, "ArgumentError: Expect 0 argument. got=1", 2, 1},
 		{`"Taipei".each_byte`, "InternalError: Can't yield without a block", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -554,14 +554,14 @@ func TestStringEachCharMethodFail(t *testing.T) {
 		"Taipei".each_char(101) do |char|
 		  puts char
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 2, 2},
+		`, "ArgumentError: Expect 0 argument. got=1", 2, 1},
 		{`"Taipei".each_char`, "InternalError: Can't yield without a block", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -603,14 +603,14 @@ func TestStringEachLineMethodFail(t *testing.T) {
 		"Taipei".each_line(101) do |line|
 		  puts line
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 2, 2},
+		`, "ArgumentError: Expect 0 argument. got=1", 2, 1},
 		{`"Taipei".each_line`, "InternalError: Can't yield without a block", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -651,7 +651,7 @@ func TestStringEndWithMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -707,44 +707,7 @@ func TestStringEqualMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
-		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestStringGlobalSubstituteMethod(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{`"Ruby".gsub("Ru", "Go")`, "Goby"},
-		{`"Hello World".gsub(" ", "\n")`, "Hello\nWorld"},
-		{`"Hello World".gsub("Hello", "Goby")`, "Goby World"},
-		{`"Hello 🍣 Hello 🍣 Hello".gsub("🍣", "🍺")`, "Hello 🍺 Hello 🍺 Hello"},
-	}
-
-	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestStringGlobalSubstituteMethodFail(t *testing.T) {
-	testsFail := []errorTestCase{
-		{`"Ruby".gsub()`, "ArgumentError: Expect 2 arguments. got=0", 1, 1},
-		{`"Ruby".gsub("Ru")`, "ArgumentError: Expect 2 arguments. got=1", 1, 1},
-		{`"Ruby".gsub(123, "Go")`, "TypeError: Expect pattern to be String. got: Integer", 1, 1},
-		{`"Ruby".gsub("Ru", 456)`, "TypeError: Expect replacement to be String. got: Integer", 1, 1},
-	}
-
-	for i, tt := range testsFail {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -785,7 +748,7 @@ func TestStringIncludeMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -830,7 +793,7 @@ func TestStringInsertMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -871,7 +834,7 @@ func TestStringLeftJustifyMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -923,7 +886,7 @@ func TestStringMatchFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -934,10 +897,9 @@ func TestStringReplaceMethod(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`"Hello".replace("World")`, "World"},
-		{`"您好".replace("再見")`, "再見"},
-		{`"Ruby\nLang".replace("Goby\nLang")`, "Goby\nLang"},
-		{`"Hello🍣".replace("World🍺")`, "World🍺"},
+		{`"Ruby Lang Ruby Ruby".replace("Ru", "Go")`, "Goby Lang Goby Goby"},
+		{`"🍣Ruby🍣Lang".replace("Ru", "Go")`, "🍣Goby🍣Lang"},
+		{`re = Regexp.new("(Ru|ru)");"Ruby Lang ruby lang".replace(re, "Go")`, "Goby Lang Goby lang"},
 	}
 
 	for i, tt := range tests {
@@ -951,15 +913,54 @@ func TestStringReplaceMethod(t *testing.T) {
 
 func TestStringReplaceMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Taipei".replace`, "ArgumentError: Expect 1 argument. got=0", 1, 1},
-		{`"Taipei".replace(101)`, "TypeError: Expect argument to be String. got: Integer", 1, 1},
-		{`"Taipei".replace(true)`, "TypeError: Expect argument to be String. got: Boolean", 1, 1},
+		{`"Invalid".replace`, "ArgumentError: Expect 2 arguments. got=0", 1, 1},
+		{`"Invalid".replace("string")`, "ArgumentError: Expect 2 arguments. got=1", 1, 1},
+		{`"Invalid".replace("string", "replace", true)`, "ArgumentError: Expect 2 arguments. got=3", 1, 1},
+		{`"Invalid".replace(true, "replacement")`, "TypeError: Expect pattern to be String or Regexp. got: Boolean", 1, 1},
+		{`"Invalid".replace("pattern", true)`, "TypeError: Expect replacement to be String. got: Boolean", 1, 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestStringReplaceOnceMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`"Ruby Lang Ruby Ruby".replace_once("Ru", "Go")`, "Goby Lang Ruby Ruby"},
+		{`"🍣Ruby🍣Lang Ruby".replace_once("Ru", "Go")`, "🍣Goby🍣Lang Ruby"},
+		{`re = Regexp.new("(Ru|ru)");"Ruby Lang ruby lang".replace_once(re, "Go")`, "Goby Lang ruby lang"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestStringReplaceOnceMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`"Invalid".replace_once`, "ArgumentError: Expect 2 arguments. got=0", 1, 1},
+		{`"Invalid".replace_once("string")`, "ArgumentError: Expect 2 arguments. got=1", 1, 1},
+		{`"Invalid".replace_once("string", "replace", true)`, "ArgumentError: Expect 2 arguments. got=3", 1, 1},
+		{`"Invalid".replace_once(true, "replacement")`, "TypeError: Expect pattern to be String or Regexp. got: Boolean", 1, 1},
+		{`"Invalid".replace_once("pattern", true)`, "TypeError: Expect replacement to be String. got: Boolean", 1, 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -1021,7 +1022,7 @@ func TestStringRightJustifyFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -1103,7 +1104,7 @@ func TestStringSliceMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -1200,7 +1201,7 @@ func TestStringSplitMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -1241,7 +1242,7 @@ func TestStringStartWithMethodFail(t *testing.T) {
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkError(t, i, evaluated, tt.expected, getFilename(), tt.errorLine)
+		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
