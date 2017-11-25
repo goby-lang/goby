@@ -713,43 +713,6 @@ func TestStringEqualMethodFail(t *testing.T) {
 	}
 }
 
-func TestStringGlobalSubstituteMethod(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{`"Ruby".gsub("Ru", "Go")`, "Goby"},
-		{`"Hello World".gsub(" ", "\n")`, "Hello\nWorld"},
-		{`"Hello World".gsub("Hello", "Goby")`, "Goby World"},
-		{`"Hello 🍣 Hello 🍣 Hello".gsub("🍣", "🍺")`, "Hello 🍺 Hello 🍺 Hello"},
-	}
-
-	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestStringGlobalSubstituteMethodFail(t *testing.T) {
-	testsFail := []errorTestCase{
-		{`"Ruby".gsub()`, "ArgumentError: Expect 2 arguments. got=0", 1, 1},
-		{`"Ruby".gsub("Ru")`, "ArgumentError: Expect 2 arguments. got=1", 1, 1},
-		{`"Ruby".gsub(123, "Go")`, "TypeError: Expect pattern to be String. got: Integer", 1, 1},
-		{`"Ruby".gsub("Ru", 456)`, "TypeError: Expect replacement to be String. got: Integer", 1, 1},
-	}
-
-	for i, tt := range testsFail {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkErrorMsg(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
-	}
-}
-
 func TestStringIncludeMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -934,10 +897,9 @@ func TestStringReplaceMethod(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`"Hello".replace("World")`, "World"},
-		{`"您好".replace("再見")`, "再見"},
-		{`"Ruby\nLang".replace("Goby\nLang")`, "Goby\nLang"},
-		{`"Hello🍣".replace("World🍺")`, "World🍺"},
+		{`"Ruby Lang Ruby Ruby".replace("Ru", "Go")`, "Goby Lang Goby Goby"},
+		{`"🍣Ruby🍣Lang".replace("Ru", "Go")`, "🍣Goby🍣Lang"},
+		{`re = Regexp.new("(Ru|ru)");"Ruby Lang ruby lang".replace(re, "Go")`, "Goby Lang Goby lang"},
 	}
 
 	for i, tt := range tests {
@@ -951,9 +913,11 @@ func TestStringReplaceMethod(t *testing.T) {
 
 func TestStringReplaceMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Taipei".replace`, "ArgumentError: Expect 1 argument. got=0", 1, 1},
-		{`"Taipei".replace(101)`, "TypeError: Expect argument to be String. got: Integer", 1, 1},
-		{`"Taipei".replace(true)`, "TypeError: Expect argument to be String. got: Boolean", 1, 1},
+		{`"Invalid".replace`, "ArgumentError: Expect 2 arguments. got=0", 1, 1},
+		{`"Invalid".replace("string")`, "ArgumentError: Expect 2 arguments. got=1", 1, 1},
+		{`"Invalid".replace("string", "replace", true)`, "ArgumentError: Expect 2 arguments. got=3", 1, 1},
+		{`"Invalid".replace(true, "replacement")`, "TypeError: Expect pattern to be String or Regexp. got: Boolean", 1, 1},
+		{`"Invalid".replace("pattern", true)`, "TypeError: Expect replacement to be String. got: Boolean", 1, 1},
 	}
 
 	for i, tt := range testsFail {
