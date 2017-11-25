@@ -53,22 +53,29 @@ func (p *Parser) parseCallExpressionWithReceiver(receiver ast.Expression) ast.Ex
 	exp.Receiver = receiver
 	exp.Method = p.curToken.Literal
 
-	switch p.peekToken.Type {
-	case token.LParen: // p.foo(x)
-		p.nextToken()
-		exp.Arguments = p.parseCallArgumentsWithParens()
-	case token.Assign: // Setter method call like: p.foo = x
-		exp.Method = exp.Method + "="
-		p.nextToken()
-		p.nextToken()
-		exp.Arguments = append(exp.Arguments, p.parseExpression(NORMAL))
-	default:
-		if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { // p.foo x, y, z || p.foo x
+	// The next token needs to be the same line
+	// Otherwise something like Range value might be treated as arguments
+	// See issue #532
+	if p.peekTokenAtSameLine() {
+		switch p.peekToken.Type {
+		case token.LParen: // p.foo(x)
 			p.nextToken()
-			exp.Arguments = p.parseCallArguments()
-		} else {
-			exp.Arguments = []ast.Expression{}
+			exp.Arguments = p.parseCallArgumentsWithParens()
+		case token.Assign: // Setter method call like: p.foo = x
+			exp.Method = exp.Method + "="
+			p.nextToken()
+			p.nextToken()
+			exp.Arguments = append(exp.Arguments, p.parseExpression(NORMAL))
+		default:
+			if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { // p.foo x, y, z || p.foo x
+				p.nextToken()
+				exp.Arguments = p.parseCallArguments()
+			} else {
+				exp.Arguments = []ast.Expression{}
+			}
 		}
+	} else {
+		exp.Arguments = []ast.Expression{}
 	}
 
 	p.fsm.Event(eventTable[oldState])
