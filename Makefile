@@ -1,5 +1,6 @@
 GOFMT ?= gofmt -s
 GOFILES := $(shell find . -name "*.go" -type f -not -path "./vendor/*")
+OPTIONS := -ldflags "-s -w"
 
 .PHONY: fmt
 fmt:
@@ -7,15 +8,15 @@ fmt:
 
 .PHONY: build
 build:
-	go build .
+	go build $(OPTIONS) .
 
 .PHONY: install
 install:
-	go install .
+	go install $(OPTIONS) .
 
 .PHONY: test
 test:
-	go test ./...
+	go test $(OPTIONS) ./...
 
 .PHONY: clean
 clean:
