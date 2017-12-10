@@ -63,8 +63,6 @@ func builtinConcurrentRWLockInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						t.callFrameStack.pop()
-
 						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
 					}
 
@@ -91,8 +89,6 @@ func builtinConcurrentRWLockInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						t.callFrameStack.pop()
-
 						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
 					}
 
@@ -119,8 +115,6 @@ func builtinConcurrentRWLockInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						t.callFrameStack.pop()
-
 						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
 					}
 
@@ -147,8 +141,6 @@ func builtinConcurrentRWLockInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						t.callFrameStack.pop()
-
 						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
 					}
 
@@ -180,8 +172,6 @@ func builtinConcurrentRWLockInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if len(args) != 0 {
-						t.callFrameStack.pop()
-
 						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
 					}
 
@@ -217,8 +207,6 @@ func builtinConcurrentRWLockInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if len(args) != 0 {
-						t.callFrameStack.pop()
-
 						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
 					}
 

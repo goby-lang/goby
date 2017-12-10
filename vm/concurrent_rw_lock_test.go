@@ -29,7 +29,7 @@ func TestRWLockAcquireReadLockMethodFail(t *testing.T) {
 		{`
 		require 'concurrent/rw_lock'
 		Concurrent::RWLock.new.acquire_read_lock(5)
-		`, "ArgumentError: Expected 0 arguments, got 1", 0},
+		`, "ArgumentError: Expected 0 arguments, got 1", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -46,7 +46,7 @@ func TestRWLockReleaseReadLockMethodFail(t *testing.T) {
 		{`
 		require 'concurrent/rw_lock'
 		Concurrent::RWLock.new.release_read_lock(5)
-		`, "ArgumentError: Expected 0 arguments, got 1", 0},
+		`, "ArgumentError: Expected 0 arguments, got 1", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -63,7 +63,7 @@ func TestRWLockAcquireWriteLockMethodFail(t *testing.T) {
 		{`
 		require 'concurrent/rw_lock'
 		Concurrent::RWLock.new.acquire_write_lock(5)
-		`, "ArgumentError: Expected 0 arguments, got 1", 0},
+		`, "ArgumentError: Expected 0 arguments, got 1", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -80,7 +80,7 @@ func TestRWLockReleaseWriteLockMethodFail(t *testing.T) {
 		{`
 		require 'concurrent/rw_lock'
 		Concurrent::RWLock.new.release_write_lock(5)
-		`, "ArgumentError: Expected 0 arguments, got 1", 0},
+		`, "ArgumentError: Expected 0 arguments, got 1", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -101,7 +101,7 @@ func TestRWLockWithReadLockMethodFail(t *testing.T) {
 		{`
 		require 'concurrent/rw_lock'
 		Concurrent::RWLock.new.with_read_lock(5) do end
-		`, "ArgumentError: Expected 0 arguments, got 1", 0},
+		`, "ArgumentError: Expected 0 arguments, got 1", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -122,7 +122,7 @@ func TestRWLockWithWriteLockMethodFail(t *testing.T) {
 		{`
 		require 'concurrent/rw_lock'
 		Concurrent::RWLock.new.with_write_lock(5) do end
-		`, "ArgumentError: Expected 0 arguments, got 1", 0},
+		`, "ArgumentError: Expected 0 arguments, got 1", 1},
 	}
 
 	for i, tt := range testsFail {
