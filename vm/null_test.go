@@ -137,7 +137,7 @@ func TestNullAssignmentByOperation(t *testing.T) {
 
 func TestNullIsNilMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`nil.nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1, 1},
+		{`nil.nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1},
 	}
 
 	for i, tt := range testsFail {

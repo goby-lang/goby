@@ -53,14 +53,14 @@ func TestDecimalConversionString(t *testing.T) {
 
 func TestDecimalConversionFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`'1.1.1'.to_d`, "ArgumentError: Invalid numeric string. got=1.1.1", 1, 1},
-		{`'1/1/1'.to_d`, "ArgumentError: Invalid numeric string. got=1/1/1", 1, 1},
-		{`'1.1/1'.to_d`, "ArgumentError: Invalid numeric string. got=1.1/1", 1, 1},
-		{`'1/1.1'.to_d`, "ArgumentError: Invalid numeric string. got=1/1.1", 1, 1},
-		{`'1..1'.to_d`, "ArgumentError: Invalid numeric string. got=1..1", 1, 1},
-		{`'..1'.to_d`, "ArgumentError: Invalid numeric string. got=..1", 1, 1},
-		{`'1//1'.to_d`, "ArgumentError: Invalid numeric string. got=1//1", 1, 1},
-		{`'abc'.to_d`, "ArgumentError: Invalid numeric string. got=abc", 1, 1},
+		{`'1.1.1'.to_d`, "ArgumentError: Invalid numeric string. got=1.1.1", 1},
+		{`'1/1/1'.to_d`, "ArgumentError: Invalid numeric string. got=1/1/1", 1},
+		{`'1.1/1'.to_d`, "ArgumentError: Invalid numeric string. got=1.1/1", 1},
+		{`'1/1.1'.to_d`, "ArgumentError: Invalid numeric string. got=1/1.1", 1},
+		{`'1..1'.to_d`, "ArgumentError: Invalid numeric string. got=1..1", 1},
+		{`'..1'.to_d`, "ArgumentError: Invalid numeric string. got=..1", 1},
+		{`'1//1'.to_d`, "ArgumentError: Invalid numeric string. got=1//1", 1},
+		{`'abc'.to_d`, "ArgumentError: Invalid numeric string. got=abc", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -161,9 +161,9 @@ func TestDecimalArithmeticOperationWithFloat(t *testing.T) {
 
 func TestDecimalArithmeticOperationFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`'1'.to_d + "p"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
-		{`'1'.to_d - "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
-		{`'1'.to_d / "t"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
+		{`'1'.to_d + "p"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`'1'.to_d - "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`'1'.to_d / "t"`, "TypeError: Expect argument to be Numeric. got: String", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -239,11 +239,11 @@ func TestDecimalComparisonWithInteger(t *testing.T) {
 
 func TestDecimalComparisonFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`'1'.to_d > "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
-		{`'1'.to_d >= "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
-		{`'1'.to_d < "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
-		{`'1'.to_d <= "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
-		{`'1'.to_d <=> "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
+		{`'1'.to_d > "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`'1'.to_d >= "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`'1'.to_d < "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`'1'.to_d <= "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`'1'.to_d <=> "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
 	}
 
 	for i, tt := range testsFail {

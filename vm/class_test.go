@@ -154,35 +154,35 @@ func TestClassInstanceVariableFail(t *testing.T) {
 		end
 
 		Bar.instance_variable_get
-		`, "ArgumentError: Expect 1 arguments. got: 0", 6, 1},
+		`, "ArgumentError: Expect 1 arguments. got: 0", 1},
 		{`
 		class Bar
 		  @foo = 1
 		end
 
 		Bar.instance_variable_get("@foo", 2)
-		`, "ArgumentError: Expect 1 arguments. got: 2", 6, 1},
+		`, "ArgumentError: Expect 1 arguments. got: 2", 1},
 		{`
 		class Bar
 		  @foo = 1
 		end
 
 		Bar.instance_variable_set
-				`, "ArgumentError: Expect 2 arguments. got: 0", 6, 1},
+				`, "ArgumentError: Expect 2 arguments. got: 0", 1},
 		{`
 		class Bar
 		  @foo = 1
 		end
 
 		Bar.instance_variable_set("@bar")
-				`, "ArgumentError: Expect 2 arguments. got: 1", 6, 1},
+				`, "ArgumentError: Expect 2 arguments. got: 1", 1},
 		{`
 		class Bar
 		  @foo = 1
 		end
 
 		Bar.instance_variable_set("@bar", 2, 3)
-				`, "ArgumentError: Expect 2 arguments. got: 3", 6, 1},
+				`, "ArgumentError: Expect 2 arguments. got: 3", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -688,7 +688,7 @@ func TestClassGreaterThanMethod(t *testing.T) {
 
 func TestClassGreaterThanMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`Array > 1`, "TypeError: Expect argument to be a module. got=Integer", 1, 1},
+		{`Array > 1`, "TypeError: Expect argument to be a module. got=Integer", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -865,12 +865,12 @@ func TestGeneralIsAMethod(t *testing.T) {
 
 func TestGeneralIsAMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`123.is_a?`, "ArgumentError: Expect 1 argument. got: 0", 1, 1},
-		{`Class.is_a?`, "ArgumentError: Expect 1 argument. got: 0", 1, 1},
-		{`123.is_a?(123, 456)`, "ArgumentError: Expect 1 argument. got: 2", 1, 1},
-		{`123.is_a?(Integer, String)`, "ArgumentError: Expect 1 argument. got: 2", 1, 1},
-		{`123.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1, 1},
-		{`Class.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1, 1},
+		{`123.is_a?`, "ArgumentError: Expect 1 argument. got: 0", 1},
+		{`Class.is_a?`, "ArgumentError: Expect 1 argument. got: 0", 1},
+		{`123.is_a?(123, 456)`, "ArgumentError: Expect 1 argument. got: 2", 1},
+		{`123.is_a?(Integer, String)`, "ArgumentError: Expect 1 argument. got: 2", 1},
+		{`123.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1},
+		{`Class.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -884,9 +884,9 @@ func TestGeneralIsAMethodFail(t *testing.T) {
 
 func TestRequireMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`require "bar"`, `InternalError: Can't require "bar"`, 1, 1},
-		{`require "db", "json"`, `ArgumentError: Expect 1 argument. got: 2`, 1, 1},
-		{`require_relative "db", "json"`, `ArgumentError: Expect 1 argument. got: 2`, 1, 1},
+		{`require "bar"`, `InternalError: Can't require "bar"`, 1},
+		{`require "db", "json"`, `ArgumentError: Expect 1 argument. got: 2`, 1},
+		{`require_relative "db", "json"`, `ArgumentError: Expect 1 argument. got: 2`, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -924,11 +924,11 @@ func TestGeneralIsNilMethod(t *testing.T) {
 
 func TestGeneralIsNilMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`123.nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1, 1},
-		{`"Fail".nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1, 1},
-		{`[1, 2, 3].nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1, 1},
-		{`{ a: 1, b: 2, c: 3 }.nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1, 1},
-		{`(1..10).nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1, 1},
+		{`123.nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`"Fail".nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`[1, 2, 3].nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`{ a: 1, b: 2, c: 3 }.nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`(1..10).nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -966,11 +966,11 @@ func TestClassNameClassMethod(t *testing.T) {
 
 func TestClassNameClassMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Taipei".name`, "UndefinedMethodError: Undefined Method 'name' for Taipei", 1, 1},
-		{`123.name`, "UndefinedMethodError: Undefined Method 'name' for 123", 1, 1},
-		{`true.name`, "UndefinedMethodError: Undefined Method 'name' for true", 1, 1},
-		{`Integer.name(Integer)`, "ArgumentError: Expect 0 argument. got: 1", 1, 1},
-		{`String.name(Hash, Array)`, "ArgumentError: Expect 0 argument. got: 2", 1, 1},
+		{`"Taipei".name`, "UndefinedMethodError: Undefined Method 'name' for Taipei", 1},
+		{`123.name`, "UndefinedMethodError: Undefined Method 'name' for 123", 1},
+		{`true.name`, "UndefinedMethodError: Undefined Method 'name' for true", 1},
+		{`Integer.name(Integer)`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`String.name(Hash, Array)`, "ArgumentError: Expect 0 argument. got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1015,11 +1015,11 @@ func TestClassSuperclassClassMethod(t *testing.T) {
 
 func TestClassSuperclassClassMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Taipei".superclass`, "UndefinedMethodError: Undefined Method 'superclass' for Taipei", 1, 1},
-		{`123.superclass`, "UndefinedMethodError: Undefined Method 'superclass' for 123", 1, 1},
-		{`true.superclass`, "UndefinedMethodError: Undefined Method 'superclass' for true", 1, 1},
-		{`Integer.superclass(Integer)`, "ArgumentError: Expect 0 argument. got: 1", 1, 1},
-		{`String.superclass(Hash, Array)`, "ArgumentError: Expect 0 argument. got: 2", 1, 1},
+		{`"Taipei".superclass`, "UndefinedMethodError: Undefined Method 'superclass' for Taipei", 1},
+		{`123.superclass`, "UndefinedMethodError: Undefined Method 'superclass' for 123", 1},
+		{`true.superclass`, "UndefinedMethodError: Undefined Method 'superclass' for true", 1},
+		{`Integer.superclass(Integer)`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`String.superclass(Hash, Array)`, "ArgumentError: Expect 0 argument. got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
