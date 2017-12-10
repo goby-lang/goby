@@ -57,7 +57,7 @@ func TestMatchDataCapturesFail(t *testing.T) {
 	}
 }
 
-func TestMatchDataToA(t *testing.T) {
+func TestMatchDataToAMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected []interface{}
@@ -76,7 +76,7 @@ func TestMatchDataToA(t *testing.T) {
 	}
 }
 
-func TestMatchDataToAFail(t *testing.T) {
+func TestMatchDataToAMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`'a1bca2'.match(Regexp.new('a.')).to_a(1)`, "ArgumentError: Expect 0 argument. got=1", 1},
 	}
@@ -123,7 +123,7 @@ func TestMatchDataLengthMethodFail(t *testing.T) {
 	}
 }
 
-func TestMatchDataToH(t *testing.T) {
+func TestMatchDataToHMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected map[string]interface{}

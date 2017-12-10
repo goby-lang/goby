@@ -315,6 +315,8 @@ func TestStringOperationFail(t *testing.T) {
 	}
 }
 
+// Method test
+
 func TestStringCapitalizeMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -1287,7 +1289,9 @@ func TestStringUpcaseMethod(t *testing.T) {
 	}
 }
 
-func TestChainingStringMethods(t *testing.T) {
+// Other test
+
+func TestStringMethodChaining(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}

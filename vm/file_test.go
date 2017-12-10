@@ -44,6 +44,8 @@ func TestFileObject(t *testing.T) {
 	}
 }
 
+// Method test
+
 func TestFileBasenameMethod(t *testing.T) {
 	tests := []struct {
 		input    string

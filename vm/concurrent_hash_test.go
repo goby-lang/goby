@@ -28,7 +28,7 @@ func TestConcurrentHashClassSuperclass(t *testing.T) {
 	}
 }
 
-func TestConcurrentHashClassNew(t *testing.T) {
+func TestConcurrentHashInitialization(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected map[string]interface{}
@@ -52,7 +52,7 @@ func TestConcurrentHashClassNew(t *testing.T) {
 	}
 }
 
-func TestConcurrentHashClassNewFail(t *testing.T) {
+func TestConcurrentHashInitializationFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/hash'

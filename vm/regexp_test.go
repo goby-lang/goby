@@ -40,7 +40,7 @@ func TestRegexpClassCreation(t *testing.T) {
 	}
 }
 
-func TestRegexpDoubleEqual(t *testing.T) {
+func TestRegexpComparison(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -67,7 +67,7 @@ func TestRegexpDoubleEqual(t *testing.T) {
 	}
 }
 
-func TestRegexpMatchQuestionMark(t *testing.T) {
+func TestRegexpMatchMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -169,7 +169,7 @@ func TestRegexpMatchQuestionMark(t *testing.T) {
 	}
 }
 
-func TestRegexpMatchQuestionMarkFail(t *testing.T) {
+func TestRegexpMatchMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`Regexp.new("abc").match?('a', 'b')`, "ArgumentError: Expect 1 argument. got=2", 1},
 		{`Regexp.new("abc").match?(1)`, "TypeError: Expect argument to be String. got: Integer", 1},

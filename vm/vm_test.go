@@ -194,6 +194,30 @@ func (v *VM) checkSP(t *testing.T, index, expectedSp int) {
 
 }
 
+// Verification helpers
+
+func checkExpected(t *testing.T, i int, evaluated Object, expected interface{}) {
+	if isError(evaluated) {
+		t.Errorf("At test case %d: %s", i, evaluated.toString())
+		return
+	}
+
+	switch expected := expected.(type) {
+	case int:
+		testIntegerObject(t, i, evaluated, expected)
+	case float64:
+		testFloatObject(t, i, evaluated, expected)
+	case string:
+		testStringObject(t, i, evaluated, expected)
+	case bool:
+		testBooleanObject(t, i, evaluated, expected)
+	case nil:
+		testNullObject(t, i, evaluated)
+	default:
+		t.Errorf("Unknown type %T at case %d", expected, i)
+	}
+}
+
 func testIntegerObject(t *testing.T, i int, obj Object, expected int) bool {
 	switch result := obj.(type) {
 	case *IntegerObject:
@@ -386,39 +410,12 @@ func testBidimensionalArrayObject(t *testing.T, index int, obj Object, expected 
 	return true
 }
 
-func checkExpected(t *testing.T, i int, evaluated Object, expected interface{}) {
-	if isError(evaluated) {
-		t.Errorf("At test case %d: %s", i, evaluated.toString())
-		return
-	}
-
-	switch expected := expected.(type) {
-	case int:
-		testIntegerObject(t, i, evaluated, expected)
-	case float64:
-		testFloatObject(t, i, evaluated, expected)
-	case string:
-		testStringObject(t, i, evaluated, expected)
-	case bool:
-		testBooleanObject(t, i, evaluated, expected)
-	case nil:
-		testNullObject(t, i, evaluated)
-	default:
-		t.Errorf("Unknown type %T at case %d", expected, i)
-	}
-}
-
 func isError(obj Object) bool {
 	if obj != nil {
 		_, ok := obj.(*Error)
 		return ok
 	}
 	return false
-}
-
-func getFilename() string {
-	_, filename, _, _ := runtime.Caller(1)
-	return filename
 }
 
 // Internal helpers -----------------------------------------------------
@@ -435,4 +432,9 @@ func _checkHashPairs(t *testing.T, actual map[string]Object, expected map[string
 	}
 
 	return true
+}
+
+func getFilename() string {
+	_, filename, _, _ := runtime.Caller(1)
+	return filename
 }

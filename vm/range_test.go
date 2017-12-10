@@ -54,6 +54,8 @@ func TestRangeComparisonOperation(t *testing.T) {
 	}
 }
 
+// Method test
+
 func TestRangeBsearchMethod(t *testing.T) {
 	tests := []struct {
 		input    string

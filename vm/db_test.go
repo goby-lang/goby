@@ -28,7 +28,7 @@ func cleanTable() {
 	db.Exec(`DELETE (SELECT * FROM users)`)
 }
 
-func TestPGConnectionPing(t *testing.T) {
+func TestDBPingMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -58,7 +58,7 @@ func TestPGConnectionPing(t *testing.T) {
 	}
 }
 
-func TestDBClose(t *testing.T) {
+func TestDBCloseMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -86,7 +86,7 @@ func TestDBClose(t *testing.T) {
 	}
 }
 
-func TestDBRun(t *testing.T) {
+func TestDBRunMethod(t *testing.T) {
 	input := `
 	require "db"
 
@@ -111,7 +111,7 @@ func TestDBRun(t *testing.T) {
 	v.checkSP(t, 0, 1)
 }
 
-func TestDBExec(t *testing.T) {
+func TestDBExecMethod(t *testing.T) {
 	setupDB(t)
 
 	tests := []struct {

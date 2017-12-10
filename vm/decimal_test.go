@@ -22,74 +22,6 @@ func TestDecimalClassSuperclass(t *testing.T) {
 	}
 }
 
-func TestDecimalConversionString(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected string
-	}{
-		{`'13.5'.to_d.to_s`, "13.5"},
-		{`'13.5'.to_d.fraction`, "27/2"},
-		{`'13.5'.to_d.inverse.fraction`, "2/27"},
-		{`'20/40'.to_d.reduction`, "1/2"},
-		{`'40/20'.to_d.fraction`, "2/1"},
-		{`'40/20'.to_d.reduction`, "2"},
-		{`'-13.5'.to_d.numerator.to_s`, "-27"},
-		{`'-13.5'.to_d.denominator.to_s`, "2"},
-		{`'129.30928304982039482039842'.to_d.numerator.to_s`, "6465464152491019741019921"},
-		{`'129.30928304982039482039842'.to_d.denominator.to_s`, "50000000000000000000000"},
-		// The followings are permissible
-		{`'1.'.to_d.to_s`, "1"},
-		{`'.1'.to_d.to_s`, "0.1"},
-	}
-
-	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestDecimalConversionFail(t *testing.T) {
-	testsFail := []errorTestCase{
-		{`'1.1.1'.to_d`, "ArgumentError: Invalid numeric string. got=1.1.1", 1},
-		{`'1/1/1'.to_d`, "ArgumentError: Invalid numeric string. got=1/1/1", 1},
-		{`'1.1/1'.to_d`, "ArgumentError: Invalid numeric string. got=1.1/1", 1},
-		{`'1/1.1'.to_d`, "ArgumentError: Invalid numeric string. got=1/1.1", 1},
-		{`'1..1'.to_d`, "ArgumentError: Invalid numeric string. got=1..1", 1},
-		{`'..1'.to_d`, "ArgumentError: Invalid numeric string. got=..1", 1},
-		{`'1//1'.to_d`, "ArgumentError: Invalid numeric string. got=1//1", 1},
-		{`'abc'.to_d`, "ArgumentError: Invalid numeric string. got=abc", 1},
-	}
-
-	for i, tt := range testsFail {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkErrorMsg(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestDecimalConversionNumeric(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{`'-13.5'.to_d.to_i`, -13},
-		{`'-13.5'.to_d.to_f`, -13.5},
-	}
-
-	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
-	}
-}
-
 func TestDecimalArithmeticOperationWithDecimal(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -288,6 +220,30 @@ func TestDecimalEquality(t *testing.T) {
 	}
 }
 
+// Test type conversion
+
+func TestDecimalToArray(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`
+		"129.30928304982039482039842".to_d.to_a[0].to_s
+		`, "6465464152491019741019921"},
+		{`
+		"129.30928304982039482039842".to_d.to_a[1].to_s
+		`, "50000000000000000000000"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestDecimalToIntegerStringConversions(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -307,7 +263,7 @@ func TestDecimalToIntegerStringConversions(t *testing.T) {
 	}
 }
 
-func TestDecimalToIntegerConversions(t *testing.T) {
+func TestDecimalToInteger(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected int
@@ -333,17 +289,13 @@ func TestDecimalToIntegerConversions(t *testing.T) {
 	}
 }
 
-func TestArrayConversionWithDecimal(t *testing.T) {
+func TestDecimalToNumeric(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected string
+		expected interface{}
 	}{
-		{`
-		"129.30928304982039482039842".to_d.to_a[0].to_s
-		`, "6465464152491019741019921"},
-		{`
-		"129.30928304982039482039842".to_d.to_a[1].to_s
-		`, "50000000000000000000000"},
+		{`'-13.5'.to_d.to_i`, -13},
+		{`'-13.5'.to_d.to_f`, -13.5},
 	}
 
 	for i, tt := range tests {
@@ -351,6 +303,56 @@ func TestArrayConversionWithDecimal(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestDecimalToStringMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`'13.5'.to_d.to_s`, "13.5"},
+		{`'13.5'.to_d.fraction`, "27/2"},
+		{`'13.5'.to_d.inverse.fraction`, "2/27"},
+		{`'20/40'.to_d.reduction`, "1/2"},
+		{`'40/20'.to_d.fraction`, "2/1"},
+		{`'40/20'.to_d.reduction`, "2"},
+		{`'-13.5'.to_d.numerator.to_s`, "-27"},
+		{`'-13.5'.to_d.denominator.to_s`, "2"},
+		{`'129.30928304982039482039842'.to_d.numerator.to_s`, "6465464152491019741019921"},
+		{`'129.30928304982039482039842'.to_d.denominator.to_s`, "50000000000000000000000"},
+		// The followings are permissible
+		{`'1.'.to_d.to_s`, "1"},
+		{`'.1'.to_d.to_s`, "0.1"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestDecimalToStringFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`'1.1.1'.to_d`, "ArgumentError: Invalid numeric string. got=1.1.1", 1},
+		{`'1/1/1'.to_d`, "ArgumentError: Invalid numeric string. got=1/1/1", 1},
+		{`'1.1/1'.to_d`, "ArgumentError: Invalid numeric string. got=1.1/1", 1},
+		{`'1/1.1'.to_d`, "ArgumentError: Invalid numeric string. got=1/1.1", 1},
+		{`'1..1'.to_d`, "ArgumentError: Invalid numeric string. got=1..1", 1},
+		{`'..1'.to_d`, "ArgumentError: Invalid numeric string. got=..1", 1},
+		{`'1//1'.to_d`, "ArgumentError: Invalid numeric string. got=1//1", 1},
+		{`'abc'.to_d`, "ArgumentError: Invalid numeric string. got=abc", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }

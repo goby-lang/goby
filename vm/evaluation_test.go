@@ -5,22 +5,542 @@ import (
 	"testing"
 )
 
-func TestEnvironmentVariable(t *testing.T) {
-	os.Setenv("FOO", "This is foo")
+func TestAssignmentEvaluation(t *testing.T) {
+	tests := []struct {
+		input         string
+		expectedValue int
+	}{
+		{"a = 5; a;", 5},
+		{"a = 5 * 5; a;", 25},
+		{"a = 5; b = a; b;", 5},
+		{"a = 5; b = a; c = a + b + 5; c;", 15},
+		{"a = 5; b = 10; c = if a > b; 100 else 50 end; c", 50},
+		{"Bar = 100; Bar", 100},
+		{`
+		a = 100
+		b = a
+		b = 1000
+		a
+		`, 100},
+		{`
+		a = 100
+		b = a
+		a = 1000
+		b
+		`, 100},
+		{`
+		i = 0
 
+		if a = 10
+		  i = 100
+		end
+
+		i + a
+		`, 110},
+		{`
+		i = 0
+
+		if @a = 10
+		  i = 100
+		end
+
+		i + @a
+		`, 110},
+		{`a = b = 10; a`, 10},
+		{`a = b = c = 10; a`, 10},
+		{`
+		i = 100
+		a = b = i + 10
+		a + b
+		`, 220},
+		{`
+		def foo(x)
+		  x
+		end
+
+		foo(a = b = c = d = 10)
+		`, 10},
+		{`
+		a = b = { foo: 100 }
+		b[:foo] = 10
+		a[:foo]
+		`, 100},
+		{`
+		a = b = [1, 2]
+		b[1] = 10
+		a[1]
+		`, 2},
+		{`
+		@a = b = { foo: 100 }
+		b[:foo] = 10
+		@a[:foo]
+		`, 100},
+		{`
+		@a = b = [1, 2]
+		b[1] = 10
+		@a[1]
+		`, 2},
+		{`
+		a = @b = { foo: 100 }
+		@b[:foo] = 10
+		a[:foo]
+		`, 100},
+		{`
+		a = @b = [1, 2]
+		@b[1] = 10
+		a[1]
+		`, 2},
+		{`
+		@a = @b = { foo: 100 }
+		@b[:foo] = 10
+		@a[:foo]
+		`, 100},
+		{`
+		@a = @b = [1, 2]
+		@b[1] = 10
+		@a[1]
+		`, 2},
+		{`
+		a = [1, 2]
+		a[1] += 2
+		a[1]
+		`, 4},
+		{`
+		a = [1, 2]
+		a[1] -= 2
+		a[1]
+		`, 0},
+		{`
+		a = []
+		a[0] ||= 2
+		a[0]
+		`, 2},
+		{`
+		h = { foo: 2 }
+		h[:foo] += 2
+		h[:foo]
+		`, 4},
+		{`
+		h = { foo: 2 }
+		h[:foo] -= 2
+		h[:foo]
+		`, 0},
+		{`
+		h = {}
+		h[:foo] ||= 2
+		h[:foo]
+		`, 2},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testIntegerObject(t, i, evaluated, tt.expectedValue)
+		v.checkCFP(t, 0, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestAssignmentByOperationEvaluation(t *testing.T) {
+	tests := []struct {
+		input         string
+		expectedValue interface{}
+	}{
+		{"a = 5; a += 2; a;", 7},
+		{"a = 5; a -= 10; a;", -5},
+		{"a = 5; a += 2 * 3 + 5; a;", 16},
+		{"a = 5; a -= 2 * 3 + 5; a;", -6},
+		{"a = false; a ||= true; a;", true},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expectedValue)
+		v.checkCFP(t, 0, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestBangPrefixMethodCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{"!5", false},
+		{"!true", false},
+		{"!false", true},
+		{"!!true", true},
+		{"!!false", false},
+		{"!!5", true},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestCaseExpressionEvaluation(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			`
+			case 2
+			when 0
+			  0
+			when 1
+			  1
+			when 2
+			  2
+			end
+			`,
+			2,
+		},
+		{
+			`
+			case 2 + 0
+			when 0
+			  0
+			when 1
+			  1
+			when 2
+			  2
+			end
+			`,
+			2,
+		},
+		{
+			`
+			case 2
+			when 0 then
+			  0
+			when 1 then
+			  1
+			when 2 then
+			  2
+			end
+			`,
+			2,
+		},
+		{
+			`
+			case 2
+			when 0 then
+			  0
+			when 1 then
+			  1
+			else
+			  2
+			end
+			`,
+			2,
+		},
+		{
+			`
+			case 2
+			when 0 + 0
+			  0
+			when 1 + 0
+			  1
+			when 2 + 0
+			  2
+			end
+			`,
+			2,
+		},
+		{
+			`
+			case 9
+			when 0, 1, 2, 3, 4, 5
+			  0
+			when 6, 7, 7 + 1, 7 + 2 then
+			  1
+			when 10, 11, 12
+			  2
+			end
+			`,
+			1,
+		},
+		{
+			`
+			case 0
+			when 0
+			  0
+			when 0, 0, 0
+			  1
+			else
+			  2
+			end
+			`,
+			0,
+		},
+		{
+			`
+			a = 10
+			b = 10
+			case a
+			when b * 3 * 3, 2 + 4 + b
+			  0
+			when b
+			  1
+			else
+			  2
+			end
+			`,
+			1,
+		},
+		{
+			`
+			a = 10
+			b = 20
+			case a
+			when b * 3 * 3, 2 + 4 + b
+			  0
+			when b - 10, b + 10
+			  1
+			else
+			  2
+			end
+			`,
+			1,
+		},
+		{
+			`
+			case false
+			when true || true
+			  0
+			when false || false
+			  1
+			else
+			  2
+			end
+			`,
+			1,
+		},
+		{
+			`
+			case [1, 2, 3]
+			when [1, 2], [2, 3], [1, 3]
+			  0
+			when [2, 3, 4], [1, 2, 3]
+			  1
+			else
+			  2
+			end
+			`,
+			1,
+		},
+		{
+			`
+			case 1 + 1 + 3
+			when [1, 2], [2, 3]
+			  0
+			when [2, 3, 4], [1, 2, 3, 4]
+			  1
+			else
+			  case true && false
+			  when [1, 2, 4], 1 + 3 * 4 == 16
+
+			    a = 1 * 3 + 5
+			    b = 4 * 3 * 5
+			    case a
+			    when 1, [2, 4, 5], b, true
+			      2
+			    when b - 52, b + 10
+			      3
+			    else
+			      4
+			    end
+			  when true || true || true || (false || true)
+			    5
+			  else
+			    6
+			  end
+			end
+			`,
+			3,
+		},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestClassInheritance(t *testing.T) {
 	input := `
-	ENV["FOO"]
-	ENV["BAR"] = "This is bar"
-	String.fmt("%s. %s.", ENV["FOO"], ENV["BAR"])
+		class Bar
+		end
+
+		class Foo < Bar
+		  def self.add
+		    10
+		  end
+		end
+
+		Foo.superclass.name
 	`
+	v := initTestVM()
+	evaluated := v.testEval(t, input, getFilename())
+
+	testStringObject(t, 0, evaluated, "Bar")
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
+}
+
+func TestClassMethodCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			`
+			class Bar
+				def self.foo
+					10
+				end
+			end
+			Bar.foo;
+			`,
+			10,
+		},
+		{
+			`
+			class Bar
+				def self.foo
+					10
+				end
+			end
+			class Foo < Bar; end
+			class FooBar < Foo; end
+			FooBar.foo
+			`,
+			10,
+		},
+		{
+			`
+			class Foo
+				def self.foo
+					10
+				end
+			end
+
+			class Bar < Foo; end
+			Bar.foo
+			`,
+			10,
+		},
+		{
+			`
+			class Foo
+				def self.foo
+					10
+				end
+			end
+
+			class Bar < Foo
+				def self.foo
+					100
+				end
+			end
+			Bar.foo
+			`,
+			100,
+		},
+		{
+			`
+			class Bar
+				def self.foo
+					bar
+				end
+
+				def self.bar
+					100
+				end
+
+				def bar
+					1000
+				end
+			end
+			Bar.foo
+			`,
+			100,
+		},
+		{
+			`
+			# Test class method call inside class method.
+			class JobPosition
+				def initialize(name)
+					@name = name
+				end
+
+				def self.engineer
+					new("Engineer")
+				end
+
+				def name
+					@name
+				end
+			end
+			job = JobPosition.engineer
+			job.name
+			`,
+			"Engineer",
+		},
+		{
+			`
+			class Foo; end
+			Foo.new.class.name
+			`,
+			"Foo",
+		},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestComment(t *testing.T) {
+	input := `
+	# Comment
+	class Foo
+		# Comment
+		def one # Comment
+			# Comment
+			1 # Comment
+			# Comment
+		end
+		# Comment
+
+		def bar(x) # Comment
+		  123
+		end  # Comment
+	end
+	# Comment
+	Foo.new.one #=> Comment
+	Foo.new.bar 10 #=> Comment
+	# Comment`
 
 	v := initTestVM()
 	evaluated := v.testEval(t, input, getFilename())
-	checkExpected(t, 0, evaluated, "This is foo. This is bar.")
+	testIntegerObject(t, 0, evaluated, 123)
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
-
-	os.Setenv("FOO", "")
 }
 
 func TestComplexEvaluation(t *testing.T) {
@@ -62,34 +582,6 @@ func TestComplexEvaluation(t *testing.T) {
 	v := initTestVM()
 	evaluated := v.testEval(t, input, getFilename())
 	testIntegerObject(t, 0, evaluated, 310)
-	v.checkCFP(t, 0, 0)
-	v.checkSP(t, 0, 1)
-}
-
-func TestComment(t *testing.T) {
-	input := `
-	# Comment
-	class Foo
-		# Comment
-		def one # Comment
-			# Comment
-			1 # Comment
-			# Comment
-		end
-		# Comment
-
-		def bar(x) # Comment
-		  123
-		end  # Comment
-	end
-	# Comment
-	Foo.new.one #=> Comment
-	Foo.new.bar 10 #=> Comment
-	# Comment`
-
-	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
-	testIntegerObject(t, 0, evaluated, 123)
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
 }
@@ -152,6 +644,329 @@ func TestConstantNamespace(t *testing.T) {
 		testArrayObject(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
 		vm.checkSP(t, i, 1)
+	}
+}
+
+func TestEnvironmentVariable(t *testing.T) {
+	os.Setenv("FOO", "This is foo")
+
+	input := `
+	ENV["FOO"]
+	ENV["BAR"] = "This is bar"
+	String.fmt("%s. %s.", ENV["FOO"], ENV["BAR"])
+	`
+
+	v := initTestVM()
+	evaluated := v.testEval(t, input, getFilename())
+	checkExpected(t, 0, evaluated, "This is foo. This is bar.")
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
+
+	os.Setenv("FOO", "")
+}
+
+func TestIfExpressionEvaluation(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			`
+			if 10 > 5
+				100
+			elsif 10 == 9
+			  0
+			else
+				-10
+			end
+			`,
+			100,
+		},
+		{
+			`
+			if 5 != 5
+				false
+			elsif 5 == 5
+			  true
+			else
+				1
+			end
+			`,
+			true,
+		},
+		{
+			`
+			if 5 > 5
+				false
+			elsif 5 < 5
+			  true
+			else
+				11
+			end
+			`,
+			11,
+		},
+		{`
+		if true
+		   10
+		end`,
+			10,
+		},
+		{"if false; 10 end", nil},
+		{"if 1; 10; end", 10},
+		{"if 1 < 2; 10 end", 10},
+		{"if 1 > 2; 10 end", nil},
+		{"if 1 > 2; 10 elsif 1 < 2; 20 end", 20},
+		{"if 1 > 2; 10 elsif 1 < 0; 20 end", nil},
+		{"if 1 > 2; 10 else 20 end", 20},
+		{"if 1 < 2; 10 else 20 end", 10},
+		{"if nil; 10 else 20 end", 20},
+		{"if 2 == 2; 10 elsif 1 < 2; 20 else 30 end", 10},
+		{"if 2 != 2; 10 elsif 1 < 2; 20 else 30 end", 20},
+		{"if 2 != 2; 10 elsif 1 > 2; 20 else 30 end", 30},
+		{`
+		if false
+		  x = 1
+		end # This pushes nil
+
+		x # This pushes nil too
+		`, nil},
+		{`
+		def foo
+		  if false
+		    x = 1
+	      end # This shouldn't push nil
+		end
+
+		foo # This should push nil
+		`, nil},
+		{`
+		def foo
+		  x = 0
+		  if true
+		    x = 1
+	      end # This shouldn't push nil
+	      x
+		end
+
+		foo # This should push nil
+		`, 1},
+		{`
+			a = 10
+			b = 5
+			if a > b
+			  puts(123)
+			  c = 10
+			else
+			  c = 5
+			end
+
+			c + 1
+		`, 11},
+		{`
+			a = 10
+			b = 5
+			c = 4
+			if a == b
+			  d = 10
+			elsif b == c
+			  d = 9
+			elsif c == 4
+			  d = 8
+			else
+			  d = 5
+			end
+
+			d + 1
+		`, 9},
+		{`
+			if false
+			  if true
+			    1
+			  elsif true
+			    2
+			  elsif true
+			    3
+			  end
+			elsif true
+			  if true
+			  	if false
+			  	  4
+			  	elsif true
+			  	  5
+
+			  	  if false
+			  	  	6
+			  	  elsif false
+			  	  	7
+			  	  elsif false
+			  	  	8
+			  	  else
+			  	  	if true
+			  	  		if false
+			  	  			9
+			  	  		elsif false
+			  	  			10
+			  	  		elsif true
+			  	  			11
+			  	  		else
+			  	  			12
+			  	  		end
+			  	  	end
+			  	  end
+			  	 end
+			  end
+			elsif true
+			  13
+			else
+			  14
+			end
+		`, 11},
+		{`
+		if false; end
+		`, nil},
+		{`
+		if true; end
+		`, nil},
+		{`
+		if false
+		elsif true
+		end
+		`, nil},
+		{`
+		if true
+		elsif true
+		  10
+		end
+		`, nil},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestInstanceMethodCall(t *testing.T) {
+	input := `
+
+		class Bar
+			def set(x)
+				@x = x
+			end
+		end
+
+		class Foo < Bar
+			def add(x, y)
+				x + y
+			end
+		end
+
+		class FooBar < Foo
+			def get
+				@x
+			end
+		end
+
+		fb = FooBar.new
+		fb.set(100)
+		fb.add(10, fb.get)
+	`
+
+	v := initTestVM()
+	evaluated := v.testEval(t, input, getFilename())
+
+	if isError(evaluated) {
+		t.Fatalf("got Error: %s", evaluated.(*Error).message)
+	}
+
+	result, ok := evaluated.(*IntegerObject)
+
+	if !ok {
+		t.Errorf("expect result to be an integer. got=%T", evaluated)
+	}
+
+	if result.value != 110 {
+		t.Errorf("expect result to be 110. got=%d", result.value)
+	}
+
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
+}
+
+func TestInstanceVariableEvaluation(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		class Foo
+			def set(x)
+				@x = x;
+			end
+
+			def get
+				@x
+			end
+
+			def double_get
+				self.get() * 2;
+			end
+		end
+
+		class Bar
+			def set(x)
+				@x = x;
+			end
+
+			def get
+				@x
+			end
+		end
+
+		f1 = Foo.new
+		f1.set(10)
+
+		f2 = Foo.new
+		f2.set(20)
+
+		b = Bar.new
+		b.set(10)
+
+		f2.double_get() + f1.get() + b.get()
+	`, 60},
+		{`
+		class Foo
+		  attr_reader("bar")
+		end
+
+		Foo.new.bar
+		`, nil},
+		{`
+		class Foo
+		  def bar
+		    @x
+		  end
+		end
+
+		Foo.new.bar
+		`, nil},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s", evaluated.(*Error).message)
+		}
+
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
 	}
 }
 
@@ -1053,231 +1868,6 @@ func TestMethodCallWithoutParens(t *testing.T) {
 	}
 }
 
-func TestClassMethodCall(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{
-			`
-			class Bar
-				def self.foo
-					10
-				end
-			end
-			Bar.foo;
-			`,
-			10,
-		},
-		{
-			`
-			class Bar
-				def self.foo
-					10
-				end
-			end
-			class Foo < Bar; end
-			class FooBar < Foo; end
-			FooBar.foo
-			`,
-			10,
-		},
-		{
-			`
-			class Foo
-				def self.foo
-					10
-				end
-			end
-
-			class Bar < Foo; end
-			Bar.foo
-			`,
-			10,
-		},
-		{
-			`
-			class Foo
-				def self.foo
-					10
-				end
-			end
-
-			class Bar < Foo
-				def self.foo
-					100
-				end
-			end
-			Bar.foo
-			`,
-			100,
-		},
-		{
-			`
-			class Bar
-				def self.foo
-					bar
-				end
-
-				def self.bar
-					100
-				end
-
-				def bar
-					1000
-				end
-			end
-			Bar.foo
-			`,
-			100,
-		},
-		{
-			`
-			# Test class method call inside class method.
-			class JobPosition
-				def initialize(name)
-					@name = name
-				end
-
-				def self.engineer
-					new("Engineer")
-				end
-
-				def name
-					@name
-				end
-			end
-			job = JobPosition.engineer
-			job.name
-			`,
-			"Engineer",
-		},
-		{
-			`
-			class Foo; end
-			Foo.new.class.name
-			`,
-			"Foo",
-		},
-	}
-
-	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestInstanceMethodCall(t *testing.T) {
-	input := `
-
-		class Bar
-			def set(x)
-				@x = x
-			end
-		end
-
-		class Foo < Bar
-			def add(x, y)
-				x + y
-			end
-		end
-
-		class FooBar < Foo
-			def get
-				@x
-			end
-		end
-
-		fb = FooBar.new
-		fb.set(100)
-		fb.add(10, fb.get)
-	`
-
-	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
-
-	if isError(evaluated) {
-		t.Fatalf("got Error: %s", evaluated.(*Error).message)
-	}
-
-	result, ok := evaluated.(*IntegerObject)
-
-	if !ok {
-		t.Errorf("expect result to be an integer. got=%T", evaluated)
-	}
-
-	if result.value != 110 {
-		t.Errorf("expect result to be 110. got=%d", result.value)
-	}
-
-	v.checkCFP(t, 0, 0)
-	v.checkSP(t, 0, 1)
-}
-
-func TestPostfixMethodCall(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected int
-	}{
-		{`
-		a = 1
-		a += 1
-		a
-		`, 2},
-		{`
-		a = 10
-		a -= 1
-		a
-		`,
-			9},
-		{`
-		a = 0
-		a -= 1
-		a
-		`,
-			-1},
-		{`
-		a = -5
-		a += 1
-		a
-		`,
-			-4},
-	}
-
-	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestBangPrefixMethodCall(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected bool
-	}{
-		{"!5", false},
-		{"!true", false},
-		{"!false", true},
-		{"!!true", true},
-		{"!!false", false},
-		{"!!5", true},
-	}
-
-	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
-	}
-}
-
 func TestMinusPrefixMethodCall(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -1296,702 +1886,6 @@ func TestMinusPrefixMethodCall(t *testing.T) {
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
-}
-
-func TestSelfExpressionEvaluation(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected string
-	}{
-		{`self.class.name`, "Object"},
-		{
-			`
-			class Bar
-				def whoami
-					"Instance of " + self.class.name
-				end
-			end
-
-			Bar.new.whoami
-		`, "Instance of Bar"},
-		{
-			`
-			class Foo
-				Self = self
-
-				def get_self
-					Self
-				end
-			end
-
-			Foo.new.get_self.name
-			`,
-			"Foo"},
-		{
-			`
-			class Foo
-				def class
-					Foo
-				end
-			end
-
-			Foo.new.class.name
-			`,
-			"Foo"},
-		{
-			`
-			class Foo
-				def class_name
-					self.class.name
-				end
-			end
-
-			Foo.new.class_name
-			`,
-			"Foo"},
-	}
-
-	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-
-		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*Error).message)
-		}
-
-		checkExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestInstanceVariableEvaluation(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{`
-		class Foo
-			def set(x)
-				@x = x;
-			end
-
-			def get
-				@x
-			end
-
-			def double_get
-				self.get() * 2;
-			end
-		end
-
-		class Bar
-			def set(x)
-				@x = x;
-			end
-
-			def get
-				@x
-			end
-		end
-
-		f1 = Foo.new
-		f1.set(10)
-
-		f2 = Foo.new
-		f2.set(20)
-
-		b = Bar.new
-		b.set(10)
-
-		f2.double_get() + f1.get() + b.get()
-	`, 60},
-		{`
-		class Foo
-		  attr_reader("bar")
-		end
-
-		Foo.new.bar
-		`, nil},
-		{`
-		class Foo
-		  def bar
-		    @x
-		  end
-		end
-
-		Foo.new.bar
-		`, nil},
-	}
-
-	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-
-		if isError(evaluated) {
-			t.Fatalf("got Error: %s", evaluated.(*Error).message)
-		}
-
-		checkExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestAssignmentEvaluation(t *testing.T) {
-	tests := []struct {
-		input         string
-		expectedValue int
-	}{
-		{"a = 5; a;", 5},
-		{"a = 5 * 5; a;", 25},
-		{"a = 5; b = a; b;", 5},
-		{"a = 5; b = a; c = a + b + 5; c;", 15},
-		{"a = 5; b = 10; c = if a > b; 100 else 50 end; c", 50},
-		{"Bar = 100; Bar", 100},
-		{`
-		a = 100
-		b = a
-		b = 1000
-		a
-		`, 100},
-		{`
-		a = 100
-		b = a
-		a = 1000
-		b
-		`, 100},
-		{`
-		i = 0
-
-		if a = 10
-		  i = 100
-		end
-
-		i + a
-		`, 110},
-		{`
-		i = 0
-
-		if @a = 10
-		  i = 100
-		end
-
-		i + @a
-		`, 110},
-		{`a = b = 10; a`, 10},
-		{`a = b = c = 10; a`, 10},
-		{`
-		i = 100
-		a = b = i + 10
-		a + b
-		`, 220},
-		{`
-		def foo(x)
-		  x
-		end
-
-		foo(a = b = c = d = 10)
-		`, 10},
-		{`
-		a = b = { foo: 100 }
-		b[:foo] = 10
-		a[:foo]
-		`, 100},
-		{`
-		a = b = [1, 2]
-		b[1] = 10
-		a[1]
-		`, 2},
-		{`
-		@a = b = { foo: 100 }
-		b[:foo] = 10
-		@a[:foo]
-		`, 100},
-		{`
-		@a = b = [1, 2]
-		b[1] = 10
-		@a[1]
-		`, 2},
-		{`
-		a = @b = { foo: 100 }
-		@b[:foo] = 10
-		a[:foo]
-		`, 100},
-		{`
-		a = @b = [1, 2]
-		@b[1] = 10
-		a[1]
-		`, 2},
-		{`
-		@a = @b = { foo: 100 }
-		@b[:foo] = 10
-		@a[:foo]
-		`, 100},
-		{`
-		@a = @b = [1, 2]
-		@b[1] = 10
-		@a[1]
-		`, 2},
-		{`
-		a = [1, 2]
-		a[1] += 2
-		a[1]
-		`, 4},
-		{`
-		a = [1, 2]
-		a[1] -= 2
-		a[1]
-		`, 0},
-		{`
-		a = []
-		a[0] ||= 2
-		a[0]
-		`, 2},
-		{`
-		h = { foo: 2 }
-		h[:foo] += 2
-		h[:foo]
-		`, 4},
-		{`
-		h = { foo: 2 }
-		h[:foo] -= 2
-		h[:foo]
-		`, 0},
-		{`
-		h = {}
-		h[:foo] ||= 2
-		h[:foo]
-		`, 2},
-	}
-
-	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		testIntegerObject(t, i, evaluated, tt.expectedValue)
-		v.checkCFP(t, 0, 0)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestAssignmentByOperationEvaluation(t *testing.T) {
-	tests := []struct {
-		input         string
-		expectedValue interface{}
-	}{
-		{"a = 5; a += 2; a;", 7},
-		{"a = 5; a -= 10; a;", -5},
-		{"a = 5; a += 2 * 3 + 5; a;", 16},
-		{"a = 5; a -= 2 * 3 + 5; a;", -6},
-		{"a = false; a ||= true; a;", true},
-	}
-
-	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expectedValue)
-		v.checkCFP(t, 0, 0)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestIfExpressionEvaluation(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{
-			`
-			if 10 > 5
-				100
-			elsif 10 == 9
-			  0
-			else
-				-10
-			end
-			`,
-			100,
-		},
-		{
-			`
-			if 5 != 5
-				false
-			elsif 5 == 5
-			  true
-			else
-				1
-			end
-			`,
-			true,
-		},
-		{
-			`
-			if 5 > 5
-				false
-			elsif 5 < 5
-			  true
-			else
-				11
-			end
-			`,
-			11,
-		},
-		{`
-		if true
-		   10
-		end`,
-			10,
-		},
-		{"if false; 10 end", nil},
-		{"if 1; 10; end", 10},
-		{"if 1 < 2; 10 end", 10},
-		{"if 1 > 2; 10 end", nil},
-		{"if 1 > 2; 10 elsif 1 < 2; 20 end", 20},
-		{"if 1 > 2; 10 elsif 1 < 0; 20 end", nil},
-		{"if 1 > 2; 10 else 20 end", 20},
-		{"if 1 < 2; 10 else 20 end", 10},
-		{"if nil; 10 else 20 end", 20},
-		{"if 2 == 2; 10 elsif 1 < 2; 20 else 30 end", 10},
-		{"if 2 != 2; 10 elsif 1 < 2; 20 else 30 end", 20},
-		{"if 2 != 2; 10 elsif 1 > 2; 20 else 30 end", 30},
-		{`
-		if false
-		  x = 1
-		end # This pushes nil
-
-		x # This pushes nil too
-		`, nil},
-		{`
-		def foo
-		  if false
-		    x = 1
-	      end # This shouldn't push nil
-		end
-
-		foo # This should push nil
-		`, nil},
-		{`
-		def foo
-		  x = 0
-		  if true
-		    x = 1
-	      end # This shouldn't push nil
-	      x
-		end
-
-		foo # This should push nil
-		`, 1},
-		{`
-			a = 10
-			b = 5
-			if a > b
-			  puts(123)
-			  c = 10
-			else
-			  c = 5
-			end
-
-			c + 1
-		`, 11},
-		{`
-			a = 10
-			b = 5
-			c = 4
-			if a == b
-			  d = 10
-			elsif b == c
-			  d = 9
-			elsif c == 4
-			  d = 8
-			else
-			  d = 5
-			end
-
-			d + 1
-		`, 9},
-		{`
-			if false
-			  if true
-			    1
-			  elsif true
-			    2
-			  elsif true
-			    3
-			  end
-			elsif true
-			  if true
-			  	if false
-			  	  4
-			  	elsif true
-			  	  5
-
-			  	  if false
-			  	  	6
-			  	  elsif false
-			  	  	7
-			  	  elsif false
-			  	  	8
-			  	  else
-			  	  	if true
-			  	  		if false
-			  	  			9
-			  	  		elsif false
-			  	  			10
-			  	  		elsif true
-			  	  			11
-			  	  		else
-			  	  			12
-			  	  		end
-			  	  	end
-			  	  end
-			  	 end
-			  end
-			elsif true
-			  13
-			else
-			  14
-			end
-		`, 11},
-		{`
-		if false; end
-		`, nil},
-		{`
-		if true; end
-		`, nil},
-		{`
-		if false
-		elsif true
-		end
-		`, nil},
-		{`
-		if true
-		elsif true
-		  10
-		end
-		`, nil},
-	}
-
-	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestCaseExpressionEvaluation(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{
-			`
-			case 2
-			when 0
-			  0
-			when 1
-			  1
-			when 2
-			  2
-			end
-			`,
-			2,
-		},
-		{
-			`
-			case 2 + 0
-			when 0
-			  0
-			when 1
-			  1
-			when 2
-			  2
-			end
-			`,
-			2,
-		},
-		{
-			`
-			case 2
-			when 0 then
-			  0
-			when 1 then
-			  1
-			when 2 then
-			  2
-			end
-			`,
-			2,
-		},
-		{
-			`
-			case 2
-			when 0 then
-			  0
-			when 1 then
-			  1
-			else
-			  2
-			end
-			`,
-			2,
-		},
-		{
-			`
-			case 2
-			when 0 + 0
-			  0
-			when 1 + 0
-			  1
-			when 2 + 0
-			  2
-			end
-			`,
-			2,
-		},
-		{
-			`
-			case 9
-			when 0, 1, 2, 3, 4, 5
-			  0
-			when 6, 7, 7 + 1, 7 + 2 then
-			  1
-			when 10, 11, 12
-			  2
-			end
-			`,
-			1,
-		},
-		{
-			`
-			case 0
-			when 0
-			  0
-			when 0, 0, 0
-			  1
-			else
-			  2
-			end
-			`,
-			0,
-		},
-		{
-			`
-			a = 10
-			b = 10
-			case a
-			when b * 3 * 3, 2 + 4 + b
-			  0
-			when b
-			  1
-			else
-			  2
-			end
-			`,
-			1,
-		},
-		{
-			`
-			a = 10
-			b = 20
-			case a
-			when b * 3 * 3, 2 + 4 + b
-			  0
-			when b - 10, b + 10
-			  1
-			else
-			  2
-			end
-			`,
-			1,
-		},
-		{
-			`
-			case false
-			when true || true
-			  0
-			when false || false
-			  1
-			else
-			  2
-			end
-			`,
-			1,
-		},
-		{
-			`
-			case [1, 2, 3]
-			when [1, 2], [2, 3], [1, 3]
-			  0
-			when [2, 3, 4], [1, 2, 3]
-			  1
-			else
-			  2
-			end
-			`,
-			1,
-		},
-		{
-			`
-			case 1 + 1 + 3
-			when [1, 2], [2, 3]
-			  0
-			when [2, 3, 4], [1, 2, 3, 4]
-			  1
-			else
-			  case true && false
-			  when [1, 2, 4], 1 + 3 * 4 == 16
-
-			    a = 1 * 3 + 5
-			    b = 4 * 3 * 5
-			    case a
-			    when 1, [2, 4, 5], b, true
-			      2
-			    when b - 52, b + 10
-			      3
-			    else
-			      4
-			    end
-			  when true || true || true || (false || true)
-			    5
-			  else
-			    6
-			  end
-			end
-			`,
-			3,
-		},
-	}
-
-	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestClassInheritance(t *testing.T) {
-	input := `
-		class Bar
-		end
-
-		class Foo < Bar
-		  def self.add
-		    10
-		  end
-		end
-
-		Foo.superclass.name
-	`
-	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
-
-	testStringObject(t, 0, evaluated, "Bar")
-	v.checkCFP(t, 0, 0)
-	v.checkSP(t, 0, 1)
 }
 
 func TestMultiVarAssignment(t *testing.T) {
@@ -2130,6 +2024,45 @@ func TestMultiVarAssignment(t *testing.T) {
 	}
 }
 
+func TestPostfixMethodCall(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{`
+		a = 1
+		a += 1
+		a
+		`, 2},
+		{`
+		a = 10
+		a -= 1
+		a
+		`,
+			9},
+		{`
+		a = 0
+		a -= 1
+		a
+		`,
+			-1},
+		{`
+		a = -5
+		a += 1
+		a
+		`,
+			-4},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestRemoveUnusedExpression(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -2159,6 +2092,73 @@ func TestRemoveUnusedExpression(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestSelfExpressionEvaluation(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`self.class.name`, "Object"},
+		{
+			`
+			class Bar
+				def whoami
+					"Instance of " + self.class.name
+				end
+			end
+
+			Bar.new.whoami
+		`, "Instance of Bar"},
+		{
+			`
+			class Foo
+				Self = self
+
+				def get_self
+					Self
+				end
+			end
+
+			Foo.new.get_self.name
+			`,
+			"Foo"},
+		{
+			`
+			class Foo
+				def class
+					Foo
+				end
+			end
+
+			Foo.new.class.name
+			`,
+			"Foo"},
+		{
+			`
+			class Foo
+				def class_name
+					self.class.name
+				end
+			end
+
+			Foo.new.class_name
+			`,
+			"Foo"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s", evaluated.(*Error).message)
+		}
+
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)

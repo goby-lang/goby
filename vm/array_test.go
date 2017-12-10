@@ -41,7 +41,7 @@ func TestArrayEvaluation(t *testing.T) {
 	checkExpected(t, 0, arr.Elements[2], true)
 }
 
-func TestArrayComparisonOperation(t *testing.T) {
+func TestArrayComparison(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -80,49 +80,6 @@ func TestArrayComparisonOperation(t *testing.T) {
 		checkExpected(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
 		vm.checkSP(t, i, 1)
-	}
-}
-
-func TestArrayDigMethod(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{`
-			[1 , 2].dig(-2)
-		`, 1},
-		{`
-			[{a: 3} , 2].dig(0, :a)
-		`, 3},
-		{`
-			[[], 2].dig(0, 1)
-		`, nil},
-		{`
-			[[], 2].dig(0, 1, 2)
-		`, nil},
-	}
-
-	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestArrayDigMethodFail(t *testing.T) {
-	testsFail := []errorTestCase{
-		{`[1, 2].dig`, "ArgumentError: Expected 1+ arguments, got 0", 1},
-		{`[1, 2].dig(0, 1)`, "TypeError: Expect target to be Diggable, got Integer", 1},
-	}
-
-	for i, tt := range testsFail {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkErrorMsg(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
 	}
 }
 
@@ -200,98 +157,6 @@ func TestArrayIndex(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestArrayStarOperator(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected []interface{}
-	}{
-		{`
-			a = [1, 2, 3]
-			a * 2
-		`, []interface{}{1, 2, 3, 1, 2, 3}},
-		// Make sure the result is an entirely new array.
-		{`
-			a = [1, 2, 3]
-			(a * 2)[0] = -1
-			a
-		`, []interface{}{1, 2, 3}},
-		{`
-			a = [1, 2, 3]
-			a * 0
-		`, []interface{}{}},
-		{`
-			a = []
-			a * 2
-		`, []interface{}{}},
-	}
-
-	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input, getFilename())
-		testArrayObject(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
-		vm.checkSP(t, i, 1)
-	}
-}
-
-func TestArrayStarOperatorFail(t *testing.T) {
-	testsFail := []errorTestCase{
-		{`[1, 2] * nil`, "TypeError: Expect argument to be Integer. got: Null", 1},
-	}
-
-	for i, tt := range testsFail {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkErrorMsg(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestArrayPlusOperator(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected []interface{}
-	}{
-		// Make sure the result is an entirely new array.
-		{`
-			a = [1, 2]
-			b = [3, 4]
-			c = a + b
-			a[0] = -1
-			b[0] = -1
-			c
-		`, []interface{}{1, 2, 3, 4}},
-		{`
-			a = []
-			b = []
-			a + b
-		`, []interface{}{}},
-	}
-
-	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input, getFilename())
-		testArrayObject(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
-		vm.checkSP(t, i, 1)
-	}
-}
-
-func TestArrayPlusOperatorFail(t *testing.T) {
-	testsFail := []errorTestCase{
-		{`[1, 2] + true`, "TypeError: Expect argument to be Array. got: Boolean", 1},
-	}
-
-	for i, tt := range testsFail {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkErrorMsg(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -658,6 +523,49 @@ func TestArrayDeleteAtMethodFail(t *testing.T) {
 	}
 }
 
+func TestArrayDigMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+			[1 , 2].dig(-2)
+		`, 1},
+		{`
+			[{a: 3} , 2].dig(0, :a)
+		`, 3},
+		{`
+			[[], 2].dig(0, 1)
+		`, nil},
+		{`
+			[[], 2].dig(0, 1, 2)
+		`, nil},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayDigMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`[1, 2].dig`, "ArgumentError: Expected 1+ arguments, got 0", 1},
+		{`[1, 2].dig(0, 1)`, "TypeError: Expect target to be Diggable, got Integer", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayEachMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -917,6 +825,28 @@ func TestArrayFlattenMethodFail(t *testing.T) {
 	}
 }
 
+func TestArrayIncludeMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{`a = ["a", "b", "c"]
+			a.include?("b")
+		`, true},
+		{`a = ["a", "b", "c"]
+			a.include?("d")
+		`, false},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayJoinMethod(t *testing.T) {
 	testsInt := []struct {
 		input    string
@@ -1099,6 +1029,50 @@ func TestArrayMapMethod(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		testArrayObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayPlusOperator(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		// Make sure the result is an entirely new array.
+		{`
+			a = [1, 2]
+			b = [3, 4]
+			c = a + b
+			a[0] = -1
+			b[0] = -1
+			c
+		`, []interface{}{1, 2, 3, 4}},
+		{`
+			a = []
+			b = []
+			a + b
+		`, []interface{}{}},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input, getFilename())
+		testArrayObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayPlusOperatorFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`[1, 2] + true`, "TypeError: Expect argument to be Array. got: Boolean", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -1444,6 +1418,54 @@ func TestArrayShiftMethodFail(t *testing.T) {
 	}
 }
 
+func TestArrayStarMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+			a = [1, 2, 3]
+			a * 2
+		`, []interface{}{1, 2, 3, 1, 2, 3}},
+		// Make sure the result is an entirely new array.
+		{`
+			a = [1, 2, 3]
+			(a * 2)[0] = -1
+			a
+		`, []interface{}{1, 2, 3}},
+		{`
+			a = [1, 2, 3]
+			a * 0
+		`, []interface{}{}},
+		{`
+			a = []
+			a * 2
+		`, []interface{}{}},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input, getFilename())
+		testArrayObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayStarMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`[1, 2] * nil`, "TypeError: Expect argument to be Integer. got: Null", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayUnshiftMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -1547,28 +1569,6 @@ func TestArrayValuesAtMethodFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestArrayIncludeP(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected bool
-	}{
-		{`a = ["a", "b", "c"]
-			a.include?("b")
-		`, true},
-		{`a = ["a", "b", "c"]
-			a.include?("d")
-		`, false},
-	}
-
-	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
 }

@@ -4,34 +4,46 @@ import (
 	"testing"
 )
 
-func TestReturnStatementEvaluation(t *testing.T) {
+func TestBreakStatement(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
 	}{
 		{`
-			def bar
-			  return 100
-			  10
-			end
+x = 0
+y = 0
 
+while x < 10 do
+  x = x + 1
+  if x == 5
+	break
+  end
+  y = y + 1
+end
 
-			bar
-			`,
-			100,
-		},
-		{
-			`
-			def bar
-			  return
-			  10
-			end
+x + y
+		`, 9},
+		{`
+x = 0
+y = 0
+i = 0
 
+while x < 10 do
+  x = x + 1
+  while y < 5 do
+	y = y + 1
 
-			bar
-			`,
-			nil,
-		},
+	if y == 3
+	  break
+	end
+
+	i = i + x * y
+  end
+end
+
+a = i * 10
+a + 100
+		`, 310},
 	}
 
 	for i, tt := range tests {
@@ -40,7 +52,6 @@ func TestReturnStatementEvaluation(t *testing.T) {
 		checkExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
-
 	}
 }
 
@@ -462,6 +473,96 @@ func TestModuleStatement(t *testing.T) {
 	}
 }
 
+func TestNextStatement(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+x = 0
+y = 0
+
+while x < 10 do
+  x = x + 1
+  if x == 5
+	next
+  end
+  y = y + 1
+end
+
+x + y
+		`, 19},
+		{`
+x = 0
+y = 0
+i = 0
+
+while x < 10 do
+  x = x + 1
+  while y < 5 do
+	y = y + 1
+
+	if y == 3
+	  next
+	end
+
+	i = i + x * y
+  end
+end
+
+i
+		`, 12},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestReturnStatement(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+			def bar
+			  return 100
+			  10
+			end
+
+
+			bar
+			`,
+			100,
+		},
+		{
+			`
+			def bar
+			  return
+			  10
+			end
+
+
+			bar
+			`,
+			nil,
+		},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+
+	}
+}
+
 func TestWhileStatement(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -536,107 +637,6 @@ func TestWhileStatement(t *testing.T) {
 
 		i
 		`, 0},
-	}
-
-	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestNextStatement(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{`
-x = 0
-y = 0
-
-while x < 10 do
-  x = x + 1
-  if x == 5
-	next
-  end
-  y = y + 1
-end
-
-x + y
-		`, 19},
-		{`
-x = 0
-y = 0
-i = 0
-
-while x < 10 do
-  x = x + 1
-  while y < 5 do
-	y = y + 1
-
-	if y == 3
-	  next
-	end
-
-	i = i + x * y
-  end
-end
-
-i
-		`, 12},
-	}
-
-	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestBreakStatement(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{`
-x = 0
-y = 0
-
-while x < 10 do
-  x = x + 1
-  if x == 5
-	break
-  end
-  y = y + 1
-end
-
-x + y
-		`, 9},
-		{`
-x = 0
-y = 0
-i = 0
-
-while x < 10 do
-  x = x + 1
-  while y < 5 do
-	y = y + 1
-
-	if y == 3
-	  break
-	end
-
-	i = i + x * y
-  end
-end
-
-a = i * 10
-a + 100
-		`, 310},
 	}
 
 	for i, tt := range tests {

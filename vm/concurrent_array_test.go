@@ -209,108 +209,6 @@ func TestConcurrentArrayComparisonOperation(t *testing.T) {
 	}
 }
 
-func TestConcurrentArrayStarOperator(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected []interface{}
-	}{
-		{`
-		require 'concurrent/array'
-		a = Concurrent::Array.new([1, 2, 3])
-		a * 2
-		`, []interface{}{1, 2, 3, 1, 2, 3}},
-		// Make sure the result is an entirely new array.
-		{`
-		require 'concurrent/array'
-		a = Concurrent::Array.new([1, 2, 3])
-		(a * 2)[0] = -1
-		a
-		`, []interface{}{1, 2, 3}},
-		{`
-		require 'concurrent/array'
-		a = Concurrent::Array.new([1, 2, 3])
-		a * 0
-		`, []interface{}{}},
-		{`
-		require 'concurrent/array'
-		a = Concurrent::Array.new([])
-		a * 2
-		`, []interface{}{}},
-	}
-
-	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input, getFilename())
-		testConcurrentArrayObject(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
-		vm.checkSP(t, i, 1)
-	}
-}
-
-func TestConcurrentArrayStarOperatorFail(t *testing.T) {
-	testsFail := []errorTestCase{
-		{`
-		require 'concurrent/array'
-		Concurrent::Array.new([1, 2]) * nil`, "TypeError: Expect argument to be Integer. got: Null", 1},
-	}
-
-	for i, tt := range testsFail {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkErrorMsg(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestConcurrentArrayPlusOperator(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected []interface{}
-	}{
-		// Make sure the result is an entirely new array.
-		{`
-		require 'concurrent/array'
-		a = Concurrent::Array.new([1, 2])
-		b = [3, 4]
-		c = a + b
-		a[0] = -1
-		b[0] = -1
-		c
-		`, []interface{}{1, 2, 3, 4}},
-		{`
-		require 'concurrent/array'
-		a = Concurrent::Array.new([])
-		b = []
-		a + b
-		`, []interface{}{}},
-	}
-
-	for i, tt := range tests {
-		vm := initTestVM()
-		evaluated := vm.testEval(t, tt.input, getFilename())
-		testConcurrentArrayObject(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 0)
-		vm.checkSP(t, i, 1)
-	}
-}
-
-func TestConcurrentArrayPlusOperatorFail(t *testing.T) {
-	testsFail := []errorTestCase{
-		{`
-		require 'concurrent/array'
-		Concurrent::Array.new([1, 2]) + true`, "TypeError: Expect argument to be Array. got: Boolean", 1},
-	}
-
-	for i, tt := range testsFail {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkErrorMsg(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
-	}
-}
-
 func TestConcurrentArrayAnyMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -1237,6 +1135,54 @@ func TestConcurrentArrayMapMethod(t *testing.T) {
 	}
 }
 
+func TestConcurrentArrayPlusMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		// Make sure the result is an entirely new array.
+		{`
+		require 'concurrent/array'
+		a = Concurrent::Array.new([1, 2])
+		b = [3, 4]
+		c = a + b
+		a[0] = -1
+		b[0] = -1
+		c
+		`, []interface{}{1, 2, 3, 4}},
+		{`
+		require 'concurrent/array'
+		a = Concurrent::Array.new([])
+		b = []
+		a + b
+		`, []interface{}{}},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input, getFilename())
+		testConcurrentArrayObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
+	}
+}
+
+func TestConcurrentArrayPlusMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`
+		require 'concurrent/array'
+		Concurrent::Array.new([1, 2]) + true`, "TypeError: Expect argument to be Array. got: Boolean", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestConcurrentArrayPopMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -1594,6 +1540,60 @@ func TestConcurrentArrayShiftMethodFail(t *testing.T) {
 		a = Concurrent::Array.new([1, 2])
 		a.shift(3, 3, 4, 5)
 		`, "ArgumentError: Expect 0 argument. got=4", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestConcurrentArrayStarMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+		require 'concurrent/array'
+		a = Concurrent::Array.new([1, 2, 3])
+		a * 2
+		`, []interface{}{1, 2, 3, 1, 2, 3}},
+		// Make sure the result is an entirely new array.
+		{`
+		require 'concurrent/array'
+		a = Concurrent::Array.new([1, 2, 3])
+		(a * 2)[0] = -1
+		a
+		`, []interface{}{1, 2, 3}},
+		{`
+		require 'concurrent/array'
+		a = Concurrent::Array.new([1, 2, 3])
+		a * 0
+		`, []interface{}{}},
+		{`
+		require 'concurrent/array'
+		a = Concurrent::Array.new([])
+		a * 2
+		`, []interface{}{}},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input, getFilename())
+		testConcurrentArrayObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
+	}
+}
+
+func TestConcurrentArrayStarMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`
+		require 'concurrent/array'
+		Concurrent::Array.new([1, 2]) * nil`, "TypeError: Expect argument to be Integer. got: Null", 1},
 	}
 
 	for i, tt := range testsFail {

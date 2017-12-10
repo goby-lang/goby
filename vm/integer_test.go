@@ -236,6 +236,8 @@ func TestIntegerConversion(t *testing.T) {
 	}
 }
 
+// Method test
+
 func TestIntegerEvenMethod(t *testing.T) {
 	tests := []struct {
 		input    string

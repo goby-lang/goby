@@ -239,6 +239,8 @@ func TestHashComparisonOperation(t *testing.T) {
 	}
 }
 
+// Method test
+
 func TestHashAnyMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -1738,6 +1740,8 @@ func TestHashValuesAtMethodFail(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
+// Test helpers
 
 func JSONBytesEqual(a, b []byte) (bool, error) {
 	var j, j2 interface{}

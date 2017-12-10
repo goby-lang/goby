@@ -9,40 +9,7 @@ import (
 	"net/http"
 )
 
-//chan parameter for blocking until server is prepared
-func startTestServer(c chan bool) {
-	m := http.NewServeMux()
-
-	m.HandleFunc("/index", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-
-		if r.Method == http.MethodPost {
-			b, err := ioutil.ReadAll(r.Body)
-			if err != nil {
-				panic(err)
-			}
-			fmt.Fprintf(w, "POST %s", b)
-		} else {
-			fmt.Fprint(w, "GET Hello World")
-		}
-
-	})
-
-	m.HandleFunc("/error", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(404)
-		fmt.Fprint(w, "oops")
-	})
-
-	m.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println(r.URL.Path)
-	})
-
-	c <- true
-
-	http.ListenAndServe(":3000", m)
-}
-
-func TestHTTPObject(t *testing.T) {
+func TestHTTPRequest(t *testing.T) {
 
 	//blocking channel
 	c := make(chan bool, 1)
@@ -85,7 +52,7 @@ func TestHTTPObject(t *testing.T) {
 	}
 }
 
-func TestHTTPObjectFail(t *testing.T) {
+func TestHTTPRequestFail(t *testing.T) {
 	//blocking channel
 	c := make(chan bool, 1)
 
@@ -171,4 +138,39 @@ func TestHTTPObjectFail(t *testing.T) {
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
+}
+
+// Test helpers
+
+//chan parameter for blocking until server is prepared
+func startTestServer(c chan bool) {
+	m := http.NewServeMux()
+
+	m.HandleFunc("/index", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+
+		if r.Method == http.MethodPost {
+			b, err := ioutil.ReadAll(r.Body)
+			if err != nil {
+				panic(err)
+			}
+			fmt.Fprintf(w, "POST %s", b)
+		} else {
+			fmt.Fprint(w, "GET Hello World")
+		}
+
+	})
+
+	m.HandleFunc("/error", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(404)
+		fmt.Fprint(w, "oops")
+	})
+
+	m.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println(r.URL.Path)
+	})
+
+	c <- true
+
+	http.ListenAndServe(":3000", m)
 }

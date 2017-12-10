@@ -30,19 +30,6 @@ func TestEvalNil(t *testing.T) {
 	v.checkSP(t, 0, 1)
 }
 
-func TestBangPrefix(t *testing.T) {
-	input := `
-	a = nil
-	!a
-	`
-
-	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
-	checkExpected(t, 0, evaluated, true)
-	v.checkCFP(t, 0, 0)
-	v.checkSP(t, 0, 1)
-}
-
 func TestNullComparisonOperation(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -65,19 +52,23 @@ func TestNullComparisonOperation(t *testing.T) {
 	}
 }
 
-func TestNullIsNilMethod(t *testing.T) {
+func TestNullAssignmentByOperation(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected bool
+		expected interface{}
 	}{
-		{`123.nil?`, false},
-		{`"Hello World".nil?`, false},
-		{`(2..10).nil?`, false},
-		{`{ a: 1, b: "2", c: ["Goby", 123] }.nil?`, false},
-		{`[1, 2, 3, 4, 5].nil?`, false},
-		{`true.nil?`, false},
-		{`String.nil?`, false},
-		{`nil.nil?`, true},
+		{`a = nil; a ||= 123;       a;`, 123},
+		{`a = nil; a ||= "string";  a;`, "string"},
+		{`a = nil; a ||= nil;     a;`, nil},
+		{`a = nil; a ||= (1..4);    a.to_s;`, "(1..4)"},
+		{`a = nil; a ||= { b: 1 };  a["b"];`, 1},
+		{`a = nil; a ||= Object;    a.name;`, "Object"},
+		{`a = nil; a ||= [1, 2, 3]; a[0];`, 1},
+		{`a = nil; a ||= [1, 2, 3]; a[1];`, 2},
+		{`a = nil; a ||= [1, 2, 3]; a[2];`, 3},
+		{`a = nil; a ||= nil;       a;`, nil},
+		{`a = nil; a ||= nil || 1;  a;`, 1},
+		{`a = nil; a ||= 1 || nil;  a;`, 1},
 	}
 
 	for i, tt := range tests {
@@ -107,23 +98,34 @@ func TestNullTypeConversion(t *testing.T) {
 	}
 }
 
-func TestNullAssignmentByOperation(t *testing.T) {
+// Method test
+
+func TestNullBangPrefixMethod(t *testing.T) {
+	input := `
+	a = nil
+	!a
+	`
+
+	v := initTestVM()
+	evaluated := v.testEval(t, input, getFilename())
+	checkExpected(t, 0, evaluated, true)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
+}
+
+func TestNullIsNilMethod(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected interface{}
+		expected bool
 	}{
-		{`a = nil; a ||= 123;       a;`, 123},
-		{`a = nil; a ||= "string";  a;`, "string"},
-		{`a = nil; a ||= nil;     a;`, nil},
-		{`a = nil; a ||= (1..4);    a.to_s;`, "(1..4)"},
-		{`a = nil; a ||= { b: 1 };  a["b"];`, 1},
-		{`a = nil; a ||= Object;    a.name;`, "Object"},
-		{`a = nil; a ||= [1, 2, 3]; a[0];`, 1},
-		{`a = nil; a ||= [1, 2, 3]; a[1];`, 2},
-		{`a = nil; a ||= [1, 2, 3]; a[2];`, 3},
-		{`a = nil; a ||= nil;       a;`, nil},
-		{`a = nil; a ||= nil || 1;  a;`, 1},
-		{`a = nil; a ||= 1 || nil;  a;`, 1},
+		{`123.nil?`, false},
+		{`"Hello World".nil?`, false},
+		{`(2..10).nil?`, false},
+		{`{ a: 1, b: "2", c: ["Goby", 123] }.nil?`, false},
+		{`[1, 2, 3, 4, 5].nil?`, false},
+		{`true.nil?`, false},
+		{`String.nil?`, false},
+		{`nil.nil?`, true},
 	}
 
 	for i, tt := range tests {
