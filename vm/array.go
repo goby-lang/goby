@@ -682,7 +682,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Loop through each element with the given block. Return a new array with each yield element.
+			// Loop through each element with the given block. Return a new array with each yield element. Block is required.
 			//
 			// ```ruby
 			// a = ["a", "b", "c"]
@@ -692,6 +692,8 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// end
 			// # => ["aa", "bb", "cc"]
 			// ```
+			//
+			// @return [Array]
 			Name: "map",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {

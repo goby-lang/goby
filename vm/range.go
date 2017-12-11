@@ -333,6 +333,47 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Loop through each element with the given range. Return a new array with each yield element. Only a block is required, and no other arguments are acceptable.
+			//
+			// ```ruby
+			// (1..10).map do |i|
+			//   i * i
+			// end
+			//
+			// # => [1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+			// ```
+			// @return [Array]
+			Name: "map",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					r := receiver.(*RangeObject)
+
+					if blockFrame == nil {
+						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+					}
+
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+					}
+
+					var elements []Object
+					if r.Start <= r.End {
+						for i := r.Start; i <= r.End; i++ {
+							obj := t.vm.initIntegerObject(i)
+							elements = append(elements, t.builtinMethodYield(blockFrame, obj).Target)
+						}
+					} else {
+						for i := r.Start; i >= r.End; i-- {
+							obj := t.vm.initIntegerObject(i)
+							elements = append(elements, t.builtinMethodYield(blockFrame, obj).Target)
+						}
+					}
+
+					return t.vm.initArrayObject(elements)
+				}
+			},
+		},
+		{
 			// Returns the size of the range
 			//
 			// ```ruby
