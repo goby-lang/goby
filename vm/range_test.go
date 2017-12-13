@@ -529,3 +529,45 @@ func TestRangeToArrayMethod(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
+func TestRangeMapMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+		(1..10).map do |x| x * x; end
+		`, []interface{}{1, 4, 9, 16, 25, 36, 49, 64, 81, 100}},
+		{`
+		(-5..5).map do |x| x * x; end
+		`, []interface{}{25, 16, 9, 4, 1, 0, 1, 4, 9, 16, 25}},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		testArrayObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestRangeMapMethodFail(t *testing.T) {
+	v := initTestVM()
+	testsFail := []errorTestCase{
+		{
+			`
+			(1..10).map
+		`, "InternalError: Can't yield without a block", 1},
+		{
+			`
+			(1..10).map(1) do |x| x * x; end
+		`, "ArgumentError: Expect 0 argument. got=1", 2},
+	}
+
+	for i, tt := range testsFail {
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+	}
+}
