@@ -852,6 +852,29 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			Name: "raise",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					switch len(args) {
+					case 0:
+						return t.vm.initErrorObject(errors.InternalError, sourceLine, "")
+					case 1:
+						return t.vm.initErrorObject(errors.InternalError, sourceLine, "'%s'", args[0].toString())
+					case 2:
+						errorClass, ok := args[0].(*RClass)
+
+						if !ok {
+							return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect error class, got: %s", args[0].Class().Name)
+						}
+
+						return t.vm.initErrorObject(errorClass.Name, sourceLine, "'%s'", args[1].toString())
+					}
+
+					return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect at most 2 arguments. got: %d", len(args))
+				}
+			},
+		},
+		{
 			// Loads the given Goby library name without extension (mainly for modules), returning `true`
 			// if successful and `false` if the feature is already loaded.
 			//
