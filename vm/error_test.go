@@ -109,6 +109,22 @@ func TestStackTraces(t *testing.T) {
 			// receiver(mainObject), receiver, argument 10, errorObject
 			4,
 		},
+		{`class FooError; end
+
+		def raise_foo
+		  raise FooError, "Foo"
+		end
+
+		raise_foo
+		`,
+			"FooError: 'Foo'",
+			[]string{
+				fmt.Sprintf("from %s:4", getFilename()),
+				fmt.Sprintf("from %s:7", getFilename()),
+			},
+			2,
+			2,
+		},
 	}
 
 	for i, tt := range tests {
