@@ -17,6 +17,8 @@ const (
 	ConstantAlreadyInitializedError = "ConstantAlreadyInitializedError"
 	// HTTPError is returned when when a request fails to return a proper response
 	HTTPError = "HTTPError"
+	// ZeroDivisionError is for zero-division by Integer/Float/Decimal value
+	ZeroDivisionError = "ZeroDivisionError"
 )
 
 /*
@@ -26,4 +28,5 @@ const (
 	WrongNumberOfArgumentFormat = "Expect %d arguments. got: %d"
 	WrongArgumentTypeFormat     = "Expect argument to be %s. got: %s"
 	CantYieldWithoutBlockFormat = "Can't yield without a block"
+	DividedByZero               = "Divided by 0"
 )

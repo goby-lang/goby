@@ -53,7 +53,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 						return leftValue + rightValue
 					}
 
-					return receiver.(*FloatObject).arithmeticOperation(t, args[0], operation, sourceLine)
+					return receiver.(*FloatObject).arithmeticOperation(t, args[0], operation, sourceLine, false)
 				}
 			},
 		},
@@ -71,7 +71,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 						return math.Mod(leftValue, rightValue)
 					}
 
-					return receiver.(*FloatObject).arithmeticOperation(t, args[0], operation, sourceLine)
+					return receiver.(*FloatObject).arithmeticOperation(t, args[0], operation, sourceLine, true)
 				}
 			},
 		},
@@ -89,7 +89,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 						return leftValue - rightValue
 					}
 
-					return receiver.(*FloatObject).arithmeticOperation(t, args[0], operation, sourceLine)
+					return receiver.(*FloatObject).arithmeticOperation(t, args[0], operation, sourceLine, false)
 				}
 			},
 		},
@@ -107,7 +107,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 						return leftValue * rightValue
 					}
 
-					return receiver.(*FloatObject).arithmeticOperation(t, args[0], operation, sourceLine)
+					return receiver.(*FloatObject).arithmeticOperation(t, args[0], operation, sourceLine, false)
 				}
 			},
 		},
@@ -125,7 +125,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 						return math.Pow(leftValue, rightValue)
 					}
 
-					return receiver.(*FloatObject).arithmeticOperation(t, args[0], operation, sourceLine)
+					return receiver.(*FloatObject).arithmeticOperation(t, args[0], operation, sourceLine, false)
 				}
 			},
 		},
@@ -143,7 +143,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 						return leftValue / rightValue
 					}
 
-					return receiver.(*FloatObject).arithmeticOperation(t, args[0], operation, sourceLine)
+					return receiver.(*FloatObject).arithmeticOperation(t, args[0], operation, sourceLine, true)
 				}
 			},
 		},
@@ -388,7 +388,7 @@ func (f *FloatObject) floatValue() float64 {
 
 // TODO: Remove instruction argument
 // Apply the passed arithmetic operation, while performing type conversion.
-func (f *FloatObject) arithmeticOperation(t *thread, rightObject Object, operation func(leftValue float64, rightValue float64) float64, sourceLine int) Object {
+func (f *FloatObject) arithmeticOperation(t *thread, rightObject Object, operation func(leftValue float64, rightValue float64) float64, sourceLine int, division bool) Object {
 	rightNumeric, ok := rightObject.(Numeric)
 
 	if !ok {
@@ -397,6 +397,10 @@ func (f *FloatObject) arithmeticOperation(t *thread, rightObject Object, operati
 
 	leftValue := f.value
 	rightValue := rightNumeric.floatValue()
+
+	if division && rightValue == 0 {
+		return t.vm.initErrorObject(errors.ZeroDivisionError, sourceLine, errors.DividedByZero)
+	}
 
 	result := operation(leftValue, rightValue)
 

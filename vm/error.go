@@ -14,12 +14,7 @@ import (
 //
 // The type of internal errors:
 //
-// * `InternalError`: default error type
-// * `ArgumentError`: an argument-related error
-// * `NameError`: a constant-related error
-// * `TypeError`: a type-related error
-// * `UndefinedMethodError`: undefined-method error
-// * `UnsupportedMethodError`: intentionally unsupported-method error
+// see vm/errors/error.go.
 //
 type Error struct {
 	*baseObj
@@ -62,7 +57,7 @@ func (vm *VM) initErrorObject(errorType string, sourceLine int, format string, a
 }
 
 func (vm *VM) initErrorClasses() {
-	errTypes := []string{errors.InternalError, errors.ArgumentError, errors.NameError, errors.TypeError, errors.UndefinedMethodError, errors.UnsupportedMethodError, errors.ConstantAlreadyInitializedError, errors.HTTPError}
+	errTypes := []string{errors.InternalError, errors.ArgumentError, errors.NameError, errors.TypeError, errors.UndefinedMethodError, errors.UnsupportedMethodError, errors.ConstantAlreadyInitializedError, errors.HTTPError, errors.ZeroDivisionError}
 
 	for _, errType := range errTypes {
 		c := vm.initializeClass(errType, false)

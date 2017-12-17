@@ -356,3 +356,22 @@ func TestDecimalToStringFail(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
+func TestDecimalZeroDivisionFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`(6.0).to_d / 0`, "ZeroDivisionError: Divided by 0", 1},
+		{`(6.0).to_d / -0`, "ZeroDivisionError: Divided by 0", 1},
+		{`(6.0).to_d / "0".to_d`, "ZeroDivisionError: Divided by 0", 1},
+		{`(6.0).to_d / "-0".to_d`, "ZeroDivisionError: Divided by 0", 1},
+		{`(6.0).to_d / "0".to_f`, "ZeroDivisionError: Divided by 0", 1},
+		{`(6.0).to_d / "-0".to_f`, "ZeroDivisionError: Divided by 0", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
