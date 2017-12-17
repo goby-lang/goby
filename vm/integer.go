@@ -77,7 +77,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 						return leftValue + rightValue
 					}
 
-					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine)
+					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine, false)
 				}
 			},
 		},
@@ -98,7 +98,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 						return math.Mod(leftValue, rightValue)
 					}
 
-					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine)
+					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine, true)
 				}
 			},
 		},
@@ -119,7 +119,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 						return leftValue - rightValue
 					}
 
-					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine)
+					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine, false)
 				}
 			},
 		},
@@ -140,7 +140,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 						return leftValue * rightValue
 					}
 
-					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine)
+					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine, false)
 				}
 			},
 		},
@@ -161,7 +161,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 						return math.Pow(leftValue, rightValue)
 					}
 
-					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine)
+					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine, false)
 				}
 			},
 		},
@@ -175,6 +175,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			Name: "/",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+
 					intOperation := func(leftValue int, rightValue int) int {
 						return leftValue / rightValue
 					}
@@ -182,7 +183,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 						return leftValue / rightValue
 					}
 
-					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine)
+					return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine, true)
 				}
 			},
 		},
@@ -695,11 +696,15 @@ func (i *IntegerObject) arithmeticOperation(
 	intOperation func(leftValue int, rightValue int) int,
 	floatOperation func(leftValue float64, rightValue float64) float64,
 	sourceLine int,
+	division bool,
 ) Object {
 	switch rightObject.(type) {
 	case *IntegerObject:
 		leftValue := i.value
 		rightValue := rightObject.(*IntegerObject).value
+		if division && rightValue == 0 {
+			return t.vm.initErrorObject(errors.ZeroDivisionError, sourceLine, errors.DividedByZero)
+		}
 
 		result := intOperation(leftValue, rightValue)
 
@@ -707,6 +712,10 @@ func (i *IntegerObject) arithmeticOperation(
 	case *FloatObject:
 		leftValue := float64(i.value)
 		rightValue := rightObject.(*FloatObject).value
+
+		if division && rightValue == 0 {
+			return t.vm.initErrorObject(errors.ZeroDivisionError, sourceLine, errors.DividedByZero)
+		}
 
 		result := floatOperation(leftValue, rightValue)
 
