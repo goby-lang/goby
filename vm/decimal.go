@@ -79,7 +79,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 						return new(Decimal).Add(leftValue, rightValue)
 					}
 
-					return receiver.(*DecimalObject).arithmeticOperation(t, args[0], operation, sourceLine)
+					return receiver.(*DecimalObject).arithmeticOperation(t, args[0], operation, sourceLine, false)
 				}
 			},
 		},
@@ -102,7 +102,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 						return new(Decimal).Sub(leftValue, rightValue)
 					}
 
-					return receiver.(*DecimalObject).arithmeticOperation(t, args[0], operation, sourceLine)
+					return receiver.(*DecimalObject).arithmeticOperation(t, args[0], operation, sourceLine, false)
 				}
 			},
 		},
@@ -125,7 +125,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 						return new(Decimal).Mul(leftValue, rightValue)
 					}
 
-					return receiver.(*DecimalObject).arithmeticOperation(t, args[0], operation, sourceLine)
+					return receiver.(*DecimalObject).arithmeticOperation(t, args[0], operation, sourceLine, false)
 				}
 			},
 		},
@@ -154,7 +154,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 						return new(Decimal).SetFloat64(math.Pow(l, r))
 					}
 
-					return receiver.(*DecimalObject).arithmeticOperation(t, args[0], operation, sourceLine)
+					return receiver.(*DecimalObject).arithmeticOperation(t, args[0], operation, sourceLine, false)
 				}
 			},
 		},
@@ -179,7 +179,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 						return new(Decimal).Quo(leftValue, rightValue)
 					}
 
-					return receiver.(*DecimalObject).arithmeticOperation(t, args[0], decimalOperation, sourceLine)
+					return receiver.(*DecimalObject).arithmeticOperation(t, args[0], decimalOperation, sourceLine, true)
 				}
 			},
 		},
@@ -621,12 +621,17 @@ func (d *DecimalObject) arithmeticOperation(
 	rightObject Object,
 	decimalOperation func(leftValue *Decimal, rightValue *Decimal) *Decimal,
 	sourceLine int,
+	division bool,
 ) Object {
 	var result Decimal
 
 	rightValue, ok := assertNumeric(rightObject)
 	if ok == false {
 		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
+	}
+
+	if division && rightValue.RatString() == "0" {
+		return t.vm.initErrorObject(errors.ZeroDivisionError, sourceLine, errors.DividedByZero)
 	}
 
 	leftValue := d.value
