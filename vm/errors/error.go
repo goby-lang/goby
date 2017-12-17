@@ -17,7 +17,7 @@ const (
 	ConstantAlreadyInitializedError = "ConstantAlreadyInitializedError"
 	// HTTPError is returned when when a request fails to return a proper response
 	HTTPError = "HTTPError"
-	// For zero-division by Integer or Decimal value
+	// ZeroDivisionError is for zero-division by Integer/Float/Decimal value
 	ZeroDivisionError = "ZeroDivisionError"
 )
 
