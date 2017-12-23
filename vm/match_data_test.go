@@ -16,7 +16,7 @@ func TestMatchDataClassSuperclass(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -36,7 +36,7 @@ func TestMatchDataCaptures(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -70,7 +70,7 @@ func TestMatchDataToAMethod(t *testing.T) {
 	for i, tt := range tests {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input, getFilename())
-		testArrayObject(t, i, evaluated, tt.expected)
+		verifyArrayObject(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
 		vm.checkSP(t, i, 1)
 	}
@@ -103,7 +103,7 @@ func TestMatchDataLengthMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -136,7 +136,7 @@ func TestMatchDataToHMethod(t *testing.T) {
 	for i, tt := range tests {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input, getFilename())
-		testHashObject(t, i, evaluated, tt.expected)
+		verifyHashObject(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
 		vm.checkSP(t, i, 1)
 	}

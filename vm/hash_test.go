@@ -19,7 +19,7 @@ func TestHashClassSuperclass(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -41,11 +41,11 @@ func TestEvalHashExpression(t *testing.T) {
 	for key, value := range h.Pairs {
 		switch key {
 		case "foo":
-			testIntegerObject(t, 0, value, 123)
+			verifyIntegerObject(t, 0, value, 123)
 		case "bar":
-			testStringObject(t, 0, value, "test")
+			verifyStringObject(t, 0, value, "test")
 		case "Baz":
-			testBooleanObject(t, 0, value, true)
+			verifyBooleanObject(t, 0, value, true)
 		}
 	}
 
@@ -121,7 +121,7 @@ func TestHashAccessOperation(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -148,7 +148,7 @@ func TestHashAccessWithDefaultOperation(t *testing.T) {
 	for i, tt := range valueTests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -173,7 +173,7 @@ func TestHashAccessWithDefaultOperation(t *testing.T) {
 	for i, tt := range hashTests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		testHashObject(t, i, evaluated, tt.expected)
+		verifyHashObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -233,7 +233,7 @@ func TestHashComparisonOperation(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -276,7 +276,7 @@ func TestHashAnyMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -318,7 +318,7 @@ func TestHashClearMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		testHashObject(t, i, evaluated, tt.expected)
+		verifyHashObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -358,7 +358,7 @@ func TestHashDefaultOperation(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -426,7 +426,7 @@ func TestHashDeleteMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -482,7 +482,7 @@ func TestHashDeleteIfMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		testHashObject(t, i, evaluated, tt.expected)
+		verifyHashObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -522,7 +522,7 @@ func TestHashDigMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -561,7 +561,7 @@ func TestHashEachMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		testHashObject(t, i, evaluated, tt.expected)
+		verifyHashObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -584,7 +584,7 @@ func TestHashEachMethod(t *testing.T) {
 	for i, tt := range tests2 {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		testBidimensionalArrayObject(t, i, evaluated, tt.expected)
+		verifyBidimensionalArrayObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -645,7 +645,7 @@ func TestHashEachKeyMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		testArrayObject(t, i, evaluated, tt.expected)
+		verifyArrayObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -699,7 +699,7 @@ func TestHashEachValueMethod(t *testing.T) {
 	for i, tt := range hashTests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		testArrayObject(t, i, evaluated, tt.expected)
+		verifyArrayObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -741,7 +741,7 @@ func TestHashEachValueMethod(t *testing.T) {
 	for i, tt := range normalTests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -777,7 +777,7 @@ func TestHashEmptyMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -820,7 +820,7 @@ func TestHashEqualMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -860,7 +860,7 @@ func TestHashFetchMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -899,7 +899,7 @@ func TestHashFetchValuesMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		testArrayObject(t, i, evaluated, tt.expected)
+		verifyArrayObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -933,7 +933,7 @@ func TestHashHasKeyMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -973,7 +973,7 @@ func TestHashHasValueMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1053,7 +1053,7 @@ func TestHashLengthMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1133,7 +1133,7 @@ func TestHashMapValuesMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1175,13 +1175,13 @@ func TestHashMergeMethod(t *testing.T) {
 		for key, value := range h.Pairs {
 			switch key {
 			case "a":
-				testStringObject(t, i, value, "Hello")
+				verifyStringObject(t, i, value, "Hello")
 			case "b":
-				testBooleanObject(t, i, value, true)
+				verifyBooleanObject(t, i, value, true)
 			case "c":
-				testIntegerObject(t, i, value, 123)
+				verifyIntegerObject(t, i, value, 123)
 			case "d":
-				testArrayObject(t, i, value, []interface{}{"World", 456, false})
+				verifyArrayObject(t, i, value, []interface{}{"World", 456, false})
 			}
 		}
 
@@ -1221,7 +1221,7 @@ func TestHashSortedKeysMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		testArrayObject(t, i, evaluated, tt.expected)
+		verifyArrayObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1266,7 +1266,7 @@ func TestHashSelectMethod(t *testing.T) {
 	for i, tt := range testsSortedArray {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		testHashObject(t, i, evaluated, tt.expected)
+		verifyHashObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1318,7 +1318,7 @@ func TestHashToArrayMethod(t *testing.T) {
 	for i, tt := range testsSortedArray {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		testArrayObject(t, i, evaluated, tt.expected)
+		verifyArrayObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1346,13 +1346,13 @@ func TestHashToArrayMethod(t *testing.T) {
 	for k, v := range evaluatedArr {
 		switch k {
 		case "a":
-			testIntegerObject(t, 0, v, 123)
+			verifyIntegerObject(t, 0, v, 123)
 		case "b":
-			testStringObject(t, 0, v, "test")
+			verifyStringObject(t, 0, v, "test")
 		case "c":
-			testBooleanObject(t, 0, v, true)
+			verifyBooleanObject(t, 0, v, true)
 		case "d":
-			testArrayObject(t, 0, v, []interface{}{1, "Goby", false})
+			verifyArrayObject(t, 0, v, []interface{}{1, "Goby", false})
 		}
 	}
 	v.checkCFP(t, 0, 0)
@@ -1552,7 +1552,7 @@ func TestHashToStringMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1632,7 +1632,7 @@ func TestHashTransformValuesMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1674,13 +1674,13 @@ func TestHashValuesMethod(t *testing.T) {
 	for _, v := range arr.Elements {
 		switch value := v.(type) {
 		case *IntegerObject:
-			testIntegerObject(t, 0, value, 123)
+			verifyIntegerObject(t, 0, value, 123)
 		case *StringObject:
-			testStringObject(t, 0, v, "test")
+			verifyStringObject(t, 0, v, "test")
 		case *BooleanObject:
-			testBooleanObject(t, 0, v, true)
+			verifyBooleanObject(t, 0, v, true)
 		case *ArrayObject:
-			testArrayObject(t, 0, v, []interface{}{1, "Goby", false})
+			verifyArrayObject(t, 0, v, []interface{}{1, "Goby", false})
 		}
 	}
 	v.checkCFP(t, 0, 0)
@@ -1721,7 +1721,7 @@ func TestHashValuesAtMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		testArrayObject(t, i, evaluated, tt.expected)
+		verifyArrayObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
