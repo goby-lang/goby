@@ -816,6 +816,59 @@ func TestRequireMethod(t *testing.T) {
 	v.checkSP(t, 0, 1)
 }
 
+func TestRaiseMethod(t *testing.T) {
+	testsFail := []struct {
+		input       string
+		expected    string
+		expectedCFP int
+		expectedSP  int
+	}{
+		{`raise`, "InternalError: ", 1, 1},
+		{`raise "Foo"`, "InternalError: 'Foo'", 1, 1},
+		{`
+		class BarError; end
+		raise BarError, "Foo"`, "BarError: 'Foo'", 1, 1},
+		{`
+		class FooError; end
+
+		def raise_foo
+		  raise FooError, "Foo"
+		end
+
+		raise_foo
+		`,
+			// Expect CFP to be 2 is because the `raise_foo`'s frame is not popped
+			// Expect SP to be 2 cause the program got stopped before it replaces receiver with the return value (error)
+			// TODO: This means we need to pop error object when implementing `rescue`
+			"FooError: 'Foo'", 2, 2},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, tt.expectedSP)
+	}
+}
+
+func TestRaiseMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`raise "Foo", "Bar"`, "ArgumentError: Expect error class, got: String", 1},
+		{`
+		class BarError; end
+		raise BarError, "Foo", "Bar"`, "ArgumentError: Expect at most 2 arguments. got: 3", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestGeneralIsAMethod(t *testing.T) {
 	tests := []struct {
 		input    string
