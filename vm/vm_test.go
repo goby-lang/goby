@@ -231,7 +231,7 @@ func testIntegerObject(t *testing.T, i int, obj Object, expected int) bool {
 		t.Errorf("At test case %d: %s", i, result.Message())
 		return false
 	default:
-		t.Errorf("At test case %d: object is not Integer. got=%T (%+v).", i, obj, obj)
+		t.Errorf("At test case %d: object is not Integer. got=%s (%+v).", i, obj.Class().Name, obj)
 		return false
 	}
 }
@@ -249,7 +249,7 @@ func testFloatObject(t *testing.T, i int, obj Object, expected float64) bool {
 		t.Errorf("At test case %d: %s", i, result.Message())
 		return false
 	default:
-		t.Errorf("At test case %d: object is not Float. got=%T (%+v).", i, obj, obj)
+		t.Errorf("At test case %d: object is not Float. got=%s (%+v).", i, obj.Class().Name, obj)
 		return false
 	}
 }
@@ -262,7 +262,7 @@ func testNullObject(t *testing.T, i int, obj Object) bool {
 		t.Errorf("At test case %d: %s", i, result.Message())
 		return false
 	default:
-		t.Errorf("At test case %d: object is not NULL. got=%T (%+v)", i, obj, obj)
+		t.Errorf("At test case %d: object is not NULL. got=%s (%+v)", i, obj.Class().Name, obj)
 		return false
 	}
 }
@@ -280,7 +280,7 @@ func testStringObject(t *testing.T, i int, obj Object, expected string) bool {
 		t.Errorf(result.Message())
 		return false
 	default:
-		t.Errorf("At test case %d: object is not String. got=%T (%+v).", i, obj, obj)
+		t.Errorf("At test case %d: object is not String. got=%s (%+v).", i, obj.Class().Name, obj)
 		return false
 	}
 }
@@ -298,7 +298,7 @@ func testBooleanObject(t *testing.T, i int, obj Object, expected bool) bool {
 		t.Errorf(result.Message())
 		return false
 	default:
-		t.Errorf("At test case %d: object is not Boolean. got=%T (%+v).", i, obj, obj)
+		t.Errorf("At test case %d: object is not Boolean. got=%s (%+v).", i, obj.Class().Name, obj)
 		return false
 	}
 }
@@ -306,7 +306,7 @@ func testBooleanObject(t *testing.T, i int, obj Object, expected bool) bool {
 func testArrayObject(t *testing.T, index int, obj Object, expected []interface{}) bool {
 	result, ok := obj.(*ArrayObject)
 	if !ok {
-		t.Errorf("At test case %d: object is not Array. got=%T (%+v)", index, obj, obj)
+		t.Errorf("At test case %d: object is not Array. got=%s (%+v)", index, obj.Class().Name, obj)
 		return false
 	}
 
@@ -315,7 +315,7 @@ func testArrayObject(t *testing.T, index int, obj Object, expected []interface{}
 	}
 
 	for i := 0; i < len(result.Elements); i++ {
-		checkExpected(t, i, result.Elements[i], expected[i])
+		checkExpected(t, index, result.Elements[i], expected[i])
 	}
 
 	return true
@@ -325,7 +325,7 @@ func testArrayObject(t *testing.T, index int, obj Object, expected []interface{}
 func testConcurrentArrayObject(t *testing.T, index int, obj Object, expected []interface{}) bool {
 	result, ok := obj.(*ConcurrentArrayObject)
 	if !ok {
-		t.Errorf("At test case %d: object is not Array. got=%T (%+v)", index, obj, obj)
+		t.Errorf("At test case %d: object is not ConcurrentArray. got=%s (%+v)", index, obj.Class().Name, obj)
 		return false
 	}
 
@@ -346,7 +346,7 @@ func testConcurrentHashObject(t *testing.T, index int, objectResult Object, expe
 	result, ok := objectResult.(*ConcurrentHashObject)
 
 	if !ok {
-		t.Errorf("At test case %d: result is not ConcurrentHash. got=%T", index, objectResult)
+		t.Errorf("At test case %d: result is not ConcurrentHash. got=%s", index, objectResult.Class().Name)
 		return false
 	}
 
@@ -374,7 +374,7 @@ func testHashObject(t *testing.T, index int, objectResult Object, expected map[s
 	result, ok := objectResult.(*HashObject)
 
 	if !ok {
-		t.Errorf("At test case %d: result is not Hash. got=%T", index, objectResult)
+		t.Errorf("At test case %d: result is not Hash. got=%s", index, objectResult.Class().Name)
 		return false
 	}
 
