@@ -210,21 +210,28 @@ func (t *thread) execInstruction(cf *normalCallFrame, i *instruction) {
 }
 
 func (t *thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object) *Pointer {
-	c := newNormalCallFrame(blockFrame.instructionSet, blockFrame.FileName(), blockFrame.sourceLine)
-	c.blockFrame = blockFrame
-	c.ep = blockFrame.ep
-	c.self = blockFrame.self
-	c.sourceLine = blockFrame.SourceLine()
-	c.isBlock = true
+	// returns NULL if the block is empty
+	if blockIsEmpty(blockFrame) {
+		st := t.stack.top()
+		st.Target = NULL
+		return st
+	} else {
+		c := newNormalCallFrame(blockFrame.instructionSet, blockFrame.FileName(), blockFrame.sourceLine)
+		c.blockFrame = blockFrame
+		c.ep = blockFrame.ep
+		c.self = blockFrame.self
+		c.sourceLine = blockFrame.SourceLine()
+		c.isBlock = true
 
-	for i := 0; i < len(args); i++ {
-		c.insertLCL(i, 0, args[i])
+		for i := 0; i < len(args); i++ {
+			c.insertLCL(i, 0, args[i])
+		}
+
+		t.callFrameStack.push(c)
+		t.startFromTopFrame()
+
+		return t.stack.top()
 	}
-
-	t.callFrameStack.push(c)
-	t.startFromTopFrame()
-
-	return t.stack.top()
 }
 
 func (t *thread) retrieveBlock(fileName, blockFlag string, sourceLine int) (blockFrame *normalCallFrame) {
@@ -419,4 +426,15 @@ func (t *thread) setErrorObject(receiverPtr, sp int, errorType string, sourceLin
 	t.stack.set(receiverPtr, &Pointer{Target: err})
 	t.sp = sp
 	panic(err.Message())
+}
+
+// Other helper functions  ----------------------------------------------
+
+// blockIsEmpty returns true if the block is empty
+func blockIsEmpty(blockFrame *normalCallFrame) bool {
+	if blockFrame.instructionSet.instructions[0].action.name == bytecode.Leave {
+		return true
+	} else {
+		return false
+	}
 }
