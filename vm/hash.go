@@ -191,6 +191,9 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					hash := receiver.(*HashObject)
+					if blockIsEmpty(blockFrame) {
+						return FALSE
+					}
 
 					if len(hash.Pairs) == 0 {
 						t.callFrameStack.pop()
@@ -336,7 +339,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Deletes every key-value pair from the hash for which block evalutates to anything except
+			// Deletes every key-value pair from the hash for which block evaluates to anything except
 			// false and nil.
 			//
 			// Returns the hash.
@@ -361,6 +364,9 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					hash := receiver.(*HashObject)
+					if blockIsEmpty(blockFrame) {
+						return hash
+					}
 
 					if len(hash.Pairs) == 0 {
 						t.callFrameStack.pop()

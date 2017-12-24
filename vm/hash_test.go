@@ -271,6 +271,19 @@ func TestHashAnyMethod(t *testing.T) {
         true
       end
 		`, false},
+		// cases for providing an empty block
+		{`
+      { a: 1, b: 2 }.any? do; end
+		`, false},
+		{`
+      { a: 1, b: 2 }.any? do |i|; end
+		`, false},
+		{`
+      {}.any? do; end
+		`, false},
+		{`
+      {}.any? do |i|; end
+		`, false},
 	}
 
 	for i, tt := range tests {
@@ -476,6 +489,19 @@ func TestHashDeleteIfMethod(t *testing.T) {
 		`, map[string]interface{}{"a": 1, "b": 2}},
 		{`
 			{ }.delete_if do |k, v| true end
+		`, map[string]interface{}{}},
+		// cases for providing an empty block
+		{`
+			{ a: 1, b: 2 }.delete_if do; end
+		`, map[string]interface{}{"a": 1, "b": 2}},
+		{`
+			{ a: 1, b: 2 }.delete_if do |i|; end
+		`, map[string]interface{}{"a": 1, "b": 2}},
+		{`
+			{}.delete_if do; end
+		`, map[string]interface{}{}},
+		{`
+			{}.delete_if do |i|; end
 		`, map[string]interface{}{}},
 	}
 
