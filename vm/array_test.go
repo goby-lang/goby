@@ -1381,6 +1381,23 @@ func TestArrayReverseEachMethod(t *testing.T) {
 		end
 		str
 		`, ""},
+		// cases for providing an empty block
+		{`
+		a = ["a", "b", "c"].reverse_each do; end
+		a.to_s
+		`, `["a", "b", "c"]`},
+		{`
+		a = ["a", "b", "c"].reverse_each do |i|; end
+		a.to_s
+		`, `["a", "b", "c"]`},
+		{`
+		a = [].reverse_each do; end
+		a.to_s
+		`, `[]`},
+		{`
+		a = [].reverse_each do |i|; end
+		a.to_s
+		`, `[]`},
 	}
 
 	for i, tt := range tests {
