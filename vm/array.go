@@ -321,6 +321,9 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if blockFrame != nil {
+						if blockIsEmpty(blockFrame) {
+							return t.vm.initIntegerObject(0)
+						}
 						if len(arr.Elements) == 0 {
 							t.callFrameStack.pop()
 						}

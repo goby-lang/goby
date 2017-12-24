@@ -422,6 +422,23 @@ func TestArrayCountMethod(t *testing.T) {
 			i.size > 1
 		end
 		`, 0},
+		// cases for providing an empty block
+		{`
+		["a", "bb", "c", "db", "bb"].count do
+		end
+		`, 0},
+		{`
+		["a", "bb", "c", "db", "bb"].count do |i|
+		end
+		`, 0},
+		{`
+		[].count do
+		end
+		`, 0},
+		{`
+		[].count do |i|
+		end
+		`, 0},
 	}
 
 	for i, tt := range tests {
