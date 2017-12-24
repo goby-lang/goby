@@ -22,7 +22,7 @@ func TestConcurrentHashClassSuperclass(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -46,7 +46,7 @@ func TestConcurrentHashInitialization(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		testConcurrentHashObject(t, i, evaluated, tt.expected)
+		verifyConcurrentHashObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -90,11 +90,11 @@ func TestEvalConcurrentHashExpression(t *testing.T) {
 	iterator := func(key, value interface{}) bool {
 		switch key {
 		case "foo":
-			testIntegerObject(t, 0, value.(Object), 123)
+			verifyIntegerObject(t, 0, value.(Object), 123)
 		case "bar":
-			testStringObject(t, 0, value.(Object), "test")
+			verifyStringObject(t, 0, value.(Object), "test")
 		case "Baz":
-			testBooleanObject(t, 0, value.(Object), true)
+			verifyBooleanObject(t, 0, value.(Object), true)
 		}
 
 		return true
@@ -189,7 +189,7 @@ func TestConcurrentHashAccessOperation(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -281,7 +281,7 @@ func TestConcurrentHashDeleteMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -332,7 +332,7 @@ func TestConcurrentHashEachMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		testConcurrentHashObject(t, i, evaluated, tt.expected)
+		verifyConcurrentHashObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -356,7 +356,7 @@ func TestConcurrentHashEachMethod(t *testing.T) {
 	for i, tt := range tests2 {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		testBidimensionalArrayObject(t, i, evaluated, tt.expected)
+		verifyBidimensionalArrayObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -397,7 +397,7 @@ func TestConcurrentHashHasKeyMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -623,7 +623,7 @@ func TestConcurrentHashToStringMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}

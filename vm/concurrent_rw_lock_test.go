@@ -152,7 +152,7 @@ func TestRWLockAcquireAndReleaseReadLock(t *testing.T) {
 
 	v := initTestVM()
 	evaluated := v.testEval(t, code, getFilename())
-	testStringObject(t, i, evaluated, expected)
+	verifyStringObject(t, i, evaluated, expected)
 	v.checkCFP(t, i, 0)
 	v.checkSP(t, i, 1)
 }
@@ -173,7 +173,7 @@ func TestRWLockAcquireAndReleaseWriteLock(t *testing.T) {
 
 	v := initTestVM()
 	evaluated := v.testEval(t, code, getFilename())
-	testStringObject(t, i, evaluated, expected)
+	verifyStringObject(t, i, evaluated, expected)
 	v.checkCFP(t, i, 0)
 	v.checkSP(t, i, 1)
 }
@@ -196,7 +196,7 @@ func TestRWLockWithReadLockMethod(t *testing.T) {
 
 	v := initTestVM()
 	evaluated := v.testEval(t, code, getFilename())
-	testStringObject(t, i, evaluated, expected)
+	verifyStringObject(t, i, evaluated, expected)
 	v.checkCFP(t, i, 0)
 	v.checkSP(t, i, 1)
 }
@@ -219,7 +219,7 @@ func TestRWLockWithWriteLockMethod(t *testing.T) {
 
 	v := initTestVM()
 	evaluated := v.testEval(t, code, getFilename())
-	testStringObject(t, i, evaluated, expected)
+	verifyStringObject(t, i, evaluated, expected)
 	v.checkCFP(t, i, 0)
 	v.checkSP(t, i, 1)
 }
@@ -259,7 +259,7 @@ func TestRWLockAcquireAndReleaseLocksReadBlocksWriteNoRaceDetection(t *testing.T
 
 	v := initTestVM()
 	evaluated := v.testEval(t, code, getFilename())
-	testStringObject(t, i, evaluated, expected)
+	verifyStringObject(t, i, evaluated, expected)
 	v.checkCFP(t, i, 0)
 	v.checkSP(t, i, 1)
 }
@@ -297,7 +297,7 @@ func TestRWLockWithReadLockReadBlocksWriteNoRaceDetection(t *testing.T) {
 
 	v := initTestVM()
 	evaluated := v.testEval(t, code, getFilename())
-	testStringObject(t, i, evaluated, expected)
+	verifyStringObject(t, i, evaluated, expected)
 	v.checkCFP(t, i, 0)
 	v.checkSP(t, i, 1)
 }
