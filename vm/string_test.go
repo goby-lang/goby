@@ -490,6 +490,23 @@ func TestStringEachByteMethod(t *testing.T) {
 		end
 		arr
 		`, []interface{}{83, 117, 115, 104, 105, 32, 240, 159, 141, 163}},
+		// cases for providing an empty block
+		{`
+		a = "Sushi 🍣".each_byte do; end
+		a.to_a
+		`, []interface{}{"S", "u", "s", "h", "i", " ", "🍣"}},
+		{`
+		a = "Sushi 🍣".each_byte do |i|; end
+		a.to_a
+		`, []interface{}{"S", "u", "s", "h", "i", " ", "🍣"}},
+		{`
+		a = "".each_byte do; end
+		a.to_a
+		`, []interface{}{}},
+		{`
+		a = "".each_byte do |i|; end
+		a.to_a
+		`, []interface{}{}},
 	}
 
 	for i, tt := range tests {

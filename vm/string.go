@@ -634,8 +634,10 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					if blockFrame == nil {
 						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
-
 					str := receiver.(*StringObject).value
+					if blockIsEmpty(blockFrame) {
+						return t.vm.initStringObject(str)
+					}
 
 					for _, byte := range []byte(str) {
 						t.builtinMethodYield(blockFrame, t.vm.initIntegerObject(int(byte)))
