@@ -206,6 +206,10 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 
+					if blockIsEmpty(blockFrame) {
+						return FALSE
+					}
+
 					if len(arr.Elements) == 0 {
 						t.callFrameStack.pop()
 					}
@@ -718,9 +722,15 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						t.callFrameStack.pop()
 					}
 
-					for i, obj := range arr.Elements {
-						result := t.builtinMethodYield(blockFrame, obj)
-						elements[i] = result.Target
+					if blockIsEmpty(blockFrame) {
+						for i := 0; i < len(arr.Elements); i++ {
+							elements[i] = NULL
+						}
+					} else {
+						for i, obj := range arr.Elements {
+							result := t.builtinMethodYield(blockFrame, obj)
+							elements[i] = result.Target
+						}
 					}
 
 					return t.vm.initArrayObject(elements)
