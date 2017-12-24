@@ -613,6 +613,19 @@ func TestStringEachLineMethod(t *testing.T) {
 		end
 		arr
 		`, []interface{}{"Max\vwell", "Alex\fius"}},
+		// cases for providing an empty block
+		{`
+		a = "Max\vwell\nAlex\fius".each_line do; end; a.to_a
+		`, []interface{}{"M", "a", "x", "\v", "w", "e", "l", "l", "\n", "A", "l", "e", "x", "\f", "i", "u", "s"}},
+		{`
+		a = "Max\vwell\nAlex\fius".each_line do |i|; end; a.to_a
+		`, []interface{}{"M", "a", "x", "\v", "w", "e", "l", "l", "\n", "A", "l", "e", "x", "\f", "i", "u", "s"}},
+		{`
+		a = "".each_line do; end; a.to_a
+		`, []interface{}{}},
+		{`
+		a = "".each_line do |i|; end; a.to_a
+		`, []interface{}{}},
 	}
 
 	for i, tt := range tests {

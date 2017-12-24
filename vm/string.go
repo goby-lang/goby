@@ -676,6 +676,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					str := receiver.(*StringObject).value
+					if blockIsEmpty(blockFrame) {
+						return t.vm.initStringObject(str)
+					}
 
 					for _, char := range []rune(str) {
 						t.builtinMethodYield(blockFrame, t.vm.initStringObject(string(char)))
@@ -710,6 +713,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					str := receiver.(*StringObject).value
+					if blockIsEmpty(blockFrame) {
+						return t.vm.initStringObject(str)
+					}
 					lineArray := strings.Split(str, "\n")
 
 					for _, line := range lineArray {
