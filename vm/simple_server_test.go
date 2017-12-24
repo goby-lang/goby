@@ -22,7 +22,7 @@ func TestServerInitialization(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkExpected(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -104,7 +104,7 @@ func TestServerRequestInitialization(t *testing.T) {
 			t.Fatalf("Expect request object to have %s attribute.", tt.varName)
 		}
 
-		checkExpected(t, i, v, tt.expected)
+		verifyExpected(t, i, v, tt.expected)
 	}
 
 }

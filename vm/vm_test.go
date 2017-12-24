@@ -144,7 +144,7 @@ foo
 		}
 
 		evaluated := v.GetExecResult()
-		checkExpected(t, i, evaluated, test.expected)
+		verifyExpected(t, i, evaluated, test.expected)
 		// Because REPL should maintain a base call frame so that the whole program won't exit
 		v.checkCFP(t, i, 1)
 	}
@@ -196,7 +196,7 @@ func (v *VM) checkSP(t *testing.T, index, expectedSp int) {
 
 // Verification helpers
 
-func checkExpected(t *testing.T, i int, evaluated Object, expected interface{}) {
+func verifyExpected(t *testing.T, i int, evaluated Object, expected interface{}) {
 	if isError(evaluated) {
 		t.Errorf("At test case %d: %s", i, evaluated.toString())
 		return
@@ -204,21 +204,21 @@ func checkExpected(t *testing.T, i int, evaluated Object, expected interface{}) 
 
 	switch expected := expected.(type) {
 	case int:
-		testIntegerObject(t, i, evaluated, expected)
+		verifyIntegerObject(t, i, evaluated, expected)
 	case float64:
-		testFloatObject(t, i, evaluated, expected)
+		verifyFloatObject(t, i, evaluated, expected)
 	case string:
-		testStringObject(t, i, evaluated, expected)
+		verifyStringObject(t, i, evaluated, expected)
 	case bool:
-		testBooleanObject(t, i, evaluated, expected)
+		verifyBooleanObject(t, i, evaluated, expected)
 	case nil:
-		testNullObject(t, i, evaluated)
+		verifyNullObject(t, i, evaluated)
 	default:
 		t.Errorf("Unknown type %T at case %d", expected, i)
 	}
 }
 
-func testIntegerObject(t *testing.T, i int, obj Object, expected int) bool {
+func verifyIntegerObject(t *testing.T, i int, obj Object, expected int) bool {
 	switch result := obj.(type) {
 	case *IntegerObject:
 		if result.value != expected {
@@ -231,12 +231,12 @@ func testIntegerObject(t *testing.T, i int, obj Object, expected int) bool {
 		t.Errorf("At test case %d: %s", i, result.Message())
 		return false
 	default:
-		t.Errorf("At test case %d: object is not Integer. got=%T (%+v).", i, obj, obj)
+		t.Errorf("At test case %d: object is not Integer. got=%s (%+v).", i, obj.Class().Name, obj)
 		return false
 	}
 }
 
-func testFloatObject(t *testing.T, i int, obj Object, expected float64) bool {
+func verifyFloatObject(t *testing.T, i int, obj Object, expected float64) bool {
 	switch result := obj.(type) {
 	case *FloatObject:
 		if result.value != expected {
@@ -249,12 +249,12 @@ func testFloatObject(t *testing.T, i int, obj Object, expected float64) bool {
 		t.Errorf("At test case %d: %s", i, result.Message())
 		return false
 	default:
-		t.Errorf("At test case %d: object is not Float. got=%T (%+v).", i, obj, obj)
+		t.Errorf("At test case %d: object is not Float. got=%s (%+v).", i, obj.Class().Name, obj)
 		return false
 	}
 }
 
-func testNullObject(t *testing.T, i int, obj Object) bool {
+func verifyNullObject(t *testing.T, i int, obj Object) bool {
 	switch result := obj.(type) {
 	case *NullObject:
 		return true
@@ -262,12 +262,12 @@ func testNullObject(t *testing.T, i int, obj Object) bool {
 		t.Errorf("At test case %d: %s", i, result.Message())
 		return false
 	default:
-		t.Errorf("At test case %d: object is not NULL. got=%T (%+v)", i, obj, obj)
+		t.Errorf("At test case %d: object is not NULL. got=%s (%+v)", i, obj.Class().Name, obj)
 		return false
 	}
 }
 
-func testStringObject(t *testing.T, i int, obj Object, expected string) bool {
+func verifyStringObject(t *testing.T, i int, obj Object, expected string) bool {
 	switch result := obj.(type) {
 	case *StringObject:
 		if result.value != expected {
@@ -280,12 +280,12 @@ func testStringObject(t *testing.T, i int, obj Object, expected string) bool {
 		t.Errorf(result.Message())
 		return false
 	default:
-		t.Errorf("At test case %d: object is not String. got=%T (%+v).", i, obj, obj)
+		t.Errorf("At test case %d: object is not String. got=%s (%+v).", i, obj.Class().Name, obj)
 		return false
 	}
 }
 
-func testBooleanObject(t *testing.T, i int, obj Object, expected bool) bool {
+func verifyBooleanObject(t *testing.T, i int, obj Object, expected bool) bool {
 	switch result := obj.(type) {
 	case *BooleanObject:
 		if result.value != expected {
@@ -298,15 +298,15 @@ func testBooleanObject(t *testing.T, i int, obj Object, expected bool) bool {
 		t.Errorf(result.Message())
 		return false
 	default:
-		t.Errorf("At test case %d: object is not Boolean. got=%T (%+v).", i, obj, obj)
+		t.Errorf("At test case %d: object is not Boolean. got=%s (%+v).", i, obj.Class().Name, obj)
 		return false
 	}
 }
 
-func testArrayObject(t *testing.T, index int, obj Object, expected []interface{}) bool {
+func verifyArrayObject(t *testing.T, index int, obj Object, expected []interface{}) bool {
 	result, ok := obj.(*ArrayObject)
 	if !ok {
-		t.Errorf("At test case %d: object is not Array. got=%T (%+v)", index, obj, obj)
+		t.Errorf("At test case %d: object is not Array. got=%s (%+v)", index, obj.Class().Name, obj)
 		return false
 	}
 
@@ -315,17 +315,17 @@ func testArrayObject(t *testing.T, index int, obj Object, expected []interface{}
 	}
 
 	for i := 0; i < len(result.Elements); i++ {
-		checkExpected(t, i, result.Elements[i], expected[i])
+		verifyExpected(t, index, result.Elements[i], expected[i])
 	}
 
 	return true
 }
 
 // Same as testHashObject(), but expects a ConcurrentArray.
-func testConcurrentArrayObject(t *testing.T, index int, obj Object, expected []interface{}) bool {
+func verifyConcurrentArrayObject(t *testing.T, index int, obj Object, expected []interface{}) bool {
 	result, ok := obj.(*ConcurrentArrayObject)
 	if !ok {
-		t.Errorf("At test case %d: object is not Array. got=%T (%+v)", index, obj, obj)
+		t.Errorf("At test case %d: object is not ConcurrentArray. got=%s (%+v)", index, obj.Class().Name, obj)
 		return false
 	}
 
@@ -334,7 +334,7 @@ func testConcurrentArrayObject(t *testing.T, index int, obj Object, expected []i
 	}
 
 	for i := 0; i < len(result.InternalArray.Elements); i++ {
-		checkExpected(t, i, result.InternalArray.Elements[i], expected[i])
+		verifyExpected(t, i, result.InternalArray.Elements[i], expected[i])
 	}
 
 	return true
@@ -342,11 +342,11 @@ func testConcurrentArrayObject(t *testing.T, index int, obj Object, expected []i
 
 // Same as testHashObject(), but expects a ConcurrentHash.
 //
-func testConcurrentHashObject(t *testing.T, index int, objectResult Object, expected map[string]interface{}) bool {
+func verifyConcurrentHashObject(t *testing.T, index int, objectResult Object, expected map[string]interface{}) bool {
 	result, ok := objectResult.(*ConcurrentHashObject)
 
 	if !ok {
-		t.Errorf("At test case %d: result is not ConcurrentHash. got=%T", index, objectResult)
+		t.Errorf("At test case %d: result is not ConcurrentHash. got=%s", index, objectResult.Class().Name)
 		return false
 	}
 
@@ -370,11 +370,11 @@ func testConcurrentHashObject(t *testing.T, index int, objectResult Object, expe
 //
 // The second limitation is currently the only Hash format in Goby, anyway.
 //
-func testHashObject(t *testing.T, index int, objectResult Object, expected map[string]interface{}) bool {
+func verifyHashObject(t *testing.T, index int, objectResult Object, expected map[string]interface{}) bool {
 	result, ok := objectResult.(*HashObject)
 
 	if !ok {
-		t.Errorf("At test case %d: result is not Hash. got=%T", index, objectResult)
+		t.Errorf("At test case %d: result is not Hash. got=%s", index, objectResult.Class().Name)
 		return false
 	}
 
@@ -389,7 +389,7 @@ func testHashObject(t *testing.T, index int, objectResult Object, expected map[s
 //		expected = [][]interface{}{{"a", 1}, {"b", "2"}}
 //		testBidimensionalArrayObject(t, i, evaluated, expected)
 //
-func testBidimensionalArrayObject(t *testing.T, index int, obj Object, expected [][]interface{}) bool {
+func verifyBidimensionalArrayObject(t *testing.T, index int, obj Object, expected [][]interface{}) bool {
 	result, ok := obj.(*ArrayObject)
 	if !ok {
 		t.Errorf("At test case %d: object is not Array. got=%T (%+v)", index, obj, obj)
@@ -404,7 +404,7 @@ func testBidimensionalArrayObject(t *testing.T, index int, obj Object, expected 
 		resultRow := result.Elements[i]
 		expectedRow := expected[i]
 
-		testArrayObject(t, index, resultRow, expectedRow)
+		verifyArrayObject(t, index, resultRow, expectedRow)
 	}
 
 	return true
@@ -428,7 +428,7 @@ func _checkHashPairs(t *testing.T, actual map[string]Object, expected map[string
 	for expectedKey, expectedValue := range expected {
 		resultValue := actual[expectedKey]
 
-		checkExpected(t, i, resultValue, expectedValue)
+		verifyExpected(t, i, resultValue, expectedValue)
 	}
 
 	return true
