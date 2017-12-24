@@ -1273,6 +1273,39 @@ func TestArrayReduceMethod(t *testing.T) {
 			true
 		end
 		`, "foo"},
+		// cases for providing an empty block
+		{`
+		a = [1, 2, 3].reduce() do; end
+		a.nil?
+		`, true},
+		{`
+		a = [1, 2, 3].reduce("foo") do; end
+		a.nil?
+		`, true},
+		{`
+		a = [1, 2, 3].reduce() do |i|; end
+		a.nil?
+		`, true},
+		{`
+		a = [1, 2, 3].reduce("foo") do |i|; end
+		a.nil?
+		`, true},
+		{`
+		a = [].reduce() do; end
+		a.nil?
+		`, true},
+		{`
+		a = [].reduce("foo") do; end
+		a.nil?
+		`, true},
+		{`
+		a = [].reduce() do |i|; end
+		a.nil?
+		`, true},
+		{`
+		a = [].reduce("foo") do |i|; end
+		a.nil?
+		`, true},
 	}
 
 	for i, tt := range tests {

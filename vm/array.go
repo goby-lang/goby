@@ -794,6 +794,10 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						t.callFrameStack.pop()
 					}
 
+					if blockIsEmpty(blockFrame) {
+						return NULL
+					}
+
 					var prev Object
 					var start int
 					if len(args) == 0 {
