@@ -685,6 +685,27 @@ func TestArrayEachIndexMethod(t *testing.T) {
 		end
 		sum
 		`, 0},
+		// cases for providing an empty block
+		{`
+		a = [1,2,3].each_index do
+		end
+		a[2]
+		`, 3},
+		{`
+		a = [1,2,3].each_index do |i|
+		end
+		a[2]
+		`, 3},
+		{`
+		a = [].each_index do
+		end
+		a.length
+		`, 0},
+		{`
+		a = [].each_index do |i|
+		end
+		a.length
+		`, 0},
 	}
 
 	for i, tt := range tests {
@@ -1069,6 +1090,23 @@ func TestArrayMapMethod(t *testing.T) {
 			i + "1"
 		end
 		`, []interface{}{"11", "sss1", "qwe1"}},
+		{`
+		[].map do |i|
+		end
+		`, []interface{}{}},
+		// cases for providing an empty block
+		{`
+		[1, 2, 3, 4, 5].map do
+		end
+		`, []interface{}{nil, nil, nil, nil, nil}},
+		{`
+		[1, 2, 3, 4, 5].map do |i|
+		end
+		`, []interface{}{nil, nil, nil, nil, nil}},
+		{`
+		[].map do
+		end
+		`, []interface{}{}},
 		{`
 		[].map do |i|
 		end
