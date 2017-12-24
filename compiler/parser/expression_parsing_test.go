@@ -115,6 +115,29 @@ func TestHashExpression(t *testing.T) {
 	}
 }
 
+func TestHashExpressionFail(t *testing.T) {
+	tests := []struct {
+		input string
+		error string
+	}{
+		{`{ 1 }`, `could not parse "1" as hash key. Line: 0`},
+		{`{ "a" }`, `could not parse "a" as hash key. Line: 0`},
+		{`{ nil }`, `could not parse "nil" as hash key. Line: 0`},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		_, err := p.ParseProgram()
+
+		if err.Message != tt.error {
+			t.Fatal("Expected hash literal parsing error")
+			t.Fatal("expect: ", tt.error)
+			t.Fatal("actual: ", err.Message)
+		}
+	}
+}
+
 func TestHashAccessExpression(t *testing.T) {
 	tests := []struct {
 		input    string
