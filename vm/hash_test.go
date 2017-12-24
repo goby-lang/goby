@@ -1287,6 +1287,16 @@ func TestHashSelectMethod(t *testing.T) {
 			source.select do |k, v| true end
 			source
 		`, map[string]interface{}{"a": 1, "b": 2}},
+		// cases for providing an empty block
+		{`
+			{ a: 1, b: 2 }.select do end
+		`, map[string]interface{}{}},
+		{`
+			{ a: 1, b: 2 }.select do |k| end
+		`, map[string]interface{}{}},
+		{`
+			{ }.select do |k| end
+		`, map[string]interface{}{}},
 	}
 
 	for i, tt := range testsSortedArray {

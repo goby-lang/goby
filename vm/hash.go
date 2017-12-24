@@ -932,8 +932,12 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 
-					sourceHash := receiver.(*HashObject)
 					destinationPairs := map[string]Object{}
+					if blockIsEmpty(blockFrame) {
+						return t.vm.initHashObject(destinationPairs)
+					}
+
+					sourceHash := receiver.(*HashObject)
 
 					if len(sourceHash.Pairs) == 0 {
 						t.callFrameStack.pop()
