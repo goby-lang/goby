@@ -1498,6 +1498,19 @@ func TestArraySelectMethod(t *testing.T) {
 			true
 		end
 		`, []interface{}{}},
+		// cases for providing an empty block
+		{`
+		[1, 2, 3, 4, 5].select do; end
+		`, []interface{}{}},
+		{`
+		[1, 2, 3, 4, 5].select do |i|; end
+		`, []interface{}{}},
+		{`
+		[].select do; end
+		`, []interface{}{}},
+		{`
+		[].select do |i|; end
+		`, []interface{}{}},
 	}
 
 	for i, tt := range tests {

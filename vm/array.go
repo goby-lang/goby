@@ -946,6 +946,10 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 
+					if blockIsEmpty(blockFrame) {
+						return t.vm.initArrayObject(elements)
+					}
+
 					// If it's an empty array, pop the block's call frame
 					if len(arr.Elements) == 0 {
 						t.callFrameStack.pop()
