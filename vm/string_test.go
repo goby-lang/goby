@@ -549,13 +549,21 @@ func TestStringEachCharMethod(t *testing.T) {
 		end
 		arr
 		`, []interface{}{"H", "e", "l", "l", "o", "\n", "W", "o", "r", "l", "d"}},
+		// cases for providing an empty block
 		{`
-		arr = []
-		"Sushi 🍣".each_char do |char|
-		  arr.push(char)
-		end
-		arr
+		a = "Sushi 🍣".each_char do; end; a.to_a
 		`, []interface{}{"S", "u", "s", "h", "i", " ", "🍣"}},
+		{`
+		a = "Sushi 🍣".each_char do |i|; end; a.to_a
+		`, []interface{}{"S", "u", "s", "h", "i", " ", "🍣"}},
+		{`
+		a = "".each_char do; end
+		a.to_a
+		`, []interface{}{}},
+		{`
+		a = "".each_char do |i|; end
+		a.to_a
+		`, []interface{}{}},
 	}
 
 	for i, tt := range tests {
