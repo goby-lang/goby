@@ -191,6 +191,19 @@ func TestArrayAnyMethod(t *testing.T) {
 			  true
 			end
 		`, false},
+		// cases for providing an empty block
+		{`
+			[1, 2, 3].any? do end
+		`, false},
+		{`
+			[1, 2, 3].any? do |i| end
+		`, false},
+		{`
+			[].any? do end
+		`, false},
+		{`
+			[].any? do |i| end
+		`, false},
 	}
 
 	for i, tt := range tests {
