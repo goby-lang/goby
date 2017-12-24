@@ -615,6 +615,27 @@ func TestArrayEachMethod(t *testing.T) {
 		end
 		sum
 		`, 0},
+		// cases for providing an empty block
+		{`
+		a = [1,2,3].each do
+		end
+		a[2]
+		`, 3},
+		{`
+		a = [1,2,3].each do |i|
+		end
+		a[2]
+		`, 3},
+		{`
+		a = [].each do
+		end
+		a.length
+		`, 0},
+		{`
+		a = [].each do |i|
+		end
+		a.length
+		`, 0},
 	}
 
 	for i, tt := range tests {

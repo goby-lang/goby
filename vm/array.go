@@ -465,6 +465,9 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					arr := receiver.(*ArrayObject)
+					if blockIsEmpty(blockFrame) {
+						return arr
+					}
 
 					// If it's an empty array, pop the block's call frame
 					if len(arr.Elements) == 0 {
