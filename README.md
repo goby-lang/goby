@@ -115,11 +115,11 @@ Perhaps Goby should be far easier for Rubyists to comprehend. You can use Ruby's
     - `while`
 - Literals
     - Numeric literal
-        - Integer: `100`, `-299`, `-0`
-        - Float: `3.14`, `-273.15`
-    - String literal: `"string"`, `'string'`, `:string`
-    - Symbol literal: `:email`, `{ tel: '9909-999-999' }
-        - Symbol literal is `String` class and just a convenient representation of string literals.
+        - Integer: `100`, `(-299)`, `(-0)`
+        - Float: `3.14`, `(-273.15)`
+    - String literal: `"candy"`, `'cake'`, `:taffy`
+    - Symbol literal: `:email`
+        - Symbol literal is `String` class and just a convenient representation for Rubyists.
             - So you can even do like: `a = :bar.replace("a", "z"); puts a #=> bzr`
     - Array literal: `[1, "2", '3', :att]`
     - Hash literal: `{ "email": 'goby@goby-lang.com', tel: '9909-999-999'}`
