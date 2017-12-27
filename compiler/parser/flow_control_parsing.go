@@ -79,10 +79,6 @@ func (p *Parser) parseCaseCondition(base ast.Expression) *ast.InfixExpression {
 		infix = newInfixExpression(infix, token.Token{Type: token.Or, Literal: token.Or}, rightInfix)
 	}
 
-	if p.peekTokenIs(token.Then) {
-		p.nextToken()
-	}
-
 	return infix
 }
 

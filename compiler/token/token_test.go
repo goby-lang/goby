@@ -19,7 +19,6 @@ func TestLookupIdentTrue(t *testing.T) {
 		"else":   Else,
 		"when":   When,
 		"case":   Case,
-		"then":   Then,
 		"return": Return,
 		"next":   Next,
 		"self":   Self,
