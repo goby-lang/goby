@@ -324,7 +324,7 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 	event, _ := eventTable[oldState]
 	p.fsm.Event(event)
 	p.acceptBlock = true
-	p.nextToken()
+	p.expectPeek(token.Do)
 
 	if p.curTokenIs(token.Semicolon) {
 		p.nextToken()
