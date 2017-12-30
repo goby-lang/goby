@@ -66,7 +66,7 @@ func (l *Lexer) NextToken() token.Token {
 		if l.peekChar() == '-' {
 			tok.Literal = "--"
 			tok.Line = l.line
-			tok.Type = token.Decr
+			tok.Type = token.Plus
 			l.readChar()
 			l.readChar()
 			return tok
@@ -125,9 +125,9 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.Comma, l.ch, l.line)
 	case '+':
 		if l.peekChar() == '+' {
-			tok.Literal = "++"
+			tok.Literal = "+"
 			tok.Line = l.line
-			tok.Type = token.Incr
+			tok.Type = token.Plus
 			l.readChar()
 			l.readChar()
 			return tok
