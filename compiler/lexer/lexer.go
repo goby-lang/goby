@@ -42,8 +42,9 @@ func (l *Lexer) NextToken() token.Token {
 
 	var tok token.Token
 	l.resetNosymbol()
-
 	l.skipWhitespace()
+	//l.reduceSigns()
+
 	switch l.ch {
 	case '"', '\'':
 		tok.Literal = l.readString(l.ch)
@@ -387,6 +388,55 @@ func (l *Lexer) peekChar() rune {
 
 	return l.input[l.readPosition]
 	// Peek shouldn't increment positions.
+}
+
+func (l *Lexer) reduceSigns() {
+	if isSign(l.ch) {
+		n := 0
+		for isSign(l.peekChar()) || l.peekChar() == ' ' {
+			if l.peekChar() == '-' {
+				n++
+			}
+			l.readChar()
+		}
+		if (n % 2) == 0 {
+			if l.isUnary() {
+				l.readChar()
+			} else {
+				l.ch = '+'
+			}
+		} else {
+			l.ch = '-'
+		}
+	}
+}
+
+func (l *Lexer) skipUnary() {
+	if l.ch == '+' && l.isUnary() {
+		l.readChar()
+	}
+}
+
+func (l *Lexer) isUnary() bool {
+	p := l.position
+	if p == 0 {
+		return true
+	}
+
+	switch l.input[p-1] {
+	case '(', ':', ',', '[', '{', '=', '>', '<', '*', '/', '%', 0:
+		return true
+	default:
+		return false
+	}
+}
+
+func isSign(ch rune) bool {
+	return (ch == '+' || ch == '-')
+}
+
+func isSignedDigit(ch rune) bool {
+	return ('0' <= ch && ch <= '9') || ch == '-'
 }
 
 func isDigit(ch rune) bool {

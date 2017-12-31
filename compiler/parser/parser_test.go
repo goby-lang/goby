@@ -132,8 +132,52 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 			"(((5 + 5) * 2) * (5 + 5))",
 		},
 		{
+			"5",
+			"5",
+		},
+		{
+			"3.14",
+			"3.14",
+		},
+		{
+			"-5",
+			"(-5)",
+		},
+		{
+			"-0",
+			"(-0)",
+		},
+		{
+			"-273.15",
+			"(-273.15)",
+		},
+		{
+			"(-0.0)",
+			"(-0.0)",
+		},
+		{
 			"-(5 + 5)",
 			"(-(5 + 5))",
+		},
+		{
+			"-(5 - 5)",
+			"(-(5 - 5))",
+		},
+		{
+			"-(-5 - 5)",
+			"(-((-5) - 5))",
+		},
+		{
+			"-(0.1 + 0.2)",
+			"(-(0.1 + 0.2))",
+		},
+		{
+			"-(0.1 - 0.2)",
+			"(-(0.1 - 0.2))",
+		},
+		{
+			"-(-0.1 - 0.2)",
+			"(-((-0.1) - 0.2))",
 		},
 		{
 			"!(true == true)",
@@ -151,6 +195,87 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 			"n.add(a + b + c * d / f + g)",
 			"n.add((((a + b) + ((c * d) / f)) + g))",
 		},
+		// check unary and multiple operators
+		{
+			"+1",
+			"1",
+		},
+		//{
+		//	"(+1)",
+		//	"1",
+		//},
+		//{
+		//	"+0",
+		//	"0",
+		//},
+		//{
+		//	"(+0)",
+		//	"0",
+		//},
+		//{
+		//	"(+0+1)",
+		//	"(0 + 1)",
+		//},
+		//{
+		//	"1+1",
+		//	"(1 + 1)",
+		//},
+		//{
+		//	"(1+1)",
+		//	"(1 + 1)",
+		//},
+		//{
+		//	"(+1+1)",
+		//	"(1 + 1)",
+		//},
+		//{
+		//	"--+- -++-- -1",
+		//	"1",
+		//},
+		//{
+		//	"--+ -++-- -1",
+		//	"(-1)",
+		//},
+		//{
+		//	"(--+- -++-- -1)",
+		//	"1",
+		//},
+		//{
+		//	"(--+ -++-- -1)",
+		//	"(-1)",
+		//},
+		//{
+		//	"1-1",
+		//	"(1 - 1)",
+		//},
+		//{
+		//	"1 -1",
+		//	"(1 - 1)",
+		//},
+		//{
+		//	"1 - 1",
+		//	"(1 - 1)",
+		//},
+		//{
+		//	"1--1",
+		//	"(1 - (-1))",
+		//},
+		//{
+		//	"1++1",
+		//	"(1 + 1)",
+		//},
+		//{
+		//	"+a",
+		//	"a",
+		//},
+		//{
+		//	"(+a)",
+		//	"a",
+		//},
+		//{
+		//	"(+a+1)",
+		//	"(a + 1)",
+		//},
 	}
 
 	for _, tt := range tests {
@@ -164,7 +289,7 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 
 		actual := program.String()
 		if actual != tt.expected {
-			t.Errorf("expcted=%q, got=%q", tt.expected, actual)
+			t.Errorf("expected=%q, got=%q", tt.expected, actual)
 		}
 	}
 }
@@ -349,9 +474,9 @@ func testBoolLiteral(t *testing.T, exp ast.Expression, v bool) bool {
 func testLiteralExpression(
 	t *testing.T,
 	exp ast.Expression,
-	expcted interface{},
+	expected interface{},
 ) bool {
-	switch v := expcted.(type) {
+	switch v := expected.(type) {
 	case int:
 		return testIntegerLiteral(t, exp, v)
 	case int64:
