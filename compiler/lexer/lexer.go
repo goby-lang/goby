@@ -43,7 +43,7 @@ func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 	l.resetNosymbol()
 	l.skipWhitespace()
-	//l.reduceSigns()
+	l.reducePositiveSigns()
 
 	switch l.ch {
 	case '"', '\'':
@@ -64,13 +64,13 @@ func (l *Lexer) NextToken() token.Token {
 			tok = newToken(token.Assign, l.ch, l.line)
 		}
 	case '-':
-		if l.peekChar() == '-' {
-			tok.Literal = "--"
-			tok.Line = l.line
-			tok.Type = token.Plus
-			l.readChar()
-			l.readChar()
-			return tok
+		if isDigit(l.peekChar()) {
+			if l.isUnary() {
+				tok.Literal = string(l.readSignedNumber())
+				tok.Type = token.Int
+				tok.Line = l.line
+				return tok
+			}
 		} else if l.peekChar() == '=' {
 			tok.Literal = "-="
 			tok.Line = l.line
@@ -125,20 +125,20 @@ func (l *Lexer) NextToken() token.Token {
 	case ',':
 		tok = newToken(token.Comma, l.ch, l.line)
 	case '+':
-		if l.peekChar() == '+' {
-			tok.Literal = "+"
-			tok.Line = l.line
-			tok.Type = token.Plus
-			l.readChar()
-			l.readChar()
-			return tok
-		} else if l.peekChar() == '=' {
+		if l.peekChar() == '=' {
 			tok.Literal = "+="
 			tok.Line = l.line
 			tok.Type = token.PlusEq
 			l.readChar()
 			l.readChar()
 			return tok
+		} else if l.isUnary() {
+			if isDigit(l.peekChar()) {
+				tok.Literal = string(l.readSignedNumber())
+				tok.Type = token.Int
+				tok.Line = l.line
+				return tok
+			}
 		}
 		tok = newToken(token.Plus, l.ch, l.line)
 	case '{':
@@ -287,6 +287,15 @@ func (l *Lexer) readNumber() []rune {
 	return l.input[position:l.position]
 }
 
+func (l *Lexer) readSignedNumber() []rune {
+	position := l.position
+	l.readChar()
+	for isDigit(l.ch) {
+		l.readChar()
+	}
+	return l.input[position:l.position]
+}
+
 func (l *Lexer) readIdentifier() []rune {
 	position := l.position
 	for isLetter(l.ch) || isDigit(l.ch) {
@@ -390,23 +399,17 @@ func (l *Lexer) peekChar() rune {
 	// Peek shouldn't increment positions.
 }
 
-func (l *Lexer) reduceSigns() {
-	if isSign(l.ch) {
-		n := 0
-		for isSign(l.peekChar()) || l.peekChar() == ' ' {
-			if l.peekChar() == '-' {
-				n++
-			}
-			l.readChar()
-		}
-		if (n % 2) == 0 {
-			if l.isUnary() {
+func (l *Lexer) reducePositiveSigns() {
+	if isPositiveSign(l.ch) {
+		if l.isUnary() {
+			if isPositiveSign(l.peekChar()) {
 				l.readChar()
-			} else {
-				l.ch = '+'
+				for isPositiveSign(l.peekChar()) || isIdentifier(l.peekChar()) || isNegativeSign(l.peekChar()) {
+					l.readChar()
+				}
+			} else if isIdentifier(l.peekChar()) {
+				l.readChar()
 			}
-		} else {
-			l.ch = '-'
 		}
 	}
 }
@@ -423,20 +426,40 @@ func (l *Lexer) isUnary() bool {
 		return true
 	}
 
-	switch l.input[p-1] {
-	case '(', ':', ',', '[', '{', '=', '>', '<', '*', '/', '%', 0:
+	p -= 1
+	switch l.input[p] {
+	case '(', ':', ',', '[', '{', '=', '>', '<', '*', '/', '%', '+', '-', 0:
+		return true
+	case ' ':
+		for l.input[p] == ' ' || p > 0 {
+			p--
+			switch l.input[p] {
+			case '(', ':', ',', '[', '{', '=', '>', '<', '*', '/', '%', '+', '-', 0:
+				return true
+			default:
+				return false
+			}
+		}
+	}
+	return false
+}
+
+func isIdentifier(ch rune) bool {
+	switch ch {
+	case '@', '(', ':', '[', '{':
+		//case '@', '(', ':', '[', '{', '-', 0:
 		return true
 	default:
-		return false
+		return isLetter(ch) || isInstanceVariable(ch)
 	}
 }
 
-func isSign(ch rune) bool {
-	return (ch == '+' || ch == '-')
+func isPositiveSign(ch rune) bool {
+	return ch == '+'
 }
 
-func isSignedDigit(ch rune) bool {
-	return ('0' <= ch && ch <= '9') || ch == '-'
+func isNegativeSign(ch rune) bool {
+	return ch == '-'
 }
 
 func isDigit(ch rune) bool {
