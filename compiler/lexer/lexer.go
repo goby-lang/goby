@@ -426,7 +426,7 @@ func (l *Lexer) isUnary() bool {
 		return true
 	}
 
-	p -= 1
+	p--
 	switch l.input[p] {
 	case '(', ':', ',', '[', '{', '=', '>', '<', '*', '/', '%', '+', '-', 0:
 		return true
