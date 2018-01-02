@@ -140,16 +140,143 @@ func TestArrayIndex(t *testing.T) {
 			a[0] = a[1] + a[2] + a[3] * a[4]
 			a[0]
 		`, 55},
-		{
-			`
+		{`
 			code = []
 			code[100] = 'Continue'
 			code[101] = 'Switching Protocols'
 			code[102] = 'Processing'
 			code[200] = 'OK'
 			code.to_s
-			`,
-			`[nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "Continue", "Switching Protocols", "Processing", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "OK"]`},
+		`, `[nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "Continue", "Switching Protocols", "Processing", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "OK"]`},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		verifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayIndexWithSuccessiveValues(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[1, 1]
+		`, []interface{}{2}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[1, 3]
+		`, []interface{}{2, 3, 4}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[1, 5]
+		`, []interface{}{2, 3, 4, 5}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[-5, 1]
+		`, []interface{}{1}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[-5, 5]
+		`, []interface{}{1, 2, 3, 4, 5}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[1, 10]
+		`, []interface{}{2, 3, 4, 5}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[1, 10]
+			a # Should not change receiver itself
+		`, []interface{}{1, 2, 3, 4, 5}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[3, 1]
+		`, []interface{}{4}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[3, 2]
+		`, []interface{}{4, 5}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[3, 3]
+		`, []interface{}{4, 5}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[3, 0]
+		`, []interface{}{}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[3, 1]
+		`, []interface{}{4}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[3, 3]
+		`, []interface{}{4, 5, 6}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[3, 5]
+		`, []interface{}{4, 5, 6, 7, 8}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[3, 7]
+		`, []interface{}{4, 5, 6, 7, 8, 9, 10}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[3, 10]
+		`, []interface{}{4, 5, 6, 7, 8, 9, 10}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[-7, 1]
+		`, []interface{}{4}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[-7, 3]
+		`, []interface{}{4, 5, 6}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[-7, 5]
+		`, []interface{}{4, 5, 6, 7, 8}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[-7, 7]
+		`, []interface{}{4, 5, 6, 7, 8, 9, 10}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[-7, 10]
+		`, []interface{}{4, 5, 6, 7, 8, 9, 10}},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input, getFilename())
+		verifyArrayObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 2)
+		vm.checkSP(t, i, 3)
+	}
+}
+
+func TestArrayIndexWithSuccessiveValuesNullCases(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[5, 5] # Range exceeded
+		`, nil},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[-6, 5] # Negative case range exceeded
+		`, nil},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[3, -1] # Second argument is negative
+		`, nil},
 	}
 
 	for i, tt := range tests {

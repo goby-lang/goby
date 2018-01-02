@@ -1123,8 +1123,8 @@ func (a *ArrayObject) dig(t *thread, keys []Object, sourceLine int) Object {
 
 // Retrieves an object in an array using Integer index; common to `[]` and `at()`.
 func (a *ArrayObject) index(t *thread, args []Object, sourceLine int) Object {
-	if len(args) != 1 {
-		return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 arguments. got=%d", len(args))
+	if len(args) > 2 {
+		return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1..2 arguments. got=%d", len(args))
 	}
 
 	i := args[0]
@@ -1135,9 +1135,22 @@ func (a *ArrayObject) index(t *thread, args []Object, sourceLine int) Object {
 	}
 
 	normalizedIndex := a.normalizeIndex(index)
-
 	if normalizedIndex == -1 {
 		return NULL
+	}
+
+	if len(args) == 2 {
+		j := args[1]
+		count, ok := j.(*IntegerObject)
+
+		if !ok {
+			return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[1].Class().Name)
+		}
+
+		if count.value < 0 {
+			return NULL
+		}
+		return t.vm.initArrayObject(a.Elements[normalizedIndex:normalizedIndex+count.value])
 	}
 
 	return a.Elements[normalizedIndex]
