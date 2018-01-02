@@ -638,12 +638,15 @@ func TestHashEachKeyMethod(t *testing.T) {
 		expected []interface{}
 	}{
 		{`
+			{ b: "Hello", c: "World", a: "Goby" }.each_key do end
+		`, []interface{}{"a", "b", "c"}},
+		{`
 			{ a: "Hello", b: "World", c: "Goby" }.each_key do |key|
 				# Empty Block
 			end
 		`, []interface{}{"a", "b", "c"}},
 		{`
-			{ b: "Hello", c: "World", a: "Goby" }.each_key do |key|
+			{ b: "Hello", c: "World", a: "Goby" }.each_key do
 				# Empty Block
 			end
 		`, []interface{}{"a", "b", "c"}},
