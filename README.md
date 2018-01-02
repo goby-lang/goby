@@ -113,6 +113,16 @@ Perhaps Goby should be far easier for Rubyists to comprehend. You can use Ruby's
 - Flow control
     - `if`, `else`, `elsif`
     - `while`
+- Literals
+    - Numeric literal
+        - Integer: `100`, `-299`, `-0`
+        - Float: `3.14`, `-273.15`
+    - String literal: `"candy"`, `'cake'`, `:taffy`
+    - Symbol literal: `:email`
+        - Symbol literal is `String` class and just a convenient representation for Rubyists.
+            - So you can even do like: `a = :bar.replace("a", "z"); puts a #=> bzr`
+    - Array literal: `[1, "2", '3', :att]`
+    - Hash literal: `{ "email": 'goby@goby-lang.com', tel: '9909-999-999'}`
 - IO
     - `#puts`
     - `ARGV`, `STDIN`, `STDOUT`, `STDERR`, `ENV` constants
@@ -131,6 +141,7 @@ Written in Go.
 - `Class`
 - `Integer`
 - `String`
+    - Symbols like `:a` or hash keys `{a: 1}` are just another notation of `String`
 - `Boolean`
 - `Null` (`nil`)
 - `Hash`
@@ -140,9 +151,13 @@ Written in Go.
 - `Channel`
 - `File`
 - `GoObject` (provides `#go_func` that wraps pure Go objects or pointers for interaction)
-- `Regexp`
+- `Regexp` and `MatchData`
 - `MatchData` (to hold the result of regexp matching)
 - `Float`
+- `Decimal`
+    - Represented as a fraction internally
+    - Number of digits has virtually no limit
+    - You can get Decimal object as for now: `a = "-99.99999999".to_d`
 
 ### Standard library
 
@@ -287,6 +302,12 @@ Support us with a monthly donation and help us continue our activities. [[Become
 <a href="https://opencollective.com/goby/sponsor/7/website" target="_blank"><img src="https://opencollective.com/goby/sponsor/7/avatar.svg"></a>
 <a href="https://opencollective.com/goby/sponsor/8/website" target="_blank"><img src="https://opencollective.com/goby/sponsor/8/avatar.svg"></a>
 <a href="https://opencollective.com/goby/sponsor/9/website" target="_blank"><img src="https://opencollective.com/goby/sponsor/9/avatar.svg"></a>
+
+### Powered by
+
+* JetBrains [Goland IDE](https://www.jetbrains.com/go/)
+
+[![JetBrains Goland](https://github.com/goby-lang/goby/blob/master/wiki/goland_logo-text.png)](https://www.jetbrains.com/go/)
 
 **Supporting Goby by sending your first PR! See [contribution guideline](https://github.com/goby-lang/goby/blob/master/CONTRIBUTING.md)**
 
