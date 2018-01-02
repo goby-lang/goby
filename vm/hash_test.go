@@ -1085,21 +1085,21 @@ func TestHashMapValuesMethod(t *testing.T) {
 			v * 3
 		end
 		h["a"]
-		`, 3},
+		`, 1},
 		{`
 		h = { a: 1, b: 2, c: 3 }
 		result = h.map_values do |v|
 			v * 3
 		end
 		h["b"]
-		`, 6},
+		`, 2},
 		{`
 		h = { a: 1, b: 2, c: 3 }
 		result = h.map_values do |v|
 			v * 3
 		end
 		h["c"]
-		`, 9},
+		`, 3},
 		{`
 		h = { a: 1, b: 2, c: 3 }
 		result = h.map_values do |v|
