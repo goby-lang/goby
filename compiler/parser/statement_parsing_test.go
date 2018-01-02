@@ -282,3 +282,20 @@ func TestWhileStatement(t *testing.T) {
 	secondCall := secondStmt.Expression.(*ast.AssignExpression)
 	testIdentifier(t, secondCall.Variables[0], "i")
 }
+
+func TestWhileStatementWithoutDoKeywordFail(t *testing.T) {
+	input := `
+	while i < a.length
+	  puts(i)
+	  i += 1
+	end`
+
+	l := lexer.New(input)
+	p := New(l)
+	_, err := p.ParseProgram()
+
+	if err.Message != "expected next token to be DO, got IDENT instead. Line: 2" {
+		t.Fatal("Condition expression should be followed by a do keyword")
+	}
+
+}
