@@ -704,6 +704,9 @@ func TestHashEachValueMethod(t *testing.T) {
 		expected []interface{}
 	}{
 		{`
+			{ a: "Hello", b: 123, c: true }.each_value do end
+		`, []interface{}{"Hello", 123, true}},
+		{`
 			{ a: "Hello", b: 123, c: true }.each_value do |v|
 				# Empty Block
 			end
