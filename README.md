@@ -115,8 +115,8 @@ Perhaps Goby should be far easier for Rubyists to comprehend. You can use Ruby's
     - `while`
 - Literals
     - Numeric literal
-        - Integer: `100`, `(-299)`, `(-0)`
-        - Float: `3.14`, `(-273.15)`
+        - Integer: `100`, `-299`, `-0`
+        - Float: `3.14`, `-273.15`
     - String literal: `"candy"`, `'cake'`, `:taffy`
     - Symbol literal: `:email`
         - Symbol literal is `String` class and just a convenient representation for Rubyists.
