@@ -825,10 +825,10 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// ```Ruby
 			// h = { a: 1, b: 2, c: 3 }
-			// result = h.transform_values do |v|
+			// result = h.map_values do |v|
 			//   v * 3
 			// end
-			// h      # => { a: 3, b: 6, c: 9 }
+			// h      # => { a: 1, b: 2, c: 3 }
 			// result # => { a: 3, b: 6, c: 9 }
 			// ```
 			//
@@ -845,16 +845,16 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					h := receiver.(*HashObject)
+					result := make(map[string]Object)
 
 					if len(h.Pairs) == 0 {
 						t.callFrameStack.pop()
 					}
 
 					for k, v := range h.Pairs {
-						result := t.builtinMethodYield(blockFrame, v)
-						h.Pairs[k] = result.Target
+						result[k] = t.builtinMethodYield(blockFrame, v).Target
 					}
-					return h
+					return t.vm.initHashObject(result)
 				}
 			},
 		},
