@@ -24,11 +24,13 @@ One of our goal is to provide web developers a sort of small and handy environme
 ## Table of contents
 
 - [Demo and sample Goby app](#demo_and_sample_app)
+- [Structure](#structure)
 - [Aspects](#aspects)
     - [Features](#features)
     - [Language](#language)
     - [Native class](#native_class)
     - [Standard class](#standard_class)
+- [Current roadmap](#current_roadmap)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Sample codes](#sample_codes)
@@ -43,6 +45,10 @@ One of our goal is to provide web developers a sort of small and handy environme
 <img src="https://i.imgur.com/1Le7nTe.gif" width="60%">
 
 **New!** Check-out our [sample app](http://sample.goby-lang.org) built with Goby. Source code is also available [here](https://github.com/goby-lang/sample-web-app).
+
+## Structure
+
+![](https://github.com/goby-lang/goby/blob/master/wiki/goby_structure.png)
 
 ## Aspects
 
@@ -113,6 +119,7 @@ Perhaps Goby should be far easier for Rubyists to comprehend. You can use Ruby's
 - Flow control
     - `if`, `else`, `elsif`
     - `while`
+    - `raise`
 - Literals
     - Numeric literal
         - Integer: `100`, `-299`, `-0`
@@ -133,6 +140,9 @@ Perhaps Goby should be far easier for Rubyists to comprehend. You can use Ruby's
     - Goroutine-based `thread` method to create a new thread
     - Works with `Channel` class for passing objects between threads, like `chan` in Go
     - See this sample: [One thousand threads](https://github.com/goby-lang/goby/blob/master/samples/one_thousand_threads.gb)
+- Very few keywords
+  - `def`, `true`, `false`, `nil`, `if`, `elsif`, `else`, `case`, `when`, `return`, `self`, `end`, `while`, `do`, `yield`, `next`, `class`, `module`, `break`
+  - Most are implemented as methods, including `thread` or `raise`
 
 ### Native class
 
@@ -173,6 +183,12 @@ written in Go and Goby.
 - `Net::HTTP::Request`
 - `Net::HTTP::Response`
 - `Net::SimpleServer` (try [sample Goby app](http://sample.goby-lang.org) and [source](https://github.com/goby-lang/sample-web-app), or [sample code](https://github.com/goby-lang/goby/blob/master/samples/server.gb)!)
+
+## Current roadmap
+
+- [ ] create functions for testing framework like `rescue`, `begin` -- by 2018 March
+- [ ] testing framework -- by 2018 April
+- [ ] third-party library support (like `rubygem`)
 
 ## Installation
 
