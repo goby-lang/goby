@@ -213,13 +213,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					for _, obj := range arr.Elements {
 						result := t.builtinMethodYield(blockFrame, obj)
 
-						booleanResult, isResultBoolean := result.Target.(*BooleanObject)
-
-						if isResultBoolean {
-							if booleanResult.value {
-								return TRUE
-							}
-						} else if result.Target != NULL {
+						if result.Target.isTruthy() {
 							return TRUE
 						}
 					}
@@ -327,7 +321,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 
 						for _, obj := range arr.Elements {
 							result := t.builtinMethodYield(blockFrame, obj)
-							if result.Target.(*BooleanObject).value {
+							if result.Target.isTruthy() {
 								count++
 							}
 						}
@@ -937,7 +931,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 
 					for _, obj := range arr.Elements {
 						result := t.builtinMethodYield(blockFrame, obj)
-						if result.Target.(*BooleanObject).value {
+						if result.Target.isTruthy() {
 							elements = append(elements, obj)
 						}
 					}

@@ -17,6 +17,7 @@ type Object interface {
 	id() int
 	instanceVariableGet(string) (Object, bool)
 	instanceVariableSet(string, Object) Object
+	isTruthy() bool
 }
 
 // baseObj ==============================================================
@@ -81,6 +82,10 @@ func (b *baseObj) id() int {
 		panic(e.Error())
 	}
 	return int(r)
+}
+
+func (b *baseObj) isTruthy() bool {
+	return true
 }
 
 // Pointer ==============================================================
