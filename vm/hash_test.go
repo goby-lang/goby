@@ -1112,6 +1112,14 @@ func TestHashMapValuesMethod(t *testing.T) {
 		expected interface{}
 	}{
 		{`
+		result = { a: 1, b: 2, c: 3 }.map_values do end
+		result["a"] + result["b"] + result["c"]
+		`, 6},
+		{`
+		result = { a: 1, b: 2, c: 3 }.map_values do |v| end
+		result["a"] + result["b"] + result["c"]
+		`, 6},
+		{`
 		h = { a: 1, b: 2, c: 3 }
 		result = h.map_values do |v|
 			v * 3

@@ -851,6 +851,10 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					h := receiver.(*HashObject)
+					if blockIsEmpty(blockFrame) {
+						return h
+					}
+
 					result := make(map[string]Object)
 
 					if len(h.Pairs) == 0 {
