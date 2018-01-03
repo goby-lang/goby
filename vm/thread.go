@@ -427,7 +427,6 @@ func (t *thread) setErrorObject(receiverPtr, sp int, errorType string, sourceLin
 func blockIsEmpty(blockFrame *normalCallFrame) bool {
 	if blockFrame.instructionSet.instructions[0].action.name == bytecode.Leave {
 		return true
-	} else {
-		return false
 	}
+	return false
 }
