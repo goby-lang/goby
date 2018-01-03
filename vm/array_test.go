@@ -283,6 +283,27 @@ func TestArrayIndexWithSuccessiveValuesNullCases(t *testing.T) {
 	}
 }
 
+func TestArrayIndexWithSuccessiveValuesFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`
+			a = [1, 2, 3, 4, 5]
+			a["1", 5]
+		`, "TypeError: Expect argument to be Integer. got: String", 1},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[1, "5"]
+		`, "TypeError: Expect argument to be Integer. got: String", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayAnyMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -881,6 +902,26 @@ func TestArrayFirstMethod(t *testing.T) {
 	}
 }
 
+func TestArrayFirstMethodNullCases(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+			a = []
+			a.first # Empty Array Case
+		`, nil},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		verifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayFirstMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = [1, 2]
@@ -1230,6 +1271,21 @@ func TestArrayPopMethod(t *testing.T) {
 	}
 }
 
+func TestArrayPopMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`[1, 2, 3, 4, 5].pop(123)`, "ArgumentError: Expect 0 argument. got=1", 1},
+		{`[1, 2, 3, 4, 5].pop("Hello", "World")`, "ArgumentError: Expect 0 argument. got=2", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayPushMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -1362,6 +1418,21 @@ func TestArrayReverseMethod(t *testing.T) {
 	}
 }
 
+func TestArrayReverseMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`[1, 2, 3, 4, 5].reverse(123)`, "ArgumentError: Expect 0 argument. got=1", 1},
+		{`[1, 2, 3, 4, 5].reverse("Hello", "World")`, "ArgumentError: Expect 0 argument. got=2", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayReverseEachMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -1488,6 +1559,20 @@ func TestArraySelectMethod(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		verifyArrayObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArraySelectMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`[1, 2, 3, 4, 5].select`, "InternalError: Can't yield without a block", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
