@@ -190,11 +190,6 @@ func TestArrayIndexWithSuccessiveValues(t *testing.T) {
 		`, []interface{}{2, 3, 4, 5}},
 		{`
 			a = [1, 2, 3, 4, 5]
-			a[1, 10]
-			a # Should not change receiver itself
-		`, []interface{}{1, 2, 3, 4, 5}},
-		{`
-			a = [1, 2, 3, 4, 5]
 			a[3, 1]
 		`, []interface{}{4}},
 		{`
@@ -255,15 +250,15 @@ func TestArrayIndexWithSuccessiveValues(t *testing.T) {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input, getFilename())
 		verifyArrayObject(t, i, evaluated, tt.expected)
-		vm.checkCFP(t, i, 2)
-		vm.checkSP(t, i, 3)
+		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
 	}
 }
 
 func TestArrayIndexWithSuccessiveValuesNullCases(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected []interface{}
+		expected interface{}
 	}{
 		{`
 			a = [1, 2, 3, 4, 5]

@@ -236,6 +236,9 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			Name: "at",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 arguments. got=%v", len(args))
+					}
 					arr := receiver.(*ArrayObject)
 					return arr.index(t, args, sourceLine)
 				}
@@ -253,7 +256,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%v", len(args))
 					}
 
 					arr := receiver.(*ArrayObject)
@@ -1149,6 +1152,10 @@ func (a *ArrayObject) index(t *thread, args []Object, sourceLine int) Object {
 
 		if count.value < 0 {
 			return NULL
+		}
+
+		if normalizedIndex + count.value > len(a.Elements) {
+			return t.vm.initArrayObject(a.Elements[normalizedIndex:])
 		}
 		return t.vm.initArrayObject(a.Elements[normalizedIndex:normalizedIndex+count.value])
 	}
