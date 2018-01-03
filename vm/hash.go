@@ -200,13 +200,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 						objectKey := t.vm.initStringObject(stringKey)
 						result := t.builtinMethodYield(blockFrame, objectKey, value)
 
-						booleanResult, isResultBoolean := result.Target.(*BooleanObject)
-
-						if isResultBoolean {
-							if booleanResult.value {
-								return TRUE
-							}
-						} else if result.Target != NULL {
+						if result.Target.isTruthy() {
 							return TRUE
 						}
 					}
@@ -937,13 +931,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 						objectKey := t.vm.initStringObject(stringKey)
 						result := t.builtinMethodYield(blockFrame, objectKey, value)
 
-						booleanResult, isResultBoolean := result.Target.(*BooleanObject)
-
-						if isResultBoolean {
-							if booleanResult.value {
-								destinationPairs[stringKey] = value
-							}
-						} else if result.Target != NULL {
+						if result.Target.isTruthy() {
 							destinationPairs[stringKey] = value
 						}
 					}
