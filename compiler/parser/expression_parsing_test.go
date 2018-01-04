@@ -263,6 +263,48 @@ func TestArrayIndexExpression(t *testing.T) {
 	}
 }
 
+func TestArrayMultipleIndexExpression(t *testing.T) {
+	tests := []struct {
+		input         string
+		expectedIndex []interface{}
+	}{
+		{`[][1, 2]`, []interface{}{1, 2}},
+		{`[][5, 4, 3, 2, 1]`, []interface{}{5, 4, 3, 2, 1}},
+		{`[][foo, bar, baz]`, []interface{}{"foo", "bar", "baz"}},
+		{`[][foo, 123, baz]`, []interface{}{"foo", 123, "baz"}},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program, err := p.ParseProgram()
+
+		if err != nil {
+			t.Fatal(err.Message)
+		}
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("program has not enough statments. expect 1, got=%d", len(program.Statements))
+		}
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+
+		if !ok {
+			t.Fatalf("program.Statments[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+		}
+
+		arrIndex, ok := stmt.Expression.(*ast.CallExpression)
+
+		for i, value := range tt.expectedIndex {
+			switch expected := value.(type) {
+			case int:
+				testIntegerLiteral(t, arrIndex.Arguments[i], expected)
+			case string:
+				testIdentifier(t, arrIndex.Arguments[i], expected)
+			}
+		}
+	}
+}
+
 func TestIdentifierExpression(t *testing.T) {
 	input := `foobar;`
 
