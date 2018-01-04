@@ -159,6 +159,23 @@ func TestArrayIndex(t *testing.T) {
 	}
 }
 
+func TestArrayIndexFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[-11] = 123
+		`, "InternalError: Index value -11 too small for array. minimum: -10", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayIndexWithSuccessiveValues(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -244,6 +261,65 @@ func TestArrayIndexWithSuccessiveValues(t *testing.T) {
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[-7, 10]
 		`, []interface{}{4, 5, 6, 7, 8, 9, 10}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[2, 3] = [1, 2, 3, 4, 5]
+		`, []interface{}{1, 2, 3, 4, 5}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[2, 3] = [1, 2, 3, 4, 5]
+			a
+		`, []interface{}{1, 2, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[1, 7] = [1, 2, 3]
+			a
+		`, []interface{}{1, 1, 2, 3, 9, 10}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[-5, 3] = [2, 4, 6, 8, 10]
+			a
+		`, []interface{}{1, 2, 3, 4, 5, 2, 4, 6, 8, 10, 9, 10}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[5, 6] = 123
+			a
+		`, []interface{}{1, 2, 3, 4, 5, 123}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[5, 0] = 123
+			a
+		`, []interface{}{1, 2, 3, 4, 5, 123, 6, 7, 8, 9, 10}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[-7, 2] = "@Maxwell-Alexius is solving issue #403"
+			a
+		`, []interface{}{1, 2, 3, "@Maxwell-Alexius is solving issue #403", 6, 7, 8, 9, 10}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[5, 123] = 123
+			a
+		`, []interface{}{1, 2, 3, 4, 5, 123}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[5, 123] = [1, 2, 3]
+			a
+		`, []interface{}{1, 2, 3, 4, 5, 1, 2, 3}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[10, 123] = 123
+			a
+		`, []interface{}{1, 2, 3, 4, 5, nil, nil, nil, nil, nil, 123}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[10, 123] = [1, 2, 3]
+			a
+		`, []interface{}{1, 2, 3, 4, 5, nil, nil, nil, nil, nil, 1, 2, 3}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[10, 123] = "@Maxwell-Alexius is solving issue #403 which have tons of feature"
+			a
+		`, []interface{}{1, 2, 3, 4, 5, nil, nil, nil, nil, nil, "@Maxwell-Alexius is solving issue #403 which have tons of feature"}},
 	}
 
 	for i, tt := range tests {
@@ -305,6 +381,22 @@ func TestArrayIndexWithSuccessiveValuesFail(t *testing.T) {
 			a = [1, 2, 3, 4, 5]
 			a[]
 		`, "ArgumentError: Expect 1..2 arguments. got=0", 1},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[1, "5"] = 6
+		`, "TypeError: Expect argument to be Integer. got: String", 1},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[1, "5", 6] = 123
+		`, "ArgumentError: Expect 2..3 arguments. got=4", 1},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[1, -3] = [1, 2, 3, 4, 5]
+		`, "InternalError: Expect second argument greater than or equal 0. got: -3", 1},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[-11, 2] = [1, 2, 3, 4, 5]
+		`, "InternalError: Index value -11 too small for array. minimum: -10", 1},
 	}
 
 	for i, tt := range testsFail {

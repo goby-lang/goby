@@ -130,26 +130,93 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 
-					// First arg is index
-					// Second arg is assigned value
-					if len(args) != 2 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 2 arguments. got=%d", len(args))
+					// First argument is index, there exists two cases which will be described in the following code
+					if len(args) != 2 && len(args) != 3 {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 2..3 arguments. got=%d", len(args))
 					}
 
 					i := args[0]
 					index, ok := i.(*IntegerObject)
-					indexValue := index.value
 
 					if !ok {
 						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 					}
 
+					indexValue := index.value
 					arr := receiver.(*ArrayObject)
+
+					// <Three Argument Case>
+					// Second argument is the length of successive array values
+					// Third argument is the assignment value
+					if len(args) == 3 {
+						// Negative index value too small
+						if indexValue < 0 {
+							if arr.normalizeIndex(index) == -1 {
+								return t.vm.initErrorObject(errors.InternalError, sourceLine, "Index value %d too small for array. minimum: %d", indexValue, -arr.length())
+							} else {
+								indexValue = arr.normalizeIndex(index)
+							}
+						}
+
+						a := args[2]
+						assignedValue, isArray := a.(*ArrayObject)
+
+						// Expand the array with nil case, we don't need to care the second argument
+						// because the count in this case is useless
+						if indexValue >= arr.length() {
+
+							for arr.length() < indexValue {
+								arr.Elements = append(arr.Elements, NULL)
+							}
+
+							if isArray {
+								arr.Elements = append(arr.Elements, assignedValue.Elements...)
+							} else {
+								arr.Elements = append(arr.Elements, a)
+							}
+							return a
+						}
+
+						c := args[1]
+						count, ok := c.(*IntegerObject)
+
+						// Second argument must be integer
+						if !ok {
+							return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[1].Class().Name)
+						}
+
+						countValue := count.value
+						// Second argument must be positive value
+						if countValue < 0 {
+							return t.vm.initErrorObject(errors.InternalError, sourceLine, "Expect second argument greater than or equal 0. got: %d", countValue)
+						}
+
+						endValue := indexValue + countValue
+						// Addition of index and count is too large
+						if endValue > arr.length() {
+							endValue = arr.length()
+						}
+
+						arr.Elements = append(arr.Elements[:indexValue], arr.Elements[endValue:]...)
+
+						// If assigned value is array, then splat the array and push each element in the receiver
+						// according to the first and second argument
+						if isArray {
+							arr.Elements = append(arr.Elements[:indexValue], append(assignedValue.Elements, arr.Elements[indexValue:]...)...)
+						} else {
+							arr.Elements = append(arr.Elements[:indexValue], append([]Object{a}, arr.Elements[indexValue:]...)...)
+						}
+
+						return a
+					}
+
+					// <Two Argument Case>
+					// Second argument is the assignment value
 
 					// Negative index value condition
 					if indexValue < 0 {
 						if len(arr.Elements) < -indexValue {
-							return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Index is too small for array. got=%s", i.Class().Name)
+							return t.vm.initErrorObject(errors.InternalError, sourceLine, "Index value %d too small for array. minimum: %d", indexValue, -arr.length())
 						}
 						arr.Elements[len(arr.Elements)+indexValue] = args[1]
 						return arr.Elements[len(arr.Elements)+indexValue]
