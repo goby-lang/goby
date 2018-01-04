@@ -153,9 +153,8 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						if indexValue < 0 {
 							if arr.normalizeIndex(index) == -1 {
 								return t.vm.initErrorObject(errors.InternalError, sourceLine, "Index value %d too small for array. minimum: %d", indexValue, -arr.length())
-							} else {
-								indexValue = arr.normalizeIndex(index)
 							}
+							indexValue = arr.normalizeIndex(index)
 						}
 
 						a := args[2]
@@ -1221,10 +1220,10 @@ func (a *ArrayObject) index(t *thread, args []Object, sourceLine int) Object {
 			return NULL
 		}
 
-		if normalizedIndex + count.value > len(a.Elements) {
+		if normalizedIndex+count.value > len(a.Elements) {
 			return t.vm.initArrayObject(a.Elements[normalizedIndex:])
 		}
-		return t.vm.initArrayObject(a.Elements[normalizedIndex:normalizedIndex+count.value])
+		return t.vm.initArrayObject(a.Elements[normalizedIndex : normalizedIndex+count.value])
 	}
 
 	return a.Elements[normalizedIndex]
