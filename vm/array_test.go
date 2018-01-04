@@ -293,6 +293,18 @@ func TestArrayIndexWithSuccessiveValuesFail(t *testing.T) {
 			a = [1, 2, 3, 4, 5]
 			a[1, "5"]
 		`, "TypeError: Expect argument to be Integer. got: String", 1},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[1, 3, 5]
+		`, "ArgumentError: Expect 1..2 arguments. got=3", 1},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[1, 3, 5, 7, 9]
+		`, "ArgumentError: Expect 1..2 arguments. got=5", 1},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[]
+		`, "ArgumentError: Expect 1..2 arguments. got=0", 1},
 	}
 
 	for i, tt := range testsFail {

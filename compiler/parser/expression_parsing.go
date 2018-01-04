@@ -243,8 +243,8 @@ func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
 	p.nextToken()
 	callExpression.Arguments = []ast.Expression{p.parseExpression(NORMAL)}
 
-	// When there are two arguments which specifies get a range of elements from array
-	if p.peekTokenIs(token.Comma) {
+	// Accepting multiple indexing argument
+	for p.peekTokenIs(token.Comma) {
 		p.nextToken()
 		p.nextToken()
 		callExpression.Arguments = append(callExpression.Arguments, p.parseExpression(NORMAL))
