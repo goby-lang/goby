@@ -1526,6 +1526,44 @@ func TestMethodCallWithBlockArgument(t *testing.T) {
 			  ten + 20
 			end
 			`, 30},
+		// Get Block
+		{`
+		def foo
+          get_block.call
+		end
+
+		foo do
+		  10
+		end
+`, 10},
+		{`
+		def bar(block)
+		  block.call + 100
+		end
+
+		def foo
+		  bar(get_block)
+		end
+
+		foo do
+		  10
+		end
+`, 110},
+		{`
+		def bar(block)
+		  block.call + get_block.call
+		end
+
+		def foo
+		  bar(get_block) do
+			20
+		  end
+		end
+
+		foo do
+		  10
+		end
+`, 30},
 	}
 
 	for i, tt := range tests {
