@@ -16,6 +16,92 @@ type (
 	infixParseFn  func(ast.Expression) ast.Expression
 )
 
+func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
+	var value ast.Expression
+	var tok token.Token
+	exp := &ast.AssignExpression{BaseNode: &ast.BaseNode{}}
+
+	if !p.fsm.Is(states.ParsingFuncCall) {
+		exp.MarkAsStmt()
+	}
+
+	oldState := p.fsm.Current()
+	p.fsm.Event(events.ParseAssignment)
+
+	switch v := v.(type) {
+	case ast.Variable:
+		exp.Variables = []ast.Expression{v}
+	case *ast.MultiVariableExpression:
+		exp.Variables = v.Variables
+	case *ast.CallExpression:
+		/*
+			for cases like: `a[i] += b`
+			which needs to be expand to
+
+			a[i] = a[i] + b
+
+			CallExp = CallExp + Expression
+		*/
+
+		if v.Method == "[]" {
+			value = p.expandAssignmentValue(v)
+
+			callExp := &ast.CallExpression{
+				BaseNode:  &ast.BaseNode{},
+				Method:    "[]=",
+				Arguments: []ast.Expression{v.Arguments[0], value},
+				Receiver:  v.Receiver,
+			}
+			return callExp
+		}
+
+		errMsg := fmt.Sprintf("Can't assign value to %s. Line: %d", v.String(), p.curToken.Line)
+		p.error = errors.InitError(errMsg, errors.InvalidAssignmentError)
+	}
+
+	if len(exp.Variables) == 1 {
+		tok = token.Token{Type: token.Assign, Literal: "=", Line: p.curToken.Line}
+		value = p.expandAssignmentValue(v)
+	} else {
+		tok = p.curToken
+		precedence := p.curPrecedence()
+		p.nextToken()
+		value = p.parseExpression(precedence)
+	}
+
+	exp.Token = tok
+	exp.Value = value
+
+	event, _ := events.EventTable[oldState]
+	p.fsm.Event(event)
+
+	return exp
+}
+
+func (p *Parser) parseConstant() ast.Expression {
+	c := &ast.Constant{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
+
+	if p.peekTokenIs(token.ResolutionOperator) {
+		c.IsNamespace = true
+		p.nextToken()
+		return p.parseInfixExpression(c)
+	}
+
+	return c
+}
+
+func (p *Parser) parseDotExpression(receiver ast.Expression) ast.Expression {
+	_, ok := receiver.(*ast.IntegerLiteral)
+
+	// When both receiver & caller are integer => Float
+	if ok && p.peekTokenIs(token.Int) {
+		return p.parseFloatLiteral(receiver)
+	}
+
+	// Normal call method expression with receiver
+	return p.parseCallExpressionWithReceiver(receiver)
+}
+
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	parseFn := p.prefixParseFns[p.curToken.Type]
 	if parseFn == nil {
@@ -115,6 +201,10 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	return leftExp
 }
 
+func (p *Parser) parseGetBlockExpression() ast.Expression {
+	return &ast.GetBlockExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
+}
+
 func (p *Parser) parseGroupedExpression() ast.Expression {
 	p.nextToken()
 
@@ -127,59 +217,8 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 	return exp
 }
 
-func (p *Parser) parseYieldExpression() ast.Expression {
-	ye := &ast.YieldExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
-
-	if p.peekTokenIs(token.LParen) {
-		p.nextToken()
-		ye.Arguments = p.parseCallArgumentsWithParens()
-	}
-
-	if arguments.Tokens[p.peekToken.Type] && p.peekTokenAtSameLine() { // yield 123
-		p.nextToken()
-		ye.Arguments = p.parseCallArguments()
-	}
-
-	return ye
-}
-
-func (p *Parser) parseSelfExpression() ast.Expression {
-	return &ast.SelfExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
-}
-
 func (p *Parser) parseIdentifier() ast.Expression {
 	return &ast.Identifier{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
-}
-
-func (p *Parser) parseConstant() ast.Expression {
-	c := &ast.Constant{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
-
-	if p.peekTokenIs(token.ResolutionOperator) {
-		c.IsNamespace = true
-		p.nextToken()
-		return p.parseInfixExpression(c)
-	}
-
-	return c
-}
-
-func (p *Parser) parseInstanceVariable() ast.Expression {
-	return &ast.InstanceVariable{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
-}
-
-func (p *Parser) parsePairExpression(key ast.Expression) ast.Expression {
-	exp := &ast.PairExpression{BaseNode: &ast.BaseNode{Token: p.curToken}, Key: key}
-
-	if p.peekTokenIs(token.Comma) || p.peekTokenIs(token.RParen) {
-		return exp
-	}
-
-	p.nextToken()
-	value := p.parseExpression(precedence.Normal)
-
-	exp.Value = value
-
-	return exp
 }
 
 func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
@@ -218,24 +257,6 @@ func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
 	return callExpression
 }
 
-func (p *Parser) parsePrefixExpression() ast.Expression {
-	pe := &ast.PrefixExpression{
-		BaseNode: &ast.BaseNode{Token: p.curToken},
-		Operator: p.curToken.Literal,
-	}
-
-	prevToken := p.curToken
-	p.nextToken()
-
-	if prevToken.Type == token.Bang {
-		pe.Right = p.parseExpression(precedence.BangPrefix)
-	} else {
-		pe.Right = p.parseExpression(precedence.MinusPrefix)
-	}
-
-	return pe
-}
-
 func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	operator := p.curToken
 	preced := p.curPrecedence()
@@ -249,66 +270,8 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	return newInfixExpression(left, operator, p.parseExpression(preced))
 }
 
-func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
-	var value ast.Expression
-	var tok token.Token
-	exp := &ast.AssignExpression{BaseNode: &ast.BaseNode{}}
-
-	if !p.fsm.Is(states.ParsingFuncCall) {
-		exp.MarkAsStmt()
-	}
-
-	oldState := p.fsm.Current()
-	p.fsm.Event(events.ParseAssignment)
-
-	switch v := v.(type) {
-	case ast.Variable:
-		exp.Variables = []ast.Expression{v}
-	case *ast.MultiVariableExpression:
-		exp.Variables = v.Variables
-	case *ast.CallExpression:
-		/*
-			for cases like: `a[i] += b`
-			which needs to be expand to
-
-			a[i] = a[i] + b
-
-			CallExp = CallExp + Expression
-		*/
-
-		if v.Method == "[]" {
-			value = p.expandAssignmentValue(v)
-
-			callExp := &ast.CallExpression{
-				BaseNode:  &ast.BaseNode{},
-				Method:    "[]=",
-				Arguments: []ast.Expression{v.Arguments[0], value},
-				Receiver:  v.Receiver,
-			}
-			return callExp
-		}
-
-		errMsg := fmt.Sprintf("Can't assign value to %s. Line: %d", v.String(), p.curToken.Line)
-		p.error = errors.InitError(errMsg, errors.InvalidAssignmentError)
-	}
-
-	if len(exp.Variables) == 1 {
-		tok = token.Token{Type: token.Assign, Literal: "=", Line: p.curToken.Line}
-		value = p.expandAssignmentValue(v)
-	} else {
-		tok = p.curToken
-		precedence := p.curPrecedence()
-		p.nextToken()
-		value = p.parseExpression(precedence)
-	}
-
-	exp.Token = tok
-	exp.Value = value
-
-	event, _ := events.EventTable[oldState]
-	p.fsm.Event(event)
-
-	return exp
+func (p *Parser) parseInstanceVariable() ast.Expression {
+	return &ast.InstanceVariable{BaseNode: &ast.BaseNode{Token: p.curToken}, Value: p.curToken.Literal}
 }
 
 func (p *Parser) parseMultiVariables(left ast.Expression) ast.Expression {
@@ -349,6 +312,61 @@ func (p *Parser) parseMultiVariables(left ast.Expression) ast.Expression {
 	result := &ast.MultiVariableExpression{Variables: vars}
 	return result
 }
+
+func (p *Parser) parsePairExpression(key ast.Expression) ast.Expression {
+	exp := &ast.PairExpression{BaseNode: &ast.BaseNode{Token: p.curToken}, Key: key}
+
+	if p.peekTokenIs(token.Comma) || p.peekTokenIs(token.RParen) {
+		return exp
+	}
+
+	p.nextToken()
+	value := p.parseExpression(precedence.Normal)
+
+	exp.Value = value
+
+	return exp
+}
+
+func (p *Parser) parsePrefixExpression() ast.Expression {
+	pe := &ast.PrefixExpression{
+		BaseNode: &ast.BaseNode{Token: p.curToken},
+		Operator: p.curToken.Literal,
+	}
+
+	prevToken := p.curToken
+	p.nextToken()
+
+	if prevToken.Type == token.Bang {
+		pe.Right = p.parseExpression(precedence.BangPrefix)
+	} else {
+		pe.Right = p.parseExpression(precedence.MinusPrefix)
+	}
+
+	return pe
+}
+
+func (p *Parser) parseSelfExpression() ast.Expression {
+	return &ast.SelfExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
+}
+
+func (p *Parser) parseYieldExpression() ast.Expression {
+	ye := &ast.YieldExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
+
+	if p.peekTokenIs(token.LParen) {
+		p.nextToken()
+		ye.Arguments = p.parseCallArgumentsWithParens()
+	}
+
+	if arguments.Tokens[p.peekToken.Type] && p.peekTokenAtSameLine() { // yield 123
+		p.nextToken()
+		ye.Arguments = p.parseCallArguments()
+	}
+
+	return ye
+}
+
+// helpers
 
 func (p *Parser) expandAssignmentValue(value ast.Expression) ast.Expression {
 	switch p.curToken.Type {

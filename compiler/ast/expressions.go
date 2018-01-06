@@ -409,6 +409,23 @@ func (ye *YieldExpression) String() string {
 	return out.String()
 }
 
+// GetBlockExpression represents `get_block` call in the AST
+type GetBlockExpression struct {
+	*BaseNode
+}
+
+func (gbe *GetBlockExpression) expressionNode() {}
+
+// TokenLiteral ...
+func (gbe *GetBlockExpression) TokenLiteral() string {
+	return gbe.Token.Literal
+}
+
+// String ...
+func (gbe *GetBlockExpression) String() string {
+	return gbe.TokenLiteral()
+}
+
 // RangeExpression defines the range expression literal which contains the node expression and its start/end value
 type RangeExpression struct {
 	*BaseNode

@@ -41,6 +41,7 @@ const (
 	DefClass            = "def_class"
 	Send                = "send"
 	InvokeBlock         = "invokeblock"
+	GetBlock            = "getblock"
 	Pop                 = "pop"
 	Dup                 = "dup"
 	Leave               = "leave"

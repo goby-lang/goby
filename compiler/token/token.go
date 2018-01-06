@@ -63,49 +63,51 @@ const (
 	NotEq = "!="
 	Range = ".."
 
-	True   = "TRUE"
-	False  = "FALSE"
-	Null   = "Null"
-	If     = "IF"
-	ElsIf  = "ELSIF"
-	Else   = "ELSE"
-	Case   = "CASE"
-	When   = "WHEN"
-	Return = "RETURN"
-	Next   = "NEXT"
-	Break  = "BREAK"
-	Def    = "DEF"
-	Self   = "SELF"
-	End    = "END"
-	While  = "WHILE"
-	Do     = "DO"
-	Yield  = "YIELD"
-	Class  = "CLASS"
-	Module = "MODULE"
+	True     = "TRUE"
+	False    = "FALSE"
+	Null     = "Null"
+	If       = "IF"
+	ElsIf    = "ELSIF"
+	Else     = "ELSE"
+	Case     = "CASE"
+	When     = "WHEN"
+	Return   = "RETURN"
+	Next     = "NEXT"
+	Break    = "BREAK"
+	Def      = "DEF"
+	Self     = "SELF"
+	End      = "END"
+	While    = "WHILE"
+	Do       = "DO"
+	Yield    = "YIELD"
+	GetBlock = "GET_BLOCK"
+	Class    = "CLASS"
+	Module   = "MODULE"
 
 	ResolutionOperator = "::"
 )
 
 var keywords = map[string]Type{
-	"def":    Def,
-	"true":   True,
-	"false":  False,
-	"nil":    Null,
-	"if":     If,
-	"elsif":  ElsIf,
-	"else":   Else,
-	"case":   Case,
-	"when":   When,
-	"return": Return,
-	"self":   Self,
-	"end":    End,
-	"while":  While,
-	"do":     Do,
-	"yield":  Yield,
-	"next":   Next,
-	"class":  Class,
-	"module": Module,
-	"break":  Break,
+	"def":       Def,
+	"true":      True,
+	"false":     False,
+	"nil":       Null,
+	"if":        If,
+	"elsif":     ElsIf,
+	"else":      Else,
+	"case":      Case,
+	"when":      When,
+	"return":    Return,
+	"self":      Self,
+	"end":       End,
+	"while":     While,
+	"do":        Do,
+	"yield":     Yield,
+	"next":      Next,
+	"class":     Class,
+	"module":    Module,
+	"break":     Break,
+	"get_block": GetBlock,
 }
 
 // LookupIdent is used for keyword identification
