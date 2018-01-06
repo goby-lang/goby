@@ -552,6 +552,24 @@ var builtinActions = map[operationType]*action{
 			t.sp = receiverPr + 1
 		},
 	},
+	bytecode.GetBlock: {
+		name: bytecode.GetBlock,
+		operation: func(t *thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
+			if cf.blockFrame == nil {
+				t.pushErrorObject(errors.InternalError, sourceLine, "Can't get block without a block argument")
+			}
+
+			blockFrame := cf.blockFrame
+
+			if cf.blockFrame.ep == cf.ep {
+				blockFrame = cf.blockFrame.ep.blockFrame
+			}
+
+			blockObject := t.vm.initBlockObject(blockFrame.instructionSet, blockFrame.ep, t.stack.Data[t.sp-1].Target)
+
+			t.stack.push(&Pointer{Target: blockObject})
+		},
+	},
 	bytecode.Leave: {
 		name: bytecode.Leave,
 		operation: func(t *thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
