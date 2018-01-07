@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 	"github.com/goby-lang/goby/compiler/ast"
+	"github.com/goby-lang/goby/compiler/parser/events"
 	"github.com/goby-lang/goby/compiler/parser/precedence"
 	"github.com/goby-lang/goby/compiler/token"
 )
@@ -106,7 +107,7 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 }
 
 func (p *Parser) parseParameters() []ast.Expression {
-	p.fsm.Event(parseMethodParam)
+	p.fsm.Event(events.ParseMethodParam)
 	params := []ast.Expression{}
 
 	p.nextToken()
@@ -128,7 +129,7 @@ func (p *Parser) parseParameters() []ast.Expression {
 
 	p.checkMethodParameters(params)
 
-	p.fsm.Event(backToNormal)
+	p.fsm.Event(events.BackToNormal)
 	return params
 }
 
@@ -318,11 +319,11 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 	p.acceptBlock = false
 
 	oldState := p.fsm.Current()
-	p.fsm.Event(parseFuncCall)
+	p.fsm.Event(events.ParseFuncCall)
 
 	ws.Condition = p.parseExpression(precedence.Normal)
 
-	event, _ := eventTable[oldState]
+	event, _ := events.EventTable[oldState]
 	p.fsm.Event(event)
 	p.acceptBlock = true
 	p.expectPeek(token.Do)

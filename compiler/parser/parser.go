@@ -2,10 +2,11 @@ package parser
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/compiler/parser/precedence"
-
 	"github.com/goby-lang/goby/compiler/ast"
 	"github.com/goby-lang/goby/compiler/lexer"
+	"github.com/goby-lang/goby/compiler/parser/events"
+	"github.com/goby-lang/goby/compiler/parser/precedence"
+	"github.com/goby-lang/goby/compiler/parser/states"
 	"github.com/goby-lang/goby/compiler/token"
 	"github.com/looplab/fsm"
 )
@@ -79,29 +80,6 @@ const (
 	OptionalKeywordArg
 )
 
-// These are state machine's events
-const (
-	backToNormal     = "backToNormal"
-	parseFuncCall    = "parseFuncCall"
-	parseMethodParam = "parseMethodParam"
-	parseAssignment  = "parseAssignment"
-)
-
-// These are state machine's states
-const (
-	normal             = "normal"
-	parsingFuncCall    = "parsingFuncCall"
-	parsingMethodParam = "parsingMethodParam"
-	parsingAssignment  = "parsingAssignment"
-)
-
-var eventTable = map[string]string{
-	normal:             backToNormal,
-	parsingFuncCall:    parseFuncCall,
-	parsingMethodParam: parseMethodParam,
-	parsingAssignment:  parseAssignment,
-}
-
 var argTable = map[int]string{
 	NormalArg:          "Normal argument",
 	OptionedArg:        "Optioned argument",
@@ -118,12 +96,12 @@ func New(l *lexer.Lexer) *Parser {
 	}
 
 	p.fsm = fsm.NewFSM(
-		normal,
+		states.Normal,
 		fsm.Events{
-			{Name: parseFuncCall, Src: []string{normal}, Dst: parsingFuncCall},
-			{Name: parseMethodParam, Src: []string{normal, parsingAssignment}, Dst: parsingMethodParam},
-			{Name: parseAssignment, Src: []string{normal, parsingFuncCall}, Dst: parsingAssignment},
-			{Name: backToNormal, Src: []string{parsingFuncCall, parsingMethodParam, parsingAssignment}, Dst: normal},
+			{Name: events.ParseFuncCall, Src: []string{states.Normal}, Dst: states.ParsingFuncCall},
+			{Name: events.ParseMethodParam, Src: []string{states.Normal, states.ParsingAssignment}, Dst: states.ParsingMethodParam},
+			{Name: events.ParseAssignment, Src: []string{states.Normal, states.ParsingFuncCall}, Dst: states.ParsingAssignment},
+			{Name: events.BackToNormal, Src: []string{states.ParsingFuncCall, states.ParsingMethodParam, states.ParsingAssignment}, Dst: states.Normal},
 		},
 		fsm.Callbacks{},
 	)

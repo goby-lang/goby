@@ -2,6 +2,7 @@ package parser
 
 import (
 	"github.com/goby-lang/goby/compiler/ast"
+	"github.com/goby-lang/goby/compiler/parser/events"
 	"github.com/goby-lang/goby/compiler/parser/precedence"
 	"github.com/goby-lang/goby/compiler/token"
 )
@@ -12,7 +13,7 @@ func (p *Parser) parseCallExpressionWithoutReceiver(receiver ast.Expression) ast
 	exp := &ast.CallExpression{BaseNode: &ast.BaseNode{}}
 
 	oldState := p.fsm.Current()
-	p.fsm.Event(parseFuncCall)
+	p.fsm.Event(events.ParseFuncCall)
 	// real receiver is self
 	selfTok := token.Token{Type: token.Self, Literal: "self", Line: p.curToken.Line}
 	self := &ast.SelfExpression{BaseNode: &ast.BaseNode{Token: selfTok}}
@@ -30,7 +31,7 @@ func (p *Parser) parseCallExpressionWithoutReceiver(receiver ast.Expression) ast
 		exp.Arguments = p.parseCallArguments()
 	}
 
-	p.fsm.Event(eventTable[oldState])
+	p.fsm.Event(events.EventTable[oldState])
 
 	if p.peekTokenIs(token.Do) && p.acceptBlock { // foo do
 		p.parseBlockArgument(exp)
@@ -43,7 +44,7 @@ func (p *Parser) parseCallExpressionWithReceiver(receiver ast.Expression) ast.Ex
 	exp := &ast.CallExpression{BaseNode: &ast.BaseNode{}}
 
 	oldState := p.fsm.Current()
-	p.fsm.Event(parseFuncCall)
+	p.fsm.Event(events.ParseFuncCall)
 
 	// check if method name is identifier
 	if !p.expectPeek(token.Ident) {
@@ -79,7 +80,7 @@ func (p *Parser) parseCallExpressionWithReceiver(receiver ast.Expression) ast.Ex
 		exp.Arguments = []ast.Expression{}
 	}
 
-	p.fsm.Event(eventTable[oldState])
+	p.fsm.Event(events.EventTable[oldState])
 
 	// Parse block
 	if p.peekTokenIs(token.Do) && p.acceptBlock {

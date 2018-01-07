@@ -2,8 +2,10 @@ package parser
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/compiler/parser/precedence"
 	"github.com/goby-lang/goby/compiler/ast"
+	"github.com/goby-lang/goby/compiler/parser/events"
+	"github.com/goby-lang/goby/compiler/parser/precedence"
+	"github.com/goby-lang/goby/compiler/parser/states"
 	"github.com/goby-lang/goby/compiler/token"
 )
 
@@ -31,7 +33,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	}
 
 	// Prohibit calling a capitalized method on toplevel:
-	if p.curTokenIs(token.Constant) && (p.fsm.Is(normal) || p.fsm.Is(parsingAssignment)) {
+	if p.curTokenIs(token.Constant) && (p.fsm.Is(states.Normal) || p.fsm.Is(states.ParsingAssignment)) {
 		if p.peekTokenIs(token.LParen) {
 			p.callConstantError(p.curToken.Type)
 			return nil
@@ -51,7 +53,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		a = foo 10
 		```
 	*/
-	if p.curTokenIs(token.Ident) && (p.fsm.Is(normal) || p.fsm.Is(parsingAssignment)) {
+	if p.curTokenIs(token.Ident) && (p.fsm.Is(states.Normal) || p.fsm.Is(states.ParsingAssignment)) {
 		if p.peekTokenIs(token.Do) {
 			method := p.parseIdentifier()
 			return p.parseCallExpressionWithoutReceiver(method)
@@ -97,7 +99,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	*/
 
 	for !p.peekTokenIs(token.Semicolon) &&
-		(precedence < p.peekPrecedence() || (p.fsm.Is(parsingAssignment) && p.peekTokenIs(token.Assign))) &&
+		(precedence < p.peekPrecedence() || (p.fsm.Is(states.ParsingAssignment) && p.peekTokenIs(token.Assign))) &&
 		// This is for preventing parser treat next line's expression as function's argument.
 		p.peekTokenAtSameLine() {
 
@@ -250,12 +252,12 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 	var tok token.Token
 	exp := &ast.AssignExpression{BaseNode: &ast.BaseNode{}}
 
-	if !p.fsm.Is(parsingFuncCall) {
+	if !p.fsm.Is(states.ParsingFuncCall) {
 		exp.MarkAsStmt()
 	}
 
 	oldState := p.fsm.Current()
-	p.fsm.Event(parseAssignment)
+	p.fsm.Event(events.ParseAssignment)
 
 	switch v := v.(type) {
 	case ast.Variable:
@@ -302,7 +304,7 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 	exp.Token = tok
 	exp.Value = value
 
-	event, _ := eventTable[oldState]
+	event, _ := events.EventTable[oldState]
 	p.fsm.Event(event)
 
 	return exp
