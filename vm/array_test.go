@@ -183,6 +183,10 @@ func TestArrayIndexWithSuccessiveValues(t *testing.T) {
 	}{
 		{`
 			a = [1, 2, 3, 4, 5]
+			a[1, 0]
+		`, []interface{}{}},
+		{`
+			a = [1, 2, 3, 4, 5]
 			a[1, 1]
 		`, []interface{}{2}},
 		{`
@@ -217,6 +221,14 @@ func TestArrayIndexWithSuccessiveValues(t *testing.T) {
 			a = [1, 2, 3, 4, 5]
 			a[3, 3]
 		`, []interface{}{4, 5}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[4, 4]
+		`, []interface{}{5}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[5, 5]
+		`, []interface{}{}},
 		{`
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[3, 0]
@@ -302,6 +314,11 @@ func TestArrayIndexWithSuccessiveValues(t *testing.T) {
 		`, []interface{}{1, 2, 3, 4, 5, 123}},
 		{`
 			a = [1, 2, 3, 4, 5]
+			a[1, 0] = 555
+			a
+		`, []interface{}{1, 555, 2, 3, 4, 5}},
+		{`
+			a = [1, 2, 3, 4, 5]
 			a[5, 123] = [1, 2, 3]
 			a
 		`, []interface{}{1, 2, 3, 4, 5, 1, 2, 3}},
@@ -338,7 +355,7 @@ func TestArrayIndexWithSuccessiveValuesNullCases(t *testing.T) {
 	}{
 		{`
 			a = [1, 2, 3, 4, 5]
-			a[5, 5] # Range exceeded
+			a[6, 5] # Range exceeded
 		`, nil},
 		{`
 			a = [1, 2, 3, 4, 5]
@@ -347,6 +364,10 @@ func TestArrayIndexWithSuccessiveValuesNullCases(t *testing.T) {
 		{`
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[3, -1] # Second argument is negative
+		`, nil},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[-1, -1] # Both negative case
 		`, nil},
 	}
 

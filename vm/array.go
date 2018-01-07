@@ -1203,6 +1203,16 @@ func (a *ArrayObject) index(t *thread, args []Object, sourceLine int) Object {
 		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 	}
 
+	/*
+	 *  This condition meets the special case (Don't know why ~ ? Ask Ruby or try it on irb!):
+	 *
+	 *  a = [1, 2, 3, 4, 5]
+	 *  a[5, 5] # => []
+	 */
+	if index.value > 0 && index.value == a.length() && len(args) == 2 {
+		return t.vm.initArrayObject([]Object{});
+	}
+
 	normalizedIndex := a.normalizeIndex(index)
 	if normalizedIndex == -1 {
 		return NULL
