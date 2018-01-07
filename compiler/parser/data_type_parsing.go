@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 	"github.com/goby-lang/goby/compiler/ast"
+	"github.com/goby-lang/goby/compiler/parser/precedence"
 	"github.com/goby-lang/goby/compiler/token"
 	"strconv"
 )
@@ -113,7 +114,7 @@ func (p *Parser) parseHashPair(pairs map[string]ast.Expression) {
 	}
 
 	p.nextToken()
-	value = p.parseExpression(NORMAL)
+	value = p.parseExpression(precedence.NORMAL)
 	pairs[key] = value
 }
 
@@ -132,12 +133,12 @@ func (p *Parser) parseArrayElements() []ast.Expression {
 	}
 
 	p.nextToken() // start of first expression
-	elems = append(elems, p.parseExpression(NORMAL))
+	elems = append(elems, p.parseExpression(precedence.NORMAL))
 
 	for p.peekTokenIs(token.Comma) {
 		p.nextToken() // ","
 		p.nextToken() // start of next expression
-		elems = append(elems, p.parseExpression(NORMAL))
+		elems = append(elems, p.parseExpression(precedence.NORMAL))
 	}
 
 	if !p.expectPeek(token.RBracket) {

@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"github.com/goby-lang/goby/compiler/parser/precedence"
 
 	"github.com/goby-lang/goby/compiler/ast"
 	"github.com/goby-lang/goby/compiler/lexer"
@@ -220,19 +221,19 @@ func (p *Parser) parseSemicolon() ast.Expression {
 }
 
 func (p *Parser) peekPrecedence() int {
-	if p, ok := precedence[p.peekToken.Type]; ok {
+	if p, ok := precedences[p.peekToken.Type]; ok {
 		return p
 	}
 
-	return NORMAL
+	return precedence.NORMAL
 }
 
 func (p *Parser) curPrecedence() int {
-	if p, ok := precedence[p.curToken.Type]; ok {
+	if p, ok := precedences[p.curToken.Type]; ok {
 		return p
 	}
 
-	return NORMAL
+	return precedence.NORMAL
 }
 
 func (p *Parser) nextToken() {
