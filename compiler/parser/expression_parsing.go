@@ -3,7 +3,6 @@ package parser
 import (
 	"fmt"
 	"github.com/goby-lang/goby/compiler/parser/precedence"
-
 	"github.com/goby-lang/goby/compiler/ast"
 	"github.com/goby-lang/goby/compiler/token"
 )
@@ -17,37 +16,6 @@ var arguments = map[token.Type]bool{
 	token.InstanceVariable: true,
 	token.Ident:            true,
 	token.Constant:         true,
-}
-
-var precedences = map[token.Type]int{
-	token.Eq:                 precedence.Equals,
-	token.NotEq:              precedence.Equals,
-	token.Match:              precedence.Compare,
-	token.LT:                 precedence.Compare,
-	token.LTE:                precedence.Compare,
-	token.GT:                 precedence.Compare,
-	token.GTE:                precedence.Compare,
-	token.COMP:               precedence.Compare,
-	token.And:                precedence.Logic,
-	token.Or:                 precedence.Logic,
-	token.Range:              precedence.Range,
-	token.Plus:               precedence.Sum,
-	token.Minus:              precedence.Sum,
-	token.Incr:               precedence.Sum,
-	token.Decr:               precedence.Sum,
-	token.Modulo:             precedence.Sum,
-	token.Slash:              precedence.Product,
-	token.Asterisk:           precedence.Product,
-	token.Pow:                precedence.Product,
-	token.LBracket:           precedence.Index,
-	token.Dot:                precedence.Call,
-	token.LParen:             precedence.Call,
-	token.ResolutionOperator: precedence.Call,
-	token.Assign:             precedence.Assign,
-	token.PlusEq:             precedence.Assign,
-	token.MinusEq:            precedence.Assign,
-	token.OrEq:               precedence.Assign,
-	token.Colon:              precedence.Assign,
 }
 
 type (
