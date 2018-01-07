@@ -46,6 +46,32 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// a[-1] # => "c"
 			// a[-3] # => "a"
 			// a[-7] # => nil
+			//
+			// # Double indexing, second argument specifies the count of the elements
+			// a[1, 3]  # => [2, 3, "a"]
+			// a[1, 0]  # => [] <-- Zero count is empty
+			// a[1, 5]  # => [2, 3, "a", "b", "c"]
+			// a[1, 10] # => [2, 3, "a", "b", "c"]
+			// a[-3, 2] # => ["a", "b"]
+			// a[-3, 5] # => ["a", "b", "c"]
+			// a[5, 1]  # => ["c"]
+			// a[6, 1]  # => []
+			// a[7, 1]  # => nil
+			//
+			// Special case 1:
+			// a[6]    # => nil
+			// a[6, 1] # => []  <-- Not nil!
+			// a[7, 1] # => nil <-- Because it is really out of the edge of the array
+			//
+			// Special case 2: Second argument is negative
+			// a[1, -1]  # => nil
+			// a[-4, -3] # => nil
+			//
+			// Special case 3: First argument is negative and exceed the array length
+			// a[-6, 1] # => [1]
+			// a[-7, 1] # => nil
+			// a[-7, 0] # => []
+			//
 			// ```
 			Name: "[]",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -125,6 +151,51 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// a[3] = 20  # => 20
 			// a          # => [10, nil, nil, 20]
 			// a[-2] = 5  # => [10, nil, 5, 20]
+			//
+			// # Double indexing, second argument specify the count of the arguments
+			// a = [1, 2, 3, 4, 5]
+			// a[2, 3] = [1, 2, 3] # <-- Common case
+			// a # => [1, 2, 1, 2, 3]
+			//
+			// a = [1, 2, 3, 4, 5]
+			// a[4, 4] = [1, 2, 3] # <- Exceeded case
+			// a # => [1, 2, 3, 4, 1, 2, 3]
+			//
+			// a = [1, 2, 3, 4, 5]
+			// a[5, 1] = [1, 2, 3] # <-- Edgy case
+			// a # => [1, 2, 3, 4, 5, 1, 2, 3]
+			//
+			// a = [1, 2, 3, 4, 5]
+			// a[8, 123] = [1, 2, 3] # <-- Weak array case
+			// a # => [1, 2, 3, 4, 5, nil, nil, nil, 1, 2, 3]
+			//
+			// a = [1, 2, 3, 4, 5]
+			// a[3, 0] = [1, 2, 3] # <-- Insertion case
+			// a # => [1, 2, 3, 1, 2, 3, 4, 5]
+			//
+			// a = [1, 2, 3, 4, 5]
+			// a[0, 3] = 12345     # <-- Assign non-array value case
+			// a # => [12345, 4, 5]
+			//
+			// a = [1, 2, 3, 4, 5]
+			// a[-3, 2] = [1, 2, 3] # <-- Negative index assign case
+			// a # => [1, 2, 1, 2, 3, 5]
+			//
+			// a = [1, 2, 3, 4, 5]
+			// a[-5, 4] = [9, 8, 7] # <-- Negative index edgy case
+			// a # => [9, 8, 7, 5]
+			//
+			// a = [1, 2, 3, 4, 5]
+			// a[-6, 4] = [9, 8, 7] # <-- Nagative index too small case
+			// # ArgumentError: Index value -6 too small for array. minimum: -5
+			//
+			// # While indexing, it returns nil instead error
+			// a[-6, 4] # => nil
+			//
+			// a = [1, 2, 3, 4, 5]
+			// a[6, -4] = [9, 8, 7] # <-- Weak array assignment with nagative count case
+			// # ArgumentError: Expect second argument greater than or equal 0. got: -4
+			//
 			// ```
 			Name: "[]=",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -157,6 +228,20 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 							indexValue = arr.normalizeIndex(index)
 						}
 
+						c := args[1]
+						count, ok := c.(*IntegerObject)
+
+						// Second argument must be integer
+						if !ok {
+							return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[1].Class().Name)
+						}
+
+						countValue := count.value
+						// Second argument must be positive value
+						if countValue < 0 {
+							return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect second argument greater than or equal 0. got: %d", countValue)
+						}
+
 						a := args[2]
 						assignedValue, isArray := a.(*ArrayObject)
 
@@ -174,20 +259,6 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 								arr.Elements = append(arr.Elements, a)
 							}
 							return a
-						}
-
-						c := args[1]
-						count, ok := c.(*IntegerObject)
-
-						// Second argument must be integer
-						if !ok {
-							return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[1].Class().Name)
-						}
-
-						countValue := count.value
-						// Second argument must be positive value
-						if countValue < 0 {
-							return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect second argument greater than or equal 0. got: %d", countValue)
 						}
 
 						endValue := indexValue + countValue
@@ -1210,7 +1281,7 @@ func (a *ArrayObject) index(t *thread, args []Object, sourceLine int) Object {
 	 *  a[5, 5] # => []
 	 */
 	if index.value > 0 && index.value == a.length() && len(args) == 2 {
-		return t.vm.initArrayObject([]Object{});
+		return t.vm.initArrayObject([]Object{})
 	}
 
 	normalizedIndex := a.normalizeIndex(index)

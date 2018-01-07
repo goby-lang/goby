@@ -419,6 +419,10 @@ func TestArrayIndexWithSuccessiveValuesFail(t *testing.T) {
 			a[-1, -1] = 555
 		`, "ArgumentError: Expect second argument greater than or equal 0. got: -1", 1},
 		{`
+			a = [1, 2, 3, 4, 5]
+			a[6, -1] = 555
+		`, "ArgumentError: Expect second argument greater than or equal 0. got: -1", 1},
+		{`
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[-11, 2] = [1, 2, 3, 4, 5]
 		`, "ArgumentError: Index value -11 too small for array. minimum: -10", 1},
