@@ -114,7 +114,7 @@ func (p *Parser) parseHashPair(pairs map[string]ast.Expression) {
 	}
 
 	p.nextToken()
-	value = p.parseExpression(precedence.NORMAL)
+	value = p.parseExpression(precedence.Normal)
 	pairs[key] = value
 }
 
@@ -133,12 +133,12 @@ func (p *Parser) parseArrayElements() []ast.Expression {
 	}
 
 	p.nextToken() // start of first expression
-	elems = append(elems, p.parseExpression(precedence.NORMAL))
+	elems = append(elems, p.parseExpression(precedence.Normal))
 
 	for p.peekTokenIs(token.Comma) {
 		p.nextToken() // ","
 		p.nextToken() // start of next expression
-		elems = append(elems, p.parseExpression(precedence.NORMAL))
+		elems = append(elems, p.parseExpression(precedence.Normal))
 	}
 
 	if !p.expectPeek(token.RBracket) {

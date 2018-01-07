@@ -20,34 +20,34 @@ var arguments = map[token.Type]bool{
 }
 
 var precedences = map[token.Type]int{
-	token.Eq:                 precedence.EQUALS,
-	token.NotEq:              precedence.EQUALS,
-	token.Match:              precedence.COMPARE,
-	token.LT:                 precedence.COMPARE,
-	token.LTE:                precedence.COMPARE,
-	token.GT:                 precedence.COMPARE,
-	token.GTE:                precedence.COMPARE,
-	token.COMP:               precedence.COMPARE,
-	token.And:                precedence.LOGIC,
-	token.Or:                 precedence.LOGIC,
-	token.Range:              precedence.RANGE,
-	token.Plus:               precedence.SUM,
-	token.Minus:              precedence.SUM,
-	token.Incr:               precedence.SUM,
-	token.Decr:               precedence.SUM,
-	token.Modulo:             precedence.SUM,
-	token.Slash:              precedence.PRODUCT,
-	token.Asterisk:           precedence.PRODUCT,
-	token.Pow:                precedence.PRODUCT,
-	token.LBracket:           precedence.INDEX,
-	token.Dot:                precedence.CALL,
-	token.LParen:             precedence.CALL,
-	token.ResolutionOperator: precedence.CALL,
-	token.Assign:             precedence.ASSIGN,
-	token.PlusEq:             precedence.ASSIGN,
-	token.MinusEq:            precedence.ASSIGN,
-	token.OrEq:               precedence.ASSIGN,
-	token.Colon:              precedence.ASSIGN,
+	token.Eq:                 precedence.Equals,
+	token.NotEq:              precedence.Equals,
+	token.Match:              precedence.Compare,
+	token.LT:                 precedence.Compare,
+	token.LTE:                precedence.Compare,
+	token.GT:                 precedence.Compare,
+	token.GTE:                precedence.Compare,
+	token.COMP:               precedence.Compare,
+	token.And:                precedence.Logic,
+	token.Or:                 precedence.Logic,
+	token.Range:              precedence.Range,
+	token.Plus:               precedence.Sum,
+	token.Minus:              precedence.Sum,
+	token.Incr:               precedence.Sum,
+	token.Decr:               precedence.Sum,
+	token.Modulo:             precedence.Sum,
+	token.Slash:              precedence.Product,
+	token.Asterisk:           precedence.Product,
+	token.Pow:                precedence.Product,
+	token.LBracket:           precedence.Index,
+	token.Dot:                precedence.Call,
+	token.LParen:             precedence.Call,
+	token.ResolutionOperator: precedence.Call,
+	token.Assign:             precedence.Assign,
+	token.PlusEq:             precedence.Assign,
+	token.MinusEq:            precedence.Assign,
+	token.OrEq:               precedence.Assign,
+	token.Colon:              precedence.Assign,
 }
 
 type (
@@ -151,7 +151,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 func (p *Parser) parseGroupedExpression() ast.Expression {
 	p.nextToken()
 
-	exp := p.parseExpression(precedence.NORMAL)
+	exp := p.parseExpression(precedence.Normal)
 
 	if !p.expectPeek(token.RParen) {
 		return nil
@@ -208,7 +208,7 @@ func (p *Parser) parsePairExpression(key ast.Expression) ast.Expression {
 	}
 
 	p.nextToken()
-	value := p.parseExpression(precedence.NORMAL)
+	value := p.parseExpression(precedence.Normal)
 
 	exp.Value = value
 
@@ -226,7 +226,7 @@ func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
 
 	p.nextToken()
 
-	callExpression.Arguments = []ast.Expression{p.parseExpression(precedence.NORMAL)}
+	callExpression.Arguments = []ast.Expression{p.parseExpression(precedence.Normal)}
 
 	// Accepting multiple indexing argument
 	for p.peekTokenIs(token.Comma) {
@@ -243,7 +243,7 @@ func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
 	if p.peekTokenIs(token.Assign) {
 		p.nextToken()
 		p.nextToken()
-		assignValue := p.parseExpression(precedence.NORMAL)
+		assignValue := p.parseExpression(precedence.Normal)
 		callExpression.Method = "[]="
 		callExpression.Arguments = append(callExpression.Arguments, assignValue)
 	}
@@ -259,7 +259,7 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 
 	p.nextToken()
 
-	pe.Right = p.parseExpression(precedence.PREFIX)
+	pe.Right = p.parseExpression(precedence.Prefix)
 
 	return pe
 }
@@ -269,7 +269,7 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	preced := p.curPrecedence()
 
 	if operator.Literal == "||" || operator.Literal == "&&" {
-		preced = precedence.NORMAL
+		preced = precedence.Normal
 	}
 
 	p.nextToken()
@@ -351,7 +351,7 @@ func (p *Parser) parseMultiVariables(left ast.Expression) ast.Expression {
 
 	p.nextToken()
 
-	exp := p.parseExpression(precedence.CALL)
+	exp := p.parseExpression(precedence.Call)
 
 	var2, ok := exp.(ast.Variable)
 
@@ -364,7 +364,7 @@ func (p *Parser) parseMultiVariables(left ast.Expression) ast.Expression {
 	for p.peekTokenIs(token.Comma) {
 		p.nextToken()
 		p.nextToken()
-		exp := p.parseExpression(precedence.CALL) // Use highest precedence
+		exp := p.parseExpression(precedence.Call) // Use highest precedence
 
 		v, ok := exp.(ast.Variable)
 
@@ -414,7 +414,7 @@ func (p *Parser) expandAssignmentValue(value ast.Expression) ast.Expression {
 
 		p.nextToken()
 
-		return newInfixExpression(value, infixOperator, p.parseExpression(precedence.LOWEST))
+		return newInfixExpression(value, infixOperator, p.parseExpression(precedence.Lowest))
 	default:
 		p.peekError(p.curToken.Type)
 		return nil

@@ -110,7 +110,7 @@ func (p *Parser) parseParameters() []ast.Expression {
 	params := []ast.Expression{}
 
 	p.nextToken()
-	param := p.parseExpression(precedence.NORMAL)
+	param := p.parseExpression(precedence.Normal)
 	params = append(params, param)
 
 	for p.peekTokenIs(token.Comma) {
@@ -122,7 +122,7 @@ func (p *Parser) parseParameters() []ast.Expression {
 			break
 		}
 
-		param := p.parseExpression(precedence.NORMAL)
+		param := p.parseExpression(precedence.Normal)
 		params = append(params, param)
 	}
 
@@ -218,7 +218,7 @@ func (p *Parser) parseClassStatement() *ast.ClassStatement {
 	if p.peekTokenIs(token.LT) {
 		p.nextToken() // <
 		p.nextToken() // Inherited class like 'Bar'
-		stmt.SuperClass = p.parseExpression(precedence.NORMAL)
+		stmt.SuperClass = p.parseExpression(precedence.Normal)
 
 		switch exp := stmt.SuperClass.(type) {
 		case *ast.InfixExpression:
@@ -257,7 +257,7 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 
 	p.nextToken()
 
-	stmt.ReturnValue = p.parseExpression(precedence.NORMAL)
+	stmt.ReturnValue = p.parseExpression(precedence.Normal)
 
 	return stmt
 }
@@ -267,9 +267,9 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	if p.curTokenIs(token.Ident) || p.curTokenIs(token.InstanceVariable) {
 		// This is used for identifying method call without parens
 		// Or multiple variable assignment
-		stmt.Expression = p.parseExpression(precedence.LOWEST)
+		stmt.Expression = p.parseExpression(precedence.Lowest)
 	} else {
-		stmt.Expression = p.parseExpression(precedence.NORMAL)
+		stmt.Expression = p.parseExpression(precedence.Normal)
 	}
 
 	return stmt
@@ -320,7 +320,7 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 	oldState := p.fsm.Current()
 	p.fsm.Event(parseFuncCall)
 
-	ws.Condition = p.parseExpression(precedence.NORMAL)
+	ws.Condition = p.parseExpression(precedence.Normal)
 
 	event, _ := eventTable[oldState]
 	p.fsm.Event(event)

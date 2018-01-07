@@ -225,7 +225,7 @@ func (p *Parser) peekPrecedence() int {
 		return p
 	}
 
-	return precedence.NORMAL
+	return precedence.Normal
 }
 
 func (p *Parser) curPrecedence() int {
@@ -233,7 +233,7 @@ func (p *Parser) curPrecedence() int {
 		return p
 	}
 
-	return precedence.NORMAL
+	return precedence.Normal
 }
 
 func (p *Parser) nextToken() {

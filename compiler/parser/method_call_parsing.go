@@ -66,7 +66,7 @@ func (p *Parser) parseCallExpressionWithReceiver(receiver ast.Expression) ast.Ex
 			exp.Method = exp.Method + "="
 			p.nextToken()
 			p.nextToken()
-			exp.Arguments = append(exp.Arguments, p.parseExpression(precedence.NORMAL))
+			exp.Arguments = append(exp.Arguments, p.parseExpression(precedence.Normal))
 		default:
 			if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { // p.foo x, y, z || p.foo x
 				p.nextToken()
@@ -111,12 +111,12 @@ func (p *Parser) parseCallArgumentsWithParens() []ast.Expression {
 func (p *Parser) parseCallArguments() []ast.Expression {
 	args := []ast.Expression{}
 
-	args = append(args, p.parseExpression(precedence.NORMAL))
+	args = append(args, p.parseExpression(precedence.Normal))
 
 	for p.peekTokenIs(token.Comma) {
 		p.nextToken() // ","
 		p.nextToken() // start of next expression
-		args = append(args, p.parseExpression(precedence.NORMAL))
+		args = append(args, p.parseExpression(precedence.Normal))
 	}
 
 	return args
