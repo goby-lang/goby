@@ -89,16 +89,22 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 
 	*/
 
-	for !p.peekTokenIs(token.Semicolon) &&
-		(precedence < p.peekPrecedence() || (p.fsm.Is(states.ParsingAssignment) && p.peekTokenIs(token.Assign))) &&
-		// This is for preventing parser treat next line's expression as function's argument.
-		p.peekTokenAtSameLine() {
-
+	for !p.peekTokenIs(token.Semicolon) && (precedence < p.peekPrecedence() || p.isParsingAssignment()) && p.peekTokenAtSameLine() {
 		infixFn := p.infixParseFns[p.peekToken.Type]
+
 		if infixFn == nil {
 			return leftExp
 		}
+
+		prevTok := p.curToken
 		p.nextToken()
+
+		// normally when current token is Dot, we'll get function `parseCallExpressionWithoutReceiver`
+		// so we need to make sure if we're parsing method call or float
+		if p.isParsingFloat(prevTok) {
+			infixFn = p.parseFloatLiteral
+		}
+
 		leftExp = infixFn(leftExp)
 	}
 
@@ -218,9 +224,14 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 		Operator: p.curToken.Literal,
 	}
 
+	prevToken := p.curToken
 	p.nextToken()
 
-	pe.Right = p.parseExpression(precedence.Prefix)
+	if prevToken.Type == token.Bang {
+		pe.Right = p.parseExpression(precedence.BangPrefix)
+	} else {
+		pe.Right = p.parseExpression(precedence.MinusPrefix)
+	}
 
 	return pe
 }
@@ -339,18 +350,6 @@ func (p *Parser) parseMultiVariables(left ast.Expression) ast.Expression {
 	return result
 }
 
-func (p *Parser) parseDotExpression(receiver ast.Expression) ast.Expression {
-	_, ok := receiver.(*ast.IntegerLiteral)
-
-	// When both receiver & caller are integer => Float
-	if ok && p.peekTokenIs(token.Int) {
-		return p.parseFloatLiteral(receiver)
-	}
-
-	// Normal call method expression with receiver
-	return p.parseCallExpressionWithReceiver(receiver)
-}
-
 func (p *Parser) expandAssignmentValue(value ast.Expression) ast.Expression {
 	switch p.curToken.Type {
 	case token.Assign:
@@ -379,6 +378,16 @@ func (p *Parser) expandAssignmentValue(value ast.Expression) ast.Expression {
 		p.peekError(p.curToken.Type)
 		return nil
 	}
+}
+
+func (p *Parser) isParsingFloat(leftTok token.Token) bool {
+	sameLine := leftTok.Line == p.peekToken.Line
+	bothAreInt := leftTok.Type == p.peekToken.Type && leftTok.Type == token.Int
+	return p.curTokenIs(token.Dot) && bothAreInt && sameLine
+}
+
+func (p *Parser) isParsingAssignment() bool {
+	return p.fsm.Is(states.ParsingAssignment) && p.peekTokenIs(token.Assign)
 }
 
 func newInfixExpression(left ast.Expression, operator token.Token, right ast.Expression) *ast.InfixExpression {
