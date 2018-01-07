@@ -164,7 +164,7 @@ func TestArrayIndexFail(t *testing.T) {
 		{`
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[-11] = 123
-		`, "InternalError: Index value -11 too small for array. minimum: -10", 1},
+		`, "ArgumentError: Index value -11 too small for array. minimum: -10", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -413,11 +413,11 @@ func TestArrayIndexWithSuccessiveValuesFail(t *testing.T) {
 		{`
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[1, -3] = [1, 2, 3, 4, 5]
-		`, "InternalError: Expect second argument greater than or equal 0. got: -3", 1},
+		`, "ArgumentError: Expect second argument greater than or equal 0. got: -3", 1},
 		{`
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[-11, 2] = [1, 2, 3, 4, 5]
-		`, "InternalError: Index value -11 too small for array. minimum: -10", 1},
+		`, "ArgumentError: Index value -11 too small for array. minimum: -10", 1},
 	}
 
 	for i, tt := range testsFail {

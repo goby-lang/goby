@@ -152,7 +152,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						// Negative index value too small
 						if indexValue < 0 {
 							if arr.normalizeIndex(index) == -1 {
-								return t.vm.initErrorObject(errors.InternalError, sourceLine, "Index value %d too small for array. minimum: %d", indexValue, -arr.length())
+								return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Index value %d too small for array. minimum: %d", indexValue, -arr.length())
 							}
 							indexValue = arr.normalizeIndex(index)
 						}
@@ -187,7 +187,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						countValue := count.value
 						// Second argument must be positive value
 						if countValue < 0 {
-							return t.vm.initErrorObject(errors.InternalError, sourceLine, "Expect second argument greater than or equal 0. got: %d", countValue)
+							return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect second argument greater than or equal 0. got: %d", countValue)
 						}
 
 						endValue := indexValue + countValue
@@ -215,7 +215,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					// Negative index value condition
 					if indexValue < 0 {
 						if len(arr.Elements) < -indexValue {
-							return t.vm.initErrorObject(errors.InternalError, sourceLine, "Index value %d too small for array. minimum: %d", indexValue, -arr.length())
+							return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Index value %d too small for array. minimum: %d", indexValue, -arr.length())
 						}
 						arr.Elements[len(arr.Elements)+indexValue] = args[1]
 						return arr.Elements[len(arr.Elements)+indexValue]
