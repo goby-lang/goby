@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/goby-lang/goby/compiler/ast"
 	"github.com/goby-lang/goby/compiler/lexer"
+	"github.com/goby-lang/goby/compiler/parser/errors"
 	"github.com/goby-lang/goby/compiler/parser/events"
 	"github.com/goby-lang/goby/compiler/parser/precedence"
 	"github.com/goby-lang/goby/compiler/parser/states"
@@ -11,47 +12,10 @@ import (
 	"github.com/looplab/fsm"
 )
 
-const (
-	_ int = iota
-	// EndOfFileError represents normal EOF error
-	EndOfFileError
-	// WrongTokenError means that token is not what we expected
-	WrongTokenError
-	// UnexpectedTokenError means that token is not expected to appear in current condition
-	UnexpectedTokenError
-	// UnexpectedEndError means we get unexpected "end" keyword (this is mainly created for REPL)
-	UnexpectedEndError
-	// MethodDefinitionError means there's an error on method definition's method name
-	MethodDefinitionError
-	// InvalidAssignmentError means user assigns value to wrong type of expressions
-	InvalidAssignmentError
-	// SyntaxError means there's a grammatical in the source code
-	SyntaxError
-	// ArgumentError means there's a method parameter's definition error
-	ArgumentError
-)
-
-// Error represents parser's parsing error
-type Error struct {
-	// Message contains the readable message of error
-	Message string
-	errType int
-}
-
-// IsEOF checks if error is end of file error
-func (e *Error) IsEOF() bool {
-	return e.errType == EndOfFileError
-}
-
-// IsUnexpectedEnd checks if error is unexpected "end" keyword error
-func (e *Error) IsUnexpectedEnd() bool {
-	return e.errType == UnexpectedEndError
-}
-
 // Parser represents lexical analyzer struct
 type Parser struct {
 	Lexer *lexer.Lexer
-	error *Error
+	error *errors.Error
 
 	curToken  token.Token
 	peekToken token.Token
@@ -160,7 +124,7 @@ func New(l *lexer.Lexer) *Parser {
 }
 
 // ParseProgram update program statements and return program
-func (p *Parser) ParseProgram() (*ast.Program, *Error) {
+func (p *Parser) ParseProgram() (*ast.Program, *errors.Error) {
 	p.error = nil
 	// Read two tokens, so curToken and peekToken are both set.
 	p.nextToken()
@@ -250,31 +214,32 @@ func (p *Parser) peekTokenAtSameLine() bool {
 
 func (p *Parser) peekError(t token.Type) {
 	msg := fmt.Sprintf("expected next token to be %s, got %s instead. Line: %d", t, p.peekToken.Type, p.peekToken.Line)
-	p.error = &Error{Message: msg, errType: UnexpectedTokenError}
+	p.error = errors.InitError(msg, errors.UnexpectedTokenError)
 }
 
 func (p *Parser) noPrefixParseFnError(t token.Type) {
 	msg := fmt.Sprintf("unexpected %s Line: %d", p.curToken.Literal, p.curToken.Line)
 
 	if t == token.End {
-		p.error = &Error{Message: msg, errType: UnexpectedEndError}
+		p.error = errors.InitError(msg, errors.UnexpectedEndError)
 	} else {
-		p.error = &Error{Message: msg, errType: UnexpectedTokenError}
+		p.error = errors.InitError(msg, errors.UnexpectedTokenError)
 	}
 }
 
-func newArgumentError(formerArgType, laterArgType int, argLiteral string, line int) *Error {
+func newArgumentError(formerArgType, laterArgType int, argLiteral string, line int) *errors.Error {
 	formerArg := argTable[formerArgType]
 	laterArg := argTable[laterArgType]
-	return &Error{Message: fmt.Sprintf("%s \"%s\" should be defined before %s. Line: %d", formerArg, argLiteral, laterArg, line), errType: ArgumentError}
+	msg := fmt.Sprintf("%s \"%s\" should be defined before %s. Line: %d", formerArg, argLiteral, laterArg, line)
+	return errors.InitError(msg, errors.ArgumentError)
 }
 
-func newTypeParsingError(tokenLiteral, targetType string, line int) *Error {
+func newTypeParsingError(tokenLiteral, targetType string, line int) *errors.Error {
 	msg := fmt.Sprintf("could not parse %q as %s. Line: %d", tokenLiteral, targetType, line)
-	return &Error{Message: msg, errType: SyntaxError}
+	return errors.InitError(msg, errors.SyntaxError)
 }
 
 func (p *Parser) callConstantError(t token.Type) {
 	msg := fmt.Sprintf("cannot call %s with %s. Line: %d", t, p.peekToken.Type, p.peekToken.Line)
-	p.error = &Error{Message: msg, errType: UnexpectedTokenError}
+	p.error = errors.InitError(msg, errors.UnexpectedTokenError)
 }

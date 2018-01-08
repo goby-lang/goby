@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 	"github.com/goby-lang/goby/compiler/ast"
+	"github.com/goby-lang/goby/compiler/parser/errors"
 	"github.com/goby-lang/goby/compiler/parser/events"
 	"github.com/goby-lang/goby/compiler/parser/precedence"
 	"github.com/goby-lang/goby/compiler/parser/states"
@@ -286,9 +287,8 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 			return callExp
 		}
 
-		p.error = &Error{Message: fmt.Sprintf("Can't assign value to %s. Line: %d", v.String(), p.curToken.Line), errType: InvalidAssignmentError}
-	default:
-		p.error = &Error{Message: fmt.Sprintf("Can't assign value to %s. Line: %d", v.String(), p.curToken.Line), errType: InvalidAssignmentError}
+		errMsg := fmt.Sprintf("Can't assign value to %s. Line: %d", v.String(), p.curToken.Line)
+		p.error = errors.InitError(errMsg, errors.InvalidAssignmentError)
 	}
 
 	if len(exp.Variables) == 1 {

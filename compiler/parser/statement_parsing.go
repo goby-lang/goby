@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 	"github.com/goby-lang/goby/compiler/ast"
+	"github.com/goby-lang/goby/compiler/parser/errors"
 	"github.com/goby-lang/goby/compiler/parser/events"
 	"github.com/goby-lang/goby/compiler/parser/precedence"
 	"github.com/goby-lang/goby/compiler/token"
@@ -61,7 +62,8 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 		case token.Self:
 			stmt.Receiver = &ast.SelfExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
 		default:
-			p.error = &Error{Message: fmt.Sprintf("Invalid method receiver: %s. Line: %d", p.curToken.Literal, p.curToken.Line), errType: MethodDefinitionError}
+			msg := fmt.Sprintf("Invalid method receiver: %s. Line: %d", p.curToken.Literal, p.curToken.Line)
+			p.error = errors.InitError(msg, errors.MethodDefinitionError)
 		}
 
 		p.nextToken() // .
@@ -79,7 +81,8 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 	}
 
 	if p.peekTokenIs(token.Ident) && p.peekTokenAtSameLine() { // def foo x, next token is x and at same line
-		p.error = &Error{Message: fmt.Sprintf("Please add parentheses around method \"%s\"'s parameters. Line: %d", stmt.Name.Value, p.curToken.Line), errType: MethodDefinitionError}
+		msg := fmt.Sprintf("Please add parentheses around method \"%s\"'s parameters. Line: %d", stmt.Name.Value, p.curToken.Line)
+		p.error = errors.InitError(msg, errors.MethodDefinitionError)
 	}
 
 	if p.peekTokenIs(token.LParen) {
@@ -189,7 +192,8 @@ func (p *Parser) checkMethodParameters(params []ast.Expression) {
 		case *ast.PrefixExpression:
 			switch argState {
 			case SplatArg:
-				p.error = &Error{Message: fmt.Sprintf("Can't define splat argument more than once. Line: %d", p.curToken.Line), errType: ArgumentError}
+				msg := fmt.Sprintf("Can't define splat argument more than once. Line: %d", p.curToken.Line)
+				p.error = errors.InitError(msg, errors.ArgumentError)
 			}
 			argState = SplatArg
 		}
@@ -199,7 +203,8 @@ func (p *Parser) checkMethodParameters(params []ast.Expression) {
 		}
 
 		if paramDuplicated(checkedParams, param) {
-			p.error = &Error{Message: fmt.Sprintf("Duplicate argument name: \"%s\". Line: %d", getArgName(param), p.curToken.Line), errType: ArgumentError}
+			msg := fmt.Sprintf("Duplicate argument name: \"%s\". Line: %d", getArgName(param), p.curToken.Line)
+			p.error = errors.InitError(msg, errors.ArgumentError)
 		} else {
 			checkedParams = append(checkedParams, param)
 		}
@@ -297,7 +302,7 @@ ParseBlockLoop:
 		}
 
 		if p.curTokenIs(token.EOF) {
-			p.error = &Error{Message: "Unexpected EOF", errType: EndOfFileError}
+			p.error = errors.InitError("Unexpected EOF", errors.EndOfFileError)
 			return bs
 		}
 		stmt := p.parseStatement()
