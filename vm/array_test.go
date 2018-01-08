@@ -361,14 +361,6 @@ func TestArrayIndexWithSuccessiveValuesNullCases(t *testing.T) {
 			a = [1, 2, 3, 4, 5]
 			a[-6, 5] # Negative case range exceeded
 		`, nil},
-		{`
-			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-			a[3, -1] # Second argument is negative
-		`, nil},
-		{`
-			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-			a[-1, -1] # Both negative case
-		`, nil},
 	}
 
 	for i, tt := range tests {
@@ -426,6 +418,14 @@ func TestArrayIndexWithSuccessiveValuesFail(t *testing.T) {
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[-11, 2] = [1, 2, 3, 4, 5]
 		`, "ArgumentError: Index value -11 too small for array. minimum: -10", 1},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[3, -1]
+		`, "ArgumentError: Expect second argument greater than or equal 0. got: -1", 1},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[-1, -4] # Both negative case
+		`, "ArgumentError: Expect second argument greater than or equal 0. got: -4", 1},
 	}
 
 	for i, tt := range testsFail {

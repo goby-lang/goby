@@ -64,8 +64,11 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// a[7, 1] # => nil <-- Because it is really out of the edge of the array
 			//
 			// Special case 2: Second argument is negative
-			// a[1, -1]  # => nil
-			// a[-4, -3] # => nil
+			// This behaviour is different from Ruby itself, in Ruby, it returns "nil".
+			// However, in Goby, it raises error because there cannot be negative count values.
+			//
+			// a[1, -1]  # => ArgumentError: Expect second argument greater than or equal 0. got: -1
+			// a[-4, -3] # => ArgumentError: Expect second argument greater than or equal 0. got: -3
 			//
 			// Special case 3: First argument is negative and exceed the array length
 			// a[-6, 1] # => [1]
@@ -1274,14 +1277,27 @@ func (a *ArrayObject) index(t *thread, args []Object, sourceLine int) Object {
 		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 	}
 
-	/*
-	 *  This condition meets the special case (Don't know why ~ ? Ask Ruby or try it on irb!):
-	 *
-	 *  a = [1, 2, 3, 4, 5]
-	 *  a[5, 5] # => []
-	 */
-	if index.value > 0 && index.value == a.length() && len(args) == 2 {
-		return t.vm.initArrayObject([]Object{})
+	/* Validation for the second argument if exists */
+	if len(args) == 2 {
+		j := args[1]
+		count, ok := j.(*IntegerObject)
+
+		if !ok {
+			return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[1].Class().Name)
+		}
+		if count.value < 0 {
+			return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect second argument greater than or equal 0. got: %d", count.value)
+		}
+
+		/*
+		 *  This condition meets the special case (Don't know why ~ ? Ask Ruby or try it on irb!):
+		 *
+		 *  a = [1, 2, 3, 4, 5]
+		 *  a[5, 5] # => []
+		 */
+		if index.value > 0 && index.value == a.length() {
+			return t.vm.initArrayObject([]Object{})
+		}
 	}
 
 	normalizedIndex := a.normalizeIndex(index)
@@ -1291,15 +1307,7 @@ func (a *ArrayObject) index(t *thread, args []Object, sourceLine int) Object {
 
 	if len(args) == 2 {
 		j := args[1]
-		count, ok := j.(*IntegerObject)
-
-		if !ok {
-			return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[1].Class().Name)
-		}
-
-		if count.value < 0 {
-			return NULL
-		}
+		count, _ := j.(*IntegerObject)
 
 		if normalizedIndex+count.value > len(a.Elements) {
 			return t.vm.initArrayObject(a.Elements[normalizedIndex:])
