@@ -32,8 +32,6 @@ var precedence = map[token.Type]int{
 	token.Range:              RANGE,
 	token.Plus:               SUM,
 	token.Minus:              SUM,
-	token.Incr:               SUM,
-	token.Decr:               SUM,
 	token.Modulo:             SUM,
 	token.Slash:              PRODUCT,
 	token.Asterisk:           PRODUCT,
