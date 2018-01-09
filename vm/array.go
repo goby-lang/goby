@@ -72,8 +72,9 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			//
 			// Special case 3: First argument is negative and exceed the array length
 			// a[-6, 1] # => [1]
-			// a[-7, 1] # => nil
-			// a[-7, 0] # => []
+			// a[-6, 0] # => []
+			// a[-7, 1] # => ArgumentError: Index value -7 too small for array. minimum: -6
+			// a[-7, 0] # => ArgumentError: Index value -7 too small for array. minimum: -6
 			//
 			// ```
 			Name: "[]",
@@ -191,9 +192,6 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// a = [1, 2, 3, 4, 5]
 			// a[-6, 4] = [9, 8, 7] # <-- Nagative index too small case
 			// # ArgumentError: Index value -6 too small for array. minimum: -5
-			//
-			// # While indexing, it returns nil instead error
-			// a[-6, 4] # => nil
 			//
 			// a = [1, 2, 3, 4, 5]
 			// a[6, -4] = [9, 8, 7] # <-- Weak array assignment with nagative count case
@@ -1272,9 +1270,14 @@ func (a *ArrayObject) index(t *thread, args []Object, sourceLine int) Object {
 
 	i := args[0]
 	index, ok := i.(*IntegerObject)
+	arrLength := a.length()
 
 	if !ok {
 		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+	}
+
+	if index.value < 0 && index.value < -arrLength {
+		return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Index value %d too small for array. minimum: %d", index.value, -arrLength)
 	}
 
 	/* Validation for the second argument if exists */
@@ -1295,11 +1298,12 @@ func (a *ArrayObject) index(t *thread, args []Object, sourceLine int) Object {
 		 *  a = [1, 2, 3, 4, 5]
 		 *  a[5, 5] # => []
 		 */
-		if index.value > 0 && index.value == a.length() {
+		if index.value > 0 && index.value == arrLength {
 			return t.vm.initArrayObject([]Object{})
 		}
 	}
 
+	/* Start Indexing */
 	normalizedIndex := a.normalizeIndex(index)
 	if normalizedIndex == -1 {
 		return NULL
@@ -1309,7 +1313,7 @@ func (a *ArrayObject) index(t *thread, args []Object, sourceLine int) Object {
 		j := args[1]
 		count, _ := j.(*IntegerObject)
 
-		if normalizedIndex+count.value > len(a.Elements) {
+		if normalizedIndex+count.value > arrLength {
 			return t.vm.initArrayObject(a.Elements[normalizedIndex:])
 		}
 		return t.vm.initArrayObject(a.Elements[normalizedIndex : normalizedIndex+count.value])

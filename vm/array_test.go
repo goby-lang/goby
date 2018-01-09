@@ -104,9 +104,6 @@ func TestArrayIndex(t *testing.T) {
 		    [1, "a", 10, "b"][-2]
 		`, 10},
 		{`
-		    [1, "a", 10, "b"][-5]
-		`, nil},
-		{`
 			a = [1, "a", 10, 5]
 			a[0]
 		`, 1},
@@ -165,6 +162,9 @@ func TestArrayIndexFail(t *testing.T) {
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[-11] = 123
 		`, "ArgumentError: Index value -11 too small for array. minimum: -10", 1},
+		{`
+		    [1, "a", 10, "b"][-5]
+		`, "ArgumentError: Index value -5 too small for array. minimum: -4", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -357,10 +357,6 @@ func TestArrayIndexWithSuccessiveValuesNullCases(t *testing.T) {
 			a = [1, 2, 3, 4, 5]
 			a[6, 5] # Range exceeded
 		`, nil},
-		{`
-			a = [1, 2, 3, 4, 5]
-			a[-6, 5] # Negative case range exceeded
-		`, nil},
 	}
 
 	for i, tt := range tests {
@@ -402,6 +398,10 @@ func TestArrayIndexWithSuccessiveValuesFail(t *testing.T) {
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[1, "5", 6] = 123
 		`, "ArgumentError: Expect 2..3 arguments. got=4", 1},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[-6, 5]
+		`, "ArgumentError: Index value -6 too small for array. minimum: -5", 1},
 		{`
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[1, -3] = [1, 2, 3, 4, 5]
@@ -513,9 +513,6 @@ func TestArrayAtMethod(t *testing.T) {
 			[1, "a", 10, 5].at(-2)
 		`, 10},
 		{`
-			[1, "a", 10, 5].at(-5)
-		`, nil},
-		{`
 			a = [1, "a", 10, 5]
 			a.at(0)
 		`, 1},
@@ -546,6 +543,7 @@ func TestArrayAtMethodFail(t *testing.T) {
 		{`[1, 2, 3].at(2, 3)`, "ArgumentError: Expect 1 arguments. got=2", 1},
 		{`[1, 2, 3].at(true)`, "TypeError: Expect argument to be Integer. got: Boolean", 1},
 		{`[1, 2, 3].at(1..3)`, "TypeError: Expect argument to be Integer. got: Range", 1},
+		{`[1, "a", 10, 5].at(-5)`, "ArgumentError: Index value -5 too small for array. minimum: -4", 1},
 	}
 
 	for i, tt := range testsFail {
