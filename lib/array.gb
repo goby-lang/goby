@@ -4,4 +4,8 @@ class Array
       i == x
     end
   end
+
+  def to_enum
+    ArrayEnumerator.new(self)
+  end
 end

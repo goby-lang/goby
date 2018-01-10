@@ -1173,6 +1173,7 @@ func (vm *VM) initArrayClass() *RClass {
 	ac.setBuiltinMethods(builtinArrayInstanceMethods(), false)
 	ac.setBuiltinMethods(builtinArrayClassMethods(), true)
 	vm.libFiles = append(vm.libFiles, "array.gb")
+	vm.libFiles = append(vm.libFiles, "array_enumerator.gb")
 	return ac
 }
 
