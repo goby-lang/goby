@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 	"github.com/goby-lang/goby/compiler/ast"
+	"github.com/goby-lang/goby/compiler/parser/arguments"
 	"github.com/goby-lang/goby/compiler/parser/errors"
 	"github.com/goby-lang/goby/compiler/parser/events"
 	"github.com/goby-lang/goby/compiler/parser/precedence"
@@ -144,7 +145,7 @@ func (p *Parser) checkMethodParameters(params []ast.Expression) {
 		2 means previous arg is keyword argument
 		3 means previous arg is splat argument
 	*/
-	argState := NormalArg
+	argState := arguments.NormalArg
 
 	checkedParams := []ast.Expression{}
 
@@ -152,50 +153,50 @@ func (p *Parser) checkMethodParameters(params []ast.Expression) {
 		switch exp := param.(type) {
 		case *ast.Identifier:
 			switch argState {
-			case OptionedArg:
-				p.error = newArgumentError(NormalArg, OptionedArg, exp.Value, p.curToken.Line)
-			case RequiredKeywordArg:
-				p.error = newArgumentError(NormalArg, RequiredKeywordArg, exp.Value, p.curToken.Line)
-			case OptionalKeywordArg:
-				p.error = newArgumentError(NormalArg, OptionalKeywordArg, exp.Value, p.curToken.Line)
-			case SplatArg:
-				p.error = newArgumentError(NormalArg, SplatArg, exp.Value, p.curToken.Line)
+			case arguments.OptionedArg:
+				p.error = newArgumentError(arguments.NormalArg, arguments.OptionedArg, exp.Value, p.curToken.Line)
+			case arguments.RequiredKeywordArg:
+				p.error = newArgumentError(arguments.NormalArg, arguments.RequiredKeywordArg, exp.Value, p.curToken.Line)
+			case arguments.OptionalKeywordArg:
+				p.error = newArgumentError(arguments.NormalArg, arguments.OptionalKeywordArg, exp.Value, p.curToken.Line)
+			case arguments.SplatArg:
+				p.error = newArgumentError(arguments.NormalArg, arguments.SplatArg, exp.Value, p.curToken.Line)
 			}
 		case *ast.AssignExpression:
 			switch argState {
-			case RequiredKeywordArg:
-				p.error = newArgumentError(OptionedArg, RequiredKeywordArg, exp.String(), p.curToken.Line)
-			case OptionalKeywordArg:
-				p.error = newArgumentError(OptionedArg, OptionalKeywordArg, exp.String(), p.curToken.Line)
-			case SplatArg:
-				p.error = newArgumentError(OptionedArg, SplatArg, exp.String(), p.curToken.Line)
+			case arguments.RequiredKeywordArg:
+				p.error = newArgumentError(arguments.OptionedArg, arguments.RequiredKeywordArg, exp.String(), p.curToken.Line)
+			case arguments.OptionalKeywordArg:
+				p.error = newArgumentError(arguments.OptionedArg, arguments.OptionalKeywordArg, exp.String(), p.curToken.Line)
+			case arguments.SplatArg:
+				p.error = newArgumentError(arguments.OptionedArg, arguments.SplatArg, exp.String(), p.curToken.Line)
 			}
-			argState = OptionedArg
+			argState = arguments.OptionedArg
 		case *ast.PairExpression:
 			if exp.Value == nil {
 				switch argState {
-				case OptionalKeywordArg:
-					p.error = newArgumentError(RequiredKeywordArg, OptionalKeywordArg, exp.String(), p.curToken.Line)
-				case SplatArg:
-					p.error = newArgumentError(RequiredKeywordArg, SplatArg, exp.String(), p.curToken.Line)
+				case arguments.OptionalKeywordArg:
+					p.error = newArgumentError(arguments.RequiredKeywordArg, arguments.OptionalKeywordArg, exp.String(), p.curToken.Line)
+				case arguments.SplatArg:
+					p.error = newArgumentError(arguments.RequiredKeywordArg, arguments.SplatArg, exp.String(), p.curToken.Line)
 				}
 
-				argState = RequiredKeywordArg
+				argState = arguments.RequiredKeywordArg
 			} else {
 				switch argState {
-				case SplatArg:
-					p.error = newArgumentError(OptionalKeywordArg, SplatArg, exp.String(), p.curToken.Line)
+				case arguments.SplatArg:
+					p.error = newArgumentError(arguments.OptionalKeywordArg, arguments.SplatArg, exp.String(), p.curToken.Line)
 				}
 
-				argState = OptionalKeywordArg
+				argState = arguments.OptionalKeywordArg
 			}
 		case *ast.PrefixExpression:
 			switch argState {
-			case SplatArg:
+			case arguments.SplatArg:
 				msg := fmt.Sprintf("Can't define splat argument more than once. Line: %d", p.curToken.Line)
 				p.error = errors.InitError(msg, errors.ArgumentError)
 			}
-			argState = SplatArg
+			argState = arguments.SplatArg
 		}
 
 		if p.error != nil {

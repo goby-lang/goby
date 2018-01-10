@@ -3,23 +3,13 @@ package parser
 import (
 	"fmt"
 	"github.com/goby-lang/goby/compiler/ast"
+	"github.com/goby-lang/goby/compiler/parser/arguments"
 	"github.com/goby-lang/goby/compiler/parser/errors"
 	"github.com/goby-lang/goby/compiler/parser/events"
 	"github.com/goby-lang/goby/compiler/parser/precedence"
 	"github.com/goby-lang/goby/compiler/parser/states"
 	"github.com/goby-lang/goby/compiler/token"
 )
-
-var arguments = map[token.Type]bool{
-	token.Int:              true,
-	token.String:           true,
-	token.True:             true,
-	token.False:            true,
-	token.Null:             true,
-	token.InstanceVariable: true,
-	token.Ident:            true,
-	token.Constant:         true,
-}
 
 type (
 	prefixParseFn func() ast.Expression
@@ -78,7 +68,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 
 			will also enter this condition first, but we'll check if those two token is at same line in the parsing function
 		*/
-		if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() {
+		if arguments.Tokens[p.peekToken.Type] && p.peekTokenAtSameLine() {
 			method := p.parseIdentifier()
 			p.nextToken()
 			return p.parseCallExpressionWithoutReceiver(method)
@@ -139,7 +129,7 @@ func (p *Parser) parseYieldExpression() ast.Expression {
 		ye.Arguments = p.parseCallArgumentsWithParens()
 	}
 
-	if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { // yield 123
+	if arguments.Tokens[p.peekToken.Type] && p.peekTokenAtSameLine() { // yield 123
 		p.nextToken()
 		ye.Arguments = p.parseCallArguments()
 	}

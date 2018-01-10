@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/goby-lang/goby/compiler/ast"
 	"github.com/goby-lang/goby/compiler/lexer"
+	"github.com/goby-lang/goby/compiler/parser/arguments"
 	"github.com/goby-lang/goby/compiler/parser/errors"
 	"github.com/goby-lang/goby/compiler/parser/events"
 	"github.com/goby-lang/goby/compiler/parser/precedence"
@@ -36,21 +37,7 @@ const (
 	NormalMode int = iota
 	REPLMode
 	TestMode
-
-	NormalArg
-	OptionedArg
-	SplatArg
-	RequiredKeywordArg
-	OptionalKeywordArg
 )
-
-var argTable = map[int]string{
-	NormalArg:          "Normal argument",
-	OptionedArg:        "Optioned argument",
-	RequiredKeywordArg: "Keyword argument",
-	OptionalKeywordArg: "Optioned keyword argument",
-	SplatArg:           "Splat argument",
-}
 
 // New initializes a parser and returns it
 func New(l *lexer.Lexer) *Parser {
@@ -228,8 +215,8 @@ func (p *Parser) noPrefixParseFnError(t token.Type) {
 }
 
 func newArgumentError(formerArgType, laterArgType int, argLiteral string, line int) *errors.Error {
-	formerArg := argTable[formerArgType]
-	laterArg := argTable[laterArgType]
+	formerArg := arguments.Types[formerArgType]
+	laterArg := arguments.Types[laterArgType]
 	msg := fmt.Sprintf("%s \"%s\" should be defined before %s. Line: %d", formerArg, argLiteral, laterArg, line)
 	return errors.InitError(msg, errors.ArgumentError)
 }

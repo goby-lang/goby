@@ -2,6 +2,7 @@ package parser
 
 import (
 	"github.com/goby-lang/goby/compiler/ast"
+	"github.com/goby-lang/goby/compiler/parser/arguments"
 	"github.com/goby-lang/goby/compiler/parser/events"
 	"github.com/goby-lang/goby/compiler/parser/precedence"
 	"github.com/goby-lang/goby/compiler/token"
@@ -69,7 +70,7 @@ func (p *Parser) parseCallExpressionWithReceiver(receiver ast.Expression) ast.Ex
 			p.nextToken()
 			exp.Arguments = append(exp.Arguments, p.parseExpression(precedence.Normal))
 		default:
-			if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { // p.foo x, y, z || p.foo x
+			if arguments.Tokens[p.peekToken.Type] && p.peekTokenAtSameLine() { // p.foo x, y, z || p.foo x
 				p.nextToken()
 				exp.Arguments = p.parseCallArguments()
 			} else {
