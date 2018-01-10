@@ -104,9 +104,6 @@ func TestArrayIndex(t *testing.T) {
 		    [1, "a", 10, "b"][-2]
 		`, 10},
 		{`
-		    [1, "a", 10, "b"][-5]
-		`, nil},
-		{`
 			a = [1, "a", 10, 5]
 			a[0]
 		`, 1},
@@ -140,16 +137,14 @@ func TestArrayIndex(t *testing.T) {
 			a[0] = a[1] + a[2] + a[3] * a[4]
 			a[0]
 		`, 55},
-		{
-			`
+		{`
 			code = []
 			code[100] = 'Continue'
 			code[101] = 'Switching Protocols'
 			code[102] = 'Processing'
 			code[200] = 'OK'
 			code.to_s
-			`,
-			`[nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "Continue", "Switching Protocols", "Processing", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "OK"]`},
+		`, `[nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "Continue", "Switching Protocols", "Processing", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "OK"]`},
 	}
 
 	for i, tt := range tests {
@@ -157,6 +152,287 @@ func TestArrayIndex(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayIndexFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[-11] = 123
+		`, "ArgumentError: Index value -11 too small for array. minimum: -10", 1},
+		{`
+		    [1, "a", 10, "b"][-5]
+		`, "ArgumentError: Index value -5 too small for array. minimum: -4", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayIndexWithSuccessiveValues(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[1, 0]
+		`, []interface{}{}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[1, 1]
+		`, []interface{}{2}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[1, 3]
+		`, []interface{}{2, 3, 4}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[1, 5]
+		`, []interface{}{2, 3, 4, 5}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[-5, 1]
+		`, []interface{}{1}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[-5, 5]
+		`, []interface{}{1, 2, 3, 4, 5}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[1, 10]
+		`, []interface{}{2, 3, 4, 5}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[3, 1]
+		`, []interface{}{4}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[3, 2]
+		`, []interface{}{4, 5}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[3, 3]
+		`, []interface{}{4, 5}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[4, 4]
+		`, []interface{}{5}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[5, 5]
+		`, []interface{}{}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[3, 0]
+		`, []interface{}{}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[3, 1]
+		`, []interface{}{4}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[3, 3]
+		`, []interface{}{4, 5, 6}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[3, 5]
+		`, []interface{}{4, 5, 6, 7, 8}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[3, 7]
+		`, []interface{}{4, 5, 6, 7, 8, 9, 10}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[3, 10]
+		`, []interface{}{4, 5, 6, 7, 8, 9, 10}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[-7, 1]
+		`, []interface{}{4}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[-7, 3]
+		`, []interface{}{4, 5, 6}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[-7, 5]
+		`, []interface{}{4, 5, 6, 7, 8}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[-7, 7]
+		`, []interface{}{4, 5, 6, 7, 8, 9, 10}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[-7, 10]
+		`, []interface{}{4, 5, 6, 7, 8, 9, 10}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[2, 3] = [1, 2, 3, 4, 5]
+		`, []interface{}{1, 2, 3, 4, 5}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[2, 3] = [1, 2, 3, 4, 5]
+			a
+		`, []interface{}{1, 2, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[1, 7] = [1, 2, 3]
+			a
+		`, []interface{}{1, 1, 2, 3, 9, 10}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[-5, 3] = [2, 4, 6, 8, 10]
+			a
+		`, []interface{}{1, 2, 3, 4, 5, 2, 4, 6, 8, 10, 9, 10}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[5, 6] = 123
+			a
+		`, []interface{}{1, 2, 3, 4, 5, 123}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[5, 0] = 123
+			a
+		`, []interface{}{1, 2, 3, 4, 5, 123, 6, 7, 8, 9, 10}},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[-7, 2] = "@Maxwell-Alexius is solving issue #403"
+			a
+		`, []interface{}{1, 2, 3, "@Maxwell-Alexius is solving issue #403", 6, 7, 8, 9, 10}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[5, 123] = 123
+			a
+		`, []interface{}{1, 2, 3, 4, 5, 123}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[1, 0] = 555
+			a
+		`, []interface{}{1, 555, 2, 3, 4, 5}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[5, 123] = [1, 2, 3]
+			a
+		`, []interface{}{1, 2, 3, 4, 5, 1, 2, 3}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[10, 123] = 123
+			a
+		`, []interface{}{1, 2, 3, 4, 5, nil, nil, nil, nil, nil, 123}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[10, 123] = [1, 2, 3]
+			a
+		`, []interface{}{1, 2, 3, 4, 5, nil, nil, nil, nil, nil, 1, 2, 3}},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[10, 123] = "@Maxwell-Alexius is solving issue #403 which have tons of feature"
+			a
+		`, []interface{}{1, 2, 3, 4, 5, nil, nil, nil, nil, nil, "@Maxwell-Alexius is solving issue #403 which have tons of feature"}},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input, getFilename())
+		verifyArrayObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayIndexWithSuccessiveValuesNullCases(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[6, 5] # Range exceeded
+		`, nil},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		verifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayIndexWithSuccessiveValuesFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`
+			a = [1, 2, 3, 4, 5]
+			a["1", 5]
+		`, "TypeError: Expect argument to be Integer. got: String", 1},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[1, "5"]
+		`, "TypeError: Expect argument to be Integer. got: String", 1},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[1, 3, 5]
+		`, "ArgumentError: Expect 1..2 arguments. got=3", 1},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[1, 3, 5, 7, 9]
+		`, "ArgumentError: Expect 1..2 arguments. got=5", 1},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[]
+		`, "ArgumentError: Expect 1..2 arguments. got=0", 1},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[1, "5"] = 6
+		`, "TypeError: Expect argument to be Integer. got: String", 1},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[1, "5", 6] = 123
+		`, "ArgumentError: Expect 2..3 arguments. got=4", 1},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[-6, 5]
+		`, "ArgumentError: Index value -6 too small for array. minimum: -5", 1},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[1, -3] = [1, 2, 3, 4, 5]
+		`, "ArgumentError: Expect second argument greater than or equal 0. got: -3", 1},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[-1, -1] = 555
+		`, "ArgumentError: Expect second argument greater than or equal 0. got: -1", 1},
+		{`
+			a = [1, 2, 3, 4, 5]
+			a[6, -1] = 555
+		`, "ArgumentError: Expect second argument greater than or equal 0. got: -1", 1},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[-11, 2] = [1, 2, 3, 4, 5]
+		`, "ArgumentError: Index value -11 too small for array. minimum: -10", 1},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[3, -1]
+		`, "ArgumentError: Expect second argument greater than or equal 0. got: -1", 1},
+		{`
+			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			a[-1, -4] # Both negative case
+		`, "ArgumentError: Expect second argument greater than or equal 0. got: -4", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -237,9 +513,6 @@ func TestArrayAtMethod(t *testing.T) {
 			[1, "a", 10, 5].at(-2)
 		`, 10},
 		{`
-			[1, "a", 10, 5].at(-5)
-		`, nil},
-		{`
 			a = [1, "a", 10, 5]
 			a.at(0)
 		`, 1},
@@ -270,6 +543,7 @@ func TestArrayAtMethodFail(t *testing.T) {
 		{`[1, 2, 3].at(2, 3)`, "ArgumentError: Expect 1 arguments. got=2", 1},
 		{`[1, 2, 3].at(true)`, "TypeError: Expect argument to be Integer. got: Boolean", 1},
 		{`[1, 2, 3].at(1..3)`, "TypeError: Expect argument to be Integer. got: Range", 1},
+		{`[1, "a", 10, 5].at(-5)`, "ArgumentError: Index value -5 too small for array. minimum: -4", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -759,6 +1033,26 @@ func TestArrayFirstMethod(t *testing.T) {
 	}
 }
 
+func TestArrayFirstMethodNullCases(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+			a = []
+			a.first # Empty Array Case
+		`, nil},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		verifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayFirstMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = [1, 2]
@@ -1108,6 +1402,21 @@ func TestArrayPopMethod(t *testing.T) {
 	}
 }
 
+func TestArrayPopMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`[1, 2, 3, 4, 5].pop(123)`, "ArgumentError: Expect 0 argument. got=1", 1},
+		{`[1, 2, 3, 4, 5].pop("Hello", "World")`, "ArgumentError: Expect 0 argument. got=2", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayPushMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -1240,6 +1549,21 @@ func TestArrayReverseMethod(t *testing.T) {
 	}
 }
 
+func TestArrayReverseMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`[1, 2, 3, 4, 5].reverse(123)`, "ArgumentError: Expect 0 argument. got=1", 1},
+		{`[1, 2, 3, 4, 5].reverse("Hello", "World")`, "ArgumentError: Expect 0 argument. got=2", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayReverseEachMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -1366,6 +1690,20 @@ func TestArraySelectMethod(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		verifyArrayObject(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArraySelectMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`[1, 2, 3, 4, 5].select`, "InternalError: Can't yield without a block", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }

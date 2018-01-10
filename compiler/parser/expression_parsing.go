@@ -241,8 +241,14 @@ func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
 	}
 
 	p.nextToken()
-
 	callExpression.Arguments = []ast.Expression{p.parseExpression(NORMAL)}
+
+	// Accepting multiple indexing argument
+	for p.peekTokenIs(token.Comma) {
+		p.nextToken()
+		p.nextToken()
+		callExpression.Arguments = append(callExpression.Arguments, p.parseExpression(NORMAL))
+	}
 
 	if !p.expectPeek(token.RBracket) {
 		return nil
