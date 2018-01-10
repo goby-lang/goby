@@ -154,38 +154,38 @@ func (p *Parser) checkMethodParameters(params []ast.Expression) {
 		case *ast.Identifier:
 			switch argState {
 			case arguments.OptionedArg:
-				p.error = newArgumentError(arguments.NormalArg, arguments.OptionedArg, exp.Value, p.curToken.Line)
+				p.error = errors.NewArgumentError(arguments.NormalArg, arguments.OptionedArg, exp.Value, p.curToken.Line)
 			case arguments.RequiredKeywordArg:
-				p.error = newArgumentError(arguments.NormalArg, arguments.RequiredKeywordArg, exp.Value, p.curToken.Line)
+				p.error = errors.NewArgumentError(arguments.NormalArg, arguments.RequiredKeywordArg, exp.Value, p.curToken.Line)
 			case arguments.OptionalKeywordArg:
-				p.error = newArgumentError(arguments.NormalArg, arguments.OptionalKeywordArg, exp.Value, p.curToken.Line)
+				p.error = errors.NewArgumentError(arguments.NormalArg, arguments.OptionalKeywordArg, exp.Value, p.curToken.Line)
 			case arguments.SplatArg:
-				p.error = newArgumentError(arguments.NormalArg, arguments.SplatArg, exp.Value, p.curToken.Line)
+				p.error = errors.NewArgumentError(arguments.NormalArg, arguments.SplatArg, exp.Value, p.curToken.Line)
 			}
 		case *ast.AssignExpression:
 			switch argState {
 			case arguments.RequiredKeywordArg:
-				p.error = newArgumentError(arguments.OptionedArg, arguments.RequiredKeywordArg, exp.String(), p.curToken.Line)
+				p.error = errors.NewArgumentError(arguments.OptionedArg, arguments.RequiredKeywordArg, exp.String(), p.curToken.Line)
 			case arguments.OptionalKeywordArg:
-				p.error = newArgumentError(arguments.OptionedArg, arguments.OptionalKeywordArg, exp.String(), p.curToken.Line)
+				p.error = errors.NewArgumentError(arguments.OptionedArg, arguments.OptionalKeywordArg, exp.String(), p.curToken.Line)
 			case arguments.SplatArg:
-				p.error = newArgumentError(arguments.OptionedArg, arguments.SplatArg, exp.String(), p.curToken.Line)
+				p.error = errors.NewArgumentError(arguments.OptionedArg, arguments.SplatArg, exp.String(), p.curToken.Line)
 			}
 			argState = arguments.OptionedArg
 		case *ast.PairExpression:
 			if exp.Value == nil {
 				switch argState {
 				case arguments.OptionalKeywordArg:
-					p.error = newArgumentError(arguments.RequiredKeywordArg, arguments.OptionalKeywordArg, exp.String(), p.curToken.Line)
+					p.error = errors.NewArgumentError(arguments.RequiredKeywordArg, arguments.OptionalKeywordArg, exp.String(), p.curToken.Line)
 				case arguments.SplatArg:
-					p.error = newArgumentError(arguments.RequiredKeywordArg, arguments.SplatArg, exp.String(), p.curToken.Line)
+					p.error = errors.NewArgumentError(arguments.RequiredKeywordArg, arguments.SplatArg, exp.String(), p.curToken.Line)
 				}
 
 				argState = arguments.RequiredKeywordArg
 			} else {
 				switch argState {
 				case arguments.SplatArg:
-					p.error = newArgumentError(arguments.OptionalKeywordArg, arguments.SplatArg, exp.String(), p.curToken.Line)
+					p.error = errors.NewArgumentError(arguments.OptionalKeywordArg, arguments.SplatArg, exp.String(), p.curToken.Line)
 				}
 
 				argState = arguments.OptionalKeywordArg

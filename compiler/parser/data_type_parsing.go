@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 	"github.com/goby-lang/goby/compiler/ast"
+	"github.com/goby-lang/goby/compiler/parser/errors"
 	"github.com/goby-lang/goby/compiler/parser/precedence"
 	"github.com/goby-lang/goby/compiler/token"
 	"strconv"
@@ -13,7 +14,7 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 
 	value, err := strconv.ParseInt(lit.TokenLiteral(), 0, 64)
 	if err != nil {
-		p.error = newTypeParsingError(lit.TokenLiteral(), "integer", p.curToken.Line)
+		p.error = errors.NewTypeParsingError(lit.TokenLiteral(), "integer", p.curToken.Line)
 		return nil
 	}
 
@@ -34,7 +35,7 @@ func (p *Parser) parseFloatLiteral(integerPart ast.Expression) ast.Expression {
 	lit := &ast.FloatLiteral{BaseNode: &ast.BaseNode{Token: floatTok}}
 	value, err := strconv.ParseFloat(lit.TokenLiteral(), 64)
 	if err != nil {
-		p.error = newTypeParsingError(lit.TokenLiteral(), "float", p.curToken.Line)
+		p.error = errors.NewTypeParsingError(lit.TokenLiteral(), "float", p.curToken.Line)
 		return nil
 	}
 	lit.Value = float64(value)
@@ -53,7 +54,7 @@ func (p *Parser) parseBooleanLiteral() ast.Expression {
 
 	value, err := strconv.ParseBool(lit.TokenLiteral())
 	if err != nil {
-		p.error = newTypeParsingError(lit.TokenLiteral(), "boolean", p.curToken.Line)
+		p.error = errors.NewTypeParsingError(lit.TokenLiteral(), "boolean", p.curToken.Line)
 		return nil
 	}
 
@@ -105,7 +106,7 @@ func (p *Parser) parseHashPair(pairs map[string]ast.Expression) {
 	case token.Constant, token.Ident:
 		key = p.parseIdentifier().(ast.Variable).ReturnValue()
 	default:
-		p.error = newTypeParsingError(p.curToken.Literal, "hash key", p.curToken.Line)
+		p.error = errors.NewTypeParsingError(p.curToken.Literal, "hash key", p.curToken.Line)
 		return
 	}
 

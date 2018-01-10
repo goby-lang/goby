@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/goby-lang/goby/compiler/ast"
 	"github.com/goby-lang/goby/compiler/lexer"
-	"github.com/goby-lang/goby/compiler/parser/arguments"
 	"github.com/goby-lang/goby/compiler/parser/errors"
 	"github.com/goby-lang/goby/compiler/parser/events"
 	"github.com/goby-lang/goby/compiler/parser/precedence"
@@ -212,18 +211,6 @@ func (p *Parser) noPrefixParseFnError(t token.Type) {
 	} else {
 		p.error = errors.InitError(msg, errors.UnexpectedTokenError)
 	}
-}
-
-func newArgumentError(formerArgType, laterArgType int, argLiteral string, line int) *errors.Error {
-	formerArg := arguments.Types[formerArgType]
-	laterArg := arguments.Types[laterArgType]
-	msg := fmt.Sprintf("%s \"%s\" should be defined before %s. Line: %d", formerArg, argLiteral, laterArg, line)
-	return errors.InitError(msg, errors.ArgumentError)
-}
-
-func newTypeParsingError(tokenLiteral, targetType string, line int) *errors.Error {
-	msg := fmt.Sprintf("could not parse %q as %s. Line: %d", tokenLiteral, targetType, line)
-	return errors.InitError(msg, errors.SyntaxError)
 }
 
 func (p *Parser) callConstantError(t token.Type) {

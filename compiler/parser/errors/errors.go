@@ -1,5 +1,10 @@
 package errors
 
+import (
+	"fmt"
+	"github.com/goby-lang/goby/compiler/parser/arguments"
+)
+
 const (
 	_ = iota
 	// EndOfFileError represents normal EOF error
@@ -37,4 +42,16 @@ func (e *Error) IsUnexpectedEnd() bool {
 
 func InitError(msg string, errType int) *Error {
 	return &Error{Message: msg, ErrType: errType}
+}
+
+func NewArgumentError(formerArgType, laterArgType int, argLiteral string, line int) *Error {
+	formerArg := arguments.Types[formerArgType]
+	laterArg := arguments.Types[laterArgType]
+	msg := fmt.Sprintf("%s \"%s\" should be defined before %s. Line: %d", formerArg, argLiteral, laterArg, line)
+	return InitError(msg, ArgumentError)
+}
+
+func NewTypeParsingError(tokenLiteral, targetType string, line int) *Error {
+	msg := fmt.Sprintf("could not parse %q as %s. Line: %d", tokenLiteral, targetType, line)
+	return InitError(msg, SyntaxError)
 }
