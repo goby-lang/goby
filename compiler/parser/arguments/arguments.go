@@ -2,6 +2,7 @@ package arguments
 
 import "github.com/goby-lang/goby/compiler/token"
 
+// Enums for different kinds of arguments
 const (
 	NormalArg = iota
 	OptionedArg
@@ -10,6 +11,7 @@ const (
 	OptionalKeywordArg
 )
 
+// Types is a table maps argument types enum to the their real name
 var Types = map[int]string{
 	NormalArg:          "Normal argument",
 	OptionedArg:        "Optioned argument",
@@ -18,6 +20,7 @@ var Types = map[int]string{
 	SplatArg:           "Splat argument",
 }
 
+// Tokens marks token types that can be used as method call arguments
 var Tokens = map[token.Type]bool{
 	token.Int:              true,
 	token.String:           true,

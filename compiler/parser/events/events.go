@@ -12,6 +12,7 @@ const (
 	ParseAssignment  = "parseAssignment"
 )
 
+// EventTable is the mapping of state and its corresponding event
 var EventTable = map[string]string{
 	states.Normal:             BackToNormal,
 	states.ParsingFuncCall:    ParseFuncCall,

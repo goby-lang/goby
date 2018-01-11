@@ -19,6 +19,7 @@ const (
 	Call
 )
 
+// LookupTable maps token to its corresponding precedence
 var LookupTable = map[token.Type]int{
 	token.Eq:                 Equals,
 	token.NotEq:              Equals,

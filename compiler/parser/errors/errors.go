@@ -5,11 +5,12 @@ import (
 	"github.com/goby-lang/goby/compiler/parser/arguments"
 )
 
+// Enums for different kinds of syntax errors
 const (
 	_ = iota
 	// EndOfFileError represents normal EOF error
 	EndOfFileError
-	// WrongTokenError means that token is not what we expected
+	// UnexpectedTokenError means that token is not what we expected
 	UnexpectedTokenError
 	// UnexpectedEndError means we get unexpected "end" keyword (this is mainly created for REPL)
 	UnexpectedEndError
@@ -40,10 +41,12 @@ func (e *Error) IsUnexpectedEnd() bool {
 	return e.ErrType == UnexpectedEndError
 }
 
+// InitError is a helper function for easily initializing error object
 func InitError(msg string, errType int) *Error {
 	return &Error{Message: msg, ErrType: errType}
 }
 
+// NewArgumentError is a helper function the helps initializing argument errors
 func NewArgumentError(formerArgType, laterArgType int, argLiteral string, line int) *Error {
 	formerArg := arguments.Types[formerArgType]
 	laterArg := arguments.Types[laterArgType]
@@ -51,6 +54,7 @@ func NewArgumentError(formerArgType, laterArgType int, argLiteral string, line i
 	return InitError(msg, ArgumentError)
 }
 
+// NewTypeParsingError is a helper function the helps initializing type parsing errors
 func NewTypeParsingError(tokenLiteral, targetType string, line int) *Error {
 	msg := fmt.Sprintf("could not parse %q as %s. Line: %d", tokenLiteral, targetType, line)
 	return InitError(msg, SyntaxError)
