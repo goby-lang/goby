@@ -100,7 +100,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.ResolutionOperator, p.parseInfixExpression)
 	p.registerInfix(token.Assign, p.parseAssignExpression)
 	p.registerInfix(token.Range, p.parseRangeExpression)
-	p.registerInfix(token.Dot, p.parseDotExpression)
+	p.registerInfix(token.Dot, p.parseCallExpressionWithReceiver)
 	p.registerInfix(token.LParen, p.parseCallExpressionWithoutReceiver)
 	p.registerInfix(token.LBracket, p.parseIndexExpression)
 	p.registerInfix(token.Colon, p.parsePairExpression)
@@ -199,7 +199,7 @@ func (p *Parser) peekTokenAtSameLine() bool {
 }
 
 func (p *Parser) peekError(t token.Type) {
-	msg := fmt.Sprintf("expected next token to be %s, got %s instead. Line: %d", t, p.peekToken.Type, p.peekToken.Line)
+	msg := fmt.Sprintf("expected next token to be %s, got %s(%s) instead. Line: %d", t, p.peekToken.Type, p.peekToken.Literal, p.peekToken.Line)
 	p.error = errors.InitError(msg, errors.UnexpectedTokenError)
 }
 
