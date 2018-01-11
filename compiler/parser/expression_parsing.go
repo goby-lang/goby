@@ -2,68 +2,13 @@ package parser
 
 import (
 	"fmt"
-
 	"github.com/goby-lang/goby/compiler/ast"
+	"github.com/goby-lang/goby/compiler/parser/arguments"
+	"github.com/goby-lang/goby/compiler/parser/errors"
+	"github.com/goby-lang/goby/compiler/parser/events"
+	"github.com/goby-lang/goby/compiler/parser/precedence"
+	"github.com/goby-lang/goby/compiler/parser/states"
 	"github.com/goby-lang/goby/compiler/token"
-)
-
-var arguments = map[token.Type]bool{
-	token.Int:              true,
-	token.String:           true,
-	token.True:             true,
-	token.False:            true,
-	token.Null:             true,
-	token.InstanceVariable: true,
-	token.Ident:            true,
-	token.Constant:         true,
-}
-
-var precedence = map[token.Type]int{
-	token.Eq:                 EQUALS,
-	token.NotEq:              EQUALS,
-	token.Match:              COMPARE,
-	token.LT:                 COMPARE,
-	token.LTE:                COMPARE,
-	token.GT:                 COMPARE,
-	token.GTE:                COMPARE,
-	token.COMP:               COMPARE,
-	token.And:                LOGIC,
-	token.Or:                 LOGIC,
-	token.Range:              RANGE,
-	token.Plus:               SUM,
-	token.Minus:              SUM,
-	token.Incr:               SUM,
-	token.Decr:               SUM,
-	token.Modulo:             SUM,
-	token.Slash:              PRODUCT,
-	token.Asterisk:           PRODUCT,
-	token.Pow:                PRODUCT,
-	token.LBracket:           INDEX,
-	token.Dot:                CALL,
-	token.LParen:             CALL,
-	token.ResolutionOperator: CALL,
-	token.Assign:             ASSIGN,
-	token.PlusEq:             ASSIGN,
-	token.MinusEq:            ASSIGN,
-	token.OrEq:               ASSIGN,
-	token.Colon:              ASSIGN,
-}
-
-// Constants for denoting precedence
-const (
-	_ int = iota
-	LOWEST
-	NORMAL
-	ASSIGN
-	LOGIC
-	RANGE
-	EQUALS
-	COMPARE
-	SUM
-	PRODUCT
-	PREFIX
-	INDEX
-	CALL
 )
 
 type (
@@ -79,7 +24,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	}
 
 	// Prohibit calling a capitalized method on toplevel:
-	if p.curTokenIs(token.Constant) && (p.fsm.Is(normal) || p.fsm.Is(parsingAssignment)) {
+	if p.curTokenIs(token.Constant) && (p.fsm.Is(states.Normal) || p.fsm.Is(states.ParsingAssignment)) {
 		if p.peekTokenIs(token.LParen) {
 			p.callConstantError(p.curToken.Type)
 			return nil
@@ -99,7 +44,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		a = foo 10
 		```
 	*/
-	if p.curTokenIs(token.Ident) && (p.fsm.Is(normal) || p.fsm.Is(parsingAssignment)) {
+	if p.curTokenIs(token.Ident) && (p.fsm.Is(states.Normal) || p.fsm.Is(states.ParsingAssignment)) {
 		if p.peekTokenIs(token.Do) {
 			method := p.parseIdentifier()
 			return p.parseCallExpressionWithoutReceiver(method)
@@ -123,7 +68,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 
 			will also enter this condition first, but we'll check if those two token is at same line in the parsing function
 		*/
-		if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() {
+		if arguments.Tokens[p.peekToken.Type] && p.peekTokenAtSameLine() {
 			method := p.parseIdentifier()
 			p.nextToken()
 			return p.parseCallExpressionWithoutReceiver(method)
@@ -145,7 +90,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	*/
 
 	for !p.peekTokenIs(token.Semicolon) &&
-		(precedence < p.peekPrecedence() || (p.fsm.Is(parsingAssignment) && p.peekTokenIs(token.Assign))) &&
+		(precedence < p.peekPrecedence() || (p.fsm.Is(states.ParsingAssignment) && p.peekTokenIs(token.Assign))) &&
 		// This is for preventing parser treat next line's expression as function's argument.
 		p.peekTokenAtSameLine() {
 
@@ -167,7 +112,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 func (p *Parser) parseGroupedExpression() ast.Expression {
 	p.nextToken()
 
-	exp := p.parseExpression(NORMAL)
+	exp := p.parseExpression(precedence.Normal)
 
 	if !p.expectPeek(token.RParen) {
 		return nil
@@ -184,7 +129,7 @@ func (p *Parser) parseYieldExpression() ast.Expression {
 		ye.Arguments = p.parseCallArgumentsWithParens()
 	}
 
-	if arguments[p.peekToken.Type] && p.peekTokenAtSameLine() { // yield 123
+	if arguments.Tokens[p.peekToken.Type] && p.peekTokenAtSameLine() { // yield 123
 		p.nextToken()
 		ye.Arguments = p.parseCallArguments()
 	}
@@ -224,7 +169,7 @@ func (p *Parser) parsePairExpression(key ast.Expression) ast.Expression {
 	}
 
 	p.nextToken()
-	value := p.parseExpression(NORMAL)
+	value := p.parseExpression(precedence.Normal)
 
 	exp.Value = value
 
@@ -241,13 +186,14 @@ func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
 	}
 
 	p.nextToken()
-	callExpression.Arguments = []ast.Expression{p.parseExpression(NORMAL)}
+
+	callExpression.Arguments = []ast.Expression{p.parseExpression(precedence.Normal)}
 
 	// Accepting multiple indexing argument
 	for p.peekTokenIs(token.Comma) {
 		p.nextToken()
 		p.nextToken()
-		callExpression.Arguments = append(callExpression.Arguments, p.parseExpression(NORMAL))
+		callExpression.Arguments = append(callExpression.Arguments, p.parseExpression(precedence.Normal))
 	}
 
 	if !p.expectPeek(token.RBracket) {
@@ -258,7 +204,7 @@ func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
 	if p.peekTokenIs(token.Assign) {
 		p.nextToken()
 		p.nextToken()
-		assignValue := p.parseExpression(NORMAL)
+		assignValue := p.parseExpression(precedence.Normal)
 		callExpression.Method = "[]="
 		callExpression.Arguments = append(callExpression.Arguments, assignValue)
 	}
@@ -274,22 +220,22 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 
 	p.nextToken()
 
-	pe.Right = p.parseExpression(PREFIX)
+	pe.Right = p.parseExpression(precedence.Prefix)
 
 	return pe
 }
 
 func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	operator := p.curToken
-	precedence := p.curPrecedence()
+	preced := p.curPrecedence()
 
 	if operator.Literal == "||" || operator.Literal == "&&" {
-		precedence = NORMAL
+		preced = precedence.Normal
 	}
 
 	p.nextToken()
 
-	return newInfixExpression(left, operator, p.parseExpression(precedence))
+	return newInfixExpression(left, operator, p.parseExpression(preced))
 }
 
 func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
@@ -297,12 +243,12 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 	var tok token.Token
 	exp := &ast.AssignExpression{BaseNode: &ast.BaseNode{}}
 
-	if !p.fsm.Is(parsingFuncCall) {
+	if !p.fsm.Is(states.ParsingFuncCall) {
 		exp.MarkAsStmt()
 	}
 
 	oldState := p.fsm.Current()
-	p.fsm.Event(parseAssignment)
+	p.fsm.Event(events.ParseAssignment)
 
 	switch v := v.(type) {
 	case ast.Variable:
@@ -331,9 +277,8 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 			return callExp
 		}
 
-		p.error = &Error{Message: fmt.Sprintf("Can't assign value to %s. Line: %d", v.String(), p.curToken.Line), errType: InvalidAssignmentError}
-	default:
-		p.error = &Error{Message: fmt.Sprintf("Can't assign value to %s. Line: %d", v.String(), p.curToken.Line), errType: InvalidAssignmentError}
+		errMsg := fmt.Sprintf("Can't assign value to %s. Line: %d", v.String(), p.curToken.Line)
+		p.error = errors.InitError(errMsg, errors.InvalidAssignmentError)
 	}
 
 	if len(exp.Variables) == 1 {
@@ -349,7 +294,7 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 	exp.Token = tok
 	exp.Value = value
 
-	event, _ := eventTable[oldState]
+	event, _ := events.EventTable[oldState]
 	p.fsm.Event(event)
 
 	return exp
@@ -366,7 +311,7 @@ func (p *Parser) parseMultiVariables(left ast.Expression) ast.Expression {
 
 	p.nextToken()
 
-	exp := p.parseExpression(CALL)
+	exp := p.parseExpression(precedence.Call)
 
 	var2, ok := exp.(ast.Variable)
 
@@ -379,7 +324,7 @@ func (p *Parser) parseMultiVariables(left ast.Expression) ast.Expression {
 	for p.peekTokenIs(token.Comma) {
 		p.nextToken()
 		p.nextToken()
-		exp := p.parseExpression(CALL) // Use highest precedence
+		exp := p.parseExpression(precedence.Call) // Use highest precedence
 
 		v, ok := exp.(ast.Variable)
 
@@ -429,7 +374,7 @@ func (p *Parser) expandAssignmentValue(value ast.Expression) ast.Expression {
 
 		p.nextToken()
 
-		return newInfixExpression(value, infixOperator, p.parseExpression(LOWEST))
+		return newInfixExpression(value, infixOperator, p.parseExpression(precedence.Lowest))
 	default:
 		p.peekError(p.curToken.Type)
 		return nil

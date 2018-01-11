@@ -3,6 +3,10 @@ package parser
 import (
 	"fmt"
 	"github.com/goby-lang/goby/compiler/ast"
+	"github.com/goby-lang/goby/compiler/parser/arguments"
+	"github.com/goby-lang/goby/compiler/parser/errors"
+	"github.com/goby-lang/goby/compiler/parser/events"
+	"github.com/goby-lang/goby/compiler/parser/precedence"
 	"github.com/goby-lang/goby/compiler/token"
 )
 
@@ -59,7 +63,8 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 		case token.Self:
 			stmt.Receiver = &ast.SelfExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
 		default:
-			p.error = &Error{Message: fmt.Sprintf("Invalid method receiver: %s. Line: %d", p.curToken.Literal, p.curToken.Line), errType: MethodDefinitionError}
+			msg := fmt.Sprintf("Invalid method receiver: %s. Line: %d", p.curToken.Literal, p.curToken.Line)
+			p.error = errors.InitError(msg, errors.MethodDefinitionError)
 		}
 
 		p.nextToken() // .
@@ -77,7 +82,8 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 	}
 
 	if p.peekTokenIs(token.Ident) && p.peekTokenAtSameLine() { // def foo x, next token is x and at same line
-		p.error = &Error{Message: fmt.Sprintf("Please add parentheses around method \"%s\"'s parameters. Line: %d", stmt.Name.Value, p.curToken.Line), errType: MethodDefinitionError}
+		msg := fmt.Sprintf("Please add parentheses around method \"%s\"'s parameters. Line: %d", stmt.Name.Value, p.curToken.Line)
+		p.error = errors.InitError(msg, errors.MethodDefinitionError)
 	}
 
 	if p.peekTokenIs(token.LParen) {
@@ -105,11 +111,11 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 }
 
 func (p *Parser) parseParameters() []ast.Expression {
-	p.fsm.Event(parseMethodParam)
+	p.fsm.Event(events.ParseMethodParam)
 	params := []ast.Expression{}
 
 	p.nextToken()
-	param := p.parseExpression(NORMAL)
+	param := p.parseExpression(precedence.Normal)
 	params = append(params, param)
 
 	for p.peekTokenIs(token.Comma) {
@@ -121,13 +127,13 @@ func (p *Parser) parseParameters() []ast.Expression {
 			break
 		}
 
-		param := p.parseExpression(NORMAL)
+		param := p.parseExpression(precedence.Normal)
 		params = append(params, param)
 	}
 
 	p.checkMethodParameters(params)
 
-	p.fsm.Event(backToNormal)
+	p.fsm.Event(events.BackToNormal)
 	return params
 }
 
@@ -139,7 +145,7 @@ func (p *Parser) checkMethodParameters(params []ast.Expression) {
 		2 means previous arg is keyword argument
 		3 means previous arg is splat argument
 	*/
-	argState := NormalArg
+	argState := arguments.NormalArg
 
 	checkedParams := []ast.Expression{}
 
@@ -147,49 +153,50 @@ func (p *Parser) checkMethodParameters(params []ast.Expression) {
 		switch exp := param.(type) {
 		case *ast.Identifier:
 			switch argState {
-			case OptionedArg:
-				p.error = newArgumentError(NormalArg, OptionedArg, exp.Value, p.curToken.Line)
-			case RequiredKeywordArg:
-				p.error = newArgumentError(NormalArg, RequiredKeywordArg, exp.Value, p.curToken.Line)
-			case OptionalKeywordArg:
-				p.error = newArgumentError(NormalArg, OptionalKeywordArg, exp.Value, p.curToken.Line)
-			case SplatArg:
-				p.error = newArgumentError(NormalArg, SplatArg, exp.Value, p.curToken.Line)
+			case arguments.OptionedArg:
+				p.error = errors.NewArgumentError(arguments.NormalArg, arguments.OptionedArg, exp.Value, p.curToken.Line)
+			case arguments.RequiredKeywordArg:
+				p.error = errors.NewArgumentError(arguments.NormalArg, arguments.RequiredKeywordArg, exp.Value, p.curToken.Line)
+			case arguments.OptionalKeywordArg:
+				p.error = errors.NewArgumentError(arguments.NormalArg, arguments.OptionalKeywordArg, exp.Value, p.curToken.Line)
+			case arguments.SplatArg:
+				p.error = errors.NewArgumentError(arguments.NormalArg, arguments.SplatArg, exp.Value, p.curToken.Line)
 			}
 		case *ast.AssignExpression:
 			switch argState {
-			case RequiredKeywordArg:
-				p.error = newArgumentError(OptionedArg, RequiredKeywordArg, exp.String(), p.curToken.Line)
-			case OptionalKeywordArg:
-				p.error = newArgumentError(OptionedArg, OptionalKeywordArg, exp.String(), p.curToken.Line)
-			case SplatArg:
-				p.error = newArgumentError(OptionedArg, SplatArg, exp.String(), p.curToken.Line)
+			case arguments.RequiredKeywordArg:
+				p.error = errors.NewArgumentError(arguments.OptionedArg, arguments.RequiredKeywordArg, exp.String(), p.curToken.Line)
+			case arguments.OptionalKeywordArg:
+				p.error = errors.NewArgumentError(arguments.OptionedArg, arguments.OptionalKeywordArg, exp.String(), p.curToken.Line)
+			case arguments.SplatArg:
+				p.error = errors.NewArgumentError(arguments.OptionedArg, arguments.SplatArg, exp.String(), p.curToken.Line)
 			}
-			argState = OptionedArg
+			argState = arguments.OptionedArg
 		case *ast.PairExpression:
 			if exp.Value == nil {
 				switch argState {
-				case OptionalKeywordArg:
-					p.error = newArgumentError(RequiredKeywordArg, OptionalKeywordArg, exp.String(), p.curToken.Line)
-				case SplatArg:
-					p.error = newArgumentError(RequiredKeywordArg, SplatArg, exp.String(), p.curToken.Line)
+				case arguments.OptionalKeywordArg:
+					p.error = errors.NewArgumentError(arguments.RequiredKeywordArg, arguments.OptionalKeywordArg, exp.String(), p.curToken.Line)
+				case arguments.SplatArg:
+					p.error = errors.NewArgumentError(arguments.RequiredKeywordArg, arguments.SplatArg, exp.String(), p.curToken.Line)
 				}
 
-				argState = RequiredKeywordArg
+				argState = arguments.RequiredKeywordArg
 			} else {
 				switch argState {
-				case SplatArg:
-					p.error = newArgumentError(OptionalKeywordArg, SplatArg, exp.String(), p.curToken.Line)
+				case arguments.SplatArg:
+					p.error = errors.NewArgumentError(arguments.OptionalKeywordArg, arguments.SplatArg, exp.String(), p.curToken.Line)
 				}
 
-				argState = OptionalKeywordArg
+				argState = arguments.OptionalKeywordArg
 			}
 		case *ast.PrefixExpression:
 			switch argState {
-			case SplatArg:
-				p.error = &Error{Message: fmt.Sprintf("Can't define splat argument more than once. Line: %d", p.curToken.Line), errType: ArgumentError}
+			case arguments.SplatArg:
+				msg := fmt.Sprintf("Can't define splat argument more than once. Line: %d", p.curToken.Line)
+				p.error = errors.InitError(msg, errors.ArgumentError)
 			}
-			argState = SplatArg
+			argState = arguments.SplatArg
 		}
 
 		if p.error != nil {
@@ -197,7 +204,8 @@ func (p *Parser) checkMethodParameters(params []ast.Expression) {
 		}
 
 		if paramDuplicated(checkedParams, param) {
-			p.error = &Error{Message: fmt.Sprintf("Duplicate argument name: \"%s\". Line: %d", getArgName(param), p.curToken.Line), errType: ArgumentError}
+			msg := fmt.Sprintf("Duplicate argument name: \"%s\". Line: %d", getArgName(param), p.curToken.Line)
+			p.error = errors.InitError(msg, errors.ArgumentError)
 		} else {
 			checkedParams = append(checkedParams, param)
 		}
@@ -217,7 +225,7 @@ func (p *Parser) parseClassStatement() *ast.ClassStatement {
 	if p.peekTokenIs(token.LT) {
 		p.nextToken() // <
 		p.nextToken() // Inherited class like 'Bar'
-		stmt.SuperClass = p.parseExpression(NORMAL)
+		stmt.SuperClass = p.parseExpression(precedence.Normal)
 
 		switch exp := stmt.SuperClass.(type) {
 		case *ast.InfixExpression:
@@ -256,7 +264,7 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 
 	p.nextToken()
 
-	stmt.ReturnValue = p.parseExpression(NORMAL)
+	stmt.ReturnValue = p.parseExpression(precedence.Normal)
 
 	return stmt
 }
@@ -266,9 +274,9 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	if p.curTokenIs(token.Ident) || p.curTokenIs(token.InstanceVariable) {
 		// This is used for identifying method call without parens
 		// Or multiple variable assignment
-		stmt.Expression = p.parseExpression(LOWEST)
+		stmt.Expression = p.parseExpression(precedence.Lowest)
 	} else {
-		stmt.Expression = p.parseExpression(NORMAL)
+		stmt.Expression = p.parseExpression(precedence.Normal)
 	}
 
 	return stmt
@@ -295,7 +303,7 @@ ParseBlockLoop:
 		}
 
 		if p.curTokenIs(token.EOF) {
-			p.error = &Error{Message: "Unexpected EOF", errType: EndOfFileError}
+			p.error = errors.InitError("Unexpected EOF", errors.EndOfFileError)
 			return bs
 		}
 		stmt := p.parseStatement()
@@ -317,11 +325,11 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 	p.acceptBlock = false
 
 	oldState := p.fsm.Current()
-	p.fsm.Event(parseFuncCall)
+	p.fsm.Event(events.ParseFuncCall)
 
-	ws.Condition = p.parseExpression(NORMAL)
+	ws.Condition = p.parseExpression(precedence.Normal)
 
-	event, _ := eventTable[oldState]
+	event, _ := events.EventTable[oldState]
 	p.fsm.Event(event)
 	p.acceptBlock = true
 	p.expectPeek(token.Do)
