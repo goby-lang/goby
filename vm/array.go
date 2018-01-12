@@ -46,6 +46,36 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// a[-1] # => "c"
 			// a[-3] # => "a"
 			// a[-7] # => nil
+			//
+			// # Double indexing, second argument specifies the count of the elements
+			// a[1, 3]  # => [2, 3, "a"]
+			// a[1, 0]  # => [] <-- Zero count is empty
+			// a[1, 5]  # => [2, 3, "a", "b", "c"]
+			// a[1, 10] # => [2, 3, "a", "b", "c"]
+			// a[-3, 2] # => ["a", "b"]
+			// a[-3, 5] # => ["a", "b", "c"]
+			// a[5, 1]  # => ["c"]
+			// a[6, 1]  # => []
+			// a[7, 1]  # => nil
+			//
+			// Special case 1:
+			// a[6]    # => nil
+			// a[6, 1] # => []  <-- Not nil!
+			// a[7, 1] # => nil <-- Because it is really out of the edge of the array
+			//
+			// Special case 2: Second argument is negative
+			// This behaviour is different from Ruby itself, in Ruby, it returns "nil".
+			// However, in Goby, it raises error because there cannot be negative count values.
+			//
+			// a[1, -1]  # => ArgumentError: Expect second argument greater than or equal 0. got: -1
+			// a[-4, -3] # => ArgumentError: Expect second argument greater than or equal 0. got: -3
+			//
+			// Special case 3: First argument is negative and exceed the array length
+			// a[-6, 1] # => [1]
+			// a[-6, 0] # => []
+			// a[-7, 1] # => ArgumentError: Index value -7 too small for array. minimum: -6
+			// a[-7, 0] # => ArgumentError: Index value -7 too small for array. minimum: -6
+			//
 			// ```
 			Name: "[]",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -125,31 +155,139 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// a[3] = 20  # => 20
 			// a          # => [10, nil, nil, 20]
 			// a[-2] = 5  # => [10, nil, 5, 20]
+			//
+			// # Double indexing, second argument specify the count of the arguments
+			// a = [1, 2, 3, 4, 5]
+			// a[2, 3] = [1, 2, 3] # <-- Common case
+			// a # => [1, 2, 1, 2, 3]
+			//
+			// a = [1, 2, 3, 4, 5]
+			// a[4, 4] = [1, 2, 3] # <- Exceeded case
+			// a # => [1, 2, 3, 4, 1, 2, 3]
+			//
+			// a = [1, 2, 3, 4, 5]
+			// a[5, 1] = [1, 2, 3] # <-- Edgy case
+			// a # => [1, 2, 3, 4, 5, 1, 2, 3]
+			//
+			// a = [1, 2, 3, 4, 5]
+			// a[8, 123] = [1, 2, 3] # <-- Weak array case
+			// a # => [1, 2, 3, 4, 5, nil, nil, nil, 1, 2, 3]
+			//
+			// a = [1, 2, 3, 4, 5]
+			// a[3, 0] = [1, 2, 3] # <-- Insertion case
+			// a # => [1, 2, 3, 1, 2, 3, 4, 5]
+			//
+			// a = [1, 2, 3, 4, 5]
+			// a[0, 3] = 12345     # <-- Assign non-array value case
+			// a # => [12345, 4, 5]
+			//
+			// a = [1, 2, 3, 4, 5]
+			// a[-3, 2] = [1, 2, 3] # <-- Negative index assign case
+			// a # => [1, 2, 1, 2, 3, 5]
+			//
+			// a = [1, 2, 3, 4, 5]
+			// a[-5, 4] = [9, 8, 7] # <-- Negative index edgy case
+			// a # => [9, 8, 7, 5]
+			//
+			// a = [1, 2, 3, 4, 5]
+			// a[-6, 4] = [9, 8, 7] # <-- Nagative index too small case
+			// # ArgumentError: Index value -6 too small for array. minimum: -5
+			//
+			// a = [1, 2, 3, 4, 5]
+			// a[6, -4] = [9, 8, 7] # <-- Weak array assignment with nagative count case
+			// # ArgumentError: Expect second argument greater than or equal 0. got: -4
+			//
 			// ```
 			Name: "[]=",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 
-					// First arg is index
-					// Second arg is assigned value
-					if len(args) != 2 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 2 arguments. got=%d", len(args))
+					// First argument is index, there exists two cases which will be described in the following code
+					if len(args) != 2 && len(args) != 3 {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 2..3 arguments. got=%d", len(args))
 					}
 
 					i := args[0]
 					index, ok := i.(*IntegerObject)
-					indexValue := index.value
 
 					if !ok {
 						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 					}
 
+					indexValue := index.value
 					arr := receiver.(*ArrayObject)
+
+					// <Three Argument Case>
+					// Second argument is the length of successive array values
+					// Third argument is the assignment value
+					if len(args) == 3 {
+						// Negative index value too small
+						if indexValue < 0 {
+							if arr.normalizeIndex(index) == -1 {
+								return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Index value %d too small for array. minimum: %d", indexValue, -arr.length())
+							}
+							indexValue = arr.normalizeIndex(index)
+						}
+
+						c := args[1]
+						count, ok := c.(*IntegerObject)
+
+						// Second argument must be integer
+						if !ok {
+							return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[1].Class().Name)
+						}
+
+						countValue := count.value
+						// Second argument must be positive value
+						if countValue < 0 {
+							return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect second argument greater than or equal 0. got: %d", countValue)
+						}
+
+						a := args[2]
+						assignedValue, isArray := a.(*ArrayObject)
+
+						// Expand the array with nil case, we don't need to care the second argument
+						// because the count in this case is useless
+						if indexValue >= arr.length() {
+
+							for arr.length() < indexValue {
+								arr.Elements = append(arr.Elements, NULL)
+							}
+
+							if isArray {
+								arr.Elements = append(arr.Elements, assignedValue.Elements...)
+							} else {
+								arr.Elements = append(arr.Elements, a)
+							}
+							return a
+						}
+
+						endValue := indexValue + countValue
+						// Addition of index and count is too large
+						if endValue > arr.length() {
+							endValue = arr.length()
+						}
+
+						arr.Elements = append(arr.Elements[:indexValue], arr.Elements[endValue:]...)
+
+						// If assigned value is array, then splat the array and push each element in the receiver
+						// according to the first and second argument
+						if isArray {
+							arr.Elements = append(arr.Elements[:indexValue], append(assignedValue.Elements, arr.Elements[indexValue:]...)...)
+						} else {
+							arr.Elements = append(arr.Elements[:indexValue], append([]Object{a}, arr.Elements[indexValue:]...)...)
+						}
+
+						return a
+					}
+
+					// <Two Argument Case>
+					// Second argument is the assignment value
 
 					// Negative index value condition
 					if indexValue < 0 {
 						if len(arr.Elements) < -indexValue {
-							return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Index is too small for array. got=%s", i.Class().Name)
+							return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Index value %d too small for array. minimum: %d", indexValue, -arr.length())
 						}
 						arr.Elements[len(arr.Elements)+indexValue] = args[1]
 						return arr.Elements[len(arr.Elements)+indexValue]
@@ -213,13 +351,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					for _, obj := range arr.Elements {
 						result := t.builtinMethodYield(blockFrame, obj)
 
-						booleanResult, isResultBoolean := result.Target.(*BooleanObject)
-
-						if isResultBoolean {
-							if booleanResult.value {
-								return TRUE
-							}
-						} else if result.Target != NULL {
+						if result.Target.isTruthy() {
 							return TRUE
 						}
 					}
@@ -242,6 +374,9 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			Name: "at",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 arguments. got=%d", len(args))
+					}
 					arr := receiver.(*ArrayObject)
 					return arr.index(t, args, sourceLine)
 				}
@@ -317,7 +452,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					var count int
 
 					if len(args) > 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument, got=%v", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument, got=%d", len(args))
 					}
 
 					if blockFrame != nil {
@@ -327,7 +462,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 
 						for _, obj := range arr.Elements {
 							result := t.builtinMethodYield(blockFrame, obj)
-							if result.Target.(*BooleanObject).value {
+							if result.Target.isTruthy() {
 								count++
 							}
 						}
@@ -818,7 +953,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 arguments. got=%d", len(args))
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 					}
 
 					arr := receiver.(*ArrayObject)
@@ -937,7 +1072,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 
 					for _, obj := range arr.Elements {
 						result := t.builtinMethodYield(blockFrame, obj)
-						if result.Target.(*BooleanObject).value {
+						if result.Target.isTruthy() {
 							elements = append(elements, obj)
 						}
 					}
@@ -1129,21 +1264,59 @@ func (a *ArrayObject) dig(t *thread, keys []Object, sourceLine int) Object {
 
 // Retrieves an object in an array using Integer index; common to `[]` and `at()`.
 func (a *ArrayObject) index(t *thread, args []Object, sourceLine int) Object {
-	if len(args) != 1 {
-		return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 arguments. got=%d", len(args))
+	if len(args) > 2 || len(args) == 0 {
+		return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1..2 arguments. got=%d", len(args))
 	}
 
 	i := args[0]
 	index, ok := i.(*IntegerObject)
+	arrLength := a.length()
 
 	if !ok {
 		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 	}
 
-	normalizedIndex := a.normalizeIndex(index)
+	if index.value < 0 && index.value < -arrLength {
+		return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Index value %d too small for array. minimum: %d", index.value, -arrLength)
+	}
 
+	/* Validation for the second argument if exists */
+	if len(args) == 2 {
+		j := args[1]
+		count, ok := j.(*IntegerObject)
+
+		if !ok {
+			return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[1].Class().Name)
+		}
+		if count.value < 0 {
+			return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect second argument greater than or equal 0. got: %d", count.value)
+		}
+
+		/*
+		 *  This condition meets the special case (Don't know why ~ ? Ask Ruby or try it on irb!):
+		 *
+		 *  a = [1, 2, 3, 4, 5]
+		 *  a[5, 5] # => []
+		 */
+		if index.value > 0 && index.value == arrLength {
+			return t.vm.initArrayObject([]Object{})
+		}
+	}
+
+	/* Start Indexing */
+	normalizedIndex := a.normalizeIndex(index)
 	if normalizedIndex == -1 {
 		return NULL
+	}
+
+	if len(args) == 2 {
+		j := args[1]
+		count, _ := j.(*IntegerObject)
+
+		if normalizedIndex+count.value > arrLength {
+			return t.vm.initArrayObject(a.Elements[normalizedIndex:])
+		}
+		return t.vm.initArrayObject(a.Elements[normalizedIndex : normalizedIndex+count.value])
 	}
 
 	return a.Elements[normalizedIndex]

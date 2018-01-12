@@ -143,6 +143,10 @@ func (b *BooleanObject) toJSON() string {
 	return b.toString()
 }
 
+func (b *BooleanObject) isTruthy() bool {
+	return b.value
+}
+
 // equal returns true if the Boolean values between receiver and parameter are equal
 func (b *BooleanObject) equal(e *BooleanObject) bool {
 	return b.value == e.value

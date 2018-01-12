@@ -49,11 +49,11 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 	}{
 		{
 			"-a * b",
-			"((-a) * b)",
+			"(-a * b)",
 		},
 		{
 			"!-a",
-			"(!(-a))",
+			"!-a",
 		},
 		{
 			"a + b + c",
@@ -81,7 +81,7 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 		},
 		{
 			"-5 * -5",
-			"((-5) * (-5))",
+			"(-5 * -5)",
 		},
 		{
 			"5 > 4 == 3 < 4",
@@ -133,11 +133,11 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 		},
 		{
 			"-(5 + 5)",
-			"(-(5 + 5))",
+			"-(5 + 5)",
 		},
 		{
 			"!(true == true)",
-			"(!(true == true))",
+			"!(true == true)",
 		},
 		{
 			"a + n.add(b * c) + d",

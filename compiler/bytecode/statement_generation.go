@@ -22,6 +22,11 @@ func (g *Generator) compileStatements(stmts []ast.Statement, scope *scope, table
 		g.compileStatement(is, statement, scope, table)
 	}
 
+	// empty input so no statement is given
+	if len(stmts) == 0 {
+		return
+	}
+
 	g.endInstructions(is, stmts[len(stmts)-1].Line())
 	g.instructionSets = append(g.instructionSets, is)
 }

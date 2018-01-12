@@ -6,6 +6,10 @@ import (
 )
 
 func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, scope *scope, table *localTable) {
+	if exp == nil {
+		return
+	}
+
 	sourceLine := exp.Line()
 	switch exp := exp.(type) {
 	case *ast.Constant:

@@ -2,6 +2,7 @@ package parser
 
 import (
 	"github.com/goby-lang/goby/compiler/ast"
+	"github.com/goby-lang/goby/compiler/parser/precedence"
 	"github.com/goby-lang/goby/compiler/token"
 )
 
@@ -43,7 +44,7 @@ func (p *Parser) parseCaseExpression() ast.Expression {
 // case expression parsing helpers
 func (p *Parser) parseCaseConditionals() []*ast.ConditionalExpression {
 	p.nextToken()
-	base := p.parseExpression(NORMAL)
+	base := p.parseExpression(precedence.Normal)
 
 	p.expectPeek(token.When)
 	ce := []*ast.ConditionalExpression{}
@@ -67,14 +68,14 @@ func (p *Parser) parseCaseConditional(base ast.Expression) *ast.ConditionalExpre
 }
 
 func (p *Parser) parseCaseCondition(base ast.Expression) *ast.InfixExpression {
-	first := p.parseExpression(NORMAL)
+	first := p.parseExpression(precedence.Normal)
 	infix := newInfixExpression(base, token.Token{Type: token.Eq, Literal: token.Eq}, first)
 
 	for p.peekTokenIs(token.Comma) {
 		p.nextToken()
 		p.nextToken()
 
-		right := p.parseExpression(NORMAL)
+		right := p.parseExpression(precedence.Normal)
 		rightInfix := newInfixExpression(base, token.Token{Type: token.Eq, Literal: token.Eq}, right)
 		infix = newInfixExpression(infix, token.Token{Type: token.Or, Literal: token.Or}, rightInfix)
 	}
@@ -111,7 +112,7 @@ func (p *Parser) parseConditionalExpressions() []*ast.ConditionalExpression {
 func (p *Parser) parseConditionalExpression() *ast.ConditionalExpression {
 	ce := &ast.ConditionalExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
 	p.nextToken()
-	ce.Condition = p.parseExpression(NORMAL)
+	ce.Condition = p.parseExpression(precedence.Normal)
 	ce.Consequence = p.parseBlockStatement(token.ElsIf, token.Else, token.End)
 	ce.Consequence.KeepLastValue()
 

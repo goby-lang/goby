@@ -53,10 +53,6 @@ func TestConcurrentArrayIndex(t *testing.T) {
 		`, 10},
 		{`
 		require 'concurrent/array'
-		Concurrent::Array.new([1, "a", 10, "b"])[-5]
-		`, nil},
-		{`
-		require 'concurrent/array'
 		a = Concurrent::Array.new([1, "a", 10, 5])
 		a[0]
 		`, 1},
@@ -111,6 +107,23 @@ func TestConcurrentArrayIndex(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestConcurrentArrayIndexFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`
+		require 'concurrent/array'
+		Concurrent::Array.new([1, "a", 10, "b"])[-5]
+		`, "ArgumentError: Index value -5 too small for array. minimum: -4", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -298,10 +311,6 @@ func TestConcurrentArrayAtMethod(t *testing.T) {
 		`, 10},
 		{`
 		require 'concurrent/array'
-		Concurrent::Array.new([1, "a", 10, 5]).at(-5)
-		`, nil},
-		{`
-		require 'concurrent/array'
 		a = Concurrent::Array.new([1, "a", 10, 5])
 		a.at(0)
 		`, 1},
@@ -342,6 +351,9 @@ func TestConcurrentArrayAtMethodFail(t *testing.T) {
 		{`
 		require 'concurrent/array'
 		Concurrent::Array.new([1, 2, 3]).at(1..3)`, "TypeError: Expect argument to be Integer. got: Range", 1},
+		{`
+		require 'concurrent/array'
+		Concurrent::Array.new([1, "a", 10, 5]).at(-5)`, "ArgumentError: Index value -5 too small for array. minimum: -4", 1},
 	}
 
 	for i, tt := range testsFail {

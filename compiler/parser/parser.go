@@ -2,54 +2,20 @@ package parser
 
 import (
 	"fmt"
-
 	"github.com/goby-lang/goby/compiler/ast"
 	"github.com/goby-lang/goby/compiler/lexer"
+	"github.com/goby-lang/goby/compiler/parser/errors"
+	"github.com/goby-lang/goby/compiler/parser/events"
+	"github.com/goby-lang/goby/compiler/parser/precedence"
+	"github.com/goby-lang/goby/compiler/parser/states"
 	"github.com/goby-lang/goby/compiler/token"
 	"github.com/looplab/fsm"
 )
 
-const (
-	_ int = iota
-	// EndOfFileError represents normal EOF error
-	EndOfFileError
-	// WrongTokenError means that token is not what we expected
-	WrongTokenError
-	// UnexpectedTokenError means that token is not expected to appear in current condition
-	UnexpectedTokenError
-	// UnexpectedEndError means we get unexpected "end" keyword (this is mainly created for REPL)
-	UnexpectedEndError
-	// MethodDefinitionError means there's an error on method definition's method name
-	MethodDefinitionError
-	// InvalidAssignmentError means user assigns value to wrong type of expressions
-	InvalidAssignmentError
-	// SyntaxError means there's a grammatical in the source code
-	SyntaxError
-	// ArgumentError means there's a method parameter's definition error
-	ArgumentError
-)
-
-// Error represents parser's parsing error
-type Error struct {
-	// Message contains the readable message of error
-	Message string
-	errType int
-}
-
-// IsEOF checks if error is end of file error
-func (e *Error) IsEOF() bool {
-	return e.errType == EndOfFileError
-}
-
-// IsUnexpectedEnd checks if error is unexpected "end" keyword error
-func (e *Error) IsUnexpectedEnd() bool {
-	return e.errType == UnexpectedEndError
-}
-
 // Parser represents lexical analyzer struct
 type Parser struct {
 	Lexer *lexer.Lexer
-	error *Error
+	error *errors.Error
 
 	curToken  token.Token
 	peekToken token.Token
@@ -70,44 +36,7 @@ const (
 	NormalMode int = iota
 	REPLMode
 	TestMode
-
-	NormalArg
-	OptionedArg
-	SplatArg
-	RequiredKeywordArg
-	OptionalKeywordArg
 )
-
-// These are state machine's events
-const (
-	backToNormal     = "backToNormal"
-	parseFuncCall    = "parseFuncCall"
-	parseMethodParam = "parseMethodParam"
-	parseAssignment  = "parseAssignment"
-)
-
-// These are state machine's states
-const (
-	normal             = "normal"
-	parsingFuncCall    = "parsingFuncCall"
-	parsingMethodParam = "parsingMethodParam"
-	parsingAssignment  = "parsingAssignment"
-)
-
-var eventTable = map[string]string{
-	normal:             backToNormal,
-	parsingFuncCall:    parseFuncCall,
-	parsingMethodParam: parseMethodParam,
-	parsingAssignment:  parseAssignment,
-}
-
-var argTable = map[int]string{
-	NormalArg:          "Normal argument",
-	OptionedArg:        "Optioned argument",
-	RequiredKeywordArg: "Keyword argument",
-	OptionalKeywordArg: "Optioned keyword argument",
-	SplatArg:           "Splat argument",
-}
 
 // New initializes a parser and returns it
 func New(l *lexer.Lexer) *Parser {
@@ -117,12 +46,12 @@ func New(l *lexer.Lexer) *Parser {
 	}
 
 	p.fsm = fsm.NewFSM(
-		normal,
+		states.Normal,
 		fsm.Events{
-			{Name: parseFuncCall, Src: []string{normal}, Dst: parsingFuncCall},
-			{Name: parseMethodParam, Src: []string{normal, parsingAssignment}, Dst: parsingMethodParam},
-			{Name: parseAssignment, Src: []string{normal, parsingFuncCall}, Dst: parsingAssignment},
-			{Name: backToNormal, Src: []string{parsingFuncCall, parsingMethodParam, parsingAssignment}, Dst: normal},
+			{Name: events.ParseFuncCall, Src: []string{states.Normal}, Dst: states.ParsingFuncCall},
+			{Name: events.ParseMethodParam, Src: []string{states.Normal, states.ParsingAssignment}, Dst: states.ParsingMethodParam},
+			{Name: events.ParseAssignment, Src: []string{states.Normal, states.ParsingFuncCall}, Dst: states.ParsingAssignment},
+			{Name: events.BackToNormal, Src: []string{states.ParsingFuncCall, states.ParsingMethodParam, states.ParsingAssignment}, Dst: states.Normal},
 		},
 		fsm.Callbacks{},
 	)
@@ -171,7 +100,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.ResolutionOperator, p.parseInfixExpression)
 	p.registerInfix(token.Assign, p.parseAssignExpression)
 	p.registerInfix(token.Range, p.parseRangeExpression)
-	p.registerInfix(token.Dot, p.parseDotExpression)
+	p.registerInfix(token.Dot, p.parseCallExpressionWithReceiver)
 	p.registerInfix(token.LParen, p.parseCallExpressionWithoutReceiver)
 	p.registerInfix(token.LBracket, p.parseIndexExpression)
 	p.registerInfix(token.Colon, p.parsePairExpression)
@@ -181,7 +110,7 @@ func New(l *lexer.Lexer) *Parser {
 }
 
 // ParseProgram update program statements and return program
-func (p *Parser) ParseProgram() (*ast.Program, *Error) {
+func (p *Parser) ParseProgram() (*ast.Program, *errors.Error) {
 	p.error = nil
 	// Read two tokens, so curToken and peekToken are both set.
 	p.nextToken()
@@ -220,19 +149,19 @@ func (p *Parser) parseSemicolon() ast.Expression {
 }
 
 func (p *Parser) peekPrecedence() int {
-	if p, ok := precedence[p.peekToken.Type]; ok {
+	if p, ok := precedence.LookupTable[p.peekToken.Type]; ok {
 		return p
 	}
 
-	return NORMAL
+	return precedence.Normal
 }
 
 func (p *Parser) curPrecedence() int {
-	if p, ok := precedence[p.curToken.Type]; ok {
+	if p, ok := precedence.LookupTable[p.curToken.Type]; ok {
 		return p
 	}
 
-	return NORMAL
+	return precedence.Normal
 }
 
 func (p *Parser) nextToken() {
@@ -270,32 +199,21 @@ func (p *Parser) peekTokenAtSameLine() bool {
 }
 
 func (p *Parser) peekError(t token.Type) {
-	msg := fmt.Sprintf("expected next token to be %s, got %s instead. Line: %d", t, p.peekToken.Type, p.peekToken.Line)
-	p.error = &Error{Message: msg, errType: UnexpectedTokenError}
+	msg := fmt.Sprintf("expected next token to be %s, got %s(%s) instead. Line: %d", t, p.peekToken.Type, p.peekToken.Literal, p.peekToken.Line)
+	p.error = errors.InitError(msg, errors.UnexpectedTokenError)
 }
 
 func (p *Parser) noPrefixParseFnError(t token.Type) {
 	msg := fmt.Sprintf("unexpected %s Line: %d", p.curToken.Literal, p.curToken.Line)
 
 	if t == token.End {
-		p.error = &Error{Message: msg, errType: UnexpectedEndError}
+		p.error = errors.InitError(msg, errors.UnexpectedEndError)
 	} else {
-		p.error = &Error{Message: msg, errType: UnexpectedTokenError}
+		p.error = errors.InitError(msg, errors.UnexpectedTokenError)
 	}
-}
-
-func newArgumentError(formerArgType, laterArgType int, argLiteral string, line int) *Error {
-	formerArg := argTable[formerArgType]
-	laterArg := argTable[laterArgType]
-	return &Error{Message: fmt.Sprintf("%s \"%s\" should be defined before %s. Line: %d", formerArg, argLiteral, laterArg, line), errType: ArgumentError}
-}
-
-func newTypeParsingError(tokenLiteral, targetType string, line int) *Error {
-	msg := fmt.Sprintf("could not parse %q as %s. Line: %d", tokenLiteral, targetType, line)
-	return &Error{Message: msg, errType: SyntaxError}
 }
 
 func (p *Parser) callConstantError(t token.Type) {
 	msg := fmt.Sprintf("cannot call %s with %s. Line: %d", t, p.peekToken.Type, p.peekToken.Line)
-	p.error = &Error{Message: msg, errType: UnexpectedTokenError}
+	p.error = errors.InitError(msg, errors.UnexpectedTokenError)
 }

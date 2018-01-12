@@ -24,11 +24,13 @@ One of our goal is to provide web developers a sort of small and handy environme
 ## Table of contents
 
 - [Demo and sample Goby app](#demo_and_sample_app)
+- [Structure](#structure)
 - [Aspects](#aspects)
     - [Features](#features)
     - [Language](#language)
     - [Native class](#native_class)
     - [Standard class](#standard_class)
+- [Current roadmap](#current_roadmap)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Sample codes](#sample_codes)
@@ -43,6 +45,10 @@ One of our goal is to provide web developers a sort of small and handy environme
 <img src="https://i.imgur.com/1Le7nTe.gif" width="60%">
 
 **New!** Check-out our [sample app](http://sample.goby-lang.org) built with Goby. Source code is also available [here](https://github.com/goby-lang/sample-web-app).
+
+## Structure
+
+![](https://github.com/goby-lang/goby/blob/master/wiki/goby_structure.png)
 
 ## Aspects
 
@@ -113,6 +119,17 @@ Perhaps Goby should be far easier for Rubyists to comprehend. You can use Ruby's
 - Flow control
     - `if`, `else`, `elsif`
     - `while`
+    - `raise`
+- Literals
+    - Numeric literal
+        - Integer: `100`, `-299`, `-0`
+        - Float: `3.14`, `-273.15`
+    - String literal: `"candy"`, `'cake'`, `:taffy`
+    - Symbol literal: `:email`
+        - Symbol literal is `String` class and just a convenient representation for Rubyists.
+            - So you can even do like: `a = :bar.replace("a", "z"); puts a #=> bzr`
+    - Array literal: `[1, "2", '3', :att]`
+    - Hash literal: `{ "email": 'goby@goby-lang.com', tel: '9909-999-999'}`
 - IO
     - `#puts`
     - `ARGV`, `STDIN`, `STDOUT`, `STDERR`, `ENV` constants
@@ -123,6 +140,9 @@ Perhaps Goby should be far easier for Rubyists to comprehend. You can use Ruby's
     - Goroutine-based `thread` method to create a new thread
     - Works with `Channel` class for passing objects between threads, like `chan` in Go
     - See this sample: [One thousand threads](https://github.com/goby-lang/goby/blob/master/samples/one_thousand_threads.gb)
+- Very few keywords
+  - `def`, `true`, `false`, `nil`, `if`, `elsif`, `else`, `case`, `when`, `return`, `self`, `end`, `while`, `do`, `yield`, `next`, `class`, `module`, `break`
+  - Most are implemented as methods, including `thread` or `raise`
 
 ### Native class
 
@@ -131,6 +151,7 @@ Written in Go.
 - `Class`
 - `Integer`
 - `String`
+    - Symbols like `:a` or hash keys `{a: 1}` are just another notation of `String`
 - `Boolean`
 - `Null` (`nil`)
 - `Hash`
@@ -140,9 +161,13 @@ Written in Go.
 - `Channel`
 - `File`
 - `GoObject` (provides `#go_func` that wraps pure Go objects or pointers for interaction)
-- `Regexp`
+- `Regexp` and `MatchData`
 - `MatchData` (to hold the result of regexp matching)
 - `Float`
+- `Decimal`
+    - Represented as a fraction internally
+    - Number of digits has virtually no limit
+    - You can get Decimal object as for now: `a = "-99.99999999".to_d`
 
 ### Standard library
 
@@ -158,6 +183,12 @@ written in Go and Goby.
 - `Net::HTTP::Request`
 - `Net::HTTP::Response`
 - `Net::SimpleServer` (try [sample Goby app](http://sample.goby-lang.org) and [source](https://github.com/goby-lang/sample-web-app), or [sample code](https://github.com/goby-lang/goby/blob/master/samples/server.gb)!)
+
+## Current roadmap
+
+- [ ] create functions for testing framework like `rescue`, `begin` -- by 2018 March
+- [ ] testing framework -- by 2018 April
+- [ ] third-party library support (like `rubygem`)
 
 ## Installation
 
@@ -287,6 +318,12 @@ Support us with a monthly donation and help us continue our activities. [[Become
 <a href="https://opencollective.com/goby/sponsor/7/website" target="_blank"><img src="https://opencollective.com/goby/sponsor/7/avatar.svg"></a>
 <a href="https://opencollective.com/goby/sponsor/8/website" target="_blank"><img src="https://opencollective.com/goby/sponsor/8/avatar.svg"></a>
 <a href="https://opencollective.com/goby/sponsor/9/website" target="_blank"><img src="https://opencollective.com/goby/sponsor/9/avatar.svg"></a>
+
+### Powered by
+
+* JetBrains [Goland IDE](https://www.jetbrains.com/go/)
+
+[![JetBrains Goland](https://github.com/goby-lang/goby/blob/master/wiki/goland_logo-text.png)](https://www.jetbrains.com/go/)
 
 **Supporting Goby by sending your first PR! See [contribution guideline](https://github.com/goby-lang/goby/blob/master/CONTRIBUTING.md)**
 

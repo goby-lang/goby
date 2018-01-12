@@ -2,6 +2,7 @@ package igb
 
 import (
 	"fmt"
+	parserErr "github.com/goby-lang/goby/compiler/parser/errors"
 	"io"
 	"log"
 	"math/rand"
@@ -247,7 +248,7 @@ reset:
 	}
 }
 
-func handleParserError(e *parser.Error, igb *iGb) {
+func handleParserError(e *parserErr.Error, igb *iGb) {
 	if e != nil {
 		if !e.IsEOF() {
 			fmt.Println(e.Message)

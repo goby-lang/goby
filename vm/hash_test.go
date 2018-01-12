@@ -184,6 +184,8 @@ func TestHashAccessOperationFail(t *testing.T) {
 		{`{ a: 1, b: 2 }[]`, "ArgumentError: Expect 1 argument. got: 0", 1},
 		{`{ a: 1, b: 2 }[true]`, "TypeError: Expect argument to be String. got: Boolean", 1},
 		{`{ a: 1, b: 2 }[true] = 1`, "TypeError: Expect argument to be String. got: Boolean", 1},
+		{`{ a: 1, b: 2 }["a", "b"]`, "ArgumentError: Expect 1 argument. got: 2", 1},
+		{`{ a: 1, b: 2 }["a", "b"] = 123`, "ArgumentError: Expect 2 arguments. got: 3", 1},
 	}
 
 	for i, tt := range testsFail {

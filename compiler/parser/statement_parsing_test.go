@@ -294,7 +294,7 @@ func TestWhileStatementWithoutDoKeywordFail(t *testing.T) {
 	p := New(l)
 	_, err := p.ParseProgram()
 
-	if err.Message != "expected next token to be DO, got IDENT instead. Line: 2" {
+	if err.Message != "expected next token to be DO, got IDENT(puts) instead. Line: 2" {
 		t.Fatal("Condition expression should be followed by a do keyword")
 	}
 
