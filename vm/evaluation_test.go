@@ -219,11 +219,11 @@ func TestCaseExpressionEvaluation(t *testing.T) {
 		{
 			`
 			case 2
-			when 0 then
+			when 0
 			  0
-			when 1 then
+			when 1
 			  1
-			when 2 then
+			when 2
 			  2
 			end
 			`,
@@ -232,9 +232,9 @@ func TestCaseExpressionEvaluation(t *testing.T) {
 		{
 			`
 			case 2
-			when 0 then
+			when 0
 			  0
-			when 1 then
+			when 1
 			  1
 			else
 			  2
@@ -260,7 +260,7 @@ func TestCaseExpressionEvaluation(t *testing.T) {
 			case 9
 			when 0, 1, 2, 3, 4, 5
 			  0
-			when 6, 7, 7 + 1, 7 + 2 then
+			when 6, 7, 7 + 1, 7 + 2
 			  1
 			when 10, 11, 12
 			  2
@@ -847,6 +847,22 @@ func TestIfExpressionEvaluation(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestUnusedKeywordFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`
+		if true then puts 1 end
+		`, "UndefinedMethodError: Undefined Method 'then' for <Instance of: Object>", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
 }

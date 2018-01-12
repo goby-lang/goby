@@ -577,7 +577,7 @@ func TestIfExpression(t *testing.T) {
 func TestCaseExpression(t *testing.T) {
 	input := `
 	case 2
-	when 0 then
+	when 0
 	  0 + 0
 	when 1
 	  1 + 1

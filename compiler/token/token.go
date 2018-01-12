@@ -71,7 +71,6 @@ const (
 	Else   = "ELSE"
 	Case   = "CASE"
 	When   = "WHEN"
-	Then   = "THEN"
 	Return = "RETURN"
 	Next   = "NEXT"
 	Break  = "BREAK"
@@ -97,7 +96,6 @@ var keywords = map[string]Type{
 	"else":   Else,
 	"case":   Case,
 	"when":   When,
-	"then":   Then,
 	"return": Return,
 	"self":   Self,
 	"end":    End,
