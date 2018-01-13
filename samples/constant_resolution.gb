@@ -1,0 +1,11 @@
+module Out
+  ModVal = "out"
+
+  module Mid
+    ModVal = "mid"
+
+    module In
+      puts ModVal
+    end
+  end
+end
