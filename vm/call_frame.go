@@ -39,8 +39,9 @@ type callFrame interface {
 	getLCL(index, depth int) *Pointer
 	insertLCL(index, depth int, value Object)
 	storeConstant(constName string, constant interface{}) *Pointer
-	lookupConstant(constName string) *Pointer
-	lookupConstantInScope(constName string) *Pointer
+	lookupConstantUnderAllScope(constName string) *Pointer
+	lookupConstantUnderCurrentScope(constName string) *Pointer
+	lookupConstantInCurrentScope(constName string) *Pointer
 	inspect() string
 	stopExecution()
 }
@@ -166,29 +167,43 @@ func (b *baseFrame) storeConstant(constName string, constant interface{}) *Point
 	return ptr
 }
 
-func (b *baseFrame) lookupConstant(constName string) *Pointer {
+func (b *baseFrame) lookupConstantUnderAllScope(constName string) *Pointer {
 	var c *Pointer
 
 	switch scope := b.self.(type) {
 	case *RClass:
-		c = scope.lookupConstantInAllScope(constName)
+		c = scope.lookupConstantUnderAllScope(constName)
 	default:
 		scopeClass := scope.Class()
-		c = scopeClass.lookupConstantInAllScope(constName)
+		c = scopeClass.lookupConstantUnderAllScope(constName)
 	}
 
 	return c
 }
 
-func (b *baseFrame) lookupConstantInScope(constName string) *Pointer {
+func (b *baseFrame) lookupConstantUnderCurrentScope(constName string) *Pointer {
 	var c *Pointer
 
 	switch scope := b.self.(type) {
 	case *RClass:
-		c = scope.lookupConstantInScope(constName)
+		c = scope.lookupConstantUnderCurrentScope(constName)
 	default:
 		scopeClass := scope.Class()
-		c = scopeClass.lookupConstantInScope(constName)
+		c = scopeClass.lookupConstantUnderCurrentScope(constName)
+	}
+
+	return c
+}
+
+func (b *baseFrame) lookupConstantInCurrentScope(constName string) *Pointer {
+	var c *Pointer
+
+	switch scope := b.self.(type) {
+	case *RClass:
+		c = scope.lookupConstantInCurrentScope(constName)
+	default:
+		scopeClass := scope.Class()
+		c = scopeClass.lookupConstantInCurrentScope(constName)
 	}
 
 	return c

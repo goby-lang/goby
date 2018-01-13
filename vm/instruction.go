@@ -183,7 +183,7 @@ var builtinActions = map[operationType]*action{
 		name: bytecode.SetConstant,
 		operation: func(t *thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			constName := args[0].(string)
-			c := cf.lookupConstantInScope(constName)
+			c := cf.lookupConstantInCurrentScope(constName)
 			v := t.stack.pop()
 
 			if c != nil {
@@ -408,7 +408,7 @@ var builtinActions = map[operationType]*action{
 			subject := strings.Split(args[0].(string), ":")
 			subjectType, subjectName := subject[0], subject[1]
 
-			classPtr := cf.lookupConstant(subjectName)
+			classPtr := cf.lookupConstantUnderAllScope(subjectName)
 
 			if classPtr == nil {
 				class := t.vm.initializeClass(subjectName, subjectType == "module")
