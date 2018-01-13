@@ -20,4 +20,5 @@ const (
 	MatchDataClass = "MatchData"
 	GoMapClass     = "GoMap"
 	DecimalClass   = "Decimal"
+	TimeClass      = "Time"
 )
