@@ -211,6 +211,8 @@ func verifyExpected(t *testing.T, i int, evaluated Object, expected interface{})
 		verifyStringObject(t, i, evaluated, expected)
 	case bool:
 		verifyBooleanObject(t, i, evaluated, expected)
+	case []interface{}:
+		verifyArrayObject(t, i, evaluated, expected)
 	case nil:
 		verifyNullObject(t, i, evaluated)
 	default:
