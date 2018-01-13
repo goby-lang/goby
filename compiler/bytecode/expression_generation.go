@@ -57,6 +57,8 @@ func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, sc
 		g.compileIfExpression(is, exp, scope, table)
 	case *ast.YieldExpression:
 		g.compileYieldExpression(is, exp, scope, table)
+	case *ast.GetBlockExpression:
+		g.compileGetBlockExpression(is, exp, scope, table)
 	case *ast.CallExpression:
 		g.compileCallExpression(is, exp, scope, table)
 	}
@@ -83,6 +85,10 @@ func (g *Generator) compileYieldExpression(is *InstructionSet, exp *ast.YieldExp
 	}
 
 	is.define(InvokeBlock, exp.Line(), len(exp.Arguments))
+}
+
+func (g *Generator) compileGetBlockExpression(is *InstructionSet, exp *ast.GetBlockExpression, scope *scope, table *localTable) {
+	is.define(GetBlock, exp.Line())
 }
 
 func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpression, scope *scope, table *localTable) {
