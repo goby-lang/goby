@@ -301,14 +301,14 @@ func (vm *VM) lookupConstant(cf callFrame, constName string) (constant *Pointer)
 	}
 
 	if hasNamespace {
-		constant = namespace.lookupConstantInAllScope(constName)
+		constant = namespace.lookupConstantUnderAllScope(constName)
 
 		if constant != nil {
 			return
 		}
 	}
 
-	constant = cf.lookupConstant(constName)
+	constant = cf.lookupConstantUnderAllScope(constName)
 
 	if constant == nil {
 		constant = vm.objectClass.constants[constName]

@@ -1262,12 +1262,22 @@ func (c *RClass) lookupMethod(methodName string) Object {
 	return method
 }
 
-func (c *RClass) lookupConstantInScope(constName string) *Pointer {
+func (c *RClass) lookupConstantInCurrentScope(constName string) *Pointer {
+	constant, ok := c.constants[constName]
+
+	if !ok {
+		return nil
+	}
+
+	return constant
+}
+
+func (c *RClass) lookupConstantUnderCurrentScope(constName string) *Pointer {
 	constant, ok := c.constants[constName]
 
 	if !ok {
 		if c.scope != nil {
-			return c.scope.lookupConstantInScope(constName)
+			return c.scope.lookupConstantUnderCurrentScope(constName)
 		}
 
 		return nil
@@ -1276,12 +1286,12 @@ func (c *RClass) lookupConstantInScope(constName string) *Pointer {
 	return constant
 }
 
-func (c *RClass) lookupConstantInAllScope(constName string) *Pointer {
+func (c *RClass) lookupConstantUnderAllScope(constName string) *Pointer {
 	constant, ok := c.constants[constName]
 
 	if !ok {
 		if c.scope != nil {
-			return c.scope.lookupConstantInScope(constName)
+			return c.scope.lookupConstantUnderCurrentScope(constName)
 		}
 
 		// Finding constant in superclass means it's out of the scope

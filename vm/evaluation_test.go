@@ -590,7 +590,7 @@ func TestComplexEvaluation(t *testing.T) {
 func TestConstantNamespace(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected []interface{}
+		expected interface{}
 	}{
 		{`
 		class Foo
@@ -637,12 +637,46 @@ func TestConstantNamespace(t *testing.T) {
 		a = [VAL.name, Foo::VAL, Foo.new.foo]
 		a
 		`, []interface{}{"VAL", "Foo's constant value", "Foo's constant value"}},
+		{`
+		module Out
+		  ModVal = "out"
+		
+		  module Mid
+			ModVal = "mid"
+		
+			module In
+			  def self.val
+				ModVal
+			  end
+			end
+		  end
+		end
+
+		Out::Mid::In.val
+		`, "mid"},
+		{`
+		module Out
+		  ModVal = "out"
+		
+		  module Mid
+			ModVal = "mid"
+		
+			class In
+			  def val
+				ModVal
+			  end
+			end
+		  end
+		end
+
+		Out::Mid::In.new.val
+		`, "mid"},
 	}
 
 	for i, tt := range tests {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input, getFilename())
-		verifyArrayObject(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
 		vm.checkSP(t, i, 1)
 	}
