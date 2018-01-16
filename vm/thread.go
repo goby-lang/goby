@@ -211,7 +211,7 @@ func (t *thread) execInstruction(cf *normalCallFrame, i *instruction) {
 
 func (t *thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object) *Pointer {
 	if blockFrame.IsRemoved() {
-		return nil
+		return &Pointer{Target:NULL}
 	}
 
 	c := newNormalCallFrame(blockFrame.instructionSet, blockFrame.FileName(), blockFrame.sourceLine)
@@ -227,6 +227,10 @@ func (t *thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object)
 
 	t.callFrameStack.push(c)
 	t.startFromTopFrame()
+
+	if blockFrame.IsRemoved() {
+		return &Pointer{Target:NULL}
+	}
 
 	return t.stack.top()
 }
