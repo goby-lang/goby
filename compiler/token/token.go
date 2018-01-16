@@ -33,8 +33,6 @@ const (
 	Pow      = "**"
 	Slash    = "/"
 	Dot      = "."
-	Incr     = "++"
-	Decr     = "--"
 	And      = "&&"
 	Or       = "||"
 	OrEq     = "||="

@@ -35,8 +35,6 @@ var LookupTable = map[token.Type]int{
 	token.Range:              Range,
 	token.Plus:               Sum,
 	token.Minus:              Sum,
-	token.Incr:               Sum,
-	token.Decr:               Sum,
 	token.Modulo:             Sum,
 	token.Slash:              Product,
 	token.Asterisk:           Product,
