@@ -18,7 +18,9 @@ type baseFrame struct {
 	lPr           int
 	isBlock       bool
 	isSourceBlock bool
-	blockFrame    *normalCallFrame
+	// for helping stop the frame execution
+	isRemoved  bool
+	blockFrame *normalCallFrame
 	sync.RWMutex
 	sourceLine int
 	fileName   string
@@ -30,6 +32,7 @@ type callFrame interface {
 	BlockFrame() *normalCallFrame
 	IsBlock() bool
 	IsSourceBlock() bool
+	IsRemoved() bool
 	EP() *normalCallFrame
 	Locals() []*Pointer
 	LocalPtr() int
@@ -52,7 +55,9 @@ type goMethodCallFrame struct {
 	name   string
 }
 
-func (cf *goMethodCallFrame) stopExecution() {}
+func (cf *goMethodCallFrame) stopExecution() {
+	cf.isRemoved = true
+}
 
 type normalCallFrame struct {
 	*baseFrame
@@ -66,6 +71,7 @@ func (n *normalCallFrame) instructionsCount() int {
 }
 
 func (n *normalCallFrame) stopExecution() {
+	n.isRemoved = true
 	n.pc = n.instructionsCount()
 }
 
@@ -79,6 +85,10 @@ func (b *baseFrame) BlockFrame() *normalCallFrame {
 
 func (b *baseFrame) IsBlock() bool {
 	return b.isBlock
+}
+
+func (b *baseFrame) IsRemoved() bool {
+	return b.isRemoved
 }
 
 func (b *baseFrame) IsSourceBlock() bool {

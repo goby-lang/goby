@@ -100,7 +100,31 @@ func (g *Generator) compileNextStatement(is *InstructionSet, stmt ast.Statement,
 }
 
 func (g *Generator) compileBreakStatement(is *InstructionSet, stmt ast.Statement, scope *scope) {
-	is.define(Jump, stmt.Line(), scope.anchors["break"])
+	if scope.anchors["break"] != nil {
+		/*
+			# We also need to leave current frame if it's inside block like:
+
+			x = [1, 2, 3]
+			y = 0
+
+			while y < 10 do
+			  x.each do |i|
+				y += i
+				if i == 2
+				  break <- need to escape from block so we also need break instruction
+				end
+			  end
+			end
+
+			y # 12
+		*/
+		if is.isType == Block {
+			is.define(Break, stmt.Line())
+		}
+		is.define(Jump, stmt.Line(), scope.anchors["break"])
+	} else {
+		is.define(Break, stmt.Line())
+	}
 }
 
 func (g *Generator) compileClassStmt(is *InstructionSet, stmt *ast.ClassStatement, scope *scope, table *localTable) {

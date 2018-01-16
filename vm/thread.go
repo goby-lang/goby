@@ -210,6 +210,10 @@ func (t *thread) execInstruction(cf *normalCallFrame, i *instruction) {
 }
 
 func (t *thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object) *Pointer {
+	if blockFrame.IsRemoved() {
+		return nil
+	}
+
 	c := newNormalCallFrame(blockFrame.instructionSet, blockFrame.FileName(), blockFrame.sourceLine)
 	c.blockFrame = blockFrame
 	c.ep = blockFrame.ep

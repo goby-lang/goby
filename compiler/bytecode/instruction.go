@@ -36,6 +36,7 @@ const (
 	BranchUnless        = "branchunless"
 	BranchIf            = "branchif"
 	Jump                = "jump"
+	Break               = "break"
 	DefMethod           = "def_method"
 	DefSingletonMethod  = "def_singleton_method"
 	DefClass            = "def_class"
