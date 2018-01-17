@@ -200,6 +200,23 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 						objectKey := t.vm.initStringObject(stringKey)
 						result := t.builtinMethodYield(blockFrame, objectKey, value)
 
+						/*
+							TODO: Discuss this behavior
+
+							```ruby
+							{ key: "foo", bar: "baz" }.any? do |k, v|
+							  true
+							  break
+							end
+							```
+
+							The block returns nil because of the break.
+							But in Ruby the final result is nil, which means the block's result is completely ignored
+						 */
+						if blockFrame.IsRemoved() {
+							return NULL
+						}
+
 						if result.Target.isTruthy() {
 							return TRUE
 						}
