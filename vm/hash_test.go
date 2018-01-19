@@ -273,6 +273,12 @@ func TestHashAnyMethod(t *testing.T) {
         true
       end
 		`, false},
+		{`
+	  { key: "foo", bar: "baz" }.any? do |k, v|
+	    true
+	    break
+	  end
+		`, nil},
 	}
 
 	for i, tt := range tests {

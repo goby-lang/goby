@@ -326,6 +326,23 @@ var builtinActions = map[operationType]*action{
 			cf.pc = args[0].(int)
 		},
 	},
+	bytecode.Break: {
+		name: bytecode.Break,
+		operation: func(t *thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
+			/*
+				Normal frame. IS name: ProgramStart. is block: false. source line: 1
+				Normal frame. IS name: 0. is block: true. ep: 17. source line: 5 <- The block source
+				Go method frame. Method name: each. <- The method call with block
+				Normal frame. IS name: 0. is block: true. ep: 17. source line: 5 <- The block execution
+			*/
+
+			if cf.IsBlock() {
+				t.callFrameStack.pop().stopExecution() // Remove block execution frame
+				t.callFrameStack.pop().stopExecution() // Remove method call frame
+				t.callFrameStack.pop().stopExecution() // Remove block source frame
+			}
+		},
+	},
 	bytecode.PutSelf: {
 		name: bytecode.PutSelf,
 		operation: func(t *thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
