@@ -1804,6 +1804,28 @@ func TestArrayStarMethodFail(t *testing.T) {
 	}
 }
 
+func TestArrayToEnumMethod(t *testing.T) {
+	input := `
+	iterated_values = []
+
+	enumerator = [1, 2, 4].to_enum
+
+	while enumerator.has_next? do
+		iterated_values.push(enumerator.next)
+	end
+
+	iterated_values
+	`
+
+	expected := []interface{}{1, 2, 4}
+
+	v := initTestVM()
+	evaluated := v.testEval(t, input, getFilename())
+	verifyArrayObject(t, i, evaluated, expected)
+	v.checkCFP(t, i, 0)
+	v.checkSP(t, i, 1)
+}
+
 func TestArrayUnshiftMethod(t *testing.T) {
 	tests := []struct {
 		input    string

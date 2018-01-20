@@ -7,6 +7,8 @@ const (
 	ArgumentError = "ArgumentError"
 	// NameError is for a constant-related error
 	NameError = "NameError"
+	// StopIteration is raised when there are no more elements in an iterator
+	StopIteration = "StopIteration"
 	// TypeError is for a type-related error
 	TypeError = "TypeError"
 	// UndefinedMethodError is for an undefined-method error
