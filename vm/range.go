@@ -527,6 +527,8 @@ func (vm *VM) initRangeClass() *RClass {
 	rc := vm.initializeClass(classes.RangeClass, false)
 	rc.setBuiltinMethods(builtinRangeInstanceMethods(), false)
 	rc.setBuiltinMethods(builtinRangeClassMethods(), true)
+	vm.libFiles = append(vm.libFiles, "range.gb")
+	vm.libFiles = append(vm.libFiles, "range_enumerator.gb")
 	return rc
 }
 
