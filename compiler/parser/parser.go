@@ -104,7 +104,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.Dot, p.parseCallExpressionWithReceiver)
 	p.registerInfix(token.LParen, p.parseCallExpressionWithoutReceiver)
 	p.registerInfix(token.LBracket, p.parseIndexExpression)
-	p.registerInfix(token.Colon, p.parsePairExpression)
+	p.registerInfix(token.Colon, p.parseArgumentPairExpression)
 	p.registerInfix(token.Asterisk, p.parseInfixExpression)
 
 	return p
