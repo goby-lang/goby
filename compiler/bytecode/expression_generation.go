@@ -43,7 +43,7 @@ func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, sc
 		is.define(NewHash, sourceLine, len(exp.Data)*2)
 	case *ast.SelfExpression:
 		is.define(PutSelf, sourceLine)
-	case *ast.PairExpression:
+	case *ast.ArgumentPairExpression:
 		g.compileExpression(is, exp.Value, scope, table)
 	case *ast.PrefixExpression:
 		g.compilePrefixExpression(is, exp, scope, table)
@@ -109,7 +109,7 @@ func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpre
 		case *ast.AssignExpression:
 			varName := arg.Variables[0].(*ast.Identifier)
 			argSet.setArg(i, varName.Value, OptionedArg)
-		case *ast.PairExpression:
+		case *ast.ArgumentPairExpression:
 			key := arg.Key.(*ast.Identifier)
 
 			if arg.Value == nil {

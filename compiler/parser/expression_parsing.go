@@ -315,7 +315,7 @@ func (p *Parser) parseMultiVariables(left ast.Expression) ast.Expression {
 
 // this function is only for parsing keyword arguments or keyword params
 func (p *Parser) parseArgumentPairExpression(key ast.Expression) ast.Expression {
-	exp := &ast.PairExpression{BaseNode: &ast.BaseNode{Token: p.curToken}, Key: key}
+	exp := &ast.ArgumentPairExpression{BaseNode: &ast.BaseNode{Token: p.curToken}, Key: key}
 
 	switch p.fsm.Current() {
 	case states.ParsingMethodParam:

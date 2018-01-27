@@ -172,7 +172,7 @@ func (p *Parser) checkMethodParameters(params []ast.Expression) {
 				p.error = errors.NewArgumentError(arguments.OptionedArg, arguments.SplatArg, exp.String(), p.curToken.Line)
 			}
 			argState = arguments.OptionedArg
-		case *ast.PairExpression:
+		case *ast.ArgumentPairExpression:
 			if exp.Value == nil {
 				switch argState {
 				case arguments.OptionalKeywordArg:
@@ -360,7 +360,7 @@ func getArgName(exp ast.Expression) string {
 	}
 
 	switch exp := exp.(type) {
-	case *ast.PairExpression:
+	case *ast.ArgumentPairExpression:
 		return exp.Key.(*ast.Identifier).Value
 	}
 
