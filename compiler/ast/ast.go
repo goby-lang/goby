@@ -53,7 +53,10 @@ type node interface {
 type Statement interface {
 	node
 	statementNode()
+
+	// Test Helpers
 	IsClassStmt(t *testing.T, className string) *ClassStatement
+	IsModuleStmt(t *testing.T, className string) *ModuleStatement
 }
 
 type Expression interface {
