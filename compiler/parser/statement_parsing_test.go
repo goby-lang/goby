@@ -63,7 +63,7 @@ func TestClassStatement(t *testing.T) {
 	stmt := program.FirstStmt().IsClassStmt(t, "Foo")
 	defStmt := stmt.HasMethod(t, "bar")
 	defStmt.HasNormalParam(t, "x")
-	defStmt.HasNormalParam(t, "c")
+	defStmt.HasNormalParam(t, "y")
 
 	body, ok := defStmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
 	if !ok {
@@ -92,15 +92,10 @@ func TestModuleStatement(t *testing.T) {
 		t.Fatal(err.Message)
 	}
 
-	stmt := program.Statements[0].(*ast.ModuleStatement)
-
-	testConstant(t, stmt.Name, "Foo")
-
-	defStmt := stmt.Body.Statements[0].(*ast.DefStatement)
-
-	testIdentifier(t, defStmt.Name, "bar")
-	testIdentifier(t, defStmt.Parameters[0], "x")
-	testIdentifier(t, defStmt.Parameters[1], "y")
+	stmt := program.FirstStmt().IsModuleStmt(t, "Foo")
+	defStmt := stmt.HasMethod(t, "bar")
+	defStmt.HasNormalParam(t, "x")
+	defStmt.HasNormalParam(t, "y")
 
 	body, ok := defStmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
 	if !ok {
