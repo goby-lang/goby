@@ -102,26 +102,26 @@ func (ae *ArrayExpression) String() string {
 }
 
 // PairExpression represents a key/value pair in method parameters or arguments
-type PairExpression struct {
+type ArgumentPairExpression struct {
 	*BaseNode
 	Key   Expression
 	Value Expression
 }
 
-func (pe *PairExpression) expressionNode() {}
+func (ape *ArgumentPairExpression) expressionNode() {}
 
 // TokenLiteral .....
-func (pe *PairExpression) TokenLiteral() string {
-	return pe.Token.Literal
+func (ape *ArgumentPairExpression) TokenLiteral() string {
+	return ape.Token.Literal
 }
 
 // String .....
-func (pe *PairExpression) String() string {
-	if pe.Value == nil {
-		return fmt.Sprintf("%s:", pe.Key.String())
+func (ape *ArgumentPairExpression) String() string {
+	if ape.Value == nil {
+		return fmt.Sprintf("%s:", ape.Key.String())
 	}
 
-	return fmt.Sprintf("%s: %s", pe.Key.String(), pe.Value.String())
+	return fmt.Sprintf("%s: %s", ape.Key.String(), ape.Value.String())
 }
 
 // HashExpression defines the hash expression literal which contains the node expression and its value

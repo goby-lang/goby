@@ -212,7 +212,7 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 			scope.localTable.setLCL(ident.Value, scope.localTable.depth)
 
 			newIS.argTypes.setArg(i, ident.Value, SplatArg)
-		case *ast.PairExpression:
+		case *ast.ArgumentPairExpression:
 			key := exp.Key.(*ast.Identifier)
 			index, depth := scope.localTable.setLCL(key.Value, scope.localTable.depth)
 

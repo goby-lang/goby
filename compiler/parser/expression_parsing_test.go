@@ -700,6 +700,26 @@ func TestMethodParameterParsing(t *testing.T) {
 	}
 }
 
+func TestArgumentPairExpressionFail(t *testing.T) {
+	tests := []struct {
+		input string
+		error string
+	}{
+		{`foo: "bar"`, `unexpected : Line: 0`},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		_, err := p.ParseProgram()
+		if err.Message != tt.error {
+			t.Fatal("Expected hash literal parsing error")
+			t.Fatal("expect: ", tt.error)
+			t.Fatal("actual: ", err.Message)
+		}
+	}
+}
+
 func TestCallExpression(t *testing.T) {
 	input := `
 		p.add(1, 2 * 3, 4 + 5)

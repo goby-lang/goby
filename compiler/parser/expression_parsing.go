@@ -313,19 +313,38 @@ func (p *Parser) parseMultiVariables(left ast.Expression) ast.Expression {
 	return result
 }
 
-func (p *Parser) parsePairExpression(key ast.Expression) ast.Expression {
-	exp := &ast.PairExpression{BaseNode: &ast.BaseNode{Token: p.curToken}, Key: key}
+// this function is only for parsing keyword arguments or keyword params
+func (p *Parser) parseArgumentPairExpression(key ast.Expression) ast.Expression {
+	exp := &ast.ArgumentPairExpression{BaseNode: &ast.BaseNode{Token: p.curToken}, Key: key}
 
-	if p.peekTokenIs(token.Comma) || p.peekTokenIs(token.RParen) {
+	switch p.fsm.Current() {
+	case states.ParsingMethodParam:
+		// when parsing keyword params, there'll be some cases that don't have pair value like
+		// ```ruby
+		//   def foo(bar:, baz:); end
+		// ```
+		if p.peekTokenIs(token.Comma) || p.peekTokenIs(token.RParen) {
+			return exp
+		}
+
+		p.nextToken()
+		value := p.parseExpression(precedence.Normal)
+
+		exp.Value = value
+
 		return exp
+	case states.ParsingFuncCall:
+		p.nextToken()
+		value := p.parseExpression(precedence.Normal)
+
+		exp.Value = value
+
+		return exp
+	default:
+		msg := fmt.Sprintf("unexpected %s Line: %d", p.curToken.Literal, p.peekToken.Line)
+		p.error = errors.InitError(msg, errors.UnexpectedTokenError)
+		return nil
 	}
-
-	p.nextToken()
-	value := p.parseExpression(precedence.Normal)
-
-	exp.Value = value
-
-	return exp
 }
 
 func (p *Parser) parsePrefixExpression() ast.Expression {
