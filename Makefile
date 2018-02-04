@@ -1,6 +1,7 @@
 GOFMT ?= gofmt -s
 GOFILES := $(shell find . -name "*.go" -type f -not -path "./vendor/*")
-OPTIONS := -ldflags "-s -w"
+RELEASE_OPTIONS := -ldflags "-s -w" -tags release
+TEST_OPTIONS := -ldflags "-s -w"
 
 .PHONY: fmt
 fmt:
@@ -8,15 +9,15 @@ fmt:
 
 .PHONY: build
 build:
-	go build $(OPTIONS) .
+	go build $(RELEASE_OPTIONS) .
 
 .PHONY: install
 install:
-	go install $(OPTIONS) .
+	go install $(RELEASE_OPTIONS) .
 
 .PHONY: test
 test:
-	go test $(OPTIONS) ./...
+	go test $(TEST_OPTIONS) ./...
 
 .PHONY: clean
 clean:
