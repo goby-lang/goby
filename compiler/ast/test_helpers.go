@@ -1,9 +1,11 @@
 package ast
 
-import "testing"
+import (
+	"testing"
+)
 
-func (p *Program) FirstStmt() Statement {
-	return p.Statements[0]
+func (p *Program) FirstStmt() TestStatement {
+	return p.Statements[0].(TestStatement)
 }
 
 // BaseNode
@@ -82,9 +84,9 @@ func (ms *ModuleStatement) NameIs(n string) bool {
 
 func (ds *DefStatement) HasNormalParam(t *testing.T, paramName string) {
 	for _, param := range ds.Parameters {
-		_, ok := param.(*Identifier)
+		p, ok := param.(*Identifier)
 
-		if ok && param.NameIs(paramName) {
+		if ok && p.NameIs(paramName) {
 			return
 		}
 	}
@@ -94,9 +96,9 @@ func (ds *DefStatement) HasNormalParam(t *testing.T, paramName string) {
 
 func (ds *DefStatement) HasOptionalParam(t *testing.T, paramName string) {
 	for _, param := range ds.Parameters {
-		_, ok := param.(*AssignExpression)
+		p, ok := param.(*AssignExpression)
 
-		if ok && param.NameIs(paramName) {
+		if ok && p.NameIs(paramName) {
 			return
 		}
 	}
@@ -132,7 +134,7 @@ func (ds *DefStatement) HasSplatParam(t *testing.T, paramName string) {
 	for _, param := range ds.Parameters {
 		p, ok := param.(*PrefixExpression)
 
-		if ok && param.NameIs(paramName) && p.Operator == "*" {
+		if ok && p.NameIs(paramName) && p.Operator == "*" {
 			return
 		}
 	}
@@ -143,7 +145,7 @@ func (ds *DefStatement) HasSplatParam(t *testing.T, paramName string) {
 // AssignExpression
 
 func (ae *AssignExpression) NameIs(n string) bool {
-	return ae.Variables[0].NameIs(n)
+	return ae.Variables[0].(testNode).NameIs(n)
 }
 
 // Identifier
