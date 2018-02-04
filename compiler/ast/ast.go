@@ -3,7 +3,6 @@ package ast
 import (
 	"bytes"
 	"github.com/goby-lang/goby/compiler/token"
-	"testing"
 )
 
 // BaseNode holds the attribute every expression or statement should have
@@ -45,18 +44,11 @@ type node interface {
 	IsStmt() bool
 	MarkAsStmt()
 	MarkAsExp()
-
-	// Belows are test helpers
-	NameIs(name string) bool
 }
 
 type Statement interface {
 	node
 	statementNode()
-
-	// Test Helpers
-	IsClassStmt(t *testing.T, className string) *ClassStatement
-	IsModuleStmt(t *testing.T, className string) *ModuleStatement
 }
 
 type Expression interface {
