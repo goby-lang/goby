@@ -16,9 +16,6 @@ before_script:
 script:
   - ./travis.sh
 
-after_script:
-  - go build -ldflags "-s -w" .
-
 env:
   - "GOBY_ROOT=$HOME/gopath/src/github.com/goby-lang/goby"
 
