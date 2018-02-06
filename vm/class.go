@@ -1024,6 +1024,13 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			Name: "singleton_class",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					r := receiver
+					if r.SingletonClass() == nil {
+						id := t.vm.initIntegerObject(r.id())
+						singletonClass := t.vm.createRClass(fmt.Sprintf("#<Class:#<%s:%s>>", r.Class().Name, id.toString()))
+						singletonClass.isSingleton = true
+						return singletonClass
+					}
 					return receiver.SingletonClass()
 				}
 			},
