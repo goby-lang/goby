@@ -61,8 +61,8 @@ func TestClassStatement(t *testing.T) {
 
 	stmt := program.FirstStmt().IsClassStmt(t, "Foo")
 	defStmt := stmt.HasMethod(t, "bar")
-	defStmt.HasNormalParam(t, "x")
-	defStmt.HasNormalParam(t, "y")
+	defStmt.ShouldHasNormalParam(t, "x")
+	defStmt.ShouldHasNormalParam(t, "y")
 
 	body, ok := defStmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
 	if !ok {
@@ -93,8 +93,8 @@ func TestModuleStatement(t *testing.T) {
 
 	stmt := program.FirstStmt().IsModuleStmt(t, "Foo")
 	defStmt := stmt.HasMethod(t, "bar")
-	defStmt.HasNormalParam(t, "x")
-	defStmt.HasNormalParam(t, "y")
+	defStmt.ShouldHasNormalParam(t, "x")
+	defStmt.ShouldHasNormalParam(t, "y")
 
 	body, ok := defStmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
 	if !ok {
@@ -127,8 +127,8 @@ func TestClassStatementWithInheritance(t *testing.T) {
 	classStmt.ShouldInherits(t, "Bar")
 
 	defStmt := classStmt.HasMethod(t, "bar")
-	defStmt.HasNormalParam(t, "x")
-	defStmt.HasNormalParam(t, "y")
+	defStmt.ShouldHasNormalParam(t, "x")
+	defStmt.ShouldHasNormalParam(t, "y")
 
 	body, ok := defStmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
 	if !ok {
@@ -160,9 +160,9 @@ func TestDefStatement(t *testing.T) {
 	}
 
 	firstStmt := program.FirstStmt().(*ast.DefStatement)
-	firstStmt.ShouldHasName(t,"add")
-	firstStmt.HasNormalParam(t, "x")
-	firstStmt.HasNormalParam(t, "y")
+	firstStmt.ShouldHasName(t, "add")
+	firstStmt.ShouldHasNormalParam(t, "x")
+	firstStmt.ShouldHasNormalParam(t, "y")
 
 	firstExpressionStmt := firstStmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
 	testInfixExpression(t, firstExpressionStmt.Expression, "x", "+", "y")
