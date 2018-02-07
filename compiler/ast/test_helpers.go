@@ -110,7 +110,7 @@ func (ds *DefStatement) HasOptionalParam(t *testing.T, paramName string) {
 
 func (ds *DefStatement) HasRequiredKeywordParam(t *testing.T, paramName string) {
 	for _, param := range ds.Parameters {
-		p, ok := param.(*PairExpression)
+		p, ok := param.(*ArgumentPairExpression)
 
 		if ok && p.NameIs(paramName) && p.Value == nil {
 			return
@@ -122,7 +122,7 @@ func (ds *DefStatement) HasRequiredKeywordParam(t *testing.T, paramName string) 
 
 func (ds *DefStatement) HasOptionalKeywordParam(t *testing.T, paramName string) {
 	for _, param := range ds.Parameters {
-		p, ok := param.(*PairExpression)
+		p, ok := param.(*ArgumentPairExpression)
 
 		if ok && p.NameIs(paramName) && p.Value != nil {
 			return
