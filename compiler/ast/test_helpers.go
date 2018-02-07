@@ -32,6 +32,12 @@ func (cs *ClassStatement) IsClassStmt(t *testing.T, className string) *ClassStat
 	return cs
 }
 
+func (cs *ClassStatement) ShouldInherits(t *testing.T, className string) {
+	if cs.SuperClassName != className {
+		t.Fatalf("Expect class %s to inherit class %s. got %s", cs.Name, className, cs.SuperClassName)
+	}
+}
+
 func (cs *ClassStatement) HasMethod(t *testing.T, methodName string) (ds *DefStatement) {
 	for _, stmt := range cs.Body.Statements {
 		s, ok := stmt.(*DefStatement)
@@ -83,6 +89,18 @@ func (ms *ModuleStatement) NameIs(n string) bool {
 }
 
 // DefStatement
+
+func (ds *DefStatement) ShouldHasName(t *testing.T, expectedName string) {
+	if ds.Name.Value != expectedName {
+		t.Fatalf("It's method %s, not %s", ds.Name.Value, expectedName)
+	}
+}
+
+func (ds *DefStatement) ShouldHasNoParam(t *testing.T) {
+	if len(ds.Parameters) != 0 {
+		t.Fatalf("Expect method %s not to have any params, got: %d", ds.Name.Value, len(ds.Parameters))
+	}
+}
 
 func (ds *DefStatement) HasNormalParam(t *testing.T, paramName string) {
 	for _, param := range ds.Parameters {
