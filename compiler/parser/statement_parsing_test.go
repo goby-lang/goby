@@ -3,7 +3,6 @@ package parser
 import (
 	"github.com/goby-lang/goby/compiler/ast"
 	"github.com/goby-lang/goby/compiler/lexer"
-	"github.com/goby-lang/goby/compiler/token"
 	"testing"
 )
 
@@ -124,16 +123,12 @@ func TestClassStatementWithInheritance(t *testing.T) {
 		t.Fatal(err.Message)
 	}
 
-	stmt := program.Statements[0].(*ast.ClassStatement)
+	classStmt := program.FirstStmt().IsClassStmt(t, "Foo")
+	classStmt.ShouldInherits(t, "Bar")
 
-	testConstant(t, stmt.Name, "Foo")
-	testConstant(t, stmt.SuperClass, "Bar")
-
-	defStmt := stmt.Body.Statements[0].(*ast.DefStatement)
-
-	testIdentifier(t, defStmt.Name, "bar")
-	testIdentifier(t, defStmt.Parameters[0], "x")
-	testIdentifier(t, defStmt.Parameters[1], "y")
+	defStmt := classStmt.HasMethod(t, "bar")
+	defStmt.HasNormalParam(t, "x")
+	defStmt.HasNormalParam(t, "y")
 
 	body, ok := defStmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
 	if !ok {
@@ -164,24 +159,17 @@ func TestDefStatement(t *testing.T) {
 		t.Fatal(err.Message)
 	}
 
-	firstStmt := program.Statements[0].(*ast.DefStatement)
-
-	testLiteralExpression(t, firstStmt.Parameters[0], "x")
-	testLiteralExpression(t, firstStmt.Parameters[1], "y")
+	firstStmt := program.FirstStmt().(*ast.DefStatement)
+	firstStmt.ShouldHasName(t,"add")
+	firstStmt.HasNormalParam(t, "x")
+	firstStmt.HasNormalParam(t, "y")
 
 	firstExpressionStmt := firstStmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
-
 	testInfixExpression(t, firstExpressionStmt.Expression, "x", "+", "y")
 
 	secondStmt := program.Statements[1].(*ast.DefStatement)
-
-	if secondStmt.Token.Type != token.Def {
-		t.Fatalf("expect DefStatement's token to be 'DEF'. got=%T", secondStmt.Token.Type)
-	}
-
-	if len(secondStmt.Parameters) != 0 {
-		t.Fatalf("expect second method definition not having any parameters")
-	}
+	secondStmt.ShouldHasName(t, "foo")
+	secondStmt.ShouldHasNoParam(t)
 
 	secondExpressionStmt := secondStmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
 	testIntegerLiteral(t, secondExpressionStmt.Expression, 123)
