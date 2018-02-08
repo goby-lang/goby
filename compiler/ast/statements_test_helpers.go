@@ -11,8 +11,8 @@ Program
 */
 
 // FirstStmt returns program's first statement as a TestStatement
-func (p *Program) FirstStmt() TestStatement {
-	return p.Statements[0].(TestStatement)
+func (p *Program) FirstStmt() TestingStatement {
+	return p.Statements[0].(TestingStatement)
 }
 
 /*

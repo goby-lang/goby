@@ -6,12 +6,12 @@ import "testing"
 
 type TestingIdentifier string
 
-type testNode interface {
+type testingNode interface {
 	// Belows are test helpers
 	NameIs(name string) bool
 }
 
-type TestStatement interface {
+type TestingStatement interface {
 	Statement
 	// Test Helpers
 	IsClassStmt(t *testing.T, className string) *ClassStatement

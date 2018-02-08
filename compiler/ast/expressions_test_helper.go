@@ -8,7 +8,7 @@ AssignExpression
 
 // NameIs compares the assignment's variable name and expected name
 func (ae *AssignExpression) NameIs(n string) bool {
-	return ae.Variables[0].(testNode).NameIs(n)
+	return ae.Variables[0].(testingNode).NameIs(n)
 }
 
 /*
