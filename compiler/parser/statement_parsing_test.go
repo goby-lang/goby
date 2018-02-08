@@ -11,9 +11,10 @@ func TestReturnStatements(t *testing.T) {
 		input         string
 		expectedValue interface{}
 	}{
-		{"return 5;", 5},
-		{"return x;", "x"},
-		{"return true;", true},
+		{"return 5", 5},
+		{"return 'x'", "x"},
+		{"return true", true},
+		{"return foo", ast.TestingIdentifier("foo")},
 	}
 
 	for _, tt := range tests {
@@ -25,21 +26,9 @@ func TestReturnStatements(t *testing.T) {
 			t.Fatal(err.Message)
 		}
 
-		if len(program.Statements) != 1 {
-			t.Fatalf("program.Statements does not contain 1 statements. got=%d",
-				len(program.Statements))
-		}
-
-		returnStmt, ok := program.Statements[0].(*ast.ReturnStatement)
-		if !ok {
-			t.Errorf("stmt not *ast.returnStatement. got=%T", returnStmt)
-		}
-		if returnStmt.TokenLiteral() != "return" {
-			t.Errorf("returnStmt.TokenLiteral not 'return', got %q", returnStmt.TokenLiteral())
-		}
-		testLiteralExpression(t, returnStmt.ReturnValue, tt.expectedValue)
+		returnStmt := program.FirstStmt().IsReturnStmt(t)
+		returnStmt.ShouldHasValue(t, tt.expectedValue)
 	}
-
 }
 
 func TestClassStatement(t *testing.T) {
