@@ -53,14 +53,9 @@ func TestClassStatement(t *testing.T) {
 	defStmt.ShouldHasNormalParam(t, "x")
 	defStmt.ShouldHasNormalParam(t, "y")
 
-	body, ok := defStmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
-	if !ok {
-		t.Errorf("expect body should be an expression statement. got=%T", body)
-	}
+	body := defStmt.MethodBody().NthStmt(1).IsExpressionStmt(t)
 
-	if !testInfixExpression(t, body.Expression, "x", "+", "y") {
-		return
-	}
+	testInfixExpression(t, body.Expression, "x", "+", "y")
 }
 
 func TestModuleStatement(t *testing.T) {
@@ -85,14 +80,9 @@ func TestModuleStatement(t *testing.T) {
 	defStmt.ShouldHasNormalParam(t, "x")
 	defStmt.ShouldHasNormalParam(t, "y")
 
-	body, ok := defStmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
-	if !ok {
-		t.Errorf("expect body should be an expression statement. got=%T", body)
-	}
+	body := defStmt.MethodBody().NthStmt(1).IsExpressionStmt(t)
 
-	if !testInfixExpression(t, body.Expression, "x", "+", "y") {
-		return
-	}
+	testInfixExpression(t, body.Expression, "x", "+", "y")
 }
 
 func TestClassStatementWithInheritance(t *testing.T) {
@@ -119,14 +109,9 @@ func TestClassStatementWithInheritance(t *testing.T) {
 	defStmt.ShouldHasNormalParam(t, "x")
 	defStmt.ShouldHasNormalParam(t, "y")
 
-	body, ok := defStmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
-	if !ok {
-		t.Errorf("expect body should be an expression statement. got=%T", body)
-	}
+	body := defStmt.MethodBody().NthStmt(1).IsExpressionStmt(t)
 
-	if !testInfixExpression(t, body.Expression, "x", "+", "y") {
-		return
-	}
+	testInfixExpression(t, body.Expression, "x", "+", "y")
 }
 
 func TestDefStatement(t *testing.T) {
@@ -153,14 +138,14 @@ func TestDefStatement(t *testing.T) {
 	firstStmt.ShouldHasNormalParam(t, "x")
 	firstStmt.ShouldHasNormalParam(t, "y")
 
-	firstExpressionStmt := firstStmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
+	firstExpressionStmt := firstStmt.MethodBody().NthStmt(1).IsExpressionStmt(t)
 	testInfixExpression(t, firstExpressionStmt.Expression, "x", "+", "y")
 
 	secondStmt := program.NthStmt(2).IsDefStmt(t)
 	secondStmt.ShouldHasName(t, "foo")
 	secondStmt.ShouldHasNoParam(t)
 
-	secondExpressionStmt := secondStmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
+	secondExpressionStmt := secondStmt.MethodBody().NthStmt(1).IsExpressionStmt(t)
 	testIntegerLiteral(t, secondExpressionStmt.Expression, 123)
 }
 
