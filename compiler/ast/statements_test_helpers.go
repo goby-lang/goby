@@ -47,6 +47,12 @@ func (b *BaseNode) IsDefStmt(t *testing.T) (rs *DefStatement) {
 	return
 }
 
+// IsExpressionStmt fails the test and returns nil by default
+func (b *BaseNode) IsExpressionStmt(t *testing.T) (es *ExpressionStatement) {
+	t.Fatalf("Node is not an expression statement, is %v", b)
+	return
+}
+
 // NameIs returns false by default
 func (b *BaseNode) NameIs(n string) bool {
 	return false
@@ -132,6 +138,17 @@ func (ms *ModuleStatement) NameIs(n string) bool {
 // IsDefStmt returns a pointer of the DefStatement
 func (ds *DefStatement) IsDefStmt(t *testing.T) *DefStatement {
 	return ds
+}
+
+// MethodBody returns method body's statements and assert them as TestingStatements
+func (ds *DefStatement) MethodBody() MethodBody {
+	var tss []TestingStatement
+
+	for _, stmt := range ds.BlockStatement.Statements {
+		tss = append(tss, stmt.(TestingStatement))
+	}
+
+	return tss
 }
 
 // ShouldHasName checks if the method's name is what we expected
@@ -233,6 +250,19 @@ func (rs *ReturnStatement) ShouldHasValue(t *testing.T, value interface{}) {
 		compareIdentifier(t, rs.ReturnValue, v)
 	}
 }
+
+/*
+ExpressionStatement
+*/
+
+// IsExpressionStmt returns ExpressionStatement itself
+func (es *ExpressionStatement) IsExpressionStmt(t *testing.T) *ExpressionStatement {
+	return es
+}
+
+/*
+interal helpers
+*/
 
 func compareInt(t *testing.T, exp Expression, value int) {
 	il, ok := exp.(*IntegerLiteral)
