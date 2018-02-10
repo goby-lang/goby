@@ -17,4 +17,5 @@ type TestingStatement interface {
 	IsClassStmt(t *testing.T, className string) *ClassStatement
 	IsModuleStmt(t *testing.T, className string) *ModuleStatement
 	IsReturnStmt(t *testing.T) *ReturnStatement
+	IsDefStmt(t *testing.T) *DefStatement
 }

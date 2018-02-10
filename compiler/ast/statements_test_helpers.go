@@ -15,6 +15,10 @@ func (p *Program) FirstStmt() TestingStatement {
 	return p.Statements[0].(TestingStatement)
 }
 
+func (p *Program) NthStmt(nth int) TestingStatement {
+	return p.Statements[nth-1].(TestingStatement)
+}
+
 /*
  BaseNode
 */
@@ -34,6 +38,12 @@ func (b *BaseNode) IsModuleStmt(t *testing.T, moduleName string) (cs *ModuleStat
 // IsReturnStmt fails the test and returns nil by default
 func (b *BaseNode) IsReturnStmt(t *testing.T) (rs *ReturnStatement) {
 	t.Fatalf("Node is not a return statement, is %v", b)
+	return
+}
+
+// IsDefStmt fails the test and returns nil by default
+func (b *BaseNode) IsDefStmt(t *testing.T) (rs *DefStatement) {
+	t.Fatalf("Node is not a method definition, is %v", b)
 	return
 }
 
@@ -118,6 +128,11 @@ func (ms *ModuleStatement) NameIs(n string) bool {
 /*
  DefStatement
 */
+
+// IsDefStmt returns a pointer of the DefStatement
+func (ds *DefStatement) IsDefStmt(t *testing.T) *DefStatement {
+	return ds
+}
 
 // ShouldHasName checks if the method's name is what we expected
 func (ds *DefStatement) ShouldHasName(t *testing.T, expectedName string) {

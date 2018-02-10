@@ -148,7 +148,7 @@ func TestDefStatement(t *testing.T) {
 		t.Fatal(err.Message)
 	}
 
-	firstStmt := program.FirstStmt().(*ast.DefStatement)
+	firstStmt := program.FirstStmt().IsDefStmt(t)
 	firstStmt.ShouldHasName(t, "add")
 	firstStmt.ShouldHasNormalParam(t, "x")
 	firstStmt.ShouldHasNormalParam(t, "y")
@@ -156,7 +156,7 @@ func TestDefStatement(t *testing.T) {
 	firstExpressionStmt := firstStmt.BlockStatement.Statements[0].(*ast.ExpressionStatement)
 	testInfixExpression(t, firstExpressionStmt.Expression, "x", "+", "y")
 
-	secondStmt := program.Statements[1].(*ast.DefStatement)
+	secondStmt := program.NthStmt(2).IsDefStmt(t)
 	secondStmt.ShouldHasName(t, "foo")
 	secondStmt.ShouldHasNoParam(t)
 
@@ -179,7 +179,7 @@ func TestDefStatementWithYield(t *testing.T) {
 		t.Fatal(err.Message)
 	}
 
-	stmt := program.Statements[0].(*ast.DefStatement)
+	stmt := program.FirstStmt().IsDefStmt(t)
 	block := stmt.BlockStatement
 	firstStmt, ok := block.Statements[0].(*ast.ExpressionStatement)
 	firstYield := firstStmt.Expression.(*ast.YieldExpression)
