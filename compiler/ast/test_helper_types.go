@@ -27,6 +27,7 @@ type TestingExpression interface {
 	// Test Helpers
 	IsAssignExpression(t *testing.T) *AssignExpression
 	IsCallExpression(t *testing.T) *CallExpression
+	IsConstant(t *testing.T) *Constant
 	IsIdentifier(t *testing.T) *Identifier
 	IsInfixExpression(t *testing.T) *InfixExpression
 	IsYieldExpression(t *testing.T) *YieldExpression

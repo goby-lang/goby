@@ -20,6 +20,12 @@ func (b *BaseNode) IsCallExpression(t *testing.T) (ce *CallExpression) {
 	return
 }
 
+// IsConstant fails the test and returns nil by default
+func (b *BaseNode) IsConstant(t *testing.T) (c *Constant) {
+	t.Fatalf("Node is not a call expression, is %v", b)
+	return
+}
+
 // IsExpression fails the test and returns nil by default
 func (b *BaseNode) IsExpression(t *testing.T) (te TestingExpression) {
 	t.Fatalf("Node is not an expression, is %v", b)
@@ -67,10 +73,35 @@ func (ce *CallExpression) IsCallExpression(t *testing.T) *CallExpression {
 	return ce
 }
 
+// NthArgument returns n-th argument of the call expression as TestingExpression
+func (ce *CallExpression) NthArgument(n int) TestingExpression {
+	return ce.Arguments[n-1].(TestingExpression)
+}
+
+// ReceiverExpression returns call expression's receiver as TestingExpression
+func (ce *CallExpression) ReceiverExpression() TestingExpression {
+	return ce.Receiver.(TestingExpression)
+}
+
 // ShouldHasMethodName
 func (ce *CallExpression) ShouldHasMethodName(t *testing.T, expectedName string) {
 	if ce.Method != expectedName {
 		t.Fatalf("expect call expression's method name to be '%s', got '%s'", expectedName, ce.Method)
+	}
+}
+
+/*
+Constant
+*/
+
+// IsConstant returns pointer of the current receiver constant
+func (c *Constant) IsConstant(t *testing.T) *Constant {
+	return c
+}
+
+func (c *Constant) ShouldHasName(t *testing.T, expectedName string) {
+	if c.Value != expectedName {
+		t.Fatalf("expect current identifier to be '%s', got '%s'", expectedName, c.Value)
 	}
 }
 
