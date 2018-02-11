@@ -15,10 +15,16 @@ type TestingStatement interface {
 	Statement
 	// Test Helpers
 	IsClassStmt(t *testing.T, className string) *ClassStatement
-	IsExpressionStmt(t *testing.T) *ExpressionStatement
+	IsExpression(t *testing.T) TestingExpression
 	IsModuleStmt(t *testing.T, className string) *ModuleStatement
 	IsReturnStmt(t *testing.T) *ReturnStatement
 	IsDefStmt(t *testing.T) *DefStatement
+}
+
+type TestingExpression interface {
+	Expression
+	// Test Helpers
+	IsYieldExpression(t *testing.T) *YieldExpression
 }
 
 type MethodBody []TestingStatement

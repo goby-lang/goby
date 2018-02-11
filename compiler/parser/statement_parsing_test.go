@@ -53,9 +53,9 @@ func TestClassStatement(t *testing.T) {
 	defStmt.ShouldHasNormalParam(t, "x")
 	defStmt.ShouldHasNormalParam(t, "y")
 
-	body := defStmt.MethodBody().NthStmt(1).IsExpressionStmt(t)
+	methodBodyExp := defStmt.MethodBody().NthStmt(1).IsExpression(t)
 
-	testInfixExpression(t, body.Expression, "x", "+", "y")
+	testInfixExpression(t, methodBodyExp, "x", "+", "y")
 }
 
 func TestModuleStatement(t *testing.T) {
@@ -80,9 +80,9 @@ func TestModuleStatement(t *testing.T) {
 	defStmt.ShouldHasNormalParam(t, "x")
 	defStmt.ShouldHasNormalParam(t, "y")
 
-	body := defStmt.MethodBody().NthStmt(1).IsExpressionStmt(t)
+	methodBodyExp := defStmt.MethodBody().NthStmt(1).IsExpression(t)
 
-	testInfixExpression(t, body.Expression, "x", "+", "y")
+	testInfixExpression(t, methodBodyExp, "x", "+", "y")
 }
 
 func TestClassStatementWithInheritance(t *testing.T) {
@@ -109,9 +109,9 @@ func TestClassStatementWithInheritance(t *testing.T) {
 	defStmt.ShouldHasNormalParam(t, "x")
 	defStmt.ShouldHasNormalParam(t, "y")
 
-	body := defStmt.MethodBody().NthStmt(1).IsExpressionStmt(t)
+	methodBodyExp := defStmt.MethodBody().NthStmt(1).IsExpression(t)
 
-	testInfixExpression(t, body.Expression, "x", "+", "y")
+	testInfixExpression(t, methodBodyExp, "x", "+", "y")
 }
 
 func TestWhileStatement(t *testing.T) {
