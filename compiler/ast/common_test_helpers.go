@@ -58,7 +58,6 @@ func (b *BaseNode) NameIs(n string) bool {
 	return false
 }
 
-
 /*
 interal helpers
 */

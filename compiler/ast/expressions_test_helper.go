@@ -4,7 +4,6 @@ package ast
 
 import "testing"
 
-
 // IsYieldExpression returns pointer of the receiver yield expression
 func (b *BaseNode) IsYieldExpression(t *testing.T) (ye *YieldExpression) {
 	t.Fatalf("Node is not an yield expression, is %v", b)

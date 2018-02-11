@@ -66,4 +66,3 @@ func TestDefStatementWithYield(t *testing.T) {
 	secondExp := stmt.MethodBody().NthStmt(2).IsExpression(t)
 	secondExp.IsYieldExpression(t)
 }
-
