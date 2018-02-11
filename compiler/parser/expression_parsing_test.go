@@ -473,97 +473,28 @@ func TestIfExpression(t *testing.T) {
 		t.Fatal(err.Message)
 	}
 
-	if len(program.Statements) != 1 {
-		t.Fatalf("expect program's statements to be 1. got=%d", len(program.Statements))
-	}
+	exp := program.FirstStmt().IsExpression(t).IsIfExpression(t)
+	exp.ShouldHasNumberOfConditionals(t, 3)
 
-	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	cs := exp.TestableConditionals()
 
-	if !ok {
-		t.Fatalf("expect program.Statements[0] to be *ast.ExpressionStatement. got=%T", program.Statements[0])
-	}
+	c0 := cs[0].IsConditionalExpression(t)
+	testInfixExpression(t, c0.Condition, "x", "<", "y")
+	consequence0 := c0.TestableConsequence()[0].IsExpression(t).IsInfixExpression(t)
+	testInfixExpression(t, consequence0, "x", "+", 5)
 
-	exp, ok := stmt.Expression.(*ast.IfExpression)
+	c1 := cs[1].IsConditionalExpression(t)
+	testInfixExpression(t, c1.Condition, "x", "==", "y")
+	consequence1 := c1.TestableConsequence()[0].IsExpression(t).IsInfixExpression(t)
+	testInfixExpression(t, consequence1, "y", "+", 5)
 
-	if !ok {
-		t.Fatalf("expect statement to be an IfExpression. got=%T", stmt.Expression)
-	}
+	c2 := cs[2].IsConditionalExpression(t)
+	testInfixExpression(t, c2.Condition, "x", ">", "y")
+	consequence2 := c2.TestableConsequence()[0].IsExpression(t).IsInfixExpression(t)
+	testInfixExpression(t, consequence2, "y", "-", 1)
 
-	cs := exp.Conditionals
-
-	if len(cs) != 3 {
-		t.Fatalf("expect the length of conditionals to be 3. got=%d", len(cs))
-	}
-
-	c0 := cs[0]
-
-	if !testInfixExpression(t, c0.Condition, "x", "<", "y") {
-		return
-	}
-
-	if len(c0.Consequence.Statements) != 1 {
-		t.Errorf("should be only one consequence. got=%d\n", len(c0.Consequence.Statements))
-	}
-
-	consequence0, ok := c0.Consequence.Statements[0].(*ast.ExpressionStatement)
-
-	if !ok {
-		t.Errorf("expect consequence should be an expression statement. got=%T", c0.Consequence.Statements[0])
-	}
-
-	if !testInfixExpression(t, consequence0.Expression, "x", "+", 5) {
-		return
-	}
-
-	c1 := cs[1]
-
-	if !testInfixExpression(t, c1.Condition, "x", "==", "y") {
-		return
-	}
-
-	if len(c1.Consequence.Statements) != 1 {
-		t.Errorf("should be only one consequence. got=%d\n", len(c1.Consequence.Statements))
-	}
-
-	consequence1, ok := c1.Consequence.Statements[0].(*ast.ExpressionStatement)
-
-	if !ok {
-		t.Errorf("expect consequence should be an expression statement. got=%T", c1.Consequence.Statements[0])
-	}
-
-	if !testInfixExpression(t, consequence1.Expression, "y", "+", 5) {
-		return
-	}
-
-	c2 := cs[2]
-
-	if !testInfixExpression(t, c2.Condition, "x", ">", "y") {
-		return
-	}
-
-	if len(c2.Consequence.Statements) != 1 {
-		t.Errorf("should be only one consequence. got=%d\n", len(c2.Consequence.Statements))
-	}
-
-	consequence2, ok := c2.Consequence.Statements[0].(*ast.ExpressionStatement)
-
-	if !ok {
-		t.Errorf("expect consequence should be an expression statement. got=%T", c2.Consequence.Statements[0])
-	}
-
-	if !testInfixExpression(t, consequence2.Expression, "y", "-", 1) {
-		return
-	}
-
-	alternative, ok := exp.Alternative.Statements[0].(*ast.ExpressionStatement)
-
-	if !ok {
-		t.Errorf("expect alternative should be an expression statement. got=%T", exp.Alternative.Statements[0])
-	}
-
-	if !testInfixExpression(t, alternative.Expression, "y", "+", 4) {
-		return
-	}
+	alternative := exp.TestableAlternative()
+	testInfixExpression(t, alternative[0].IsExpression(t), "y", "+", 4)
 }
 
 func TestInfixExpression(t *testing.T) {
