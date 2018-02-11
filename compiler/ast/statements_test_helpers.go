@@ -89,7 +89,7 @@ func (ds *DefStatement) IsDefStmt(t *testing.T) *DefStatement {
 }
 
 // MethodBody returns method body's statements and assert them as TestingStatements
-func (ds *DefStatement) MethodBody() MethodBody {
+func (ds *DefStatement) MethodBody() CodeBlock {
 	var tss []TestingStatement
 
 	for _, stmt := range ds.BlockStatement.Statements {
@@ -206,4 +206,29 @@ ExpressionStatement
 // IsExpressionStmt returns ExpressionStatement itself
 func (ts *ExpressionStatement) IsExpression(t *testing.T) TestingExpression {
 	return ts.Expression.(TestingExpression)
+}
+
+/*
+WhileStatement
+*/
+
+// Block returns while statement's code block as a set of TestingStatements
+func (we *WhileStatement) CodeBlock() CodeBlock {
+	var tss []TestingStatement
+
+	for _, stmt := range we.Body.Statements {
+		tss = append(tss, stmt.(TestingStatement))
+	}
+
+	return tss
+}
+
+// ConditionExpression returns while statement's condition as TestingExpression
+func (we *WhileStatement) ConditionExpression() TestingExpression {
+	return we.Condition.(TestingExpression)
+}
+
+// IsWhileStmt returns the pointer of current while statement
+func (ws *WhileStatement) IsWhileStmt(t *testing.T) *WhileStatement {
+	return ws
 }

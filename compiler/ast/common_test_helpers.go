@@ -47,9 +47,45 @@ func (b *BaseNode) IsDefStmt(t *testing.T) (rs *DefStatement) {
 	return
 }
 
+// IsWhileStmt fails the test and returns nil by default
+func (b *BaseNode) IsWhileStmt(t *testing.T) (ws *WhileStatement) {
+	t.Fatalf("Node is not a while statement, is %v", b)
+	return
+}
+
+// IsAssignExpression fails the test and returns nil by default
+func (b *BaseNode) IsAssignExpression(t *testing.T) (ae *AssignExpression) {
+	t.Fatalf("Node is not an assign expression, is %v", b)
+	return
+}
+
+// IsCallExpression fails the test and returns nil by default
+func (b *BaseNode) IsCallExpression(t *testing.T) (ce *CallExpression) {
+	t.Fatalf("Node is not a call expression, is %v", b)
+	return
+}
+
 // IsExpression fails the test and returns nil by default
 func (b *BaseNode) IsExpression(t *testing.T) (te TestingExpression) {
 	t.Fatalf("Node is not an expression, is %v", b)
+	return
+}
+
+// IsIdentifier fails the test and returns nil by default
+func (b *BaseNode) IsIdentifier(t *testing.T) (i *Identifier) {
+	t.Fatalf("Node is not an identifier, is %v", b)
+	return
+}
+
+// IsInfixExpression fails the test and returns nil by default
+func (b *BaseNode) IsInfixExpression(t *testing.T) (ie *InfixExpression) {
+	t.Fatalf("Node is not an infix expression, is %v", b)
+	return
+}
+
+// IsYieldExpression returns pointer of the receiver yield expression
+func (b *BaseNode) IsYieldExpression(t *testing.T) (ye *YieldExpression) {
+	t.Fatalf("Node is not an yield expression, is %v", b)
 	return
 }
 
