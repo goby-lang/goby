@@ -34,6 +34,7 @@ type TestingExpression interface {
 	IsHashExpression(t *testing.T) *HashExpression
 	IsIdentifier(t *testing.T) *Identifier
 	IsInfixExpression(t *testing.T) *InfixExpression
+	IsIntegerLiteral(t *testing.T) *IntegerLiteral
 	IsStringLiteral(t *testing.T) *StringLiteral
 	IsYieldExpression(t *testing.T) *YieldExpression
 }

@@ -162,8 +162,8 @@ func TestArrayExpression(t *testing.T) {
 
 		arrayExp := program.FirstStmt().IsExpression(t).IsArrayExpression(t)
 
-		for i, elem := range arrayExp.Elements {
-			testIntegerLiteral(t, elem, tt.expectedElements[i])
+		for i, elem := range arrayExp.TestableElements() {
+			elem.IsIntegerLiteral(t).ShouldEqualTo(t, tt.expectedElements[i])
 		}
 	}
 }
@@ -194,7 +194,7 @@ func TestArrayIndexExpression(t *testing.T) {
 
 		switch expected := tt.expectedIndex.(type) {
 		case int:
-			testIntegerLiteral(t, arrIndexing.NthArgument(1), expected)
+			arrIndexing.NthArgument(1).IsIntegerLiteral(t).ShouldEqualTo(t, expected)
 		case string:
 			arrIndexing.NthArgument(1).IsIdentifier(t).ShouldHasName(t, expected)
 		}
@@ -224,11 +224,12 @@ func TestArrayMultipleIndexExpression(t *testing.T) {
 		arrIndexing := program.FirstStmt().IsExpression(t).IsCallExpression(t)
 
 		for i, value := range tt.expectedIndex {
+			arg := arrIndexing.NthArgument(i + 1)
 			switch expected := value.(type) {
 			case int:
-				testIntegerLiteral(t, arrIndexing.Arguments[i], expected)
+				arg.IsIntegerLiteral(t).ShouldEqualTo(t, expected)
 			case string:
-				arrIndexing.NthArgument(i+1).IsIdentifier(t).ShouldHasName(t, expected)
+				arg.IsIdentifier(t).ShouldHasName(t, expected)
 			}
 		}
 	}
@@ -295,17 +296,8 @@ func TestIntegerLiteralExpression(t *testing.T) {
 		t.Fatal(err.Message)
 	}
 
-	if len(program.Statements) != 1 {
-		t.Fatalf("program has wrong number of statements. got=%d", len(program.Statements))
-	}
-
-	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-	if !ok {
-		t.Fatalf("first program statement is not ast.ExpressionStatement. got=%T", program.Statements[0])
-	}
-
-	literal, ok := stmt.Expression.(*ast.IntegerLiteral)
-	testIntegerLiteral(t, literal, 5)
+	integerLiteral := program.FirstStmt().IsExpression(t).IsIntegerLiteral(t)
+	integerLiteral.ShouldEqualTo(t, 5)
 }
 
 func TestIntegerLiteralExpressionFail(t *testing.T) {
