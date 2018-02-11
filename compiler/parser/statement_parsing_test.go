@@ -48,8 +48,9 @@ func TestClassStatement(t *testing.T) {
 		t.Fatal(err.Message)
 	}
 
-	stmt := program.FirstStmt().IsClassStmt(t, "Foo")
-	defStmt := stmt.HasMethod(t, "bar")
+	stmt := program.FirstStmt().IsClassStmt(t)
+	stmt.ShouldHasName("Foo")
+	defStmt := stmt.HasMethod("bar")
 	defStmt.ShouldHasNormalParam(t, "x")
 	defStmt.ShouldHasNormalParam(t, "y")
 
@@ -102,10 +103,11 @@ func TestClassStatementWithInheritance(t *testing.T) {
 		t.Fatal(err.Message)
 	}
 
-	classStmt := program.FirstStmt().IsClassStmt(t, "Foo")
-	classStmt.ShouldInherits(t, "Bar")
+	classStmt := program.FirstStmt().IsClassStmt(t)
+	classStmt.ShouldHasName("Foo")
+	classStmt.ShouldInherits("Bar")
 
-	defStmt := classStmt.HasMethod(t, "bar")
+	defStmt := classStmt.HasMethod("bar")
 	defStmt.ShouldHasNormalParam(t, "x")
 	defStmt.ShouldHasNormalParam(t, "y")
 

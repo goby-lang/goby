@@ -11,7 +11,7 @@ import (
 */
 
 // IsClassStmt fails the test and returns nil by default
-func (b *BaseNode) IsClassStmt(t *testing.T, className string) (cs *ClassStatement) {
+func (b *BaseNode) IsClassStmt(t *testing.T) (tcs *TestableClassStatement) {
 	t.Fatalf(nodeFailureMsgFormat, "class statement", b)
 	return
 }
@@ -44,31 +44,8 @@ func (b *BaseNode) IsWhileStmt(t *testing.T) (ws *WhileStatement) {
  ClassStatement
 */
 
-// IsClassStmt returns a pointer of the class statement
-func (cs *ClassStatement) IsClassStmt(t *testing.T, className string) *ClassStatement {
-	return cs
-}
-
-// ShouldInherits checks if current class statement inherits the target class
-func (cs *ClassStatement) ShouldInherits(t *testing.T, className string) {
-	if cs.SuperClassName != className {
-		t.Fatalf("Expect class %s to inherit class %s. got %s", cs.Name, className, cs.SuperClassName)
-	}
-}
-
-// HasMethod checks if current class statement has target method, and returns the method if it has
-func (cs *ClassStatement) HasMethod(t *testing.T, methodName string) (ds *DefStatement) {
-	for _, stmt := range cs.Body.Statements {
-		s, ok := stmt.(*DefStatement)
-
-		if ok && s.Name.Value == methodName {
-			ds = s
-			return
-		}
-	}
-
-	t.Fatalf("Can't find method '%s' in class '%s'", methodName, cs.Name)
-	return
+func (cs *ClassStatement) IsClassStmt(t *testing.T) *TestableClassStatement {
+	return &TestableClassStatement{t: t, ClassStatement: cs}
 }
 
 // NameIs returns the compare result of current class name and target class name
