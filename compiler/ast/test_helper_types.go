@@ -27,6 +27,7 @@ type TestingStatement interface {
 type TestingExpression interface {
 	Expression
 	// Test Helpers
+	IsArrayExpression(t *testing.T) *ArrayExpression
 	IsAssignExpression(t *testing.T) *AssignExpression
 	IsCallExpression(t *testing.T) *CallExpression
 	IsConstant(t *testing.T) *Constant
