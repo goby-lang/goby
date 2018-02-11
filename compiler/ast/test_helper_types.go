@@ -28,8 +28,10 @@ type TestingExpression interface {
 	IsAssignExpression(t *testing.T) *AssignExpression
 	IsCallExpression(t *testing.T) *CallExpression
 	IsConstant(t *testing.T) *Constant
+	IsHashExpression(t *testing.T) *HashExpression
 	IsIdentifier(t *testing.T) *Identifier
 	IsInfixExpression(t *testing.T) *InfixExpression
+	IsStringLiteral(t *testing.T) *StringLiteral
 	IsYieldExpression(t *testing.T) *YieldExpression
 }
 

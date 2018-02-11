@@ -32,6 +32,12 @@ func (b *BaseNode) IsExpression(t *testing.T) (te TestingExpression) {
 	return
 }
 
+// HashExpression fails the test and returns nil by default
+func (b *BaseNode) IsHashExpression(t *testing.T) (he *HashExpression) {
+	t.Fatalf("Node is not a hash expression, is %v", b)
+	return
+}
+
 // IsIdentifier fails the test and returns nil by default
 func (b *BaseNode) IsIdentifier(t *testing.T) (i *Identifier) {
 	t.Fatalf("Node is not an identifier, is %v", b)
@@ -41,6 +47,12 @@ func (b *BaseNode) IsIdentifier(t *testing.T) (i *Identifier) {
 // IsInfixExpression fails the test and returns nil by default
 func (b *BaseNode) IsInfixExpression(t *testing.T) (ie *InfixExpression) {
 	t.Fatalf("Node is not an infix expression, is %v", b)
+	return
+}
+
+// IsStringLiteral fails the test and returns nil by default
+func (b *BaseNode) IsStringLiteral(t *testing.T) (sl *StringLiteral) {
+	t.Fatalf("Node is not a string literal, is %v", b)
 	return
 }
 
@@ -106,6 +118,15 @@ func (c *Constant) ShouldHasName(t *testing.T, expectedName string) {
 }
 
 /*
+HashExpression
+*/
+
+// HashExpression fails the test and returns nil by default
+func (he *HashExpression) IsHashExpression(t *testing.T) *HashExpression {
+	return he
+}
+
+/*
 Identifier
 */
 
@@ -153,6 +174,15 @@ func (ie *InfixExpression) LeftExpression() TestingExpression {
 // RightExpression returns infix expression's right expression as TestingExpression
 func (ie *InfixExpression) RightExpression() TestingExpression {
 	return ie.Right.(TestingExpression)
+}
+
+/*
+StringLiteral
+*/
+
+// IsStringLiteral returns pointer of the receiver string literal
+func (sl *StringLiteral) IsStringLiteral(t *testing.T) *StringLiteral {
+	return sl
 }
 
 /*
