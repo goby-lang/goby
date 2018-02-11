@@ -23,7 +23,7 @@ func (b *BaseNode) IsModuleStmt(t *testing.T, moduleName string) (cs *ModuleStat
 }
 
 // IsReturnStmt fails the test and returns nil by default
-func (b *BaseNode) IsReturnStmt(t *testing.T) (rs *ReturnStatement) {
+func (b *BaseNode) IsReturnStmt(t *testing.T) (trs *TestableReturnStatement) {
 	t.Fatalf(nodeFailureMsgFormat, "return statement", b)
 	return
 }
@@ -216,21 +216,8 @@ func (ds *DefStatement) ShouldHasSplatParam(t *testing.T, paramName string) {
 ReturnStatement
 */
 
-func (rs *ReturnStatement) IsReturnStmt(t *testing.T) (r *ReturnStatement) {
-	return rs
-}
-
-func (rs *ReturnStatement) ShouldHasValue(t *testing.T, value interface{}) {
-	switch v := value.(type) {
-	case int:
-		compareInt(t, rs.ReturnValue, v)
-	case string:
-		compareString(t, rs.ReturnValue, v)
-	case bool:
-		compareBool(t, rs.ReturnValue, v)
-	case TestingIdentifier:
-		compareIdentifier(t, rs.ReturnValue, v)
-	}
+func (rs *ReturnStatement) IsReturnStmt(t *testing.T) (trs *TestableReturnStatement) {
+	return &TestableReturnStatement{t: t, ReturnStatement: rs}
 }
 
 /*
