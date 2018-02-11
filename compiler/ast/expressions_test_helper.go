@@ -2,6 +2,15 @@
 
 package ast
 
+import "testing"
+
+
+// IsYieldExpression returns pointer of the receiver yield expression
+func (b *BaseNode) IsYieldExpression(t *testing.T) (ye *YieldExpression) {
+	t.Fatalf("Node is not an yield expression, is %v", b)
+	return
+}
+
 /*
 AssignExpression
 */
@@ -22,4 +31,13 @@ func (i *Identifier) NameIs(n string) bool {
 	}
 
 	return false
+}
+
+/*
+YieldExpression
+*/
+
+// IsYieldExpression returns pointer of the receiver yield expression
+func (ye *YieldExpression) IsYieldExpression(t *testing.T) *YieldExpression {
+	return ye
 }
