@@ -56,6 +56,12 @@ func (b *BaseNode) IsInfixExpression(t *testing.T) (ie *InfixExpression) {
 	return
 }
 
+// IsIntegerLiteral fails the test and returns nil by default
+func (b *BaseNode) IsIntegerLiteral(t *testing.T) (il *IntegerLiteral) {
+	t.Fatalf(nodeFailureMsgFormat, "integer literal", b)
+	return
+}
+
 // IsStringLiteral fails the test and returns nil by default
 func (b *BaseNode) IsStringLiteral(t *testing.T) (sl *StringLiteral) {
 	t.Fatalf(nodeFailureMsgFormat, "string literal", b)
@@ -75,6 +81,14 @@ ArrayExpression
 // IsArrayExpression returns pointer of the receiver array expression
 func (ae *ArrayExpression) IsArrayExpression(t *testing.T) *ArrayExpression {
 	return ae
+}
+
+func (ae *ArrayExpression) TestableElements() (tes []TestingExpression) {
+	for _, elem := range ae.Elements {
+		tes = append(tes, elem.(TestingExpression))
+	}
+
+	return
 }
 
 /*
@@ -189,6 +203,21 @@ func (ie *InfixExpression) LeftExpression() TestingExpression {
 // RightExpression returns infix expression's right expression as TestingExpression
 func (ie *InfixExpression) RightExpression() TestingExpression {
 	return ie.Right.(TestingExpression)
+}
+
+/*
+IntegerLiteral
+*/
+
+// IsIntegerLiteral returns pointer of the receiver string literal
+func (il *IntegerLiteral) IsIntegerLiteral(t *testing.T) *IntegerLiteral {
+	return il
+}
+
+func (il *IntegerLiteral) ShouldEqualTo(t *testing.T, expectedInt int) {
+	if il.Value != expectedInt {
+		t.Fatalf("Expect integer literal to be %d, got %d", expectedInt, il.Value)
+	}
 }
 
 /*
