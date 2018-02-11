@@ -2,7 +2,9 @@
 
 package ast
 
-import "testing"
+import (
+	"testing"
+)
 
 /*
  BaseNode
@@ -26,6 +28,12 @@ func (b *BaseNode) IsCallExpression(t *testing.T) (ce *CallExpression) {
 	return
 }
 
+// IsConditionalExpression fails the test and returns nil by default
+func (b *BaseNode) IsConditionalExpression(t *testing.T) (ce *ConditionalExpression) {
+	t.Fatalf(nodeFailureMsgFormat, "conditional expression", b)
+	return
+}
+
 // IsConstant fails the test and returns nil by default
 func (b *BaseNode) IsConstant(t *testing.T) (c *Constant) {
 	t.Fatalf(nodeFailureMsgFormat, "constant", b)
@@ -34,6 +42,7 @@ func (b *BaseNode) IsConstant(t *testing.T) (c *Constant) {
 
 // IsExpression fails the test and returns nil by default
 func (b *BaseNode) IsExpression(t *testing.T) (te TestingExpression) {
+	t.Helper()
 	t.Fatalf(nodeFailureMsgFormat, "expression", b)
 	return
 }
@@ -47,6 +56,12 @@ func (b *BaseNode) IsHashExpression(t *testing.T) (he *HashExpression) {
 // IsIdentifier fails the test and returns nil by default
 func (b *BaseNode) IsIdentifier(t *testing.T) (i *Identifier) {
 	t.Fatalf(nodeFailureMsgFormat, "identifier", b)
+	return
+}
+
+// IsIfExpression fails the test and returns nil by default
+func (b *BaseNode) IsIfExpression(t *testing.T) (i *IfExpression) {
+	t.Fatalf(nodeFailureMsgFormat, "if expression", b)
 	return
 }
 
@@ -132,6 +147,23 @@ func (ce *CallExpression) ShouldHasMethodName(t *testing.T, expectedName string)
 }
 
 /*
+ConditionalExpression
+*/
+
+func (ce *ConditionalExpression) IsConditionalExpression(t *testing.T) *ConditionalExpression {
+	return ce
+}
+
+func (ce *ConditionalExpression) TestableConsequence() CodeBlock {
+	var tss []TestingStatement
+	for _, stmt := range ce.Consequence.Statements {
+		tss = append(tss, stmt.(TestingStatement))
+	}
+
+	return tss
+}
+
+/*
 Constant
 */
 
@@ -150,7 +182,7 @@ func (c *Constant) ShouldHasName(t *testing.T, expectedName string) {
 HashExpression
 */
 
-// HashExpression fails the test and returns nil by default
+// IsHashExpression returns pointer of the receiver hash expression
 func (he *HashExpression) IsHashExpression(t *testing.T) *HashExpression {
 	return he
 }
@@ -177,6 +209,38 @@ func (i *Identifier) NameIs(n string) bool {
 	}
 
 	return false
+}
+
+/*
+IfExpression
+*/
+
+// IsIfExpression returns pointer of the receiver if expression
+func (ie *IfExpression) IsIfExpression(t *testing.T) *IfExpression {
+	return ie
+}
+
+func (ie *IfExpression) ShouldHasNumberOfConditionals(t *testing.T, n int) {
+	if len(ie.Conditionals) != n {
+		t.Fatalf("Expect if expression to have %d conditionals, got %d", n, len(ie.Conditionals))
+	}
+}
+
+func (ie *IfExpression) TestableConditionals() (tes []TestingExpression) {
+	for _, cond := range ie.Conditionals {
+		tes = append(tes, cond)
+	}
+
+	return
+}
+
+func (ie *IfExpression) TestableAlternative() CodeBlock {
+	var tss []TestingStatement
+	for _, stmt := range ie.Alternative.Statements {
+		tss = append(tss, stmt.(TestingStatement))
+	}
+
+	return tss
 }
 
 /*

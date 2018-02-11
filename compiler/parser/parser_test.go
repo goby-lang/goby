@@ -303,6 +303,7 @@ func testInfixExpression(
 	operator string,
 	right interface{},
 ) bool {
+	t.Helper()
 	opExp, ok := exp.(*ast.InfixExpression)
 	if !ok {
 		t.Errorf("exp is not %T. got=%T", exp, exp)
