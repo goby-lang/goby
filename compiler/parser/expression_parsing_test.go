@@ -196,22 +196,17 @@ func TestCallExpression(t *testing.T) {
 		t.Fatal(err.Message)
 	}
 
-	stmt := program.Statements[0].(*ast.ExpressionStatement)
-	callExpression := stmt.Expression.(*ast.CallExpression)
-
-	if !testIdentifier(t, callExpression.Receiver, "p") {
-		return
-	}
-
-	testMethodName(t, callExpression, "add")
+	callExpression := program.FirstStmt().IsExpression(t).IsCallExpression(t)
+	callExpression.ReceiverExpression().IsIdentifier(t).ShouldHasName(t, "p")
+	callExpression.ShouldHasMethodName(t, "add")
 
 	if len(callExpression.Arguments) != 3 {
 		t.Fatalf("expect %d arguments. got=%d", 3, len(callExpression.Arguments))
 	}
 
-	testIntegerLiteral(t, callExpression.Arguments[0], 1)
-	testInfixExpression(t, callExpression.Arguments[1], 2, "*", 3)
-	testInfixExpression(t, callExpression.Arguments[2], 4, "+", 5)
+	callExpression.NthArgument(1).IsIntegerLiteral(t).ShouldEqualTo(t, 1)
+	testInfixExpression(t, callExpression.NthArgument(2), 2, "*", 3)
+	testInfixExpression(t, callExpression.NthArgument(3), 4, "+", 5)
 }
 
 func TestCallExpressionWithBlock(t *testing.T) {
@@ -228,20 +223,14 @@ func TestCallExpressionWithBlock(t *testing.T) {
 		t.Fatal(err.Message)
 	}
 
-	stmt := program.Statements[0].(*ast.ExpressionStatement)
-	callExpression := stmt.Expression.(*ast.CallExpression)
-
-	receiver := callExpression.Receiver
-	if _, ok := receiver.(*ast.ArrayExpression); !ok {
-		t.Fatalf("Expect receiver to be an Array. got=%T", receiver)
-	}
-
-	testMethodName(t, callExpression, "each")
-	testIdentifier(t, callExpression.BlockArguments[0], "i")
+	callExpression := program.FirstStmt().IsExpression(t).IsCallExpression(t)
+	callExpression.ReceiverExpression().IsArrayExpression(t)
+	callExpression.ShouldHasMethodName(t, "each")
+	callExpression.BlockArguments[0].IsIdentifier(t).ShouldHasName(t, "i")
 
 	block := callExpression.Block
-	exp := block.Statements[0].(*ast.ExpressionStatement).Expression
-	testMethodName(t, exp, "puts")
+	exp := block.Statements[0].(ast.TestingStatement).IsExpression(t)
+	exp.IsCallExpression(t).ShouldHasMethodName(t, "puts")
 }
 
 func TestCaseExpression(t *testing.T) {
