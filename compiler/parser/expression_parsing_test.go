@@ -147,7 +147,7 @@ func TestAssignInfixExpressionWithLiteralValue(t *testing.T) {
 			t.Fatal("ParseProgram() returned nil")
 		}
 
-		testAssignExpression(t, program.Statements[0].(*ast.ExpressionStatement).Expression, tt.expectedIdentifier, tt.variableMatchFunc, tt.expectedValue)
+		testAssignExpression(t, program.FirstStmt().IsExpression(t).IsAssignExpression(t), tt.expectedIdentifier, tt.variableMatchFunc, tt.expectedValue)
 	}
 }
 
@@ -177,25 +177,9 @@ func TestAssignIndexExpressionWithVariableValue(t *testing.T) {
 			t.Fatal(err.Message)
 		}
 
-		if program == nil {
-			t.Fatal("ParseProgram() returned nil")
-		}
-
-		stmt := program.Statements[0].(*ast.ExpressionStatement)
-		exp := stmt.Expression
-		infixExp, ok := exp.(*ast.AssignExpression)
-
-		if !ok {
-			t.Fatalf("exp is not AssignExpression. got=%T", exp)
-		}
-
-		if !tt.variableMatchFunc(t, infixExp.Variables[0], tt.expectedIdentifier) {
-			return
-		}
-
-		if !tt.valueMatchFunc(t, infixExp.Value, tt.expectedValue) {
-			return
-		}
+		assignExp := program.FirstStmt().IsExpression(t).IsAssignExpression(t)
+		tt.variableMatchFunc(t, assignExp.Variables[0], tt.expectedIdentifier)
+		tt.valueMatchFunc(t, assignExp.Value, tt.expectedValue)
 	}
 }
 
