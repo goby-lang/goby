@@ -7,6 +7,40 @@ import (
 )
 
 /*
+ BaseNode
+*/
+
+// IsClassStmt fails the test and returns nil by default
+func (b *BaseNode) IsClassStmt(t *testing.T, className string) (cs *ClassStatement) {
+	t.Fatalf("Node is not a class statement, is %v", b)
+	return
+}
+
+// IsModuleStmt fails the test and returns nil by default
+func (b *BaseNode) IsModuleStmt(t *testing.T, moduleName string) (cs *ModuleStatement) {
+	t.Fatalf("Node is not a module statement, is %v", b)
+	return
+}
+
+// IsReturnStmt fails the test and returns nil by default
+func (b *BaseNode) IsReturnStmt(t *testing.T) (rs *ReturnStatement) {
+	t.Fatalf("Node is not a return statement, is %v", b)
+	return
+}
+
+// IsDefStmt fails the test and returns nil by default
+func (b *BaseNode) IsDefStmt(t *testing.T) (rs *DefStatement) {
+	t.Fatalf("Node is not a method definition, is %v", b)
+	return
+}
+
+// IsWhileStmt fails the test and returns nil by default
+func (b *BaseNode) IsWhileStmt(t *testing.T) (ws *WhileStatement) {
+	t.Fatalf("Node is not a while statement, is %v", b)
+	return
+}
+
+/*
  ClassStatement
 */
 
@@ -89,7 +123,7 @@ func (ds *DefStatement) IsDefStmt(t *testing.T) *DefStatement {
 }
 
 // MethodBody returns method body's statements and assert them as TestingStatements
-func (ds *DefStatement) MethodBody() MethodBody {
+func (ds *DefStatement) MethodBody() CodeBlock {
 	var tss []TestingStatement
 
 	for _, stmt := range ds.BlockStatement.Statements {
@@ -206,4 +240,29 @@ ExpressionStatement
 // IsExpressionStmt returns ExpressionStatement itself
 func (ts *ExpressionStatement) IsExpression(t *testing.T) TestingExpression {
 	return ts.Expression.(TestingExpression)
+}
+
+/*
+WhileStatement
+*/
+
+// Block returns while statement's code block as a set of TestingStatements
+func (we *WhileStatement) CodeBlock() CodeBlock {
+	var tss []TestingStatement
+
+	for _, stmt := range we.Body.Statements {
+		tss = append(tss, stmt.(TestingStatement))
+	}
+
+	return tss
+}
+
+// ConditionExpression returns while statement's condition as TestingExpression
+func (we *WhileStatement) ConditionExpression() TestingExpression {
+	return we.Condition.(TestingExpression)
+}
+
+// IsWhileStmt returns the pointer of current while statement
+func (ws *WhileStatement) IsWhileStmt(t *testing.T) *WhileStatement {
+	return ws
 }

@@ -130,37 +130,27 @@ func TestWhileStatement(t *testing.T) {
 		t.Fatal(err.Message)
 	}
 
-	whileStatement := program.Statements[0].(*ast.WhileStatement)
+	whileStatement := program.FirstStmt().IsWhileStmt(t)
 
-	infix := whileStatement.Condition.(*ast.InfixExpression)
-
-	testIdentifier(t, infix.Left, "i")
-
-	if infix.Operator != "<" {
-		t.Fatalf("Expect condition's infix operator to be '<'. got=%s", infix.Operator)
-	}
-
-	callExp, ok := infix.Right.(*ast.CallExpression)
-
-	if !ok {
-		t.Fatalf("Expect infix's right to be a CallExpression. got=%T", infix.Right)
-	}
-
-	testMethodName(t, callExp, "length")
+	infix := whileStatement.ConditionExpression().IsInfixExpression(t)
+	infix.LeftExpression().IsIdentifier(t).ShouldHasName(t, "i")
+	infix.ShouldHasOperator(t, "<")
+	callExp := infix.RightExpression().IsCallExpression(t)
+	callExp.ShouldHasMethodName(t, "length")
 
 	if callExp.Block != nil {
 		t.Fatalf("Condition expression shouldn't have block")
 	}
 
 	// Test block
-	block := whileStatement.Body
-	firstStmt := block.Statements[0].(*ast.ExpressionStatement)
-	firstCall := firstStmt.Expression.(*ast.CallExpression)
-	testMethodName(t, firstCall, "puts")
+	block := whileStatement.CodeBlock()
+	firstExp := block.NthStmt(1).IsExpression(t)
+	firstCall := firstExp.IsCallExpression(t)
+	firstCall.ShouldHasMethodName(t, "puts")
 	testIdentifier(t, firstCall.Arguments[0], "i")
 
-	secondStmt := block.Statements[1].(*ast.ExpressionStatement)
-	secondCall := secondStmt.Expression.(*ast.AssignExpression)
+	secondExp := block.NthStmt(2).IsExpression(t)
+	secondCall := secondExp.IsAssignExpression(t)
 	testIdentifier(t, secondCall.Variables[0], "i")
 }
 

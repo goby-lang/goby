@@ -20,26 +20,22 @@ func TestMethodChainExpression(t *testing.T) {
 		t.Fatal(err.Message)
 	}
 
-	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	exp := program.FirstStmt().IsExpression(t)
+	firstCall := exp.IsCallExpression(t)
+	firstCall.ShouldHasMethodName(t, "add")
+	firstCall.NthArgument(1).IsIdentifier(t).ShouldHasName(t, "d")
 
-	firstCall := stmt.Expression.(*ast.CallExpression)
+	secondCall := firstCall.ReceiverExpression().IsCallExpression(t)
+	secondCall.ShouldHasMethodName(t, "bar")
+	secondCall.NthArgument(1).IsIdentifier(t).ShouldHasName(t, "c")
 
-	testMethodName(t, firstCall, "add")
-	testIdentifier(t, firstCall.Arguments[0], "d")
+	thirdCall := secondCall.ReceiverExpression().IsCallExpression(t)
+	thirdCall.ShouldHasMethodName(t, "new")
+	thirdCall.NthArgument(1).IsIdentifier(t).ShouldHasName(t, "a")
+	thirdCall.NthArgument(2).IsIdentifier(t).ShouldHasName(t, "b")
 
-	secondCall := firstCall.Receiver.(*ast.CallExpression)
-
-	testMethodName(t, secondCall, "bar")
-	testIdentifier(t, secondCall.Arguments[0], "c")
-
-	thirdCall := secondCall.Receiver.(*ast.CallExpression)
-
-	testMethodName(t, thirdCall, "new")
-	testIdentifier(t, thirdCall.Arguments[0], "a")
-	testIdentifier(t, thirdCall.Arguments[1], "b")
-
-	originalReceiver := thirdCall.Receiver.(*ast.Constant)
-	testConstant(t, originalReceiver, "Person")
+	originalReceiver := thirdCall.ReceiverExpression().IsConstant(t)
+	originalReceiver.ShouldHasName(t, "Person")
 }
 
 func TestOperatorPrecedenceParsing(t *testing.T) {

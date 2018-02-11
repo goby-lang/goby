@@ -40,32 +40,10 @@ func TestNamespaceConstant(t *testing.T) {
 		t.Fatal(err.Message)
 	}
 
-	stmt := program.Statements[0].(*ast.ExpressionStatement)
-	exp := stmt.Expression.(*ast.InfixExpression)
-
-	if exp.Operator != "::" {
-		t.Fatalf("Expect infix operator to be resolution operator. got=%s", exp.Operator)
-	}
-
-	namespace, ok := exp.Left.(*ast.Constant)
-
-	if !ok {
-		t.Fatalf("Expect left side of resolution operator is a constant. got=%T", exp.Left)
-
-		if namespace.Value != "Foo" {
-			t.Fatalf("Expect namespace to be %s. got=%s", "Foo", namespace.Value)
-		}
-	}
-
-	constant, ok := exp.Right.(*ast.Constant)
-
-	if !ok {
-		t.Fatalf("Expect right side of resolution operator is a constant. got=%T", exp.Right)
-
-		if namespace.Value != "Bar" {
-			t.Fatalf("Expect namespace to be %s. got=%s", "Bar", constant.Value)
-		}
-	}
+	infixExp := program.FirstStmt().IsExpression(t).IsInfixExpression(t)
+	infixExp.ShouldHasOperator(t, "::")
+	infixExp.LeftExpression().IsConstant(t).ShouldHasName(t, "Foo")
+	infixExp.RightExpression().IsConstant(t).ShouldHasName(t, "Bar")
 }
 
 func TestHashExpression(t *testing.T) {
@@ -98,16 +76,7 @@ func TestHashExpression(t *testing.T) {
 			t.Fatal(err.Message)
 		}
 
-		if len(program.Statements) != 1 {
-			t.Fatalf("program has not enough statments. expect 1, got=%d", len(program.Statements))
-		}
-		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-
-		if !ok {
-			t.Fatalf("program.Statments[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
-		}
-
-		hash, ok := stmt.Expression.(*ast.HashExpression)
+		hash := program.FirstStmt().IsExpression(t).IsHashExpression(t)
 
 		for key := range hash.Data {
 			testIntegerLiteral(t, hash.Data[key], tt.expectedElements[key])
@@ -159,27 +128,14 @@ func TestHashAccessExpression(t *testing.T) {
 			t.Fatal(err.Message)
 		}
 
-		if len(program.Statements) != 1 {
-			t.Fatalf("program has not enough statments. expect 1, got=%d", len(program.Statements))
-		}
-		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-
-		if !ok {
-			t.Fatalf("program.Statments[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
-		}
-
-		hashAccess, ok := stmt.Expression.(*ast.CallExpression)
-
-		_, ok = hashAccess.Receiver.(*ast.HashExpression)
-
-		if !ok {
-			t.Fatalf("expect method call's receiver to be a hash. got=%T", hashAccess.Receiver)
-		}
+		callExp := program.FirstStmt().IsExpression(t).IsCallExpression(t)
+		callExp.ReceiverExpression().IsHashExpression(t)
+		callExp.NthArgument(1)
 
 		if i < 4 {
-			testStringLiteral(t, hashAccess.Arguments[0], tt.expected)
+			callExp.NthArgument(1).IsStringLiteral(t)
 		} else {
-			testIdentifier(t, hashAccess.Arguments[0], tt.expected)
+			callExp.NthArgument(1).IsIdentifier(t).ShouldHasName(t, "var")
 		}
 
 	}
