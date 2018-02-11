@@ -6,138 +6,23 @@ import (
 	"testing"
 )
 
-func TestNilExpression(t *testing.T) {
-	input := `
-	nil
-	`
-
-	l := lexer.New(input)
-	p := New(l)
-	program, err := p.ParseProgram()
-
-	if err != nil {
-		t.Fatal(err.Message)
-	}
-
-	stmt := program.Statements[0].(*ast.ExpressionStatement)
-	_, ok := stmt.Expression.(*ast.NilExpression)
-
-	if !ok {
-		t.Fatalf("Expect expression to be NilExpression. got=%T", stmt.Expression)
-	}
-}
-
-func TestNamespaceConstant(t *testing.T) {
-	input := `
-	Foo::Bar
-	`
-
-	l := lexer.New(input)
-	p := New(l)
-	program, err := p.ParseProgram()
-
-	if err != nil {
-		t.Fatal(err.Message)
-	}
-
-	infixExp := program.FirstStmt().IsExpression(t).IsInfixExpression(t)
-	infixExp.ShouldHasOperator(t, "::")
-	infixExp.LeftExpression().IsConstant(t).ShouldHasName(t, "Foo")
-	infixExp.RightExpression().IsConstant(t).ShouldHasName(t, "Bar")
-}
-
-func TestHashExpression(t *testing.T) {
-	tests := []struct {
-		input            string
-		expectedElements map[string]int
-	}{
-		{`{}`, map[string]int{}},
-		{
-			`{ test: 123 }`,
-			map[string]int{
-				"test": 123,
-			},
-		},
-		{
-
-			`{ another_string: 456 }`,
-			map[string]int{
-				"another_string": 456,
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		l := lexer.New(tt.input)
-		p := New(l)
-		program, err := p.ParseProgram()
-
-		if err != nil {
-			t.Fatal(err.Message)
-		}
-
-		hash := program.FirstStmt().IsExpression(t).IsHashExpression(t)
-
-		for key := range hash.Data {
-			testIntegerLiteral(t, hash.Data[key], tt.expectedElements[key])
-		}
-	}
-}
-
-func TestHashExpressionFail(t *testing.T) {
+func TestArgumentPairExpressionFail(t *testing.T) {
 	tests := []struct {
 		input string
 		error string
 	}{
-		{`{ 1 }`, `could not parse "1" as hash key. Line: 0`},
-		{`{ "a" }`, `could not parse "a" as hash key. Line: 0`},
-		{`{ nil }`, `could not parse "nil" as hash key. Line: 0`},
+		{`foo: "bar"`, `unexpected : Line: 0`},
 	}
 
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
 		p := New(l)
 		_, err := p.ParseProgram()
-
 		if err.Message != tt.error {
 			t.Fatal("Expected hash literal parsing error")
 			t.Fatal("expect: ", tt.error)
 			t.Fatal("actual: ", err.Message)
 		}
-	}
-}
-
-func TestHashAccessExpression(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected string
-	}{
-		{`{}["123"]`, "123"},
-		{`{ test: 1 }["test"]`, "test"},
-		{`{ foo: "123" }["foo"]`, "foo"},
-		{`{ bar: true }["bar"]`, "bar"},
-		{`{ bar: true }[var]`, "var"},
-	}
-
-	for i, tt := range tests {
-		l := lexer.New(tt.input)
-		p := New(l)
-		program, err := p.ParseProgram()
-
-		if err != nil {
-			t.Fatal(err.Message)
-		}
-
-		callExp := program.FirstStmt().IsExpression(t).IsCallExpression(t)
-		callExp.ReceiverExpression().IsHashExpression(t)
-		callExp.NthArgument(1)
-
-		if i < 4 {
-			callExp.NthArgument(1).IsStringLiteral(t)
-		} else {
-			callExp.NthArgument(1).IsIdentifier(t).ShouldHasName(t, "var")
-		}
-
 	}
 }
 
@@ -235,8 +120,89 @@ func TestArrayMultipleIndexExpression(t *testing.T) {
 	}
 }
 
-func TestIdentifierExpression(t *testing.T) {
-	input := `foobar;`
+func TestAssignInfixExpressionWithLiteralValue(t *testing.T) {
+	tests := []struct {
+		input              string
+		expectedIdentifier string
+		expectedValue      interface{}
+		variableMatchFunc  func(*testing.T, ast.Expression, string) bool
+	}{
+		{"x = 5;", "x", 5, testIdentifier},
+		{"y = true;", "y", true, testIdentifier},
+
+		{"Foo = '123'", "Foo", "123", testConstant},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+
+		program, err := p.ParseProgram()
+
+		if err != nil {
+			t.Fatal(err.Message)
+		}
+
+		if program == nil {
+			t.Fatal("ParseProgram() returned nil")
+		}
+
+		testAssignExpression(t, program.Statements[0].(*ast.ExpressionStatement).Expression, tt.expectedIdentifier, tt.variableMatchFunc, tt.expectedValue)
+	}
+}
+
+func TestAssignIndexExpressionWithVariableValue(t *testing.T) {
+	tests := []struct {
+		input              string
+		expectedIdentifier string
+		expectedValue      string
+		variableMatchFunc  func(*testing.T, ast.Expression, string) bool
+		valueMatchFunc     func(*testing.T, ast.Expression, string) bool
+	}{
+		{"x = y", "x", "y", testIdentifier, testIdentifier},
+		{"@foo = y", "@foo", "y", testInstanceVariable, testIdentifier},
+		{"y = @foo", "y", "@foo", testIdentifier, testInstanceVariable},
+		{"Foo = @bar", "Foo", "@bar", testConstant, testInstanceVariable},
+		{"@bar = Foo", "@bar", "Foo", testInstanceVariable, testConstant},
+		{"@bar = @foo", "@bar", "@foo", testInstanceVariable, testInstanceVariable},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+
+		program, err := p.ParseProgram()
+
+		if err != nil {
+			t.Fatal(err.Message)
+		}
+
+		if program == nil {
+			t.Fatal("ParseProgram() returned nil")
+		}
+
+		stmt := program.Statements[0].(*ast.ExpressionStatement)
+		exp := stmt.Expression
+		infixExp, ok := exp.(*ast.AssignExpression)
+
+		if !ok {
+			t.Fatalf("exp is not AssignExpression. got=%T", exp)
+		}
+
+		if !tt.variableMatchFunc(t, infixExp.Variables[0], tt.expectedIdentifier) {
+			return
+		}
+
+		if !tt.valueMatchFunc(t, infixExp.Value, tt.expectedValue) {
+			return
+		}
+	}
+}
+
+func TestCallExpression(t *testing.T) {
+	input := `
+		p.add(1, 2 * 3, 4 + 5)
+	`
 
 	l := lexer.New(input)
 	p := New(l)
@@ -246,9 +212,145 @@ func TestIdentifierExpression(t *testing.T) {
 		t.Fatal(err.Message)
 	}
 
-	ident := program.FirstStmt().IsExpression(t).IsIdentifier(t)
-	ident.ShouldHasName(t, "foobar")
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	callExpression := stmt.Expression.(*ast.CallExpression)
 
+	if !testIdentifier(t, callExpression.Receiver, "p") {
+		return
+	}
+
+	testMethodName(t, callExpression, "add")
+
+	if len(callExpression.Arguments) != 3 {
+		t.Fatalf("expect %d arguments. got=%d", 3, len(callExpression.Arguments))
+	}
+
+	testIntegerLiteral(t, callExpression.Arguments[0], 1)
+	testInfixExpression(t, callExpression.Arguments[1], 2, "*", 3)
+	testInfixExpression(t, callExpression.Arguments[2], 4, "+", 5)
+}
+
+func TestCallExpressionWithBlock(t *testing.T) {
+	input := `
+	[1, 2, 3, 4].each do |i|
+	  puts(i)
+	end
+	`
+	l := lexer.New(input)
+	p := New(l)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatal(err.Message)
+	}
+
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	callExpression := stmt.Expression.(*ast.CallExpression)
+
+	receiver := callExpression.Receiver
+	if _, ok := receiver.(*ast.ArrayExpression); !ok {
+		t.Fatalf("Expect receiver to be an Array. got=%T", receiver)
+	}
+
+	testMethodName(t, callExpression, "each")
+	testIdentifier(t, callExpression.BlockArguments[0], "i")
+
+	block := callExpression.Block
+	exp := block.Statements[0].(*ast.ExpressionStatement).Expression
+	testMethodName(t, exp, "puts")
+}
+
+func TestCaseExpression(t *testing.T) {
+	input := `
+	case 2
+	when 0
+	  0 + 0
+	when 1
+	  1 + 1
+	else
+	  2 + 2
+	end
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatal(err.Message)
+	}
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("expect program's statements to be 1. got=%d", len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+
+	if !ok {
+		t.Fatalf("expect program.Statements[0] to be *ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	exp, ok := stmt.Expression.(*ast.IfExpression)
+
+	if !ok {
+		t.Fatalf("expect statement to be an CaseExpression. got=%T", stmt.Expression)
+	}
+
+	cs := exp.Conditionals
+
+	if len(cs) != 2 {
+		t.Fatalf("expect the length of conditionals to be 2. got=%d", len(cs))
+	}
+
+	c0 := cs[0]
+
+	if !testInfixExpression(t, c0.Condition, 2, "==", 0) {
+		return
+	}
+
+	if len(c0.Consequence.Statements) != 1 {
+		t.Errorf("should be only one consequence. got=%d\n", len(c0.Consequence.Statements))
+	}
+
+	consequence0, ok := c0.Consequence.Statements[0].(*ast.ExpressionStatement)
+
+	if !ok {
+		t.Errorf("expect consequence should be an expression statement. got=%T", c0.Consequence.Statements[0])
+	}
+
+	if !testInfixExpression(t, consequence0.Expression, 0, "+", 0) {
+		return
+	}
+
+	c1 := cs[1]
+
+	if !testInfixExpression(t, c1.Condition, 2, "==", 1) {
+		return
+	}
+
+	if len(c1.Consequence.Statements) != 1 {
+		t.Errorf("should be only one consequence. got=%d\n", len(c1.Consequence.Statements))
+	}
+
+	consequence1, ok := c1.Consequence.Statements[0].(*ast.ExpressionStatement)
+
+	if !ok {
+		t.Errorf("expect consequence should be an expression statement. got=%T", c1.Consequence.Statements[0])
+	}
+
+	if !testInfixExpression(t, consequence1.Expression, 1, "+", 1) {
+		return
+	}
+
+	alternative, ok := exp.Alternative.Statements[0].(*ast.ExpressionStatement)
+
+	if !ok {
+		t.Errorf("expect alternative should be an expression statement. got=%T", exp.Alternative.Statements[0])
+	}
+
+	if !testInfixExpression(t, alternative.Expression, 2, "+", 2) {
+		return
+	}
 }
 
 func TestConstantExpression(t *testing.T) {
@@ -266,45 +368,25 @@ func TestConstantExpression(t *testing.T) {
 	constant.ShouldHasName(t, "Person")
 }
 
-func TestIntegerLiteralExpression(t *testing.T) {
-	input := `5;`
-
-	l := lexer.New(input)
-	p := New(l)
-	program, err := p.ParseProgram()
-
-	if err != nil {
-		t.Fatal(err.Message)
-	}
-
-	integerLiteral := program.FirstStmt().IsExpression(t).IsIntegerLiteral(t)
-	integerLiteral.ShouldEqualTo(t, 5)
-}
-
-func TestIntegerLiteralExpressionFail(t *testing.T) {
-	input := `9223372036854775808;`
-
-	l := lexer.New(input)
-	p := New(l)
-	_, err := p.ParseProgram()
-
-	if err == nil {
-		t.Fatal("Expected Integer literal parsing error")
-	} else if p.error.Message != "could not parse \"9223372036854775808\" as integer. Line: 0" {
-		t.Fatalf("Unexpected parsing error: %s", p.error.Message)
-	}
-
-	// "could not parse 9223372036854775808 as integer. Line: 1"
-}
-
-func TestStringLiteralExpression(t *testing.T) {
+func TestHashExpression(t *testing.T) {
 	tests := []struct {
-		input    string
-		expected string
+		input            string
+		expectedElements map[string]int
 	}{
-		{input: `"testString";`, expected: "testString"},
-		{input: `'test_string';`, expected: "test_string"},
-		{input: `'!@#!@!$123';`, expected: "!@#!@!$123"},
+		{`{}`, map[string]int{}},
+		{
+			`{ test: 123 }`,
+			map[string]int{
+				"test": 123,
+			},
+		},
+		{
+
+			`{ another_string: 456 }`,
+			map[string]int{
+				"another_string": 456,
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -316,32 +398,50 @@ func TestStringLiteralExpression(t *testing.T) {
 			t.Fatal(err.Message)
 		}
 
-		if len(program.Statements) != 1 {
-			t.Fatalf("program has wrong number of statements. got=%d", len(program.Statements))
-		}
+		hash := program.FirstStmt().IsExpression(t).IsHashExpression(t)
 
-		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-		if !ok {
-			t.Fatalf("first program statement is not ast.ExpressionStatement. got=%T", program.Statements[0])
+		for key := range hash.Data {
+			testIntegerLiteral(t, hash.Data[key], tt.expectedElements[key])
 		}
-
-		literal, ok := stmt.Expression.(*ast.StringLiteral)
-		testStringLiteral(t, literal, tt.expected)
 	}
 }
 
-func TestParsingInfixExpression(t *testing.T) {
-	infixTests := []struct {
-		input      string
-		leftValue  int
-		operator   string
-		rightValue int
+func TestHashExpressionFail(t *testing.T) {
+	tests := []struct {
+		input string
+		error string
 	}{
-		{"4 + 1;", 4, "+", 1},
-		{"3 - 2;", 3, "-", 2},
+		{`{ 1 }`, `could not parse "1" as hash key. Line: 0`},
+		{`{ "a" }`, `could not parse "a" as hash key. Line: 0`},
+		{`{ nil }`, `could not parse "nil" as hash key. Line: 0`},
 	}
 
-	for _, tt := range infixTests {
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		_, err := p.ParseProgram()
+
+		if err.Message != tt.error {
+			t.Fatal("Expected hash literal parsing error")
+			t.Fatal("expect: ", tt.error)
+			t.Fatal("actual: ", err.Message)
+		}
+	}
+}
+
+func TestHashAccessExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`{}["123"]`, "123"},
+		{`{ test: 1 }["test"]`, "test"},
+		{`{ foo: "123" }["foo"]`, "foo"},
+		{`{ bar: true }["bar"]`, "bar"},
+		{`{ bar: true }[var]`, "var"},
+	}
+
+	for i, tt := range tests {
 		l := lexer.New(tt.input)
 		p := New(l)
 		program, err := p.ParseProgram()
@@ -350,16 +450,33 @@ func TestParsingInfixExpression(t *testing.T) {
 			t.Fatal(err.Message)
 		}
 
-		if len(program.Statements) != 1 {
-			t.Fatalf("expect %d statements. got=%d", 1, len(program.Statements))
+		callExp := program.FirstStmt().IsExpression(t).IsCallExpression(t)
+		callExp.ReceiverExpression().IsHashExpression(t)
+		callExp.NthArgument(1)
+
+		if i < 4 {
+			callExp.NthArgument(1).IsStringLiteral(t)
+		} else {
+			callExp.NthArgument(1).IsIdentifier(t).ShouldHasName(t, "var")
 		}
 
-		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-		if !ok {
-			t.Fatalf("program.Statments[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
-		}
-		testInfixExpression(t, stmt.Expression, tt.leftValue, tt.operator, tt.rightValue)
 	}
+}
+
+func TestIdentifierExpression(t *testing.T) {
+	input := `foobar;`
+
+	l := lexer.New(input)
+	p := New(l)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatal(err.Message)
+	}
+
+	ident := program.FirstStmt().IsExpression(t).IsIdentifier(t)
+	ident.ShouldHasName(t, "foobar")
+
 }
 
 func TestIfExpression(t *testing.T) {
@@ -476,17 +593,40 @@ func TestIfExpression(t *testing.T) {
 	}
 }
 
-func TestCaseExpression(t *testing.T) {
-	input := `
-	case 2
-	when 0
-	  0 + 0
-	when 1
-	  1 + 1
-	else
-	  2 + 2
-	end
-	`
+func TestInfixExpression(t *testing.T) {
+	infixTests := []struct {
+		input      string
+		leftValue  int
+		operator   string
+		rightValue int
+	}{
+		{"4 + 1;", 4, "+", 1},
+		{"3 - 2;", 3, "-", 2},
+	}
+
+	for _, tt := range infixTests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program, err := p.ParseProgram()
+
+		if err != nil {
+			t.Fatal(err.Message)
+		}
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("expect %d statements. got=%d", 1, len(program.Statements))
+		}
+
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+		if !ok {
+			t.Fatalf("program.Statments[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+		}
+		testInfixExpression(t, stmt.Expression, tt.leftValue, tt.operator, tt.rightValue)
+	}
+}
+
+func TestIntegerLiteralExpression(t *testing.T) {
+	input := `5;`
 
 	l := lexer.New(input)
 	p := New(l)
@@ -496,80 +636,27 @@ func TestCaseExpression(t *testing.T) {
 		t.Fatal(err.Message)
 	}
 
-	if len(program.Statements) != 1 {
-		t.Fatalf("expect program's statements to be 1. got=%d", len(program.Statements))
-	}
-
-	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-
-	if !ok {
-		t.Fatalf("expect program.Statements[0] to be *ast.ExpressionStatement. got=%T", program.Statements[0])
-	}
-
-	exp, ok := stmt.Expression.(*ast.IfExpression)
-
-	if !ok {
-		t.Fatalf("expect statement to be an CaseExpression. got=%T", stmt.Expression)
-	}
-
-	cs := exp.Conditionals
-
-	if len(cs) != 2 {
-		t.Fatalf("expect the length of conditionals to be 2. got=%d", len(cs))
-	}
-
-	c0 := cs[0]
-
-	if !testInfixExpression(t, c0.Condition, 2, "==", 0) {
-		return
-	}
-
-	if len(c0.Consequence.Statements) != 1 {
-		t.Errorf("should be only one consequence. got=%d\n", len(c0.Consequence.Statements))
-	}
-
-	consequence0, ok := c0.Consequence.Statements[0].(*ast.ExpressionStatement)
-
-	if !ok {
-		t.Errorf("expect consequence should be an expression statement. got=%T", c0.Consequence.Statements[0])
-	}
-
-	if !testInfixExpression(t, consequence0.Expression, 0, "+", 0) {
-		return
-	}
-
-	c1 := cs[1]
-
-	if !testInfixExpression(t, c1.Condition, 2, "==", 1) {
-		return
-	}
-
-	if len(c1.Consequence.Statements) != 1 {
-		t.Errorf("should be only one consequence. got=%d\n", len(c1.Consequence.Statements))
-	}
-
-	consequence1, ok := c1.Consequence.Statements[0].(*ast.ExpressionStatement)
-
-	if !ok {
-		t.Errorf("expect consequence should be an expression statement. got=%T", c1.Consequence.Statements[0])
-	}
-
-	if !testInfixExpression(t, consequence1.Expression, 1, "+", 1) {
-		return
-	}
-
-	alternative, ok := exp.Alternative.Statements[0].(*ast.ExpressionStatement)
-
-	if !ok {
-		t.Errorf("expect alternative should be an expression statement. got=%T", exp.Alternative.Statements[0])
-	}
-
-	if !testInfixExpression(t, alternative.Expression, 2, "+", 2) {
-		return
-	}
+	integerLiteral := program.FirstStmt().IsExpression(t).IsIntegerLiteral(t)
+	integerLiteral.ShouldEqualTo(t, 5)
 }
 
-func TestMethodParameterParsing(t *testing.T) {
+func TestIntegerLiteralExpressionFail(t *testing.T) {
+	input := `9223372036854775808;`
+
+	l := lexer.New(input)
+	p := New(l)
+	_, err := p.ParseProgram()
+
+	if err == nil {
+		t.Fatal("Expected Integer literal parsing error")
+	} else if p.error.Message != "could not parse \"9223372036854775808\" as integer. Line: 0" {
+		t.Fatalf("Unexpected parsing error: %s", p.error.Message)
+	}
+
+	// "could not parse 9223372036854775808 as integer. Line: 1"
+}
+
+func TestMethodArgumentsParsing(t *testing.T) {
 	tests := []struct {
 		input          string
 		expectedParams []string
@@ -602,29 +689,28 @@ func TestMethodParameterParsing(t *testing.T) {
 	}
 }
 
-func TestArgumentPairExpressionFail(t *testing.T) {
-	tests := []struct {
-		input string
-		error string
-	}{
-		{`foo: "bar"`, `unexpected : Line: 0`},
+func TestNamespaceConstant(t *testing.T) {
+	input := `
+	Foo::Bar
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+	program, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatal(err.Message)
 	}
 
-	for _, tt := range tests {
-		l := lexer.New(tt.input)
-		p := New(l)
-		_, err := p.ParseProgram()
-		if err.Message != tt.error {
-			t.Fatal("Expected hash literal parsing error")
-			t.Fatal("expect: ", tt.error)
-			t.Fatal("actual: ", err.Message)
-		}
-	}
+	infixExp := program.FirstStmt().IsExpression(t).IsInfixExpression(t)
+	infixExp.ShouldHasOperator(t, "::")
+	infixExp.LeftExpression().IsConstant(t).ShouldHasName(t, "Foo")
+	infixExp.RightExpression().IsConstant(t).ShouldHasName(t, "Bar")
 }
 
-func TestCallExpression(t *testing.T) {
+func TestNilExpression(t *testing.T) {
 	input := `
-		p.add(1, 2 * 3, 4 + 5)
+	nil
 	`
 
 	l := lexer.New(input)
@@ -636,24 +722,14 @@ func TestCallExpression(t *testing.T) {
 	}
 
 	stmt := program.Statements[0].(*ast.ExpressionStatement)
-	callExpression := stmt.Expression.(*ast.CallExpression)
+	_, ok := stmt.Expression.(*ast.NilExpression)
 
-	if !testIdentifier(t, callExpression.Receiver, "p") {
-		return
+	if !ok {
+		t.Fatalf("Expect expression to be NilExpression. got=%T", stmt.Expression)
 	}
-
-	testMethodName(t, callExpression, "add")
-
-	if len(callExpression.Arguments) != 3 {
-		t.Fatalf("expect %d arguments. got=%d", 3, len(callExpression.Arguments))
-	}
-
-	testIntegerLiteral(t, callExpression.Arguments[0], 1)
-	testInfixExpression(t, callExpression.Arguments[1], 2, "*", 3)
-	testInfixExpression(t, callExpression.Arguments[2], 4, "+", 5)
 }
 
-func TestSelfCallExpression(t *testing.T) {
+func TestSelfExpression(t *testing.T) {
 	input := `
 		self.add(1, 2 * 3, 4 + 5);
 	`
@@ -689,112 +765,36 @@ func TestSelfCallExpression(t *testing.T) {
 	testInfixExpression(t, callExpression.Arguments[2], 4, "+", 5)
 }
 
-func TestCallExpressionWithBlock(t *testing.T) {
-	input := `
-	[1, 2, 3, 4].each do |i|
-	  puts(i)
-	end
-	`
-	l := lexer.New(input)
-	p := New(l)
-	program, err := p.ParseProgram()
-
-	if err != nil {
-		t.Fatal(err.Message)
-	}
-
-	stmt := program.Statements[0].(*ast.ExpressionStatement)
-	callExpression := stmt.Expression.(*ast.CallExpression)
-
-	receiver := callExpression.Receiver
-	if _, ok := receiver.(*ast.ArrayExpression); !ok {
-		t.Fatalf("Expect receiver to be an Array. got=%T", receiver)
-	}
-
-	testMethodName(t, callExpression, "each")
-	testIdentifier(t, callExpression.BlockArguments[0], "i")
-
-	block := callExpression.Block
-	exp := block.Statements[0].(*ast.ExpressionStatement).Expression
-	testMethodName(t, exp, "puts")
-}
-
-func TestAssignInfixExpressionWithLiteralValue(t *testing.T) {
+func TestStringLiteralExpression(t *testing.T) {
 	tests := []struct {
-		input              string
-		expectedIdentifier string
-		expectedValue      interface{}
-		variableMatchFunc  func(*testing.T, ast.Expression, string) bool
+		input    string
+		expected string
 	}{
-		{"x = 5;", "x", 5, testIdentifier},
-		{"y = true;", "y", true, testIdentifier},
-
-		{"Foo = '123'", "Foo", "123", testConstant},
+		{input: `"testString";`, expected: "testString"},
+		{input: `'test_string';`, expected: "test_string"},
+		{input: `'!@#!@!$123';`, expected: "!@#!@!$123"},
 	}
 
 	for _, tt := range tests {
 		l := lexer.New(tt.input)
 		p := New(l)
-
 		program, err := p.ParseProgram()
 
 		if err != nil {
 			t.Fatal(err.Message)
 		}
 
-		if program == nil {
-			t.Fatal("ParseProgram() returned nil")
+		if len(program.Statements) != 1 {
+			t.Fatalf("program has wrong number of statements. got=%d", len(program.Statements))
 		}
 
-		testAssignExpression(t, program.Statements[0].(*ast.ExpressionStatement).Expression, tt.expectedIdentifier, tt.variableMatchFunc, tt.expectedValue)
-	}
-}
-
-func TestAssignIndexExpressionWithVariableValue(t *testing.T) {
-	tests := []struct {
-		input              string
-		expectedIdentifier string
-		expectedValue      string
-		variableMatchFunc  func(*testing.T, ast.Expression, string) bool
-		valueMatchFunc     func(*testing.T, ast.Expression, string) bool
-	}{
-		{"x = y", "x", "y", testIdentifier, testIdentifier},
-		{"@foo = y", "@foo", "y", testInstanceVariable, testIdentifier},
-		{"y = @foo", "y", "@foo", testIdentifier, testInstanceVariable},
-		{"Foo = @bar", "Foo", "@bar", testConstant, testInstanceVariable},
-		{"@bar = Foo", "@bar", "Foo", testInstanceVariable, testConstant},
-		{"@bar = @foo", "@bar", "@foo", testInstanceVariable, testInstanceVariable},
-	}
-
-	for _, tt := range tests {
-		l := lexer.New(tt.input)
-		p := New(l)
-
-		program, err := p.ParseProgram()
-
-		if err != nil {
-			t.Fatal(err.Message)
-		}
-
-		if program == nil {
-			t.Fatal("ParseProgram() returned nil")
-		}
-
-		stmt := program.Statements[0].(*ast.ExpressionStatement)
-		exp := stmt.Expression
-		infixExp, ok := exp.(*ast.AssignExpression)
-
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
 		if !ok {
-			t.Fatalf("exp is not AssignExpression. got=%T", exp)
+			t.Fatalf("first program statement is not ast.ExpressionStatement. got=%T", program.Statements[0])
 		}
 
-		if !tt.variableMatchFunc(t, infixExp.Variables[0], tt.expectedIdentifier) {
-			return
-		}
-
-		if !tt.valueMatchFunc(t, infixExp.Value, tt.expectedValue) {
-			return
-		}
+		literal, ok := stmt.Expression.(*ast.StringLiteral)
+		testStringLiteral(t, literal, tt.expected)
 	}
 }
 
