@@ -10,55 +10,55 @@ import "testing"
 
 // IsAssignExpression fails the test and returns nil by default
 func (b *BaseNode) IsAssignExpression(t *testing.T) (ae *AssignExpression) {
-	t.Fatalf("Node is not an assign expression, is %v", b)
+	t.Fatalf(nodeFailureMsgFormat, "assign expression", b)
 	return
 }
 
 // IsCallExpression fails the test and returns nil by default
 func (b *BaseNode) IsCallExpression(t *testing.T) (ce *CallExpression) {
-	t.Fatalf("Node is not a call expression, is %v", b)
+	t.Fatalf(nodeFailureMsgFormat, "call expression", b)
 	return
 }
 
 // IsConstant fails the test and returns nil by default
 func (b *BaseNode) IsConstant(t *testing.T) (c *Constant) {
-	t.Fatalf("Node is not a call expression, is %v", b)
+	t.Fatalf(nodeFailureMsgFormat, "constant", b)
 	return
 }
 
 // IsExpression fails the test and returns nil by default
 func (b *BaseNode) IsExpression(t *testing.T) (te TestingExpression) {
-	t.Fatalf("Node is not an expression, is %v", b)
+	t.Fatalf(nodeFailureMsgFormat, "expression", b)
 	return
 }
 
 // HashExpression fails the test and returns nil by default
 func (b *BaseNode) IsHashExpression(t *testing.T) (he *HashExpression) {
-	t.Fatalf("Node is not a hash expression, is %v", b)
+	t.Fatalf(nodeFailureMsgFormat, "hash expression", b)
 	return
 }
 
 // IsIdentifier fails the test and returns nil by default
 func (b *BaseNode) IsIdentifier(t *testing.T) (i *Identifier) {
-	t.Fatalf("Node is not an identifier, is %v", b)
+	t.Fatalf(nodeFailureMsgFormat, "identifier", b)
 	return
 }
 
 // IsInfixExpression fails the test and returns nil by default
 func (b *BaseNode) IsInfixExpression(t *testing.T) (ie *InfixExpression) {
-	t.Fatalf("Node is not an infix expression, is %v", b)
+	t.Fatalf(nodeFailureMsgFormat, "infix expression", b)
 	return
 }
 
 // IsStringLiteral fails the test and returns nil by default
 func (b *BaseNode) IsStringLiteral(t *testing.T) (sl *StringLiteral) {
-	t.Fatalf("Node is not a string literal, is %v", b)
+	t.Fatalf(nodeFailureMsgFormat, "string literal", b)
 	return
 }
 
 // IsYieldExpression returns pointer of the receiver yield expression
 func (b *BaseNode) IsYieldExpression(t *testing.T) (ye *YieldExpression) {
-	t.Fatalf("Node is not an yield expression, is %v", b)
+	t.Fatalf(nodeFailureMsgFormat, "yield expression", b)
 	return
 }
 

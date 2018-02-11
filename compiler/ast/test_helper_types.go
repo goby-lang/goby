@@ -4,6 +4,8 @@ package ast
 
 import "testing"
 
+const nodeFailureMsgFormat = "Node is not %s, is %v"
+
 type TestingIdentifier string
 
 type testingNode interface {
