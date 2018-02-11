@@ -27,7 +27,7 @@ func TestReturnStatements(t *testing.T) {
 		}
 
 		returnStmt := program.FirstStmt().IsReturnStmt(t)
-		returnStmt.ShouldHasValue(t, tt.expectedValue)
+		returnStmt.ShouldHasValue(tt.expectedValue)
 	}
 }
 
