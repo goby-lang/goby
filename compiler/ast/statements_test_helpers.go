@@ -7,6 +7,40 @@ import (
 )
 
 /*
+ BaseNode
+*/
+
+// IsClassStmt fails the test and returns nil by default
+func (b *BaseNode) IsClassStmt(t *testing.T, className string) (cs *ClassStatement) {
+	t.Fatalf("Node is not a class statement, is %v", b)
+	return
+}
+
+// IsModuleStmt fails the test and returns nil by default
+func (b *BaseNode) IsModuleStmt(t *testing.T, moduleName string) (cs *ModuleStatement) {
+	t.Fatalf("Node is not a module statement, is %v", b)
+	return
+}
+
+// IsReturnStmt fails the test and returns nil by default
+func (b *BaseNode) IsReturnStmt(t *testing.T) (rs *ReturnStatement) {
+	t.Fatalf("Node is not a return statement, is %v", b)
+	return
+}
+
+// IsDefStmt fails the test and returns nil by default
+func (b *BaseNode) IsDefStmt(t *testing.T) (rs *DefStatement) {
+	t.Fatalf("Node is not a method definition, is %v", b)
+	return
+}
+
+// IsWhileStmt fails the test and returns nil by default
+func (b *BaseNode) IsWhileStmt(t *testing.T) (ws *WhileStatement) {
+	t.Fatalf("Node is not a while statement, is %v", b)
+	return
+}
+
+/*
  ClassStatement
 */
 
