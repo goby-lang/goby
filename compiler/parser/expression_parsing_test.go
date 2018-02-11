@@ -160,18 +160,9 @@ func TestArrayExpression(t *testing.T) {
 			t.Fatal(err.Message)
 		}
 
-		if len(program.Statements) != 1 {
-			t.Fatalf("program has not enough statments. expect 1, got=%d", len(program.Statements))
-		}
-		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+		arrayExp := program.FirstStmt().IsExpression(t).IsArrayExpression(t)
 
-		if !ok {
-			t.Fatalf("program.Statments[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
-		}
-
-		arr, ok := stmt.Expression.(*ast.ArrayExpression)
-
-		for i, elem := range arr.Elements {
+		for i, elem := range arrayExp.Elements {
 			testIntegerLiteral(t, elem, tt.expectedElements[i])
 		}
 	}
@@ -199,22 +190,13 @@ func TestArrayIndexExpression(t *testing.T) {
 			t.Fatal(err.Message)
 		}
 
-		if len(program.Statements) != 1 {
-			t.Fatalf("program has not enough statments. expect 1, got=%d", len(program.Statements))
-		}
-		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-
-		if !ok {
-			t.Fatalf("program.Statments[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
-		}
-
-		arrIndex, ok := stmt.Expression.(*ast.CallExpression)
+		arrIndexing := program.FirstStmt().IsExpression(t).IsCallExpression(t)
 
 		switch expected := tt.expectedIndex.(type) {
 		case int:
-			testIntegerLiteral(t, arrIndex.Arguments[0], expected)
+			testIntegerLiteral(t, arrIndexing.NthArgument(1), expected)
 		case string:
-			testIdentifier(t, arrIndex.Arguments[0], expected)
+			arrIndexing.NthArgument(1).IsIdentifier(t).ShouldHasName(t, expected)
 		}
 	}
 }
@@ -239,23 +221,14 @@ func TestArrayMultipleIndexExpression(t *testing.T) {
 			t.Fatal(err.Message)
 		}
 
-		if len(program.Statements) != 1 {
-			t.Fatalf("program has not enough statments. expect 1, got=%d", len(program.Statements))
-		}
-		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-
-		if !ok {
-			t.Fatalf("program.Statments[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
-		}
-
-		arrIndex, ok := stmt.Expression.(*ast.CallExpression)
+		arrIndexing := program.FirstStmt().IsExpression(t).IsCallExpression(t)
 
 		for i, value := range tt.expectedIndex {
 			switch expected := value.(type) {
 			case int:
-				testIntegerLiteral(t, arrIndex.Arguments[i], expected)
+				testIntegerLiteral(t, arrIndexing.Arguments[i], expected)
 			case string:
-				testIdentifier(t, arrIndex.Arguments[i], expected)
+				arrIndexing.NthArgument(i+1).IsIdentifier(t).ShouldHasName(t, expected)
 			}
 		}
 	}

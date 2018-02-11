@@ -9,6 +9,12 @@ import "testing"
 */
 
 // IsAssignExpression fails the test and returns nil by default
+func (b *BaseNode) IsArrayExpression(t *testing.T) (ae *ArrayExpression) {
+	t.Fatalf(nodeFailureMsgFormat, "array expression", b)
+	return
+}
+
+// IsAssignExpression fails the test and returns nil by default
 func (b *BaseNode) IsAssignExpression(t *testing.T) (ae *AssignExpression) {
 	t.Fatalf(nodeFailureMsgFormat, "assign expression", b)
 	return
@@ -60,6 +66,15 @@ func (b *BaseNode) IsStringLiteral(t *testing.T) (sl *StringLiteral) {
 func (b *BaseNode) IsYieldExpression(t *testing.T) (ye *YieldExpression) {
 	t.Fatalf(nodeFailureMsgFormat, "yield expression", b)
 	return
+}
+
+/*
+ArrayExpression
+*/
+
+// IsArrayExpression returns pointer of the receiver array expression
+func (ae *ArrayExpression) IsArrayExpression(t *testing.T) *ArrayExpression {
+	return ae
 }
 
 /*
