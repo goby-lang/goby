@@ -40,32 +40,10 @@ func TestNamespaceConstant(t *testing.T) {
 		t.Fatal(err.Message)
 	}
 
-	stmt := program.Statements[0].(*ast.ExpressionStatement)
-	exp := stmt.Expression.(*ast.InfixExpression)
-
-	if exp.Operator != "::" {
-		t.Fatalf("Expect infix operator to be resolution operator. got=%s", exp.Operator)
-	}
-
-	namespace, ok := exp.Left.(*ast.Constant)
-
-	if !ok {
-		t.Fatalf("Expect left side of resolution operator is a constant. got=%T", exp.Left)
-
-		if namespace.Value != "Foo" {
-			t.Fatalf("Expect namespace to be %s. got=%s", "Foo", namespace.Value)
-		}
-	}
-
-	constant, ok := exp.Right.(*ast.Constant)
-
-	if !ok {
-		t.Fatalf("Expect right side of resolution operator is a constant. got=%T", exp.Right)
-
-		if namespace.Value != "Bar" {
-			t.Fatalf("Expect namespace to be %s. got=%s", "Bar", constant.Value)
-		}
-	}
+	infixExp := program.FirstStmt().IsExpression(t).IsInfixExpression(t)
+	infixExp.ShouldHasOperator(t,"::")
+	infixExp.LeftExpression().IsConstant(t).ShouldHasName(t, "Foo")
+	infixExp.RightExpression().IsConstant(t).ShouldHasName(t, "Bar")
 }
 
 func TestHashExpression(t *testing.T) {
