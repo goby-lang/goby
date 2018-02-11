@@ -246,17 +246,8 @@ func TestIdentifierExpression(t *testing.T) {
 		t.Fatal(err.Message)
 	}
 
-	if len(program.Statements) != 1 {
-		t.Fatalf("program has not enough statments. expect 1, got=%d", len(program.Statements))
-	}
-	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-
-	if !ok {
-		t.Fatalf("program.Statments[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
-	}
-
-	ident, ok := stmt.Expression.(*ast.Identifier)
-	testIdentifier(t, ident, "foobar")
+	ident := program.FirstStmt().IsExpression(t).IsIdentifier(t)
+	ident.ShouldHasName(t, "foobar")
 
 }
 
@@ -271,18 +262,8 @@ func TestConstantExpression(t *testing.T) {
 		t.Fatal(err.Message)
 	}
 
-	if len(program.Statements) != 1 {
-		t.Fatalf("program has not enough statments. expect 1, got=%d", len(program.Statements))
-	}
-	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-
-	if !ok {
-		t.Fatalf("program.Statments[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
-	}
-
-	constant, ok := stmt.Expression.(*ast.Constant)
-	testConstant(t, constant, "Person")
-
+	constant := program.FirstStmt().IsExpression(t).IsConstant(t)
+	constant.ShouldHasName(t, "Person")
 }
 
 func TestIntegerLiteralExpression(t *testing.T) {
