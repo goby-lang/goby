@@ -13,7 +13,7 @@ type TestingExpression interface {
 	IsHashExpression(t *testing.T) *TestableHashExpression
 	IsIdentifier(t *testing.T) *TestableIdentifier
 	IsIfExpression(t *testing.T) *IfExpression
-	IsInfixExpression(t *testing.T) *InfixExpression
+	IsInfixExpression(t *testing.T) *TestableInfixExpression
 	IsIntegerLiteral(t *testing.T) *IntegerLiteral
 	IsStringLiteral(t *testing.T) *StringLiteral
 	IsYieldExpression(t *testing.T) *YieldExpression
@@ -83,6 +83,30 @@ func (ti *TestableIdentifier) ShouldHasName(expectedName string) {
 	if ti.Value != expectedName {
 		ti.t.Fatalf("expect current identifier to be '%s', got '%s'", expectedName, ti.Value)
 	}
+}
+
+/*TestableInfixExpression*/
+
+type TestableInfixExpression struct {
+	*InfixExpression
+	t *testing.T
+}
+
+// ShouldHasOperator checks if the infix expression has expected operator
+func (tie *TestableInfixExpression) ShouldHasOperator(expectedOperator string) {
+	if tie.Operator != expectedOperator {
+		tie.t.Fatalf("Expect infix expression to have %s operator, got %s", expectedOperator, tie.Operator)
+	}
+}
+
+// LeftExpression returns infix expression's left expression as TestingExpression
+func (tie *TestableInfixExpression) TestableLeftExpression() TestingExpression {
+	return tie.Left.(TestingExpression)
+}
+
+// RightExpression returns infix expression's right expression as TestingExpression
+func (tie *TestableInfixExpression) TestableRightExpression() TestingExpression {
+	return tie.Right.(TestingExpression)
 }
 
 /*TestableConstant*/

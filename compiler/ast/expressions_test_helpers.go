@@ -66,7 +66,7 @@ func (b *BaseNode) IsIfExpression(t *testing.T) (i *IfExpression) {
 }
 
 // IsInfixExpression fails the test and returns nil by default
-func (b *BaseNode) IsInfixExpression(t *testing.T) (ie *InfixExpression) {
+func (b *BaseNode) IsInfixExpression(t *testing.T) (ie *TestableInfixExpression) {
 	t.Fatalf(nodeFailureMsgFormat, "infix expression", b)
 	return
 }
@@ -211,25 +211,8 @@ InfixExpression
 */
 
 // IsInfixExpression returns pointer of the receiver infix expression
-func (ie *InfixExpression) IsInfixExpression(t *testing.T) *InfixExpression {
-	return ie
-}
-
-// ShouldHasOperator checks if the infix expression has expected operator
-func (ie *InfixExpression) ShouldHasOperator(t *testing.T, expectedOperator string) {
-	if ie.Operator != expectedOperator {
-		t.Fatalf("Expect infix expression to have %s operator, got %s", expectedOperator, ie.Operator)
-	}
-}
-
-// LeftExpression returns infix expression's left expression as TestingExpression
-func (ie *InfixExpression) LeftExpression() TestingExpression {
-	return ie.Left.(TestingExpression)
-}
-
-// RightExpression returns infix expression's right expression as TestingExpression
-func (ie *InfixExpression) RightExpression() TestingExpression {
-	return ie.Right.(TestingExpression)
+func (ie *InfixExpression) IsInfixExpression(t *testing.T) *TestableInfixExpression {
+	return &TestableInfixExpression{InfixExpression: ie, t: t}
 }
 
 /*

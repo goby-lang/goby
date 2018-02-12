@@ -205,8 +205,8 @@ func TestCallExpression(t *testing.T) {
 	}
 
 	callExpression.NthArgument(1).IsIntegerLiteral(t).ShouldEqualTo(t, 1)
-	testInfixExpression(t, callExpression.NthArgument(2), 2, "*", 3)
-	testInfixExpression(t, callExpression.NthArgument(3), 4, "+", 5)
+	testInfixExpression(t, callExpression.NthArgument(2).IsInfixExpression(t), 2, "*", 3)
+	testInfixExpression(t, callExpression.NthArgument(3).IsInfixExpression(t), 4, "+", 5)
 }
 
 func TestCallExpressionWithBlock(t *testing.T) {
@@ -607,9 +607,9 @@ func TestNamespaceConstant(t *testing.T) {
 	}
 
 	infixExp := program.FirstStmt().IsExpression(t).IsInfixExpression(t)
-	infixExp.ShouldHasOperator(t, "::")
-	infixExp.LeftExpression().IsConstant(t).ShouldHasName("Foo")
-	infixExp.RightExpression().IsConstant(t).ShouldHasName("Bar")
+	infixExp.ShouldHasOperator("::")
+	infixExp.TestableLeftExpression().IsConstant(t).ShouldHasName("Foo")
+	infixExp.TestableRightExpression().IsConstant(t).ShouldHasName("Bar")
 }
 
 func TestNilExpression(t *testing.T) {
