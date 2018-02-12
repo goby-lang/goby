@@ -5,7 +5,7 @@ import "testing"
 type TestingExpression interface {
 	Expression
 	// Test Helpers
-	IsArrayExpression(t *testing.T) *ArrayExpression
+	IsArrayExpression(t *testing.T) *TestableArrayExpression
 	IsAssignExpression(t *testing.T) *AssignExpression
 	IsCallExpression(t *testing.T) *TestableCallExpression
 	IsConditionalExpression(t *testing.T) *ConditionalExpression
@@ -17,6 +17,21 @@ type TestingExpression interface {
 	IsIntegerLiteral(t *testing.T) *IntegerLiteral
 	IsStringLiteral(t *testing.T) *StringLiteral
 	IsYieldExpression(t *testing.T) *YieldExpression
+}
+
+/*TestableArrayExpression*/
+
+type TestableArrayExpression struct {
+	*ArrayExpression
+	t *testing.T
+}
+
+func (tae *TestableArrayExpression) TestableElements() (tes []TestingExpression) {
+	for _, elem := range tae.Elements {
+		tes = append(tes, elem.(TestingExpression))
+	}
+
+	return
 }
 
 /*TestableCallExpression*/

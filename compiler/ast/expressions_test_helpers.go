@@ -11,9 +11,9 @@ import (
 */
 
 // IsAssignExpression fails the test and returns nil by default
-func (b *BaseNode) IsArrayExpression(t *testing.T) (ae *ArrayExpression) {
+func (b *BaseNode) IsArrayExpression(t *testing.T) *TestableArrayExpression {
 	t.Fatalf(nodeFailureMsgFormat, "array expression", b)
-	return
+	return nil
 }
 
 // IsAssignExpression fails the test and returns nil by default
@@ -54,9 +54,9 @@ func (b *BaseNode) IsHashExpression(t *testing.T) (he *HashExpression) {
 }
 
 // IsIdentifier fails the test and returns nil by default
-func (b *BaseNode) IsIdentifier(t *testing.T) (i *TestableIdentifier) {
+func (b *BaseNode) IsIdentifier(t *testing.T) *TestableIdentifier {
 	t.Fatalf(nodeFailureMsgFormat, "identifier", b)
-	return
+	return nil
 }
 
 // IsIfExpression fails the test and returns nil by default
@@ -94,16 +94,8 @@ ArrayExpression
 */
 
 // IsArrayExpression returns pointer of the receiver array expression
-func (ae *ArrayExpression) IsArrayExpression(t *testing.T) *ArrayExpression {
-	return ae
-}
-
-func (ae *ArrayExpression) TestableElements() (tes []TestingExpression) {
-	for _, elem := range ae.Elements {
-		tes = append(tes, elem.(TestingExpression))
-	}
-
-	return
+func (ae *ArrayExpression) IsArrayExpression(t *testing.T) *TestableArrayExpression {
+	return &TestableArrayExpression{ArrayExpression: ae, t: t}
 }
 
 /*
