@@ -338,7 +338,7 @@ func TestConstantExpression(t *testing.T) {
 	}
 
 	constant := program.FirstStmt().IsExpression(t).IsConstant(t)
-	constant.ShouldHasName(t, "Person")
+	constant.ShouldHasName("Person")
 }
 
 func TestHashExpression(t *testing.T) {
@@ -608,8 +608,8 @@ func TestNamespaceConstant(t *testing.T) {
 
 	infixExp := program.FirstStmt().IsExpression(t).IsInfixExpression(t)
 	infixExp.ShouldHasOperator(t, "::")
-	infixExp.LeftExpression().IsConstant(t).ShouldHasName(t, "Foo")
-	infixExp.RightExpression().IsConstant(t).ShouldHasName(t, "Bar")
+	infixExp.LeftExpression().IsConstant(t).ShouldHasName("Foo")
+	infixExp.RightExpression().IsConstant(t).ShouldHasName("Bar")
 }
 
 func TestNilExpression(t *testing.T) {

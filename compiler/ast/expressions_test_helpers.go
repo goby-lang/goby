@@ -35,7 +35,7 @@ func (b *BaseNode) IsConditionalExpression(t *testing.T) (ce *ConditionalExpress
 }
 
 // IsConstant fails the test and returns nil by default
-func (b *BaseNode) IsConstant(t *testing.T) (c *Constant) {
+func (b *BaseNode) IsConstant(t *testing.T) (c *TestableConstant) {
 	t.Fatalf(nodeFailureMsgFormat, "constant", b)
 	return
 }
@@ -143,14 +143,8 @@ Constant
 */
 
 // IsConstant returns pointer of the current receiver constant
-func (c *Constant) IsConstant(t *testing.T) *Constant {
-	return c
-}
-
-func (c *Constant) ShouldHasName(t *testing.T, expectedName string) {
-	if c.Value != expectedName {
-		t.Fatalf("expect current identifier to be '%s', got '%s'", expectedName, c.Value)
-	}
+func (c *Constant) IsConstant(t *testing.T) *TestableConstant {
+	return &TestableConstant{Constant: c, t: t}
 }
 
 /*

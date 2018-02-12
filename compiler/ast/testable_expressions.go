@@ -9,7 +9,7 @@ type TestingExpression interface {
 	IsAssignExpression(t *testing.T) *TestableAssignExpression
 	IsCallExpression(t *testing.T) *TestableCallExpression
 	IsConditionalExpression(t *testing.T) *ConditionalExpression
-	IsConstant(t *testing.T) *Constant
+	IsConstant(t *testing.T) *TestableConstant
 	IsHashExpression(t *testing.T) *HashExpression
 	IsIdentifier(t *testing.T) *TestableIdentifier
 	IsIfExpression(t *testing.T) *IfExpression
@@ -75,5 +75,18 @@ type TestableIdentifier struct {
 func (ti *TestableIdentifier) ShouldHasName(expectedName string) {
 	if ti.Value != expectedName {
 		ti.t.Fatalf("expect current identifier to be '%s', got '%s'", expectedName, ti.Value)
+	}
+}
+
+/*TestableConstant*/
+
+type TestableConstant struct {
+	*Constant
+	t *testing.T
+}
+
+func (tc *TestableConstant) ShouldHasName(expectedName string) {
+	if tc.Value != expectedName {
+		tc.t.Fatalf("expect current identifier to be '%s', got '%s'", expectedName, tc.Value)
 	}
 }

@@ -39,7 +39,7 @@ func TestMethodChainExpression(t *testing.T) {
 	argName2.IsIdentifier(t).ShouldHasName("b")
 
 	originalReceiver := thirdCall.TestableReceiver().IsConstant(t)
-	originalReceiver.ShouldHasName(t, "Person")
+	originalReceiver.ShouldHasName("Person")
 }
 
 func TestOperatorPrecedenceParsing(t *testing.T) {
