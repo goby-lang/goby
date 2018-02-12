@@ -10,7 +10,7 @@ type TestingStatement interface {
 	IsClassStmt(t *testing.T) *TestableClassStatement
 	IsDefStmt(t *testing.T) *DefStatement
 	IsExpression(t *testing.T) TestingExpression
-	IsModuleStmt(t *testing.T, className string) *ModuleStatement
+	IsModuleStmt(t *testing.T) *TestableModuleStatement
 	IsReturnStmt(t *testing.T) *TestableReturnStatement
 	IsWhileStmt(t *testing.T) *WhileStatement
 }
@@ -53,6 +53,34 @@ func (tcs *TestableClassStatement) ShouldHasName(name string) {
 func (tcs *TestableClassStatement) ShouldInherits(className string) {
 	if tcs.SuperClassName != className {
 		tcs.t.Fatalf("Expect class %s to inherit class %s. got %s", tcs.Name, className, tcs.SuperClassName)
+	}
+}
+
+/*TestableModuleStatement*/
+
+type TestableModuleStatement struct {
+	*ModuleStatement
+	t *testing.T
+}
+
+// HasMethod checks if current class statement has target method, and returns the method if it has
+func (tms *TestableModuleStatement) HasMethod(t *testing.T, methodName string) (ds *DefStatement) {
+	for _, stmt := range tms.Body.Statements {
+		s, ok := stmt.(*DefStatement)
+
+		if ok && s.Name.Value == methodName {
+			ds = s
+			return
+		}
+	}
+
+	t.Fatalf("Can't find method '%s' in module '%s'", methodName, tms.Name)
+	return
+}
+
+func (tms *TestableModuleStatement) ShouldHasName(name string) {
+	if tms.Name.Value != name {
+		tms.t.Fatalf("Wrong class, this class is %s", tms.Name.Value)
 	}
 }
 
