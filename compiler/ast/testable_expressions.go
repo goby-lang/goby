@@ -14,7 +14,7 @@ type TestingExpression interface {
 	IsIdentifier(t *testing.T) *TestableIdentifier
 	IsIfExpression(t *testing.T) *TestableIfExpression
 	IsInfixExpression(t *testing.T) *TestableInfixExpression
-	IsIntegerLiteral(t *testing.T) *IntegerLiteral
+	IsIntegerLiteral(t *testing.T) *TestableIntegerLiteral
 	IsStringLiteral(t *testing.T) *StringLiteral
 	IsYieldExpression(t *testing.T) *YieldExpression
 }
@@ -153,6 +153,19 @@ func (tie *TestableInfixExpression) TestableLeftExpression() TestingExpression {
 // RightExpression returns infix expression's right expression as TestingExpression
 func (tie *TestableInfixExpression) TestableRightExpression() TestingExpression {
 	return tie.Right.(TestingExpression)
+}
+
+/*TestableIntegerLiteral*/
+
+type TestableIntegerLiteral struct {
+	*IntegerLiteral
+	t *testing.T
+}
+
+func (til *TestableIntegerLiteral) ShouldEqualTo(expectedInt int) {
+	if til.Value != expectedInt {
+		til.t.Fatalf("Expect integer literal to be %d, got %d", expectedInt, til.Value)
+	}
 }
 
 /*TestableConstant*/
