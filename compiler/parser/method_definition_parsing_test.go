@@ -59,9 +59,9 @@ func TestDefStatementWithYield(t *testing.T) {
 	firstExp := stmt.MethodBody().NthStmt(1).IsExpression(t)
 	firstYield := firstExp.IsYieldExpression(t)
 
-	testIntegerLiteral(t, firstYield.Arguments[0], 1)
-	testIntegerLiteral(t, firstYield.Arguments[1], 2)
-	testIdentifier(t, firstYield.Arguments[2], "bar")
+	firstYield.NthArgument(1).IsIntegerLiteral(t).ShouldEqualTo(1)
+	firstYield.NthArgument(2).IsIntegerLiteral(t).ShouldEqualTo(2)
+	firstYield.NthArgument(3).IsIdentifier(t).ShouldHasName("bar")
 
 	secondExp := stmt.MethodBody().NthStmt(2).IsExpression(t)
 	secondExp.IsYieldExpression(t)

@@ -19,7 +19,7 @@ type TestingExpression interface {
 	IsIntegerLiteral(t *testing.T) *TestableIntegerLiteral
 	IsSelfExpression(t *testing.T) *TestableSelfExpression
 	IsStringLiteral(t *testing.T) *TestableStringLiteral
-	IsYieldExpression(t *testing.T) *YieldExpression
+	IsYieldExpression(t *testing.T) *TestableYieldExpression
 }
 
 /*TestableArrayExpression*/
@@ -201,7 +201,6 @@ type TestableSelfExpression struct {
 	t *testing.T
 }
 
-
 /*TestableStringLiteral*/
 
 type TestableStringLiteral struct {
@@ -213,4 +212,15 @@ func (tsl *TestableStringLiteral) ShouldEqualTo(expected string) {
 	if tsl.Value != expected {
 		tsl.t.Fatalf("Expect string literal to be %s, got %s", expected, tsl.Value)
 	}
+}
+
+/*TestableYieldExpression*/
+
+type TestableYieldExpression struct {
+	*YieldExpression
+	t *testing.T
+}
+
+func (tye *TestableYieldExpression) NthArgument(n int) TestingExpression {
+	return tye.Arguments[n-1].(TestingExpression)
 }
