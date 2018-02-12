@@ -81,7 +81,7 @@ func TestArrayIndexExpression(t *testing.T) {
 		case int:
 			arrIndexing.NthArgument(1).IsIntegerLiteral(t).ShouldEqualTo(t, expected)
 		case string:
-			arrIndexing.NthArgument(1).IsIdentifier(t).ShouldHasName(t, expected)
+			arrIndexing.NthArgument(1).IsIdentifier(t).ShouldHasName(expected)
 		}
 	}
 }
@@ -114,7 +114,7 @@ func TestArrayMultipleIndexExpression(t *testing.T) {
 			case int:
 				arg.IsIntegerLiteral(t).ShouldEqualTo(t, expected)
 			case string:
-				arg.IsIdentifier(t).ShouldHasName(t, expected)
+				arg.IsIdentifier(t).ShouldHasName(expected)
 			}
 		}
 	}
@@ -197,7 +197,7 @@ func TestCallExpression(t *testing.T) {
 	}
 
 	callExpression := program.FirstStmt().IsExpression(t).IsCallExpression(t)
-	callExpression.ReceiverExpression().IsIdentifier(t).ShouldHasName(t, "p")
+	callExpression.TestableReceiver().IsIdentifier(t).ShouldHasName("p")
 	callExpression.ShouldHasMethodName("add")
 
 	if len(callExpression.Arguments) != 3 {
@@ -224,9 +224,9 @@ func TestCallExpressionWithBlock(t *testing.T) {
 	}
 
 	callExpression := program.FirstStmt().IsExpression(t).IsCallExpression(t)
-	callExpression.ReceiverExpression().IsArrayExpression(t)
+	callExpression.TestableReceiver().IsArrayExpression(t)
 	callExpression.ShouldHasMethodName("each")
-	callExpression.BlockArguments[0].IsIdentifier(t).ShouldHasName(t, "i")
+	callExpression.BlockArguments[0].IsIdentifier(t).ShouldHasName("i")
 
 	block := callExpression.Block
 	exp := block.Statements[0].(ast.TestingStatement).IsExpression(t)
@@ -424,13 +424,13 @@ func TestHashAccessExpression(t *testing.T) {
 		}
 
 		callExp := program.FirstStmt().IsExpression(t).IsCallExpression(t)
-		callExp.ReceiverExpression().IsHashExpression(t)
+		callExp.TestableReceiver().IsHashExpression(t)
 		callExp.NthArgument(1)
 
 		if i < 4 {
 			callExp.NthArgument(1).IsStringLiteral(t)
 		} else {
-			callExp.NthArgument(1).IsIdentifier(t).ShouldHasName(t, "var")
+			callExp.NthArgument(1).IsIdentifier(t).ShouldHasName("var")
 		}
 
 	}
@@ -448,7 +448,7 @@ func TestIdentifierExpression(t *testing.T) {
 	}
 
 	ident := program.FirstStmt().IsExpression(t).IsIdentifier(t)
-	ident.ShouldHasName(t, "foobar")
+	ident.ShouldHasName("foobar")
 
 }
 
