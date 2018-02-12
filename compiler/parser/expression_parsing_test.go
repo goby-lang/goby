@@ -198,7 +198,7 @@ func TestCallExpression(t *testing.T) {
 
 	callExpression := program.FirstStmt().IsExpression(t).IsCallExpression(t)
 	callExpression.ReceiverExpression().IsIdentifier(t).ShouldHasName(t, "p")
-	callExpression.ShouldHasMethodName(t, "add")
+	callExpression.ShouldHasMethodName("add")
 
 	if len(callExpression.Arguments) != 3 {
 		t.Fatalf("expect %d arguments. got=%d", 3, len(callExpression.Arguments))
@@ -225,12 +225,12 @@ func TestCallExpressionWithBlock(t *testing.T) {
 
 	callExpression := program.FirstStmt().IsExpression(t).IsCallExpression(t)
 	callExpression.ReceiverExpression().IsArrayExpression(t)
-	callExpression.ShouldHasMethodName(t, "each")
+	callExpression.ShouldHasMethodName("each")
 	callExpression.BlockArguments[0].IsIdentifier(t).ShouldHasName(t, "i")
 
 	block := callExpression.Block
 	exp := block.Statements[0].(ast.TestingStatement).IsExpression(t)
-	exp.IsCallExpression(t).ShouldHasMethodName(t, "puts")
+	exp.IsCallExpression(t).ShouldHasMethodName("puts")
 }
 
 func TestCaseExpression(t *testing.T) {

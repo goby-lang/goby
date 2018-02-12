@@ -22,15 +22,15 @@ func TestMethodChainExpression(t *testing.T) {
 
 	exp := program.FirstStmt().IsExpression(t)
 	firstCall := exp.IsCallExpression(t)
-	firstCall.ShouldHasMethodName(t, "add")
+	firstCall.ShouldHasMethodName("add")
 	firstCall.NthArgument(1).IsIdentifier(t).ShouldHasName(t, "d")
 
 	secondCall := firstCall.ReceiverExpression().IsCallExpression(t)
-	secondCall.ShouldHasMethodName(t, "bar")
+	secondCall.ShouldHasMethodName("bar")
 	secondCall.NthArgument(1).IsIdentifier(t).ShouldHasName(t, "c")
 
 	thirdCall := secondCall.ReceiverExpression().IsCallExpression(t)
-	thirdCall.ShouldHasMethodName(t, "new")
+	thirdCall.ShouldHasMethodName("new")
 	thirdCall.NthArgument(1).IsIdentifier(t).ShouldHasName(t, "a")
 	thirdCall.NthArgument(2).IsIdentifier(t).ShouldHasName(t, "b")
 

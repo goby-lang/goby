@@ -139,7 +139,7 @@ func TestWhileStatement(t *testing.T) {
 	infix.LeftExpression().IsIdentifier(t).ShouldHasName(t, "i")
 	infix.ShouldHasOperator(t, "<")
 	callExp := infix.RightExpression().IsCallExpression(t)
-	callExp.ShouldHasMethodName(t, "length")
+	callExp.ShouldHasMethodName("length")
 
 	if callExp.Block != nil {
 		t.Fatalf("Condition expression shouldn't have block")
@@ -149,7 +149,7 @@ func TestWhileStatement(t *testing.T) {
 	block := whileStatement.CodeBlock()
 	firstExp := block.NthStmt(1).IsExpression(t)
 	firstCall := firstExp.IsCallExpression(t)
-	firstCall.ShouldHasMethodName(t, "puts")
+	firstCall.ShouldHasMethodName("puts")
 	testIdentifier(t, firstCall.Arguments[0], "i")
 
 	secondExp := block.NthStmt(2).IsExpression(t)
