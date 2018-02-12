@@ -258,17 +258,17 @@ func TestCaseExpression(t *testing.T) {
 	cs := exp.TestableConditionals()
 
 	c0 := cs[0]
-	testInfixExpression(t, c0.IsConditionalExpression(t).IsInfixExpression(t), 2, "==", 0)
+	testInfixExpression(t, c0.IsConditionalExpression(t).TestableCondition().IsInfixExpression(t), 2, "==", 0)
 	consequence0 := c0.IsConditionalExpression(t).TestableConsequence()
-	testInfixExpression(t, consequence0[0].IsExpression(t), 0, "+", 0)
+	testInfixExpression(t, consequence0[0].IsExpression(t).IsInfixExpression(t), 0, "+", 0)
 
 	c1 := cs[1]
-	testInfixExpression(t, c1.IsConditionalExpression(t).IsInfixExpression(t), 2, "==", 1)
+	testInfixExpression(t, c1.IsConditionalExpression(t).TestableCondition().IsInfixExpression(t), 2, "==", 1)
 	consequence1 := c1.IsConditionalExpression(t).TestableConsequence()
-	testInfixExpression(t, consequence1[0].IsExpression(t), 1, "+", 1)
+	testInfixExpression(t, consequence1[0].IsExpression(t).IsInfixExpression(t), 1, "+", 1)
 
 	alternative := exp.TestableAlternative()
-	testInfixExpression(t, alternative.NthStmt(0).IsExpression(t), 2, "+", 2)
+	testInfixExpression(t, alternative.NthStmt(1).IsExpression(t).IsInfixExpression(t), 2, "+", 2)
 }
 
 func TestConstantExpression(t *testing.T) {
@@ -424,22 +424,22 @@ func TestIfExpression(t *testing.T) {
 	cs := exp.TestableConditionals()
 
 	c0 := cs[0].IsConditionalExpression(t)
-	testInfixExpression(t, c0.Condition, "x", "<", "y")
+	testInfixExpression(t, c0.TestableCondition().IsInfixExpression(t), "x", "<", "y")
 	consequence0 := c0.TestableConsequence()[0].IsExpression(t).IsInfixExpression(t)
 	testInfixExpression(t, consequence0, "x", "+", 5)
 
 	c1 := cs[1].IsConditionalExpression(t)
-	testInfixExpression(t, c1.Condition, "x", "==", "y")
+	testInfixExpression(t, c1.TestableCondition().IsInfixExpression(t), "x", "==", "y")
 	consequence1 := c1.TestableConsequence()[0].IsExpression(t).IsInfixExpression(t)
 	testInfixExpression(t, consequence1, "y", "+", 5)
 
 	c2 := cs[2].IsConditionalExpression(t)
-	testInfixExpression(t, c2.Condition, "x", ">", "y")
+	testInfixExpression(t, c2.TestableCondition().IsInfixExpression(t), "x", ">", "y")
 	consequence2 := c2.TestableConsequence()[0].IsExpression(t).IsInfixExpression(t)
 	testInfixExpression(t, consequence2, "y", "-", 1)
 
 	alternative := exp.TestableAlternative()
-	testInfixExpression(t, alternative[0].IsExpression(t), "y", "+", 4)
+	testInfixExpression(t, alternative[0].IsExpression(t).IsInfixExpression(t), "y", "+", 4)
 }
 
 func TestInfixExpression(t *testing.T) {
@@ -462,15 +462,8 @@ func TestInfixExpression(t *testing.T) {
 			t.Fatal(err.Message)
 		}
 
-		if len(program.Statements) != 1 {
-			t.Fatalf("expect %d statements. got=%d", 1, len(program.Statements))
-		}
-
-		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-		if !ok {
-			t.Fatalf("program.Statments[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
-		}
-		testInfixExpression(t, stmt.Expression, tt.leftValue, tt.operator, tt.rightValue)
+		exp := program.FirstStmt().IsExpression(t).IsInfixExpression(t)
+		testInfixExpression(t, exp, tt.leftValue, tt.operator, tt.rightValue)
 	}
 }
 
@@ -591,27 +584,14 @@ func TestSelfExpression(t *testing.T) {
 		t.Fatal(err.Message)
 	}
 
-	stmt := program.Statements[0].(*ast.ExpressionStatement)
-	callExpression := stmt.Expression.(*ast.CallExpression)
+	callExpression := program.FirstStmt().IsExpression(t).IsCallExpression(t)
+	callExpression.ShouldHasMethodName("add")
+	callExpression.ShouldHasNumbersOfArguments(3)
+	callExpression.TestableReceiver().IsSelfExpression(t)
 
-	self, ok := callExpression.Receiver.(*ast.SelfExpression)
-	if !ok {
-		t.Fatalf("expect receiver to be SelfExpression. got=%T", callExpression.Receiver)
-	}
-
-	if self.TokenLiteral() != "self" {
-		t.Fatalf("expect SelfExpression's token literal to be 'self'. got=%s", self.TokenLiteral())
-	}
-
-	testMethodName(t, callExpression, "add")
-
-	if len(callExpression.Arguments) != 3 {
-		t.Fatalf("expect %d arguments. got=%d", 3, len(callExpression.Arguments))
-	}
-
-	testIntegerLiteral(t, callExpression.Arguments[0], 1)
-	testInfixExpression(t, callExpression.Arguments[1], 2, "*", 3)
-	testInfixExpression(t, callExpression.Arguments[2], 4, "+", 5)
+	callExpression.NthArgument(1).IsIntegerLiteral(t).ShouldEqualTo(1)
+	testInfixExpression(t, callExpression.NthArgument(2).IsInfixExpression(t), 2, "*", 3)
+	testInfixExpression(t, callExpression.NthArgument(3).IsInfixExpression(t), 4, "+", 5)
 }
 
 func TestStringLiteralExpression(t *testing.T) {

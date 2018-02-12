@@ -15,6 +15,7 @@ type TestingExpression interface {
 	IsIfExpression(t *testing.T) *TestableIfExpression
 	IsInfixExpression(t *testing.T) *TestableInfixExpression
 	IsIntegerLiteral(t *testing.T) *TestableIntegerLiteral
+	IsSelfExpression(t *testing.T) *TestableSelfExpression
 	IsStringLiteral(t *testing.T) *StringLiteral
 	IsYieldExpression(t *testing.T) *YieldExpression
 }
@@ -65,11 +66,21 @@ func (tce *TestableCallExpression) ShouldHasMethodName(expectedName string) {
 	}
 }
 
+func (tce *TestableCallExpression) ShouldHasNumbersOfArguments(n int) {
+	if len(tce.Arguments) != n {
+		tce.t.Fatalf("expect call expression to have %d arguments, got %d", n, (tce.Arguments))
+	}
+}
+
 /*TestableConditionalExpression*/
 
 type TestableConditionalExpression struct {
 	*ConditionalExpression
 	t *testing.T
+}
+
+func (tce *TestableConditionalExpression) TestableCondition() TestingExpression {
+	return tce.Condition.(TestingExpression)
 }
 
 func (tce *TestableConditionalExpression) TestableConsequence() CodeBlock {
@@ -179,4 +190,11 @@ func (tc *TestableConstant) ShouldHasName(expectedName string) {
 	if tc.Value != expectedName {
 		tc.t.Fatalf("expect current identifier to be '%s', got '%s'", expectedName, tc.Value)
 	}
+}
+
+/*TestableSelfExpression*/
+
+type TestableSelfExpression struct {
+	*SelfExpression
+	t *testing.T
 }
