@@ -17,6 +17,7 @@ type TestingExpression interface {
 	IsIdentifier(t *testing.T) *TestableIdentifier
 	IsIfExpression(t *testing.T) *TestableIfExpression
 	IsInfixExpression(t *testing.T) *TestableInfixExpression
+	IsInstanceVariable(t *testing.T) *TestableInstanceVariable
 	IsIntegerLiteral(t *testing.T) *TestableIntegerLiteral
 	IsSelfExpression(t *testing.T) *TestableSelfExpression
 	IsStringLiteral(t *testing.T) *TestableStringLiteral
@@ -209,6 +210,19 @@ func (tie *TestableInfixExpression) TestableLeftExpression() TestingExpression {
 // RightExpression returns infix expression's right expression as TestingExpression
 func (tie *TestableInfixExpression) TestableRightExpression() TestingExpression {
 	return tie.Right.(TestingExpression)
+}
+
+/*TestableInstanceVariable*/
+
+type TestableInstanceVariable struct {
+	*InstanceVariable
+	t *testing.T
+}
+
+func (tiv *TestableInstanceVariable) ShouldHasName(expectedName string) {
+	if tiv.Value != expectedName {
+		tiv.t.Fatalf("expect current instance variable to be '%s', got '%s'", expectedName, tiv.Value)
+	}
 }
 
 /*TestableIntegerLiteral*/

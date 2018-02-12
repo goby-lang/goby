@@ -78,6 +78,13 @@ func (b *BaseNode) IsInfixExpression(t *testing.T) (ie *TestableInfixExpression)
 	return
 }
 
+// IsInstanceVariable fails the test and returns nil by default
+func (b *BaseNode) IsInstanceVariable(t *testing.T) (ie *TestableInstanceVariable) {
+	t.Helper()
+	t.Fatalf(nodeFailureMsgFormat, "instance variable", b)
+	return
+}
+
 // IsIntegerLiteral fails the test and returns nil by default
 func (b *BaseNode) IsIntegerLiteral(t *testing.T) (il *TestableIntegerLiteral) {
 	t.Fatalf(nodeFailureMsgFormat, "integer literal", b)
@@ -164,6 +171,11 @@ func (ie *IfExpression) IsIfExpression(t *testing.T) *TestableIfExpression {
 // IsInfixExpression returns pointer of the receiver infix expression
 func (ie *InfixExpression) IsInfixExpression(t *testing.T) *TestableInfixExpression {
 	return &TestableInfixExpression{InfixExpression: ie, t: t}
+}
+
+// IsInstanceVariable returns pointer of the receiver instance variable
+func (iv *InstanceVariable) IsInstanceVariable(t *testing.T) *TestableInstanceVariable {
+	return &TestableInstanceVariable{InstanceVariable: iv, t: t}
 }
 
 // IsIntegerLiteral returns pointer of the receiver string literal
