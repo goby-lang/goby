@@ -498,39 +498,6 @@ func TestIntegerLiteralExpressionFail(t *testing.T) {
 	// "could not parse 9223372036854775808 as integer. Line: 1"
 }
 
-func TestMethodArgumentsParsing(t *testing.T) {
-	tests := []struct {
-		input          string
-		expectedParams []string
-	}{
-		{input: "def add(x, y); end", expectedParams: []string{"x", "y"}},
-		{input: `
-		def print(x)
-		end
-		`, expectedParams: []string{"x"}},
-		{input: "def test(x, y, z); end", expectedParams: []string{"x", "y", "z"}},
-	}
-
-	for _, tt := range tests {
-		l := lexer.New(tt.input)
-		p := New(l)
-		program, err := p.ParseProgram()
-
-		if err != nil {
-			t.Fatal(err.Message)
-		}
-		methodStatement := program.Statements[0].(*ast.DefStatement)
-
-		if len(methodStatement.Parameters) != len(tt.expectedParams) {
-			t.Errorf("expect %d parameters. got=%d", len(tt.expectedParams), len(methodStatement.Parameters))
-		}
-
-		for i, expectedParam := range tt.expectedParams {
-			testIdentifier(t, methodStatement.Parameters[i], expectedParam)
-		}
-	}
-}
-
 func TestNamespaceConstant(t *testing.T) {
 	input := `
 	Foo::Bar
@@ -613,17 +580,8 @@ func TestStringLiteralExpression(t *testing.T) {
 			t.Fatal(err.Message)
 		}
 
-		if len(program.Statements) != 1 {
-			t.Fatalf("program has wrong number of statements. got=%d", len(program.Statements))
-		}
-
-		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-		if !ok {
-			t.Fatalf("first program statement is not ast.ExpressionStatement. got=%T", program.Statements[0])
-		}
-
-		literal, ok := stmt.Expression.(*ast.StringLiteral)
-		testStringLiteral(t, literal, tt.expected)
+		literal := program.FirstStmt().IsExpression(t).IsStringLiteral(t)
+		literal.ShouldEqualTo(tt.expected)
 	}
 }
 

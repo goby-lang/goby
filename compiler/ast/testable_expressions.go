@@ -18,7 +18,7 @@ type TestingExpression interface {
 	IsInfixExpression(t *testing.T) *TestableInfixExpression
 	IsIntegerLiteral(t *testing.T) *TestableIntegerLiteral
 	IsSelfExpression(t *testing.T) *TestableSelfExpression
-	IsStringLiteral(t *testing.T) *StringLiteral
+	IsStringLiteral(t *testing.T) *TestableStringLiteral
 	IsYieldExpression(t *testing.T) *YieldExpression
 }
 
@@ -92,6 +92,19 @@ func (tce *TestableConditionalExpression) TestableConsequence() CodeBlock {
 	}
 
 	return tss
+}
+
+/*TestableConstant*/
+
+type TestableConstant struct {
+	*Constant
+	t *testing.T
+}
+
+func (tc *TestableConstant) ShouldHasName(expectedName string) {
+	if tc.Value != expectedName {
+		tc.t.Fatalf("expect current identifier to be '%s', got '%s'", expectedName, tc.Value)
+	}
 }
 
 /*TestableHashExpression*/
@@ -181,22 +194,23 @@ func (til *TestableIntegerLiteral) ShouldEqualTo(expectedInt int) {
 	}
 }
 
-/*TestableConstant*/
-
-type TestableConstant struct {
-	*Constant
-	t *testing.T
-}
-
-func (tc *TestableConstant) ShouldHasName(expectedName string) {
-	if tc.Value != expectedName {
-		tc.t.Fatalf("expect current identifier to be '%s', got '%s'", expectedName, tc.Value)
-	}
-}
-
 /*TestableSelfExpression*/
 
 type TestableSelfExpression struct {
 	*SelfExpression
 	t *testing.T
+}
+
+
+/*TestableStringLiteral*/
+
+type TestableStringLiteral struct {
+	*StringLiteral
+	t *testing.T
+}
+
+func (tsl *TestableStringLiteral) ShouldEqualTo(expected string) {
+	if tsl.Value != expected {
+		tsl.t.Fatalf("Expect string literal to be %s, got %s", expected, tsl.Value)
+	}
 }
