@@ -48,9 +48,9 @@ func (b *BaseNode) IsExpression(t *testing.T) (te TestingExpression) {
 }
 
 // HashExpression fails the test and returns nil by default
-func (b *BaseNode) IsHashExpression(t *testing.T) (he *HashExpression) {
+func (b *BaseNode) IsHashExpression(t *testing.T) *TestableHashExpression {
 	t.Fatalf(nodeFailureMsgFormat, "hash expression", b)
-	return
+	return nil
 }
 
 // IsIdentifier fails the test and returns nil by default
@@ -152,8 +152,8 @@ HashExpression
 */
 
 // IsHashExpression returns pointer of the receiver hash expression
-func (he *HashExpression) IsHashExpression(t *testing.T) *HashExpression {
-	return he
+func (he *HashExpression) IsHashExpression(t *testing.T) *TestableHashExpression {
+	return &TestableHashExpression{HashExpression: he, t: t}
 }
 
 /*
