@@ -9,6 +9,7 @@ type TestingExpression interface {
 	// Test Helpers
 	IsArrayExpression(t *testing.T) *TestableArrayExpression
 	IsAssignExpression(t *testing.T) *TestableAssignExpression
+	IsBooleanExpression(t *testing.T) *TestableBooleanExpression
 	IsCallExpression(t *testing.T) *TestableCallExpression
 	IsConditionalExpression(t *testing.T) *TestableConditionalExpression
 	IsConstant(t *testing.T) *TestableConstant
@@ -42,6 +43,27 @@ func (tae *TestableArrayExpression) TestableElements() (tes []TestingExpression)
 type TestableAssignExpression struct {
 	*AssignExpression
 	t *testing.T
+}
+
+func (tae *TestableAssignExpression) NthVariable(n int) TestingExpression {
+	return tae.Variables[n-1].(TestingExpression)
+}
+
+func (tae *TestableAssignExpression) TestableValue() TestingExpression {
+	return tae.Value.(TestingExpression)
+}
+
+/*TestableBooleanExpression*/
+
+type TestableBooleanExpression struct {
+	*BooleanExpression
+	t *testing.T
+}
+
+func (tbe *TestableBooleanExpression) ShouldEqualTo(expected bool) {
+	if tbe.Value != expected {
+		tbe.t.Fatalf("Expect boolean literal to be %d, got %d", expected, tbe.Value)
+	}
 }
 
 /*TestableCallExpression*/
@@ -112,6 +134,14 @@ func (tc *TestableConstant) ShouldHasName(expectedName string) {
 type TestableHashExpression struct {
 	*HashExpression
 	t *testing.T
+}
+
+func (the *TestableHashExpression) TestableDataPairs() (pairs map[string]TestingExpression) {
+	for k, v := range the.Data {
+		pairs[k] = v.(TestingExpression)
+	}
+
+	return
 }
 
 /*TestableIdentifier*/

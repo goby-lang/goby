@@ -22,6 +22,12 @@ func (b *BaseNode) IsAssignExpression(t *testing.T) (ae *TestableAssignExpressio
 	return
 }
 
+// IsBooleanExpression fails the test and returns nil by default
+func (b *BaseNode) IsBooleanExpression(t *testing.T) (ae *TestableBooleanExpression) {
+	t.Fatalf(nodeFailureMsgFormat, "boolean expression", b)
+	return
+}
+
 // IsCallExpression fails the test and returns nil by default
 func (b *BaseNode) IsCallExpression(t *testing.T) (ce *TestableCallExpression) {
 	t.Fatalf(nodeFailureMsgFormat, "call expression", b)
@@ -105,6 +111,11 @@ func (ae *ArrayExpression) IsArrayExpression(t *testing.T) *TestableArrayExpress
 // IsAssignExpression returns pointer of the receiver assign expression
 func (ae *AssignExpression) IsAssignExpression(t *testing.T) *TestableAssignExpression {
 	return &TestableAssignExpression{AssignExpression: ae, t: t}
+}
+
+// IsAssignExpression returns pointer of the receiver boolean expression
+func (be *BooleanExpression) IsBooleanExpression(t *testing.T) *TestableBooleanExpression {
+	return &TestableBooleanExpression{BooleanExpression: be, t: t}
 }
 
 // NameIs compares the assignment's variable name and expected name
