@@ -85,9 +85,9 @@ func (b *BaseNode) IsSelfExpression(t *testing.T) (sl *TestableSelfExpression) {
 }
 
 // IsStringLiteral fails the test and returns nil by default
-func (b *BaseNode) IsStringLiteral(t *testing.T) (sl *StringLiteral) {
+func (b *BaseNode) IsStringLiteral(t *testing.T) *TestableStringLiteral {
 	t.Fatalf(nodeFailureMsgFormat, "string literal", b)
-	return
+	return nil
 }
 
 // IsYieldExpression returns pointer of the receiver yield expression
@@ -164,8 +164,8 @@ func (se *SelfExpression) IsSelfExpression(t *testing.T) *TestableSelfExpression
 }
 
 // IsStringLiteral returns pointer of the receiver string literal
-func (sl *StringLiteral) IsStringLiteral(t *testing.T) *StringLiteral {
-	return sl
+func (sl *StringLiteral) IsStringLiteral(t *testing.T) *TestableStringLiteral {
+	return &TestableStringLiteral{StringLiteral: sl, t: t}
 }
 
 // IsYieldExpression returns pointer of the receiver yield expression
