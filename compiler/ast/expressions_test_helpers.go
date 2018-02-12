@@ -29,9 +29,9 @@ func (b *BaseNode) IsCallExpression(t *testing.T) (ce *TestableCallExpression) {
 }
 
 // IsConditionalExpression fails the test and returns nil by default
-func (b *BaseNode) IsConditionalExpression(t *testing.T) (ce *ConditionalExpression) {
+func (b *BaseNode) IsConditionalExpression(t *testing.T) *TestableConditionalExpression {
 	t.Fatalf(nodeFailureMsgFormat, "conditional expression", b)
-	return
+	return nil
 }
 
 // IsConstant fails the test and returns nil by default
@@ -60,9 +60,9 @@ func (b *BaseNode) IsIdentifier(t *testing.T) *TestableIdentifier {
 }
 
 // IsIfExpression fails the test and returns nil by default
-func (b *BaseNode) IsIfExpression(t *testing.T) (i *IfExpression) {
+func (b *BaseNode) IsIfExpression(t *testing.T) *TestableIfExpression {
 	t.Fatalf(nodeFailureMsgFormat, "if expression", b)
-	return
+	return nil
 }
 
 // IsInfixExpression fails the test and returns nil by default
@@ -125,17 +125,8 @@ func (ce *CallExpression) IsCallExpression(t *testing.T) *TestableCallExpression
 ConditionalExpression
 */
 
-func (ce *ConditionalExpression) IsConditionalExpression(t *testing.T) *ConditionalExpression {
-	return ce
-}
-
-func (ce *ConditionalExpression) TestableConsequence() CodeBlock {
-	var tss []TestingStatement
-	for _, stmt := range ce.Consequence.Statements {
-		tss = append(tss, stmt.(TestingStatement))
-	}
-
-	return tss
+func (ce *ConditionalExpression) IsConditionalExpression(t *testing.T) *TestableConditionalExpression {
+	return &TestableConditionalExpression{ConditionalExpression: ce, t: t}
 }
 
 /*
@@ -179,31 +170,8 @@ IfExpression
 */
 
 // IsIfExpression returns pointer of the receiver if expression
-func (ie *IfExpression) IsIfExpression(t *testing.T) *IfExpression {
-	return ie
-}
-
-func (ie *IfExpression) ShouldHasNumberOfConditionals(t *testing.T, n int) {
-	if len(ie.Conditionals) != n {
-		t.Fatalf("Expect if expression to have %d conditionals, got %d", n, len(ie.Conditionals))
-	}
-}
-
-func (ie *IfExpression) TestableConditionals() (tes []TestingExpression) {
-	for _, cond := range ie.Conditionals {
-		tes = append(tes, cond)
-	}
-
-	return
-}
-
-func (ie *IfExpression) TestableAlternative() CodeBlock {
-	var tss []TestingStatement
-	for _, stmt := range ie.Alternative.Statements {
-		tss = append(tss, stmt.(TestingStatement))
-	}
-
-	return tss
+func (ie *IfExpression) IsIfExpression(t *testing.T) *TestableIfExpression {
+	return &TestableIfExpression{IfExpression: ie, t: t}
 }
 
 /*
