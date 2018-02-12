@@ -215,3 +215,19 @@ type TestableWhileStatement struct {
 	*WhileStatement
 	t *testing.T
 }
+
+// Block returns while statement's code block as a set of TestingStatements
+func (tws *TestableWhileStatement) CodeBlock() CodeBlock {
+	var tss []TestingStatement
+
+	for _, stmt := range tws.Body.Statements {
+		tss = append(tss, stmt.(TestingStatement))
+	}
+
+	return tss
+}
+
+// ConditionExpression returns while statement's condition as TestingExpression
+func (tws *TestableWhileStatement) ConditionExpression() TestingExpression {
+	return tws.Condition.(TestingExpression)
+}

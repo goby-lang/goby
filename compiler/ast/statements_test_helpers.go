@@ -90,27 +90,7 @@ func (ts *ExpressionStatement) IsExpression(t *testing.T) TestingExpression {
 	return ts.Expression.(TestingExpression)
 }
 
-/*
-WhileStatement
-*/
-
 // IsWhileStmt returns the pointer of current while statement
 func (ws *WhileStatement) IsWhileStmt(t *testing.T) *TestableWhileStatement {
 	return &TestableWhileStatement{WhileStatement: ws, t: t}
-}
-
-// Block returns while statement's code block as a set of TestingStatements
-func (tws *TestableWhileStatement) CodeBlock() CodeBlock {
-	var tss []TestingStatement
-
-	for _, stmt := range tws.Body.Statements {
-		tss = append(tss, stmt.(TestingStatement))
-	}
-
-	return tss
-}
-
-// ConditionExpression returns while statement's condition as TestingExpression
-func (tws *TestableWhileStatement) ConditionExpression() TestingExpression {
-	return tws.Condition.(TestingExpression)
 }
