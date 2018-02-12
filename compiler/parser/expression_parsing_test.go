@@ -703,11 +703,7 @@ func TestStringLiteralExpression(t *testing.T) {
 }
 
 func testAssignExpression(t *testing.T, exp ast.Expression, expectedIdentifier string, variableMatchFunction func(*testing.T, ast.Expression, string) bool, expected interface{}) {
-	assignExp, ok := exp.(*ast.AssignExpression)
-
-	if !ok {
-		t.Fatalf("exp is not AssignExpression. got=%T", exp)
-	}
+	assignExp := exp.(*ast.TestableAssignExpression)
 
 	if !variableMatchFunction(t, assignExp.Variables[0], expectedIdentifier) {
 		return
