@@ -55,8 +55,10 @@ func TestClassStatement(t *testing.T) {
 	defStmt.ShouldHasNormalParam("y")
 
 	methodBodyExp := defStmt.MethodBody().NthStmt(1).IsExpression(t)
-
-	testInfixExpression(t, methodBodyExp.IsInfixExpression(t), "x", "+", "y")
+	infix := methodBodyExp.IsInfixExpression(t)
+	infix.ShouldHasOperator("+")
+	infix.TestableLeftExpression().IsIdentifier(t).ShouldHasName("x")
+	infix.TestableRightExpression().IsIdentifier(t).ShouldHasName("y")
 }
 
 func TestModuleStatement(t *testing.T) {
@@ -83,8 +85,10 @@ func TestModuleStatement(t *testing.T) {
 	defStmt.ShouldHasNormalParam("y")
 
 	methodBodyExp := defStmt.MethodBody().NthStmt(1).IsExpression(t)
-
-	testInfixExpression(t, methodBodyExp.IsInfixExpression(t), "x", "+", "y")
+	infix := methodBodyExp.IsInfixExpression(t)
+	infix.ShouldHasOperator("+")
+	infix.TestableLeftExpression().IsIdentifier(t).ShouldHasName("x")
+	infix.TestableRightExpression().IsIdentifier(t).ShouldHasName("y")
 }
 
 func TestClassStatementWithInheritance(t *testing.T) {
@@ -113,8 +117,10 @@ func TestClassStatementWithInheritance(t *testing.T) {
 	defStmt.ShouldHasNormalParam("y")
 
 	methodBodyExp := defStmt.MethodBody().NthStmt(1).IsExpression(t)
-
-	testInfixExpression(t, methodBodyExp.IsInfixExpression(t), "x", "+", "y")
+	infix := methodBodyExp.IsInfixExpression(t)
+	infix.ShouldHasOperator("+")
+	infix.TestableLeftExpression().IsIdentifier(t).ShouldHasName("x")
+	infix.TestableRightExpression().IsIdentifier(t).ShouldHasName("y")
 }
 
 func TestWhileStatement(t *testing.T) {
@@ -150,11 +156,11 @@ func TestWhileStatement(t *testing.T) {
 	firstExp := block.NthStmt(1).IsExpression(t)
 	firstCall := firstExp.IsCallExpression(t)
 	firstCall.ShouldHasMethodName("puts")
-	testIdentifier(t, firstCall.Arguments[0], "i")
+	firstCall.NthArgument(1).IsIdentifier(t).ShouldHasName("i")
 
 	secondExp := block.NthStmt(2).IsExpression(t)
 	secondCall := secondExp.IsAssignExpression(t)
-	testIdentifier(t, secondCall.Variables[0], "i")
+	secondCall.NthVariable(1).IsIdentifier(t).ShouldHasName("i")
 }
 
 func TestWhileStatementWithoutDoKeywordFail(t *testing.T) {
