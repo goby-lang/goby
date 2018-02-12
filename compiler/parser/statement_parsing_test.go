@@ -136,7 +136,7 @@ func TestWhileStatement(t *testing.T) {
 	whileStatement := program.FirstStmt().IsWhileStmt(t)
 
 	infix := whileStatement.ConditionExpression().IsInfixExpression(t)
-	infix.LeftExpression().IsIdentifier(t).ShouldHasName(t, "i")
+	infix.LeftExpression().IsIdentifier(t).ShouldHasName("i")
 	infix.ShouldHasOperator(t, "<")
 	callExp := infix.RightExpression().IsCallExpression(t)
 	callExp.ShouldHasMethodName("length")

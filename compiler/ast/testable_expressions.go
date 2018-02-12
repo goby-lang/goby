@@ -11,7 +11,7 @@ type TestingExpression interface {
 	IsConditionalExpression(t *testing.T) *ConditionalExpression
 	IsConstant(t *testing.T) *Constant
 	IsHashExpression(t *testing.T) *HashExpression
-	IsIdentifier(t *testing.T) *Identifier
+	IsIdentifier(t *testing.T) *TestableIdentifier
 	IsIfExpression(t *testing.T) *IfExpression
 	IsInfixExpression(t *testing.T) *InfixExpression
 	IsIntegerLiteral(t *testing.T) *IntegerLiteral
@@ -32,7 +32,7 @@ func (tce *TestableCallExpression) NthArgument(n int) TestingExpression {
 }
 
 // ReceiverExpression returns call expression's receiver as TestingExpression
-func (tce *TestableCallExpression) ReceiverExpression() TestingExpression {
+func (tce *TestableCallExpression) TestableReceiver() TestingExpression {
 	return tce.Receiver.(TestingExpression)
 }
 
@@ -40,5 +40,18 @@ func (tce *TestableCallExpression) ReceiverExpression() TestingExpression {
 func (tce *TestableCallExpression) ShouldHasMethodName(expectedName string) {
 	if tce.Method != expectedName {
 		tce.t.Fatalf("expect call expression's method name to be '%s', got '%s'", expectedName, tce.Method)
+	}
+}
+
+/*TestableIdentifier*/
+
+type TestableIdentifier struct {
+	*Identifier
+	t *testing.T
+}
+
+func (ti *TestableIdentifier) ShouldHasName(expectedName string) {
+	if ti.Value != expectedName {
+		ti.t.Fatalf("expect current identifier to be '%s', got '%s'", expectedName, ti.Value)
 	}
 }

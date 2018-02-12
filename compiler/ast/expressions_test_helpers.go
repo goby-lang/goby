@@ -54,7 +54,7 @@ func (b *BaseNode) IsHashExpression(t *testing.T) (he *HashExpression) {
 }
 
 // IsIdentifier fails the test and returns nil by default
-func (b *BaseNode) IsIdentifier(t *testing.T) (i *Identifier) {
+func (b *BaseNode) IsIdentifier(t *testing.T) (i *TestableIdentifier) {
 	t.Fatalf(nodeFailureMsgFormat, "identifier", b)
 	return
 }
@@ -175,14 +175,8 @@ Identifier
 */
 
 // IsIdentifier returns pointer of the receiver identifier
-func (i *Identifier) IsIdentifier(t *testing.T) *Identifier {
-	return i
-}
-
-func (i *Identifier) ShouldHasName(t *testing.T, expectedName string) {
-	if i.Value != expectedName {
-		t.Fatalf("expect current identifier to be '%s', got '%s'", expectedName, i.Value)
-	}
+func (i *Identifier) IsIdentifier(t *testing.T) *TestableIdentifier {
+	return &TestableIdentifier{Identifier: i, t: t}
 }
 
 // NameIs compares the identifier's name and expected name

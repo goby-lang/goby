@@ -23,18 +23,22 @@ func TestMethodChainExpression(t *testing.T) {
 	exp := program.FirstStmt().IsExpression(t)
 	firstCall := exp.IsCallExpression(t)
 	firstCall.ShouldHasMethodName("add")
-	firstCall.NthArgument(1).IsIdentifier(t).ShouldHasName(t, "d")
+	argName := firstCall.NthArgument(1)
+	argName.IsIdentifier(t).ShouldHasName("d")
 
-	secondCall := firstCall.ReceiverExpression().IsCallExpression(t)
+	secondCall := firstCall.TestableReceiver().IsCallExpression(t)
 	secondCall.ShouldHasMethodName("bar")
-	secondCall.NthArgument(1).IsIdentifier(t).ShouldHasName(t, "c")
+	argName = secondCall.NthArgument(1)
+	argName.IsIdentifier(t).ShouldHasName("c")
 
-	thirdCall := secondCall.ReceiverExpression().IsCallExpression(t)
+	thirdCall := secondCall.TestableReceiver().IsCallExpression(t)
 	thirdCall.ShouldHasMethodName("new")
-	thirdCall.NthArgument(1).IsIdentifier(t).ShouldHasName(t, "a")
-	thirdCall.NthArgument(2).IsIdentifier(t).ShouldHasName(t, "b")
+	argName1 := thirdCall.NthArgument(1)
+	argName1.IsIdentifier(t).ShouldHasName("a")
+	argName2 := thirdCall.NthArgument(2)
+	argName2.IsIdentifier(t).ShouldHasName("b")
 
-	originalReceiver := thirdCall.ReceiverExpression().IsConstant(t)
+	originalReceiver := thirdCall.TestableReceiver().IsConstant(t)
 	originalReceiver.ShouldHasName(t, "Person")
 }
 
