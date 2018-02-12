@@ -76,7 +76,8 @@ func TestModuleStatement(t *testing.T) {
 		t.Fatal(err.Message)
 	}
 
-	stmt := program.FirstStmt().IsModuleStmt(t, "Foo")
+	stmt := program.FirstStmt().IsModuleStmt(t)
+	stmt.ShouldHasName("Foo")
 	defStmt := stmt.HasMethod(t, "bar")
 	defStmt.ShouldHasNormalParam(t, "x")
 	defStmt.ShouldHasNormalParam(t, "y")

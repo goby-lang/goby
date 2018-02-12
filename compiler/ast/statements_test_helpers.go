@@ -17,7 +17,7 @@ func (b *BaseNode) IsClassStmt(t *testing.T) (tcs *TestableClassStatement) {
 }
 
 // IsModuleStmt fails the test and returns nil by default
-func (b *BaseNode) IsModuleStmt(t *testing.T, moduleName string) (cs *ModuleStatement) {
+func (b *BaseNode) IsModuleStmt(t *testing.T) (tms *TestableModuleStatement) {
 	t.Fatalf(nodeFailureMsgFormat, "module statement", b)
 	return
 }
@@ -62,23 +62,8 @@ func (cs *ClassStatement) NameIs(n string) bool {
 */
 
 // IsModuleStmt returns a pointer of the module statement
-func (ms *ModuleStatement) IsModuleStmt(t *testing.T, moduleName string) *ModuleStatement {
-	return ms
-}
-
-// HasMethod checks if current class statement has target method, and returns the method if it has
-func (ms *ModuleStatement) HasMethod(t *testing.T, methodName string) (ds *DefStatement) {
-	for _, stmt := range ms.Body.Statements {
-		s, ok := stmt.(*DefStatement)
-
-		if ok && s.Name.Value == methodName {
-			ds = s
-			return
-		}
-	}
-
-	t.Fatalf("Can't find method '%s' in module '%s'", methodName, ms.Name)
-	return
+func (ms *ModuleStatement) IsModuleStmt(t *testing.T) *TestableModuleStatement {
+	return &TestableModuleStatement{ModuleStatement: ms, t: t}
 }
 
 // NameIs returns the compare result of current module name and target module name
