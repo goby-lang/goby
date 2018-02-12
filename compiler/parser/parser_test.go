@@ -308,11 +308,8 @@ func testInfixExpression(
 	right interface{},
 ) bool {
 	t.Helper()
-	opExp, ok := exp.(*ast.InfixExpression)
-	if !ok {
-		t.Errorf("exp is not %T. got=%T", exp, exp)
-		return false
-	}
+
+	opExp := exp.(*ast.TestableInfixExpression)
 
 	if !testLiteralExpression(t, opExp.Left, left) {
 		return false
