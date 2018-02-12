@@ -253,77 +253,22 @@ func TestCaseExpression(t *testing.T) {
 		t.Fatal(err.Message)
 	}
 
-	if len(program.Statements) != 1 {
-		t.Fatalf("expect program's statements to be 1. got=%d", len(program.Statements))
-	}
-
-	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-
-	if !ok {
-		t.Fatalf("expect program.Statements[0] to be *ast.ExpressionStatement. got=%T", program.Statements[0])
-	}
-
-	exp, ok := stmt.Expression.(*ast.IfExpression)
-
-	if !ok {
-		t.Fatalf("expect statement to be an CaseExpression. got=%T", stmt.Expression)
-	}
-
-	cs := exp.Conditionals
-
-	if len(cs) != 2 {
-		t.Fatalf("expect the length of conditionals to be 2. got=%d", len(cs))
-	}
+	exp := program.FirstStmt().IsExpression(t).IsIfExpression(t)
+	exp.ShouldHasNumberOfConditionals(2)
+	cs := exp.TestableConditionals()
 
 	c0 := cs[0]
-
-	if !testInfixExpression(t, c0.Condition, 2, "==", 0) {
-		return
-	}
-
-	if len(c0.Consequence.Statements) != 1 {
-		t.Errorf("should be only one consequence. got=%d\n", len(c0.Consequence.Statements))
-	}
-
-	consequence0, ok := c0.Consequence.Statements[0].(*ast.ExpressionStatement)
-
-	if !ok {
-		t.Errorf("expect consequence should be an expression statement. got=%T", c0.Consequence.Statements[0])
-	}
-
-	if !testInfixExpression(t, consequence0.Expression, 0, "+", 0) {
-		return
-	}
+	testInfixExpression(t, c0.IsConditionalExpression(t), 2, "==", 0)
+	consequence0 := c0.IsConditionalExpression(t).TestableConsequence()
+	testInfixExpression(t, consequence0[0].IsExpression(t), 0, "+", 0)
 
 	c1 := cs[1]
+	testInfixExpression(t, c1.IsConditionalExpression(t), 2, "==", 1)
+	consequence1 := c1.IsConditionalExpression(t).TestableConsequence()
+	testInfixExpression(t, consequence1[0].IsExpression(t), 1, "+", 1)
 
-	if !testInfixExpression(t, c1.Condition, 2, "==", 1) {
-		return
-	}
-
-	if len(c1.Consequence.Statements) != 1 {
-		t.Errorf("should be only one consequence. got=%d\n", len(c1.Consequence.Statements))
-	}
-
-	consequence1, ok := c1.Consequence.Statements[0].(*ast.ExpressionStatement)
-
-	if !ok {
-		t.Errorf("expect consequence should be an expression statement. got=%T", c1.Consequence.Statements[0])
-	}
-
-	if !testInfixExpression(t, consequence1.Expression, 1, "+", 1) {
-		return
-	}
-
-	alternative, ok := exp.Alternative.Statements[0].(*ast.ExpressionStatement)
-
-	if !ok {
-		t.Errorf("expect alternative should be an expression statement. got=%T", exp.Alternative.Statements[0])
-	}
-
-	if !testInfixExpression(t, alternative.Expression, 2, "+", 2) {
-		return
-	}
+	alternative := exp.TestableAlternative()
+	testInfixExpression(t, alternative.NthStmt(0).IsExpression(t), 2, "+", 2)
 }
 
 func TestConstantExpression(t *testing.T) {
@@ -474,7 +419,7 @@ func TestIfExpression(t *testing.T) {
 	}
 
 	exp := program.FirstStmt().IsExpression(t).IsIfExpression(t)
-	exp.ShouldHasNumberOfConditionals(t, 3)
+	exp.ShouldHasNumberOfConditionals(3)
 
 	cs := exp.TestableConditionals()
 

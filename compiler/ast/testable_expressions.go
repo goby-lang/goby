@@ -8,11 +8,11 @@ type TestingExpression interface {
 	IsArrayExpression(t *testing.T) *TestableArrayExpression
 	IsAssignExpression(t *testing.T) *TestableAssignExpression
 	IsCallExpression(t *testing.T) *TestableCallExpression
-	IsConditionalExpression(t *testing.T) *ConditionalExpression
+	IsConditionalExpression(t *testing.T) *TestableConditionalExpression
 	IsConstant(t *testing.T) *TestableConstant
 	IsHashExpression(t *testing.T) *TestableHashExpression
 	IsIdentifier(t *testing.T) *TestableIdentifier
-	IsIfExpression(t *testing.T) *IfExpression
+	IsIfExpression(t *testing.T) *TestableIfExpression
 	IsInfixExpression(t *testing.T) *TestableInfixExpression
 	IsIntegerLiteral(t *testing.T) *IntegerLiteral
 	IsStringLiteral(t *testing.T) *StringLiteral
@@ -65,6 +65,22 @@ func (tce *TestableCallExpression) ShouldHasMethodName(expectedName string) {
 	}
 }
 
+/*TestableConditionalExpression*/
+
+type TestableConditionalExpression struct {
+	*ConditionalExpression
+	t *testing.T
+}
+
+func (tce *TestableConditionalExpression) TestableConsequence() CodeBlock {
+	var tss []TestingStatement
+	for _, stmt := range tce.Consequence.Statements {
+		tss = append(tss, stmt.(TestingStatement))
+	}
+
+	return tss
+}
+
 /*TestableHashExpression*/
 
 type TestableHashExpression struct {
@@ -83,6 +99,36 @@ func (ti *TestableIdentifier) ShouldHasName(expectedName string) {
 	if ti.Value != expectedName {
 		ti.t.Fatalf("expect current identifier to be '%s', got '%s'", expectedName, ti.Value)
 	}
+}
+
+/*TestableIfExpression*/
+
+type TestableIfExpression struct {
+	*IfExpression
+	t *testing.T
+}
+
+func (tie *TestableIfExpression) ShouldHasNumberOfConditionals(n int) {
+	if len(tie.Conditionals) != n {
+		tie.t.Fatalf("Expect if expression to have %d conditionals, got %d", n, len(tie.Conditionals))
+	}
+}
+
+func (tie *TestableIfExpression) TestableConditionals() (tes []TestingExpression) {
+	for _, cond := range tie.Conditionals {
+		tes = append(tes, cond)
+	}
+
+	return
+}
+
+func (tie *TestableIfExpression) TestableAlternative() CodeBlock {
+	var tss []TestingStatement
+	for _, stmt := range tie.Alternative.Statements {
+		tss = append(tss, stmt.(TestingStatement))
+	}
+
+	return tss
 }
 
 /*TestableInfixExpression*/
