@@ -10,7 +10,7 @@ type TestingExpression interface {
 	IsCallExpression(t *testing.T) *TestableCallExpression
 	IsConditionalExpression(t *testing.T) *ConditionalExpression
 	IsConstant(t *testing.T) *TestableConstant
-	IsHashExpression(t *testing.T) *HashExpression
+	IsHashExpression(t *testing.T) *TestableHashExpression
 	IsIdentifier(t *testing.T) *TestableIdentifier
 	IsIfExpression(t *testing.T) *IfExpression
 	IsInfixExpression(t *testing.T) *InfixExpression
@@ -63,6 +63,13 @@ func (tce *TestableCallExpression) ShouldHasMethodName(expectedName string) {
 	if tce.Method != expectedName {
 		tce.t.Fatalf("expect call expression's method name to be '%s', got '%s'", expectedName, tce.Method)
 	}
+}
+
+/*TestableHashExpression*/
+
+type TestableHashExpression struct {
+	*HashExpression
+	t *testing.T
 }
 
 /*TestableIdentifier*/
