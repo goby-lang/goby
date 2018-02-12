@@ -6,7 +6,7 @@ type TestingExpression interface {
 	Expression
 	// Test Helpers
 	IsArrayExpression(t *testing.T) *TestableArrayExpression
-	IsAssignExpression(t *testing.T) *AssignExpression
+	IsAssignExpression(t *testing.T) *TestableAssignExpression
 	IsCallExpression(t *testing.T) *TestableCallExpression
 	IsConditionalExpression(t *testing.T) *ConditionalExpression
 	IsConstant(t *testing.T) *Constant
@@ -32,6 +32,13 @@ func (tae *TestableArrayExpression) TestableElements() (tes []TestingExpression)
 	}
 
 	return
+}
+
+/*TestableAssignExpression*/
+
+type TestableAssignExpression struct {
+	*AssignExpression
+	t *testing.T
 }
 
 /*TestableCallExpression*/

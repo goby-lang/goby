@@ -17,7 +17,7 @@ func (b *BaseNode) IsArrayExpression(t *testing.T) *TestableArrayExpression {
 }
 
 // IsAssignExpression fails the test and returns nil by default
-func (b *BaseNode) IsAssignExpression(t *testing.T) (ae *AssignExpression) {
+func (b *BaseNode) IsAssignExpression(t *testing.T) (ae *TestableAssignExpression) {
 	t.Fatalf(nodeFailureMsgFormat, "assign expression", b)
 	return
 }
@@ -103,8 +103,8 @@ AssignExpression
 */
 
 // IsAssignExpression returns pointer of the receiver assign expression
-func (ae *AssignExpression) IsAssignExpression(t *testing.T) *AssignExpression {
-	return ae
+func (ae *AssignExpression) IsAssignExpression(t *testing.T) *TestableAssignExpression {
+	return &TestableAssignExpression{AssignExpression: ae, t: t}
 }
 
 // NameIs compares the assignment's variable name and expected name
