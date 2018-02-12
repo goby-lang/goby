@@ -370,7 +370,7 @@ func TestHashAccessExpression(t *testing.T) {
 
 		callExp := program.FirstStmt().IsExpression(t).IsCallExpression(t)
 		callExp.TestableReceiver().IsHashExpression(t)
-		callExp.NthArgument(1)
+		callExp.ShouldHasNumbersOfArguments(1)
 
 		if i < 4 {
 			callExp.NthArgument(1).IsStringLiteral(t)
