@@ -30,7 +30,7 @@ func TestDefStatement(t *testing.T) {
 	firstStmt.ShouldHasNormalParam("y")
 
 	firstExpression := firstStmt.MethodBody().NthStmt(1).IsExpression(t)
-	testInfixExpression(t, firstExpression, "x", "+", "y")
+	testInfixExpression(t, firstExpression.IsInfixExpression(t), "x", "+", "y")
 
 	secondStmt := program.NthStmt(2).IsDefStmt(t)
 	secondStmt.ShouldHasName("foo")

@@ -56,7 +56,7 @@ func TestClassStatement(t *testing.T) {
 
 	methodBodyExp := defStmt.MethodBody().NthStmt(1).IsExpression(t)
 
-	testInfixExpression(t, methodBodyExp, "x", "+", "y")
+	testInfixExpression(t, methodBodyExp.IsInfixExpression(t), "x", "+", "y")
 }
 
 func TestModuleStatement(t *testing.T) {
@@ -84,7 +84,7 @@ func TestModuleStatement(t *testing.T) {
 
 	methodBodyExp := defStmt.MethodBody().NthStmt(1).IsExpression(t)
 
-	testInfixExpression(t, methodBodyExp, "x", "+", "y")
+	testInfixExpression(t, methodBodyExp.IsInfixExpression(t), "x", "+", "y")
 }
 
 func TestClassStatementWithInheritance(t *testing.T) {
@@ -114,7 +114,7 @@ func TestClassStatementWithInheritance(t *testing.T) {
 
 	methodBodyExp := defStmt.MethodBody().NthStmt(1).IsExpression(t)
 
-	testInfixExpression(t, methodBodyExp, "x", "+", "y")
+	testInfixExpression(t, methodBodyExp.IsInfixExpression(t), "x", "+", "y")
 }
 
 func TestWhileStatement(t *testing.T) {

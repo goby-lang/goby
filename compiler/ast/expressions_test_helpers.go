@@ -67,6 +67,7 @@ func (b *BaseNode) IsIfExpression(t *testing.T) *TestableIfExpression {
 
 // IsInfixExpression fails the test and returns nil by default
 func (b *BaseNode) IsInfixExpression(t *testing.T) (ie *TestableInfixExpression) {
+	t.Helper()
 	t.Fatalf(nodeFailureMsgFormat, "infix expression", b)
 	return
 }
@@ -74,6 +75,12 @@ func (b *BaseNode) IsInfixExpression(t *testing.T) (ie *TestableInfixExpression)
 // IsIntegerLiteral fails the test and returns nil by default
 func (b *BaseNode) IsIntegerLiteral(t *testing.T) (il *TestableIntegerLiteral) {
 	t.Fatalf(nodeFailureMsgFormat, "integer literal", b)
+	return
+}
+
+// IsSelfExpression fails the test and returns nil by default
+func (b *BaseNode) IsSelfExpression(t *testing.T) (sl *TestableSelfExpression) {
+	t.Fatalf(nodeFailureMsgFormat, "self expression", b)
 	return
 }
 
@@ -150,6 +157,10 @@ func (ie *InfixExpression) IsInfixExpression(t *testing.T) *TestableInfixExpress
 // IsIntegerLiteral returns pointer of the receiver string literal
 func (il *IntegerLiteral) IsIntegerLiteral(t *testing.T) *TestableIntegerLiteral {
 	return &TestableIntegerLiteral{IntegerLiteral: il, t: t}
+}
+
+func (se *SelfExpression) IsSelfExpression(t *testing.T) *TestableSelfExpression {
+	return &TestableSelfExpression{SelfExpression: se, t: t}
 }
 
 // IsStringLiteral returns pointer of the receiver string literal
