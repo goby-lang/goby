@@ -102,27 +102,27 @@ type DefStatement struct {
 	BlockStatement *BlockStatement
 }
 
-func (ds *DefStatement) statementNode() {}
-func (ds *DefStatement) TokenLiteral() string {
-	return ds.Token.Literal
+func (tds *DefStatement) statementNode() {}
+func (tds *DefStatement) TokenLiteral() string {
+	return tds.Token.Literal
 }
-func (ds *DefStatement) String() string {
+func (tds *DefStatement) String() string {
 	var out bytes.Buffer
 
 	out.WriteString("def ")
-	out.WriteString(ds.Name.TokenLiteral())
+	out.WriteString(tds.Name.TokenLiteral())
 	out.WriteString("(")
 
-	for i, param := range ds.Parameters {
+	for i, param := range tds.Parameters {
 		out.WriteString(param.String())
-		if i != len(ds.Parameters)-1 {
+		if i != len(tds.Parameters)-1 {
 			out.WriteString(", ")
 		}
 	}
 
 	out.WriteString(") ")
 	out.WriteString("{\n")
-	out.WriteString(ds.BlockStatement.String())
+	out.WriteString(tds.BlockStatement.String())
 	out.WriteString("\n}")
 
 	return out.String()

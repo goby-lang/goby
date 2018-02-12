@@ -8,7 +8,7 @@ type TestingStatement interface {
 	Statement
 	// Test Helpers
 	IsClassStmt(t *testing.T) *TestableClassStatement
-	IsDefStmt(t *testing.T) *DefStatement
+	IsDefStmt(t *testing.T) *TestableDefStatement
 	IsExpression(t *testing.T) TestingExpression
 	IsModuleStmt(t *testing.T) *TestableModuleStatement
 	IsReturnStmt(t *testing.T) *TestableReturnStatement
@@ -29,12 +29,15 @@ type TestableClassStatement struct {
 }
 
 // HasMethod checks if current class statement has target method, and returns the method if it has
-func (tcs *TestableClassStatement) HasMethod(methodName string) (ds *DefStatement) {
+func (tcs *TestableClassStatement) HasMethod(methodName string) (ds *TestableDefStatement) {
 	for _, stmt := range tcs.Body.Statements {
 		s, ok := stmt.(*DefStatement)
 
 		if ok && s.Name.Value == methodName {
-			ds = s
+			ds = &TestableDefStatement{
+				DefStatement: s,
+				t:            tcs.t,
+			}
 			return
 		}
 	}
@@ -56,6 +59,103 @@ func (tcs *TestableClassStatement) ShouldInherits(className string) {
 	}
 }
 
+/*TestableDefStatement*/
+
+type TestableDefStatement struct {
+	*DefStatement
+	t *testing.T
+}
+
+// MethodBody returns method body's statements and assert them as TestingStatements
+func (tds *TestableDefStatement) MethodBody() CodeBlock {
+	var tss []TestingStatement
+
+	for _, stmt := range tds.BlockStatement.Statements {
+		tss = append(tss, stmt.(TestingStatement))
+	}
+
+	return tss
+}
+
+// ShouldHasName checks if the method's name is what we expected
+func (tds *TestableDefStatement) ShouldHasName(expectedName string) {
+	if tds.Name.Value != expectedName {
+		tds.t.Fatalf("It's method %s, not %s", tds.Name.Value, expectedName)
+	}
+}
+
+// ShouldHasNoParam checks if the method has no param
+func (tds *TestableDefStatement) ShouldHasNoParam() {
+	if len(tds.Parameters) != 0 {
+		tds.t.Fatalf("Expect method %s not to have any params, got: %d", tds.Name.Value, len(tds.Parameters))
+	}
+}
+
+// ShouldHasNormalParam checks if the method has expected normal argument
+func (tds *TestableDefStatement) ShouldHasNormalParam(paramName string) {
+	for _, param := range tds.Parameters {
+		p, ok := param.(*Identifier)
+
+		if ok && p.NameIs(paramName) {
+			return
+		}
+	}
+
+	tds.t.Fatalf("Can't find normal param '%s' in method '%s'", paramName, tds.Name.Value)
+}
+
+// ShouldHasOptionalParam checks if the method has expected optional argument
+func (tds *TestableDefStatement) ShouldHasOptionalParam(paramName string) {
+	for _, param := range tds.Parameters {
+		p, ok := param.(*AssignExpression)
+
+		if ok && p.NameIs(paramName) {
+			return
+		}
+	}
+
+	tds.t.Fatalf("Can't find optional param '%s' in method '%s'", paramName, tds.Name.Value)
+}
+
+// ShouldHasRequiredKeywordParam checks if the method has expected keyword argument
+func (tds *TestableDefStatement) ShouldHasRequiredKeywordParam(paramName string) {
+	for _, param := range tds.Parameters {
+		p, ok := param.(*ArgumentPairExpression)
+
+		if ok && p.NameIs(paramName) && p.Value == nil {
+			return
+		}
+	}
+
+	tds.t.Fatalf("Can't find required keyword param '%s' in method '%s'", paramName, tds.Name.Value)
+}
+
+// ShouldHasOptionalKeywordParam checks if the method has expected optional keyword argument
+func (tds *TestableDefStatement) ShouldHasOptionalKeywordParam(paramName string) {
+	for _, param := range tds.Parameters {
+		p, ok := param.(*ArgumentPairExpression)
+
+		if ok && p.NameIs(paramName) && p.Value != nil {
+			return
+		}
+	}
+
+	tds.t.Fatalf("Can't find optional keyword param '%s' in method '%s'", paramName, tds.Name.Value)
+}
+
+// ShouldHasSplatParam checks if the method has expected splat argument
+func (tds *TestableDefStatement) ShouldHasSplatParam(paramName string) {
+	for _, param := range tds.Parameters {
+		p, ok := param.(*PrefixExpression)
+
+		if ok && p.NameIs(paramName) && p.Operator == "*" {
+			return
+		}
+	}
+
+	tds.t.Fatalf("Can't find splat param '%s' in method '%s'", paramName, tds.Name.Value)
+}
+
 /*TestableModuleStatement*/
 
 type TestableModuleStatement struct {
@@ -64,12 +164,15 @@ type TestableModuleStatement struct {
 }
 
 // HasMethod checks if current class statement has target method, and returns the method if it has
-func (tms *TestableModuleStatement) HasMethod(t *testing.T, methodName string) (ds *DefStatement) {
+func (tms *TestableModuleStatement) HasMethod(t *testing.T, methodName string) (ds *TestableDefStatement) {
 	for _, stmt := range tms.Body.Statements {
 		s, ok := stmt.(*DefStatement)
 
 		if ok && s.Name.Value == methodName {
-			ds = s
+			ds = &TestableDefStatement{
+				DefStatement: s,
+				t:            tms.t,
+			}
 			return
 		}
 	}

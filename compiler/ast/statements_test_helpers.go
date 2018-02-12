@@ -11,33 +11,33 @@ import (
 */
 
 // IsClassStmt fails the test and returns nil by default
-func (b *BaseNode) IsClassStmt(t *testing.T) (tcs *TestableClassStatement) {
+func (b *BaseNode) IsClassStmt(t *testing.T) *TestableClassStatement {
 	t.Fatalf(nodeFailureMsgFormat, "class statement", b)
-	return
+	return nil
 }
 
 // IsModuleStmt fails the test and returns nil by default
-func (b *BaseNode) IsModuleStmt(t *testing.T) (tms *TestableModuleStatement) {
+func (b *BaseNode) IsModuleStmt(t *testing.T) *TestableModuleStatement {
 	t.Fatalf(nodeFailureMsgFormat, "module statement", b)
-	return
+	return nil
 }
 
 // IsReturnStmt fails the test and returns nil by default
-func (b *BaseNode) IsReturnStmt(t *testing.T) (trs *TestableReturnStatement) {
+func (b *BaseNode) IsReturnStmt(t *testing.T) *TestableReturnStatement {
 	t.Fatalf(nodeFailureMsgFormat, "return statement", b)
-	return
+	return nil
 }
 
 // IsDefStmt fails the test and returns nil by default
-func (b *BaseNode) IsDefStmt(t *testing.T) (rs *DefStatement) {
+func (b *BaseNode) IsDefStmt(t *testing.T) *TestableDefStatement {
 	t.Fatalf(nodeFailureMsgFormat, "method definition", b)
-	return
+	return nil
 }
 
 // IsWhileStmt fails the test and returns nil by default
 func (b *BaseNode) IsWhileStmt(t *testing.T) (ws *WhileStatement) {
 	t.Fatalf(nodeFailureMsgFormat, "while statement", b)
-	return
+	return nil
 }
 
 /*
@@ -80,98 +80,8 @@ func (ms *ModuleStatement) NameIs(n string) bool {
 */
 
 // IsDefStmt returns a pointer of the DefStatement
-func (ds *DefStatement) IsDefStmt(t *testing.T) *DefStatement {
-	return ds
-}
-
-// MethodBody returns method body's statements and assert them as TestingStatements
-func (ds *DefStatement) MethodBody() CodeBlock {
-	var tss []TestingStatement
-
-	for _, stmt := range ds.BlockStatement.Statements {
-		tss = append(tss, stmt.(TestingStatement))
-	}
-
-	return tss
-}
-
-// ShouldHasName checks if the method's name is what we expected
-func (ds *DefStatement) ShouldHasName(t *testing.T, expectedName string) {
-	if ds.Name.Value != expectedName {
-		t.Fatalf("It's method %s, not %s", ds.Name.Value, expectedName)
-	}
-}
-
-// ShouldHasNoParam checks if the method has no param
-func (ds *DefStatement) ShouldHasNoParam(t *testing.T) {
-	if len(ds.Parameters) != 0 {
-		t.Fatalf("Expect method %s not to have any params, got: %d", ds.Name.Value, len(ds.Parameters))
-	}
-}
-
-// ShouldHasNormalParam checks if the method has expected normal argument
-func (ds *DefStatement) ShouldHasNormalParam(t *testing.T, paramName string) {
-	for _, param := range ds.Parameters {
-		p, ok := param.(*Identifier)
-
-		if ok && p.NameIs(paramName) {
-			return
-		}
-	}
-
-	t.Fatalf("Can't find normal param '%s' in method '%s'", paramName, ds.Name.Value)
-}
-
-// ShouldHasOptionalParam checks if the method has expected optional argument
-func (ds *DefStatement) ShouldHasOptionalParam(t *testing.T, paramName string) {
-	for _, param := range ds.Parameters {
-		p, ok := param.(*AssignExpression)
-
-		if ok && p.NameIs(paramName) {
-			return
-		}
-	}
-
-	t.Fatalf("Can't find optional param '%s' in method '%s'", paramName, ds.Name.Value)
-}
-
-// ShouldHasRequiredKeywordParam checks if the method has expected keyword argument
-func (ds *DefStatement) ShouldHasRequiredKeywordParam(t *testing.T, paramName string) {
-	for _, param := range ds.Parameters {
-		p, ok := param.(*ArgumentPairExpression)
-
-		if ok && p.NameIs(paramName) && p.Value == nil {
-			return
-		}
-	}
-
-	t.Fatalf("Can't find required keyword param '%s' in method '%s'", paramName, ds.Name.Value)
-}
-
-// ShouldHasOptionalKeywordParam checks if the method has expected optional keyword argument
-func (ds *DefStatement) ShouldHasOptionalKeywordParam(t *testing.T, paramName string) {
-	for _, param := range ds.Parameters {
-		p, ok := param.(*ArgumentPairExpression)
-
-		if ok && p.NameIs(paramName) && p.Value != nil {
-			return
-		}
-	}
-
-	t.Fatalf("Can't find optional keyword param '%s' in method '%s'", paramName, ds.Name.Value)
-}
-
-// ShouldHasSplatParam checks if the method has expected splat argument
-func (ds *DefStatement) ShouldHasSplatParam(t *testing.T, paramName string) {
-	for _, param := range ds.Parameters {
-		p, ok := param.(*PrefixExpression)
-
-		if ok && p.NameIs(paramName) && p.Operator == "*" {
-			return
-		}
-	}
-
-	t.Fatalf("Can't find splat param '%s' in method '%s'", paramName, ds.Name.Value)
+func (ds *DefStatement) IsDefStmt(t *testing.T) *TestableDefStatement {
+	return &TestableDefStatement{DefStatement: ds, t: t}
 }
 
 /*
