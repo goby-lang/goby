@@ -51,8 +51,8 @@ func TestClassStatement(t *testing.T) {
 	stmt := program.FirstStmt().IsClassStmt(t)
 	stmt.ShouldHasName("Foo")
 	defStmt := stmt.HasMethod("bar")
-	defStmt.ShouldHasNormalParam(t, "x")
-	defStmt.ShouldHasNormalParam(t, "y")
+	defStmt.ShouldHasNormalParam("x")
+	defStmt.ShouldHasNormalParam("y")
 
 	methodBodyExp := defStmt.MethodBody().NthStmt(1).IsExpression(t)
 
@@ -79,8 +79,8 @@ func TestModuleStatement(t *testing.T) {
 	stmt := program.FirstStmt().IsModuleStmt(t)
 	stmt.ShouldHasName("Foo")
 	defStmt := stmt.HasMethod(t, "bar")
-	defStmt.ShouldHasNormalParam(t, "x")
-	defStmt.ShouldHasNormalParam(t, "y")
+	defStmt.ShouldHasNormalParam("x")
+	defStmt.ShouldHasNormalParam("y")
 
 	methodBodyExp := defStmt.MethodBody().NthStmt(1).IsExpression(t)
 
@@ -109,8 +109,8 @@ func TestClassStatementWithInheritance(t *testing.T) {
 	classStmt.ShouldInherits("Bar")
 
 	defStmt := classStmt.HasMethod("bar")
-	defStmt.ShouldHasNormalParam(t, "x")
-	defStmt.ShouldHasNormalParam(t, "y")
+	defStmt.ShouldHasNormalParam("x")
+	defStmt.ShouldHasNormalParam("y")
 
 	methodBodyExp := defStmt.MethodBody().NthStmt(1).IsExpression(t)
 

@@ -25,16 +25,16 @@ func TestDefStatement(t *testing.T) {
 	}
 
 	firstStmt := program.FirstStmt().IsDefStmt(t)
-	firstStmt.ShouldHasName(t, "add")
-	firstStmt.ShouldHasNormalParam(t, "x")
-	firstStmt.ShouldHasNormalParam(t, "y")
+	firstStmt.ShouldHasName("add")
+	firstStmt.ShouldHasNormalParam("x")
+	firstStmt.ShouldHasNormalParam("y")
 
 	firstExpression := firstStmt.MethodBody().NthStmt(1).IsExpression(t)
 	testInfixExpression(t, firstExpression, "x", "+", "y")
 
 	secondStmt := program.NthStmt(2).IsDefStmt(t)
-	secondStmt.ShouldHasName(t, "foo")
-	secondStmt.ShouldHasNoParam(t)
+	secondStmt.ShouldHasName("foo")
+	secondStmt.ShouldHasNoParam()
 
 	secondExpression := secondStmt.MethodBody().NthStmt(1).IsExpression(t)
 	testIntegerLiteral(t, secondExpression, 123)
