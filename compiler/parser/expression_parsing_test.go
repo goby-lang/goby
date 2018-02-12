@@ -6,6 +6,12 @@ import (
 	"testing"
 )
 
+const (
+	Ident = iota
+	Const
+	Ivar
+)
+
 func TestArgumentPairExpressionFail(t *testing.T) {
 	tests := []struct {
 		input string
@@ -120,51 +126,17 @@ func TestArrayMultipleIndexExpression(t *testing.T) {
 	}
 }
 
-func TestAssignInfixExpressionWithLiteralValue(t *testing.T) {
+func TestAssignExpressionWithLiteralValue(t *testing.T) {
 	tests := []struct {
 		input              string
 		expectedIdentifier string
 		expectedValue      interface{}
-		variableMatchFunc  func(*testing.T, ast.Expression, string) bool
+		variableType		int
 	}{
-		{"x = 5;", "x", 5, testIdentifier},
-		{"y = true;", "y", true, testIdentifier},
+		{"x = 5;", "x", 5, Ident},
+		{"y = true;", "y", true, Ident},
 
-		{"Foo = '123'", "Foo", "123", testConstant},
-	}
-
-	for _, tt := range tests {
-		l := lexer.New(tt.input)
-		p := New(l)
-
-		program, err := p.ParseProgram()
-
-		if err != nil {
-			t.Fatal(err.Message)
-		}
-
-		if program == nil {
-			t.Fatal("ParseProgram() returned nil")
-		}
-
-		testAssignExpression(t, program.FirstStmt().IsExpression(t).IsAssignExpression(t), tt.expectedIdentifier, tt.variableMatchFunc, tt.expectedValue)
-	}
-}
-
-func TestAssignIndexExpressionWithVariableValue(t *testing.T) {
-	tests := []struct {
-		input              string
-		expectedIdentifier string
-		expectedValue      string
-		variableMatchFunc  func(*testing.T, ast.Expression, string) bool
-		valueMatchFunc     func(*testing.T, ast.Expression, string) bool
-	}{
-		{"x = y", "x", "y", testIdentifier, testIdentifier},
-		{"@foo = y", "@foo", "y", testInstanceVariable, testIdentifier},
-		{"y = @foo", "y", "@foo", testIdentifier, testInstanceVariable},
-		{"Foo = @bar", "Foo", "@bar", testConstant, testInstanceVariable},
-		{"@bar = Foo", "@bar", "Foo", testInstanceVariable, testConstant},
-		{"@bar = @foo", "@bar", "@foo", testInstanceVariable, testInstanceVariable},
+		{"Foo = '123'", "Foo", "123", Const},
 	}
 
 	for _, tt := range tests {
@@ -178,8 +150,70 @@ func TestAssignIndexExpressionWithVariableValue(t *testing.T) {
 		}
 
 		assignExp := program.FirstStmt().IsExpression(t).IsAssignExpression(t)
-		tt.variableMatchFunc(t, assignExp.Variables[0], tt.expectedIdentifier)
-		tt.valueMatchFunc(t, assignExp.Value, tt.expectedValue)
+
+		switch tt.variableType {
+		case Ident:
+			assignExp.NthVariable(1).IsIdentifier(t).ShouldHasName(tt.expectedIdentifier)
+		case Const:
+			assignExp.NthVariable(1).IsConstant(t).ShouldHasName(tt.expectedIdentifier)
+		}
+
+		switch v := tt.expectedValue.(type) {
+		case int:
+			assignExp.TestableValue().IsIntegerLiteral(t).ShouldEqualTo(v)
+		case string:
+			assignExp.TestableValue().IsStringLiteral(t).ShouldEqualTo(v)
+		case bool:
+			assignExp.TestableValue().IsBooleanExpression(t).ShouldEqualTo(v)
+		}
+	}
+}
+
+func TestAssignExpressionWithVariableValue(t *testing.T) {
+	tests := []struct {
+		input              string
+		expectedIdentifier string
+		expectedValue      string
+		variableType int
+		valueType int
+	}{
+		{"x = y", "x", "y", Ident, Ident},
+		{"@foo = y", "@foo", "y", Ivar, Ident},
+		{"y = @foo", "y", "@foo", Ident, Ivar},
+		{"Foo = @bar", "Foo", "@bar", Const, Ivar},
+		{"@bar = Foo", "@bar", "Foo", Ivar, Const},
+		{"@bar = @foo", "@bar", "@foo", Ivar, Ivar},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+
+		program, err := p.ParseProgram()
+
+		if err != nil {
+			t.Fatal(err.Message)
+		}
+
+		assignExp := program.FirstStmt().IsExpression(t).IsAssignExpression(t)
+
+		switch tt.variableType {
+		case Ident:
+			assignExp.NthVariable(1).IsIdentifier(t).ShouldHasName(tt.expectedIdentifier)
+		case Const:
+			assignExp.NthVariable(1).IsConstant(t).ShouldHasName(tt.expectedIdentifier)
+		case Ivar:
+			assignExp.NthVariable(1).IsInstanceVariable(t).ShouldHasName(tt.expectedIdentifier)
+		}
+
+		switch tt.valueType {
+		case Ident:
+			assignExp.TestableValue().IsIdentifier(t).ShouldHasName(tt.expectedValue)
+		case Const:
+			assignExp.TestableValue().IsConstant(t).ShouldHasName(tt.expectedValue)
+		case Ivar:
+			assignExp.TestableValue().IsInstanceVariable(t).ShouldHasName(tt.expectedValue)
+		}
 	}
 }
 
@@ -205,8 +239,15 @@ func TestCallExpression(t *testing.T) {
 	}
 
 	callExpression.NthArgument(1).IsIntegerLiteral(t).ShouldEqualTo(1)
-	testInfixExpression(t, callExpression.NthArgument(2).IsInfixExpression(t), 2, "*", 3)
-	testInfixExpression(t, callExpression.NthArgument(3).IsInfixExpression(t), 4, "+", 5)
+	infix1 := callExpression.NthArgument(2).IsInfixExpression(t)
+	infix1.ShouldHasOperator("*")
+	infix1.TestableLeftExpression().IsIntegerLiteral(t).ShouldEqualTo(2)
+	infix1.TestableRightExpression().IsIntegerLiteral(t).ShouldEqualTo(3)
+
+	infix2 := callExpression.NthArgument(3).IsInfixExpression(t)
+	infix2.ShouldHasOperator("+")
+	infix2.TestableLeftExpression().IsIntegerLiteral(t).ShouldEqualTo(4)
+	infix2.TestableRightExpression().IsIntegerLiteral(t).ShouldEqualTo(5)
 }
 
 func TestCallExpressionWithBlock(t *testing.T) {
@@ -257,18 +298,35 @@ func TestCaseExpression(t *testing.T) {
 	exp.ShouldHasNumberOfConditionals(2)
 	cs := exp.TestableConditionals()
 
-	c0 := cs[0]
-	testInfixExpression(t, c0.IsConditionalExpression(t).TestableCondition().IsInfixExpression(t), 2, "==", 0)
-	consequence0 := c0.IsConditionalExpression(t).TestableConsequence()
-	testInfixExpression(t, consequence0[0].IsExpression(t).IsInfixExpression(t), 0, "+", 0)
+	c0 := cs[0].IsConditionalExpression(t)
+	condition0 := c0.TestableCondition().IsInfixExpression(t)
+	condition0.ShouldHasOperator("==")
+	condition0.TestableLeftExpression().IsIntegerLiteral(t).ShouldEqualTo(2)
+	condition0.TestableRightExpression().IsIntegerLiteral(t).ShouldEqualTo(0)
 
-	c1 := cs[1]
-	testInfixExpression(t, c1.IsConditionalExpression(t).TestableCondition().IsInfixExpression(t), 2, "==", 1)
-	consequence1 := c1.IsConditionalExpression(t).TestableConsequence()
-	testInfixExpression(t, consequence1[0].IsExpression(t).IsInfixExpression(t), 1, "+", 1)
+	consequence0 := c0.TestableConsequence()
+	firstConsequenceExp := consequence0.NthStmt(1).IsExpression(t).IsInfixExpression(t)
+	firstConsequenceExp.ShouldHasOperator("+")
+	firstConsequenceExp.TestableLeftExpression().IsIntegerLiteral(t).ShouldEqualTo(0)
+	firstConsequenceExp.TestableRightExpression().IsIntegerLiteral(t).ShouldEqualTo(0)
+
+	c1 := cs[1].IsConditionalExpression(t)
+	condition1 := c1.TestableCondition().IsInfixExpression(t)
+	condition1.ShouldHasOperator("==")
+	condition1.TestableLeftExpression().IsIntegerLiteral(t).ShouldEqualTo(2)
+	condition1.TestableRightExpression().IsIntegerLiteral(t).ShouldEqualTo(1)
+
+	consequence1 := c1.TestableConsequence()
+	firstConsequenceExp = consequence1.NthStmt(1).IsExpression(t).IsInfixExpression(t)
+	firstConsequenceExp.ShouldHasOperator("+")
+	firstConsequenceExp.TestableLeftExpression().IsIntegerLiteral(t).ShouldEqualTo(1)
+	firstConsequenceExp.TestableRightExpression().IsIntegerLiteral(t).ShouldEqualTo(1)
 
 	alternative := exp.TestableAlternative()
-	testInfixExpression(t, alternative.NthStmt(1).IsExpression(t).IsInfixExpression(t), 2, "+", 2)
+	alternativeInfix := alternative.NthStmt(1).IsExpression(t).IsInfixExpression(t)
+	alternativeInfix.ShouldHasOperator("+")
+	alternativeInfix.TestableLeftExpression().IsIntegerLiteral(t).ShouldEqualTo(2)
+	alternativeInfix.TestableRightExpression().IsIntegerLiteral(t).ShouldEqualTo(2)
 }
 
 func TestConstantExpression(t *testing.T) {
@@ -318,8 +376,8 @@ func TestHashExpression(t *testing.T) {
 
 		hash := program.FirstStmt().IsExpression(t).IsHashExpression(t)
 
-		for key := range hash.Data {
-			testIntegerLiteral(t, hash.Data[key], tt.expectedElements[key])
+		for key := range hash.TestableDataPairs() {
+			hash.TestableDataPairs()[key].IsIntegerLiteral(t).ShouldEqualTo(tt.expectedElements[key])
 		}
 	}
 }
@@ -400,7 +458,7 @@ func TestIdentifierExpression(t *testing.T) {
 func TestIfExpression(t *testing.T) {
 	input := `
 	if x < y
-	  x + 5
+	  @x + 5
 	elsif x == y
 	  y + 5
 	elsif x > y
@@ -424,22 +482,40 @@ func TestIfExpression(t *testing.T) {
 	cs := exp.TestableConditionals()
 
 	c0 := cs[0].IsConditionalExpression(t)
-	testInfixExpression(t, c0.TestableCondition().IsInfixExpression(t), "x", "<", "y")
-	consequence0 := c0.TestableConsequence()[0].IsExpression(t).IsInfixExpression(t)
-	testInfixExpression(t, consequence0, "x", "+", 5)
+	condition0 := c0.TestableCondition().IsInfixExpression(t)
+	condition0.ShouldHasOperator("<")
+	condition0.TestableLeftExpression().IsIdentifier(t).ShouldHasName("x")
+	condition0.TestableRightExpression().IsIdentifier(t).ShouldHasName("y")
+	consequence0 := c0.TestableConsequence().NthStmt(1).IsExpression(t).IsInfixExpression(t)
+	consequence0.ShouldHasOperator("+")
+	consequence0.TestableLeftExpression().IsInstanceVariable(t).ShouldHasName("@x")
+	consequence0.TestableRightExpression().IsIntegerLiteral(t).ShouldEqualTo(5)
 
 	c1 := cs[1].IsConditionalExpression(t)
-	testInfixExpression(t, c1.TestableCondition().IsInfixExpression(t), "x", "==", "y")
-	consequence1 := c1.TestableConsequence()[0].IsExpression(t).IsInfixExpression(t)
-	testInfixExpression(t, consequence1, "y", "+", 5)
+	condition1 := c1.TestableCondition().IsInfixExpression(t)
+	condition1.ShouldHasOperator("==")
+	condition1.TestableLeftExpression().IsIdentifier(t).ShouldHasName("x")
+	condition1.TestableRightExpression().IsIdentifier(t).ShouldHasName("y")
+	consequence1 := c1.TestableConsequence().NthStmt(1).IsExpression(t).IsInfixExpression(t)
+	consequence1.ShouldHasOperator("+")
+	consequence1.TestableLeftExpression().IsIdentifier(t).ShouldHasName("y")
+	consequence1.TestableRightExpression().IsIntegerLiteral(t).ShouldEqualTo(5)
 
 	c2 := cs[2].IsConditionalExpression(t)
-	testInfixExpression(t, c2.TestableCondition().IsInfixExpression(t), "x", ">", "y")
-	consequence2 := c2.TestableConsequence()[0].IsExpression(t).IsInfixExpression(t)
-	testInfixExpression(t, consequence2, "y", "-", 1)
+	condition2 := c2.TestableCondition().IsInfixExpression(t)
+	condition2.ShouldHasOperator(">")
+	condition2.TestableLeftExpression().IsIdentifier(t).ShouldHasName("x")
+	condition2.TestableRightExpression().IsIdentifier(t).ShouldHasName("y")
+	consequence2 := c2.TestableConsequence().NthStmt(1).IsExpression(t).IsInfixExpression(t)
+	consequence2.ShouldHasOperator("-")
+	consequence2.TestableLeftExpression().IsIdentifier(t).ShouldHasName("y")
+	consequence2.TestableRightExpression().IsIntegerLiteral(t).ShouldEqualTo(1)
 
 	alternative := exp.TestableAlternative()
-	testInfixExpression(t, alternative[0].IsExpression(t).IsInfixExpression(t), "y", "+", 4)
+	alternativeExp := alternative.NthStmt(1).IsExpression(t).IsInfixExpression(t)
+	alternativeExp.ShouldHasOperator("+")
+	alternativeExp.TestableLeftExpression().IsIdentifier(t).ShouldHasName("y")
+	alternativeExp.TestableRightExpression().IsIntegerLiteral(t).ShouldEqualTo(4)
 }
 
 func TestInfixExpression(t *testing.T) {
@@ -463,7 +539,9 @@ func TestInfixExpression(t *testing.T) {
 		}
 
 		exp := program.FirstStmt().IsExpression(t).IsInfixExpression(t)
-		testInfixExpression(t, exp, tt.leftValue, tt.operator, tt.rightValue)
+		exp.ShouldHasOperator(tt.operator)
+		exp.TestableLeftExpression().IsIntegerLiteral(t).ShouldEqualTo(tt.leftValue)
+		exp.TestableRightExpression().IsIntegerLiteral(t).ShouldEqualTo(tt.rightValue)
 	}
 }
 
@@ -557,8 +635,16 @@ func TestSelfExpression(t *testing.T) {
 	callExpression.TestableReceiver().IsSelfExpression(t)
 
 	callExpression.NthArgument(1).IsIntegerLiteral(t).ShouldEqualTo(1)
-	testInfixExpression(t, callExpression.NthArgument(2).IsInfixExpression(t), 2, "*", 3)
-	testInfixExpression(t, callExpression.NthArgument(3).IsInfixExpression(t), 4, "+", 5)
+
+	infix1 := callExpression.NthArgument(2).IsInfixExpression(t)
+	infix1.ShouldHasOperator("*")
+	infix1.TestableLeftExpression().IsIntegerLiteral(t).ShouldEqualTo(2)
+	infix1.TestableRightExpression().IsIntegerLiteral(t).ShouldEqualTo(3)
+
+	infix2 := callExpression.NthArgument(3).IsInfixExpression(t)
+	infix2.ShouldHasOperator("+")
+	infix2.TestableLeftExpression().IsIntegerLiteral(t).ShouldEqualTo(4)
+	infix2.TestableRightExpression().IsIntegerLiteral(t).ShouldEqualTo(5)
 }
 
 func TestStringLiteralExpression(t *testing.T) {
@@ -582,22 +668,5 @@ func TestStringLiteralExpression(t *testing.T) {
 
 		literal := program.FirstStmt().IsExpression(t).IsStringLiteral(t)
 		literal.ShouldEqualTo(tt.expected)
-	}
-}
-
-func testAssignExpression(t *testing.T, exp ast.Expression, expectedIdentifier string, variableMatchFunction func(*testing.T, ast.Expression, string) bool, expected interface{}) {
-	assignExp := exp.(*ast.TestableAssignExpression)
-
-	if !variableMatchFunction(t, assignExp.Variables[0], expectedIdentifier) {
-		return
-	}
-
-	switch expected := expected.(type) {
-	case int:
-		testIntegerLiteral(t, assignExp.Value, expected)
-	case string:
-		testStringLiteral(t, assignExp.Value, expected)
-	case bool:
-		testBoolLiteral(t, assignExp.Value, expected)
 	}
 }

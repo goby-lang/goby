@@ -138,6 +138,7 @@ type TestableHashExpression struct {
 }
 
 func (the *TestableHashExpression) TestableDataPairs() (pairs map[string]TestingExpression) {
+	pairs = make(map[string]TestingExpression)
 	for k, v := range the.Data {
 		pairs[k] = v.(TestingExpression)
 	}
@@ -153,6 +154,7 @@ type TestableIdentifier struct {
 }
 
 func (ti *TestableIdentifier) ShouldHasName(expectedName string) {
+	ti.t.Helper()
 	if ti.Value != expectedName {
 		ti.t.Fatalf("expect current identifier to be '%s', got '%s'", expectedName, ti.Value)
 	}

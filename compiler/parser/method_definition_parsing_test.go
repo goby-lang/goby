@@ -30,14 +30,17 @@ func TestDefStatement(t *testing.T) {
 	firstStmt.ShouldHasNormalParam("y")
 
 	firstExpression := firstStmt.MethodBody().NthStmt(1).IsExpression(t)
-	testInfixExpression(t, firstExpression.IsInfixExpression(t), "x", "+", "y")
+	infixExp := firstExpression.IsInfixExpression(t)
+	infixExp.ShouldHasOperator("+")
+	infixExp.TestableLeftExpression().IsIdentifier(t).ShouldHasName("x")
+	infixExp.TestableRightExpression().IsIdentifier(t).ShouldHasName("y")
 
 	secondStmt := program.NthStmt(2).IsDefStmt(t)
 	secondStmt.ShouldHasName("foo")
 	secondStmt.ShouldHasNoParam()
 
 	secondExpression := secondStmt.MethodBody().NthStmt(1).IsExpression(t)
-	testIntegerLiteral(t, secondExpression, 123)
+	secondExpression.IsIntegerLiteral(t).ShouldEqualTo(123)
 }
 
 func TestDefStatementWithYield(t *testing.T) {
