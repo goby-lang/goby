@@ -72,7 +72,7 @@ func (b *BaseNode) IsInfixExpression(t *testing.T) (ie *TestableInfixExpression)
 }
 
 // IsIntegerLiteral fails the test and returns nil by default
-func (b *BaseNode) IsIntegerLiteral(t *testing.T) (il *IntegerLiteral) {
+func (b *BaseNode) IsIntegerLiteral(t *testing.T) (il *TestableIntegerLiteral) {
 	t.Fatalf(nodeFailureMsgFormat, "integer literal", b)
 	return
 }
@@ -89,18 +89,10 @@ func (b *BaseNode) IsYieldExpression(t *testing.T) (ye *YieldExpression) {
 	return
 }
 
-/*
-ArrayExpression
-*/
-
 // IsArrayExpression returns pointer of the receiver array expression
 func (ae *ArrayExpression) IsArrayExpression(t *testing.T) *TestableArrayExpression {
 	return &TestableArrayExpression{ArrayExpression: ae, t: t}
 }
-
-/*
-AssignExpression
-*/
 
 // IsAssignExpression returns pointer of the receiver assign expression
 func (ae *AssignExpression) IsAssignExpression(t *testing.T) *TestableAssignExpression {
@@ -112,44 +104,24 @@ func (ae *AssignExpression) NameIs(n string) bool {
 	return ae.Variables[0].(testingNode).NameIs(n)
 }
 
-/*
-CallExpression
-*/
-
 // IsCallExpression returns pointer of the receiver call expression
 func (ce *CallExpression) IsCallExpression(t *testing.T) *TestableCallExpression {
 	return &TestableCallExpression{CallExpression: ce, t: t}
 }
 
-/*
-ConditionalExpression
-*/
-
 func (ce *ConditionalExpression) IsConditionalExpression(t *testing.T) *TestableConditionalExpression {
 	return &TestableConditionalExpression{ConditionalExpression: ce, t: t}
 }
-
-/*
-Constant
-*/
 
 // IsConstant returns pointer of the current receiver constant
 func (c *Constant) IsConstant(t *testing.T) *TestableConstant {
 	return &TestableConstant{Constant: c, t: t}
 }
 
-/*
-HashExpression
-*/
-
 // IsHashExpression returns pointer of the receiver hash expression
 func (he *HashExpression) IsHashExpression(t *testing.T) *TestableHashExpression {
 	return &TestableHashExpression{HashExpression: he, t: t}
 }
-
-/*
-Identifier
-*/
 
 // IsIdentifier returns pointer of the receiver identifier
 func (i *Identifier) IsIdentifier(t *testing.T) *TestableIdentifier {
@@ -165,51 +137,25 @@ func (i *Identifier) NameIs(n string) bool {
 	return false
 }
 
-/*
-IfExpression
-*/
-
 // IsIfExpression returns pointer of the receiver if expression
 func (ie *IfExpression) IsIfExpression(t *testing.T) *TestableIfExpression {
 	return &TestableIfExpression{IfExpression: ie, t: t}
 }
-
-/*
-InfixExpression
-*/
 
 // IsInfixExpression returns pointer of the receiver infix expression
 func (ie *InfixExpression) IsInfixExpression(t *testing.T) *TestableInfixExpression {
 	return &TestableInfixExpression{InfixExpression: ie, t: t}
 }
 
-/*
-IntegerLiteral
-*/
-
 // IsIntegerLiteral returns pointer of the receiver string literal
-func (il *IntegerLiteral) IsIntegerLiteral(t *testing.T) *IntegerLiteral {
-	return il
+func (il *IntegerLiteral) IsIntegerLiteral(t *testing.T) *TestableIntegerLiteral {
+	return &TestableIntegerLiteral{IntegerLiteral: il, t: t}
 }
-
-func (il *IntegerLiteral) ShouldEqualTo(t *testing.T, expectedInt int) {
-	if il.Value != expectedInt {
-		t.Fatalf("Expect integer literal to be %d, got %d", expectedInt, il.Value)
-	}
-}
-
-/*
-StringLiteral
-*/
 
 // IsStringLiteral returns pointer of the receiver string literal
 func (sl *StringLiteral) IsStringLiteral(t *testing.T) *StringLiteral {
 	return sl
 }
-
-/*
-YieldExpression
-*/
 
 // IsYieldExpression returns pointer of the receiver yield expression
 func (ye *YieldExpression) IsYieldExpression(t *testing.T) *YieldExpression {

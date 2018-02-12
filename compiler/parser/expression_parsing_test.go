@@ -48,7 +48,7 @@ func TestArrayExpression(t *testing.T) {
 		arrayExp := program.FirstStmt().IsExpression(t).IsArrayExpression(t)
 
 		for i, elem := range arrayExp.TestableElements() {
-			elem.IsIntegerLiteral(t).ShouldEqualTo(t, tt.expectedElements[i])
+			elem.IsIntegerLiteral(t).ShouldEqualTo(tt.expectedElements[i])
 		}
 	}
 }
@@ -79,7 +79,7 @@ func TestArrayIndexExpression(t *testing.T) {
 
 		switch expected := tt.expectedIndex.(type) {
 		case int:
-			arrIndexing.NthArgument(1).IsIntegerLiteral(t).ShouldEqualTo(t, expected)
+			arrIndexing.NthArgument(1).IsIntegerLiteral(t).ShouldEqualTo(expected)
 		case string:
 			arrIndexing.NthArgument(1).IsIdentifier(t).ShouldHasName(expected)
 		}
@@ -112,7 +112,7 @@ func TestArrayMultipleIndexExpression(t *testing.T) {
 			arg := arrIndexing.NthArgument(i + 1)
 			switch expected := value.(type) {
 			case int:
-				arg.IsIntegerLiteral(t).ShouldEqualTo(t, expected)
+				arg.IsIntegerLiteral(t).ShouldEqualTo(expected)
 			case string:
 				arg.IsIdentifier(t).ShouldHasName(expected)
 			}
@@ -204,7 +204,7 @@ func TestCallExpression(t *testing.T) {
 		t.Fatalf("expect %d arguments. got=%d", 3, len(callExpression.Arguments))
 	}
 
-	callExpression.NthArgument(1).IsIntegerLiteral(t).ShouldEqualTo(t, 1)
+	callExpression.NthArgument(1).IsIntegerLiteral(t).ShouldEqualTo(1)
 	testInfixExpression(t, callExpression.NthArgument(2).IsInfixExpression(t), 2, "*", 3)
 	testInfixExpression(t, callExpression.NthArgument(3).IsInfixExpression(t), 4, "+", 5)
 }
@@ -258,12 +258,12 @@ func TestCaseExpression(t *testing.T) {
 	cs := exp.TestableConditionals()
 
 	c0 := cs[0]
-	testInfixExpression(t, c0.IsConditionalExpression(t), 2, "==", 0)
+	testInfixExpression(t, c0.IsConditionalExpression(t).IsInfixExpression(t), 2, "==", 0)
 	consequence0 := c0.IsConditionalExpression(t).TestableConsequence()
 	testInfixExpression(t, consequence0[0].IsExpression(t), 0, "+", 0)
 
 	c1 := cs[1]
-	testInfixExpression(t, c1.IsConditionalExpression(t), 2, "==", 1)
+	testInfixExpression(t, c1.IsConditionalExpression(t).IsInfixExpression(t), 2, "==", 1)
 	consequence1 := c1.IsConditionalExpression(t).TestableConsequence()
 	testInfixExpression(t, consequence1[0].IsExpression(t), 1, "+", 1)
 
@@ -486,7 +486,7 @@ func TestIntegerLiteralExpression(t *testing.T) {
 	}
 
 	integerLiteral := program.FirstStmt().IsExpression(t).IsIntegerLiteral(t)
-	integerLiteral.ShouldEqualTo(t, 5)
+	integerLiteral.ShouldEqualTo(5)
 }
 
 func TestIntegerLiteralExpressionFail(t *testing.T) {
