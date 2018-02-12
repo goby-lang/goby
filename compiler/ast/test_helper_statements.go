@@ -12,7 +12,7 @@ type TestingStatement interface {
 	IsExpression(t *testing.T) TestingExpression
 	IsModuleStmt(t *testing.T) *TestableModuleStatement
 	IsReturnStmt(t *testing.T) *TestableReturnStatement
-	IsWhileStmt(t *testing.T) *WhileStatement
+	IsWhileStmt(t *testing.T) *TestableWhileStatement
 }
 
 type CodeBlock []TestingStatement
@@ -207,4 +207,11 @@ func (trs *TestableReturnStatement) ShouldHasValue(value interface{}) {
 	case TestingIdentifier:
 		compareIdentifier(t, rs.ReturnValue, v)
 	}
+}
+
+/*TestableWhileStatement*/
+
+type TestableWhileStatement struct {
+	*WhileStatement
+	t *testing.T
 }

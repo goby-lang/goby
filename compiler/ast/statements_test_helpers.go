@@ -35,7 +35,7 @@ func (b *BaseNode) IsDefStmt(t *testing.T) *TestableDefStatement {
 }
 
 // IsWhileStmt fails the test and returns nil by default
-func (b *BaseNode) IsWhileStmt(t *testing.T) (ws *WhileStatement) {
+func (b *BaseNode) IsWhileStmt(t *testing.T) (ws *TestableWhileStatement) {
 	t.Fatalf(nodeFailureMsgFormat, "while statement", b)
 	return nil
 }
@@ -75,26 +75,15 @@ func (ms *ModuleStatement) NameIs(n string) bool {
 	return false
 }
 
-/*
- DefStatement
-*/
-
 // IsDefStmt returns a pointer of the DefStatement
 func (ds *DefStatement) IsDefStmt(t *testing.T) *TestableDefStatement {
 	return &TestableDefStatement{DefStatement: ds, t: t}
 }
 
-/*
-ReturnStatement
-*/
-
+// IsDefStmt returns a pointer of the ReturnStatement
 func (rs *ReturnStatement) IsReturnStmt(t *testing.T) (trs *TestableReturnStatement) {
 	return &TestableReturnStatement{t: t, ReturnStatement: rs}
 }
-
-/*
-ExpressionStatement
-*/
 
 // IsExpressionStmt returns ExpressionStatement itself
 func (ts *ExpressionStatement) IsExpression(t *testing.T) TestingExpression {
@@ -105,11 +94,16 @@ func (ts *ExpressionStatement) IsExpression(t *testing.T) TestingExpression {
 WhileStatement
 */
 
+// IsWhileStmt returns the pointer of current while statement
+func (ws *WhileStatement) IsWhileStmt(t *testing.T) *TestableWhileStatement {
+	return &TestableWhileStatement{WhileStatement: ws, t: t}
+}
+
 // Block returns while statement's code block as a set of TestingStatements
-func (we *WhileStatement) CodeBlock() CodeBlock {
+func (tws *TestableWhileStatement) CodeBlock() CodeBlock {
 	var tss []TestingStatement
 
-	for _, stmt := range we.Body.Statements {
+	for _, stmt := range tws.Body.Statements {
 		tss = append(tss, stmt.(TestingStatement))
 	}
 
@@ -117,11 +111,6 @@ func (we *WhileStatement) CodeBlock() CodeBlock {
 }
 
 // ConditionExpression returns while statement's condition as TestingExpression
-func (we *WhileStatement) ConditionExpression() TestingExpression {
-	return we.Condition.(TestingExpression)
-}
-
-// IsWhileStmt returns the pointer of current while statement
-func (ws *WhileStatement) IsWhileStmt(t *testing.T) *WhileStatement {
-	return ws
+func (tws *TestableWhileStatement) ConditionExpression() TestingExpression {
+	return tws.Condition.(TestingExpression)
 }
