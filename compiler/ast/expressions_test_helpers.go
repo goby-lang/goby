@@ -6,6 +6,17 @@ import (
 	"testing"
 )
 
+const nodeFailureMsgFormat = "Node is not %s, is %T"
+
+// TestableIdentifierValue for marking a string as an identifier's value for test
+type TestableIdentifierValue string
+
+type testingNode interface {
+	node
+	// Belows are test helpers
+	nameIs(name string) bool
+}
+
 /*
  BaseNode
 */
@@ -47,7 +58,7 @@ func (b *BaseNode) IsConstant(t *testing.T) (c *TestableConstant) {
 }
 
 // IsExpression fails the test and returns nil by default
-func (b *BaseNode) IsExpression(t *testing.T) (te TestingExpression) {
+func (b *BaseNode) IsExpression(t *testing.T) (te TestableExpression) {
 	t.Helper()
 	t.Fatalf(nodeFailureMsgFormat, "expression", b)
 	return
@@ -110,6 +121,10 @@ func (b *BaseNode) IsYieldExpression(t *testing.T) *TestableYieldExpression {
 	return nil
 }
 
+/*
+AST node's helpers
+*/
+
 // IsArrayExpression returns pointer of the receiver array expression
 func (ae *ArrayExpression) IsArrayExpression(t *testing.T) *TestableArrayExpression {
 	return &TestableArrayExpression{ArrayExpression: ae, t: t}
@@ -120,14 +135,13 @@ func (ae *AssignExpression) IsAssignExpression(t *testing.T) *TestableAssignExpr
 	return &TestableAssignExpression{AssignExpression: ae, t: t}
 }
 
-// IsAssignExpression returns pointer of the receiver boolean expression
-func (be *BooleanExpression) IsBooleanExpression(t *testing.T) *TestableBooleanExpression {
-	return &TestableBooleanExpression{BooleanExpression: be, t: t}
+func (ae *AssignExpression) nameIs(n string) bool {
+	return ae.Variables[0].(testingNode).nameIs(n)
 }
 
-// NameIs compares the assignment's variable name and expected name
-func (ae *AssignExpression) NameIs(n string) bool {
-	return ae.Variables[0].(testingNode).NameIs(n)
+// IsBooleanExpression returns pointer of the receiver boolean expression
+func (be *BooleanExpression) IsBooleanExpression(t *testing.T) *TestableBooleanExpression {
+	return &TestableBooleanExpression{BooleanExpression: be, t: t}
 }
 
 // IsCallExpression returns pointer of the receiver call expression
@@ -135,6 +149,7 @@ func (ce *CallExpression) IsCallExpression(t *testing.T) *TestableCallExpression
 	return &TestableCallExpression{CallExpression: ce, t: t}
 }
 
+// IsConditionalExpression returns pointer of the receiver conditional expression
 func (ce *ConditionalExpression) IsConditionalExpression(t *testing.T) *TestableConditionalExpression {
 	return &TestableConditionalExpression{ConditionalExpression: ce, t: t}
 }
@@ -154,8 +169,7 @@ func (i *Identifier) IsIdentifier(t *testing.T) *TestableIdentifier {
 	return &TestableIdentifier{Identifier: i, t: t}
 }
 
-// NameIs compares the identifier's name and expected name
-func (i *Identifier) NameIs(n string) bool {
+func (i *Identifier) nameIs(n string) bool {
 	if i.Value == n {
 		return true
 	}
@@ -178,11 +192,12 @@ func (iv *InstanceVariable) IsInstanceVariable(t *testing.T) *TestableInstanceVa
 	return &TestableInstanceVariable{InstanceVariable: iv, t: t}
 }
 
-// IsIntegerLiteral returns pointer of the receiver string literal
+// IsIntegerLiteral returns pointer of the receiver integer literal
 func (il *IntegerLiteral) IsIntegerLiteral(t *testing.T) *TestableIntegerLiteral {
 	return &TestableIntegerLiteral{IntegerLiteral: il, t: t}
 }
 
+// IsSelfExpression returns pointer of the receiver self expression
 func (se *SelfExpression) IsSelfExpression(t *testing.T) *TestableSelfExpression {
 	return &TestableSelfExpression{SelfExpression: se, t: t}
 }

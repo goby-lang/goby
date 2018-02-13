@@ -4,20 +4,20 @@ package ast
 
 import "testing"
 
-type TestingStatement interface {
+type TestableStatement interface {
 	Statement
 	// Test Helpers
 	IsClassStmt(t *testing.T) *TestableClassStatement
 	IsDefStmt(t *testing.T) *TestableDefStatement
-	IsExpression(t *testing.T) TestingExpression
+	IsExpression(t *testing.T) TestableExpression
 	IsModuleStmt(t *testing.T) *TestableModuleStatement
 	IsReturnStmt(t *testing.T) *TestableReturnStatement
 	IsWhileStmt(t *testing.T) *TestableWhileStatement
 }
 
-type CodeBlock []TestingStatement
+type CodeBlock []TestableStatement
 
-func (cb CodeBlock) NthStmt(n int) TestingStatement {
+func (cb CodeBlock) NthStmt(n int) TestableStatement {
 	return cb[n-1]
 }
 
@@ -68,10 +68,10 @@ type TestableDefStatement struct {
 
 // MethodBody returns method body's statements and assert them as TestingStatements
 func (tds *TestableDefStatement) MethodBody() CodeBlock {
-	var tss []TestingStatement
+	var tss []TestableStatement
 
 	for _, stmt := range tds.BlockStatement.Statements {
-		tss = append(tss, stmt.(TestingStatement))
+		tss = append(tss, stmt.(TestableStatement))
 	}
 
 	return tss
@@ -96,7 +96,7 @@ func (tds *TestableDefStatement) ShouldHasNormalParam(paramName string) {
 	for _, param := range tds.Parameters {
 		p, ok := param.(*Identifier)
 
-		if ok && p.NameIs(paramName) {
+		if ok && p.nameIs(paramName) {
 			return
 		}
 	}
@@ -109,7 +109,7 @@ func (tds *TestableDefStatement) ShouldHasOptionalParam(paramName string) {
 	for _, param := range tds.Parameters {
 		p, ok := param.(*AssignExpression)
 
-		if ok && p.NameIs(paramName) {
+		if ok && p.nameIs(paramName) {
 			return
 		}
 	}
@@ -204,7 +204,7 @@ func (trs *TestableReturnStatement) ShouldHasValue(value interface{}) {
 		compareString(t, rs.ReturnValue, v)
 	case bool:
 		compareBool(t, rs.ReturnValue, v)
-	case TestingIdentifier:
+	case TestableIdentifierValue:
 		compareIdentifier(t, rs.ReturnValue, v)
 	}
 }
@@ -218,16 +218,16 @@ type TestableWhileStatement struct {
 
 // Block returns while statement's code block as a set of TestingStatements
 func (tws *TestableWhileStatement) CodeBlock() CodeBlock {
-	var tss []TestingStatement
+	var tss []TestableStatement
 
 	for _, stmt := range tws.Body.Statements {
-		tss = append(tss, stmt.(TestingStatement))
+		tss = append(tss, stmt.(TestableStatement))
 	}
 
 	return tss
 }
 
 // ConditionExpression returns while statement's condition as TestingExpression
-func (tws *TestableWhileStatement) ConditionExpression() TestingExpression {
-	return tws.Condition.(TestingExpression)
+func (tws *TestableWhileStatement) ConditionExpression() TestableExpression {
+	return tws.Condition.(TestableExpression)
 }

@@ -86,8 +86,8 @@ func (rs *ReturnStatement) IsReturnStmt(t *testing.T) (trs *TestableReturnStatem
 }
 
 // IsExpressionStmt returns ExpressionStatement itself
-func (ts *ExpressionStatement) IsExpression(t *testing.T) TestingExpression {
-	return ts.Expression.(TestingExpression)
+func (ts *ExpressionStatement) IsExpression(t *testing.T) TestableExpression {
+	return ts.Expression.(TestableExpression)
 }
 
 // IsWhileStmt returns the pointer of current while statement

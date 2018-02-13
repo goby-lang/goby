@@ -4,7 +4,7 @@ package ast
 
 import "testing"
 
-type TestingExpression interface {
+type TestableExpression interface {
 	Expression
 	// Test Helpers
 	IsArrayExpression(t *testing.T) *TestableArrayExpression
@@ -31,9 +31,9 @@ type TestableArrayExpression struct {
 	t *testing.T
 }
 
-func (tae *TestableArrayExpression) TestableElements() (tes []TestingExpression) {
+func (tae *TestableArrayExpression) TestableElements() (tes []TestableExpression) {
 	for _, elem := range tae.Elements {
-		tes = append(tes, elem.(TestingExpression))
+		tes = append(tes, elem.(TestableExpression))
 	}
 
 	return
@@ -46,12 +46,12 @@ type TestableAssignExpression struct {
 	t *testing.T
 }
 
-func (tae *TestableAssignExpression) NthVariable(n int) TestingExpression {
-	return tae.Variables[n-1].(TestingExpression)
+func (tae *TestableAssignExpression) NthVariable(n int) TestableExpression {
+	return tae.Variables[n-1].(TestableExpression)
 }
 
-func (tae *TestableAssignExpression) TestableValue() TestingExpression {
-	return tae.Value.(TestingExpression)
+func (tae *TestableAssignExpression) TestableValue() TestableExpression {
+	return tae.Value.(TestableExpression)
 }
 
 /*TestableBooleanExpression*/
@@ -75,13 +75,13 @@ type TestableCallExpression struct {
 }
 
 // NthArgument returns n-th argument of the call expression as TestingExpression
-func (tce *TestableCallExpression) NthArgument(n int) TestingExpression {
-	return tce.Arguments[n-1].(TestingExpression)
+func (tce *TestableCallExpression) NthArgument(n int) TestableExpression {
+	return tce.Arguments[n-1].(TestableExpression)
 }
 
 // ReceiverExpression returns call expression's receiver as TestingExpression
-func (tce *TestableCallExpression) TestableReceiver() TestingExpression {
-	return tce.Receiver.(TestingExpression)
+func (tce *TestableCallExpression) TestableReceiver() TestableExpression {
+	return tce.Receiver.(TestableExpression)
 }
 
 // ShouldHasMethodName
@@ -104,14 +104,14 @@ type TestableConditionalExpression struct {
 	t *testing.T
 }
 
-func (tce *TestableConditionalExpression) TestableCondition() TestingExpression {
-	return tce.Condition.(TestingExpression)
+func (tce *TestableConditionalExpression) TestableCondition() TestableExpression {
+	return tce.Condition.(TestableExpression)
 }
 
 func (tce *TestableConditionalExpression) TestableConsequence() CodeBlock {
-	var tss []TestingStatement
+	var tss []TestableStatement
 	for _, stmt := range tce.Consequence.Statements {
-		tss = append(tss, stmt.(TestingStatement))
+		tss = append(tss, stmt.(TestableStatement))
 	}
 
 	return tss
@@ -137,10 +137,10 @@ type TestableHashExpression struct {
 	t *testing.T
 }
 
-func (the *TestableHashExpression) TestableDataPairs() (pairs map[string]TestingExpression) {
-	pairs = make(map[string]TestingExpression)
+func (the *TestableHashExpression) TestableDataPairs() (pairs map[string]TestableExpression) {
+	pairs = make(map[string]TestableExpression)
 	for k, v := range the.Data {
-		pairs[k] = v.(TestingExpression)
+		pairs[k] = v.(TestableExpression)
 	}
 
 	return
@@ -173,7 +173,7 @@ func (tie *TestableIfExpression) ShouldHasNumberOfConditionals(n int) {
 	}
 }
 
-func (tie *TestableIfExpression) TestableConditionals() (tes []TestingExpression) {
+func (tie *TestableIfExpression) TestableConditionals() (tes []TestableExpression) {
 	for _, cond := range tie.Conditionals {
 		tes = append(tes, cond)
 	}
@@ -182,9 +182,9 @@ func (tie *TestableIfExpression) TestableConditionals() (tes []TestingExpression
 }
 
 func (tie *TestableIfExpression) TestableAlternative() CodeBlock {
-	var tss []TestingStatement
+	var tss []TestableStatement
 	for _, stmt := range tie.Alternative.Statements {
-		tss = append(tss, stmt.(TestingStatement))
+		tss = append(tss, stmt.(TestableStatement))
 	}
 
 	return tss
@@ -205,13 +205,13 @@ func (tie *TestableInfixExpression) ShouldHasOperator(expectedOperator string) {
 }
 
 // LeftExpression returns infix expression's left expression as TestingExpression
-func (tie *TestableInfixExpression) TestableLeftExpression() TestingExpression {
-	return tie.Left.(TestingExpression)
+func (tie *TestableInfixExpression) TestableLeftExpression() TestableExpression {
+	return tie.Left.(TestableExpression)
 }
 
 // RightExpression returns infix expression's right expression as TestingExpression
-func (tie *TestableInfixExpression) TestableRightExpression() TestingExpression {
-	return tie.Right.(TestingExpression)
+func (tie *TestableInfixExpression) TestableRightExpression() TestableExpression {
+	return tie.Right.(TestableExpression)
 }
 
 /*TestableInstanceVariable*/
@@ -267,6 +267,6 @@ type TestableYieldExpression struct {
 	t *testing.T
 }
 
-func (tye *TestableYieldExpression) NthArgument(n int) TestingExpression {
-	return tye.Arguments[n-1].(TestingExpression)
+func (tye *TestableYieldExpression) NthArgument(n int) TestableExpression {
+	return tye.Arguments[n-1].(TestableExpression)
 }

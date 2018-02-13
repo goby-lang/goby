@@ -270,7 +270,7 @@ func TestCallExpressionWithBlock(t *testing.T) {
 	callExpression.BlockArguments[0].IsIdentifier(t).ShouldHasName("i")
 
 	block := callExpression.Block
-	exp := block.Statements[0].(ast.TestingStatement).IsExpression(t)
+	exp := block.Statements[0].(ast.TestableStatement).IsExpression(t)
 	exp.IsCallExpression(t).ShouldHasMethodName("puts")
 }
 
