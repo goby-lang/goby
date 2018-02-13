@@ -20,15 +20,6 @@ func (p *Program) NthStmt(nth int) TestableStatement {
 }
 
 /*
- BaseNode
-*/
-
-// NameIs returns false by default
-func (b *BaseNode) NameIs(n string) bool {
-	return false
-}
-
-/*
 interal helpers
 */
 

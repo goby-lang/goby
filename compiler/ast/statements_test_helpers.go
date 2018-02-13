@@ -48,15 +48,6 @@ func (cs *ClassStatement) IsClassStmt(t *testing.T) *TestableClassStatement {
 	return &TestableClassStatement{t: t, ClassStatement: cs}
 }
 
-// NameIs returns the compare result of current class name and target class name
-func (cs *ClassStatement) NameIs(n string) bool {
-	if cs.Name.Value == n {
-		return true
-	}
-
-	return false
-}
-
 /*
  Module Statement
 */
@@ -64,15 +55,6 @@ func (cs *ClassStatement) NameIs(n string) bool {
 // IsModuleStmt returns a pointer of the module statement
 func (ms *ModuleStatement) IsModuleStmt(t *testing.T) *TestableModuleStatement {
 	return &TestableModuleStatement{ModuleStatement: ms, t: t}
-}
-
-// NameIs returns the compare result of current module name and target module name
-func (ms *ModuleStatement) NameIs(n string) bool {
-	if ms.Name.Value == n {
-		return true
-	}
-
-	return false
 }
 
 // IsDefStmt returns a pointer of the DefStatement
