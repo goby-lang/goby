@@ -2,7 +2,9 @@
 
 package ast
 
-import "testing"
+import (
+	"testing"
+)
 
 type TestableStatement interface {
 	Statement
@@ -92,68 +94,82 @@ func (tds *TestableDefStatement) ShouldHasNoParam() {
 }
 
 // ShouldHasNormalParam checks if the method has expected normal argument
-func (tds *TestableDefStatement) ShouldHasNormalParam(paramName string) {
+func (tds *TestableDefStatement) ShouldHasNormalParam(expectedName string) {
 	for _, param := range tds.Parameters {
 		p, ok := param.(*Identifier)
 
-		if ok && p.nameIs(paramName) {
+		if ok && p.Value == expectedName {
 			return
 		}
 	}
 
-	tds.t.Fatalf("Can't find normal param '%s' in method '%s'", paramName, tds.Name.Value)
+	tds.t.Fatalf("Can't find normal param '%s' in method '%s'", expectedName, tds.Name.Value)
 }
 
 // ShouldHasOptionalParam checks if the method has expected optional argument
-func (tds *TestableDefStatement) ShouldHasOptionalParam(paramName string) {
+func (tds *TestableDefStatement) ShouldHasOptionalParam(expectedName string) {
 	for _, param := range tds.Parameters {
 		p, ok := param.(*AssignExpression)
 
-		if ok && p.nameIs(paramName) {
-			return
+		if ok {
+			paramName := p.Variables[0].(*Identifier).Value
+			if paramName == expectedName {
+				return
+			}
 		}
 	}
 
-	tds.t.Fatalf("Can't find optional param '%s' in method '%s'", paramName, tds.Name.Value)
+	tds.t.Fatalf("Can't find optional param '%s' in method '%s'", expectedName, tds.Name.Value)
 }
 
 // ShouldHasRequiredKeywordParam checks if the method has expected keyword argument
-func (tds *TestableDefStatement) ShouldHasRequiredKeywordParam(paramName string) {
+func (tds *TestableDefStatement) ShouldHasRequiredKeywordParam(expectedName string) {
 	for _, param := range tds.Parameters {
 		p, ok := param.(*ArgumentPairExpression)
 
-		if ok && p.NameIs(paramName) && p.Value == nil {
-			return
+		if ok {
+			paramName := p.Key.(*Identifier).Value
+			if expectedName == paramName && p.Value == nil {
+				return
+			}
+
 		}
 	}
 
-	tds.t.Fatalf("Can't find required keyword param '%s' in method '%s'", paramName, tds.Name.Value)
+	tds.t.Fatalf("Can't find required keyword param '%s' in method '%s'", expectedName, tds.Name.Value)
 }
 
 // ShouldHasOptionalKeywordParam checks if the method has expected optional keyword argument
-func (tds *TestableDefStatement) ShouldHasOptionalKeywordParam(paramName string) {
+func (tds *TestableDefStatement) ShouldHasOptionalKeywordParam(expectedName string) {
 	for _, param := range tds.Parameters {
 		p, ok := param.(*ArgumentPairExpression)
 
-		if ok && p.NameIs(paramName) && p.Value != nil {
-			return
+		if ok {
+			paramName := p.Key.(*Identifier).Value
+			if expectedName == paramName && p.Value != nil {
+				return
+			}
+
 		}
 	}
 
-	tds.t.Fatalf("Can't find optional keyword param '%s' in method '%s'", paramName, tds.Name.Value)
+	tds.t.Fatalf("Can't find optional keyword param '%s' in method '%s'", expectedName, tds.Name.Value)
 }
 
 // ShouldHasSplatParam checks if the method has expected splat argument
-func (tds *TestableDefStatement) ShouldHasSplatParam(paramName string) {
+func (tds *TestableDefStatement) ShouldHasSplatParam(expectedName string) {
 	for _, param := range tds.Parameters {
 		p, ok := param.(*PrefixExpression)
 
-		if ok && p.NameIs(paramName) && p.Operator == "*" {
-			return
+		if ok {
+			paramName := p.Right.(*Identifier).Value
+			if expectedName == paramName {
+				return
+			}
 		}
 	}
 
-	tds.t.Fatalf("Can't find splat param '%s' in method '%s'", paramName, tds.Name.Value)
+	tds.t.Fatalf("Can't find splat param '%s' in method '%s'", expectedName, tds.Name.Value)
 }
 
 /*TestableModuleStatement*/

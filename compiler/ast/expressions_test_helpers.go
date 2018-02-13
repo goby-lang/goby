@@ -11,12 +11,6 @@ const nodeFailureMsgFormat = "Node is not %s, is %T"
 // TestableIdentifierValue for marking a string as an identifier's value for test
 type TestableIdentifierValue string
 
-type testingNode interface {
-	node
-	// Belows are test helpers
-	nameIs(name string) bool
-}
-
 /*
  BaseNode
 */
@@ -135,10 +129,6 @@ func (ae *AssignExpression) IsAssignExpression(t *testing.T) *TestableAssignExpr
 	return &TestableAssignExpression{AssignExpression: ae, t: t}
 }
 
-func (ae *AssignExpression) nameIs(n string) bool {
-	return ae.Variables[0].(testingNode).nameIs(n)
-}
-
 // IsBooleanExpression returns pointer of the receiver boolean expression
 func (be *BooleanExpression) IsBooleanExpression(t *testing.T) *TestableBooleanExpression {
 	return &TestableBooleanExpression{BooleanExpression: be, t: t}
@@ -167,14 +157,6 @@ func (he *HashExpression) IsHashExpression(t *testing.T) *TestableHashExpression
 // IsIdentifier returns pointer of the receiver identifier
 func (i *Identifier) IsIdentifier(t *testing.T) *TestableIdentifier {
 	return &TestableIdentifier{Identifier: i, t: t}
-}
-
-func (i *Identifier) nameIs(n string) bool {
-	if i.Value == n {
-		return true
-	}
-
-	return false
 }
 
 // IsIfExpression returns pointer of the receiver if expression
