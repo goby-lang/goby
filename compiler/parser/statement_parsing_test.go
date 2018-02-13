@@ -14,7 +14,7 @@ func TestReturnStatements(t *testing.T) {
 		{"return 5", 5},
 		{"return 'x'", "x"},
 		{"return true", true},
-		{"return foo", ast.TestingIdentifier("foo")},
+		{"return foo", ast.TestableIdentifierValue("foo")},
 	}
 
 	for _, tt := range tests {

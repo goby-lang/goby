@@ -11,12 +11,12 @@ Program
 */
 
 // FirstStmt returns program's first statement as a TestStatement
-func (p *Program) FirstStmt() TestingStatement {
-	return p.Statements[0].(TestingStatement)
+func (p *Program) FirstStmt() TestableStatement {
+	return p.Statements[0].(TestableStatement)
 }
 
-func (p *Program) NthStmt(nth int) TestingStatement {
-	return p.Statements[nth-1].(TestingStatement)
+func (p *Program) NthStmt(nth int) TestableStatement {
+	return p.Statements[nth-1].(TestableStatement)
 }
 
 /*
@@ -52,7 +52,7 @@ func compareString(t *testing.T, exp Expression, value string) {
 	}
 }
 
-func compareIdentifier(t *testing.T, exp Expression, value TestingIdentifier) {
+func compareIdentifier(t *testing.T, exp Expression, value TestableIdentifierValue) {
 	sl, ok := exp.(*Identifier)
 	if !ok {
 		t.Fatalf("expect exp to be StringLiteral. got=%T", exp)
