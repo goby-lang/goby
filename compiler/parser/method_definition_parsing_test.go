@@ -14,6 +14,10 @@ func TestDefStatement(t *testing.T) {
 	def foo
 	  123;
 	end
+
+	def bar(x = 10, y: ); end
+
+	def baz(z: 100, *s); end
 	`
 
 	l := lexer.New(input)
@@ -41,6 +45,16 @@ func TestDefStatement(t *testing.T) {
 
 	secondExpression := secondStmt.MethodBody().NthStmt(1).IsExpression(t)
 	secondExpression.IsIntegerLiteral(t).ShouldEqualTo(123)
+
+	thirdStmt := program.NthStmt(3).IsDefStmt(t)
+	thirdStmt.ShouldHasName("bar")
+	thirdStmt.ShouldHasOptionalParam("x")
+	thirdStmt.ShouldHasRequiredKeywordParam("y")
+
+	fourthStmt := program.NthStmt(4).IsDefStmt(t)
+	fourthStmt.ShouldHasName("baz")
+	fourthStmt.ShouldHasOptionalKeywordParam("z")
+	fourthStmt.ShouldHasSplatParam("s")
 }
 
 func TestDefStatementWithYield(t *testing.T) {

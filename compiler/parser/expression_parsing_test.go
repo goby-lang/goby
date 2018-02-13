@@ -131,7 +131,7 @@ func TestAssignExpressionWithLiteralValue(t *testing.T) {
 		input              string
 		expectedIdentifier string
 		expectedValue      interface{}
-		variableType		int
+		variableType       int
 	}{
 		{"x = 5;", "x", 5, Ident},
 		{"y = true;", "y", true, Ident},
@@ -174,8 +174,8 @@ func TestAssignExpressionWithVariableValue(t *testing.T) {
 		input              string
 		expectedIdentifier string
 		expectedValue      string
-		variableType int
-		valueType int
+		variableType       int
+		valueType          int
 	}{
 		{"x = y", "x", "y", Ident, Ident},
 		{"@foo = y", "@foo", "y", Ivar, Ident},
