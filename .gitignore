@@ -30,4 +30,5 @@ goby
 
 *.gbbc
 coverage.txt
+profile.out
 .DS_Store

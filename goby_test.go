@@ -13,18 +13,19 @@ import (
 )
 
 func init() {
-	_, err := os.Stat("goby.go")
+	_, err := os.Stat("./goby")
 	if err != nil {
 		panic(fmt.Errorf("Goby not bulit"))
-	}
-	fmt.Println("Testing on prebuilt ./goby")
 
-	//cmd := exec.Command("go", "build", ".")
-	//err := cmd.Run()
-	//if err != nil {
-	//	fmt.Println("could not build binary\n", err.Error())
-	//	panic(err)
-	//}
+		cmd := exec.Command("go", "build", ".")
+		err = cmd.Run()
+		if err != nil {
+			fmt.Println("could not build binary\n", err.Error())
+			panic(err)
+		}
+	}
+
+	fmt.Println("Testing goby command on prebuild binary: ./goby")
 }
 
 func execGoby(t *testing.T, args ...string) (in io.WriteCloser, out io.ReadCloser) {
@@ -71,7 +72,7 @@ func TestArgE(t *testing.T) {
 	}
 
 	if !strings.Contains(string(byt), partialReport()) {
-		t.Fatalf("Interpreter output incorect")
+		t.Fatalf("Interpreter -e output incorect:\nExpected \n`%s` in string `\n%s`", partialReport(), string(byt))
 	}
 }
 
@@ -101,8 +102,8 @@ func TestArgV(t *testing.T) {
 		t.Fatalf("Couldn't read from pipe: %s", err.Error())
 	}
 
-	if string(byt) != vm.Version {
-		t.Fatalf("Interpreter output incorect")
+	if !strings.Contains(string(byt), vm.Version) {
+		t.Fatalf("Interpreter -v output incorect:\nExpected '%s' in string '%s'.",vm.Version, string(byt))
 	}
 }
 
