@@ -15,17 +15,19 @@ import (
 func init() {
 	_, err := os.Stat("./goby")
 	if err != nil {
-		panic(fmt.Errorf("Goby not bulit"))
+		fmt.Println("Goby binary not found, building")
 
 		cmd := exec.Command("go", "build", ".")
 		err = cmd.Run()
 		if err != nil {
-			fmt.Println("could not build binary\n", err.Error())
+			fmt.Println("Could not build binary\n", err.Error())
 			panic(err)
 		}
+		fmt.Println("Built. Testing ./goby")
+	} else {
+		fmt.Println("Using existing Goby binary. Testing ./goby")
 	}
 
-	fmt.Println("Testing goby command on prebuild binary: ./goby")
 }
 
 func execGoby(t *testing.T, args ...string) (in io.WriteCloser, out io.ReadCloser) {
