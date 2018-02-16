@@ -15,6 +15,7 @@ func (p *Program) FirstStmt() TestableStatement {
 	return p.Statements[0].(TestableStatement)
 }
 
+// NthStmt returns program's nth statement as a TestStatement
 func (p *Program) NthStmt(nth int) TestableStatement {
 	return p.Statements[nth-1].(TestableStatement)
 }

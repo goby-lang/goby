@@ -4,6 +4,7 @@ package ast
 
 import "testing"
 
+// TestableExpression interface implements basic Expression's functions, and helper functions to assert node's type
 type TestableExpression interface {
 	Expression
 	// Test Helpers
@@ -24,13 +25,13 @@ type TestableExpression interface {
 	IsYieldExpression(t *testing.T) *TestableYieldExpression
 }
 
-/*TestableArrayExpression*/
-
+// TestableArrayExpression
 type TestableArrayExpression struct {
 	*ArrayExpression
 	t *testing.T
 }
 
+// TestableElements returns array expression's element nodes and assert them as TestableExpression
 func (tae *TestableArrayExpression) TestableElements() (tes []TestableExpression) {
 	for _, elem := range tae.Elements {
 		tes = append(tes, elem.(TestableExpression))
@@ -39,36 +40,36 @@ func (tae *TestableArrayExpression) TestableElements() (tes []TestableExpression
 	return
 }
 
-/*TestableAssignExpression*/
-
+// TestableAssignExpression
 type TestableAssignExpression struct {
 	*AssignExpression
 	t *testing.T
 }
 
+// NthVariable returns the nth variable of the assignment as a TestableExpression
 func (tae *TestableAssignExpression) NthVariable(n int) TestableExpression {
 	return tae.Variables[n-1].(TestableExpression)
 }
 
+// TestableValue returns the assignment's value as a TestableExpression
 func (tae *TestableAssignExpression) TestableValue() TestableExpression {
 	return tae.Value.(TestableExpression)
 }
 
-/*TestableBooleanExpression*/
-
+// TestableBooleanExpression
 type TestableBooleanExpression struct {
 	*BooleanExpression
 	t *testing.T
 }
 
+// ShouldEqualTo compares if the boolean expression's value equals to the expected value
 func (tbe *TestableBooleanExpression) ShouldEqualTo(expected bool) {
 	if tbe.Value != expected {
-		tbe.t.Fatalf("Expect boolean literal to be %d, got %d", expected, tbe.Value)
+		tbe.t.Fatalf("Expect boolean literal to be %t, got %t", expected, tbe.Value)
 	}
 }
 
-/*TestableCallExpression*/
-
+//TestableCallExpression
 type TestableCallExpression struct {
 	*CallExpression
 	t *testing.T
@@ -84,21 +85,21 @@ func (tce *TestableCallExpression) TestableReceiver() TestableExpression {
 	return tce.Receiver.(TestableExpression)
 }
 
-// ShouldHasMethodName
+// ShouldHasMethodName checks if the method's name is same as we expected
 func (tce *TestableCallExpression) ShouldHasMethodName(expectedName string) {
 	if tce.Method != expectedName {
 		tce.t.Fatalf("expect call expression's method name to be '%s', got '%s'", expectedName, tce.Method)
 	}
 }
 
+// ShouldHasNumbersOfArguments checks if the method call's argument number is same we expected
 func (tce *TestableCallExpression) ShouldHasNumbersOfArguments(n int) {
 	if len(tce.Arguments) != n {
 		tce.t.Fatalf("expect call expression to have %d arguments, got %d", n, (tce.Arguments))
 	}
 }
 
-/*TestableConditionalExpression*/
-
+// TestableConditionalExpression
 type TestableConditionalExpression struct {
 	*ConditionalExpression
 	t *testing.T
@@ -117,26 +118,26 @@ func (tce *TestableConditionalExpression) TestableConsequence() CodeBlock {
 	return tss
 }
 
-/*TestableConstant*/
-
+// TestableConstant
 type TestableConstant struct {
 	*Constant
 	t *testing.T
 }
 
+// ShouldHasName checks if the constant's name is same as we expected
 func (tc *TestableConstant) ShouldHasName(expectedName string) {
 	if tc.Value != expectedName {
 		tc.t.Fatalf("expect current identifier to be '%s', got '%s'", expectedName, tc.Value)
 	}
 }
 
-/*TestableHashExpression*/
-
+// TestableHashExpression
 type TestableHashExpression struct {
 	*HashExpression
 	t *testing.T
 }
 
+// TestableDataPairs returns a map of hash expression's element and assert them as TestableExpression
 func (the *TestableHashExpression) TestableDataPairs() (pairs map[string]TestableExpression) {
 	pairs = make(map[string]TestableExpression)
 	for k, v := range the.Data {
@@ -146,13 +147,13 @@ func (the *TestableHashExpression) TestableDataPairs() (pairs map[string]Testabl
 	return
 }
 
-/*TestableIdentifier*/
-
+// TestableIdentifier
 type TestableIdentifier struct {
 	*Identifier
 	t *testing.T
 }
 
+// ShouldHasName checks if the identifier's name is same as we expected
 func (ti *TestableIdentifier) ShouldHasName(expectedName string) {
 	ti.t.Helper()
 	if ti.Value != expectedName {
@@ -160,8 +161,7 @@ func (ti *TestableIdentifier) ShouldHasName(expectedName string) {
 	}
 }
 
-/*TestableIfExpression*/
-
+// TestableIfExpression
 type TestableIfExpression struct {
 	*IfExpression
 	t *testing.T
@@ -173,6 +173,7 @@ func (tie *TestableIfExpression) ShouldHasNumberOfConditionals(n int) {
 	}
 }
 
+// TestableConditionals returns if expression's conditionals and assert them as TestableExpression
 func (tie *TestableIfExpression) TestableConditionals() (tes []TestableExpression) {
 	for _, cond := range tie.Conditionals {
 		tes = append(tes, cond)
@@ -181,6 +182,7 @@ func (tie *TestableIfExpression) TestableConditionals() (tes []TestableExpressio
 	return
 }
 
+// TestableAlternative returns if expression's alternative code block as TestableExpression
 func (tie *TestableIfExpression) TestableAlternative() CodeBlock {
 	var tss []TestableStatement
 	for _, stmt := range tie.Alternative.Statements {
@@ -190,8 +192,7 @@ func (tie *TestableIfExpression) TestableAlternative() CodeBlock {
 	return tss
 }
 
-/*TestableInfixExpression*/
-
+// TestableInfixExpression
 type TestableInfixExpression struct {
 	*InfixExpression
 	t *testing.T
@@ -214,59 +215,58 @@ func (tie *TestableInfixExpression) TestableRightExpression() TestableExpression
 	return tie.Right.(TestableExpression)
 }
 
-/*TestableInstanceVariable*/
-
+// TestableInstanceVariable
 type TestableInstanceVariable struct {
 	*InstanceVariable
 	t *testing.T
 }
 
+// ShouldHasName checks if the instance variable's name is same as we expected
 func (tiv *TestableInstanceVariable) ShouldHasName(expectedName string) {
 	if tiv.Value != expectedName {
 		tiv.t.Fatalf("expect current instance variable to be '%s', got '%s'", expectedName, tiv.Value)
 	}
 }
 
-/*TestableIntegerLiteral*/
-
+// TestableIntegerLiteral
 type TestableIntegerLiteral struct {
 	*IntegerLiteral
 	t *testing.T
 }
 
+// ShouldEqualTo compares if the integer literal's value equals to the expected value
 func (til *TestableIntegerLiteral) ShouldEqualTo(expectedInt int) {
 	if til.Value != expectedInt {
 		til.t.Fatalf("Expect integer literal to be %d, got %d", expectedInt, til.Value)
 	}
 }
 
-/*TestableSelfExpression*/
-
+// TestableSelfExpression
 type TestableSelfExpression struct {
 	*SelfExpression
 	t *testing.T
 }
 
-/*TestableStringLiteral*/
-
+// TestableStringLiteral
 type TestableStringLiteral struct {
 	*StringLiteral
 	t *testing.T
 }
 
+// ShouldEqualTo compares if the string literal's value equals to the expected value
 func (tsl *TestableStringLiteral) ShouldEqualTo(expected string) {
 	if tsl.Value != expected {
 		tsl.t.Fatalf("Expect string literal to be %s, got %s", expected, tsl.Value)
 	}
 }
 
-/*TestableYieldExpression*/
-
+// TestableYieldExpression
 type TestableYieldExpression struct {
 	*YieldExpression
 	t *testing.T
 }
 
+// NthArgument returns n-th argument of the yield expression as TestingExpression
 func (tye *TestableYieldExpression) NthArgument(n int) TestableExpression {
 	return tye.Arguments[n-1].(TestableExpression)
 }
