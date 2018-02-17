@@ -27,7 +27,7 @@ func PrintError(v *VM) {
 		fmt.Println("No error detected")
 	}
 	fmt.Printf("# %s\n", err.Type)
-	fmt.Println(err.Message)
+	fmt.Println(err.Message())
 
 	fmt.Printf("### Goby version\n%s\n", Version)
 	fmt.Printf("### GOBY_ROOT\n%s\n", os.Getenv("GOBY_ROOT"))
@@ -62,5 +62,5 @@ func PrintError(v *VM) {
 	for ; currLine < line+20 && scanner.Scan(); currLine++ {
 		fmt.Printf("%s\n", scanner.Text())
 	}
-	fmt.Println("```\n")
+	fmt.Println("```")
 }

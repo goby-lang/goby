@@ -80,7 +80,7 @@ func (bo *BlockObject) Value() interface{} {
 
 // toString returns the object's name as the string format
 func (bo *BlockObject) toString() string {
-	return fmt.Sprintf("<Block: %p>", bo.instructionSet.filename)
+	return fmt.Sprintf("<Block: %s>", bo.instructionSet.filename)
 }
 
 // toJSON just delegates to toString
