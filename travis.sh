@@ -34,7 +34,7 @@ done
 
 # Test if libs that require built in Goby script would work.
 # TODO: Write a test for this specific case
-go install -ldflags "-s -w" .
+make install
 goby test_fixtures/server.gb & PID=$!
 echo "Sleeping for $SLEEP sec to wait server.gb being ready..."; sleep $SLEEP
 
