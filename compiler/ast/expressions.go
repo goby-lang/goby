@@ -331,19 +331,19 @@ type CallExpression struct {
 	BlockArguments []*Identifier
 }
 
-func (ce *CallExpression) expressionNode() {}
-func (ce *CallExpression) TokenLiteral() string {
-	return ce.Token.Literal
+func (tce *CallExpression) expressionNode() {}
+func (tce *CallExpression) TokenLiteral() string {
+	return tce.Token.Literal
 }
-func (ce *CallExpression) String() string {
+func (tce *CallExpression) String() string {
 	var out bytes.Buffer
 
-	out.WriteString(ce.Receiver.String())
+	out.WriteString(tce.Receiver.String())
 	out.WriteString(".")
-	out.WriteString(ce.Method)
+	out.WriteString(tce.Method)
 
 	var args = []string{}
-	for _, arg := range ce.Arguments {
+	for _, arg := range tce.Arguments {
 		args = append(args, arg.String())
 	}
 
@@ -351,12 +351,12 @@ func (ce *CallExpression) String() string {
 	out.WriteString(strings.Join(args, ", "))
 	out.WriteString(")")
 
-	if ce.Block != nil {
+	if tce.Block != nil {
 		var blockArgs []string
 		out.WriteString(" do")
 
-		if len(ce.BlockArguments) > 0 {
-			for _, arg := range ce.BlockArguments {
+		if len(tce.BlockArguments) > 0 {
+			for _, arg := range tce.BlockArguments {
 				blockArgs = append(blockArgs, arg.String())
 			}
 			out.WriteString(" |")
@@ -365,7 +365,7 @@ func (ce *CallExpression) String() string {
 		}
 
 		out.WriteString("\n")
-		out.WriteString(ce.Block.String())
+		out.WriteString(tce.Block.String())
 		out.WriteString("\nend")
 	}
 
