@@ -105,7 +105,7 @@ func TestArgV(t *testing.T) {
 	}
 
 	if !strings.Contains(string(byt), vm.Version) {
-		t.Fatalf("Interpreter -v output incorect:\nExpected '%s' in string '%s'.",vm.Version, string(byt))
+		t.Fatalf("Interpreter -v output incorect:\nExpected '%s' in string '%s'.", vm.Version, string(byt))
 	}
 }
 
