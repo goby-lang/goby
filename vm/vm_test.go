@@ -242,7 +242,7 @@ func verifyFloatObject(t *testing.T, i int, obj Object, expected float64) bool {
 	switch result := obj.(type) {
 	case *FloatObject:
 		if result.value != expected {
-			t.Errorf("At test case %d: object has wrong value. expect=%d, got=%d", i, expected, result.value)
+			t.Errorf("At test case %d: object has wrong value. expect=%f, got=%f", i, expected, result.value)
 			return false
 		}
 

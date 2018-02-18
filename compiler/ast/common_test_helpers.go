@@ -60,6 +60,6 @@ func compareBool(t *testing.T, exp Expression, value bool) {
 		t.Fatalf("expect exp to be IntegerLiteral. got=%T", exp)
 	}
 	if b.Value != value {
-		t.Fatalf("il.Value is not %d. got=%d", value, b.Value)
+		t.Fatalf("il.Value is not %t. got=%t", value, b.Value)
 	}
 }
