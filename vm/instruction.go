@@ -412,7 +412,7 @@ var builtinActions = map[operationType]*action{
 			case *RClass:
 				v.SingletonClass().Methods.set(methodName, method)
 			default:
-				singletonClass := t.vm.createRClass(fmt.Sprintf("#<Class:#<%s:%s>>", v.Class().Name, v.id()))
+				singletonClass := t.vm.createRClass(fmt.Sprintf("#<Class:#<%s:%d>>", v.Class().Name, v.id()))
 				singletonClass.Methods.set(methodName, method)
 				singletonClass.isSingleton = true
 				v.SetSingletonClass(singletonClass)
