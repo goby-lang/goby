@@ -28,10 +28,7 @@ One of our goal is to provide web developers a sort of small and handy environme
 - [Demo and sample Goby app](#demo_and_sample_app)
 - [Structure](#structure)
 - [Aspects](#aspects)
-    - [Features](#features)
-    - [Language](#language)
-    - [Native class](#native_class)
-    - [Standard class](#standard_class)
+- [Features](#features)
 - [Current roadmap](#current_roadmap)
 - [Installation](#installation)
 - [Usage](#usage)
@@ -58,7 +55,7 @@ Goby has several aspects: language specification, design of compiler and vm, imp
 
 We are optimizing and expanding Goby all the time. Toward the first release, we've been focusing on implementing Goby first.
 
-### Features
+## Major Features
 
 - Plugin system
     - Allows to use Go libraries (packages) dynamically
