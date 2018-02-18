@@ -28,7 +28,7 @@ One of our goal is to provide web developers a sort of small and handy environme
 - [Demo and sample Goby app](#demo_and_sample_app)
 - [Structure](#structure)
 - [Aspects](#aspects)
-- [Features](#features)
+- [Features](#major-features)
 - [Current roadmap](#current_roadmap)
 - [Installation](#installation)
 - [Usage](#usage)
