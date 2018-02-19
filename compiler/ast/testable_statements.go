@@ -50,6 +50,7 @@ func (tcs *TestableClassStatement) HasMethod(methodName string) (ds *TestableDef
 
 func (tcs *TestableClassStatement) ShouldHasName(name string) {
 	if tcs.Name.Value != name {
+		tcs.t.Helper()
 		tcs.t.Fatalf("Wrong class, this class is %s", tcs.Name.Value)
 	}
 }
@@ -57,6 +58,7 @@ func (tcs *TestableClassStatement) ShouldHasName(name string) {
 // ShouldInherits checks if current class statement inherits the target class
 func (tcs *TestableClassStatement) ShouldInherits(className string) {
 	if tcs.SuperClassName != className {
+		tcs.t.Helper()
 		tcs.t.Fatalf("Expect class %s to inherit class %s. got %s", tcs.Name, className, tcs.SuperClassName)
 	}
 }
@@ -82,6 +84,7 @@ func (tds *TestableDefStatement) MethodBody() CodeBlock {
 // ShouldHasName checks if the method's name is what we expected
 func (tds *TestableDefStatement) ShouldHasName(expectedName string) {
 	if tds.Name.Value != expectedName {
+		tds.t.Helper()
 		tds.t.Fatalf("It's method %s, not %s", tds.Name.Value, expectedName)
 	}
 }
@@ -89,6 +92,7 @@ func (tds *TestableDefStatement) ShouldHasName(expectedName string) {
 // ShouldHasNoParam checks if the method has no param
 func (tds *TestableDefStatement) ShouldHasNoParam() {
 	if len(tds.Parameters) != 0 {
+		tds.t.Helper()
 		tds.t.Fatalf("Expect method %s not to have any params, got: %d", tds.Name.Value, len(tds.Parameters))
 	}
 }
@@ -103,6 +107,7 @@ func (tds *TestableDefStatement) ShouldHasNormalParam(expectedName string) {
 		}
 	}
 
+	tds.t.Helper()
 	tds.t.Fatalf("Can't find normal param '%s' in method '%s'", expectedName, tds.Name.Value)
 }
 
@@ -119,6 +124,7 @@ func (tds *TestableDefStatement) ShouldHasOptionalParam(expectedName string) {
 		}
 	}
 
+	tds.t.Helper()
 	tds.t.Fatalf("Can't find optional param '%s' in method '%s'", expectedName, tds.Name.Value)
 }
 
@@ -136,6 +142,7 @@ func (tds *TestableDefStatement) ShouldHasRequiredKeywordParam(expectedName stri
 		}
 	}
 
+	tds.t.Helper()
 	tds.t.Fatalf("Can't find required keyword param '%s' in method '%s'", expectedName, tds.Name.Value)
 }
 
@@ -153,6 +160,7 @@ func (tds *TestableDefStatement) ShouldHasOptionalKeywordParam(expectedName stri
 		}
 	}
 
+	tds.t.Helper()
 	tds.t.Fatalf("Can't find optional keyword param '%s' in method '%s'", expectedName, tds.Name.Value)
 }
 
@@ -169,6 +177,7 @@ func (tds *TestableDefStatement) ShouldHasSplatParam(expectedName string) {
 		}
 	}
 
+	tds.t.Helper()
 	tds.t.Fatalf("Can't find splat param '%s' in method '%s'", expectedName, tds.Name.Value)
 }
 
@@ -193,12 +202,14 @@ func (tms *TestableModuleStatement) HasMethod(t *testing.T, methodName string) (
 		}
 	}
 
+	t.Helper()
 	t.Fatalf("Can't find method '%s' in module '%s'", methodName, tms.Name)
 	return
 }
 
 func (tms *TestableModuleStatement) ShouldHasName(name string) {
 	if tms.Name.Value != name {
+		tms.t.Helper()
 		tms.t.Fatalf("Wrong class, this class is %s", tms.Name.Value)
 	}
 }
@@ -212,6 +223,7 @@ type TestableReturnStatement struct {
 
 func (trs *TestableReturnStatement) ShouldHasValue(value interface{}) {
 	t := trs.t
+	t.Helper()
 	rs := trs.ReturnStatement
 	switch v := value.(type) {
 	case int:

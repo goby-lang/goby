@@ -65,6 +65,7 @@ type TestableBooleanExpression struct {
 // ShouldEqualTo compares if the boolean expression's value equals to the expected value
 func (tbe *TestableBooleanExpression) ShouldEqualTo(expected bool) {
 	if tbe.Value != expected {
+		tbe.t.Helper()
 		tbe.t.Fatalf("Expect boolean literal to be %t, got %t", expected, tbe.Value)
 	}
 }
@@ -88,6 +89,7 @@ func (tce *TestableCallExpression) TestableReceiver() TestableExpression {
 // ShouldHasMethodName checks if the method's name is same as we expected
 func (tce *TestableCallExpression) ShouldHasMethodName(expectedName string) {
 	if tce.Method != expectedName {
+		tce.t.Helper()
 		tce.t.Fatalf("expect call expression's method name to be '%s', got '%s'", expectedName, tce.Method)
 	}
 }
@@ -95,7 +97,8 @@ func (tce *TestableCallExpression) ShouldHasMethodName(expectedName string) {
 // ShouldHasNumbersOfArguments checks if the method call's argument number is same we expected
 func (tce *TestableCallExpression) ShouldHasNumbersOfArguments(n int) {
 	if len(tce.Arguments) != n {
-		tce.t.Fatalf("expect call expression to have %d arguments, got %d", n, (tce.Arguments))
+		tce.t.Helper()
+		tce.t.Fatalf("expect call expression to have %d arguments, got %d", n, len(tce.Arguments))
 	}
 }
 
@@ -127,6 +130,7 @@ type TestableConstant struct {
 // ShouldHasName checks if the constant's name is same as we expected
 func (tc *TestableConstant) ShouldHasName(expectedName string) {
 	if tc.Value != expectedName {
+		tc.t.Helper()
 		tc.t.Fatalf("expect current identifier to be '%s', got '%s'", expectedName, tc.Value)
 	}
 }
@@ -155,8 +159,8 @@ type TestableIdentifier struct {
 
 // ShouldHasName checks if the identifier's name is same as we expected
 func (ti *TestableIdentifier) ShouldHasName(expectedName string) {
-	ti.t.Helper()
 	if ti.Value != expectedName {
+		ti.t.Helper()
 		ti.t.Fatalf("expect current identifier to be '%s', got '%s'", expectedName, ti.Value)
 	}
 }
@@ -169,6 +173,7 @@ type TestableIfExpression struct {
 
 func (tie *TestableIfExpression) ShouldHasNumberOfConditionals(n int) {
 	if len(tie.Conditionals) != n {
+		tie.t.Helper()
 		tie.t.Fatalf("Expect if expression to have %d conditionals, got %d", n, len(tie.Conditionals))
 	}
 }
@@ -201,6 +206,7 @@ type TestableInfixExpression struct {
 // ShouldHasOperator checks if the infix expression has expected operator
 func (tie *TestableInfixExpression) ShouldHasOperator(expectedOperator string) {
 	if tie.Operator != expectedOperator {
+		tie.t.Helper()
 		tie.t.Fatalf("Expect infix expression to have %s operator, got %s", expectedOperator, tie.Operator)
 	}
 }
@@ -224,6 +230,7 @@ type TestableInstanceVariable struct {
 // ShouldHasName checks if the instance variable's name is same as we expected
 func (tiv *TestableInstanceVariable) ShouldHasName(expectedName string) {
 	if tiv.Value != expectedName {
+		tiv.t.Helper()
 		tiv.t.Fatalf("expect current instance variable to be '%s', got '%s'", expectedName, tiv.Value)
 	}
 }
@@ -237,6 +244,7 @@ type TestableIntegerLiteral struct {
 // ShouldEqualTo compares if the integer literal's value equals to the expected value
 func (til *TestableIntegerLiteral) ShouldEqualTo(expectedInt int) {
 	if til.Value != expectedInt {
+		til.t.Helper()
 		til.t.Fatalf("Expect integer literal to be %d, got %d", expectedInt, til.Value)
 	}
 }
@@ -256,6 +264,7 @@ type TestableStringLiteral struct {
 // ShouldEqualTo compares if the string literal's value equals to the expected value
 func (tsl *TestableStringLiteral) ShouldEqualTo(expected string) {
 	if tsl.Value != expected {
+		tsl.t.Helper()
 		tsl.t.Fatalf("Expect string literal to be %s, got %s", expected, tsl.Value)
 	}
 }
