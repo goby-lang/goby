@@ -371,26 +371,53 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 
 					str := receiver.(*StringObject).value
 					i := args[0]
-					index, ok := i.(*IntegerObject)
 
-					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, i.Class().Name)
-					}
+					switch index := i.(type) {
+					case *IntegerObject:
+						indexValue := index.value
 
-					indexValue := index.value
+						if indexValue < 0 {
+							strLength := utf8.RuneCountInString(str)
+							if -indexValue > strLength {
+								return NULL
+							}
+							return t.vm.initStringObject(string([]rune(str)[strLength+indexValue]))
+						}
 
-					if indexValue < 0 {
+						if len(str) > indexValue {
+							return t.vm.initStringObject(string([]rune(str)[indexValue]))
+						}
+
+						return NULL
+					case *RangeObject:
 						strLength := utf8.RuneCountInString(str)
-						if -indexValue > strLength {
+						start := index.Start
+						end := index.End
+
+						if start < 0 {
+							start = strLength + start
+
+							if start < 0 {
+								return NULL
+							}
+						}
+
+						if end < 0 {
+							end = strLength + end
+						}
+
+						if start > strLength {
 							return NULL
 						}
-						return t.vm.initStringObject(string([]rune(str)[strLength+indexValue]))
-					}
 
-					if len(str) > indexValue {
-						return t.vm.initStringObject(string([]rune(str)[indexValue]))
+						if end >= strLength {
+							end = strLength - 1
+						}
+
+						return t.vm.initStringObject(string([]rune(str)[start : end+1]))
+					default:
+						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, i.Class().Name)
 					}
-					return NULL
 				}
 			},
 		},

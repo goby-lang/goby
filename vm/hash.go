@@ -212,7 +212,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 
 							The block returns nil because of the break.
 							But in Ruby the final result is nil, which means the block's result is completely ignored
-						 */
+						*/
 						if blockFrame.IsRemoved() {
 							return NULL
 						}
