@@ -397,6 +397,7 @@ func TestConstantAlreadyInitializedError(t *testing.T) {
 // Error test helper methods
 
 func checkErrorMsg(t *testing.T, index int, evaluated Object, expectedErrMsg string) {
+	t.Helper()
 	err, ok := evaluated.(*Error)
 	if !ok {
 		t.Fatalf("At test case %d: Expect Error. got=%T (%+v)", index, evaluated, evaluated)
@@ -408,6 +409,7 @@ func checkErrorMsg(t *testing.T, index int, evaluated Object, expectedErrMsg str
 }
 
 func checkErrorTraces(t *testing.T, index int, evaluated Object, expectedTraces []string) {
+	t.Helper()
 	err, ok := evaluated.(*Error)
 	if !ok {
 		t.Fatalf("At test case %d: Expect Error. got=%T (%+v)", index, evaluated, evaluated)
