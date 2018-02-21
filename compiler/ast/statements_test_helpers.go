@@ -12,30 +12,35 @@ import (
 
 // IsClassStmt fails the test and returns nil by default
 func (b *BaseNode) IsClassStmt(t *testing.T) *TestableClassStatement {
+	t.Helper()
 	t.Fatalf(nodeFailureMsgFormat, "class statement", b)
 	return nil
 }
 
 // IsModuleStmt fails the test and returns nil by default
 func (b *BaseNode) IsModuleStmt(t *testing.T) *TestableModuleStatement {
+	t.Helper()
 	t.Fatalf(nodeFailureMsgFormat, "module statement", b)
 	return nil
 }
 
 // IsReturnStmt fails the test and returns nil by default
 func (b *BaseNode) IsReturnStmt(t *testing.T) *TestableReturnStatement {
+	t.Helper()
 	t.Fatalf(nodeFailureMsgFormat, "return statement", b)
 	return nil
 }
 
 // IsDefStmt fails the test and returns nil by default
 func (b *BaseNode) IsDefStmt(t *testing.T) *TestableDefStatement {
+	t.Helper()
 	t.Fatalf(nodeFailureMsgFormat, "method definition", b)
 	return nil
 }
 
 // IsWhileStmt fails the test and returns nil by default
 func (b *BaseNode) IsWhileStmt(t *testing.T) (ws *TestableWhileStatement) {
+	t.Helper()
 	t.Fatalf(nodeFailureMsgFormat, "while statement", b)
 	return nil
 }

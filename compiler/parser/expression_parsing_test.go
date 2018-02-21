@@ -233,10 +233,7 @@ func TestCallExpression(t *testing.T) {
 	callExpression := program.FirstStmt().IsExpression(t).IsCallExpression(t)
 	callExpression.TestableReceiver().IsIdentifier(t).ShouldHasName("p")
 	callExpression.ShouldHasMethodName("add")
-
-	if len(callExpression.Arguments) != 3 {
-		t.Fatalf("expect %d arguments. got=%d", 3, len(callExpression.Arguments))
-	}
+	callExpression.ShouldHasNumbersOfArguments(3)
 
 	callExpression.NthArgument(1).IsIntegerLiteral(t).ShouldEqualTo(1)
 	infix1 := callExpression.NthArgument(2).IsInfixExpression(t)

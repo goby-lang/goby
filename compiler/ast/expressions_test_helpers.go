@@ -17,36 +17,42 @@ type TestableIdentifierValue string
 
 // IsAssignExpression fails the test and returns nil by default
 func (b *BaseNode) IsArrayExpression(t *testing.T) *TestableArrayExpression {
+	t.Helper()
 	t.Fatalf(nodeFailureMsgFormat, "array expression", b)
 	return nil
 }
 
 // IsAssignExpression fails the test and returns nil by default
 func (b *BaseNode) IsAssignExpression(t *testing.T) (ae *TestableAssignExpression) {
+	t.Helper()
 	t.Fatalf(nodeFailureMsgFormat, "assign expression", b)
 	return
 }
 
 // IsBooleanExpression fails the test and returns nil by default
 func (b *BaseNode) IsBooleanExpression(t *testing.T) (ae *TestableBooleanExpression) {
+	t.Helper()
 	t.Fatalf(nodeFailureMsgFormat, "boolean expression", b)
 	return
 }
 
 // IsCallExpression fails the test and returns nil by default
 func (b *BaseNode) IsCallExpression(t *testing.T) (ce *TestableCallExpression) {
+	t.Helper()
 	t.Fatalf(nodeFailureMsgFormat, "call expression", b)
 	return
 }
 
 // IsConditionalExpression fails the test and returns nil by default
 func (b *BaseNode) IsConditionalExpression(t *testing.T) *TestableConditionalExpression {
+	t.Helper()
 	t.Fatalf(nodeFailureMsgFormat, "conditional expression", b)
 	return nil
 }
 
 // IsConstant fails the test and returns nil by default
 func (b *BaseNode) IsConstant(t *testing.T) (c *TestableConstant) {
+	t.Helper()
 	t.Fatalf(nodeFailureMsgFormat, "constant", b)
 	return
 }
@@ -60,18 +66,21 @@ func (b *BaseNode) IsExpression(t *testing.T) (te TestableExpression) {
 
 // HashExpression fails the test and returns nil by default
 func (b *BaseNode) IsHashExpression(t *testing.T) *TestableHashExpression {
+	t.Helper()
 	t.Fatalf(nodeFailureMsgFormat, "hash expression", b)
 	return nil
 }
 
 // IsIdentifier fails the test and returns nil by default
 func (b *BaseNode) IsIdentifier(t *testing.T) *TestableIdentifier {
+	t.Helper()
 	t.Fatalf(nodeFailureMsgFormat, "identifier", b)
 	return nil
 }
 
 // IsIfExpression fails the test and returns nil by default
 func (b *BaseNode) IsIfExpression(t *testing.T) *TestableIfExpression {
+	t.Helper()
 	t.Fatalf(nodeFailureMsgFormat, "if expression", b)
 	return nil
 }
@@ -92,12 +101,14 @@ func (b *BaseNode) IsInstanceVariable(t *testing.T) (ie *TestableInstanceVariabl
 
 // IsIntegerLiteral fails the test and returns nil by default
 func (b *BaseNode) IsIntegerLiteral(t *testing.T) (il *TestableIntegerLiteral) {
+	t.Helper()
 	t.Fatalf(nodeFailureMsgFormat, "integer literal", b)
 	return
 }
 
 // IsSelfExpression fails the test and returns nil by default
 func (b *BaseNode) IsSelfExpression(t *testing.T) (sl *TestableSelfExpression) {
+	t.Helper()
 	t.Fatalf(nodeFailureMsgFormat, "self expression", b)
 	return
 }
@@ -111,6 +122,7 @@ func (b *BaseNode) IsStringLiteral(t *testing.T) *TestableStringLiteral {
 
 // IsYieldExpression returns pointer of the receiver yield expression
 func (b *BaseNode) IsYieldExpression(t *testing.T) *TestableYieldExpression {
+	t.Helper()
 	t.Fatalf(nodeFailureMsgFormat, "yield expression", b)
 	return nil
 }
