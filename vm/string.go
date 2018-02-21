@@ -414,9 +414,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 							end = strLength - 1
 						}
 
-
-
-						return t.vm.initStringObject(string([]rune(str)[start:end+1]))
+						return t.vm.initStringObject(string([]rune(str)[start : end+1]))
 					default:
 						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, i.Class().Name)
 					}
