@@ -116,7 +116,12 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 	vm.channelObjectMap = &objectMap{store: &sync.Map{}}
 
 	for _, fn := range vm.libFiles {
-		vm.mainThread.execGobyLib(fn)
+		err := vm.mainThread.execGobyLib(fn)
+		if err != nil {
+			fmt.Printf("An error occurs when loading lib file %s:\n", string(fn))
+			fmt.Println(err.Error())
+			break
+		}
 	}
 
 	return

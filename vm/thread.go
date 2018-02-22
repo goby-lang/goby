@@ -69,7 +69,7 @@ func (t *thread) getClassIS(name string, filename filename) *instructionSet {
 	return is
 }
 
-func (t *thread) execGobyLib(libName string) {
+func (t *thread) execGobyLib(libName string) (err error) {
 	libPath := filepath.Join(t.vm.projectRoot, "lib", libName)
 	file, err := ioutil.ReadFile(libPath)
 
@@ -77,14 +77,14 @@ func (t *thread) execGobyLib(libName string) {
 		t.vm.mainThread.pushErrorObject(errors.InternalError, -1, err.Error())
 	}
 
-	t.execRequiredFile(libPath, file)
+	err = t.execRequiredFile(libPath, file)
+	return
 }
 
-func (t *thread) execRequiredFile(filepath string, file []byte) {
+func (t *thread) execRequiredFile(filepath string, file []byte) (err error) {
 	instructionSets, err := compiler.CompileToInstructions(string(file), parser.NormalMode)
 
 	if err != nil {
-		fmt.Println(err.Error())
 		return
 	}
 
@@ -107,6 +107,8 @@ func (t *thread) execRequiredFile(filepath string, file []byte) {
 	// Restore instruction sets.
 	t.vm.isTables[bytecode.MethodDef] = oldMethodTable
 	t.vm.isTables[bytecode.ClassDef] = oldClassTable
+
+	return
 }
 
 func (t *thread) startFromTopFrame() {
