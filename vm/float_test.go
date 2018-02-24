@@ -215,10 +215,9 @@ func TestFloatConversions(t *testing.T) {
 		{`
 		3.14159265358979.to_d.to_s`,
 			"3.14159265358979"},
-		// TODO: Able to parse negative float value and call method without parentheses
-		//{`
-		//-273.150000000.to_d.to_s`,
-		//	"-273.15"},
+		{`
+		-273.150000000.to_d.to_s`,
+			"-273.15"},
 	}
 
 	for i, tt := range tests {

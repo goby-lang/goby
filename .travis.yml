@@ -1,7 +1,7 @@
 language: go
 
 go:
-  - 1.9.x
+  - "1.10"
 
 services:
   - postgresql
@@ -15,9 +15,6 @@ before_script:
 
 script:
   - ./travis.sh
-
-after_script:
-  - go build -ldflags "-s -w" .
 
 env:
   - "GOBY_ROOT=$HOME/gopath/src/github.com/goby-lang/goby"

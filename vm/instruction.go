@@ -183,7 +183,7 @@ var builtinActions = map[operationType]*action{
 		name: bytecode.SetConstant,
 		operation: func(t *thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			constName := args[0].(string)
-			c := cf.lookupConstantInScope(constName)
+			c := cf.lookupConstantInCurrentScope(constName)
 			v := t.stack.pop()
 
 			if c != nil {
@@ -326,6 +326,23 @@ var builtinActions = map[operationType]*action{
 			cf.pc = args[0].(int)
 		},
 	},
+	bytecode.Break: {
+		name: bytecode.Break,
+		operation: func(t *thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
+			/*
+				Normal frame. IS name: ProgramStart. is block: false. source line: 1
+				Normal frame. IS name: 0. is block: true. ep: 17. source line: 5 <- The block source
+				Go method frame. Method name: each. <- The method call with block
+				Normal frame. IS name: 0. is block: true. ep: 17. source line: 5 <- The block execution
+			*/
+
+			if cf.IsBlock() {
+				t.callFrameStack.pop().stopExecution() // Remove block execution frame
+				t.callFrameStack.pop().stopExecution() // Remove method call frame
+				t.callFrameStack.pop().stopExecution() // Remove block source frame
+			}
+		},
+	},
 	bytecode.PutSelf: {
 		name: bytecode.PutSelf,
 		operation: func(t *thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
@@ -395,7 +412,7 @@ var builtinActions = map[operationType]*action{
 			case *RClass:
 				v.SingletonClass().Methods.set(methodName, method)
 			default:
-				singletonClass := t.vm.createRClass(fmt.Sprintf("#<Class:#<%s:%s>>", v.Class().Name, v.id()))
+				singletonClass := t.vm.createRClass(fmt.Sprintf("#<Class:#<%s:%d>>", v.Class().Name, v.id()))
 				singletonClass.Methods.set(methodName, method)
 				singletonClass.isSingleton = true
 				v.SetSingletonClass(singletonClass)
@@ -408,7 +425,7 @@ var builtinActions = map[operationType]*action{
 			subject := strings.Split(args[0].(string), ":")
 			subjectType, subjectName := subject[0], subject[1]
 
-			classPtr := cf.lookupConstant(subjectName)
+			classPtr := cf.lookupConstantUnderAllScope(subjectName)
 
 			if classPtr == nil {
 				class := t.vm.initializeClass(subjectName, subjectType == "module")
@@ -550,6 +567,24 @@ var builtinActions = map[operationType]*action{
 
 			t.stack.set(receiverPr, t.stack.top())
 			t.sp = receiverPr + 1
+		},
+	},
+	bytecode.GetBlock: {
+		name: bytecode.GetBlock,
+		operation: func(t *thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
+			if cf.blockFrame == nil {
+				t.pushErrorObject(errors.InternalError, sourceLine, "Can't get block without a block argument")
+			}
+
+			blockFrame := cf.blockFrame
+
+			if cf.blockFrame.ep == cf.ep {
+				blockFrame = cf.blockFrame.ep.blockFrame
+			}
+
+			blockObject := t.vm.initBlockObject(blockFrame.instructionSet, blockFrame.ep, t.stack.Data[t.sp-1].Target)
+
+			t.stack.push(&Pointer{Target: blockObject})
 		},
 	},
 	bytecode.Leave: {

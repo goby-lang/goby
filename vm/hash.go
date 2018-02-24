@@ -203,13 +203,24 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 						objectKey := t.vm.initStringObject(stringKey)
 						result := t.builtinMethodYield(blockFrame, objectKey, value)
 
-						booleanResult, isResultBoolean := result.Target.(*BooleanObject)
+						/*
+							TODO: Discuss this behavior
 
-						if isResultBoolean {
-							if booleanResult.value {
-								return TRUE
-							}
-						} else if result.Target != NULL {
+							```ruby
+							{ key: "foo", bar: "baz" }.any? do |k, v|
+							  true
+							  break
+							end
+							```
+
+							The block returns nil because of the break.
+							But in Ruby the final result is nil, which means the block's result is completely ignored
+						*/
+						if blockFrame.IsRemoved() {
+							return NULL
+						}
+
+						if result.Target.isTruthy() {
 							return TRUE
 						}
 					}
@@ -951,13 +962,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 						objectKey := t.vm.initStringObject(stringKey)
 						result := t.builtinMethodYield(blockFrame, objectKey, value)
 
-						booleanResult, isResultBoolean := result.Target.(*BooleanObject)
-
-						if isResultBoolean {
-							if booleanResult.value {
-								destinationPairs[stringKey] = value
-							}
-						} else if result.Target != NULL {
+						if result.Target.isTruthy() {
 							destinationPairs[stringKey] = value
 						}
 					}

@@ -159,3 +159,7 @@ func (n *NullObject) toString() string {
 func (n *NullObject) toJSON() string {
 	return "null"
 }
+
+func (n *NullObject) isTruthy() bool {
+	return false
+}

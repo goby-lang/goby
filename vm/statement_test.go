@@ -10,40 +10,68 @@ func TestBreakStatement(t *testing.T) {
 		expected interface{}
 	}{
 		{`
-x = 0
-y = 0
+		x = 0
+		y = 0
 
-while x < 10 do
-  x = x + 1
-  if x == 5
-	break
-  end
-  y = y + 1
-end
+		while x < 10 do
+		  x = x + 1
+		  if x == 5
+			break
+		  end
+		  y = y + 1
+		end
 
-x + y
-		`, 9},
+		x + y
+				`, 9},
 		{`
-x = 0
-y = 0
-i = 0
+		x = [1, 2, 3]
+		y = 0
+		
+		x.each do |i|
+		  y += i
+		  if i == 2
+			break
+		  end
+		end
+		
+		y
+		`, 3},
+		{`
+		x = [1, 2, 3]
+		y = 0
+		
+		while y < 10 do
+		  x.each do |i|
+			y += i
+			if i == 2
+			  break
+			end
+		  end
+		end
+		
+		y
+		`, 12},
+		{`
+		x = 0
+		y = 0
+		i = 0
 
-while x < 10 do
-  x = x + 1
-  while y < 5 do
-	y = y + 1
+		while x < 10 do
+		  x = x + 1
+		  while y < 5 do
+			y = y + 1
 
-	if y == 3
-	  break
-	end
+			if y == 3
+			  break
+			end
 
-	i = i + x * y
-  end
-end
+			i = i + x * y
+		  end
+		end
 
-a = i * 10
-a + 100
-		`, 310},
+		a = i * 10
+		a + 100
+				`, 310},
 	}
 
 	for i, tt := range tests {

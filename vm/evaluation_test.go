@@ -173,6 +173,7 @@ func TestBangPrefixMethodCall(t *testing.T) {
 		{"!!true", true},
 		{"!!false", false},
 		{"!!5", true},
+		{`!123.nil?`, true},
 	}
 
 	for i, tt := range tests {
@@ -218,11 +219,11 @@ func TestCaseExpressionEvaluation(t *testing.T) {
 		{
 			`
 			case 2
-			when 0 then
+			when 0
 			  0
-			when 1 then
+			when 1
 			  1
-			when 2 then
+			when 2
 			  2
 			end
 			`,
@@ -231,9 +232,9 @@ func TestCaseExpressionEvaluation(t *testing.T) {
 		{
 			`
 			case 2
-			when 0 then
+			when 0
 			  0
-			when 1 then
+			when 1
 			  1
 			else
 			  2
@@ -259,7 +260,7 @@ func TestCaseExpressionEvaluation(t *testing.T) {
 			case 9
 			when 0, 1, 2, 3, 4, 5
 			  0
-			when 6, 7, 7 + 1, 7 + 2 then
+			when 6, 7, 7 + 1, 7 + 2
 			  1
 			when 10, 11, 12
 			  2
@@ -589,7 +590,7 @@ func TestComplexEvaluation(t *testing.T) {
 func TestConstantNamespace(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected []interface{}
+		expected interface{}
 	}{
 		{`
 		class Foo
@@ -636,12 +637,46 @@ func TestConstantNamespace(t *testing.T) {
 		a = [VAL.name, Foo::VAL, Foo.new.foo]
 		a
 		`, []interface{}{"VAL", "Foo's constant value", "Foo's constant value"}},
+		{`
+		module Out
+		  ModVal = "out"
+		
+		  module Mid
+			ModVal = "mid"
+		
+			module In
+			  def self.val
+				ModVal
+			  end
+			end
+		  end
+		end
+
+		Out::Mid::In.val
+		`, "mid"},
+		{`
+		module Out
+		  ModVal = "out"
+		
+		  module Mid
+			ModVal = "mid"
+		
+			class In
+			  def val
+				ModVal
+			  end
+			end
+		  end
+		end
+
+		Out::Mid::In.new.val
+		`, "mid"},
 	}
 
 	for i, tt := range tests {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input, getFilename())
-		verifyArrayObject(t, i, evaluated, tt.expected)
+		verifyExpected(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
 		vm.checkSP(t, i, 1)
 	}
@@ -846,6 +881,22 @@ func TestIfExpressionEvaluation(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestUnusedKeywordFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`
+		if true then puts 1 end
+		`, "UndefinedMethodError: Undefined Method 'then' for <Instance of: Object>", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -1509,6 +1560,44 @@ func TestMethodCallWithBlockArgument(t *testing.T) {
 			  ten + 20
 			end
 			`, 30},
+		// Get Block
+		{`
+		def foo
+          get_block.call
+		end
+
+		foo do
+		  10
+		end
+`, 10},
+		{`
+		def bar(block)
+		  block.call + 100
+		end
+
+		def foo
+		  bar(get_block)
+		end
+
+		foo do
+		  10
+		end
+`, 110},
+		{`
+		def bar(block)
+		  block.call + get_block.call
+		end
+
+		def foo
+		  bar(get_block) do
+			20
+		  end
+		end
+
+		foo do
+		  10
+		end
+`, 30},
 	}
 
 	for i, tt := range tests {

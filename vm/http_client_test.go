@@ -89,16 +89,7 @@ func TestHTTPClientObjectFail(t *testing.T) {
 		end
 
 		res
-		`, "HTTPError: Could not complete request, Get http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: getsockopt: connection refused", 4},
-		{`
-		require "net/http"
-
-		res = Net::HTTP.start do |client|
-			client.get("http://127.0.0.1:3001")
-		end
-
-		res
-		`, "HTTPError: Could not complete request, Get http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: getsockopt: connection refused", 4},
+		`, "HTTPError: Could not complete request, Get http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: connect: connection refused", 4},
 	}
 
 	for i, tt := range testsFail {

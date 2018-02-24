@@ -6,6 +6,10 @@ import (
 )
 
 func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, scope *scope, table *localTable) {
+	if exp == nil {
+		return
+	}
+
 	sourceLine := exp.Line()
 	switch exp := exp.(type) {
 	case *ast.Constant:
@@ -39,7 +43,7 @@ func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, sc
 		is.define(NewHash, sourceLine, len(exp.Data)*2)
 	case *ast.SelfExpression:
 		is.define(PutSelf, sourceLine)
-	case *ast.PairExpression:
+	case *ast.ArgumentPairExpression:
 		g.compileExpression(is, exp.Value, scope, table)
 	case *ast.PrefixExpression:
 		g.compilePrefixExpression(is, exp, scope, table)
@@ -53,6 +57,8 @@ func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, sc
 		g.compileIfExpression(is, exp, scope, table)
 	case *ast.YieldExpression:
 		g.compileYieldExpression(is, exp, scope, table)
+	case *ast.GetBlockExpression:
+		g.compileGetBlockExpression(is, exp, scope, table)
 	case *ast.CallExpression:
 		g.compileCallExpression(is, exp, scope, table)
 	}
@@ -81,6 +87,10 @@ func (g *Generator) compileYieldExpression(is *InstructionSet, exp *ast.YieldExp
 	is.define(InvokeBlock, exp.Line(), len(exp.Arguments))
 }
 
+func (g *Generator) compileGetBlockExpression(is *InstructionSet, exp *ast.GetBlockExpression, scope *scope, table *localTable) {
+	is.define(GetBlock, exp.Line())
+}
+
 func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpression, scope *scope, table *localTable) {
 	var blockInfo string
 	argSet := &ArgSet{
@@ -99,7 +109,7 @@ func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpre
 		case *ast.AssignExpression:
 			varName := arg.Variables[0].(*ast.Identifier)
 			argSet.setArg(i, varName.Value, OptionedArg)
-		case *ast.PairExpression:
+		case *ast.ArgumentPairExpression:
 			key := arg.Key.(*ast.Identifier)
 
 			if arg.Value == nil {

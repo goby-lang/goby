@@ -1100,6 +1100,12 @@ func TestClassSingletonClassMethod(t *testing.T) {
 		class Foo < Bar; end
 		Foo.singleton_class.superclass.name
 		`, "#<Class:Bar>"},
+		// Check if this works on non-class objects
+		{`'a'.singleton_class.to_s.slice(1..16).to_s`, "<Class:#<String:"},
+		{`1.singleton_class.to_s.slice(1..17).to_s`, "<Class:#<Integer:"},
+		{`nil.singleton_class.to_s.slice(1..14).to_s`, "<Class:#<Null:"},
+		{`[1,2].singleton_class.to_s.slice(1..15).to_s`, "<Class:#<Array:"},
+		{`{key: "value"}.singleton_class.to_s.slice(1..14).to_s`, "<Class:#<Hash:"},
 	}
 
 	for i, tt := range tests {

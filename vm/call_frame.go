@@ -18,7 +18,9 @@ type baseFrame struct {
 	lPr           int
 	isBlock       bool
 	isSourceBlock bool
-	blockFrame    *normalCallFrame
+	// for helping stop the frame execution
+	isRemoved  bool
+	blockFrame *normalCallFrame
 	sync.RWMutex
 	sourceLine int
 	fileName   string
@@ -30,6 +32,7 @@ type callFrame interface {
 	BlockFrame() *normalCallFrame
 	IsBlock() bool
 	IsSourceBlock() bool
+	IsRemoved() bool
 	EP() *normalCallFrame
 	Locals() []*Pointer
 	LocalPtr() int
@@ -39,8 +42,9 @@ type callFrame interface {
 	getLCL(index, depth int) *Pointer
 	insertLCL(index, depth int, value Object)
 	storeConstant(constName string, constant interface{}) *Pointer
-	lookupConstant(constName string) *Pointer
-	lookupConstantInScope(constName string) *Pointer
+	lookupConstantUnderAllScope(constName string) *Pointer
+	lookupConstantUnderCurrentScope(constName string) *Pointer
+	lookupConstantInCurrentScope(constName string) *Pointer
 	inspect() string
 	stopExecution()
 }
@@ -51,7 +55,9 @@ type goMethodCallFrame struct {
 	name   string
 }
 
-func (cf *goMethodCallFrame) stopExecution() {}
+func (cf *goMethodCallFrame) stopExecution() {
+	cf.isRemoved = true
+}
 
 type normalCallFrame struct {
 	*baseFrame
@@ -65,6 +71,7 @@ func (n *normalCallFrame) instructionsCount() int {
 }
 
 func (n *normalCallFrame) stopExecution() {
+	n.isRemoved = true
 	n.pc = n.instructionsCount()
 }
 
@@ -78,6 +85,10 @@ func (b *baseFrame) BlockFrame() *normalCallFrame {
 
 func (b *baseFrame) IsBlock() bool {
 	return b.isBlock
+}
+
+func (b *baseFrame) IsRemoved() bool {
+	return b.isRemoved
 }
 
 func (b *baseFrame) IsSourceBlock() bool {
@@ -166,29 +177,43 @@ func (b *baseFrame) storeConstant(constName string, constant interface{}) *Point
 	return ptr
 }
 
-func (b *baseFrame) lookupConstant(constName string) *Pointer {
+func (b *baseFrame) lookupConstantUnderAllScope(constName string) *Pointer {
 	var c *Pointer
 
 	switch scope := b.self.(type) {
 	case *RClass:
-		c = scope.lookupConstantInAllScope(constName)
+		c = scope.lookupConstantUnderAllScope(constName)
 	default:
 		scopeClass := scope.Class()
-		c = scopeClass.lookupConstantInAllScope(constName)
+		c = scopeClass.lookupConstantUnderAllScope(constName)
 	}
 
 	return c
 }
 
-func (b *baseFrame) lookupConstantInScope(constName string) *Pointer {
+func (b *baseFrame) lookupConstantUnderCurrentScope(constName string) *Pointer {
 	var c *Pointer
 
 	switch scope := b.self.(type) {
 	case *RClass:
-		c = scope.lookupConstantInScope(constName)
+		c = scope.lookupConstantUnderCurrentScope(constName)
 	default:
 		scopeClass := scope.Class()
-		c = scopeClass.lookupConstantInScope(constName)
+		c = scopeClass.lookupConstantUnderCurrentScope(constName)
+	}
+
+	return c
+}
+
+func (b *baseFrame) lookupConstantInCurrentScope(constName string) *Pointer {
+	var c *Pointer
+
+	switch scope := b.self.(type) {
+	case *RClass:
+		c = scope.lookupConstantInCurrentScope(constName)
+	default:
+		scopeClass := scope.Class()
+		c = scopeClass.lookupConstantInCurrentScope(constName)
 	}
 
 	return c

@@ -1024,6 +1024,13 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			Name: "singleton_class",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					r := receiver
+					if r.SingletonClass() == nil {
+						id := t.vm.initIntegerObject(r.id())
+						singletonClass := t.vm.createRClass(fmt.Sprintf("#<Class:#<%s:%s>>", r.Class().Name, id.toString()))
+						singletonClass.isSingleton = true
+						return singletonClass
+					}
 					return receiver.SingletonClass()
 				}
 			},
@@ -1262,12 +1269,22 @@ func (c *RClass) lookupMethod(methodName string) Object {
 	return method
 }
 
-func (c *RClass) lookupConstantInScope(constName string) *Pointer {
+func (c *RClass) lookupConstantInCurrentScope(constName string) *Pointer {
+	constant, ok := c.constants[constName]
+
+	if !ok {
+		return nil
+	}
+
+	return constant
+}
+
+func (c *RClass) lookupConstantUnderCurrentScope(constName string) *Pointer {
 	constant, ok := c.constants[constName]
 
 	if !ok {
 		if c.scope != nil {
-			return c.scope.lookupConstantInScope(constName)
+			return c.scope.lookupConstantUnderCurrentScope(constName)
 		}
 
 		return nil
@@ -1276,12 +1293,12 @@ func (c *RClass) lookupConstantInScope(constName string) *Pointer {
 	return constant
 }
 
-func (c *RClass) lookupConstantInAllScope(constName string) *Pointer {
+func (c *RClass) lookupConstantUnderAllScope(constName string) *Pointer {
 	constant, ok := c.constants[constName]
 
 	if !ok {
 		if c.scope != nil {
-			return c.scope.lookupConstantInScope(constName)
+			return c.scope.lookupConstantUnderCurrentScope(constName)
 		}
 
 		// Finding constant in superclass means it's out of the scope

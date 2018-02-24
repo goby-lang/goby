@@ -67,7 +67,7 @@ func main() {
 		var v *vm.VM
 
 		if *issueOptionPtr {
-			fmt.Println("Will generate issue report on error...\n")
+			fmt.Println("Will generate issue report on error...")
 			v, err = vm.InitIssueReportVM(dir, args)
 			defer vm.PrintError(v)
 		} else {

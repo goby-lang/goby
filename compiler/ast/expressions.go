@@ -102,26 +102,26 @@ func (ae *ArrayExpression) String() string {
 }
 
 // PairExpression represents a key/value pair in method parameters or arguments
-type PairExpression struct {
+type ArgumentPairExpression struct {
 	*BaseNode
 	Key   Expression
 	Value Expression
 }
 
-func (pe *PairExpression) expressionNode() {}
+func (ape *ArgumentPairExpression) expressionNode() {}
 
 // TokenLiteral .....
-func (pe *PairExpression) TokenLiteral() string {
-	return pe.Token.Literal
+func (ape *ArgumentPairExpression) TokenLiteral() string {
+	return ape.Token.Literal
 }
 
 // String .....
-func (pe *PairExpression) String() string {
-	if pe.Value == nil {
-		return fmt.Sprintf("%s:", pe.Key.String())
+func (ape *ArgumentPairExpression) String() string {
+	if ape.Value == nil {
+		return fmt.Sprintf("%s:", ape.Key.String())
 	}
 
-	return fmt.Sprintf("%s: %s", pe.Key.String(), pe.Value.String())
+	return fmt.Sprintf("%s: %s", ape.Key.String(), ape.Value.String())
 }
 
 // HashExpression defines the hash expression literal which contains the node expression and its value
@@ -166,10 +166,8 @@ func (pe *PrefixExpression) TokenLiteral() string {
 func (pe *PrefixExpression) String() string {
 	var out bytes.Buffer
 
-	out.WriteString("(")
 	out.WriteString(pe.Operator)
 	out.WriteString(pe.Right.String())
-	out.WriteString(")")
 
 	return out.String()
 }
@@ -333,19 +331,19 @@ type CallExpression struct {
 	BlockArguments []*Identifier
 }
 
-func (ce *CallExpression) expressionNode() {}
-func (ce *CallExpression) TokenLiteral() string {
-	return ce.Token.Literal
+func (tce *CallExpression) expressionNode() {}
+func (tce *CallExpression) TokenLiteral() string {
+	return tce.Token.Literal
 }
-func (ce *CallExpression) String() string {
+func (tce *CallExpression) String() string {
 	var out bytes.Buffer
 
-	out.WriteString(ce.Receiver.String())
+	out.WriteString(tce.Receiver.String())
 	out.WriteString(".")
-	out.WriteString(ce.Method)
+	out.WriteString(tce.Method)
 
 	var args = []string{}
-	for _, arg := range ce.Arguments {
+	for _, arg := range tce.Arguments {
 		args = append(args, arg.String())
 	}
 
@@ -353,12 +351,12 @@ func (ce *CallExpression) String() string {
 	out.WriteString(strings.Join(args, ", "))
 	out.WriteString(")")
 
-	if ce.Block != nil {
+	if tce.Block != nil {
 		var blockArgs []string
 		out.WriteString(" do")
 
-		if len(ce.BlockArguments) > 0 {
-			for _, arg := range ce.BlockArguments {
+		if len(tce.BlockArguments) > 0 {
+			for _, arg := range tce.BlockArguments {
 				blockArgs = append(blockArgs, arg.String())
 			}
 			out.WriteString(" |")
@@ -367,7 +365,7 @@ func (ce *CallExpression) String() string {
 		}
 
 		out.WriteString("\n")
-		out.WriteString(ce.Block.String())
+		out.WriteString(tce.Block.String())
 		out.WriteString("\nend")
 	}
 
@@ -409,6 +407,23 @@ func (ye *YieldExpression) String() string {
 	out.WriteString(")")
 
 	return out.String()
+}
+
+// GetBlockExpression represents `get_block` call in the AST
+type GetBlockExpression struct {
+	*BaseNode
+}
+
+func (gbe *GetBlockExpression) expressionNode() {}
+
+// TokenLiteral ...
+func (gbe *GetBlockExpression) TokenLiteral() string {
+	return gbe.Token.Literal
+}
+
+// String ...
+func (gbe *GetBlockExpression) String() string {
+	return gbe.TokenLiteral()
 }
 
 // RangeExpression defines the range expression literal which contains the node expression and its start/end value

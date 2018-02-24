@@ -11,7 +11,7 @@ import (
 )
 
 // Version stores current Goby version
-const Version = "0.1.6"
+const Version = "0.1.7"
 
 // These are the enums for marking parser's mode, which decides whether it should pop unused values.
 const (
@@ -116,7 +116,12 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 	vm.channelObjectMap = &objectMap{store: &sync.Map{}}
 
 	for _, fn := range vm.libFiles {
-		vm.mainThread.execGobyLib(fn)
+		err := vm.mainThread.execGobyLib(fn)
+		if err != nil {
+			fmt.Printf("An error occurs when loading lib file %s:\n", string(fn))
+			fmt.Println(err.Error())
+			break
+		}
 	}
 
 	return
@@ -216,6 +221,7 @@ func (vm *VM) initConstants() {
 		vm.initHashClass(),
 		vm.initRangeClass(),
 		vm.initMethodClass(),
+		vm.initBlockClass(),
 		vm.initChannelClass(),
 		vm.initGoClass(),
 		vm.initFileClass(),
@@ -300,14 +306,14 @@ func (vm *VM) lookupConstant(cf callFrame, constName string) (constant *Pointer)
 	}
 
 	if hasNamespace {
-		constant = namespace.lookupConstantInAllScope(constName)
+		constant = namespace.lookupConstantUnderAllScope(constName)
 
 		if constant != nil {
 			return
 		}
 	}
 
-	constant = cf.lookupConstant(constName)
+	constant = cf.lookupConstantUnderAllScope(constName)
 
 	if constant == nil {
 		constant = vm.objectClass.constants[constName]
