@@ -541,6 +541,9 @@ func TestRangeMapMethod(t *testing.T) {
 		{`
 		(-5..5).map do |x| x * x; end
 		`, []interface{}{25, 16, 9, 4, 1, 0, 1, 4, 9, 16, 25}},
+		{`
+		(1..5).map do |x| end
+		`, []interface{}{nil, nil, nil, nil, nil}},
 	}
 
 	for i, tt := range tests {
