@@ -4,6 +4,9 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"net/http"
+	"io/ioutil"
+	"time"
 )
 
 func TestServerInitialization(t *testing.T) {
@@ -25,6 +28,53 @@ func TestServerInitialization(t *testing.T) {
 		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
+	}
+}
+
+func TestServerSetupResponse(t *testing.T) {
+	tests := []struct {
+		input    string
+		expectedBody string
+		expectedStatus int
+	}{
+		{`
+		require "net/simple_server"
+
+		server = Net::SimpleServer.new(4000)
+		server.get("/") do |req, res|
+		  res.body = req.method + " Hello World"
+		  res.status = 200
+		end
+		puts("foo")
+		server.start
+		`,
+			"GET Hello World",
+			200},
+	}
+
+	for _, tt := range tests {
+		go func() {
+			v := initTestVM()
+			v.testEval(t, tt.input, getFilename())
+		}()
+
+		time.Sleep(1 * time.Second)
+		resp, err := http.Get("http://localhost:4000")
+
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+
+		if string(body) != tt.expectedBody {
+			t.Fatalf("Expect response body to be: \n %s, got \n %s", tt.expectedBody, string(body))
+		}
+
+		if resp.StatusCode != tt.expectedStatus {
+			t.Fatalf("Expect response status to be %d, got %d", tt.expectedStatus, resp.StatusCode)
+		}
 	}
 }
 
