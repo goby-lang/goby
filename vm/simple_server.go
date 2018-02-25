@@ -10,10 +10,10 @@ import (
 	"path/filepath"
 	"unicode"
 
+	"fmt"
 	"github.com/fatih/structs"
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/gorilla/mux"
-	"fmt"
 	"strconv"
 )
 

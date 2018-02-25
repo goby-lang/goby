@@ -1,11 +1,11 @@
 package vm
 
 import (
+	"io/ioutil"
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
-	"net/http"
-	"io/ioutil"
 	"time"
 )
 
@@ -32,34 +32,47 @@ func TestServerInitialization(t *testing.T) {
 }
 
 func TestServerSetupResponse(t *testing.T) {
+	serverScript := `
+	require "net/simple_server"
+
+	server = Net::SimpleServer.new(4000)
+	server.get "/" do |req, res|
+	  res.body = req.method + " Hello World"
+	  res.status = 200
+	end
+
+	server.get "/not_found" do |req, res|
+	  res.body = String.fmt("Path \"%s\" not found", req.path)
+	  res.status = 404
+	end
+		
+	server.start
+
+`
 	tests := []struct {
-		input    string
-		expectedBody string
+		path           string
+		expectedBody   string
 		expectedStatus int
 	}{
-		{`
-		require "net/simple_server"
-
-		server = Net::SimpleServer.new(4000)
-		server.get("/") do |req, res|
-		  res.body = req.method + " Hello World"
-		  res.status = 200
-		end
-		puts("foo")
-		server.start
-		`,
+		{
+			"/",
 			"GET Hello World",
 			200},
+		{
+			"/not_found",
+			"Path \"/not_found\" not found",
+			404},
 	}
 
-	for _, tt := range tests {
-		go func() {
-			v := initTestVM()
-			v.testEval(t, tt.input, getFilename())
-		}()
+	go func() {
+		v := initTestVM()
+		v.testEval(t, serverScript, getFilename())
+	}()
 
-		time.Sleep(1 * time.Second)
-		resp, err := http.Get("http://localhost:4000")
+	time.Sleep(1 * time.Second)
+
+	for _, tt := range tests {
+		resp, err := http.Get("http://localhost:4000" + tt.path)
 
 		if err != nil {
 			t.Fatal(err.Error())
