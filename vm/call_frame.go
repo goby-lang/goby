@@ -33,6 +33,7 @@ type callFrame interface {
 	IsBlock() bool
 	IsSourceBlock() bool
 	IsRemoved() bool
+	setAsRemoved()
 	EP() *normalCallFrame
 	Locals() []*Pointer
 	LocalPtr() int
@@ -55,9 +56,7 @@ type goMethodCallFrame struct {
 	name   string
 }
 
-func (cf *goMethodCallFrame) stopExecution() {
-	cf.isRemoved = true
-}
+func (cf *goMethodCallFrame) stopExecution() {}
 
 type normalCallFrame struct {
 	*baseFrame
@@ -71,7 +70,6 @@ func (n *normalCallFrame) instructionsCount() int {
 }
 
 func (n *normalCallFrame) stopExecution() {
-	n.isRemoved = true
 	n.pc = n.instructionsCount()
 }
 
@@ -89,6 +87,10 @@ func (b *baseFrame) IsBlock() bool {
 
 func (b *baseFrame) IsRemoved() bool {
 	return b.isRemoved
+}
+
+func (b *baseFrame) setAsRemoved() {
+	b.isRemoved = true
 }
 
 func (b *baseFrame) IsSourceBlock() bool {
