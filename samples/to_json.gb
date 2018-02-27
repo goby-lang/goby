@@ -1,2 +1,27 @@
-h = { a: 1, b: [1, "2", [4, 5, nil], { foo: "bar" }]}.to_json
-puts(h) #=> {"a":1,"b":[1, "2", [4, 5, null], {"foo":"bar"}]}
+class JobTitle
+  def initialize(name)
+    @name = name
+  end
+
+  def to_json
+    { title: @name }.to_json
+  end
+end
+
+class Person
+  def initialize(name, age)
+    @name = name
+    @age = age
+    @job = JobTitle.new("software engineer")
+  end
+
+  def to_json
+    { name: @name, age: @age, job: @job }.to_json
+  end
+end
+
+stan = Person.new("Stan", 23)
+
+h = { a: 1, b: [1, "2", [4, 5, nil], { person: stan }]}.to_json
+puts(h) #=> {"b":[1, "2", [4, 5, null], {"person":{"name":"Stan","job":{"title":"software engineer"},"age":23}}],"a":1}
+

@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+	"github.com/goby-lang/goby/compiler/bytecode"
 	"strconv"
 )
 
@@ -117,6 +118,15 @@ func (ro *RObject) toString() string {
 
 // toJSON just delegates to toString
 func (ro *RObject) toJSON(t *thread) string {
+	customToJSONMethod := ro.findMethod("to_json").(*MethodObject)
+
+	if customToJSONMethod != nil {
+		t.stack.push(&Pointer{Target: ro})
+		callObj := newCallObject(ro, customToJSONMethod, t.sp, 0, &bytecode.ArgSet{}, nil, customToJSONMethod.instructionSet.instructions[0].sourceLine)
+		t.evalMethodObject(callObj, customToJSONMethod.instructionSet.instructions[0].sourceLine)
+		result := t.stack.pop().Target
+		return result.toString()
+	}
 	return ro.toString()
 }
 

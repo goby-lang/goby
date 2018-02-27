@@ -1507,25 +1507,44 @@ func TestHashToJSONMethodWithCustomType(t *testing.T) {
 			},
 		}},
 		{`
-		{ a: 1, b: { c: 2, d: { e: "foo" }}}.to_json
+		class JobTitle
+		  def initialize(name)
+			@name = name
+		  end
+		
+		  def to_json
+			{ title: @name }.to_json
+		  end
+		end
+		
+		class Person
+		  def initialize(name, age)
+			@name = name
+			@age = age
+			@job = JobTitle.new("software engineer")
+		  end
+		
+		  def to_json
+			{ name: @name, age: @age, job: @job }.to_json
+		  end
+		end
+
+		stan = Person.new("Stan", 23)
+		stan.to_json
 		`, struct {
-			A int `json:"a"`
-			B struct {
-				C int `json:"c"`
-				D struct {
-					E string `json:"e"`
-				} `json:"d"`
-			} `json:"b"`
+			Name string `json:"name"`
+			Age  int    `json:"age"`
+			Job  struct {
+				Title string `json:"title"`
+			} `json:"job"`
 		}{
-			1,
+			"Stan",
+			23,
 			struct {
-				C int `json:"c"`
-				D struct {
-					E string `json:"e"`
-				} `json:"d"`
-			}{C: 2, D: struct {
-				E string `json:"e"`
-			}{E: "foo"}},
+				Title string `json:"title"`
+			}{
+				Title: "software engineer",
+			},
 		}},
 	}
 
