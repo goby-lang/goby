@@ -13,7 +13,7 @@ type Object interface {
 	SetSingletonClass(*RClass)
 	findMethod(string) Object
 	toString() string
-	toJSON() string
+	toJSON(t *thread) string
 	id() int
 	instanceVariableGet(string) (Object, bool)
 	instanceVariableSet(string, Object) Object
@@ -116,7 +116,7 @@ func (ro *RObject) toString() string {
 }
 
 // toJSON just delegates to toString
-func (ro *RObject) toJSON() string {
+func (ro *RObject) toJSON(t *thread) string {
 	return ro.toString()
 }
 

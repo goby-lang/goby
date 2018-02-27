@@ -262,6 +262,6 @@ func (lock *ConcurrentRWLockObject) toString() string {
 }
 
 // toJSON just delegates to toString
-func (lock *ConcurrentRWLockObject) toJSON() string {
+func (lock *ConcurrentRWLockObject) toJSON(t *thread) string {
 	return lock.toString()
 }

@@ -1692,7 +1692,7 @@ func (s *StringObject) toString() string {
 }
 
 // toJSON just delegates to toString
-func (s *StringObject) toJSON() string {
+func (s *StringObject) toJSON(t *thread) string {
 	return strconv.Quote(s.value)
 }
 

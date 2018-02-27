@@ -156,7 +156,7 @@ func (n *NullObject) toString() string {
 }
 
 // toJSON just delegates to toString
-func (n *NullObject) toJSON() string {
+func (n *NullObject) toJSON(t *thread) string {
 	return "null"
 }
 

@@ -540,7 +540,7 @@ func (ro *RangeObject) toString() string {
 }
 
 // toJSON just delegates to toString
-func (ro *RangeObject) toJSON() string {
+func (ro *RangeObject) toJSON(t *thread) string {
 	return ro.toString()
 }
 
