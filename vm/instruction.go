@@ -337,9 +337,16 @@ var builtinActions = map[operationType]*action{
 			*/
 
 			if cf.IsBlock() {
-				t.callFrameStack.pop().stopExecution() // Remove block execution frame
-				t.callFrameStack.pop().stopExecution() // Remove method call frame
-				t.callFrameStack.pop().stopExecution() // Remove block source frame
+				/*
+				  1. Remove block execution frame
+				  2. Remove method call frame
+				  3. Remove block source frame
+				*/
+				for i := 0; i < 3; i++ {
+					frame := t.callFrameStack.pop()
+					frame.stopExecution()
+					frame.setAsRemoved()
+				}
 			}
 		},
 	},

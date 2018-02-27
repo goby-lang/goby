@@ -10,9 +10,11 @@ import (
 	"path/filepath"
 	"unicode"
 
+	"fmt"
 	"github.com/fatih/structs"
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/gorilla/mux"
+	"strconv"
 )
 
 type request struct {
@@ -71,12 +73,19 @@ func builtinSimpleServerInstanceMethods() []*BuiltinMethodObject {
 					var serveStatic bool
 					server := receiver.(*RObject)
 
-					portVar, ok := server.InstanceVariables.get("@port")
+					portVar, ok := server.instanceVariableGet("@port")
 
 					if !ok {
 						port = "8080"
 					} else {
-						port = portVar.(*StringObject).value
+						switch p := portVar.(type) {
+						case *StringObject:
+							port = p.value
+						case *IntegerObject:
+							port = strconv.Itoa(p.value)
+						default:
+							fmt.Printf("Unexpected type %s for port setting\n", portVar.Class().Name)
+						}
 					}
 
 					log.Println("SimpleServer start listening on port: " + port)
