@@ -199,7 +199,7 @@ func (m *MatchDataObject) toString() string {
 }
 
 // returns a `{ captureNumber: captureValue }` JSON-encoded string
-func (m *MatchDataObject) toJSON() string {
+func (m *MatchDataObject) toJSON(t *thread) string {
 	result := "{"
 
 	for _, c := range m.match.Groups() {

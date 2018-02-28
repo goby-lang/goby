@@ -187,7 +187,7 @@ func (p *PluginObject) toString() string {
 }
 
 // toJSON just delegates to toString
-func (p *PluginObject) toJSON() string {
+func (p *PluginObject) toJSON(t *thread) string {
 	return p.toString()
 }
 

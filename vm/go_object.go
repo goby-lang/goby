@@ -78,7 +78,7 @@ func (s *GoObject) toString() string {
 }
 
 // toJSON just delegates to toString
-func (s *GoObject) toJSON() string {
+func (s *GoObject) toJSON(t *thread) string {
 	return s.toString()
 }
 
