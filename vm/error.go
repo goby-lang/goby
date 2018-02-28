@@ -73,7 +73,7 @@ func (e *Error) toString() string {
 }
 
 // toJSON just delegates to `toString`
-func (e *Error) toJSON() string {
+func (e *Error) toJSON(t *thread) string {
 	return e.toString()
 }
 

@@ -33,7 +33,7 @@ func (m *MethodObject) toString() string {
 	return out.String()
 }
 
-func (m *MethodObject) toJSON() string {
+func (m *MethodObject) toJSON(t *thread) string {
 	return m.toString()
 }
 
@@ -85,7 +85,7 @@ func (bim *BuiltinMethodObject) toString() string {
 }
 
 // toJSON just delegates to `toString`
-func (bim *BuiltinMethodObject) toJSON() string {
+func (bim *BuiltinMethodObject) toJSON(t *thread) string {
 	return bim.toString()
 }
 

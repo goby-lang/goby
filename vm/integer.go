@@ -782,7 +782,7 @@ func (i *IntegerObject) toString() string {
 }
 
 // toJSON just delegates to toString
-func (i *IntegerObject) toJSON() string {
+func (i *IntegerObject) toJSON(t *thread) string {
 	return i.toString()
 }
 

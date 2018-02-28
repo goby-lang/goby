@@ -125,8 +125,8 @@ func initConcurrentArrayClass(vm *VM) {
 // Object interface functions -------------------------------------------
 
 // toJSON returns the object's name as the JSON string format
-func (cac *ConcurrentArrayObject) toJSON() string {
-	return cac.InternalArray.toJSON()
+func (cac *ConcurrentArrayObject) toJSON(t *thread) string {
+	return cac.InternalArray.toJSON(t)
 }
 
 // toString returns the object's name as the string format

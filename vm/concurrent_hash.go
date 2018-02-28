@@ -270,7 +270,7 @@ func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					r := receiver.(*ConcurrentHashObject)
-					return t.vm.initStringObject(r.toJSON())
+					return t.vm.initStringObject(r.toJSON(t))
 				}
 			},
 		},
@@ -366,13 +366,13 @@ func (h *ConcurrentHashObject) toString() string {
 }
 
 // toJSON returns the object's name as the JSON string format
-func (h *ConcurrentHashObject) toJSON() string {
+func (h *ConcurrentHashObject) toJSON(t *thread) string {
 	var out bytes.Buffer
 	var values []string
 	out.WriteString("{")
 
 	iterator := func(key, value interface{}) bool {
-		values = append(values, generateJSONFromPair(key.(string), value.(Object)))
+		values = append(values, generateJSONFromPair(key.(string), value.(Object), t))
 
 		return true
 	}

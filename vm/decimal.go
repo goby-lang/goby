@@ -712,7 +712,7 @@ func (d *DecimalObject) toString() string {
 }
 
 // toJSON just delegates to toString
-func (d *DecimalObject) toJSON() string {
+func (d *DecimalObject) toJSON(t *thread) string {
 	return d.toString()
 }
 

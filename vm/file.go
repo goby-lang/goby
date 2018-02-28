@@ -367,7 +367,7 @@ func (f *FileObject) toString() string {
 }
 
 // toJSON just delegates to `toString`
-func (f *FileObject) toJSON() string {
+func (f *FileObject) toJSON(t *thread) string {
 	return f.toString()
 }
 

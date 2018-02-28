@@ -139,7 +139,7 @@ func (b *BooleanObject) toString() string {
 }
 
 // toJSON just delegates to `toString`
-func (b *BooleanObject) toJSON() string {
+func (b *BooleanObject) toJSON(t *thread) string {
 	return b.toString()
 }
 
