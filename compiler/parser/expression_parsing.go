@@ -261,6 +261,13 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	operator := p.curToken
 	preced := p.curPrecedence()
 
+	// prevent "* *" from being parsed
+	if p.curToken.Literal == token.Asterisk && p.peekToken.Literal == token.Asterisk {
+		msg := fmt.Sprintf("unexpected %s Line: %d", p.curToken.Literal, p.peekToken.Line)
+		p.error = errors.InitError(msg, errors.UnexpectedTokenError)
+		return nil
+	}
+
 	if operator.Literal == "||" || operator.Literal == "&&" {
 		preced = precedence.Normal
 	}
