@@ -117,11 +117,6 @@ end
 foo
 `,
 			}, 345},
-		{
-			[]string{
-				`raise ArgumentError`,
-			}, "error",
-		},
 	}
 
 	for i, test := range tests {
