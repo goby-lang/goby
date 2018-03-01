@@ -6,10 +6,10 @@ import (
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/compiler/lexer"
 	"github.com/goby-lang/goby/compiler/parser"
+	"github.com/goby-lang/goby/vm/errors"
 	"os"
 	"runtime"
 	"testing"
-	"github.com/goby-lang/goby/vm/errors"
 )
 
 func TestVM_REPLExec(t *testing.T) {
@@ -159,14 +159,14 @@ foo
 func TestVM_REPLExecFail(t *testing.T) {
 
 	tests := []struct {
-		inputs  []string
+		inputs   []string
 		expected string
 	}{
 		{
 			[]string{
 				`raise ArgumentError`,
 			},
-			fmt.Sprintf("InternalError: '%s'",errors.ArgumentError),
+			fmt.Sprintf("InternalError: '%s'", errors.ArgumentError),
 		},
 		{
 			[]string{
