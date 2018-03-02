@@ -6,6 +6,7 @@ import (
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/compiler/lexer"
 	"github.com/goby-lang/goby/compiler/parser"
+	"github.com/goby-lang/goby/vm/errors"
 	"os"
 	"runtime"
 	"testing"
@@ -145,6 +146,73 @@ foo
 
 		evaluated := v.GetExecResult()
 		verifyExpected(t, i, evaluated, test.expected)
+		// Because REPL should maintain a base call frame so that the whole program won't exit
+		v.checkCFP(t, i, 1)
+	}
+}
+
+func TestVM_REPLExecFail(t *testing.T) {
+
+	tests := []struct {
+		inputs   []string
+		expected string
+	}{
+		{
+			[]string{
+				`raise ArgumentError`,
+			},
+			fmt.Sprintf("InternalError: '%s'", errors.ArgumentError),
+		},
+		{
+			[]string{
+				"NonExistentBuiltinMethod",
+			},
+			"NameError: uninitialized constant NonExistentBuiltinMethod",
+		},
+		{
+			[]string{
+				"Hash.notExist",
+			},
+			"UndefinedMethodError: Undefined Method 'notExist' for Hash",
+		},
+	}
+
+	for i, test := range tests {
+		v := initTestVM()
+		v.InitForREPL()
+
+		// Initialize parser, lexer is not important here
+		p := parser.New(lexer.New(""))
+		p.Mode = parser.REPLMode
+
+		program, _ := p.ParseProgram()
+
+		// Initialize code generator, and it will behavior a little different in REPL mode.
+		g := bytecode.NewGenerator()
+		g.REPL = true
+		g.InitTopLevelScope(program)
+
+		for _, input := range test.inputs {
+			p := parser.New(lexer.New(input))
+			p.Mode = parser.REPLMode
+
+			// prevent parse errors from panicking tests
+			program, Err := p.ParseProgram()
+			if Err != nil {
+				t.Fatalf("At case %d unexpected parse error %q", i, Err.Message)
+			}
+			sets := g.GenerateInstructions(program.Statements)
+
+			v.REPLExec(sets)
+		}
+
+		evaluated := v.GetExecResult()
+
+		if evaluated.toString() != test.expected {
+			t.Fatalf("At case %d expected %s got %s", i,
+				test.expected, evaluated.toString())
+		}
+
 		// Because REPL should maintain a base call frame so that the whole program won't exit
 		v.checkCFP(t, i, 1)
 	}
