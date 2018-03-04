@@ -1077,7 +1077,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					r := receiver.(*HashObject)
-					return t.vm.initStringObject(r.toJSON())
+					return t.vm.initStringObject(r.toJSON(t))
 				}
 			},
 		},
@@ -1253,14 +1253,14 @@ func (h *HashObject) toString() string {
 }
 
 // toJSON returns the object's name as the JSON string format
-func (h *HashObject) toJSON() string {
+func (h *HashObject) toJSON(t *thread) string {
 	var out bytes.Buffer
 	var values []string
 	pairs := h.Pairs
 	out.WriteString("{")
 
 	for key, value := range pairs {
-		values = append(values, generateJSONFromPair(key, value))
+		values = append(values, generateJSONFromPair(key, value, t))
 	}
 
 	out.WriteString(strings.Join(values, ","))
@@ -1331,14 +1331,14 @@ func (h *HashObject) dig(t *thread, keys []Object, sourceLine int) Object {
 // Other helper functions ----------------------------------------------
 
 // Return the JSON style strings of the Hash object
-func generateJSONFromPair(key string, v Object) string {
+func generateJSONFromPair(key string, v Object, t *thread) string {
 	var data string
 	var out bytes.Buffer
 
 	out.WriteString(data)
 	out.WriteString("\"" + key + "\"")
 	out.WriteString(":")
-	out.WriteString(v.toJSON())
+	out.WriteString(v.toJSON(t))
 
 	return out.String()
 }

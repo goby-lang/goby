@@ -1,9 +1,12 @@
 package vm
 
 import (
+	"io/ioutil"
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestServerInitialization(t *testing.T) {
@@ -25,6 +28,66 @@ func TestServerInitialization(t *testing.T) {
 		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
+	}
+}
+
+func TestServerSetupResponse(t *testing.T) {
+	serverScript := `
+	require "net/simple_server"
+
+	server = Net::SimpleServer.new(4000)
+	server.get "/" do |req, res|
+	  res.body = req.method + " Hello World"
+	  res.status = 200
+	end
+
+	server.get "/not_found" do |req, res|
+	  res.body = String.fmt("Path \"%s\" not found", req.path)
+	  res.status = 404
+	end
+		
+	server.start
+
+`
+	tests := []struct {
+		path           string
+		expectedBody   string
+		expectedStatus int
+	}{
+		{
+			"/",
+			"GET Hello World",
+			200},
+		{
+			"/not_found",
+			"Path \"/not_found\" not found",
+			404},
+	}
+
+	go func() {
+		v := initTestVM()
+		v.testEval(t, serverScript, getFilename())
+	}()
+
+	time.Sleep(1 * time.Second)
+
+	for _, tt := range tests {
+		resp, err := http.Get("http://localhost:4000" + tt.path)
+
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+
+		if string(body) != tt.expectedBody {
+			t.Fatalf("Expect response body to be: \n %s, got \n %s", tt.expectedBody, string(body))
+		}
+
+		if resp.StatusCode != tt.expectedStatus {
+			t.Fatalf("Expect response status to be %d, got %d", tt.expectedStatus, resp.StatusCode)
+		}
 	}
 }
 

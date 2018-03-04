@@ -1521,6 +1521,92 @@ func TestHashToJSONMethodWithNestedHash(t *testing.T) {
 	}
 }
 
+func TestHashToJSONMethodWithCustomType(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		class Person
+		  def initialize(name, age)
+			@name = name
+			@age = age
+		  end
+		
+		  def to_json
+			{ name: @name, age: @age }.to_json
+		  end
+		end
+		
+		stan = Person.new("Stan", 23)
+		h = { a: 1, person: stan }.to_json
+		`, struct {
+			A      int `json:"a"`
+			Person struct {
+				Name string `json:"name"`
+				Age  int    `json:"age"`
+			} `json:"person"`
+		}{
+			1,
+			struct {
+				Name string `json:"name"`
+				Age  int    `json:"age"`
+			}{
+				Name: "Stan",
+				Age:  23,
+			},
+		}},
+		{`
+		class JobTitle
+		  def initialize(name)
+			@name = name
+		  end
+		
+		  def to_json
+			{ title: @name }.to_json
+		  end
+		end
+		
+		class Person
+		  def initialize(name, age)
+			@name = name
+			@age = age
+			@job = JobTitle.new("software engineer")
+		  end
+		
+		  def to_json
+			{ name: @name, age: @age, job: @job }.to_json
+		  end
+		end
+
+		stan = Person.new("Stan", 23)
+		stan.to_json
+		`, struct {
+			Name string `json:"name"`
+			Age  int    `json:"age"`
+			Job  struct {
+				Title string `json:"title"`
+			} `json:"job"`
+		}{
+			"Stan",
+			23,
+			struct {
+				Title string `json:"title"`
+			}{
+				Title: "software engineer",
+			},
+		}},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		compareJSONResult(t, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestHashToJSONMethodWithBasicTypes(t *testing.T) {
 	tests := []struct {
 		input    string

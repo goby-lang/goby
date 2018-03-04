@@ -1213,7 +1213,7 @@ func (c *RClass) toString() string {
 }
 
 // toJSON just delegates to `toString`
-func (c *RClass) toJSON() string {
+func (c *RClass) toJSON(t *thread) string {
 	return c.toString()
 }
 

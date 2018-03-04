@@ -1237,11 +1237,11 @@ func (a *ArrayObject) toString() string {
 }
 
 // toJSON returns the object's elements as the JSON string format
-func (a *ArrayObject) toJSON() string {
+func (a *ArrayObject) toJSON(t *thread) string {
 	var out bytes.Buffer
 	elements := []string{}
 	for _, e := range a.Elements {
-		elements = append(elements, e.toJSON())
+		elements = append(elements, e.toJSON(t))
 	}
 
 	out.WriteString("[")

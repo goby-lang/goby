@@ -667,3 +667,26 @@ func TestStringLiteralExpression(t *testing.T) {
 		literal.ShouldEqualTo(tt.expected)
 	}
 }
+
+func TestArithmeticExpressionFail(t *testing.T) {
+	tests := []struct {
+		input string
+		error string
+	}{
+		{`{ 1 ++ 1 }`, `unexpected + Line: 0`},
+		{`{ 1 * * 1 }`, `unexpected * Line: 0`},
+		{`{ 1 ** [1, 2] }`, `expected next token to be }, got **(**) instead. Line: 0`},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		_, err := p.ParseProgram()
+
+		if err.Message != tt.error {
+			t.Log("Expected arithmetic parsing error")
+			t.Log("expect: ", tt.error)
+			t.Fatal("actual: ", err.Message)
+		}
+	}
+}

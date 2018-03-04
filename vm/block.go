@@ -84,7 +84,7 @@ func (bo *BlockObject) toString() string {
 }
 
 // toJSON just delegates to toString
-func (bo *BlockObject) toJSON() string {
+func (bo *BlockObject) toJSON(t *thread) string {
 	return bo.toString()
 }
 

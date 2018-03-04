@@ -158,6 +158,6 @@ func (m *GoMap) toString() string {
 }
 
 // toJSON just delegates to toString
-func (m *GoMap) toJSON() string {
+func (m *GoMap) toJSON(t *thread) string {
 	return m.toString()
 }

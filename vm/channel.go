@@ -96,7 +96,7 @@ func (co *ChannelObject) toString() string {
 }
 
 // toJSON just delegates to toString
-func (co *ChannelObject) toJSON() string {
+func (co *ChannelObject) toJSON(t *thread) string {
 	return co.toString()
 }
 

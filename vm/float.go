@@ -446,7 +446,7 @@ func (f *FloatObject) toString() string {
 }
 
 // toJSON just delegates to toString
-func (f *FloatObject) toJSON() string {
+func (f *FloatObject) toJSON(t *thread) string {
 	return f.toString()
 }
 

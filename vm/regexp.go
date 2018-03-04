@@ -178,7 +178,7 @@ func (r *RegexpObject) toString() string {
 }
 
 // toJSON just delegates to toString
-func (r *RegexpObject) toJSON() string {
+func (r *RegexpObject) toJSON(t *thread) string {
 	return "\"" + r.toString() + "\""
 }
 
