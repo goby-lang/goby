@@ -273,6 +273,19 @@ func TestHashAnyMethod(t *testing.T) {
         true
       end
 		`, false},
+		// cases for providing an empty block
+		{`
+      { a: 1, b: 2 }.any? do; end
+		`, false},
+		{`
+      { a: 1, b: 2 }.any? do |i|; end
+		`, false},
+		{`
+      {}.any? do; end
+		`, false},
+		{`
+      {}.any? do |i|; end
+		`, false},
 		{`
 	  { key: "foo", bar: "baz" }.any? do |k, v|
 	    true
@@ -485,6 +498,19 @@ func TestHashDeleteIfMethod(t *testing.T) {
 		{`
 			{ }.delete_if do |k, v| true end
 		`, map[string]interface{}{}},
+		// cases for providing an empty block
+		{`
+			{ a: 1, b: 2 }.delete_if do; end
+		`, map[string]interface{}{"a": 1, "b": 2}},
+		{`
+			{ a: 1, b: 2 }.delete_if do |i|; end
+		`, map[string]interface{}{"a": 1, "b": 2}},
+		{`
+			{}.delete_if do; end
+		`, map[string]interface{}{}},
+		{`
+			{}.delete_if do |i|; end
+		`, map[string]interface{}{}},
 	}
 
 	for i, tt := range tests {
@@ -620,12 +646,15 @@ func TestHashEachKeyMethod(t *testing.T) {
 		expected []interface{}
 	}{
 		{`
+			{ b: "Hello", c: "World", a: "Goby" }.each_key do end
+		`, []interface{}{"a", "b", "c"}},
+		{`
 			{ a: "Hello", b: "World", c: "Goby" }.each_key do |key|
 				# Empty Block
 			end
 		`, []interface{}{"a", "b", "c"}},
 		{`
-			{ b: "Hello", c: "World", a: "Goby" }.each_key do |key|
+			{ b: "Hello", c: "World", a: "Goby" }.each_key do
 				# Empty Block
 			end
 		`, []interface{}{"a", "b", "c"}},
@@ -682,6 +711,9 @@ func TestHashEachValueMethod(t *testing.T) {
 		input    string
 		expected []interface{}
 	}{
+		{`
+			{ a: "Hello", b: 123, c: true }.each_value do end
+		`, []interface{}{"Hello", 123, true}},
 		{`
 			{ a: "Hello", b: 123, c: true }.each_value do |v|
 				# Empty Block
@@ -1088,6 +1120,14 @@ func TestHashMapValuesMethod(t *testing.T) {
 		expected interface{}
 	}{
 		{`
+		result = { a: 1, b: 2, c: 3 }.map_values do end
+		result["a"] + result["b"] + result["c"]
+		`, 6},
+		{`
+		result = { a: 1, b: 2, c: 3 }.map_values do |v| end
+		result["a"] + result["b"] + result["c"]
+		`, 6},
+		{`
 		h = { a: 1, b: 2, c: 3 }
 		result = h.map_values do |v|
 			v * 3
@@ -1269,6 +1309,16 @@ func TestHashSelectMethod(t *testing.T) {
 			source.select do |k, v| true end
 			source
 		`, map[string]interface{}{"a": 1, "b": 2}},
+		// cases for providing an empty block
+		{`
+			{ a: 1, b: 2 }.select do end
+		`, map[string]interface{}{}},
+		{`
+			{ a: 1, b: 2 }.select do |k| end
+		`, map[string]interface{}{}},
+		{`
+			{ }.select do |k| end
+		`, map[string]interface{}{}},
 	}
 
 	for i, tt := range testsSortedArray {

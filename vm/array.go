@@ -344,6 +344,10 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 
+					if blockIsEmpty(blockFrame) {
+						return FALSE
+					}
+
 					if len(arr.Elements) == 0 {
 						t.callFrameStack.pop()
 					}
@@ -456,6 +460,9 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if blockFrame != nil {
+						if blockIsEmpty(blockFrame) {
+							return t.vm.initIntegerObject(0)
+						}
 						if len(arr.Elements) == 0 {
 							t.callFrameStack.pop()
 						}
@@ -597,6 +604,9 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					arr := receiver.(*ArrayObject)
+					if blockIsEmpty(blockFrame) {
+						return arr
+					}
 
 					// If it's an empty array, pop the block's call frame
 					if len(arr.Elements) == 0 {
@@ -623,6 +633,9 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					arr := receiver.(*ArrayObject)
+					if blockIsEmpty(blockFrame) {
+						return arr
+					}
 
 					// If it's an empty array, pop the block's call frame
 					if len(arr.Elements) == 0 {
@@ -844,9 +857,15 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						t.callFrameStack.pop()
 					}
 
-					for i, obj := range arr.Elements {
-						result := t.builtinMethodYield(blockFrame, obj)
-						elements[i] = result.Target
+					if blockIsEmpty(blockFrame) {
+						for i := 0; i < len(arr.Elements); i++ {
+							elements[i] = NULL
+						}
+					} else {
+						for i, obj := range arr.Elements {
+							result := t.builtinMethodYield(blockFrame, obj)
+							elements[i] = result.Target
+						}
 					}
 
 					return t.vm.initArrayObject(elements)
@@ -920,6 +939,10 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						t.callFrameStack.pop()
 					}
 
+					if blockIsEmpty(blockFrame) {
+						return NULL
+					}
+
 					var prev Object
 					var start int
 					if len(args) == 0 {
@@ -987,6 +1010,9 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					arr := receiver.(*ArrayObject)
+					if blockIsEmpty(blockFrame) {
+						return arr
+					}
 
 					// If it's an empty array, pop the block's call frame
 					if len(arr.Elements) == 0 {
@@ -1063,6 +1089,10 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 
 					if blockFrame == nil {
 						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+					}
+
+					if blockIsEmpty(blockFrame) {
+						return t.vm.initArrayObject(elements)
 					}
 
 					// If it's an empty array, pop the block's call frame

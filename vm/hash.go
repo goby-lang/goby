@@ -191,6 +191,9 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					hash := receiver.(*HashObject)
+					if blockIsEmpty(blockFrame) {
+						return FALSE
+					}
 
 					if len(hash.Pairs) == 0 {
 						t.callFrameStack.pop()
@@ -347,7 +350,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Deletes every key-value pair from the hash for which block evalutates to anything except
+			// Deletes every key-value pair from the hash for which block evaluates to anything except
 			// false and nil.
 			//
 			// Returns the hash.
@@ -372,6 +375,9 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					hash := receiver.(*HashObject)
+					if blockIsEmpty(blockFrame) {
+						return hash
+					}
 
 					if len(hash.Pairs) == 0 {
 						t.callFrameStack.pop()
@@ -856,6 +862,10 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					h := receiver.(*HashObject)
+					if blockIsEmpty(blockFrame) {
+						return h
+					}
+
 					result := make(map[string]Object)
 
 					if len(h.Pairs) == 0 {
@@ -937,8 +947,12 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 
-					sourceHash := receiver.(*HashObject)
 					destinationPairs := map[string]Object{}
+					if blockIsEmpty(blockFrame) {
+						return t.vm.initHashObject(destinationPairs)
+					}
+
+					sourceHash := receiver.(*HashObject)
 
 					if len(sourceHash.Pairs) == 0 {
 						t.callFrameStack.pop()

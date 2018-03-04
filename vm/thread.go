@@ -430,3 +430,13 @@ func (t *thread) setErrorObject(receiverPtr, sp int, errorType string, sourceLin
 	t.sp = sp
 	panic(err.Message())
 }
+
+// Other helper functions  ----------------------------------------------
+
+// blockIsEmpty returns true if the block is empty
+func blockIsEmpty(blockFrame *normalCallFrame) bool {
+	if blockFrame.instructionSet.instructions[0].action.name == bytecode.Leave {
+		return true
+	}
+	return false
+}

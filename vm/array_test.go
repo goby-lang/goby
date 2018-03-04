@@ -467,6 +467,19 @@ func TestArrayAnyMethod(t *testing.T) {
 			  true
 			end
 		`, false},
+		// cases for providing an empty block
+		{`
+			[1, 2, 3].any? do end
+		`, false},
+		{`
+			[1, 2, 3].any? do |i| end
+		`, false},
+		{`
+			[].any? do end
+		`, false},
+		{`
+			[].any? do |i| end
+		`, false},
 	}
 
 	for i, tt := range tests {
@@ -683,6 +696,23 @@ func TestArrayCountMethod(t *testing.T) {
 			i.size > 1
 		end
 		`, 0},
+		// cases for providing an empty block
+		{`
+		["a", "bb", "c", "db", "bb"].count do
+		end
+		`, 0},
+		{`
+		["a", "bb", "c", "db", "bb"].count do |i|
+		end
+		`, 0},
+		{`
+		[].count do
+		end
+		`, 0},
+		{`
+		[].count do |i|
+		end
+		`, 0},
 	}
 
 	for i, tt := range tests {
@@ -859,6 +889,27 @@ func TestArrayEachMethod(t *testing.T) {
 		end
 		sum
 		`, 0},
+		// cases for providing an empty block
+		{`
+		a = [1,2,3].each do
+		end
+		a[2]
+		`, 3},
+		{`
+		a = [1,2,3].each do |i|
+		end
+		a[2]
+		`, 3},
+		{`
+		a = [].each do
+		end
+		a.length
+		`, 0},
+		{`
+		a = [].each do |i|
+		end
+		a.length
+		`, 0},
 	}
 
 	for i, tt := range tests {
@@ -907,6 +958,27 @@ func TestArrayEachIndexMethod(t *testing.T) {
 			sum += i
 		end
 		sum
+		`, 0},
+		// cases for providing an empty block
+		{`
+		a = [1,2,3].each_index do
+		end
+		a[2]
+		`, 3},
+		{`
+		a = [1,2,3].each_index do |i|
+		end
+		a[2]
+		`, 3},
+		{`
+		a = [].each_index do
+		end
+		a.length
+		`, 0},
+		{`
+		a = [].each_index do |i|
+		end
+		a.length
 		`, 0},
 	}
 
@@ -1316,6 +1388,23 @@ func TestArrayMapMethod(t *testing.T) {
 		[].map do |i|
 		end
 		`, []interface{}{}},
+		// cases for providing an empty block
+		{`
+		[1, 2, 3, 4, 5].map do
+		end
+		`, []interface{}{nil, nil, nil, nil, nil}},
+		{`
+		[1, 2, 3, 4, 5].map do |i|
+		end
+		`, []interface{}{nil, nil, nil, nil, nil}},
+		{`
+		[].map do
+		end
+		`, []interface{}{}},
+		{`
+		[].map do |i|
+		end
+		`, []interface{}{}},
 	}
 
 	for i, tt := range tests {
@@ -1493,6 +1582,39 @@ func TestArrayReduceMethod(t *testing.T) {
 			true
 		end
 		`, "foo"},
+		// cases for providing an empty block
+		{`
+		a = [1, 2, 3].reduce() do; end
+		a.nil?
+		`, true},
+		{`
+		a = [1, 2, 3].reduce("foo") do; end
+		a.nil?
+		`, true},
+		{`
+		a = [1, 2, 3].reduce() do |i|; end
+		a.nil?
+		`, true},
+		{`
+		a = [1, 2, 3].reduce("foo") do |i|; end
+		a.nil?
+		`, true},
+		{`
+		a = [].reduce() do; end
+		a.nil?
+		`, true},
+		{`
+		a = [].reduce("foo") do; end
+		a.nil?
+		`, true},
+		{`
+		a = [].reduce() do |i|; end
+		a.nil?
+		`, true},
+		{`
+		a = [].reduce("foo") do |i|; end
+		a.nil?
+		`, true},
 	}
 
 	for i, tt := range tests {
@@ -1583,6 +1705,23 @@ func TestArrayReverseEachMethod(t *testing.T) {
 		end
 		str
 		`, ""},
+		// cases for providing an empty block
+		{`
+		a = ["a", "b", "c"].reverse_each do; end
+		a.to_s
+		`, `["a", "b", "c"]`},
+		{`
+		a = ["a", "b", "c"].reverse_each do |i|; end
+		a.to_s
+		`, `["a", "b", "c"]`},
+		{`
+		a = [].reverse_each do; end
+		a.to_s
+		`, `[]`},
+		{`
+		a = [].reverse_each do |i|; end
+		a.to_s
+		`, `[]`},
 	}
 
 	for i, tt := range tests {
@@ -1682,6 +1821,19 @@ func TestArraySelectMethod(t *testing.T) {
 		[].select do |i|
 			true
 		end
+		`, []interface{}{}},
+		// cases for providing an empty block
+		{`
+		[1, 2, 3, 4, 5].select do; end
+		`, []interface{}{}},
+		{`
+		[1, 2, 3, 4, 5].select do |i|; end
+		`, []interface{}{}},
+		{`
+		[].select do; end
+		`, []interface{}{}},
+		{`
+		[].select do |i|; end
 		`, []interface{}{}},
 	}
 

@@ -357,13 +357,21 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					var elements []Object
+					var start, end int
+
 					if r.Start <= r.End {
-						for i := r.Start; i <= r.End; i++ {
-							obj := t.vm.initIntegerObject(i)
-							elements = append(elements, t.builtinMethodYield(blockFrame, obj).Target)
-						}
+						start = r.Start
+						end = r.End
 					} else {
-						for i := r.Start; i >= r.End; i-- {
+						start = r.End
+						end = r.Start
+					}
+
+					for i := start; i <= end; i++ {
+						// TODO: We should return an null array directly instead of running this loop
+						if blockIsEmpty(blockFrame) {
+							elements = append(elements, NULL)
+						} else {
 							obj := t.vm.initIntegerObject(i)
 							elements = append(elements, t.builtinMethodYield(blockFrame, obj).Target)
 						}

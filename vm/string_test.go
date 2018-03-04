@@ -496,6 +496,23 @@ func TestStringEachByteMethod(t *testing.T) {
 		end
 		arr
 		`, []interface{}{83, 117, 115, 104, 105, 32, 240, 159, 141, 163}},
+		// cases for providing an empty block
+		{`
+		a = "Sushi 🍣".each_byte do; end
+		a.to_a
+		`, []interface{}{"S", "u", "s", "h", "i", " ", "🍣"}},
+		{`
+		a = "Sushi 🍣".each_byte do |i|; end
+		a.to_a
+		`, []interface{}{"S", "u", "s", "h", "i", " ", "🍣"}},
+		{`
+		a = "".each_byte do; end
+		a.to_a
+		`, []interface{}{}},
+		{`
+		a = "".each_byte do |i|; end
+		a.to_a
+		`, []interface{}{}},
 	}
 
 	for i, tt := range tests {
@@ -538,13 +555,21 @@ func TestStringEachCharMethod(t *testing.T) {
 		end
 		arr
 		`, []interface{}{"H", "e", "l", "l", "o", "\n", "W", "o", "r", "l", "d"}},
+		// cases for providing an empty block
 		{`
-		arr = []
-		"Sushi 🍣".each_char do |char|
-		  arr.push(char)
-		end
-		arr
+		a = "Sushi 🍣".each_char do; end; a.to_a
 		`, []interface{}{"S", "u", "s", "h", "i", " ", "🍣"}},
+		{`
+		a = "Sushi 🍣".each_char do |i|; end; a.to_a
+		`, []interface{}{"S", "u", "s", "h", "i", " ", "🍣"}},
+		{`
+		a = "".each_char do; end
+		a.to_a
+		`, []interface{}{}},
+		{`
+		a = "".each_char do |i|; end
+		a.to_a
+		`, []interface{}{}},
 	}
 
 	for i, tt := range tests {
@@ -594,6 +619,19 @@ func TestStringEachLineMethod(t *testing.T) {
 		end
 		arr
 		`, []interface{}{"Max\vwell", "Alex\fius"}},
+		// cases for providing an empty block
+		{`
+		a = "Max\vwell\nAlex\fius".each_line do; end; a.to_a
+		`, []interface{}{"M", "a", "x", "\v", "w", "e", "l", "l", "\n", "A", "l", "e", "x", "\f", "i", "u", "s"}},
+		{`
+		a = "Max\vwell\nAlex\fius".each_line do |i|; end; a.to_a
+		`, []interface{}{"M", "a", "x", "\v", "w", "e", "l", "l", "\n", "A", "l", "e", "x", "\f", "i", "u", "s"}},
+		{`
+		a = "".each_line do; end; a.to_a
+		`, []interface{}{}},
+		{`
+		a = "".each_line do |i|; end; a.to_a
+		`, []interface{}{}},
 	}
 
 	for i, tt := range tests {

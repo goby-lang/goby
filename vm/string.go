@@ -661,8 +661,10 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					if blockFrame == nil {
 						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
-
 					str := receiver.(*StringObject).value
+					if blockIsEmpty(blockFrame) {
+						return t.vm.initStringObject(str)
+					}
 
 					for _, byte := range []byte(str) {
 						t.builtinMethodYield(blockFrame, t.vm.initIntegerObject(int(byte)))
@@ -701,6 +703,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					str := receiver.(*StringObject).value
+					if blockIsEmpty(blockFrame) {
+						return t.vm.initStringObject(str)
+					}
 
 					for _, char := range []rune(str) {
 						t.builtinMethodYield(blockFrame, t.vm.initStringObject(string(char)))
@@ -735,6 +740,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					str := receiver.(*StringObject).value
+					if blockIsEmpty(blockFrame) {
+						return t.vm.initStringObject(str)
+					}
 					lineArray := strings.Split(str, "\n")
 
 					for _, line := range lineArray {
