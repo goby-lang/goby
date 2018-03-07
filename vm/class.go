@@ -126,6 +126,47 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Returns true if self is an ancestor or same class/module of another.
+			//
+			// ```ruby
+			// Object >= Array #=> true
+			// Array >= Object #=> false
+			// Object >= Object #=> true
+			// ```
+			//
+			// @param module [Class]
+			// @return [Boolean, Null]
+			Name: ">=",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					c, ok := receiver.(*RClass)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#<", receiver.toString())
+					}
+
+					module, ok := args[0].(*RClass)
+
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, sourceLine, "Expect argument to be a module. got=%v", args[0].Class().Name)
+					}
+
+					if c == module {
+						return TRUE
+					}
+
+					if module.alreadyInherit(c) {
+						return TRUE
+					}
+
+					if c.alreadyInherit(module) {
+						return FALSE
+					}
+					return NULL
+				}
+			},
+		},
+		{
 			// Creates instance variables and corresponding methods that return the value of
 			// each instance variable and assign an argument to each instance variable.
 			// Only string literal can be used for now.
