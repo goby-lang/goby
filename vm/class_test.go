@@ -820,6 +820,66 @@ func TestClassLesserThanMethodFail(t *testing.T) {
 	}
 }
 
+func TestClassLesserThanOrEqualMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{`
+		Object <= Array
+		`, false},
+		{`
+		Array <= Object
+		`, true},
+		{`
+		Object <= Object
+		`, true},
+		{`
+		(Array <= Hash).nil?
+		`, true},
+		{`
+		module M
+		end
+		class C
+		end
+		class C2 < C
+		  include M
+		end
+		class C3 < C2
+		end
+		C3 <= M
+		`, true},
+		{`
+		module M
+		end
+		class C
+		end
+		(M <= C).nil?
+		`, true},
+	}
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		verifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestClassLesserThanOrEqualMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`Array <= 1`, "TypeError: Expect argument to be a module. got=Integer", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestSendMethod(t *testing.T) {
 	tests := []struct {
 		input    string
