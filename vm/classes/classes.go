@@ -12,7 +12,7 @@ const (
 	NullClass      = "Null"
 	ChannelClass   = "Channel"
 	RangeClass     = "Range"
-	MethodClass    = "method"
+	MethodClass    = "Method"
 	PluginClass    = "Plugin"
 	GoObjectClass  = "GoObject"
 	FileClass      = "File"
