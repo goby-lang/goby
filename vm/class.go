@@ -808,12 +808,20 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			Name: "instance_eval",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) > 0 && args[0].Class().Name == "Block" {
-						blockObj := args[0].(*BlockObject)
-						blockFrame = newNormalCallFrame(blockObj.instructionSet, blockObj.instructionSet.filename, sourceLine)
-						blockFrame.ep = blockObj.ep
-						blockFrame.self = receiver
-						blockFrame.isBlock = true
+					switch len(args) {
+					case 0:
+					case 1:
+						if args[0].Class().Name == classes.BlockClass {
+							blockObj := args[0].(*BlockObject)
+							blockFrame = newNormalCallFrame(blockObj.instructionSet, blockObj.instructionSet.filename, sourceLine)
+							blockFrame.ep = blockObj.ep
+							blockFrame.self = receiver
+							blockFrame.isBlock = true
+						} else {
+							return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.BlockClass, args[0].Class().Name)
+						}
+					default:
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect at most 1 arguments. got: %d", len(args))
 					}
 
 					if blockFrame == nil {

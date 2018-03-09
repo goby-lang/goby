@@ -1349,6 +1349,21 @@ func TestInstanceEvalMethod(t *testing.T) {
 	}
 }
 
+func TestInstanceEvalMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`"s".instance_eval(1, 1)`, "ArgumentError: Expect at most 1 arguments. got: 2", 1},
+		{`"s".instance_eval(true)`, "TypeError: Expect argument to be Block. got: Boolean", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestObjectIdMethod(t *testing.T) {
 	tests := []struct {
 		input    string
