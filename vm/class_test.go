@@ -996,6 +996,22 @@ func TestRequireMethod(t *testing.T) {
 	v.checkSP(t, 0, 1)
 }
 
+func TestRequireMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`require "bar"`, `InternalError: Can't require "bar"`, 1},
+		{`require "db", "json"`, `ArgumentError: Expect 1 argument. got: 2`, 1},
+		{`require_relative "db", "json"`, `ArgumentError: Expect 1 argument. got: 2`, 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestRaiseMethod(t *testing.T) {
 	testsFail := []struct {
 		input       string
@@ -1104,22 +1120,6 @@ func TestGeneralIsAMethodFail(t *testing.T) {
 		{`123.is_a?(Integer, String)`, "ArgumentError: Expect 1 argument. got: 2", 1},
 		{`123.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1},
 		{`Class.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1},
-	}
-
-	for i, tt := range testsFail {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkErrorMsg(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestRequireMethodFail(t *testing.T) {
-	testsFail := []errorTestCase{
-		{`require "bar"`, `InternalError: Can't require "bar"`, 1},
-		{`require "db", "json"`, `ArgumentError: Expect 1 argument. got: 2`, 1},
-		{`require_relative "db", "json"`, `ArgumentError: Expect 1 argument. got: 2`, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1286,6 +1286,45 @@ func TestClassSingletonClassMethod(t *testing.T) {
 		{`nil.singleton_class.to_s.slice(1..14).to_s`, "<Class:#<Null:"},
 		{`[1,2].singleton_class.to_s.slice(1..15).to_s`, "<Class:#<Array:"},
 		{`{key: "value"}.singleton_class.to_s.slice(1..14).to_s`, "<Class:#<Hash:"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		verifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestInstanceEvalMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		class Foo
+		  def initialize
+			@secret = 99
+		  end
+		end
+
+		f = Foo.new
+		f.instance_eval do
+		  @secret
+		end
+`, 99},
+		{`
+		string = "String"
+		string.instance_eval do
+		  def new_method
+			self.reverse
+		  end
+		end
+		string.new_method
+`, "gnirtS"},
+		{`"a".instance_eval`, "a"},
+		{`"a".instance_eval do end`, "a"},
 	}
 
 	for i, tt := range tests {
