@@ -804,6 +804,41 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		},
+		{
+			Name: "instance_eval",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					switch len(args) {
+					case 0:
+					case 1:
+						if args[0].Class().Name == classes.BlockClass {
+							blockObj := args[0].(*BlockObject)
+							blockFrame = newNormalCallFrame(blockObj.instructionSet, blockObj.instructionSet.filename, sourceLine)
+							blockFrame.ep = blockObj.ep
+							blockFrame.self = receiver
+							blockFrame.isBlock = true
+						} else {
+							return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.BlockClass, args[0].Class().Name)
+						}
+					default:
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect at most 1 arguments. got: %d", len(args))
+					}
+
+					if blockFrame == nil {
+						return receiver
+					}
+
+					if blockIsEmpty(blockFrame) {
+						return receiver
+					}
+
+					blockFrame.self = receiver
+					result := t.builtinMethodYield(blockFrame)
+
+					return result.Target
+				}
+			},
+		},
 		// Returns the value of the instance variable.
 		// Only string literal with `@` is supported.
 		//
