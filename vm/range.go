@@ -246,16 +246,17 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 
+					// number to add to the iterator
+					var iterAdd int
 					if ran.Start <= ran.End {
-						for i := ran.Start; i <= ran.End; i++ {
-							obj := t.vm.initIntegerObject(i)
-							t.builtinMethodYield(blockFrame, obj)
-						}
+						iterAdd = 1
 					} else {
-						for i := ran.End; i <= ran.Start; i++ {
-							obj := t.vm.initIntegerObject(i)
-							t.builtinMethodYield(blockFrame, obj)
-						}
+						iterAdd = -1
+					}
+
+					for i := ran.Start; i != (ran.End + iterAdd); i += iterAdd {
+						obj := t.vm.initIntegerObject(i)
+						t.builtinMethodYield(blockFrame, obj)
 					}
 					return ran
 				}
@@ -357,17 +358,15 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					var elements []Object
-					var start, end int
+					var iterAdd int
 
 					if r.Start <= r.End {
-						start = r.Start
-						end = r.End
+						iterAdd = 1
 					} else {
-						start = r.End
-						end = r.Start
+						iterAdd = -1
 					}
 
-					for i := start; i <= end; i++ {
+					for i := r.Start; i != (r.End + iterAdd); i += iterAdd {
 						// TODO: We should return an null array directly instead of running this loop
 						if blockIsEmpty(blockFrame) {
 							elements = append(elements, NULL)
@@ -451,7 +450,15 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					// range end must greater or equal than range start to execute the block
-					if ran.End >= ran.Start {
+					var iterAdd int
+
+					if ran.Start <= ran.End {
+						iterAdd = 1 * stepValue
+					} else {
+						iterAdd = -1 * stepValue
+					}
+
+					for i := ran.Start; i != (ran.End + iterAdd); i += iterAdd {
 						for i := ran.Start; i <= ran.End; i += stepValue {
 							obj := t.vm.initIntegerObject(i)
 							t.builtinMethodYield(blockFrame, obj)
@@ -485,14 +492,16 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 
 					elems := []Object{}
 
+					var iterAdd int
+
 					if ro.Start <= ro.End {
-						for i := ro.Start; i <= ro.End; i++ {
-							elems = append(elems, t.vm.initIntegerObject(i))
-						}
+						iterAdd = 1
 					} else {
-						for i := ro.End; i <= ro.Start; i++ {
-							elems = append(elems, t.vm.initIntegerObject(i))
-						}
+						iterAdd = -1
+					}
+
+					for i := ro.Start; i != (ro.End + iterAdd); i += iterAdd {
+						elems = append(elems, t.vm.initIntegerObject(i))
 					}
 
 					return t.vm.initArrayObject(elems)
