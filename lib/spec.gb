@@ -1,0 +1,66 @@
+class Spec
+  def self.describe(context_name)
+    Describe.new(context_name, get_block)
+  end
+end
+
+class Describe
+  attr_reader :context_name, :examples
+
+  def initialize(context_name, block)
+    @context_name = context_name
+    @describes = []
+    @examples = []
+    instance_eval block
+  end
+
+  def describe(context_name)
+    describes.push(Describe.new(context_name, get_block))
+  end
+
+  def it(context_name)
+    examples.push(Example.new(context_name, get_block))
+  end
+
+  def test
+    puts context_name
+    describes.each do |describe_node|
+      puts "  " + describe_node.context_name
+      describe_node.examples.each do |example_node|
+        result_output = "    " + example_node.context_name
+        if !example_node.test_result
+          result_output += " (FAILED)"
+        end
+        puts(result_output)
+      end
+    end
+  end
+
+  attr_accessor :describes
+end
+
+class Example
+  attr_reader :context_name, :test_result
+
+  def initialize(context_name, block)
+    @context_name = context_name
+    instance_eval block
+  end
+
+  def expect(result)
+    @result = result
+    self
+  end
+
+  def to(expectation)
+    @test_result = expectation.call(result)
+  end
+
+  def eq(expectation)
+    Block.new do |n|
+      n == expectation
+    end
+  end
+
+  attr_reader :result
+end

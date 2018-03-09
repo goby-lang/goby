@@ -1,1 +1,12 @@
 require "spec"
+
+spec = Spec.describe Array do
+  describe "#[]" do
+    it "returns first element when index is 0" do
+      a = [1, 2, 3]
+      expect(a[0]).to eq(2)
+    end
+  end
+end
+
+spec.test
