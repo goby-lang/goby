@@ -1325,6 +1325,19 @@ func TestInstanceEvalMethod(t *testing.T) {
 `, "gnirtS"},
 		{`"a".instance_eval`, "a"},
 		{`"a".instance_eval do end`, "a"},
+		{`
+		class Foo
+		  def bar
+			10
+		  end
+		end
+
+		block = Block.new do
+		  self.bar
+		end
+
+		Foo.new.instance_eval block
+		`, 10},
 	}
 
 	for i, tt := range tests {

@@ -808,9 +808,18 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			Name: "instance_eval",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					if len(args) > 0 && args[0].Class().Name == "Block" {
+						blockObj := args[0].(*BlockObject)
+						blockFrame = newNormalCallFrame(blockObj.instructionSet, blockObj.instructionSet.filename, sourceLine)
+						blockFrame.ep = blockObj.ep
+						blockFrame.self = receiver
+						blockFrame.isBlock = true
+					}
+
 					if blockFrame == nil {
 						return receiver
 					}
+
 					if blockIsEmpty(blockFrame) {
 						return receiver
 					}
