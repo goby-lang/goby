@@ -1404,6 +1404,13 @@ func TestMethodCallWithSplatArgument(t *testing.T) {
 
 		bar(1, 2, 3, 5)
 		`, 11},
+		{`
+		def foo(*a)
+		  a
+		end
+
+		foo
+		`, []interface{}{}},
 	}
 
 	for i, tt := range tests {
