@@ -112,6 +112,20 @@ func (t *thread) execRequiredFile(filepath string, file []byte) (err error) {
 }
 
 func (t *thread) startFromTopFrame() {
+	defer func() {
+		if recover() == nil {
+			return
+		}
+
+		err, ok := recover().(*Error)
+
+		if ok && t.vm.mode == NormalMode {
+			fmt.Println(err.Message())
+		} else {
+			panic(err)
+		}
+	}()
+
 	cf := t.callFrameStack.top()
 	t.evalCallFrame(cf)
 }
