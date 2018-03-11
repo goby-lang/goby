@@ -11,7 +11,7 @@ import (
 )
 
 // Version stores current Goby version
-const Version = "0.1.8"
+const Version = "0.1.8.1"
 
 // These are the enums for marking parser's mode, which decides whether it should pop unused values.
 const (

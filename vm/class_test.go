@@ -1065,6 +1065,22 @@ func TestRaiseMethodFail(t *testing.T) {
 	}
 }
 
+// With the current framework, only exit() failures can be tested.
+func TestExitMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`exit("abc")`, "TypeError: Expect argument to be Integer. got: String", 1},
+		{`exit(1, 2)`, "ArgumentError: Expected at most 1 argument; got: 2", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestGeneralIsAMethod(t *testing.T) {
 	tests := []struct {
 		input    string
