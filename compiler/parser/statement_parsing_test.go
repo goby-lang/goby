@@ -179,3 +179,17 @@ func TestWhileStatementWithoutDoKeywordFail(t *testing.T) {
 	}
 
 }
+
+func TestInvalidMethodNameFail(t *testing.T) {
+	input := `
+	def ()
+	end`
+
+	l := lexer.New(input)
+	p := New(l)
+	_, err := p.ParseProgram()
+
+	if err.Message != "Invalid method name: (. Line: 1" {
+		t.Fatal(err.Message)
+	}
+}

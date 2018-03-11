@@ -51,6 +51,11 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 
 	p.nextToken()
 
+	if !p.curTokenIs(token.Ident) && !(p.peekTokenIs(token.Dot) && (p.curTokenIs(token.InstanceVariable) || p.curTokenIs(token.Constant) || p.curTokenIs(token.Self))) {
+		msg := fmt.Sprintf("Invalid method name: %s. Line: %d", p.curToken.Literal, p.curToken.Line)
+		p.error = errors.InitError(msg, errors.MethodDefinitionError)
+		return nil
+	}
 	// Method has specific receiver like `def self.foo` or `def bar.foo`
 	if p.peekTokenIs(token.Dot) {
 		switch p.curToken.Type {
