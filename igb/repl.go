@@ -30,7 +30,6 @@ const (
 	echo      = "\033[33m#»\033[0m"
 	interrupt = "^C"
 	semicolon = ";"
-	exit      = "exit"
 	help      = "help"
 	reset     = "reset"
 
@@ -84,7 +83,6 @@ reset:
 		HistoryFile:         filepath.Join(os.TempDir(), "readline_goby.tmp"),
 		AutoComplete:        igb.completer,
 		InterruptPrompt:     interrupt,
-		EOFPrompt:           exit,
 		HistorySearchFold:   true,
 		FuncFilterInputRune: filterInput,
 	})
@@ -148,10 +146,6 @@ reset:
 			println(prompt(igb.indents) + igb.lines)
 			println("Restarting iGb...")
 			goto reset
-		case igb.lines == exit:
-			println(prompt(igb.indents) + igb.lines)
-			println("Bye!")
-			return
 		case igb.lines == "":
 			println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
 			continue
@@ -279,7 +273,6 @@ func newIgb() *iGb {
 		completer: readline.NewPrefixCompleter(
 			readline.PcItem(help),
 			readline.PcItem(reset),
-			readline.PcItem(exit),
 		),
 	}
 }
