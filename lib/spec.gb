@@ -1,6 +1,19 @@
 class Spec
+  attr_accessor :session_successful
+
   def self.describe(context_name)
     Describe.new(context_name, get_block)
+  end
+
+  # Currently, it's not possible to implement a true singleton, as access levels are not yet
+  # implemented.
+  #
+  def self.instance
+    @instance ||= Spec.new
+  end
+
+  def initialize
+    @session_successful = true
   end
 end
 
