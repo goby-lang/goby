@@ -43,9 +43,16 @@ class Describe
         result_output = "    " + example_node.context_name
         if !example_node.test_result
           result_output += " (FAILED)"
+          Spec.instance.session_successful = false
         end
         puts(result_output)
       end
+    end
+
+    if Spec.instance.session_successful
+      exit
+    else
+      exit(1)
     end
   end
 
