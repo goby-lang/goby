@@ -76,6 +76,10 @@ class Example
     @test_result = expectation.call(result)
   end
 
+  def not_to(expectation)
+    @test_result = !expectation.call(result)
+  end
+
   def eq(expectation)
     Block.new do |n|
       n == expectation

@@ -1,0 +1,25 @@
+require "spec"
+
+# Note that #to is tested functionally, as a base for (almost) all the UTs.
+#
+spec = Spec.describe Spec do
+  describe "Basic functionality" do
+    it "should report a failure" do
+      expect(1).to eq(2)
+    end
+  end
+
+  describe "Relations" do
+    it "should implement #not_to" do
+      expect(2).not_to eq(22)
+    end
+  end
+
+  describe "Matchers" do
+    it "should implement eq(), backed by ==()" do
+      expect(2).to eq("2.0".to_f)
+    end
+  end
+end
+
+spec.test
