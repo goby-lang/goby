@@ -218,3 +218,8 @@ func (p *Parser) callConstantError(t token.Type) {
 	msg := fmt.Sprintf("cannot call %s with %s. Line: %d", t, p.peekToken.Type, p.peekToken.Line)
 	p.error = errors.InitError(msg, errors.UnexpectedTokenError)
 }
+
+func (p *Parser) IsNotDefMethodToken() bool {
+
+	return p.curToken.Type != token.Ident && !(p.peekToken.Type == token.Dot && (p.curToken.Type == token.InstanceVariable || p.curToken.Type == token.Constant || p.curToken.Type == token.Self))
+}

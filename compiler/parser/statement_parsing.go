@@ -51,7 +51,7 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 
 	p.nextToken()
 
-	if !p.curTokenIs(token.Ident) && !(p.peekTokenIs(token.Dot) && (p.curTokenIs(token.InstanceVariable) || p.curTokenIs(token.Constant) || p.curTokenIs(token.Self))) {
+	if p.IsNotDefMethodToken() {
 		msg := fmt.Sprintf("Invalid method name: %s. Line: %d", p.curToken.Literal, p.curToken.Line)
 		p.error = errors.InitError(msg, errors.MethodDefinitionError)
 		return nil
