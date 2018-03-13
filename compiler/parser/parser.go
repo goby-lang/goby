@@ -112,6 +112,13 @@ func New(l *lexer.Lexer) *Parser {
 
 // ParseProgram update program statements and return program
 func (p *Parser) ParseProgram() (*ast.Program, *errors.Error) {
+
+	defer func() {
+		if recover() != nil {
+			fmt.Println("Panic has been recover parser ")
+		}
+	}()
+
 	p.error = nil
 	// Read two tokens, so curToken and peekToken are both set.
 	p.nextToken()
