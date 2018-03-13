@@ -2,28 +2,38 @@ package vm
 
 import (
 	"testing"
+	"os"
+	"os/exec"
 )
 
-func TestSpecSuccessWithoutExit(t *testing.T) {
+func TestSpecSuccessWithExitCode0(t *testing.T) {
 	input := `
 require "spec"
 
 Spec.describe Spec do
-  it "fails and exit with code 1" do
+  it "passes" do
 	expect(1).to eq(1)
   end
 end
 
 Spec.test
-
-10
 `
-	v := initTestVM()
-	result := v.testEval(t, input, getFilename())
-	verifyExpected(t, 0, result, 10)
+	if os.Getenv("TEST_SPEC_NOT_EXIT") == "1" {
+		v := initTestVM()
+		result := v.testEval(t, input, getFilename())
+		verifyExpected(t, 0, result, 10)
+		return
+	}
+
+	cmd := exec.Command(os.Args[0], "-test.run=TestSpecSuccessWithExitCode0")
+	cmd.Env = append(os.Environ(), "TEST_SPEC_NOT_EXIT=1")
+	err := cmd.Run()
+	if e, ok := err.(*exec.ExitError); ok && !e.Success() {
+		t.Fatalf("Spec should exit with status 0.")
+	}
 }
 
-func TestSpecFailAndExit(t *testing.T) {
+func TestSpecFailWithExitCode1(t *testing.T) {
 	input := `
 require "spec"
 
@@ -34,14 +44,18 @@ Spec.describe Spec do
 end
 
 Spec.test
-
-10
 `
-	v := initTestVM()
-	result := v.testEval(t, input, getFilename())
-	_, ok := result.(*IntegerObject)
-
-	if ok {
-		t.Fatal("Program should exit early because the spec failed")
+	if os.Getenv("TEST_SPEC_EXIT") == "1" {
+		v := initTestVM()
+		v.testEval(t, input, getFilename())
+		return
 	}
+
+	cmd := exec.Command(os.Args[0], "-test.run=TestSpecFailWithExitCode1")
+	cmd.Env = append(os.Environ(), "TEST_SPEC_EXIT=1")
+	err := cmd.Run()
+	if e, ok := err.(*exec.ExitError); ok && !e.Success() {
+		return
+	}
+	t.Fatalf("Spec fail should exit with status 1.")
 }
