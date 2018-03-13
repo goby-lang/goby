@@ -3,21 +3,17 @@ require "spec"
 # Note that #to is tested functionally, as a base for (almost) all the UTs.
 #
 Spec.describe Spec do
-  describe "Basic functionality" do
-    it "should report a failure" do
-      expect(1).to eq(2)
+  describe "comparison" do
+    describe "to equal" do
+      it "compares if two values are equal" do
+        expect(1).to eq(1)
+      end
     end
-  end
 
-  describe "Relations" do
-    it "should implement #not_to" do
-      expect(2).not_to eq(22)
-    end
-  end
-
-  describe "Matchers" do
-    it "should implement eq(), backed by ==()" do
-      expect(2).to eq("2.0".to_f)
+    describe "not to equal" do
+      it "compares if two values are not equal" do
+        expect(1).not_to eq(2)
+      end
     end
   end
 end

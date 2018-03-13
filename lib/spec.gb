@@ -59,16 +59,15 @@ class Describe
 
   def test
     puts context_name
+    run_specs
     describes.each do |describe_node|
-      puts "  " + describe_node.context_name
-      describe_node.examples.each do |example_node|
-        result_output = "    " + example_node.context_name
-        if !example_node.test_result
-          result_output += " (FAILED)"
-          Spec.instance.session_successful = false
-        end
-        puts(result_output)
-      end
+      describe_node.test
+    end
+  end
+
+  def run_specs
+    examples.each do |example_node|
+      example_node.print_result
     end
   end
 
@@ -76,7 +75,7 @@ class Describe
 end
 
 class Example
-  attr_reader :context_name, :test_result
+  attr_reader :context_name, :test_result, :result
 
   def initialize(context_name, block)
     @context_name = context_name
@@ -102,5 +101,12 @@ class Example
     end
   end
 
-  attr_reader :result
+  def print_result
+    result_output = "    " + context_name
+    if !test_result
+      result_output += " (FAILED)"
+      Spec.instance.session_successful = false
+    end
+    puts(result_output)
+  end
 end
