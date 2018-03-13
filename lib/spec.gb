@@ -8,7 +8,7 @@ class Spec
   end
 
   def self.describe(context_name)
-    describes.push(Describe.new(context_name, get_block))
+    describes.push(Describe.new(context_name, get_block, 0))
   end
 
   # Currently, it's not possible to implement a true singleton, as access levels are not yet
@@ -42,7 +42,8 @@ end
 class Describe
   attr_reader :context_name, :examples
 
-  def initialize(context_name, block)
+  def initialize(context_name, block, indentation)
+    @indentation = indentation
     @context_name = context_name
     @describes = []
     @examples = []
@@ -50,15 +51,14 @@ class Describe
   end
 
   def describe(context_name)
-    describes.push(Describe.new(context_name, get_block))
+    describes.push(Describe.new(context_name, get_block, @indentation + 2))
   end
 
   def it(context_name)
-    examples.push(Example.new(context_name, get_block))
+    examples.push(Example.new(context_name, get_block, @indentation + 2))
   end
 
   def test
-    puts context_name
     run_specs
     describes.each do |describe_node|
       describe_node.test
@@ -66,6 +66,7 @@ class Describe
   end
 
   def run_specs
+    puts " " * @indentation + context_name.to_s
     examples.each do |example_node|
       example_node.print_result
     end
@@ -77,8 +78,10 @@ end
 class Example
   attr_reader :context_name, :test_result, :result
 
-  def initialize(context_name, block)
+  def initialize(context_name, block, indentation)
+    @indentation = indentation
     @context_name = context_name
+    @test_result = true
     instance_eval block
   end
 
@@ -102,7 +105,7 @@ class Example
   end
 
   def print_result
-    result_output = "    " + context_name
+    result_output = String.fmt("%sit \"%s\"", " " * @indentation, context_name.to_s)
     if !test_result
       result_output += " (FAILED)"
       Spec.instance.session_successful = false
