@@ -1,8 +1,14 @@
 class Spec
   attr_accessor :session_successful
+  attr_reader :describes
+
+  def initialize
+    @session_successful = true
+    @describes = []
+  end
 
   def self.describe(context_name)
-    Describe.new(context_name, get_block)
+    describes.push(Describe.new(context_name, get_block))
   end
 
   # Currently, it's not possible to implement a true singleton, as access levels are not yet
@@ -12,8 +18,24 @@ class Spec
     @instance ||= Spec.new
   end
 
-  def initialize
-    @session_successful = true
+  def self.test
+    instance.test
+  end
+
+  def self.describes
+    instance.describes
+  end
+
+  def test
+    @describes.each do |describe|
+      describe.test
+    end
+
+    if Spec.instance.session_successful
+      exit
+    else
+      exit(1)
+    end
   end
 end
 
@@ -47,12 +69,6 @@ class Describe
         end
         puts(result_output)
       end
-    end
-
-    if Spec.instance.session_successful
-      exit
-    else
-      exit(1)
     end
   end
 
