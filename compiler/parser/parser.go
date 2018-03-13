@@ -226,6 +226,7 @@ func (p *Parser) callConstantError(t token.Type) {
 	p.error = errors.InitError(msg, errors.UnexpectedTokenError)
 }
 
+// IsNotDefMethodToken ensures correct naming in Def statement
 func (p *Parser) IsNotDefMethodToken() bool {
 
 	return p.curToken.Type != token.Ident && !(p.peekToken.Type == token.Dot && (p.curToken.Type == token.InstanceVariable || p.curToken.Type == token.Constant || p.curToken.Type == token.Self))
