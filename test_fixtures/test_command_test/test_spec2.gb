@@ -1,0 +1,11 @@
+require "spec"
+
+Spec.describe "Spec test 2" do
+  describe "comparison" do
+    describe "#to eq" do
+      it "compares if two values are equal" do
+        expect(1).to eq(1)
+      end
+    end
+  end
+end

@@ -55,12 +55,11 @@ func main() {
 
 		// To get the directory path
 		if fi.Mode().IsDir() {
-			dir, err = filepath.Abs(fi.Name())
+			dir, err = filepath.Abs(fp)
 			reportErrorAndExit(err)
 		} else {
 			fp, err = filepath.Abs(fp)
 			reportErrorAndExit(err)
-			fmt.Println(fp)
 			dir, _, _ = extractFileInfo(fp)
 		}
 
