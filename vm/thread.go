@@ -111,7 +111,28 @@ func (t *thread) execRequiredFile(filepath string, file []byte) (err error) {
 	return
 }
 
+func (t *thread) captureAndHandlePanic() {
+	switch e := recover().(type) {
+	case *Error:
+		if t.vm.mode == NormalMode {
+			fmt.Println(e.Message())
+			if t.isMainThread() {
+				os.Exit(1)
+			}
+		} else {
+			panic(e)
+		}
+	case error:
+		fmt.Println(e.Error())
+	case nil:
+		return
+	default:
+		panic(e)
+	}
+}
+
 func (t *thread) startFromTopFrame() {
+	defer t.captureAndHandlePanic()
 	cf := t.callFrameStack.top()
 	t.evalCallFrame(cf)
 }

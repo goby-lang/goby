@@ -1,0 +1,30 @@
+require "spec"
+
+# Note that #to is tested functionally, as a base for (almost) all the UTs.
+#
+Spec.describe Spec do
+  describe "comparison" do
+    describe "#to eq" do
+      it "compares if two values are equal" do
+        expect(1).to eq(1)
+      end
+    end
+
+    describe "#not_to eq" do
+      it "compares if two values are not equal" do
+        expect(1).not_to eq(2)
+      end
+    end
+  end
+
+  describe "indentation" do
+    it "indents four spaces" do
+    end
+    describe "nest another level" do
+      it "indents six spaces" do
+      end
+    end
+  end
+end
+
+Spec.test
