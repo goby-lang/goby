@@ -116,6 +116,9 @@ func (t *thread) captureAndHandlePanic() {
 	case *Error:
 		if t.vm.mode == NormalMode {
 			fmt.Println(e.Message())
+			if t.isMainThread() {
+				os.Exit(1)
+			}
 		} else {
 			panic(e)
 		}
