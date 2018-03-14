@@ -67,12 +67,7 @@ func main() {
 		v, err := vm.New(dir, args)
 
 		execTestFile := func(dir, fp string) (err error) {
-			file, ok := readFile(fp)
-
-			if !ok {
-				os.Exit(1)
-			}
-
+			file := readFile(fp)
 			instructionSets, err := compiler.CompileToInstructions(string(file), parser.NormalMode)
 
 			if err != nil {
@@ -112,21 +107,13 @@ func main() {
 	}
 
 	dir, _, fileExt := extractFileInfo(fp)
-	file, ok := readFile(fp)
-
-	if !ok {
-		os.Exit(0)
-	}
+	file := readFile(fp)
 
 	switch fileExt {
 	case "gb", "rb":
 		args := flag.Args()[1:]
 		instructionSets, err := compiler.CompileToInstructions(string(file), parser.NormalMode)
-
-		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
-		}
+		reportErrorAndExit(err)
 
 		var v *vm.VM
 
@@ -137,18 +124,10 @@ func main() {
 		} else {
 			v, err = vm.New(dir, args)
 		}
-
-		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
-		}
+		reportErrorAndExit(err)
 
 		fp, err := filepath.Abs(fp)
-
-		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
-		}
+		reportErrorAndExit(err)
 
 		v.ExecInstructions(instructionSets, fp)
 	default:
@@ -165,15 +144,10 @@ func extractFileInfo(fp string) (dir, filename, fileExt string) {
 	return
 }
 
-func readFile(filepath string) (file []byte, ok bool) {
+func readFile(filepath string) (file []byte) {
 	file, err := ioutil.ReadFile(filepath)
-
-	if err != nil {
-		fmt.Println(err.Error())
-		return []byte{}, false
-	}
-
-	return file, true
+	reportErrorAndExit(err)
+	return
 }
 
 func reportErrorAndExit(err error) {
