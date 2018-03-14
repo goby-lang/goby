@@ -115,7 +115,7 @@ func (p *Parser) ParseProgram() (*ast.Program, *errors.Error) {
 
 	defer func() {
 		if recover() != nil {
-			fmt.Println("Panic has been recover parser ")
+			fmt.Println("Parser recovered from panic")
 		}
 	}()
 
