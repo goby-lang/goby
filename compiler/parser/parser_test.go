@@ -214,3 +214,13 @@ func TestProhibitingCallingCapitalizedMethod(t *testing.T) {
 		}
 	}
 }
+
+// If parser doesn't crash then we covered panic successfully
+func TestRecoverMechanism(t *testing.T) {
+	input := `
+	if )(
+	`
+	l := lexer.New(input)
+	p := New(l)
+	p.ParseProgram()
+}
