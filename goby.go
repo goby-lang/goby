@@ -39,37 +39,72 @@ func main() {
 		os.Exit(0)
 	}
 
-	fp := flag.Arg(0)
+	var fp string
 
-	switch fp {
+	switch flag.Arg(0) {
 	case "":
 		flag.Usage()
 		os.Exit(0)
 	case "test":
 		args := flag.Args()[1:]
-		fp, err := filepath.Abs(flag.Arg(1))
-		dir, _, _ := extractFileInfo(fp)
-		file, ok := readFile(fp)
+		fp := flag.Arg(1)
+		fi, err := os.Stat(fp)
+		reportErrorAndExit(err)
 
-		if !ok {
-			os.Exit(0)
-		}
-		instructionSets, err := compiler.CompileToInstructions(string(file), parser.NormalMode)
+		var dir string
 
-		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
+		// To get the directory path
+		if fi.Mode().IsDir() {
+			dir, err = filepath.Abs(fi.Name())
+			reportErrorAndExit(err)
+		} else {
+			fp, err = filepath.Abs(fp)
+			reportErrorAndExit(err)
+			fmt.Println(fp)
+			dir, _, _ = extractFileInfo(fp)
 		}
 
 		v, err := vm.New(dir, args)
 
-		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
+		execTestFile := func(dir, fp string) (err error) {
+			file, ok := readFile(fp)
+
+			if !ok {
+				os.Exit(1)
+			}
+
+			instructionSets, err := compiler.CompileToInstructions(string(file), parser.NormalMode)
+
+			if err != nil {
+				return
+			}
+
+			v.ExecInstructions(instructionSets, fp)
+			return
 		}
 
+		if fi.Mode().IsDir() {
+			fileInfos, err := ioutil.ReadDir(fp)
+			reportErrorAndExit(err)
+
+			for _, fileInfo := range fileInfos {
+				fp := filepath.Join(dir, fileInfo.Name())
+				reportErrorAndExit(err)
+
+				err := execTestFile(dir, fp)
+				reportErrorAndExit(err)
+			}
+		} else {
+			err := execTestFile(dir, fp)
+			reportErrorAndExit(err)
+		}
+
+		instructionSets, err := compiler.CompileToInstructions("Spec.test", parser.NormalMode)
 		v.ExecInstructions(instructionSets, fp)
+		return
 	default:
+		fp = flag.Arg(0)
+
 		if !strings.Contains(fp, ".") {
 			flag.Usage()
 			os.Exit(0)
@@ -139,4 +174,11 @@ func readFile(filepath string) (file []byte, ok bool) {
 	}
 
 	return file, true
+}
+
+func reportErrorAndExit(err error) {
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
 }

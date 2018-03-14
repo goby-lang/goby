@@ -26,5 +26,3 @@ Spec.describe Spec do
     end
   end
 end
-
-Spec.test
