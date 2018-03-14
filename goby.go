@@ -47,25 +47,25 @@ func main() {
 		os.Exit(0)
 	case "test":
 		args := flag.Args()[1:]
-		fp := flag.Arg(1)
-		fi, err := os.Stat(fp)
+		filePath := flag.Arg(1)
+		fileInfo, err := os.Stat(filePath)
 		reportErrorAndExit(err)
 
 		var dir string
 
 		// To get the directory path
-		if fi.Mode().IsDir() {
-			dir, err = filepath.Abs(fp)
+		if fileInfo.Mode().IsDir() {
+			dir, err = filepath.Abs(filePath)
 			reportErrorAndExit(err)
 		} else {
-			fp, err = filepath.Abs(fp)
+			filePath, err = filepath.Abs(filePath)
 			reportErrorAndExit(err)
-			dir, _, _ = extractFileInfo(fp)
+			dir, _, _ = extractFileInfo(filePath)
 		}
 
 		v, err := vm.New(dir, args)
 
-		execTestFile := func(dir, fp string) (err error) {
+		runSpecFile := func(dir, fp string) (err error) {
 			file := readFile(fp)
 			instructionSets, err := compiler.CompileToInstructions(string(file), parser.NormalMode)
 
@@ -77,24 +77,24 @@ func main() {
 			return
 		}
 
-		if fi.Mode().IsDir() {
-			fileInfos, err := ioutil.ReadDir(fp)
+		if fileInfo.Mode().IsDir() {
+			fileInfos, err := ioutil.ReadDir(filePath)
 			reportErrorAndExit(err)
 
 			for _, fileInfo := range fileInfos {
 				fp := filepath.Join(dir, fileInfo.Name())
 				reportErrorAndExit(err)
 
-				err := execTestFile(dir, fp)
+				err := runSpecFile(dir, fp)
 				reportErrorAndExit(err)
 			}
 		} else {
-			err := execTestFile(dir, fp)
+			err := runSpecFile(dir, filePath)
 			reportErrorAndExit(err)
 		}
 
 		instructionSets, err := compiler.CompileToInstructions("Spec.test", parser.NormalMode)
-		v.ExecInstructions(instructionSets, fp)
+		v.ExecInstructions(instructionSets, filePath)
 		return
 	default:
 		fp = flag.Arg(0)
