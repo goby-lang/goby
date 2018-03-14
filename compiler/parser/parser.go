@@ -112,6 +112,13 @@ func New(l *lexer.Lexer) *Parser {
 
 // ParseProgram update program statements and return program
 func (p *Parser) ParseProgram() (*ast.Program, *errors.Error) {
+
+	defer func() {
+		if recover() != nil {
+			fmt.Println("Parser recovered from panic")
+		}
+	}()
+
 	p.error = nil
 	// Read two tokens, so curToken and peekToken are both set.
 	p.nextToken()
@@ -217,4 +224,10 @@ func (p *Parser) noPrefixParseFnError(t token.Type) {
 func (p *Parser) callConstantError(t token.Type) {
 	msg := fmt.Sprintf("cannot call %s with %s. Line: %d", t, p.peekToken.Type, p.peekToken.Line)
 	p.error = errors.InitError(msg, errors.UnexpectedTokenError)
+}
+
+// IsNotDefMethodToken ensures correct naming in Def statement
+func (p *Parser) IsNotDefMethodToken() bool {
+
+	return p.curToken.Type != token.Ident && !(p.peekToken.Type == token.Dot && (p.curToken.Type == token.InstanceVariable || p.curToken.Type == token.Constant || p.curToken.Type == token.Self))
 }
