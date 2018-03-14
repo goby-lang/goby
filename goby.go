@@ -41,27 +41,56 @@ func main() {
 
 	fp := flag.Arg(0)
 
-	if fp == "" || !strings.Contains(fp, ".") {
+	switch fp {
+	case "":
 		flag.Usage()
 		os.Exit(0)
-	}
+	case "test":
+		args := flag.Args()[1:]
+		fp, err := filepath.Abs(flag.Arg(1))
+		dir, _, _ := extractFileInfo(fp)
+		file, ok := readFile(fp)
 
-	args := flag.Args()[1:]
+		if !ok {
+			os.Exit(0)
+		}
+		instructionSets, err := compiler.CompileToInstructions(string(file), parser.NormalMode)
+
+		if err != nil {
+			fmt.Println(err.Error())
+			os.Exit(1)
+		}
+
+		v, err := vm.New(dir, args)
+
+		if err != nil {
+			fmt.Println(err.Error())
+			os.Exit(1)
+		}
+
+		v.ExecInstructions(instructionSets, fp)
+	default:
+		if !strings.Contains(fp, ".") {
+			flag.Usage()
+			os.Exit(0)
+		}
+	}
 
 	dir, _, fileExt := extractFileInfo(fp)
 	file, ok := readFile(fp)
 
 	if !ok {
-		return
+		os.Exit(0)
 	}
 
 	switch fileExt {
 	case "gb", "rb":
+		args := flag.Args()[1:]
 		instructionSets, err := compiler.CompileToInstructions(string(file), parser.NormalMode)
 
 		if err != nil {
 			fmt.Println(err.Error())
-			return
+			os.Exit(1)
 		}
 
 		var v *vm.VM
@@ -76,14 +105,14 @@ func main() {
 
 		if err != nil {
 			fmt.Println(err.Error())
-			return
+			os.Exit(1)
 		}
 
 		fp, err := filepath.Abs(fp)
 
 		if err != nil {
 			fmt.Println(err.Error())
-			return
+			os.Exit(1)
 		}
 
 		v.ExecInstructions(instructionSets, fp)
