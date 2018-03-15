@@ -16,7 +16,7 @@ Spec.describe Spec do
   end
 end
 
-Spec.test
+Spec.run
 `
 	if os.Getenv("TEST_SPEC_NOT_EXIT") == "1" {
 		v := initTestVM()
@@ -43,7 +43,7 @@ Spec.describe Spec do
   end
 end
 
-Spec.test
+Spec.run
 `
 	if os.Getenv("TEST_SPEC_EXIT") == "1" {
 		v := initTestVM()

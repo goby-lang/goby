@@ -18,17 +18,17 @@ class Spec
     @instance ||= Spec.new
   end
 
-  def self.test
-    instance.test
+  def self.run
+    instance.run
   end
 
   def self.describes
     instance.describes
   end
 
-  def test
+  def run
     @describes.each do |describe|
-      describe.test
+      describe.run
     end
 
     if Spec.instance.session_successful
@@ -58,10 +58,10 @@ class Describe
     examples.push(Example.new(context_name, get_block, @indentation + 2))
   end
 
-  def test
+  def run
     run_specs
     describes.each do |describe_node|
-      describe_node.test
+      describe_node.run
     end
   end
 
@@ -76,7 +76,7 @@ class Describe
 end
 
 class Example
-  attr_reader :context_name, :test_result, :result
+  attr_reader :context_name, :test_result, :subject
 
   def initialize(context_name, block, indentation)
     @indentation = indentation
@@ -85,17 +85,17 @@ class Example
     instance_eval block
   end
 
-  def expect(result)
-    @result = result
+  def expect(subject)
+    @subject = subject
     self
   end
 
   def to(expectation)
-    @test_result = expectation.call(result)
+    @test_result = expectation.call(subject)
   end
 
   def not_to(expectation)
-    @test_result = !expectation.call(result)
+    @test_result = !expectation.call(subject)
   end
 
   def eq(expectation)
