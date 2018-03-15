@@ -31,6 +31,7 @@ func init() {
 }
 
 func execGoby(t *testing.T, args ...string) (in io.WriteCloser, out io.ReadCloser) {
+	exec.Command("rm ./goby")
 	exec.Command("make build")
 	cmd := exec.Command("./goby", args...)
 

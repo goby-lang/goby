@@ -51,31 +51,8 @@ func main() {
 		fileInfo, err := os.Stat(filePath)
 		reportErrorAndExit(err)
 
-		var dir string
-
-		// To get the directory path
-		if fileInfo.Mode().IsDir() {
-			dir, err = filepath.Abs(filePath)
-			reportErrorAndExit(err)
-		} else {
-			filePath, err = filepath.Abs(filePath)
-			reportErrorAndExit(err)
-			dir, _, _ = extractFileInfo(filePath)
-		}
-
+		dir := extractDirFromFilePath(filePath, fileInfo)
 		v, err := vm.New(dir, args)
-
-		runSpecFile := func(dir, fp string) (err error) {
-			file := readFile(fp)
-			instructionSets, err := compiler.CompileToInstructions(string(file), parser.NormalMode)
-
-			if err != nil {
-				return
-			}
-
-			v.ExecInstructions(instructionSets, fp)
-			return
-		}
 
 		if fileInfo.Mode().IsDir() {
 			fileInfos, err := ioutil.ReadDir(filePath)
@@ -85,11 +62,11 @@ func main() {
 				fp := filepath.Join(dir, fileInfo.Name())
 				reportErrorAndExit(err)
 
-				err := runSpecFile(dir, fp)
+				err := runSpecFile(v, fp)
 				reportErrorAndExit(err)
 			}
 		} else {
-			err := runSpecFile(dir, filePath)
+			err := runSpecFile(v, filePath)
 			reportErrorAndExit(err)
 		}
 
@@ -105,6 +82,7 @@ func main() {
 		}
 	}
 
+	// Execute files normally
 	dir, _, fileExt := extractFileInfo(fp)
 	file := readFile(fp)
 
@@ -143,9 +121,34 @@ func extractFileInfo(fp string) (dir, filename, fileExt string) {
 	return
 }
 
+func extractDirFromFilePath(filePath string, fileInfo os.FileInfo) string {
+	if fileInfo.Mode().IsDir() {
+		dir, err := filepath.Abs(filePath)
+		reportErrorAndExit(err)
+		return dir
+	}
+
+	filePath, err := filepath.Abs(filePath)
+	reportErrorAndExit(err)
+	dir, _, _ := extractFileInfo(filePath)
+	return dir
+}
+
 func readFile(filepath string) (file []byte) {
 	file, err := ioutil.ReadFile(filepath)
 	reportErrorAndExit(err)
+	return
+}
+
+func runSpecFile(v *vm.VM, fp string) (err error) {
+	file := readFile(fp)
+	instructionSets, err := compiler.CompileToInstructions(string(file), parser.NormalMode)
+
+	if err != nil {
+		return
+	}
+
+	v.ExecInstructions(instructionSets, fp)
 	return
 }
 
