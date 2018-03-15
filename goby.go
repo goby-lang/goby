@@ -93,7 +93,7 @@ func main() {
 			reportErrorAndExit(err)
 		}
 
-		instructionSets, err := compiler.CompileToInstructions("Spec.test", parser.NormalMode)
+		instructionSets, err := compiler.CompileToInstructions("Spec.run", parser.NormalMode)
 		v.ExecInstructions(instructionSets, filePath)
 		return
 	default:
