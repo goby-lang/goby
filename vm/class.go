@@ -2,7 +2,6 @@ package vm
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"reflect"
@@ -1126,16 +1125,10 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 					case *StringObject:
 						callerDir := path.Dir(t.vm.currentFilePath())
 						filepath := args[0].(*StringObject).value
-
 						filepath = path.Join(callerDir, filepath)
+						filepath = filepath + ".gb"
 
-						file, err := ioutil.ReadFile(filepath + ".gb")
-
-						if err != nil {
-							return t.vm.initErrorObject(errors.InternalError, sourceLine, err.Error())
-						}
-
-						t.execRequiredFile(filepath, file)
+						t.execFile(filepath)
 
 						return TRUE
 					default:

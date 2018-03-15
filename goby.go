@@ -39,30 +39,80 @@ func main() {
 		os.Exit(0)
 	}
 
-	fp := flag.Arg(0)
+	var fp string
 
-	if fp == "" || !strings.Contains(fp, ".") {
+	switch flag.Arg(0) {
+	case "":
 		flag.Usage()
 		os.Exit(0)
-	}
+	case "test":
+		args := flag.Args()[1:]
+		filePath := flag.Arg(1)
+		fileInfo, err := os.Stat(filePath)
+		reportErrorAndExit(err)
 
-	args := flag.Args()[1:]
+		var dir string
+
+		// To get the directory path
+		if fileInfo.Mode().IsDir() {
+			dir, err = filepath.Abs(filePath)
+			reportErrorAndExit(err)
+		} else {
+			filePath, err = filepath.Abs(filePath)
+			reportErrorAndExit(err)
+			dir, _, _ = extractFileInfo(filePath)
+		}
+
+		v, err := vm.New(dir, args)
+
+		runSpecFile := func(dir, fp string) (err error) {
+			file := readFile(fp)
+			instructionSets, err := compiler.CompileToInstructions(string(file), parser.NormalMode)
+
+			if err != nil {
+				return
+			}
+
+			v.ExecInstructions(instructionSets, fp)
+			return
+		}
+
+		if fileInfo.Mode().IsDir() {
+			fileInfos, err := ioutil.ReadDir(filePath)
+			reportErrorAndExit(err)
+
+			for _, fileInfo := range fileInfos {
+				fp := filepath.Join(dir, fileInfo.Name())
+				reportErrorAndExit(err)
+
+				err := runSpecFile(dir, fp)
+				reportErrorAndExit(err)
+			}
+		} else {
+			err := runSpecFile(dir, filePath)
+			reportErrorAndExit(err)
+		}
+
+		instructionSets, err := compiler.CompileToInstructions("Spec.test", parser.NormalMode)
+		v.ExecInstructions(instructionSets, filePath)
+		return
+	default:
+		fp = flag.Arg(0)
+
+		if !strings.Contains(fp, ".") {
+			flag.Usage()
+			os.Exit(0)
+		}
+	}
 
 	dir, _, fileExt := extractFileInfo(fp)
-	file, ok := readFile(fp)
-
-	if !ok {
-		return
-	}
+	file := readFile(fp)
 
 	switch fileExt {
 	case "gb", "rb":
+		args := flag.Args()[1:]
 		instructionSets, err := compiler.CompileToInstructions(string(file), parser.NormalMode)
-
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
+		reportErrorAndExit(err)
 
 		var v *vm.VM
 
@@ -73,18 +123,10 @@ func main() {
 		} else {
 			v, err = vm.New(dir, args)
 		}
-
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
+		reportErrorAndExit(err)
 
 		fp, err := filepath.Abs(fp)
-
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
+		reportErrorAndExit(err)
 
 		v.ExecInstructions(instructionSets, fp)
 	default:
@@ -101,13 +143,15 @@ func extractFileInfo(fp string) (dir, filename, fileExt string) {
 	return
 }
 
-func readFile(filepath string) (file []byte, ok bool) {
+func readFile(filepath string) (file []byte) {
 	file, err := ioutil.ReadFile(filepath)
+	reportErrorAndExit(err)
+	return
+}
 
+func reportErrorAndExit(err error) {
 	if err != nil {
 		fmt.Println(err.Error())
-		return []byte{}, false
+		os.Exit(1)
 	}
-
-	return file, true
 }
