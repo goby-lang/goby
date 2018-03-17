@@ -320,6 +320,70 @@ var builtinFloatInstanceMethods = []*BuiltinMethodObject{
 
 		},
 	},
+	{
+		// Returns the Float as a positive value.
+		//
+		// ```Ruby
+		// -3.14.abs # => 3.14
+		// 3.14.abs # => 3.14
+		// ```
+		// @return [Float]
+		Name: "abs",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%v", strconv.Itoa(len(args)))
+			}
+			r := receiver.(*FloatObject)
+			result := math.Abs(r.value)
+			return t.vm.initFloatObject(result)
+		},
+	},
+	{
+		// Returns the smallest Integer greater than or equal to self.
+		//
+		// ```Ruby
+		// 1.2.ceil # => 2
+		// 2.ceil # => 2
+		// -1.2.ceil # => -1
+		// -2.ceil # => -2
+		// ```
+		// @return [Integer]
+		Name: "ceil",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			// TODO: Make ceil accept arguments
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%v", strconv.Itoa(len(args)))
+			}
+			r := receiver.(*FloatObject)
+			result := math.Ceil(r.value)
+			newInt := t.vm.InitIntegerObject(int(result))
+			newInt.flag = i
+			return newInt
+		},
+	},
+	{
+		// Returns the largest Integer less than or equal to self.
+		//
+		// ```Ruby
+		// 1.2.floor # => 1
+		// 2.0.floor # => 2
+		// -1.2.floor # => -2
+		// -2.0.floor # => -2
+		// ```
+		// @return [Integer]
+		Name: "floor",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			// TODO: Make floor accept arguments
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%v", strconv.Itoa(len(args)))
+			}
+			r := receiver.(*FloatObject)
+			result := math.Floor(r.value)
+			newInt := t.vm.InitIntegerObject(int(result))
+			newInt.flag = i
+			return newInt
+		},
+	},
 }
 
 // Internal functions ===================================================
