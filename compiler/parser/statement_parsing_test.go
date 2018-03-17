@@ -193,3 +193,47 @@ func TestInvalidMethodNameFail(t *testing.T) {
 		t.Fatal(err.Message)
 	}
 }
+
+func TestInvalidParameter(t *testing.T) {
+	input := `
+	def foo(@a)
+	end`
+
+	l := lexer.New(input)
+	p := New(l)
+	_, err := p.ParseProgram()
+
+	if err.Message != "Invalid parameters: @a. Line: 1" {
+		t.Fatal(err.Message)
+	}
+}
+
+func TestInvalidMultipleParameter(t *testing.T) {
+	input := `
+	def foo(a, @b, c)
+	end`
+
+	l := lexer.New(input)
+	p := New(l)
+	_, err := p.ParseProgram()
+
+	if err.Message != "Invalid parameters: @b. Line: 1" {
+		t.Fatal(err.Message)
+	}
+}
+
+func TestParenthesisInNextLineIsNotParameter(t *testing.T) {
+	input := `
+	def test
+	  (@instance = 1)
+	end`
+
+	l := lexer.New(input)
+	p := New(l)
+	_, err := p.ParseProgram()
+
+	if err != nil {
+		t.Fatal(err.Message)
+	}
+
+}
