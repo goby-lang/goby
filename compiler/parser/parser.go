@@ -231,3 +231,9 @@ func (p *Parser) IsNotDefMethodToken() bool {
 
 	return p.curToken.Type != token.Ident && !(p.peekToken.Type == token.Dot && (p.curToken.Type == token.InstanceVariable || p.curToken.Type == token.Constant || p.curToken.Type == token.Self))
 }
+
+// IsNotParamsToken ensures correct parameters which means it is not InstanceVariable
+func (p *Parser) IsNotParamsToken() bool {
+
+	return p.curToken.Type == token.InstanceVariable
+}
