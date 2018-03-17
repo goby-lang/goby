@@ -266,3 +266,61 @@ func TestFloatZeroDivisionFail(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
+func TestFloatAbs(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{"34.56.abs", 34.56},
+		{"-34.56.abs", 34.56},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		verifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestFloatCeil(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{"1.2.ceil", 2},
+		{"2.0.ceil", 2},
+		{"-1.2.ceil", -1},
+		{"-2.0.ceil", -2},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		verifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestFloatFloor(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{"1.2.floor", 1},
+		{"2.0.floor", 2},
+		{"-1.2.floor", -2},
+		{"-2.0.floor", -2},  
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		verifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
