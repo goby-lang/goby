@@ -232,8 +232,16 @@ func (p *Parser) IsNotDefMethodToken() bool {
 	return p.curToken.Type != token.Ident && !(p.peekToken.Type == token.Dot && (p.curToken.Type == token.InstanceVariable || p.curToken.Type == token.Constant || p.curToken.Type == token.Self))
 }
 
+// Token type InstanceVariable and Constant will trigger IsNotParamsToken()
+var invalidParams = map[token.Type]bool{
+	token.InstanceVariable: true,
+	token.Constant:         true,
+}
+
 // IsNotParamsToken ensures correct parameters which means it is not InstanceVariable
 func (p *Parser) IsNotParamsToken() bool {
 
-	return p.curToken.Type == token.InstanceVariable
+	_, ok := invalidParams[p.curToken.Type]
+	return ok
+
 }
