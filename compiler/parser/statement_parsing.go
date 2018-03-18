@@ -91,7 +91,7 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 		p.error = errors.InitError(msg, errors.MethodDefinitionError)
 	}
 
-	if p.peekTokenIs(token.LParen) {
+	if p.peekTokenIs(token.LParen) && p.peekTokenAtSameLine() {
 		p.nextToken()
 
 		switch p.peekToken.Type {
@@ -99,6 +99,10 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 			params = []ast.Expression{}
 		default:
 			params = p.parseParameters()
+		}
+
+		if p.IsNotParamsToken() {
+			return nil
 		}
 
 		if !p.expectPeek(token.RParen) {
@@ -120,12 +124,25 @@ func (p *Parser) parseParameters() []ast.Expression {
 	params := []ast.Expression{}
 
 	p.nextToken()
+
+	if p.IsNotParamsToken() {
+		msg := fmt.Sprintf("Invalid parameters: %s. Line: %d", p.curToken.Literal, p.curToken.Line)
+		p.error = errors.InitError(msg, errors.MethodDefinitionError)
+		return nil
+	}
+
 	param := p.parseExpression(precedence.Normal)
 	params = append(params, param)
 
 	for p.peekTokenIs(token.Comma) {
 		p.nextToken()
 		p.nextToken()
+
+		if p.IsNotParamsToken() {
+			msg := fmt.Sprintf("Invalid parameters: %s. Line: %d", p.curToken.Literal, p.curToken.Line)
+			p.error = errors.InitError(msg, errors.MethodDefinitionError)
+			return nil
+		}
 
 		if p.curTokenIs(token.Asterisk) && !p.peekTokenIs(token.Ident) {
 			p.expectPeek(token.Ident)
