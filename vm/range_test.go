@@ -116,7 +116,7 @@ func TestRangeBsearchMethod(t *testing.T) {
 		(4..0).bsearch do |i|
 			ary[i] >= 4
 		end
-		`, nil},
+		`, 1},
 		{`
 		ary = [0, 4, 7, 10, 12]
 		(-1..3).bsearch do |i|
@@ -176,7 +176,7 @@ func TestRangeBsearchMethod(t *testing.T) {
 		(4..0).bsearch do |i|
 			0 - ary[i]
 		end
-		`, nil},
+		`, 0},
 		{`
 		ary = [0, 100, 100, 100, 200]
 		(2..-1).bsearch do |i|
@@ -458,7 +458,7 @@ func TestRangeStepMethod(t *testing.T) {
 		  sum = sum + i
 		 end
 		 sum
-		`, -10},
+		`, -9},
 	}
 
 	for i, tt := range tests {

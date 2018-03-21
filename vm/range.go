@@ -154,14 +154,23 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					ran := receiver.(*RangeObject)
 
-					if ran.Start > ran.End || ran.Start < 0 {
+					if ran.Start < 0 || ran.End < 0{
 						// if block is not used, it should be popped
 						t.callFrameStack.pop()
 						return NULL
 					}
 
-					start := ran.Start
-					end := ran.End
+					var start, end int
+					if ran.Start < ran.End {
+						start, end = ran.Start, ran.End
+					} else {
+						start, end = ran.End, ran.Start
+					}
+
+					// the element of the range
+					// object with the highest value
+					ranEnd := end
+
 					var mid int
 					pivot := -1
 
@@ -188,7 +197,7 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 
 							if r.value {
 								end = mid - 1
-							} else if mid+1 > ran.End {
+							} else if mid+1 > ranEnd {
 								return NULL
 							} else {
 								start = mid + 1
