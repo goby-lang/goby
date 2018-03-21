@@ -2,7 +2,7 @@ package vm
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path"
 	"reflect"
 	"time"
@@ -757,6 +757,40 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		},
+			// Exits from the interpreter, returning the specified exit code (if any).
+			//
+			// The method itself formally returns nil, although it's not usable.
+			//
+			// ```ruby
+			// exit                    # exits with status code 0
+			// exit(1)                 # exits with status code 1
+			// ```
+			//
+			// @param [Integer] exit code (optional), defaults to 0
+			// @return nil
+		{
+			Name: "exit",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					switch len(args) {
+					case 0:
+						os.Exit(0)
+					case 1:
+						exitCode, ok := args[0].(*IntegerObject)
+
+						if !ok {
+							return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+						}
+
+						os.Exit(exitCode.value)
+					default:
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expected at most 1 argument; got: %d", len(args))
+					}
+
+					return NULL
+				}
+			},
+		},
 		{
 			// Returns true if Object class is equal to the input argument class
 			//
@@ -801,6 +835,41 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 						receiverClass = receiverClass.superClass
 					}
 					return FALSE
+				}
+			},
+		},
+		{
+			Name: "instance_eval",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					switch len(args) {
+					case 0:
+					case 1:
+						if args[0].Class().Name == classes.BlockClass {
+							blockObj := args[0].(*BlockObject)
+							blockFrame = newNormalCallFrame(blockObj.instructionSet, blockObj.instructionSet.filename, sourceLine)
+							blockFrame.ep = blockObj.ep
+							blockFrame.self = receiver
+							blockFrame.isBlock = true
+						} else {
+							return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.BlockClass, args[0].Class().Name)
+						}
+					default:
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect at most 1 arguments. got: %d", len(args))
+					}
+
+					if blockFrame == nil {
+						return receiver
+					}
+
+					if blockIsEmpty(blockFrame) {
+						return receiver
+					}
+
+					blockFrame.self = receiver
+					result := t.builtinMethodYield(blockFrame)
+
+					return result.Target
 				}
 			},
 		},
@@ -1056,16 +1125,10 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 					case *StringObject:
 						callerDir := path.Dir(t.vm.currentFilePath())
 						filepath := args[0].(*StringObject).value
-
 						filepath = path.Join(callerDir, filepath)
+						filepath = filepath + ".gb"
 
-						file, err := ioutil.ReadFile(filepath + ".gb")
-
-						if err != nil {
-							return t.vm.initErrorObject(errors.InternalError, sourceLine, err.Error())
-						}
-
-						t.execRequiredFile(filepath, file)
+						t.execFile(filepath)
 
 						return TRUE
 					default:

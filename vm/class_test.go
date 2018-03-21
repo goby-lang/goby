@@ -996,6 +996,22 @@ func TestRequireMethod(t *testing.T) {
 	v.checkSP(t, 0, 1)
 }
 
+func TestRequireMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`require "bar"`, `InternalError: Can't require "bar"`, 1},
+		{`require "db", "json"`, `ArgumentError: Expect 1 argument. got: 2`, 1},
+		{`require_relative "db", "json"`, `ArgumentError: Expect 1 argument. got: 2`, 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestRaiseMethod(t *testing.T) {
 	testsFail := []struct {
 		input       string
@@ -1038,6 +1054,22 @@ func TestRaiseMethodFail(t *testing.T) {
 		{`
 		class BarError; end
 		raise BarError, "Foo", "Bar"`, "ArgumentError: Expect at most 2 arguments. got: 3", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
+// With the current framework, only exit() failures can be tested.
+func TestExitMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`exit("abc")`, "TypeError: Expect argument to be Integer. got: String", 1},
+		{`exit(1, 2)`, "ArgumentError: Expected at most 1 argument; got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1104,22 +1136,6 @@ func TestGeneralIsAMethodFail(t *testing.T) {
 		{`123.is_a?(Integer, String)`, "ArgumentError: Expect 1 argument. got: 2", 1},
 		{`123.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1},
 		{`Class.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1},
-	}
-
-	for i, tt := range testsFail {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkErrorMsg(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestRequireMethodFail(t *testing.T) {
-	testsFail := []errorTestCase{
-		{`require "bar"`, `InternalError: Can't require "bar"`, 1},
-		{`require "db", "json"`, `ArgumentError: Expect 1 argument. got: 2`, 1},
-		{`require_relative "db", "json"`, `ArgumentError: Expect 1 argument. got: 2`, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1293,6 +1309,73 @@ func TestClassSingletonClassMethod(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestInstanceEvalMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		class Foo
+		  def initialize
+			@secret = 99
+		  end
+		end
+
+		f = Foo.new
+		f.instance_eval do
+		  @secret
+		end
+`, 99},
+		{`
+		string = "String"
+		string.instance_eval do
+		  def new_method
+			self.reverse
+		  end
+		end
+		string.new_method
+`, "gnirtS"},
+		{`"a".instance_eval`, "a"},
+		{`"a".instance_eval do end`, "a"},
+		{`
+		class Foo
+		  def bar
+			10
+		  end
+		end
+
+		block = Block.new do
+		  self.bar
+		end
+
+		Foo.new.instance_eval block
+		`, 10},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		verifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestInstanceEvalMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`"s".instance_eval(1, 1)`, "ArgumentError: Expect at most 1 arguments. got: 2", 1},
+		{`"s".instance_eval(true)`, "TypeError: Expect argument to be Block. got: Boolean", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
