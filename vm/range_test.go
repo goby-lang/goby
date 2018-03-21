@@ -35,6 +35,7 @@ func TestRangeComparisonOperation(t *testing.T) {
 		{`(1..3) == { a: 1, b: 2 }`, false},
 		{`(1..3) == [1, "String", true, 2..5]`, false},
 		{`(1..3) == Integer`, false},
+		{`(3..1) == (3..1)`, true},
 		{`(1..3) != (1..3)`, false},
 		{`(1..3) != (1..4)`, true},
 		{`(1..3) != 123`, true},
@@ -43,6 +44,7 @@ func TestRangeComparisonOperation(t *testing.T) {
 		{`(1..3) != { a: 1, b: 2 }`, true},
 		{`(1..3) != [1, "String", true, 2..5]`, true},
 		{`(1..3) != Integer`, true},
+		{`(3..1) != Integer`, true},
 	}
 
 	for i, tt := range tests {
@@ -426,7 +428,7 @@ func TestRangeStepMethod(t *testing.T) {
 		  sum = sum + i
 		end
 		sum
-		`, 0},
+		`, -10},
 		{`
 		sum = 0
 		a = 2
@@ -456,7 +458,7 @@ func TestRangeStepMethod(t *testing.T) {
 		  sum = sum + i
 		 end
 		 sum
-		`, 0},
+		`, -10},
 	}
 
 	for i, tt := range tests {

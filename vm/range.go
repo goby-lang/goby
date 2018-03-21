@@ -246,18 +246,13 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 
-					// number to add to the iterator
-					var iterAdd int
-					if ran.Start <= ran.End {
-						iterAdd = 1
-					} else {
-						iterAdd = -1
-					}
-
-					for i := ran.Start; i != (ran.End + iterAdd); i += iterAdd {
+					ran.each(func(i int) error {
 						obj := t.vm.initIntegerObject(i)
 						t.builtinMethodYield(blockFrame, obj)
-					}
+
+						return nil
+					})
+
 					return ran
 				}
 			},
@@ -358,23 +353,17 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					var elements []Object
-					var iterAdd int
 
-					if r.Start <= r.End {
-						iterAdd = 1
-					} else {
-						iterAdd = -1
-					}
-
-					for i := r.Start; i != (r.End + iterAdd); i += iterAdd {
-						// TODO: We should return an null array directly instead of running this loop
+					r.each(func(i int) error {
 						if blockIsEmpty(blockFrame) {
 							elements = append(elements, NULL)
 						} else {
 							obj := t.vm.initIntegerObject(i)
 							elements = append(elements, t.builtinMethodYield(blockFrame, obj).Target)
 						}
-					}
+
+						return nil
+					})
 
 					return t.vm.initArrayObject(elements)
 				}
@@ -449,26 +438,24 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Step can't be negative")
 					}
 
-					// range end must greater or equal than range start to execute the block
-					var iterAdd int
+					blockFrameUsed := false
 
-					if ran.Start <= ran.End {
-						iterAdd = 1 * stepValue
-					} else {
-						iterAdd = -1 * stepValue
-					}
-
-					for i := ran.Start; i != (ran.End + iterAdd); i += iterAdd {
-						for i := ran.Start; i <= ran.End; i += stepValue {
-							obj := t.vm.initIntegerObject(i)
-							t.builtinMethodYield(blockFrame, obj)
+					ran.each(func (i int) error {
+						if (i - ran.Start) % stepValue != 0 {
+							return nil
 						}
 
-						return ran
-					}
+						obj := t.vm.initIntegerObject(i)
+						t.builtinMethodYield(blockFrame, obj)
+						blockFrameUsed = true
+
+						return nil
+					})
 
 					// if block is not used, it should be popped
-					t.callFrameStack.pop()
+					if !blockFrameUsed {
+						t.callFrameStack.pop()
+					}
 
 					return ran
 				}
@@ -564,4 +551,22 @@ func (ro *RangeObject) toJSON(t *thread) string {
 // Value returns range object's string format
 func (ro *RangeObject) Value() interface{} {
 	return ro.toString()
+}
+
+
+func (ro *RangeObject) each(f func (int) error) (err error) {
+	var inc int
+	if ro.End - ro.Start >= 0 {
+		inc = 1
+	} else {
+		inc = -1
+	}
+
+	for i := ro.Start; i != ro.End + inc; i += inc {
+		if err = f(i); err != nil {
+			return err
+		}
+	}
+
+	return
 }
