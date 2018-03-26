@@ -8,16 +8,26 @@ class RangeEnumerator
   def initialize(range)
     @range = range
     @current_value = nil
+
+    if @range.first < @range.last
+      @delta = 1
+    else
+      @delta = -1
+    end
   end
 
   # Returns true if there is another element is available.
   #
   def has_next?
-    if @range.last < @range.first
-      return false
+    if @current_value.nil?
+      return true
     end
 
-    @current_value.nil? || @current_value < @range.last
+    if @range.last < @range.first
+      return @current_value > @range.last
+    end
+
+    @current_value < @range.last
   end
 
   # Returns the next element, and advances the internal position.
@@ -32,7 +42,7 @@ class RangeEnumerator
     if @current_value.nil?
       @current_value = @range.first
     else
-      @current_value += 1
+      @current_value += @delta
     end
 
     @current_value
