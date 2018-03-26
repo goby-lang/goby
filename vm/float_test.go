@@ -478,3 +478,22 @@ func TestPositive(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
+func TestNegative(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{"-1.0.negative?", true},
+		{"0.0.negative?", false},
+		{"1.0.negative?", false},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
