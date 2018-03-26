@@ -441,3 +441,21 @@ func TestFloatFloor(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
+func TestZero(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{"0.0.zero?", true},
+		{"1.0.zero?", false},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
