@@ -400,6 +400,24 @@ var builtinFloatInstanceMethods = []*BuiltinMethodObject{
 			return toBooleanObject(r.value == 0.0)
 		},
 	},
+	{
+		// Returns true if Float is larger than 0.0
+		//
+		// ```Ruby
+		// -1.0.positive? # => false
+		// 0.0.positive?  # => false
+		// 1.0.positive?  # => true
+		// ```
+		// @return [Boolean]
+		Name: "positive?",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%v", strconv.Itoa(len(args)))
+			}
+			r := receiver.(*FloatObject)
+			return toBooleanObject(r.value > 0.0)
+		},
+	},
 }
 
 // Internal functions ===================================================
