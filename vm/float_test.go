@@ -342,3 +342,22 @@ func TestZero(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
+func TestPositive(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{"-1.0.positive?", false},
+		{"0.0.positive?", false},
+		{"1.0.positive?", true},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		verifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
