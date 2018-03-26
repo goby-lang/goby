@@ -357,8 +357,8 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// Returns the Float as a positive value.
 			//
 			// ```Ruby
-			// -3.14.abs # => 3.14
-			// 3.14.abs # => 3.14
+			// -34.56.abs # => 34.56
+			// 34.56.abs # => 34.56
 			// ```
 			// @return [Float]
 			Name: "abs",
@@ -377,10 +377,10 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// Returns the smallest Integer greater than or equal to self.
 			//
 			// ```Ruby
-			// 1.2.ceil # => 2
-			// 2.ceil # => 2
+			// 1.2.ceil  # => 2
+			// 2.ceil    # => 2
 			// -1.2.ceil # => -1
-			// -2.ceil # => -2
+			// -2.ceil   # => -2
 			// ```
 			// @return [Integer]
 			Name: "ceil",
@@ -402,8 +402,8 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// Returns the largest Integer less than or equal to self.
 			//
 			// ```Ruby
-			// 1.2.floor # => 1
-			// 2.0.floor # => 2
+			// 1.2.floor  # => 1
+			// 2.0.floor  # => 2
 			// -1.2.floor # => -2
 			// -2.0.floor # => -2
 			// ```
@@ -420,6 +420,25 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 					newInt := t.vm.initIntegerObject(int(result))
 					newInt.flag = i
 					return newInt
+				}
+			},
+		},
+		{
+			// Returns true if Float is equal to 0.0
+			//
+			// ```Ruby
+			// 0.0.zero? # => true
+			// 1.0.zero? # => false
+			// ```
+			// @return [Boolean]
+			Name: "zero?",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					if len(args) != 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%v", strconv.Itoa(len(args)))
+					}
+					r := receiver.(*FloatObject)
+					return toBooleanObject(r.value == 0.0)
 				}
 			},
 		},
