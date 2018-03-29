@@ -111,11 +111,15 @@ func New(l *lexer.Lexer) *Parser {
 }
 
 // ParseProgram update program statements and return program
-func (p *Parser) ParseProgram() (*ast.Program, *errors.Error) {
+func (p *Parser) ParseProgram() (program *ast.Program,err *errors.Error) {
 
-	defer func() {
+	defer func(){
 		if recover() != nil {
-			fmt.Println("Parser recovered from panic")
+			err = p.error
+			if err == nil {
+				msg := fmt.Sprintf("Some panic happen token: %s. Line: %d", p.curToken.Literal, p.curToken.Line)
+				err = errors.InitError(msg, errors.MethodDefinitionError)
+			}
 		}
 	}()
 
@@ -123,7 +127,7 @@ func (p *Parser) ParseProgram() (*ast.Program, *errors.Error) {
 	// Read two tokens, so curToken and peekToken are both set.
 	p.nextToken()
 	p.nextToken()
-	program := &ast.Program{}
+	program = &ast.Program{}
 	program.Statements = []ast.Statement{}
 
 	for !p.curTokenIs(token.EOF) {
