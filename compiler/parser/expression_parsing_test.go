@@ -690,3 +690,19 @@ func TestArithmeticExpressionFail(t *testing.T) {
 		}
 	}
 }
+
+// If parser doesn't crash then we covered panic successfully
+
+func TestMultipleAssignError(t *testing.T) {
+	input := `
+	a = 4, 5`
+
+	l := lexer.New(input)
+	p := New(l)
+	_, err := p.ParseProgram()
+
+	if err.Message != "unexpected 5 Line: 1" {
+		t.Fatal(err.Message)
+	}
+
+}
