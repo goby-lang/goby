@@ -111,9 +111,9 @@ func New(l *lexer.Lexer) *Parser {
 }
 
 // ParseProgram update program statements and return program
-func (p *Parser) ParseProgram() (program *ast.Program,err *errors.Error) {
+func (p *Parser) ParseProgram() (program *ast.Program, err *errors.Error) {
 
-	defer func(){
+	defer func() {
 		if recover() != nil {
 			err = p.error
 			if err == nil {

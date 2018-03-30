@@ -691,8 +691,7 @@ func TestArithmeticExpressionFail(t *testing.T) {
 	}
 }
 
-// If parser doesn't crash then we covered panic successfully
-
+// After covered panic still return error to repl
 func TestMultipleAssignError(t *testing.T) {
 	input := `
 	a = 4, 5`
@@ -702,6 +701,21 @@ func TestMultipleAssignError(t *testing.T) {
 	_, err := p.ParseProgram()
 
 	if err.Message != "unexpected 5 Line: 1" {
+		t.Fatal(err.Message)
+	}
+
+}
+
+// Transfer the unexpected panic into error
+func TestUnexpectedPanicError(t *testing.T) {
+	input := `
+	3()`
+
+	l := lexer.New(input)
+	p := New(l)
+	_, err := p.ParseProgram()
+
+	if err.Message != "Some panic happen token: (. Line: 1" {
 		t.Fatal(err.Message)
 	}
 
