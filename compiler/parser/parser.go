@@ -118,7 +118,7 @@ func (p *Parser) ParseProgram() (program *ast.Program, err *errors.Error) {
 			err = p.error
 			if err == nil {
 				msg := fmt.Sprintf("Some panic happen token: %s. Line: %d", p.curToken.Literal, p.curToken.Line)
-				err = errors.InitError(msg, errors.MethodDefinitionError)
+				err = errors.InitError(msg, errors.SyntaxError)
 			}
 		}
 	}()
