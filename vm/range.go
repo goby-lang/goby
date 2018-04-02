@@ -154,7 +154,7 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					ran := receiver.(*RangeObject)
 
-					if ran.Start < 0 || ran.End < 0{
+					if ran.Start < 0 || ran.End < 0 {
 						// if block is not used, it should be popped
 						t.callFrameStack.pop()
 						return NULL
@@ -449,8 +449,8 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 
 					blockFrameUsed := false
 
-					ran.each(func (i int) error {
-						if (i - ran.Start) % stepValue != 0 {
+					ran.each(func(i int) error {
+						if (i-ran.Start)%stepValue != 0 {
 							return nil
 						}
 
@@ -562,16 +562,15 @@ func (ro *RangeObject) Value() interface{} {
 	return ro.toString()
 }
 
-
-func (ro *RangeObject) each(f func (int) error) (err error) {
+func (ro *RangeObject) each(f func(int) error) (err error) {
 	var inc int
-	if ro.End - ro.Start >= 0 {
+	if ro.End-ro.Start >= 0 {
 		inc = 1
 	} else {
 		inc = -1
 	}
 
-	for i := ro.Start; i != ro.End + inc; i += inc {
+	for i := ro.Start; i != ro.End+inc; i += inc {
 		if err = f(i); err != nil {
 			return err
 		}

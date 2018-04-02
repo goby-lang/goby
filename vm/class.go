@@ -757,17 +757,17 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		},
-			// Exits from the interpreter, returning the specified exit code (if any).
-			//
-			// The method itself formally returns nil, although it's not usable.
-			//
-			// ```ruby
-			// exit                    # exits with status code 0
-			// exit(1)                 # exits with status code 1
-			// ```
-			//
-			// @param [Integer] exit code (optional), defaults to 0
-			// @return nil
+		// Exits from the interpreter, returning the specified exit code (if any).
+		//
+		// The method itself formally returns nil, although it's not usable.
+		//
+		// ```ruby
+		// exit                    # exits with status code 0
+		// exit(1)                 # exits with status code 1
+		// ```
+		//
+		// @param [Integer] exit code (optional), defaults to 0
+		// @return nil
 		{
 			Name: "exit",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
