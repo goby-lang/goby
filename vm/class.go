@@ -395,7 +395,7 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 					var class *RClass
 					module, ok := args[0].(*RClass)
 
-					if !ok {
+					if !ok || !module.isModule {
 						return t.vm.initErrorObject(errors.TypeError, sourceLine, "Expect argument to be a module. got=%v", args[0].Class().Name)
 					}
 
@@ -463,7 +463,7 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 					var class *RClass
 					module, ok := args[0].(*RClass)
 
-					if !ok {
+					if !ok || !module.isModule {
 						return t.vm.initErrorObject(errors.TypeError, sourceLine, "Expect argument to be a module. got=%v", args[0].Class().Name)
 					}
 
