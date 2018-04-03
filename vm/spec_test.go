@@ -1,9 +1,9 @@
 package vm
 
 import (
-	"testing"
 	"os"
 	"os/exec"
+	"testing"
 )
 
 func TestSpecSuccessWithExitCode0(t *testing.T) {

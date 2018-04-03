@@ -96,7 +96,7 @@ func TestAttrReaderAndWriter(t *testing.T) {
 	}
 }
 
-func TestClassInheritModule(t *testing.T) {
+func TestClassInheritModuleError(t *testing.T) {
 	input := `module Foo
 end
 
@@ -535,6 +535,40 @@ func TestGeneralAssignmentByOperation(t *testing.T) {
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
+}
+
+func TestForbiddenInclusionWithClass(t *testing.T) {
+	input := `class Foo
+end
+
+class Bar
+  include Foo
+end
+	`
+	expected := `TypeError: Expect argument to be a module. got=Class`
+
+	v := initTestVM()
+	evaluated := v.testEval(t, input, getFilename())
+	checkErrorMsg(t, i, evaluated, expected)
+	v.checkCFP(t, 0, 2)
+	v.checkSP(t, 0, 1)
+}
+
+func TestForbiddenExtensionWithClass(t *testing.T) {
+	input := `class Foo
+end
+
+class Bar
+  extend Foo
+end
+	`
+	expected := `TypeError: Expect argument to be a module. got=Class`
+
+	v := initTestVM()
+	evaluated := v.testEval(t, input, getFilename())
+	checkErrorMsg(t, i, evaluated, expected)
+	v.checkCFP(t, 0, 2)
+	v.checkSP(t, 0, 1)
 }
 
 // Method tests
