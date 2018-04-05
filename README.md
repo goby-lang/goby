@@ -33,7 +33,7 @@ One of our goal is to provide web developers a sort of small and handy environme
 - [Installation](#installation)
 - [Usage](#usage)
 - [Sample codes](#sample_codes)
-- [Documentation](#documentation)
+- [Documentation](https://goby-lang.org/docs/introduction.html)
 - [Joining to Goby](#joining-to-goby)
 - [Maintainers](#maintainers)
 - [Support us](#support-us)
@@ -128,11 +128,6 @@ Goby has official [docker image](https://hub.docker.com/r/gobylang/goby/) as wel
 - [One thousand threads](https://github.com/goby-lang/goby/blob/master/samples/one_thousand_threads.gb)
 
 More sample Goby codes can be found in [sample directory](https://github.com/goby-lang/goby/tree/master/samples).
-
-## Documentation
-
-- [**User Manual (WIP)**](https://goby-lang.gitbooks.io/goby/content/)(Gitbooks)
-- [API Documentation](https://goby-lang.github.io/api.doc/) -- needs update the build script. See the [guide for API doc](https://github.com/goby-lang/api.doc#documenting-goby-code) if you'd like to contribute.
 
 ## Joining to Goby
 
