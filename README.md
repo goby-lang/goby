@@ -119,6 +119,32 @@ FYI: You can just run `brew test goby` to check Homebrew installation.
 
 Goby has official [docker image](https://hub.docker.com/r/gobylang/goby/) as well. You can try the [Plugin System](https://goby-lang.gitbooks.io/goby/content/plugin-system.html) using docker.
 
+## Syntax highlighting
+
+The Goby syntax is currently a subset of the Ruby one, with an exception (`get_block`), therefore, it's possible to attain syntax highlighting on any platform/editor by simply switching it to Ruby for the currently opened file.
+
+### Sublime Text 3
+
+Sublime Text 3 users can use the `Only Goby` package, by typing the following in a terminal:
+
+```sh
+git clone git@github.com:saveriomiroddi/only-goby-for-sublime-text "$HOME/.config/sublime-text-3/Packages/only-goby-for-sublime-text"
+```
+
+this will automatically apply the Goby syntax highlighting to the `.gb` files.
+
+### Vim
+
+Vim users can use the `vim-goby-syntax-highlighting` definition, by typing the following in a terminal:
+
+```sh
+mkdir -p "$HOME/.vim/syntax"
+wget -O "$HOME/.vim/syntax/goby.vim" https://raw.githubusercontent.com/saveriomiroddi/vim-goby-syntax-highlighting/master/goby.vim
+echo 'au BufNewFile,BufRead *.gb    setf goby' >> "$HOME/.vim/filetype.vim"
+```
+
+this will automatically apply the Goby syntax highlighting to the `.gb` files.
+
 ## Sample codes
 
 - [Built a stack data structure using Goby](https://github.com/goby-lang/goby/blob/master/samples/stack.gb)
