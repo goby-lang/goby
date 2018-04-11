@@ -70,7 +70,7 @@ func (t *thread) getClassIS(name string, filename filename) *instructionSet {
 }
 
 func (t *thread) execGobyLib(libName string) (err error) {
-	libPath := filepath.Join(t.vm.projectRoot, "lib", libName)
+	libPath := filepath.Join(t.vm.libPath, libName)
 	err = t.execFile(libPath)
 	return
 }

@@ -65,6 +65,9 @@ type VM struct {
 	// projectRoot is goby root's absolute path, which is $GOROOT/src/github.com/goby-lang/goby
 	projectRoot string
 
+	// libPath indicates the Goby (.gb) libraries path
+	libPath string
+
 	channelObjectMap *objectMap
 
 	mode int
@@ -111,6 +114,8 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 	} else {
 		vm.projectRoot = gobyRoot
 	}
+
+	vm.libPath = filepath.Join(vm.projectRoot, "lib")
 
 	vm.initConstants()
 	vm.mainObj = vm.initMainObj()
