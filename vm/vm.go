@@ -20,6 +20,9 @@ const (
 	TestMode
 )
 
+// DefaultLibPath is used for overriding vm.libpath build-time.
+var DefaultLibPath string
+
 type isIndexTable struct {
 	Data map[string]int
 }
@@ -64,6 +67,10 @@ type VM struct {
 	args []string
 	// projectRoot is goby root's absolute path, which is $GOROOT/src/github.com/goby-lang/goby
 	projectRoot string
+
+	// libPath indicates the Goby (.gb) libraries path. Defaults to `<projectRoot>/lib`, unless
+	// DefaultLibPath is specified.
+	libPath string
 
 	channelObjectMap *objectMap
 
@@ -110,6 +117,12 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 		}
 	} else {
 		vm.projectRoot = gobyRoot
+	}
+
+	if DefaultLibPath != "" {
+		vm.libPath = DefaultLibPath
+	} else {
+		vm.libPath = filepath.Join(vm.projectRoot, "lib")
 	}
 
 	vm.initConstants()
