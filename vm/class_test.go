@@ -1099,6 +1099,36 @@ func TestRaiseMethodFail(t *testing.T) {
 	}
 }
 
+func TestRapMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{`
+		1.rap? :to_i
+		`, true},
+		{`
+		"string".rap? "+"
+		`, true},
+		{`
+		1.rap? :numerator
+		`, false},
+		{`
+		Class.rap? "rap?"
+		`, true},
+		{`
+		Class.rap? :phantom
+		`, false},
+	}
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		verifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 // With the current framework, only exit() failures can be tested.
 func TestExitMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
