@@ -554,17 +554,16 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 		},
 		{
 			// A predicate class method that returns `true` if the object has an ability to respond to the method, otherwise `false`.
-			// Equivalent to Ruby's `respond_to?` but shorter.
-			// Note that signs like `+` or `-` should be String literal.
+			// Note that signs like `+` or `?` should be String literal.
 			//
 			// ```ruby
-			// Class.rap? "rap?"            #=> true
-			// Class.rap? :numerator        #=> false
+			// Class.respond_to? "respond_to?"            #=> true
+			// Class.respond_to? :numerator        #=> false
 			// ```
 			//
 			// @param [String]
 			// @return [Boolean]
-			Name: "rap?",
+			Name: "respond_to?",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
@@ -1099,19 +1098,18 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// A predicate method that returns `true` if the object has an ability to respond to the method, otherwise `false`.
-			// Equivalent to Ruby's `respond_to?` but shorter.
-			// Note that signs like `+` or `-` should be String literal.
+			// A predicate class method that returns `true` if the object has an ability to respond to the method, otherwise `false`.
+			// Note that signs like `+` or `?` should be String literal.
 			//
 			// ```ruby
-			// 1.rap? :to_i               #=> true
-			// "string".rap? "+"          #=> true
-			// 1.rap? :numerator          #=> false
+			// 1.respond_to? :to_i               #=> true
+			// "string".respond_to? "+"          #=> true
+			// 1.respond_to? :numerator          #=> false
 			// ```
 			//
 			// @param [String]
 			// @return [Boolean]
-			Name: "rap?",
+			Name: "respond_to?",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {

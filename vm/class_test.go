@@ -1099,25 +1099,25 @@ func TestRaiseMethodFail(t *testing.T) {
 	}
 }
 
-func TestRapMethod(t *testing.T) {
+func TestResponseToMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected bool
 	}{
 		{`
-		1.rap? :to_i
+		1.respond_to? :to_i
 		`, true},
 		{`
-		"string".rap? "+"
+		"string".respond_to? "+"
 		`, true},
 		{`
-		1.rap? :numerator
+		1.respond_to? :numerator
 		`, false},
 		{`
-		Class.rap? "rap?"
+		Class.respond_to? "respond_to?"
 		`, true},
 		{`
-		Class.rap? :phantom
+		Class.respond_to? :phantom
 		`, false},
 	}
 	for i, tt := range tests {
