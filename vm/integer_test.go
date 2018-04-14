@@ -223,8 +223,17 @@ func TestIntegerConversion(t *testing.T) {
 		expected interface{}
 	}{
 		{`100.to_i`, 100},
+		{`-100.to_i`, -100},
 		{`100.to_f`, 100.0},
+		{`-100.to_f`, -100.0},
 		{`100.to_s`, "100"},
+		{`100.to_d.to_i`, 100},
+		{`-100.to_d.to_i`, -100},
+		{`100.to_d.numerator.to_i`, 100},
+		{`100.to_d.denominator.to_i`, 1},
+		{`-100.to_d.numerator.to_i`, -100},
+		{`-100.to_d.denominator.to_i`, 1},
+		{`100.to_d.class.name`, "Decimal"},
 	}
 
 	for i, tt := range tests {
