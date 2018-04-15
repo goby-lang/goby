@@ -553,6 +553,37 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// A predicate class method that returns `true` if the object has an ability to respond to the method, otherwise `false`.
+			// Note that signs like `+` or `?` should be String literal.
+			//
+			// ```ruby
+			// Class.respond_to? "respond_to?"            #=> true
+			// Class.respond_to? :numerator        #=> false
+			// ```
+			//
+			// @param [String]
+			// @return [Boolean]
+			Name: "respond_to?",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%d", len(args))
+					}
+
+					arg, ok := args[0].(*StringObject)
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, arg.Class().Name)
+					}
+
+					r := receiver
+					if r.findMethod(arg.value) == nil {
+						return FALSE
+					}
+					return TRUE
+				}
+			},
+		},
+		{
 			// Returns the superclass object of the receiver.
 			//
 			// ```ruby
@@ -1063,6 +1094,38 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect at most 2 arguments. got: %d", len(args))
+				}
+			},
+		},
+		{
+			// A predicate class method that returns `true` if the object has an ability to respond to the method, otherwise `false`.
+			// Note that signs like `+` or `?` should be String literal.
+			//
+			// ```ruby
+			// 1.respond_to? :to_i               #=> true
+			// "string".respond_to? "+"          #=> true
+			// 1.respond_to? :numerator          #=> false
+			// ```
+			//
+			// @param [String]
+			// @return [Boolean]
+			Name: "respond_to?",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					if len(args) != 1 {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%d", len(args))
+					}
+
+					arg, ok := args[0].(*StringObject)
+					if !ok {
+						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, arg.Class().Name)
+					}
+
+					r := receiver
+					if r.findMethod(arg.value) == nil {
+						return FALSE
+					}
+					return TRUE
 				}
 			},
 		},
