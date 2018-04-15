@@ -245,6 +245,20 @@ func TestIntegerConversion(t *testing.T) {
 	}
 }
 
+func TestIntegerConversonFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`100.to_d 1`, "ArgumentError: Expect 0 arguments. got: 1", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 // Method test
 
 func TestIntegerEvenMethod(t *testing.T) {
