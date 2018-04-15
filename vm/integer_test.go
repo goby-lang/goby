@@ -223,8 +223,17 @@ func TestIntegerConversion(t *testing.T) {
 		expected interface{}
 	}{
 		{`100.to_i`, 100},
+		{`-100.to_i`, -100},
 		{`100.to_f`, 100.0},
+		{`-100.to_f`, -100.0},
 		{`100.to_s`, "100"},
+		{`100.to_d.to_i`, 100},
+		{`-100.to_d.to_i`, -100},
+		{`100.to_d.numerator.to_i`, 100},
+		{`100.to_d.denominator.to_i`, 1},
+		{`-100.to_d.numerator.to_i`, -100},
+		{`-100.to_d.denominator.to_i`, 1},
+		{`100.to_d.class.name`, "Decimal"},
 	}
 
 	for i, tt := range tests {
@@ -232,6 +241,20 @@ func TestIntegerConversion(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestIntegerConversonFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`100.to_d 1`, "ArgumentError: Expect 0 arguments. got: 1", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }

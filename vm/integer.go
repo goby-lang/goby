@@ -383,6 +383,24 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		},
+		// Returns the `Decimal` conversion of self.
+		//
+		// ```Ruby
+		// 100.to_d # => '100'.to_d
+		// ```
+		// @return [Decimal]
+		{
+			Name: "to_d",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					if len(args) > 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 arguments. got: %d", len(args))
+					}
+					r := receiver.(*IntegerObject)
+					return t.vm.initDecimalObject(intToDecimal(r))
+				}
+			},
+		},
 		// Returns the `Float` conversion of self.
 		//
 		// ```Ruby
