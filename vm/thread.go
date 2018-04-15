@@ -79,7 +79,7 @@ func (t *thread) execFile(fpath string) (err error) {
 	file, err := ioutil.ReadFile(fpath)
 
 	if err != nil {
-		t.vm.mainThread.pushErrorObject(errors.InternalError, -1, err.Error())
+		return
 	}
 
 	instructionSets, err := compiler.CompileToInstructions(string(file), parser.NormalMode)
