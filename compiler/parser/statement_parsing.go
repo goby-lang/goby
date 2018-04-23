@@ -310,6 +310,12 @@ func (p *Parser) parseBlockStatement(endTokens ...token.Type) *ast.BlockStatemen
 	bs := &ast.BlockStatement{BaseNode: &ast.BaseNode{Token: p.curToken}}
 	bs.Statements = []ast.Statement{}
 
+	if p.curTokenIs(token.End) {
+		msg := fmt.Sprintf("syntax error, unexpected %s Line: %d", p.curToken.Literal, p.curToken.Line)
+		p.error = errors.InitError(msg, errors.SyntaxError)
+		return bs
+	}
+
 	p.nextToken()
 
 	if p.curTokenIs(token.Semicolon) {
@@ -318,6 +324,7 @@ func (p *Parser) parseBlockStatement(endTokens ...token.Type) *ast.BlockStatemen
 
 ParseBlockLoop:
 	for {
+
 		for _, t := range endTokens {
 			if p.curTokenIs(t) {
 				break ParseBlockLoop
@@ -325,10 +332,15 @@ ParseBlockLoop:
 		}
 
 		if p.curTokenIs(token.EOF) {
+
 			p.error = errors.InitError("Unexpected EOF", errors.EndOfFileError)
 			return bs
 		}
 		stmt := p.parseStatement()
+
+		if p.error != nil {
+			return bs
+		}
 
 		if stmt != nil {
 			bs.Statements = append(bs.Statements, stmt)

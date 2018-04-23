@@ -205,6 +205,8 @@ reset:
 
 			if perr != nil {
 				handleParserError(perr, igb)
+				igb.cmds = nil
+				igb.sm.Event(readyToExec)
 				continue
 			}
 

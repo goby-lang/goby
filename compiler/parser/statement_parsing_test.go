@@ -237,3 +237,73 @@ func TestParenthesisInNextLineIsNotParameter(t *testing.T) {
 	}
 
 }
+
+func TestInvalidIfStatement(t *testing.T) {
+	input := `
+	if
+	end`
+
+	l := lexer.New(input)
+	p := New(l)
+	_, err := p.ParseProgram()
+
+	if err.Message != "syntax error, unexpected end Line: 2" {
+		t.Fatal(err.Message)
+	}
+}
+
+func TestInvalidIfStatementWithParentheses(t *testing.T) {
+	input := `
+	if ()
+	end`
+
+	l := lexer.New(input)
+	p := New(l)
+	_, err := p.ParseProgram()
+
+	if err.Message != "expected next token to be ), got END(end) instead. Line: 2" {
+		t.Fatal(err.Message)
+	}
+}
+
+func TestInvalidIfStatementWithReverseParentheses(t *testing.T) {
+	input := `
+	if )(
+	end`
+
+	l := lexer.New(input)
+	p := New(l)
+	_, err := p.ParseProgram()
+
+	if err.Message != "expected next token to be ), got EOF() instead. Line: 2" {
+		t.Fatal(err.Message)
+	}
+}
+
+func TestInvalidIfStatementWithRightParentheses(t *testing.T) {
+	input := `
+	if )
+	end`
+
+	l := lexer.New(input)
+	p := New(l)
+	_, err := p.ParseProgram()
+
+	if err.Message != "unexpected ) Line: 1" {
+		t.Fatal(err.Message)
+	}
+}
+
+func TestInvalidIfStatementWithLeftParentheses(t *testing.T) {
+	input := `
+	if (
+	end`
+
+	l := lexer.New(input)
+	p := New(l)
+	_, err := p.ParseProgram()
+
+	if err.Message != "syntax error, unexpected end Line: 2" {
+		t.Fatal(err.Message)
+	}
+}
