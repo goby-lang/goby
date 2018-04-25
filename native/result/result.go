@@ -40,7 +40,7 @@ func (r *Result) Value() interface{} {
 	return r.value
 }
 
-// New creates and returns a new isntance of a Result
+// New creates and returns a new instance of a Result
 func (Result) New(t *Thread, name Object, value Object) Object {
 	r := &Result{
 		name:    name,

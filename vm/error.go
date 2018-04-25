@@ -29,7 +29,8 @@ type Error struct {
 
 // Functions for initialization -----------------------------------------
 
-func (vm *VM) initUnsupportedMethodError(sourceLine int, methodName string, receiver Object) *Error {
+// InitUnsupportedMethodError is to print unsupported method errors. This is exported for using from sub-packages.
+func (vm *VM) InitUnsupportedMethodError(sourceLine int, methodName string, receiver Object) *Error {
 	return vm.InitErrorObject(errors.UnsupportedMethodError, sourceLine, "Unsupported Method %s for %+v", methodName, receiver.ToString())
 }
 

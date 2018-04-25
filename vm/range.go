@@ -39,7 +39,7 @@ func builtinRangeClassMethods() []*BuiltinMethodObject {
 		{
 			Name: "new",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
+				return t.vm.InitUnsupportedMethodError(sourceLine, "#new", receiver)
 
 			},
 		},
