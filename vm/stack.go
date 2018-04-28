@@ -10,20 +10,19 @@ type stack struct {
 	// Although every thread has its own stack, vm's main thread still can be accessed by other threads.
 	// This is why we need a lock in stack
 	// TODO: Find a way to fix this instead of put lock on every stack.
-	*sync.RWMutex
+	sync.RWMutex
 }
 
 func (s *stack) set(index int, pointer *Pointer) {
 	s.Lock()
 
-	defer s.Unlock()
-
 	s.Data[index] = pointer
+
+	s.Unlock()
 }
 
 func (s *stack) push(v *Pointer) {
 	s.Lock()
-	defer s.Unlock()
 
 	if len(s.Data) <= s.thread.sp {
 		s.Data = append(s.Data, v)
@@ -32,11 +31,11 @@ func (s *stack) push(v *Pointer) {
 	}
 
 	s.thread.sp++
+	s.Unlock()
 }
 
 func (s *stack) pop() *Pointer {
 	s.Lock()
-	defer s.Unlock()
 
 	if len(s.Data) < 1 {
 		panic("Nothing to pop!")
@@ -52,20 +51,23 @@ func (s *stack) pop() *Pointer {
 
 	v := s.Data[s.thread.sp]
 	s.Data[s.thread.sp] = nil
+	s.Unlock()
 	return v
 }
 
 func (s *stack) top() *Pointer {
+	var r *Pointer
 	s.RLock()
-	defer s.RUnlock()
 
 	if len(s.Data) == 0 {
-		return nil
+		r = nil
+	} else if s.thread.sp > 0 {
+		r = s.Data[s.thread.sp-1]
+	} else {
+		r = s.Data[0]
 	}
 
-	if s.thread.sp > 0 {
-		return s.Data[s.thread.sp-1]
-	}
+	s.RUnlock()
 
-	return s.Data[0]
+	return r
 }
