@@ -2,8 +2,9 @@ package vm
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/compiler/bytecode"
 	"strconv"
+
+	"github.com/goby-lang/goby/compiler/bytecode"
 )
 
 // Object represents all objects in Goby, including Array, Integer or even Method and Error.
@@ -122,7 +123,7 @@ func (ro *RObject) toJSON(t *thread) string {
 
 	if customToJSONMethod != nil {
 		t.stack.push(&Pointer{Target: ro})
-		callObj := newCallObject(ro, customToJSONMethod, t.sp, 0, &bytecode.ArgSet{}, nil, customToJSONMethod.instructionSet.instructions[0].sourceLine)
+		callObj := newCallObject(ro, customToJSONMethod, t.stack.pointer, 0, &bytecode.ArgSet{}, nil, customToJSONMethod.instructionSet.instructions[0].sourceLine)
 		t.evalMethodObject(callObj, customToJSONMethod.instructionSet.instructions[0].sourceLine)
 		result := t.stack.pop().Target
 		return result.toString()

@@ -6,7 +6,7 @@ import (
 
 type callFrameStack struct {
 	callFrames []callFrame
-	thread     *thread
+	pointer    int
 }
 
 type baseFrame struct {
@@ -226,13 +226,13 @@ func (cfs *callFrameStack) push(cf callFrame) {
 		panic("Callframe can't be nil!")
 	}
 
-	if len(cfs.callFrames) <= cfs.thread.cfp {
+	if len(cfs.callFrames) <= cfs.pointer {
 		cfs.callFrames = append(cfs.callFrames, cf)
 	} else {
-		cfs.callFrames[cfs.thread.cfp] = cf
+		cfs.callFrames[cfs.pointer] = cf
 	}
 
-	cfs.thread.cfp++
+	cfs.pointer++
 }
 
 func (cfs *callFrameStack) pop() callFrame {
@@ -242,19 +242,19 @@ func (cfs *callFrameStack) pop() callFrame {
 		panic("Nothing to pop!")
 	}
 
-	if cfs.thread.cfp > 0 {
-		cfs.thread.cfp--
+	if cfs.pointer > 0 {
+		cfs.pointer--
 	}
 
-	cf = cfs.callFrames[cfs.thread.cfp]
-	cfs.callFrames[cfs.thread.cfp] = nil
+	cf = cfs.callFrames[cfs.pointer]
+	cfs.callFrames[cfs.pointer] = nil
 
 	return cf
 }
 
 func (cfs *callFrameStack) top() callFrame {
-	if cfs.thread.cfp > 0 {
-		return cfs.callFrames[cfs.thread.cfp-1]
+	if cfs.pointer > 0 {
+		return cfs.callFrames[cfs.pointer-1]
 	}
 
 	return nil

@@ -5,8 +5,8 @@ import (
 )
 
 type stack struct {
-	Data   []*Pointer
-	thread *thread
+	Data    []*Pointer
+	pointer int
 	// Although every thread has its own stack, vm's main thread still can be accessed by other threads.
 	// This is why we need a lock in stack
 	// TODO: Find a way to fix this instead of put lock on every stack.
@@ -24,13 +24,13 @@ func (s *stack) set(index int, pointer *Pointer) {
 func (s *stack) push(v *Pointer) {
 	s.Lock()
 
-	if len(s.Data) <= s.thread.sp {
+	if len(s.Data) <= s.pointer {
 		s.Data = append(s.Data, v)
 	} else {
-		s.Data[s.thread.sp] = v
+		s.Data[s.pointer] = v
 	}
 
-	s.thread.sp++
+	s.pointer++
 	s.Unlock()
 }
 
@@ -41,16 +41,16 @@ func (s *stack) pop() *Pointer {
 		panic("Nothing to pop!")
 	}
 
-	if s.thread.sp < 0 {
+	if s.pointer < 0 {
 		panic("SP is not normal!")
 	}
 
-	if s.thread.sp > 0 {
-		s.thread.sp--
+	if s.pointer > 0 {
+		s.pointer--
 	}
 
-	v := s.Data[s.thread.sp]
-	s.Data[s.thread.sp] = nil
+	v := s.Data[s.pointer]
+	s.Data[s.pointer] = nil
 	s.Unlock()
 	return v
 }
@@ -61,8 +61,8 @@ func (s *stack) top() *Pointer {
 
 	if len(s.Data) == 0 {
 		r = nil
-	} else if s.thread.sp > 0 {
-		r = s.Data[s.thread.sp-1]
+	} else if s.pointer > 0 {
+		r = s.Data[s.pointer-1]
 	} else {
 		r = s.Data[0]
 	}

@@ -2,11 +2,12 @@ package vm
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
-	"strconv"
-	"strings"
 )
 
 type operation func(t *thread, sourceLine int, cf *normalCallFrame, args ...interface{})
@@ -487,7 +488,7 @@ var builtinActions = map[operationType]*action{
 				}
 			}
 
-			argPr := t.sp - argCount
+			argPr := t.stack.pointer - argCount
 			receiverPr := argPr - 1
 			receiver := t.stack.Data[receiverPr].Target
 
@@ -523,7 +524,7 @@ var builtinActions = map[operationType]*action{
 		name: bytecode.InvokeBlock,
 		operation: func(t *thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			argCount := args[0].(int)
-			argPr := t.sp - argCount
+			argPr := t.stack.pointer - argCount
 			receiverPr := argPr - 1
 			receiver := t.stack.Data[receiverPr].Target
 
@@ -573,7 +574,7 @@ var builtinActions = map[operationType]*action{
 			t.startFromTopFrame()
 
 			t.stack.set(receiverPr, t.stack.top())
-			t.sp = receiverPr + 1
+			t.stack.pointer = receiverPr + 1
 		},
 	},
 	bytecode.GetBlock: {
@@ -589,7 +590,7 @@ var builtinActions = map[operationType]*action{
 				blockFrame = cf.blockFrame.ep.blockFrame
 			}
 
-			blockObject := t.vm.initBlockObject(blockFrame.instructionSet, blockFrame.ep, t.stack.Data[t.sp-1].Target)
+			blockObject := t.vm.initBlockObject(blockFrame.instructionSet, blockFrame.ep, t.stack.Data[t.stack.pointer-1].Target)
 
 			t.stack.push(&Pointer{Target: blockObject})
 		},

@@ -2,12 +2,13 @@ package vm
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/compiler/bytecode"
-	"github.com/goby-lang/goby/vm/classes"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/goby-lang/goby/compiler/bytecode"
+	"github.com/goby-lang/goby/vm/classes"
 )
 
 // Version stores current Goby version
@@ -142,13 +143,7 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 }
 
 func (vm *VM) newThread() *thread {
-	s := &stack{}
-	cfs := &callFrameStack{callFrames: []callFrame{}}
-	t := &thread{stack: s, callFrameStack: cfs, sp: 0, cfp: 0}
-	s.thread = t
-	cfs.thread = t
-	t.vm = vm
-	return t
+	return &thread{vm: vm}
 }
 
 // ExecInstructions accepts a sequence of bytecodes and use vm to evaluate them.

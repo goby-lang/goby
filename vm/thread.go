@@ -2,25 +2,22 @@ package vm
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/compiler"
-	"github.com/goby-lang/goby/compiler/bytecode"
-	"github.com/goby-lang/goby/compiler/parser"
-	"github.com/goby-lang/goby/vm/errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/goby-lang/goby/compiler"
+	"github.com/goby-lang/goby/compiler/bytecode"
+	"github.com/goby-lang/goby/compiler/parser"
+	"github.com/goby-lang/goby/vm/errors"
 )
 
 type thread struct {
 	// a stack that holds call frames
-	callFrameStack *callFrameStack
-	// call frame pointer
-	cfp int
+	callFrameStack callFrameStack
 	// data stack
-	stack *stack
-	// stack pointer
-	sp int
+	stack stack
 
 	vm *VM
 }
@@ -199,7 +196,7 @@ func (t *thread) reportErrorAndStop() {
 	err := top.(*Error)
 
 	if !err.storedTraces {
-		for i := t.cfp - 1; i > 0; i-- {
+		for i := t.callFrameStack.pointer - 1; i > 0; i-- {
 			frame := t.callFrameStack.callFrames[i]
 
 			if frame.IsBlock() {
@@ -292,7 +289,7 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 		}
 	}
 
-	argPr := t.sp - argCount - 1
+	argPr := t.stack.pointer - argCount - 1
 	receiverPr := argPr - 1
 	receiver := t.stack.Data[receiverPr].Target
 
@@ -319,7 +316,7 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 		t.stack.Data[argPr+i] = t.stack.Data[argPr+i+1]
 	}
 
-	t.sp--
+	t.stack.pointer--
 
 	method = receiver.findMethod(methodName)
 
@@ -364,7 +361,7 @@ func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 	}
 
 	t.stack.set(receiverPtr, evaluated)
-	t.sp = argPtr
+	t.stack.pointer = argPtr
 
 	if err, ok := evaluated.Target.(*Error); ok {
 		panic(err.Message())
@@ -424,7 +421,7 @@ func (t *thread) evalMethodObject(call *callObject, sourceLine int) {
 	t.startFromTopFrame()
 
 	t.stack.set(call.receiverPtr, t.stack.top())
-	t.sp = call.argPtr()
+	t.stack.pointer = call.argPtr()
 }
 
 func (t *thread) reportArgumentError(sourceLine, idealArgNumber int, methodName string, exactArgNumber int, receiverPtr int) {
@@ -448,7 +445,7 @@ func (t *thread) pushErrorObject(errorType string, sourceLine int, format string
 func (t *thread) setErrorObject(receiverPtr, sp int, errorType string, sourceLine int, format string, args ...interface{}) {
 	err := t.vm.initErrorObject(errorType, sourceLine, format, args...)
 	t.stack.set(receiverPtr, &Pointer{Target: err})
-	t.sp = sp
+	t.stack.pointer = sp
 	panic(err.Message())
 }
 

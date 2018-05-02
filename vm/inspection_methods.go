@@ -58,14 +58,14 @@ func (s *stack) inspect() string {
 	for i, p := range s.Data {
 		if p != nil {
 			o := p.Target
-			if i == s.thread.sp {
+			if i == s.pointer {
 				datas = append(datas, fmt.Sprintf("%s (%T) %d <----", o.toString(), o, i))
 			} else {
 				datas = append(datas, fmt.Sprintf("%s (%T) %d", o.toString(), o, i))
 			}
 
 		} else {
-			if i == s.thread.sp {
+			if i == s.pointer {
 				datas = append(datas, "nil <----")
 			} else {
 				datas = append(datas, "nil")

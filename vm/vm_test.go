@@ -2,15 +2,16 @@ package vm
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"runtime"
+	"testing"
+
 	"github.com/goby-lang/goby/compiler"
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/compiler/lexer"
 	"github.com/goby-lang/goby/compiler/parser"
 	"github.com/goby-lang/goby/vm/errors"
-	"os"
-	"path/filepath"
-	"runtime"
-	"testing"
 )
 
 func TestVM_REPLExec(t *testing.T) {
@@ -265,16 +266,16 @@ func (v *VM) testEval(t *testing.T, input, filepath string) Object {
 
 func (v *VM) checkCFP(t *testing.T, index, expectedCFP int) {
 	t.Helper()
-	if v.mainThread.cfp != expectedCFP {
-		t.Errorf("At case %d expect main thread's cfp to be %d. got: %d", index, expectedCFP, v.mainThread.cfp)
+	if v.mainThread.callFrameStack.pointer != expectedCFP {
+		t.Errorf("At case %d expect main thread's cfp to be %d. got: %d", index, expectedCFP, v.mainThread.callFrameStack.pointer)
 	}
 }
 
 func (v *VM) checkSP(t *testing.T, index, expectedSp int) {
 	t.Helper()
-	if v.mainThread.sp != expectedSp {
+	if v.mainThread.stack.pointer != expectedSp {
 		fmt.Println(v.mainThread.stack.inspect())
-		t.Errorf("At case %d expect main thread's sp to be %d. got: %d", index, expectedSp, v.mainThread.sp)
+		t.Errorf("At case %d expect main thread's sp to be %d. got: %d", index, expectedSp, v.mainThread.stack.pointer)
 	}
 
 }
