@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/vm/classes"
@@ -52,7 +53,7 @@ var standardLibraries = map[string]func(*VM){
 // VM represents a stack based virtual machine.
 type VM struct {
 	mainObj     *RObject
-	mainThread  *thread
+	mainThread  thread
 	objectClass *RClass
 	// a map holds different types of instruction set tables
 	isTables map[setType]isTable
@@ -78,12 +79,15 @@ type VM struct {
 	mode int
 
 	libFiles []string
+
+	threadCount int64
 }
 
 // New initializes a vm to initialize state and returns it.
 func New(fileDir string, args []string) (vm *VM, e error) {
 	vm = &VM{args: args}
-	vm.mainThread = vm.newThread()
+	vm.mainThread.vm = vm
+	vm.threadCount++
 
 	vm.methodISIndexTables = map[filename]*isIndexTable{
 		fileDir: newISIndexTable(),
@@ -142,8 +146,10 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 	return
 }
 
-func (vm *VM) newThread() *thread {
-	return &thread{vm: vm}
+func (vm *VM) newThread() (t thread) {
+	t.vm = vm
+	t.id = atomic.AddInt64(&vm.threadCount, 1)
+	return
 }
 
 // ExecInstructions accepts a sequence of bytecodes and use vm to evaluate them.

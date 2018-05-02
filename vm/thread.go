@@ -13,17 +13,22 @@ import (
 	"github.com/goby-lang/goby/vm/errors"
 )
 
+const mainThreadID = 0
+
 type thread struct {
 	// a stack that holds call frames
 	callFrameStack callFrameStack
 	// data stack
 	stack stack
 
+	// theads have an id so they can be looked up in the vm. The main thread is always 0
+	id int64
+
 	vm *VM
 }
 
 func (t *thread) isMainThread() bool {
-	return t == t.vm.mainThread
+	return t.id == mainThreadID
 }
 
 func (t *thread) getBlock(name string, filename filename) *instructionSet {

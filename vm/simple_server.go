@@ -11,10 +11,11 @@ import (
 	"unicode"
 
 	"fmt"
+	"strconv"
+
 	"github.com/fatih/structs"
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/gorilla/mux"
-	"strconv"
 )
 
 type request struct {
@@ -159,7 +160,6 @@ func newHandler(t *thread, blockFrame *normalCallFrame) func(http.ResponseWriter
 			res.instanceVariableSet("@status", t.vm.initIntegerObject(500))
 		}
 
-		thread = nil
 		setupResponse(w, r, res)
 	}
 }

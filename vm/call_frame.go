@@ -121,13 +121,13 @@ func (b *baseFrame) FileName() string {
 // The main scenario is when multiple threads want to access local variables outside it's block
 // Since they share same block frame, they will all access to that frame's locals.
 // TODO: Find a better way to fix this, or prevent thread from accessing outside locals.
-func (b *baseFrame) getLCL(index, depth int) *Pointer {
+func (b *baseFrame) getLCL(index, depth int) (p *Pointer) {
+
 	if depth == 0 {
 		b.RLock()
-
-		defer b.RUnlock()
-
-		return b.locals[index]
+		p = b.locals[index]
+		b.RUnlock()
+		return
 	}
 
 	return b.blockFrame.ep.getLCL(index, depth-1)
@@ -143,8 +143,6 @@ func (b *baseFrame) insertLCL(index, depth int, value Object) {
 
 	b.Lock()
 
-	defer b.Unlock()
-
 	b.locals = append(b.locals, nil)
 	copy(b.locals[index:], b.locals[index:])
 	b.locals[index] = &Pointer{Target: value}
@@ -152,6 +150,7 @@ func (b *baseFrame) insertLCL(index, depth int, value Object) {
 	if index >= b.lPr {
 		b.lPr = index + 1
 	}
+	b.Unlock()
 }
 
 func (b *baseFrame) storeConstant(constName string, constant interface{}) *Pointer {
