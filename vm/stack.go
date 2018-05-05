@@ -4,8 +4,8 @@ import (
 	"sync"
 )
 
-type stack struct {
-	Data    []*Pointer
+type Stack struct {
+	data    []*Pointer
 	pointer int
 	// Although every thread has its own stack, vm's main thread still can be accessed by other threads.
 	// This is why we need a lock in stack
@@ -13,31 +13,31 @@ type stack struct {
 	sync.RWMutex
 }
 
-func (s *stack) set(index int, pointer *Pointer) {
+func (s *Stack) Set(index int, pointer *Pointer) {
 	s.Lock()
 
-	s.Data[index] = pointer
+	s.data[index] = pointer
 
 	s.Unlock()
 }
 
-func (s *stack) push(v *Pointer) {
+func (s *Stack) Push(v *Pointer) {
 	s.Lock()
 
-	if len(s.Data) <= s.pointer {
-		s.Data = append(s.Data, v)
+	if len(s.data) <= s.pointer {
+		s.data = append(s.data, v)
 	} else {
-		s.Data[s.pointer] = v
+		s.data[s.pointer] = v
 	}
 
 	s.pointer++
 	s.Unlock()
 }
 
-func (s *stack) pop() *Pointer {
+func (s *Stack) Pop() *Pointer {
 	s.Lock()
 
-	if len(s.Data) < 1 {
+	if len(s.data) < 1 {
 		panic("Nothing to pop!")
 	}
 
@@ -49,22 +49,22 @@ func (s *stack) pop() *Pointer {
 		s.pointer--
 	}
 
-	v := s.Data[s.pointer]
-	s.Data[s.pointer] = nil
+	v := s.data[s.pointer]
+	s.data[s.pointer] = nil
 	s.Unlock()
 	return v
 }
 
-func (s *stack) top() *Pointer {
+func (s *Stack) top() *Pointer {
 	var r *Pointer
 	s.RLock()
 
-	if len(s.Data) == 0 {
+	if len(s.data) == 0 {
 		r = nil
 	} else if s.pointer > 0 {
-		r = s.Data[s.pointer-1]
+		r = s.data[s.pointer-1]
 	} else {
-		r = s.Data[0]
+		r = s.data[0]
 	}
 
 	s.RUnlock()

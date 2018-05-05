@@ -156,7 +156,7 @@ func TestAssignmentByOperationEvaluation(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expectedValue)
+		VerifyExpected(t, i, evaluated, tt.expectedValue)
 		v.checkCFP(t, 0, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -179,7 +179,7 @@ func TestBangPrefixMethodCall(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -372,7 +372,7 @@ func TestCaseExpressionEvaluation(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -510,7 +510,7 @@ func TestClassMethodCall(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -676,7 +676,7 @@ func TestConstantNamespace(t *testing.T) {
 	for i, tt := range tests {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
 		vm.checkSP(t, i, 1)
 	}
@@ -693,7 +693,7 @@ func TestEnvironmentVariable(t *testing.T) {
 
 	v := initTestVM()
 	evaluated := v.testEval(t, input, getFilename())
-	verifyExpected(t, 0, evaluated, "This is foo. This is bar.")
+	VerifyExpected(t, 0, evaluated, "This is foo. This is bar.")
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
 
@@ -879,7 +879,7 @@ func TestIfExpressionEvaluation(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1015,7 +1015,7 @@ func TestInstanceVariableEvaluation(t *testing.T) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).message)
 		}
 
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1316,7 +1316,7 @@ func TestMethodCall(t *testing.T) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).message)
 		}
 
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1421,7 +1421,7 @@ func TestMethodCallWithSplatArgument(t *testing.T) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).message)
 		}
 
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1610,7 +1610,7 @@ func TestMethodCallWithBlockArgument(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1716,7 +1716,7 @@ func TestMethodCallWithNestedBlock(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1958,7 +1958,7 @@ func TestMethodCallWithoutParens(t *testing.T) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).message)
 		}
 
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1978,7 +1978,7 @@ func TestMinusPrefixMethodCall(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -2114,7 +2114,7 @@ func TestMultiVarAssignment(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -2153,7 +2153,7 @@ func TestPostfixMethodCall(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -2188,7 +2188,7 @@ func TestRemoveUnusedExpression(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -2255,7 +2255,7 @@ func TestSelfExpressionEvaluation(t *testing.T) {
 			t.Fatalf("got Error: %s", evaluated.(*Error).message)
 		}
 
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}

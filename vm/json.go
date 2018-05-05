@@ -16,15 +16,15 @@ func builtinJSONClassMethods() []*BuiltinMethodObject {
 		{
 			Name: "parse",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
 					j, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					var obj jsonObj
@@ -38,7 +38,7 @@ func builtinJSONClassMethods() []*BuiltinMethodObject {
 						err = json.Unmarshal([]byte(jsonString), &objs)
 
 						if err != nil {
-							return t.vm.initErrorObject(errors.InternalError, sourceLine, "Can't parse string %s as json: %s", jsonString, err.Error())
+							return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Can't parse string %s as json: %s", jsonString, err.Error())
 						}
 
 						var objects []Object
@@ -47,7 +47,7 @@ func builtinJSONClassMethods() []*BuiltinMethodObject {
 							objects = append(objects, t.vm.convertJSONToHashObj(obj))
 						}
 
-						return t.vm.initArrayObject(objects)
+						return t.vm.InitArrayObject(objects)
 					}
 
 					return t.vm.convertJSONToHashObj(obj)
@@ -57,15 +57,15 @@ func builtinJSONClassMethods() []*BuiltinMethodObject {
 		{
 			Name: "validate",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
 					j, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					var obj jsonObj
@@ -123,7 +123,7 @@ func (v *VM) convertJSONToHashObj(j jsonObj) Object {
 				objs = append(objs, v.convertJSONToHashObj(value))
 			}
 
-			objectMap[key] = v.initArrayObject(objs)
+			objectMap[key] = v.InitArrayObject(objs)
 		case []interface{}:
 			objs := []Object{}
 
@@ -132,11 +132,11 @@ func (v *VM) convertJSONToHashObj(j jsonObj) Object {
 				case map[string]interface{}:
 					objs = append(objs, v.convertJSONToHashObj(e))
 				default:
-					objs = append(objs, v.initObjectFromGoType(e))
+					objs = append(objs, v.InitObjectFromGoType(e))
 				}
 			}
 
-			objectMap[key] = v.initArrayObject(objs)
+			objectMap[key] = v.InitArrayObject(objs)
 			// Single json object
 		case map[string]interface{}:
 			objectMap[key] = v.convertJSONToHashObj(jsonValue)
@@ -144,14 +144,14 @@ func (v *VM) convertJSONToHashObj(j jsonObj) Object {
 			// TODO: Find a better way to distinguish between Float & Integer because default GO JSON package
 			// TODO: support only for parsing float out regardless of integer or float type data of JSON value
 			if jsonValue == float64(int(jsonValue)) {
-				objectMap[key] = v.initIntegerObject(int(jsonValue))
+				objectMap[key] = v.InitIntegerObject(int(jsonValue))
 			} else {
 				objectMap[key] = v.initFloatObject(jsonValue)
 			}
 		default:
-			objectMap[key] = v.initObjectFromGoType(jsonValue)
+			objectMap[key] = v.InitObjectFromGoType(jsonValue)
 		}
 	}
 
-	return v.initHashObject(objectMap)
+	return v.InitHashObject(objectMap)
 }

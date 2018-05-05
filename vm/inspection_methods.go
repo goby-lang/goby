@@ -51,11 +51,11 @@ func (cfs *callFrameStack) inspect() string {
 	return out.String()
 }
 
-func (s *stack) inspect() string {
+func (s *Stack) inspect() string {
 	var out bytes.Buffer
 	datas := []string{}
 
-	for i, p := range s.Data {
+	for i, p := range s.data {
 		if p != nil {
 			o := p.Target
 			if i == s.pointer {

@@ -63,9 +63,9 @@ func builtinConcurrentArrayClassMethods() []*BuiltinMethodObject {
 		{
 			Name: "new",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) > 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 or 1 arguments, got %d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 or 1 arguments, got %d", len(args))
 					}
 
 					if len(args) == 0 {
@@ -75,7 +75,7 @@ func builtinConcurrentArrayClassMethods() []*BuiltinMethodObject {
 						arrayArg, ok := arg.(*ArrayObject)
 
 						if !ok {
-							return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.ArrayClass, arg.Class().Name)
+							return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.ArrayClass, arg.Class().Name)
 						}
 
 						return t.vm.initConcurrentArrayObject(arrayArg.Elements)
@@ -108,7 +108,7 @@ func (vm *VM) initConcurrentArrayObject(elements []Object) *ConcurrentArrayObjec
 
 	return &ConcurrentArrayObject{
 		baseObj:       &baseObj{class: array},
-		InternalArray: vm.initArrayObject(elements[:]),
+		InternalArray: vm.InitArrayObject(elements[:]),
 	}
 }
 
@@ -125,7 +125,7 @@ func initConcurrentArrayClass(vm *VM) {
 // Object interface functions -------------------------------------------
 
 // toJSON returns the object's name as the JSON string format
-func (cac *ConcurrentArrayObject) toJSON(t *thread) string {
+func (cac *ConcurrentArrayObject) toJSON(t *Thread) string {
 	return cac.InternalArray.toJSON(t)
 }
 
@@ -145,7 +145,7 @@ func DefineForwardedConcurrentArrayMethod(methodName string, requireWriteLock bo
 	return &BuiltinMethodObject{
 		Name: methodName,
 		Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-			return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+			return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				concurrentArray := receiver.(*ConcurrentArrayObject)
 
 				if requireWriteLock {

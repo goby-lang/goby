@@ -42,7 +42,7 @@ f.exec_block(b)
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}

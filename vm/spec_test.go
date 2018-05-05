@@ -21,7 +21,7 @@ Spec.run
 	if os.Getenv("TEST_SPEC_NOT_EXIT") == "1" {
 		v := initTestVM()
 		result := v.testEval(t, input, getFilename())
-		verifyExpected(t, 0, result, 10)
+		VerifyExpected(t, 0, result, 10)
 		return
 	}
 
