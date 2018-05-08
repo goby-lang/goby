@@ -265,11 +265,17 @@ func (l *Lexer) resetNosymbol() {
 }
 
 func (l *Lexer) readNumber() []rune {
-	position := l.position
-	for isDigit(l.ch) {
+	var input []rune
+
+	for isDigit(l.ch) || l.ch == '_' {
+
+		if isDigit(l.ch) {
+			input = append(input, l.ch)
+		}
+
 		l.readChar()
 	}
-	return l.input[position:l.position]
+	return input
 }
 
 func (l *Lexer) readIdentifier() []rune {
