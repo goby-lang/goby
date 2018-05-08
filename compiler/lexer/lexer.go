@@ -264,6 +264,13 @@ func (l *Lexer) resetNosymbol() {
 
 }
 
+// prevent double underscores and underscore at the end such as 1__2, 3_
+func (l *Lexer) checkNumberError() bool {
+
+	return l.ch == '_' && (l.readPosition >= len(l.input) || !isDigit(l.input[l.readPosition]))
+
+}
+
 func (l *Lexer) readNumber() []rune {
 	var input []rune
 
@@ -271,6 +278,10 @@ func (l *Lexer) readNumber() []rune {
 
 		if isDigit(l.ch) {
 			input = append(input, l.ch)
+		}
+
+		if l.checkNumberError() {
+			return input
 		}
 
 		l.readChar()
