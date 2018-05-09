@@ -11,7 +11,7 @@ import (
 )
 
 // Version stores current Goby version
-const Version = "0.1.8"
+const Version = "0.1.9"
 
 // These are the enums for marking parser's mode, which decides whether it should pop unused values.
 const (
@@ -19,6 +19,9 @@ const (
 	REPLMode
 	TestMode
 )
+
+// DefaultLibPath is used for overriding vm.libpath build-time.
+var DefaultLibPath string
 
 type isIndexTable struct {
 	Data map[string]int
@@ -42,6 +45,7 @@ var standardLibraries = map[string]func(*VM){
 	"concurrent/array":   initConcurrentArrayClass,
 	"concurrent/hash":    initConcurrentHashClass,
 	"concurrent/rw_lock": initConcurrentRWLockClass,
+	"spec":               initSpecClass,
 }
 
 // VM represents a stack based virtual machine.
@@ -63,6 +67,10 @@ type VM struct {
 	args []string
 	// projectRoot is goby root's absolute path, which is $GOROOT/src/github.com/goby-lang/goby
 	projectRoot string
+
+	// libPath indicates the Goby (.gb) libraries path. Defaults to `<projectRoot>/lib`, unless
+	// DefaultLibPath is specified.
+	libPath string
 
 	channelObjectMap *objectMap
 
@@ -111,6 +119,12 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 		vm.projectRoot = gobyRoot
 	}
 
+	if DefaultLibPath != "" {
+		vm.libPath = DefaultLibPath
+	} else {
+		vm.libPath = filepath.Join(vm.projectRoot, "lib")
+	}
+
 	vm.initConstants()
 	vm.mainObj = vm.initMainObj()
 	vm.channelObjectMap = &objectMap{store: &sync.Map{}}
@@ -128,7 +142,7 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 }
 
 func (vm *VM) newThread() *thread {
-	s := &stack{RWMutex: new(sync.RWMutex)}
+	s := &stack{}
 	cfs := &callFrameStack{callFrames: []callFrame{}}
 	t := &thread{stack: s, callFrameStack: cfs, sp: 0, cfp: 0}
 	s.thread = t

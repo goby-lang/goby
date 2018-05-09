@@ -32,3 +32,6 @@ goby
 coverage.txt
 profile.out
 .DS_Store
+
+.tmp_benchmarks
+.tmp_benchmark_comparison

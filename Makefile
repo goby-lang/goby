@@ -1,6 +1,6 @@
 GOFMT ?= gofmt -s
 GOFILES := $(shell find . -name "*.go" -type f -not -path "./vendor/*")
-RELEASE_OPTIONS := -ldflags "-s -w" -tags release
+RELEASE_OPTIONS := -ldflags "-s -w -X github.com/goby-lang/goby/vm.DefaultLibPath=${GOBY_LIBPATH}" -tags release
 TEST_OPTIONS := -ldflags "-s -w"
 
 .PHONY: fmt
@@ -22,4 +22,3 @@ test:
 .PHONY: clean
 clean:
 	go clean .
-

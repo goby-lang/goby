@@ -96,7 +96,7 @@ func TestAttrReaderAndWriter(t *testing.T) {
 	}
 }
 
-func TestClassInheritModule(t *testing.T) {
+func TestClassInheritModuleError(t *testing.T) {
 	input := `module Foo
 end
 
@@ -537,6 +537,40 @@ func TestGeneralAssignmentByOperation(t *testing.T) {
 	}
 }
 
+func TestForbiddenInclusionWithClass(t *testing.T) {
+	input := `class Foo
+end
+
+class Bar
+  include Foo
+end
+	`
+	expected := `TypeError: Expect argument to be a module. got=Class`
+
+	v := initTestVM()
+	evaluated := v.testEval(t, input, getFilename())
+	checkErrorMsg(t, i, evaluated, expected)
+	v.checkCFP(t, 0, 2)
+	v.checkSP(t, 0, 1)
+}
+
+func TestForbiddenExtensionWithClass(t *testing.T) {
+	input := `class Foo
+end
+
+class Bar
+  extend Foo
+end
+	`
+	expected := `TypeError: Expect argument to be a module. got=Class`
+
+	v := initTestVM()
+	evaluated := v.testEval(t, input, getFilename())
+	checkErrorMsg(t, i, evaluated, expected)
+	v.checkCFP(t, 0, 2)
+	v.checkSP(t, 0, 1)
+}
+
 // Method tests
 
 func TestMethodsMethod(t *testing.T) {
@@ -700,6 +734,186 @@ func TestClassGreaterThanMethodFail(t *testing.T) {
 	}
 }
 
+func TestClassGreaterThanOrEqualMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{`
+		Object >= Array
+		`, true},
+		{`
+		Array >= Object
+		`, false},
+		{`
+		Object >= Object
+		`, true},
+		{`
+		(Array >= Hash).nil?
+		`, true},
+		{`
+		module M
+		end
+		class C
+		end
+		class C2 < C
+		  include M
+		end
+		class C3 < C2
+		end
+		M >= C3
+		`, true},
+		{`
+		module M
+		end
+		class C
+		end
+		(M >= C).nil?
+		`, true},
+	}
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		verifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestClassGreaterThanOrEqualMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`Array >= 1`, "TypeError: Expect argument to be a module. got=Integer", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestClassLesserThanMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{`
+		Object < Array
+		`, false},
+		{`
+		Array < Object
+		`, true},
+		{`
+		Object < Object
+		`, false},
+		{`
+		(Array < Hash).nil?
+		`, true},
+		{`
+		module M
+		end
+		class C
+		end
+		class C2 < C
+		  include M
+		end
+		class C3 < C2
+		end
+		C3 < M
+		`, true},
+		{`
+		module M
+		end
+		class C
+		end
+		(M < C).nil?
+		`, true},
+	}
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		verifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestClassLesserThanMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`Array < 1`, "TypeError: Expect argument to be a module. got=Integer", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestClassLesserThanOrEqualMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{`
+		Object <= Array
+		`, false},
+		{`
+		Array <= Object
+		`, true},
+		{`
+		Object <= Object
+		`, true},
+		{`
+		(Array <= Hash).nil?
+		`, true},
+		{`
+		module M
+		end
+		class C
+		end
+		class C2 < C
+		  include M
+		end
+		class C3 < C2
+		end
+		C3 <= M
+		`, true},
+		{`
+		module M
+		end
+		class C
+		end
+		(M <= C).nil?
+		`, true},
+	}
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		verifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestClassLesserThanOrEqualMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`Array <= 1`, "TypeError: Expect argument to be a module. got=Integer", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestSendMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -816,6 +1030,22 @@ func TestRequireMethod(t *testing.T) {
 	v.checkSP(t, 0, 1)
 }
 
+func TestRequireMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`require "bar"`, `InternalError: Can't require "bar"`, 1},
+		{`require "db", "json"`, `ArgumentError: Expect 1 argument. got: 2`, 1},
+		{`require_relative "db", "json"`, `ArgumentError: Expect 1 argument. got: 2`, 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestRaiseMethod(t *testing.T) {
 	testsFail := []struct {
 		input       string
@@ -858,6 +1088,52 @@ func TestRaiseMethodFail(t *testing.T) {
 		{`
 		class BarError; end
 		raise BarError, "Foo", "Bar"`, "ArgumentError: Expect at most 2 arguments. got: 3", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestResponseToMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{`
+		1.respond_to? :to_i
+		`, true},
+		{`
+		"string".respond_to? "+"
+		`, true},
+		{`
+		1.respond_to? :numerator
+		`, false},
+		{`
+		Class.respond_to? "respond_to?"
+		`, true},
+		{`
+		Class.respond_to? :phantom
+		`, false},
+	}
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		verifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+// With the current framework, only exit() failures can be tested.
+func TestExitMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`exit("abc")`, "TypeError: Expect argument to be Integer. got: String", 1},
+		{`exit(1, 2)`, "ArgumentError: Expected at most 1 argument; got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -924,22 +1200,6 @@ func TestGeneralIsAMethodFail(t *testing.T) {
 		{`123.is_a?(Integer, String)`, "ArgumentError: Expect 1 argument. got: 2", 1},
 		{`123.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1},
 		{`Class.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1},
-	}
-
-	for i, tt := range testsFail {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkErrorMsg(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestRequireMethodFail(t *testing.T) {
-	testsFail := []errorTestCase{
-		{`require "bar"`, `InternalError: Can't require "bar"`, 1},
-		{`require "db", "json"`, `ArgumentError: Expect 1 argument. got: 2`, 1},
-		{`require_relative "db", "json"`, `ArgumentError: Expect 1 argument. got: 2`, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1113,6 +1373,73 @@ func TestClassSingletonClassMethod(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		verifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestInstanceEvalMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		class Foo
+		  def initialize
+			@secret = 99
+		  end
+		end
+
+		f = Foo.new
+		f.instance_eval do
+		  @secret
+		end
+`, 99},
+		{`
+		string = "String"
+		string.instance_eval do
+		  def new_method
+			self.reverse
+		  end
+		end
+		string.new_method
+`, "gnirtS"},
+		{`"a".instance_eval`, "a"},
+		{`"a".instance_eval do end`, "a"},
+		{`
+		class Foo
+		  def bar
+			10
+		  end
+		end
+
+		block = Block.new do
+		  self.bar
+		end
+
+		Foo.new.instance_eval block
+		`, 10},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		verifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestInstanceEvalMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`"s".instance_eval(1, 1)`, "ArgumentError: Expect at most 1 arguments. got: 2", 1},
+		{`"s".instance_eval(true)`, "TypeError: Expect argument to be Block. got: Boolean", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }

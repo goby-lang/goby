@@ -18,7 +18,7 @@ One of our goal is to provide web developers a sort of small and handy environme
 - Builtin high-performance HTTP server
 - Builtin database library (currently only support PostgreSQL adapter)
 - JSON support
-- [Plugin system](https://goby-lang.gitbooks.io/goby/content/plugin-system.html) that can load existing Go packages dynamically (Only for Linux by now)
+- [Plugin system](https://goby-lang.gitbooks.io/goby/content/plugin-system.html) that can load existing Go packages dynamically (Only for Linux and MacOS right now)
 - Accessing Go objects from Goby directly
 
 > Note: Goby had formerly been known as "Rooby", which was renamed in May 2017.
@@ -33,7 +33,7 @@ One of our goal is to provide web developers a sort of small and handy environme
 - [Installation](#installation)
 - [Usage](#usage)
 - [Sample codes](#sample_codes)
-- [Documentation](#documentation)
+- [Documentation](https://goby-lang.org/docs/introduction.html)
 - [Joining to Goby](#joining-to-goby)
 - [Maintainers](#maintainers)
 - [Support us](#support-us)
@@ -119,6 +119,32 @@ FYI: You can just run `brew test goby` to check Homebrew installation.
 
 Goby has official [docker image](https://hub.docker.com/r/gobylang/goby/) as well. You can try the [Plugin System](https://goby-lang.gitbooks.io/goby/content/plugin-system.html) using docker.
 
+## Syntax highlighting
+
+The Goby syntax is currently a subset of the Ruby one, with an exception (`get_block`), therefore, it's possible to attain syntax highlighting on any platform/editor by simply switching it to Ruby for the currently opened file.
+
+### Sublime Text 3
+
+Sublime Text 3 users can use the `Only Goby` package, by typing the following in a terminal:
+
+```sh
+git clone git@github.com:saveriomiroddi/only-goby-for-sublime-text "$HOME/.config/sublime-text-3/Packages/only-goby-for-sublime-text"
+```
+
+this will automatically apply the Goby syntax highlighting to the `.gb` files.
+
+### Vim
+
+Vim users can use the `vim-goby-syntax-highlighting` definition, by typing the following in a terminal:
+
+```sh
+mkdir -p "$HOME/.vim/syntax"
+wget -O "$HOME/.vim/syntax/goby.vim" https://raw.githubusercontent.com/saveriomiroddi/vim-goby-syntax-highlighting/master/goby.vim
+echo 'au BufNewFile,BufRead *.gb    setf goby' >> "$HOME/.vim/filetype.vim"
+```
+
+this will automatically apply the Goby syntax highlighting to the `.gb` files.
+
 ## Sample codes
 
 - [Built a stack data structure using Goby](https://github.com/goby-lang/goby/blob/master/samples/stack.gb)
@@ -128,11 +154,6 @@ Goby has official [docker image](https://hub.docker.com/r/gobylang/goby/) as wel
 - [One thousand threads](https://github.com/goby-lang/goby/blob/master/samples/one_thousand_threads.gb)
 
 More sample Goby codes can be found in [sample directory](https://github.com/goby-lang/goby/tree/master/samples).
-
-## Documentation
-
-- [**User Manual (WIP)**](https://goby-lang.gitbooks.io/goby/content/)(Gitbooks)
-- [API Documentation](https://goby-lang.github.io/api.doc/) -- needs update the build script. See the [guide for API doc](https://github.com/goby-lang/api.doc#documenting-goby-code) if you'd like to contribute.
 
 ## Joining to Goby
 

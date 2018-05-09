@@ -208,8 +208,13 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 			if exp.Operator != "*" {
 				continue
 			}
+
 			ident := exp.Right.(*ast.Identifier)
-			scope.localTable.setLCL(ident.Value, scope.localTable.depth)
+
+			// Set default value to an empty array
+			index, depth := scope.localTable.setLCL(ident.Value, scope.localTable.depth)
+			newIS.define(NewArray, exp.Line(), 0)
+			newIS.define(SetLocal, exp.Line(), depth, index, 1)
 
 			newIS.argTypes.setArg(i, ident.Value, SplatArg)
 		case *ast.ArgumentPairExpression:

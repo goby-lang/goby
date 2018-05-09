@@ -8,6 +8,7 @@ import (
 	"github.com/goby-lang/goby/compiler/parser"
 	"github.com/goby-lang/goby/vm/errors"
 	"os"
+	"path/filepath"
 	"runtime"
 	"testing"
 )
@@ -233,6 +234,19 @@ func initTestVM() *VM {
 
 	v.mode = TestMode
 	return v
+}
+
+func TestLoadingGobyLibraryFail(t *testing.T) {
+	vm := initTestVM()
+
+	libFileFullPath := filepath.Join(vm.projectRoot, "lib/_library_not_existing.gb")
+	expectedErrorMessage := fmt.Sprintf("open %s: no such file or directory", libFileFullPath)
+
+	err := vm.mainThread.execGobyLib("_library_not_existing.gb")
+
+	if err.Error() != expectedErrorMessage {
+		t.Errorf("Unexpected error message: %s", err.Error())
+	}
 }
 
 func (v *VM) testEval(t *testing.T, input, filepath string) Object {

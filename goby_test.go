@@ -31,6 +31,8 @@ func init() {
 }
 
 func execGoby(t *testing.T, args ...string) (in io.WriteCloser, out io.ReadCloser) {
+	exec.Command("rm ./goby")
+	exec.Command("make build")
 	cmd := exec.Command("./goby", args...)
 
 	var err error
@@ -120,5 +122,43 @@ func TestArgP(t *testing.T) {
 
 	if string(byt) != "500500\n" {
 		t.Fatalf("Test failed, excpected 500500, got %s", string(byt))
+	}
+}
+
+func TestTestCommand(t *testing.T) {
+	// Folder name with slash
+	_, out := execGoby(t, "test", "test_fixtures/test_command_test/")
+
+	byt, err := ioutil.ReadAll(out)
+	if err != nil {
+		t.Fatalf("Couldn't read from pipe: %s", err.Error())
+	}
+
+	if !strings.Contains(string(byt), "Spec test 2") {
+		t.Fatalf("Test files by giving folder name with slash failed, got: %s", string(byt))
+	}
+
+	// Folder name
+	_, out = execGoby(t, "test", "test_fixtures/test_command_test")
+
+	byt, err = ioutil.ReadAll(out)
+	if err != nil {
+		t.Fatalf("Couldn't read from pipe: %s", err.Error())
+	}
+
+	if !strings.Contains(string(byt), "Spec test 2") {
+		t.Fatalf("Test files by giving folder name failed, got: %s", string(byt))
+	}
+
+	// File name
+	_, out = execGoby(t, "test", "test_fixtures/test_command_test/test_spec.gb")
+
+	byt, err = ioutil.ReadAll(out)
+	if err != nil {
+		t.Fatalf("Couldn't read from pipe: %s", err.Error())
+	}
+
+	if !strings.Contains(string(byt), "Spec") {
+		t.Fatalf("Test files by giving file name failed, got: %s", string(byt))
 	}
 }

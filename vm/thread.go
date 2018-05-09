@@ -70,18 +70,18 @@ func (t *thread) getClassIS(name string, filename filename) *instructionSet {
 }
 
 func (t *thread) execGobyLib(libName string) (err error) {
-	libPath := filepath.Join(t.vm.projectRoot, "lib", libName)
-	file, err := ioutil.ReadFile(libPath)
-
-	if err != nil {
-		t.vm.mainThread.pushErrorObject(errors.InternalError, -1, err.Error())
-	}
-
-	err = t.execRequiredFile(libPath, file)
+	libPath := filepath.Join(t.vm.libPath, libName)
+	err = t.execFile(libPath)
 	return
 }
 
-func (t *thread) execRequiredFile(filepath string, file []byte) (err error) {
+func (t *thread) execFile(fpath string) (err error) {
+	file, err := ioutil.ReadFile(fpath)
+
+	if err != nil {
+		return
+	}
+
 	instructionSets, err := compiler.CompileToInstructions(string(file), parser.NormalMode)
 
 	if err != nil {
@@ -102,7 +102,7 @@ func (t *thread) execRequiredFile(filepath string, file []byte) (err error) {
 
 	// This creates new execution environments for required file, including new instruction set table.
 	// So we need to copy old instruction sets and restore them later, otherwise current program's instruction set would be overwrite.
-	t.vm.ExecInstructions(instructionSets, filepath)
+	t.vm.ExecInstructions(instructionSets, fpath)
 
 	// Restore instruction sets.
 	t.vm.isTables[bytecode.MethodDef] = oldMethodTable
@@ -111,7 +111,28 @@ func (t *thread) execRequiredFile(filepath string, file []byte) (err error) {
 	return
 }
 
+func (t *thread) captureAndHandlePanic() {
+	switch e := recover().(type) {
+	case *Error:
+		if t.vm.mode == NormalMode {
+			fmt.Println(e.Message())
+			if t.isMainThread() {
+				os.Exit(1)
+			}
+		} else {
+			panic(e)
+		}
+	case error:
+		fmt.Println(e.Error())
+	case nil:
+		return
+	default:
+		panic(e)
+	}
+}
+
 func (t *thread) startFromTopFrame() {
+	defer t.captureAndHandlePanic()
 	cf := t.callFrameStack.top()
 	t.evalCallFrame(cf)
 }

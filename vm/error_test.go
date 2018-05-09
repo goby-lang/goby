@@ -299,6 +299,14 @@ func TestArgumentError(t *testing.T) {
 			// - the receiver of bar, because that call haven't been finished
 			// - the error object
 			6, 3, 3},
+		{`def foo
+          (x=1)
+		end
+		foo(2)
+		`,
+			"ArgumentError: Expect at most 0 args for method 'foo'. got: 1",
+
+			4, 1, 1},
 	}
 
 	for i, tt := range tests {

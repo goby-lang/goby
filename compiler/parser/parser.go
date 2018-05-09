@@ -111,12 +111,23 @@ func New(l *lexer.Lexer) *Parser {
 }
 
 // ParseProgram update program statements and return program
-func (p *Parser) ParseProgram() (*ast.Program, *errors.Error) {
+func (p *Parser) ParseProgram() (program *ast.Program, err *errors.Error) {
+
+	defer func() {
+		if recover() != nil {
+			err = p.error
+			if err == nil {
+				msg := fmt.Sprintf("Some panic happen token: %s. Line: %d", p.curToken.Literal, p.curToken.Line)
+				err = errors.InitError(msg, errors.SyntaxError)
+			}
+		}
+	}()
+
 	p.error = nil
 	// Read two tokens, so curToken and peekToken are both set.
 	p.nextToken()
 	p.nextToken()
-	program := &ast.Program{}
+	program = &ast.Program{}
 	program.Statements = []ast.Statement{}
 
 	for !p.curTokenIs(token.EOF) {
@@ -217,4 +228,24 @@ func (p *Parser) noPrefixParseFnError(t token.Type) {
 func (p *Parser) callConstantError(t token.Type) {
 	msg := fmt.Sprintf("cannot call %s with %s. Line: %d", t, p.peekToken.Type, p.peekToken.Line)
 	p.error = errors.InitError(msg, errors.UnexpectedTokenError)
+}
+
+// IsNotDefMethodToken ensures correct naming in Def statement
+func (p *Parser) IsNotDefMethodToken() bool {
+
+	return p.curToken.Type != token.Ident && !(p.peekToken.Type == token.Dot && (p.curToken.Type == token.InstanceVariable || p.curToken.Type == token.Constant || p.curToken.Type == token.Self))
+}
+
+// Token type InstanceVariable and Constant will trigger IsNotParamsToken()
+var invalidParams = map[token.Type]bool{
+	token.InstanceVariable: true,
+	token.Constant:         true,
+}
+
+// IsNotParamsToken ensures correct parameters which means it is not InstanceVariable
+func (p *Parser) IsNotParamsToken() bool {
+
+	_, ok := invalidParams[p.curToken.Type]
+	return ok
+
 }
