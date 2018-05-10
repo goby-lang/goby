@@ -337,6 +337,7 @@ func TestFloatNumberOfDigit(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
 // API tests
 
 func TestFloatAbs(t *testing.T) {
@@ -482,6 +483,30 @@ func TestFloatPositive(t *testing.T) {
 	}
 }
 
+func TestFloatRound(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{"1.115.round", 1.0},
+		{"1.115.round(1)", 1.1},
+		{"1.115.round(2)", 1.12},
+		{"-1.115.round", -1.0},
+		{"-1.115.round(1)", -1.1},
+		{"-1.115.round(2)", -1.12},
+		{"1.115.round(-1)", 0.0},
+		{"-1.115.round(-1)", 0.0},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestFloatZero(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -499,4 +524,3 @@ func TestFloatZero(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
-
