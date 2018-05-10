@@ -337,6 +337,8 @@ func TestFloatNumberOfDigit(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+// API tests
+
 func TestFloatAbs(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -442,13 +444,14 @@ func TestFloatFloor(t *testing.T) {
 	}
 }
 
-func TestZero(t *testing.T) {
+func TestFloatNegative(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
 	}{
-		{"0.0.zero?", true},
-		{"1.0.zero?", false},
+		{"-1.0.negative?", true},
+		{"0.0.negative?", false},
+		{"1.0.negative?", false},
 	}
 
 	for i, tt := range tests {
@@ -460,7 +463,7 @@ func TestZero(t *testing.T) {
 	}
 }
 
-func TestPositive(t *testing.T) {
+func TestFloatPositive(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -479,14 +482,13 @@ func TestPositive(t *testing.T) {
 	}
 }
 
-func TestNegative(t *testing.T) {
+func TestFloatZero(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
 	}{
-		{"-1.0.negative?", true},
-		{"0.0.negative?", false},
-		{"1.0.negative?", false},
+		{"0.0.zero?", true},
+		{"1.0.zero?", false},
 	}
 
 	for i, tt := range tests {
@@ -497,3 +499,4 @@ func TestNegative(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
