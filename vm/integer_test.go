@@ -390,3 +390,41 @@ func TestIntegerZeroDivisionFail(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
+func TestIntegerWithWrongUnderscore(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`1_`, "UndefinedMethodError: Undefined Method '_' for <Instance of: Object>", 1},
+		{`1__2`, "UndefinedMethodError: Undefined Method '__2' for <Instance of: Object>", 1},
+		{`_1`, "UndefinedMethodError: Undefined Method '_1' for <Instance of: Object>", 1},
+	}
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+
+}
+
+func TestIntegerWithCorrectUnderscore(t *testing.T) {
+
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`1_234`, 1234},
+		{`1_2_34`, 1234},
+		{`1_23_4`, 1234},
+		{`1_2_3_4`, 1234},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		verifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+
+}

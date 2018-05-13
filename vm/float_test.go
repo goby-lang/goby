@@ -266,3 +266,38 @@ func TestFloatZeroDivisionFail(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
+func TestFloatWithWrongUnderscore(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`1._2`, "UndefinedMethodError: Undefined Method '_2' for 1", 1},
+		{`1.2_`, "UndefinedMethodError: Undefined Method '_' for <Instance of: Object>", 1},
+	}
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestFloatWithCorrectUnderscore(t *testing.T) {
+
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`1_2.34`, 12.34},
+		{`12.3_4`, 12.34},
+		{`1_2.3_4`, 12.34},
+		{`1_2_3.4_5_6`, 123.456},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		verifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
