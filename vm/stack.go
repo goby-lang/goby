@@ -4,6 +4,7 @@ import (
 	"sync"
 )
 
+// Stack is a basic stack implimentation
 type Stack struct {
 	data    []*Pointer
 	pointer int
@@ -13,6 +14,7 @@ type Stack struct {
 	sync.RWMutex
 }
 
+// Set a value at a given index in the stack. TODO: Maybe we should be checking for size before we do this.
 func (s *Stack) Set(index int, pointer *Pointer) {
 	s.Lock()
 
@@ -21,6 +23,7 @@ func (s *Stack) Set(index int, pointer *Pointer) {
 	s.Unlock()
 }
 
+// Push an element to the top of the stack
 func (s *Stack) Push(v *Pointer) {
 	s.Lock()
 
@@ -34,6 +37,7 @@ func (s *Stack) Push(v *Pointer) {
 	s.Unlock()
 }
 
+// Pop an element off the top of the stack
 func (s *Stack) Pop() *Pointer {
 	s.Lock()
 
