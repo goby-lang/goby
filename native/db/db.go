@@ -1,4 +1,4 @@
-package lib
+package db
 
 import (
 	"fmt"
@@ -6,9 +6,11 @@ import (
 	"github.com/goby-lang/goby/vm"
 	"github.com/goby-lang/goby/vm/errors"
 	"github.com/jmoiron/sqlx"
+	// all packages imported by this need postgres
 	_ "github.com/lib/pq"
 )
 
+// Imported objects from vm
 type Object = vm.Object
 type GoObject = vm.GoObject
 type VM = vm.VM
