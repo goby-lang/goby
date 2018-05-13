@@ -125,6 +125,8 @@ func TestNextToken(t *testing.T) {
 	'\"string\"'
 	"\'string\'"
 	'\'string\''
+     1_23
+     12_3.45_6
 	`
 
 	tests := []struct {
@@ -438,8 +440,11 @@ func TestNextToken(t *testing.T) {
 		{token.String, "\\\"string\\\"", 116},
 		{token.String, "'string'", 117},
 		{token.String, "'string'", 118},
-
-		{token.EOF, "", 119},
+		{token.Int, "123", 119},
+		{token.Int, "123", 120},
+		{token.Dot, ".", 120},
+		{token.Int, "456", 120},
+		{token.EOF, "", 121},
 	}
 	l := New(input)
 
