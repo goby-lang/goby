@@ -1191,6 +1191,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 
 // Functions for initialization -----------------------------------------
 
+// InitArrayObject returns a new object with the given elemnts
 func (vm *VM) InitArrayObject(elements []Object) *ArrayObject {
 	return &ArrayObject{
 		baseObj:  &baseObj{class: vm.topLevelClass(classes.ArrayClass)},
