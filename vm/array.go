@@ -118,7 +118,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			//
 			// ```ruby
 			// a = [1, 2]
-			// b + [3, 4]  # => [1, 2, 4, 4]
+			// b + [3, 4]  # => [1, 2, 3, 4]
 			// ```
 			Name: "+",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
