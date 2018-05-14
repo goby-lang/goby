@@ -1873,6 +1873,7 @@ func TestArraySelectMethod(t *testing.T) {
 
 func TestArraySelectMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
+		{`[1, 2].select(1)`, "ArgumentError: Expect 0 argument. got=1", 1},
 		{`[1, 2, 3, 4, 5].select`, "InternalError: Can't yield without a block", 1},
 	}
 

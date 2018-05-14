@@ -1250,7 +1250,6 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// Loops through each element with the given block literal that contains conditional expressions.
 			// Returns a new array that contains elements that have been evaluated as `true` by the block.
 			// A block literal is required.
-			// TODO: should check no arguments have been passed.
 			//
 			// ```ruby
 			// a = [1, 2, 3, 4, 5]
@@ -1266,6 +1265,10 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			Name: "select",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					if len(args) > 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+					}
+
 					arr := receiver.(*ArrayObject)
 					var elements []Object
 
