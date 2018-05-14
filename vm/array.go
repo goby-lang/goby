@@ -8,9 +8,10 @@ import (
 	"github.com/goby-lang/goby/vm/errors"
 )
 
-// ArrayObject represents instance from Array class.
+// ArrayObject represents an instance from Array class.
 // An array is a collection of different objects that are ordered and indexed.
-// Elements in an array can belong to any class.
+// Elements in an array can belong to any class and you can also build a "tuple" within an array.
+// Array objects should always be enumerable.
 type ArrayObject struct {
 	*baseObj
 	Elements []Object
@@ -40,43 +41,49 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			//
 			// ```ruby
 			// a = [1, 2, 3, "a", "b", "c"]
-			// a[0]  # => 1
-			// a[3]  # => "a"
-			// a[10] # => nil
-			// a[-1] # => "c"
-			// a[-3] # => "a"
-			// a[-7] # => nil
+			// a[0]  #=> 1
+			// a[3]  #=> "a"
+			// a[10] #=> nil
+			// a[-1] #=> "c"
+			// a[-3] #=> "a"
+			// a[-7] #=> nil
 			//
 			// # Double indexing, second argument specifies the count of the elements
-			// a[1, 3]  # => [2, 3, "a"]
-			// a[1, 0]  # => [] <-- Zero count is empty
-			// a[1, 5]  # => [2, 3, "a", "b", "c"]
-			// a[1, 10] # => [2, 3, "a", "b", "c"]
-			// a[-3, 2] # => ["a", "b"]
-			// a[-3, 5] # => ["a", "b", "c"]
-			// a[5, 1]  # => ["c"]
-			// a[6, 1]  # => []
-			// a[7, 1]  # => nil
+			// a[1, 3]  #=> [2, 3, "a"]
+			// a[1, 0]  #=> [] <-- Zero count is empty
+			// a[1, 5]  #=> [2, 3, "a", "b", "c"]
+			// a[1, 10] #=> [2, 3, "a", "b", "c"]
+			// a[-3, 2] #=> ["a", "b"]
+			// a[-3, 5] #=> ["a", "b", "c"]
+			// a[5, 1]  #=> ["c"]
+			// a[6, 1]  #=> []
+			// a[7, 1]  #=> nil
 			//
 			// Special case 1:
-			// a[6]    # => nil
-			// a[6, 1] # => []  <-- Not nil!
-			// a[7, 1] # => nil <-- Because it is really out of the edge of the array
+			// a[6]    #=> nil
+			// a[6, 1] #=> []  <-- Not nil!
+			// a[7, 1] #=> nil <-- Because it is really out of the edge of the array
 			//
 			// Special case 2: Second argument is negative
 			// This behaviour is different from Ruby itself, in Ruby, it returns "nil".
 			// However, in Goby, it raises error because there cannot be negative count values.
 			//
-			// a[1, -1]  # => ArgumentError: Expect second argument greater than or equal 0. got: -1
-			// a[-4, -3] # => ArgumentError: Expect second argument greater than or equal 0. got: -3
+			// a[1, -1]  #=> ArgumentError: Expect second argument greater than or equal 0. got: -1
+			// a[-4, -3] #=> ArgumentError: Expect second argument greater than or equal 0. got: -3
 			//
 			// Special case 3: First argument is negative and exceed the array length
-			// a[-6, 1] # => [1]
-			// a[-6, 0] # => []
-			// a[-7, 1] # => ArgumentError: Index value -7 too small for array. minimum: -6
-			// a[-7, 0] # => ArgumentError: Index value -7 too small for array. minimum: -6
-			//
+			// a[-6, 1] #=> [1]
+			// a[-6, 0] #=> []
+			// a[-7, 1] #=> ArgumentError: Index value -7 too small for array. minimum: -6
+			// a[-7, 0] #=> ArgumentError: Index value -7 too small for array. minimum: -6
 			// ```
+			//
+			// Note:
+			// * The notations such as `a.[](1)` or `a.[] 1` are unsupported.
+			// * `Range` object is unsupported for now.
+			//
+			// @param index [Integer], (count [Integer])
+			// @return [Array]
 			Name: "[]",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -86,14 +93,18 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Repetition — returns a new array built by concatenating the specified number of copies
-			// of `self`.
+			// Repetition — returns a new array built by just concatenating the specified number of copies of `self`.
 			//
 			// ```ruby
 			// a = [1, 2, 3]
-			// a * 2   # => [1, 2, 3, 1, 2, 3]
-			// a * ',' # => "1,2,3"
+			// a * 2   #=> [1, 2, 3, 1, 2, 3]
 			// ```
+			//
+			// * The index should be a positive or zero Integer object.
+			// * Ruby's syntax such as `[1, 2, 3] * ','` are unsupported. Use `#join` instead.
+			//
+			// @param zero or positive integer [Integer]
+			// @return [Array]
 			Name: "*",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -114,12 +125,15 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns a new array built by concatenating the two arrays together to produce a third array.
+			// Concatenation: returns a new array by just concatenating the two arrays.
 			//
 			// ```ruby
 			// a = [1, 2]
-			// b + [3, 4]  # => [1, 2, 3, 4]
+			// b + [3, 4]  #=> [1, 2, 3, 4]
 			// ```
+			//
+			// @param array [Array]
+			// @return [Array]
 			Name: "+",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -145,64 +159,79 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Assigns value to an array. It requires an index and a value as argument.
-			// The array will expand if the assigned index is bigger than its size.
+			// Assigns one or more values to an array. It requires one or two indices and a value as argument.
+			// The first index should be Integer, and the second index should be zero or positive integer.
+			// The array will expand if the assigned index is bigger than the current size of self.
 			// Returns the assigned value.
+			// The gaps will be filled with `nil`, but such operations should be avoided.
 			//
 			// ```ruby
 			// a = []
-			// a[0] = 10  # => 10
-			// a[3] = 20  # => 20
-			// a          # => [10, nil, nil, 20]
-			// a[-2] = 5  # => [10, nil, 5, 20]
+			// a[0] = 10  #=> 10
+			// a[3] = 20  #=> 20
+			// a          #=> [10, nil, nil, 20]
+			// a[-2] = 5  #=> [10, nil, 5, 20]
 			//
 			// # Double indexing, second argument specify the count of the arguments
 			// a = [1, 2, 3, 4, 5]
-			// a[2, 3] = [1, 2, 3] # <-- Common case
-			// a # => [1, 2, 1, 2, 3]
+			// a[2, 3] = [:a, :b, :c]   # <-- Common case: overridden
+			// a #=> [1, 2, "a", "b", "c"]
 			//
 			// a = [1, 2, 3, 4, 5]
-			// a[4, 4] = [1, 2, 3] # <- Exceeded case
-			// a # => [1, 2, 3, 4, 1, 2, 3]
+			// a[4, 4] = [:a, :b, :c]   # <- Exceeded case: the array will be expanded and `5` will be overridden
+			// a #=> [1, 2, 3, 4, "a", "b", "c"]
 			//
 			// a = [1, 2, 3, 4, 5]
-			// a[5, 1] = [1, 2, 3] # <-- Edgy case
-			// a # => [1, 2, 3, 4, 5, 1, 2, 3]
+			// a[5, 1] = [:a, :b, :c]   # <-- Edge case: insertion
+			// a #=> [1, 2, 3, 4, 5, "a", "b", "c"]
 			//
 			// a = [1, 2, 3, 4, 5]
-			// a[8, 123] = [1, 2, 3] # <-- Weak array case
-			// a # => [1, 2, 3, 4, 5, nil, nil, nil, 1, 2, 3]
+			// a[8, 123] = [:a, :b, :c] # <-- Weak array case: the gaps will be filled with `nil` but the tailing ones not
+			// a #=> [1, 2, 3, 4, 5, nil, nil, nil, "a", "b", "c"]
 			//
 			// a = [1, 2, 3, 4, 5]
-			// a[3, 0] = [1, 2, 3] # <-- Insertion case
-			// a # => [1, 2, 3, 1, 2, 3, 4, 5]
+			// a[3, 0] = [:a, :b, :c]   # <-- Insertion case: the second index `0` is to insert there
+			// a #=> [1, 2, 3, "a", "b", "c", 4, 5]
 			//
 			// a = [1, 2, 3, 4, 5]
-			// a[0, 3] = 12345     # <-- Assign non-array value case
-			// a # => [12345, 4, 5]
+			// a[0, 3] = 12345          # <-- Assign non-array value case
+			// a #=> [12345, 4, 5]
 			//
 			// a = [1, 2, 3, 4, 5]
-			// a[-3, 2] = [1, 2, 3] # <-- Negative index assign case
-			// a # => [1, 2, 1, 2, 3, 5]
+			// a[-3, 2] = [:a, :b, :c]  # <-- Negative index assign case
+			// a #=> [1, 2, "a", "b", "c", 5]
 			//
 			// a = [1, 2, 3, 4, 5]
-			// a[-5, 4] = [9, 8, 7] # <-- Negative index edgy case
-			// a # => [9, 8, 7, 5]
+			// a[-5, 3] = [:a, :b, :c]  # <-- Negative index edge case
+			// a #=> ["a", "b", "c", 4, 5]
 			//
 			// a = [1, 2, 3, 4, 5]
-			// a[-6, 4] = [9, 8, 7] # <-- Nagative index too small case
+			// a[-5, 4] = [:a, :b, :c]  # <-- Negative index exceeded case: `4` will be destroyed
+			// a #=> ["a", "b", "c", 5]
+			//
+			// a = [1, 2, 3, 4, 5]
+			// a[-5, 5] = [:a, :b, :c]  # <-- Negative index exceeded case: `4, 5` will be destroyed
+			// a #=> ["a", "b", "c"]
+			//
+			// a = [1, 2, 3, 4, 5]
+			// a[-6, 4] = [:a, :b, :c]     # <-- Invalid: Negative index too small case
 			// # ArgumentError: Index value -6 too small for array. minimum: -5
 			//
 			// a = [1, 2, 3, 4, 5]
-			// a[6, -4] = [9, 8, 7] # <-- Weak array assignment with nagative count case
+			// a[6, -4] = [9, 8, 7]     # <-- Weak array assignment with negative count case
 			// # ArgumentError: Expect second argument greater than or equal 0. got: -4
-			//
 			// ```
+			//
+			// Note that passing multiple values to the method is unavailable.
+			//
+			// @param index [Integer], object [Object]
+			// @param index [Integer], count [Integer], object [Object]
+			// @return [Array]
 			Name: "[]=",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
 
-					// First argument is index, there exists two cases which will be described in the following code
+					// First argument is an index: there exists two cases which will be described in the following code
 					if len(args) != 2 && len(args) != 3 {
 						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 2..3 arguments. got=%d", len(args))
 					}
@@ -218,8 +247,8 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					arr := receiver.(*ArrayObject)
 
 					// <Three Argument Case>
-					// Second argument is the length of successive array values
-					// Third argument is the assignment value
+					// Second argument: the length of successive array values (zero or positive Integer)
+					// Third argument: the assignment value (object)
 					if len(args) == 3 {
 						// Negative index value too small
 						if indexValue < 0 {
@@ -232,13 +261,13 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						c := args[1]
 						count, ok := c.(*IntegerObject)
 
-						// Second argument must be integer
+						// Second argument must be an integer
 						if !ok {
 							return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[1].Class().Name)
 						}
 
 						countValue := count.value
-						// Second argument must be positive value
+						// Second argument must be a positive value
 						if countValue < 0 {
 							return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect second argument greater than or equal 0. got: %d", countValue)
 						}
@@ -246,8 +275,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						a := args[2]
 						assignedValue, isArray := a.(*ArrayObject)
 
-						// Expand the array with nil case, we don't need to care the second argument
-						// because the count in this case is useless
+						// Expand the array with nil; the second index is unnecessary in the case
 						if indexValue >= arr.length() {
 
 							for arr.length() < indexValue {
@@ -263,15 +291,15 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						}
 
 						endValue := indexValue + countValue
-						// Addition of index and count is too large
+						// the case the addition of index and count is too large
 						if endValue > arr.length() {
 							endValue = arr.length()
 						}
 
 						arr.Elements = append(arr.Elements[:indexValue], arr.Elements[endValue:]...)
 
-						// If assigned value is array, then splat the array and push each element in the receiver
-						// according to the first and second argument
+						// If assigned value is an array, then splat the array and push each element to the receiver
+						// following the first and second indices
 						if isArray {
 							arr.Elements = append(arr.Elements[:indexValue], append(assignedValue.Elements, arr.Elements[indexValue:]...)...)
 						} else {
@@ -282,7 +310,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					// <Two Argument Case>
-					// Second argument is the assignment value
+					// Second argument is the assignment value (object)
 
 					// Negative index value condition
 					if indexValue < 0 {
@@ -310,31 +338,35 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Passes each element of the collection to the given block. The method returns true if
-			// the block ever returns a value other than false or nil
+			// A predicate method.
+			// Evaluates the given block and returns `true` if the block ever returns a value.
+			// Returns `false` if the evaluated block returns `false` or `nil`.
 			//
 			// ```ruby
 			// a = [1, 2, 3]
 			//
 			// a.any? do |e|
 			//   e == 2
-			// end            # => true
+			// end            #=> true
 			// a.any? do |e|
 			//   e
-			// end            # => true
+			// end            #=> true
 			// a.any? do |e|
 			//   e == 5
-			// end            # => false
+			// end            #=> false
 			// a.any? do |e|
 			//   nil
-			// end            # => false
+			// end            #=> false
 			//
 			// a = []
 			//
 			// a.any? do |e|
 			//   true
-			// end            # => false
+			// end            #=> false
 			// ```
+			//
+			// @param block [Block]
+			// @return [Boolean]
 			Name: "any?",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -365,16 +397,19 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Retrieves an object in an array using the index argument.
-			// The index is 0-based; nil is returned when trying to access the index out of bounds.
+			// Retrieves an object in an array using the given index.
+			// The index is 0-based; `nil` is returned when trying to access the index out of bounds.
 			//
 			// ```ruby
 			// a = [1, 2, 3]
-			// a.at(0)  # => 1
-			// a.at(10) # => nil
-			// a.at(-2) # => 2
-			// a.at(-4) # => nil
+			// a.at(0)  #=> 1
+			// a.at(10) #=> nil
+			// a.at(-2) #=> 2
+			// a.at(-4) #=> nil
 			// ```
+			//
+			// @param index [Integer]
+			// @return [Object]
 			Name: "at",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -391,9 +426,11 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			//
 			// ```ruby
 			// a = [1, 2, 3]
-			// a.clear # => []
-			// a       # => []
+			// a.clear #=> []
+			// a       #=> []
 			// ```
+			//
+			// @return [Array]
 			Name: "clear",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -409,13 +446,16 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Appends any number of argument to the array.
+			// Concatenation: returns a new array by just concatenating the two arrays.
 			//
 			// ```ruby
 			// a = [1, 2, 3]
-			// a.concat(4, 5, 6)
-			// a # => [1, 2, 3, 4, 5, 6]
+			// a.concat([4, 5, 6])
+			// a #=> [1, 2, 3, 4, 5, 6]
 			// ```
+			//
+			// @param array [Array]
+			// @return [Array]
 			Name: "concat",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -438,8 +478,9 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Loop through each element with the given block.
-			// Return the sum of elements that return true from yield.
+			// If no block is given, just returns the count of the elements within the array.
+			// If a block is given, evaluate each element of the array by the given block,
+			// and then return the count of elements that return `true` by the block.
 			//
 			// ```ruby
 			// a = [1, 2, 3, 4, 5]
@@ -447,8 +488,12 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// a.count do |e|
 			//   e * 2 > 3
 			// end
-			// # => 4
+			// #=> 4
 			// ```
+			//
+			// @param
+			// @param block [Block]
+			// @return [Integer]
 			Name: "count",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -512,16 +557,20 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Deletes the element at the given position.
+			// Deletes the element pointed by the given index.
 			// Returns the removed element.
-			// The index is 0-based; nil is returned when using an out of bounds index.
+			// The method is destructive and the self is mutated.
+			// The index is 0-based; `nil` is returned when using an out-of-bounds index.
 			//
 			// ```ruby
 			// a = ["a", "b", "c"]
-			// a.delete_at(1) # => "b"
-			// a.delete_at(-1) # => "c"
-			// a       # => ["a"]
+			// a.delete_at(1) #=> "b"
+			// a.delete_at(-1) #=> "c"
+			// a       #=> ["a"]
 			// ```
+			//
+			// @param index [Integer]
+			// @return [Object]
 			Name: "delete_at",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -554,16 +603,18 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Extracts the nested value specified by the sequence of idx objects by calling `dig` at
-			// each step, returning nil if any intermediate step is nil.
+			// Returns the value from the nested array, specified by one or more indices,
+			// Returns `nil` if one of the intermediate values are `nil`.
 			//
 			// ```Ruby
-			// [1 , 2].dig(-2)      # => 1
-			// [[], 2].dig(0, 1)    # => nil
-			// [[], 2].dig(0, 1, 2) # => nil
-			// [1, 2].dig(0, 1)     # => TypeError: Expect target to be Diggable
+			// [1 , 2].dig(-2)      #=> 1
+			// [[], 2].dig(0, 1)    #=> nil
+			// [[], 2].dig(0, 1, 2) #=> nil
+			// [[1, 2, [3, [8, [9]]]], 4, 5].dig(0, 2, 1, 1, 0) #=> 9
+			// [1, 2].dig(0, 1)     #=> TypeError: Expect target to be Diggable
 			// ```
 			//
+			// @param index [Integer]...
 			// @return [Object]
 			Name: "dig",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -580,18 +631,25 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Loop through each element with the given block.
+			// Loops through each element in the array, with the given block.
+			// Returns self.
+			// A block literal is required.
 			//
 			// ```ruby
 			// a = ["a", "b", "c"]
 			//
-			// a.each do |e|
+			// b = a.each do |e|
 			//   puts(e + e)
 			// end
-			// # => "aa"
-			// # => "bb"
-			// # => "cc"
+			// #=> "aa"
+			// #=> "bb"
+			// #=> "cc"
+			// puts b
+			// #=> ["a", "b", "c"]
 			// ```
+			//
+			// @param block literal
+			// @return [Array]
 			Name: "each",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -620,6 +678,26 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 				}
 			},
 		},
+		// Works like #each, but passes the index of the element instead of the element itself.
+		// Returns self.
+		// A block literal is required.
+		//
+		// ```ruby
+		// a = [:apple, :orange, :grape, :melon]
+		//
+		// b = a.each_index do |i|
+		//   puts(i*i)
+		// end
+		// #=> 0
+		// #=> 1
+		// #=> 4
+		// #=> 9
+		// puts b
+		// #=> ["a", "b", "c"]
+		// ```
+		//
+		// @param block literal
+		// @return [Array]
 		{
 			Name: "each_index",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -650,12 +728,15 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// A predicate method.
 			// Returns if the array"s length is 0 or not.
 			//
 			// ```ruby
-			// [1, 2, 3].empty? # => false
-			// [].empty? # => true
+			// [1, 2, 3].empty? #=> false
+			// [].empty?        #=> true
+			// [[]].empty?      #=> false
 			// ```
+			//
 			// @return [Boolean]
 			Name: "empty?",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -677,6 +758,16 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			// Returns the first element of the array.
+			// If a count 'n' is provided as an argument, it returns the array of the first n elements.
+			//
+			// ```ruby
+			// [1, 2, 3].first                            #=> 1
+			// [:apple, :orange, :grape, :melon].first    #=> "apple"
+			// [:apple, :orange, :grape, :melon].first(2) #=> ["apple", "orange"]
+			// ```
+			//
+			// @param count [Integer]
+			// @return [Object]
 			Name: "first",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -718,9 +809,13 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// ```ruby
 			// a = [ 1, 2, 3 ]
 			// b = [ 4, 5, 6, [7, 8] ]
-			// c = [ a, b, 9, 10 ] # => [[1, 2, 3], [4, 5, 6, [7, 8]], 9, 10]
-			// c.flatten # => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			// c = [ a, b, 9, 10 ] #=> [[1, 2, 3], [4, 5, 6, [7, 8]], 9, 10]
+			// c.flatten #=> [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			//
+			// [[[1, 2], [[[3, 4]], [5, 6]]]].flatten
+			// #=> [1, 2, 3, 4, 5, 6]
 			// ```
+			//
 			// @return [Array]
 			Name: "flatten",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -739,12 +834,16 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			// Returns a string by concatenating each element to string, separated by given separator.
+			// If the array is nested, they will be flattened and then concatenated.
 			// If separator is nil, it uses empty string.
 			//
 			// ```ruby
-			// [ 1, 2, 3 ].join # => "123"
-			// [ 1, 2, 3 ].join("-") # => "1-2-3"
+			// [ 1, 2, 3 ].join                #=> "123"
+			// [[:h, :e, :l], [[:l], :o]].join #=> "hello"
+			// [[:hello],{k: :v}].join         #=> 'hello{ k: "v" }'
+			// [ 1, 2, 3 ].join("-")           #=> "1-2-3"
 			// ```
+			//
 			// @param separator [String]
 			// @return [String]
 			Name: "join",
@@ -778,6 +877,16 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			// Returns the last element of the array.
+			// If a count 'n' is provided as an argument, it returns the array of the last n elements.
+			//
+			// ```ruby
+			// [1, 2, 3].last                            #=> 3
+			// [:apple, :orange, :grape, :melon].last    #=> "melon"
+			// [:apple, :orange, :grape, :melon].last(2) #=> ["grape", "melon"]
+			// ```
+			//
+			// @param count [Integer]
+			// @return [Object]
 			Name: "last",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -811,10 +920,12 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			// Returns the length of the array.
+			// The method does not take a block literal and is just to check the length of the array.
 			//
 			// ```ruby
-			// [1, 2, 3].length # => 3
+			// [1, 2, 3].length #=> 3
 			// ```
+			//
 			// @return [Integer]
 			Name: "length",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -830,7 +941,8 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Loop through each element with the given block. Return a new array with each yield element. Block is required.
+			// Loops through each element with the given block literal, and then returns the yielded elements as an array.
+			// A block literal is required.
 			//
 			// ```ruby
 			// a = ["a", "b", "c"]
@@ -838,9 +950,18 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// a.map do |e|
 			//   e + e
 			// end
-			// # => ["aa", "bb", "cc"]
+			// #=> ["aa", "bb", "cc"]
+			//
+			// -------------------------
+			//
+			// a = [:apple, :orange, :lemon, :grape].map do |i|
+			//   i + "s"
+			// end
+			// puts a
+			// #=> ["apples", "oranges", "lemons", "grapes"]
 			// ```
 			//
+			// @param block literal
 			// @return [Array]
 			Name: "map",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
@@ -873,13 +994,16 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// A destructive method.
 			// Removes the last element in the array and returns it.
 			//
 			// ```ruby
 			// a = [1, 2, 3]
-			// a.pop # => 3
-			// a     # => [1, 2]
+			// a.pop #=> 3
+			// a     #=> [1, 2]
 			// ```
+			//
+			// @return [Object]
 			Name: "pop",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -894,12 +1018,24 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// A destructive method.
 			// Appends the given object to the array and returns the array.
+			// One or more arguments can be passed to the method.
+			// If no argument have been given, nothing will be added to the array,
+			// and returns the unchanged array.
+			// Even `nil` or empty strings `""` will be added to the array.
 			//
 			// ```ruby
 			// a = [1, 2, 3]
-			// a.push(4) # => [1, 2, 3, 4]
+			// a.push(4)       #=> [1, 2, 3, 4]
+			// a.push(5, 6, 7) #=> [1, 2, 3, 4, 5, 6, 7]
+			// a.push          #=> [1, 2, 3, 4, 5, 6, 7]
+			// a               #=> [1, 2, 3, 4, 5, 6, 7]
+			// a.push(nil, "") #=> [1, 2, 3, 4, 5, 6, 7, nil, ""]
 			// ```
+			//
+			// @param object [Object]...
+			// @return [Array]
 			Name: "push",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -910,8 +1046,13 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Loop through each elements and accumulate each results of given block in the first argument of the block
-			// If you do not give an argument, the first element of collection is used as an initial value
+			// Accumulates the given argument and the results from evaluating each elements
+			// with the first block parameter of the given block.
+			// Takes one block with two block arguments (less than two block arguments are meaningless).
+			// The first block argument is to succeed the initial value or previous result,
+			// and the second block arguments is to enumerate the elements of the array.
+			// You can also pass an argument as an initial value.
+			// If you do not pass an argument, the first element of collection is used as an initial value.
 			//
 			// ```ruby
 			// a = [1, 2, 7]
@@ -919,13 +1060,22 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// a.reduce do |sum, n|
 			//   sum + n
 			// end
-			// # => 10
+			// #=> 10
 			//
 			// a.reduce(10) do |sum, n|
 			//   sum + n
 			// end
-			// # => 20
+			// #=> 20
+			//
+			// a = ["this", "is", "a", "test!"]
+			// a.reduce("Yes, ") do |prev, s|
+			//   prev + s + " "
+			// end
+			// #=> "Yes, this is a test! "
 			// ```
+			//
+			// @param initial value [Object], block literal with two block parameters
+			// @return [Object]
 			Name: "reduce",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -965,13 +1115,15 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns a new array containing self‘s elements in reverse order.
+			// Returns a new array containing self‘s elements in reverse order. Not destructive.
 			//
 			// ```ruby
 			// a = [1, 2, 7]
 			//
-			// a.reverse # => [7, 2, 1]
+			// a.reverse #=> [7, 2, 1]
 			// ```
+			//
+			// @return [Array]
 			Name: "reverse",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -986,18 +1138,23 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Same as #each, but traverses self in reverse order.
+			// Behaves as the same as #each, but traverses self in reverse order.
+			// Returns self.
+			// A block literal is required.
 			//
 			// ```ruby
-			// a = ["a", "b", "c"]
+			// a = [:a, :b, :c]
 			//
-			// a.each do |e|
+			// a.reverse_each do |e|
 			//   puts(e + e)
 			// end
-			// # => "cc"
-			// # => "bb"
-			// # => "aa"
+			// #=> "cc"
+			// #=> "bb"
+			// #=> "aa"
 			// ```
+			//
+			// @param block literal
+			// @return [Array]
 			Name: "reverse_each",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -1030,16 +1187,22 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns a new array by putting the desired element as the first element.
-			// Use integer index as an argument to retrieve the element.
+			// Returns a new rotated array from the self.
+			// The method is not destructive.
+			// if an optional positive integer `n` is passed, it returns a new array that has been rotated `n` times to left.
+			// If an optional negative integer `-n` is passed, it returns a new array that has been rotated `n` times to right.
+			// TODO: the method should also work with a negative integer.
 			//
 			// ```ruby
-			// a = ["a", "b", "c", "d"]
+			// a = [:a, :b, :c, :d]
 			//
-			// a.rotate    # => ["b", "c", "d", "a"]
-			// a.rotate(2) # => ["c", "d", "a", "b"]
-			// a.rotate(3) # => ["d", "a", "b", "c"]
+			// a.rotate    #=> ["b", "c", "d", "a"]
+			// a.rotate(2) #=> ["c", "d", "a", "b"]
+			// a.rotate(3) #=> ["d", "a", "b", "c"]
 			// ```
+			//
+			// @param index [Integer]
+			// @return [Array]
 			Name: "rotate",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -1070,8 +1233,10 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Loop through each element with the given block.
-			// Return a new array with each element that returns true from yield.
+			// Loops through each element with the given block literal that contains conditional expressions.
+			// Returns a new array that contains elements that have been evaluated as `true` by the block.
+			// A block literal is required.
+			// TODO: should check no arguments have been passed.
 			//
 			// ```ruby
 			// a = [1, 2, 3, 4, 5]
@@ -1079,8 +1244,11 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// a.select do |e|
 			//   e + 1 > 3
 			// end
-			// # => [3, 4, 5]
+			// #=> [3, 4, 5]
 			// ```
+			//
+			// @param conditional block literal
+			// @return [Array]
 			Name: "select",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -1112,13 +1280,16 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Removes the first element in the array and returns it.
+			// A destructive method.
+			// Removes the first element from the array and returns the removed element.
 			//
 			// ```ruby
 			// a = [1, 2, 3]
-			// a.shift # => 1
-			// a       # => [2, 3]
+			// a.shift #=> 1
+			// a       #=> [2, 3]
 			// ```
+			//
+			// @return [Object]
 			Name: "shift",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -1132,13 +1303,19 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Inserts the specified element in the first position of the array.
+			// A destructive method.
+			// Inserts one or more arguments at the first position of the array, and then returns the self.
 			//
 			// ```ruby
 			// a = [1, 2]
-			// a.unshift(0) # => [0, 1, 2]
-			// a            # => [0, 1, 2]
+			// a.unshift(0)             #=> [0, 1, 2]
+			// a                        #=> [0, 1, 2]
+			// a.unshift(:hello, :goby) #=> ["hello", "goby", 0, 1, 2]
+			// a                        #=> ["hello", "goby", 0, 1, 2]
 			// ```
+			//
+			// @param element [Object]
+			// @return [Array]
 			Name: "unshift",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -1148,14 +1325,19 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns an array containing the elements in self corresponding to the given indexes.
+			// Returns a new array that contains the elements pointed by zero or more indices given.
+			// If no arguments have been passed, an empty array `[]` will be returned.
+			// If the index is out of range, `nil` is used as the element.
 			//
 			// ```ruby
 			// a = ["a", "b", "c"]
-			// a.values_at(1)     # => ["b"]
-			// a.values_at(-1, 3) # => ["c", nil]
-			// a.values_at()      # => []
+			// a.values_at(1)     #=> ["b"]
+			// a.values_at(-1, 3) #=> ["c", nil]
+			// a.values_at()      #=> []
 			// ```
+			//
+			// @param index [Integer]...
+			// @return [Array]
 			Name: "values_at",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -1328,7 +1510,7 @@ func (a *ArrayObject) index(t *thread, args []Object, sourceLine int) Object {
 		 *  This condition meets the special case (Don't know why ~ ? Ask Ruby or try it on irb!):
 		 *
 		 *  a = [1, 2, 3, 4, 5]
-		 *  a[5, 5] # => []
+		 *  a[5, 5] #=> []
 		 */
 		if index.value > 0 && index.value == arrLength {
 			return t.vm.initArrayObject([]Object{})
