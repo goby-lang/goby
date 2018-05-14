@@ -1189,9 +1189,8 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 		{
 			// Returns a new rotated array from the self.
 			// The method is not destructive.
-			// if an optional positive integer `n` is passed, it returns a new array that has been rotated `n` times to left.
-			// If an optional negative integer `-n` is passed, it returns a new array that has been rotated `n` times to right.
-			// TODO: the method should also work with a negative integer.
+			// If zero `0` is passed, it returns a new array that has been rotated 1 time to left (default).
+			// If an optional positive integer `n` is passed, it returns a new array that has been rotated `n` times to left.
 			//
 			// ```ruby
 			// a = [:a, :b, :c, :d]
@@ -1199,6 +1198,14 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// a.rotate    #=> ["b", "c", "d", "a"]
 			// a.rotate(2) #=> ["c", "d", "a", "b"]
 			// a.rotate(3) #=> ["d", "a", "b", "c"]
+			// ```
+			//
+			// If an optional negative integer `-n` is passed, it returns a new array that has been rotated `n` times to right.
+			//
+			// ```ruby
+			// a = [:a, :b, :c, :d]
+			//
+			// a.rotate(-1) #=> ["d", "a", "b", "c"]
 			// ```
 			//
 			// @param index [Integer]
@@ -1209,13 +1216,13 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					if len(args) > 1 {
 						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0..1 argument. got=%d", len(args))
 					}
-
+					var rotate int
 					arr := receiver.(*ArrayObject)
 					rotArr := t.vm.initArrayObject(arr.Elements)
 
-					rotate := 1
-
-					if len(args) != 0 {
+					if len(args) == 0 {
+						rotate = 1
+					} else {
 						arg, ok := args[0].(*IntegerObject)
 						if !ok {
 							return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
@@ -1223,9 +1230,16 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						rotate = arg.value
 					}
 
-					for i := 0; i < rotate; i++ {
-						el := rotArr.shift()
-						rotArr.push([]Object{el})
+					if rotate < 0 {
+						for i := 0; i > rotate; i-- {
+							el := rotArr.pop()
+							rotArr.unshift([]Object{el})
+						}
+					} else {
+						for i := 0; i < rotate; i++ {
+							el := rotArr.shift()
+							rotArr.push([]Object{el})
+						}
 					}
 
 					return rotArr
@@ -1236,7 +1250,6 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// Loops through each element with the given block literal that contains conditional expressions.
 			// Returns a new array that contains elements that have been evaluated as `true` by the block.
 			// A block literal is required.
-			// TODO: should check no arguments have been passed.
 			//
 			// ```ruby
 			// a = [1, 2, 3, 4, 5]
@@ -1252,6 +1265,10 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			Name: "select",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+					if len(args) > 0 {
+						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+					}
+
 					arr := receiver.(*ArrayObject)
 					var elements []Object
 
@@ -1632,13 +1649,13 @@ func (a *ArrayObject) shift() Object {
 
 // copy returns the duplicate of the Array object
 func (a *ArrayObject) copy() Object {
-	elems := make([]Object, len(a.Elements))
+	e := make([]Object, len(a.Elements))
 
-	copy(elems, a.Elements)
+	copy(e, a.Elements)
 
 	newArr := &ArrayObject{
 		baseObj:  &baseObj{class: a.class},
-		Elements: elems,
+		Elements: e,
 	}
 
 	return newArr
