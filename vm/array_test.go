@@ -1775,13 +1775,21 @@ func TestArrayRotateMethod(t *testing.T) {
 		expected []interface{}
 	}{
 		{`
-		a = [1, 2]
+		a = [1, 2, 3, 4]
 		a.rotate
-		`, []interface{}{2, 1}},
+		`, []interface{}{2, 3, 4, 1}},
 		{`
 		a = [1, 2, 3, 4]
 		a.rotate(2)
 		`, []interface{}{3, 4, 1, 2}},
+		{`
+		a = [1, 2, 3, 4]
+		a.rotate(0)
+		`, []interface{}{1, 2, 3, 4}},
+		{`
+		a = [1, 2, 3, 4]
+		a.rotate(-1)
+		`, []interface{}{4, 1, 2, 3}},
 	}
 
 	for i, tt := range tests {
