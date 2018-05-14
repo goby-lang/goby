@@ -844,6 +844,7 @@ func TestArrayDigMethod(t *testing.T) {
 		{`
 			[[], 2].dig(0, 1, 2)
 		`, nil},
+		{`[[1, 2, [3, [8, [9]]]], 4, 5].dig(0, 2, 1, 1, 0)`, 9},
 	}
 
 	for i, tt := range tests {
@@ -1067,6 +1068,10 @@ func TestArrayFirstMethod(t *testing.T) {
 		a = [1, 2]
 		a.first
 		`, 1},
+		{`
+[:apple, :orange, :grape, :melon].first`,
+			"apple",
+		},
 	}
 
 	for i, tt := range testsInt {
@@ -1230,6 +1235,8 @@ func TestArrayJoinMethod(t *testing.T) {
 		{`
 		[1, 2, [3, 4]].join(",")
 		`, "1,2,3,4"},
+		{`[[:h, :e, :l], [[:l], :o]].join`, "hello"},
+		{`[[:hello],{k: :v}].join `, `hello{ k: "v" }`},
 	}
 
 	for i, tt := range testsInt {
@@ -1405,6 +1412,10 @@ func TestArrayMapMethod(t *testing.T) {
 		[].map do |i|
 		end
 		`, []interface{}{}},
+		{`
+		a = [:apple, :orange, :lemon, :grape].map do |i|
+		i + "s"
+ 		end`, []interface{}{"apples", "oranges", "lemons", "grapes"}},
 	}
 
 	for i, tt := range tests {
@@ -1537,6 +1548,12 @@ func TestArrayPushMethod(t *testing.T) {
 			a.push(234)
 			a[0]
 			`, "foo"},
+		{`
+			[1, 2, 3, 4].push(5, 6, 7).to_s
+			`, "[1, 2, 3, 4, 5, 6, 7]"},
+		{`
+			[].push(nil, "", '').to_s
+	`, `[nil, "", ""]`},
 	}
 
 	for i, tt := range tests {
