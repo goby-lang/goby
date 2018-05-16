@@ -33,9 +33,9 @@ func builtinConcurrentRWLockClassMethods() []*BuiltinMethodObject {
 		{
 			Name: "new",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
 					}
 
 					return t.vm.initConcurrentRWLockObject()
@@ -61,9 +61,9 @@ func builtinConcurrentRWLockInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			Name: "acquire_read_lock",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
 					}
 
 					lockObject := receiver.(*ConcurrentRWLockObject)
@@ -87,9 +87,9 @@ func builtinConcurrentRWLockInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			Name: "acquire_write_lock",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
 					}
 
 					lockObject := receiver.(*ConcurrentRWLockObject)
@@ -113,9 +113,9 @@ func builtinConcurrentRWLockInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			Name: "release_read_lock",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
 					}
 
 					lockObject := receiver.(*ConcurrentRWLockObject)
@@ -139,9 +139,9 @@ func builtinConcurrentRWLockInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			Name: "release_write_lock",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
 					}
 
 					lockObject := receiver.(*ConcurrentRWLockObject)
@@ -166,13 +166,13 @@ func builtinConcurrentRWLockInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			Name: "with_read_lock",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if blockFrame == nil {
-						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
 					}
 
 					lockObject := receiver.(*ConcurrentRWLockObject)
@@ -201,13 +201,13 @@ func builtinConcurrentRWLockInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			Name: "with_write_lock",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if blockFrame == nil {
-						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
 					}
 
 					lockObject := receiver.(*ConcurrentRWLockObject)
@@ -262,6 +262,6 @@ func (lock *ConcurrentRWLockObject) toString() string {
 }
 
 // toJSON just delegates to toString
-func (lock *ConcurrentRWLockObject) toJSON(t *thread) string {
+func (lock *ConcurrentRWLockObject) toJSON(t *Thread) string {
 	return lock.toString()
 }

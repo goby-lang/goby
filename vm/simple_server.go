@@ -11,10 +11,11 @@ import (
 	"unicode"
 
 	"fmt"
+	"strconv"
+
 	"github.com/fatih/structs"
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/gorilla/mux"
-	"strconv"
 )
 
 type request struct {
@@ -43,7 +44,7 @@ func builtinSimpleServerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "mount",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					path := args[0].(*StringObject).value
 					method := args[1].(*StringObject).value
 
@@ -56,7 +57,7 @@ func builtinSimpleServerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "static",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					prefix := args[0].(*StringObject).value
 					fileName := args[1].(*StringObject).value
 					router.PathPrefix(prefix).Handler(http.StripPrefix(prefix, http.FileServer(http.Dir(fileName))))
@@ -68,12 +69,12 @@ func builtinSimpleServerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "start",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					var port string
 					var serveStatic bool
 					server := receiver.(*RObject)
 
-					portVar, ok := server.instanceVariableGet("@port")
+					portVar, ok := server.InstanceVariableGet("@port")
 
 					if !ok {
 						port = "8080"
@@ -145,7 +146,7 @@ func initSimpleServerClass(vm *VM) {
 
 // Other helper functions -----------------------------------------------
 
-func newHandler(t *thread, blockFrame *normalCallFrame) func(http.ResponseWriter, *http.Request) {
+func newHandler(t *Thread, blockFrame *normalCallFrame) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Go creates one goroutine per request, so we also need to create a new Goby thread for every request.
 		thread := t.vm.newThread()
@@ -156,15 +157,14 @@ func newHandler(t *thread, blockFrame *normalCallFrame) func(http.ResponseWriter
 
 		if err, ok := result.Target.(*Error); ok {
 			log.Printf("Error: %s", err.message)
-			res.instanceVariableSet("@status", t.vm.initIntegerObject(500))
+			res.InstanceVariableSet("@status", t.vm.InitIntegerObject(500))
 		}
 
-		thread = nil
 		setupResponse(w, r, res)
 	}
 }
 
-func initRequest(t *thread, w http.ResponseWriter, req *http.Request) *RObject {
+func initRequest(t *Thread, w http.ResponseWriter, req *http.Request) *RObject {
 	r := request{}
 	reqObj := httpRequestClass.initializeInstance()
 
@@ -189,7 +189,7 @@ func initRequest(t *thread, w http.ResponseWriter, req *http.Request) *RObject {
 
 	for k, v := range m {
 		varName := "@" + toSnakeCase(k)
-		reqObj.instanceVariableSet(varName, t.vm.initObjectFromGoType(v))
+		reqObj.InstanceVariableSet(varName, t.vm.InitObjectFromGoType(v))
 	}
 
 	vars := map[string]Object{}
@@ -198,7 +198,7 @@ func initRequest(t *thread, w http.ResponseWriter, req *http.Request) *RObject {
 		vars[k] = t.vm.initStringObject(v)
 	}
 
-	reqObj.instanceVariableSet("@params", t.vm.initHashObject(vars))
+	reqObj.InstanceVariableSet("@params", t.vm.InitHashObject(vars))
 
 	return reqObj
 }
@@ -206,7 +206,7 @@ func initRequest(t *thread, w http.ResponseWriter, req *http.Request) *RObject {
 func setupResponse(w http.ResponseWriter, req *http.Request, res *RObject) {
 	r := &response{}
 
-	resStatus, ok := res.instanceVariableGet("@status")
+	resStatus, ok := res.InstanceVariableGet("@status")
 
 	if ok {
 		r.status = resStatus.(*IntegerObject).value
@@ -214,7 +214,7 @@ func setupResponse(w http.ResponseWriter, req *http.Request, res *RObject) {
 		r.status = http.StatusOK
 	}
 
-	resBody, ok := res.instanceVariableGet("@body")
+	resBody, ok := res.InstanceVariableGet("@body")
 
 	if !ok {
 		r.body = ""
@@ -222,7 +222,7 @@ func setupResponse(w http.ResponseWriter, req *http.Request, res *RObject) {
 		r.body = resBody.(*StringObject).value
 	}
 
-	h, ok := res.instanceVariableGet("@headers")
+	h, ok := res.InstanceVariableGet("@headers")
 
 	if headers, isHashObject := h.(*HashObject); ok && isHashObject {
 		for k, v := range headers.Pairs {

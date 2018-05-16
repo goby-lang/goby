@@ -21,24 +21,24 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 			// Sends a GET request to the target and returns a `Net::HTTP::Response` object.
 			Name: "get",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 1, len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 1, len(args))
 					}
 
 					u, ok := args[0].(*StringObject)
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, u.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, u.Class().Name)
 					}
 
 					resp, err := goClient.Get(u.value)
 					if err != nil {
-						return t.vm.initErrorObject(errors.HTTPError, sourceLine, "Could not complete request, %s", err)
+						return t.vm.InitErrorObject(errors.HTTPError, sourceLine, "Could not complete request, %s", err)
 					}
 
 					gobyResp, err := responseGoToGoby(t, resp)
 					if err != nil {
-						return t.vm.initErrorObject(errors.InternalError, sourceLine, err.Error())
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, err.Error())
 					}
 
 					return gobyResp
@@ -48,36 +48,36 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 			// Sends a POST request to the target and returns a `Net::HTTP::Response` object.
 			Name: "post",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 3 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 3, len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 3, len(args))
 					}
 
 					u, ok := args[0].(*StringObject)
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, u.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, u.Class().Name)
 					}
 
 					contentType, ok := args[1].(*StringObject)
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, u.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, u.Class().Name)
 					}
 
 					body, ok := args[2].(*StringObject)
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, u.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, u.Class().Name)
 					}
 
 					bodyR := strings.NewReader(body.value)
 
 					resp, err := goClient.Post(u.value, contentType.value, bodyR)
 					if err != nil {
-						return t.vm.initErrorObject(errors.HTTPError, sourceLine, "Could not complete request, %s", err)
+						return t.vm.InitErrorObject(errors.HTTPError, sourceLine, "Could not complete request, %s", err)
 					}
 
 					gobyResp, err := responseGoToGoby(t, resp)
 					if err != nil {
-						return t.vm.initErrorObject(errors.InternalError, sourceLine, err.Error())
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, err.Error())
 					}
 
 					return gobyResp
@@ -87,24 +87,24 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 			// Sends a HEAD request to the target and returns a `Net::HTTP::Response` object.
 			Name: "head",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 1, len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 1, len(args))
 					}
 
 					u, ok := args[0].(*StringObject)
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, u.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, u.Class().Name)
 					}
 
 					resp, err := goClient.Head(u.value)
 					if err != nil {
-						return t.vm.initErrorObject(errors.HTTPError, sourceLine, "Could not complete request, %s", err)
+						return t.vm.InitErrorObject(errors.HTTPError, sourceLine, "Could not complete request, %s", err)
 					}
 
 					gobyResp, err := responseGoToGoby(t, resp)
 					if err != nil {
-						return t.vm.initErrorObject(errors.InternalError, sourceLine, err.Error())
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, err.Error())
 					}
 
 					return gobyResp
@@ -114,7 +114,7 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 			// Returns a blank `Net::HTTP::Request` object to be sent with the`exec` method
 			Name: "request",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					return httpRequestClass.initializeInstance()
 				}
 			},
@@ -122,29 +122,29 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 			// Sends a passed `Net::HTTP::Request` object and returns a `Net::HTTP::Response` object
 			Name: "exec",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 1, len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 1, len(args))
 					}
 
 					if args[0].Class().Name != httpRequestClass.Name {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "HTTP Response", args[0].Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "HTTP Response", args[0].Class().Name)
 					}
 
 					goReq, err := requestGobyToGo(args[0])
 					if err != nil {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, err.Error())
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, err.Error())
 					}
 
 					goResp, err := goClient.Do(goReq)
 					if err != nil {
-						return t.vm.initErrorObject(errors.HTTPError, sourceLine, "Could not complete request, %s", err)
+						return t.vm.InitErrorObject(errors.HTTPError, sourceLine, "Could not complete request, %s", err)
 					}
 
 					gobyResp, err := responseGoToGoby(t, goResp)
 
 					if err != nil {
-						return t.vm.initErrorObject(errors.InternalError, sourceLine, err.Error())
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, err.Error())
 					}
 
 					return gobyResp
@@ -172,14 +172,14 @@ func initClientClass(vm *VM, hc *RClass) *RClass {
 
 func requestGobyToGo(gobyReq Object) (*http.Request, error) {
 	//:method, :protocol, :body, :content_length, :transfer_encoding, :host, :path, :url, :params
-	uObj, ok := gobyReq.instanceVariableGet("@url")
+	uObj, ok := gobyReq.InstanceVariableGet("@url")
 	if !ok {
 		return nil, fmt.Errorf("could not get url")
 	}
 
 	u := uObj.(*StringObject).value
 
-	methodObj, ok := gobyReq.instanceVariableGet("@method")
+	methodObj, ok := gobyReq.InstanceVariableGet("@method")
 	if !ok {
 		return nil, fmt.Errorf("could not get method")
 	}
@@ -188,7 +188,7 @@ func requestGobyToGo(gobyReq Object) (*http.Request, error) {
 
 	var body string
 	if !(method == "GET" || method == "HEAD") {
-		bodyObj, ok := gobyReq.instanceVariableGet("@body")
+		bodyObj, ok := gobyReq.InstanceVariableGet("@body")
 		if !ok {
 			return nil, fmt.Errorf("could not get body")
 		}
@@ -200,7 +200,7 @@ func requestGobyToGo(gobyReq Object) (*http.Request, error) {
 
 }
 
-func responseGoToGoby(t *thread, goResp *http.Response) (Object, error) {
+func responseGoToGoby(t *Thread, goResp *http.Response) (Object, error) {
 	gobyResp := httpResponseClass.initializeInstance()
 
 	//attr_accessor :body, :status, :status_code, :protocol, :transfer_encoding, :http_version, :request_http_version, :request
@@ -211,19 +211,19 @@ func responseGoToGoby(t *thread, goResp *http.Response) (Object, error) {
 		return nil, err
 	}
 
-	gobyResp.instanceVariableSet("@body", t.vm.initStringObject(string(body)))
-	gobyResp.instanceVariableSet("@status_code", t.vm.initObjectFromGoType(goResp.StatusCode))
-	gobyResp.instanceVariableSet("@status", t.vm.initObjectFromGoType(goResp.Status))
-	gobyResp.instanceVariableSet("@protocol", t.vm.initObjectFromGoType(goResp.Proto))
-	gobyResp.instanceVariableSet("@transfer_encoding", t.vm.initObjectFromGoType(goResp.TransferEncoding))
+	gobyResp.InstanceVariableSet("@body", t.vm.initStringObject(string(body)))
+	gobyResp.InstanceVariableSet("@status_code", t.vm.InitObjectFromGoType(goResp.StatusCode))
+	gobyResp.InstanceVariableSet("@status", t.vm.InitObjectFromGoType(goResp.Status))
+	gobyResp.InstanceVariableSet("@protocol", t.vm.InitObjectFromGoType(goResp.Proto))
+	gobyResp.InstanceVariableSet("@transfer_encoding", t.vm.InitObjectFromGoType(goResp.TransferEncoding))
 
 	underHeaders := map[string]Object{}
 
 	for k, v := range goResp.Header {
-		underHeaders[k] = t.vm.initObjectFromGoType(v)
+		underHeaders[k] = t.vm.InitObjectFromGoType(v)
 	}
 
-	gobyResp.instanceVariableSet("@headers", t.vm.initHashObject(underHeaders))
+	gobyResp.InstanceVariableSet("@headers", t.vm.InitHashObject(underHeaders))
 
 	return gobyResp, nil
 }

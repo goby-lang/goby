@@ -50,15 +50,15 @@ func builtinStringClassMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "fmt",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) < 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect at least 1 argument. got=%v", strconv.Itoa(len(args)))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect at least 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
 					formatObj, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					format := formatObj.value
@@ -71,7 +71,7 @@ func builtinStringClassMethods() []*BuiltinMethodObject {
 					count := strings.Count(format, "%s")
 
 					if len(args[1:]) != count {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect %d string arguments. got=%d", count, len(args[1:]))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect %d string arguments. got=%d", count, len(args[1:]))
 					}
 
 					return t.vm.initStringObject(fmt.Sprintf(format, arguments...))
@@ -81,7 +81,7 @@ func builtinStringClassMethods() []*BuiltinMethodObject {
 		{
 			Name: "new",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
 				}
 			},
@@ -103,14 +103,14 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "+",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					leftValue := receiver.(*StringObject).value
 					r := args[0]
 					right, ok := r.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, r.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, r.Class().Name)
 					}
 
 					rightValue := right.value
@@ -128,18 +128,18 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "*",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					leftValue := receiver.(*StringObject).value
 					r := args[0]
 					right, ok := r.(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, r.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, r.Class().Name)
 					}
 
 					if right.value < 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Second argument must be greater than or equal to 0. got=%v", right.value)
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Second argument must be greater than or equal to 0. got=%v", right.value)
 					}
 
 					var result string
@@ -162,14 +162,14 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: ">",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					leftValue := receiver.(*StringObject).value
 					r := args[0]
 					right, ok := r.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, r.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, r.Class().Name)
 					}
 
 					rightValue := right.value
@@ -192,14 +192,14 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "<",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					leftValue := receiver.(*StringObject).value
 					r := args[0]
 					right, ok := r.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, r.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, r.Class().Name)
 					}
 
 					rightValue := right.value
@@ -223,7 +223,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "==",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					leftValue := receiver.(*StringObject).value
 					r := args[0]
@@ -254,9 +254,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			Name: "=~",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%d", len(args))
 					}
 
 					arg := args[0]
@@ -264,7 +264,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					re, ok := arg.(*RegexpObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.RegexpClass, arg.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.RegexpClass, arg.Class().Name)
 					}
 
 					text := receiver.(*StringObject).value
@@ -277,7 +277,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 
 					position := match.Groups()[0].Captures[0].Index
 
-					return t.vm.initIntegerObject(position)
+					return t.vm.InitIntegerObject(position)
 				}
 			},
 		},
@@ -294,26 +294,26 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			Name: "<=>",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					leftValue := receiver.(*StringObject).value
 					r := args[0]
 					right, ok := r.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, r.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, r.Class().Name)
 					}
 
 					rightValue := right.value
 
 					if leftValue < rightValue {
-						return t.vm.initIntegerObject(-1)
+						return t.vm.InitIntegerObject(-1)
 					}
 					if leftValue > rightValue {
-						return t.vm.initIntegerObject(1)
+						return t.vm.InitIntegerObject(1)
 					}
 
-					return t.vm.initIntegerObject(0)
+					return t.vm.InitIntegerObject(0)
 				}
 			},
 		},
@@ -328,7 +328,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "!=",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					leftValue := receiver.(*StringObject).value
 					right, ok := args[0].(*StringObject)
@@ -364,9 +364,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "[]",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%d", len(args))
 					}
 
 					str := receiver.(*StringObject).value
@@ -416,7 +416,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 
 						return t.vm.initStringObject(string([]rune(str)[start : end+1]))
 					default:
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, i.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, i.Class().Name)
 					}
 				}
 			},
@@ -440,9 +440,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "[]=",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 2 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 2 arguments. got=%v", strconv.Itoa(len(args)))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 2 arguments. got=%v", strconv.Itoa(len(args)))
 					}
 
 					str := receiver.(*StringObject).value
@@ -450,28 +450,28 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					index, ok := i.(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, i.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, i.Class().Name)
 					}
 
 					indexValue := index.value
 					strLength := utf8.RuneCountInString(str)
 
 					if strLength < indexValue {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Index value out of range. got=%v", strconv.Itoa(indexValue))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Index value out of range. got=%v", strconv.Itoa(indexValue))
 					}
 
 					r := args[1]
 					replaceStr, ok := r.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, r.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, r.Class().Name)
 					}
 					replaceStrValue := replaceStr.value
 
 					// Negative Index Case
 					if indexValue < 0 {
 						if -indexValue > strLength {
-							return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Index value out of range. got=%v", strconv.Itoa(indexValue))
+							return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Index value out of range. got=%v", strconv.Itoa(indexValue))
 						}
 						// Change to positive index to replace the string
 						indexValue += strLength
@@ -499,7 +499,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "capitalize",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					str := receiver.(*StringObject).value
 					start := string([]rune(str)[0])
@@ -522,7 +522,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "chop",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					str := receiver.(*StringObject).value
 					strLength := utf8.RuneCountInString(str)
@@ -543,9 +543,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "concat",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
 					str := receiver.(*StringObject).value
@@ -553,7 +553,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					concatStr, ok := c.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, c.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, c.Class().Name)
 					}
 
 					return t.vm.initStringObject(str + concatStr.value)
@@ -573,12 +573,12 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			Name: "count",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					str := receiver.(*StringObject).value
 
 					// Support UTF-8 Encoding
-					return t.vm.initIntegerObject(utf8.RuneCountInString(str))
+					return t.vm.InitIntegerObject(utf8.RuneCountInString(str))
 				}
 			},
 		},
@@ -595,9 +595,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "delete",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
 					str := receiver.(*StringObject).value
@@ -605,7 +605,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					deleteStr, ok := d.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, d.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, d.Class().Name)
 					}
 
 					return t.vm.initStringObject(strings.Replace(str, deleteStr.value, "", -1))
@@ -623,7 +623,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "downcase",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					str := receiver.(*StringObject).value
 
@@ -653,13 +653,13 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "each_byte",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 					}
 
 					if blockFrame == nil {
-						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 					str := receiver.(*StringObject).value
 					if blockIsEmpty(blockFrame) {
@@ -667,7 +667,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					for _, byte := range []byte(str) {
-						t.builtinMethodYield(blockFrame, t.vm.initIntegerObject(int(byte)))
+						t.builtinMethodYield(blockFrame, t.vm.InitIntegerObject(int(byte)))
 					}
 
 					return t.vm.initStringObject(str)
@@ -693,13 +693,13 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "each_char",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 					}
 
 					if blockFrame == nil {
-						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 
 					str := receiver.(*StringObject).value
@@ -730,13 +730,13 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "each_line",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 					}
 
 					if blockFrame == nil {
-						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 
 					str := receiver.(*StringObject).value
@@ -764,7 +764,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "empty?",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					str := receiver.(*StringObject).value
 
@@ -788,9 +788,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "end_with?",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
 					str := receiver.(*StringObject).value
@@ -798,7 +798,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					compareStr, ok := c.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, c.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, c.Class().Name)
 					}
 
 					compareStrValue := compareStr.value
@@ -828,9 +828,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "eql?",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
 					str := receiver.(*StringObject).value
@@ -856,9 +856,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [Bool]
 			Name: "include?",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
 					str := receiver.(*StringObject).value
@@ -866,7 +866,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					includeStr, ok := i.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, i.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, i.Class().Name)
 					}
 
 					if strings.Contains(str, includeStr.value) {
@@ -896,9 +896,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "insert",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 2 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 2 arguments. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 2 arguments. got=%d", len(args))
 					}
 
 					str := receiver.(*StringObject).value
@@ -906,7 +906,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					index, ok := i.(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, i.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, i.Class().Name)
 					}
 
 					indexValue := index.value
@@ -914,13 +914,13 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					insertStr, ok := ins.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, "Expect insert string to be String. got: %s", ins.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect insert string to be String. got: %s", ins.Class().Name)
 					}
 					strLength := utf8.RuneCountInString(str)
 
 					if indexValue < 0 {
 						if -indexValue > strLength+1 {
-							return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Index value out of range. got=%v", indexValue)
+							return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Index value out of range. got=%v", indexValue)
 						} else if -indexValue == strLength+1 {
 							return t.vm.initStringObject(insertStr.value + str)
 						}
@@ -929,7 +929,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if strLength < indexValue {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Index value out of range. got=%v", indexValue)
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Index value out of range. got=%v", indexValue)
 					}
 
 					// Support UTF-8 Encoding
@@ -950,12 +950,12 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			Name: "length",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					str := receiver.(*StringObject).value
 
 					// Support UTF-8 Encoding
-					return t.vm.initIntegerObject(utf8.RuneCountInString(str))
+					return t.vm.InitIntegerObject(utf8.RuneCountInString(str))
 				}
 			},
 		},
@@ -976,9 +976,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "ljust",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 && len(args) != 2 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1..2 arguments. got=%v", strconv.Itoa(len(args)))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1..2 arguments. got=%v", strconv.Itoa(len(args)))
 					}
 
 					str := receiver.(*StringObject).value
@@ -987,7 +987,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					strLength, ok := l.(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, "Expect justify width to be Integer. got: %s", l.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect justify width to be Integer. got: %s", l.Class().Name)
 					}
 
 					strLengthValue := strLength.value
@@ -1000,7 +1000,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 						padStr, ok := p.(*StringObject)
 
 						if !ok {
-							return t.vm.initErrorObject(errors.TypeError, sourceLine, "Expect padding string to be String. got: %s", p.Class().Name)
+							return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect padding string to be String. got: %s", p.Class().Name)
 						}
 
 						padStrValue = padStr.value
@@ -1033,16 +1033,16 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [MatchData]
 			Name: "match",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%d", len(args))
 					}
 
 					arg := args[0]
 					regexpObj, ok := arg.(*RegexpObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.RegexpClass, arg.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.RegexpClass, arg.Class().Name)
 					}
 
 					re := regexpObj.regexp
@@ -1077,14 +1077,14 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "replace",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 2 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 2 arguments. got=%v", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 2 arguments. got=%v", len(args))
 					}
 					r := args[1]
 					replacement, ok := r.(*StringObject)
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, "Expect replacement to be String. got: %s", r.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect replacement to be String. got: %s", r.Class().Name)
 					}
 
 					var result string
@@ -1098,10 +1098,10 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 						pattern := args[0].(*RegexpObject)
 						result, err = pattern.regexp.Replace(target, replacement.value, 0, -1)
 						if err != nil {
-							return t.vm.initErrorObject(errors.TypeError, sourceLine, "Replacement failure with the Regexp. got: %s", args[0].Class().Name)
+							return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Replacement failure with the Regexp. got: %s", args[0].Class().Name)
 						}
 					default:
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, "Expect pattern to be String or Regexp. got: %s", args[0].Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect pattern to be String or Regexp. got: %s", args[0].Class().Name)
 					}
 
 					return t.vm.initStringObject(result)
@@ -1125,14 +1125,14 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "replace_once",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 2 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 2 arguments. got=%v", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 2 arguments. got=%v", len(args))
 					}
 					r := args[1]
 					replacement, ok := r.(*StringObject)
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, "Expect replacement to be String. got: %s", r.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect replacement to be String. got: %s", r.Class().Name)
 					}
 
 					var result string
@@ -1146,10 +1146,10 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 						pattern := args[0].(*RegexpObject)
 						result, err = pattern.regexp.Replace(target, replacement.value, 0, 1)
 						if err != nil {
-							return t.vm.initErrorObject(errors.TypeError, sourceLine, "Replacement failure with the Regexp. got: %s", args[0].Class().Name)
+							return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Replacement failure with the Regexp. got: %s", args[0].Class().Name)
 						}
 					default:
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, "Expect pattern to be String or Regexp. got: %s", args[0].Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect pattern to be String or Regexp. got: %s", args[0].Class().Name)
 					}
 
 					return t.vm.initStringObject(result)
@@ -1169,7 +1169,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "reverse",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					str := receiver.(*StringObject).value
 
@@ -1200,9 +1200,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "rjust",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 && len(args) != 2 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1..2 arguments. got=%v", strconv.Itoa(len(args)))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1..2 arguments. got=%v", strconv.Itoa(len(args)))
 					}
 
 					str := receiver.(*StringObject).value
@@ -1210,7 +1210,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					strLength, ok := l.(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, "Expect justify width to be Integer. got: %s", l.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect justify width to be Integer. got: %s", l.Class().Name)
 					}
 
 					strLengthValue := strLength.value
@@ -1223,7 +1223,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 						padStr, ok := p.(*StringObject)
 
 						if !ok {
-							return t.vm.initErrorObject(errors.TypeError, sourceLine, "Expect padding string to be String. got: %s", p.Class().Name)
+							return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect padding string to be String. got: %s", p.Class().Name)
 						}
 
 						padStrValue = padStr.value
@@ -1262,12 +1262,12 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			Name: "size",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					str := receiver.(*StringObject).value
 
 					// Support UTF-8 Encoding
-					return t.vm.initIntegerObject(utf8.RuneCountInString(str))
+					return t.vm.InitIntegerObject(utf8.RuneCountInString(str))
 				}
 			},
 		},
@@ -1311,9 +1311,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "slice",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
 					str := receiver.(*StringObject).value
@@ -1372,7 +1372,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.initStringObject(string([]rune(str)[intValue]))
 
 					default:
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, "Expect slice range to be Range or Integer. got: %s", args[0].Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect slice range to be Range or Integer. got: %s", args[0].Class().Name)
 					}
 				}
 			},
@@ -1390,16 +1390,16 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "split",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
 					s := args[0]
 					seperator, ok := s.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, s.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, s.Class().Name)
 					}
 
 					str := receiver.(*StringObject).value
@@ -1410,7 +1410,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 						elements = append(elements, t.vm.initStringObject(arr[i]))
 					}
 
-					return t.vm.initArrayObject(elements)
+					return t.vm.InitArrayObject(elements)
 				}
 			},
 		},
@@ -1427,9 +1427,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "start_with",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
 					str := receiver.(*StringObject).value
@@ -1437,7 +1437,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					compareStr, ok := c.(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, c.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, c.Class().Name)
 					}
 
 					compareStrValue := compareStr.value
@@ -1468,7 +1468,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "strip",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					str := receiver.(*StringObject).value
 
@@ -1500,7 +1500,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "to_a",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					str := receiver.(*StringObject)
 					strLength := utf8.RuneCountInString(str.value)
@@ -1510,7 +1510,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 						elems = append(elems, t.vm.initStringObject(string([]rune(str.value)[i])))
 					}
 
-					return t.vm.initArrayObject(elems)
+					return t.vm.InitArrayObject(elems)
 				}
 			},
 		},
@@ -1526,17 +1526,17 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "to_d",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%v", strconv.Itoa(len(args)))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
 					str := receiver.(*StringObject).value
 
 					de, err := new(Decimal).SetString(str)
 					if err == false {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Invalid numeric string. got=%v", str)
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Invalid numeric string. got=%v", str)
 					}
 
 					return t.vm.initDecimalObject(de)
@@ -1559,7 +1559,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [Float]
 			Name: "to_f",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					str := receiver.(*StringObject).value
 
 					for i, char := range str {
@@ -1592,13 +1592,13 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			Name: "to_i",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					str := receiver.(*StringObject).value
 					parsedStr, err := strconv.ParseInt(str, 10, 0)
 
 					if err == nil {
-						return t.vm.initIntegerObject(int(parsedStr))
+						return t.vm.InitIntegerObject(int(parsedStr))
 					}
 
 					var digits string
@@ -1614,10 +1614,10 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 
 					if len(digits) > 0 {
 						parsedStr, _ = strconv.ParseInt(digits, 10, 0)
-						return t.vm.initIntegerObject(int(parsedStr))
+						return t.vm.InitIntegerObject(int(parsedStr))
 					}
 
-					return t.vm.initIntegerObject(0)
+					return t.vm.InitIntegerObject(0)
 				}
 			},
 		},
@@ -1631,7 +1631,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "to_s",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					str := receiver.(*StringObject).value
 
@@ -1649,7 +1649,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "upcase",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					str := receiver.(*StringObject).value
 
@@ -1660,7 +1660,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_bytes",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*StringObject)
 					return t.vm.initGoObject([]byte(r.value))
 				}
@@ -1700,7 +1700,7 @@ func (s *StringObject) toString() string {
 }
 
 // toJSON just delegates to toString
-func (s *StringObject) toJSON(t *thread) string {
+func (s *StringObject) toJSON(t *Thread) string {
 	return strconv.Quote(s.value)
 }
 

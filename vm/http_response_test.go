@@ -21,7 +21,7 @@ func TestHTTPResponseObject(t *testing.T) {
 
 	v := initTestVM()
 	evaluated := v.testEval(t, input, getFilename())
-	verifyExpected(t, 0, evaluated, "test")
+	VerifyExpected(t, 0, evaluated, "test")
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
 }
@@ -42,7 +42,7 @@ Net::HTTP.get("%s")
 
 	v := initTestVM()
 	evaluated := v.testEval(t, testScript, getFilename())
-	verifyExpected(t, 0, evaluated, expected)
+	VerifyExpected(t, 0, evaluated, expected)
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
 }
@@ -68,7 +68,7 @@ Net::HTTP.get("%s", "path")
 
 	v := initTestVM()
 	evaluated := v.testEval(t, testScript, getFilename())
-	verifyExpected(t, 0, evaluated, expected)
+	VerifyExpected(t, 0, evaluated, expected)
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
 }

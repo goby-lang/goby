@@ -17,11 +17,11 @@ func InitIssueReportVM(dir string, args []string) (*VM, error) {
 
 // PrintError prints an error report string given a vm which evaluated to and Error object
 func PrintError(v *VM) {
-	if v.mainThread.stack.top() == nil {
+	if v.mainThread.Stack.top() == nil {
 		fmt.Println("No error detected: stack empty")
 		return
 	}
-	eval := v.mainThread.stack.top().Target
+	eval := v.mainThread.Stack.top().Target
 	err, ok := eval.(*Error)
 	if !ok {
 		fmt.Println("No error detected")

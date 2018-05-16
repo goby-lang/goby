@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
 )
@@ -59,9 +60,9 @@ func builtinBlockClassMethods() []*BuiltinMethodObject {
 			// @return [Block]
 			Name: "new",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if blockFrame == nil {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Can't initialize block object without block argument")
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Can't initialize block object without block argument")
 					}
 
 					return t.vm.initBlockObject(blockFrame.instructionSet, blockFrame.ep, blockFrame.self)
@@ -113,7 +114,7 @@ func builtinBlockInstanceMethods() []*BuiltinMethodObject {
 			// @return [Object]
 			Name: "call",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					block := receiver.(*BlockObject)
 					c := newNormalCallFrame(block.instructionSet, block.instructionSet.filename, sourceLine)
 					c.ep = block.ep
@@ -160,7 +161,7 @@ func (bo *BlockObject) toString() string {
 }
 
 // toJSON just delegates to toString
-func (bo *BlockObject) toJSON(t *thread) string {
+func (bo *BlockObject) toJSON(t *Thread) string {
 	return bo.toString()
 }
 

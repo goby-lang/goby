@@ -31,7 +31,7 @@ func builtinBooleanClassMethods() []*BuiltinMethodObject {
 		{
 			Name: "new",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
 				}
 			},
@@ -75,7 +75,7 @@ func (b *BooleanObject) toString() string {
 }
 
 // toJSON just delegates to `toString`
-func (b *BooleanObject) toJSON(t *thread) string {
+func (b *BooleanObject) toJSON(t *Thread) string {
 	return b.toString()
 }
 

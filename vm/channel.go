@@ -19,7 +19,7 @@ func builtinChannelClassMethods() []*BuiltinMethodObject {
 		{
 			Name: "new",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					c := &ChannelObject{baseObj: &baseObj{class: t.vm.topLevelClass(classes.ChannelClass)}, Chan: make(chan int)}
 					return c
 				}
@@ -34,7 +34,7 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "close",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					c := receiver.(*ChannelObject)
 
 					close(c.Chan)
@@ -46,7 +46,7 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "deliver",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					id := t.vm.channelObjectMap.storeObj(args[0])
 
 					c := receiver.(*ChannelObject)
@@ -60,7 +60,7 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "receive",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					c := receiver.(*ChannelObject)
 
 					num := <-c.Chan
@@ -96,7 +96,7 @@ func (co *ChannelObject) toString() string {
 }
 
 // toJSON just delegates to toString
-func (co *ChannelObject) toJSON(t *thread) string {
+func (co *ChannelObject) toJSON(t *Thread) string {
 	return co.toString()
 }
 

@@ -2,8 +2,9 @@ package vm
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/compiler/bytecode"
 	"strconv"
+
+	"github.com/goby-lang/goby/compiler/bytecode"
 )
 
 // Object represents all objects in Goby, including Array, Integer or even Method and Error.
@@ -14,10 +15,10 @@ type Object interface {
 	SetSingletonClass(*RClass)
 	findMethod(string) Object
 	toString() string
-	toJSON(t *thread) string
+	toJSON(t *Thread) string
 	id() int
-	instanceVariableGet(string) (Object, bool)
-	instanceVariableSet(string, Object) Object
+	InstanceVariableGet(string) (Object, bool)
+	InstanceVariableSet(string, Object) Object
 	isTruthy() bool
 }
 
@@ -49,7 +50,7 @@ func (b *baseObj) SetSingletonClass(c *RClass) {
 	b.singletonClass = c
 }
 
-func (b *baseObj) instanceVariableGet(name string) (Object, bool) {
+func (b *baseObj) InstanceVariableGet(name string) (Object, bool) {
 	v, ok := b.InstanceVariables.get(name)
 
 	if !ok {
@@ -59,7 +60,7 @@ func (b *baseObj) instanceVariableGet(name string) (Object, bool) {
 	return v, true
 }
 
-func (b *baseObj) instanceVariableSet(name string, value Object) Object {
+func (b *baseObj) InstanceVariableSet(name string, value Object) Object {
 	b.InstanceVariables.set(name, value)
 
 	return value
@@ -117,14 +118,14 @@ func (ro *RObject) toString() string {
 }
 
 // toJSON just delegates to toString
-func (ro *RObject) toJSON(t *thread) string {
+func (ro *RObject) toJSON(t *Thread) string {
 	customToJSONMethod := ro.findMethod("to_json").(*MethodObject)
 
 	if customToJSONMethod != nil {
-		t.stack.push(&Pointer{Target: ro})
-		callObj := newCallObject(ro, customToJSONMethod, t.sp, 0, &bytecode.ArgSet{}, nil, customToJSONMethod.instructionSet.instructions[0].sourceLine)
+		t.Stack.Push(&Pointer{Target: ro})
+		callObj := newCallObject(ro, customToJSONMethod, t.Stack.pointer, 0, &bytecode.ArgSet{}, nil, customToJSONMethod.instructionSet.instructions[0].sourceLine)
 		t.evalMethodObject(callObj, customToJSONMethod.instructionSet.instructions[0].sourceLine)
-		result := t.stack.pop().Target
+		result := t.Stack.Pop().Target
 		return result.toString()
 	}
 	return ro.toString()

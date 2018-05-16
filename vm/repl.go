@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+
 	"github.com/goby-lang/goby/compiler/bytecode"
 )
 
@@ -58,7 +59,7 @@ func (vm *VM) REPLExec(sets []*bytecode.InstructionSet) {
 
 // GetExecResult returns stack's top most value. Normally it's used in tests.
 func (vm *VM) GetExecResult() Object {
-	top := vm.mainThread.stack.top()
+	top := vm.mainThread.Stack.top()
 	if top != nil {
 		return top.Target
 	}
@@ -67,7 +68,7 @@ func (vm *VM) GetExecResult() Object {
 
 // GetREPLResult returns strings that should be showed after each evaluation.
 func (vm *VM) GetREPLResult() string {
-	top := vm.mainThread.stack.pop()
+	top := vm.mainThread.Stack.Pop()
 
 	if top != nil {
 		return top.Target.toString()

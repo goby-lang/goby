@@ -24,7 +24,7 @@ func builtinArrayClassMethods() []*BuiltinMethodObject {
 		{
 			Name: "new",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
 				}
 			},
@@ -86,7 +86,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "[]",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					arr := receiver.(*ArrayObject)
 					return arr.index(t, args, sourceLine)
 				}
@@ -107,9 +107,9 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "*",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 arguments. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 arguments. got=%d", len(args))
 					}
 
 					arr := receiver.(*ArrayObject)
@@ -117,7 +117,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					copiesNumber, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 					}
 
 					return arr.concatenateCopies(t, copiesNumber)
@@ -136,23 +136,23 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "+",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 arguments. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 arguments. got=%d", len(args))
 					}
 
 					otherArrayArg := args[0]
 					otherArray, ok := otherArrayArg.(*ArrayObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.ArrayClass, args[0].Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.ArrayClass, args[0].Class().Name)
 					}
 
 					selfArray := receiver.(*ArrayObject)
 
 					newArrayelements := append(selfArray.Elements, otherArray.Elements...)
 
-					newArray := t.vm.initArrayObject(newArrayelements)
+					newArray := t.vm.InitArrayObject(newArrayelements)
 
 					return newArray
 				}
@@ -229,18 +229,18 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "[]=",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					// First argument is an index: there exists two cases which will be described in the following code
 					if len(args) != 2 && len(args) != 3 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 2..3 arguments. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 2..3 arguments. got=%d", len(args))
 					}
 
 					i := args[0]
 					index, ok := i.(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 					}
 
 					indexValue := index.value
@@ -253,7 +253,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						// Negative index value too small
 						if indexValue < 0 {
 							if arr.normalizeIndex(index) == -1 {
-								return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Index value %d too small for array. minimum: %d", indexValue, -arr.length())
+								return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Index value %d too small for array. minimum: %d", indexValue, -arr.length())
 							}
 							indexValue = arr.normalizeIndex(index)
 						}
@@ -263,13 +263,13 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 
 						// Second argument must be an integer
 						if !ok {
-							return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[1].Class().Name)
+							return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[1].Class().Name)
 						}
 
 						countValue := count.value
 						// Second argument must be a positive value
 						if countValue < 0 {
-							return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect second argument greater than or equal 0. got: %d", countValue)
+							return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect second argument greater than or equal 0. got: %d", countValue)
 						}
 
 						a := args[2]
@@ -315,7 +315,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					// Negative index value condition
 					if indexValue < 0 {
 						if len(arr.Elements) < -indexValue {
-							return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Index value %d too small for array. minimum: %d", indexValue, -arr.length())
+							return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Index value %d too small for array. minimum: %d", indexValue, -arr.length())
 						}
 						arr.Elements[len(arr.Elements)+indexValue] = args[1]
 						return arr.Elements[len(arr.Elements)+indexValue]
@@ -369,11 +369,11 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "any?",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					arr := receiver.(*ArrayObject)
 
 					if blockFrame == nil {
-						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 
 					if blockIsEmpty(blockFrame) {
@@ -412,9 +412,9 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Object]
 			Name: "at",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 arguments. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 arguments. got=%d", len(args))
 					}
 					arr := receiver.(*ArrayObject)
 					return arr.index(t, args, sourceLine)
@@ -433,9 +433,9 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "clear",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 					}
 
 					arr := receiver.(*ArrayObject)
@@ -458,14 +458,14 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "concat",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					arr := receiver.(*ArrayObject)
 
 					for _, arg := range args {
 						addAr, ok := arg.(*ArrayObject)
 
 						if !ok {
-							return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.ArrayClass, arg.Class().Name)
+							return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.ArrayClass, arg.Class().Name)
 						}
 
 						for _, el := range addAr.Elements {
@@ -496,17 +496,17 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			Name: "count",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					arr := receiver.(*ArrayObject)
 					var count int
 
 					if len(args) > 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument, got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument, got=%d", len(args))
 					}
 
 					if blockFrame != nil {
 						if blockIsEmpty(blockFrame) {
-							return t.vm.initIntegerObject(0)
+							return t.vm.InitIntegerObject(0)
 						}
 						if len(arr.Elements) == 0 {
 							t.callFrameStack.pop()
@@ -519,11 +519,11 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 							}
 						}
 
-						return t.vm.initIntegerObject(count)
+						return t.vm.InitIntegerObject(count)
 					}
 
 					if len(args) == 0 {
-						return t.vm.initIntegerObject(len(arr.Elements))
+						return t.vm.InitIntegerObject(len(arr.Elements))
 					}
 
 					arg := args[0]
@@ -552,7 +552,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						}
 					}
 
-					return t.vm.initIntegerObject(count)
+					return t.vm.InitIntegerObject(count)
 				}
 			},
 		},
@@ -573,16 +573,16 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Object]
 			Name: "delete_at",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%d", len(args))
 					}
 
 					i := args[0]
 					index, ok := i.(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 					}
 
 					arr := receiver.(*ArrayObject)
@@ -618,9 +618,9 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Object]
 			Name: "dig",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) == 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expected 1+ arguments, got 0")
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 1+ arguments, got 0")
 					}
 
 					array := receiver.(*ArrayObject)
@@ -652,13 +652,13 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "each",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 					}
 
 					if blockFrame == nil {
-						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 
 					arr := receiver.(*ArrayObject)
@@ -701,13 +701,13 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "each_index",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 					}
 
 					if blockFrame == nil {
-						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 
 					arr := receiver.(*ArrayObject)
@@ -721,7 +721,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					for i := range arr.Elements {
-						t.builtinMethodYield(blockFrame, t.vm.initIntegerObject(i))
+						t.builtinMethodYield(blockFrame, t.vm.InitIntegerObject(i))
 					}
 					return arr
 				}
@@ -740,10 +740,10 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "empty?",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 					}
 
 					arr := receiver.(*ArrayObject)
@@ -770,9 +770,9 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Object]
 			Name: "first",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) > 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0..1 argument. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0..1 argument. got=%d", len(args))
 					}
 
 					arr := receiver.(*ArrayObject)
@@ -789,15 +789,15 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					arg, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 					}
 
 					if arg.value < 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect argument to be positive value. got=%d", arg.value)
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect argument to be positive value. got=%d", arg.value)
 					}
 
 					if arrLength > arg.value {
-						return t.vm.initArrayObject(arr.Elements[:arg.value])
+						return t.vm.InitArrayObject(arr.Elements[:arg.value])
 					}
 					return arr
 				}
@@ -819,16 +819,16 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "flatten",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					arr := receiver.(*ArrayObject)
 
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 					}
 
 					newElements := arr.flatten()
 
-					return t.vm.initArrayObject(newElements)
+					return t.vm.InitArrayObject(newElements)
 				}
 			},
 		},
@@ -848,7 +848,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "join",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					arr := receiver.(*ArrayObject)
 
 					var sep string
@@ -858,12 +858,12 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						arg, ok := args[0].(*StringObject)
 
 						if !ok {
-							return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+							return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 						}
 
 						sep = arg.value
 					} else {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 or 1 argument. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 or 1 argument. got=%d", len(args))
 					}
 
 					elements := []string{}
@@ -889,9 +889,9 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Object]
 			Name: "last",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) > 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0..1 argument. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0..1 argument. got=%d", len(args))
 					}
 
 					arr := receiver.(*ArrayObject)
@@ -904,15 +904,15 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					arg, ok := args[0].(*IntegerObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 					}
 
 					if arg.value < 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect argument to be positive value. got=%d", arg.value)
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect argument to be positive value. got=%d", arg.value)
 					}
 
 					if arrLength > arg.value {
-						return t.vm.initArrayObject(arr.Elements[arrLength-arg.value : arrLength])
+						return t.vm.InitArrayObject(arr.Elements[arrLength-arg.value : arrLength])
 					}
 					return arr
 				}
@@ -929,14 +929,14 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			Name: "length",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 					}
 
 					arr := receiver.(*ArrayObject)
-					return t.vm.initIntegerObject(arr.length())
+					return t.vm.InitIntegerObject(arr.length())
 				}
 			},
 		},
@@ -965,12 +965,12 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "map",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					arr := receiver.(*ArrayObject)
 					var elements = make([]Object, len(arr.Elements))
 
 					if blockFrame == nil {
-						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 
 					// If it's an empty array, pop the block's call frame
@@ -989,7 +989,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						}
 					}
 
-					return t.vm.initArrayObject(elements)
+					return t.vm.InitArrayObject(elements)
 				}
 			},
 		},
@@ -1006,10 +1006,10 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Object]
 			Name: "pop",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 					}
 
 					arr := receiver.(*ArrayObject)
@@ -1038,7 +1038,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "push",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					arr := receiver.(*ArrayObject)
 					return arr.push(args)
@@ -1078,10 +1078,10 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Object]
 			Name: "reduce",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					arr := receiver.(*ArrayObject)
 					if blockFrame == nil {
-						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 
 					// If it's an empty array, pop the block's call frame
@@ -1102,7 +1102,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						prev = args[0]
 						start = 0
 					} else {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 or 1 argument. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 or 1 argument. got=%d", len(args))
 					}
 
 					for i := start; i < len(arr.Elements); i++ {
@@ -1126,9 +1126,9 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "reverse",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 					}
 
 					arr := receiver.(*ArrayObject)
@@ -1157,13 +1157,13 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "reverse_each",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 					}
 
 					if blockFrame == nil {
-						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 
 					arr := receiver.(*ArrayObject)
@@ -1212,20 +1212,20 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "rotate",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) > 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0..1 argument. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0..1 argument. got=%d", len(args))
 					}
 					var rotate int
 					arr := receiver.(*ArrayObject)
-					rotArr := t.vm.initArrayObject(arr.Elements)
+					rotArr := t.vm.InitArrayObject(arr.Elements)
 
 					if len(args) == 0 {
 						rotate = 1
 					} else {
 						arg, ok := args[0].(*IntegerObject)
 						if !ok {
-							return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+							return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 						}
 						rotate = arg.value
 					}
@@ -1264,20 +1264,20 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "select",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) > 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 					}
 
 					arr := receiver.(*ArrayObject)
 					var elements []Object
 
 					if blockFrame == nil {
-						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 
 					if blockIsEmpty(blockFrame) {
-						return t.vm.initArrayObject(elements)
+						return t.vm.InitArrayObject(elements)
 					}
 
 					// If it's an empty array, pop the block's call frame
@@ -1292,7 +1292,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						}
 					}
 
-					return t.vm.initArrayObject(elements)
+					return t.vm.InitArrayObject(elements)
 				}
 			},
 		},
@@ -1309,9 +1309,9 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Object]
 			Name: "shift",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 					}
 
 					arr := receiver.(*ArrayObject)
@@ -1335,7 +1335,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "unshift",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					arr := receiver.(*ArrayObject)
 					return arr.unshift(args)
 				}
@@ -1357,7 +1357,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "values_at",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					arr := receiver.(*ArrayObject)
 					var elements = make([]Object, len(args))
 
@@ -1365,7 +1365,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						index, ok := arg.(*IntegerObject)
 
 						if !ok {
-							return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, arg.Class().Name)
+							return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, arg.Class().Name)
 						}
 
 						if index.value >= len(arr.Elements) {
@@ -1379,7 +1379,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						}
 					}
 
-					return t.vm.initArrayObject(elements)
+					return t.vm.InitArrayObject(elements)
 				}
 			},
 		},
@@ -1390,7 +1390,8 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 
 // Functions for initialization -----------------------------------------
 
-func (vm *VM) initArrayObject(elements []Object) *ArrayObject {
+// InitArrayObject returns a new object with the given elemnts
+func (vm *VM) InitArrayObject(elements []Object) *ArrayObject {
 	return &ArrayObject{
 		baseObj:  &baseObj{class: vm.topLevelClass(classes.ArrayClass)},
 		Elements: elements,
@@ -1436,7 +1437,7 @@ func (a *ArrayObject) toString() string {
 }
 
 // toJSON returns the object's elements as the JSON string format
-func (a *ArrayObject) toJSON(t *thread) string {
+func (a *ArrayObject) toJSON(t *Thread) string {
 	var out bytes.Buffer
 	elements := []string{}
 	for _, e := range a.Elements {
@@ -1451,7 +1452,7 @@ func (a *ArrayObject) toJSON(t *thread) string {
 }
 
 // concatenateCopies returns a array composed of N copies of the array
-func (a *ArrayObject) concatenateCopies(t *thread, n *IntegerObject) Object {
+func (a *ArrayObject) concatenateCopies(t *Thread, n *IntegerObject) Object {
 	aLen := len(a.Elements)
 	result := make([]Object, 0, aLen*n.value)
 
@@ -1459,16 +1460,16 @@ func (a *ArrayObject) concatenateCopies(t *thread, n *IntegerObject) Object {
 		result = append(result, a.Elements...)
 	}
 
-	return t.vm.initArrayObject(result)
+	return t.vm.InitArrayObject(result)
 }
 
 // recursive indexed access - see ArrayObject#dig documentation.
-func (a *ArrayObject) dig(t *thread, keys []Object, sourceLine int) Object {
+func (a *ArrayObject) dig(t *Thread, keys []Object, sourceLine int) Object {
 	currentKey := keys[0]
 	intCurrentKey, ok := currentKey.(*IntegerObject)
 
 	if !ok {
-		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, currentKey.Class().Name)
+		return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, currentKey.Class().Name)
 	}
 
 	normalizedIndex := a.normalizeIndex(intCurrentKey)
@@ -1487,16 +1488,16 @@ func (a *ArrayObject) dig(t *thread, keys []Object, sourceLine int) Object {
 	diggableCurrentValue, ok := currentValue.(Diggable)
 
 	if !ok {
-		return t.vm.initErrorObject(errors.TypeError, sourceLine, "Expect target to be Diggable, got %s", currentValue.Class().Name)
+		return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect target to be Diggable, got %s", currentValue.Class().Name)
 	}
 
 	return diggableCurrentValue.dig(t, nextKeys, sourceLine)
 }
 
 // Retrieves an object in an array using Integer index; common to `[]` and `at()`.
-func (a *ArrayObject) index(t *thread, args []Object, sourceLine int) Object {
+func (a *ArrayObject) index(t *Thread, args []Object, sourceLine int) Object {
 	if len(args) > 2 || len(args) == 0 {
-		return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1..2 arguments. got=%d", len(args))
+		return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1..2 arguments. got=%d", len(args))
 	}
 
 	i := args[0]
@@ -1504,11 +1505,11 @@ func (a *ArrayObject) index(t *thread, args []Object, sourceLine int) Object {
 	arrLength := a.length()
 
 	if !ok {
-		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+		return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 	}
 
 	if index.value < 0 && index.value < -arrLength {
-		return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Index value %d too small for array. minimum: %d", index.value, -arrLength)
+		return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Index value %d too small for array. minimum: %d", index.value, -arrLength)
 	}
 
 	/* Validation for the second argument if exists */
@@ -1517,10 +1518,10 @@ func (a *ArrayObject) index(t *thread, args []Object, sourceLine int) Object {
 		count, ok := j.(*IntegerObject)
 
 		if !ok {
-			return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[1].Class().Name)
+			return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[1].Class().Name)
 		}
 		if count.value < 0 {
-			return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect second argument greater than or equal 0. got: %d", count.value)
+			return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect second argument greater than or equal 0. got: %d", count.value)
 		}
 
 		/*
@@ -1530,7 +1531,7 @@ func (a *ArrayObject) index(t *thread, args []Object, sourceLine int) Object {
 		 *  a[5, 5] #=> []
 		 */
 		if index.value > 0 && index.value == arrLength {
-			return t.vm.initArrayObject([]Object{})
+			return t.vm.InitArrayObject([]Object{})
 		}
 	}
 
@@ -1545,9 +1546,9 @@ func (a *ArrayObject) index(t *thread, args []Object, sourceLine int) Object {
 		count, _ := j.(*IntegerObject)
 
 		if normalizedIndex+count.value > arrLength {
-			return t.vm.initArrayObject(a.Elements[normalizedIndex:])
+			return t.vm.InitArrayObject(a.Elements[normalizedIndex:])
 		}
-		return t.vm.initArrayObject(a.Elements[normalizedIndex : normalizedIndex+count.value])
+		return t.vm.InitArrayObject(a.Elements[normalizedIndex : normalizedIndex+count.value])
 	}
 
 	return a.Elements[normalizedIndex]

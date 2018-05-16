@@ -12,6 +12,7 @@ import (
 	"github.com/goby-lang/goby/compiler/parser"
 	"github.com/goby-lang/goby/igb"
 	"github.com/goby-lang/goby/vm"
+	_ "github.com/goby-lang/goby/native/db"
 	"github.com/pkg/profile"
 )
 

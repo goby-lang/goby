@@ -3,6 +3,7 @@ package vm
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/vm/classes"
 )
@@ -33,7 +34,7 @@ func (m *MethodObject) toString() string {
 	return out.String()
 }
 
-func (m *MethodObject) toJSON(t *thread) string {
+func (m *MethodObject) toJSON(t *Thread) string {
 	return m.toString()
 }
 
@@ -75,7 +76,26 @@ type BuiltinMethodObject struct {
 	Fn   func(receiver Object, sourceLine int) builtinMethodBody
 }
 
-type builtinMethodBody func(*thread, []Object, *normalCallFrame) Object
+// Method is a callable function
+type Method = func(t *Thread, args []Object) Object
+
+// MethodBuilder constructs an instance of a method
+type MethodBuilder = func(receiver Object, line int) Method
+
+// ExternalBuiltinMethod is a function that builds a BuiltinMethodObject from an external function
+func ExternalBuiltinMethod(name string, m MethodBuilder) *BuiltinMethodObject {
+	return &BuiltinMethodObject{
+		Name: name,
+		Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+			f := m(receiver, sourceLine)
+			return func(t *Thread, args []Object, c *normalCallFrame) Object {
+				return f(t, args)
+			}
+		},
+	}
+}
+
+type builtinMethodBody func(*Thread, []Object, *normalCallFrame) Object
 
 // Polymorphic helper functions -----------------------------------------
 
@@ -85,7 +105,7 @@ func (bim *BuiltinMethodObject) toString() string {
 }
 
 // toJSON just delegates to `toString`
-func (bim *BuiltinMethodObject) toJSON(t *thread) string {
+func (bim *BuiltinMethodObject) toJSON(t *Thread) string {
 	return bim.toString()
 }
 
