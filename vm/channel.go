@@ -12,6 +12,10 @@ import (
 // You should always use channel objects for safe communications between threads.
 // `Channel#new` is available.
 //
+// Note that channels are not like files and you don't need to explicitly close them (e.g.: exiting a loop).
+// If you `close` the closed channel, Goland will cause a panic. TODO: this panic should be avoided.
+// See https://tour.golang.org/concurrency/4
+//
 // ```ruby
 // def f(from)
 //   i = 0
@@ -46,7 +50,7 @@ import (
 // i = 0
 // thread do
 //   i += 1
-//   c.deliver(i)   # sends `i` to channel `c`
+//   c.deliver(i)     # sends `i` to channel `c`
 // end
 //
 // # If we put a bare `i += 1` here, then it will execute along with other thread,
@@ -55,7 +59,7 @@ import (
 // c.receive
 // i += 1
 //
-// c.close           # you should call this to close the channel explicitly
+// c.close           # Redundant: just for explanation and you don't need to call this here
 // ```
 type ChannelObject struct {
 	*baseObj
@@ -89,8 +93,11 @@ func builtinChannelClassMethods() []*BuiltinMethodObject {
 func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
-			// Closes and releases the channel.
-			// You should explicitly call `close` when threading is finished.
+			// Just to close and the channel to declare no more objects will be sent.
+			// You don't need to call `close` explicitly unless you must notify that no more objects will be sent.
+			// Channels are not like files. When you call `close` against the closed channel, Golang will cause a panic.
+			// TODO: this panic should be avoided.
+			// See https://tour.golang.org/concurrency/4
 			//
 			// ```ruby
 			// c = Channel.new
