@@ -170,9 +170,11 @@ func TestBangPrefixMethodCall(t *testing.T) {
 		{"!5", false},
 		{"!true", false},
 		{"!false", true},
+		{`!nil`, true},
+		{"!!5", true},
 		{"!!true", true},
 		{"!!false", false},
-		{"!!5", true},
+		{`!!nil`, false},
 		{`!123.nil?`, true},
 	}
 

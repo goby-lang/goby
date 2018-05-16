@@ -712,11 +712,13 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Inverts the boolean value.
+			// Inverts the boolean value. Any objects other than `nil` and `false` are `true`, thus returns `false`.
 			//
 			// ```ruby
 			// !true  # => false
 			// !false # => true
+			// !nil   # => true
+			// !555   # => false
 			// ```
 			//
 			// @param object [Object] object that return boolean value to invert
@@ -725,7 +727,15 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
-					return FALSE
+					rightValue, ok := receiver.(*BooleanObject)
+					if !ok {
+						return FALSE
+					}
+
+					if rightValue.value {
+						return FALSE
+					}
+					return TRUE
 				}
 			},
 		},

@@ -37,6 +37,18 @@ end
 f = Foo.new
 f.exec_block(b)
 `, 1000},
+		{`
+bl = Block.new do |array|
+  array.reduce do |sum, i|
+    sum + i
+  end
+end
+bl.call([1, 2, 3, 4])`, 10},
+		{`
+p = Block.new do |i, j, k|
+  [i, j, k]
+end
+p.call(1, 2, 3, 4, 5)`, []interface{}{1, 2, 3}},
 	}
 
 	for i, tt := range tests {

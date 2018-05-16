@@ -1775,13 +1775,21 @@ func TestArrayRotateMethod(t *testing.T) {
 		expected []interface{}
 	}{
 		{`
-		a = [1, 2]
+		a = [1, 2, 3, 4]
 		a.rotate
-		`, []interface{}{2, 1}},
+		`, []interface{}{2, 3, 4, 1}},
 		{`
 		a = [1, 2, 3, 4]
 		a.rotate(2)
 		`, []interface{}{3, 4, 1, 2}},
+		{`
+		a = [1, 2, 3, 4]
+		a.rotate(0)
+		`, []interface{}{1, 2, 3, 4}},
+		{`
+		a = [1, 2, 3, 4]
+		a.rotate(-1)
+		`, []interface{}{4, 1, 2, 3}},
 	}
 
 	for i, tt := range tests {
@@ -1865,6 +1873,7 @@ func TestArraySelectMethod(t *testing.T) {
 
 func TestArraySelectMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
+		{`[1, 2].select(1)`, "ArgumentError: Expect 0 argument. got=1", 1},
 		{`[1, 2, 3, 4, 5].select`, "InternalError: Can't yield without a block", 1},
 	}
 
