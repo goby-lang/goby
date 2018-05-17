@@ -47,9 +47,9 @@ func TestObjectMutationInThread(t *testing.T) {
 		  c.deliver(i)
 		end
 
-		# if we put i += 1 here than it will execute along with other thread,
-		# which will cause raise condition
-		# Used to block main process until thread is finished
+		# if we put i += 1 here then it will execute along with other thread,
+		# which will cause a race condition.
+		# The following "receive" is needed to block the main process until thread is finished
 		c.receive
 		i += 1
 		i

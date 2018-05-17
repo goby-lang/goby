@@ -2,12 +2,65 @@ package vm
 
 import (
 	"fmt"
-	"sync"
-
 	"github.com/goby-lang/goby/vm/classes"
+	"sync"
 )
 
-// ChannelObject represents a goby channel, which carries a golang channel
+// ChannelObject represents Goby's "channel", which equips the Golang' channel and works with `thread`.
+// `thread` is actually a "goroutine".
+// A channel object can relay any kind of objects and guarantees thread-safe communications.
+// You should always use channel objects for safe communications between threads.
+// `Channel#new` is available.
+//
+// Note that channels are not like files and you don't need to explicitly close them (e.g.: exiting a loop).
+// If you `close` the closed channel, Goland will cause a panic. TODO: this panic should be avoided.
+// See https://tour.golang.org/concurrency/4
+//
+// ```ruby
+// def f(from)
+//   i = 0
+//   while i < 3 do
+//     puts(from + ": " + i.to_s)
+//     i += 1
+//   end
+// end
+//
+// f("direct")
+//
+// c = Channel.new    # spawning a channel object
+//
+// thread do
+//   puts(c.receive)
+//   f("thread")
+// end
+//
+// thread do
+//   puts("going")
+//   c.deliver(10)
+// end
+//
+// sleep(2) # This is to prevent main program finished before goroutine.
+// ```
+//
+// Note that the possibility of race conditions still exists. Handle them with care.
+//
+// ```ruby
+// c = Channel.new
+//
+// i = 0
+// thread do
+//   i += 1
+//   c.deliver(i)     # sends `i` to channel `c`
+// end
+//
+// # If we put a bare `i += 1` here, then it will execute along with other thread,
+// # which will cause a race condition.
+// # The following "receive" is needed to block the main process until thread is finished
+// c.receive
+// i += 1
+//
+// c.close           # Redundant: just for explanation and you don't need to call this here
+// ```
 type ChannelObject struct {
 	*baseObj
 	Chan chan int
@@ -17,6 +70,14 @@ type ChannelObject struct {
 func builtinChannelClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
+			// Creates an instance of `Channel` class, taking no arguments.
+			//
+			// ```ruby
+			// c = Channel.new
+			// c.class         #=> Channel
+			// ```
+			//
+			// @return [Channel]
 			Name: "new",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -32,6 +93,34 @@ func builtinChannelClassMethods() []*BuiltinMethodObject {
 func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
+			// Just to close and the channel to declare no more objects will be sent.
+			// You don't need to call `close` explicitly unless you must notify that no more objects will be sent.
+			// Channels are not like files. When you call `close` against the closed channel, Golang will cause a panic.
+			// TODO: this panic should be avoided.
+			// See https://tour.golang.org/concurrency/4
+			//
+			// ```ruby
+			// c = Channel.new
+			//
+			// 1001.times do |i|
+			// 	 thread do
+			//     c.deliver(i)
+			//	 end
+			// end
+			//
+			// r = 0
+			// 1001.times do
+			//   r = r + c.receive
+			// end
+			//
+			// c.close           # close the channel
+			//
+			// puts(r)
+			// ```
+			//
+			// It takes no argument. TODO: add argument checking.
+			//
+			// @return [Null]
 			Name: "close",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -44,6 +133,27 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Sends an object to the receiver (channel), then returns the object.
+			// Note that the method suspends the process until the object is actually received.
+			// Thus if you call `deliver` outside thread, the main process would suspend.
+			// Note that you don't need to send dummy object just to resume; use `close` instead.
+			//
+			// ```ruby
+			// c = Channel.new
+			//
+			// i = 0
+			// thread do
+			//   i += 1
+			//   c.deliver(i)   # sends `i` to channel `c`
+			// end
+			//
+			// c.receive        # receives `i`
+			// ```
+			//
+			// It takes 1 argument. TODO: add argument checking.
+			//
+			// @param object [Object]
+			// @return [Object]
 			Name: "deliver",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -58,6 +168,24 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Receives objects from other threads' `deliver` method, then returns it.
+			// The method works as if the channel would receive objects perpetually from outer space.
+			// Note that the method suspends the process until it actually receives something via `deliver`.
+			// Thus if you call `receive` outside thread, the main process would suspend.
+			// This also means you can resume a code by using the `receive` method.
+			//
+			// ```ruby
+			// c = Channel.new
+			//
+			// thread do
+			//   puts(c.receive)    # prints the object received from other threads.
+			//   f("thread")
+			// end
+			// ```
+			//
+			// It takes no arguments. TODO: add argument checking.
+			//
+			// @return [Object]
 			Name: "receive",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
