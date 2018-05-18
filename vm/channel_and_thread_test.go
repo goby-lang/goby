@@ -20,6 +20,52 @@ func TestChannelClassSuperclass(t *testing.T) {
 	}
 }
 
+func TestChannelCloseFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`c = Channel.new; c.close(1)`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`c = Channel.new; c.close;c.close`, "InternalError: The channel is already closed. got: 0", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestChannelReceiveFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`c = Channel.new; c.receive(1)`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`c = Channel.new; c.close; c.receive`, "InternalError: The channel is already closed. got: 0", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestChannelDeliverFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`c = Channel.new; c.deliver`, "ArgumentError: Expect 1 argument. got: 0", 1},
+		{`c = Channel.new; c.deliver 1, 2`, "ArgumentError: Expect 1 argument. got: 2", 1},
+		{`c = Channel.new; c.close; c.deliver 1`, "InternalError: The channel is already closed. got: 1", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestObjectMutationInThread(t *testing.T) {
 	tests := []struct {
 		input    string
