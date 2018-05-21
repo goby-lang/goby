@@ -2022,6 +2022,28 @@ func TestMethodMissing(t *testing.T) {
 		
 		Foo.new.foo("bar")
 `, "foobar"},
+		{`
+		class Foo
+		  def method_missing(name)
+		    yield
+		  end
+		end
+		
+		Foo.new.bar do
+		  10
+		end
+`, 10},
+		{`
+		class Foo
+		  def method_missing(name)
+		    get_block.call
+		  end
+		end
+		
+		Foo.new.bar do
+		  10
+		end
+`, 10},
 	}
 
 	for i, tt := range tests {
@@ -2034,6 +2056,57 @@ func TestMethodMissing(t *testing.T) {
 
 		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestMethodMissingFail(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`
+		class Foo
+		  def method_missing
+		    10
+		  end
+		end
+		
+		Foo.new.bar
+`, "ArgumentError: Expect at most 0 args for method 'method_missing'. got: 1"},
+		{`
+		class Bar
+		  def method_missing
+		    10
+		  end
+		end
+
+		class Foo < Bar
+		end
+		
+		Foo.new.bar
+`, "UndefinedMethodError: Undefined Method 'bar' for <Instance of: Foo>"},
+		{`
+		module Bar
+		  def method_missing
+		    10
+		  end
+		end
+
+		class Foo 
+		  include Bar
+		end
+		
+		Foo.new.bar
+`, "UndefinedMethodError: Undefined Method 'bar' for <Instance of: Foo>"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
 }
