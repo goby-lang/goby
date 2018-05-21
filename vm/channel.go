@@ -75,8 +75,8 @@ type ChannelObject struct {
 // - You cannot read nil channels, or causes a deadlock.
 // Ref: https://beatsync.net/main/log20150325.html
 const (
-	OPEN   int = iota
-	CLOSED int = iota
+	OPEN = iota
+	CLOSED
 )
 
 // Class methods --------------------------------------------------------
@@ -107,8 +107,10 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			// Just to close and the channel to declare no more objects will be sent.
-			// You don't need to call `close` explicitly unless you definitely need to notify that no more objects will be sent.
-			// Channels are not like files. When you call `close` against the closed channel, Golang will cause a panic.
+			// Channel is not like files, and you don't need to call `close` explicitly unless
+			// you definitely need to notify that no more objects will be sent,
+			// Well, you can call `#close` against the same channel twice or more, which is redundant.
+			// (Go's channel cannot do that)
 			// See https://tour.golang.org/concurrency/4
 			//
 			// ```ruby
@@ -139,12 +141,12 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 0, len(args))
 					}
 					c := receiver.(*ChannelObject)
 
 					if c.ChannelState == CLOSED {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, "The channel is already closed. got: %d", len(args))
+						return t.vm.InitErrorObject(errors.ChannelCloseError, sourceLine, errors.ChannelIsClosed)
 					}
 					c.ChannelState = CLOSED
 
@@ -182,17 +184,15 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 1, len(args))
 					}
-
-					id := t.vm.channelObjectMap.storeObj(args[0])
-
 					c := receiver.(*ChannelObject)
 
 					if c.ChannelState == CLOSED {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, "The channel is already closed. got: %d", len(args))
+						return t.vm.InitErrorObject(errors.ChannelCloseError, sourceLine, errors.ChannelIsClosed)
 					}
 
+					id := t.vm.channelObjectMap.storeObj(args[0])
 					c.Chan <- id
 
 					return args[0]
@@ -201,7 +201,7 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			// Receives objects from other threads' `deliver` method, then returns it.
-			// The method works as if the channel would receive objects perpetually from outer space.
+			// The method works as if the channel would receive objects perpetually from outside.
 			// Note that the method suspends the process until it actually receives something via `deliver`.
 			// Thus if you call `receive` outside thread, the main process would suspend.
 			// This also means you can resume a code by using the `receive` method.
@@ -224,12 +224,14 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
+						if len(args) != 0 {
+							return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 0, len(args))
+						}
 					}
 					c := receiver.(*ChannelObject)
 
 					if c.ChannelState == CLOSED {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, "The channel is already closed. got: %d", len(args))
+						return t.vm.InitErrorObject(errors.ChannelCloseError, sourceLine, errors.ChannelIsClosed)
 					}
 
 					num := <-c.Chan
