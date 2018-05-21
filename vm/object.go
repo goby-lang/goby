@@ -14,7 +14,7 @@ type Object interface {
 	SingletonClass() *RClass
 	SetSingletonClass(*RClass)
 	findMethod(string) Object
-	findMethodMissing() (Object)
+	findMethodMissing() Object
 	toString() string
 	toJSON(t *Thread) string
 	id() int

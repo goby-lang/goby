@@ -507,8 +507,8 @@ var builtinActions = map[operationType]*action{
 					// TODO: Improve this
 					t.Stack.Push(&Pointer{Target: nil})
 
-					for i := argCount-1; i >= 0; i-- {
-						position := argPr+i
+					for i := argCount - 1; i >= 0; i-- {
+						position := argPr + i
 						arg := t.Stack.data[argPr+i]
 						t.Stack.Set(position+1, arg)
 					}
