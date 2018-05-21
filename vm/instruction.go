@@ -496,7 +496,14 @@ var builtinActions = map[operationType]*action{
 			method = receiver.findMethod(methodName)
 
 			if method == nil {
-				t.setErrorObject(receiverPr, argPr, errors.UndefinedMethodError, sourceLine, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
+				mm := receiver.findMethodMissing()
+
+				if mm == nil {
+					t.setErrorObject(receiverPr, argPr, errors.UndefinedMethodError, sourceLine, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
+				} else {
+					t.Stack.Push(&Pointer{Target: t.vm.initStringObject(methodName)})
+					method = mm
+				}
 			}
 
 			// Find Block
