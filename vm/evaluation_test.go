@@ -1969,11 +1969,11 @@ func TestMethodCallWithoutParens(t *testing.T) {
 func TestMethodMissing(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected int
+		expected interface{}
 	}{
 		{`
 		class Foo
-		  def method_missing
+		  def method_missing(name)
 		    10
 		  end
 		end
@@ -1989,12 +1989,39 @@ func TestMethodMissing(t *testing.T) {
 
 		f = Foo.new
 		
-		def f.method_missing
+		def f.method_missing(name)
 		  20
 		end
 		
 		f.bar
 `, 20},
+		{`
+		class Foo
+		  def method_missing(name)
+		    name
+		  end
+		end
+		
+		Foo.new.bar
+`, "bar"},
+		{`
+		class Foo
+		  def method_missing(name, *args)
+		    args[0]
+		  end
+		end
+		
+		Foo.new.bar(1)
+`, 1},
+		{`
+		class Foo
+		  def method_missing(name, *args)
+		    name + args[0]
+		  end
+		end
+		
+		Foo.new.foo("bar")
+`, "foobar"},
 	}
 
 	for i, tt := range tests {
