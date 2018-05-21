@@ -501,7 +501,21 @@ var builtinActions = map[operationType]*action{
 				if mm == nil {
 					t.setErrorObject(receiverPr, argPr, errors.UndefinedMethodError, sourceLine, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
 				} else {
-					t.Stack.Push(&Pointer{Target: t.vm.initStringObject(methodName)})
+					// Move up args for missed method's name
+					// before: | arg 1       | arg 2 |
+					// after:  | method name | arg 1 | arg 2 |
+					// TODO: Improve this
+					t.Stack.Push(&Pointer{Target: nil})
+
+					for i := argCount-1; i >= 0; i-- {
+						position := argPr+i
+						arg := t.Stack.data[argPr+i]
+						t.Stack.Set(position+1, arg)
+					}
+
+					t.Stack.Set(argPr, &Pointer{Target: t.vm.initStringObject(methodName)})
+					argCount++
+
 					method = mm
 				}
 			}
