@@ -1966,6 +1966,51 @@ func TestMethodCallWithoutParens(t *testing.T) {
 	}
 }
 
+func TestMethodMissing(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int
+	}{
+		{`
+		class Foo
+		  def method_missing
+		    10
+		  end
+		end
+		
+		Foo.new.bar
+`, 10},
+		{`
+		class Foo
+		  def method_missing
+		    10
+		  end
+		end
+
+		f = Foo.new
+		
+		def f.method_missing
+		  20
+		end
+		
+		f.bar
+`, 20},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s", evaluated.(*Error).message)
+		}
+
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestMinusPrefixMethodCall(t *testing.T) {
 	tests := []struct {
 		input    string
