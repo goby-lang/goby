@@ -207,7 +207,7 @@ var builtinActions = map[operationType]*action{
 		name: bytecode.NewArray,
 		operation: func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			argCount := args[0].(int)
-			elems := []Object{}
+			var elems []Object
 
 			for i := 0; i < argCount; i++ {
 				v := t.Stack.Pop()
@@ -228,7 +228,7 @@ var builtinActions = map[operationType]*action{
 				t.pushErrorObject(errors.TypeError, sourceLine, "Expect stack top's value to be an Array when executing 'expandarray' instruction.")
 			}
 
-			elems := []Object{}
+			var elems []Object
 
 			for i := 0; i < arrLength; i++ {
 				var elem Object
@@ -279,10 +279,10 @@ var builtinActions = map[operationType]*action{
 		name: bytecode.BranchUnless,
 		operation: func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			v := t.Stack.Pop()
-			bool, isBool := v.Target.(*BooleanObject)
+			bo, isBool := v.Target.(*BooleanObject)
 
 			if isBool {
-				if bool.value {
+				if bo.value {
 					return
 				}
 
@@ -304,9 +304,9 @@ var builtinActions = map[operationType]*action{
 		name: bytecode.BranchIf,
 		operation: func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			v := t.Stack.Pop()
-			bool, isBool := v.Target.(*BooleanObject)
+			bo, isBool := v.Target.(*BooleanObject)
 
-			if isBool && !bool.value {
+			if isBool && !bo.value {
 				return
 			}
 
@@ -505,7 +505,7 @@ var builtinActions = map[operationType]*action{
 					// before: | arg 1       | arg 2 |
 					// after:  | method name | arg 1 | arg 2 |
 					// TODO: Improve this
-					t.Stack.Push(&Pointer{Target: nil})
+					t.Stack.Push(nil)
 
 					for i := argCount - 1; i >= 0; i-- {
 						position := argPr + i
@@ -625,39 +625,39 @@ var builtinActions = map[operationType]*action{
 	},
 }
 
-func (vm *VM) InitObjectFromGoType(value interface{}) Object {
-	switch v := value.(type) {
+func (v *VM) InitObjectFromGoType(value interface{}) Object {
+	switch val := value.(type) {
 	case nil:
 		return NULL
 	case int:
-		return vm.InitIntegerObject(v)
+		return v.InitIntegerObject(val)
 	case int64:
-		return vm.InitIntegerObject(int(v))
+		return v.InitIntegerObject(int(val))
 	case int32:
-		return vm.InitIntegerObject(int(v))
+		return v.InitIntegerObject(int(val))
 	case float64:
-		return vm.initFloatObject(v)
+		return v.initFloatObject(val)
 	case []uint8:
-		bytes := []byte{}
+		var bytes []byte
 
-		for _, i := range v {
+		for _, i := range val {
 			bytes = append(bytes, byte(i))
 		}
 
-		return vm.initStringObject(string(bytes))
+		return v.initStringObject(string(bytes))
 	case string:
-		return vm.initStringObject(v)
+		return v.initStringObject(val)
 	case bool:
-		return toBooleanObject(v)
+		return toBooleanObject(val)
 	case []interface{}:
-		var objs []Object
+		var objects []Object
 
-		for _, elem := range v {
-			objs = append(objs, vm.InitObjectFromGoType(elem))
+		for _, elem := range val {
+			objects = append(objects, v.InitObjectFromGoType(elem))
 		}
 
-		return vm.InitArrayObject(objs)
+		return v.InitArrayObject(objects)
 	default:
-		return vm.initGoObject(value)
+		return v.initGoObject(value)
 	}
 }
