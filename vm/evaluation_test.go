@@ -1966,6 +1966,151 @@ func TestMethodCallWithoutParens(t *testing.T) {
 	}
 }
 
+func TestMethodMissing(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		class Foo
+		  def method_missing(name)
+		    10
+		  end
+		end
+		
+		Foo.new.bar
+`, 10},
+		{`
+		class Foo
+		  def method_missing
+		    10
+		  end
+		end
+
+		f = Foo.new
+		
+		def f.method_missing(name)
+		  20
+		end
+		
+		f.bar
+`, 20},
+		{`
+		class Foo
+		  def method_missing(name)
+		    name
+		  end
+		end
+		
+		Foo.new.bar
+`, "bar"},
+		{`
+		class Foo
+		  def method_missing(name, *args)
+		    args[0]
+		  end
+		end
+		
+		Foo.new.bar(1)
+`, 1},
+		{`
+		class Foo
+		  def method_missing(name, *args)
+		    name + args[0]
+		  end
+		end
+		
+		Foo.new.foo("bar")
+`, "foobar"},
+		{`
+		class Foo
+		  def method_missing(name)
+		    yield
+		  end
+		end
+		
+		Foo.new.bar do
+		  10
+		end
+`, 10},
+		{`
+		class Foo
+		  def method_missing(name)
+		    get_block.call
+		  end
+		end
+		
+		Foo.new.bar do
+		  10
+		end
+`, 10},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s", evaluated.(*Error).message)
+		}
+
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestMethodMissingFail(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`
+		class Foo
+		  def method_missing
+		    10
+		  end
+		end
+		
+		Foo.new.bar
+`, "ArgumentError: Expect at most 0 args for method 'method_missing'. got: 1"},
+		{`
+		class Bar
+		  def method_missing
+		    10
+		  end
+		end
+
+		class Foo < Bar
+		end
+		
+		Foo.new.bar
+`, "UndefinedMethodError: Undefined Method 'bar' for <Instance of: Foo>"},
+		{`
+		module Bar
+		  def method_missing
+		    10
+		  end
+		end
+
+		class Foo 
+		  include Bar
+		end
+		
+		Foo.new.bar
+`, "UndefinedMethodError: Undefined Method 'bar' for <Instance of: Foo>"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 1)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestMinusPrefixMethodCall(t *testing.T) {
 	tests := []struct {
 		input    string
