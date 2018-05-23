@@ -1235,7 +1235,7 @@ func TestGeneralIsAMethodFail(t *testing.T) {
 		{`123.is_a?(123, 456)`, "ArgumentError: Expect 1 argument. got: 2", 1},
 		{`123.is_a?(Integer, String)`, "ArgumentError: Expect 1 argument. got: 2", 1},
 		{`123.is_a?(true)`, "TypeError: Expects argument to be Class. got: Boolean", 1},
-		{`Class.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1},
+		{`Class.is_a?(true)`, "TypeError: Expects argument to be Class. got: Boolean", 1},
 	}
 
 	for i, tt := range testsFail {
