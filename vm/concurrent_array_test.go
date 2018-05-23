@@ -347,10 +347,10 @@ func TestConcurrentArrayAtMethodFail(t *testing.T) {
 		Concurrent::Array.new([1, 2, 3]).at(2, 3)`, "ArgumentError: Expect 1 arguments. got=2", 1},
 		{`
 		require 'concurrent/array'
-		Concurrent::Array.new([1, 2, 3]).at(true)`, "TypeError: Expect argument to be Integer. got: Boolean", 1},
+		Concurrent::Array.new([1, 2, 3]).at(true)`, "TypeError: Expects argument to be Integer. got: Boolean", 1},
 		{`
 		require 'concurrent/array'
-		Concurrent::Array.new([1, 2, 3]).at(1..3)`, "TypeError: Expect argument to be Integer. got: Range", 1},
+		Concurrent::Array.new([1, 2, 3]).at(1..3)`, "TypeError: Expects argument to be Integer. got: Range", 1},
 		{`
 		require 'concurrent/array'
 		Concurrent::Array.new([1, "a", 10, 5]).at(-5)`, "ArgumentError: Index value -5 too small for array. minimum: -4", 1},
@@ -447,12 +447,12 @@ func TestConcurrentArrayConcatMethodFail(t *testing.T) {
 		require 'concurrent/array'
 		a = Concurrent::Array.new([1, 2])
 		a.concat(3)
-		`, "TypeError: Expect argument to be Array. got: Integer", 1},
+		`, "TypeError: Expects argument to be Array. got: Integer", 1},
 		{`
 		require 'concurrent/array'
 		a = Concurrent::Array.new([])
 		a.concat("a")
-		`, "TypeError: Expect argument to be Array. got: String", 1},
+		`, "TypeError: Expects argument to be Array. got: String", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -632,10 +632,10 @@ func TestConcurrentArrayDeleteAtMethodFail(t *testing.T) {
 		Concurrent::Array.new([1, 2, 3]).delete_at(2, 3)`, "ArgumentError: Expect 1 argument. got=2", 1},
 		{`
 		require 'concurrent/array'
-		Concurrent::Array.new([1, 2, 3]).delete_at(true)`, "TypeError: Expect argument to be Integer. got: Boolean", 1},
+		Concurrent::Array.new([1, 2, 3]).delete_at(true)`, "TypeError: Expects argument to be Integer. got: Boolean", 1},
 		{`
 		require 'concurrent/array'
-		Concurrent::Array.new([1, 2, 3]).delete_at(1..3)`, "TypeError: Expect argument to be Integer. got: Range", 1},
+		Concurrent::Array.new([1, 2, 3]).delete_at(1..3)`, "TypeError: Expects argument to be Integer. got: Range", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -865,7 +865,7 @@ func TestConcurrentArrayFirstMethodFail(t *testing.T) {
 		require 'concurrent/array'
 		a = Concurrent::Array.new([1, 2])
 		a.first("a")
-		`, "TypeError: Expect argument to be Integer. got: String", 1},
+		`, "TypeError: Expects argument to be Integer. got: String", 1},
 		{`
 		require 'concurrent/array'
 		a = Concurrent::Array.new([1, 2])
@@ -980,7 +980,7 @@ func TestConcurrentArrayJoinMethodFail(t *testing.T) {
 		require 'concurrent/array'
 		a = Concurrent::Array.new([1, 2])
 		a.join(1)
-		`, "TypeError: Expect argument to be String. got: Integer", 1},
+		`, "TypeError: Expects argument to be String. got: Integer", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1034,7 +1034,7 @@ func TestConcurrentArrayLastMethodFail(t *testing.T) {
 		require 'concurrent/array'
 		a = Concurrent::Array.new([1, 2])
 		a.last("l")
-		`, "TypeError: Expect argument to be Integer. got: String", 1},
+		`, "TypeError: Expects argument to be Integer. got: String", 1},
 		{`
 		require 'concurrent/array'
 		a = Concurrent::Array.new([1, 2])
@@ -1183,7 +1183,7 @@ func TestConcurrentArrayPlusMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/array'
-		Concurrent::Array.new([1, 2]) + true`, "TypeError: Expect argument to be Array. got: Boolean", 1},
+		Concurrent::Array.new([1, 2]) + true`, "TypeError: Expects argument to be Array. got: Boolean", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1455,7 +1455,7 @@ func TestConcurrentArrayRotateMethodFail(t *testing.T) {
 		require 'concurrent/array'
 		a = Concurrent::Array.new([1, 2])
 		a.rotate("a")
-		`, "TypeError: Expect argument to be Integer. got: String", 1},
+		`, "TypeError: Expects argument to be Integer. got: String", 1},
 		{`
 		require 'concurrent/array'
 		a = Concurrent::Array.new([1, 2])
@@ -1605,7 +1605,7 @@ func TestConcurrentArrayStarMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/array'
-		Concurrent::Array.new([1, 2]) * nil`, "TypeError: Expect argument to be Integer. got: Null", 1},
+		Concurrent::Array.new([1, 2]) * nil`, "TypeError: Expects argument to be Integer. got: Null", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1714,7 +1714,7 @@ func TestConcurrentArrayValuesAtMethodFail(t *testing.T) {
 		require 'concurrent/array'
 		a = Concurrent::Array.new(["a", "b", "c"])
 		a.values_at("-")
-		`, "TypeError: Expect argument to be Integer. got: String", 1},
+		`, "TypeError: Expects argument to be Integer. got: String", 1},
 	}
 
 	for i, tt := range testsFail {
