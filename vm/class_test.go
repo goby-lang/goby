@@ -1168,7 +1168,7 @@ func TestResponseToMethod(t *testing.T) {
 // With the current framework, only exit() failures can be tested.
 func TestExitMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`exit("abc")`, "TypeError: Expect argument to be Integer. got: String", 1},
+		{`exit("abc")`, "TypeError: Expects argument to be Integer. got: String", 1},
 		{`exit(1, 2)`, "ArgumentError: Expected at most 1 argument; got: 2", 1},
 	}
 
@@ -1234,7 +1234,7 @@ func TestGeneralIsAMethodFail(t *testing.T) {
 		{`Class.is_a?`, "ArgumentError: Expect 1 argument. got: 0", 1},
 		{`123.is_a?(123, 456)`, "ArgumentError: Expect 1 argument. got: 2", 1},
 		{`123.is_a?(Integer, String)`, "ArgumentError: Expect 1 argument. got: 2", 1},
-		{`123.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1},
+		{`123.is_a?(true)`, "TypeError: Expects argument to be Class. got: Boolean", 1},
 		{`Class.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1},
 	}
 
@@ -1468,7 +1468,7 @@ func TestInstanceEvalMethod(t *testing.T) {
 func TestInstanceEvalMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`"s".instance_eval(1, 1)`, "ArgumentError: Expect at most 1 arguments. got: 2", 1},
-		{`"s".instance_eval(true)`, "TypeError: Expect argument to be Block. got: Boolean", 1},
+		{`"s".instance_eval(true)`, "TypeError: Expects argument to be Block. got: Boolean", 1},
 	}
 
 	for i, tt := range testsFail {

@@ -373,11 +373,11 @@ func TestArrayIndexWithSuccessiveValuesFail(t *testing.T) {
 		{`
 			a = [1, 2, 3, 4, 5]
 			a["1", 5]
-		`, "TypeError: Expect argument to be Integer. got: String", 1},
+		`, "TypeError: Expects argument to be Integer. got: String", 1},
 		{`
 			a = [1, 2, 3, 4, 5]
 			a[1, "5"]
-		`, "TypeError: Expect argument to be Integer. got: String", 1},
+		`, "TypeError: Expects argument to be Integer. got: String", 1},
 		{`
 			a = [1, 2, 3, 4, 5]
 			a[1, 3, 5]
@@ -393,7 +393,7 @@ func TestArrayIndexWithSuccessiveValuesFail(t *testing.T) {
 		{`
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[1, "5"] = 6
-		`, "TypeError: Expect argument to be Integer. got: String", 1},
+		`, "TypeError: Expects argument to be Integer. got: String", 1},
 		{`
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[1, "5", 6] = 123
@@ -554,8 +554,8 @@ func TestArrayAtMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`[1, 2, 3].at`, "ArgumentError: Expect 1 arguments. got=0", 1},
 		{`[1, 2, 3].at(2, 3)`, "ArgumentError: Expect 1 arguments. got=2", 1},
-		{`[1, 2, 3].at(true)`, "TypeError: Expect argument to be Integer. got: Boolean", 1},
-		{`[1, 2, 3].at(1..3)`, "TypeError: Expect argument to be Integer. got: Range", 1},
+		{`[1, 2, 3].at(true)`, "TypeError: Expects argument to be Integer. got: Boolean", 1},
+		{`[1, 2, 3].at(1..3)`, "TypeError: Expects argument to be Integer. got: Range", 1},
 		{`[1, "a", 10, 5].at(-5)`, "ArgumentError: Index value -5 too small for array. minimum: -4", 1},
 	}
 
@@ -639,10 +639,10 @@ func TestArrayConcatMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = [1, 2]
 		a.concat(3)
-		`, "TypeError: Expect argument to be Array. got: Integer", 1},
+		`, "TypeError: Expects argument to be Array. got: Integer", 1},
 		{`a = []
 		a.concat("a")
-		`, "TypeError: Expect argument to be Array. got: String", 1},
+		`, "TypeError: Expects argument to be Array. got: String", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -814,8 +814,8 @@ func TestArrayDeleteAtMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`[1, 2, 3].delete_at`, "ArgumentError: Expect 1 argument. got=0", 1},
 		{`[1, 2, 3].delete_at(2, 3)`, "ArgumentError: Expect 1 argument. got=2", 1},
-		{`[1, 2, 3].delete_at(true)`, "TypeError: Expect argument to be Integer. got: Boolean", 1},
-		{`[1, 2, 3].delete_at(1..3)`, "TypeError: Expect argument to be Integer. got: Range", 1},
+		{`[1, 2, 3].delete_at(true)`, "TypeError: Expects argument to be Integer. got: Boolean", 1},
+		{`[1, 2, 3].delete_at(1..3)`, "TypeError: Expects argument to be Integer. got: Range", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1134,7 +1134,7 @@ func TestArrayFirstMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = [1, 2]
 		a.first("a")
-		`, "TypeError: Expect argument to be Integer. got: String", 1},
+		`, "TypeError: Expects argument to be Integer. got: String", 1},
 		{`a = [1, 2]
 		a.first(1, 2, 3)
 		`, "ArgumentError: Expect 0..1 argument. got=3", 1},
@@ -1255,7 +1255,7 @@ func TestArrayJoinMethodFail(t *testing.T) {
 		`, "ArgumentError: Expect 0 or 1 argument. got=2", 1},
 		{`a = [1, 2]
 		a.join(1)
-		`, "TypeError: Expect argument to be String. got: Integer", 1},
+		`, "TypeError: Expects argument to be String. got: Integer", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1303,7 +1303,7 @@ func TestArrayLastMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = [1, 2]
 		a.last("l")
-		`, "TypeError: Expect argument to be Integer. got: String", 1},
+		`, "TypeError: Expects argument to be Integer. got: String", 1},
 		{`a = [1, 2]
 		a.last(1, 2, 3)
 		`, "ArgumentError: Expect 0..1 argument. got=3", 1},
@@ -1459,7 +1459,7 @@ func TestArrayPlusOperator(t *testing.T) {
 
 func TestArrayPlusOperatorFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2] + true`, "TypeError: Expect argument to be Array. got: Boolean", 1},
+		{`[1, 2] + true`, "TypeError: Expects argument to be Array. got: Boolean", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1805,7 +1805,7 @@ func TestArrayRotateMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = [1, 2]
 		a.rotate("a")
-		`, "TypeError: Expect argument to be Integer. got: String", 1},
+		`, "TypeError: Expects argument to be Integer. got: String", 1},
 		{`a = [1, 2]
 		a.rotate(1, 2, 3)`, "ArgumentError: Expect 0..1 argument. got=3", 1},
 	}
@@ -1970,7 +1970,7 @@ func TestArrayStarMethod(t *testing.T) {
 
 func TestArrayStarMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2] * nil`, "TypeError: Expect argument to be Integer. got: Null", 1},
+		{`[1, 2] * nil`, "TypeError: Expects argument to be Integer. got: Null", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -2099,7 +2099,7 @@ func TestArrayValuesAtMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = ["a", "b", "c"]
 			a.values_at("-")
-		`, "TypeError: Expect argument to be Integer. got: String", 1},
+		`, "TypeError: Expects argument to be Integer. got: String", 1},
 	}
 
 	for i, tt := range testsFail {
