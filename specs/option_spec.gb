@@ -1,0 +1,83 @@
+require "spec"
+require "option"
+
+Spec.describe Option do
+    describe "empty Option" do 
+        describe "#or" do 
+            o = Option.new 
+
+            it "never calls a given block" do
+                is_called = false
+                o.or do |name, val|
+                    is_called = true
+                end
+                expect(is_called).to eq(false)
+            end
+        end
+    end
+
+    describe "filled Option" do
+        o = Option.new(:hello, "world")
+
+        describe "#wrong_key" do
+            it "block will not be called" do 
+                called = false
+                o.wrong_key do |value|
+                    called = true
+                end
+                expect(called).to eq(false)
+            end
+        end
+        
+        describe "#or" do
+            n = ""
+            v = nil
+            o.or do |name, val|
+                n = name
+                v = val
+            end
+            it "always call block" do
+                expect(n).to eq(:hello)
+                expect(v).to eq("world")
+            end
+        end
+    end
+
+    describe "key other than or" do
+        o = Option.new(:hello, "world")
+
+        describe "#wrong_key" do
+            it "block will not be called" do 
+                called = false
+                o.wrong_key do |value|
+                    called = true
+                end
+                expect(called).to eq(false)
+            end
+        end
+
+        describe "#hello" do
+            it "will be called with value" do 
+                called = false
+                value = nil
+                o.hello do |v|
+                    called = true
+                    value = v
+                end
+                expect(called).to eq(true)
+                expect(value).to eq("world")
+            end
+        end
+
+        describe "#or" do
+            it "won't be called" do
+                called = false
+                o.hello do |v|
+                    called = true
+                end
+                expect(called).to eq(false)
+            end
+        end
+    end
+
+end
