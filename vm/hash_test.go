@@ -182,8 +182,8 @@ func TestHashAccessWithDefaultOperation(t *testing.T) {
 func TestHashAccessOperationFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`{ a: 1, b: 2 }[]`, "ArgumentError: Expect 1 argument. got: 0", 1},
-		{`{ a: 1, b: 2 }[true]`, "TypeError: Expect argument to be String. got: Boolean", 1},
-		{`{ a: 1, b: 2 }[true] = 1`, "TypeError: Expect argument to be String. got: Boolean", 1},
+		{`{ a: 1, b: 2 }[true]`, "TypeError: Expects argument to be String. got: Boolean", 1},
+		{`{ a: 1, b: 2 }[true] = 1`, "TypeError: Expects argument to be String. got: Boolean", 1},
 		{`{ a: 1, b: 2 }["a", "b"]`, "ArgumentError: Expect 1 argument. got: 2", 1},
 		{`{ a: 1, b: 2 }["a", "b"] = 123`, "ArgumentError: Expect 2 arguments. got: 3", 1},
 	}
@@ -457,8 +457,8 @@ func TestHashDeleteMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`{ a: 1, b: "Hello", c: true }.delete`, "ArgumentError: Expect 1 argument. got: 0", 1},
 		{`{ a: 1, b: "Hello", c: true }.delete("a", "b")`, "ArgumentError: Expect 1 argument. got: 2", 1},
-		{`{ a: 1, b: "Hello", c: true }.delete(123)`, "TypeError: Expect argument to be String. got: Integer", 1},
-		{`{ a: 1, b: "Hello", c: true }.delete(true)`, "TypeError: Expect argument to be String. got: Boolean", 1},
+		{`{ a: 1, b: "Hello", c: true }.delete(123)`, "TypeError: Expects argument to be String. got: Integer", 1},
+		{`{ a: 1, b: "Hello", c: true }.delete(true)`, "TypeError: Expects argument to be String. got: Boolean", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -948,7 +948,7 @@ func TestHashFetchValuesMethod(t *testing.T) {
 func TestHashFetchValuesMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`{ cat: "feline" }.fetch_values()`, "ArgumentError: Expected 1+ arguments, got 0", 1},
-		{`{ cat: "feline" }.fetch_values(1)`, "TypeError: Expect argument to be String. got: Integer", 1},
+		{`{ cat: "feline" }.fetch_values(1)`, "TypeError: Expects argument to be String. got: Integer", 1},
 		{`{ cat: "feline" }.fetch_values("dog")`, "ArgumentError: There is no value for the key `dog`, and no block has been provided", 1},
 	}
 
@@ -983,8 +983,8 @@ func TestHashHasKeyMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`{ a: 1, b: 2 }.has_key?`, "ArgumentError: Expect 1 argument. got: 0", 1},
 		{`{ a: 1, b: 2 }.has_key?(true, { hello: "World" })`, "ArgumentError: Expect 1 argument. got: 2", 1},
-		{`{ a: 1, b: 2 }.has_key?(true)`, "TypeError: Expect argument to be String. got: Boolean", 1},
-		{`{ a: 1, b: 2 }.has_key?(123)`, "TypeError: Expect argument to be String. got: Integer", 1},
+		{`{ a: 1, b: 2 }.has_key?(true)`, "TypeError: Expects argument to be String. got: Boolean", 1},
+		{`{ a: 1, b: 2 }.has_key?(123)`, "TypeError: Expects argument to be String. got: Integer", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1241,8 +1241,8 @@ func TestHashMergeMethod(t *testing.T) {
 func TestHashMergeMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`{ a: 1, b: 2 }.merge`, "ArgumentError: Expect at least 1 argument. got: 0", 1},
-		{`{ a: 1, b: 2 }.merge(true, { hello: "World" })`, "TypeError: Expect argument to be Hash. got: Boolean", 1},
-		{`{ a: 1, b: 2 }.merge({ hello: "World" }, 123, "Hello")`, "TypeError: Expect argument to be Hash. got: Integer", 1},
+		{`{ a: 1, b: 2 }.merge(true, { hello: "World" })`, "TypeError: Expects argument to be Hash. got: Boolean", 1},
+		{`{ a: 1, b: 2 }.merge({ hello: "World" }, 123, "Hello")`, "TypeError: Expects argument to be Hash. got: Integer", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1419,7 +1419,7 @@ func TestHashToArrayMethod(t *testing.T) {
 func TestHashToArrayMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`{ a: 1, b: 2 }.to_a(true, { hello: "World" })`, "ArgumentError: Expect 0..1 argument. got: 2", 1},
-		{`{ a: 1, b: 2 }.to_a(123)`, "TypeError: Expect argument to be Boolean. got: Integer", 1},
+		{`{ a: 1, b: 2 }.to_a(123)`, "TypeError: Expects argument to be Boolean. got: Integer", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1873,7 +1873,7 @@ func TestHashValuesAtMethod(t *testing.T) {
 
 func TestHashValuesAtMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ a: 1, b: 2 }.values_at(123)`, "TypeError: Expect argument to be String. got: Integer", 1},
+		{`{ a: 1, b: 2 }.values_at(123)`, "TypeError: Expects argument to be String. got: Integer", 1},
 	}
 
 	for i, tt := range testsFail {

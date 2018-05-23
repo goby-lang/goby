@@ -68,10 +68,10 @@ func TestFloatArithmeticOperationWithInteger(t *testing.T) {
 
 func TestFloatArithmeticOperationFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`1.1 + "p"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`1.1 - "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`1.1 ** "p"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`1.1 / "t"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`1.1 + "p"`, "TypeError: Expects argument to be Numeric. got: String", 1},
+		{`1.1 - "m"`, "TypeError: Expects argument to be Numeric. got: String", 1},
+		{`1.1 ** "p"`, "TypeError: Expects argument to be Numeric. got: String", 1},
+		{`1.1 / "t"`, "TypeError: Expects argument to be Numeric. got: String", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -147,11 +147,11 @@ func TestFloatComparisonWithInteger(t *testing.T) {
 
 func TestFloatComparisonFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`1 > "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`1 >= "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`1 < "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`1 <= "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`1 <=> "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`1 > "m"`, "TypeError: Expects argument to be Numeric. got: String", 1},
+		{`1 >= "m"`, "TypeError: Expects argument to be Numeric. got: String", 1},
+		{`1 < "m"`, "TypeError: Expects argument to be Numeric. got: String", 1},
+		{`1 <= "m"`, "TypeError: Expects argument to be Numeric. got: String", 1},
+		{`1 <=> "m"`, "TypeError: Expects argument to be Numeric. got: String", 1},
 	}
 
 	for i, tt := range testsFail {
