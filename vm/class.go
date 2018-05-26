@@ -24,10 +24,11 @@ type RClass struct {
 	// It can be normal class, singleton class or a module.
 	superClass *RClass
 	// Class points to this class's class, which should be ClassClass
-	isSingleton bool
-	isModule    bool
-	constants   map[string]*Pointer
-	scope       *RClass
+	isSingleton           bool
+	isModule              bool
+	constants             map[string]*Pointer
+	scope                 *RClass
+	inheritsMethodMissing bool
 	*baseObj
 }
 
@@ -522,6 +523,29 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			Name: "inherits_method_missing",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+					var class *RClass
+
+					if len(args) != 0 {
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
+					}
+
+					switch r := receiver.(type) {
+					case *RClass:
+						class = r
+					default:
+						class = r.SingletonClass()
+					}
+
+					class.inheritsMethodMissing = true
+
+					return class
+				}
+			},
+		},
+		{
 			// Returns the name of the class (receiver).
 			//
 			// ```ruby
@@ -911,6 +935,22 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 
 						receiverClass = receiverClass.superClass
 					}
+					return FALSE
+				}
+			},
+		},
+		{
+			Name: "inherits_method_missing?",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+					if len(args) != 0 {
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
+					}
+
+					if receiver.Class().inheritsMethodMissing {
+						return TRUE
+					}
+
 					return FALSE
 				}
 			},
