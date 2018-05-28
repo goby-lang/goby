@@ -1,29 +1,29 @@
 class Option
-    def initialize(name=nil, value=nil)
-        @name = name
-        @value = value
-        @empty = name == nil
-        @used = false
+  def initialize(name=nil, value=nil)
+    @name = name
+    @value = value
+    @empty = name == nil
+    @used = false
+  end
+
+  def method_missing(name, *args)
+  if name == @name && @used == false
+    if block_given?
+      yield @value
+    end
+    @used = true
+  end
+
+  self
+  end
+
+  def or
+    if @used || @empty
+      return
     end
 
-    def method_missing(name, *args)
-        if name == @name && @used == false
-            if block_given?
-                yield @value
-            end
-            @used = true
-        end
-
-        self
+    if block_given? 
+      yield @name, @value
     end
-
-    def or
-        if @used || @empty
-            return
-        end
-
-        if block_given? 
-            yield @name, @value
-        end
-    end
+  end
 end
