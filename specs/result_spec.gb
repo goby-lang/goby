@@ -1,10 +1,10 @@
 require "spec"
-require "option"
+require "result"
 
-Spec.describe Option do
-    describe "empty Option" do 
+Spec.describe Result do
+    describe "empty Result" do 
         describe "#or" do 
-            o = Option.new 
+            o = Result.new 
 
             it "never calls a given block" do
                 is_called = false
@@ -16,8 +16,8 @@ Spec.describe Option do
         end
     end
 
-    describe "filled Option" do
-        o = Option.new(:hello, "world")
+    describe "filled Result" do
+        o = Result.new(:hello, "world")
 
         describe "#wrong_key" do
             it "block will not be called" do 
@@ -44,7 +44,7 @@ Spec.describe Option do
     end
 
     describe "key other than or" do
-        o = Option.new(:hello, "world")
+        o = Result.new(:hello, "world")
 
         describe "#wrong_key" do
             it "block will not be called" do 

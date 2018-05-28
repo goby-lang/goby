@@ -1,4 +1,4 @@
-class Option
+class Result
   def initialize(name=nil, value=nil)
     @name = name
     @value = value
