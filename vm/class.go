@@ -1204,8 +1204,10 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 							loaders, ok := externalClasses[libName]
 							externalClassLock.Unlock()
 							if !ok {
-								return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Can't require \"%s\"", libName)
-
+								err := t.execGobyLib(libName + ".gb")
+								if err != nil {
+									return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Can't require \"%s\"", libName)
+								}
 							}
 							initFunc = func(v *VM) {
 								for _, l := range loaders {
