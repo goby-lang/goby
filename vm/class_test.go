@@ -914,6 +914,42 @@ func TestClassLesserThanOrEqualMethodFail(t *testing.T) {
 	}
 }
 
+func TestInheritsMethodMissingMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		class Bar
+		end
+		
+		Bar.new.inherits_method_missing?
+
+`, false},
+		{`
+		class Bar
+		  inherits_method_missing
+		end
+		
+		Bar.new.inherits_method_missing?
+
+`, true},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s", evaluated.(*Error).message)
+		}
+
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestSendMethod(t *testing.T) {
 	tests := []struct {
 		input    string
