@@ -10,6 +10,13 @@ import (
 
 type jsonObj map[string]interface{}
 
+const (
+	// JSONError is for JSON-specific error
+	JSONError = "JSONError"
+
+	CantParseStringAsJSON = "Can't parse string %s as JSON: %s"
+)
+
 // Class methods --------------------------------------------------------
 func builtinJSONClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
@@ -38,7 +45,7 @@ func builtinJSONClassMethods() []*BuiltinMethodObject {
 						err = json.Unmarshal([]byte(jsonString), &objs)
 
 						if err != nil {
-							return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Can't parse string %s as json: %s", jsonString, err.Error())
+							return t.vm.InitErrorObject(JSONError, sourceLine, CantParseStringAsJSON, jsonString, err.Error())
 						}
 
 						var objects []Object

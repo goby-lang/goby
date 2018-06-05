@@ -20,7 +20,7 @@ class ArrayEnumerator
   #
   def next
     if !has_next?
-      raise StopIteration, "No more elements!"
+      raise StopIterationError, "No more elements!"
     end
 
     @current_position += 1

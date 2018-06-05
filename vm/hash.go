@@ -187,7 +187,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.BlockError, sourceLine, errors.CantGetBlockWithoutBlockArgument)
 					}
 
 					hash := receiver.(*HashObject)
@@ -371,7 +371,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.BlockError, sourceLine, errors.CantGetBlockWithoutBlockArgument)
 					}
 
 					hash := receiver.(*HashObject)
@@ -453,7 +453,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.BlockError, sourceLine, errors.CantGetBlockWithoutBlockArgument)
 					}
 
 					h := receiver.(*HashObject)
@@ -499,7 +499,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.BlockError, sourceLine, errors.CantGetBlockWithoutBlockArgument)
 					}
 
 					h := receiver.(*HashObject)
@@ -544,7 +544,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.BlockError, sourceLine, errors.CantGetBlockWithoutBlockArgument)
 					}
 
 					h := receiver.(*HashObject)
@@ -858,7 +858,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.BlockError, sourceLine, errors.CantGetBlockWithoutBlockArgument)
 					}
 
 					h := receiver.(*HashObject)
@@ -944,7 +944,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.BlockError, sourceLine, errors.CantGetBlockWithoutBlockArgument)
 					}
 
 					destinationPairs := map[string]Object{}
@@ -1126,7 +1126,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.BlockError, sourceLine, errors.CantGetBlockWithoutBlockArgument)
 					}
 
 					h := receiver.(*HashObject)

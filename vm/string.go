@@ -659,7 +659,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.BlockError, sourceLine, errors.CantGetBlockWithoutBlockArgument)
 					}
 					str := receiver.(*StringObject).value
 					if blockIsEmpty(blockFrame) {
@@ -699,7 +699,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.BlockError, sourceLine, errors.CantGetBlockWithoutBlockArgument)
 					}
 
 					str := receiver.(*StringObject).value
@@ -736,7 +736,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.BlockError, sourceLine, errors.CantGetBlockWithoutBlockArgument)
 					}
 
 					str := receiver.(*StringObject).value

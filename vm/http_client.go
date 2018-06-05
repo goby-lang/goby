@@ -33,7 +33,7 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 
 					resp, err := goClient.Get(u.value)
 					if err != nil {
-						return t.vm.InitErrorObject(errors.HTTPError, sourceLine, "Could not complete request, %s", err)
+						return t.vm.InitErrorObject(HTTPError, sourceLine, "Could not complete request, %s", err)
 					}
 
 					gobyResp, err := responseGoToGoby(t, resp)
@@ -72,7 +72,7 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 
 					resp, err := goClient.Post(u.value, contentType.value, bodyR)
 					if err != nil {
-						return t.vm.InitErrorObject(errors.HTTPError, sourceLine, "Could not complete request, %s", err)
+						return t.vm.InitErrorObject(HTTPError, sourceLine, "Could not complete request, %s", err)
 					}
 
 					gobyResp, err := responseGoToGoby(t, resp)
@@ -99,7 +99,7 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 
 					resp, err := goClient.Head(u.value)
 					if err != nil {
-						return t.vm.InitErrorObject(errors.HTTPError, sourceLine, "Could not complete request, %s", err)
+						return t.vm.InitErrorObject(HTTPError, sourceLine, "Could not complete request, %s", err)
 					}
 
 					gobyResp, err := responseGoToGoby(t, resp)
@@ -138,7 +138,7 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 
 					goResp, err := goClient.Do(goReq)
 					if err != nil {
-						return t.vm.InitErrorObject(errors.HTTPError, sourceLine, "Could not complete request, %s", err)
+						return t.vm.InitErrorObject(HTTPError, sourceLine, "Could not complete request, %s", err)
 					}
 
 					gobyResp, err := responseGoToGoby(t, goResp)

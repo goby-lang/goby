@@ -30,7 +30,7 @@ type Error struct {
 // Functions for initialization -----------------------------------------
 
 func (vm *VM) initUnsupportedMethodError(sourceLine int, methodName string, receiver Object) *Error {
-	return vm.InitErrorObject(errors.UnsupportedMethodError, sourceLine, "Unsupported Method %s for %+v", methodName, receiver.toString())
+	return vm.InitErrorObject(errors.UnsupportedFeatureError, sourceLine, errors.UnsupportedMethodFor, methodName, receiver.toString())
 }
 
 func (vm *VM) InitErrorObject(errorType string, sourceLine int, format string, args ...interface{}) *Error {
@@ -58,7 +58,7 @@ func (vm *VM) InitErrorObject(errorType string, sourceLine int, format string, a
 }
 
 func (vm *VM) initErrorClasses() {
-	errTypes := []string{errors.InternalError, errors.ArgumentError, errors.NameError, errors.StopIteration, errors.TypeError, errors.UndefinedMethodError, errors.UnsupportedMethodError, errors.ConstantAlreadyInitializedError, errors.HTTPError, errors.ZeroDivisionError}
+	errTypes := []string{errors.InternalError, errors.ArgumentError, errors.ConstantError, errors.StopIterationError, errors.TypeError, errors.UndefinedMethodError, errors.UnsupportedFeatureError, errors.ZeroDivisionError, errors.BlockError, HTTPError, PluginError, ArrayError, JSONError, FileError}
 
 	for _, errType := range errTypes {
 		c := vm.initializeClass(errType, false)

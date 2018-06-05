@@ -36,7 +36,7 @@ class RangeEnumerator
   #
   def next
     if !has_next?
-      raise StopIteration, "No more elements!"
+      raise StopIterationError, "No more elements!"
     end
 
     if @current_value.nil?

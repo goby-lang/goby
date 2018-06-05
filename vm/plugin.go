@@ -21,6 +21,13 @@ type PluginObject struct {
 	plugin *plugin.Plugin
 }
 
+const (
+	// PluginError is for plugin error
+	PluginError = "PluginError"
+
+	CantCreatePlugin = "Can't create plugin: %s"
+)
+
 // Class methods --------------------------------------------------------
 func builtinPluginClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{

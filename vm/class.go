@@ -853,7 +853,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 					case Object:
 						return r.Class()
 					default:
-						return &Error{message: "Can't call class on %T" + string(r.Class().ReturnName())}
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantCallClass, string(r.Class().ReturnName()))
 					}
 				}
 			},
@@ -1427,7 +1427,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.BlockError, sourceLine, errors.CantGetBlockWithoutBlockArgument)
 					}
 
 					newT := t.vm.newThread()

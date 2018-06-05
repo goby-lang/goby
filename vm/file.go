@@ -17,6 +17,13 @@ type FileObject struct {
 	File *os.File
 }
 
+const (
+	// FileError is for file-specific error
+	FileError = "FileError"
+
+	InvalidFileMode = "Invalid file mode: %"
+)
+
 var fileModeTable = map[string]int{
 	"r":  syscall.O_RDONLY,
 	"r+": syscall.O_RDWR,
@@ -170,7 +177,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 							md, ok := fileModeTable[m]
 
 							if !ok {
-								return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Unknown file mode: %s", m)
+								return t.vm.InitErrorObject(FileError, sourceLine, InvalidFileMode, m)
 							}
 
 							if md == syscall.O_RDWR || md == syscall.O_WRONLY {

@@ -520,7 +520,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.BlockError, sourceLine, errors.CantGetBlockWithoutBlockArgument)
 					}
 
 					for i := 0; i < n.value; i++ {

@@ -166,7 +166,7 @@ func TestVM_REPLExecFail(t *testing.T) {
 			[]string{
 				"NonExistentBuiltinMethod",
 			},
-			"NameError: uninitialized constant NonExistentBuiltinMethod",
+			"ConstantError: uninitialized constant NonExistentBuiltinMethod",
 		},
 		{
 			[]string{
