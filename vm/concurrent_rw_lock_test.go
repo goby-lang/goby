@@ -97,7 +97,7 @@ func TestRWLockWithReadLockMethodFail(t *testing.T) {
 		{`
 		require 'concurrent/rw_lock'
 		Concurrent::RWLock.new.with_read_lock
-		`, "InternalError: Can't yield without a block", 1},
+		`, "BlockError: Can't get block without a block argument", 1},
 		{`
 		require 'concurrent/rw_lock'
 		Concurrent::RWLock.new.with_read_lock(5) do end
@@ -118,7 +118,7 @@ func TestRWLockWithWriteLockMethodFail(t *testing.T) {
 		{`
 		require 'concurrent/rw_lock'
 		Concurrent::RWLock.new.with_write_lock
-		`, "InternalError: Can't yield without a block", 1},
+		`, "BlockError: Can't get block without a block argument", 1},
 		{`
 		require 'concurrent/rw_lock'
 		Concurrent::RWLock.new.with_write_lock(5) do end

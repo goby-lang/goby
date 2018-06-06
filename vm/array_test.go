@@ -33,7 +33,7 @@ func TestArrayEvaluation(t *testing.T) {
 
 	arr, ok := evaluated.(*ArrayObject)
 	if !ok {
-		t.Fatalf("Expect evaluated value to be an array. got=%T", evaluated)
+		t.Fatalf("Expect evaluated value to be an array. got: %T", evaluated)
 	}
 
 	VerifyExpected(t, 0, arr.Elements[0], 1)
@@ -161,10 +161,10 @@ func TestArrayIndexFail(t *testing.T) {
 		{`
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[-11] = 123
-		`, "ArgumentError: Index value -11 too small for array. minimum: -10", 1},
+		`, "ArrayError: Index value -11 is too small for array. minimum: -10", 1},
 		{`
 		    [1, "a", 10, "b"][-5]
-		`, "ArgumentError: Index value -5 too small for array. minimum: -4", 1},
+		`, "ArrayError: Index value -5 is too small for array. minimum: -4", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -373,59 +373,59 @@ func TestArrayIndexWithSuccessiveValuesFail(t *testing.T) {
 		{`
 			a = [1, 2, 3, 4, 5]
 			a["1", 5]
-		`, "TypeError: Expect argument to be Integer. got: String", 1},
+		`, "TypeError: Expects argument to be Integer. got: String", 1},
 		{`
 			a = [1, 2, 3, 4, 5]
 			a[1, "5"]
-		`, "TypeError: Expect argument to be Integer. got: String", 1},
+		`, "TypeError: Expects argument to be Integer. got: String", 1},
 		{`
 			a = [1, 2, 3, 4, 5]
 			a[1, 3, 5]
-		`, "ArgumentError: Expect 1..2 arguments. got=3", 1},
+		`, "ArgumentError: Expects 1 to 2 argument(s). got: 3", 1},
 		{`
 			a = [1, 2, 3, 4, 5]
 			a[1, 3, 5, 7, 9]
-		`, "ArgumentError: Expect 1..2 arguments. got=5", 1},
+		`, "ArgumentError: Expects 1 to 2 argument(s). got: 5", 1},
 		{`
 			a = [1, 2, 3, 4, 5]
 			a[]
-		`, "ArgumentError: Expect 1..2 arguments. got=0", 1},
+		`, "ArgumentError: Expects 1 to 2 argument(s). got: 0", 1},
 		{`
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[1, "5"] = 6
-		`, "TypeError: Expect argument to be Integer. got: String", 1},
+		`, "TypeError: Expects argument to be Integer. got: String", 1},
 		{`
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[1, "5", 6] = 123
-		`, "ArgumentError: Expect 2..3 arguments. got=4", 1},
+		`, "ArgumentError: Expects 2 to 3 argument(s). got: 4", 1},
 		{`
 			a = [1, 2, 3, 4, 5]
 			a[-6, 5]
-		`, "ArgumentError: Index value -6 too small for array. minimum: -5", 1},
+		`, "ArrayError: Index value -6 is too small for array. minimum: -5", 1},
 		{`
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[1, -3] = [1, 2, 3, 4, 5]
-		`, "ArgumentError: Expect second argument greater than or equal 0. got: -3", 1},
+		`, "ArrayError: Expects argument #2 to be positive. got: -3", 1},
 		{`
 			a = [1, 2, 3, 4, 5]
 			a[-1, -1] = 555
-		`, "ArgumentError: Expect second argument greater than or equal 0. got: -1", 1},
+		`, "ArrayError: Expects argument #2 to be positive. got: -1", 1},
 		{`
 			a = [1, 2, 3, 4, 5]
 			a[6, -1] = 555
-		`, "ArgumentError: Expect second argument greater than or equal 0. got: -1", 1},
+		`, "ArrayError: Expects argument #2 to be positive. got: -1", 1},
 		{`
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[-11, 2] = [1, 2, 3, 4, 5]
-		`, "ArgumentError: Index value -11 too small for array. minimum: -10", 1},
+		`, "ArrayError: Index value -11 is too small for array. minimum: -10", 1},
 		{`
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[3, -1]
-		`, "ArgumentError: Expect second argument greater than or equal 0. got: -1", 1},
+		`, "ArrayError: Expects argument #2 to be positive. got: -1", 1},
 		{`
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[-1, -4] # Both negative case
-		`, "ArgumentError: Expect second argument greater than or equal 0. got: -4", 1},
+		`, "ArrayError: Expects argument #2 to be positive. got: -4", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -493,7 +493,7 @@ func TestArrayAnyMethod(t *testing.T) {
 
 func TestArrayAnyMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[].any?`, "InternalError: Can't yield without a block", 1},
+		{`[].any?`, "BlockError: Can't get block without a block argument", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -552,11 +552,11 @@ func TestArrayAtMethod(t *testing.T) {
 
 func TestArrayAtMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2, 3].at`, "ArgumentError: Expect 1 arguments. got=0", 1},
-		{`[1, 2, 3].at(2, 3)`, "ArgumentError: Expect 1 arguments. got=2", 1},
-		{`[1, 2, 3].at(true)`, "TypeError: Expect argument to be Integer. got: Boolean", 1},
-		{`[1, 2, 3].at(1..3)`, "TypeError: Expect argument to be Integer. got: Range", 1},
-		{`[1, "a", 10, 5].at(-5)`, "ArgumentError: Index value -5 too small for array. minimum: -4", 1},
+		{`[1, 2, 3].at`, "ArgumentError: Expects 1 argument(s). got: 0", 1},
+		{`[1, 2, 3].at(2, 3)`, "ArgumentError: Expects 1 argument(s). got: 2", 1},
+		{`[1, 2, 3].at(true)`, "TypeError: Expects argument to be Integer. got: Boolean", 1},
+		{`[1, 2, 3].at(1..3)`, "TypeError: Expects argument to be Integer. got: Range", 1},
+		{`[1, "a", 10, 5].at(-5)`, "ArrayError: Index value -5 is too small for array. minimum: -4", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -594,8 +594,8 @@ func TestArrayClearMethod(t *testing.T) {
 
 func TestArrayClearMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`['Maxwell', 'Alexius'].clear(123)`, "ArgumentError: Expect 0 argument. got=1", 1},
-		{`['Taipei', 101].clear(1, 0, 1)`, "ArgumentError: Expect 0 argument. got=3", 1},
+		{`['Maxwell', 'Alexius'].clear(123)`, "ArgumentError: Expects 0 argument(s). got: 1", 1},
+		{`['Taipei', 101].clear(1, 0, 1)`, "ArgumentError: Expects 0 argument(s). got: 3", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -639,10 +639,10 @@ func TestArrayConcatMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = [1, 2]
 		a.concat(3)
-		`, "TypeError: Expect argument to be Array. got: Integer", 1},
+		`, "TypeError: Expects argument to be Array. got: Integer", 1},
 		{`a = []
 		a.concat("a")
-		`, "TypeError: Expect argument to be Array. got: String", 1},
+		`, "TypeError: Expects argument to be Array. got: String", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -729,7 +729,7 @@ func TestArrayCountMethodFail(t *testing.T) {
 		{
 			`a = [1, 2]
 		a.count(3, 3)
-		`, "ArgumentError: Expect 1 argument, got=2", 1},
+		`, "ArgumentError: Expects 1 argument(s). got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -812,10 +812,10 @@ func TestArrayDeleteAtMethod(t *testing.T) {
 
 func TestArrayDeleteAtMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2, 3].delete_at`, "ArgumentError: Expect 1 argument. got=0", 1},
-		{`[1, 2, 3].delete_at(2, 3)`, "ArgumentError: Expect 1 argument. got=2", 1},
-		{`[1, 2, 3].delete_at(true)`, "TypeError: Expect argument to be Integer. got: Boolean", 1},
-		{`[1, 2, 3].delete_at(1..3)`, "TypeError: Expect argument to be Integer. got: Range", 1},
+		{`[1, 2, 3].delete_at`, "ArgumentError: Expects 1 argument(s). got: 0", 1},
+		{`[1, 2, 3].delete_at(2, 3)`, "ArgumentError: Expects 1 argument(s). got: 2", 1},
+		{`[1, 2, 3].delete_at(true)`, "TypeError: Expects argument to be Integer. got: Boolean", 1},
+		{`[1, 2, 3].delete_at(1..3)`, "TypeError: Expects argument to be Integer. got: Range", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -858,8 +858,8 @@ func TestArrayDigMethod(t *testing.T) {
 
 func TestArrayDigMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2].dig`, "ArgumentError: Expected 1+ arguments, got 0", 1},
-		{`[1, 2].dig(0, 1)`, "TypeError: Expect target to be Diggable, got Integer", 1},
+		{`[1, 2].dig`, "ArgumentError: Expects 1 or more arguments. got: 0", 1},
+		{`[1, 2].dig(0, 1)`, "TypeError: Expects argument to be Diggable. got: Integer", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -924,12 +924,12 @@ func TestArrayEachMethod(t *testing.T) {
 
 func TestArrayEachMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`['M', 'A', 'X', 'W', 'E', 'L', 'L'].each`, "InternalError: Can't yield without a block", 1},
+		{`['M', 'A', 'X', 'W', 'E', 'L', 'L'].each`, "BlockError: Can't get block without a block argument", 1},
 		{`
 		['T', 'A', 'I', 'P', 'E', 'I'].each(101) do |char|
 		  puts char
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 1},
+		`, "ArgumentError: Expects 0 argument(s). got: 1", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -994,12 +994,12 @@ func TestArrayEachIndexMethod(t *testing.T) {
 
 func TestArrayEachIndexMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`['M', 'A', 'X', 'W', 'E', 'L', 'L'].each_index`, "InternalError: Can't yield without a block", 1},
+		{`['M', 'A', 'X', 'W', 'E', 'L', 'L'].each_index`, "BlockError: Can't get block without a block argument", 1},
 		{`
 		['T', 'A', 'I', 'P', 'E', 'I'].each_index(101) do |char|
 		  puts char
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 1},
+		`, "ArgumentError: Expects 0 argument(s). got: 1", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1046,8 +1046,8 @@ func TestArrayEmptyMethod(t *testing.T) {
 
 func TestArrayEmptyMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2, 3].empty?(123)`, "ArgumentError: Expect 0 argument. got=1", 1},
-		{`['T', 'A', 'I', 'P', 'E', 'I'].empty?(1, 0, 1)`, "ArgumentError: Expect 0 argument. got=3", 1},
+		{`[1, 2, 3].empty?(123)`, "ArgumentError: Expects 0 argument(s). got: 1", 1},
+		{`['T', 'A', 'I', 'P', 'E', 'I'].empty?(1, 0, 1)`, "ArgumentError: Expects 0 argument(s). got: 3", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1134,13 +1134,13 @@ func TestArrayFirstMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = [1, 2]
 		a.first("a")
-		`, "TypeError: Expect argument to be Integer. got: String", 1},
+		`, "TypeError: Expects argument to be Integer. got: String", 1},
 		{`a = [1, 2]
 		a.first(1, 2, 3)
-		`, "ArgumentError: Expect 0..1 argument. got=3", 1},
+		`, "ArgumentError: Expects 0 to 1 argument(s). got: 3", 1},
 		{`a = [1, 2]
 		a.first(-1)
-		`, "ArgumentError: Expect argument to be positive value. got=-1", 1},
+		`, "ArrayError: Expects argument #1 to be positive. got: -1", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1184,7 +1184,7 @@ func TestArrayFlattenMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = [1, 2]
 		a.flatten(1)
-		`, "ArgumentError: Expect 0 argument. got=1", 1},
+		`, "ArgumentError: Expects 0 argument(s). got: 1", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1252,10 +1252,10 @@ func TestArrayJoinMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = [1, 2]
 		a.join(",", "-")
-		`, "ArgumentError: Expect 0 or 1 argument. got=2", 1},
+		`, "ArgumentError: Expects 0 to 1 argument(s). got: 2", 1},
 		{`a = [1, 2]
 		a.join(1)
-		`, "TypeError: Expect argument to be String. got: Integer", 1},
+		`, "TypeError: Expects argument to be String. got: Integer", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1303,13 +1303,13 @@ func TestArrayLastMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = [1, 2]
 		a.last("l")
-		`, "TypeError: Expect argument to be Integer. got: String", 1},
+		`, "TypeError: Expects argument to be Integer. got: String", 1},
 		{`a = [1, 2]
 		a.last(1, 2, 3)
-		`, "ArgumentError: Expect 0..1 argument. got=3", 1},
+		`, "ArgumentError: Expects 0 to 1 argument(s). got: 3", 1},
 		{`a = [1, 2]
 		a.last(-1)
-		`, "ArgumentError: Expect argument to be positive value. got=-1", 1},
+		`, "ArrayError: Expects argument #1 to be positive. got: -1", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1356,7 +1356,7 @@ func TestArrayLengthMethod(t *testing.T) {
 
 func TestArrayLengthMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2, 3].length(10)`, "ArgumentError: Expect 0 argument. got=1", 1},
+		{`[1, 2, 3].length(10)`, "ArgumentError: Expects 0 argument(s). got: 1", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1459,7 +1459,7 @@ func TestArrayPlusOperator(t *testing.T) {
 
 func TestArrayPlusOperatorFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2] + true`, "TypeError: Expect argument to be Array. got: Boolean", 1},
+		{`[1, 2] + true`, "TypeError: Expects argument to be Array. got: Boolean", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1504,8 +1504,8 @@ func TestArrayPopMethod(t *testing.T) {
 
 func TestArrayPopMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2, 3, 4, 5].pop(123)`, "ArgumentError: Expect 0 argument. got=1", 1},
-		{`[1, 2, 3, 4, 5].pop("Hello", "World")`, "ArgumentError: Expect 0 argument. got=2", 1},
+		{`[1, 2, 3, 4, 5].pop(123)`, "ArgumentError: Expects 0 argument(s). got: 1", 1},
+		{`[1, 2, 3, 4, 5].pop("Hello", "World")`, "ArgumentError: Expects 0 argument(s). got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1647,12 +1647,12 @@ func TestArrayReduceMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = [1, 2]
 		a.reduce(1)
-		`, "InternalError: Can't yield without a block", 1},
+		`, "BlockError: Can't get block without a block argument", 1},
 		{`a = [1, 2]
 		a.reduce(1, 2) do |prev, n|
 			prev + n
 		end
-		`, "ArgumentError: Expect 0 or 1 argument. got=2", 1},
+		`, "ArgumentError: Expects 0 to 1 argument(s). got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1690,8 +1690,8 @@ func TestArrayReverseMethod(t *testing.T) {
 
 func TestArrayReverseMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2, 3, 4, 5].reverse(123)`, "ArgumentError: Expect 0 argument. got=1", 1},
-		{`[1, 2, 3, 4, 5].reverse("Hello", "World")`, "ArgumentError: Expect 0 argument. got=2", 1},
+		{`[1, 2, 3, 4, 5].reverse(123)`, "ArgumentError: Expects 0 argument(s). got: 1", 1},
+		{`[1, 2, 3, 4, 5].reverse("Hello", "World")`, "ArgumentError: Expects 0 argument(s). got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1752,12 +1752,12 @@ func TestArrayReverseEachMethod(t *testing.T) {
 
 func TestArrayReverseEachMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`['M', 'A'].reverse_each`, "InternalError: Can't yield without a block", 1},
+		{`['M', 'A'].reverse_each`, "BlockError: Can't get block without a block argument", 1},
 		{`
 		['T', 'A'].reverse_each(101) do |char|
 		  puts char
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 1},
+		`, "ArgumentError: Expects 0 argument(s). got: 1", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1805,9 +1805,9 @@ func TestArrayRotateMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = [1, 2]
 		a.rotate("a")
-		`, "TypeError: Expect argument to be Integer. got: String", 1},
+		`, "TypeError: Expects argument to be Integer. got: String", 1},
 		{`a = [1, 2]
-		a.rotate(1, 2, 3)`, "ArgumentError: Expect 0..1 argument. got=3", 1},
+		a.rotate(1, 2, 3)`, "ArgumentError: Expects 0 to 1 argument(s). got: 3", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1873,8 +1873,8 @@ func TestArraySelectMethod(t *testing.T) {
 
 func TestArraySelectMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2].select(1)`, "ArgumentError: Expect 0 argument. got=1", 1},
-		{`[1, 2, 3, 4, 5].select`, "InternalError: Can't yield without a block", 1},
+		{`[1, 2].select(1)`, "ArgumentError: Expects 0 argument(s). got: 1", 1},
+		{`[1, 2, 3, 4, 5].select`, "BlockError: Can't get block without a block argument", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1922,7 +1922,7 @@ func TestArrayShiftMethodFail(t *testing.T) {
 		{`a = [1, 2]
 		a.shift(3, 3, 4, 5)
 		`,
-			"ArgumentError: Expect 0 argument. got=4", 1},
+			"ArgumentError: Expects 0 argument(s). got: 4", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1970,7 +1970,7 @@ func TestArrayStarMethod(t *testing.T) {
 
 func TestArrayStarMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2] * nil`, "TypeError: Expect argument to be Integer. got: Null", 1},
+		{`[1, 2] * nil`, "TypeError: Expects argument to be Integer. got: Null", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -2099,7 +2099,7 @@ func TestArrayValuesAtMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = ["a", "b", "c"]
 			a.values_at("-")
-		`, "TypeError: Expect argument to be Integer. got: String", 1},
+		`, "TypeError: Expects argument to be Integer. got: String", 1},
 	}
 
 	for i, tt := range testsFail {

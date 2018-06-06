@@ -172,7 +172,7 @@ func TestRegexpMatchMethod(t *testing.T) {
 func TestRegexpMatchMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`Regexp.new("abc").match?('a', 'b')`, "ArgumentError: Expect 1 argument. got=2", 1},
-		{`Regexp.new("abc").match?(1)`, "TypeError: Expect argument to be String. got: Integer", 1},
+		{`Regexp.new("abc").match?(1)`, "TypeError: Expects argument to be String. got: Integer", 1},
 	}
 
 	for i, tt := range testsFail {

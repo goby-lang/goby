@@ -891,7 +891,7 @@ func TestUnusedKeywordFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		if true then puts 1 end
-		`, "UndefinedMethodError: Undefined Method 'then' for <Instance of: Object>", 1},
+		`, "UndefinedMethodError: Undefined method 'then' for <Instance of: Object>", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -2143,7 +2143,7 @@ func TestMethodMissingFail(t *testing.T) {
 		end
 		
 		Foo.new.bar
-`, "UndefinedMethodError: Undefined Method 'bar' for <Instance of: Foo>"},
+`, "UndefinedMethodError: Undefined method 'bar' for <Instance of: Foo>"},
 		{`
 		module Bar
 		  def method_missing
@@ -2156,7 +2156,7 @@ func TestMethodMissingFail(t *testing.T) {
 		end
 		
 		Foo.new.bar
-`, "UndefinedMethodError: Undefined Method 'bar' for <Instance of: Foo>"},
+`, "UndefinedMethodError: Undefined method 'bar' for <Instance of: Foo>"},
 	}
 
 	for i, tt := range tests {
@@ -2471,11 +2471,11 @@ func TestUnusedVariableFail(t *testing.T) {
 		{`
 		_ = 1
 		_
-		`, "UndefinedMethodError: Undefined Method '_' for <Instance of: Object>", 1},
+		`, "UndefinedMethodError: Undefined method '_' for <Instance of: Object>", 1},
 		{`
 		_, b = [1, 2]
 		_
-		`, "UndefinedMethodError: Undefined Method '_' for <Instance of: Object>", 1},
+		`, "UndefinedMethodError: Undefined method '_' for <Instance of: Object>", 1},
 	}
 
 	for i, tt := range testsFail {

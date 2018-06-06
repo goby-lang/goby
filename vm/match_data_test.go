@@ -45,7 +45,7 @@ func TestMatchDataCaptures(t *testing.T) {
 func TestMatchDataCapturesFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`'a1bca2'.match(1, 2)`, "ArgumentError: Expect 1 argument. got=2", 1},
-		{`'a1bca2'.match('a.')`, "TypeError: Expect argument to be Regexp. got: String", 1},
+		{`'a1bca2'.match('a.')`, "TypeError: Expects argument to be Regexp. got: String", 1},
 	}
 
 	for i, tt := range testsFail {

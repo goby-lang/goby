@@ -52,6 +52,16 @@ type BlockObject struct {
 	self           Object
 }
 
+const (
+	// BlockError is for indicating errors regarding block
+	BlockError = "BlockError"
+)
+
+const (
+	cantYieldWithoutBlockFormat                   = "Can't yield without a block"
+	cantInitializeBlockObjectWithoutBlockArgument = "Can't initialize block object without a block argument"
+)
+
 // Class methods --------------------------------------------------------
 func builtinBlockClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{

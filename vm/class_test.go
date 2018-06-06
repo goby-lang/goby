@@ -105,7 +105,7 @@ end
 
 a = Bar.new()
 	`
-	expected := `InternalError: Module inheritance is not supported: Foo`
+	expected := `UnsupportedFeatureError: Module inheritance is unsupported: Foo`
 
 	v := initTestVM()
 	evaluated := v.testEval(t, input, getFilename())
@@ -1168,7 +1168,7 @@ func TestResponseToMethod(t *testing.T) {
 // With the current framework, only exit() failures can be tested.
 func TestExitMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`exit("abc")`, "TypeError: Expect argument to be Integer. got: String", 1},
+		{`exit("abc")`, "TypeError: Expects argument to be Integer. got: String", 1},
 		{`exit(1, 2)`, "ArgumentError: Expected at most 1 argument; got: 2", 1},
 	}
 
@@ -1234,8 +1234,8 @@ func TestGeneralIsAMethodFail(t *testing.T) {
 		{`Class.is_a?`, "ArgumentError: Expect 1 argument. got: 0", 1},
 		{`123.is_a?(123, 456)`, "ArgumentError: Expect 1 argument. got: 2", 1},
 		{`123.is_a?(Integer, String)`, "ArgumentError: Expect 1 argument. got: 2", 1},
-		{`123.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1},
-		{`Class.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1},
+		{`123.is_a?(true)`, "TypeError: Expects argument to be Class. got: Boolean", 1},
+		{`Class.is_a?(true)`, "TypeError: Expects argument to be Class. got: Boolean", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1315,9 +1315,9 @@ func TestClassNameClassMethod(t *testing.T) {
 
 func TestClassNameClassMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Taipei".name`, "UndefinedMethodError: Undefined Method 'name' for Taipei", 1},
-		{`123.name`, "UndefinedMethodError: Undefined Method 'name' for 123", 1},
-		{`true.name`, "UndefinedMethodError: Undefined Method 'name' for true", 1},
+		{`"Taipei".name`, "UndefinedMethodError: Undefined method 'name' for Taipei", 1},
+		{`123.name`, "UndefinedMethodError: Undefined method 'name' for 123", 1},
+		{`true.name`, "UndefinedMethodError: Undefined method 'name' for true", 1},
 		{`Integer.name(Integer)`, "ArgumentError: Expect 0 argument. got: 1", 1},
 		{`String.name(Hash, Array)`, "ArgumentError: Expect 0 argument. got: 2", 1},
 	}
@@ -1364,9 +1364,9 @@ func TestClassSuperclassClassMethod(t *testing.T) {
 
 func TestClassSuperclassClassMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Taipei".superclass`, "UndefinedMethodError: Undefined Method 'superclass' for Taipei", 1},
-		{`123.superclass`, "UndefinedMethodError: Undefined Method 'superclass' for 123", 1},
-		{`true.superclass`, "UndefinedMethodError: Undefined Method 'superclass' for true", 1},
+		{`"Taipei".superclass`, "UndefinedMethodError: Undefined method 'superclass' for Taipei", 1},
+		{`123.superclass`, "UndefinedMethodError: Undefined method 'superclass' for 123", 1},
+		{`true.superclass`, "UndefinedMethodError: Undefined method 'superclass' for true", 1},
 		{`Integer.superclass(Integer)`, "ArgumentError: Expect 0 argument. got: 1", 1},
 		{`String.superclass(Hash, Array)`, "ArgumentError: Expect 0 argument. got: 2", 1},
 	}
@@ -1468,7 +1468,7 @@ func TestInstanceEvalMethod(t *testing.T) {
 func TestInstanceEvalMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`"s".instance_eval(1, 1)`, "ArgumentError: Expect at most 1 arguments. got: 2", 1},
-		{`"s".instance_eval(true)`, "TypeError: Expect argument to be Block. got: Boolean", 1},
+		{`"s".instance_eval(true)`, "TypeError: Expects argument to be Block. got: Boolean", 1},
 	}
 
 	for i, tt := range testsFail {

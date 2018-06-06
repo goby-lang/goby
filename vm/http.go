@@ -17,6 +17,13 @@ var (
 	httpClientClass   *RClass
 )
 
+const (
+	// HTTPError is returned when when a request fails to return a proper response
+	HTTPError = "HTTPError"
+
+	cantCompleteRequest = "Can't complete request: %s"
+)
+
 // Class methods --------------------------------------------------------
 func builtinHTTPClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
@@ -48,10 +55,10 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 
 					resp, err := http.Get(uri.String())
 					if err != nil {
-						return t.vm.InitErrorObject(errors.HTTPError, sourceLine, "Could not complete request, %s", err)
+						return t.vm.InitErrorObject(HTTPError, sourceLine, "Could not complete request, %s", err)
 					}
 					if resp.StatusCode != http.StatusOK {
-						return t.vm.InitErrorObject(errors.HTTPError, sourceLine, "Non-200 response, %s (%d)", resp.Status, resp.StatusCode)
+						return t.vm.InitErrorObject(HTTPError, sourceLine, "Non-200 response, %s (%d)", resp.Status, resp.StatusCode)
 					}
 
 					content, err := ioutil.ReadAll(resp.Body)
@@ -93,10 +100,10 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 
 					resp, err := http.Post(host, contentType, strings.NewReader(body))
 					if err != nil {
-						return t.vm.InitErrorObject(errors.HTTPError, sourceLine, "Could not complete request, %s", err)
+						return t.vm.InitErrorObject(HTTPError, sourceLine, "Could not complete request, %s", err)
 					}
 					if resp.StatusCode != http.StatusOK {
-						return t.vm.InitErrorObject(errors.HTTPError, sourceLine, "Non-200 response, %s (%d)", resp.Status, resp.StatusCode)
+						return t.vm.InitErrorObject(HTTPError, sourceLine, "Non-200 response, %s (%d)", resp.Status, resp.StatusCode)
 					}
 
 					content, err := ioutil.ReadAll(resp.Body)
@@ -137,10 +144,10 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 
 					resp, err := http.Head(uri.String())
 					if err != nil {
-						return t.vm.InitErrorObject(errors.HTTPError, sourceLine, "Could not complete request, %s", err)
+						return t.vm.InitErrorObject(HTTPError, sourceLine, "Could not complete request, %s", err)
 					}
 					if resp.StatusCode != http.StatusOK {
-						return t.vm.InitErrorObject(errors.HTTPError, sourceLine, "Non-200 response, %s (%d)", resp.Status, resp.StatusCode)
+						return t.vm.InitErrorObject(HTTPError, sourceLine, "Non-200 response, %s (%d)", resp.Status, resp.StatusCode)
 					}
 
 					ret := t.vm.InitHashObject(map[string]Object{})

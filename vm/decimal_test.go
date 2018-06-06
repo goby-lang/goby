@@ -93,9 +93,9 @@ func TestDecimalArithmeticOperationWithFloat(t *testing.T) {
 
 func TestDecimalArithmeticOperationFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`'1'.to_d + "p"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`'1'.to_d - "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`'1'.to_d / "t"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`'1'.to_d + "p"`, "TypeError: Expects argument to be Numeric. got: String", 1},
+		{`'1'.to_d - "m"`, "TypeError: Expects argument to be Numeric. got: String", 1},
+		{`'1'.to_d / "t"`, "TypeError: Expects argument to be Numeric. got: String", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -171,11 +171,11 @@ func TestDecimalComparisonWithInteger(t *testing.T) {
 
 func TestDecimalComparisonFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`'1'.to_d > "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`'1'.to_d >= "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`'1'.to_d < "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`'1'.to_d <= "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`'1'.to_d <=> "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`'1'.to_d > "m"`, "TypeError: Expects argument to be Numeric. got: String", 1},
+		{`'1'.to_d >= "m"`, "TypeError: Expects argument to be Numeric. got: String", 1},
+		{`'1'.to_d < "m"`, "TypeError: Expects argument to be Numeric. got: String", 1},
+		{`'1'.to_d <= "m"`, "TypeError: Expects argument to be Numeric. got: String", 1},
+		{`'1'.to_d <=> "m"`, "TypeError: Expects argument to be Numeric. got: String", 1},
 	}
 
 	for i, tt := range testsFail {

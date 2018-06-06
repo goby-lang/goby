@@ -252,7 +252,7 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 					ran := receiver.(*RangeObject)
 
 					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.BlockError, sourceLine, errors.CantGetBlockWithoutBlockArgument)
 					}
 
 					ran.each(func(i int) error {
@@ -354,7 +354,7 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 					r := receiver.(*RangeObject)
 
 					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.BlockError, sourceLine, errors.CantGetBlockWithoutBlockArgument)
 					}
 
 					if len(args) != 0 {
@@ -437,7 +437,7 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 					ran := receiver.(*RangeObject)
 
 					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.BlockError, sourceLine, errors.CantGetBlockWithoutBlockArgument)
 					}
 
 					stepValue := args[0].(*IntegerObject).value

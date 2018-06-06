@@ -141,27 +141,27 @@ func TestStackTraces(t *testing.T) {
 
 func TestUndefinedMethodError(t *testing.T) {
 	tests := []errorTestCase{
-		{`a`, "UndefinedMethodError: Undefined Method 'a' for <Instance of: Object>", 1},
+		{`a`, "UndefinedMethodError: Undefined method 'a' for <Instance of: Object>", 1},
 		{`class Foo
 		 end
 
 		 a = Foo.new
 		 a.bar = "fuz"
-		`, "UndefinedMethodError: Undefined Method 'bar=' for <Instance of: Foo>", 1},
+		`, "UndefinedMethodError: Undefined method 'bar=' for <Instance of: Foo>", 1},
 		{`class Foo
 		   attr_reader("foo")
 		 end
 
 		 a = Foo.new
 		 a.bar = "fuz"
-		`, "UndefinedMethodError: Undefined Method 'bar=' for <Instance of: Foo>", 1},
+		`, "UndefinedMethodError: Undefined method 'bar=' for <Instance of: Foo>", 1},
 		{`class Foo
 		  attr_reader("bar")
 		end
 
 		a = Foo.new
 		a.bar = "fuz"
-		`, "UndefinedMethodError: Undefined Method 'bar=' for <Instance of: Foo>", 1},
+		`, "UndefinedMethodError: Undefined method 'bar=' for <Instance of: Foo>", 1},
 	}
 
 	for i, tt := range tests {
@@ -176,12 +176,12 @@ func TestUndefinedMethodError(t *testing.T) {
 
 func TestUnsupportedMethodError(t *testing.T) {
 	tests := []errorTestCase{
-		{`String.new`, "UnsupportedMethodError: Unsupported Method #new for String", 1},
-		{`Integer.new`, "UnsupportedMethodError: Unsupported Method #new for Integer", 1},
-		{`Hash.new`, "UnsupportedMethodError: Unsupported Method #new for Hash", 1},
-		{`Array.new`, "UnsupportedMethodError: Unsupported Method #new for Array", 1},
-		{`Boolean.new`, "UnsupportedMethodError: Unsupported Method #new for Boolean", 1},
-		{`Null.new`, "UnsupportedMethodError: Unsupported Method #new for Null", 1},
+		{`String.new`, "UnsupportedFeatureError: Method #new is unsupported for String", 1},
+		{`Integer.new`, "UnsupportedFeatureError: Method #new is unsupported for Integer", 1},
+		{`Hash.new`, "UnsupportedFeatureError: Method #new is unsupported for Hash", 1},
+		{`Array.new`, "UnsupportedFeatureError: Method #new is unsupported for Array", 1},
+		{`Boolean.new`, "UnsupportedFeatureError: Method #new is unsupported for Boolean", 1},
+		{`Null.new`, "UnsupportedFeatureError: Method #new is unsupported for Null", 1},
 	}
 
 	for i, tt := range tests {
@@ -384,13 +384,13 @@ func TestConstantAlreadyInitializedError(t *testing.T) {
 	tests := []errorTestCase{
 		{`Foo = 10
 		Foo = 100
-		`, "ConstantAlreadyInitializedError: Constant Foo already been initialized. Can't assign value to a constant twice.", 1},
+		`, "ConstantError: Constant Foo already been initialized. Can't assign value to a constant twice.", 1},
 		{`class Foo; end
 		Foo = 100
-		`, "ConstantAlreadyInitializedError: Constant Foo already been initialized. Can't assign value to a constant twice.", 1},
+		`, "ConstantError: Constant Foo already been initialized. Can't assign value to a constant twice.", 1},
 		{`module Foo; end
 		Foo = 100
-		`, "ConstantAlreadyInitializedError: Constant Foo already been initialized. Can't assign value to a constant twice.", 1},
+		`, "ConstantError: Constant Foo already been initialized. Can't assign value to a constant twice.", 1},
 	}
 
 	for i, tt := range tests {

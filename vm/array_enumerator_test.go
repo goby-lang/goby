@@ -44,7 +44,7 @@ func TestArrayEnumeratorEnumerationWithElements(t *testing.T) {
 func TestArrayEnumeratorRaiseErrorWhenNoElementsOnNext(t *testing.T) {
 	testCase := errorTestCase{`
 	ArrayEnumerator.new([]).next
-	`, "StopIteration: 'No more elements!'", 2}
+	`, "StopIterationError: 'No more elements!'", 2}
 
 	v := initTestVM()
 	evaluated := v.testEval(t, testCase.input, getFilename())

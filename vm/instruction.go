@@ -77,7 +77,7 @@ var builtinActions = map[operationType]*action{
 			c := t.vm.lookupConstant(cf, constName)
 
 			if c == nil {
-				t.pushErrorObject(errors.NameError, sourceLine, "uninitialized constant %s", constName)
+				t.pushErrorObject(errors.ConstantError, sourceLine, errors.UninitializedConstant, constName)
 			}
 
 			c.isNamespace = args[1].(string) == "true"
@@ -188,7 +188,7 @@ var builtinActions = map[operationType]*action{
 			v := t.Stack.Pop()
 
 			if c != nil {
-				t.pushErrorObject(errors.ConstantAlreadyInitializedError, sourceLine, "Constant %s already been initialized. Can't assign value to a constant twice.", constName)
+				t.pushErrorObject(errors.ConstantError, sourceLine, errors.ConstantAlreadyInitializedError, constName)
 			}
 
 			cf.storeConstant(constName, v)
@@ -392,7 +392,7 @@ var builtinActions = map[operationType]*action{
 			is, ok := t.getMethodIS(methodName, cf.FileName())
 
 			if !ok {
-				t.pushErrorObject(errors.InternalError, sourceLine, "Can't get method %s's instruction set.", methodName)
+				t.pushErrorObject(errors.InternalError, sourceLine, errors.CantGetInstructionSet, methodName)
 			}
 
 			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.topLevelClass(classes.MethodClass)}}
@@ -445,11 +445,11 @@ var builtinActions = map[operationType]*action{
 					inheritedClass, ok := superClass.Target.(*RClass)
 
 					if !ok {
-						t.pushErrorObject(errors.InternalError, sourceLine, "Constant %s is not a class. got=%s", superClassName, string(superClass.Target.Class().ReturnName()))
+						t.pushErrorObject(errors.ConstantError, sourceLine, errors.ConstantIsNotClass, superClassName, string(superClass.Target.Class().ReturnName()))
 					}
 
 					if inheritedClass.isModule {
-						t.pushErrorObject(errors.InternalError, sourceLine, "Module inheritance is not supported: %s", inheritedClass.Name)
+						t.pushErrorObject(errors.UnsupportedFeatureError, sourceLine, errors.ModuleInheritanceUnsupported, inheritedClass.Name)
 					}
 
 					class.inherits(inheritedClass)
@@ -499,7 +499,7 @@ var builtinActions = map[operationType]*action{
 				mm := receiver.findMethodMissing(receiver.Class().inheritsMethodMissing)
 
 				if mm == nil {
-					t.setErrorObject(receiverPr, argPr, errors.UndefinedMethodError, sourceLine, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
+					t.setErrorObject(receiverPr, argPr, errors.UndefinedMethodError, sourceLine, errors.UndefinedMethodFor, methodName, receiver.toString())
 				} else {
 					// Move up args for missed method's name
 					// before: | arg 1       | arg 2 |
