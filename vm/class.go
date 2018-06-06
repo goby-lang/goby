@@ -109,7 +109,7 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 					c, ok := receiver.(*RClass)
 
 					if !ok {
-						return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#ancestors", receiver.toString())
+						return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, errors.UndefinedMethodFor, "#ancestors", receiver.toString())
 					}
 
 					a := c.ancestors()
@@ -138,7 +138,7 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 					c, ok := receiver.(*RClass)
 
 					if !ok {
-						return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#<", receiver.toString())
+						return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, errors.UndefinedMethodFor, "#<", receiver.toString())
 					}
 
 					module, ok := args[0].(*RClass)
@@ -179,7 +179,7 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 					c, ok := receiver.(*RClass)
 
 					if !ok {
-						return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#<", receiver.toString())
+						return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, errors.UndefinedMethodFor, "#<", receiver.toString())
 					}
 
 					module, ok := args[0].(*RClass)
@@ -220,7 +220,7 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 					c, ok := receiver.(*RClass)
 
 					if !ok {
-						return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#<", receiver.toString())
+						return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, errors.UndefinedMethodFor, "#<", receiver.toString())
 					}
 
 					module, ok := args[0].(*RClass)
@@ -261,7 +261,7 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 					c, ok := receiver.(*RClass)
 
 					if !ok {
-						return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#<", receiver.toString())
+						return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, errors.UndefinedMethodFor, "#<", receiver.toString())
 					}
 
 					module, ok := args[0].(*RClass)
@@ -565,7 +565,7 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 					n, ok := receiver.(*RClass)
 
 					if !ok {
-						return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#name", receiver.toString())
+						return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, errors.UndefinedMethodFor, "#name", receiver.toString())
 					}
 
 					name := n.ReturnName()
@@ -682,7 +682,7 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 					c, ok := receiver.(*RClass)
 
 					if !ok {
-						return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#superclass", receiver.toString())
+						return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, errors.UndefinedMethodFor, "#superclass", receiver.toString())
 					}
 
 					superClass := c.returnSuperClass()

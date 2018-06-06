@@ -1529,7 +1529,7 @@ func (a *ArrayObject) index(t *Thread, args []Object, sourceLine int) Object {
 			return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[1].Class().Name)
 		}
 		if count.value < 0 {
-			return t.vm.InitErrorObject(ArrayError, sourceLine, WrongArgumentNegativeSign, count.value)
+			return t.vm.InitErrorObject(ArrayError, sourceLine, WrongArgumentNegativeSign, 2, count.value)
 		}
 
 		/*

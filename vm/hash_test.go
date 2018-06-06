@@ -306,7 +306,7 @@ func TestHashAnyMethod(t *testing.T) {
 func TestHashAnyMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`{  }.any?(123) do end`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`{  }.any?`, "InternalError: Can't yield without a block", 1},
+		{`{  }.any?`, "BlockError: Can't get block without a block argument", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -525,7 +525,7 @@ func TestHashDeleteIfMethod(t *testing.T) {
 func TestHashDeleteIfMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`{ }.delete_if(123) do end`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`{ }.delete_if`, "InternalError: Can't yield without a block", 1},
+		{`{ }.delete_if`, "BlockError: Can't get block without a block argument", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -628,7 +628,7 @@ func TestHashEachMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`{ a: 1, b: 2}.each("Hello") do end
 		`, "ArgumentError: Expect 0 arguments. got: 1", 1},
-		{`{ a: 1, b: 2}.each`, "InternalError: Can't yield without a block", 1},
+		{`{ a: 1, b: 2}.each`, "BlockError: Can't get block without a block argument", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -694,7 +694,7 @@ func TestHashEachKeyMethodFail(t *testing.T) {
 			puts key
 		end
 		`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`{ a: 1, b: 2, c: 3 }.each_key`, "InternalError: Can't yield without a block", 1},
+		{`{ a: 1, b: 2, c: 3 }.each_key`, "BlockError: Can't get block without a block argument", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -793,7 +793,7 @@ func TestHashEachValueMethodFail(t *testing.T) {
 			puts value
 		end
 		`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`{ a: 1, b: 2, c: 3 }.each_value`, "InternalError: Can't yield without a block", 1},
+		{`{ a: 1, b: 2, c: 3 }.each_value`, "BlockError: Can't get block without a block argument", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1193,7 +1193,7 @@ func TestHashMapValuesMethodFail(t *testing.T) {
 			value * 3
 		end
 		`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`{ a: 1, b: 2, c: 3 }.map_values`, "InternalError: Can't yield without a block", 1},
+		{`{ a: 1, b: 2, c: 3 }.map_values`, "BlockError: Can't get block without a block argument", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1333,7 +1333,7 @@ func TestHashSelectMethod(t *testing.T) {
 func TestHashSelectMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`{ }.select(123) do end`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`{ }.select`, "InternalError: Can't yield without a block", 1},
+		{`{ }.select`, "BlockError: Can't get block without a block argument", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1788,7 +1788,7 @@ func TestHashTransformValuesMethodFail(t *testing.T) {
 			value * 3
 		end
 		`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`{ a: 1, b: 2, c: 3 }.transform_values`, "InternalError: Can't yield without a block", 1},
+		{`{ a: 1, b: 2, c: 3 }.transform_values`, "BlockError: Can't get block without a block argument", 1},
 	}
 
 	for i, tt := range testsFail {

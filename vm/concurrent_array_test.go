@@ -116,7 +116,7 @@ func TestConcurrentArrayIndexFail(t *testing.T) {
 		{`
 		require 'concurrent/array'
 		Concurrent::Array.new([1, "a", 10, "b"])[-5]
-		`, "ArgumentError: Index value -5 too small for array. minimum: -4", 1},
+		`, "ArrayError: Index value -5 is too small for array. minimum: -4", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -272,7 +272,7 @@ func TestConcurrentArrayAnyMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/array'
-		Concurrent::Array.new([]).any?`, "InternalError: Can't yield without a block", 1},
+		Concurrent::Array.new([]).any?`, "BlockError: Can't get block without a block argument", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -341,10 +341,10 @@ func TestConcurrentArrayAtMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/array'
-		Concurrent::Array.new([1, 2, 3]).at`, "ArgumentError: Expect 1 arguments. got=0", 1},
+		Concurrent::Array.new([1, 2, 3]).at`, "ArgumentError: Expects 1 argument(s). got: 0", 1},
 		{`
 		require 'concurrent/array'
-		Concurrent::Array.new([1, 2, 3]).at(2, 3)`, "ArgumentError: Expect 1 arguments. got=2", 1},
+		Concurrent::Array.new([1, 2, 3]).at(2, 3)`, "ArgumentError: Expects 1 argument(s). got: 2", 1},
 		{`
 		require 'concurrent/array'
 		Concurrent::Array.new([1, 2, 3]).at(true)`, "TypeError: Expects argument to be Integer. got: Boolean", 1},
@@ -353,7 +353,7 @@ func TestConcurrentArrayAtMethodFail(t *testing.T) {
 		Concurrent::Array.new([1, 2, 3]).at(1..3)`, "TypeError: Expects argument to be Integer. got: Range", 1},
 		{`
 		require 'concurrent/array'
-		Concurrent::Array.new([1, "a", 10, 5]).at(-5)`, "ArgumentError: Index value -5 too small for array. minimum: -4", 1},
+		Concurrent::Array.new([1, "a", 10, 5]).at(-5)`, "ArrayError: Index value -5 is too small for array. minimum: -4", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -395,10 +395,10 @@ func TestConcurrentArrayClearMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/array'
-		Concurrent::Array.new(['Maxwell', 'Alexius']).clear(123)`, "ArgumentError: Expect 0 argument. got=1", 1},
+		Concurrent::Array.new(['Maxwell', 'Alexius']).clear(123)`, "ArgumentError: Expects 0 argument(s). got: 1", 1},
 		{`
 		require 'concurrent/array'
-		Concurrent::Array.new(['Taipei', 101]).clear(1, 0, 1)`, "ArgumentError: Expect 0 argument. got=3", 1},
+		Concurrent::Array.new(['Taipei', 101]).clear(1, 0, 1)`, "ArgumentError: Expects 0 argument(s). got: 3", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -531,7 +531,7 @@ func TestConcurrentArrayCountMethodFail(t *testing.T) {
 		require 'concurrent/array'
 		a = Concurrent::Array.new([1, 2])
 		a.count(3, 3)
-		`, "ArgumentError: Expect 1 argument, got=2", 1},
+		`, "ArgumentError: Expects 1 argument(s). got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -626,10 +626,10 @@ func TestConcurrentArrayDeleteAtMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/array'
-		Concurrent::Array.new([1, 2, 3]).delete_at`, "ArgumentError: Expect 1 argument. got=0", 1},
+		Concurrent::Array.new([1, 2, 3]).delete_at`, "ArgumentError: Expects 1 argument(s). got: 0", 1},
 		{`
 		require 'concurrent/array'
-		Concurrent::Array.new([1, 2, 3]).delete_at(2, 3)`, "ArgumentError: Expect 1 argument. got=2", 1},
+		Concurrent::Array.new([1, 2, 3]).delete_at(2, 3)`, "ArgumentError: Expects 1 argument(s). got: 2", 1},
 		{`
 		require 'concurrent/array'
 		Concurrent::Array.new([1, 2, 3]).delete_at(true)`, "TypeError: Expects argument to be Integer. got: Boolean", 1},
@@ -683,13 +683,13 @@ func TestConcurrentArrayEachMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/array'
-		Concurrent::Array.new(['M', 'A', 'X', 'W', 'E', 'L', 'L']).each`, "InternalError: Can't yield without a block", 1},
+		Concurrent::Array.new(['M', 'A', 'X', 'W', 'E', 'L', 'L']).each`, "BlockError: Can't get block without a block argument", 1},
 		{`
 		require 'concurrent/array'
 		Concurrent::Array.new(['T', 'A', 'I', 'P', 'E', 'I']).each(101) do |char|
 			puts char
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 1},
+		`, "ArgumentError: Expects 0 argument(s). got: 1", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -737,13 +737,13 @@ func TestConcurrentArrayEachIndexMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/array'
-		Concurrent::Array.new(['M', 'A', 'X', 'W', 'E', 'L', 'L']).each_index`, "InternalError: Can't yield without a block", 1},
+		Concurrent::Array.new(['M', 'A', 'X', 'W', 'E', 'L', 'L']).each_index`, "BlockError: Can't get block without a block argument", 1},
 		{`
 		require 'concurrent/array'
 		Concurrent::Array.new(['T', 'A', 'I', 'P', 'E', 'I']).each_index(101) do |char|
 			puts char
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 1},
+		`, "ArgumentError: Expects 0 argument(s). got: 1", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -792,10 +792,10 @@ func TestConcurrentArrayEmptyMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/array'
-		Concurrent::Array.new([1, 2, 3]).empty?(123)`, "ArgumentError: Expect 0 argument. got=1", 1},
+		Concurrent::Array.new([1, 2, 3]).empty?(123)`, "ArgumentError: Expects 0 argument(s). got: 1", 1},
 		{`
 		require 'concurrent/array'
-		Concurrent::Array.new(['T', 'A', 'I', 'P', 'E', 'I']).empty?(1, 0, 1)`, "ArgumentError: Expect 0 argument. got=3", 1},
+		Concurrent::Array.new(['T', 'A', 'I', 'P', 'E', 'I']).empty?(1, 0, 1)`, "ArgumentError: Expects 0 argument(s). got: 3", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -870,12 +870,12 @@ func TestConcurrentArrayFirstMethodFail(t *testing.T) {
 		require 'concurrent/array'
 		a = Concurrent::Array.new([1, 2])
 		a.first(1, 2, 3)
-		`, "ArgumentError: Expect 0..1 argument. got=3", 1},
+		`, "ArgumentError: Expects 0 to 1 argument(s). got: 3", 1},
 		{`
 		require 'concurrent/array'
 		a = Concurrent::Array.new([1, 2])
 		a.first(-1)
-		`, "ArgumentError: Expect argument to be positive value. got=-1", 1},
+		`, "ArrayError: Expects argument #1 to be positive. got: -1", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -925,7 +925,7 @@ func TestConcurrentArrayFlattenMethodFail(t *testing.T) {
 		require 'concurrent/array'
 		a = Concurrent::Array.new([1, 2])
 		a.flatten(1)
-		`, "ArgumentError: Expect 0 argument. got=1", 1},
+		`, "ArgumentError: Expects 0 argument(s). got: 1", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -975,7 +975,7 @@ func TestConcurrentArrayJoinMethodFail(t *testing.T) {
 		require 'concurrent/array'
 		a = Concurrent::Array.new([1, 2])
 		a.join(",", "-")
-		`, "ArgumentError: Expect 0 or 1 argument. got=2", 1},
+		`, "ArgumentError: Expects 0 to 1 argument(s). got: 2", 1},
 		{`
 		require 'concurrent/array'
 		a = Concurrent::Array.new([1, 2])
@@ -1039,12 +1039,12 @@ func TestConcurrentArrayLastMethodFail(t *testing.T) {
 		require 'concurrent/array'
 		a = Concurrent::Array.new([1, 2])
 		a.last(1, 2, 3)
-		`, "ArgumentError: Expect 0..1 argument. got=3", 1},
+		`, "ArgumentError: Expects 0 to 1 argument(s). got: 3", 1},
 		{`
 		require 'concurrent/array'
 		a = Concurrent::Array.new([1, 2])
 		a.last(-1)
-		`, "ArgumentError: Expect argument to be positive value. got=-1", 1},
+		`, "ArrayError: Expects argument #1 to be positive. got: -1", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1093,7 +1093,7 @@ func TestConcurrentArrayLengthMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/array'
-		Concurrent::Array.new([1, 2, 3]).length(10)`, "ArgumentError: Expect 0 argument. got=1", 1},
+		Concurrent::Array.new([1, 2, 3]).length(10)`, "ArgumentError: Expects 0 argument(s). got: 1", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1324,14 +1324,14 @@ func TestConcurrentArrayReduceMethodFail(t *testing.T) {
 		require 'concurrent/array'
 		a = Concurrent::Array.new([1, 2])
 		a.reduce(1)
-		`, "InternalError: Can't yield without a block", 1},
+		`, "BlockError: Can't get block without a block argument", 1},
 		{`
 		require 'concurrent/array'
 		a = Concurrent::Array.new([1, 2])
 		a.reduce(1, 2) do |prev, n|
 			prev + n
 		end
-		`, "ArgumentError: Expect 0 or 1 argument. got=2", 1},
+		`, "ArgumentError: Expects 0 to 1 argument(s). got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1405,13 +1405,13 @@ func TestConcurrentArrayReverseEachMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/array'
-		Concurrent::Array.new(['M', 'A']).reverse_each`, "InternalError: Can't yield without a block", 1},
+		Concurrent::Array.new(['M', 'A']).reverse_each`, "BlockError: Can't get block without a block argument", 1},
 		{`
 		require 'concurrent/array'
 		Concurrent::Array.new(['T', 'A']).reverse_each(101) do |char|
 			puts char
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 1},
+		`, "ArgumentError: Expects 0 argument(s). got: 1", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1459,7 +1459,7 @@ func TestConcurrentArrayRotateMethodFail(t *testing.T) {
 		{`
 		require 'concurrent/array'
 		a = Concurrent::Array.new([1, 2])
-		a.rotate(1, 2, 3)`, "ArgumentError: Expect 0..1 argument. got=3", 1},
+		a.rotate(1, 2, 3)`, "ArgumentError: Expects 0 to 1 argument(s). got: 3", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1551,7 +1551,7 @@ func TestConcurrentArrayShiftMethodFail(t *testing.T) {
 		require 'concurrent/array'
 		a = Concurrent::Array.new([1, 2])
 		a.shift(3, 3, 4, 5)
-		`, "ArgumentError: Expect 0 argument. got=4", 1},
+		`, "ArgumentError: Expects 0 argument(s). got: 4", 1},
 	}
 
 	for i, tt := range testsFail {

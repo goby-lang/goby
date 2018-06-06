@@ -43,7 +43,7 @@ const (
 	// UnsupportedFeatureError is for an intentionally unsupported-feature error
 	UnsupportedFeatureError = "UnsupportedFeatureError"
 
-	UnsupportedMethodFor         = "Method %s for %+v is unsupported"
+	UnsupportedMethodFor         = "Method %s is unsupported for %+v"
 	ModuleInheritanceUnsupported = "Module inheritance is unsupported: %s"
 )
 
@@ -52,7 +52,7 @@ const (
 	ArgumentError = "ArgumentError"
 
 	WrongNumberOfArgumentFormat      = "Expects %d argument(s). got: %d"
-	WrongNumberOfArgumentFormatMore  = "Expects %d or more argument(s). got: %d"
+	WrongNumberOfArgumentFormatMore  = "Expects %d or more arguments. got: %d"
 	WrongNumberOfArgumentFormatRange = "Expects %d to %d argument(s). got: %d"
 )
 

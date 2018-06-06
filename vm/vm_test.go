@@ -166,13 +166,13 @@ func TestVM_REPLExecFail(t *testing.T) {
 			[]string{
 				"NonExistentBuiltinMethod",
 			},
-			"ConstantError: uninitialized constant NonExistentBuiltinMethod",
+			"ConstantError: Uninitialized constant: NonExistentBuiltinMethod",
 		},
 		{
 			[]string{
 				"Hash.notExist",
 			},
-			"UndefinedMethodError: Undefined Method 'notExist' for Hash",
+			"UndefinedMethodError: Undefined method 'notExist' for Hash",
 		},
 	}
 

@@ -563,7 +563,7 @@ func TestRangeMapMethodFail(t *testing.T) {
 		{
 			`
 			(1..10).map
-		`, "InternalError: Can't yield without a block", 1},
+		`, "BlockError: Can't get block without a block argument", 1},
 		{
 			`
 			(1..10).map(1) do |x| x * x; end

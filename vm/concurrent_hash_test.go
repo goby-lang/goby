@@ -369,7 +369,7 @@ func TestConcurrentHashEachMethodFail(t *testing.T) {
 		Concurrent::Hash.new({ a: 1, b: 2}).each("Hello") do end`, "ArgumentError: Expect 0 arguments. got: 1", 1},
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: 2}).each`, "InternalError: Can't yield without a block", 1},
+		Concurrent::Hash.new({ a: 1, b: 2}).each`, "BlockError: Can't get block without a block argument", 1},
 	}
 
 	for i, tt := range testsFail {

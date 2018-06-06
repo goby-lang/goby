@@ -531,7 +531,7 @@ func TestStringEachByteMethodFail(t *testing.T) {
 		  puts byte
 		end
 		`, "ArgumentError: Expect 0 argument. got=1", 1},
-		{`"Taipei".each_byte`, "InternalError: Can't yield without a block", 1},
+		{`"Taipei".each_byte`, "BlockError: Can't get block without a block argument", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -588,7 +588,7 @@ func TestStringEachCharMethodFail(t *testing.T) {
 		  puts char
 		end
 		`, "ArgumentError: Expect 0 argument. got=1", 1},
-		{`"Taipei".each_char`, "InternalError: Can't yield without a block", 1},
+		{`"Taipei".each_char`, "BlockError: Can't get block without a block argument", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -650,7 +650,7 @@ func TestStringEachLineMethodFail(t *testing.T) {
 		  puts line
 		end
 		`, "ArgumentError: Expect 0 argument. got=1", 1},
-		{`"Taipei".each_line`, "InternalError: Can't yield without a block", 1},
+		{`"Taipei".each_line`, "BlockError: Can't get block without a block argument", 1},
 	}
 
 	for i, tt := range testsFail {
