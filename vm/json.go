@@ -14,7 +14,7 @@ const (
 	// JSONError is for JSON-specific error
 	JSONError = "JSONError"
 
-	CantParseStringAsJSON = "Can't parse string %s as JSON: %s"
+	cantParseStringAsJSON = "Can't parse string %s as JSON: %s"
 )
 
 // Class methods --------------------------------------------------------
@@ -45,7 +45,7 @@ func builtinJSONClassMethods() []*BuiltinMethodObject {
 						err = json.Unmarshal([]byte(jsonString), &objs)
 
 						if err != nil {
-							return t.vm.InitErrorObject(JSONError, sourceLine, CantParseStringAsJSON, jsonString, err.Error())
+							return t.vm.InitErrorObject(JSONError, sourceLine, cantParseStringAsJSON, jsonString, err.Error())
 						}
 
 						var objects []Object

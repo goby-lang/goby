@@ -22,8 +22,8 @@ const (
 	// ArrayError is for array-specific error
 	ArrayError = "ArrayError"
 
-	WrongArgumentNegativeSign = "Expects argument #%d to be positive. got: %d"
-	IndexValueTooSmall        = "Index value %d is too small for array. minimum: %d"
+	wrongArgumentNegativeSign = "Expects argument #%d to be positive. got: %d"
+	indexValueTooSmall        = "Index value %d is too small for array. minimum: %d"
 )
 
 // Class methods --------------------------------------------------------
@@ -261,7 +261,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						// Negative index value too small
 						if indexValue < 0 {
 							if arr.normalizeIndex(index) == -1 {
-								return t.vm.InitErrorObject(ArrayError, sourceLine, IndexValueTooSmall, indexValue, -arr.length())
+								return t.vm.InitErrorObject(ArrayError, sourceLine, indexValueTooSmall, indexValue, -arr.length())
 							}
 							indexValue = arr.normalizeIndex(index)
 						}
@@ -277,7 +277,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						countValue := count.value
 						// Second argument must be a positive value
 						if countValue < 0 {
-							return t.vm.InitErrorObject(ArrayError, sourceLine, WrongArgumentNegativeSign, 2, countValue)
+							return t.vm.InitErrorObject(ArrayError, sourceLine, wrongArgumentNegativeSign, 2, countValue)
 						}
 
 						a := args[2]
@@ -323,7 +323,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					// Negative index value condition
 					if indexValue < 0 {
 						if len(arr.Elements) < -indexValue {
-							return t.vm.InitErrorObject(ArrayError, sourceLine, IndexValueTooSmall, indexValue, -arr.length())
+							return t.vm.InitErrorObject(ArrayError, sourceLine, indexValueTooSmall, indexValue, -arr.length())
 						}
 						arr.Elements[len(arr.Elements)+indexValue] = args[1]
 						return arr.Elements[len(arr.Elements)+indexValue]
@@ -801,7 +801,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if arg.value < 1 {
-						return t.vm.InitErrorObject(ArrayError, sourceLine, WrongArgumentNegativeSign, 1, arg.value)
+						return t.vm.InitErrorObject(ArrayError, sourceLine, wrongArgumentNegativeSign, 1, arg.value)
 					}
 
 					if arrLength > arg.value {
@@ -916,7 +916,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if arg.value < 1 {
-						return t.vm.InitErrorObject(ArrayError, sourceLine, WrongArgumentNegativeSign, 1, arg.value)
+						return t.vm.InitErrorObject(ArrayError, sourceLine, wrongArgumentNegativeSign, 1, arg.value)
 					}
 
 					if arrLength > arg.value {
@@ -1517,7 +1517,7 @@ func (a *ArrayObject) index(t *Thread, args []Object, sourceLine int) Object {
 	}
 
 	if index.value < 0 && index.value < -arrLength {
-		return t.vm.InitErrorObject(ArrayError, sourceLine, IndexValueTooSmall, index.value, -arrLength)
+		return t.vm.InitErrorObject(ArrayError, sourceLine, indexValueTooSmall, index.value, -arrLength)
 	}
 
 	/* Validation for the second argument if exists */
@@ -1529,7 +1529,7 @@ func (a *ArrayObject) index(t *Thread, args []Object, sourceLine int) Object {
 			return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[1].Class().Name)
 		}
 		if count.value < 0 {
-			return t.vm.InitErrorObject(ArrayError, sourceLine, WrongArgumentNegativeSign, 2, count.value)
+			return t.vm.InitErrorObject(ArrayError, sourceLine, wrongArgumentNegativeSign, 2, count.value)
 		}
 
 		/*

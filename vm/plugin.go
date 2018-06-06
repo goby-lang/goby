@@ -25,7 +25,7 @@ const (
 	// PluginError is for plugin error
 	PluginError = "PluginError"
 
-	CantCreatePlugin = "Can't create plugin: %s"
+	cantCreatePlugin = "Can't create plugin: %s"
 )
 
 // Class methods --------------------------------------------------------

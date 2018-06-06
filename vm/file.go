@@ -21,7 +21,7 @@ const (
 	// FileError is for file-specific error
 	FileError = "FileError"
 
-	InvalidFileMode = "Invalid file mode: %"
+	invalidFileMode = "Invalid file mode: %"
 )
 
 var fileModeTable = map[string]int{
@@ -177,7 +177,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 							md, ok := fileModeTable[m]
 
 							if !ok {
-								return t.vm.InitErrorObject(FileError, sourceLine, InvalidFileMode, m)
+								return t.vm.InitErrorObject(FileError, sourceLine, invalidFileMode, m)
 							}
 
 							if md == syscall.O_RDWR || md == syscall.O_WRONLY {

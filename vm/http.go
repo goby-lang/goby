@@ -21,7 +21,7 @@ const (
 	// HTTPError is returned when when a request fails to return a proper response
 	HTTPError = "HTTPError"
 
-	CantCompleteRequest = "Can't complete request: %s"
+	cantCompleteRequest = "Can't complete request: %s"
 )
 
 // Class methods --------------------------------------------------------
