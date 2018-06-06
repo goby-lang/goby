@@ -75,8 +75,8 @@ type ChannelObject struct {
 // - You cannot read nil channels, or causes a deadlock.
 // Ref: https://beatsync.net/main/log20150325.html
 const (
-	OPEN = iota
-	CLOSED
+	chOpen = iota
+	chClosed
 )
 
 // Class methods --------------------------------------------------------
@@ -94,7 +94,7 @@ func builtinChannelClassMethods() []*BuiltinMethodObject {
 			Name: "new",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					c := &ChannelObject{baseObj: &baseObj{class: t.vm.topLevelClass(classes.ChannelClass)}, Chan: make(chan int, OPEN)}
+					c := &ChannelObject{baseObj: &baseObj{class: t.vm.topLevelClass(classes.ChannelClass)}, Chan: make(chan int, chOpen)}
 					return c
 				}
 			},
@@ -145,10 +145,10 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 					}
 					c := receiver.(*ChannelObject)
 
-					if c.ChannelState == CLOSED {
+					if c.ChannelState == chClosed {
 						return t.vm.InitErrorObject(errors.ChannelCloseError, sourceLine, errors.ChannelIsClosed)
 					}
-					c.ChannelState = CLOSED
+					c.ChannelState = chClosed
 
 					close(receiver.(*ChannelObject).Chan)
 					receiver = nil
@@ -188,7 +188,7 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 					}
 					c := receiver.(*ChannelObject)
 
-					if c.ChannelState == CLOSED {
+					if c.ChannelState == chClosed {
 						return t.vm.InitErrorObject(errors.ChannelCloseError, sourceLine, errors.ChannelIsClosed)
 					}
 
@@ -230,7 +230,7 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 					}
 					c := receiver.(*ChannelObject)
 
-					if c.ChannelState == CLOSED {
+					if c.ChannelState == chClosed {
 						return t.vm.InitErrorObject(errors.ChannelCloseError, sourceLine, errors.ChannelIsClosed)
 					}
 
