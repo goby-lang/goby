@@ -3,6 +3,7 @@ package classes
 const (
 	ObjectClass    = "Object"
 	ClassClass     = "Class"
+	ModuleClass    = "Module"
 	IntegerClass   = "Integer"
 	FloatClass     = "Float"
 	StringClass    = "String"

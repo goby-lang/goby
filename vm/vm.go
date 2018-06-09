@@ -226,6 +226,7 @@ func (vm *VM) initConstants() {
 	cClass := initClassClass()
 	vm.objectClass = initObjectClass(cClass)
 	vm.topLevelClass(classes.ObjectClass).setClassConstant(cClass)
+	vm.topLevelClass(classes.ObjectClass).setClassConstant(cClass.superClass)
 
 	// Init builtin classes
 	builtinClasses := []*RClass{

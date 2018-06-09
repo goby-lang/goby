@@ -8,7 +8,8 @@ func TestClassClassSuperclass(t *testing.T) {
 		expected string
 	}{
 		{`Class.class.name`, "Class"},
-		{`Class.superclass.name`, "Object"},
+		{`Class.superclass.name`, "Module"},
+		{`Module.superclass.name`, "Object"},
 	}
 
 	for i, tt := range tests {
@@ -1343,7 +1344,7 @@ func TestClassSuperclassClassMethod(t *testing.T) {
 		{`Hash.superclass.name`, "Object"},
 		{`Array.superclass.name`, "Object"},
 		{`Object.superclass.name`, "Object"},
-		{`Class.superclass.name`, "Object"},
+		{`Module.superclass.name`, "Object"},
 		{`
 		module Bar; end
 		class Foo
