@@ -1509,7 +1509,14 @@ func initClassClass() *RClass {
 		baseObj:   &baseObj{},
 	}
 
-	singletonClass := &RClass{
+	moduleClass := &RClass{
+		Name:      classes.ModuleClass,
+		Methods:   newEnvironment(),
+		constants: make(map[string]*Pointer),
+		baseObj:   &baseObj{},
+	}
+
+	classSingletonClass := &RClass{
 		Name:        "#<Class:Class>",
 		Methods:     newEnvironment(),
 		constants:   make(map[string]*Pointer),
@@ -1518,10 +1525,24 @@ func initClassClass() *RClass {
 		isSingleton: true,
 	}
 
-	classClass.class = classClass
-	classClass.singletonClass = singletonClass
+	moduleSingletonClass := &RClass{
+		Name:        "#<Class:Module>",
+		Methods:     newEnvironment(),
+		constants:   make(map[string]*Pointer),
+		isModule:    false,
+		baseObj:     &baseObj{class: classClass, InstanceVariables: newEnvironment()},
+		isSingleton: true,
+	}
 
-	classClass.setBuiltinMethods(builtinClassCommonClassMethods(), true)
+	classClass.superClass = moduleClass
+	classClass.pseudoSuperClass = moduleClass
+
+	classClass.class = classClass
+	moduleClass.class = classClass
+	classClass.singletonClass = classSingletonClass
+	moduleClass.singletonClass = moduleSingletonClass
+
+	moduleClass.setBuiltinMethods(builtinClassCommonClassMethods(), true)
 
 	return classClass
 }
@@ -1547,7 +1568,7 @@ func initObjectClass(c *RClass) *RClass {
 	objectClass.singletonClass = singletonClass
 	objectClass.superClass = objectClass
 	objectClass.pseudoSuperClass = objectClass
-	c.inherits(objectClass)
+	c.superClass.inherits(objectClass)
 
 	objectClass.setBuiltinMethods(builtinClassCommonInstanceMethods(), true)
 	objectClass.setBuiltinMethods(builtinClassCommonInstanceMethods(), false)
@@ -1600,25 +1621,11 @@ func (c *RClass) setBuiltinMethods(methodList []*BuiltinMethodObject, classMetho
 	}
 }
 
-func (c *RClass) findMethod(methodName string) (method Object) {
-	if c.isSingleton {
-		method = c.superClass.lookupMethod(methodName)
-	} else {
-		method = c.SingletonClass().lookupMethod(methodName)
-	}
-
-	return
-}
-
 func (c *RClass) lookupMethod(methodName string) Object {
 	method, ok := c.Methods.get(methodName)
 
 	if !ok {
 		if c.superClass != nil && c.superClass != c {
-			if c.Name == classes.ClassClass {
-				return nil
-			}
-
 			return c.superClass.lookupMethod(methodName)
 		}
 
