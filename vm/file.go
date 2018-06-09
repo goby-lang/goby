@@ -350,7 +350,7 @@ func (vm *VM) initFileObject(f *os.File) *FileObject {
 }
 
 func (vm *VM) initFileClass() *RClass {
-	fc := vm.initializeClass(classes.FileClass, false)
+	fc := vm.initializeClass(classes.FileClass)
 	fc.setBuiltinMethods(builtinFileClassMethods(), true)
 	fc.setBuiltinMethods(builtinFileInstanceMethods(), false)
 

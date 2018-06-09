@@ -109,9 +109,9 @@ func builtinURIClassMethods() []*BuiltinMethodObject {
 // Functions for initialization -----------------------------------------
 
 func initURIClass(vm *VM) {
-	uri := vm.initializeClass("URI", true)
-	http := vm.initializeClass("HTTP", false)
-	https := vm.initializeClass("HTTPS", false)
+	uri := vm.initializeModule("URI")
+	http := vm.initializeClass("HTTP")
+	https := vm.initializeClass("HTTPS")
 	https.superClass = http
 	https.pseudoSuperClass = http
 	uri.setClassConstant(http)

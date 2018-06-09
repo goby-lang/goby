@@ -311,7 +311,7 @@ func (vm *VM) initConcurrentHashObject(pairs map[string]Object) *ConcurrentHashO
 	}
 
 	concurrent := vm.loadConstant("Concurrent", true)
-	hash := concurrent.getClassConstant("Hash")
+	hash := concurrent.getClassConstant(classes.HashClass)
 
 	return &ConcurrentHashObject{
 		baseObj:     &baseObj{class: hash},
@@ -321,7 +321,7 @@ func (vm *VM) initConcurrentHashObject(pairs map[string]Object) *ConcurrentHashO
 
 func initConcurrentHashClass(vm *VM) {
 	concurrent := vm.loadConstant("Concurrent", true)
-	hash := vm.initializeClass("Hash", false)
+	hash := vm.initializeClass(classes.HashClass)
 
 	hash.setBuiltinMethods(builtinConcurrentHashInstanceMethods(), false)
 	hash.setBuiltinMethods(builtinConcurrentHashClassMethods(), true)

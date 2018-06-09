@@ -1218,7 +1218,7 @@ func (vm *VM) InitHashObject(pairs map[string]Object) *HashObject {
 }
 
 func (vm *VM) initHashClass() *RClass {
-	hc := vm.initializeClass(classes.HashClass, false)
+	hc := vm.initializeClass(classes.HashClass)
 	hc.setBuiltinMethods(builtinHashInstanceMethods(), false)
 	hc.setBuiltinMethods(builtinHashClassMethods(), true)
 	return hc

@@ -133,7 +133,7 @@ func builtinBlockInstanceMethods() []*BuiltinMethodObject {
 // Functions for initialization -----------------------------------------
 
 func (vm *VM) initBlockClass() *RClass {
-	class := vm.initializeClass(classes.BlockClass, false)
+	class := vm.initializeClass(classes.BlockClass)
 	class.setBuiltinMethods(builtinBlockClassMethods(), true)
 	class.setBuiltinMethods(builtinBlockInstanceMethods(), false)
 	return class
