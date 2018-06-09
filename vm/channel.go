@@ -248,7 +248,7 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 // Functions for initialization -----------------------------------------
 
 func (vm *VM) initChannelClass() *RClass {
-	class := vm.initializeClass(classes.ChannelClass, false)
+	class := vm.initializeClass(classes.ChannelClass)
 	class.setBuiltinMethods(builtinChannelClassMethods(), true)
 	class.setBuiltinMethods(builtinChannelInstanceMethods(), false)
 	return class

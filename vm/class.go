@@ -58,7 +58,7 @@ func buildMethods(m map[string]MethodBuilder) []*BuiltinMethodObject {
 // ExternalClass helps define external go classes
 func ExternalClass(name, path string, classMethods, instanceMethods map[string]MethodBuilder) ClassLoader {
 	return func(v *VM) error {
-		pg := v.initializeClass(name, false)
+		pg := v.initializeClass(name)
 		pg.setBuiltinMethods(buildMethods(classMethods), true)
 		pg.setBuiltinMethods(buildMethods(instanceMethods), false)
 		v.objectClass.setClassConstant(pg)
@@ -1464,9 +1464,20 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 
 // initializeClass is a common function for vm, which initializes and returns
 // a class instance with given class name.
-func (vm *VM) initializeClass(name string, isModule bool) *RClass {
+func (vm *VM) initializeClass(name string) *RClass {
 	class := vm.createRClass(name)
-	class.isModule = isModule
+	class.isModule = false
+	singletonClass := vm.createRClass(fmt.Sprintf("#<Class:%s>", name))
+	singletonClass.isSingleton = true
+	class.singletonClass = singletonClass
+	class.inherits(vm.objectClass)
+
+	return class
+}
+
+func (vm *VM) initializeModule(name string) *RClass {
+	class := vm.createRClass(name)
+	class.isModule = true
 	singletonClass := vm.createRClass(fmt.Sprintf("#<Class:%s>", name))
 	singletonClass.isSingleton = true
 	class.singletonClass = singletonClass

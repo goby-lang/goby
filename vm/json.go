@@ -102,7 +102,7 @@ func builtinJSONInstanceMethods() []*BuiltinMethodObject {
 // Functions for initialization -----------------------------------------
 
 func initJSONClass(vm *VM) {
-	class := vm.initializeClass("JSON", false)
+	class := vm.initializeClass("JSON")
 	class.setBuiltinMethods(builtinJSONClassMethods(), true)
 	class.setBuiltinMethods(builtinJSONInstanceMethods(), false)
 	vm.objectClass.setClassConstant(class)

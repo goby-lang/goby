@@ -137,7 +137,7 @@ func builtinSimpleServerInstanceMethods() []*BuiltinMethodObject {
 func initSimpleServerClass(vm *VM) {
 	initHTTPClass(vm)
 	net := vm.loadConstant("Net", true)
-	simpleServer := vm.initializeClass("SimpleServer", false)
+	simpleServer := vm.initializeClass("SimpleServer")
 	simpleServer.setBuiltinMethods(builtinSimpleServerInstanceMethods(), false)
 	net.setClassConstant(simpleServer)
 

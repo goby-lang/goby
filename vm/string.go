@@ -1681,7 +1681,7 @@ func (vm *VM) initStringObject(value string) *StringObject {
 }
 
 func (vm *VM) initStringClass() *RClass {
-	sc := vm.initializeClass(classes.StringClass, false)
+	sc := vm.initializeClass(classes.StringClass)
 	sc.setBuiltinMethods(builtinStringInstanceMethods(), false)
 	sc.setBuiltinMethods(builtinStringClassMethods(), true)
 	return sc

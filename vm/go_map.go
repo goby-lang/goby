@@ -138,7 +138,7 @@ func (vm *VM) initGoMap(d map[string]interface{}) *GoMap {
 }
 
 func (vm *VM) initGoMapClass() *RClass {
-	sc := vm.initializeClass(classes.GoMapClass, false)
+	sc := vm.initializeClass(classes.GoMapClass)
 	sc.setBuiltinMethods(builtinGoMapClassMethods(), true)
 	sc.setBuiltinMethods(builtinGoMapInstanceMethods(), false)
 	vm.objectClass.setClassConstant(sc)

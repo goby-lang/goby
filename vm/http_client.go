@@ -159,7 +159,7 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 // Functions for initialization -----------------------------------------
 
 func initClientClass(vm *VM, hc *RClass) *RClass {
-	clientClass := vm.initializeClass("Client", false)
+	clientClass := vm.initializeClass("Client")
 	hc.setClassConstant(clientClass)
 
 	clientClass.setBuiltinMethods(builtinHTTPClientInstanceMethods(), false)

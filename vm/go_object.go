@@ -58,7 +58,7 @@ func (vm *VM) initGoObject(d interface{}) *GoObject {
 }
 
 func (vm *VM) initGoClass() *RClass {
-	sc := vm.initializeClass(classes.GoObjectClass, false)
+	sc := vm.initializeClass(classes.GoObjectClass)
 	sc.setBuiltinMethods(builtinGoObjectClassMethods(), true)
 	sc.setBuiltinMethods(builtinGoObjectInstanceMethods(), false)
 	vm.objectClass.setClassConstant(sc)

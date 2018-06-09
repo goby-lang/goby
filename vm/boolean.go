@@ -44,7 +44,7 @@ func builtinBooleanClassMethods() []*BuiltinMethodObject {
 // Functions for initialization -----------------------------------------
 
 func (vm *VM) initBoolClass() *RClass {
-	b := vm.initializeClass(classes.BooleanClass, false)
+	b := vm.initializeClass(classes.BooleanClass)
 	b.setBuiltinMethods(builtinBooleanClassMethods(), true)
 
 	TRUE = &BooleanObject{value: true, baseObj: &baseObj{class: b}}
