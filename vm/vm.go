@@ -224,9 +224,10 @@ func (vm *VM) initMainObj() *RObject {
 func (vm *VM) initConstants() {
 	// Init Class and Object
 	cClass := initClassClass()
+	mClass := initModuleClass(cClass)
 	vm.objectClass = initObjectClass(cClass)
 	vm.topLevelClass(classes.ObjectClass).setClassConstant(cClass)
-	vm.topLevelClass(classes.ObjectClass).setClassConstant(cClass.superClass)
+	vm.topLevelClass(classes.ObjectClass).setClassConstant(mClass)
 
 	// Init builtin classes
 	builtinClasses := []*RClass{

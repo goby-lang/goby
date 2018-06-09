@@ -1501,28 +1501,12 @@ func (vm *VM) createRClass(className string) *RClass {
 	}
 }
 
-func initClassClass() *RClass {
-	classClass := &RClass{
-		Name:      classes.ClassClass,
-		Methods:   newEnvironment(),
-		constants: make(map[string]*Pointer),
-		baseObj:   &baseObj{},
-	}
-
+func initModuleClass(classClass *RClass) *RClass {
 	moduleClass := &RClass{
 		Name:      classes.ModuleClass,
 		Methods:   newEnvironment(),
 		constants: make(map[string]*Pointer),
 		baseObj:   &baseObj{},
-	}
-
-	classSingletonClass := &RClass{
-		Name:        "#<Class:Class>",
-		Methods:     newEnvironment(),
-		constants:   make(map[string]*Pointer),
-		isModule:    false,
-		baseObj:     &baseObj{class: classClass, InstanceVariables: newEnvironment()},
-		isSingleton: true,
 	}
 
 	moduleSingletonClass := &RClass{
@@ -1537,12 +1521,33 @@ func initClassClass() *RClass {
 	classClass.superClass = moduleClass
 	classClass.pseudoSuperClass = moduleClass
 
-	classClass.class = classClass
 	moduleClass.class = classClass
-	classClass.singletonClass = classSingletonClass
 	moduleClass.singletonClass = moduleSingletonClass
 
 	moduleClass.setBuiltinMethods(builtinClassCommonClassMethods(), true)
+
+	return moduleClass
+}
+
+func initClassClass() *RClass {
+	classClass := &RClass{
+		Name:      classes.ClassClass,
+		Methods:   newEnvironment(),
+		constants: make(map[string]*Pointer),
+		baseObj:   &baseObj{},
+	}
+
+	classSingletonClass := &RClass{
+		Name:        "#<Class:Class>",
+		Methods:     newEnvironment(),
+		constants:   make(map[string]*Pointer),
+		isModule:    false,
+		baseObj:     &baseObj{class: classClass, InstanceVariables: newEnvironment()},
+		isSingleton: true,
+	}
+
+	classClass.class = classClass
+	classClass.singletonClass = classSingletonClass
 
 	return classClass
 }
