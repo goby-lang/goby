@@ -67,8 +67,52 @@ func ExternalClass(name, path string, classMethods, instanceMethods map[string]M
 	}
 }
 
-// Class methods --------------------------------------------------------
+// Class's class methods
 func builtinClassCommonClassMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
+		{
+			// Creates and returns a new anonymous class from a receiver.
+			// You can use any classes you defined as the receiver:
+			//
+			// ```ruby
+			// class Foo
+			// end
+			// a = Foo.new
+			// ```
+			//
+			// Note that the built-in classes such as String are not open for creating instances
+			// and you can't call `new` against them.
+			//
+			// ```ruby
+			// a = String.new # => error
+			// ```
+			// @param class [Class] Receiver
+			// @return [Object] Created object
+			Name: "new",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+					class, ok := receiver.(*RClass)
+
+					if !ok {
+						return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
+					}
+
+					instance := class.initializeInstance()
+					initMethod := class.lookupMethod("initialize")
+
+					if initMethod != nil {
+						instance.InitializeMethod = initMethod.(*MethodObject)
+					}
+
+					return instance
+				}
+			},
+		},
+	}
+}
+
+// Class methods --------------------------------------------------------
+func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			// Returns an array that contains ancestor classes/modules of the receiver,
@@ -571,44 +615,6 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 					name := n.ReturnName()
 					nameString := t.vm.initStringObject(name)
 					return nameString
-				}
-			},
-		},
-		{
-			// Creates and returns a new anonymous class from a receiver.
-			// You can use any classes you defined as the receiver:
-			//
-			// ```ruby
-			// class Foo
-			// end
-			// a = Foo.new
-			// ```
-			//
-			// Note that the built-in classes such as String are not open for creating instances
-			// and you can't call `new` against them.
-			//
-			// ```ruby
-			// a = String.new # => error
-			// ```
-			// @param class [Class] Receiver
-			// @return [Object] Created object
-			Name: "new",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					class, ok := receiver.(*RClass)
-
-					if !ok {
-						return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
-					}
-
-					instance := class.initializeInstance()
-					initMethod := class.lookupMethod("initialize")
-
-					if initMethod != nil {
-						instance.InitializeMethod = initMethod.(*MethodObject)
-					}
-
-					return instance
 				}
 			},
 		},
@@ -1476,14 +1482,17 @@ func (vm *VM) initializeClass(name string) *RClass {
 }
 
 func (vm *VM) initializeModule(name string) *RClass {
-	class := vm.createRClass(name)
-	class.isModule = true
+	moduleClass := vm.topLevelClass(classes.ModuleClass)
+	module := vm.createRClass(name)
+	module.class = moduleClass
+	module.isModule = true
 	singletonClass := vm.createRClass(fmt.Sprintf("#<Class:%s>", name))
 	singletonClass.isSingleton = true
-	class.singletonClass = singletonClass
-	class.inherits(vm.objectClass)
+	singletonClass.superClass = moduleClass
+	singletonClass.pseudoSuperClass = moduleClass
+	module.singletonClass = singletonClass
 
-	return class
+	return module
 }
 
 func (vm *VM) createRClass(className string) *RClass {
@@ -1524,7 +1533,7 @@ func initModuleClass(classClass *RClass) *RClass {
 	moduleClass.class = classClass
 	moduleClass.singletonClass = moduleSingletonClass
 
-	moduleClass.setBuiltinMethods(builtinClassCommonClassMethods(), true)
+	moduleClass.setBuiltinMethods(builtinModuleCommonClassMethods(), true)
 
 	return moduleClass
 }
@@ -1548,6 +1557,8 @@ func initClassClass() *RClass {
 
 	classClass.class = classClass
 	classClass.singletonClass = classSingletonClass
+
+	classClass.setBuiltinMethods(builtinClassCommonClassMethods(), true)
 
 	return classClass
 }
