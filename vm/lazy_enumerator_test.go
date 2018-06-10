@@ -106,6 +106,21 @@ func TestLazyEnumeratorFirstMethod(t *testing.T) {
 	v.checkSP(t, i, 1)
 }
 
+func TestLazyEnumeratorFirstMethodWithoutArgument(t *testing.T) {
+	input := `
+	[5, 6, 4].lazy.first
+	`
+
+	expected := 5
+
+	v := initTestVM()
+	evaluated := v.testEval(t, input, getFilename())
+	verifyExpected(t, i, evaluated, expected)
+	v.checkCFP(t, i, 0)
+	v.checkSP(t, i, 1)
+}
+
+
 func TestLazyEnumeratorFirstMethodWithZeroValues(t *testing.T) {
 	input := `
 	iterated_values = []

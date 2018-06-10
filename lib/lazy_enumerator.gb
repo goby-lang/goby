@@ -22,6 +22,7 @@
 #   => [0, 2]
 #
 class LazyEnumerator
+  NONE = Object.new
 
   # Instantiate a LazyEnumerator.
   #
@@ -74,7 +75,16 @@ class LazyEnumerator
 
   # Returns the first (`size`) elements.
   #
-  def first(size)
+  def first(size = NONE)
+    # If the size is not given, it returns first element instead of an array.
+    if size == NONE
+      result = each do |value|
+        break value
+      end
+
+      return result
+    end
+
     # We need not to perform a number of :each cycles exactly the number of times required.
     # If the size is 0, we can't enter the block, so we break immediately.
     if size == 0
