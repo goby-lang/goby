@@ -67,9 +67,7 @@ Here's a [complete list](https://github.com/goby-lang/goby/wiki/Features) of all
 
 ## Current roadmap
 
-- [ ] create functions for testing framework like `rescue`, `begin` -- by 2018 March
-- [ ] testing framework -- by 2018 April
-- [ ] third-party library support (like `rubygem`)
+See wiki: [Current roadmap](https://github.com/goby-lang/goby/wiki/Current-Roadmap)
 
 ## Installation
 
