@@ -12,6 +12,7 @@ import (
 	"github.com/goby-lang/goby/compiler/parser"
 	"github.com/goby-lang/goby/igb"
 	"github.com/goby-lang/goby/vm"
+	_ "github.com/goby-lang/goby/native/db"
 	"github.com/pkg/profile"
 )
 
@@ -39,30 +40,58 @@ func main() {
 		os.Exit(0)
 	}
 
-	fp := flag.Arg(0)
+	var fp string
 
-	if fp == "" || !strings.Contains(fp, ".") {
+	switch flag.Arg(0) {
+	case "":
 		flag.Usage()
 		os.Exit(0)
-	}
+	case "test":
+		args := flag.Args()[1:]
+		filePath := flag.Arg(1)
+		fileInfo, err := os.Stat(filePath)
+		reportErrorAndExit(err)
 
-	args := flag.Args()[1:]
+		dir := extractDirFromFilePath(filePath, fileInfo)
+		v, err := vm.New(dir, args)
 
-	dir, _, fileExt := extractFileInfo(fp)
-	file, ok := readFile(fp)
+		if fileInfo.Mode().IsDir() {
+			fileInfos, err := ioutil.ReadDir(filePath)
+			reportErrorAndExit(err)
 
-	if !ok {
+			for _, fileInfo := range fileInfos {
+				fp := filepath.Join(dir, fileInfo.Name())
+				reportErrorAndExit(err)
+
+				err := runSpecFile(v, fp)
+				reportErrorAndExit(err)
+			}
+		} else {
+			err := runSpecFile(v, filePath)
+			reportErrorAndExit(err)
+		}
+
+		instructionSets, err := compiler.CompileToInstructions("Spec.run", parser.NormalMode)
+		v.ExecInstructions(instructionSets, filePath)
 		return
+	default:
+		fp = flag.Arg(0)
+
+		if !strings.Contains(fp, ".") {
+			flag.Usage()
+			os.Exit(0)
+		}
 	}
+
+	// Execute files normally
+	dir, _, fileExt := extractFileInfo(fp)
+	file := readFile(fp)
 
 	switch fileExt {
 	case "gb", "rb":
+		args := flag.Args()[1:]
 		instructionSets, err := compiler.CompileToInstructions(string(file), parser.NormalMode)
-
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
+		reportErrorAndExit(err)
 
 		var v *vm.VM
 
@@ -73,18 +102,10 @@ func main() {
 		} else {
 			v, err = vm.New(dir, args)
 		}
-
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
+		reportErrorAndExit(err)
 
 		fp, err := filepath.Abs(fp)
-
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
+		reportErrorAndExit(err)
 
 		v.ExecInstructions(instructionSets, fp)
 	default:
@@ -101,13 +122,40 @@ func extractFileInfo(fp string) (dir, filename, fileExt string) {
 	return
 }
 
-func readFile(filepath string) (file []byte, ok bool) {
-	file, err := ioutil.ReadFile(filepath)
-
-	if err != nil {
-		fmt.Println(err.Error())
-		return []byte{}, false
+func extractDirFromFilePath(filePath string, fileInfo os.FileInfo) string {
+	if fileInfo.Mode().IsDir() {
+		dir, err := filepath.Abs(filePath)
+		reportErrorAndExit(err)
+		return dir
 	}
 
-	return file, true
+	filePath, err := filepath.Abs(filePath)
+	reportErrorAndExit(err)
+	dir, _, _ := extractFileInfo(filePath)
+	return dir
+}
+
+func readFile(filepath string) (file []byte) {
+	file, err := ioutil.ReadFile(filepath)
+	reportErrorAndExit(err)
+	return
+}
+
+func runSpecFile(v *vm.VM, fp string) (err error) {
+	file := readFile(fp)
+	instructionSets, err := compiler.CompileToInstructions(string(file), parser.NormalMode)
+
+	if err != nil {
+		return
+	}
+
+	v.ExecInstructions(instructionSets, fp)
+	return
+}
+
+func reportErrorAndExit(err error) {
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
 }

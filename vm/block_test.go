@@ -37,12 +37,24 @@ end
 f = Foo.new
 f.exec_block(b)
 `, 1000},
+		{`
+bl = Block.new do |array|
+  array.reduce do |sum, i|
+    sum + i
+  end
+end
+bl.call([1, 2, 3, 4])`, 10},
+		{`
+p = Block.new do |i, j, k|
+  [i, j, k]
+end
+p.call(1, 2, 3, 4, 5)`, []interface{}{1, 2, 3}},
 	}
 
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}

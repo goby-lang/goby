@@ -25,7 +25,7 @@ func TestServerInitialization(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -116,7 +116,7 @@ func TestSetupResponseDefaultValue(t *testing.T) {
 func TestServerRequestInitialization(t *testing.T) {
 	v := initTestVM()
 	reader := strings.NewReader("Hello World")
-	r := initRequest(v.mainThread, httptest.NewRecorder(), httptest.NewRequest("GET", "https://google.com/path", reader))
+	r := initRequest(&v.mainThread, httptest.NewRecorder(), httptest.NewRequest("GET", "https://google.com/path", reader))
 
 	tests := []struct {
 		varName  string
@@ -167,7 +167,7 @@ func TestServerRequestInitialization(t *testing.T) {
 			t.Fatalf("Expect request object to have %s attribute.", tt.varName)
 		}
 
-		verifyExpected(t, i, v, tt.expected)
+		VerifyExpected(t, i, v, tt.expected)
 	}
 
 }

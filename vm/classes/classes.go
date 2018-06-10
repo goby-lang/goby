@@ -3,6 +3,7 @@ package classes
 const (
 	ObjectClass    = "Object"
 	ClassClass     = "Class"
+	ModuleClass    = "Module"
 	IntegerClass   = "Integer"
 	FloatClass     = "Float"
 	StringClass    = "String"
@@ -12,7 +13,7 @@ const (
 	NullClass      = "Null"
 	ChannelClass   = "Channel"
 	RangeClass     = "Range"
-	MethodClass    = "method"
+	MethodClass    = "Method"
 	PluginClass    = "Plugin"
 	GoObjectClass  = "GoObject"
 	FileClass      = "File"

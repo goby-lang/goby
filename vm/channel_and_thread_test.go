@@ -2,24 +2,6 @@ package vm
 
 import "testing"
 
-func TestChannelClassSuperclass(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected string
-	}{
-		{`Channel.class.name`, "Class"},
-		{`Channel.superclass.name`, "Object"},
-	}
-
-	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
-	}
-}
-
 func TestObjectMutationInThread(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -47,9 +29,9 @@ func TestObjectMutationInThread(t *testing.T) {
 		  c.deliver(i)
 		end
 
-		# if we put i += 1 here than it will execute along with other thread,
-		# which will cause raise condition
-		# Used to block main process until thread is finished
+		# if we put i += 1 here then it will execute along with other thread,
+		# which will cause a race condition.
+		# The following "receive" is needed to block the main process until thread is finished
 		c.receive
 		i += 1
 		i
@@ -59,7 +41,7 @@ func TestObjectMutationInThread(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -154,7 +136,7 @@ func TestObjectDeliveryBetweenThread(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}

@@ -39,7 +39,7 @@ func builtinRangeClassMethods() []*BuiltinMethodObject {
 		{
 			Name: "new",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
 				}
 			},
@@ -61,7 +61,7 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "==",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					left := receiver.(*RangeObject)
 					r := args[0]
@@ -90,7 +90,7 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "!=",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					left := receiver.(*RangeObject)
 					r := args[0]
@@ -151,17 +151,26 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			Name: "bsearch",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					ran := receiver.(*RangeObject)
 
-					if ran.Start > ran.End || ran.Start < 0 {
+					if ran.Start < 0 || ran.End < 0 {
 						// if block is not used, it should be popped
 						t.callFrameStack.pop()
 						return NULL
 					}
 
-					start := ran.Start
-					end := ran.End
+					var start, end int
+					if ran.Start < ran.End {
+						start, end = ran.Start, ran.End
+					} else {
+						start, end = ran.End, ran.Start
+					}
+
+					// the element of the range
+					// object with the highest value
+					ranEnd := end
+
 					var mid int
 					pivot := -1
 
@@ -171,7 +180,7 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 							mid++
 						}
 
-						result := t.builtinMethodYield(blockFrame, t.vm.initIntegerObject(mid))
+						result := t.builtinMethodYield(blockFrame, t.vm.InitIntegerObject(mid))
 
 						switch r := result.Target.(type) {
 						case *BooleanObject:
@@ -183,19 +192,19 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 								if pivot == -1 {
 									return NULL
 								}
-								return t.vm.initIntegerObject(pivot)
+								return t.vm.InitIntegerObject(pivot)
 							}
 
 							if r.value {
 								end = mid - 1
-							} else if mid+1 > ran.End {
+							} else if mid+1 > ranEnd {
 								return NULL
 							} else {
 								start = mid + 1
 							}
 						case *IntegerObject:
 							if r.value == 0 {
-								return t.vm.initIntegerObject(mid)
+								return t.vm.InitIntegerObject(mid)
 							}
 
 							if start == end {
@@ -208,7 +217,7 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 								end = mid - 1
 							}
 						default:
-							return t.vm.initErrorObject(errors.TypeError, sourceLine, "Expect Integer or Boolean type. got=%s", r.Class().Name)
+							return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect Integer or Boolean type. got=%s", r.Class().Name)
 						}
 					}
 				}
@@ -239,24 +248,20 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			// @return [Range]
 			Name: "each",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					ran := receiver.(*RangeObject)
 
 					if blockFrame == nil {
-						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 
-					if ran.Start <= ran.End {
-						for i := ran.Start; i <= ran.End; i++ {
-							obj := t.vm.initIntegerObject(i)
-							t.builtinMethodYield(blockFrame, obj)
-						}
-					} else {
-						for i := ran.End; i <= ran.Start; i++ {
-							obj := t.vm.initIntegerObject(i)
-							t.builtinMethodYield(blockFrame, obj)
-						}
-					}
+					ran.each(func(i int) error {
+						obj := t.vm.InitIntegerObject(i)
+						t.builtinMethodYield(blockFrame, obj)
+
+						return nil
+					})
+
 					return ran
 				}
 			},
@@ -274,9 +279,9 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			Name: "first",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					ran := receiver.(*RangeObject)
-					return t.vm.initIntegerObject(ran.Start)
+					return t.vm.InitIntegerObject(ran.Start)
 				}
 			},
 		},
@@ -299,7 +304,7 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "include?",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					ran := receiver.(*RangeObject)
 
 					value := args[0].(*IntegerObject).value
@@ -326,9 +331,9 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			Name: "last",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					ran := receiver.(*RangeObject)
-					return t.vm.initIntegerObject(ran.End)
+					return t.vm.InitIntegerObject(ran.End)
 				}
 			},
 		},
@@ -345,39 +350,31 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "map",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*RangeObject)
 
 					if blockFrame == nil {
-						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 					}
 
 					var elements []Object
-					var start, end int
 
-					if r.Start <= r.End {
-						start = r.Start
-						end = r.End
-					} else {
-						start = r.End
-						end = r.Start
-					}
-
-					for i := start; i <= end; i++ {
-						// TODO: We should return an null array directly instead of running this loop
+					r.each(func(i int) error {
 						if blockIsEmpty(blockFrame) {
 							elements = append(elements, NULL)
 						} else {
-							obj := t.vm.initIntegerObject(i)
+							obj := t.vm.InitIntegerObject(i)
 							elements = append(elements, t.builtinMethodYield(blockFrame, obj).Target)
 						}
-					}
 
-					return t.vm.initArrayObject(elements)
+						return nil
+					})
+
+					return t.vm.InitArrayObject(elements)
 				}
 			},
 		},
@@ -393,13 +390,13 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			Name: "size",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					ran := receiver.(*RangeObject)
 
 					if ran.Start <= ran.End {
-						return t.vm.initIntegerObject(ran.End - ran.Start + 1)
+						return t.vm.InitIntegerObject(ran.End - ran.Start + 1)
 					}
-					return t.vm.initIntegerObject(ran.Start - ran.End + 1)
+					return t.vm.InitIntegerObject(ran.Start - ran.End + 1)
 				}
 			},
 		},
@@ -436,32 +433,38 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			// @return [Range]
 			Name: "step",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					ran := receiver.(*RangeObject)
 
 					if blockFrame == nil {
-						return t.vm.initErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 					}
 
 					stepValue := args[0].(*IntegerObject).value
 					if stepValue == 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Step can't be 0")
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Step can't be 0")
 					} else if stepValue < 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Step can't be negative")
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Step can't be negative")
 					}
 
-					// range end must greater or equal than range start to execute the block
-					if ran.End >= ran.Start {
-						for i := ran.Start; i <= ran.End; i += stepValue {
-							obj := t.vm.initIntegerObject(i)
-							t.builtinMethodYield(blockFrame, obj)
+					blockFrameUsed := false
+
+					ran.each(func(i int) error {
+						if (i-ran.Start)%stepValue != 0 {
+							return nil
 						}
 
-						return ran
-					}
+						obj := t.vm.InitIntegerObject(i)
+						t.builtinMethodYield(blockFrame, obj)
+						blockFrameUsed = true
+
+						return nil
+					})
 
 					// if block is not used, it should be popped
-					t.callFrameStack.pop()
+					if !blockFrameUsed {
+						t.callFrameStack.pop()
+					}
 
 					return ran
 				}
@@ -480,22 +483,24 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "to_a",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					ro := receiver.(*RangeObject)
 
 					elems := []Object{}
 
+					var iterAdd int
+
 					if ro.Start <= ro.End {
-						for i := ro.Start; i <= ro.End; i++ {
-							elems = append(elems, t.vm.initIntegerObject(i))
-						}
+						iterAdd = 1
 					} else {
-						for i := ro.End; i <= ro.Start; i++ {
-							elems = append(elems, t.vm.initIntegerObject(i))
-						}
+						iterAdd = -1
 					}
 
-					return t.vm.initArrayObject(elems)
+					for i := ro.Start; i != (ro.End + iterAdd); i += iterAdd {
+						elems = append(elems, t.vm.InitIntegerObject(i))
+					}
+
+					return t.vm.InitArrayObject(elems)
 				}
 			},
 		},
@@ -509,7 +514,7 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "to_s",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					ran := receiver.(*RangeObject)
 
 					return t.vm.initStringObject(ran.toString())
@@ -532,7 +537,7 @@ func (vm *VM) initRangeObject(start, end int) *RangeObject {
 }
 
 func (vm *VM) initRangeClass() *RClass {
-	rc := vm.initializeClass(classes.RangeClass, false)
+	rc := vm.initializeClass(classes.RangeClass)
 	rc.setBuiltinMethods(builtinRangeInstanceMethods(), false)
 	rc.setBuiltinMethods(builtinRangeClassMethods(), true)
 	vm.libFiles = append(vm.libFiles, "range.gb")
@@ -548,11 +553,28 @@ func (ro *RangeObject) toString() string {
 }
 
 // toJSON just delegates to toString
-func (ro *RangeObject) toJSON(t *thread) string {
+func (ro *RangeObject) toJSON(t *Thread) string {
 	return ro.toString()
 }
 
 // Value returns range object's string format
 func (ro *RangeObject) Value() interface{} {
 	return ro.toString()
+}
+
+func (ro *RangeObject) each(f func(int) error) (err error) {
+	var inc int
+	if ro.End-ro.Start >= 0 {
+		inc = 1
+	} else {
+		inc = -1
+	}
+
+	for i := ro.Start; i != ro.End+inc; i += inc {
+		if err = f(i); err != nil {
+			return err
+		}
+	}
+
+	return
 }

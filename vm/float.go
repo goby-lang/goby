@@ -3,9 +3,10 @@ package vm
 import (
 	"math"
 
+	"strconv"
+
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
-	"strconv"
 )
 
 // FloatObject represents an inexact real number using the native architecture's double-precision floating point
@@ -28,7 +29,7 @@ func builtinFloatClassMethods() []*BuiltinMethodObject {
 		{
 			Name: "new",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
 				}
 			},
@@ -48,7 +49,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// @return [Float]
 			Name: "+",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					operation := func(leftValue float64, rightValue float64) float64 {
 						return leftValue + rightValue
 					}
@@ -66,7 +67,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// @return [Float]
 			Name: "%",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					operation := func(leftValue float64, rightValue float64) float64 {
 						return math.Mod(leftValue, rightValue)
 					}
@@ -84,7 +85,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// @return [Float]
 			Name: "-",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					operation := func(leftValue float64, rightValue float64) float64 {
 						return leftValue - rightValue
 					}
@@ -102,7 +103,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// @return [Float]
 			Name: "*",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					operation := func(leftValue float64, rightValue float64) float64 {
 						return leftValue * rightValue
 					}
@@ -120,7 +121,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// @return [Float]
 			Name: "**",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					operation := func(leftValue float64, rightValue float64) float64 {
 						return math.Pow(leftValue, rightValue)
 					}
@@ -138,7 +139,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// @return [Float]
 			Name: "/",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					operation := func(leftValue float64, rightValue float64) float64 {
 						return leftValue / rightValue
 					}
@@ -157,7 +158,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: ">",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					operation := func(leftValue float64, rightValue float64) bool {
 						return leftValue > rightValue
 					}
@@ -176,7 +177,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: ">=",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					operation := func(leftValue float64, rightValue float64) bool {
 						return leftValue >= rightValue
 					}
@@ -195,7 +196,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "<",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					operation := func(leftValue float64, rightValue float64) bool {
 						return leftValue < rightValue
 					}
@@ -214,7 +215,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "<=",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					operation := func(leftValue float64, rightValue float64) bool {
 						return leftValue <= rightValue
 					}
@@ -234,24 +235,24 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// @return [Float]
 			Name: "<=>",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					rightNumeric, ok := args[0].(Numeric)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", args[0].Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", args[0].Class().Name)
 					}
 
 					leftValue := receiver.(*FloatObject).value
 					rightValue := rightNumeric.floatValue()
 
 					if leftValue < rightValue {
-						return t.vm.initIntegerObject(-1)
+						return t.vm.InitIntegerObject(-1)
 					}
 					if leftValue > rightValue {
-						return t.vm.initIntegerObject(1)
+						return t.vm.InitIntegerObject(1)
 					}
 
-					return t.vm.initIntegerObject(0)
+					return t.vm.InitIntegerObject(0)
 				}
 			},
 		},
@@ -268,7 +269,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "==",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					result := receiver.(*FloatObject).equalityTest(args[0])
 
 					return toBooleanObject(result)
@@ -288,7 +289,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "!=",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					result := !receiver.(*FloatObject).equalityTest(args[0])
 
 					return toBooleanObject(result)
@@ -310,17 +311,17 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// @return [Decimal]
 			Name: "to_d",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%v", strconv.Itoa(len(args)))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%v", strconv.Itoa(len(args)))
 					}
 
 					fl := receiver.(*FloatObject).value
 					fs := strconv.FormatFloat(fl, 'f', -1, 64)
 					de, err := new(Decimal).SetString(fs)
 					if err == false {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Invalid numeric string. got=%v", fs)
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Invalid numeric string. got=%v", fs)
 					}
 
 					return t.vm.initDecimalObject(de)
@@ -336,9 +337,9 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			Name: "to_i",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*FloatObject)
-					newInt := t.vm.initIntegerObject(int(r.value))
+					newInt := t.vm.InitIntegerObject(int(r.value))
 					newInt.flag = i
 					return newInt
 				}
@@ -347,7 +348,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "ptr",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					r := receiver.(*FloatObject)
 					return t.vm.initGoObject(&r.value)
 				}
@@ -368,7 +369,7 @@ func (vm *VM) initFloatObject(value float64) *FloatObject {
 }
 
 func (vm *VM) initFloatClass() *RClass {
-	ic := vm.initializeClass(classes.FloatClass, false)
+	ic := vm.initializeClass(classes.FloatClass)
 	ic.setBuiltinMethods(builtinFloatInstanceMethods(), false)
 	ic.setBuiltinMethods(builtinFloatClassMethods(), true)
 	return ic
@@ -388,18 +389,18 @@ func (f *FloatObject) floatValue() float64 {
 
 // TODO: Remove instruction argument
 // Apply the passed arithmetic operation, while performing type conversion.
-func (f *FloatObject) arithmeticOperation(t *thread, rightObject Object, operation func(leftValue float64, rightValue float64) float64, sourceLine int, division bool) Object {
+func (f *FloatObject) arithmeticOperation(t *Thread, rightObject Object, operation func(leftValue float64, rightValue float64) float64, sourceLine int, division bool) Object {
 	rightNumeric, ok := rightObject.(Numeric)
 
 	if !ok {
-		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
+		return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
 	}
 
 	leftValue := f.value
 	rightValue := rightNumeric.floatValue()
 
 	if division && rightValue == 0 {
-		return t.vm.initErrorObject(errors.ZeroDivisionError, sourceLine, errors.DividedByZero)
+		return t.vm.InitErrorObject(errors.ZeroDivisionError, sourceLine, errors.DividedByZero)
 	}
 
 	result := operation(leftValue, rightValue)
@@ -424,11 +425,11 @@ func (f *FloatObject) equalityTest(rightObject Object) bool {
 
 // TODO: Remove instruction argument
 // Apply the passed numeric comparison, while performing type conversion.
-func (f *FloatObject) numericComparison(t *thread, rightObject Object, operation func(leftValue float64, rightValue float64) bool, sourceLine int) Object {
+func (f *FloatObject) numericComparison(t *Thread, rightObject Object, operation func(leftValue float64, rightValue float64) bool, sourceLine int) Object {
 	rightNumeric, ok := rightObject.(Numeric)
 
 	if !ok {
-		return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
+		return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
 	}
 
 	leftValue := f.value
@@ -446,7 +447,7 @@ func (f *FloatObject) toString() string {
 }
 
 // toJSON just delegates to toString
-func (f *FloatObject) toJSON(t *thread) string {
+func (f *FloatObject) toJSON(t *Thread) string {
 	return f.toString()
 }
 

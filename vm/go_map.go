@@ -24,7 +24,7 @@ func builtinGoMapClassMethods() []*BuiltinMethodObject {
 			// @return [GoMap]
 			Name: "new",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					m := make(map[string]interface{})
 
 					if len(args) == 0 {
@@ -34,7 +34,7 @@ func builtinGoMapClassMethods() []*BuiltinMethodObject {
 					hash, ok := args[0].(*HashObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.HashClass, args[0].Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.HashClass, args[0].Class().Name)
 					}
 
 					for k, v := range hash.Pairs {
@@ -54,9 +54,9 @@ func builtinGoMapInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_hash",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 0 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
 					}
 
 					m := receiver.(*GoMap)
@@ -64,26 +64,26 @@ func builtinGoMapInstanceMethods() []*BuiltinMethodObject {
 					pairs := map[string]Object{}
 
 					for k, obj := range m.data {
-						pairs[k] = t.vm.initObjectFromGoType(obj)
+						pairs[k] = t.vm.InitObjectFromGoType(obj)
 
 					}
 
-					return t.vm.initHashObject(pairs)
+					return t.vm.InitHashObject(pairs)
 				}
 			},
 		},
 		{
 			Name: "get",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 1 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
 					}
 
 					key, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					m := receiver.(*GoMap).data
@@ -97,7 +97,7 @@ func builtinGoMapInstanceMethods() []*BuiltinMethodObject {
 					obj, ok := result.(Object)
 
 					if !ok {
-						obj = t.vm.initObjectFromGoType(result)
+						obj = t.vm.InitObjectFromGoType(result)
 					}
 
 					return obj
@@ -107,15 +107,15 @@ func builtinGoMapInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "set",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					if len(args) != 2 {
-						return t.vm.initErrorObject(errors.ArgumentError, sourceLine, "Expect 2 argument. got: %d", len(args))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 2 argument. got: %d", len(args))
 					}
 
 					key, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					m := receiver.(*GoMap).data
@@ -138,7 +138,7 @@ func (vm *VM) initGoMap(d map[string]interface{}) *GoMap {
 }
 
 func (vm *VM) initGoMapClass() *RClass {
-	sc := vm.initializeClass(classes.GoMapClass, false)
+	sc := vm.initializeClass(classes.GoMapClass)
 	sc.setBuiltinMethods(builtinGoMapClassMethods(), true)
 	sc.setBuiltinMethods(builtinGoMapInstanceMethods(), false)
 	vm.objectClass.setClassConstant(sc)
@@ -158,6 +158,6 @@ func (m *GoMap) toString() string {
 }
 
 // toJSON just delegates to toString
-func (m *GoMap) toJSON(t *thread) string {
+func (m *GoMap) toJSON(t *Thread) string {
 	return m.toString()
 }

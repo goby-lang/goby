@@ -2,16 +2,22 @@ package vm
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/compiler/bytecode"
-	"github.com/goby-lang/goby/vm/classes"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
+	"sync/atomic"
+	"testing"
+
+	"github.com/goby-lang/goby/compiler"
+	"github.com/goby-lang/goby/compiler/bytecode"
+	"github.com/goby-lang/goby/compiler/parser"
+	"github.com/goby-lang/goby/vm/classes"
 )
 
 // Version stores current Goby version
-const Version = "0.1.8"
+const Version = "0.1.9"
 
 // These are the enums for marking parser's mode, which decides whether it should pop unused values.
 const (
@@ -19,6 +25,9 @@ const (
 	REPLMode
 	TestMode
 )
+
+// DefaultLibPath is used for overriding vm.libpath build-time.
+var DefaultLibPath string
 
 type isIndexTable struct {
 	Data map[string]int
@@ -36,18 +45,18 @@ var standardLibraries = map[string]func(*VM){
 	"net/http":           initHTTPClass,
 	"net/simple_server":  initSimpleServerClass,
 	"uri":                initURIClass,
-	"db":                 initDBClass,
 	"plugin":             initPluginClass,
 	"json":               initJSONClass,
 	"concurrent/array":   initConcurrentArrayClass,
 	"concurrent/hash":    initConcurrentHashClass,
 	"concurrent/rw_lock": initConcurrentRWLockClass,
+	"spec":               initSpecClass,
 }
 
 // VM represents a stack based virtual machine.
 type VM struct {
 	mainObj     *RObject
-	mainThread  *thread
+	mainThread  Thread
 	objectClass *RClass
 	// a map holds different types of instruction set tables
 	isTables map[setType]isTable
@@ -64,17 +73,24 @@ type VM struct {
 	// projectRoot is goby root's absolute path, which is $GOROOT/src/github.com/goby-lang/goby
 	projectRoot string
 
+	// libPath indicates the Goby (.gb) libraries path. Defaults to `<projectRoot>/lib`, unless
+	// DefaultLibPath is specified.
+	libPath string
+
 	channelObjectMap *objectMap
 
 	mode int
 
 	libFiles []string
+
+	threadCount int64
 }
 
 // New initializes a vm to initialize state and returns it.
 func New(fileDir string, args []string) (vm *VM, e error) {
 	vm = &VM{args: args}
-	vm.mainThread = vm.newThread()
+	vm.mainThread.vm = vm
+	vm.threadCount++
 
 	vm.methodISIndexTables = map[filename]*isIndexTable{
 		fileDir: newISIndexTable(),
@@ -111,6 +127,12 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 		vm.projectRoot = gobyRoot
 	}
 
+	if DefaultLibPath != "" {
+		vm.libPath = DefaultLibPath
+	} else {
+		vm.libPath = filepath.Join(vm.projectRoot, "lib")
+	}
+
 	vm.initConstants()
 	vm.mainObj = vm.initMainObj()
 	vm.channelObjectMap = &objectMap{store: &sync.Map{}}
@@ -127,14 +149,10 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 	return
 }
 
-func (vm *VM) newThread() *thread {
-	s := &stack{RWMutex: new(sync.RWMutex)}
-	cfs := &callFrameStack{callFrames: []callFrame{}}
-	t := &thread{stack: s, callFrameStack: cfs, sp: 0, cfp: 0}
-	s.thread = t
-	cfs.thread = t
+func (vm *VM) newThread() (t Thread) {
 	t.vm = vm
-	return t
+	t.id = atomic.AddInt64(&vm.threadCount, 1)
+	return
 }
 
 // ExecInstructions accepts a sequence of bytecodes and use vm to evaluate them.
@@ -186,7 +204,7 @@ func builtinMainObjSingletonMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_s",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(thread *thread, objects []Object, frame *normalCallFrame) Object {
+				return func(thread *Thread, objects []Object, frame *normalCallFrame) Object {
 					return thread.vm.initStringObject("main")
 				}
 			},
@@ -196,7 +214,7 @@ func builtinMainObjSingletonMethods() []*BuiltinMethodObject {
 
 func (vm *VM) initMainObj() *RObject {
 	obj := vm.objectClass.initializeInstance()
-	singletonClass := vm.initializeClass(fmt.Sprintf("#<Class:%s>", obj.toString()), false)
+	singletonClass := vm.initializeClass(fmt.Sprintf("#<Class:%s>", obj.toString()))
 	singletonClass.Methods.set("include", vm.topLevelClass(classes.ClassClass).lookupMethod("include"))
 	singletonClass.setBuiltinMethods(builtinMainObjSingletonMethods(), false)
 	obj.singletonClass = singletonClass
@@ -207,8 +225,10 @@ func (vm *VM) initMainObj() *RObject {
 func (vm *VM) initConstants() {
 	// Init Class and Object
 	cClass := initClassClass()
+	mClass := initModuleClass(cClass)
 	vm.objectClass = initObjectClass(cClass)
 	vm.topLevelClass(classes.ObjectClass).setClassConstant(cClass)
+	vm.topLevelClass(classes.ObjectClass).setClassConstant(mClass)
 
 	// Init builtin classes
 	builtinClasses := []*RClass{
@@ -245,7 +265,7 @@ func (vm *VM) initConstants() {
 		args = append(args, vm.initStringObject(arg))
 	}
 
-	vm.objectClass.constants["ARGV"] = &Pointer{Target: vm.initArrayObject(args)}
+	vm.objectClass.constants["ARGV"] = &Pointer{Target: vm.InitArrayObject(args)}
 
 	// Init ENV
 	envs := map[string]Object{}
@@ -255,7 +275,7 @@ func (vm *VM) initConstants() {
 		envs[pair[0]] = vm.initStringObject(pair[1])
 	}
 
-	vm.objectClass.constants["ENV"] = &Pointer{Target: vm.initHashObject(envs)}
+	vm.objectClass.constants["ENV"] = &Pointer{Target: vm.InitHashObject(envs)}
 	vm.objectClass.constants["STDOUT"] = &Pointer{Target: vm.initFileObject(os.Stdout)}
 	vm.objectClass.constants["STDERR"] = &Pointer{Target: vm.initFileObject(os.Stderr)}
 	vm.objectClass.constants["STDIN"] = &Pointer{Target: vm.initFileObject(os.Stdin)}
@@ -284,7 +304,12 @@ func (vm *VM) loadConstant(name string, isModule bool) *RClass {
 	ptr = vm.objectClass.constants[name]
 
 	if ptr == nil {
-		c = vm.initializeClass(name, isModule)
+		if isModule {
+			c = vm.initializeClass(name)
+		} else {
+			c = vm.initializeModule(name)
+		}
+
 		vm.objectClass.setClassConstant(c)
 	} else {
 		c = ptr.Target.(*RClass)
@@ -297,7 +322,7 @@ func (vm *VM) lookupConstant(cf callFrame, constName string) (constant *Pointer)
 	var namespace *RClass
 	var hasNamespace bool
 
-	top := vm.mainThread.stack.top()
+	top := vm.mainThread.Stack.top()
 
 	if top == nil {
 		hasNamespace = false
@@ -324,4 +349,45 @@ func (vm *VM) lookupConstant(cf callFrame, constName string) (constant *Pointer)
 	}
 
 	return
+}
+func initTestVM() *VM {
+	fn, err := os.Getwd()
+
+	if err != nil {
+		panic(err)
+	}
+
+	v, err := New(fn, []string{})
+
+	if err != nil {
+		panic(err)
+	}
+
+	v.mode = TestMode
+	return v
+}
+
+func getFilename() string {
+	_, filename, _, _ := runtime.Caller(1)
+	return filename
+}
+
+func ExecAndReturn(t *testing.T, src string) Object {
+	t.Helper()
+	v := initTestVM()
+	return v.testEval(t, src, getFilename())
+}
+
+func (v *VM) testEval(t *testing.T, input, filepath string) Object {
+	iss, err := compiler.CompileToInstructions(input, parser.TestMode)
+
+	if err != nil {
+		t.Helper()
+		t.Errorf("Error when compiling input: %s", input)
+		t.Fatal(err.Error())
+	}
+
+	v.ExecInstructions(iss, filepath)
+
+	return v.mainThread.Stack.top().Target
 }

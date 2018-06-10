@@ -22,13 +22,13 @@ func builtinURIClassMethods() []*BuiltinMethodObject {
 			// ```
 			Name: "parse",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					uri := args[0].(*StringObject).value
 					uriModule := t.vm.topLevelClass("URI")
 					u, err := url.Parse(uri)
 
 					if err != nil {
-						return t.vm.initErrorObject(errors.InternalError, sourceLine, err.Error())
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, err.Error())
 					}
 
 					uriAttrs := map[string]Object{
@@ -48,18 +48,18 @@ func builtinURIClassMethods() []*BuiltinMethodObject {
 					if len(u.Port()) == 0 {
 						switch u.Scheme {
 						case "http":
-							uriAttrs["@port"] = t.vm.initIntegerObject(80)
+							uriAttrs["@port"] = t.vm.InitIntegerObject(80)
 						case "https":
-							uriAttrs["@port"] = t.vm.initIntegerObject(443)
+							uriAttrs["@port"] = t.vm.InitIntegerObject(443)
 						}
 					} else {
 						p, err := strconv.ParseInt(u.Port(), 0, 64)
 
 						if err != nil {
-							return t.vm.initErrorObject(errors.InternalError, sourceLine, err.Error())
+							return t.vm.InitErrorObject(errors.InternalError, sourceLine, err.Error())
 						}
 
-						uriAttrs["@port"] = t.vm.initIntegerObject(int(p))
+						uriAttrs["@port"] = t.vm.InitIntegerObject(int(p))
 					}
 
 					// Path
@@ -109,9 +109,9 @@ func builtinURIClassMethods() []*BuiltinMethodObject {
 // Functions for initialization -----------------------------------------
 
 func initURIClass(vm *VM) {
-	uri := vm.initializeClass("URI", true)
-	http := vm.initializeClass("HTTP", false)
-	https := vm.initializeClass("HTTPS", false)
+	uri := vm.initializeModule("URI")
+	http := vm.initializeClass("HTTP")
+	https := vm.initializeClass("HTTPS")
 	https.superClass = http
 	https.pseudoSuperClass = http
 	uri.setClassConstant(http)

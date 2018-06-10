@@ -16,7 +16,7 @@ func TestRangeClassSuperclass(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -35,6 +35,7 @@ func TestRangeComparisonOperation(t *testing.T) {
 		{`(1..3) == { a: 1, b: 2 }`, false},
 		{`(1..3) == [1, "String", true, 2..5]`, false},
 		{`(1..3) == Integer`, false},
+		{`(3..1) == (3..1)`, true},
 		{`(1..3) != (1..3)`, false},
 		{`(1..3) != (1..4)`, true},
 		{`(1..3) != 123`, true},
@@ -43,12 +44,13 @@ func TestRangeComparisonOperation(t *testing.T) {
 		{`(1..3) != { a: 1, b: 2 }`, true},
 		{`(1..3) != [1, "String", true, 2..5]`, true},
 		{`(1..3) != Integer`, true},
+		{`(3..1) != Integer`, true},
 	}
 
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -114,7 +116,7 @@ func TestRangeBsearchMethod(t *testing.T) {
 		(4..0).bsearch do |i|
 			ary[i] >= 4
 		end
-		`, nil},
+		`, 1},
 		{`
 		ary = [0, 4, 7, 10, 12]
 		(-1..3).bsearch do |i|
@@ -174,7 +176,7 @@ func TestRangeBsearchMethod(t *testing.T) {
 		(4..0).bsearch do |i|
 			0 - ary[i]
 		end
-		`, nil},
+		`, 0},
 		{`
 		ary = [0, 100, 100, 100, 200]
 		(2..-1).bsearch do |i|
@@ -192,7 +194,7 @@ func TestRangeBsearchMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -269,7 +271,7 @@ func TestRangeEachMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -297,7 +299,7 @@ func TestRangeFirstMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -346,7 +348,7 @@ func TestRangeIncludeMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -374,7 +376,7 @@ func TestRangeLastMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -402,7 +404,7 @@ func TestRangeSizeMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -426,7 +428,7 @@ func TestRangeStepMethod(t *testing.T) {
 		  sum = sum + i
 		end
 		sum
-		`, 0},
+		`, -10},
 		{`
 		sum = 0
 		a = 2
@@ -456,13 +458,13 @@ func TestRangeStepMethod(t *testing.T) {
 		  sum = sum + i
 		 end
 		 sum
-		`, 0},
+		`, -9},
 	}
 
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -490,7 +492,7 @@ func TestRangeToStringMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -524,7 +526,7 @@ func TestRangeToArrayMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}

@@ -25,11 +25,11 @@ func builtinGoObjectInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "go_func",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					s, ok := args[0].(*StringObject)
 
 					if !ok {
-						return t.vm.initErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 					}
 
 					funcName := s.value
@@ -38,11 +38,11 @@ func builtinGoObjectInstanceMethods() []*BuiltinMethodObject {
 					funcArgs, err := convertToGoFuncArgs(args[1:])
 
 					if err != nil {
-						t.vm.initErrorObject(errors.TypeError, sourceLine, err.Error())
+						t.vm.InitErrorObject(errors.TypeError, sourceLine, err.Error())
 					}
 
 					result := metago.CallFunc(r.data, funcName, funcArgs...)
-					return t.vm.initObjectFromGoType(result)
+					return t.vm.InitObjectFromGoType(result)
 				}
 			},
 		},
@@ -58,7 +58,7 @@ func (vm *VM) initGoObject(d interface{}) *GoObject {
 }
 
 func (vm *VM) initGoClass() *RClass {
-	sc := vm.initializeClass(classes.GoObjectClass, false)
+	sc := vm.initializeClass(classes.GoObjectClass)
 	sc.setBuiltinMethods(builtinGoObjectClassMethods(), true)
 	sc.setBuiltinMethods(builtinGoObjectInstanceMethods(), false)
 	vm.objectClass.setClassConstant(sc)
@@ -78,7 +78,7 @@ func (s *GoObject) toString() string {
 }
 
 // toJSON just delegates to toString
-func (s *GoObject) toJSON(t *thread) string {
+func (s *GoObject) toJSON(t *Thread) string {
 	return s.toString()
 }
 

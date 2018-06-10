@@ -6,9 +6,13 @@ import (
 	"github.com/goby-lang/goby/vm/classes"
 )
 
-// BooleanObject represents boolean object in goby.
-// It includes `true` and `FALSE` which represents logically true and false value.
-// - `Boolean.new` is not supported.
+// BooleanObject represents boolean object in goby and no instance methods are contained within it.
+// `Boolean` class is just a dummy to hold logical `true` and `false` representation and no other active usage.
+// `Boolean.new` is not supported.
+//
+// Please note that class checking such as `#is_a?(Boolean)` **should be avoided in principle**.
+// `#is_a?` often leads to redundant code. Consider using `respond_to?` first, but actually it is unnecessary
+// in almost all cases.
 type BooleanObject struct {
 	*baseObj
 	value bool
@@ -27,75 +31,8 @@ func builtinBooleanClassMethods() []*BuiltinMethodObject {
 		{
 			Name: "new",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
-				}
-			},
-		},
-	}
-}
-
-// Instance methods -----------------------------------------------------
-func builtinBooleanInstanceMethods() []*BuiltinMethodObject {
-	return []*BuiltinMethodObject{
-		{
-			// Returns true if the receiver equals to the argument.
-			//
-			// ```Ruby
-			// 1 == 1 # => true
-			// 100 == 33 # => false
-			// ```
-			// @return [Boolean]
-			Name: "==",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
-
-					if receiver == args[0] {
-						return TRUE
-					}
-
-					return FALSE
-				}
-			},
-		},
-		{
-			// Returns true if the receiver is not equals to the argument.
-			//
-			// ```Ruby
-			// 4 != 2 # => true
-			// 45 != 45 # => false
-			// ```
-			// @return [Boolean]
-			Name: "!=",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
-
-					if receiver != args[0] {
-						return TRUE
-					}
-					return FALSE
-				}
-			},
-		},
-		{
-			// Reverse the receiver.
-			//
-			// ```ruby
-			// !true  # => false
-			// !false # => true
-			// ```
-			// @return [Boolean]
-			Name: "!",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *thread, args []Object, blockFrame *normalCallFrame) Object {
-
-					rightValue := receiver.(*BooleanObject).value
-
-					if rightValue {
-						return FALSE
-					}
-
-					return TRUE
 				}
 			},
 		},
@@ -107,8 +44,7 @@ func builtinBooleanInstanceMethods() []*BuiltinMethodObject {
 // Functions for initialization -----------------------------------------
 
 func (vm *VM) initBoolClass() *RClass {
-	b := vm.initializeClass(classes.BooleanClass, false)
-	b.setBuiltinMethods(builtinBooleanInstanceMethods(), false)
+	b := vm.initializeClass(classes.BooleanClass)
 	b.setBuiltinMethods(builtinBooleanClassMethods(), true)
 
 	TRUE = &BooleanObject{value: true, baseObj: &baseObj{class: b}}
@@ -139,7 +75,7 @@ func (b *BooleanObject) toString() string {
 }
 
 // toJSON just delegates to `toString`
-func (b *BooleanObject) toJSON(t *thread) string {
+func (b *BooleanObject) toJSON(t *Thread) string {
 	return b.toString()
 }
 

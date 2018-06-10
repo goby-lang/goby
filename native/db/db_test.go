@@ -1,8 +1,9 @@
-package vm
+package db
 
 import (
 	"testing"
 
+	"github.com/goby-lang/goby/vm"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -50,11 +51,8 @@ func TestDBPingMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
+		evaluated := vm.ExecAndReturn(t, tt.input)
+		vm.VerifyExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -78,11 +76,8 @@ func TestDBCloseMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
+		evaluated := vm.ExecAndReturn(t, tt.input)
+		vm.VerifyExpected(t, i, evaluated, tt.expected)
 	}
 }
 
@@ -104,11 +99,8 @@ func TestDBRunMethod(t *testing.T) {
 	results.first[:exists]
 	`
 
-	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
-	verifyExpected(t, 0, evaluated, true)
-	v.checkCFP(t, 0, 0)
-	v.checkSP(t, 0, 1)
+	evaluated := vm.ExecAndReturn(t, input)
+	vm.VerifyExpected(t, 0, evaluated, true)
 }
 
 func TestDBExecMethod(t *testing.T) {
@@ -154,11 +146,7 @@ func TestDBExecMethod(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
-		cleanTable()
+		evaluated := vm.ExecAndReturn(t, tt.input)
+		vm.VerifyExpected(t, i, evaluated, tt.expected)
 	}
 }

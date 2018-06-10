@@ -3,8 +3,9 @@ package vm
 import (
 	"fmt"
 
-	"github.com/goby-lang/goby/vm/errors"
 	"strings"
+
+	"github.com/goby-lang/goby/vm/errors"
 )
 
 // Error class is actually a special struct to hold internal error types with messages.
@@ -29,10 +30,10 @@ type Error struct {
 // Functions for initialization -----------------------------------------
 
 func (vm *VM) initUnsupportedMethodError(sourceLine int, methodName string, receiver Object) *Error {
-	return vm.initErrorObject(errors.UnsupportedMethodError, sourceLine, "Unsupported Method %s for %+v", methodName, receiver.toString())
+	return vm.InitErrorObject(errors.UnsupportedMethodError, sourceLine, "Unsupported Method %s for %+v", methodName, receiver.toString())
 }
 
-func (vm *VM) initErrorObject(errorType string, sourceLine int, format string, args ...interface{}) *Error {
+func (vm *VM) InitErrorObject(errorType string, sourceLine int, format string, args ...interface{}) *Error {
 	errClass := vm.objectClass.getClassConstant(errorType)
 
 	t := vm.mainThread
@@ -57,10 +58,10 @@ func (vm *VM) initErrorObject(errorType string, sourceLine int, format string, a
 }
 
 func (vm *VM) initErrorClasses() {
-	errTypes := []string{errors.InternalError, errors.ArgumentError, errors.NameError, errors.StopIteration, errors.TypeError, errors.UndefinedMethodError, errors.UnsupportedMethodError, errors.ConstantAlreadyInitializedError, errors.HTTPError, errors.ZeroDivisionError}
+	errTypes := []string{errors.InternalError, errors.ArgumentError, errors.NameError, errors.StopIteration, errors.TypeError, errors.UndefinedMethodError, errors.UnsupportedMethodError, errors.ConstantAlreadyInitializedError, errors.HTTPError, errors.ZeroDivisionError, errors.ChannelCloseError}
 
 	for _, errType := range errTypes {
-		c := vm.initializeClass(errType, false)
+		c := vm.initializeClass(errType)
 		vm.objectClass.setClassConstant(c)
 	}
 }
@@ -73,7 +74,7 @@ func (e *Error) toString() string {
 }
 
 // toJSON just delegates to `toString`
-func (e *Error) toJSON(t *thread) string {
+func (e *Error) toJSON(t *Thread) string {
 	return e.toString()
 }
 

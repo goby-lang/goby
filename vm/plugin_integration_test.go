@@ -39,7 +39,7 @@ func TestCallingPluginFunctionWithReturnValueNoRaceDetection(t *testing.T) {
 
 	v := initTestVM()
 	evaluated := v.testEval(t, input, getFilename())
-	verifyExpected(t, 0, evaluated, "Bar")
+	VerifyExpected(t, 0, evaluated, "Bar")
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
 }
@@ -56,7 +56,7 @@ func TestCallingLibFuncFromPluginNoRaceDetection(t *testing.T) {
 
 	v := initTestVM()
 	evaluated := v.testEval(t, input, getFilename())
-	verifyExpected(t, 0, evaluated, "lib")
+	VerifyExpected(t, 0, evaluated, "lib")
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
 }
@@ -80,7 +80,7 @@ func TestPluginGenerationNoRaceDetection(t *testing.T) {
 
 	v := initTestVM()
 	evaluated := v.testEval(t, input, getFilename())
-	verifyExpected(t, 0, evaluated, true)
+	VerifyExpected(t, 0, evaluated, true)
 	v.checkCFP(t, 0, 0)
 	v.checkSP(t, 0, 1)
 }

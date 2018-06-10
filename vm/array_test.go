@@ -16,7 +16,7 @@ func TestArrayClassSuperclass(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -36,9 +36,9 @@ func TestArrayEvaluation(t *testing.T) {
 		t.Fatalf("Expect evaluated value to be an array. got=%T", evaluated)
 	}
 
-	verifyExpected(t, 0, arr.Elements[0], 1)
-	verifyExpected(t, 0, arr.Elements[1], "234")
-	verifyExpected(t, 0, arr.Elements[2], true)
+	VerifyExpected(t, 0, arr.Elements[0], 1)
+	VerifyExpected(t, 0, arr.Elements[1], "234")
+	VerifyExpected(t, 0, arr.Elements[2], true)
 }
 
 func TestArrayComparison(t *testing.T) {
@@ -77,7 +77,7 @@ func TestArrayComparison(t *testing.T) {
 	for i, tt := range tests {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
 		vm.checkSP(t, i, 1)
 	}
@@ -150,7 +150,7 @@ func TestArrayIndex(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -362,7 +362,7 @@ func TestArrayIndexWithSuccessiveValuesNullCases(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -485,7 +485,7 @@ func TestArrayAnyMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -544,7 +544,7 @@ func TestArrayAtMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -718,7 +718,7 @@ func TestArrayCountMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -769,7 +769,7 @@ func TestArrayDeleteAtMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -844,12 +844,13 @@ func TestArrayDigMethod(t *testing.T) {
 		{`
 			[[], 2].dig(0, 1, 2)
 		`, nil},
+		{`[[1, 2, [3, [8, [9]]]], 4, 5].dig(0, 2, 1, 1, 0)`, 9},
 	}
 
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -915,7 +916,7 @@ func TestArrayEachMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -985,7 +986,7 @@ func TestArrayEachIndexMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1037,7 +1038,7 @@ func TestArrayEmptyMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1067,12 +1068,16 @@ func TestArrayFirstMethod(t *testing.T) {
 		a = [1, 2]
 		a.first
 		`, 1},
+		{`
+[:apple, :orange, :grape, :melon].first`,
+			"apple",
+		},
 	}
 
 	for i, tt := range testsInt {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 	}
 
@@ -1119,7 +1124,7 @@ func TestArrayFirstMethodNullCases(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1207,7 +1212,7 @@ func TestArrayIncludeMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1230,12 +1235,14 @@ func TestArrayJoinMethod(t *testing.T) {
 		{`
 		[1, 2, [3, 4]].join(",")
 		`, "1,2,3,4"},
+		{`[[:h, :e, :l], [[:l], :o]].join`, "hello"},
+		{`[[:hello],{k: :v}].join `, `hello{ k: "v" }`},
 	}
 
 	for i, tt := range testsInt {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1341,7 +1348,7 @@ func TestArrayLengthMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1405,6 +1412,10 @@ func TestArrayMapMethod(t *testing.T) {
 		[].map do |i|
 		end
 		`, []interface{}{}},
+		{`
+		a = [:apple, :orange, :lemon, :grape].map do |i|
+		i + "s"
+ 		end`, []interface{}{"apples", "oranges", "lemons", "grapes"}},
 	}
 
 	for i, tt := range tests {
@@ -1485,7 +1496,7 @@ func TestArrayPopMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1537,12 +1548,18 @@ func TestArrayPushMethod(t *testing.T) {
 			a.push(234)
 			a[0]
 			`, "foo"},
+		{`
+			[1, 2, 3, 4].push(5, 6, 7).to_s
+			`, "[1, 2, 3, 4, 5, 6, 7]"},
+		{`
+			[].push(nil, "", '').to_s
+	`, `[nil, "", ""]`},
 	}
 
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1620,7 +1637,7 @@ func TestArrayReduceMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1727,7 +1744,7 @@ func TestArrayReverseEachMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -1758,13 +1775,21 @@ func TestArrayRotateMethod(t *testing.T) {
 		expected []interface{}
 	}{
 		{`
-		a = [1, 2]
+		a = [1, 2, 3, 4]
 		a.rotate
-		`, []interface{}{2, 1}},
+		`, []interface{}{2, 3, 4, 1}},
 		{`
 		a = [1, 2, 3, 4]
 		a.rotate(2)
 		`, []interface{}{3, 4, 1, 2}},
+		{`
+		a = [1, 2, 3, 4]
+		a.rotate(0)
+		`, []interface{}{1, 2, 3, 4}},
+		{`
+		a = [1, 2, 3, 4]
+		a.rotate(-1)
+		`, []interface{}{4, 1, 2, 3}},
 	}
 
 	for i, tt := range tests {
@@ -1848,6 +1873,7 @@ func TestArraySelectMethod(t *testing.T) {
 
 func TestArraySelectMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
+		{`[1, 2].select(1)`, "ArgumentError: Expect 0 argument. got=1", 1},
 		{`[1, 2, 3, 4, 5].select`, "InternalError: Can't yield without a block", 1},
 	}
 
@@ -1885,7 +1911,7 @@ func TestArrayShiftMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
@@ -2027,7 +2053,7 @@ func TestArrayUnshiftMethod(t *testing.T) {
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyExpected(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}

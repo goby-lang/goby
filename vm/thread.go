@@ -2,34 +2,41 @@ package vm
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/compiler"
-	"github.com/goby-lang/goby/compiler/bytecode"
-	"github.com/goby-lang/goby/compiler/parser"
-	"github.com/goby-lang/goby/vm/errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/goby-lang/goby/compiler"
+	"github.com/goby-lang/goby/compiler/bytecode"
+	"github.com/goby-lang/goby/compiler/parser"
+	"github.com/goby-lang/goby/vm/errors"
 )
 
-type thread struct {
+const mainThreadID = 0
+
+// Thread is the context needed for a single thread of execution
+type Thread struct {
 	// a stack that holds call frames
-	callFrameStack *callFrameStack
-	// call frame pointer
-	cfp int
-	// data stack
-	stack *stack
-	// stack pointer
-	sp int
+	callFrameStack callFrameStack
+	// data Stack
+	Stack Stack
+
+	// theads have an id so they can be looked up in the vm. The main thread is always 0
+	id int64
 
 	vm *VM
 }
 
-func (t *thread) isMainThread() bool {
-	return t == t.vm.mainThread
+func (t *Thread) VM() *VM {
+	return t.vm
 }
 
-func (t *thread) getBlock(name string, filename filename) *instructionSet {
+func (t *Thread) isMainThread() bool {
+	return t.id == mainThreadID
+}
+
+func (t *Thread) getBlock(name string, filename filename) *instructionSet {
 	// The "name" here is actually an index of block
 	// for example <Block:1>'s name is "1"
 	is, ok := t.vm.blockTables[filename][name]
@@ -41,7 +48,7 @@ func (t *thread) getBlock(name string, filename filename) *instructionSet {
 	return is
 }
 
-func (t *thread) getMethodIS(name string, filename filename) (*instructionSet, bool) {
+func (t *Thread) getMethodIS(name string, filename filename) (*instructionSet, bool) {
 	iss, ok := t.vm.isTables[bytecode.MethodDef][name]
 
 	if !ok {
@@ -55,7 +62,7 @@ func (t *thread) getMethodIS(name string, filename filename) (*instructionSet, b
 	return is, ok
 }
 
-func (t *thread) getClassIS(name string, filename filename) *instructionSet {
+func (t *Thread) getClassIS(name string, filename filename) *instructionSet {
 	iss, ok := t.vm.isTables[bytecode.ClassDef][name]
 
 	if !ok {
@@ -69,19 +76,19 @@ func (t *thread) getClassIS(name string, filename filename) *instructionSet {
 	return is
 }
 
-func (t *thread) execGobyLib(libName string) (err error) {
-	libPath := filepath.Join(t.vm.projectRoot, "lib", libName)
-	file, err := ioutil.ReadFile(libPath)
-
-	if err != nil {
-		t.vm.mainThread.pushErrorObject(errors.InternalError, -1, err.Error())
-	}
-
-	err = t.execRequiredFile(libPath, file)
+func (t *Thread) execGobyLib(libName string) (err error) {
+	libPath := filepath.Join(t.vm.libPath, libName)
+	err = t.execFile(libPath)
 	return
 }
 
-func (t *thread) execRequiredFile(filepath string, file []byte) (err error) {
+func (t *Thread) execFile(fpath string) (err error) {
+	file, err := ioutil.ReadFile(fpath)
+
+	if err != nil {
+		return
+	}
+
 	instructionSets, err := compiler.CompileToInstructions(string(file), parser.NormalMode)
 
 	if err != nil {
@@ -102,7 +109,7 @@ func (t *thread) execRequiredFile(filepath string, file []byte) (err error) {
 
 	// This creates new execution environments for required file, including new instruction set table.
 	// So we need to copy old instruction sets and restore them later, otherwise current program's instruction set would be overwrite.
-	t.vm.ExecInstructions(instructionSets, filepath)
+	t.vm.ExecInstructions(instructionSets, fpath)
 
 	// Restore instruction sets.
 	t.vm.isTables[bytecode.MethodDef] = oldMethodTable
@@ -111,12 +118,33 @@ func (t *thread) execRequiredFile(filepath string, file []byte) (err error) {
 	return
 }
 
-func (t *thread) startFromTopFrame() {
+func (t *Thread) captureAndHandlePanic() {
+	switch e := recover().(type) {
+	case *Error:
+		if t.vm.mode == NormalMode {
+			fmt.Println(e.Message())
+			if t.isMainThread() {
+				os.Exit(1)
+			}
+		} else {
+			panic(e)
+		}
+	case error:
+		fmt.Println(e.Error())
+	case nil:
+		return
+	default:
+		panic(e)
+	}
+}
+
+func (t *Thread) startFromTopFrame() {
+	defer t.captureAndHandlePanic()
 	cf := t.callFrameStack.top()
 	t.evalCallFrame(cf)
 }
 
-func (t *thread) evalCallFrame(cf callFrame) {
+func (t *Thread) evalCallFrame(cf callFrame) {
 	defer func() {
 		if r := recover(); r != nil {
 			t.reportErrorAndStop()
@@ -140,7 +168,7 @@ func (t *thread) evalCallFrame(cf callFrame) {
 		//fmt.Println("-----------------------")
 		//fmt.Println(t.callFrameStack.inspect())
 		result := cf.method(t, args, cf.blockFrame)
-		t.stack.push(&Pointer{Target: result})
+		t.Stack.Push(&Pointer{Target: result})
 		//fmt.Println(t.callFrameStack.inspect())
 		//fmt.Println("-----------------------")
 		t.callFrameStack.pop()
@@ -159,7 +187,7 @@ func (t *thread) evalCallFrame(cf callFrame) {
 	Main frame
 */
 
-func (t *thread) removeUselessBlockFrame(frame callFrame) {
+func (t *Thread) removeUselessBlockFrame(frame callFrame) {
 	topFrame := t.callFrameStack.top()
 
 	if topFrame != nil && topFrame.IsSourceBlock() {
@@ -167,18 +195,18 @@ func (t *thread) removeUselessBlockFrame(frame callFrame) {
 	}
 }
 
-func (t *thread) reportErrorAndStop() {
+func (t *Thread) reportErrorAndStop() {
 	cf := t.callFrameStack.top()
 
 	if cf != nil {
 		cf.stopExecution()
 	}
 
-	top := t.stack.top().Target
+	top := t.Stack.top().Target
 	err := top.(*Error)
 
 	if !err.storedTraces {
-		for i := t.cfp - 1; i > 0; i-- {
+		for i := t.callFrameStack.pointer - 1; i > 0; i-- {
 			frame := t.callFrameStack.callFrames[i]
 
 			if frame.IsBlock() {
@@ -201,7 +229,7 @@ func (t *thread) reportErrorAndStop() {
 	}
 }
 
-func (t *thread) execInstruction(cf *normalCallFrame, i *instruction) {
+func (t *Thread) execInstruction(cf *normalCallFrame, i *instruction) {
 	cf.pc++
 
 	//fmt.Println(t.callFrameStack.inspect())
@@ -211,7 +239,7 @@ func (t *thread) execInstruction(cf *normalCallFrame, i *instruction) {
 	//fmt.Println(t.callFrameStack.inspect())
 }
 
-func (t *thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object) *Pointer {
+func (t *Thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object) *Pointer {
 	if blockFrame.IsRemoved() {
 		return &Pointer{Target: NULL}
 	}
@@ -234,10 +262,10 @@ func (t *thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object)
 		return &Pointer{Target: NULL}
 	}
 
-	return t.stack.top()
+	return t.Stack.top()
 }
 
-func (t *thread) retrieveBlock(fileName, blockFlag string, sourceLine int) (blockFrame *normalCallFrame) {
+func (t *Thread) retrieveBlock(fileName, blockFlag string, sourceLine int) (blockFrame *normalCallFrame) {
 	var blockName string
 	var hasBlock bool
 
@@ -258,22 +286,22 @@ func (t *thread) retrieveBlock(fileName, blockFlag string, sourceLine int) (bloc
 	return
 }
 
-func (t *thread) sendMethod(methodName string, argCount int, blockFrame *normalCallFrame, sourceLine int) {
+func (t *Thread) sendMethod(methodName string, argCount int, blockFrame *normalCallFrame, sourceLine int) {
 	var method Object
 
-	if arr, ok := t.stack.top().Target.(*ArrayObject); ok && arr.splat {
+	if arr, ok := t.Stack.top().Target.(*ArrayObject); ok && arr.splat {
 		// Pop array
-		t.stack.pop()
+		t.Stack.Pop()
 		// Can't count array self, only the number of array elements
 		argCount = argCount + len(arr.Elements)
 		for _, elem := range arr.Elements {
-			t.stack.push(&Pointer{Target: elem})
+			t.Stack.Push(&Pointer{Target: elem})
 		}
 	}
 
-	argPr := t.sp - argCount - 1
+	argPr := t.Stack.pointer - argCount - 1
 	receiverPr := argPr - 1
-	receiver := t.stack.Data[receiverPr].Target
+	receiver := t.Stack.data[receiverPr].Target
 
 	/*
 		Because send method adds additional object (method name) to the stack.
@@ -295,10 +323,10 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 		This also means we need to minus one on argument count and stack pointer
 	*/
 	for i := 0; i < argCount; i++ {
-		t.stack.Data[argPr+i] = t.stack.Data[argPr+i+1]
+		t.Stack.data[argPr+i] = t.Stack.data[argPr+i+1]
 	}
 
-	t.sp--
+	t.Stack.pointer--
 
 	method = receiver.findMethod(methodName)
 
@@ -319,19 +347,19 @@ func (t *thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 	}
 }
 
-func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame, sourceLine int, fileName string) {
+func (t *Thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame, sourceLine int, fileName string) {
 	cf := newGoMethodCallFrame(method.Fn(receiver, sourceLine), method.Name, fileName, sourceLine)
 	cf.sourceLine = sourceLine
 	cf.blockFrame = blockFrame
 	argPtr := receiverPtr + 1
 
 	for i := 0; i < argCount; i++ {
-		cf.locals = append(cf.locals, t.stack.Data[argPtr+i])
+		cf.locals = append(cf.locals, t.Stack.data[argPtr+i])
 	}
 
 	t.callFrameStack.push(cf)
 	t.startFromTopFrame()
-	evaluated := t.stack.top()
+	evaluated := t.Stack.top()
 
 	_, ok := receiver.(*RClass)
 	if method.Name == "new" && ok {
@@ -342,8 +370,8 @@ func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 		}
 	}
 
-	t.stack.set(receiverPtr, evaluated)
-	t.sp = argPtr
+	t.Stack.Set(receiverPtr, evaluated)
+	t.Stack.pointer = argPtr
 
 	if err, ok := evaluated.Target.(*Error); ok {
 		panic(err.Message())
@@ -351,11 +379,11 @@ func (t *thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 }
 
 // TODO: Move instruction into call object
-func (t *thread) evalMethodObject(call *callObject, sourceLine int) {
+func (t *Thread) evalMethodObject(call *callObject, sourceLine int) {
 	normalParamsCount := call.normalParamsCount()
 	paramTypes := call.paramTypes()
 	paramsCount := len(call.paramTypes())
-	stack := t.stack.Data
+	stack := t.Stack.data
 
 	if call.argCount > paramsCount && !call.method.isSplatArgIncluded() {
 		t.reportArgumentError(sourceLine, paramsCount, call.methodName(), call.argCount, call.receiverPtr)
@@ -392,7 +420,7 @@ func (t *thread) evalMethodObject(call *callObject, sourceLine int) {
 				call.assignNormalAndOptionedArguments(paramIndex, stack)
 			case bytecode.SplatArg:
 				call.argIndex = paramIndex
-				call.assignSplatArgument(stack, t.vm.initArrayObject([]Object{}))
+				call.assignSplatArgument(stack, t.vm.InitArrayObject([]Object{}))
 			}
 		}
 	} else {
@@ -402,11 +430,11 @@ func (t *thread) evalMethodObject(call *callObject, sourceLine int) {
 	t.callFrameStack.push(call.callFrame)
 	t.startFromTopFrame()
 
-	t.stack.set(call.receiverPtr, t.stack.top())
-	t.sp = call.argPtr()
+	t.Stack.Set(call.receiverPtr, t.Stack.top())
+	t.Stack.pointer = call.argPtr()
 }
 
-func (t *thread) reportArgumentError(sourceLine, idealArgNumber int, methodName string, exactArgNumber int, receiverPtr int) {
+func (t *Thread) reportArgumentError(sourceLine, idealArgNumber int, methodName string, exactArgNumber int, receiverPtr int) {
 	var message string
 
 	if idealArgNumber > exactArgNumber {
@@ -418,16 +446,16 @@ func (t *thread) reportArgumentError(sourceLine, idealArgNumber int, methodName 
 	t.setErrorObject(receiverPtr, receiverPtr+1, errors.ArgumentError, sourceLine, message, idealArgNumber, methodName, exactArgNumber)
 }
 
-func (t *thread) pushErrorObject(errorType string, sourceLine int, format string, args ...interface{}) {
-	err := t.vm.initErrorObject(errorType, sourceLine, format, args...)
-	t.stack.push(&Pointer{Target: err})
+func (t *Thread) pushErrorObject(errorType string, sourceLine int, format string, args ...interface{}) {
+	err := t.vm.InitErrorObject(errorType, sourceLine, format, args...)
+	t.Stack.Push(&Pointer{Target: err})
 	panic(err.Message())
 }
 
-func (t *thread) setErrorObject(receiverPtr, sp int, errorType string, sourceLine int, format string, args ...interface{}) {
-	err := t.vm.initErrorObject(errorType, sourceLine, format, args...)
-	t.stack.set(receiverPtr, &Pointer{Target: err})
-	t.sp = sp
+func (t *Thread) setErrorObject(receiverPtr, sp int, errorType string, sourceLine int, format string, args ...interface{}) {
+	err := t.vm.InitErrorObject(errorType, sourceLine, format, args...)
+	t.Stack.Set(receiverPtr, &Pointer{Target: err})
+	t.Stack.pointer = sp
 	panic(err.Message())
 }
 
