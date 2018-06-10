@@ -369,7 +369,7 @@ func (vm *VM) initFloatObject(value float64) *FloatObject {
 }
 
 func (vm *VM) initFloatClass() *RClass {
-	ic := vm.initializeClass(classes.FloatClass, false)
+	ic := vm.initializeClass(classes.FloatClass)
 	ic.setBuiltinMethods(builtinFloatInstanceMethods(), false)
 	ic.setBuiltinMethods(builtinFloatClassMethods(), true)
 	return ic

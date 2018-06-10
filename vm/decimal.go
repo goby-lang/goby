@@ -587,7 +587,7 @@ func (vm *VM) initDecimalObject(value *Decimal) *DecimalObject {
 }
 
 func (vm *VM) initDecimalClass() *RClass {
-	dc := vm.initializeClass(classes.DecimalClass, false)
+	dc := vm.initializeClass(classes.DecimalClass)
 	dc.setBuiltinMethods(builtinDecimalInstanceMethods(), false)
 	dc.setBuiltinMethods(builtinDecimalClassMethods(), true)
 	return dc

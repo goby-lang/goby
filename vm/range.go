@@ -537,7 +537,7 @@ func (vm *VM) initRangeObject(start, end int) *RangeObject {
 }
 
 func (vm *VM) initRangeClass() *RClass {
-	rc := vm.initializeClass(classes.RangeClass, false)
+	rc := vm.initializeClass(classes.RangeClass)
 	rc.setBuiltinMethods(builtinRangeInstanceMethods(), false)
 	rc.setBuiltinMethods(builtinRangeClassMethods(), true)
 	vm.libFiles = append(vm.libFiles, "range.gb")

@@ -136,7 +136,7 @@ func builtinNullInstanceMethods() []*BuiltinMethodObject {
 // Functions for initialization -----------------------------------------
 
 func (vm *VM) initNullClass() *RClass {
-	nc := vm.initializeClass(classes.NullClass, false)
+	nc := vm.initializeClass(classes.NullClass)
 	nc.setBuiltinMethods(builtinNullInstanceMethods(), false)
 	nc.setBuiltinMethods(builtinNullClassMethods(), true)
 	NULL = &NullObject{baseObj: &baseObj{class: nc}}

@@ -172,7 +172,7 @@ func (vm *VM) initMatchDataObject(match *Match, pattern, text string) *MatchData
 }
 
 func (vm *VM) initMatchDataClass() *RClass {
-	klass := vm.initializeClass(classes.MatchDataClass, false)
+	klass := vm.initializeClass(classes.MatchDataClass)
 	klass.setBuiltinMethods(builtinMatchDataInstanceMethods(), false)
 	klass.setBuiltinMethods(builtInMatchDataClassMethods(), true)
 	return klass

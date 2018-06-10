@@ -171,7 +171,7 @@ func (vm *VM) initPluginObject(fn string, p *plugin.Plugin) *PluginObject {
 }
 
 func initPluginClass(vm *VM) {
-	pc := vm.initializeClass(classes.PluginClass, false)
+	pc := vm.initializeClass(classes.PluginClass)
 	pc.setBuiltinMethods(builtinPluginClassMethods(), true)
 	pc.setBuiltinMethods(builtinPluginInstanceMethods(), false)
 	vm.objectClass.setClassConstant(pc)

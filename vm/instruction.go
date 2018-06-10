@@ -436,7 +436,13 @@ var builtinActions = map[operationType]*action{
 			classPtr := cf.lookupConstantUnderAllScope(subjectName)
 
 			if classPtr == nil {
-				class := t.vm.initializeClass(subjectName, subjectType == "module")
+				var class *RClass
+				if subjectType == "module" {
+					class = t.vm.initializeModule(subjectName)
+				} else {
+					class = t.vm.initializeClass(subjectName)
+				}
+
 				classPtr = cf.storeConstant(class.Name, class)
 
 				if len(args) >= 2 {
