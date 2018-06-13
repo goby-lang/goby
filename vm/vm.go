@@ -205,7 +205,7 @@ func builtinMainObjSingletonMethods() []*BuiltinMethodObject {
 			Name: "to_s",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(thread *Thread, objects []Object, frame *normalCallFrame) Object {
-					return thread.vm.initStringObject("main")
+					return thread.vm.InitStringObject("main")
 				}
 			},
 		},
@@ -262,7 +262,7 @@ func (vm *VM) initConstants() {
 	args := []Object{}
 
 	for _, arg := range vm.args {
-		args = append(args, vm.initStringObject(arg))
+		args = append(args, vm.InitStringObject(arg))
 	}
 
 	vm.objectClass.constants["ARGV"] = &Pointer{Target: vm.InitArrayObject(args)}
@@ -272,7 +272,7 @@ func (vm *VM) initConstants() {
 
 	for _, e := range os.Environ() {
 		pair := strings.Split(e, "=")
-		envs[pair[0]] = vm.initStringObject(pair[1])
+		envs[pair[0]] = vm.InitStringObject(pair[1])
 	}
 
 	vm.objectClass.constants["ENV"] = &Pointer{Target: vm.InitHashObject(envs)}

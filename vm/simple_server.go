@@ -195,7 +195,7 @@ func initRequest(t *Thread, w http.ResponseWriter, req *http.Request) *RObject {
 	vars := map[string]Object{}
 
 	for k, v := range mux.Vars(req) {
-		vars[k] = t.vm.initStringObject(v)
+		vars[k] = t.vm.InitStringObject(v)
 	}
 
 	reqObj.InstanceVariableSet("@params", t.vm.InitHashObject(vars))

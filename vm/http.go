@@ -61,7 +61,7 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 						return t.vm.InitErrorObject(errors.InternalError, sourceLine, err.Error())
 					}
 
-					return t.vm.initStringObject(string(content))
+					return t.vm.InitStringObject(string(content))
 				}
 			},
 		}, {
@@ -106,7 +106,7 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 						return t.vm.InitErrorObject(errors.InternalError, sourceLine, err.Error())
 					}
 
-					return t.vm.initStringObject(string(content))
+					return t.vm.InitStringObject(string(content))
 				}
 			},
 		}, {
@@ -146,7 +146,7 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 					ret := t.vm.InitHashObject(map[string]Object{})
 
 					for k, v := range resp.Header {
-						ret.Pairs[k] = t.vm.initStringObject(strings.Join(v, " "))
+						ret.Pairs[k] = t.vm.InitStringObject(strings.Join(v, " "))
 					}
 
 					return ret

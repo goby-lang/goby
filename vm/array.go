@@ -871,7 +871,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						elements = append(elements, e.toString())
 					}
 
-					return t.vm.initStringObject(strings.Join(elements, sep))
+					return t.vm.InitStringObject(strings.Join(elements, sep))
 				}
 			},
 		},

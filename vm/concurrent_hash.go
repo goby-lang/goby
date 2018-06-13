@@ -200,7 +200,7 @@ func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
 					framePopped := false
 
 					iterator := func(key, value interface{}) bool {
-						keyObject := t.vm.initStringObject(key.(string))
+						keyObject := t.vm.InitStringObject(key.(string))
 
 						t.builtinMethodYield(blockFrame, keyObject, value.(Object))
 
@@ -270,7 +270,7 @@ func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					r := receiver.(*ConcurrentHashObject)
-					return t.vm.initStringObject(r.toJSON(t))
+					return t.vm.InitStringObject(r.toJSON(t))
 				}
 			},
 		},
@@ -292,7 +292,7 @@ func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					h := receiver.(*ConcurrentHashObject)
-					return t.vm.initStringObject(h.toString())
+					return t.vm.InitStringObject(h.toString())
 				}
 			},
 		},

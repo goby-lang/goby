@@ -418,7 +418,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			Name: "reduction",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.vm.initStringObject(receiver.(*DecimalObject).value.RatString())
+					return t.vm.InitStringObject(receiver.(*DecimalObject).value.RatString())
 				}
 			},
 		},
@@ -456,7 +456,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			Name: "fraction",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.vm.initStringObject(receiver.(*DecimalObject).value.String())
+					return t.vm.InitStringObject(receiver.(*DecimalObject).value.String())
 				}
 			},
 		},
@@ -568,7 +568,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			Name: "to_s",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.vm.initStringObject(receiver.(*DecimalObject).toString())
+					return t.vm.InitStringObject(receiver.(*DecimalObject).toString())
 				}
 			},
 		},
