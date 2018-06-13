@@ -519,7 +519,7 @@ var builtinActions = map[operationType]*action{
 						t.Stack.Set(position+1, arg)
 					}
 
-					t.Stack.Set(argPr, &Pointer{Target: t.vm.initStringObject(methodName)})
+					t.Stack.Set(argPr, &Pointer{Target: t.vm.InitStringObject(methodName)})
 					argCount++
 
 					method = mm
@@ -650,9 +650,9 @@ func (v *VM) InitObjectFromGoType(value interface{}) Object {
 			bytes = append(bytes, byte(i))
 		}
 
-		return v.initStringObject(string(bytes))
+		return v.InitStringObject(string(bytes))
 	case string:
-		return v.initStringObject(val)
+		return v.InitStringObject(val)
 	case bool:
 		return toBooleanObject(val)
 	case []interface{}:

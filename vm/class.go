@@ -613,7 +613,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 					}
 
 					name := n.ReturnName()
-					nameString := t.vm.initStringObject(name)
+					nameString := t.vm.InitStringObject(name)
 					return nameString
 				}
 			},
@@ -1095,7 +1095,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 						for _, name := range klass.Methods.names() {
 							if set[name] == nil {
 								set[name] = true
-								methods = append(methods, t.vm.initStringObject(name))
+								methods = append(methods, t.vm.InitStringObject(name))
 							}
 						}
 					}
@@ -1457,7 +1457,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			Name: "to_s",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.vm.initStringObject(receiver.toString())
+					return t.vm.InitStringObject(receiver.toString())
 				}
 			},
 		},

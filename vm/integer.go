@@ -444,7 +444,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 
 					int := receiver.(*IntegerObject)
 
-					return t.vm.initStringObject(strconv.Itoa(int.value))
+					return t.vm.InitStringObject(strconv.Itoa(int.value))
 				}
 			},
 		},
