@@ -62,7 +62,7 @@ func builtinNullInstanceMethods() []*BuiltinMethodObject {
 			Name: "to_s",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.vm.initStringObject("")
+					return t.vm.InitStringObject("")
 				}
 			},
 		},
