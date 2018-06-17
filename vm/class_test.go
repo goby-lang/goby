@@ -931,6 +931,51 @@ func TestClassLesserThanOrEqualMethodFail(t *testing.T) {
 	}
 }
 
+func TestConstantsMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		class Foo
+		  module Bar
+		  end
+		end
+
+		Foo.constants.map do |constant|
+		  constant.to_s
+		end
+		`, []interface{}{"Bar"}},
+		{`
+		module Foo
+		  class Bar
+		  end
+
+		  Baz = "123"
+		end
+
+		Foo.constants.map do |constant|
+		  constant.to_s
+		end
+		`, []interface{}{"Bar", "123"}},
+		{`
+		Bar = "1123"
+		Object.constants.include?(Bar)
+		`, true},
+		{`
+		class Bar; end
+		Object.constants.include?(Bar)
+		`, true},
+	}
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestInheritsMethodMissingMethod(t *testing.T) {
 	tests := []struct {
 		input    string

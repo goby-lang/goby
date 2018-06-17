@@ -442,6 +442,21 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				}
 			},
 		},
+		{
+			Name: "constants",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+					var constants []Object
+					r := receiver.(*RClass)
+
+					for _, c := range r.constants {
+						constants = append(constants, c.Target)
+					}
+
+					return t.vm.InitArrayObject(constants)
+				}
+			},
+		},
 		// Inserts a module as a singleton class to make the module's methods class methods.
 		// You can see the extended module by using `singleton_class.ancestors`
 		//
@@ -854,13 +869,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			Name: "class",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-
-					switch r := receiver.(type) {
-					case Object:
-						return r.Class()
-					default:
-						return &Error{message: "Can't call class on %T" + string(r.Class().ReturnName())}
-					}
+					return receiver.Class()
 				}
 			},
 		},
