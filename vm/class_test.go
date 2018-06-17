@@ -942,22 +942,15 @@ func TestConstantsMethod(t *testing.T) {
 		  end
 		end
 
-		Foo.constants.map do |constant|
-		  constant.to_s
-		end
-		`, []interface{}{"Bar"}},
+		Foo.constants.first.to_s
+		`, "Bar"},
 		{`
 		module Foo
-		  class Bar
-		  end
-
 		  Baz = "123"
 		end
 
-		Foo.constants.map do |constant|
-		  constant.to_s
-		end
-		`, []interface{}{"Bar", "123"}},
+		Foo.constants.first.to_s
+		`, "123"},
 		{`
 		Bar = "1123"
 		Object.constants.include?(Bar)
