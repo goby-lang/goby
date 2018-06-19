@@ -7,6 +7,12 @@
   revision = "41eea22f717c616615e1e59aa06cf831f9901f35"
 
 [[projects]]
+  name = "github.com/dave/jennifer"
+  packages = ["jen"]
+  revision = "0264ec47f284c27fe4f52072dc0f4da5a5771c04"
+  version = "v0.19.0"
+
+[[projects]]
   name = "github.com/dlclark/regexp2"
   packages = [
     ".",
@@ -80,6 +86,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "60c072da2c43c2b262fcd76e489c974ef6df06075aef1e401e7619ccdba80d5a"
+  inputs-digest = "4e716ed5f8ae86789d82e6dde2de7173294b5296f4c3a57a3d78452e78cd4fc0"
   solver-name = "gps-cdcl"
   solver-version = 1

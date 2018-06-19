@@ -7,6 +7,8 @@ import (
 	"go/token"
 	"io/ioutil"
 	"log"
+
+	"github.com/dave/jennifer/jen"
 )
 
 var (
@@ -66,10 +68,10 @@ func main() {
 		return true
 	})
 	log.Printf("%+v", binding)
-	// o := jen.NewFile(*out)
-	//
-	// o.Func().Id("main").Params().Block(jen.Qual("log", "Println").Call(jen.Lit("Hello world")))
-	// b := new(bytes.Buffer)
-	// err = o.Render(b)
-	// log.Println(err, b.String())
+	o := jen.NewFile(*out)
+	
+	o.Func().Id("main").Params().Block(jen.Qual("log", "Println").Call(jen.Lit("Hello world")))
+	b := new(bytes.Buffer)
+	err = o.Render(b)
+	log.Println(err, b.String())
 }
