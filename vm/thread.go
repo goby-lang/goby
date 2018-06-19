@@ -239,6 +239,23 @@ func (t *Thread) execInstruction(cf *normalCallFrame, i *instruction) {
 	//fmt.Println(t.callFrameStack.inspect())
 }
 
+// Yield to a call frame
+func (t *Thread) Yield(args ...Object) *Pointer {
+	cf := t.callFrameStack.callFrames[t.callFrameStack.pointer-2]
+	return t.builtinMethodYield(cf.BlockFrame(), args...)
+}
+
+// BlockGiven returns whethe or not we have a block frame below us in the stack
+func (t *Thread) BlockGiven() bool {
+	cf := t.callFrameStack.callFrames[t.callFrameStack.pointer-2]
+
+	if cf.BlockFrame() == nil {
+		return false
+	}
+
+	return true
+}
+
 func (t *Thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object) *Pointer {
 	if blockFrame.IsRemoved() {
 		return &Pointer{Target: NULL}

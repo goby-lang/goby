@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"go/ast"
@@ -10,17 +9,53 @@ import (
 	"io/ioutil"
 	"log"
 
-	"github.com/dave/jennifer/jen"
+	. "github.com/dave/jennifer/jen"
 )
 
 var (
-	in  = flag.String("in", ".", "folder to create bindings from")
-	out = flag.String("out", "bindings", "output file name")
+	in       = flag.String("in", ".", "folder to create bindings from")
+	typeName = flag.String("type", "", "type to generate bindings for")
 )
 
 const (
 	vmPkg = "github.com/goby-lang/goby/vm"
 )
+
+func typeFromExpr(e ast.Expr) string {
+	var name string
+	switch t := e.(type) {
+	case *ast.Ident:
+		name = t.Name
+
+	case *ast.StarExpr:
+		name = fmt.Sprintf("*%s", typeFromExpr(t.X))
+
+	case *ast.SelectorExpr:
+		name = fmt.Sprintf("%s.%s", typeFromExpr(t.X), t.Sel.Name)
+	default:
+		log.Printf("%T", e)
+
+	}
+	return name
+}
+
+func typeNameFromExpr(e ast.Expr) string {
+	var name string
+	switch t := e.(type) {
+	case *ast.Ident:
+		name = t.Name
+
+	case *ast.StarExpr:
+		name = typeFromExpr(t.X)
+
+	case *ast.SelectorExpr:
+		name = fmt.Sprintf("%s.%s", typeFromExpr(t.X), t.Sel.Name)
+	default:
+		log.Printf("%T", e)
+
+	}
+	return name
+}
 
 type Binding struct {
 	ClassName       string
@@ -36,7 +71,8 @@ func (b *Binding) bindingName(f *ast.FuncDecl) string {
 	return fmt.Sprintf("_binding_%s_%s", b.ClassName, f.Name.Name)
 }
 
-func (b *Binding) BindMethods(f *jen.File) {
+func (b *Binding) BindMethods(f *File) {
+	f.Var().Id(b.staticName()).Op("=").New(Id(b.ClassName))
 	for _, c := range b.ClassMethods {
 		b.BindClassMethod(f, c)
 		f.Line()
@@ -47,19 +83,53 @@ func (b *Binding) BindMethods(f *jen.File) {
 	}
 }
 
-func (b *Binding) BindClassMethod(f *jen.File, d *ast.FuncDecl) {
-	f.Func().Id(b.bindingName(d)).Call().Block()
+func (b *Binding) BindClassMethod(f *File, d *ast.FuncDecl) {
+	r := Id("r").Op(":=").Id(b.staticName()).Line()
+	b.body(r, f, d)
+}
+func (b *Binding) BindInstanceMethod(f *File, d *ast.FuncDecl) {
+	r := List(Id("r"), Id("ok")).Op(":=").Add(Id("receiver")).Assert(Op("*").Id(b.ClassName)).Line()
+	r = r.If(Op("!").Id("ok")).Block(
+		Panic(Lit("NOT OK")),
+	).Line()
+	b.body(r, f, d)
 }
 
-func (b *Binding) BindInstanceMethod(f *jen.File, d *ast.FuncDecl) {
+func (b *Binding) body(receiver *Statement, f *File, d *ast.FuncDecl) {
 	s := f.Func().Id(b.bindingName(d))
-	s = s.Params(jen.Id("r").Qual(vmPkg, "Object"), jen.Id("line").Id("int")).Qual(vmPkg, "Method")
-	ff := jen.Func().Params(jen.Id("t").Qual(vmPkg, "Thread"), jen.Id("args").Index().Qual(vmPkg, "Object"))
+	s = s.Params(Id("receiver").Qual(vmPkg, "Object"), Id("line").Id("int")).Qual(vmPkg, "Method")
+	ff := Func().Params(Id("t").Op("*").Qual(vmPkg, "Thread"), Id("args").Index().Qual(vmPkg, "Object"))
 	ff = ff.Qual(vmPkg, "Object")
-	ff = ff.Block(
-		jen.Return(nil),
-	)
-	s.Block(jen.Return(ff))
+
+	var args []*Statement
+	for i, a := range d.Type.Params.List {
+		if i == 0 {
+			continue
+		}
+		i = i - 1
+		c := List(Id(fmt.Sprintf("arg%d", i)), Id("ok")).Op(":=").Id("args").Index(Lit(i)).Assert(Id(typeFromExpr(a.Type)))
+		c = c.Line()
+		c = c.If(Op("!").Id("ok")).Block(
+			Panic(Lit("NOT OK")),
+		).Line()
+		args = append(args, c)
+	}
+
+	inner := receiver.If(Len(Id("args")).Op("!=").Lit(d.Type.Params.NumFields() - 1)).Block(
+		Panic(Lit("NOT OK")),
+	).Line()
+
+	argNames := []Code{
+		Id("t"),
+	}
+	for i, a := range args {
+		inner = inner.Add(a).Line()
+		argNames = append(argNames, Id(fmt.Sprintf("arg%d", i)))
+	}
+
+	inner = inner.Return(Id("r").Dot(d.Name.Name).Call(argNames...))
+	ff = ff.Block(inner)
+	s.Block(Return(ff))
 
 	// func closeDB(receiver vm.Object, sourceLine int) vm.Method {
 	// 	return func(t *vm.Thread, args []vm.Object) vm.Object {
@@ -90,18 +160,11 @@ func main() {
 			if n.Recv != nil {
 				// class or instance?
 				r := n.Recv.List[0]
-				var name string
-				switch t := r.Type.(type) {
-				case *ast.Ident:
-					name = t.Name
-
-				case *ast.StarExpr:
-					name = t.X.(*ast.Ident).Name
-				}
+				name := typeNameFromExpr(r.Type)
 
 				b, ok := bindings[name]
 				if !ok {
-					b := new(Binding)
+					b = new(Binding)
 					b.ClassName = name
 					bindings[name] = b
 				}
@@ -122,13 +185,17 @@ func main() {
 
 		return true
 	})
-	o := jen.NewFile(*out)
 
-	for _, x := range bindings {
-		x.BindMethods(o)
+	bnd, ok := bindings[*typeName]
+	if !ok {
+		log.Fatal("Uknown type", *typeName)
 	}
 
-	var b bytes.Buffer
-	err = o.Render(&b)
-	log.Println(err, b.String())
+	o := NewFile(f.Name.Name)
+	bnd.BindMethods(o)
+
+	err = o.Save("bindings.go")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
