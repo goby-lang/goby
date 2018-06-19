@@ -21,7 +21,7 @@ type MethodObject struct {
 // Functions for initialization -----------------------------------------
 
 func (vm *VM) initMethodClass() *RClass {
-	return vm.initializeClass(classes.MethodClass, false)
+	return vm.initializeClass(classes.MethodClass)
 }
 
 // Polymorphic helper functions -----------------------------------------

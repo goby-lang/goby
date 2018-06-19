@@ -74,7 +74,7 @@ func builtinStringClassMethods() []*BuiltinMethodObject {
 						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect %d string arguments. got=%d", count, len(args[1:]))
 					}
 
-					return t.vm.initStringObject(fmt.Sprintf(format, arguments...))
+					return t.vm.InitStringObject(fmt.Sprintf(format, arguments...))
 				}
 			},
 		},
@@ -114,7 +114,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					rightValue := right.value
-					return t.vm.initStringObject(leftValue + rightValue)
+					return t.vm.InitStringObject(leftValue + rightValue)
 				}
 			},
 		},
@@ -148,7 +148,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 						result += leftValue
 					}
 
-					return t.vm.initStringObject(result)
+					return t.vm.InitStringObject(result)
 				}
 			},
 		},
@@ -381,11 +381,11 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 							if -indexValue > strLength {
 								return NULL
 							}
-							return t.vm.initStringObject(string([]rune(str)[strLength+indexValue]))
+							return t.vm.InitStringObject(string([]rune(str)[strLength+indexValue]))
 						}
 
 						if len(str) > indexValue {
-							return t.vm.initStringObject(string([]rune(str)[indexValue]))
+							return t.vm.InitStringObject(string([]rune(str)[indexValue]))
 						}
 
 						return NULL
@@ -414,7 +414,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 							end = strLength - 1
 						}
 
-						return t.vm.initStringObject(string([]rune(str)[start : end+1]))
+						return t.vm.InitStringObject(string([]rune(str)[start : end+1]))
 					default:
 						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, i.Class().Name)
 					}
@@ -478,11 +478,11 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if strLength == indexValue {
-						return t.vm.initStringObject(str + replaceStrValue)
+						return t.vm.InitStringObject(str + replaceStrValue)
 					}
 					// Using rune type to support UTF-8 encoding to replace character
 					result := string([]rune(str)[:indexValue]) + replaceStrValue + string([]rune(str)[indexValue+1:])
-					return t.vm.initStringObject(result)
+					return t.vm.InitStringObject(result)
 				}
 			},
 		},
@@ -506,7 +506,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					rest := string([]rune(str)[1:])
 					result := strings.ToUpper(start) + strings.ToLower(rest)
 
-					return t.vm.initStringObject(result)
+					return t.vm.InitStringObject(result)
 				}
 			},
 		},
@@ -528,7 +528,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					strLength := utf8.RuneCountInString(str)
 
 					// Support UTF-8 Encoding
-					return t.vm.initStringObject(string([]rune(str)[:strLength-1]))
+					return t.vm.InitStringObject(string([]rune(str)[:strLength-1]))
 				}
 			},
 		},
@@ -556,7 +556,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, c.Class().Name)
 					}
 
-					return t.vm.initStringObject(str + concatStr.value)
+					return t.vm.InitStringObject(str + concatStr.value)
 				}
 			},
 		},
@@ -608,7 +608,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, d.Class().Name)
 					}
 
-					return t.vm.initStringObject(strings.Replace(str, deleteStr.value, "", -1))
+					return t.vm.InitStringObject(strings.Replace(str, deleteStr.value, "", -1))
 				}
 			},
 		},
@@ -627,7 +627,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 
 					str := receiver.(*StringObject).value
 
-					return t.vm.initStringObject(strings.ToLower(str))
+					return t.vm.InitStringObject(strings.ToLower(str))
 				}
 			},
 		},
@@ -663,14 +663,14 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					}
 					str := receiver.(*StringObject).value
 					if blockIsEmpty(blockFrame) {
-						return t.vm.initStringObject(str)
+						return t.vm.InitStringObject(str)
 					}
 
 					for _, byte := range []byte(str) {
 						t.builtinMethodYield(blockFrame, t.vm.InitIntegerObject(int(byte)))
 					}
 
-					return t.vm.initStringObject(str)
+					return t.vm.InitStringObject(str)
 				}
 			},
 		},
@@ -704,14 +704,14 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 
 					str := receiver.(*StringObject).value
 					if blockIsEmpty(blockFrame) {
-						return t.vm.initStringObject(str)
+						return t.vm.InitStringObject(str)
 					}
 
 					for _, char := range []rune(str) {
-						t.builtinMethodYield(blockFrame, t.vm.initStringObject(string(char)))
+						t.builtinMethodYield(blockFrame, t.vm.InitStringObject(string(char)))
 					}
 
-					return t.vm.initStringObject(str)
+					return t.vm.InitStringObject(str)
 				}
 			},
 		},
@@ -741,15 +741,15 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 
 					str := receiver.(*StringObject).value
 					if blockIsEmpty(blockFrame) {
-						return t.vm.initStringObject(str)
+						return t.vm.InitStringObject(str)
 					}
 					lineArray := strings.Split(str, "\n")
 
 					for _, line := range lineArray {
-						t.builtinMethodYield(blockFrame, t.vm.initStringObject(line))
+						t.builtinMethodYield(blockFrame, t.vm.InitStringObject(line))
 					}
 
-					return t.vm.initStringObject(str)
+					return t.vm.InitStringObject(str)
 				}
 			},
 		},
@@ -922,7 +922,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 						if -indexValue > strLength+1 {
 							return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Index value out of range. got=%v", indexValue)
 						} else if -indexValue == strLength+1 {
-							return t.vm.initStringObject(insertStr.value + str)
+							return t.vm.InitStringObject(insertStr.value + str)
 						}
 						// Change it to positive index value to replace the string via index
 						indexValue += strLength
@@ -933,7 +933,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					// Support UTF-8 Encoding
-					return t.vm.initStringObject(string([]rune(str)[:indexValue]) + insertStr.value + string([]rune(str)[indexValue:]))
+					return t.vm.InitStringObject(string([]rune(str)[:indexValue]) + insertStr.value + string([]rune(str)[indexValue:]))
 				}
 			},
 		},
@@ -1017,7 +1017,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					// Support UTF-8 Encoding
-					return t.vm.initStringObject(str)
+					return t.vm.InitStringObject(str)
 				}
 			},
 		},
@@ -1104,7 +1104,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect pattern to be String or Regexp. got: %s", args[0].Class().Name)
 					}
 
-					return t.vm.initStringObject(result)
+					return t.vm.InitStringObject(result)
 				}
 			},
 		},
@@ -1152,7 +1152,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect pattern to be String or Regexp. got: %s", args[0].Class().Name)
 					}
 
-					return t.vm.initStringObject(result)
+					return t.vm.InitStringObject(result)
 				}
 			},
 		},
@@ -1179,7 +1179,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					// Support UTF-8 Encoding
-					return t.vm.initStringObject(revert)
+					return t.vm.InitStringObject(revert)
 				}
 			},
 		},
@@ -1245,7 +1245,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					// Support UTF-8 Encoding
-					return t.vm.initStringObject(str)
+					return t.vm.InitStringObject(str)
 				}
 			},
 		},
@@ -1328,34 +1328,34 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 							if ran.Start > strLength {
 								return NULL
 							} else if ran.Start > ran.End {
-								return t.vm.initStringObject("")
+								return t.vm.InitStringObject("")
 							}
-							return t.vm.initStringObject(string([]rune(str)[ran.Start : ran.End+1]))
+							return t.vm.InitStringObject(string([]rune(str)[ran.Start : ran.End+1]))
 						case ran.Start < 0 && ran.End >= 0:
 							positiveStart := strLength + ran.Start
 							if -ran.Start > strLength {
 								return NULL
 							} else if positiveStart > ran.End {
-								return t.vm.initStringObject("")
+								return t.vm.InitStringObject("")
 							}
-							return t.vm.initStringObject(string([]rune(str)[positiveStart : ran.End+1]))
+							return t.vm.InitStringObject(string([]rune(str)[positiveStart : ran.End+1]))
 						case ran.Start >= 0 && ran.End < 0:
 							positiveEnd := strLength + ran.End
 							if ran.Start > strLength {
 								return NULL
 							} else if positiveEnd < 0 || ran.Start > positiveEnd {
-								return t.vm.initStringObject("")
+								return t.vm.InitStringObject("")
 							}
-							return t.vm.initStringObject(string([]rune(str)[ran.Start : positiveEnd+1]))
+							return t.vm.InitStringObject(string([]rune(str)[ran.Start : positiveEnd+1]))
 						default:
 							positiveStart := strLength + ran.Start
 							positiveEnd := strLength + ran.End
 							if positiveStart < 0 {
 								return NULL
 							} else if positiveStart > positiveEnd {
-								return t.vm.initStringObject("")
+								return t.vm.InitStringObject("")
 							}
-							return t.vm.initStringObject(string([]rune(str)[positiveStart : positiveEnd+1]))
+							return t.vm.InitStringObject(string([]rune(str)[positiveStart : positiveEnd+1]))
 						}
 
 					case *IntegerObject:
@@ -1364,12 +1364,12 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 							if -intValue > strLength {
 								return NULL
 							}
-							return t.vm.initStringObject(string([]rune(str)[strLength+intValue]))
+							return t.vm.InitStringObject(string([]rune(str)[strLength+intValue]))
 						}
 						if intValue > strLength-1 {
 							return NULL
 						}
-						return t.vm.initStringObject(string([]rune(str)[intValue]))
+						return t.vm.InitStringObject(string([]rune(str)[intValue]))
 
 					default:
 						return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect slice range to be Range or Integer. got: %s", args[0].Class().Name)
@@ -1407,7 +1407,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 
 					var elements []Object
 					for i := 0; i < len(arr); i++ {
-						elements = append(elements, t.vm.initStringObject(arr[i]))
+						elements = append(elements, t.vm.InitStringObject(arr[i]))
 					}
 
 					return t.vm.InitArrayObject(elements)
@@ -1485,7 +1485,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 						}
 						break
 					}
-					return t.vm.initStringObject(str)
+					return t.vm.InitStringObject(str)
 				}
 			},
 		},
@@ -1507,7 +1507,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					elems := []Object{}
 
 					for i := 0; i < strLength; i++ {
-						elems = append(elems, t.vm.initStringObject(string([]rune(str.value)[i])))
+						elems = append(elems, t.vm.InitStringObject(string([]rune(str.value)[i])))
 					}
 
 					return t.vm.InitArrayObject(elems)
@@ -1635,7 +1635,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 
 					str := receiver.(*StringObject).value
 
-					return t.vm.initStringObject(str)
+					return t.vm.InitStringObject(str)
 				}
 			},
 		},
@@ -1653,7 +1653,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 
 					str := receiver.(*StringObject).value
 
-					return t.vm.initStringObject(strings.ToUpper(str))
+					return t.vm.InitStringObject(strings.ToUpper(str))
 				}
 			},
 		},
@@ -1673,7 +1673,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 
 // Functions for initialization -----------------------------------------
 
-func (vm *VM) initStringObject(value string) *StringObject {
+func (vm *VM) InitStringObject(value string) *StringObject {
 	return &StringObject{
 		baseObj: &baseObj{class: vm.topLevelClass(classes.StringClass)},
 		value:   value,
@@ -1681,7 +1681,7 @@ func (vm *VM) initStringObject(value string) *StringObject {
 }
 
 func (vm *VM) initStringClass() *RClass {
-	sc := vm.initializeClass(classes.StringClass, false)
+	sc := vm.initializeClass(classes.StringClass)
 	sc.setBuiltinMethods(builtinStringInstanceMethods(), false)
 	sc.setBuiltinMethods(builtinStringClassMethods(), true)
 	return sc

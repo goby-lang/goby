@@ -200,7 +200,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					for stringKey, value := range hash.Pairs {
-						objectKey := t.vm.initStringObject(stringKey)
+						objectKey := t.vm.InitStringObject(stringKey)
 						result := t.builtinMethodYield(blockFrame, objectKey, value)
 
 						/*
@@ -386,7 +386,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					// Note that from the Go specification, https://golang.org/ref/spec#For_statements,
 					// it's safe to delete elements from a Map, while iterating it.
 					for stringKey, value := range hash.Pairs {
-						objectKey := t.vm.initStringObject(stringKey)
+						objectKey := t.vm.InitStringObject(stringKey)
 						result := t.builtinMethodYield(blockFrame, objectKey, value)
 
 						booleanResult, isResultBoolean := result.Target.(*BooleanObject)
@@ -465,7 +465,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 
 						for _, k := range keys {
 							v := h.Pairs[k]
-							strK := t.vm.initStringObject(k)
+							strK := t.vm.InitStringObject(k)
 
 							t.builtinMethodYield(blockFrame, strK, v)
 						}
@@ -512,7 +512,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					var arrOfKeys []Object
 
 					for _, k := range keys {
-						obj := t.vm.initStringObject(k)
+						obj := t.vm.InitStringObject(k)
 						arrOfKeys = append(arrOfKeys, obj)
 						t.builtinMethodYield(blockFrame, obj)
 					}
@@ -809,7 +809,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					h := receiver.(*HashObject)
 					var keys []Object
 					for k := range h.Pairs {
-						keys = append(keys, t.vm.initStringObject(k))
+						keys = append(keys, t.vm.InitStringObject(k))
 					}
 					return t.vm.InitArrayObject(keys)
 				}
@@ -959,7 +959,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					for stringKey, value := range sourceHash.Pairs {
-						objectKey := t.vm.initStringObject(stringKey)
+						objectKey := t.vm.InitStringObject(stringKey)
 						result := t.builtinMethodYield(blockFrame, objectKey, value)
 
 						if result.Target.isTruthy() {
@@ -997,7 +997,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					sortedKeys := h.sortedKeys()
 					var keys []Object
 					for _, k := range sortedKeys {
-						keys = append(keys, t.vm.initStringObject(k))
+						keys = append(keys, t.vm.InitStringObject(k))
 					}
 					return t.vm.InitArrayObject(keys)
 				}
@@ -1043,14 +1043,14 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					if sorted {
 						for _, k := range h.sortedKeys() {
 							var pairArr []Object
-							pairArr = append(pairArr, t.vm.initStringObject(k))
+							pairArr = append(pairArr, t.vm.InitStringObject(k))
 							pairArr = append(pairArr, h.Pairs[k])
 							resultArr = append(resultArr, t.vm.InitArrayObject(pairArr))
 						}
 					} else {
 						for k, v := range h.Pairs {
 							var pairArr []Object
-							pairArr = append(pairArr, t.vm.initStringObject(k))
+							pairArr = append(pairArr, t.vm.InitStringObject(k))
 							pairArr = append(pairArr, v)
 							resultArr = append(resultArr, t.vm.InitArrayObject(pairArr))
 						}
@@ -1077,7 +1077,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					r := receiver.(*HashObject)
-					return t.vm.initStringObject(r.toJSON(t))
+					return t.vm.InitStringObject(r.toJSON(t))
 				}
 			},
 		},
@@ -1099,7 +1099,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					h := receiver.(*HashObject)
-					return t.vm.initStringObject(h.toString())
+					return t.vm.InitStringObject(h.toString())
 				}
 			},
 		},
@@ -1218,7 +1218,7 @@ func (vm *VM) InitHashObject(pairs map[string]Object) *HashObject {
 }
 
 func (vm *VM) initHashClass() *RClass {
-	hc := vm.initializeClass(classes.HashClass, false)
+	hc := vm.initializeClass(classes.HashClass)
 	hc.setBuiltinMethods(builtinHashInstanceMethods(), false)
 	hc.setBuiltinMethods(builtinHashClassMethods(), true)
 	return hc

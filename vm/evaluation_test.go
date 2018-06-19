@@ -2060,6 +2060,64 @@ func TestMethodMissing(t *testing.T) {
 	}
 }
 
+func TestInheritableMethodMissing(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		class Bar
+		  inherits_method_missing
+		end
+		
+		Bar.new.inherits_method_missing?
+
+`, true},
+		{`
+		class Foo
+		  def method_missing(name)
+		    10
+		  end
+		end
+
+		class Bar < Foo
+		  inherits_method_missing
+		end
+		
+		Bar.new.bar
+
+`, 10},
+		{`
+		module Foo
+		  def method_missing(name)
+		    10
+		  end
+		end
+
+		class Bar
+		  include Foo
+		  inherits_method_missing
+		end
+		
+		Bar.new.bar
+
+`, 10},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s", evaluated.(*Error).message)
+		}
+
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestMethodMissingFail(t *testing.T) {
 	tests := []struct {
 		input    string

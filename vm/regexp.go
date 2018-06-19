@@ -159,7 +159,7 @@ func (vm *VM) initRegexpObject(regexp string) *RegexpObject {
 }
 
 func (vm *VM) initRegexpClass() *RClass {
-	rc := vm.initializeClass(classes.RegexpClass, false)
+	rc := vm.initializeClass(classes.RegexpClass)
 	rc.setBuiltinMethods(builtinRegexpInstanceMethods(), false)
 	rc.setBuiltinMethods(builtInRegexpClassMethods(), true)
 	return rc

@@ -104,7 +104,7 @@ func builtinConcurrentArrayInstanceMethods() []*BuiltinMethodObject {
 
 func (vm *VM) initConcurrentArrayObject(elements []Object) *ConcurrentArrayObject {
 	concurrent := vm.loadConstant("Concurrent", true)
-	array := concurrent.getClassConstant("Array")
+	array := concurrent.getClassConstant(classes.ArrayClass)
 
 	return &ConcurrentArrayObject{
 		baseObj:       &baseObj{class: array},
@@ -114,7 +114,7 @@ func (vm *VM) initConcurrentArrayObject(elements []Object) *ConcurrentArrayObjec
 
 func initConcurrentArrayClass(vm *VM) {
 	concurrent := vm.loadConstant("Concurrent", true)
-	array := vm.initializeClass("Array", false)
+	array := vm.initializeClass(classes.ArrayClass)
 
 	array.setBuiltinMethods(builtinConcurrentArrayInstanceMethods(), false)
 	array.setBuiltinMethods(builtinConcurrentArrayClassMethods(), true)

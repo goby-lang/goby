@@ -436,7 +436,13 @@ var builtinActions = map[operationType]*action{
 			classPtr := cf.lookupConstantUnderAllScope(subjectName)
 
 			if classPtr == nil {
-				class := t.vm.initializeClass(subjectName, subjectType == "module")
+				var class *RClass
+				if subjectType == "module" {
+					class = t.vm.initializeModule(subjectName)
+				} else {
+					class = t.vm.initializeClass(subjectName)
+				}
+
 				classPtr = cf.storeConstant(class.Name, class)
 
 				if len(args) >= 2 {
@@ -496,7 +502,7 @@ var builtinActions = map[operationType]*action{
 			method = receiver.findMethod(methodName)
 
 			if method == nil {
-				mm := receiver.findMethodMissing()
+				mm := receiver.findMethodMissing(receiver.Class().inheritsMethodMissing)
 
 				if mm == nil {
 					t.setErrorObject(receiverPr, argPr, errors.UndefinedMethodError, sourceLine, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
@@ -513,7 +519,7 @@ var builtinActions = map[operationType]*action{
 						t.Stack.Set(position+1, arg)
 					}
 
-					t.Stack.Set(argPr, &Pointer{Target: t.vm.initStringObject(methodName)})
+					t.Stack.Set(argPr, &Pointer{Target: t.vm.InitStringObject(methodName)})
 					argCount++
 
 					method = mm
@@ -644,9 +650,9 @@ func (v *VM) InitObjectFromGoType(value interface{}) Object {
 			bytes = append(bytes, byte(i))
 		}
 
-		return v.initStringObject(string(bytes))
+		return v.InitStringObject(string(bytes))
 	case string:
-		return v.initStringObject(val)
+		return v.InitStringObject(val)
 	case bool:
 		return toBooleanObject(val)
 	case []interface{}:

@@ -35,14 +35,14 @@ func builtinURIClassMethods() []*BuiltinMethodObject {
 						"@user":     NULL,
 						"@password": NULL,
 						"@query":    NULL,
-						"@path":     t.vm.initStringObject("/"),
+						"@path":     t.vm.InitStringObject("/"),
 					}
 
 					// Scheme
-					uriAttrs["@scheme"] = t.vm.initStringObject(u.Scheme)
+					uriAttrs["@scheme"] = t.vm.InitStringObject(u.Scheme)
 
 					// Host
-					uriAttrs["@host"] = t.vm.initStringObject(u.Host)
+					uriAttrs["@host"] = t.vm.InitStringObject(u.Host)
 
 					// Port
 					if len(u.Port()) == 0 {
@@ -64,22 +64,22 @@ func builtinURIClassMethods() []*BuiltinMethodObject {
 
 					// Path
 					if len(u.Path) != 0 {
-						uriAttrs["@path"] = t.vm.initStringObject(u.Path)
+						uriAttrs["@path"] = t.vm.InitStringObject(u.Path)
 					}
 
 					// Query
 					if len(u.RawQuery) != 0 {
-						uriAttrs["@query"] = t.vm.initStringObject(u.RawQuery)
+						uriAttrs["@query"] = t.vm.InitStringObject(u.RawQuery)
 					}
 
 					// User
 					if u.User != nil {
 						if len(u.User.Username()) != 0 {
-							uriAttrs["@user"] = t.vm.initStringObject(u.User.Username())
+							uriAttrs["@user"] = t.vm.InitStringObject(u.User.Username())
 						}
 
 						if p, ok := u.User.Password(); ok {
-							uriAttrs["@password"] = t.vm.initStringObject(p)
+							uriAttrs["@password"] = t.vm.InitStringObject(p)
 						}
 					}
 
@@ -109,9 +109,9 @@ func builtinURIClassMethods() []*BuiltinMethodObject {
 // Functions for initialization -----------------------------------------
 
 func initURIClass(vm *VM) {
-	uri := vm.initializeClass("URI", true)
-	http := vm.initializeClass("HTTP", false)
-	https := vm.initializeClass("HTTPS", false)
+	uri := vm.initializeModule("URI")
+	http := vm.initializeClass("HTTP")
+	https := vm.initializeClass("HTTPS")
 	https.superClass = http
 	https.pseudoSuperClass = http
 	uri.setClassConstant(http)
@@ -119,13 +119,13 @@ func initURIClass(vm *VM) {
 	uri.setBuiltinMethods(builtinURIClassMethods(), true)
 
 	attrs := []Object{
-		vm.initStringObject("host"),
-		vm.initStringObject("path"),
-		vm.initStringObject("port"),
-		vm.initStringObject("query"),
-		vm.initStringObject("scheme"),
-		vm.initStringObject("user"),
-		vm.initStringObject("password"),
+		vm.InitStringObject("host"),
+		vm.InitStringObject("path"),
+		vm.InitStringObject("port"),
+		vm.InitStringObject("query"),
+		vm.InitStringObject("scheme"),
+		vm.InitStringObject("user"),
+		vm.InitStringObject("password"),
 	}
 
 	http.setAttrReader(attrs)

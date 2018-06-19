@@ -3,6 +3,7 @@ package vm
 import (
 	"fmt"
 	"github.com/goby-lang/goby/vm/classes"
+	"github.com/goby-lang/goby/vm/errors"
 	"sync"
 )
 
@@ -13,7 +14,6 @@ import (
 // `Channel#new` is available.
 //
 // Note that channels are not like files and you don't need to explicitly close them (e.g.: exiting a loop).
-// If you `close` the closed channel, Goland will cause a panic. TODO: this panic should be avoided.
 // See https://tour.golang.org/concurrency/4
 //
 // ```ruby
@@ -63,8 +63,21 @@ import (
 // ```
 type ChannelObject struct {
 	*baseObj
-	Chan chan int
+	Chan         chan int
+	ChannelState int
 }
+
+// Channel's state.
+// To Goby language contributors: Golang's channels should be carefully handled because:
+// - You cannot write to closed channels, or got a panic.
+// - You cannot close closed channels, or got a panic.
+// - You cannot write to nil channels, or causes a deadlock.
+// - You cannot read nil channels, or causes a deadlock.
+// Ref: https://beatsync.net/main/log20150325.html
+const (
+	chOpen = iota
+	chClosed
+)
 
 // Class methods --------------------------------------------------------
 func builtinChannelClassMethods() []*BuiltinMethodObject {
@@ -81,7 +94,7 @@ func builtinChannelClassMethods() []*BuiltinMethodObject {
 			Name: "new",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					c := &ChannelObject{baseObj: &baseObj{class: t.vm.topLevelClass(classes.ChannelClass)}, Chan: make(chan int)}
+					c := &ChannelObject{baseObj: &baseObj{class: t.vm.topLevelClass(classes.ChannelClass)}, Chan: make(chan int, chOpen)}
 					return c
 				}
 			},
@@ -94,9 +107,10 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			// Just to close and the channel to declare no more objects will be sent.
-			// You don't need to call `close` explicitly unless you must notify that no more objects will be sent.
-			// Channels are not like files. When you call `close` against the closed channel, Golang will cause a panic.
-			// TODO: this panic should be avoided.
+			// Channel is not like files, and you don't need to call `close` explicitly unless
+			// you definitely need to notify that no more objects will be sent,
+			// Well, you can call `#close` against the same channel twice or more, which is redundant.
+			// (Go's channel cannot do that)
 			// See https://tour.golang.org/concurrency/4
 			//
 			// ```ruby
@@ -118,16 +132,26 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 			// puts(r)
 			// ```
 			//
-			// It takes no argument. TODO: add argument checking.
+			// If you call `close` twice against the same channel, an error is returned.
+			//
+			// It takes no argument.
 			//
 			// @return [Null]
 			Name: "close",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+					if len(args) != 0 {
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 0, len(args))
+					}
 					c := receiver.(*ChannelObject)
 
-					close(c.Chan)
+					if c.ChannelState == chClosed {
+						return t.vm.InitErrorObject(errors.ChannelCloseError, sourceLine, errors.ChannelIsClosed)
+					}
+					c.ChannelState = chClosed
 
+					close(receiver.(*ChannelObject).Chan)
+					receiver = nil
 					return NULL
 				}
 			},
@@ -150,17 +174,25 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 			// c.receive        # receives `i`
 			// ```
 			//
-			// It takes 1 argument. TODO: add argument checking.
+			// If you call `deliver` against the closed channel, an error is returned.
+			//
+			// It takes 1 argument.
 			//
 			// @param object [Object]
 			// @return [Object]
 			Name: "deliver",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					id := t.vm.channelObjectMap.storeObj(args[0])
-
+					if len(args) != 1 {
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 1, len(args))
+					}
 					c := receiver.(*ChannelObject)
 
+					if c.ChannelState == chClosed {
+						return t.vm.InitErrorObject(errors.ChannelCloseError, sourceLine, errors.ChannelIsClosed)
+					}
+
+					id := t.vm.channelObjectMap.storeObj(args[0])
 					c.Chan <- id
 
 					return args[0]
@@ -169,7 +201,7 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			// Receives objects from other threads' `deliver` method, then returns it.
-			// The method works as if the channel would receive objects perpetually from outer space.
+			// The method works as if the channel would receive objects perpetually from outside.
 			// Note that the method suspends the process until it actually receives something via `deliver`.
 			// Thus if you call `receive` outside thread, the main process would suspend.
 			// This also means you can resume a code by using the `receive` method.
@@ -183,13 +215,24 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 			// end
 			// ```
 			//
-			// It takes no arguments. TODO: add argument checking.
+			// If you call `receive` against the closed channel, an error is returned.
+			//
+			// It takes no arguments.
 			//
 			// @return [Object]
 			Name: "receive",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+					if len(args) != 0 {
+						if len(args) != 0 {
+							return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 0, len(args))
+						}
+					}
 					c := receiver.(*ChannelObject)
+
+					if c.ChannelState == chClosed {
+						return t.vm.InitErrorObject(errors.ChannelCloseError, sourceLine, errors.ChannelIsClosed)
+					}
 
 					num := <-c.Chan
 
@@ -205,7 +248,7 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 // Functions for initialization -----------------------------------------
 
 func (vm *VM) initChannelClass() *RClass {
-	class := vm.initializeClass(classes.ChannelClass, false)
+	class := vm.initializeClass(classes.ChannelClass)
 	class.setBuiltinMethods(builtinChannelClassMethods(), true)
 	class.setBuiltinMethods(builtinChannelInstanceMethods(), false)
 	return class

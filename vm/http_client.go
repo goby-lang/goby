@@ -159,7 +159,7 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 // Functions for initialization -----------------------------------------
 
 func initClientClass(vm *VM, hc *RClass) *RClass {
-	clientClass := vm.initializeClass("Client", false)
+	clientClass := vm.initializeClass("Client")
 	hc.setClassConstant(clientClass)
 
 	clientClass.setBuiltinMethods(builtinHTTPClientInstanceMethods(), false)
@@ -211,7 +211,7 @@ func responseGoToGoby(t *Thread, goResp *http.Response) (Object, error) {
 		return nil, err
 	}
 
-	gobyResp.InstanceVariableSet("@body", t.vm.initStringObject(string(body)))
+	gobyResp.InstanceVariableSet("@body", t.vm.InitStringObject(string(body)))
 	gobyResp.InstanceVariableSet("@status_code", t.vm.InitObjectFromGoType(goResp.StatusCode))
 	gobyResp.InstanceVariableSet("@status", t.vm.InitObjectFromGoType(goResp.Status))
 	gobyResp.InstanceVariableSet("@protocol", t.vm.InitObjectFromGoType(goResp.Proto))

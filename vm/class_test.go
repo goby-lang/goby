@@ -8,7 +8,8 @@ func TestClassClassSuperclass(t *testing.T) {
 		expected string
 	}{
 		{`Class.class.name`, "Class"},
-		{`Class.superclass.name`, "Object"},
+		{`Class.superclass.name`, "Module"},
+		{`Module.superclass.name`, "Object"},
 	}
 
 	for i, tt := range tests {
@@ -112,6 +113,22 @@ a = Bar.new()
 	checkErrorMsg(t, i, evaluated, expected)
 	v.checkCFP(t, 0, 1)
 	v.checkSP(t, 0, 3)
+}
+
+func TestModuleInitializeError(t *testing.T) {
+	input := `
+	module Foo
+	end
+
+	Foo.new
+	`
+	expected := `UndefinedMethodError: Undefined Method 'new' for Foo`
+
+	v := initTestVM()
+	evaluated := v.testEval(t, input, getFilename())
+	checkErrorMsg(t, i, evaluated, expected)
+	v.checkCFP(t, 0, 1)
+	v.checkSP(t, 0, 1)
 }
 
 func TestClassInstanceVariable(t *testing.T) {
@@ -914,6 +931,42 @@ func TestClassLesserThanOrEqualMethodFail(t *testing.T) {
 	}
 }
 
+func TestInheritsMethodMissingMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		class Bar
+		end
+		
+		Bar.new.inherits_method_missing?
+
+`, false},
+		{`
+		class Bar
+		  inherits_method_missing
+		end
+		
+		Bar.new.inherits_method_missing?
+
+`, true},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+
+		if isError(evaluated) {
+			t.Fatalf("got Error: %s", evaluated.(*Error).message)
+		}
+
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestSendMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -1307,7 +1360,10 @@ func TestClassSuperclassClassMethod(t *testing.T) {
 		{`Hash.superclass.name`, "Object"},
 		{`Array.superclass.name`, "Object"},
 		{`Object.superclass.name`, "Object"},
-		{`Class.superclass.name`, "Object"},
+		{`Module.superclass.name`, "Object"},
+		{`Class.superclass.name`, "Module"},
+
+		// This is to make sure superclass won't return included module
 		{`
 		module Bar; end
 		class Foo
@@ -1350,6 +1406,7 @@ func TestClassSingletonClassMethod(t *testing.T) {
 		expected interface{}
 	}{
 		{`Integer.singleton_class.name`, "#<Class:Integer>"},
+		{`Integer.singleton_class.class.name`, "Class"},
 		{`Integer.singleton_class.superclass.name`, "#<Class:Object>"},
 		{`
 		class Bar; end
@@ -1360,12 +1417,28 @@ func TestClassSingletonClassMethod(t *testing.T) {
 		class Foo < Bar; end
 		Foo.singleton_class.superclass.name
 		`, "#<Class:Bar>"},
+		{`
+		module Bar; end
+		
+		Bar.singleton_class.name
+		`, "#<Class:Bar>"},
 		// Check if this works on non-class objects
 		{`'a'.singleton_class.to_s.slice(1..16).to_s`, "<Class:#<String:"},
 		{`1.singleton_class.to_s.slice(1..17).to_s`, "<Class:#<Integer:"},
 		{`nil.singleton_class.to_s.slice(1..14).to_s`, "<Class:#<Null:"},
 		{`[1,2].singleton_class.to_s.slice(1..15).to_s`, "<Class:#<Array:"},
 		{`{key: "value"}.singleton_class.to_s.slice(1..14).to_s`, "<Class:#<Hash:"},
+		// Below is for testing module inheritance chain
+		{`
+		module Bar; end
+		
+		Bar.singleton_class.class.name
+		`, "Class"},
+		{`
+		module Bar; end
+		
+		Bar.singleton_class.superclass.name
+		`, "Module"},
 	}
 
 	for i, tt := range tests {
