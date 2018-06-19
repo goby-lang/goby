@@ -241,7 +241,7 @@ func (vm *VM) initConcurrentRWLockObject() *ConcurrentRWLockObject {
 
 func initConcurrentRWLockClass(vm *VM) {
 	concurrentModule := vm.loadConstant("Concurrent", true)
-	lockClass := vm.initializeClass("RWLock", false)
+	lockClass := vm.initializeClass("RWLock")
 
 	lockClass.setBuiltinMethods(builtinConcurrentRWLockInstanceMethods(), false)
 	lockClass.setBuiltinMethods(builtinConcurrentRWLockClassMethods(), true)

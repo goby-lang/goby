@@ -11,8 +11,8 @@ import (
 	"github.com/goby-lang/goby/compiler"
 	"github.com/goby-lang/goby/compiler/parser"
 	"github.com/goby-lang/goby/igb"
-	"github.com/goby-lang/goby/vm"
 	_ "github.com/goby-lang/goby/native/db"
+	"github.com/goby-lang/goby/vm"
 	"github.com/pkg/profile"
 )
 

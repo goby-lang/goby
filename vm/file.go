@@ -39,7 +39,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					filename := args[0].(*StringObject).value
-					return t.vm.initStringObject(filepath.Base(filename))
+					return t.vm.InitStringObject(filepath.Base(filename))
 				}
 			},
 		},
@@ -117,7 +117,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					filename := args[0].(*StringObject).value
-					return t.vm.initStringObject(filepath.Ext(filename))
+					return t.vm.InitStringObject(filepath.Ext(filename))
 				}
 			},
 		},
@@ -137,7 +137,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 						elements = append(elements, next)
 					}
 
-					return t.vm.initStringObject(filepath.Join(elements...))
+					return t.vm.InitStringObject(filepath.Join(elements...))
 				}
 			},
 		},
@@ -239,8 +239,8 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 					filename := args[0].(*StringObject).value
 					dir, file := filepath.Split(filename)
 
-					dirObject := t.vm.initStringObject(dir)
-					fileObject := t.vm.initStringObject(file)
+					dirObject := t.vm.InitStringObject(dir)
+					fileObject := t.vm.InitStringObject(file)
 
 					return t.vm.InitArrayObject([]Object{dirObject, fileObject})
 				}
@@ -268,7 +268,7 @@ func builtinFileInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					name := receiver.(*FileObject).File.Name()
-					return t.vm.initStringObject(name)
+					return t.vm.InitStringObject(name)
 				}
 			},
 		},
@@ -294,7 +294,7 @@ func builtinFileInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.InitErrorObject(errors.InternalError, sourceLine, err.Error())
 					}
 
-					return t.vm.initStringObject(result)
+					return t.vm.InitStringObject(result)
 				}
 			},
 		},
@@ -350,7 +350,7 @@ func (vm *VM) initFileObject(f *os.File) *FileObject {
 }
 
 func (vm *VM) initFileClass() *RClass {
-	fc := vm.initializeClass(classes.FileClass, false)
+	fc := vm.initializeClass(classes.FileClass)
 	fc.setBuiltinMethods(builtinFileClassMethods(), true)
 	fc.setBuiltinMethods(builtinFileInstanceMethods(), false)
 

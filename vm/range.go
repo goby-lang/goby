@@ -517,7 +517,7 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 					ran := receiver.(*RangeObject)
 
-					return t.vm.initStringObject(ran.toString())
+					return t.vm.InitStringObject(ran.toString())
 				}
 			},
 		},
@@ -537,7 +537,7 @@ func (vm *VM) initRangeObject(start, end int) *RangeObject {
 }
 
 func (vm *VM) initRangeClass() *RClass {
-	rc := vm.initializeClass(classes.RangeClass, false)
+	rc := vm.initializeClass(classes.RangeClass)
 	rc.setBuiltinMethods(builtinRangeInstanceMethods(), false)
 	rc.setBuiltinMethods(builtinRangeClassMethods(), true)
 	vm.libFiles = append(vm.libFiles, "range.gb")

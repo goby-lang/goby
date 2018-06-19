@@ -205,7 +205,7 @@ func builtinMainObjSingletonMethods() []*BuiltinMethodObject {
 			Name: "to_s",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(thread *Thread, objects []Object, frame *normalCallFrame) Object {
-					return thread.vm.initStringObject("main")
+					return thread.vm.InitStringObject("main")
 				}
 			},
 		},
@@ -214,7 +214,7 @@ func builtinMainObjSingletonMethods() []*BuiltinMethodObject {
 
 func (vm *VM) initMainObj() *RObject {
 	obj := vm.objectClass.initializeInstance()
-	singletonClass := vm.initializeClass(fmt.Sprintf("#<Class:%s>", obj.toString()), false)
+	singletonClass := vm.initializeClass(fmt.Sprintf("#<Class:%s>", obj.toString()))
 	singletonClass.Methods.set("include", vm.topLevelClass(classes.ClassClass).lookupMethod("include"))
 	singletonClass.setBuiltinMethods(builtinMainObjSingletonMethods(), false)
 	obj.singletonClass = singletonClass
@@ -225,8 +225,10 @@ func (vm *VM) initMainObj() *RObject {
 func (vm *VM) initConstants() {
 	// Init Class and Object
 	cClass := initClassClass()
+	mClass := initModuleClass(cClass)
 	vm.objectClass = initObjectClass(cClass)
 	vm.topLevelClass(classes.ObjectClass).setClassConstant(cClass)
+	vm.topLevelClass(classes.ObjectClass).setClassConstant(mClass)
 
 	// Init builtin classes
 	builtinClasses := []*RClass{
@@ -260,7 +262,7 @@ func (vm *VM) initConstants() {
 	args := []Object{}
 
 	for _, arg := range vm.args {
-		args = append(args, vm.initStringObject(arg))
+		args = append(args, vm.InitStringObject(arg))
 	}
 
 	vm.objectClass.constants["ARGV"] = &Pointer{Target: vm.InitArrayObject(args)}
@@ -270,7 +272,7 @@ func (vm *VM) initConstants() {
 
 	for _, e := range os.Environ() {
 		pair := strings.Split(e, "=")
-		envs[pair[0]] = vm.initStringObject(pair[1])
+		envs[pair[0]] = vm.InitStringObject(pair[1])
 	}
 
 	vm.objectClass.constants["ENV"] = &Pointer{Target: vm.InitHashObject(envs)}
@@ -302,7 +304,12 @@ func (vm *VM) loadConstant(name string, isModule bool) *RClass {
 	ptr = vm.objectClass.constants[name]
 
 	if ptr == nil {
-		c = vm.initializeClass(name, isModule)
+		if isModule {
+			c = vm.initializeClass(name)
+		} else {
+			c = vm.initializeModule(name)
+		}
+
 		vm.objectClass.setClassConstant(c)
 	} else {
 		c = ptr.Target.(*RClass)

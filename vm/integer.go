@@ -444,7 +444,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 
 					int := receiver.(*IntegerObject)
 
-					return t.vm.initStringObject(strconv.Itoa(int.value))
+					return t.vm.InitStringObject(strconv.Itoa(int.value))
 				}
 			},
 		},
@@ -688,7 +688,7 @@ func (vm *VM) InitIntegerObject(value int) *IntegerObject {
 }
 
 func (vm *VM) initIntegerClass() *RClass {
-	ic := vm.initializeClass(classes.IntegerClass, false)
+	ic := vm.initializeClass(classes.IntegerClass)
 	ic.setBuiltinMethods(builtinIntegerInstanceMethods(), false)
 	ic.setBuiltinMethods(builtinIntegerClassMethods(), true)
 	return ic

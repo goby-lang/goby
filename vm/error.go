@@ -58,10 +58,10 @@ func (vm *VM) InitErrorObject(errorType string, sourceLine int, format string, a
 }
 
 func (vm *VM) initErrorClasses() {
-	errTypes := []string{errors.InternalError, errors.ArgumentError, errors.NameError, errors.StopIteration, errors.TypeError, errors.UndefinedMethodError, errors.UnsupportedMethodError, errors.ConstantAlreadyInitializedError, errors.HTTPError, errors.ZeroDivisionError}
+	errTypes := []string{errors.InternalError, errors.ArgumentError, errors.NameError, errors.StopIteration, errors.TypeError, errors.UndefinedMethodError, errors.UnsupportedMethodError, errors.ConstantAlreadyInitializedError, errors.HTTPError, errors.ZeroDivisionError, errors.ChannelCloseError}
 
 	for _, errType := range errTypes {
-		c := vm.initializeClass(errType, false)
+		c := vm.initializeClass(errType)
 		vm.objectClass.setClassConstant(c)
 	}
 }

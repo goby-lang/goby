@@ -21,6 +21,8 @@ const (
 	HTTPError = "HTTPError"
 	// ZeroDivisionError is for zero-division by Integer/Float/Decimal value
 	ZeroDivisionError = "ZeroDivisionError"
+	// ChannelCloseError is for accessing to the closed channel
+	ChannelCloseError = "ChannelCloseError"
 )
 
 /*
@@ -31,4 +33,5 @@ const (
 	WrongArgumentTypeFormat     = "Expect argument to be %s. got: %s"
 	CantYieldWithoutBlockFormat = "Can't yield without a block"
 	DividedByZero               = "Divided by 0"
+	ChannelIsClosed             = "The channel is already closed."
 )

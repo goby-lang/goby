@@ -66,7 +66,7 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 					destCaptures := make([]Object, n, n)
 
 					for i := 0; i < n; i++ {
-						destCaptures[i] = t.vm.initStringObject(g.GroupByNumber(i + offset).String())
+						destCaptures[i] = t.vm.InitStringObject(g.GroupByNumber(i + offset).String())
 					}
 
 					return t.vm.InitArrayObject(destCaptures)
@@ -96,7 +96,7 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 					destCaptures := make([]Object, n, n)
 
 					for i := 0; i < n; i++ {
-						destCaptures[i] = t.vm.initStringObject(g.GroupByNumber(i).String())
+						destCaptures[i] = t.vm.InitStringObject(g.GroupByNumber(i).String())
 					}
 
 					return t.vm.InitArrayObject(destCaptures)
@@ -127,7 +127,7 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 					result := make(map[string]Object)
 
 					for _, g := range groups.Groups() {
-						result[g.Name] = t.vm.initStringObject(g.String())
+						result[g.Name] = t.vm.InitStringObject(g.String())
 					}
 
 					return t.vm.InitHashObject(result)
@@ -172,7 +172,7 @@ func (vm *VM) initMatchDataObject(match *Match, pattern, text string) *MatchData
 }
 
 func (vm *VM) initMatchDataClass() *RClass {
-	klass := vm.initializeClass(classes.MatchDataClass, false)
+	klass := vm.initializeClass(classes.MatchDataClass)
 	klass.setBuiltinMethods(builtinMatchDataInstanceMethods(), false)
 	klass.setBuiltinMethods(builtInMatchDataClassMethods(), true)
 	return klass

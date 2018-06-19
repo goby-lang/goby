@@ -14,7 +14,7 @@ type Object interface {
 	SingletonClass() *RClass
 	SetSingletonClass(*RClass)
 	findMethod(string) Object
-	findMethodMissing() Object
+	findMethodMissing(bool) Object
 	toString() string
 	toJSON(t *Thread) string
 	id() int
@@ -79,13 +79,19 @@ func (b *baseObj) findMethod(methodName string) (method Object) {
 	return
 }
 
-func (b *baseObj) findMethodMissing() (method Object) {
+func (b *baseObj) findMethodMissing(searchAncestor bool) (method Object) {
+	methodMissing := "method_missing"
+
 	if b.SingletonClass() != nil {
-		method, _ = b.SingletonClass().Methods.get("method_missing")
+		method, _ = b.SingletonClass().Methods.get(methodMissing)
 	}
 
 	if method == nil {
-		method, _ = b.Class().Methods.get("method_missing")
+		method, _ = b.Class().Methods.get(methodMissing)
+	}
+
+	if method == nil && searchAncestor {
+		method = b.findMethod(methodMissing)
 	}
 
 	return

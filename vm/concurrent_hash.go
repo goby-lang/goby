@@ -200,7 +200,7 @@ func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
 					framePopped := false
 
 					iterator := func(key, value interface{}) bool {
-						keyObject := t.vm.initStringObject(key.(string))
+						keyObject := t.vm.InitStringObject(key.(string))
 
 						t.builtinMethodYield(blockFrame, keyObject, value.(Object))
 
@@ -270,7 +270,7 @@ func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					r := receiver.(*ConcurrentHashObject)
-					return t.vm.initStringObject(r.toJSON(t))
+					return t.vm.InitStringObject(r.toJSON(t))
 				}
 			},
 		},
@@ -292,7 +292,7 @@ func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					h := receiver.(*ConcurrentHashObject)
-					return t.vm.initStringObject(h.toString())
+					return t.vm.InitStringObject(h.toString())
 				}
 			},
 		},
@@ -311,7 +311,7 @@ func (vm *VM) initConcurrentHashObject(pairs map[string]Object) *ConcurrentHashO
 	}
 
 	concurrent := vm.loadConstant("Concurrent", true)
-	hash := concurrent.getClassConstant("Hash")
+	hash := concurrent.getClassConstant(classes.HashClass)
 
 	return &ConcurrentHashObject{
 		baseObj:     &baseObj{class: hash},
@@ -321,7 +321,7 @@ func (vm *VM) initConcurrentHashObject(pairs map[string]Object) *ConcurrentHashO
 
 func initConcurrentHashClass(vm *VM) {
 	concurrent := vm.loadConstant("Concurrent", true)
-	hash := vm.initializeClass("Hash", false)
+	hash := vm.initializeClass(classes.HashClass)
 
 	hash.setBuiltinMethods(builtinConcurrentHashInstanceMethods(), false)
 	hash.setBuiltinMethods(builtinConcurrentHashClassMethods(), true)

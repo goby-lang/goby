@@ -24,10 +24,11 @@ type RClass struct {
 	// It can be normal class, singleton class or a module.
 	superClass *RClass
 	// Class points to this class's class, which should be ClassClass
-	isSingleton bool
-	isModule    bool
-	constants   map[string]*Pointer
-	scope       *RClass
+	isSingleton           bool
+	isModule              bool
+	constants             map[string]*Pointer
+	scope                 *RClass
+	inheritsMethodMissing bool
 	*baseObj
 }
 
@@ -57,7 +58,7 @@ func buildMethods(m map[string]MethodBuilder) []*BuiltinMethodObject {
 // ExternalClass helps define external go classes
 func ExternalClass(name, path string, classMethods, instanceMethods map[string]MethodBuilder) ClassLoader {
 	return func(v *VM) error {
-		pg := v.initializeClass(name, false)
+		pg := v.initializeClass(name)
 		pg.setBuiltinMethods(buildMethods(classMethods), true)
 		pg.setBuiltinMethods(buildMethods(instanceMethods), false)
 		v.objectClass.setClassConstant(pg)
@@ -66,8 +67,52 @@ func ExternalClass(name, path string, classMethods, instanceMethods map[string]M
 	}
 }
 
-// Class methods --------------------------------------------------------
+// Class's class methods
 func builtinClassCommonClassMethods() []*BuiltinMethodObject {
+	return []*BuiltinMethodObject{
+		{
+			// Creates and returns a new anonymous class from a receiver.
+			// You can use any classes you defined as the receiver:
+			//
+			// ```ruby
+			// class Foo
+			// end
+			// a = Foo.new
+			// ```
+			//
+			// Note that the built-in classes such as String are not open for creating instances
+			// and you can't call `new` against them.
+			//
+			// ```ruby
+			// a = String.new # => error
+			// ```
+			// @param class [Class] Receiver
+			// @return [Object] Created object
+			Name: "new",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+					class, ok := receiver.(*RClass)
+
+					if !ok {
+						return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
+					}
+
+					instance := class.initializeInstance()
+					initMethod := class.lookupMethod("initialize")
+
+					if initMethod != nil {
+						instance.InitializeMethod = initMethod.(*MethodObject)
+					}
+
+					return instance
+				}
+			},
+		},
+	}
+}
+
+// Class methods --------------------------------------------------------
+func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			// Returns an array that contains ancestor classes/modules of the receiver,
@@ -522,6 +567,29 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			Name: "inherits_method_missing",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+					var class *RClass
+
+					if len(args) != 0 {
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
+					}
+
+					switch r := receiver.(type) {
+					case *RClass:
+						class = r
+					default:
+						class = r.SingletonClass()
+					}
+
+					class.inheritsMethodMissing = true
+
+					return class
+				}
+			},
+		},
+		{
 			// Returns the name of the class (receiver).
 			//
 			// ```ruby
@@ -545,46 +613,8 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 					}
 
 					name := n.ReturnName()
-					nameString := t.vm.initStringObject(name)
+					nameString := t.vm.InitStringObject(name)
 					return nameString
-				}
-			},
-		},
-		{
-			// Creates and returns a new anonymous class from a receiver.
-			// You can use any classes you defined as the receiver:
-			//
-			// ```ruby
-			// class Foo
-			// end
-			// a = Foo.new
-			// ```
-			//
-			// Note that the built-in classes such as String are not open for creating instances
-			// and you can't call `new` against them.
-			//
-			// ```ruby
-			// a = String.new # => error
-			// ```
-			// @param class [Class] Receiver
-			// @return [Object] Created object
-			Name: "new",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					class, ok := receiver.(*RClass)
-
-					if !ok {
-						return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
-					}
-
-					instance := class.initializeInstance()
-					initMethod := class.lookupMethod("initialize")
-
-					if initMethod != nil {
-						instance.InitializeMethod = initMethod.(*MethodObject)
-					}
-
-					return instance
 				}
 			},
 		},
@@ -916,6 +946,22 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			Name: "inherits_method_missing?",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+					if len(args) != 0 {
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
+					}
+
+					if receiver.Class().inheritsMethodMissing {
+						return TRUE
+					}
+
+					return FALSE
+				}
+			},
+		},
+		{
 			Name: "instance_eval",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -1049,7 +1095,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 						for _, name := range klass.Methods.names() {
 							if set[name] == nil {
 								set[name] = true
-								methods = append(methods, t.vm.initStringObject(name))
+								methods = append(methods, t.vm.InitStringObject(name))
 							}
 						}
 					}
@@ -1204,8 +1250,10 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 							loaders, ok := externalClasses[libName]
 							externalClassLock.Unlock()
 							if !ok {
-								return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Can't require \"%s\"", libName)
-
+								err := t.execGobyLib(libName + ".gb")
+								if err != nil {
+									return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Can't require \"%s\"", libName)
+								}
 							}
 							initFunc = func(v *VM) {
 								for _, l := range loaders {
@@ -1409,7 +1457,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			Name: "to_s",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.vm.initStringObject(receiver.toString())
+					return t.vm.InitStringObject(receiver.toString())
 				}
 			},
 		},
@@ -1422,15 +1470,29 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 
 // initializeClass is a common function for vm, which initializes and returns
 // a class instance with given class name.
-func (vm *VM) initializeClass(name string, isModule bool) *RClass {
+func (vm *VM) initializeClass(name string) *RClass {
 	class := vm.createRClass(name)
-	class.isModule = isModule
+	class.isModule = false
 	singletonClass := vm.createRClass(fmt.Sprintf("#<Class:%s>", name))
 	singletonClass.isSingleton = true
 	class.singletonClass = singletonClass
 	class.inherits(vm.objectClass)
 
 	return class
+}
+
+func (vm *VM) initializeModule(name string) *RClass {
+	moduleClass := vm.topLevelClass(classes.ModuleClass)
+	module := vm.createRClass(name)
+	module.class = moduleClass
+	module.isModule = true
+	singletonClass := vm.createRClass(fmt.Sprintf("#<Class:%s>", name))
+	singletonClass.isSingleton = true
+	singletonClass.superClass = moduleClass
+	singletonClass.pseudoSuperClass = moduleClass
+	module.singletonClass = singletonClass
+
+	return module
 }
 
 func (vm *VM) createRClass(className string) *RClass {
@@ -1448,6 +1510,34 @@ func (vm *VM) createRClass(className string) *RClass {
 	}
 }
 
+func initModuleClass(classClass *RClass) *RClass {
+	moduleClass := &RClass{
+		Name:      classes.ModuleClass,
+		Methods:   newEnvironment(),
+		constants: make(map[string]*Pointer),
+		baseObj:   &baseObj{},
+	}
+
+	moduleSingletonClass := &RClass{
+		Name:        "#<Class:Module>",
+		Methods:     newEnvironment(),
+		constants:   make(map[string]*Pointer),
+		isModule:    false,
+		baseObj:     &baseObj{class: classClass, InstanceVariables: newEnvironment()},
+		isSingleton: true,
+	}
+
+	classClass.superClass = moduleClass
+	classClass.pseudoSuperClass = moduleClass
+
+	moduleClass.class = classClass
+	moduleClass.singletonClass = moduleSingletonClass
+
+	moduleClass.setBuiltinMethods(builtinModuleCommonClassMethods(), true)
+
+	return moduleClass
+}
+
 func initClassClass() *RClass {
 	classClass := &RClass{
 		Name:      classes.ClassClass,
@@ -1456,7 +1546,7 @@ func initClassClass() *RClass {
 		baseObj:   &baseObj{},
 	}
 
-	singletonClass := &RClass{
+	classSingletonClass := &RClass{
 		Name:        "#<Class:Class>",
 		Methods:     newEnvironment(),
 		constants:   make(map[string]*Pointer),
@@ -1466,7 +1556,7 @@ func initClassClass() *RClass {
 	}
 
 	classClass.class = classClass
-	classClass.singletonClass = singletonClass
+	classClass.singletonClass = classSingletonClass
 
 	classClass.setBuiltinMethods(builtinClassCommonClassMethods(), true)
 
@@ -1494,7 +1584,7 @@ func initObjectClass(c *RClass) *RClass {
 	objectClass.singletonClass = singletonClass
 	objectClass.superClass = objectClass
 	objectClass.pseudoSuperClass = objectClass
-	c.inherits(objectClass)
+	c.superClass.inherits(objectClass)
 
 	objectClass.setBuiltinMethods(builtinClassCommonInstanceMethods(), true)
 	objectClass.setBuiltinMethods(builtinClassCommonInstanceMethods(), false)
@@ -1547,25 +1637,11 @@ func (c *RClass) setBuiltinMethods(methodList []*BuiltinMethodObject, classMetho
 	}
 }
 
-func (c *RClass) findMethod(methodName string) (method Object) {
-	if c.isSingleton {
-		method = c.superClass.lookupMethod(methodName)
-	} else {
-		method = c.SingletonClass().lookupMethod(methodName)
-	}
-
-	return
-}
-
 func (c *RClass) lookupMethod(methodName string) Object {
 	method, ok := c.Methods.get(methodName)
 
 	if !ok {
 		if c.superClass != nil && c.superClass != c {
-			if c.Name == classes.ClassClass {
-				return nil
-			}
-
 			return c.superClass.lookupMethod(methodName)
 		}
 

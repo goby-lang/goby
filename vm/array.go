@@ -871,7 +871,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 						elements = append(elements, e.toString())
 					}
 
-					return t.vm.initStringObject(strings.Join(elements, sep))
+					return t.vm.InitStringObject(strings.Join(elements, sep))
 				}
 			},
 		},
@@ -1399,7 +1399,7 @@ func (vm *VM) InitArrayObject(elements []Object) *ArrayObject {
 }
 
 func (vm *VM) initArrayClass() *RClass {
-	ac := vm.initializeClass(classes.ArrayClass, false)
+	ac := vm.initializeClass(classes.ArrayClass)
 	ac.setBuiltinMethods(builtinArrayInstanceMethods(), false)
 	ac.setBuiltinMethods(builtinArrayClassMethods(), true)
 	vm.libFiles = append(vm.libFiles, "array.gb")
