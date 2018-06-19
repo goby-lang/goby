@@ -7,14 +7,14 @@ class Result
   end
 
   def method_missing(name, *args)
-  if name == @name && @used == false
-    if block_given?
-      yield @value
+    if name == @name && @used == false
+      if block_given?
+        yield @value
+      end
+      @used = true
     end
-    @used = true
-  end
 
-  self
+    self
   end
 
   def or
