@@ -214,7 +214,7 @@ func builtinMainObjSingletonMethods() []*BuiltinMethodObject {
 
 func (vm *VM) initMainObj() *RObject {
 	obj := vm.objectClass.initializeInstance()
-	singletonClass := vm.initializeClass(fmt.Sprintf("#<Class:%s>", obj.toString()))
+	singletonClass := vm.initializeClass(fmt.Sprintf("#<Class:%s>", obj.ToString()))
 	singletonClass.Methods.set("include", vm.topLevelClass(classes.ClassClass).lookupMethod("include"))
 	singletonClass.setBuiltinMethods(builtinMainObjSingletonMethods(), false)
 	obj.singletonClass = singletonClass

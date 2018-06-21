@@ -14,7 +14,7 @@ import (
 // `#is_a?` often leads to redundant code. Consider using `respond_to?` first, but actually it is unnecessary
 // in almost all cases.
 type BooleanObject struct {
-	*baseObj
+	*BaseObj
 	value bool
 }
 
@@ -47,8 +47,8 @@ func (vm *VM) initBoolClass() *RClass {
 	b := vm.initializeClass(classes.BooleanClass)
 	b.setBuiltinMethods(builtinBooleanClassMethods(), true)
 
-	TRUE = &BooleanObject{value: true, baseObj: &baseObj{class: b}}
-	FALSE = &BooleanObject{value: false, baseObj: &baseObj{class: b}}
+	TRUE = &BooleanObject{value: true, BaseObj: &BaseObj{class: b}}
+	FALSE = &BooleanObject{value: false, BaseObj: &BaseObj{class: b}}
 
 	return b
 }
@@ -69,14 +69,14 @@ func (b *BooleanObject) Value() interface{} {
 	return b.value
 }
 
-// toString returns the object's name as the string format
-func (b *BooleanObject) toString() string {
+// ToString returns the object's name as the string format
+func (b *BooleanObject) ToString() string {
 	return fmt.Sprintf("%t", b.value)
 }
 
-// toJSON just delegates to `toString`
-func (b *BooleanObject) toJSON(t *Thread) string {
-	return b.toString()
+// ToJSON just delegates to `ToString`
+func (b *BooleanObject) ToJSON(t *Thread) string {
+	return b.ToString()
 }
 
 func (b *BooleanObject) isTruthy() bool {

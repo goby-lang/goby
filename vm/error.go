@@ -18,7 +18,7 @@ import (
 // see vm/errors/error.go.
 //
 type Error struct {
-	*baseObj
+	*BaseObj
 	message      string
 	stackTraces  []string
 	storedTraces bool
@@ -30,7 +30,7 @@ type Error struct {
 // Functions for initialization -----------------------------------------
 
 func (vm *VM) initUnsupportedMethodError(sourceLine int, methodName string, receiver Object) *Error {
-	return vm.InitErrorObject(errors.UnsupportedMethodError, sourceLine, "Unsupported Method %s for %+v", methodName, receiver.toString())
+	return vm.InitErrorObject(errors.UnsupportedMethodError, sourceLine, "Unsupported Method %s for %+v", methodName, receiver.ToString())
 }
 
 func (vm *VM) InitErrorObject(errorType string, sourceLine int, format string, args ...interface{}) *Error {
@@ -49,7 +49,7 @@ func (vm *VM) InitErrorObject(errorType string, sourceLine int, format string, a
 	}
 
 	return &Error{
-		baseObj: &baseObj{class: errClass},
+		BaseObj: &BaseObj{class: errClass},
 		// Add 1 to source line because it's zero indexed
 		message:     fmt.Sprintf(errorType+": "+format, args...),
 		stackTraces: []string{fmt.Sprintf("from %s:%d", cf.FileName(), sourceLine)},
@@ -68,14 +68,14 @@ func (vm *VM) initErrorClasses() {
 
 // Polymorphic helper functions -----------------------------------------
 
-// toString returns the object's name as the string format
-func (e *Error) toString() string {
+// ToString returns the object's name as the string format
+func (e *Error) ToString() string {
 	return e.message
 }
 
-// toJSON just delegates to `toString`
-func (e *Error) toJSON(t *Thread) string {
-	return e.toString()
+// ToJSON just delegates to `ToString`
+func (e *Error) ToJSON(t *Thread) string {
+	return e.ToString()
 }
 
 func (e *Error) Value() interface{} {

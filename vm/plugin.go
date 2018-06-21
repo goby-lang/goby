@@ -16,7 +16,7 @@ import (
 
 // PluginObject is a special type that contains a Go's plugin
 type PluginObject struct {
-	*baseObj
+	*BaseObj
 	fn     string
 	plugin *plugin.Plugin
 }
@@ -38,7 +38,7 @@ func builtinPluginClassMethods() []*BuiltinMethodObject {
 						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "String", args[0].Class().Name)
 					}
 
-					return &PluginObject{fn: name.value, baseObj: &baseObj{class: t.vm.topLevelClass(classes.PluginClass), InstanceVariables: newEnvironment()}}
+					return &PluginObject{fn: name.value, BaseObj: &BaseObj{class: t.vm.topLevelClass(classes.PluginClass), InstanceVariables: newEnvironment()}}
 				}
 			},
 		},
@@ -167,7 +167,7 @@ func builtinPluginInstanceMethods() []*BuiltinMethodObject {
 // Functions for initialization -----------------------------------------
 
 func (vm *VM) initPluginObject(fn string, p *plugin.Plugin) *PluginObject {
-	return &PluginObject{fn: fn, plugin: p, baseObj: &baseObj{class: vm.topLevelClass(classes.PluginClass)}}
+	return &PluginObject{fn: fn, plugin: p, BaseObj: &BaseObj{class: vm.topLevelClass(classes.PluginClass)}}
 }
 
 func initPluginClass(vm *VM) {
@@ -181,14 +181,14 @@ func initPluginClass(vm *VM) {
 
 // Polymorphic helper functions -----------------------------------------
 
-// toString returns the object's name as the string format
-func (p *PluginObject) toString() string {
+// ToString returns the object's name as the string format
+func (p *PluginObject) ToString() string {
 	return "<Plugin: " + p.fn + ">"
 }
 
-// toJSON just delegates to toString
-func (p *PluginObject) toJSON(t *Thread) string {
-	return p.toString()
+// ToJSON just delegates to ToString
+func (p *PluginObject) ToJSON(t *Thread) string {
+	return p.ToString()
 }
 
 // Value returns plugin object's string format

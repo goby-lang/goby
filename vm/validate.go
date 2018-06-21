@@ -7,7 +7,7 @@ import "testing"
 func VerifyExpected(t *testing.T, i int, evaluated Object, expected interface{}) {
 	t.Helper()
 	if isError(evaluated) {
-		t.Errorf("At test case %d: %s", i, evaluated.toString())
+		t.Errorf("At test case %d: %s", i, evaluated.ToString())
 		return
 	}
 

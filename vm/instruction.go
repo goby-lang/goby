@@ -395,7 +395,7 @@ var builtinActions = map[operationType]*action{
 				t.pushErrorObject(errors.InternalError, sourceLine, "Can't get method %s's instruction set.", methodName)
 			}
 
-			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.topLevelClass(classes.MethodClass)}}
+			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, BaseObj: &BaseObj{class: t.vm.topLevelClass(classes.MethodClass)}}
 
 			v := t.Stack.Pop().Target
 			switch self := v.(type) {
@@ -412,7 +412,7 @@ var builtinActions = map[operationType]*action{
 			argCount := args[0].(int)
 			methodName := t.Stack.Pop().Target.(*StringObject).value
 			is, _ := t.getMethodIS(methodName, cf.FileName())
-			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, baseObj: &baseObj{class: t.vm.topLevelClass(classes.MethodClass)}}
+			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, BaseObj: &BaseObj{class: t.vm.topLevelClass(classes.MethodClass)}}
 
 			v := t.Stack.Pop().Target
 
@@ -505,7 +505,7 @@ var builtinActions = map[operationType]*action{
 				mm := receiver.findMethodMissing(receiver.Class().inheritsMethodMissing)
 
 				if mm == nil {
-					t.setErrorObject(receiverPr, argPr, errors.UndefinedMethodError, sourceLine, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
+					t.setErrorObject(receiverPr, argPr, errors.UndefinedMethodError, sourceLine, "Undefined Method '%+v' for %+v", methodName, receiver.ToString())
 				} else {
 					// Move up args for missed method's name
 					// before: | arg 1       | arg 2 |
@@ -543,7 +543,7 @@ var builtinActions = map[operationType]*action{
 			case *BuiltinMethodObject:
 				t.evalBuiltinMethod(receiver, m, receiverPr, argCount, argSet, blockFrame, sourceLine, cf.fileName)
 			case *Error:
-				t.pushErrorObject(errors.InternalError, sourceLine, m.toString())
+				t.pushErrorObject(errors.InternalError, sourceLine, m.ToString())
 			}
 		},
 	},
@@ -664,6 +664,6 @@ func (v *VM) InitObjectFromGoType(value interface{}) Object {
 
 		return v.InitArrayObject(objects)
 	default:
-		return v.initGoObject(value)
+		return v.InitGoObject(value)
 	}
 }

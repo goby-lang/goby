@@ -71,7 +71,7 @@ func (vm *VM) GetREPLResult() string {
 	top := vm.mainThread.Stack.Pop()
 
 	if top != nil {
-		return top.Target.toString()
+		return top.Target.ToString()
 	}
 
 	return ""

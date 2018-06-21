@@ -22,6 +22,12 @@
   version = "v1.1.6"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/fatih/camelcase"
+  packages = ["."]
+  revision = "44e46d280b43ec1531bb25252440e34f1b800b65"
+
+[[projects]]
   name = "github.com/fatih/structs"
   packages = ["."]
   revision = "74a29b9fac7397d933f47e33eba94d2d83a464a2"
@@ -86,6 +92,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4e716ed5f8ae86789d82e6dde2de7173294b5296f4c3a57a3d78452e78cd4fc0"
+  inputs-digest = "d04e6bcc388e144036a96b0709f309ae79f8b1bf007c07a7686d0ad11b314d29"
   solver-name = "gps-cdcl"
   solver-version = 1

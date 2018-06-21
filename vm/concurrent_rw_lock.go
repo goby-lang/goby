@@ -23,7 +23,7 @@ import (
 // ```
 //
 type ConcurrentRWLockObject struct {
-	*baseObj
+	*BaseObj
 	mutex sync.RWMutex
 }
 
@@ -234,7 +234,7 @@ func (vm *VM) initConcurrentRWLockObject() *ConcurrentRWLockObject {
 	lockClass := concurrentModule.getClassConstant("RWLock")
 
 	return &ConcurrentRWLockObject{
-		baseObj: &baseObj{class: lockClass},
+		BaseObj: &BaseObj{class: lockClass},
 		mutex:   sync.RWMutex{},
 	}
 }
@@ -256,12 +256,12 @@ func (lock *ConcurrentRWLockObject) Value() interface{} {
 	return lock.mutex
 }
 
-// toString returns the object's name as the string format
-func (lock *ConcurrentRWLockObject) toString() string {
+// ToString returns the object's name as the string format
+func (lock *ConcurrentRWLockObject) ToString() string {
 	return "<Instance of: " + lock.class.Name + ">"
 }
 
-// toJSON just delegates to toString
-func (lock *ConcurrentRWLockObject) toJSON(t *Thread) string {
-	return lock.toString()
+// ToJSON just delegates to ToString
+func (lock *ConcurrentRWLockObject) ToJSON(t *Thread) string {
+	return lock.ToString()
 }

@@ -10,7 +10,7 @@ import (
 
 // GoObject ...
 type GoObject struct {
-	*baseObj
+	*BaseObj
 	data interface{}
 }
 
@@ -53,8 +53,8 @@ func builtinGoObjectInstanceMethods() []*BuiltinMethodObject {
 
 // Functions for initialization -----------------------------------------
 
-func (vm *VM) initGoObject(d interface{}) *GoObject {
-	return &GoObject{data: d, baseObj: &baseObj{class: vm.topLevelClass(classes.GoObjectClass)}}
+func (vm *VM) InitGoObject(d interface{}) *GoObject {
+	return &GoObject{data: d, BaseObj: &BaseObj{class: vm.topLevelClass(classes.GoObjectClass)}}
 }
 
 func (vm *VM) initGoClass() *RClass {
@@ -72,14 +72,14 @@ func (s *GoObject) Value() interface{} {
 	return s.data
 }
 
-// toString returns the object's name as the string format
-func (s *GoObject) toString() string {
+// ToString returns the object's name as the string format
+func (s *GoObject) ToString() string {
 	return fmt.Sprintf("<GoObject: %p>", s)
 }
 
-// toJSON just delegates to toString
-func (s *GoObject) toJSON(t *Thread) string {
-	return s.toString()
+// ToJSON just delegates to ToString
+func (s *GoObject) ToJSON(t *Thread) string {
+	return s.ToString()
 }
 
 // Other helper functions -----------------------------------------------

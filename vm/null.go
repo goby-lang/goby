@@ -9,7 +9,7 @@ import (
 // `nil` is convert into `null` when exported to JSON format.
 // - `Null.new` is not supported.
 type NullObject struct {
-	*baseObj
+	*BaseObj
 }
 
 var (
@@ -139,7 +139,7 @@ func (vm *VM) initNullClass() *RClass {
 	nc := vm.initializeClass(classes.NullClass)
 	nc.setBuiltinMethods(builtinNullInstanceMethods(), false)
 	nc.setBuiltinMethods(builtinNullClassMethods(), true)
-	NULL = &NullObject{baseObj: &baseObj{class: nc}}
+	NULL = &NullObject{BaseObj: &BaseObj{class: nc}}
 	return nc
 }
 
@@ -150,13 +150,13 @@ func (n *NullObject) Value() interface{} {
 	return nil
 }
 
-// toString returns the object's name as the string format
-func (n *NullObject) toString() string {
+// ToString returns the object's name as the string format
+func (n *NullObject) ToString() string {
 	return "nil"
 }
 
-// toJSON just delegates to toString
-func (n *NullObject) toJSON(t *Thread) string {
+// ToJSON just delegates to ToString
+func (n *NullObject) ToJSON(t *Thread) string {
 	return "null"
 }
 

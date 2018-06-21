@@ -36,7 +36,7 @@ import (
 // ToDo: Regexp literals with '/.../'
 type Regexp = regexp2.Regexp
 type RegexpObject struct {
-	*baseObj
+	*BaseObj
 	regexp *Regexp
 }
 
@@ -56,9 +56,9 @@ func builtInRegexpClassMethods() []*BuiltinMethodObject {
 						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, arg.Class().Name)
 					}
 
-					r := t.vm.initRegexpObject(args[0].toString())
+					r := t.vm.initRegexpObject(args[0].ToString())
 					if r == nil {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Invalid regexp: %v", args[0].toString())
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Invalid regexp: %v", args[0].ToString())
 					}
 					return r
 				}
@@ -153,7 +153,7 @@ func (vm *VM) initRegexpObject(regexp string) *RegexpObject {
 		return nil
 	}
 	return &RegexpObject{
-		baseObj: &baseObj{class: vm.topLevelClass(classes.RegexpClass)},
+		BaseObj: &BaseObj{class: vm.topLevelClass(classes.RegexpClass)},
 		regexp:  r,
 	}
 }
@@ -172,17 +172,17 @@ func (r *RegexpObject) Value() interface{} {
 	return r.regexp.String()
 }
 
-// toString returns the object's name as the string format
-func (r *RegexpObject) toString() string {
+// ToString returns the object's name as the string format
+func (r *RegexpObject) ToString() string {
 	return r.regexp.String()
 }
 
-// toJSON just delegates to toString
-func (r *RegexpObject) toJSON(t *Thread) string {
-	return "\"" + r.toString() + "\""
+// ToJSON just delegates to ToString
+func (r *RegexpObject) ToJSON(t *Thread) string {
+	return "\"" + r.ToString() + "\""
 }
 
 // equal checks if the string values between receiver and argument are equal
 func (r *RegexpObject) equal(e *RegexpObject) bool {
-	return r.toString() == r.toString()
+	return r.ToString() == r.ToString()
 }
