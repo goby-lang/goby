@@ -131,6 +131,11 @@ func (b *Binding) body(receiver *Statement, f *File, d *ast.FuncDecl) {
 	ff = ff.Block(inner)
 	s.Block(Return(ff))
 
+	// func closeDB(receiver vm.Object, sourceLine int) vm.Method {
+	// 	return func(t *vm.Thread, args []vm.Object) vm.Object {
+	// 	}
+	// 	return nil
+	// }
 }
 
 func main() {
