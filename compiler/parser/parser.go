@@ -102,6 +102,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.Assign, p.parseAssignExpression)
 	p.registerInfix(token.Range, p.parseRangeExpression)
 	p.registerInfix(token.Dot, p.parseCallExpressionWithReceiver)
+	p.registerInfix(token.UnderScore, p.parseUnderScoreLiteral)
 	p.registerInfix(token.LParen, p.parseCallExpressionWithoutReceiver)
 	p.registerInfix(token.LBracket, p.parseIndexExpression)
 	p.registerInfix(token.Colon, p.parseArgumentPairExpression)

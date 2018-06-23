@@ -23,6 +23,7 @@ const (
 	String           = "STRING"
 	Comment          = "COMMENT"
 
+	UnderScore   = "_"
 	Assign   = "="
 	Plus     = "+"
 	PlusEq   = "+="

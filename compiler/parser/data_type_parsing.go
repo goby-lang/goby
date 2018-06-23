@@ -23,6 +23,34 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	return lit
 }
 
+func (p *Parser) parseUnderScoreLiteral(integerPart ast.Expression) ast.Expression {
+	p.nextToken()
+
+	lit := &ast.IntegerLiteral{BaseNode: &ast.BaseNode{Token: p.curToken}}
+
+	firstValue, err := strconv.ParseInt(integerPart.String(), 0, 64)
+
+
+	len := len(integerPart.String())
+
+	for ; len > 1; len-- {
+		firstValue *= 10
+	}
+
+	secondValue, err := strconv.ParseInt(lit.TokenLiteral(), 0, 64)
+
+	if err != nil {
+		p.error = errors.NewTypeParsingError(lit.TokenLiteral(), "integer", p.curToken.Line)
+		return nil
+	}
+
+	lit.Value = int(firstValue + secondValue)
+
+
+
+	return lit
+}
+
 func (p *Parser) parseFloatLiteral(integerPart ast.Expression) ast.Expression {
 	// Get the fractional part of the token
 	p.nextToken()
@@ -38,7 +66,10 @@ func (p *Parser) parseFloatLiteral(integerPart ast.Expression) ast.Expression {
 		p.error = errors.NewTypeParsingError(lit.TokenLiteral(), "float", p.curToken.Line)
 		return nil
 	}
+	fmt.Println("lit1:", lit)
 	lit.Value = float64(value)
+	fmt.Println("lit2:", lit)
+
 	return lit
 }
 
