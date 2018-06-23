@@ -950,14 +950,14 @@ func TestConstantsMethod(t *testing.T) {
 		end
 
 		Foo.constants.first.to_s
-		`, "123"},
+		`, "Baz"},
 		{`
 		Bar = "1123"
-		Object.constants.include?(Bar)
+		Object.constants.include?("Bar")
 		`, true},
 		{`
 		class Bar; end
-		Object.constants.include?(Bar)
+		Object.constants.include?("Bar")
 		`, true},
 	}
 	for i, tt := range tests {

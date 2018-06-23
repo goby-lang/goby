@@ -446,14 +446,14 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 			Name: "constants",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					var constants []Object
+					var constantNames []Object
 					r := receiver.(*RClass)
 
-					for _, c := range r.constants {
-						constants = append(constants, c.Target)
+					for n := range r.constants {
+						constantNames = append(constantNames, t.vm.InitStringObject(n))
 					}
 
-					return t.vm.InitArrayObject(constants)
+					return t.vm.InitArrayObject(constantNames)
 				}
 			},
 		},
