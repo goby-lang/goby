@@ -952,6 +952,14 @@ func TestConstantsMethod(t *testing.T) {
 		Foo.constants.first.to_s
 		`, "Baz"},
 		{`
+		module Foo
+		  Bar = "456"
+		  Baz = "123"
+		end
+
+		Foo.constants.to_s
+		`, "[\"Bar\", \"Baz\"]"},
+		{`
 		Bar = "1123"
 		Object.constants.include?("Bar")
 		`, true},

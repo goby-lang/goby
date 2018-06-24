@@ -10,6 +10,7 @@ import (
 
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
+	"sort"
 )
 
 // RClass represents normal (not built in) class object
@@ -446,14 +447,20 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 			Name: "constants",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					var constantNames []Object
+					var constantNames []string
+					var objs []Object
 					r := receiver.(*RClass)
 
 					for n := range r.constants {
-						constantNames = append(constantNames, t.vm.InitStringObject(n))
+						constantNames = append(constantNames, n)
+					}
+					sort.Strings(constantNames)
+
+					for _, cn := range constantNames {
+						objs = append(objs, t.vm.InitStringObject(cn))
 					}
 
-					return t.vm.InitArrayObject(constantNames)
+					return t.vm.InitArrayObject(objs)
 				}
 			},
 		},
