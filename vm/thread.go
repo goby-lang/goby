@@ -338,8 +338,8 @@ func (t *Thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 
 	switch m := method.(type) {
 	case *MethodObject:
-		callObj := newCallObject(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, sendCallFrame.SourceLine())
-		t.evalMethodObject(callObj, sourceLine)
+		callObj := newCallObject(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, 1)
+		t.evalMethodObject(callObj)
 	case *BuiltinMethodObject:
 		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, sourceLine, sendCallFrame.FileName())
 	case *Error:
@@ -366,7 +366,7 @@ func (t *Thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 		instance, ok := evaluated.Target.(*RObject)
 		if ok && instance.InitializeMethod != nil {
 			callObj := newCallObject(instance, instance.InitializeMethod, receiverPtr, argCount, argSet, blockFrame, sourceLine)
-			t.evalMethodObject(callObj, sourceLine)
+			t.evalMethodObject(callObj)
 		}
 	}
 
@@ -379,11 +379,12 @@ func (t *Thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 }
 
 // TODO: Move instruction into call object
-func (t *Thread) evalMethodObject(call *callObject, sourceLine int) {
+func (t *Thread) evalMethodObject(call *callObject) {
 	normalParamsCount := call.normalParamsCount()
 	paramTypes := call.paramTypes()
 	paramsCount := len(call.paramTypes())
 	stack := t.Stack.data
+	sourceLine := call.sourceLine
 
 	if call.argCount > paramsCount && !call.method.isSplatArgIncluded() {
 		t.reportArgumentError(sourceLine, paramsCount, call.methodName(), call.argCount, call.receiverPtr)
