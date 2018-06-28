@@ -125,6 +125,24 @@ func TestStackTraces(t *testing.T) {
 			2,
 			2,
 		},
+		{`def foo
+		  10
+		end
+
+		[1, 2].each do
+			[1, 2, 3].each(1) do |i|
+			  foo(i)
+			end
+		end
+		`,
+			"ArgumentError: Expect 0 argument. got=1",
+			[]string{
+				fmt.Sprintf("from %s:6", getFilename()),
+				fmt.Sprintf("from %s:5", getFilename()),
+			},
+			4,
+			2,
+		},
 	}
 
 	for i, tt := range tests {
