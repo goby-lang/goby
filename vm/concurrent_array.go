@@ -69,16 +69,16 @@ func builtinConcurrentArrayClassMethods() []*BuiltinMethodObject {
 
 				if len(args) == 0 {
 					return t.vm.initConcurrentArrayObject([]Object{})
-				} else {
-					arg := args[0]
-					arrayArg, ok := arg.(*ArrayObject)
-
-					if !ok {
-						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.ArrayClass, arg.Class().Name)
-					}
-
-					return t.vm.initConcurrentArrayObject(arrayArg.Elements)
 				}
+
+				arg := args[0]
+				arrayArg, ok := arg.(*ArrayObject)
+
+				if !ok {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.ArrayClass, arg.Class().Name)
+				}
+
+				return t.vm.initConcurrentArrayObject(arrayArg.Elements)
 			},
 		},
 	}

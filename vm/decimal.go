@@ -199,9 +199,9 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 				decimalOperation := func(leftValue *Decimal, rightValue *Decimal) bool {
 					if leftValue.Cmp(rightValue) == 1 {
 						return true
-					} else {
-						return false
 					}
+
+					return false
 				}
 
 				return receiver.(*DecimalObject).numericComparison(t, args[0], decimalOperation, sourceLine)
@@ -262,9 +262,9 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 				decimalOperation := func(leftValue *Decimal, rightValue *Decimal) bool {
 					if leftValue.Cmp(rightValue) == -1 {
 						return true
-					} else {
-						return false
 					}
+
+					return false
 				}
 
 				return receiver.(*DecimalObject).numericComparison(t, args[0], decimalOperation, sourceLine)
@@ -348,9 +348,9 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 				decimalOperation := func(leftValue *Decimal, rightValue *Decimal) bool {
 					if leftValue.Cmp(rightValue) == 0 {
 						return true
-					} else {
-						return false
 					}
+
+					return false
 				}
 
 				return receiver.(*DecimalObject).equalityTest(t, args[0], decimalOperation, true, sourceLine)
@@ -378,9 +378,9 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 				decimalOperation := func(leftValue *Decimal, rightValue *Decimal) bool {
 					if leftValue.Cmp(rightValue) != 0 {
 						return true
-					} else {
-						return false
 					}
+
+					return false
 				}
 
 				return receiver.(*DecimalObject).equalityTest(t, args[0], decimalOperation, false, sourceLine)
