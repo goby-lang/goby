@@ -269,6 +269,19 @@ func newNormalCallFrame(is *instructionSet, filename string, sourceLine int) *no
 	return &normalCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 5), lPr: 0, fileName: filename, sourceLine: sourceLine}, instructionSet: is, pc: 0}
 }
 
-func newGoMethodCallFrame(m builtinMethodBody, receiver Object, n, filename string, sourceLine int) *goMethodCallFrame {
-	return &goMethodCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 5), lPr: 0, fileName: filename, sourceLine: sourceLine}, method: m, name: n, receiver: receiver}
+func newGoMethodCallFrame(m builtinMethodBody, receiver Object, argCount, argPtr int, n, filename string, sourceLine int, blockFrame *normalCallFrame) *goMethodCallFrame {
+	return &goMethodCallFrame{
+		baseFrame: &baseFrame{
+			locals:     make([]*Pointer, 5),
+			lPr:        0,
+			fileName:   filename,
+			sourceLine: sourceLine,
+			blockFrame: blockFrame,
+		},
+		method:   m,
+		name:     n,
+		receiver: receiver,
+		argCount: argCount,
+		argPtr: argPtr,
+	}
 }

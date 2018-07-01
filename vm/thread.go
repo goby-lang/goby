@@ -346,11 +346,18 @@ func (t *Thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 }
 
 func (t *Thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame, sourceLine int, fileName string) {
-	cf := newGoMethodCallFrame(method.Fn, receiver, method.Name, fileName, sourceLine)
-	cf.sourceLine = sourceLine
-	cf.blockFrame = blockFrame
-	cf.argPtr = receiverPtr + 1
-	cf.argCount = argCount
+	argPtr := receiverPtr + 1
+
+	cf := newGoMethodCallFrame(
+		method.Fn,
+		receiver,
+		argCount,
+		argPtr,
+		method.Name,
+		fileName,
+		sourceLine,
+		blockFrame,
+	)
 
 	t.callFrameStack.push(cf)
 	t.startFromTopFrame()
