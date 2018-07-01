@@ -144,8 +144,11 @@ func (b *baseFrame) insertLCL(index, depth int, value Object) {
 
 	b.Lock()
 
-	b.locals = append(b.locals, nil)
-	copy(b.locals[index:], b.locals[index:])
+	if index >= len(b.locals) {
+		b.locals = append(b.locals, nil)
+		copy(b.locals[index:], b.locals[index:])
+	}
+
 	b.locals[index] = &Pointer{Target: value}
 
 	if index >= b.lPr {
