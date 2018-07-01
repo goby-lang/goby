@@ -160,10 +160,8 @@ func (t *Thread) evalCallFrame(cf callFrame) {
 	case *goMethodCallFrame:
 		args := []Object{}
 
-		for _, obj := range cf.locals {
-			if obj != nil {
-				args = append(args, obj.Target)
-			}
+		for i := 0; i < cf.argCount; i++ {
+			args = append(args, t.Stack.data[cf.argPtr+i].Target)
 		}
 		//fmt.Println("-----------------------")
 		//fmt.Println(t.callFrameStack.inspect())
@@ -351,12 +349,8 @@ func (t *Thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 	cf := newGoMethodCallFrame(method.Fn, receiver, method.Name, fileName, sourceLine)
 	cf.sourceLine = sourceLine
 	cf.blockFrame = blockFrame
-
-	argPtr := receiverPtr + 1
-
-	for i := 0; i < argCount; i++ {
-		cf.locals = append(cf.locals, t.Stack.data[argPtr+i])
-	}
+	cf.argPtr = receiverPtr + 1
+	cf.argCount = argCount
 
 	t.callFrameStack.push(cf)
 	t.startFromTopFrame()
@@ -372,7 +366,7 @@ func (t *Thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 	}
 
 	t.Stack.Set(receiverPtr, evaluated)
-	t.Stack.pointer = argPtr
+	t.Stack.pointer = cf.argPtr
 
 	if err, ok := evaluated.Target.(*Error); ok {
 		panic(err.Message())

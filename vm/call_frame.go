@@ -53,6 +53,8 @@ type callFrame interface {
 type goMethodCallFrame struct {
 	*baseFrame
 	method   builtinMethodBody
+	argPtr   int
+	argCount int
 	receiver Object
 	name     string
 }
