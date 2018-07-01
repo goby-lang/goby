@@ -30,10 +30,8 @@ func builtinBooleanClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "new",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
-				}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
 			},
 		},
 	}

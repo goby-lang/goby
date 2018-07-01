@@ -24,26 +24,25 @@ func builtinGoObjectInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "go_func",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					s, ok := args[0].(*StringObject)
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				s, ok := args[0].(*StringObject)
 
-					if !ok {
-						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
-					}
-
-					funcName := s.value
-					r := receiver.(*GoObject)
-
-					funcArgs, err := convertToGoFuncArgs(args[1:])
-
-					if err != nil {
-						t.vm.InitErrorObject(errors.TypeError, sourceLine, err.Error())
-					}
-
-					result := metago.CallFunc(r.data, funcName, funcArgs...)
-					return t.vm.InitObjectFromGoType(result)
+				if !ok {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 				}
+
+				funcName := s.value
+				r := receiver.(*GoObject)
+
+				funcArgs, err := convertToGoFuncArgs(args[1:])
+
+				if err != nil {
+					t.vm.InitErrorObject(errors.TypeError, sourceLine, err.Error())
+				}
+
+				result := metago.CallFunc(r.data, funcName, funcArgs...)
+				return t.vm.InitObjectFromGoType(result)
+
 			},
 		},
 	}

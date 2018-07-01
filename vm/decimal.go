@@ -49,10 +49,9 @@ func builtinDecimalClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "new",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
-				}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
+
 			},
 		},
 	}
@@ -74,14 +73,13 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Decimal]
 			Name: "+",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					operation := func(leftValue *Decimal, rightValue *Decimal) *Decimal {
-						return new(Decimal).Add(leftValue, rightValue)
-					}
-
-					return receiver.(*DecimalObject).arithmeticOperation(t, args[0], operation, sourceLine, false)
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				operation := func(leftValue *Decimal, rightValue *Decimal) *Decimal {
+					return new(Decimal).Add(leftValue, rightValue)
 				}
+
+				return receiver.(*DecimalObject).arithmeticOperation(t, args[0], operation, sourceLine, false)
+
 			},
 		},
 		{
@@ -97,14 +95,13 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Decimal]
 			Name: "-",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					operation := func(leftValue *Decimal, rightValue *Decimal) *Decimal {
-						return new(Decimal).Sub(leftValue, rightValue)
-					}
-
-					return receiver.(*DecimalObject).arithmeticOperation(t, args[0], operation, sourceLine, false)
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				operation := func(leftValue *Decimal, rightValue *Decimal) *Decimal {
+					return new(Decimal).Sub(leftValue, rightValue)
 				}
+
+				return receiver.(*DecimalObject).arithmeticOperation(t, args[0], operation, sourceLine, false)
+
 			},
 		},
 		{
@@ -120,14 +117,13 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Decimal]
 			Name: "*",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					operation := func(leftValue *Decimal, rightValue *Decimal) *Decimal {
-						return new(Decimal).Mul(leftValue, rightValue)
-					}
-
-					return receiver.(*DecimalObject).arithmeticOperation(t, args[0], operation, sourceLine, false)
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				operation := func(leftValue *Decimal, rightValue *Decimal) *Decimal {
+					return new(Decimal).Mul(leftValue, rightValue)
 				}
+
+				return receiver.(*DecimalObject).arithmeticOperation(t, args[0], operation, sourceLine, false)
+
 			},
 		},
 		{
@@ -147,16 +143,15 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Decimal]
 			Name: "**",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					operation := func(leftValue *Decimal, rightValue *Decimal) *Decimal {
-						l, _ := leftValue.Float64()
-						r, _ := rightValue.Float64()
-						return new(Decimal).SetFloat64(math.Pow(l, r))
-					}
-
-					return receiver.(*DecimalObject).arithmeticOperation(t, args[0], operation, sourceLine, false)
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				operation := func(leftValue *Decimal, rightValue *Decimal) *Decimal {
+					l, _ := leftValue.Float64()
+					r, _ := rightValue.Float64()
+					return new(Decimal).SetFloat64(math.Pow(l, r))
 				}
+
+				return receiver.(*DecimalObject).arithmeticOperation(t, args[0], operation, sourceLine, false)
+
 			},
 		},
 		{
@@ -174,14 +169,13 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Decimal]
 			Name: "/",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					decimalOperation := func(leftValue *Decimal, rightValue *Decimal) *Decimal {
-						return new(Decimal).Quo(leftValue, rightValue)
-					}
-
-					return receiver.(*DecimalObject).arithmeticOperation(t, args[0], decimalOperation, sourceLine, true)
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				decimalOperation := func(leftValue *Decimal, rightValue *Decimal) *Decimal {
+					return new(Decimal).Quo(leftValue, rightValue)
 				}
+
+				return receiver.(*DecimalObject).arithmeticOperation(t, args[0], decimalOperation, sourceLine, true)
+
 			},
 		},
 		{
@@ -201,18 +195,17 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Boolean]
 			Name: ">",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					decimalOperation := func(leftValue *Decimal, rightValue *Decimal) bool {
-						if leftValue.Cmp(rightValue) == 1 {
-							return true
-						} else {
-							return false
-						}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				decimalOperation := func(leftValue *Decimal, rightValue *Decimal) bool {
+					if leftValue.Cmp(rightValue) == 1 {
+						return true
+					} else {
+						return false
 					}
-
-					return receiver.(*DecimalObject).numericComparison(t, args[0], decimalOperation, sourceLine)
 				}
+
+				return receiver.(*DecimalObject).numericComparison(t, args[0], decimalOperation, sourceLine)
+
 			},
 		},
 		{
@@ -234,19 +227,18 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Boolean]
 			Name: ">=",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					decimalOperation := func(leftValue *Decimal, rightValue *Decimal) bool {
-						switch leftValue.Cmp(rightValue) {
-						case 1, 0:
-							return true
-						default:
-							return false
-						}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				decimalOperation := func(leftValue *Decimal, rightValue *Decimal) bool {
+					switch leftValue.Cmp(rightValue) {
+					case 1, 0:
+						return true
+					default:
+						return false
 					}
-
-					return receiver.(*DecimalObject).numericComparison(t, args[0], decimalOperation, sourceLine)
 				}
+
+				return receiver.(*DecimalObject).numericComparison(t, args[0], decimalOperation, sourceLine)
+
 			},
 		},
 		{
@@ -266,18 +258,17 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Boolean]
 			Name: "<",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					decimalOperation := func(leftValue *Decimal, rightValue *Decimal) bool {
-						if leftValue.Cmp(rightValue) == -1 {
-							return true
-						} else {
-							return false
-						}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				decimalOperation := func(leftValue *Decimal, rightValue *Decimal) bool {
+					if leftValue.Cmp(rightValue) == -1 {
+						return true
+					} else {
+						return false
 					}
-
-					return receiver.(*DecimalObject).numericComparison(t, args[0], decimalOperation, sourceLine)
 				}
+
+				return receiver.(*DecimalObject).numericComparison(t, args[0], decimalOperation, sourceLine)
+
 			},
 		},
 		{
@@ -299,19 +290,17 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Boolean]
 			Name: "<=",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					decimalOperation := func(leftValue *Decimal, rightValue *Decimal) bool {
-						switch leftValue.Cmp(rightValue) {
-						case -1, 0:
-							return true
-						default:
-							return false
-						}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				decimalOperation := func(leftValue *Decimal, rightValue *Decimal) bool {
+					switch leftValue.Cmp(rightValue) {
+					case -1, 0:
+						return true
+					default:
+						return false
 					}
-
-					return receiver.(*DecimalObject).numericComparison(t, args[0], decimalOperation, sourceLine)
 				}
+
+				return receiver.(*DecimalObject).numericComparison(t, args[0], decimalOperation, sourceLine)
 			},
 		},
 		{
@@ -329,14 +318,13 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Integer]
 			Name: "<=>",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					decimalOperation := func(leftValue *Decimal, rightValue *Decimal) int {
-						return leftValue.Cmp(rightValue)
-					}
-
-					return receiver.(*DecimalObject).rocketComparison(t, args[0], decimalOperation, sourceLine)
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				decimalOperation := func(leftValue *Decimal, rightValue *Decimal) int {
+					return leftValue.Cmp(rightValue)
 				}
+
+				return receiver.(*DecimalObject).rocketComparison(t, args[0], decimalOperation, sourceLine)
+
 			},
 		},
 		{
@@ -356,18 +344,17 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Boolean]
 			Name: "==",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					decimalOperation := func(leftValue *Decimal, rightValue *Decimal) bool {
-						if leftValue.Cmp(rightValue) == 0 {
-							return true
-						} else {
-							return false
-						}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				decimalOperation := func(leftValue *Decimal, rightValue *Decimal) bool {
+					if leftValue.Cmp(rightValue) == 0 {
+						return true
+					} else {
+						return false
 					}
-
-					return receiver.(*DecimalObject).equalityTest(t, args[0], decimalOperation, true, sourceLine)
 				}
+
+				return receiver.(*DecimalObject).equalityTest(t, args[0], decimalOperation, true, sourceLine)
+
 			},
 		},
 		{
@@ -387,18 +374,17 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Boolean]
 			Name: "!=",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					decimalOperation := func(leftValue *Decimal, rightValue *Decimal) bool {
-						if leftValue.Cmp(rightValue) != 0 {
-							return true
-						} else {
-							return false
-						}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				decimalOperation := func(leftValue *Decimal, rightValue *Decimal) bool {
+					if leftValue.Cmp(rightValue) != 0 {
+						return true
+					} else {
+						return false
 					}
-
-					return receiver.(*DecimalObject).equalityTest(t, args[0], decimalOperation, false, sourceLine)
 				}
+
+				return receiver.(*DecimalObject).equalityTest(t, args[0], decimalOperation, false, sourceLine)
+
 			},
 		},
 		{
@@ -416,10 +402,9 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [String]
 			Name: "reduction",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.vm.InitStringObject(receiver.(*DecimalObject).value.RatString())
-				}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				return t.vm.InitStringObject(receiver.(*DecimalObject).value.RatString())
+
 			},
 		},
 		{
@@ -434,10 +419,9 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Decimal]
 			Name: "denominator",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.vm.initDecimalObject(new(Decimal).SetInt(receiver.(*DecimalObject).value.Denom()))
-				}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				return t.vm.initDecimalObject(new(Decimal).SetInt(receiver.(*DecimalObject).value.Denom()))
+
 			},
 		},
 		{
@@ -454,10 +438,9 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [String]
 			Name: "fraction",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.vm.InitStringObject(receiver.(*DecimalObject).value.String())
-				}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				return t.vm.InitStringObject(receiver.(*DecimalObject).value.String())
+
 			},
 		},
 		{
@@ -471,11 +454,10 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Decimal]
 			Name: "inverse",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					d := receiver.(*DecimalObject).value
-					return t.vm.initDecimalObject(d.Inv(d))
-				}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				d := receiver.(*DecimalObject).value
+				return t.vm.initDecimalObject(d.Inv(d))
+
 			},
 		},
 		{
@@ -490,10 +472,9 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Decimal]
 			Name: "numerator",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.vm.initDecimalObject(new(Decimal).SetInt(receiver.(*DecimalObject).value.Num()))
-				}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				return t.vm.initDecimalObject(new(Decimal).SetInt(receiver.(*DecimalObject).value.Num()))
+
 			},
 		},
 		{
@@ -506,18 +487,17 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Array]
 			Name: "to_a",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
-					n := receiver.(*DecimalObject).value.Num()
-					d := receiver.(*DecimalObject).value.Denom()
-					elems := []Object{}
+				n := receiver.(*DecimalObject).value.Num()
+				d := receiver.(*DecimalObject).value.Denom()
+				elems := []Object{}
 
-					elems = append(elems, t.vm.initDecimalObject(new(Decimal).SetInt(n)))
-					elems = append(elems, t.vm.initDecimalObject(new(Decimal).SetInt(d)))
+				elems = append(elems, t.vm.initDecimalObject(new(Decimal).SetInt(n)))
+				elems = append(elems, t.vm.initDecimalObject(new(Decimal).SetInt(d)))
 
-					return t.vm.InitArrayObject(elems)
-				}
+				return t.vm.InitArrayObject(elems)
+
 			},
 		},
 		{
@@ -532,10 +512,9 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Float]
 			Name: "to_f",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.vm.initFloatObject(receiver.(*DecimalObject).FloatValue())
-				}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				return t.vm.initFloatObject(receiver.(*DecimalObject).FloatValue())
+
 			},
 		},
 		{
@@ -548,10 +527,9 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Integer]
 			Name: "to_i",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.vm.InitIntegerObject(receiver.(*DecimalObject).IntegerValue())
-				}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				return t.vm.InitIntegerObject(receiver.(*DecimalObject).IntegerValue())
+
 			},
 		},
 		{
@@ -566,10 +544,9 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [String]
 			Name: "to_s",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.vm.InitStringObject(receiver.(*DecimalObject).toString())
-				}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				return t.vm.InitStringObject(receiver.(*DecimalObject).toString())
+
 			},
 		},
 	}

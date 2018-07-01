@@ -37,25 +37,24 @@ func builtinConcurrentHashClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "new",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) > 1 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 or 1 arguments, got %d", len(args))
-					}
-
-					if len(args) == 0 {
-						return t.vm.initConcurrentHashObject(make(map[string]Object))
-					}
-
-					arg := args[0]
-					hashArg, ok := arg.(*HashObject)
-
-					if !ok {
-						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.HashClass, arg.Class().Name)
-					}
-
-					return t.vm.initConcurrentHashObject(hashArg.Pairs)
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) > 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 or 1 arguments, got %d", len(args))
 				}
+
+				if len(args) == 0 {
+					return t.vm.initConcurrentHashObject(make(map[string]Object))
+				}
+
+				arg := args[0]
+				hashArg, ok := arg.(*HashObject)
+
+				if !ok {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.HashClass, arg.Class().Name)
+				}
+
+				return t.vm.initConcurrentHashObject(hashArg.Pairs)
+
 			},
 		},
 	}
@@ -77,30 +76,29 @@ func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Object]
 			Name: "[]",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
-					if len(args) != 1 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
-					}
-
-					i := args[0]
-					key, ok := i.(*StringObject)
-
-					if !ok {
-						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, i.Class().Name)
-					}
-
-					h := receiver.(*ConcurrentHashObject)
-
-					value, ok := h.internalMap.Load(key.value)
-
-					if !ok {
-						return NULL
-					}
-
-					return value.(Object)
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
 				}
+
+				i := args[0]
+				key, ok := i.(*StringObject)
+
+				if !ok {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, i.Class().Name)
+				}
+
+				h := receiver.(*ConcurrentHashObject)
+
+				value, ok := h.internalMap.Load(key.value)
+
+				if !ok {
+					return NULL
+				}
+
+				return value.(Object)
+
 			},
 		},
 		{
@@ -115,27 +113,26 @@ func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Object] The value
 			Name: "[]=",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
-					// First arg is index
-					// Second arg is assigned value
-					if len(args) != 2 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 2 arguments. got: %d", len(args))
-					}
-
-					k := args[0]
-					key, ok := k.(*StringObject)
-
-					if !ok {
-						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, k.Class().Name)
-					}
-
-					h := receiver.(*ConcurrentHashObject)
-					h.internalMap.Store(key.value, args[1])
-
-					return args[1]
+				// First arg is index
+				// Second arg is assigned value
+				if len(args) != 2 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 2 arguments. got: %d", len(args))
 				}
+
+				k := args[0]
+				key, ok := k.(*StringObject)
+
+				if !ok {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, k.Class().Name)
+				}
+
+				h := receiver.(*ConcurrentHashObject)
+				h.internalMap.Store(key.value, args[1])
+
+				return args[1]
+
 			},
 		},
 		{
@@ -149,24 +146,23 @@ func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [NULL]
 			Name: "delete",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 1 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
-					}
-
-					h := receiver.(*ConcurrentHashObject)
-					d := args[0]
-					deleteKeyObject, ok := d.(*StringObject)
-
-					if !ok {
-						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, d.Class().Name)
-					}
-
-					h.internalMap.Delete(deleteKeyObject.value)
-
-					return NULL
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
 				}
+
+				h := receiver.(*ConcurrentHashObject)
+				d := args[0]
+				deleteKeyObject, ok := d.(*StringObject)
+
+				if !ok {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, d.Class().Name)
+				}
+
+				h.internalMap.Delete(deleteKeyObject.value)
+
+				return NULL
+
 			},
 		},
 		{
@@ -186,37 +182,36 @@ func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Hash] self
 			Name: "each",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
-					}
-
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 arguments. got: %d", len(args))
-					}
-
-					hash := receiver.(*ConcurrentHashObject)
-					framePopped := false
-
-					iterator := func(key, value interface{}) bool {
-						keyObject := t.vm.InitStringObject(key.(string))
-
-						t.builtinMethodYield(blockFrame, keyObject, value.(Object))
-
-						framePopped = true
-
-						return true
-					}
-
-					hash.internalMap.Range(iterator)
-
-					if !framePopped {
-						t.callFrameStack.pop()
-					}
-
-					return hash
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if blockFrame == nil {
+					return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 				}
+
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 arguments. got: %d", len(args))
+				}
+
+				hash := receiver.(*ConcurrentHashObject)
+				framePopped := false
+
+				iterator := func(key, value interface{}) bool {
+					keyObject := t.vm.InitStringObject(key.(string))
+
+					t.builtinMethodYield(blockFrame, keyObject, value.(Object))
+
+					framePopped = true
+
+					return true
+				}
+
+				hash.internalMap.Range(iterator)
+
+				if !framePopped {
+					t.callFrameStack.pop()
+				}
+
+				return hash
+
 			},
 		},
 		{
@@ -230,26 +225,25 @@ func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Boolean]
 			Name: "has_key?",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 1 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
-					}
-
-					h := receiver.(*ConcurrentHashObject)
-					i := args[0]
-					input, ok := i.(*StringObject)
-
-					if !ok {
-						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, i.Class().Name)
-					}
-
-					if _, ok := h.internalMap.Load(input.value); ok {
-						return TRUE
-					}
-
-					return FALSE
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
 				}
+
+				h := receiver.(*ConcurrentHashObject)
+				i := args[0]
+				input, ok := i.(*StringObject)
+
+				if !ok {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, i.Class().Name)
+				}
+
+				if _, ok := h.internalMap.Load(input.value); ok {
+					return TRUE
+				}
+
+				return FALSE
+
 			},
 		},
 		{
@@ -263,15 +257,14 @@ func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [String]
 			Name: "to_json",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
-					}
-
-					r := receiver.(*ConcurrentHashObject)
-					return t.vm.InitStringObject(r.toJSON(t))
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
 				}
+
+				r := receiver.(*ConcurrentHashObject)
+				return t.vm.InitStringObject(r.toJSON(t))
+
 			},
 		},
 		{
@@ -285,15 +278,14 @@ func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [String]
 			Name: "to_s",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
-					}
-
-					h := receiver.(*ConcurrentHashObject)
-					return t.vm.InitStringObject(h.toString())
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
 				}
+
+				h := receiver.(*ConcurrentHashObject)
+				return t.vm.InitStringObject(h.toString())
+
 			},
 		},
 	}

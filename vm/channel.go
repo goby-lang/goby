@@ -92,11 +92,9 @@ func builtinChannelClassMethods() []*BuiltinMethodObject {
 			//
 			// @return [Channel]
 			Name: "new",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					c := &ChannelObject{baseObj: &baseObj{class: t.vm.topLevelClass(classes.ChannelClass)}, Chan: make(chan int, chOpen)}
-					return c
-				}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				c := &ChannelObject{baseObj: &baseObj{class: t.vm.topLevelClass(classes.ChannelClass)}, Chan: make(chan int, chOpen)}
+				return c
 			},
 		},
 	}
@@ -138,22 +136,20 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Null]
 			Name: "close",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 0, len(args))
-					}
-					c := receiver.(*ChannelObject)
-
-					if c.ChannelState == chClosed {
-						return t.vm.InitErrorObject(errors.ChannelCloseError, sourceLine, errors.ChannelIsClosed)
-					}
-					c.ChannelState = chClosed
-
-					close(receiver.(*ChannelObject).Chan)
-					receiver = nil
-					return NULL
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 0, len(args))
 				}
+				c := receiver.(*ChannelObject)
+
+				if c.ChannelState == chClosed {
+					return t.vm.InitErrorObject(errors.ChannelCloseError, sourceLine, errors.ChannelIsClosed)
+				}
+				c.ChannelState = chClosed
+
+				close(receiver.(*ChannelObject).Chan)
+				receiver = nil
+				return NULL
 			},
 		},
 		{
@@ -181,22 +177,20 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 			// @param object [Object]
 			// @return [Object]
 			Name: "deliver",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 1 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 1, len(args))
-					}
-					c := receiver.(*ChannelObject)
-
-					if c.ChannelState == chClosed {
-						return t.vm.InitErrorObject(errors.ChannelCloseError, sourceLine, errors.ChannelIsClosed)
-					}
-
-					id := t.vm.channelObjectMap.storeObj(args[0])
-					c.Chan <- id
-
-					return args[0]
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 1, len(args))
 				}
+				c := receiver.(*ChannelObject)
+
+				if c.ChannelState == chClosed {
+					return t.vm.InitErrorObject(errors.ChannelCloseError, sourceLine, errors.ChannelIsClosed)
+				}
+
+				id := t.vm.channelObjectMap.storeObj(args[0])
+				c.Chan <- id
+
+				return args[0]
 			},
 		},
 		{
@@ -221,23 +215,21 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Object]
 			Name: "receive",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
 					if len(args) != 0 {
-						if len(args) != 0 {
-							return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 0, len(args))
-						}
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 0, len(args))
 					}
-					c := receiver.(*ChannelObject)
-
-					if c.ChannelState == chClosed {
-						return t.vm.InitErrorObject(errors.ChannelCloseError, sourceLine, errors.ChannelIsClosed)
-					}
-
-					num := <-c.Chan
-
-					return t.vm.channelObjectMap.retrieveObj(num)
 				}
+				c := receiver.(*ChannelObject)
+
+				if c.ChannelState == chClosed {
+					return t.vm.InitErrorObject(errors.ChannelCloseError, sourceLine, errors.ChannelIsClosed)
+				}
+
+				num := <-c.Chan
+
+				return t.vm.channelObjectMap.retrieveObj(num)
 			},
 		},
 	}

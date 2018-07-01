@@ -169,7 +169,7 @@ func (t *Thread) evalCallFrame(cf callFrame) {
 		}
 		//fmt.Println("-----------------------")
 		//fmt.Println(t.callFrameStack.inspect())
-		result := cf.method(t, args, cf.blockFrame)
+		result := cf.method(cf.receiver, cf.sourceLine, t, args, cf.blockFrame)
 		t.Stack.Push(&Pointer{Target: result})
 		//fmt.Println(t.callFrameStack.inspect())
 		//fmt.Println("-----------------------")
@@ -353,7 +353,7 @@ func (t *Thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 	oldSourceLine := t.sourceLine
 	t.sourceLine = sl
 
-	cf := newGoMethodCallFrame(method.Fn(receiver, t.sourceLine), method.Name, fileName, t.sourceLine)
+	cf := newGoMethodCallFrame(method.Fn, receiver, method.Name, fileName, t.sourceLine)
 	cf.sourceLine = t.sourceLine
 	cf.blockFrame = blockFrame
 

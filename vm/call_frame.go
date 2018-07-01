@@ -52,8 +52,9 @@ type callFrame interface {
 
 type goMethodCallFrame struct {
 	*baseFrame
-	method builtinMethodBody
-	name   string
+	method   builtinMethodBody
+	receiver Object
+	name     string
 }
 
 func (cf *goMethodCallFrame) stopExecution() {}
@@ -263,6 +264,6 @@ func newNormalCallFrame(is *instructionSet, filename string, sourceLine int) *no
 	return &normalCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 15), lPr: 0, fileName: filename, sourceLine: sourceLine}, instructionSet: is, pc: 0}
 }
 
-func newGoMethodCallFrame(m builtinMethodBody, n, filename string, sourceLine int) *goMethodCallFrame {
-	return &goMethodCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 15), lPr: 0, fileName: filename, sourceLine: sourceLine}, method: m, name: n}
+func newGoMethodCallFrame(m builtinMethodBody, receiver Object, n, filename string, sourceLine int) *goMethodCallFrame {
+	return &goMethodCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 15), lPr: 0, fileName: filename, sourceLine: sourceLine}, method: m, name: n, receiver: receiver}
 }
