@@ -25,8 +25,6 @@ type Thread struct {
 	// theads have an id so they can be looked up in the vm. The main thread is always 0
 	id int64
 
-	sourceLine int
-
 	vm *VM
 }
 
@@ -349,12 +347,9 @@ func (t *Thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 	}
 }
 
-func (t *Thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame, sl int, fileName string) {
-	oldSourceLine := t.sourceLine
-	t.sourceLine = sl
-
-	cf := newGoMethodCallFrame(method.Fn, receiver, method.Name, fileName, t.sourceLine)
-	cf.sourceLine = t.sourceLine
+func (t *Thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame, sourceLine int, fileName string) {
+	cf := newGoMethodCallFrame(method.Fn, receiver, method.Name, fileName, sourceLine)
+	cf.sourceLine = sourceLine
 	cf.blockFrame = blockFrame
 
 	argPtr := receiverPtr + 1
@@ -371,7 +366,7 @@ func (t *Thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 	if method.Name == "new" && ok {
 		instance, ok := evaluated.Target.(*RObject)
 		if ok && instance.InitializeMethod != nil {
-			callObj := newCallObject(instance, instance.InitializeMethod, receiverPtr, argCount, argSet, blockFrame, t.sourceLine)
+			callObj := newCallObject(instance, instance.InitializeMethod, receiverPtr, argCount, argSet, blockFrame, sourceLine)
 			t.evalMethodObject(callObj)
 		}
 	}
@@ -379,7 +374,6 @@ func (t *Thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 	t.Stack.Set(receiverPtr, evaluated)
 	t.Stack.pointer = argPtr
 
-	t.sourceLine = oldSourceLine
 	if err, ok := evaluated.Target.(*Error); ok {
 		panic(err.Message())
 	}
@@ -391,16 +385,14 @@ func (t *Thread) evalMethodObject(call *callObject) {
 	paramTypes := call.paramTypes()
 	paramsCount := len(call.paramTypes())
 	stack := t.Stack.data
-
-	oldSourceLine := t.sourceLine
-	t.sourceLine = call.sourceLine
+	sourceLine := call.sourceLine
 
 	if call.argCount > paramsCount && !call.method.isSplatArgIncluded() {
-		t.reportArgumentError(t.sourceLine, paramsCount, call.methodName(), call.argCount, call.receiverPtr)
+		t.reportArgumentError(sourceLine, paramsCount, call.methodName(), call.argCount, call.receiverPtr)
 	}
 
 	if normalParamsCount > call.argCount {
-		t.reportArgumentError(t.sourceLine, normalParamsCount, call.methodName(), call.argCount, call.receiverPtr)
+		t.reportArgumentError(sourceLine, normalParamsCount, call.methodName(), call.argCount, call.receiverPtr)
 	}
 
 	// Check if arguments include all the required keys before assign keyword arguments
@@ -409,7 +401,7 @@ func (t *Thread) evalMethodObject(call *callObject) {
 		case bytecode.RequiredKeywordArg:
 			paramName := call.paramNames()[paramIndex]
 			if _, ok := call.hasKeywordArgument(paramName); !ok {
-				t.setErrorObject(call.receiverPtr, call.argPtr(), errors.ArgumentError, t.sourceLine, "Method %s requires key argument %s", call.methodName(), paramName)
+				t.setErrorObject(call.receiverPtr, call.argPtr(), errors.ArgumentError, sourceLine, "Method %s requires key argument %s", call.methodName(), paramName)
 			}
 		}
 	}
@@ -417,7 +409,7 @@ func (t *Thread) evalMethodObject(call *callObject) {
 	err := call.assignKeywordArguments(stack)
 
 	if err != nil {
-		t.setErrorObject(call.receiverPtr, call.argPtr(), errors.ArgumentError, t.sourceLine, err.Error())
+		t.setErrorObject(call.receiverPtr, call.argPtr(), errors.ArgumentError, sourceLine, err.Error())
 	}
 
 	// If given arguments is more than the normal arguments.
@@ -442,7 +434,6 @@ func (t *Thread) evalMethodObject(call *callObject) {
 
 	t.Stack.Set(call.receiverPtr, t.Stack.top())
 	t.Stack.pointer = call.argPtr()
-	t.sourceLine = oldSourceLine
 }
 
 func (t *Thread) reportArgumentError(sourceLine, idealArgNumber int, methodName string, exactArgNumber int, receiverPtr int) {
