@@ -28,7 +28,7 @@ import (
 // ```
 //
 type RangeObject struct {
-	*baseObj
+	*BaseObj
 	Start int
 	End   int
 }
@@ -530,7 +530,7 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 
 func (vm *VM) initRangeObject(start, end int) *RangeObject {
 	return &RangeObject{
-		baseObj: &baseObj{class: vm.topLevelClass(classes.RangeClass)},
+		BaseObj: &BaseObj{class: vm.topLevelClass(classes.RangeClass)},
 		Start:   start,
 		End:     end,
 	}
@@ -547,19 +547,19 @@ func (vm *VM) initRangeClass() *RClass {
 
 // Polymorphic helper functions -----------------------------------------
 
-// toString returns the object's name as the string format
-func (ro *RangeObject) toString() string {
+// ToString returns the object's name as the string format
+func (ro *RangeObject) ToString() string {
 	return fmt.Sprintf("(%d..%d)", ro.Start, ro.End)
 }
 
-// toJSON just delegates to toString
-func (ro *RangeObject) toJSON(t *Thread) string {
-	return ro.toString()
+// ToJSON just delegates to ToString
+func (ro *RangeObject) ToJSON(t *Thread) string {
+	return ro.ToString()
 }
 
 // Value returns range object's string format
 func (ro *RangeObject) Value() interface{} {
-	return ro.toString()
+	return ro.ToString()
 }
 
 func (ro *RangeObject) each(f func(int) error) (err error) {

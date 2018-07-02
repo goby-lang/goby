@@ -5,6 +5,9 @@ import (
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
 	"sync"
+
+	"github.com/goby-lang/goby/vm/classes"
+	"github.com/goby-lang/goby/vm/errors"
 )
 
 // ChannelObject represents Goby's "channel", which equips the Golang' channel and works with `thread`.
@@ -261,19 +264,19 @@ func (co *ChannelObject) Value() interface{} {
 	return co.Chan
 }
 
-// toString returns the object's name as the string format
-func (co *ChannelObject) toString() string {
+// ToString returns the object's name as the string format
+func (co *ChannelObject) ToString() string {
 	return fmt.Sprintf("<Channel: %p>", co.Chan)
 }
 
-// toJSON just delegates to toString
-func (co *ChannelObject) toJSON(t *Thread) string {
-	return co.toString()
+// ToJSON just delegates to ToString
+func (co *ChannelObject) ToJSON(t *Thread) string {
+	return co.ToString()
 }
 
 // copy returns the duplicate of the Array object
 func (co *ChannelObject) copy() Object {
-	newC := &ChannelObject{baseObj: &baseObj{class: co.class}, Chan: make(chan int)}
+	newC := &ChannelObject{BaseObj: &BaseObj{class: co.class}, Chan: make(chan int)}
 	return newC
 }
 

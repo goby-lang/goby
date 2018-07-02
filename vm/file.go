@@ -13,7 +13,7 @@ import (
 
 // FileObject is a special type that contains file pointer so we can keep track on target file.
 type FileObject struct {
-	*baseObj
+	*BaseObj
 	File *os.File
 }
 
@@ -194,7 +194,7 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 					}
 
 					// TODO: Refactor this class retrieval mess
-					fileObj := &FileObject{File: f, baseObj: &baseObj{class: t.vm.topLevelClass(classes.FileClass)}}
+					fileObj := &FileObject{File: f, BaseObj: &BaseObj{class: t.vm.topLevelClass(classes.FileClass)}}
 
 					return fileObj
 				}
@@ -344,7 +344,7 @@ func builtinFileInstanceMethods() []*BuiltinMethodObject {
 
 func (vm *VM) initFileObject(f *os.File) *FileObject {
 	return &FileObject{
-		baseObj: &baseObj{class: vm.topLevelClass(classes.FileClass)},
+		BaseObj: &BaseObj{class: vm.topLevelClass(classes.FileClass)},
 		File:    f,
 	}
 }
@@ -361,14 +361,14 @@ func (vm *VM) initFileClass() *RClass {
 
 // Polymorphic helper functions -----------------------------------------
 
-// toString returns the object's name as the string format
-func (f *FileObject) toString() string {
+// ToString returns the object's name as the string format
+func (f *FileObject) ToString() string {
 	return "<File: " + f.File.Name() + ">"
 }
 
-// toJSON just delegates to `toString`
-func (f *FileObject) toJSON(t *Thread) string {
-	return f.toString()
+// ToJSON just delegates to `ToString`
+func (f *FileObject) ToJSON(t *Thread) string {
+	return f.ToString()
 }
 
 // Value returns file object's string format

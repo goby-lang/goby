@@ -22,7 +22,7 @@ import (
 // - `MatchData.new` is not supported.
 type Match = regexp2.Match
 type MatchDataObject struct {
-	*baseObj
+	*BaseObj
 	match *Match
 }
 
@@ -166,7 +166,7 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 // create an inconsistent MatchData object.
 func (vm *VM) initMatchDataObject(match *Match, pattern, text string) *MatchDataObject {
 	return &MatchDataObject{
-		baseObj: &baseObj{class: vm.topLevelClass(classes.MatchDataClass)},
+		BaseObj: &BaseObj{class: vm.topLevelClass(classes.MatchDataClass)},
 		match:   match,
 	}
 }
@@ -180,13 +180,13 @@ func (vm *VM) initMatchDataClass() *RClass {
 
 // Polymorphic helper functions -----------------------------------------
 
-// redirects to toString()
+// redirects to ToString()
 func (m *MatchDataObject) Value() interface{} {
-	return m.toString()
+	return m.ToString()
 }
 
 // returns a string representation of the object
-func (m *MatchDataObject) toString() string {
+func (m *MatchDataObject) ToString() string {
 	result := "#<MatchData"
 
 	for _, c := range m.match.Groups() {
@@ -199,7 +199,7 @@ func (m *MatchDataObject) toString() string {
 }
 
 // returns a `{ captureNumber: captureValue }` JSON-encoded string
-func (m *MatchDataObject) toJSON(t *Thread) string {
+func (m *MatchDataObject) ToJSON(t *Thread) string {
 	result := "{"
 
 	for _, c := range m.match.Groups() {

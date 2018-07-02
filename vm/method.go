@@ -10,7 +10,7 @@ import (
 
 // MethodObject represents methods defined using goby.
 type MethodObject struct {
-	*baseObj
+	*BaseObj
 	Name           string
 	instructionSet *instructionSet
 	argc           int
@@ -25,7 +25,7 @@ func (vm *VM) initMethodClass() *RClass {
 }
 
 // Polymorphic helper functions -----------------------------------------
-func (m *MethodObject) toString() string {
+func (m *MethodObject) ToString() string {
 	var out bytes.Buffer
 
 	out.WriteString(fmt.Sprintf("<Method: %s (%d params)\n>", m.Name, m.argc))
@@ -34,13 +34,13 @@ func (m *MethodObject) toString() string {
 	return out.String()
 }
 
-func (m *MethodObject) toJSON(t *Thread) string {
-	return m.toString()
+func (m *MethodObject) ToJSON(t *Thread) string {
+	return m.ToString()
 }
 
 // Value returns method object's string format
 func (m *MethodObject) Value() interface{} {
-	return m.toString()
+	return m.ToString()
 }
 
 func (m *MethodObject) paramTypes() []int {
@@ -71,7 +71,7 @@ func (m *MethodObject) isKeywordArgIncluded() bool {
 
 // BuiltinMethodObject represents methods defined in go.
 type BuiltinMethodObject struct {
-	*baseObj
+	*BaseObj
 	Name string
 	Fn   func(receiver Object, sourceLine int) builtinMethodBody
 }
@@ -99,14 +99,14 @@ type builtinMethodBody func(*Thread, []Object, *normalCallFrame) Object
 
 // Polymorphic helper functions -----------------------------------------
 
-// toString returns the object's name as the string format
-func (bim *BuiltinMethodObject) toString() string {
+// ToString returns the object's name as the string format
+func (bim *BuiltinMethodObject) ToString() string {
 	return "<BuiltinMethod: " + bim.Name + ">"
 }
 
-// toJSON just delegates to `toString`
-func (bim *BuiltinMethodObject) toJSON(t *Thread) string {
-	return bim.toString()
+// ToJSON just delegates to `ToString`
+func (bim *BuiltinMethodObject) ToJSON(t *Thread) string {
+	return bim.ToString()
 }
 
 // Value returns builtin method object's function
