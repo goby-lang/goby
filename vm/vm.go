@@ -45,7 +45,6 @@ var standardLibraries = map[string]func(*VM){
 	"net/http":           initHTTPClass,
 	"net/simple_server":  initSimpleServerClass,
 	"uri":                initURIClass,
-	"plugin":             initPluginClass,
 	"json":               initJSONClass,
 	"concurrent/array":   initConcurrentArrayClass,
 	"concurrent/hash":    initConcurrentHashClass,
