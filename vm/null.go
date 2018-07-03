@@ -62,7 +62,8 @@ func builtinNullInstanceMethods() []*BuiltinMethodObject {
 			Name: "to_s",
 			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
 				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.vm.InitStringObject("")
+					n := receiver.(*NullObject)
+					return t.vm.InitStringObject(n.toString())
 				}
 			},
 		},
@@ -152,7 +153,7 @@ func (n *NullObject) Value() interface{} {
 
 // toString returns the object's name as the string format
 func (n *NullObject) toString() string {
-	return "nil"
+	return ""
 }
 
 // toJSON just delegates to toString
