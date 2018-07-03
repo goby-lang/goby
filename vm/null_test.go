@@ -98,6 +98,20 @@ func TestNullTypeConversion(t *testing.T) {
 	}
 }
 
+func TestNullTypeConversionFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`nil.to_s(1)`, "ArgumentError: Expect 0 argument. got: 1", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 // Method test
 
 func TestNullBangPrefixMethod(t *testing.T) {
