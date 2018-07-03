@@ -1154,6 +1154,27 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Print an object, without the newline, converting into String if needed.
+			//
+			// ```ruby
+			// print("foo", "bar")
+			// # => foobar
+			// ```
+			//
+			// @param *args [Class] String literals, or other objects that can be converted into String.
+			// @return [Null]
+			Name: "print",
+			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
+				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+					for _, arg := range args {
+						fmt.Print(arg.toString())
+					}
+
+					return NULL
+				}
+			},
+		},
+		{
 			// Puts string literals or objects into stdout with a tailing line feed, converting into String
 			// if needed.
 			//
