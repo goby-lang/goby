@@ -99,7 +99,7 @@ func TestConcurrentArrayIndex(t *testing.T) {
 		code[3] = 'Switching Protocols'
 		code[5] = 'OK'
 		code.to_s
-		`, `[nil, nil, "Continue", "Switching Protocols", nil, "OK"]`},
+		`, `[, , "Continue", "Switching Protocols", , "OK"]`},
 	}
 
 	for i, tt := range tests {
