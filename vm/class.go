@@ -46,7 +46,7 @@ func RegisterExternalClass(path string, c ...ClassLoader) {
 // ClassLoader can be registerd with a vm so that it can load this library at vm creation
 type ClassLoader = func(*VM) error
 
-func buildMethods(m map[string]MethodBuilder) []*BuiltinMethodObject {
+func buildMethods(m map[string]Method) []*BuiltinMethodObject {
 	out := make([]*BuiltinMethodObject, len(m))
 	var i int
 	for k, v := range m {
@@ -57,7 +57,7 @@ func buildMethods(m map[string]MethodBuilder) []*BuiltinMethodObject {
 }
 
 // ExternalClass helps define external go classes
-func ExternalClass(name, path string, classMethods, instanceMethods map[string]MethodBuilder) ClassLoader {
+func ExternalClass(name, path string, classMethods, instanceMethods map[string]Method) ClassLoader {
 	return func(v *VM) error {
 		pg := v.initializeClass(name)
 		pg.setBuiltinMethods(buildMethods(classMethods), true)
