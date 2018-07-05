@@ -79,7 +79,6 @@ type BuiltinMethodObject struct {
 // Method is a callable function
 type Method = func(receiver Object, line int, t *Thread, args []Object) Object
 
-
 // ExternalBuiltinMethod is a function that builds a BuiltinMethodObject from an external function
 func ExternalBuiltinMethod(name string, m Method) *BuiltinMethodObject {
 	return &BuiltinMethodObject{

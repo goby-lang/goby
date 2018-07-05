@@ -282,6 +282,6 @@ func newGoMethodCallFrame(m builtinMethodBody, receiver Object, argCount, argPtr
 		name:     n,
 		receiver: receiver,
 		argCount: argCount,
-		argPtr: argPtr,
+		argPtr:   argPtr,
 	}
 }
