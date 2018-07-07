@@ -8,6 +8,9 @@ import (
 	"go/token"
 	"io/ioutil"
 	"log"
+	"strings"
+
+	"github.com/fatih/camelcase"
 
 	. "github.com/dave/jennifer/jen"
 )
@@ -57,6 +60,24 @@ func typeNameFromExpr(e ast.Expr) string {
 	return name
 }
 
+type argPair struct {
+	name, kind string
+}
+
+func allArgs(f *ast.FieldList) []argPair {
+	var args []argPair
+	for _, l := range f.List {
+		for _, n := range l.Names {
+			args = append(args, argPair{
+				name: n.Name,
+				kind: typeNameFromExpr(l.Type),
+			})
+		}
+	}
+
+	return args
+}
+
 type Binding struct {
 	ClassName       string
 	ClassMethods    []*ast.FuncDecl
@@ -71,7 +92,8 @@ func (b *Binding) bindingName(f *ast.FuncDecl) string {
 	return fmt.Sprintf("_binding_%s_%s", b.ClassName, f.Name.Name)
 }
 
-func (b *Binding) BindMethods(f *File) {
+func (b *Binding) BindMethods(f *File, x *ast.File) {
+	f.Add(mapping(b, x.Name.Name))
 	f.Var().Id(b.staticName()).Op("=").New(Id(b.ClassName))
 	for _, c := range b.ClassMethods {
 		b.BindClassMethod(f, c)
@@ -88,37 +110,38 @@ func (b *Binding) BindClassMethod(f *File, d *ast.FuncDecl) {
 	b.body(r, f, d)
 }
 func (b *Binding) BindInstanceMethod(f *File, d *ast.FuncDecl) {
-	r := List(Id("r"), Id("ok")).Op(":=").Add(Id("receiver")).Assert(Op("*").Id(b.ClassName)).Line()
+	r := List(Id("r"), Id("ok")).Op(":=").Add(Id("receiver")).Dot("Value").Call().Assert(Op("*").Id(b.ClassName)).Line()
 	r = r.If(Op("!").Id("ok")).Block(
-		Panic(Lit("NOT OK")),
+		Panic(
+			Qual("fmt", "Sprintf").Call(Lit("Impossible receiver type. Wanted "+b.ClassName+" got %s"), Id("receiver")),
+		),
 	).Line()
 	b.body(r, f, d)
 }
 
 func (b *Binding) body(receiver *Statement, f *File, d *ast.FuncDecl) {
 	s := f.Func().Id(b.bindingName(d))
-	s = s.Params(Id("receiver").Qual(vmPkg, "Object"), Id("line").Id("int")).Qual(vmPkg, "Method")
-	ff := Func().Params(Id("t").Op("*").Qual(vmPkg, "Thread"), Id("args").Index().Qual(vmPkg, "Object"))
-	ff = ff.Qual(vmPkg, "Object")
+	s = s.Params(Id("receiver").Qual(vmPkg, "Object"), Id("line").Id("int"), Id("t").Op("*").Qual(vmPkg, "Thread"), Id("args").Index().Qual(vmPkg, "Object")).Qual(vmPkg, "Object")
 
 	var args []*Statement
-	for i, a := range d.Type.Params.List {
+	for i, a := range allArgs(d.Type.Params) {
 		if i == 0 {
 			continue
 		}
 		i = i - 1
-		c := List(Id(fmt.Sprintf("arg%d", i)), Id("ok")).Op(":=").Id("args").Index(Lit(i)).Assert(Id(typeFromExpr(a.Type)))
+		c := List(Id(fmt.Sprintf("arg%d", i)), Id("ok")).Op(":=").Id("args").Index(Lit(i)).Assert(Id(a.kind))
 		c = c.Line()
 		c = c.If(Op("!").Id("ok")).Block(
-			Panic(Lit("NOT OK")),
+			Panic(Lit(fmt.Sprintf("Argument %d must be %s", i, a.kind))),
 		).Line()
 		args = append(args, c)
 	}
 
 	inner := receiver.If(Len(Id("args")).Op("!=").Lit(d.Type.Params.NumFields() - 1)).Block(
-		Panic(Lit("NOT OK")),
+		Panic(
+			Qual("fmt", "Sprintf").Call(Lit(fmt.Sprintf("Wrong NArgs. Wanted: %d got: ", d.Type.Params.NumFields()-1)+"%d"), Len(Id("args"))),
+		).Line(),
 	).Line()
-
 	argNames := []Code{
 		Id("t"),
 	}
@@ -128,14 +151,36 @@ func (b *Binding) body(receiver *Statement, f *File, d *ast.FuncDecl) {
 	}
 
 	inner = inner.Return(Id("r").Dot(d.Name.Name).Call(argNames...))
-	ff = ff.Block(inner)
-	s.Block(Return(ff))
+	s.Block(inner)
+}
 
-	// func closeDB(receiver vm.Object, sourceLine int) vm.Method {
-	// 	return func(t *vm.Thread, args []vm.Object) vm.Object {
-	// 	}
-	// 	return nil
-	// }
+func mapping(b *Binding, pkg string) Code {
+	fnName := func(s string) string {
+		x := camelcase.Split(s)
+		return strings.ToLower(strings.Join(x, "_"))
+	}
+
+	cm := Dict{}
+	for _, d := range b.ClassMethods {
+		cm[Lit(fnName(d.Name.Name))] = Id(b.bindingName(d))
+	}
+	im := Dict{}
+	for _, d := range b.InstanceMethods {
+		im[Lit(fnName(d.Name.Name))] = Id(b.bindingName(d))
+	}
+	dm := Qual(vmPkg, "RegisterExternalClass").Call(
+		Line().Lit(pkg),
+		Qual(vmPkg, "ExternalClass").Call(
+			Line().Lit(b.ClassName),
+			Line().Lit(pkg+".gb"),
+			Line().Map(String()).Qual(vmPkg, "Method").Values(cm),
+			Line().Map(String()).Qual(vmPkg, "Method").Values(im),
+		),
+	)
+	l := Func().Id("init").Params().Block(
+		dm,
+	)
+	return l
 }
 
 func main() {
@@ -192,7 +237,7 @@ func main() {
 	}
 
 	o := NewFile(f.Name.Name)
-	bnd.BindMethods(o)
+	bnd.BindMethods(o, f)
 
 	err = o.Save("bindings.go")
 	if err != nil {

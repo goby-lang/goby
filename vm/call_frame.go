@@ -52,8 +52,11 @@ type callFrame interface {
 
 type goMethodCallFrame struct {
 	*baseFrame
-	method builtinMethodBody
-	name   string
+	method   builtinMethodBody
+	argPtr   int
+	argCount int
+	receiver Object
+	name     string
 }
 
 func (cf *goMethodCallFrame) stopExecution() {}
@@ -143,8 +146,11 @@ func (b *baseFrame) insertLCL(index, depth int, value Object) {
 
 	b.Lock()
 
-	b.locals = append(b.locals, nil)
-	copy(b.locals[index:], b.locals[index:])
+	if index >= len(b.locals) {
+		b.locals = append(b.locals, nil)
+		copy(b.locals[index:], b.locals[index:])
+	}
+
 	b.locals[index] = &Pointer{Target: value}
 
 	if index >= b.lPr {
@@ -260,9 +266,22 @@ func (cfs *callFrameStack) top() callFrame {
 }
 
 func newNormalCallFrame(is *instructionSet, filename string, sourceLine int) *normalCallFrame {
-	return &normalCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 15), lPr: 0, fileName: filename, sourceLine: sourceLine}, instructionSet: is, pc: 0}
+	return &normalCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 5), lPr: 0, fileName: filename, sourceLine: sourceLine}, instructionSet: is, pc: 0}
 }
 
-func newGoMethodCallFrame(m builtinMethodBody, n, filename string, sourceLine int) *goMethodCallFrame {
-	return &goMethodCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 15), lPr: 0, fileName: filename, sourceLine: sourceLine}, method: m, name: n}
+func newGoMethodCallFrame(m builtinMethodBody, receiver Object, argCount, argPtr int, n, filename string, sourceLine int, blockFrame *normalCallFrame) *goMethodCallFrame {
+	return &goMethodCallFrame{
+		baseFrame: &baseFrame{
+			locals:     make([]*Pointer, 5),
+			lPr:        0,
+			fileName:   filename,
+			sourceLine: sourceLine,
+			blockFrame: blockFrame,
+		},
+		method:   m,
+		name:     n,
+		receiver: receiver,
+		argCount: argCount,
+		argPtr:   argPtr,
+	}
 }

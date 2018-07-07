@@ -202,10 +202,9 @@ func builtinMainObjSingletonMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "to_s",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(thread *Thread, objects []Object, frame *normalCallFrame) Object {
-					return thread.vm.InitStringObject("main")
-				}
+			Fn: func(receiver Object, sourceLine int, thread *Thread, objects []Object, frame *normalCallFrame) Object {
+				return thread.vm.InitStringObject("main")
+
 			},
 		},
 	}
@@ -213,8 +212,8 @@ func builtinMainObjSingletonMethods() []*BuiltinMethodObject {
 
 func (vm *VM) initMainObj() *RObject {
 	obj := vm.objectClass.initializeInstance()
-	singletonClass := vm.initializeClass(fmt.Sprintf("#<Class:%s>", obj.toString()))
-	singletonClass.Methods.set("include", vm.topLevelClass(classes.ClassClass).lookupMethod("include"))
+	singletonClass := vm.initializeClass(fmt.Sprintf("#<Class:%s>", obj.ToString()))
+	singletonClass.Methods.set("include", vm.TopLevelClass(classes.ClassClass).lookupMethod("include"))
 	singletonClass.setBuiltinMethods(builtinMainObjSingletonMethods(), false)
 	obj.singletonClass = singletonClass
 
@@ -226,8 +225,8 @@ func (vm *VM) initConstants() {
 	cClass := initClassClass()
 	mClass := initModuleClass(cClass)
 	vm.objectClass = initObjectClass(cClass)
-	vm.topLevelClass(classes.ObjectClass).setClassConstant(cClass)
-	vm.topLevelClass(classes.ObjectClass).setClassConstant(mClass)
+	vm.TopLevelClass(classes.ObjectClass).setClassConstant(cClass)
+	vm.TopLevelClass(classes.ObjectClass).setClassConstant(mClass)
 
 	// Init builtin classes
 	builtinClasses := []*RClass{
@@ -280,7 +279,7 @@ func (vm *VM) initConstants() {
 	vm.objectClass.constants["STDIN"] = &Pointer{Target: vm.initFileObject(os.Stdin)}
 }
 
-func (vm *VM) topLevelClass(cn string) *RClass {
+func (vm *VM) TopLevelClass(cn string) *RClass {
 	objClass := vm.objectClass
 
 	if cn == classes.ObjectClass {

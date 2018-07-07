@@ -13,6 +13,7 @@ type callObject struct {
 	argIndex     int
 	lastArgIndex int
 	callFrame    *normalCallFrame
+	sourceLine   int
 }
 
 func newCallObject(receiver Object, method *MethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame, sourceLine int) *callObject {
@@ -28,6 +29,7 @@ func newCallObject(receiver Object, method *MethodObject, receiverPtr, argCount 
 		// This is only for normal/optioned arguments
 		lastArgIndex: -1,
 		callFrame:    cf,
+		sourceLine:   sourceLine,
 	}
 }
 
