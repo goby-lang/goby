@@ -29,8 +29,8 @@ func (r *Result) Value() interface{} {
 }
 
 // New creates and returns a new isntance of a Result
-func (Result) New(t *Thread, name Object, value Object) (r *Result) {
-	r = &Result{
+func (Result) New(t *Thread, name Object, value Object) Object {
+	r := &Result{
 		name:    name,
 		value:   value,
 		BaseObj: vm.NewBaseObject(t.VM(), "Result"),
@@ -39,11 +39,11 @@ func (Result) New(t *Thread, name Object, value Object) (r *Result) {
 		r.empty = true
 	}
 
-	return
+	return r
 }
 
 // MethodMissing will be called for all methods other than 'or'
-func (r *Result) MethodMissing(t *Thread, name Object, args Object) *Result {
+func (r *Result) MethodMissing(t *Thread, name Object, args Object) Object {
 	if name == r.name && !r.used {
 		r.used = true
 		if t.BlockGiven() {

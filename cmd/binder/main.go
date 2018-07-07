@@ -35,8 +35,6 @@ func typeFromExpr(e ast.Expr) string {
 
 	case *ast.SelectorExpr:
 		name = fmt.Sprintf("%s.%s", typeFromExpr(t.X), t.Sel.Name)
-	default:
-		log.Printf("%T", e)
 
 	}
 	return name
@@ -53,8 +51,6 @@ func typeNameFromExpr(e ast.Expr) string {
 
 	case *ast.SelectorExpr:
 		name = fmt.Sprintf("%s.%s", typeFromExpr(t.X), t.Sel.Name)
-	default:
-		log.Printf("%T", e)
 
 	}
 	return name
@@ -110,7 +106,7 @@ func (b *Binding) BindClassMethod(f *File, d *ast.FuncDecl) {
 	b.body(r, f, d)
 }
 func (b *Binding) BindInstanceMethod(f *File, d *ast.FuncDecl) {
-	r := List(Id("r"), Id("ok")).Op(":=").Add(Id("receiver")).Dot("Value").Call().Assert(Op("*").Id(b.ClassName)).Line()
+	r := List(Id("r"), Id("ok")).Op(":=").Add(Id("receiver")).Assert(Op("*").Id(b.ClassName)).Line()
 	r = r.If(Op("!").Id("ok")).Block(
 		Panic(
 			Qual("fmt", "Sprintf").Call(Lit("Impossible receiver type. Wanted "+b.ClassName+" got %s"), Id("receiver")),
@@ -203,6 +199,15 @@ func main() {
 		switch n := n.(type) {
 		case *ast.FuncDecl:
 			if n.Recv != nil {
+				res := n.Type.Results
+				if res == nil {
+					return true
+				}
+
+				if len(res.List) == 0 || typeNameFromExpr(res.List[0].Type) != "Object" {
+					return true
+				}
+
 				// class or instance?
 				r := n.Recv.List[0]
 				name := typeNameFromExpr(r.Type)

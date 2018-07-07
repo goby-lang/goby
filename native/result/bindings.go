@@ -39,7 +39,7 @@ func _binding_Result_New(receiver vm.Object, line int, t *vm.Thread, args []vm.O
 }
 
 func _binding_Result_MethodMissing(receiver vm.Object, line int, t *vm.Thread, args []vm.Object) vm.Object {
-	r, ok := receiver.Value().(*Result)
+	r, ok := receiver.(*Result)
 	if !ok {
 		panic(fmt.Sprintf("Impossible receiver type. Wanted Result got %s", receiver))
 	}
@@ -61,7 +61,7 @@ func _binding_Result_MethodMissing(receiver vm.Object, line int, t *vm.Thread, a
 }
 
 func _binding_Result_Or(receiver vm.Object, line int, t *vm.Thread, args []vm.Object) vm.Object {
-	r, ok := receiver.Value().(*Result)
+	r, ok := receiver.(*Result)
 	if !ok {
 		panic(fmt.Sprintf("Impossible receiver type. Wanted Result got %s", receiver))
 	}
