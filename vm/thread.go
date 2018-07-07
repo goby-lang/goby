@@ -160,14 +160,12 @@ func (t *Thread) evalCallFrame(cf callFrame) {
 	case *goMethodCallFrame:
 		args := []Object{}
 
-		for _, obj := range cf.locals {
-			if obj != nil {
-				args = append(args, obj.Target)
-			}
+		for i := 0; i < cf.argCount; i++ {
+			args = append(args, t.Stack.data[cf.argPtr+i].Target)
 		}
 		//fmt.Println("-----------------------")
 		//fmt.Println(t.callFrameStack.inspect())
-		result := cf.method(t, args, cf.blockFrame)
+		result := cf.method(cf.receiver, cf.sourceLine, t, args, cf.blockFrame)
 		t.Stack.Push(&Pointer{Target: result})
 		//fmt.Println(t.callFrameStack.inspect())
 		//fmt.Println("-----------------------")
@@ -355,8 +353,8 @@ func (t *Thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 
 	switch m := method.(type) {
 	case *MethodObject:
-		callObj := newCallObject(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, sendCallFrame.SourceLine())
-		t.evalMethodObject(callObj, sourceLine)
+		callObj := newCallObject(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, 1)
+		t.evalMethodObject(callObj)
 	case *BuiltinMethodObject:
 		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, sourceLine, sendCallFrame.FileName())
 	case *Error:
@@ -365,14 +363,18 @@ func (t *Thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 }
 
 func (t *Thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame, sourceLine int, fileName string) {
-	cf := newGoMethodCallFrame(method.Fn(receiver, sourceLine), method.Name, fileName, sourceLine)
-	cf.sourceLine = sourceLine
-	cf.blockFrame = blockFrame
 	argPtr := receiverPtr + 1
 
-	for i := 0; i < argCount; i++ {
-		cf.locals = append(cf.locals, t.Stack.data[argPtr+i])
-	}
+	cf := newGoMethodCallFrame(
+		method.Fn,
+		receiver,
+		argCount,
+		argPtr,
+		method.Name,
+		fileName,
+		sourceLine,
+		blockFrame,
+	)
 
 	t.callFrameStack.push(cf)
 	t.startFromTopFrame()
@@ -383,12 +385,12 @@ func (t *Thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 		instance, ok := evaluated.Target.(*RObject)
 		if ok && instance.InitializeMethod != nil {
 			callObj := newCallObject(instance, instance.InitializeMethod, receiverPtr, argCount, argSet, blockFrame, sourceLine)
-			t.evalMethodObject(callObj, sourceLine)
+			t.evalMethodObject(callObj)
 		}
 	}
 
 	t.Stack.Set(receiverPtr, evaluated)
-	t.Stack.pointer = argPtr
+	t.Stack.pointer = cf.argPtr
 
 	if err, ok := evaluated.Target.(*Error); ok {
 		panic(err.Message())
@@ -396,11 +398,12 @@ func (t *Thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 }
 
 // TODO: Move instruction into call object
-func (t *Thread) evalMethodObject(call *callObject, sourceLine int) {
+func (t *Thread) evalMethodObject(call *callObject) {
 	normalParamsCount := call.normalParamsCount()
 	paramTypes := call.paramTypes()
 	paramsCount := len(call.paramTypes())
 	stack := t.Stack.data
+	sourceLine := call.sourceLine
 
 	if call.argCount > paramsCount && !call.method.isSplatArgIncluded() {
 		t.reportArgumentError(sourceLine, paramsCount, call.methodName(), call.argCount, call.receiverPtr)

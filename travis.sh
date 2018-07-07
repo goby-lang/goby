@@ -36,3 +36,5 @@ done
 # TODO: Write a test for this specific case
 make install
 goby test specs
+
+./benchmark.rb

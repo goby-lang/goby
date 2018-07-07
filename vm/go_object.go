@@ -24,26 +24,25 @@ func builtinGoObjectInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "go_func",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					s, ok := args[0].(*StringObject)
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				s, ok := args[0].(*StringObject)
 
-					if !ok {
-						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
-					}
-
-					funcName := s.value
-					r := receiver.(*GoObject)
-
-					funcArgs, err := convertToGoFuncArgs(args[1:])
-
-					if err != nil {
-						t.vm.InitErrorObject(errors.TypeError, sourceLine, err.Error())
-					}
-
-					result := metago.CallFunc(r.data, funcName, funcArgs...)
-					return t.vm.InitObjectFromGoType(result)
+				if !ok {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 				}
+
+				funcName := s.value
+				r := receiver.(*GoObject)
+
+				funcArgs, err := ConvertToGoFuncArgs(args[1:])
+
+				if err != nil {
+					t.vm.InitErrorObject(errors.TypeError, sourceLine, err.Error())
+				}
+
+				result := metago.CallFunc(r.data, funcName, funcArgs...)
+				return t.vm.InitObjectFromGoType(result)
+
 			},
 		},
 	}
@@ -53,8 +52,8 @@ func builtinGoObjectInstanceMethods() []*BuiltinMethodObject {
 
 // Functions for initialization -----------------------------------------
 
-func (vm *VM) InitGoObject(d interface{}) *GoObject {
-	return &GoObject{data: d, BaseObj: &BaseObj{class: vm.topLevelClass(classes.GoObjectClass)}}
+func (vm *VM) initGoObject(d interface{}) *GoObject {
+	return &GoObject{data: d, BaseObj: &BaseObj{class: vm.TopLevelClass(classes.GoObjectClass)}}
 }
 
 func (vm *VM) initGoClass() *RClass {
@@ -84,7 +83,7 @@ func (s *GoObject) ToJSON(t *Thread) string {
 
 // Other helper functions -----------------------------------------------
 
-func convertToGoFuncArgs(args []Object) ([]interface{}, error) {
+func ConvertToGoFuncArgs(args []Object) ([]interface{}, error) {
 	funcArgs := []interface{}{}
 
 	for _, arg := range args {

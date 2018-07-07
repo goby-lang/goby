@@ -15,15 +15,15 @@ type Object interface {
 	SetSingletonClass(*RClass)
 	findMethod(string) Object
 	findMethodMissing(bool) Object
-	toString() string
-	toJSON(t *Thread) string
+	ToString() string
+	ToJSON(t *Thread) string
 	id() int
 	InstanceVariableGet(string) (Object, bool)
 	InstanceVariableSet(string, Object) Object
 	isTruthy() bool
 }
 
-// baseObj ==============================================================
+// BaseObj ==============================================================
 
 type BaseObj struct {
 	class             *RClass
@@ -31,8 +31,11 @@ type BaseObj struct {
 	InstanceVariables *environment
 }
 
-func NewBaseObj(v *VM, name string) *BaseObj {
-	return &BaseObj{class: v.topLevelClass(name)}
+func NewBaseObject(v *VM, class string) *BaseObj {
+	return &BaseObj{
+		class:             v.TopLevelClass(class),
+		InstanceVariables: newEnvironment(),
+	}
 }
 
 // Polymorphic helper functions -----------------------------------------
@@ -83,7 +86,7 @@ func (b *BaseObj) findMethod(methodName string) (method Object) {
 	return
 }
 
-func (b *baseObj) findMethodMissing(searchAncestor bool) (method Object) {
+func (b *BaseObj) findMethodMissing(searchAncestor bool) (method Object) {
 	methodMissing := "method_missing"
 
 	if b.SingletonClass() != nil {
@@ -101,7 +104,7 @@ func (b *baseObj) findMethodMissing(searchAncestor bool) (method Object) {
 	return
 }
 
-func (b *baseObj) id() int {
+func (b *BaseObj) id() int {
 	r, e := strconv.ParseInt(fmt.Sprintf("%p", b), 0, 64)
 	if e != nil {
 		panic(e.Error())
@@ -147,7 +150,7 @@ func (ro *RObject) ToJSON(t *Thread) string {
 	if customToJSONMethod != nil {
 		t.Stack.Push(&Pointer{Target: ro})
 		callObj := newCallObject(ro, customToJSONMethod, t.Stack.pointer, 0, &bytecode.ArgSet{}, nil, customToJSONMethod.instructionSet.instructions[0].sourceLine)
-		t.evalMethodObject(callObj, customToJSONMethod.instructionSet.instructions[0].sourceLine)
+		t.evalMethodObject(callObj)
 		result := t.Stack.Pop().Target
 		return result.ToString()
 	}

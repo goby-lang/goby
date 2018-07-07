@@ -43,88 +43,85 @@ func builtinSimpleServerInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "mount",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					path := args[0].(*StringObject).value
-					method := args[1].(*StringObject).value
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				path := args[0].(*StringObject).value
+				method := args[1].(*StringObject).value
 
-					router.HandleFunc(path, newHandler(t, blockFrame)).Methods(method)
+				router.HandleFunc(path, newHandler(t, blockFrame)).Methods(method)
 
-					return receiver
-				}
+				return receiver
+
 			},
 		},
 		{
 			Name: "static",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					prefix := args[0].(*StringObject).value
-					fileName := args[1].(*StringObject).value
-					router.PathPrefix(prefix).Handler(http.StripPrefix(prefix, http.FileServer(http.Dir(fileName))))
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				prefix := args[0].(*StringObject).value
+				fileName := args[1].(*StringObject).value
+				router.PathPrefix(prefix).Handler(http.StripPrefix(prefix, http.FileServer(http.Dir(fileName))))
 
-					return receiver
-				}
+				return receiver
+
 			},
 		},
 		{
 			Name: "start",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					var port string
-					var serveStatic bool
-					server := receiver.(*RObject)
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				var port string
+				var serveStatic bool
+				server := receiver.(*RObject)
 
-					portVar, ok := server.InstanceVariableGet("@port")
+				portVar, ok := server.InstanceVariableGet("@port")
 
-					if !ok {
-						port = "8080"
-					} else {
-						switch p := portVar.(type) {
-						case *StringObject:
-							port = p.value
-						case *IntegerObject:
-							port = strconv.Itoa(p.value)
-						default:
-							fmt.Printf("Unexpected type %s for port setting\n", portVar.Class().Name)
-						}
+				if !ok {
+					port = "8080"
+				} else {
+					switch p := portVar.(type) {
+					case *StringObject:
+						port = p.value
+					case *IntegerObject:
+						port = strconv.Itoa(p.value)
+					default:
+						fmt.Printf("Unexpected type %s for port setting\n", portVar.Class().Name)
 					}
-
-					log.Println("SimpleServer start listening on port: " + port)
-
-					c := make(chan os.Signal, 1)
-					signal.Notify(c, os.Interrupt)
-
-					go func() {
-						for range c {
-							log.Println("SimpleServer gracefully stopped")
-							os.Exit(0)
-						}
-					}()
-
-					fileRoot, serveStatic := server.InstanceVariables.get("@file_root")
-
-					router.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-						log.Printf("%s %s %s %d\n", r.Method, r.URL.Path, r.Proto, 404)
-					})
-
-					if serveStatic && fileRoot.Class() != t.vm.objectClass.getClassConstant(classes.NullClass) {
-						fr := fileRoot.(*StringObject).value
-						currentDir, _ := os.Getwd()
-						fp := filepath.Join(currentDir, fr)
-						fs := http.FileServer(http.Dir(fp))
-						http.Handle("/", fs)
-					} else {
-						http.Handle("/", router)
-					}
-
-					err := http.ListenAndServe(":"+port, nil)
-
-					if err != http.ErrServerClosed { // HL
-						log.Fatalf("listen: %s\n", err)
-					}
-
-					return receiver
 				}
+
+				log.Println("SimpleServer start listening on port: " + port)
+
+				c := make(chan os.Signal, 1)
+				signal.Notify(c, os.Interrupt)
+
+				go func() {
+					for range c {
+						log.Println("SimpleServer gracefully stopped")
+						os.Exit(0)
+					}
+				}()
+
+				fileRoot, serveStatic := server.InstanceVariables.get("@file_root")
+
+				router.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					log.Printf("%s %s %s %d\n", r.Method, r.URL.Path, r.Proto, 404)
+				})
+
+				if serveStatic && fileRoot.Class() != t.vm.objectClass.getClassConstant(classes.NullClass) {
+					fr := fileRoot.(*StringObject).value
+					currentDir, _ := os.Getwd()
+					fp := filepath.Join(currentDir, fr)
+					fs := http.FileServer(http.Dir(fp))
+					http.Handle("/", fs)
+				} else {
+					http.Handle("/", router)
+				}
+
+				err := http.ListenAndServe(":"+port, nil)
+
+				if err != http.ErrServerClosed { // HL
+					log.Fatalf("listen: %s\n", err)
+				}
+
+				return receiver
+
 			},
 		},
 	}

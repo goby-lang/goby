@@ -59,14 +59,12 @@ func builtinBlockClassMethods() []*BuiltinMethodObject {
 			// @param block literal
 			// @return [Block]
 			Name: "new",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Can't initialize block object without block argument")
-					}
-
-					return t.vm.initBlockObject(blockFrame.instructionSet, blockFrame.ep, blockFrame.self)
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if blockFrame == nil {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Can't initialize block object without block argument")
 				}
+
+				return t.vm.initBlockObject(blockFrame.instructionSet, blockFrame.ep, blockFrame.self)
 			},
 		},
 	}
@@ -113,16 +111,14 @@ func builtinBlockInstanceMethods() []*BuiltinMethodObject {
 			// @param object [Object]...
 			// @return [Object]
 			Name: "call",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					block := receiver.(*BlockObject)
-					c := newNormalCallFrame(block.instructionSet, block.instructionSet.filename, sourceLine)
-					c.ep = block.ep
-					c.self = block.self
-					c.isBlock = true
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				block := receiver.(*BlockObject)
+				c := newNormalCallFrame(block.instructionSet, block.instructionSet.filename, sourceLine)
+				c.ep = block.ep
+				c.self = block.self
+				c.isBlock = true
 
-					return t.builtinMethodYield(c, args...).Target
-				}
+				return t.builtinMethodYield(c, args...).Target
 			},
 		},
 	}
@@ -141,7 +137,7 @@ func (vm *VM) initBlockClass() *RClass {
 
 func (vm *VM) initBlockObject(is *instructionSet, ep *normalCallFrame, self Object) *BlockObject {
 	return &BlockObject{
-		BaseObj:        &BaseObj{class: vm.topLevelClass(classes.BlockClass)},
+		BaseObj:        &BaseObj{class: vm.TopLevelClass(classes.BlockClass)},
 		instructionSet: is,
 		ep:             ep,
 		self:           self,
