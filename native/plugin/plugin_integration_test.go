@@ -1,8 +1,10 @@
-package vm
+package plugin
 
 import (
 	"os"
 	"testing"
+
+	"github.com/goby-lang/goby/vm"
 )
 
 func TestCallingPluginFunctionNoRaceDetection(t *testing.T) {
@@ -11,18 +13,15 @@ func TestCallingPluginFunctionNoRaceDetection(t *testing.T) {
 	input := `
 	require "plugin"
 
-	p = Plugin.use "../test_fixtures/import_test/plugin/plugin.go"
+	p = Plugin.use "../test_fixtures/import_test.VM()/plugin.go"
 	p.go_func("Foo", "!")
 	p.go_func("Baz")
 	`
 
-	v := initTestVM()
 	// We don't test the result here for two reasons:
 	// - If it doesn't work it'll returns error or panic
 	// - It's hard to test a plugin obj
-	v.testEval(t, input, getFilename())
-	v.checkCFP(t, 0, 0)
-	v.checkSP(t, 0, 1)
+	vm.ExecAndReturn(t, input)
 }
 
 func TestCallingPluginFunctionWithReturnValueNoRaceDetection(t *testing.T) {
@@ -31,15 +30,12 @@ func TestCallingPluginFunctionWithReturnValueNoRaceDetection(t *testing.T) {
 	input := `
 	require "plugin"
 
-	p = Plugin.use "../test_fixtures/import_test/plugin/plugin.go"
+	p = Plugin.use "../test_fixtures/import_test.VM()/plugin.go"
 	p.go_func("Bar")
 	`
 
-	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
-	VerifyExpected(t, 0, evaluated, "Bar")
-	v.checkCFP(t, 0, 0)
-	v.checkSP(t, 0, 1)
+	evaluated := vm.ExecAndReturn(t, input)
+	vm.VerifyExpected(t, 0, evaluated, "Bar")
 }
 
 func TestCallingLibFuncFromPluginNoRaceDetection(t *testing.T) {
@@ -48,15 +44,12 @@ func TestCallingLibFuncFromPluginNoRaceDetection(t *testing.T) {
 	input := `
 	require "plugin"
 
-	p = Plugin.use "../test_fixtures/import_test/plugin/plugin.go"
+	p = Plugin.use "../test_fixtures/import_test.VM()/plugin.go"
 	p.go_func("ReturnLibName")
 	`
 
-	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
-	VerifyExpected(t, 0, evaluated, "lib")
-	v.checkCFP(t, 0, 0)
-	v.checkSP(t, 0, 1)
+	evaluated := vm.ExecAndReturn(t, input)
+	vm.VerifyExpected(t, 0, evaluated, "lib")
 }
 
 func TestPluginGenerationNoRaceDetection(t *testing.T) {
@@ -76,11 +69,8 @@ func TestPluginGenerationNoRaceDetection(t *testing.T) {
 	!err.nil? && err.go_func("Error").is_a?(String)
 	`
 
-	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
-	VerifyExpected(t, 0, evaluated, true)
-	v.checkCFP(t, 0, 0)
-	v.checkSP(t, 0, 1)
+	evaluated := vm.ExecAndReturn(t, input)
+	vm.VerifyExpected(t, 0, evaluated, true)
 }
 
 func skipPluginTestIfEnvNotSet(t *testing.T) {

@@ -1,7 +1,9 @@
-package vm
+package plugin
 
 import (
 	"testing"
+
+	"github.com/goby-lang/goby/vm"
 )
 
 func TestPluginInitialization(t *testing.T) {
@@ -45,10 +47,7 @@ func TestPluginInitialization(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		VerifyExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
+		evaluated := vm.ExecAndReturn(t, tt.input)
+		vm.VerifyExpected(t, i, evaluated, tt.expected)
 	}
 }

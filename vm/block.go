@@ -46,7 +46,7 @@ import (
 // ```
 //
 type BlockObject struct {
-	*baseObj
+	*BaseObj
 	instructionSet *instructionSet
 	ep             *normalCallFrame
 	self           Object
@@ -137,7 +137,7 @@ func (vm *VM) initBlockClass() *RClass {
 
 func (vm *VM) initBlockObject(is *instructionSet, ep *normalCallFrame, self Object) *BlockObject {
 	return &BlockObject{
-		baseObj:        &baseObj{class: vm.topLevelClass(classes.BlockClass)},
+		BaseObj:        &BaseObj{class: vm.TopLevelClass(classes.BlockClass)},
 		instructionSet: is,
 		ep:             ep,
 		self:           self,
@@ -151,18 +151,18 @@ func (bo *BlockObject) Value() interface{} {
 	return bo.instructionSet
 }
 
-// toString returns the object's name as the string format
-func (bo *BlockObject) toString() string {
+// ToString returns the object's name as the string format
+func (bo *BlockObject) ToString() string {
 	return fmt.Sprintf("<Block: %s>", bo.instructionSet.filename)
 }
 
-// toJSON just delegates to toString
-func (bo *BlockObject) toJSON(t *Thread) string {
-	return bo.toString()
+// ToJSON just delegates to ToString
+func (bo *BlockObject) ToJSON(t *Thread) string {
+	return bo.ToString()
 }
 
 // copy returns the duplicate of the Array object
 func (bo *BlockObject) copy() Object {
-	newC := &BlockObject{baseObj: &baseObj{class: bo.class}, instructionSet: bo.instructionSet}
+	newC := &BlockObject{BaseObj: &BaseObj{class: bo.class}, instructionSet: bo.instructionSet}
 	return newC
 }

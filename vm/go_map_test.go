@@ -15,7 +15,7 @@ func TestGoMapInitWithoutArg(t *testing.T) {
 	_, ok := evaluated.(*GoMap)
 
 	if !ok {
-		t.Errorf("Expect object to be an instance of GoMap. got: %s", evaluated.toString())
+		t.Errorf("Expect object to be an instance of GoMap. got: %s", evaluated.ToString())
 	}
 }
 
@@ -31,7 +31,7 @@ func TestGoMapInitWithHash(t *testing.T) {
 	m, ok := evaluated.(*GoMap)
 
 	if !ok {
-		t.Fatalf("Expect object to be an instance of GoMap. got: %s", evaluated.toString())
+		t.Fatalf("Expect object to be an instance of GoMap. got: %s", evaluated.ToString())
 	}
 
 	bar, ok := m.data["foo"]

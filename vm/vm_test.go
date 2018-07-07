@@ -207,9 +207,9 @@ func TestVM_REPLExecFail(t *testing.T) {
 
 		evaluated := v.GetExecResult()
 
-		if evaluated.toString() != test.expected {
+		if evaluated.ToString() != test.expected {
 			t.Fatalf("At case %d expected %s got %s", i,
-				test.expected, evaluated.toString())
+				test.expected, evaluated.ToString())
 		}
 
 		// Because REPL should maintain a base call frame so that the whole program won't exit

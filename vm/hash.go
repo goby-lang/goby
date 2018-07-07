@@ -40,7 +40,7 @@ import (
 // - Operator `=>` is not supported.
 // - `Hash.new` is not supported.
 type HashObject struct {
-	*baseObj
+	*BaseObj
 	Pairs map[string]Object
 
 	// See `[]` and `[]=` for the operational explanation of the default value.
@@ -1050,7 +1050,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 				}
 
 				r := receiver.(*HashObject)
-				return t.vm.InitStringObject(r.toJSON(t))
+				return t.vm.InitStringObject(r.ToJSON(t))
 
 			},
 		},
@@ -1071,7 +1071,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 				}
 
 				h := receiver.(*HashObject)
-				return t.vm.InitStringObject(h.toString())
+				return t.vm.InitStringObject(h.ToString())
 
 			},
 		},
@@ -1181,7 +1181,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 
 func (vm *VM) InitHashObject(pairs map[string]Object) *HashObject {
 	return &HashObject{
-		baseObj: &baseObj{class: vm.topLevelClass(classes.HashClass)},
+		BaseObj: &BaseObj{class: vm.TopLevelClass(classes.HashClass)},
 		Pairs:   pairs,
 	}
 }
@@ -1200,17 +1200,17 @@ func (h *HashObject) Value() interface{} {
 	return h.Pairs
 }
 
-// toString returns the object's name as the string format
-func (h *HashObject) toString() string {
+// ToString returns the object's name as the string format
+func (h *HashObject) ToString() string {
 	var out bytes.Buffer
 	var pairs []string
 
 	for _, key := range h.sortedKeys() {
 		// TODO: Improve this conditional statement
 		if _, isString := h.Pairs[key].(*StringObject); isString {
-			pairs = append(pairs, fmt.Sprintf("%s: \"%s\"", key, h.Pairs[key].toString()))
+			pairs = append(pairs, fmt.Sprintf("%s: \"%s\"", key, h.Pairs[key].ToString()))
 		} else {
-			pairs = append(pairs, fmt.Sprintf("%s: %s", key, h.Pairs[key].toString()))
+			pairs = append(pairs, fmt.Sprintf("%s: %s", key, h.Pairs[key].ToString()))
 		}
 	}
 
@@ -1221,8 +1221,8 @@ func (h *HashObject) toString() string {
 	return out.String()
 }
 
-// toJSON returns the object's name as the JSON string format
-func (h *HashObject) toJSON(t *Thread) string {
+// ToJSON returns the object's name as the JSON string format
+func (h *HashObject) ToJSON(t *Thread) string {
 	var out bytes.Buffer
 	var values []string
 	pairs := h.Pairs
@@ -1261,7 +1261,7 @@ func (h *HashObject) copy() Object {
 	}
 
 	newHash := &HashObject{
-		baseObj: &baseObj{class: h.class},
+		BaseObj: &BaseObj{class: h.class},
 		Pairs:   elems,
 	}
 
@@ -1307,7 +1307,7 @@ func generateJSONFromPair(key string, v Object, t *Thread) string {
 	out.WriteString(data)
 	out.WriteString("\"" + key + "\"")
 	out.WriteString(":")
-	out.WriteString(v.toJSON(t))
+	out.WriteString(v.ToJSON(t))
 
 	return out.String()
 }
