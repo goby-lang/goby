@@ -203,10 +203,9 @@ func builtinMainObjSingletonMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "to_s",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(thread *Thread, objects []Object, frame *normalCallFrame) Object {
-					return thread.vm.InitStringObject("main")
-				}
+			Fn: func(receiver Object, sourceLine int, thread *Thread, objects []Object, frame *normalCallFrame) Object {
+				return thread.vm.InitStringObject("main")
+
 			},
 		},
 	}

@@ -31,10 +31,9 @@ func builtInMatchDataClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "new",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
-				}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
+
 			},
 		},
 	}
@@ -54,23 +53,22 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Array]
 			Name: "captures",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
-					}
-					offset := 1
-
-					g := receiver.(*MatchDataObject).match
-					n := len(g.Groups()) - offset
-					destCaptures := make([]Object, n, n)
-
-					for i := 0; i < n; i++ {
-						destCaptures[i] = t.vm.InitStringObject(g.GroupByNumber(i + offset).String())
-					}
-
-					return t.vm.InitArrayObject(destCaptures)
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 				}
+				offset := 1
+
+				g := receiver.(*MatchDataObject).match
+				n := len(g.Groups()) - offset
+				destCaptures := make([]Object, n, n)
+
+				for i := 0; i < n; i++ {
+					destCaptures[i] = t.vm.InitStringObject(g.GroupByNumber(i + offset).String())
+				}
+
+				return t.vm.InitArrayObject(destCaptures)
+
 			},
 		},
 		{
@@ -85,22 +83,21 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Array]
 			Name: "to_a",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
-					}
-
-					g := receiver.(*MatchDataObject).match
-					n := len(g.Groups())
-					destCaptures := make([]Object, n, n)
-
-					for i := 0; i < n; i++ {
-						destCaptures[i] = t.vm.InitStringObject(g.GroupByNumber(i).String())
-					}
-
-					return t.vm.InitArrayObject(destCaptures)
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 				}
+
+				g := receiver.(*MatchDataObject).match
+				n := len(g.Groups())
+				destCaptures := make([]Object, n, n)
+
+				for i := 0; i < n; i++ {
+					destCaptures[i] = t.vm.InitStringObject(g.GroupByNumber(i).String())
+				}
+
+				return t.vm.InitArrayObject(destCaptures)
+
 			},
 		},
 		{
@@ -117,21 +114,20 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Hash]
 			Name: "to_h",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
-					}
-
-					groups := receiver.(*MatchDataObject).match
-					result := make(map[string]Object)
-
-					for _, g := range groups.Groups() {
-						result[g.Name] = t.vm.InitStringObject(g.String())
-					}
-
-					return t.vm.InitHashObject(result)
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 				}
+
+				groups := receiver.(*MatchDataObject).match
+				result := make(map[string]Object)
+
+				for _, g := range groups.Groups() {
+					result[g.Name] = t.vm.InitStringObject(g.String())
+				}
+
+				return t.vm.InitHashObject(result)
+
 			},
 		},
 		{
@@ -142,16 +138,15 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			// @return [Integer]
 			Name: "length",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
-					}
-
-					m := receiver.(*MatchDataObject).match
-
-					return t.vm.InitIntegerObject(m.GroupCount())
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
 				}
+
+				m := receiver.(*MatchDataObject).match
+
+				return t.vm.InitIntegerObject(m.GroupCount())
+
 			},
 		},
 	}

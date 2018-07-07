@@ -52,10 +52,9 @@ func builtinHashClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "new",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
-				}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
+
 			},
 		},
 	}
@@ -86,34 +85,33 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Object]
 			Name: "[]",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
-					if len(args) != 1 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
-					}
-
-					i := args[0]
-					key, ok := i.(*StringObject)
-
-					if !ok {
-						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, i.Class().Name)
-					}
-
-					h := receiver.(*HashObject)
-
-					value, ok := h.Pairs[key.value]
-
-					if !ok {
-						if h.Default != nil {
-							return h.Default
-						}
-
-						return NULL
-					}
-
-					return value
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
 				}
+
+				i := args[0]
+				key, ok := i.(*StringObject)
+
+				if !ok {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, i.Class().Name)
+				}
+
+				h := receiver.(*HashObject)
+
+				value, ok := h.Pairs[key.value]
+
+				if !ok {
+					if h.Default != nil {
+						return h.Default
+					}
+
+					return NULL
+				}
+
+				return value
+
 			},
 		},
 		{
@@ -130,27 +128,26 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Object] The value
 			Name: "[]=",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
-					// First arg is index
-					// Second arg is assigned value
-					if len(args) != 2 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 2 arguments. got: %d", len(args))
-					}
-
-					k := args[0]
-					key, ok := k.(*StringObject)
-
-					if !ok {
-						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, k.Class().Name)
-					}
-
-					h := receiver.(*HashObject)
-					h.Pairs[key.value] = args[1]
-
-					return args[1]
+				// First arg is index
+				// Second arg is assigned value
+				if len(args) != 2 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 2 arguments. got: %d", len(args))
 				}
+
+				k := args[0]
+				key, ok := k.(*StringObject)
+
+				if !ok {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, k.Class().Name)
+				}
+
+				h := receiver.(*HashObject)
+				h.Pairs[key.value] = args[1]
+
+				return args[1]
+
 			},
 		},
 		{
@@ -180,53 +177,52 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// end            # => false
 			// ```
 			Name: "any?",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
-					}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
+				}
 
-					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
-					}
+				if blockFrame == nil {
+					return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+				}
 
-					hash := receiver.(*HashObject)
-					if blockIsEmpty(blockFrame) {
-						return FALSE
-					}
-
-					if len(hash.Pairs) == 0 {
-						t.callFrameStack.pop()
-					}
-
-					for stringKey, value := range hash.Pairs {
-						objectKey := t.vm.InitStringObject(stringKey)
-						result := t.builtinMethodYield(blockFrame, objectKey, value)
-
-						/*
-							TODO: Discuss this behavior
-
-							```ruby
-							{ key: "foo", bar: "baz" }.any? do |k, v|
-							  true
-							  break
-							end
-							```
-
-							The block returns nil because of the break.
-							But in Ruby the final result is nil, which means the block's result is completely ignored
-						*/
-						if blockFrame.IsRemoved() {
-							return NULL
-						}
-
-						if result.Target.isTruthy() {
-							return TRUE
-						}
-					}
-
+				hash := receiver.(*HashObject)
+				if blockIsEmpty(blockFrame) {
 					return FALSE
 				}
+
+				if len(hash.Pairs) == 0 {
+					t.callFrameStack.pop()
+				}
+
+				for stringKey, value := range hash.Pairs {
+					objectKey := t.vm.InitStringObject(stringKey)
+					result := t.builtinMethodYield(blockFrame, objectKey, value)
+
+					/*
+						TODO: Discuss this behavior
+
+						```ruby
+						{ key: "foo", bar: "baz" }.any? do |k, v|
+						  true
+						  break
+						end
+						```
+
+						The block returns nil because of the break.
+						But in Ruby the final result is nil, which means the block's result is completely ignored
+					*/
+					if blockFrame.IsRemoved() {
+						return NULL
+					}
+
+					if result.Target.isTruthy() {
+						return TRUE
+					}
+				}
+
+				return FALSE
+
 			},
 		},
 		{
@@ -239,18 +235,17 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Boolean]
 			Name: "clear",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
-					}
-
-					h := receiver.(*HashObject)
-
-					h.Pairs = make(map[string]Object)
-
-					return h
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
 				}
+
+				h := receiver.(*HashObject)
+
+				h.Pairs = make(map[string]Object)
+
+				return h
+
 			},
 		},
 		{
@@ -265,20 +260,19 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Object]
 			Name: "default",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 0 argument, got: %d", len(args))
-					}
-
-					hash := receiver.(*HashObject)
-
-					if hash.Default == nil {
-						return NULL
-					}
-
-					return hash.Default
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 0 argument, got: %d", len(args))
 				}
+
+				hash := receiver.(*HashObject)
+
+				if hash.Default == nil {
+					return NULL
+				}
+
+				return hash.Default
+
 			},
 		},
 		{
@@ -295,26 +289,25 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Object]
 			Name: "default=",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 1 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 1 argument, got %d", len(args))
-					}
-
-					// Arrays and Hashes are generally a mistake, since a single instance would be used for all the accesses
-					// via default.
-					switch args[0].(type) {
-					case *HashObject, *ArrayObject:
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Arrays and Hashes are not accepted as default values")
-					}
-
-					hash := receiver.(*HashObject)
-					hashDefault := args[0]
-
-					hash.Default = hashDefault
-
-					return hashDefault
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 1 argument, got %d", len(args))
 				}
+
+				// Arrays and Hashes are generally a mistake, since a single instance would be used for all the accesses
+				// via default.
+				switch args[0].(type) {
+				case *HashObject, *ArrayObject:
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Arrays and Hashes are not accepted as default values")
+				}
+
+				hash := receiver.(*HashObject)
+				hashDefault := args[0]
+
+				hash.Default = hashDefault
+
+				return hashDefault
+
 			},
 		},
 		{
@@ -327,26 +320,25 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Hash]
 			Name: "delete",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 1 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
-					}
-
-					h := receiver.(*HashObject)
-					d := args[0]
-					deleteKey, ok := d.(*StringObject)
-
-					if !ok {
-						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, d.Class().Name)
-					}
-
-					deleteKeyValue := deleteKey.value
-					if _, ok := h.Pairs[deleteKeyValue]; ok {
-						delete(h.Pairs, deleteKeyValue)
-					}
-					return h
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
 				}
+
+				h := receiver.(*HashObject)
+				d := args[0]
+				deleteKey, ok := d.(*StringObject)
+
+				if !ok {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, d.Class().Name)
+				}
+
+				deleteKeyValue := deleteKey.value
+				if _, ok := h.Pairs[deleteKeyValue]; ok {
+					delete(h.Pairs, deleteKeyValue)
+				}
+				return h
+
 			},
 		},
 		{
@@ -364,44 +356,43 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Hash]
 			Name: "delete_if",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
-					}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
+				}
 
-					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
-					}
+				if blockFrame == nil {
+					return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+				}
 
-					hash := receiver.(*HashObject)
-					if blockIsEmpty(blockFrame) {
-						return hash
-					}
-
-					if len(hash.Pairs) == 0 {
-						t.callFrameStack.pop()
-					}
-
-					// Note that from the Go specification, https://golang.org/ref/spec#For_statements,
-					// it's safe to delete elements from a Map, while iterating it.
-					for stringKey, value := range hash.Pairs {
-						objectKey := t.vm.InitStringObject(stringKey)
-						result := t.builtinMethodYield(blockFrame, objectKey, value)
-
-						booleanResult, isResultBoolean := result.Target.(*BooleanObject)
-
-						if isResultBoolean {
-							if booleanResult.value {
-								delete(hash.Pairs, stringKey)
-							}
-						} else if result.Target != NULL {
-							delete(hash.Pairs, stringKey)
-						}
-					}
-
+				hash := receiver.(*HashObject)
+				if blockIsEmpty(blockFrame) {
 					return hash
 				}
+
+				if len(hash.Pairs) == 0 {
+					t.callFrameStack.pop()
+				}
+
+				// Note that from the Go specification, https://golang.org/ref/spec#For_statements,
+				// it's safe to delete elements from a Map, while iterating it.
+				for stringKey, value := range hash.Pairs {
+					objectKey := t.vm.InitStringObject(stringKey)
+					result := t.builtinMethodYield(blockFrame, objectKey, value)
+
+					booleanResult, isResultBoolean := result.Target.(*BooleanObject)
+
+					if isResultBoolean {
+						if booleanResult.value {
+							delete(hash.Pairs, stringKey)
+						}
+					} else if result.Target != NULL {
+						delete(hash.Pairs, stringKey)
+					}
+				}
+
+				return hash
+
 			},
 		},
 		{
@@ -417,17 +408,16 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Object]
 			Name: "dig",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) == 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 1+ arguments, got 0")
-					}
-
-					hash := receiver.(*HashObject)
-					value := hash.dig(t, args, sourceLine)
-
-					return value
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) == 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 1+ arguments, got 0")
 				}
+
+				hash := receiver.(*HashObject)
+				value := hash.dig(t, args, sourceLine)
+
+				return value
+
 			},
 		},
 		{
@@ -446,33 +436,32 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Hash]
 			Name: "each",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 arguments. got: %d", len(args))
-					}
-
-					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
-					}
-
-					h := receiver.(*HashObject)
-
-					if len(h.Pairs) == 0 {
-						t.callFrameStack.pop()
-					} else {
-						keys := h.sortedKeys()
-
-						for _, k := range keys {
-							v := h.Pairs[k]
-							strK := t.vm.InitStringObject(k)
-
-							t.builtinMethodYield(blockFrame, strK, v)
-						}
-					}
-
-					return h
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 arguments. got: %d", len(args))
 				}
+
+				if blockFrame == nil {
+					return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+				}
+
+				h := receiver.(*HashObject)
+
+				if len(h.Pairs) == 0 {
+					t.callFrameStack.pop()
+				} else {
+					keys := h.sortedKeys()
+
+					for _, k := range keys {
+						v := h.Pairs[k]
+						strK := t.vm.InitStringObject(k)
+
+						t.builtinMethodYield(blockFrame, strK, v)
+					}
+				}
+
+				return h
+
 			},
 		},
 		{
@@ -492,33 +481,32 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Array]
 			Name: "each_key",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
-					}
-
-					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
-					}
-
-					h := receiver.(*HashObject)
-
-					if len(h.Pairs) == 0 {
-						t.callFrameStack.pop()
-					}
-
-					keys := h.sortedKeys()
-					var arrOfKeys []Object
-
-					for _, k := range keys {
-						obj := t.vm.InitStringObject(k)
-						arrOfKeys = append(arrOfKeys, obj)
-						t.builtinMethodYield(blockFrame, obj)
-					}
-
-					return t.vm.InitArrayObject(arrOfKeys)
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
 				}
+
+				if blockFrame == nil {
+					return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+				}
+
+				h := receiver.(*HashObject)
+
+				if len(h.Pairs) == 0 {
+					t.callFrameStack.pop()
+				}
+
+				keys := h.sortedKeys()
+				var arrOfKeys []Object
+
+				for _, k := range keys {
+					obj := t.vm.InitStringObject(k)
+					arrOfKeys = append(arrOfKeys, obj)
+					t.builtinMethodYield(blockFrame, obj)
+				}
+
+				return t.vm.InitArrayObject(arrOfKeys)
+
 			},
 		},
 		{
@@ -537,33 +525,32 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			//
 			Name: "each_value",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
-					}
-
-					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
-					}
-
-					h := receiver.(*HashObject)
-
-					if len(h.Pairs) == 0 {
-						t.callFrameStack.pop()
-					}
-
-					keys := h.sortedKeys()
-					var arrOfValues []Object
-
-					for _, k := range keys {
-						value := h.Pairs[k]
-						arrOfValues = append(arrOfValues, value)
-						t.builtinMethodYield(blockFrame, value)
-					}
-
-					return t.vm.InitArrayObject(arrOfValues)
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
 				}
+
+				if blockFrame == nil {
+					return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+				}
+
+				h := receiver.(*HashObject)
+
+				if len(h.Pairs) == 0 {
+					t.callFrameStack.pop()
+				}
+
+				keys := h.sortedKeys()
+				var arrOfValues []Object
+
+				for _, k := range keys {
+					value := h.Pairs[k]
+					arrOfValues = append(arrOfValues, value)
+					t.builtinMethodYield(blockFrame, value)
+				}
+
+				return t.vm.InitArrayObject(arrOfValues)
+
 			},
 		},
 		{
@@ -576,18 +563,17 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Boolean]
 			Name: "empty?",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
-					}
-
-					h := receiver.(*HashObject)
-					if h.length() == 0 {
-						return TRUE
-					}
-					return FALSE
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
 				}
+
+				h := receiver.(*HashObject)
+				if h.length() == 0 {
+					return TRUE
+				}
+				return FALSE
+
 			},
 		},
 		{
@@ -599,21 +585,20 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Boolean]
 			Name: "eql?",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 1 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
-					}
-
-					h := receiver.(*HashObject)
-					c := args[0]
-					compare, ok := c.(*HashObject)
-
-					if ok && reflect.DeepEqual(h, compare) {
-						return TRUE
-					}
-					return FALSE
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
 				}
+
+				h := receiver.(*HashObject)
+				c := args[0]
+				compare, ok := c.(*HashObject)
+
+				if ok && reflect.DeepEqual(h, compare) {
+					return TRUE
+				}
+				return FALSE
+
 			},
 		},
 		{
@@ -632,41 +617,40 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Object]
 			Name: "fetch",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if !(len(args) == 1 || len(args) == 2) {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 1 or 2 arguments, got %d", len(args))
-					} else if len(args) == 2 && blockFrame != nil {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "The default argument can't be passed along with a block")
-					}
-
-					hash := receiver.(*HashObject)
-					key, ok := args[0].(*StringObject)
-
-					if !ok {
-						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, key.Class().Name)
-					}
-
-					value, ok := hash.Pairs[key.value]
-
-					if ok {
-						if blockFrame != nil {
-							t.callFrameStack.pop()
-						}
-
-						return value
-					}
-
-					if len(args) == 2 {
-						return args[1]
-					}
-
-					if blockFrame != nil {
-						return t.builtinMethodYield(blockFrame, key).Target
-					}
-
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "The value was not found, and no block has been provided")
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if !(len(args) == 1 || len(args) == 2) {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 1 or 2 arguments, got %d", len(args))
+				} else if len(args) == 2 && blockFrame != nil {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "The default argument can't be passed along with a block")
 				}
+
+				hash := receiver.(*HashObject)
+				key, ok := args[0].(*StringObject)
+
+				if !ok {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, key.Class().Name)
+				}
+
+				value, ok := hash.Pairs[key.value]
+
+				if ok {
+					if blockFrame != nil {
+						t.callFrameStack.pop()
+					}
+
+					return value
+				}
+
+				if len(args) == 2 {
+					return args[1]
+				}
+
+				if blockFrame != nil {
+					return t.builtinMethodYield(blockFrame, key).Target
+				}
+
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "The value was not found, and no block has been provided")
+
 			},
 		},
 		{
@@ -683,44 +667,43 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [ArrayObject]
 			Name: "fetch_values",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) == 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 1+ arguments, got 0")
-					}
-
-					values := make([]Object, len(args))
-
-					hash := receiver.(*HashObject)
-					blockFramePopped := false
-
-					for index, objectKey := range args {
-						stringKey, ok := objectKey.(*StringObject)
-
-						if !ok {
-							return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, objectKey.Class().Name)
-						}
-
-						value, ok := hash.Pairs[stringKey.value]
-
-						if !ok {
-							if blockFrame != nil {
-								value = t.builtinMethodYield(blockFrame, objectKey).Target
-								blockFramePopped = true
-							} else {
-								return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "There is no value for the key `%s`, and no block has been provided", stringKey.value)
-							}
-						}
-
-						values[index] = value
-					}
-
-					if blockFrame != nil && !blockFramePopped {
-						t.callFrameStack.pop()
-					}
-
-					return t.vm.InitArrayObject(values)
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) == 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 1+ arguments, got 0")
 				}
+
+				values := make([]Object, len(args))
+
+				hash := receiver.(*HashObject)
+				blockFramePopped := false
+
+				for index, objectKey := range args {
+					stringKey, ok := objectKey.(*StringObject)
+
+					if !ok {
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, objectKey.Class().Name)
+					}
+
+					value, ok := hash.Pairs[stringKey.value]
+
+					if !ok {
+						if blockFrame != nil {
+							value = t.builtinMethodYield(blockFrame, objectKey).Target
+							blockFramePopped = true
+						} else {
+							return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "There is no value for the key `%s`, and no block has been provided", stringKey.value)
+						}
+					}
+
+					values[index] = value
+				}
+
+				if blockFrame != nil && !blockFramePopped {
+					t.callFrameStack.pop()
+				}
+
+				return t.vm.InitArrayObject(values)
+
 			},
 		},
 		{
@@ -738,25 +721,24 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Boolean]
 			Name: "has_key?",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 1 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
-					}
-
-					h := receiver.(*HashObject)
-					i := args[0]
-					input, ok := i.(*StringObject)
-
-					if !ok {
-						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, i.Class().Name)
-					}
-
-					if _, ok := h.Pairs[input.value]; ok {
-						return TRUE
-					}
-					return FALSE
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
 				}
+
+				h := receiver.(*HashObject)
+				i := args[0]
+				input, ok := i.(*StringObject)
+
+				if !ok {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, i.Class().Name)
+				}
+
+				if _, ok := h.Pairs[input.value]; ok {
+					return TRUE
+				}
+				return FALSE
+
 			},
 		},
 		{
@@ -773,21 +755,20 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Boolean]
 			Name: "has_value?",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 1 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
-					}
-
-					h := receiver.(*HashObject)
-
-					for _, v := range h.Pairs {
-						if reflect.DeepEqual(v, args[0]) {
-							return TRUE
-						}
-					}
-					return FALSE
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
 				}
+
+				h := receiver.(*HashObject)
+
+				for _, v := range h.Pairs {
+					if reflect.DeepEqual(v, args[0]) {
+						return TRUE
+					}
+				}
+				return FALSE
+
 			},
 		},
 		{
@@ -800,19 +781,18 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Boolean]
 			Name: "keys",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
-					}
-
-					h := receiver.(*HashObject)
-					var keys []Object
-					for k := range h.Pairs {
-						keys = append(keys, t.vm.InitStringObject(k))
-					}
-					return t.vm.InitArrayObject(keys)
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
 				}
+
+				h := receiver.(*HashObject)
+				var keys []Object
+				for k := range h.Pairs {
+					keys = append(keys, t.vm.InitStringObject(k))
+				}
+				return t.vm.InitArrayObject(keys)
+
 			},
 		},
 		{
@@ -825,15 +805,14 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Integer]
 			Name: "length",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
-					}
-
-					h := receiver.(*HashObject)
-					return t.vm.InitIntegerObject(h.length())
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
 				}
+
+				h := receiver.(*HashObject)
+				return t.vm.InitIntegerObject(h.length())
+
 			},
 		},
 		{
@@ -851,32 +830,31 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Boolean]
 			Name: "map_values",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
-					}
-
-					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
-					}
-
-					h := receiver.(*HashObject)
-					if blockIsEmpty(blockFrame) {
-						return h
-					}
-
-					result := make(map[string]Object)
-
-					if len(h.Pairs) == 0 {
-						t.callFrameStack.pop()
-					}
-
-					for k, v := range h.Pairs {
-						result[k] = t.builtinMethodYield(blockFrame, v).Target
-					}
-					return t.vm.InitHashObject(result)
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
 				}
+
+				if blockFrame == nil {
+					return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+				}
+
+				h := receiver.(*HashObject)
+				if blockIsEmpty(blockFrame) {
+					return h
+				}
+
+				result := make(map[string]Object)
+
+				if len(h.Pairs) == 0 {
+					t.callFrameStack.pop()
+				}
+
+				for k, v := range h.Pairs {
+					result[k] = t.builtinMethodYield(blockFrame, v).Target
+				}
+				return t.vm.InitHashObject(result)
+
 			},
 		},
 		{
@@ -890,30 +868,29 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Hash]
 			Name: "merge",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) < 1 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect at least 1 argument. got: %d", len(args))
-					}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) < 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect at least 1 argument. got: %d", len(args))
+				}
 
-					h := receiver.(*HashObject)
-					result := make(map[string]Object)
-					for k, v := range h.Pairs {
+				h := receiver.(*HashObject)
+				result := make(map[string]Object)
+				for k, v := range h.Pairs {
+					result[k] = v
+				}
+
+				for _, obj := range args {
+					hashObj, ok := obj.(*HashObject)
+					if !ok {
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.HashClass, obj.Class().Name)
+					}
+					for k, v := range hashObj.Pairs {
 						result[k] = v
 					}
-
-					for _, obj := range args {
-						hashObj, ok := obj.(*HashObject)
-						if !ok {
-							return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.HashClass, obj.Class().Name)
-						}
-						for k, v := range hashObj.Pairs {
-							result[k] = v
-						}
-					}
-
-					return t.vm.InitHashObject(result)
 				}
+
+				return t.vm.InitHashObject(result)
+
 			},
 		},
 		{
@@ -937,38 +914,37 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// end            # => { }
 			// ```
 			Name: "select",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
-					}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
+				}
 
-					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
-					}
+				if blockFrame == nil {
+					return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+				}
 
-					destinationPairs := map[string]Object{}
-					if blockIsEmpty(blockFrame) {
-						return t.vm.InitHashObject(destinationPairs)
-					}
-
-					sourceHash := receiver.(*HashObject)
-
-					if len(sourceHash.Pairs) == 0 {
-						t.callFrameStack.pop()
-					}
-
-					for stringKey, value := range sourceHash.Pairs {
-						objectKey := t.vm.InitStringObject(stringKey)
-						result := t.builtinMethodYield(blockFrame, objectKey, value)
-
-						if result.Target.isTruthy() {
-							destinationPairs[stringKey] = value
-						}
-					}
-
+				destinationPairs := map[string]Object{}
+				if blockIsEmpty(blockFrame) {
 					return t.vm.InitHashObject(destinationPairs)
 				}
+
+				sourceHash := receiver.(*HashObject)
+
+				if len(sourceHash.Pairs) == 0 {
+					t.callFrameStack.pop()
+				}
+
+				for stringKey, value := range sourceHash.Pairs {
+					objectKey := t.vm.InitStringObject(stringKey)
+					result := t.builtinMethodYield(blockFrame, objectKey, value)
+
+					if result.Target.isTruthy() {
+						destinationPairs[stringKey] = value
+					}
+				}
+
+				return t.vm.InitHashObject(destinationPairs)
+
 			},
 		},
 		{
@@ -987,20 +963,19 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Boolean]
 			Name: "sorted_keys",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
-					}
-
-					h := receiver.(*HashObject)
-					sortedKeys := h.sortedKeys()
-					var keys []Object
-					for _, k := range sortedKeys {
-						keys = append(keys, t.vm.InitStringObject(k))
-					}
-					return t.vm.InitArrayObject(keys)
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
 				}
+
+				h := receiver.(*HashObject)
+				sortedKeys := h.sortedKeys()
+				var keys []Object
+				for _, k := range sortedKeys {
+					keys = append(keys, t.vm.InitStringObject(k))
+				}
+				return t.vm.InitArrayObject(keys)
+
 			},
 		},
 		{
@@ -1020,43 +995,42 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Array]
 			Name: "to_a",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
-					h := receiver.(*HashObject)
-					var sorted bool
+				h := receiver.(*HashObject)
+				var sorted bool
 
-					if len(args) == 0 {
-						sorted = false
-					} else if len(args) > 1 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0..1 argument. got: %d", len(args))
-					} else {
-						s := args[0]
-						st, ok := s.(*BooleanObject)
-						if !ok {
-							return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.BooleanClass, s.Class().Name)
-						}
-						sorted = st.value
+				if len(args) == 0 {
+					sorted = false
+				} else if len(args) > 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0..1 argument. got: %d", len(args))
+				} else {
+					s := args[0]
+					st, ok := s.(*BooleanObject)
+					if !ok {
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.BooleanClass, s.Class().Name)
 					}
-
-					var resultArr []Object
-					if sorted {
-						for _, k := range h.sortedKeys() {
-							var pairArr []Object
-							pairArr = append(pairArr, t.vm.InitStringObject(k))
-							pairArr = append(pairArr, h.Pairs[k])
-							resultArr = append(resultArr, t.vm.InitArrayObject(pairArr))
-						}
-					} else {
-						for k, v := range h.Pairs {
-							var pairArr []Object
-							pairArr = append(pairArr, t.vm.InitStringObject(k))
-							pairArr = append(pairArr, v)
-							resultArr = append(resultArr, t.vm.InitArrayObject(pairArr))
-						}
-					}
-					return t.vm.InitArrayObject(resultArr)
+					sorted = st.value
 				}
+
+				var resultArr []Object
+				if sorted {
+					for _, k := range h.sortedKeys() {
+						var pairArr []Object
+						pairArr = append(pairArr, t.vm.InitStringObject(k))
+						pairArr = append(pairArr, h.Pairs[k])
+						resultArr = append(resultArr, t.vm.InitArrayObject(pairArr))
+					}
+				} else {
+					for k, v := range h.Pairs {
+						var pairArr []Object
+						pairArr = append(pairArr, t.vm.InitStringObject(k))
+						pairArr = append(pairArr, v)
+						resultArr = append(resultArr, t.vm.InitArrayObject(pairArr))
+					}
+				}
+				return t.vm.InitArrayObject(resultArr)
+
 			},
 		},
 		{
@@ -1070,15 +1044,14 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [String]
 			Name: "to_json",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
-					}
-
-					r := receiver.(*HashObject)
-					return t.vm.InitStringObject(r.toJSON(t))
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
 				}
+
+				r := receiver.(*HashObject)
+				return t.vm.InitStringObject(r.toJSON(t))
+
 			},
 		},
 		{
@@ -1092,15 +1065,14 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [String]
 			Name: "to_s",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
-					}
-
-					h := receiver.(*HashObject)
-					return t.vm.InitStringObject(h.toString())
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
 				}
+
+				h := receiver.(*HashObject)
+				return t.vm.InitStringObject(h.toString())
+
 			},
 		},
 		{
@@ -1119,29 +1091,28 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Boolean]
 			Name: "transform_values",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
-					}
-
-					if blockFrame == nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
-					}
-
-					h := receiver.(*HashObject)
-
-					if len(h.Pairs) == 0 {
-						t.callFrameStack.pop()
-					}
-
-					resultHash := make(map[string]Object)
-					for k, v := range h.Pairs {
-						result := t.builtinMethodYield(blockFrame, v)
-						resultHash[k] = result.Target
-					}
-					return t.vm.InitHashObject(resultHash)
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
 				}
+
+				if blockFrame == nil {
+					return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+				}
+
+				h := receiver.(*HashObject)
+
+				if len(h.Pairs) == 0 {
+					t.callFrameStack.pop()
+				}
+
+				resultHash := make(map[string]Object)
+				for k, v := range h.Pairs {
+					result := t.builtinMethodYield(blockFrame, v)
+					resultHash[k] = result.Target
+				}
+				return t.vm.InitHashObject(resultHash)
+
 			},
 		},
 		{
@@ -1154,19 +1125,18 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Boolean]
 			Name: "values",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
-					}
-
-					h := receiver.(*HashObject)
-					var keys []Object
-					for _, v := range h.Pairs {
-						keys = append(keys, v)
-					}
-					return t.vm.InitArrayObject(keys)
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
 				}
+
+				h := receiver.(*HashObject)
+				var keys []Object
+				for _, v := range h.Pairs {
+					keys = append(keys, v)
+				}
+				return t.vm.InitArrayObject(keys)
+
 			},
 		},
 		{
@@ -1178,29 +1148,28 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			// @return [Boolean]
 			Name: "values_at",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					hash := receiver.(*HashObject)
-					var result []Object
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				hash := receiver.(*HashObject)
+				var result []Object
 
-					for _, objectKey := range args {
-						stringObjectKey, ok := objectKey.(*StringObject)
+				for _, objectKey := range args {
+					stringObjectKey, ok := objectKey.(*StringObject)
 
-						if !ok {
-							return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, objectKey.Class().Name)
-						}
-
-						value, ok := hash.Pairs[stringObjectKey.value]
-
-						if !ok {
-							value = NULL
-						}
-
-						result = append(result, value)
+					if !ok {
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, objectKey.Class().Name)
 					}
 
-					return t.vm.InitArrayObject(result)
+					value, ok := hash.Pairs[stringObjectKey.value]
+
+					if !ok {
+						value = NULL
+					}
+
+					result = append(result, value)
 				}
+
+				return t.vm.InitArrayObject(result)
+
 			},
 		},
 	}

@@ -62,25 +62,23 @@ func builtinConcurrentArrayClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "new",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) > 1 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 or 1 arguments, got %d", len(args))
-					}
-
-					if len(args) == 0 {
-						return t.vm.initConcurrentArrayObject([]Object{})
-					} else {
-						arg := args[0]
-						arrayArg, ok := arg.(*ArrayObject)
-
-						if !ok {
-							return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.ArrayClass, arg.Class().Name)
-						}
-
-						return t.vm.initConcurrentArrayObject(arrayArg.Elements)
-					}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) > 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 or 1 arguments, got %d", len(args))
 				}
+
+				if len(args) == 0 {
+					return t.vm.initConcurrentArrayObject([]Object{})
+				}
+
+				arg := args[0]
+				arrayArg, ok := arg.(*ArrayObject)
+
+				if !ok {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.ArrayClass, arg.Class().Name)
+				}
+
+				return t.vm.initConcurrentArrayObject(arrayArg.Elements)
 			},
 		},
 	}
@@ -144,31 +142,29 @@ func (cac *ConcurrentArrayObject) Value() interface{} {
 func DefineForwardedConcurrentArrayMethod(methodName string, requireWriteLock bool) *BuiltinMethodObject {
 	return &BuiltinMethodObject{
 		Name: methodName,
-		Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-			return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				concurrentArray := receiver.(*ConcurrentArrayObject)
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			concurrentArray := receiver.(*ConcurrentArrayObject)
 
-				if requireWriteLock {
-					concurrentArray.Lock()
-				} else {
-					concurrentArray.RLock()
-				}
+			if requireWriteLock {
+				concurrentArray.Lock()
+			} else {
+				concurrentArray.RLock()
+			}
 
-				arrayMethodObject := concurrentArray.InternalArray.findMethod(methodName).(*BuiltinMethodObject)
-				result := arrayMethodObject.Fn(concurrentArray.InternalArray, sourceLine)(t, args, blockFrame)
+			arrayMethodObject := concurrentArray.InternalArray.findMethod(methodName).(*BuiltinMethodObject)
+			result := arrayMethodObject.Fn(concurrentArray.InternalArray, sourceLine, t, args, blockFrame)
 
-				if requireWriteLock {
-					concurrentArray.Unlock()
-				} else {
-					concurrentArray.RUnlock()
-				}
+			if requireWriteLock {
+				concurrentArray.Unlock()
+			} else {
+				concurrentArray.RUnlock()
+			}
 
-				switch result.(type) {
-				case *ArrayObject:
-					return t.vm.initConcurrentArrayObject(result.(*ArrayObject).Elements)
-				default:
-					return result
-				}
+			switch result.(type) {
+			case *ArrayObject:
+				return t.vm.initConcurrentArrayObject(result.(*ArrayObject).Elements)
+			default:
+				return result
 			}
 		},
 	}

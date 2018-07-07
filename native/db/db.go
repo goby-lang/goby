@@ -21,11 +21,11 @@ type StringObject = vm.StringObject
 func init() {
 	vm.RegisterExternalClass("db", vm.ExternalClass("DB", "db.gb",
 		// class methods
-		map[string]vm.MethodBuilder{
+		map[string]vm.Method{
 			"get_connection": getConnection,
 		},
 		// instance methods
-		map[string]vm.MethodBuilder{
+		map[string]vm.Method{
 			"query": query,
 			"close": closeDB,
 			"exec":  exec,
@@ -55,90 +55,80 @@ func init() {
 //
 // @return [Object]
 //
-func getConnection(receiver vm.Object, sourceLine int) vm.Method {
-	return func(t *vm.Thread, args []vm.Object) vm.Object {
-		if len(args) != 2 {
-			return t.VM().InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 2, len(args))
-		}
-
-		driverName, ok := args[0].(*vm.StringObject)
-
-		if !ok {
-			return t.VM().InitErrorObject(errors.ArgumentError, sourceLine, "Expect database's driver name to be a String object. got: %s", args[0].Class().Name)
-		}
-
-		dataSource, ok := args[1].(*vm.StringObject)
-
-		if !ok {
-			return t.VM().InitErrorObject(errors.ArgumentError, sourceLine, "Expect database's data source to be a String object. got: %s", args[1].Class().Name)
-		}
-
-		conn, err := sqlx.Open(driverName.Value().(string), dataSource.Value().(string))
-
-		if err != nil {
-			return t.VM().InitErrorObject(errors.InternalError, sourceLine, err.Error())
-		}
-
-		connObj := t.VM().InitObjectFromGoType(conn)
-		return connObj
+func getConnection(receiver vm.Object, sourceLine int, t *vm.Thread, args []vm.Object) vm.Object {
+	if len(args) != 2 {
+		return t.VM().InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 2, len(args))
 	}
+
+	driverName, ok := args[0].(*vm.StringObject)
+
+	if !ok {
+		return t.VM().InitErrorObject(errors.ArgumentError, sourceLine, "Expect database's driver name to be a String object. got: %s", args[0].Class().Name)
+	}
+
+	dataSource, ok := args[1].(*vm.StringObject)
+
+	if !ok {
+		return t.VM().InitErrorObject(errors.ArgumentError, sourceLine, "Expect database's data source to be a String object. got: %s", args[1].Class().Name)
+	}
+
+	conn, err := sqlx.Open(driverName.Value().(string), dataSource.Value().(string))
+
+	if err != nil {
+		return t.VM().InitErrorObject(errors.InternalError, sourceLine, err.Error())
+	}
+
+	connObj := t.VM().InitObjectFromGoType(conn)
+	return connObj
+
 }
 
-func closeDB(receiver vm.Object, sourceLine int) vm.Method {
-	return func(t *vm.Thread, args []vm.Object) vm.Object {
-		conn, err := getDBConn(t, receiver)
+func closeDB(receiver vm.Object, sourceLine int, t *vm.Thread, args []vm.Object) vm.Object {
+	conn, err := getDBConn(t, receiver)
 
-		if err != nil {
-			return t.VM().InitErrorObject(errors.InternalError, sourceLine, err.Error())
-		}
-
-		err = conn.Close()
-
-		if err != nil {
-			if err != nil {
-				return t.VM().InitErrorObject(errors.InternalError, sourceLine, "Error happens when closing DB connection: %s", err.Error())
-			}
-		}
-
-		return vm.TRUE
+	if err != nil {
+		return t.VM().InitErrorObject(errors.InternalError, sourceLine, err.Error())
 	}
+
+	err = conn.Close()
+
+	if err != nil {
+		if err != nil {
+			return t.VM().InitErrorObject(errors.InternalError, sourceLine, "Error happens when closing DB connection: %s", err.Error())
+		}
+	}
+
+	return vm.TRUE
+
 }
 
-// Class methods --------------------------------------------------------
-func builtinDBClassMethods() map[string]vm.MethodBuilder {
-	return map[string]vm.MethodBuilder{
-		"get_connection": getConnection,
+func run(receiver Object, sourceLine int, t *Thread, args []Object) Object {
+	v := t.VM()
+	if len(args) < 1 {
+		return v.InitErrorObject(errors.ArgumentError, sourceLine, "Expect at least 1 argument.")
 	}
-}
 
-func run(receiver Object, sourceLine int) Method {
-	return func(t *Thread, args []Object) Object {
-		v := t.VM()
-		if len(args) < 1 {
-			return v.InitErrorObject(errors.ArgumentError, sourceLine, "Expect at least 1 argument.")
-		}
+	conn, err := getDBConn(t, receiver)
 
-		conn, err := getDBConn(t, receiver)
-
-		if err != nil {
-			return v.InitErrorObject(errors.InternalError, sourceLine, err.Error())
-		}
-
-		queryString := args[0].(*vm.StringObject).Value().(string)
-		execArgs := []interface{}{}
-
-		for _, arg := range args[1:] {
-			execArgs = append(execArgs, arg.Value())
-		}
-
-		_, err = conn.Exec(queryString, execArgs...)
-
-		if err != nil {
-			return v.InitErrorObject(errors.InternalError, sourceLine, err.Error())
-		}
-
-		return vm.TRUE
+	if err != nil {
+		return v.InitErrorObject(errors.InternalError, sourceLine, err.Error())
 	}
+
+	queryString := args[0].(*vm.StringObject).Value().(string)
+	execArgs := []interface{}{}
+
+	for _, arg := range args[1:] {
+		execArgs = append(execArgs, arg.Value())
+	}
+
+	_, err = conn.Exec(queryString, execArgs...)
+
+	if err != nil {
+		return v.InitErrorObject(errors.InternalError, sourceLine, err.Error())
+	}
+
+	return vm.TRUE
+
 }
 
 // 		{
@@ -196,37 +186,36 @@ func run(receiver Object, sourceLine int) Method {
 // 			// @return [Integer]
 // 			//
 // 			Name: "exec",
-func exec(receiver Object, sourceLine int) Method {
-	return func(t *Thread, args []Object) Object {
-		v := t.VM()
-		if len(args) < 1 {
-			return v.InitErrorObject(errors.ArgumentError, sourceLine, "Expect at least 1 argument.")
-		}
-
-		conn, err := getDBConn(t, receiver)
-
-		if err != nil {
-			return v.InitErrorObject(errors.InternalError, sourceLine, err.Error())
-		}
-
-		queryString := args[0].(*vm.StringObject).Value().(string)
-		execArgs := []interface{}{}
-
-		for _, arg := range args[1:] {
-			execArgs = append(execArgs, arg.Value())
-		}
-
-		// The reason I implement this way: https://github.com/lib/pq/issues/24
-		var id int
-
-		err = conn.QueryRow(fmt.Sprintf("%s RETURNING id", queryString), execArgs...).Scan(&id)
-
-		if err != nil {
-			return v.InitErrorObject(errors.InternalError, sourceLine, err.Error())
-		}
-
-		return v.InitIntegerObject(id)
+func exec(receiver Object, sourceLine int, t *Thread, args []Object) Object {
+	v := t.VM()
+	if len(args) < 1 {
+		return v.InitErrorObject(errors.ArgumentError, sourceLine, "Expect at least 1 argument.")
 	}
+
+	conn, err := getDBConn(t, receiver)
+
+	if err != nil {
+		return v.InitErrorObject(errors.InternalError, sourceLine, err.Error())
+	}
+
+	queryString := args[0].(*vm.StringObject).Value().(string)
+	execArgs := []interface{}{}
+
+	for _, arg := range args[1:] {
+		execArgs = append(execArgs, arg.Value())
+	}
+
+	// The reason I implement this way: https://github.com/lib/pq/issues/24
+	var id int
+
+	err = conn.QueryRow(fmt.Sprintf("%s RETURNING id", queryString), execArgs...).Scan(&id)
+
+	if err != nil {
+		return v.InitErrorObject(errors.InternalError, sourceLine, err.Error())
+	}
+
+	return v.InitIntegerObject(id)
+
 }
 
 // 		},
@@ -261,54 +250,53 @@ func exec(receiver Object, sourceLine int) Method {
 // 			// @return [Array]
 // 			//
 // 			Name: "query",
-func query(receiver Object, sourceLine int) Method {
-	return func(t *Thread, args []Object) Object {
-		if len(args) < 1 {
-			return t.VM().InitErrorObject(errors.ArgumentError, sourceLine, "Expect at least 1 argument.")
-		}
-
-		conn, err := getDBConn(t, receiver)
-
-		if err != nil {
-			return t.VM().InitErrorObject(errors.InternalError, sourceLine, err.Error())
-		}
-
-		queryString := args[0].(*StringObject).Value().(string)
-		execArgs := []interface{}{}
-
-		for _, arg := range args[1:] {
-			execArgs = append(execArgs, arg.Value())
-		}
-
-		rows, err := conn.Queryx(queryString, execArgs...)
-
-		if err != nil {
-			return t.VM().InitErrorObject(errors.InternalError, sourceLine, err.Error())
-		}
-
-		results := []Object{}
-
-		for rows.Next() {
-			row := make(map[string]interface{})
-
-			err = rows.MapScan(row)
-
-			if err != nil {
-				return t.VM().InitErrorObject(errors.InternalError, sourceLine, err.Error())
-			}
-
-			data := map[string]Object{}
-
-			for k, v := range row {
-				data[k] = t.VM().InitObjectFromGoType(v)
-			}
-
-			result := t.VM().InitHashObject(data)
-			results = append(results, result)
-		}
-
-		return t.VM().InitArrayObject(results)
+func query(receiver Object, sourceLine int, t *Thread, args []Object) Object {
+	if len(args) < 1 {
+		return t.VM().InitErrorObject(errors.ArgumentError, sourceLine, "Expect at least 1 argument.")
 	}
+
+	conn, err := getDBConn(t, receiver)
+
+	if err != nil {
+		return t.VM().InitErrorObject(errors.InternalError, sourceLine, err.Error())
+	}
+
+	queryString := args[0].(*StringObject).Value().(string)
+	execArgs := []interface{}{}
+
+	for _, arg := range args[1:] {
+		execArgs = append(execArgs, arg.Value())
+	}
+
+	rows, err := conn.Queryx(queryString, execArgs...)
+
+	if err != nil {
+		return t.VM().InitErrorObject(errors.InternalError, sourceLine, err.Error())
+	}
+
+	results := []Object{}
+
+	for rows.Next() {
+		row := make(map[string]interface{})
+
+		err = rows.MapScan(row)
+
+		if err != nil {
+			return t.VM().InitErrorObject(errors.InternalError, sourceLine, err.Error())
+		}
+
+		data := map[string]Object{}
+
+		for k, v := range row {
+			data[k] = t.VM().InitObjectFromGoType(v)
+		}
+
+		result := t.VM().InitHashObject(data)
+		results = append(results, result)
+	}
+
+	return t.VM().InitArrayObject(results)
+
 }
 
 func getDBConn(t *vm.Thread, receiver Object) (*sqlx.DB, error) {

@@ -26,39 +26,37 @@ func builtinPluginClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "new",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					if len(args) != 1 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 1, len(args))
-					}
-
-					name, ok := args[0].(*StringObject)
-
-					if !ok {
-						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "String", args[0].Class().Name)
-					}
-
-					return &PluginObject{fn: name.value, baseObj: &baseObj{class: t.vm.topLevelClass(classes.PluginClass), InstanceVariables: newEnvironment()}}
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 1, len(args))
 				}
+
+				name, ok := args[0].(*StringObject)
+
+				if !ok {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "String", args[0].Class().Name)
+				}
+
+				return &PluginObject{fn: name.value, baseObj: &baseObj{class: t.vm.topLevelClass(classes.PluginClass), InstanceVariables: newEnvironment()}}
+
 			},
 		},
 		{
 			Name: "use",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					pkgPath := args[0].(*StringObject).value
-					_, pkgName := filepath.Split(pkgPath)
-					pkgName = strings.Split(pkgName, ".")[0]
-					soName := filepath.Join("./", pkgName+".so")
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				pkgPath := args[0].(*StringObject).value
+				_, pkgName := filepath.Split(pkgPath)
+				pkgName = strings.Split(pkgName, ".")[0]
+				soName := filepath.Join("./", pkgName+".so")
 
-					p, err := compileAndOpenPlugin(soName, pkgPath)
+				p, err := compileAndOpenPlugin(soName, pkgPath)
 
-					if err != nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, err.Error())
-					}
-
-					return t.vm.initPluginObject(pkgPath, p)
+				if err != nil {
+					return t.vm.InitErrorObject(errors.InternalError, sourceLine, err.Error())
 				}
+
+				return t.vm.initPluginObject(pkgPath, p)
+
 			},
 		},
 	}
@@ -69,94 +67,92 @@ func builtinPluginInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
 			Name: "compile",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					r := receiver.(*PluginObject)
-					context, ok := receiver.InstanceVariableGet("@context")
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				r := receiver.(*PluginObject)
+				context, ok := receiver.InstanceVariableGet("@context")
 
-					if !ok {
-						return NULL
-					}
-
-					// Create plugins directory
-					pluginDir := "./plugins"
-
-					ok, err := fileExists(pluginDir)
-
-					if err != nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, err.Error())
-					}
-
-					if !ok {
-						os.Mkdir(pluginDir, 0777)
-					}
-
-					// generate plugin content from context
-					pc := setPluginContext(context)
-					pluginContent := compilePluginTemplate(pc.pkgs, pc.funcs)
-
-					// create plugin file
-					fn := fmt.Sprintf("%s/%s", pluginDir, r.fn)
-
-					file, err := os.OpenFile(fn+".go", os.O_RDWR|os.O_CREATE, 0755)
-
-					if err != nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Error when creating plugin: %s", err.Error())
-					}
-
-					file.WriteString(pluginContent)
-
-					soName := fn + ".so"
-
-					p, err := compileAndOpenPlugin(soName, file.Name())
-
-					if err != nil {
-						t.vm.InitErrorObject(errors.InternalError, sourceLine, err.Error())
-					}
-
-					r.plugin = p
-
-					return r
+				if !ok {
+					return NULL
 				}
+
+				// Create plugins directory
+				pluginDir := "./plugins"
+
+				ok, err := fileExists(pluginDir)
+
+				if err != nil {
+					return t.vm.InitErrorObject(errors.InternalError, sourceLine, err.Error())
+				}
+
+				if !ok {
+					os.Mkdir(pluginDir, 0777)
+				}
+
+				// generate plugin content from context
+				pc := setPluginContext(context)
+				pluginContent := compilePluginTemplate(pc.pkgs, pc.funcs)
+
+				// create plugin file
+				fn := fmt.Sprintf("%s/%s", pluginDir, r.fn)
+
+				file, err := os.OpenFile(fn+".go", os.O_RDWR|os.O_CREATE, 0755)
+
+				if err != nil {
+					return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Error when creating plugin: %s", err.Error())
+				}
+
+				file.WriteString(pluginContent)
+
+				soName := fn + ".so"
+
+				p, err := compileAndOpenPlugin(soName, file.Name())
+
+				if err != nil {
+					t.vm.InitErrorObject(errors.InternalError, sourceLine, err.Error())
+				}
+
+				r.plugin = p
+
+				return r
+
 			},
 		},
 		{
 			Name: "go_func",
-			Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-				return func(t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-					s, ok := args[0].(*StringObject)
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				s, ok := args[0].(*StringObject)
 
-					if !ok {
-						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
-					}
-
-					funcName := s.value
-					r := receiver.(*PluginObject)
-					p := r.plugin
-					f, err := p.Lookup(funcName)
-
-					if err != nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, err.Error())
-					}
-
-					funcArgs, err := convertToGoFuncArgs(args[1:])
-
-					if err != nil {
-						t.vm.InitErrorObject(errors.TypeError, sourceLine, err.Error())
-					}
-
-					funcValue := reflect.ValueOf(f)
-
-					// Check if f is a pointer to function instead of function object
-					if funcValue.Type().Kind() == reflect.Ptr {
-						ptr := funcValue
-						funcValue = ptr.Elem()
-					}
-
-					result := reflect.ValueOf(funcValue.Call(metago.WrapArguments(funcArgs...))).Interface()
-
-					return t.vm.InitObjectFromGoType(metago.UnwrapReflectValues(result))
+				if !ok {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 				}
+
+				funcName := s.value
+				r := receiver.(*PluginObject)
+				p := r.plugin
+				f, err := p.Lookup(funcName)
+
+				if err != nil {
+					return t.vm.InitErrorObject(errors.InternalError, sourceLine, err.Error())
+				}
+
+				funcArgs, err := convertToGoFuncArgs(args[1:])
+
+				if err != nil {
+					t.vm.InitErrorObject(errors.TypeError, sourceLine, err.Error())
+				}
+
+				funcValue := reflect.ValueOf(f)
+
+				// Check if f is a pointer to function instead of function object
+				if funcValue.Type().Kind() == reflect.Ptr {
+					ptr := funcValue
+					funcValue = ptr.Elem()
+				}
+
+				result := reflect.ValueOf(funcValue.Call(metago.WrapArguments(funcArgs...))).Interface()
+
+				return t.vm.InitObjectFromGoType(metago.UnwrapReflectValues(result))
+
 			},
 		},
 	}

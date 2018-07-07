@@ -73,29 +73,23 @@ func (m *MethodObject) isKeywordArgIncluded() bool {
 type BuiltinMethodObject struct {
 	*baseObj
 	Name string
-	Fn   func(receiver Object, sourceLine int) builtinMethodBody
+	Fn   builtinMethodBody
 }
 
 // Method is a callable function
-type Method = func(t *Thread, args []Object) Object
-
-// MethodBuilder constructs an instance of a method
-type MethodBuilder = func(receiver Object, line int) Method
+type Method = func(receiver Object, line int, t *Thread, args []Object) Object
 
 // ExternalBuiltinMethod is a function that builds a BuiltinMethodObject from an external function
-func ExternalBuiltinMethod(name string, m MethodBuilder) *BuiltinMethodObject {
+func ExternalBuiltinMethod(name string, m Method) *BuiltinMethodObject {
 	return &BuiltinMethodObject{
 		Name: name,
-		Fn: func(receiver Object, sourceLine int) builtinMethodBody {
-			f := m(receiver, sourceLine)
-			return func(t *Thread, args []Object, c *normalCallFrame) Object {
-				return f(t, args)
-			}
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, c *normalCallFrame) Object {
+			return m(receiver, sourceLine, t, args)
 		},
 	}
 }
 
-type builtinMethodBody func(*Thread, []Object, *normalCallFrame) Object
+type builtinMethodBody func(Object, int, *Thread, []Object, *normalCallFrame) Object
 
 // Polymorphic helper functions -----------------------------------------
 
