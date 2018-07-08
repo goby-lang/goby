@@ -13,7 +13,7 @@ func TestCallingPluginFunctionNoRaceDetection(t *testing.T) {
 	input := `
 	require "plugin"
 
-	p = Plugin.use "../test_fixtures/import_test.VM()/plugin.go"
+	p = Plugin.use "../test_fixtures/import_test/plugin/plugin.go"
 	p.go_func("Foo", "!")
 	p.go_func("Baz")
 	`
@@ -30,7 +30,7 @@ func TestCallingPluginFunctionWithReturnValueNoRaceDetection(t *testing.T) {
 	input := `
 	require "plugin"
 
-	p = Plugin.use "../test_fixtures/import_test.VM()/plugin.go"
+	p = Plugin.use "../test_fixtures/import_test/plugin/plugin.go"
 	p.go_func("Bar")
 	`
 
@@ -44,7 +44,7 @@ func TestCallingLibFuncFromPluginNoRaceDetection(t *testing.T) {
 	input := `
 	require "plugin"
 
-	p = Plugin.use "../test_fixtures/import_test.VM()/plugin.go"
+	p = Plugin.use "../test_fixtures/import_test/plugin/plugin.go"
 	p.go_func("ReturnLibName")
 	`
 
