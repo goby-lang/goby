@@ -23,6 +23,7 @@ _testmain.go
 *.exe
 *.test
 *.prof
+.vscode
 
 .idea
 
@@ -35,4 +36,5 @@ profile.out
 
 .tmp_benchmarks
 .tmp_benchmark_comparison
-.vscode
+
+vm/plugins
