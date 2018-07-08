@@ -74,10 +74,12 @@ func allArgs(f *ast.FieldList) []argPair {
 	return args
 }
 
+// Binding holds context about a struct that represents a goby class.
 type Binding struct {
 	ClassName       string
-	ClassMethods    []*ast.FuncDecl
-	InstanceMethods []*ast.FuncDecl
+	ClassMethods    []*ast.FuncDecl // Any method defined without a pointer reciever is a class method func (Class) myFunc
+	InstanceMethods []*ast.FuncDecl // Any method defined with a pointer reciever is an instance method func (c *Class) myFunc
+
 }
 
 func (b *Binding) staticName() string {
@@ -88,6 +90,7 @@ func (b *Binding) bindingName(f *ast.FuncDecl) string {
 	return fmt.Sprintf("_binding_%s_%s", b.ClassName, f.Name.Name)
 }
 
+// BindMethods generates code that binds methods of a go structure to a goby class
 func (b *Binding) BindMethods(f *File, x *ast.File) {
 	f.Add(mapping(b, x.Name.Name))
 	f.Var().Id(b.staticName()).Op("=").New(Id(b.ClassName))
@@ -101,10 +104,15 @@ func (b *Binding) BindMethods(f *File, x *ast.File) {
 	}
 }
 
+// BindClassMethod will generate class method bindings.
+// This is a global static method associated with the class.
 func (b *Binding) BindClassMethod(f *File, d *ast.FuncDecl) {
 	r := Id("r").Op(":=").Id(b.staticName()).Line()
 	b.body(r, f, d)
 }
+
+// BindInstanceMethod will generate instance method bindings.
+// This function will be bound to a spesific instantation of a goby class.
 func (b *Binding) BindInstanceMethod(f *File, d *ast.FuncDecl) {
 	r := List(Id("r"), Id("ok")).Op(":=").Add(Id("receiver")).Assert(Op("*").Id(b.ClassName)).Line()
 	r = r.If(Op("!").Id("ok")).Block(
@@ -115,6 +123,7 @@ func (b *Binding) BindInstanceMethod(f *File, d *ast.FuncDecl) {
 	b.body(r, f, d)
 }
 
+// body is a helper function for generating the common body of a method
 func (b *Binding) body(receiver *Statement, f *File, d *ast.FuncDecl) {
 	s := f.Func().Id(b.bindingName(d))
 	s = s.Params(Id("receiver").Qual(vmPkg, "Object"), Id("line").Id("int"), Id("t").Op("*").Qual(vmPkg, "Thread"), Id("args").Index().Qual(vmPkg, "Object")).Qual(vmPkg, "Object")
@@ -150,6 +159,8 @@ func (b *Binding) body(receiver *Statement, f *File, d *ast.FuncDecl) {
 	s.Block(inner)
 }
 
+// mapping generates the "init" portion of the bindings.
+// This will call hooks in the vm package to load the class definition at runtime.
 func mapping(b *Binding, pkg string) Code {
 	fnName := func(s string) string {
 		x := camelcase.Split(s)
@@ -195,6 +206,7 @@ func main() {
 
 	bindings := make(map[string]*Binding)
 
+	// iterate though every node in the ast looking for function definitions
 	ast.Inspect(f, func(n ast.Node) bool {
 		switch n := n.(type) {
 		case *ast.FuncDecl:
