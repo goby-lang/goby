@@ -66,7 +66,7 @@ func TestPluginGenerationNoRaceDetection(t *testing.T) {
 
 	conn, err = p.go_func("Open", "postgres", "")
 	err = conn.go_func("Ping")
-	!err.nil? && err.go_func("Error").is_a?(String)
+	err.nil?
 	`
 
 	evaluated := vm.ExecAndReturn(t, input)
