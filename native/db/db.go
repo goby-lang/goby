@@ -6,17 +6,20 @@ import (
 	"github.com/goby-lang/goby/vm"
 	"github.com/goby-lang/goby/vm/errors"
 	"github.com/jmoiron/sqlx"
+
 	// all packages imported by this need postgres
 	_ "github.com/lib/pq"
 )
 
-// Imported objects from vm
-type Object = vm.Object
-type GoObject = vm.GoObject
-type VM = vm.VM
-type Thread = vm.Thread
-type Method = vm.Method
-type StringObject = vm.StringObject
+type (
+	// Imported objects from vm
+	Object       = vm.Object
+	GoObject     = vm.GoObject
+	VM           = vm.VM
+	Thread       = vm.Thread
+	Method       = vm.Method
+	StringObject = vm.StringObject
+)
 
 func init() {
 	vm.RegisterExternalClass("db", vm.ExternalClass("DB", "db.gb",

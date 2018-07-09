@@ -9,7 +9,7 @@ import (
 
 // GoMap ...
 type GoMap struct {
-	*baseObj
+	*BaseObj
 	data map[string]interface{}
 }
 
@@ -130,7 +130,7 @@ func builtinGoMapInstanceMethods() []*BuiltinMethodObject {
 // Functions for initialization -----------------------------------------
 
 func (vm *VM) initGoMap(d map[string]interface{}) *GoMap {
-	return &GoMap{data: d, baseObj: &baseObj{class: vm.topLevelClass(classes.GoMapClass)}}
+	return &GoMap{data: d, BaseObj: &BaseObj{class: vm.TopLevelClass(classes.GoMapClass)}}
 }
 
 func (vm *VM) initGoMapClass() *RClass {
@@ -148,12 +148,12 @@ func (m *GoMap) Value() interface{} {
 	return m.data
 }
 
-// toString returns the object's name as the string format
-func (m *GoMap) toString() string {
+// ToString returns the object's name as the string format
+func (m *GoMap) ToString() string {
 	return fmt.Sprintf("<GoMap: %p>", m)
 }
 
-// toJSON just delegates to toString
-func (m *GoMap) toJSON(t *Thread) string {
-	return m.toString()
+// ToJSON just delegates to ToString
+func (m *GoMap) ToJSON(t *Thread) string {
+	return m.ToString()
 }

@@ -1,4 +1,4 @@
-package vm
+package plugin
 
 import (
 	"strings"

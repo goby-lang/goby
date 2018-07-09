@@ -23,7 +23,7 @@ func builtinURIClassMethods() []*BuiltinMethodObject {
 			Name: "parse",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				uri := args[0].(*StringObject).value
-				uriModule := t.vm.topLevelClass("URI")
+				uriModule := t.vm.TopLevelClass("URI")
 				u, err := url.Parse(uri)
 
 				if err != nil {

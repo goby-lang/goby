@@ -59,9 +59,9 @@ func (s *Stack) inspect() string {
 		if p != nil {
 			o := p.Target
 			if i == s.pointer {
-				datas = append(datas, fmt.Sprintf("%s (%T) %d <----", o.toString(), o, i))
+				datas = append(datas, fmt.Sprintf("%s (%T) %d <----", o.ToString(), o, i))
 			} else {
-				datas = append(datas, fmt.Sprintf("%s (%T) %d", o.toString(), o, i))
+				datas = append(datas, fmt.Sprintf("%s (%T) %d", o.ToString(), o, i))
 			}
 
 		} else {

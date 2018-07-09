@@ -329,7 +329,7 @@ func (t *Thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 	method = receiver.findMethod(methodName)
 
 	if method == nil {
-		t.setErrorObject(receiverPr, argPr, errors.UndefinedMethodError, sourceLine, "Undefined Method '%+v' for %+v", methodName, receiver.toString())
+		t.setErrorObject(receiverPr, argPr, errors.UndefinedMethodError, sourceLine, "Undefined Method '%+v' for %+v", methodName, receiver.ToString())
 	}
 
 	sendCallFrame := t.callFrameStack.top()
@@ -341,7 +341,7 @@ func (t *Thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 	case *BuiltinMethodObject:
 		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, sourceLine, sendCallFrame.FileName())
 	case *Error:
-		t.pushErrorObject(errors.InternalError, sourceLine, m.toString())
+		t.pushErrorObject(errors.InternalError, sourceLine, m.ToString())
 	}
 }
 

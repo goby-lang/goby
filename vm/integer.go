@@ -17,7 +17,7 @@ import (
 //
 // - `Integer.new` is not supported.
 type IntegerObject struct {
-	*baseObj
+	*BaseObj
 	value int
 	flag  int
 }
@@ -645,7 +645,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 
 func (vm *VM) InitIntegerObject(value int) *IntegerObject {
 	return &IntegerObject{
-		baseObj: &baseObj{class: vm.topLevelClass(classes.IntegerClass)},
+		BaseObj: &BaseObj{class: vm.TopLevelClass(classes.IntegerClass)},
 		value:   value,
 		flag:    i,
 	}
@@ -758,14 +758,14 @@ func (i *IntegerObject) numericComparison(
 	}
 }
 
-// toString returns the object's name as the string format
-func (i *IntegerObject) toString() string {
+// ToString returns the object's name as the string format
+func (i *IntegerObject) ToString() string {
 	return strconv.Itoa(i.value)
 }
 
-// toJSON just delegates to toString
-func (i *IntegerObject) toJSON(t *Thread) string {
-	return i.toString()
+// ToJSON just delegates to ToString
+func (i *IntegerObject) ToJSON(t *Thread) string {
+	return i.ToString()
 }
 
 // equal checks if the integer values between receiver and argument are equal

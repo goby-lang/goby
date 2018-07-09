@@ -30,7 +30,7 @@ import (
 // - Currently, UTF-8 encoding is assumed based upon Golang's string manipulation, but the encoding is not actually specified(TBD).
 // - `String.new` is not supported.
 type StringObject struct {
-	*baseObj
+	*BaseObj
 	value string
 }
 
@@ -64,7 +64,7 @@ func builtinStringClassMethods() []*BuiltinMethodObject {
 				arguments := []interface{}{}
 
 				for _, arg := range args[1:] {
-					arguments = append(arguments, arg.toString())
+					arguments = append(arguments, arg.ToString())
 				}
 
 				count := strings.Count(format, "%s")
@@ -1628,7 +1628,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 
 func (vm *VM) InitStringObject(value string) *StringObject {
 	return &StringObject{
-		baseObj: &baseObj{class: vm.topLevelClass(classes.StringClass)},
+		BaseObj: &BaseObj{class: vm.TopLevelClass(classes.StringClass)},
 		value:   value,
 	}
 }
@@ -1647,13 +1647,13 @@ func (s *StringObject) Value() interface{} {
 	return s.value
 }
 
-// toString returns the object's name as the string format
-func (s *StringObject) toString() string {
+// ToString returns the object's name as the string format
+func (s *StringObject) ToString() string {
 	return s.value
 }
 
-// toJSON just delegates to toString
-func (s *StringObject) toJSON(t *Thread) string {
+// ToJSON just delegates to ToString
+func (s *StringObject) ToJSON(t *Thread) string {
 	return strconv.Quote(s.value)
 }
 

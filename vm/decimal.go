@@ -40,7 +40,7 @@ type Float = big.Float
 //
 // - `Decimal.new` is not supported.
 type DecimalObject struct {
-	*baseObj
+	*BaseObj
 	value *Decimal
 }
 
@@ -545,7 +545,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "to_s",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				return t.vm.InitStringObject(receiver.(*DecimalObject).toString())
+				return t.vm.InitStringObject(receiver.(*DecimalObject).ToString())
 
 			},
 		},
@@ -558,7 +558,7 @@ func builtinDecimalInstanceMethods() []*BuiltinMethodObject {
 
 func (vm *VM) initDecimalObject(value *Decimal) *DecimalObject {
 	return &DecimalObject{
-		baseObj: &baseObj{class: vm.topLevelClass(classes.DecimalClass)},
+		BaseObj: &BaseObj{class: vm.TopLevelClass(classes.DecimalClass)},
 		value:   value,
 	}
 }
@@ -681,17 +681,17 @@ func (d *DecimalObject) rocketComparison(
 	return newInt
 }
 
-// toString returns the object's approximate float value as the string format.
-func (d *DecimalObject) toString() string {
+// ToString returns the object's approximate float value as the string format.
+func (d *DecimalObject) ToString() string {
 	fs := d.value.FloatString(60)
 	fs = strings.TrimRight(fs, "0")
 	fs = strings.TrimRight(fs, ".")
 	return fs
 }
 
-// toJSON just delegates to toString
-func (d *DecimalObject) toJSON(t *Thread) string {
-	return d.toString()
+// ToJSON just delegates to ToString
+func (d *DecimalObject) ToJSON(t *Thread) string {
+	return d.ToString()
 }
 
 // Other helper functions  ----------------------------------------------
