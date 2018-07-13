@@ -245,7 +245,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					// Negative index value too small
 					if indexValue < 0 {
 						if arr.normalizeIndex(index) == -1 {
-							return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Index value %d too small for array. minimum: %d", indexValue, -arr.length())
+							return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Index value %d too small for array. minimum: %d", indexValue, -arr.Len())
 						}
 						indexValue = arr.normalizeIndex(index)
 					}
@@ -268,9 +268,9 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					assignedValue, isArray := a.(*ArrayObject)
 
 					// Expand the array with nil; the second index is unnecessary in the case
-					if indexValue >= arr.length() {
+					if indexValue >= arr.Len() {
 
-						for arr.length() < indexValue {
+						for arr.Len() < indexValue {
 							arr.Elements = append(arr.Elements, NULL)
 						}
 
@@ -284,8 +284,8 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 
 					endValue := indexValue + countValue
 					// the case the addition of index and count is too large
-					if endValue > arr.length() {
-						endValue = arr.length()
+					if endValue > arr.Len() {
+						endValue = arr.Len()
 					}
 
 					arr.Elements = append(arr.Elements[:indexValue], arr.Elements[endValue:]...)
@@ -307,7 +307,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 				// Negative index value condition
 				if indexValue < 0 {
 					if len(arr.Elements) < -indexValue {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Index value %d too small for array. minimum: %d", indexValue, -arr.length())
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Index value %d too small for array. minimum: %d", indexValue, -arr.Len())
 					}
 					arr.Elements[len(arr.Elements)+indexValue] = args[1]
 					return arr.Elements[len(arr.Elements)+indexValue]
@@ -730,7 +730,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 
 				arr := receiver.(*ArrayObject)
 
-				if arr.length() == 0 {
+				if arr.Len() == 0 {
 					return TRUE
 				}
 
@@ -913,7 +913,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 				}
 
 				arr := receiver.(*ArrayObject)
-				return t.vm.InitIntegerObject(arr.length())
+				return t.vm.InitIntegerObject(arr.Len())
 
 			},
 		},
@@ -1468,7 +1468,7 @@ func (a *ArrayObject) index(t *Thread, args []Object, sourceLine int) Object {
 
 	i := args[0]
 	index, ok := i.(*IntegerObject)
-	arrLength := a.length()
+	arrLength := a.Len()
 
 	if !ok {
 		return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
@@ -1536,9 +1536,25 @@ func (a *ArrayObject) flatten() []Object {
 	return result
 }
 
-// length returns the length of array's elements
-func (a *ArrayObject) length() int {
+// Len returns the length of array's elements
+func (a *ArrayObject) Len() int {
 	return len(a.Elements)
+}
+
+// Swap is one of the required method to fulfill sortable interface
+func (a *ArrayObject) Swap(i, j int) {
+	a.Elements[i], a.Elements[j] = a.Elements[j], a.Elements[i]
+}
+
+// Less is one of the required method to fulfill sortable interface
+func (a *ArrayObject) Less(i, j int) bool {
+	leftObj, rightObj := a.Elements[i], a.Elements[j]
+	switch leftObj := leftObj.(type) {
+	case *IntegerObject:
+		return leftObj.lessThan(rightObj)
+	default:
+		return false
+	}
 }
 
 // normalizes the index to the Ruby-style:
