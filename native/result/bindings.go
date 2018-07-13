@@ -2,6 +2,7 @@ package result
 
 import (
 	"fmt"
+
 	vm "github.com/goby-lang/goby/vm"
 	errors "github.com/goby-lang/goby/vm/errors"
 )
@@ -23,6 +24,7 @@ func init() {
 
 var staticResult = new(Result)
 
+// bindingResultNew is genderated by github.com/goby-lang/goby/cmd/binder
 func bindingResultNew(receiver vm.Object, line int, t *vm.Thread, args []vm.Object) vm.Object {
 	r := staticResult
 	if len(args) != 2 {
@@ -41,6 +43,7 @@ func bindingResultNew(receiver vm.Object, line int, t *vm.Thread, args []vm.Obje
 	return r.New(t, arg0, arg1)
 }
 
+// bindingResultEmpty is genderated by github.com/goby-lang/goby/cmd/binder
 func bindingResultEmpty(receiver vm.Object, line int, t *vm.Thread, args []vm.Object) vm.Object {
 	r := staticResult
 	if len(args) != 0 {
@@ -49,6 +52,7 @@ func bindingResultEmpty(receiver vm.Object, line int, t *vm.Thread, args []vm.Ob
 	return r.Empty(t)
 }
 
+// bindingResultMethodMissing is genderated by github.com/goby-lang/goby/cmd/binder
 func bindingResultMethodMissing(receiver vm.Object, line int, t *vm.Thread, args []vm.Object) vm.Object {
 	r, ok := receiver.(*Result)
 	if !ok {
@@ -65,6 +69,7 @@ func bindingResultMethodMissing(receiver vm.Object, line int, t *vm.Thread, args
 	return r.MethodMissing(t, arg0)
 }
 
+// bindingResultOr is genderated by github.com/goby-lang/goby/cmd/binder
 func bindingResultOr(receiver vm.Object, line int, t *vm.Thread, args []vm.Object) vm.Object {
 	r, ok := receiver.(*Result)
 	if !ok {

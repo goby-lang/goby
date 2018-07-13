@@ -97,10 +97,12 @@ func (b *Binding) BindMethods(f *File, x *ast.File) {
 	f.Add(mapping(b, x.Name.Name))
 	f.Var().Id(b.staticName()).Op("=").New(Id(b.ClassName))
 	for _, c := range b.ClassMethods {
+		f.Commentf("%s is genderated by github.com/goby-lang/goby/cmd/binder", b.bindingName(c))
 		b.BindClassMethod(f, c)
 		f.Line()
 	}
 	for _, c := range b.InstanceMethods {
+		f.Commentf("%s is genderated by github.com/goby-lang/goby/cmd/binder", b.bindingName(c))
 		b.BindInstanceMethod(f, c)
 		f.Line()
 	}
