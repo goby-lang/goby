@@ -3,6 +3,7 @@ package vm
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -19,6 +20,10 @@ const mainThreadID = 0
 type Thread struct {
 	// a stack that holds call frames
 	callFrameStack callFrameStack
+
+	// The acall frame currently being executed
+	currentFrame callFrame
+
 	// data Stack
 	Stack Stack
 
@@ -114,7 +119,6 @@ func (t *Thread) execFile(fpath string) (err error) {
 	// Restore instruction sets.
 	t.vm.isTables[bytecode.MethodDef] = oldMethodTable
 	t.vm.isTables[bytecode.ClassDef] = oldClassTable
-
 	return
 }
 
@@ -127,13 +131,16 @@ func (t *Thread) captureAndHandlePanic() {
 				os.Exit(1)
 			}
 		} else {
+			log.Println(e)
 			panic(e)
 		}
 	case error:
+		log.Println(e)
 		fmt.Println(e.Error())
 	case nil:
 		return
 	default:
+		log.Println(e)
 		panic(e)
 	}
 }
@@ -150,6 +157,8 @@ func (t *Thread) evalCallFrame(cf callFrame) {
 			t.reportErrorAndStop()
 		}
 	}()
+
+	t.currentFrame = cf
 
 	switch cf := cf.(type) {
 	case *normalCallFrame:
@@ -239,19 +248,12 @@ func (t *Thread) execInstruction(cf *normalCallFrame, i *instruction) {
 
 // Yield to a call frame
 func (t *Thread) Yield(args ...Object) *Pointer {
-	cf := t.callFrameStack.callFrames[t.callFrameStack.pointer-2]
-	return t.builtinMethodYield(cf.BlockFrame(), args...)
+	return t.builtinMethodYield(t.currentFrame.BlockFrame(), args...)
 }
 
 // BlockGiven returns whethe or not we have a block frame below us in the stack
 func (t *Thread) BlockGiven() bool {
-	cf := t.callFrameStack.callFrames[t.callFrameStack.pointer-2]
-
-	if cf.BlockFrame() == nil {
-		return false
-	}
-
-	return true
+	return t.currentFrame.BlockFrame() != nil
 }
 
 func (t *Thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object) *Pointer {

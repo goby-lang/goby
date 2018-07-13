@@ -12,6 +12,7 @@ import (
 
 	"github.com/fatih/camelcase"
 
+	// makes writing this easier
 	. "github.com/dave/jennifer/jen"
 )
 
@@ -21,7 +22,8 @@ var (
 )
 
 const (
-	vmPkg = "github.com/goby-lang/goby/vm"
+	vmPkg     = "github.com/goby-lang/goby/vm"
+	errorsPkg = "github.com/goby-lang/goby/vm/errors"
 )
 
 func typeFromExpr(e ast.Expr) string {
@@ -83,11 +85,11 @@ type Binding struct {
 }
 
 func (b *Binding) staticName() string {
-	return fmt.Sprintf("_static%s", b.ClassName)
+	return fmt.Sprintf("static%s", b.ClassName)
 }
 
 func (b *Binding) bindingName(f *ast.FuncDecl) string {
-	return fmt.Sprintf("_binding_%s_%s", b.ClassName, f.Name.Name)
+	return fmt.Sprintf("binding%s%s", b.ClassName, f.Name.Name)
 }
 
 // BindMethods generates code that binds methods of a go structure to a goby class
@@ -123,10 +125,35 @@ func (b *Binding) BindInstanceMethod(f *File, d *ast.FuncDecl) {
 	b.body(r, f, d)
 }
 
+func wrongArgNum(want int) Code {
+	return Return(Id("t").Dot("VM").Call().Dot("InitErrorObject").Call(
+		Qual(errorsPkg, "ArgumentError"),
+		Id("line"),
+		Qual(errorsPkg, "WrongNumberOfArgumentFormat"),
+		Lit(want),
+		Id("len").Call(Id("args")),
+	))
+}
+
+func wrongArgType(name, want string) Code {
+	return Return(Id("t").Dot("VM").Call().Dot("InitErrorObject").Call(
+		Qual(errorsPkg, "TypeError"),
+		Id("line"),
+		Qual(errorsPkg, "WrongArgumentTypeFormat"),
+		Lit(want),
+		Id(name).Dot("Class").Call().Dot("Name"),
+	))
+}
+
 // body is a helper function for generating the common body of a method
 func (b *Binding) body(receiver *Statement, f *File, d *ast.FuncDecl) {
 	s := f.Func().Id(b.bindingName(d))
-	s = s.Params(Id("receiver").Qual(vmPkg, "Object"), Id("line").Id("int"), Id("t").Op("*").Qual(vmPkg, "Thread"), Id("args").Index().Qual(vmPkg, "Object")).Qual(vmPkg, "Object")
+	s = s.Params(
+		Id("receiver").Qual(vmPkg, "Object"),
+		Id("line").Id("int"),
+		Id("t").Op("*").Qual(vmPkg, "Thread"),
+		Id("args").Index().Qual(vmPkg, "Object"),
+	).Qual(vmPkg, "Object")
 
 	var args []*Statement
 	for i, a := range allArgs(d.Type.Params) {
@@ -143,9 +170,7 @@ func (b *Binding) body(receiver *Statement, f *File, d *ast.FuncDecl) {
 	}
 
 	inner := receiver.If(Len(Id("args")).Op("!=").Lit(d.Type.Params.NumFields() - 1)).Block(
-		Panic(
-			Qual("fmt", "Sprintf").Call(Lit(fmt.Sprintf("Wrong NArgs. Wanted: %d got: ", d.Type.Params.NumFields()-1)+"%d"), Len(Id("args"))),
-		).Line(),
+		wrongArgNum(d.Type.Params.NumFields() - 1),
 	).Line()
 	argNames := []Code{
 		Id("t"),

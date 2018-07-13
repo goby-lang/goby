@@ -42,9 +42,17 @@ func (Result) New(t *Thread, name Object, value Object) Object {
 	return r
 }
 
+// Empty creats a new empty Result
+func (Result) Empty(t *Thread) Object {
+	return &Result{empty: true,
+		BaseObj: vm.NewBaseObject(t.VM(), "Result"),
+	}
+}
+
 // MethodMissing will be called for all methods other than 'or'
-func (r *Result) MethodMissing(t *Thread, name Object, args Object) Object {
-	if name == r.name && !r.used {
+func (r *Result) MethodMissing(t *Thread, name Object) Object {
+
+	if name.Value() == r.name.Value() && !r.used {
 		r.used = true
 		if t.BlockGiven() {
 			t.Yield(r.value)
@@ -54,6 +62,7 @@ func (r *Result) MethodMissing(t *Thread, name Object, args Object) Object {
 	return r
 }
 
+// Or should be the final catch all for a result call chain
 func (r *Result) Or(t *Thread) Object {
 	if r.used || r.empty {
 		return vm.NULL
