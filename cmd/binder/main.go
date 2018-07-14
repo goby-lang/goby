@@ -8,6 +8,7 @@ import (
 	"go/token"
 	"io/ioutil"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/fatih/camelcase"
@@ -17,7 +18,7 @@ import (
 )
 
 var (
-	in       = flag.String("in", ".", "folder to create bindings from")
+	in       = flag.String("in", "", "folder to create bindings from")
 	typeName = flag.String("type", "", "type to generate bindings for")
 )
 
@@ -229,7 +230,16 @@ func mapping(b *Binding, pkg string) Code {
 }
 
 func main() {
+	flag.Usage = func() {
+		fmt.Println("binder is used for generating class bindings for go structures.")
+		flag.PrintDefaults()
+	}
+
 	flag.Parse()
+	if *in == "" {
+		flag.Usage()
+		os.Exit(0)
+	}
 
 	fs := token.NewFileSet()
 	buff, err := ioutil.ReadFile(*in)
