@@ -2,9 +2,17 @@ package result
 
 //go:generate binder -in result.go -type Result
 
-import "github.com/goby-lang/goby/vm"
+import (
+	"encoding/json"
+	"fmt"
 
+	"github.com/goby-lang/goby/vm"
+)
+
+// Object is this packages copy of the the Object type
 type Object = vm.Object
+
+// Thread is this packages copy of the the Thread type
 type Thread = vm.Thread
 
 // Result is a variant return type
@@ -16,14 +24,18 @@ type Result struct {
 	value Object
 }
 
+// ToJSON is supposed to json encoded a result, but it doesn't
 func (r *Result) ToJSON(*Thread) string {
-	return ""
+	b, _ := json.Marshal(r)
+	return string(b)
 }
 
+// ToString returns the string representation of the result
 func (r *Result) ToString() string {
-	return ""
+	return fmt.Sprintf("<Result %s>", r.ToString())
 }
 
+// Value returns the internal value of the result
 func (r *Result) Value() interface{} {
 	return r.value
 }
