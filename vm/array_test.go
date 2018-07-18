@@ -1934,6 +1934,28 @@ func TestArrayShiftMethodFail(t *testing.T) {
 	}
 }
 
+func TestArraySortMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+		[5,4,3,2,1].sort
+		`, []interface{}{1, 2, 3, 4, 5}},
+		{`
+		[5,4,1,2,3].sort
+		`, []interface{}{1, 2, 3, 4, 5}},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		verifyArrayObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayStarMethod(t *testing.T) {
 	tests := []struct {
 		input    string

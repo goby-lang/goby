@@ -6,6 +6,7 @@ import (
 
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
+	"sort"
 )
 
 // ArrayObject represents an instance from Array class.
@@ -1284,6 +1285,28 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 
 				arr := receiver.(*ArrayObject)
 				return arr.shift()
+
+			},
+		},
+		{
+			// Return a sorted array
+			//
+			// ```ruby
+			// a = [3, 2, 1]
+			// a.sort #=> [1, 2, 3]
+			// ```
+			//
+			// @return [Object]
+			Name: "sort",
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+				}
+
+				arr := receiver.(*ArrayObject)
+				newArr := arr.copy().(*ArrayObject)
+				sort.Sort(newArr)
+				return newArr
 
 			},
 		},
