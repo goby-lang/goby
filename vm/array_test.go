@@ -1945,6 +1945,12 @@ func TestArraySortMethod(t *testing.T) {
 		{`
 		[5,4,1,2,3].sort
 		`, []interface{}{1, 2, 3, 4, 5}},
+		{`
+		["efg", "abc"].sort
+		`, []interface{}{"abc", "efg"}},
+		{`
+		["abc", "aaaaaa"].sort
+		`, []interface{}{"aaaaaa", "abc"}},
 	}
 
 	for i, tt := range tests {

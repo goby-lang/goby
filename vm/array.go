@@ -1575,6 +1575,14 @@ func (a *ArrayObject) Less(i, j int) bool {
 	switch leftObj := leftObj.(type) {
 	case *IntegerObject:
 		return leftObj.lessThan(rightObj)
+	case *StringObject:
+		right, ok := rightObj.(*StringObject)
+
+		if ok {
+			return leftObj.value < right.value
+		}
+
+		return false
 	default:
 		return false
 	}
