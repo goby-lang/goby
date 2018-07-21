@@ -2,9 +2,10 @@ package vm
 
 import (
 	"fmt"
+	"sync"
+
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
-	"sync"
 )
 
 // ChannelObject represents Goby's "channel", which equips the Golang' channel and works with `thread`.

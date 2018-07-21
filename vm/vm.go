@@ -112,7 +112,8 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 		_, err := os.Stat(vm.projectRoot)
 
 		if err != nil {
-			path, _ := filepath.Abs("$GOPATH/src/github.com/goby-lang/goby")
+			gp := os.Getenv("GOPATH")
+			path, _ := filepath.Abs(gp + "/src/github.com/goby-lang/goby")
 			_, err = os.Stat(path)
 
 			if err != nil {

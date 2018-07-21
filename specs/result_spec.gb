@@ -4,7 +4,7 @@ require "result"
 Spec.describe Result do
     describe "empty Result" do 
         describe "#or" do 
-            o = Result.new 
+            o = Result.empty
 
             it "never calls a given block" do
                 is_called = false

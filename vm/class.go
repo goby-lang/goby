@@ -8,9 +8,10 @@ import (
 	"sync"
 	"time"
 
+	"sort"
+
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
-	"sort"
 )
 
 // RClass represents normal (not built in) class object
@@ -63,6 +64,10 @@ func ExternalClass(name, path string, classMethods, instanceMethods map[string]M
 		pg.setBuiltinMethods(buildMethods(classMethods), true)
 		pg.setBuiltinMethods(buildMethods(instanceMethods), false)
 		v.objectClass.setClassConstant(pg)
+
+		if path == "" {
+			return nil
+		}
 
 		return v.mainThread.execGobyLib(path)
 	}

@@ -13,6 +13,7 @@ import (
 	"github.com/goby-lang/goby/igb"
 	_ "github.com/goby-lang/goby/native/db"
 	_ "github.com/goby-lang/goby/native/plugin"
+	_ "github.com/goby-lang/goby/native/result"
 	"github.com/goby-lang/goby/vm"
 	"github.com/pkg/profile"
 )
