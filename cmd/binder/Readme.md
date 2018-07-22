@@ -15,7 +15,7 @@ import _ "github.com/path/to/your/package"
 
 ## Auto generate using go generate
 
-Adding a go generate comment in the file your define your go structure will allow you to automatically generate updated bindings easity by running `go generate ./...` in the root of your project.
+Adding a go generate comment in the file your define your go structure will allow you to automatically generate updated bindings easily by running `go generate ./...` in the root of your project.
 
 example in
 `github.com/goby-lang/native/result/result.go`
@@ -26,17 +26,17 @@ package result
 
 ## Binding rules
 
-* Methods with a named reciever will be instance methods.
-* Methods without a named reciever will be class methods.
+* Methods with a named receiver will be instance methods.
+* Methods without a named receiver will be class methods.
 * Types must be exported.
-* Cammel case names will be converted to snake case names.
+* Camel case names will be converted to snake case names.
 
 examples.
 ```go
 func (t *MyType) func MyFunc() vm.Object
 ```
 
-will generate the equivelent instance method in goby.
+will generate the equivalent instance method in goby.
 ```ruby
 class MyType
     def my_func()
@@ -49,7 +49,7 @@ end
 func (MyType) func MyFunc() vm.Object
 ```
 
-will generate the equivelent class method in goby.
+will generate the equivalent class method in goby.
 ```ruby
 class MyType
     def self.my_func()
@@ -61,4 +61,4 @@ end
 
 * Only one type can have generated bindings per package.
 * Only functions that return `vm.Object` will have bindings generated.
-* Function names cannot contain special charecters like `?`.
+* Function names cannot contain special characters like `?`.
