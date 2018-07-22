@@ -1,9 +1,7 @@
 package bytecode
 
 import (
-	"bytes"
 	"fmt"
-	"strings"
 )
 
 // instruction set types
@@ -51,7 +49,7 @@ const (
 // Instruction represents compiled bytecode instruction
 type Instruction struct {
 	Action     string
-	Params     []string
+	Params     []interface{}
 	line       int
 	anchor     *anchor
 	sourceLine int
@@ -75,25 +73,6 @@ func (i *Instruction) Line() int {
 // SourceLine returns instruction's source line number
 func (i *Instruction) SourceLine() int {
 	return i.sourceLine
-}
-
-func (i *Instruction) compile() string {
-	if i.anchor != nil {
-		return fmt.Sprintf("%d %s %d\n", i.line, i.Action, i.anchor.line)
-	}
-	if len(i.Params) > 0 {
-		lastParam := i.Params[len(i.Params)-1]
-
-		// If the send action doesn't have a block (block info), we'll have a trailing space after join.
-		// So we need to remove that empty string element
-		if i.Action == Send && len(lastParam) == 0 {
-			return fmt.Sprintf("%d %s %s\n", i.line, i.Action, strings.Join(i.Params[:len(i.Params)-1], " "))
-		}
-
-		return fmt.Sprintf("%d %s %s\n", i.line, i.Action, strings.Join(i.Params, " "))
-	}
-
-	return fmt.Sprintf("%d %s\n", i.line, i.Action)
 }
 
 type anchor struct {
@@ -178,19 +157,4 @@ func (is *InstructionSet) define(action string, sourceLine int, params ...interf
 	is.Instructions = append(is.Instructions, i)
 	is.count++
 	return i
-}
-
-func (is *InstructionSet) compile() string {
-	var out bytes.Buffer
-	if is.isType == Program {
-		out.WriteString(fmt.Sprintf("<%s>\n", is.isType))
-	} else {
-		out.WriteString(fmt.Sprintf("<%s:%s>\n", is.isType, is.name))
-	}
-
-	for _, i := range is.Instructions {
-		out.WriteString(i.compile())
-	}
-
-	return out.String()
 }
