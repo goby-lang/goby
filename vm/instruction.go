@@ -80,7 +80,7 @@ var builtinActions = map[operationType]*action{
 				t.pushErrorObject(errors.NameError, sourceLine, "uninitialized constant %s", constName)
 			}
 
-			c.isNamespace = args[1].(string) == "true"
+			c.isNamespace = args[1].(bool)
 
 			if t.Stack.top() != nil && t.Stack.top().isNamespace {
 				t.Stack.Pop()
@@ -477,10 +477,16 @@ var builtinActions = map[operationType]*action{
 		name: bytecode.Send,
 		operation: func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			var method Object
+			var blockFlag string
 
 			methodName := args[0].(string)
 			argCount := args[1].(int)
-			blockFlag := args[2].(string)
+			blockFlag, ok := args[2].(string)
+
+			if !ok {
+				blockFlag = ""
+			}
+
 			argSet := args[3].(*bytecode.ArgSet)
 
 			// Deal with splat arguments

@@ -14,9 +14,9 @@ func TestArrayEnumeratorEnumerationWithoutElements(t *testing.T) {
 
 	v := initTestVM()
 	evaluated := v.testEval(t, input, getFilename())
-	VerifyExpected(t, i, evaluated, expected)
-	v.checkCFP(t, i, 0)
-	v.checkSP(t, i, 1)
+	VerifyExpected(t, 0, evaluated, expected)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
 }
 
 func TestArrayEnumeratorEnumerationWithElements(t *testing.T) {

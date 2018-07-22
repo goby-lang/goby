@@ -13,17 +13,17 @@ func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, sc
 	sourceLine := exp.Line()
 	switch exp := exp.(type) {
 	case *ast.Constant:
-		is.define(GetConstant, sourceLine, exp.Value, fmt.Sprint(exp.IsNamespace))
+		is.define(GetConstant, sourceLine, exp.Value, exp.IsNamespace)
 	case *ast.InstanceVariable:
 		is.define(GetInstanceVariable, sourceLine, exp.Value)
 	case *ast.IntegerLiteral:
-		is.define(PutObject, sourceLine, fmt.Sprint(exp.Value))
+		is.define(PutObject, sourceLine, exp.Value)
 	case *ast.FloatLiteral:
-		is.define(PutFloat, sourceLine, fmt.Sprint(exp.Value))
+		is.define(PutFloat, sourceLine, exp.Value)
 	case *ast.StringLiteral:
 		is.define(PutString, sourceLine, exp.Value)
 	case *ast.BooleanExpression:
-		is.define(PutBoolean, sourceLine, fmt.Sprint(exp.Value))
+		is.define(PutBoolean, sourceLine, exp.Value)
 	case *ast.NilExpression:
 		is.define(PutNull, sourceLine)
 	case *ast.RangeExpression:
@@ -274,6 +274,6 @@ func (g *Generator) compileInfixExpression(is *InstructionSet, node *ast.InfixEx
 	default:
 		g.compileExpression(is, node.Left, scope, table)
 		g.compileExpression(is, node.Right, scope, table)
-		is.define(Send, node.Line(), node.Operator, "1", "")
+		is.define(Send, node.Line(), node.Operator, 1, "")
 	}
 }

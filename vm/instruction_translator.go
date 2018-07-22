@@ -3,7 +3,6 @@ package vm
 import (
 	"fmt"
 	"github.com/goby-lang/goby/compiler/bytecode"
-	"strconv"
 )
 
 // instructionTranslator is responsible for parsing bytecodes
@@ -44,29 +43,6 @@ func (it *instructionTranslator) setMetadata(is *instructionSet, set *bytecode.I
 	}
 }
 
-func (it *instructionTranslator) parseBooleanParam(param string) bool {
-	boolValue, err := strconv.ParseBool(param)
-
-	// Can happen only in case of programmatic error, as the `param` value
-	// is the string version of a boolean.
-	if err != nil {
-		panic(fmt.Sprintf("Unknown boolean value: %s", param))
-	}
-
-	return boolValue
-}
-
-func (it *instructionTranslator) parseParam(param string) interface{} {
-	integer, e := strconv.ParseInt(param, 0, 64)
-	if e != nil {
-		return param
-	}
-
-	i := int(integer)
-
-	return i
-}
-
 func (it *instructionTranslator) transferInstructionSets(sets []*bytecode.InstructionSet) []*instructionSet {
 	iss := []*instructionSet{}
 
@@ -103,7 +79,7 @@ func (it *instructionTranslator) transferInstruction(is *instructionSet, i *byte
 
 	switch act {
 	case bytecode.PutBoolean:
-		params = append(params, it.parseBooleanParam(i.Params[0]))
+		params = append(params, i.Params[0])
 	case bytecode.PutString:
 		params = append(params, i.Params[0])
 	case bytecode.BranchUnless, bytecode.BranchIf, bytecode.Jump:
@@ -116,12 +92,12 @@ func (it *instructionTranslator) transferInstruction(is *instructionSet, i *byte
 		params = append(params, line)
 	case bytecode.Send:
 		for _, param := range i.Params {
-			params = append(params, it.parseParam(param))
+			params = append(params, param)
 		}
 		params = append(params, i.ArgSet)
 	default:
 		for _, param := range i.Params {
-			params = append(params, it.parseParam(param))
+			params = append(params, param)
 		}
 	}
 

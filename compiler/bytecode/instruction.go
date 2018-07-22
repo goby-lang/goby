@@ -135,23 +135,13 @@ func (is *InstructionSet) Type() string {
 }
 
 func (is *InstructionSet) define(action string, sourceLine int, params ...interface{}) *Instruction {
-	ps := []string{}
-	i := &Instruction{Action: action, Params: ps, line: is.count, sourceLine: sourceLine}
+	i := &Instruction{Action: action, Params: params, line: is.count, sourceLine: sourceLine}
 	for _, param := range params {
-		switch p := param.(type) {
-		case string:
-			ps = append(ps, p)
-		case *anchor:
-			i.anchor = p
-		case int:
-			ps = append(ps, fmt.Sprint(p))
-		case bool:
-			ps = append(ps, fmt.Sprint(p))
-		}
-	}
+		a, ok := param.(*anchor)
 
-	if len(ps) > 0 {
-		i.Params = ps
+		if ok {
+			i.anchor = a
+		}
 	}
 
 	is.Instructions = append(is.Instructions, i)
