@@ -28,7 +28,7 @@ import (
 // ```
 //
 type ConcurrentHashObject struct {
-	*baseObj
+	*BaseObj
 	internalMap sync.Map
 }
 
@@ -263,7 +263,7 @@ func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
 				}
 
 				r := receiver.(*ConcurrentHashObject)
-				return t.vm.InitStringObject(r.toJSON(t))
+				return t.vm.InitStringObject(r.ToJSON(t))
 
 			},
 		},
@@ -284,7 +284,7 @@ func builtinConcurrentHashInstanceMethods() []*BuiltinMethodObject {
 				}
 
 				h := receiver.(*ConcurrentHashObject)
-				return t.vm.InitStringObject(h.toString())
+				return t.vm.InitStringObject(h.ToString())
 
 			},
 		},
@@ -306,7 +306,7 @@ func (vm *VM) initConcurrentHashObject(pairs map[string]Object) *ConcurrentHashO
 	hash := concurrent.getClassConstant(classes.HashClass)
 
 	return &ConcurrentHashObject{
-		baseObj:     &baseObj{class: hash},
+		BaseObj:     &BaseObj{class: hash},
 		internalMap: internalMap,
 	}
 }
@@ -328,8 +328,8 @@ func (h *ConcurrentHashObject) Value() interface{} {
 	return h.internalMap
 }
 
-// toString returns the object's name as the string format
-func (h *ConcurrentHashObject) toString() string {
+// ToString returns the object's name as the string format
+func (h *ConcurrentHashObject) ToString() string {
 	var out bytes.Buffer
 	var pairs []string
 
@@ -343,7 +343,7 @@ func (h *ConcurrentHashObject) toString() string {
 			template = "%s: %s"
 		}
 
-		pairs = append(pairs, fmt.Sprintf(template, key, value.(Object).toString()))
+		pairs = append(pairs, fmt.Sprintf(template, key, value.(Object).ToString()))
 
 		return true
 	}
@@ -357,8 +357,8 @@ func (h *ConcurrentHashObject) toString() string {
 	return out.String()
 }
 
-// toJSON returns the object's name as the JSON string format
-func (h *ConcurrentHashObject) toJSON(t *Thread) string {
+// ToJSON returns the object's name as the JSON string format
+func (h *ConcurrentHashObject) ToJSON(t *Thread) string {
 	var out bytes.Buffer
 	var values []string
 	out.WriteString("{")

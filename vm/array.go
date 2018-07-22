@@ -14,7 +14,7 @@ import (
 // Elements in an array can belong to any class and you can also build a "tuple" within an array.
 // Array objects should always be enumerable.
 type ArrayObject struct {
-	*baseObj
+	*BaseObj
 	Elements []Object
 	splat    bool
 }
@@ -848,7 +848,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 
 				elements := []string{}
 				for _, e := range arr.flatten() {
-					elements = append(elements, e.toString())
+					elements = append(elements, e.ToString())
 				}
 
 				return t.vm.InitStringObject(strings.Join(elements, sep))
@@ -1382,7 +1382,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 // InitArrayObject returns a new object with the given elemnts
 func (vm *VM) InitArrayObject(elements []Object) *ArrayObject {
 	return &ArrayObject{
-		baseObj:  &baseObj{class: vm.topLevelClass(classes.ArrayClass)},
+		BaseObj:  &BaseObj{class: vm.TopLevelClass(classes.ArrayClass)},
 		Elements: elements,
 	}
 }
@@ -1404,17 +1404,17 @@ func (a *ArrayObject) Value() interface{} {
 	return a.Elements
 }
 
-// toString returns the object's elements as the string format
-func (a *ArrayObject) toString() string {
+// ToString returns the object's elements as the string format
+func (a *ArrayObject) ToString() string {
 	var out bytes.Buffer
 
 	elements := []string{}
 	for _, e := range a.Elements {
 		_, isString := e.(*StringObject)
 		if isString {
-			elements = append(elements, "\""+e.toString()+"\"")
+			elements = append(elements, "\""+e.ToString()+"\"")
 		} else {
-			elements = append(elements, e.toString())
+			elements = append(elements, e.ToString())
 		}
 	}
 
@@ -1425,12 +1425,12 @@ func (a *ArrayObject) toString() string {
 	return out.String()
 }
 
-// toJSON returns the object's elements as the JSON string format
-func (a *ArrayObject) toJSON(t *Thread) string {
+// ToJSON returns the object's elements as the JSON string format
+func (a *ArrayObject) ToJSON(t *Thread) string {
 	var out bytes.Buffer
 	elements := []string{}
 	for _, e := range a.Elements {
-		elements = append(elements, e.toJSON(t))
+		elements = append(elements, e.ToJSON(t))
 	}
 
 	out.WriteString("[")
@@ -1643,7 +1643,7 @@ func (a *ArrayObject) reverse() *ArrayObject {
 	}
 
 	newArr := &ArrayObject{
-		baseObj:  &baseObj{class: a.class},
+		BaseObj:  &BaseObj{class: a.class},
 		Elements: reversedArrElems,
 	}
 
@@ -1668,7 +1668,7 @@ func (a *ArrayObject) copy() Object {
 	copy(e, a.Elements)
 
 	newArr := &ArrayObject{
-		baseObj:  &baseObj{class: a.class},
+		BaseObj:  &BaseObj{class: a.class},
 		Elements: e,
 	}
 

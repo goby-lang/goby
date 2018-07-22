@@ -19,7 +19,7 @@ import (
 //
 // - `Float.new` is not supported.
 type FloatObject struct {
-	*baseObj
+	*BaseObj
 	value float64
 }
 
@@ -366,7 +366,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 
 func (vm *VM) initFloatObject(value float64) *FloatObject {
 	return &FloatObject{
-		baseObj: &baseObj{class: vm.topLevelClass(classes.FloatClass)},
+		BaseObj: &BaseObj{class: vm.TopLevelClass(classes.FloatClass)},
 		value:   value,
 	}
 }
@@ -445,15 +445,15 @@ func (f *FloatObject) lessThan(arg Object) bool {
 	return f.numericComparison(arg, floatComparison)
 }
 
-// toString returns the object's value as the string format, in non
+// ToString returns the object's value as the string format, in non
 // exponential format (straight number, without exponent `E<exp>`).
-func (f *FloatObject) toString() string {
+func (f *FloatObject) ToString() string {
 	return strconv.FormatFloat(f.value, 'f', -1, 64) // fmt.Sprintf("%f", f.value)
 }
 
-// toJSON just delegates to toString
-func (f *FloatObject) toJSON(t *Thread) string {
-	return f.toString()
+// ToJSON just delegates to ToString
+func (f *FloatObject) ToJSON(t *Thread) string {
+	return f.ToString()
 }
 
 // equal checks if the Float values between receiver and argument are equal

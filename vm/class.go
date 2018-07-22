@@ -8,9 +8,10 @@ import (
 	"sync"
 	"time"
 
+	"sort"
+
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
-	"sort"
 )
 
 // RClass represents normal (not built in) class object
@@ -30,7 +31,7 @@ type RClass struct {
 	constants             map[string]*Pointer
 	scope                 *RClass
 	inheritsMethodMissing bool
-	*baseObj
+	*BaseObj
 }
 
 var externalClasses = map[string][]ClassLoader{}
@@ -63,6 +64,10 @@ func ExternalClass(name, path string, classMethods, instanceMethods map[string]M
 		pg.setBuiltinMethods(buildMethods(classMethods), true)
 		pg.setBuiltinMethods(buildMethods(instanceMethods), false)
 		v.objectClass.setClassConstant(pg)
+
+		if path == "" {
+			return nil
+		}
 
 		return v.mainThread.execGobyLib(path)
 	}
@@ -151,7 +156,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				c, ok := receiver.(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#ancestors", receiver.toString())
+					return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#ancestors", receiver.ToString())
 				}
 
 				a := c.ancestors()
@@ -178,7 +183,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				c, ok := receiver.(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#<", receiver.toString())
+					return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#<", receiver.ToString())
 				}
 
 				module, ok := args[0].(*RClass)
@@ -217,7 +222,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				c, ok := receiver.(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#<", receiver.toString())
+					return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#<", receiver.ToString())
 				}
 
 				module, ok := args[0].(*RClass)
@@ -256,7 +261,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				c, ok := receiver.(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#<", receiver.toString())
+					return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#<", receiver.ToString())
 				}
 
 				module, ok := args[0].(*RClass)
@@ -295,7 +300,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				c, ok := receiver.(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#<", receiver.toString())
+					return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#<", receiver.ToString())
 				}
 
 				module, ok := args[0].(*RClass)
@@ -605,7 +610,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				n, ok := receiver.(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#name", receiver.toString())
+					return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#name", receiver.ToString())
 				}
 
 				name := n.ReturnName()
@@ -680,7 +685,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				c, ok := receiver.(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#superclass", receiver.toString())
+					return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#superclass", receiver.ToString())
 				}
 
 				superClass := c.returnSuperClass()
@@ -1117,7 +1122,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			Name: "print",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				for _, arg := range args {
-					fmt.Print(arg.toString())
+					fmt.Print(arg.ToString())
 				}
 
 				return NULL
@@ -1145,7 +1150,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			Name: "puts",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				for _, arg := range args {
-					fmt.Println(arg.toString())
+					fmt.Println(arg.ToString())
 				}
 
 				return NULL
@@ -1159,7 +1164,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 				case 0:
 					return t.vm.InitErrorObject(errors.InternalError, sourceLine, "")
 				case 1:
-					return t.vm.InitErrorObject(errors.InternalError, sourceLine, "'%s'", args[0].toString())
+					return t.vm.InitErrorObject(errors.InternalError, sourceLine, "'%s'", args[0].ToString())
 				case 2:
 					errorClass, ok := args[0].(*RClass)
 
@@ -1167,7 +1172,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect error class, got: %s", args[0].Class().Name)
 					}
 
-					return t.vm.InitErrorObject(errorClass.Name, sourceLine, "'%s'", args[1].toString())
+					return t.vm.InitErrorObject(errorClass.Name, sourceLine, "'%s'", args[1].ToString())
 				}
 
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect at most 2 arguments. got: %d", len(args))
@@ -1361,7 +1366,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 				r := receiver
 				if r.SingletonClass() == nil {
 					id := t.vm.InitIntegerObject(r.id())
-					singletonClass := t.vm.createRClass(fmt.Sprintf("#<Class:#<%s:%s>>", r.Class().Name, id.toString()))
+					singletonClass := t.vm.createRClass(fmt.Sprintf("#<Class:#<%s:%s>>", r.Class().Name, id.ToString()))
 					singletonClass.isSingleton = true
 					return singletonClass
 				}
@@ -1434,7 +1439,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			// @return [String] Object's string representation.
 			Name: "to_s",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				return t.vm.InitStringObject(receiver.toString())
+				return t.vm.InitStringObject(receiver.ToString())
 
 			},
 		},
@@ -1459,7 +1464,7 @@ func (vm *VM) initializeClass(name string) *RClass {
 }
 
 func (vm *VM) initializeModule(name string) *RClass {
-	moduleClass := vm.topLevelClass(classes.ModuleClass)
+	moduleClass := vm.TopLevelClass(classes.ModuleClass)
 	module := vm.createRClass(name)
 	module.class = moduleClass
 	module.isModule = true
@@ -1474,7 +1479,7 @@ func (vm *VM) initializeModule(name string) *RClass {
 
 func (vm *VM) createRClass(className string) *RClass {
 	objectClass := vm.objectClass
-	classClass := vm.topLevelClass(classes.ClassClass)
+	classClass := vm.TopLevelClass(classes.ClassClass)
 
 	return &RClass{
 		Name:             className,
@@ -1483,7 +1488,7 @@ func (vm *VM) createRClass(className string) *RClass {
 		superClass:       objectClass,
 		constants:        make(map[string]*Pointer),
 		isModule:         false,
-		baseObj:          &baseObj{class: classClass, InstanceVariables: newEnvironment()},
+		BaseObj:          &BaseObj{class: classClass, InstanceVariables: newEnvironment()},
 	}
 }
 
@@ -1492,7 +1497,7 @@ func initModuleClass(classClass *RClass) *RClass {
 		Name:      classes.ModuleClass,
 		Methods:   newEnvironment(),
 		constants: make(map[string]*Pointer),
-		baseObj:   &baseObj{},
+		BaseObj:   &BaseObj{},
 	}
 
 	moduleSingletonClass := &RClass{
@@ -1500,7 +1505,7 @@ func initModuleClass(classClass *RClass) *RClass {
 		Methods:     newEnvironment(),
 		constants:   make(map[string]*Pointer),
 		isModule:    false,
-		baseObj:     &baseObj{class: classClass, InstanceVariables: newEnvironment()},
+		BaseObj:     &BaseObj{class: classClass, InstanceVariables: newEnvironment()},
 		isSingleton: true,
 	}
 
@@ -1520,7 +1525,7 @@ func initClassClass() *RClass {
 		Name:      classes.ClassClass,
 		Methods:   newEnvironment(),
 		constants: make(map[string]*Pointer),
-		baseObj:   &baseObj{},
+		BaseObj:   &BaseObj{},
 	}
 
 	classSingletonClass := &RClass{
@@ -1528,7 +1533,7 @@ func initClassClass() *RClass {
 		Methods:     newEnvironment(),
 		constants:   make(map[string]*Pointer),
 		isModule:    false,
-		baseObj:     &baseObj{class: classClass, InstanceVariables: newEnvironment()},
+		BaseObj:     &BaseObj{class: classClass, InstanceVariables: newEnvironment()},
 		isSingleton: true,
 	}
 
@@ -1545,7 +1550,7 @@ func initObjectClass(c *RClass) *RClass {
 		Name:      classes.ObjectClass,
 		Methods:   newEnvironment(),
 		constants: make(map[string]*Pointer),
-		baseObj:   &baseObj{class: c},
+		BaseObj:   &BaseObj{class: c},
 	}
 
 	singletonClass := &RClass{
@@ -1553,7 +1558,7 @@ func initObjectClass(c *RClass) *RClass {
 		Methods:     newEnvironment(),
 		constants:   make(map[string]*Pointer),
 		isModule:    false,
-		baseObj:     &baseObj{class: c, InstanceVariables: newEnvironment()},
+		BaseObj:     &BaseObj{class: c, InstanceVariables: newEnvironment()},
 		isSingleton: true,
 		superClass:  c,
 	}
@@ -1580,14 +1585,14 @@ func (c *RClass) ReturnName() string {
 
 // TODO: Singleton class's inspect() should also mark if it's a singleton class explicitly.
 
-// toString returns the object's name as the string format
-func (c *RClass) toString() string {
+// ToString returns the object's name as the string format
+func (c *RClass) ToString() string {
 	return c.Name
 }
 
-// toJSON just delegates to `toString`
-func (c *RClass) toJSON(t *Thread) string {
-	return c.toString()
+// ToJSON just delegates to `ToString`
+func (c *RClass) ToJSON(t *Thread) string {
+	return c.ToString()
 }
 
 // Value returns class itself
@@ -1704,7 +1709,7 @@ func (c *RClass) returnSuperClass() *RClass {
 }
 
 func (c *RClass) initializeInstance() *RObject {
-	instance := &RObject{baseObj: &baseObj{class: c, InstanceVariables: newEnvironment()}}
+	instance := &RObject{BaseObj: &BaseObj{class: c, InstanceVariables: newEnvironment()}}
 
 	return instance
 }

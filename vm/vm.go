@@ -45,7 +45,6 @@ var standardLibraries = map[string]func(*VM){
 	"net/http":           initHTTPClass,
 	"net/simple_server":  initSimpleServerClass,
 	"uri":                initURIClass,
-	"plugin":             initPluginClass,
 	"json":               initJSONClass,
 	"concurrent/array":   initConcurrentArrayClass,
 	"concurrent/hash":    initConcurrentHashClass,
@@ -113,7 +112,8 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 		_, err := os.Stat(vm.projectRoot)
 
 		if err != nil {
-			path, _ := filepath.Abs("$GOPATH/src/github.com/goby-lang/goby")
+			gp := os.Getenv("GOPATH")
+			path, _ := filepath.Abs(gp + "/src/github.com/goby-lang/goby")
 			_, err = os.Stat(path)
 
 			if err != nil {
@@ -213,8 +213,8 @@ func builtinMainObjSingletonMethods() []*BuiltinMethodObject {
 
 func (vm *VM) initMainObj() *RObject {
 	obj := vm.objectClass.initializeInstance()
-	singletonClass := vm.initializeClass(fmt.Sprintf("#<Class:%s>", obj.toString()))
-	singletonClass.Methods.set("include", vm.topLevelClass(classes.ClassClass).lookupMethod("include"))
+	singletonClass := vm.initializeClass(fmt.Sprintf("#<Class:%s>", obj.ToString()))
+	singletonClass.Methods.set("include", vm.TopLevelClass(classes.ClassClass).lookupMethod("include"))
 	singletonClass.setBuiltinMethods(builtinMainObjSingletonMethods(), false)
 	obj.singletonClass = singletonClass
 
@@ -226,8 +226,8 @@ func (vm *VM) initConstants() {
 	cClass := initClassClass()
 	mClass := initModuleClass(cClass)
 	vm.objectClass = initObjectClass(cClass)
-	vm.topLevelClass(classes.ObjectClass).setClassConstant(cClass)
-	vm.topLevelClass(classes.ObjectClass).setClassConstant(mClass)
+	vm.TopLevelClass(classes.ObjectClass).setClassConstant(cClass)
+	vm.TopLevelClass(classes.ObjectClass).setClassConstant(mClass)
 
 	// Init builtin classes
 	builtinClasses := []*RClass{
@@ -280,7 +280,7 @@ func (vm *VM) initConstants() {
 	vm.objectClass.constants["STDIN"] = &Pointer{Target: vm.initFileObject(os.Stdin)}
 }
 
-func (vm *VM) topLevelClass(cn string) *RClass {
+func (vm *VM) TopLevelClass(cn string) *RClass {
 	objClass := vm.objectClass
 
 	if cn == classes.ObjectClass {

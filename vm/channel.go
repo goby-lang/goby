@@ -2,9 +2,10 @@ package vm
 
 import (
 	"fmt"
+	"sync"
+
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
-	"sync"
 )
 
 // ChannelObject represents Goby's "channel", which equips the Golang' channel and works with `thread`.
@@ -62,7 +63,7 @@ import (
 // c.close           # Redundant: just for explanation and you don't need to call this here
 // ```
 type ChannelObject struct {
-	*baseObj
+	*BaseObj
 	Chan         chan int
 	ChannelState int
 }
@@ -93,7 +94,7 @@ func builtinChannelClassMethods() []*BuiltinMethodObject {
 			// @return [Channel]
 			Name: "new",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				c := &ChannelObject{baseObj: &baseObj{class: t.vm.topLevelClass(classes.ChannelClass)}, Chan: make(chan int, chOpen)}
+				c := &ChannelObject{BaseObj: &BaseObj{class: t.vm.TopLevelClass(classes.ChannelClass)}, Chan: make(chan int, chOpen)}
 				return c
 			},
 		},
@@ -253,19 +254,19 @@ func (co *ChannelObject) Value() interface{} {
 	return co.Chan
 }
 
-// toString returns the object's name as the string format
-func (co *ChannelObject) toString() string {
+// ToString returns the object's name as the string format
+func (co *ChannelObject) ToString() string {
 	return fmt.Sprintf("<Channel: %p>", co.Chan)
 }
 
-// toJSON just delegates to toString
-func (co *ChannelObject) toJSON(t *Thread) string {
-	return co.toString()
+// ToJSON just delegates to ToString
+func (co *ChannelObject) ToJSON(t *Thread) string {
+	return co.ToString()
 }
 
 // copy returns the duplicate of the Array object
 func (co *ChannelObject) copy() Object {
-	newC := &ChannelObject{baseObj: &baseObj{class: co.class}, Chan: make(chan int)}
+	newC := &ChannelObject{BaseObj: &BaseObj{class: co.class}, Chan: make(chan int)}
 	return newC
 }
 

@@ -51,7 +51,7 @@ var ConcurrentArrayMethodsForwardingTable = map[string]bool{
 // For implementation simplicity, methods are simple redirection, and defined via a table.
 //
 type ConcurrentArrayObject struct {
-	*baseObj
+	*BaseObj
 	InternalArray *ArrayObject
 
 	sync.RWMutex
@@ -105,7 +105,7 @@ func (vm *VM) initConcurrentArrayObject(elements []Object) *ConcurrentArrayObjec
 	array := concurrent.getClassConstant(classes.ArrayClass)
 
 	return &ConcurrentArrayObject{
-		baseObj:       &baseObj{class: array},
+		BaseObj:       &BaseObj{class: array},
 		InternalArray: vm.InitArrayObject(elements[:]),
 	}
 }
@@ -122,14 +122,14 @@ func initConcurrentArrayClass(vm *VM) {
 
 // Object interface functions -------------------------------------------
 
-// toJSON returns the object's name as the JSON string format
-func (cac *ConcurrentArrayObject) toJSON(t *Thread) string {
-	return cac.InternalArray.toJSON(t)
+// ToJSON returns the object's name as the JSON string format
+func (cac *ConcurrentArrayObject) ToJSON(t *Thread) string {
+	return cac.InternalArray.ToJSON(t)
 }
 
-// toString returns the object's name as the string format
-func (cac *ConcurrentArrayObject) toString() string {
-	return cac.InternalArray.toString()
+// ToString returns the object's name as the string format
+func (cac *ConcurrentArrayObject) ToString() string {
+	return cac.InternalArray.ToString()
 }
 
 // Value returns the object
