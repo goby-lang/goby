@@ -1573,7 +1573,7 @@ func (a *ArrayObject) Swap(i, j int) {
 func (a *ArrayObject) Less(i, j int) bool {
 	leftObj, rightObj := a.Elements[i], a.Elements[j]
 	switch leftObj := leftObj.(type) {
-	case *IntegerObject:
+	case Numeric:
 		return leftObj.lessThan(rightObj)
 	case *StringObject:
 		right, ok := rightObj.(*StringObject)

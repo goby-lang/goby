@@ -151,11 +151,16 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: ">",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				rightObj, ok := args[0].(*FloatObject)
+
+				if !ok {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", args[0].Class().Name)
+				}
 				operation := func(leftValue float64, rightValue float64) bool {
 					return leftValue > rightValue
 				}
 
-				return receiver.(*FloatObject).numericComparison(t, args[0], operation, sourceLine)
+				return toBooleanObject(receiver.(*FloatObject).numericComparison(rightObj, operation))
 
 			},
 		},
@@ -169,12 +174,16 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: ">=",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				rightObj, ok := args[0].(*FloatObject)
+
+				if !ok {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", args[0].Class().Name)
+				}
 				operation := func(leftValue float64, rightValue float64) bool {
 					return leftValue >= rightValue
 				}
 
-				return receiver.(*FloatObject).numericComparison(t, args[0], operation, sourceLine)
-
+				return toBooleanObject(receiver.(*FloatObject).numericComparison(rightObj, operation))
 			},
 		},
 		{
@@ -187,11 +196,16 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "<",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				rightObj, ok := args[0].(*FloatObject)
+
+				if !ok {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", args[0].Class().Name)
+				}
 				operation := func(leftValue float64, rightValue float64) bool {
 					return leftValue < rightValue
 				}
 
-				return receiver.(*FloatObject).numericComparison(t, args[0], operation, sourceLine)
+				return toBooleanObject(receiver.(*FloatObject).numericComparison(rightObj, operation))
 
 			},
 		},
@@ -205,11 +219,17 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "<=",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				rightObj, ok := args[0].(*FloatObject)
+
+				if !ok {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", args[0].Class().Name)
+				}
+
 				operation := func(leftValue float64, rightValue float64) bool {
 					return leftValue <= rightValue
 				}
 
-				return receiver.(*FloatObject).numericComparison(t, args[0], operation, sourceLine)
+				return toBooleanObject(receiver.(*FloatObject).numericComparison(rightObj, operation))
 
 			},
 		},
@@ -408,19 +428,21 @@ func (f *FloatObject) equalityTest(rightObject Object) bool {
 
 // TODO: Remove instruction argument
 // Apply the passed numeric comparison, while performing type conversion.
-func (f *FloatObject) numericComparison(t *Thread, rightObject Object, operation func(leftValue float64, rightValue float64) bool, sourceLine int) Object {
-	rightNumeric, ok := rightObject.(Numeric)
-
-	if !ok {
-		return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
-	}
+func (f *FloatObject) numericComparison(rightObject Object, operation func(leftValue float64, rightValue float64) bool) bool {
+	rightNumeric := rightObject.(Numeric)
 
 	leftValue := f.value
 	rightValue := rightNumeric.floatValue()
 
-	result := operation(leftValue, rightValue)
+	return operation(leftValue, rightValue)
+}
 
-	return toBooleanObject(result)
+func (f *FloatObject) lessThan(arg Object) bool {
+	floatComparison := func(leftValue float64, rightValue float64) bool {
+		return leftValue < rightValue
+	}
+
+	return f.numericComparison(arg, floatComparison)
 }
 
 // toString returns the object's value as the string format, in non
