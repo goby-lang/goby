@@ -3,7 +3,6 @@ package vm
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -122,27 +121,7 @@ func (t *Thread) execFile(fpath string) (err error) {
 	return
 }
 
-func (t *Thread) captureAndHandlePanic() {
-	switch e := recover().(type) {
-	case *Error:
-		if t.vm.mode == NormalMode {
-			fmt.Println(e.Message())
-			if t.isMainThread() {
-				os.Exit(1)
-			}
-		} else {
-			log.Println(e)
-			panic(e)
-		}
-	case nil:
-		return
-	default:
-		panic(e)
-	}
-}
-
 func (t *Thread) startFromTopFrame() {
-	defer t.captureAndHandlePanic()
 	cf := t.callFrameStack.top()
 	t.evalCallFrame(cf)
 }
