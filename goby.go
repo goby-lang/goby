@@ -14,6 +14,7 @@ import (
 	_ "github.com/goby-lang/goby/native/db"
 	_ "github.com/goby-lang/goby/native/plugin"
 	_ "github.com/goby-lang/goby/native/result"
+	_ "github.com/goby-lang/goby/native/ripper"
 	"github.com/goby-lang/goby/vm"
 	"github.com/pkg/profile"
 )

@@ -1,6 +1,6 @@
 package token
 
-// Type is used to determite token type
+// Type is used to determine token type
 type Type string
 
 // Token is structure for identifying input stream of characters
