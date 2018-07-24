@@ -99,7 +99,7 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 				class, ok := receiver.(*RClass)
 
 				if !ok {
-					return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
+					return t.vm.InitUnsupportedMethodError(sourceLine, "#new", receiver)
 				}
 
 				instance := class.initializeInstance()
