@@ -122,17 +122,16 @@ func (t *Thread) execFile(fpath string) (err error) {
 }
 
 func (t *Thread) startFromTopFrame() {
-	cf := t.callFrameStack.top()
-	t.evalCallFrame(cf)
-}
-
-func (t *Thread) evalCallFrame(cf callFrame) {
 	defer func() {
 		if r := recover(); r != nil {
 			t.reportErrorAndStop(r)
 		}
 	}()
+	cf := t.callFrameStack.top()
+	t.evalCallFrame(cf)
+}
 
+func (t *Thread) evalCallFrame(cf callFrame) {
 	t.currentFrame = cf
 
 	switch cf := cf.(type) {
