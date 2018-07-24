@@ -2,7 +2,6 @@ package vm
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/goby-lang/goby/compiler/bytecode"
@@ -367,13 +366,7 @@ var builtinActions = map[operationType]*action{
 	bytecode.PutFloat: {
 		name: bytecode.PutFloat,
 		operation: func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
-			var value float64
-			switch argValue := args[0].(type) {
-			case string:
-				value, _ = strconv.ParseFloat(argValue, 64)
-			case int:
-				value = float64(argValue)
-			}
+			value := args[0].(float64)
 			object := t.vm.initFloatObject(value)
 			t.Stack.Push(&Pointer{Target: object})
 		},
