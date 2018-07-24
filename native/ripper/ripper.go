@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-// Ripper is a loadable library and has abilities to obtain parsed/lexed/tokenized Goby codes from String.
+// Ripper is a loadable library and has abilities to parse/lex/tokenize/get instructions of Goby codes from String.
 // The library would be convenient for validating Goby codes when building lint tools,
 // as well as the tests for Goby's compiler.
 // For now, Ripper is a class and has only class methods, but I think this should finally be a 'newable' module with more sophisticated instance methods.
@@ -29,7 +29,7 @@ type ArrayObject = vm.ArrayObject
 // Class methods --------------------------------------------------------
 
 // Returns the list of instruction code generated from Goby code.
-// Returns an error when the code is invalid.
+// Returns `[]` when the Goby code is invalid.
 // The return value is a "tuple" style nested array:
 // - `Array`: contains an instruction set
 //   - `arg_types:` (none if `nil`)
@@ -50,7 +50,7 @@ type ArrayObject = vm.ArrayObject
 // #=>
 //
 // require 'ripper'; Ripper.instruction "10.times do |i| puts i" # the code is invalid
-// #=> TypeError: InternalError%!(EXTRA string=String, string=Invalid Goby code)
+// #=> []
 // ```
 //
 // @param Goby code [String]
