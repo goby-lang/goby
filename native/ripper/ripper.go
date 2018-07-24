@@ -10,6 +10,7 @@ import (
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
 	"strings"
+	"fmt"
 )
 
 // Ripper is a loadable library and has abilities to parse/lex/tokenize/get instructions of Goby codes from String.
@@ -225,7 +226,7 @@ func convertToTuple(instSet []*bytecode.InstructionSet, v *VM) *ArrayObject {
 			
 			arrayParams := []Object{}
 			for _, param := range ins.Params {
-				arrayParams = append(arrayParams, v.InitStringObject(param))
+				arrayParams = append(arrayParams, v.InitStringObject(covertTypesToString(param)))
 			}
 			hashInstLevel2["params"] = v.InitArrayObject(arrayParams)
 			
@@ -337,4 +338,8 @@ func convertLex(t token.Type) string {
 	}
 	
 	return "on_" + s
+}
+
+func covertTypesToString(v interface{}) string {
+	return fmt.Sprint(v)
 }
