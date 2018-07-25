@@ -3,7 +3,6 @@ package vm
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -122,42 +121,17 @@ func (t *Thread) execFile(fpath string) (err error) {
 	return
 }
 
-func (t *Thread) captureAndHandlePanic() {
-	switch e := recover().(type) {
-	case *Error:
-		if t.vm.mode == NormalMode {
-			fmt.Println(e.Message())
-			if t.isMainThread() {
-				os.Exit(1)
-			}
-		} else {
-			log.Println(e)
-			panic(e)
-		}
-	case error:
-		log.Println(e)
-		fmt.Println(e.Error())
-	case nil:
-		return
-	default:
-		log.Println(e)
-		panic(e)
-	}
-}
-
 func (t *Thread) startFromTopFrame() {
-	defer t.captureAndHandlePanic()
+	defer func() {
+		if r := recover(); r != nil {
+			t.reportErrorAndStop(r)
+		}
+	}()
 	cf := t.callFrameStack.top()
 	t.evalCallFrame(cf)
 }
 
 func (t *Thread) evalCallFrame(cf callFrame) {
-	defer func() {
-		if r := recover(); r != nil {
-			t.reportErrorAndStop()
-		}
-	}()
-
 	t.currentFrame = cf
 
 	switch cf := cf.(type) {
@@ -202,37 +176,44 @@ func (t *Thread) removeUselessBlockFrame(frame callFrame) {
 	}
 }
 
-func (t *Thread) reportErrorAndStop() {
+func (t *Thread) reportErrorAndStop(e interface{}) {
 	cf := t.callFrameStack.top()
 
 	if cf != nil {
 		cf.stopExecution()
 	}
 
+
 	top := t.Stack.top().Target
-	err := top.(*Error)
+	switch err := top.(type) {
+	// If we can get an error object it means it's an Goby error
+	case *Error:
+		if !err.storedTraces {
+			for i := t.callFrameStack.pointer - 1; i > 0; i-- {
+				frame := t.callFrameStack.callFrames[i]
 
-	if !err.storedTraces {
-		for i := t.callFrameStack.pointer - 1; i > 0; i-- {
-			frame := t.callFrameStack.callFrames[i]
+				if frame.IsBlock() {
+					continue
+				}
 
-			if frame.IsBlock() {
-				continue
+				msg := fmt.Sprintf("from %s:%d", frame.FileName(), frame.SourceLine())
+				err.stackTraces = append(err.stackTraces, msg)
 			}
 
-			msg := fmt.Sprintf("from %s:%d", frame.FileName(), frame.SourceLine())
-			err.stackTraces = append(err.stackTraces, msg)
+			err.storedTraces = true
 		}
 
-		err.storedTraces = true
-	}
+		panic(err)
 
-	panic(err)
+		if t.vm.mode == NormalMode {
 
-	if t.vm.mode == NormalMode {
-		if t.isMainThread() {
-			os.Exit(1)
+			if t.isMainThread() {
+				os.Exit(1)
+			}
 		}
+	// Otherwise it's a Go panic that needs to be raise
+	default:
+		panic(e)
 	}
 }
 
