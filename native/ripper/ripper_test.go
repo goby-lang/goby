@@ -30,7 +30,7 @@ func TestRipperClassSuperclass(t *testing.T) {
 
 func TestRipperClassCreationFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`require 'ripper'; Ripper.new`, "UnsupportedMethodError: Unsupported Method #new for Ripper", 1},
+		{`require 'ripper'; Ripper.new`, "NoMethodError: Undefined Method 'new' for Ripper", 1},
 	}
 
 	for i, tt := range testsFail {

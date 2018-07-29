@@ -31,7 +31,7 @@ type Error struct {
 
 // InitNoMethodError is to print unsupported method errors. This is exported for using from sub-packages.
 func (vm *VM) InitNoMethodError(sourceLine int, methodName string, receiver Object) *Error {
-	return vm.InitErrorObject(errors.NoMethodError, sourceLine, "Undefined Method %s for %+v", methodName, receiver.ToString())
+	return vm.InitErrorObject(errors.NoMethodError, sourceLine, errors.UndefinedMethod, methodName, receiver.ToString())
 }
 
 func (vm *VM) InitErrorObject(errorType string, sourceLine int, format string, args ...interface{}) *Error {
