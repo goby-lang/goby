@@ -122,7 +122,7 @@ func TestModuleInitializeError(t *testing.T) {
 
 	Foo.new
 	`
-	expected := `UndefinedMethodError: Undefined Method 'new' for Foo`
+	expected := `NoMethodError: Undefined Method 'new' for Foo`
 
 	v := initTestVM()
 	evaluated := v.testEval(t, input, getFilename())
@@ -1378,9 +1378,9 @@ func TestClassNameClassMethod(t *testing.T) {
 
 func TestClassNameClassMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Taipei".name`, "UndefinedMethodError: Undefined Method 'name' for Taipei", 1},
-		{`123.name`, "UndefinedMethodError: Undefined Method 'name' for 123", 1},
-		{`true.name`, "UndefinedMethodError: Undefined Method 'name' for true", 1},
+		{`"Taipei".name`, "NoMethodError: Undefined Method 'name' for Taipei", 1},
+		{`123.name`, "NoMethodError: Undefined Method 'name' for 123", 1},
+		{`true.name`, "NoMethodError: Undefined Method 'name' for true", 1},
 		{`Integer.name(Integer)`, "ArgumentError: Expect 0 argument. got: 1", 1},
 		{`String.name(Hash, Array)`, "ArgumentError: Expect 0 argument. got: 2", 1},
 	}
@@ -1430,9 +1430,9 @@ func TestClassSuperclassClassMethod(t *testing.T) {
 
 func TestClassSuperclassClassMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Taipei".superclass`, "UndefinedMethodError: Undefined Method 'superclass' for Taipei", 1},
-		{`123.superclass`, "UndefinedMethodError: Undefined Method 'superclass' for 123", 1},
-		{`true.superclass`, "UndefinedMethodError: Undefined Method 'superclass' for true", 1},
+		{`"Taipei".superclass`, "NoMethodError: Undefined Method 'superclass' for Taipei", 1},
+		{`123.superclass`, "NoMethodError: Undefined Method 'superclass' for 123", 1},
+		{`true.superclass`, "NoMethodError: Undefined Method 'superclass' for true", 1},
 		{`Integer.superclass(Integer)`, "ArgumentError: Expect 0 argument. got: 1", 1},
 		{`String.superclass(Hash, Array)`, "ArgumentError: Expect 0 argument. got: 2", 1},
 	}

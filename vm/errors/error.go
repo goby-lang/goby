@@ -32,4 +32,5 @@ const (
 	CantYieldWithoutBlockFormat = "Can't yield without a block"
 	DividedByZero               = "Divided by 0"
 	ChannelIsClosed             = "The channel is already closed."
+	UndefinedMethod             = "Undefined Method '%+v' for %+v"
 )
