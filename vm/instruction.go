@@ -505,7 +505,7 @@ var builtinActions = map[operationType]*action{
 				mm := receiver.findMethodMissing(receiver.Class().inheritsMethodMissing)
 
 				if mm == nil {
-					t.setErrorObject(receiverPr, argPr, errors.UndefinedMethodError, sourceLine, "Undefined Method '%+v' for %+v", methodName, receiver.ToString())
+					t.setErrorObject(receiverPr, argPr, errors.NoMethodError, sourceLine, "Undefined Method '%+v' for %+v", methodName, receiver.ToString())
 				} else {
 					// Move up args for missed method's name
 					// before: | arg 1       | arg 2 |
