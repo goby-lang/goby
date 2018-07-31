@@ -189,7 +189,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				module, ok := args[0].(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect argument to be a module. got=%v", args[0].Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "a module", args[0].Class().Name)
 				}
 
 				if c == module {
@@ -228,7 +228,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				module, ok := args[0].(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect argument to be a module. got=%v", args[0].Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "a module", args[0].Class().Name)
 				}
 
 				if c == module {
@@ -267,7 +267,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				module, ok := args[0].(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect argument to be a module. got=%v", args[0].Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "a module", args[0].Class().Name)
 				}
 
 				if c == module {
@@ -306,7 +306,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				module, ok := args[0].(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect argument to be a module. got=%v", args[0].Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "a module", args[0].Class().Name)
 				}
 
 				if c == module {
@@ -484,7 +484,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				module, ok := args[0].(*RClass)
 
 				if !ok || !module.isModule {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect argument to be a module. got=%v", args[0].Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "a module", args[0].Class().Name)
 				}
 
 				class = receiver.SingletonClass()
@@ -550,7 +550,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				module, ok := args[0].(*RClass)
 
 				if !ok || !module.isModule {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect argument to be a module. got=%v", args[0].Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "a module", args[0].Class().Name)
 				}
 
 				switch r := receiver.(type) {
