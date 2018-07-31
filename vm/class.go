@@ -156,7 +156,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				c, ok := receiver.(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.NoMethodError, sourceLine, errors.UndefinedMethod, "#ancestors", receiver.ToString())
+					return t.vm.InitNoMethodError(sourceLine, "#ancestors", receiver)
 				}
 
 				a := c.ancestors()
@@ -183,7 +183,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				c, ok := receiver.(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.NoMethodError, sourceLine, errors.UndefinedMethod, "#<", receiver.ToString())
+					return t.vm.InitNoMethodError(sourceLine, "#>", receiver)
 				}
 
 				module, ok := args[0].(*RClass)
@@ -222,7 +222,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				c, ok := receiver.(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.NoMethodError, sourceLine, errors.UndefinedMethod, "#<", receiver.ToString())
+					return t.vm.InitNoMethodError(sourceLine, "#>=", receiver)
 				}
 
 				module, ok := args[0].(*RClass)
@@ -261,7 +261,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				c, ok := receiver.(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.NoMethodError, sourceLine, errors.UndefinedMethod, "#<", receiver.ToString())
+					return t.vm.InitNoMethodError(sourceLine, "#<", receiver)
 				}
 
 				module, ok := args[0].(*RClass)
@@ -300,7 +300,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				c, ok := receiver.(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.NoMethodError, sourceLine, errors.UndefinedMethod, "#<", receiver.ToString())
+					return t.vm.InitNoMethodError(sourceLine, "#<=", receiver)
 				}
 
 				module, ok := args[0].(*RClass)
@@ -610,7 +610,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				n, ok := receiver.(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.NoMethodError, sourceLine, errors.UndefinedMethod, "#name", receiver.ToString())
+					return t.vm.InitNoMethodError(sourceLine, "#name", receiver)
 				}
 
 				name := n.ReturnName()
@@ -685,7 +685,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				c, ok := receiver.(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.NoMethodError, sourceLine, errors.UndefinedMethod, "#superclass", receiver.ToString())
+					return t.vm.InitNoMethodError(sourceLine, "#superclass", receiver)
 				}
 
 				superClass := c.returnSuperClass()
