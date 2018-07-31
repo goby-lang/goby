@@ -875,7 +875,7 @@ func TestConcurrentArrayFirstMethodFail(t *testing.T) {
 		require 'concurrent/array'
 		a = Concurrent::Array.new([1, 2])
 		a.first(-1)
-		`, "ArgumentError: Expect argument to be positive value. got=-1", 1},
+		`, "ArgumentError: Expect argument to be positive value. got: -1", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1044,7 +1044,7 @@ func TestConcurrentArrayLastMethodFail(t *testing.T) {
 		require 'concurrent/array'
 		a = Concurrent::Array.new([1, 2])
 		a.last(-1)
-		`, "ArgumentError: Expect argument to be positive value. got=-1", 1},
+		`, "ArgumentError: Expect argument to be positive value. got: -1", 1},
 	}
 
 	for i, tt := range testsFail {
