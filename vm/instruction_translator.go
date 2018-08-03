@@ -68,7 +68,6 @@ func (it *instructionTranslator) transferInstructionSet(iss []*instructionSet, s
 
 // transferInstruction transfer a bytecode.Instruction into an vm instruction and append it into given instruction set.
 func (it *instructionTranslator) transferInstruction(is *instructionSet, i *bytecode.Instruction) {
-	var params []interface{}
 	act := i.Action
 
 	action := builtinActions[act]
@@ -77,23 +76,6 @@ func (it *instructionTranslator) transferInstruction(is *instructionSet, i *byte
 		panic(fmt.Sprintf("Unknown command: %s. line: %d", act, i.Line()))
 	}
 
-	switch act {
-	case bytecode.PutBoolean:
-		params = append(params, i.Params[0])
-	case bytecode.PutString:
-		params = append(params, i.Params[0])
-	case bytecode.BranchUnless, bytecode.BranchIf, bytecode.Jump:
-		params = append(params, i.Params[0])
-	case bytecode.Send:
-		for _, param := range i.Params {
-			params = append(params, param)
-		}
-	default:
-		for _, param := range i.Params {
-			params = append(params, param)
-		}
-	}
-
-	vmI := is.define(i.Line(), action, params...)
+	vmI := is.define(i.Line(), action, i.Params...)
 	vmI.sourceLine = i.SourceLine() + 1
 }
