@@ -88,7 +88,6 @@ func (it *instructionTranslator) transferInstruction(is *instructionSet, i *byte
 		for _, param := range i.Params {
 			params = append(params, param)
 		}
-		params = append(params, i.ArgSet)
 	default:
 		for _, param := range i.Params {
 			params = append(params, param)

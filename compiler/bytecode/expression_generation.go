@@ -74,7 +74,7 @@ func (g *Generator) compileIdentifier(is *InstructionSet, exp *ast.Identifier, s
 
 	// otherwise it's a method call
 	is.define(PutSelf, exp.Line())
-	is.define(Send, exp.Line(), exp.Value, 0, "")
+	is.define(Send, exp.Line(), exp.Value, 0, "", &ArgSet{})
 }
 
 func (g *Generator) compileYieldExpression(is *InstructionSet, exp *ast.YieldExpression, scope *scope, table *localTable) {
@@ -140,8 +140,7 @@ func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpre
 		g.compileBlockArgExpression(blockIndex, exp, scope, newTable)
 	}
 
-	i := is.define(Send, exp.Line(), exp.Method, len(exp.Arguments), blockInfo)
-	i.ArgSet = argSet
+	is.define(Send, exp.Line(), exp.Method, len(exp.Arguments), blockInfo, argSet)
 }
 
 func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.AssignExpression, scope *scope, table *localTable) {
@@ -237,14 +236,14 @@ func (g *Generator) compilePrefixExpression(is *InstructionSet, exp *ast.PrefixE
 	switch exp.Operator {
 	case "!":
 		g.compileExpression(is, exp.Right, scope, table)
-		is.define(Send, exp.Line(), exp.Operator, 0, "")
+		is.define(Send, exp.Line(), exp.Operator, 0, "", &ArgSet{})
 	case "*":
 		g.compileExpression(is, exp.Right, scope, table)
 		is.define(SplatArray, exp.Line())
 	case "-":
 		is.define(PutObject, exp.Line(), 0)
 		g.compileExpression(is, exp.Right, scope, table)
-		is.define(Send, exp.Line(), exp.Operator, 1, "")
+		is.define(Send, exp.Line(), exp.Operator, 1, "", &ArgSet{})
 	}
 }
 
@@ -278,6 +277,6 @@ func (g *Generator) compileInfixExpression(is *InstructionSet, node *ast.InfixEx
 	default:
 		g.compileExpression(is, node.Left, scope, table)
 		g.compileExpression(is, node.Right, scope, table)
-		is.define(Send, node.Line(), node.Operator, 1, "")
+		is.define(Send, node.Line(), node.Operator, 1, "", &ArgSet{})
 	}
 }

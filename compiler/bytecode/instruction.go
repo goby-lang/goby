@@ -53,7 +53,6 @@ type Instruction struct {
 	line       int
 	anchor     *anchor
 	sourceLine int
-	ArgSet     *ArgSet
 }
 
 // AnchorLine returns instruction anchor's line number if it has an anchor
