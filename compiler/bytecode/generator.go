@@ -18,15 +18,16 @@ func newScope(stmt ast.Statement) *scope {
 
 // Generator contains program's AST and will store generated instruction sets
 type Generator struct {
-	REPL            bool
-	instructionSets []*InstructionSet
-	blockCounter    int
-	scope           *scope
+	REPL                   bool
+	instructionSets        []*InstructionSet
+	blockCounter           int
+	scope                  *scope
+	instructionsWithAnchor []*Instruction
 }
 
 // NewGenerator initializes new Generator with complete AST tree.
 func NewGenerator() *Generator {
-	return &Generator{}
+	return &Generator{instructionsWithAnchor: []*Instruction{}}
 }
 
 // ResetInstructionSets clears generator's instruction sets
@@ -42,7 +43,9 @@ func (g *Generator) InitTopLevelScope(program *ast.Program) {
 // GenerateInstructions returns compiled instructions
 func (g *Generator) GenerateInstructions(stmts []ast.Statement) []*InstructionSet {
 	g.compileStatements(stmts, g.scope, g.scope.localTable)
-
+	for _, i := range g.instructionsWithAnchor {
+		i.Params[0], _ = i.AnchorLine()
+	}
 	//fmt.Println(g.instructionsToString())
 	//fmt.Print()
 	return g.instructionSets

@@ -83,13 +83,7 @@ func (it *instructionTranslator) transferInstruction(is *instructionSet, i *byte
 	case bytecode.PutString:
 		params = append(params, i.Params[0])
 	case bytecode.BranchUnless, bytecode.BranchIf, bytecode.Jump:
-		line, err := i.AnchorLine()
-
-		if err != nil {
-			panic(err.Error())
-		}
-
-		params = append(params, line)
+		params = append(params, i.Params[0])
 	case bytecode.Send:
 		for _, param := range i.Params {
 			params = append(params, param)

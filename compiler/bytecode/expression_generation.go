@@ -206,7 +206,8 @@ func (g *Generator) compileIfExpression(is *InstructionSet, exp *ast.IfExpressio
 		anchorConditional := &anchor{}
 
 		g.compileExpression(is, c.Condition, scope, table)
-		is.define(BranchUnless, exp.Line(), anchorConditional)
+		bu := is.define(BranchUnless, exp.Line(), anchorConditional)
+		g.instructionsWithAnchor = append(g.instructionsWithAnchor, bu)
 
 		if c.Consequence.IsEmpty() {
 			is.define(PutNull, exp.Line())
@@ -215,7 +216,8 @@ func (g *Generator) compileIfExpression(is *InstructionSet, exp *ast.IfExpressio
 		}
 
 		anchorConditional.line = is.count + 1
-		is.define(Jump, exp.Line(), anchorLast)
+		jp := is.define(Jump, exp.Line(), anchorLast)
+		g.instructionsWithAnchor = append(g.instructionsWithAnchor, jp)
 	}
 
 	if exp.Alternative == nil {
@@ -256,7 +258,8 @@ func (g *Generator) compileInfixExpression(is *InstructionSet, node *ast.InfixEx
 
 		g.compileExpression(is, node.Left, scope, table)
 		is.define(Dup, node.Line())
-		is.define(BranchUnless, node.Line(), andAnchor)
+		bu := is.define(BranchUnless, node.Line(), andAnchor)
+		g.instructionsWithAnchor = append(g.instructionsWithAnchor, bu)
 		is.define(Pop, node.Line())
 		g.compileExpression(is, node.Right, scope, table)
 		andAnchor.line = len(is.Instructions)
@@ -266,7 +269,8 @@ func (g *Generator) compileInfixExpression(is *InstructionSet, node *ast.InfixEx
 
 		g.compileExpression(is, node.Left, scope, table)
 		is.define(Dup, node.Line())
-		is.define(BranchIf, node.Line(), andAnchor)
+		bi := is.define(BranchIf, node.Line(), andAnchor)
+		g.instructionsWithAnchor = append(g.instructionsWithAnchor, bi)
 		is.define(Pop, node.Line())
 		g.compileExpression(is, node.Right, scope, table)
 		andAnchor.line = len(is.Instructions)

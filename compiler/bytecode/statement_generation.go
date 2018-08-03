@@ -77,7 +77,8 @@ func (g *Generator) compileWhileStmt(is *InstructionSet, stmt *ast.WhileStatemen
 	anchor1 := &anchor{}
 	breakAnchor := &anchor{}
 
-	is.define(Jump, stmt.Line(), anchor1)
+	jp := is.define(Jump, stmt.Line(), anchor1)
+	g.instructionsWithAnchor = append(g.instructionsWithAnchor, jp)
 
 	anchor2 := &anchor{is.count}
 
@@ -90,13 +91,15 @@ func (g *Generator) compileWhileStmt(is *InstructionSet, stmt *ast.WhileStatemen
 
 	g.compileExpression(is, stmt.Condition, scope, table)
 
-	is.define(BranchIf, stmt.Line(), anchor2)
+	bi := is.define(BranchIf, stmt.Line(), anchor2)
+	g.instructionsWithAnchor = append(g.instructionsWithAnchor, bi)
 
 	breakAnchor.line = is.count
 }
 
 func (g *Generator) compileNextStatement(is *InstructionSet, stmt ast.Statement, scope *scope) {
-	is.define(Jump, stmt.Line(), scope.anchors["next"])
+	jp := is.define(Jump, stmt.Line(), scope.anchors["next"])
+	g.instructionsWithAnchor = append(g.instructionsWithAnchor, jp)
 }
 
 func (g *Generator) compileBreakStatement(is *InstructionSet, stmt ast.Statement, scope *scope) {
@@ -121,7 +124,8 @@ func (g *Generator) compileBreakStatement(is *InstructionSet, stmt ast.Statement
 		if is.isType == Block {
 			is.define(Break, stmt.Line())
 		}
-		is.define(Jump, stmt.Line(), scope.anchors["break"])
+		jp := is.define(Jump, stmt.Line(), scope.anchors["break"])
+		g.instructionsWithAnchor = append(g.instructionsWithAnchor, jp)
 	} else {
 		is.define(Break, stmt.Line())
 	}
