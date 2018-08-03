@@ -230,8 +230,8 @@ func convertToTuple(instSet []*bytecode.InstructionSet, v *VM) *ArrayObject {
 			}
 			hashInstLevel2["params"] = v.InitArrayObject(arrayParams)
 			
-			if ins.ArgSet != nil {
-				hashInstLevel1["arg_set"] = getArgNameType(ins.ArgSet, v)
+			if ins.Action == bytecode.Send {
+				hashInstLevel1["arg_set"] = getArgNameType(ins.Params[3].(*bytecode.ArgSet), v)
 			}
 			
 			arrayInst = append(arrayInst, v.InitHashObject(hashInstLevel2))
