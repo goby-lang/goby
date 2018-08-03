@@ -8,7 +8,7 @@ import (
 	These constants are enums that represent argument's types
 */
 const (
-	NormalArg int = iota
+	NormalArg uint8 = iota
 	OptionedArg
 	SplatArg
 	RequiredKeywordArg
@@ -186,7 +186,7 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 		isType: MethodDef,
 		argTypes: &ArgSet{
 			names: make([]string, len(stmt.Parameters)),
-			types: make([]int, len(stmt.Parameters)),
+			types: make([]uint8, len(stmt.Parameters)),
 		},
 	}
 

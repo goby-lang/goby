@@ -95,7 +95,7 @@ func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpre
 	var blockInfo string
 	argSet := &ArgSet{
 		names: make([]string, len(exp.Arguments)),
-		types: make([]int, len(exp.Arguments)),
+		types: make([]uint8, len(exp.Arguments)),
 	}
 
 	// Compile receiver

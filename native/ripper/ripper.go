@@ -254,7 +254,7 @@ func getArgNameType(argSet *bytecode.ArgSet, v *VM) *HashObject {
 	
 	aType := []Object{}
 	for _, argtype := range argSet.Types() {
-		aType = append(aType, v.InitIntegerObject(argtype))
+		aType = append(aType, v.InitIntegerObject(int(argtype)))
 	}
 	
 	h["types"] = v.InitArrayObject(aType)

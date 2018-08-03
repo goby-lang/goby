@@ -91,11 +91,11 @@ type InstructionSet struct {
 // ArgSet stores the metadata of a method definition's parameters.
 type ArgSet struct {
 	names []string
-	types []int
+	types []uint8
 }
 
 // Types are the getter method of *ArgSet's types attribute
-func (as *ArgSet) Types() []int {
+func (as *ArgSet) Types() []uint8 {
 	return as.types
 }
 
@@ -114,7 +114,7 @@ func (as *ArgSet) FindIndex(name string) int {
 	return -1
 }
 
-func (as *ArgSet) setArg(index int, name string, argType int) {
+func (as *ArgSet) setArg(index int, name string, argType uint8) {
 	as.names[index] = name
 	as.types[index] = argType
 }

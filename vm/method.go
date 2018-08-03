@@ -43,7 +43,7 @@ func (m *MethodObject) Value() interface{} {
 	return m.ToString()
 }
 
-func (m *MethodObject) paramTypes() []int {
+func (m *MethodObject) paramTypes() []uint8 {
 	return m.instructionSet.paramTypes.Types()
 }
 
