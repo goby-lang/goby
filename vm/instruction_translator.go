@@ -1,14 +1,12 @@
 package vm
 
 import (
-	"fmt"
 	"github.com/goby-lang/goby/compiler/bytecode"
 )
 
 // instructionTranslator is responsible for parsing bytecodes
 type instructionTranslator struct {
 	vm         *VM
-	line       int
 	setTable   map[setType]map[string][]*instructionSet
 	blockTable map[string]*instructionSet
 	filename   filename
@@ -47,35 +45,14 @@ func (it *instructionTranslator) transferInstructionSets(sets []*bytecode.Instru
 	iss := []*instructionSet{}
 
 	for _, set := range sets {
-		it.transferInstructionSet(iss, set)
+		is := &instructionSet{filename: it.filename}
+		it.setMetadata(is, set)
+
+		is.instructions = set.Instructions
+		is.paramTypes = set.ArgTypes()
+
+		iss = append(iss, is)
 	}
 
 	return iss
-}
-
-func (it *instructionTranslator) transferInstructionSet(iss []*instructionSet, set *bytecode.InstructionSet) {
-	is := &instructionSet{filename: it.filename}
-	it.setMetadata(is, set)
-
-	for _, i := range set.Instructions {
-		it.transferInstruction(is, i)
-	}
-
-	is.paramTypes = set.ArgTypes()
-
-	iss = append(iss, is)
-}
-
-// transferInstruction transfer a bytecode.Instruction into an vm instruction and append it into given instruction set.
-func (it *instructionTranslator) transferInstruction(is *instructionSet, i *bytecode.Instruction) {
-	act := i.Action
-
-	action := builtinActions[act]
-
-	if action == nil {
-		panic(fmt.Sprintf("Unknown command: %d. line: %d", act, i.Line()))
-	}
-
-	vmI := is.define(i.Line(), action, i.Params...)
-	vmI.sourceLine = i.SourceLine() + 1
 }

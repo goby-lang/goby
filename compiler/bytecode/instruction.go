@@ -2,6 +2,7 @@ package bytecode
 
 import (
 	"fmt"
+	"strings"
 )
 
 // instruction set types
@@ -88,6 +89,15 @@ type Instruction struct {
 	sourceLine int
 }
 
+func (i *Instruction) Inspect() string {
+	var params []string
+
+	for _, param := range i.Params {
+		params = append(params, fmt.Sprint(param))
+	}
+	return fmt.Sprintf("%s: %s. source line: %d", i.ActionName(), strings.Join(params, ", "), i.sourceLine)
+}
+
 func (i *Instruction) ActionName() string {
 	return InstructionNameTable[i.Action]
 }
@@ -171,7 +181,7 @@ func (is *InstructionSet) Type() string {
 }
 
 func (is *InstructionSet) define(action uint8, sourceLine int, params ...interface{}) *Instruction {
-	i := &Instruction{Action: action, Params: params, line: is.count, sourceLine: sourceLine}
+	i := &Instruction{Action: action, Params: params, line: is.count, sourceLine: sourceLine+1}
 	for _, param := range params {
 		a, ok := param.(*anchor)
 
