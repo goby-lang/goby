@@ -47,6 +47,8 @@ const (
 	Leave
 )
 
+
+// InstructionNameTable is the table the maps instruction's op code with its readable name
 var InstructionNameTable = map[uint8]string{
 	GetLocal:            "getlocal",
 	GetConstant:         "getconstant",
@@ -82,13 +84,14 @@ var InstructionNameTable = map[uint8]string{
 
 // Instruction represents compiled bytecode instruction
 type Instruction struct {
-	Action     uint8
+	Opcode     uint8
 	Params     []interface{}
 	line       int
 	anchor     *anchor
 	sourceLine int
 }
 
+// Inspect is for inspecting the instruction's content
 func (i *Instruction) Inspect() string {
 	var params []string
 
@@ -98,8 +101,9 @@ func (i *Instruction) Inspect() string {
 	return fmt.Sprintf("%s: %s. source line: %d", i.ActionName(), strings.Join(params, ", "), i.sourceLine)
 }
 
+// ActionName returns the human readable name of the instruction
 func (i *Instruction) ActionName() string {
-	return InstructionNameTable[i.Action]
+	return InstructionNameTable[i.Opcode]
 }
 
 // AnchorLine returns instruction anchor's line number if it has an anchor
@@ -108,7 +112,7 @@ func (i *Instruction) AnchorLine() (int, error) {
 		return i.anchor.line, nil
 	}
 
-	return 0, fmt.Errorf("can't find anchor on action %d", i.Action)
+	return 0, fmt.Errorf("can't find anchor on action %d", i.Opcode)
 }
 
 // Line returns instruction's line number
@@ -181,7 +185,7 @@ func (is *InstructionSet) Type() string {
 }
 
 func (is *InstructionSet) define(action uint8, sourceLine int, params ...interface{}) *Instruction {
-	i := &Instruction{Action: action, Params: params, line: is.count, sourceLine: sourceLine+1}
+	i := &Instruction{Opcode: action, Params: params, line: is.count, sourceLine: sourceLine+1}
 	for _, param := range params {
 		a, ok := param.(*anchor)
 

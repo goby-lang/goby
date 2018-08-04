@@ -15,7 +15,7 @@ type operationType = uint8
 
 type setType = string
 
-type action struct {
+type op struct {
 	name      string
 	operation operation
 }
@@ -27,10 +27,11 @@ type instructionSet struct {
 	paramTypes   *bytecode.ArgSet
 }
 
-var builtinActions map[operationType]*action
+var builtinActions map[operationType]*op
 
+// This is for avoiding initialization loop
 func init() {
-	builtinActions = map[operationType]*action{
+	builtinActions = map[operationType]*op{
 		bytecode.Pop: {
 			name: bytecode.InstructionNameTable[bytecode.Pop],
 			operation: func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {

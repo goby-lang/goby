@@ -221,7 +221,7 @@ func (t *Thread) execInstruction(cf *normalCallFrame, i *bytecode.Instruction) {
 
 	//fmt.Println(t.callFrameStack.inspect())
 	//fmt.Println(i.inspect())
-	ins := builtinActions[i.Action]
+	ins := builtinActions[i.Opcode]
 	ins.operation(t, i.SourceLine(), cf, i.Params...)
 	//fmt.Println("============================")
 	//fmt.Println(t.callFrameStack.inspect())
