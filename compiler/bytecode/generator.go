@@ -44,7 +44,7 @@ func (g *Generator) InitTopLevelScope(program *ast.Program) {
 func (g *Generator) GenerateInstructions(stmts []ast.Statement) []*InstructionSet {
 	g.compileStatements(stmts, g.scope, g.scope.localTable)
 	for _, i := range g.instructionsWithAnchor {
-		i.Params[0], _ = i.AnchorLine()
+		i.Params[0] = i.AnchorLine()
 	}
 	//fmt.Println(g.instructionsToString())
 	//fmt.Print()

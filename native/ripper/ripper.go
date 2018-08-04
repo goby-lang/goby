@@ -221,7 +221,7 @@ func convertToTuple(instSet []*bytecode.InstructionSet, v *VM) *ArrayObject {
 			hashInstLevel2["action"] = v.InitStringObject(ins.ActionName())
 			hashInstLevel2["line"] = v.InitIntegerObject(ins.Line())
 			hashInstLevel2["source_line"] = v.InitIntegerObject(ins.SourceLine())
-			anchor, _ := ins.AnchorLine()
+			anchor := ins.AnchorLine()
 			hashInstLevel2["anchor"] = v.InitIntegerObject(anchor)
 			
 			arrayParams := []Object{}

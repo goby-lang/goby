@@ -107,12 +107,12 @@ func (i *Instruction) ActionName() string {
 }
 
 // AnchorLine returns instruction anchor's line number if it has an anchor
-func (i *Instruction) AnchorLine() (int, error) {
+func (i *Instruction) AnchorLine() int {
 	if i.anchor != nil {
-		return i.anchor.line, nil
+		return i.anchor.line
 	}
 
-	return 0, fmt.Errorf("can't find anchor on action %d", i.Opcode)
+	panic("you are calling AnchorLine on an instruction without anchors")
 }
 
 // Line returns instruction's line number
