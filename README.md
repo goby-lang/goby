@@ -9,6 +9,7 @@
 [![Readme Score](http://readme-score-api.herokuapp.com/score.svg?url=goby-lang/goby)](http://clayallsopp.github.io/readme-score?url=goby-lang/goby)
 [![Snap Status](https://build.snapcraft.io/badge/goby-lang/goby.svg)](https://build.snapcraft.io/user/goby-lang/goby)
 [![Open Source Helpers](https://www.codetriage.com/goby-lang/goby/badges/users.svg)](https://www.codetriage.com/goby-lang/goby)
+[![Reviewed by Hound](https://img.shields.io/badge/Reviewed_by-Hound-8E64B0.svg)](https://houndci.com)
 
 **Goby** is an object-oriented interpreter language deeply inspired by **Ruby** as well as its core implementation by 100% pure **Go**. Moreover, it has standard libraries to provide several features such as the Plugin system. Note that we do not intend to reproduce whole of the honorable works of Ruby syntax/implementation/libraries.
 
