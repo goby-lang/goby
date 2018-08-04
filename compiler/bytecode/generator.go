@@ -41,6 +41,7 @@ func (g *Generator) InitTopLevelScope(program *ast.Program) {
 // GenerateInstructions returns compiled instructions
 func (g *Generator) GenerateInstructions(stmts []ast.Statement) []*InstructionSet {
 	g.compileStatements(stmts, g.scope, g.scope.localTable)
+	// Use anchor's exact position to replace anchor obj
 	for _, i := range g.instructionsWithAnchor {
 		i.Params[0] = i.AnchorLine()
 	}
