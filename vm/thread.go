@@ -183,7 +183,6 @@ func (t *Thread) reportErrorAndStop(e interface{}) {
 		cf.stopExecution()
 	}
 
-
 	top := t.Stack.top().Target
 	switch err := top.(type) {
 	// If we can get an error object it means it's an Goby error
@@ -466,7 +465,7 @@ func (t *Thread) setErrorObject(receiverPtr, sp int, errorType string, sourceLin
 
 // blockIsEmpty returns true if the block is empty
 func blockIsEmpty(blockFrame *normalCallFrame) bool {
-	if blockFrame.instructionSet.instructions[0].action.name == bytecode.Leave {
+	if blockFrame.instructionSet.instructions[0].action.name == "leave" {
 		return true
 	}
 	return false

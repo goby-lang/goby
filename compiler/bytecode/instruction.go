@@ -14,45 +14,82 @@ const (
 
 // instruction actions
 const (
-	GetLocal            = "getlocal"
-	GetConstant         = "getconstant"
-	GetInstanceVariable = "getinstancevariable"
-	SetLocal            = "setlocal"
-	SetConstant         = "setconstant"
-	SetInstanceVariable = "setinstancevariable"
-	PutBoolean          = "putboolean"
-	PutString           = "putstring"
-	PutFloat            = "putfloat"
-	PutSelf             = "putself"
-	PutObject           = "putobject"
-	PutNull             = "putnil"
-	NewArray            = "newarray"
-	ExpandArray         = "expand_array"
-	SplatArray          = "splat_array"
-	NewHash             = "newhash"
-	NewRange            = "newrange"
-	BranchUnless        = "branchunless"
-	BranchIf            = "branchif"
-	Jump                = "jump"
-	Break               = "break"
-	DefMethod           = "def_method"
-	DefSingletonMethod  = "def_singleton_method"
-	DefClass            = "def_class"
-	Send                = "send"
-	InvokeBlock         = "invokeblock"
-	GetBlock            = "getblock"
-	Pop                 = "pop"
-	Dup                 = "dup"
-	Leave               = "leave"
+	GetLocal            uint8 = iota
+	GetConstant
+	GetInstanceVariable
+	SetLocal
+	SetConstant
+	SetInstanceVariable
+	PutBoolean
+	PutString
+	PutFloat
+	PutSelf
+	PutObject
+	PutNull
+	NewArray
+	ExpandArray
+	SplatArray
+	NewHash
+	NewRange
+	BranchUnless
+	BranchIf
+	Jump
+	Break
+	DefMethod
+	DefSingletonMethod
+	DefClass
+	Send
+	InvokeBlock
+	GetBlock
+	Pop
+	Dup
+	Leave
 )
+
+var InstructionNameTable = map[uint8]string{
+	GetLocal:            "getlocal",
+	GetConstant:         "getconstant",
+	GetInstanceVariable: "getinstancevariable",
+	SetLocal:            "setlocal",
+	SetConstant:         "setconstant",
+	SetInstanceVariable: "setinstancevariable",
+	PutBoolean:          "putboolean",
+	PutString:           "putstring",
+	PutFloat:            "putfloat",
+	PutSelf:             "putself",
+	PutObject:           "putobject",
+	PutNull:             "putnil",
+	NewArray:            "newarray",
+	ExpandArray:         "expand_array",
+	SplatArray:          "splat_array",
+	NewHash:             "newhash",
+	NewRange:            "newrange",
+	BranchUnless:        "branchunless",
+	BranchIf:            "branchif",
+	Jump:                "jump",
+	Break:               "break",
+	DefMethod:           "def_method",
+	DefSingletonMethod:  "def_singleton_method",
+	DefClass:            "def_class",
+	Send:                "send",
+	InvokeBlock:         "invokeblock",
+	GetBlock:            "getblock",
+	Pop:                 "pop",
+	Dup:                 "dup",
+	Leave:               "leave",
+}
 
 // Instruction represents compiled bytecode instruction
 type Instruction struct {
-	Action     string
+	Action     uint8
 	Params     []interface{}
 	line       int
 	anchor     *anchor
 	sourceLine int
+}
+
+func (i *Instruction) ActionName() string {
+	return InstructionNameTable[i.Action]
 }
 
 // AnchorLine returns instruction anchor's line number if it has an anchor
@@ -61,7 +98,7 @@ func (i *Instruction) AnchorLine() (int, error) {
 		return i.anchor.line, nil
 	}
 
-	return 0, fmt.Errorf("Can't find anchor on action %s", i.Action)
+	return 0, fmt.Errorf("can't find anchor on action %d", i.Action)
 }
 
 // Line returns instruction's line number
@@ -133,7 +170,7 @@ func (is *InstructionSet) Type() string {
 	return is.isType
 }
 
-func (is *InstructionSet) define(action string, sourceLine int, params ...interface{}) *Instruction {
+func (is *InstructionSet) define(action uint8, sourceLine int, params ...interface{}) *Instruction {
 	i := &Instruction{Action: action, Params: params, line: is.count, sourceLine: sourceLine}
 	for _, param := range params {
 		a, ok := param.(*anchor)
