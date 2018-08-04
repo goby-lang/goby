@@ -5,15 +5,13 @@ import (
 )
 
 type scope struct {
-	self       ast.Statement
 	program    *ast.Program
 	localTable *localTable
-	line       int
 	anchors    map[string]*anchor
 }
 
-func newScope(stmt ast.Statement) *scope {
-	return &scope{localTable: newLocalTable(0), self: stmt, line: 0, anchors: make(map[string]*anchor)}
+func newScope() *scope {
+	return &scope{localTable: newLocalTable(0), anchors: make(map[string]*anchor)}
 }
 
 // Generator contains program's AST and will store generated instruction sets

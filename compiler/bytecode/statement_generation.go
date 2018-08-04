@@ -32,7 +32,6 @@ func (g *Generator) compileStatements(stmts []ast.Statement, scope *scope, table
 }
 
 func (g *Generator) compileStatement(is *InstructionSet, statement ast.Statement, scope *scope, table *localTable) {
-	scope.line++
 	switch stmt := statement.(type) {
 	case *ast.ExpressionStatement:
 		if !g.REPL && stmt.Expression.IsStmt() {
@@ -143,7 +142,7 @@ func (g *Generator) compileClassStmt(is *InstructionSet, stmt *ast.ClassStatemen
 
 	is.define(Pop, stmt.Line())
 
-	scope = newScope(stmt)
+	scope = newScope()
 
 	// compile class's content
 	newIS := &InstructionSet{}
@@ -160,7 +159,7 @@ func (g *Generator) compileModuleStmt(is *InstructionSet, stmt *ast.ModuleStatem
 	is.define(DefClass, stmt.Line(), "module:"+stmt.Name.Value)
 	is.define(Pop, stmt.Line())
 
-	scope = newScope(stmt)
+	scope = newScope()
 	newIS := &InstructionSet{}
 	newIS.name = stmt.Name.Value
 	newIS.isType = ClassDef
@@ -182,7 +181,7 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 		is.define(DefSingletonMethod, stmt.Line(), len(stmt.Parameters))
 	}
 
-	scope = newScope(stmt)
+	scope = newScope()
 
 	// compile method definition's content
 	newIS := &InstructionSet{
