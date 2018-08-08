@@ -642,10 +642,10 @@ func TestConstantNamespace(t *testing.T) {
 		{`
 		module Out
 		  ModVal = "out"
-		
+
 		  module Mid
 			ModVal = "mid"
-		
+
 			module In
 			  def self.val
 				ModVal
@@ -659,10 +659,10 @@ func TestConstantNamespace(t *testing.T) {
 		{`
 		module Out
 		  ModVal = "out"
-		
+
 		  module Mid
 			ModVal = "mid"
-		
+
 			class In
 			  def val
 				ModVal
@@ -1977,7 +1977,7 @@ func TestMethodMissing(t *testing.T) {
 		    10
 		  end
 		end
-		
+
 		Foo.new.bar
 `, 10},
 		{`
@@ -1988,11 +1988,11 @@ func TestMethodMissing(t *testing.T) {
 		end
 
 		f = Foo.new
-		
+
 		def f.method_missing(name)
 		  20
 		end
-		
+
 		f.bar
 `, 20},
 		{`
@@ -2001,7 +2001,7 @@ func TestMethodMissing(t *testing.T) {
 		    name
 		  end
 		end
-		
+
 		Foo.new.bar
 `, "bar"},
 		{`
@@ -2010,7 +2010,7 @@ func TestMethodMissing(t *testing.T) {
 		    args[0]
 		  end
 		end
-		
+
 		Foo.new.bar(1)
 `, 1},
 		{`
@@ -2019,7 +2019,7 @@ func TestMethodMissing(t *testing.T) {
 		    name + args[0]
 		  end
 		end
-		
+
 		Foo.new.foo("bar")
 `, "foobar"},
 		{`
@@ -2028,7 +2028,7 @@ func TestMethodMissing(t *testing.T) {
 		    yield
 		  end
 		end
-		
+
 		Foo.new.bar do
 		  10
 		end
@@ -2039,7 +2039,7 @@ func TestMethodMissing(t *testing.T) {
 		    get_block.call
 		  end
 		end
-		
+
 		Foo.new.bar do
 		  10
 		end
@@ -2069,7 +2069,7 @@ func TestInheritableMethodMissing(t *testing.T) {
 		class Bar
 		  inherits_method_missing
 		end
-		
+
 		Bar.new.inherits_method_missing?
 
 `, true},
@@ -2083,7 +2083,7 @@ func TestInheritableMethodMissing(t *testing.T) {
 		class Bar < Foo
 		  inherits_method_missing
 		end
-		
+
 		Bar.new.bar
 
 `, 10},
@@ -2098,7 +2098,7 @@ func TestInheritableMethodMissing(t *testing.T) {
 		  include Foo
 		  inherits_method_missing
 		end
-		
+
 		Bar.new.bar
 
 `, 10},
@@ -2129,7 +2129,7 @@ func TestMethodMissingFail(t *testing.T) {
 		    10
 		  end
 		end
-		
+
 		Foo.new.bar
 `, "ArgumentError: Expect at most 0 args for method 'method_missing'. got: 1"},
 		{`
@@ -2141,7 +2141,7 @@ func TestMethodMissingFail(t *testing.T) {
 
 		class Foo < Bar
 		end
-		
+
 		Foo.new.bar
 `, "NoMethodError: Undefined Method 'bar' for <Instance of: Foo>"},
 		{`
@@ -2151,10 +2151,10 @@ func TestMethodMissingFail(t *testing.T) {
 		  end
 		end
 
-		class Foo 
+		class Foo
 		  include Bar
 		end
-		
+
 		Foo.new.bar
 `, "NoMethodError: Undefined Method 'bar' for <Instance of: Foo>"},
 	}
