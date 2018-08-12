@@ -49,7 +49,7 @@ const (
 
 
 // InstructionNameTable is the table the maps instruction's op code with its readable name
-var InstructionNameTable = map[uint8]string{
+var InstructionNameTable = []string{
 	GetLocal:            "getlocal",
 	GetConstant:         "getconstant",
 	GetInstanceVariable: "getinstancevariable",
