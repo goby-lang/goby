@@ -41,18 +41,11 @@ func (it *instructionTranslator) setMetadata(is *instructionSet, set *bytecode.I
 	}
 }
 
-func (it *instructionTranslator) transferInstructionSets(sets []*bytecode.InstructionSet) []*instructionSet {
-	iss := []*instructionSet{}
-
+func (it *instructionTranslator) transferInstructionSets(sets []*bytecode.InstructionSet) {
 	for _, set := range sets {
 		is := &instructionSet{filename: it.filename}
-		it.setMetadata(is, set)
-
 		is.instructions = set.Instructions
 		is.paramTypes = set.ArgTypes()
-
-		iss = append(iss, is)
+		it.setMetadata(is, set)
 	}
-
-	return iss
 }
