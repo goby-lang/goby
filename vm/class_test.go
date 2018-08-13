@@ -562,7 +562,7 @@ class Bar
   include Foo
 end
 	`
-	expected := `TypeError: Expect argument to be a module. got=Class`
+	expected := `TypeError: Expect argument to be a module. got: Class`
 
 	v := initTestVM()
 	evaluated := v.testEval(t, input, getFilename())
@@ -579,7 +579,7 @@ class Bar
   extend Foo
 end
 	`
-	expected := `TypeError: Expect argument to be a module. got=Class`
+	expected := `TypeError: Expect argument to be a module. got: Class`
 
 	v := initTestVM()
 	evaluated := v.testEval(t, input, getFilename())
@@ -739,7 +739,7 @@ func TestClassGreaterThanMethod(t *testing.T) {
 
 func TestClassGreaterThanMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`Array > 1`, "TypeError: Expect argument to be a module. got=Integer", 1},
+		{`Array > 1`, "TypeError: Expect argument to be a module. got: Integer", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -799,7 +799,7 @@ func TestClassGreaterThanOrEqualMethod(t *testing.T) {
 
 func TestClassGreaterThanOrEqualMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`Array >= 1`, "TypeError: Expect argument to be a module. got=Integer", 1},
+		{`Array >= 1`, "TypeError: Expect argument to be a module. got: Integer", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -859,7 +859,7 @@ func TestClassLesserThanMethod(t *testing.T) {
 
 func TestClassLesserThanMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`Array < 1`, "TypeError: Expect argument to be a module. got=Integer", 1},
+		{`Array < 1`, "TypeError: Expect argument to be a module. got: Integer", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -919,7 +919,7 @@ func TestClassLesserThanOrEqualMethod(t *testing.T) {
 
 func TestClassLesserThanOrEqualMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`Array <= 1`, "TypeError: Expect argument to be a module. got=Integer", 1},
+		{`Array <= 1`, "TypeError: Expect argument to be a module. got: Integer", 1},
 	}
 
 	for i, tt := range testsFail {
