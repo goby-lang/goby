@@ -55,7 +55,7 @@ type PluginObject struct {
 
 func newPlugin(receiver Object, sourceLine int, t *Thread, args []Object) Object {
 	if len(args) != 1 {
-		return t.VM().InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 1, len(args))
+		return t.VM().InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 	}
 
 	name, ok := args[0].(*StringObject)
