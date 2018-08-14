@@ -135,7 +135,7 @@ func TestStackTraces(t *testing.T) {
 			end
 		end
 		`,
-			"ArgumentError: Expect 0 argument. got=1",
+			"ArgumentError: Expect 0 argument(s). got: 1",
 			[]string{
 				fmt.Sprintf("from %s:6", getFilename()),
 				fmt.Sprintf("from %s:5", getFilename()),
