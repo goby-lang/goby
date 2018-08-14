@@ -50,7 +50,7 @@ func builtinDecimalClassMethods() []*BuiltinMethodObject {
 		{
 			Name: "new",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
+				return t.vm.InitNoMethodError(sourceLine, "#new", receiver)
 
 			},
 		},

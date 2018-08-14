@@ -172,7 +172,7 @@ func TestVM_REPLExecFail(t *testing.T) {
 			[]string{
 				"Hash.notExist",
 			},
-			"UndefinedMethodError: Undefined Method 'notExist' for Hash",
+			"NoMethodError: Undefined Method 'notExist' for Hash",
 		},
 	}
 

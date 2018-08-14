@@ -505,7 +505,7 @@ var builtinActions = map[operationType]*action{
 				mm := receiver.findMethodMissing(receiver.Class().inheritsMethodMissing)
 
 				if mm == nil {
-					t.setErrorObject(receiverPr, argPr, errors.UndefinedMethodError, sourceLine, "Undefined Method '%+v' for %+v", methodName, receiver.ToString())
+					t.setErrorObject(receiverPr, argPr, errors.NoMethodError, sourceLine, errors.UndefinedMethod, methodName, receiver.ToString())
 				} else {
 					// Move up args for missed method's name
 					// before: | arg 1       | arg 2 |
@@ -556,7 +556,7 @@ var builtinActions = map[operationType]*action{
 			receiver := t.Stack.data[receiverPr].Target
 
 			if cf.blockFrame == nil {
-				t.pushErrorObject(errors.InternalError, sourceLine, "Can't yield without a block")
+				t.pushErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 			}
 
 			blockFrame := cf.blockFrame

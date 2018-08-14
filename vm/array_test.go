@@ -1140,7 +1140,7 @@ func TestArrayFirstMethodFail(t *testing.T) {
 		`, "ArgumentError: Expect 0..1 argument. got=3", 1},
 		{`a = [1, 2]
 		a.first(-1)
-		`, "ArgumentError: Expect argument to be positive value. got=-1", 1},
+		`, "ArgumentError: Expect argument to be positive value. got: -1", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1309,7 +1309,7 @@ func TestArrayLastMethodFail(t *testing.T) {
 		`, "ArgumentError: Expect 0..1 argument. got=3", 1},
 		{`a = [1, 2]
 		a.last(-1)
-		`, "ArgumentError: Expect argument to be positive value. got=-1", 1},
+		`, "ArgumentError: Expect argument to be positive value. got: -1", 1},
 	}
 
 	for i, tt := range testsFail {

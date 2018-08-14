@@ -29,8 +29,9 @@ type Error struct {
 
 // Functions for initialization -----------------------------------------
 
-func (vm *VM) initUnsupportedMethodError(sourceLine int, methodName string, receiver Object) *Error {
-	return vm.InitErrorObject(errors.UnsupportedMethodError, sourceLine, "Unsupported Method %s for %+v", methodName, receiver.ToString())
+// InitNoMethodError is to print unsupported method errors. This is exported for using from sub-packages.
+func (vm *VM) InitNoMethodError(sourceLine int, methodName string, receiver Object) *Error {
+	return vm.InitErrorObject(errors.NoMethodError, sourceLine, errors.UndefinedMethod, methodName, receiver.ToString())
 }
 
 func (vm *VM) InitErrorObject(errorType string, sourceLine int, format string, args ...interface{}) *Error {
@@ -58,7 +59,7 @@ func (vm *VM) InitErrorObject(errorType string, sourceLine int, format string, a
 }
 
 func (vm *VM) initErrorClasses() {
-	errTypes := []string{errors.InternalError, errors.ArgumentError, errors.NameError, errors.StopIteration, errors.TypeError, errors.UndefinedMethodError, errors.UnsupportedMethodError, errors.ConstantAlreadyInitializedError, errors.HTTPError, errors.ZeroDivisionError, errors.ChannelCloseError}
+	errTypes := []string{errors.InternalError, errors.ArgumentError, errors.NameError, errors.StopIteration, errors.TypeError, errors.NoMethodError, errors.ConstantAlreadyInitializedError, errors.HTTPError, errors.ZeroDivisionError, errors.ChannelCloseError}
 
 	for _, errType := range errTypes {
 		c := vm.initializeClass(errType)

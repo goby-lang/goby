@@ -25,7 +25,7 @@ func builtinArrayClassMethods() []*BuiltinMethodObject {
 		{
 			Name: "new",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				return t.vm.initUnsupportedMethodError(sourceLine, "#new", receiver)
+				return t.vm.InitNoMethodError(sourceLine, "new", receiver)
 			},
 		},
 	}
@@ -775,7 +775,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 				}
 
 				if arg.value < 1 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect argument to be positive value. got=%d", arg.value)
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.PositiveValue, arg.value)
 				}
 
 				if arrLength > arg.value {
@@ -887,7 +887,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 				}
 
 				if arg.value < 1 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect argument to be positive value. got=%d", arg.value)
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.PositiveValue, arg.value)
 				}
 
 				if arrLength > arg.value {

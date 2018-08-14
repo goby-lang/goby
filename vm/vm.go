@@ -178,10 +178,13 @@ func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) {
 	vm.mainThread.callFrameStack.push(cf)
 
 	defer func() {
-		err, ok := recover().(*Error)
-
-		if ok && vm.mode == NormalMode {
-			fmt.Println(err.Message())
+		switch err := recover().(type) {
+		case error:
+			panic(err)
+		case *Error:
+			if vm.mode == NormalMode {
+				fmt.Println(err.Message())
+			}
 		}
 	}()
 
