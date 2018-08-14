@@ -556,7 +556,7 @@ var builtinActions = map[operationType]*action{
 			receiver := t.Stack.data[receiverPr].Target
 
 			if cf.blockFrame == nil {
-				t.pushErrorObject(errors.InternalError, sourceLine, "Can't yield without a block")
+				t.pushErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 			}
 
 			blockFrame := cf.blockFrame
