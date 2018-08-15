@@ -114,7 +114,7 @@ func lex(receiver Object, sourceLine int, t *Thread, args []Object) Object  {
 
 // Just to disable creating instances.
 func new(receiver Object, sourceLine int, t *Thread, args []Object) Object {
-	return t.VM().InitUnsupportedMethodError(sourceLine, "#new", receiver)
+	return t.VM().InitNoMethodError(sourceLine, "new", receiver)
 }
 
 // Returns the parsed Goby codes as a String object.

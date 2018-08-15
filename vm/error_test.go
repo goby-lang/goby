@@ -157,29 +157,29 @@ func TestStackTraces(t *testing.T) {
 
 // Error types test
 
-func TestUndefinedMethodError(t *testing.T) {
+func TestNoMethodError(t *testing.T) {
 	tests := []errorTestCase{
-		{`a`, "UndefinedMethodError: Undefined Method 'a' for <Instance of: Object>", 1},
+		{`a`, "NoMethodError: Undefined Method 'a' for <Instance of: Object>", 1},
 		{`class Foo
 		 end
 
 		 a = Foo.new
 		 a.bar = "fuz"
-		`, "UndefinedMethodError: Undefined Method 'bar=' for <Instance of: Foo>", 1},
+		`, "NoMethodError: Undefined Method 'bar=' for <Instance of: Foo>", 1},
 		{`class Foo
 		   attr_reader("foo")
 		 end
 
 		 a = Foo.new
 		 a.bar = "fuz"
-		`, "UndefinedMethodError: Undefined Method 'bar=' for <Instance of: Foo>", 1},
+		`, "NoMethodError: Undefined Method 'bar=' for <Instance of: Foo>", 1},
 		{`class Foo
 		  attr_reader("bar")
 		end
 
 		a = Foo.new
 		a.bar = "fuz"
-		`, "UndefinedMethodError: Undefined Method 'bar=' for <Instance of: Foo>", 1},
+		`, "NoMethodError: Undefined Method 'bar=' for <Instance of: Foo>", 1},
 	}
 
 	for i, tt := range tests {
@@ -192,14 +192,14 @@ func TestUndefinedMethodError(t *testing.T) {
 
 }
 
-func TestUnsupportedMethodError(t *testing.T) {
+func TestNoMethodErrorOnNew(t *testing.T) {
 	tests := []errorTestCase{
-		{`String.new`, "UnsupportedMethodError: Unsupported Method #new for String", 1},
-		{`Integer.new`, "UnsupportedMethodError: Unsupported Method #new for Integer", 1},
-		{`Hash.new`, "UnsupportedMethodError: Unsupported Method #new for Hash", 1},
-		{`Array.new`, "UnsupportedMethodError: Unsupported Method #new for Array", 1},
-		{`Boolean.new`, "UnsupportedMethodError: Unsupported Method #new for Boolean", 1},
-		{`Null.new`, "UnsupportedMethodError: Unsupported Method #new for Null", 1},
+		{`String.new`, "NoMethodError: Undefined Method 'new' for String", 1},
+		{`Integer.new`, "NoMethodError: Undefined Method 'new' for Integer", 1},
+		{`Hash.new`, "NoMethodError: Undefined Method 'new' for Hash", 1},
+		{`Array.new`, "NoMethodError: Undefined Method 'new' for Array", 1},
+		{`Boolean.new`, "NoMethodError: Undefined Method 'new' for Boolean", 1},
+		{`Null.new`, "NoMethodError: Undefined Method 'new' for Null", 1},
 	}
 
 	for i, tt := range tests {

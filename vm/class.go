@@ -99,7 +99,7 @@ func builtinClassCommonClassMethods() []*BuiltinMethodObject {
 				class, ok := receiver.(*RClass)
 
 				if !ok {
-					return t.vm.InitUnsupportedMethodError(sourceLine, "#new", receiver)
+					return t.vm.InitNoMethodError(sourceLine, "new", receiver)
 				}
 
 				instance := class.initializeInstance()
@@ -156,7 +156,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				c, ok := receiver.(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#ancestors", receiver.ToString())
+					return t.vm.InitNoMethodError(sourceLine, "#ancestors", receiver)
 				}
 
 				a := c.ancestors()
@@ -183,13 +183,13 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				c, ok := receiver.(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#<", receiver.ToString())
+					return t.vm.InitNoMethodError(sourceLine, "#>", receiver)
 				}
 
 				module, ok := args[0].(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect argument to be a module. got=%v", args[0].Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "a module", args[0].Class().Name)
 				}
 
 				if c == module {
@@ -222,13 +222,13 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				c, ok := receiver.(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#<", receiver.ToString())
+					return t.vm.InitNoMethodError(sourceLine, "#>=", receiver)
 				}
 
 				module, ok := args[0].(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect argument to be a module. got=%v", args[0].Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "a module", args[0].Class().Name)
 				}
 
 				if c == module {
@@ -261,13 +261,13 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				c, ok := receiver.(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#<", receiver.ToString())
+					return t.vm.InitNoMethodError(sourceLine, "#<", receiver)
 				}
 
 				module, ok := args[0].(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect argument to be a module. got=%v", args[0].Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "a module", args[0].Class().Name)
 				}
 
 				if c == module {
@@ -300,13 +300,13 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				c, ok := receiver.(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#<", receiver.ToString())
+					return t.vm.InitNoMethodError(sourceLine, "#<=", receiver)
 				}
 
 				module, ok := args[0].(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect argument to be a module. got=%v", args[0].Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "a module", args[0].Class().Name)
 				}
 
 				if c == module {
@@ -484,7 +484,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				module, ok := args[0].(*RClass)
 
 				if !ok || !module.isModule {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect argument to be a module. got=%v", args[0].Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "a module", args[0].Class().Name)
 				}
 
 				class = receiver.SingletonClass()
@@ -550,7 +550,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				module, ok := args[0].(*RClass)
 
 				if !ok || !module.isModule {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect argument to be a module. got=%v", args[0].Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "a module", args[0].Class().Name)
 				}
 
 				switch r := receiver.(type) {
@@ -610,7 +610,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				n, ok := receiver.(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#name", receiver.ToString())
+					return t.vm.InitNoMethodError(sourceLine, "#name", receiver)
 				}
 
 				name := n.ReturnName()
@@ -685,7 +685,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				c, ok := receiver.(*RClass)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.UndefinedMethodError, sourceLine, "Undefined Method '%s' for %s", "#superclass", receiver.ToString())
+					return t.vm.InitNoMethodError(sourceLine, "#superclass", receiver)
 				}
 
 				superClass := c.returnSuperClass()

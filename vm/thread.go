@@ -329,7 +329,7 @@ func (t *Thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 	method = receiver.findMethod(methodName)
 
 	if method == nil {
-		t.setErrorObject(receiverPr, argPr, errors.UndefinedMethodError, sourceLine, "Undefined Method '%+v' for %+v", methodName, receiver.ToString())
+		t.setErrorObject(receiverPr, argPr, errors.NoMethodError, sourceLine, errors.UndefinedMethod, methodName, receiver.ToString())
 	}
 
 	sendCallFrame := t.callFrameStack.top()
