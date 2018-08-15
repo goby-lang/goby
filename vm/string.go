@@ -1652,6 +1652,10 @@ func (s *StringObject) ToString() string {
 	return s.value
 }
 
+func (s *StringObject) Inspect() string {
+	return s.ToString()
+}
+
 // ToJSON just delegates to ToString
 func (s *StringObject) ToJSON(t *Thread) string {
 	return strconv.Quote(s.value)

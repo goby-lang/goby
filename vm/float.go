@@ -429,6 +429,10 @@ func (f *FloatObject) ToString() string {
 	return strconv.FormatFloat(f.value, 'f', -1, 64) // fmt.Sprintf("%f", f.value)
 }
 
+func (f *FloatObject) Inspect() string {
+	return f.ToString()
+}
+
 // ToJSON just delegates to ToString
 func (f *FloatObject) ToJSON(t *Thread) string {
 	return f.ToString()

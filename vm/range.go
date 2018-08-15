@@ -539,6 +539,10 @@ func (ro *RangeObject) ToString() string {
 	return fmt.Sprintf("(%d..%d)", ro.Start, ro.End)
 }
 
+func (ro *RangeObject) Inspect() string {
+	return ro.ToString()
+}
+
 // ToJSON just delegates to ToString
 func (ro *RangeObject) ToJSON(t *Thread) string {
 	return ro.ToString()

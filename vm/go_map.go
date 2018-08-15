@@ -153,6 +153,10 @@ func (m *GoMap) ToString() string {
 	return fmt.Sprintf("<GoMap: %p>", m)
 }
 
+func (m *GoMap) Inspect() string {
+	return m.ToString()
+}
+
 // ToJSON just delegates to ToString
 func (m *GoMap) ToJSON(t *Thread) string {
 	return m.ToString()

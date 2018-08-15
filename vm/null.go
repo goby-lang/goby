@@ -69,6 +69,19 @@ func builtinNullInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			Name: "inspect",
+
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
+				}
+
+				n := receiver.(*NullObject)
+				return t.vm.InitStringObject(n.Inspect())
+
+			},
+		},
+		{
 			// Returns true because it is nil. (See the main implementation of nil? method in vm/class.go)
 			//
 			// ```ruby
@@ -157,6 +170,10 @@ func (n *NullObject) ToString() string {
 // ToJSON just delegates to ToString
 func (n *NullObject) ToJSON(t *Thread) string {
 	return "null"
+}
+
+func (n *NullObject) Inspect() string {
+	return "nil"
 }
 
 func (n *NullObject) isTruthy() bool {

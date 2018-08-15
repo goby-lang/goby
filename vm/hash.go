@@ -1221,6 +1221,10 @@ func (h *HashObject) ToString() string {
 	return out.String()
 }
 
+func (h *HashObject) Inspect() string {
+	return h.ToString()
+}
+
 // ToJSON returns the object's name as the JSON string format
 func (h *HashObject) ToJSON(t *Thread) string {
 	var out bytes.Buffer

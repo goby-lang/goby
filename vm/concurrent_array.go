@@ -129,7 +129,11 @@ func (cac *ConcurrentArrayObject) ToJSON(t *Thread) string {
 
 // ToString returns the object's name as the string format
 func (cac *ConcurrentArrayObject) ToString() string {
-	return cac.InternalArray.ToString()
+	return cac.InternalArray.Inspect()
+}
+
+func (cac *ConcurrentArrayObject) Inspect() string {
+	return cac.ToString()
 }
 
 // Value returns the object

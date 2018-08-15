@@ -76,6 +76,10 @@ func (s *GoObject) ToString() string {
 	return fmt.Sprintf("<GoObject: %p>", s)
 }
 
+func (s *GoObject) Inspect() string {
+	return s.ToString()
+}
+
 // ToJSON just delegates to ToString
 func (s *GoObject) ToJSON(t *Thread) string {
 	return s.ToString()

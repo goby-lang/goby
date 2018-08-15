@@ -254,6 +254,10 @@ func (lock *ConcurrentRWLockObject) ToString() string {
 	return "<Instance of: " + lock.class.Name + ">"
 }
 
+func (lock *ConcurrentRWLockObject) Inspect() string {
+	return lock.ToString()
+}
+
 // ToJSON just delegates to ToString
 func (lock *ConcurrentRWLockObject) ToJSON(t *Thread) string {
 	return lock.ToString()

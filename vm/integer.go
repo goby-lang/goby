@@ -763,6 +763,10 @@ func (i *IntegerObject) ToString() string {
 	return strconv.Itoa(i.value)
 }
 
+func (i *IntegerObject) Inspect() string {
+	return i.ToString()
+}
+
 // ToJSON just delegates to ToString
 func (i *IntegerObject) ToJSON(t *Thread) string {
 	return i.ToString()

@@ -156,6 +156,10 @@ func (bo *BlockObject) ToString() string {
 	return fmt.Sprintf("<Block: %s>", bo.instructionSet.filename)
 }
 
+func (bo *BlockObject) Inspect() string {
+	return bo.ToString()
+}
+
 // ToJSON just delegates to ToString
 func (bo *BlockObject) ToJSON(t *Thread) string {
 	return bo.ToString()

@@ -35,6 +35,10 @@ func (r *Result) ToString() string {
 	return fmt.Sprintf("<Result %s>", r.ToString())
 }
 
+func (r *Result) Inspect() string {
+	return r.ToString()
+}
+
 // Value returns the internal value of the result
 func (r *Result) Value() interface{} {
 	return r.value

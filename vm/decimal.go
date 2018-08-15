@@ -689,6 +689,10 @@ func (d *DecimalObject) ToString() string {
 	return fs
 }
 
+func (d *DecimalObject) Inspect() string {
+	return d.ToString()
+}
+
 // ToJSON just delegates to ToString
 func (d *DecimalObject) ToJSON(t *Thread) string {
 	return d.ToString()

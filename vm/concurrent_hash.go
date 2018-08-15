@@ -343,7 +343,7 @@ func (h *ConcurrentHashObject) ToString() string {
 			template = "%s: %s"
 		}
 
-		pairs = append(pairs, fmt.Sprintf(template, key, value.(Object).ToString()))
+		pairs = append(pairs, fmt.Sprintf(template, key, value.(Object).Inspect()))
 
 		return true
 	}
@@ -355,6 +355,10 @@ func (h *ConcurrentHashObject) ToString() string {
 	out.WriteString(" }")
 
 	return out.String()
+}
+
+func (h *ConcurrentHashObject) Inspect() string {
+	return h.ToString()
 }
 
 // ToJSON returns the object's name as the JSON string format

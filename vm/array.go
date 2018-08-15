@@ -1389,9 +1389,9 @@ func (a *ArrayObject) ToString() string {
 	for _, e := range a.Elements {
 		_, isString := e.(*StringObject)
 		if isString {
-			elements = append(elements, "\""+e.ToString()+"\"")
+			elements = append(elements, "\""+e.Inspect()+"\"")
 		} else {
-			elements = append(elements, e.ToString())
+			elements = append(elements, e.Inspect())
 		}
 	}
 
@@ -1400,6 +1400,10 @@ func (a *ArrayObject) ToString() string {
 	out.WriteString("]")
 
 	return out.String()
+}
+
+func (a *ArrayObject) Inspect() string {
+	return a.ToString()
 }
 
 // ToJSON returns the object's elements as the JSON string format

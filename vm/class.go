@@ -1590,6 +1590,10 @@ func (c *RClass) ToString() string {
 	return c.Name
 }
 
+func (c *RClass) Inspect() string {
+	return c.ToString()
+}
+
 // ToJSON just delegates to `ToString`
 func (c *RClass) ToJSON(t *Thread) string {
 	return c.ToString()
