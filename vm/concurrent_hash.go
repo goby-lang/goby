@@ -334,17 +334,7 @@ func (h *ConcurrentHashObject) ToString() string {
 	var pairs []string
 
 	iterator := func(key, value interface{}) bool {
-		var template string
-
-		switch value.(type) {
-		case *StringObject:
-			template = "%s: \"%s\""
-		default:
-			template = "%s: %s"
-		}
-
-		pairs = append(pairs, fmt.Sprintf(template, key, value.(Object).Inspect()))
-
+		pairs = append(pairs, fmt.Sprintf("%s: %s", key, value.(Object).Inspect()))
 		return true
 	}
 
