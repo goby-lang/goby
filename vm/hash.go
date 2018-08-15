@@ -1206,12 +1206,7 @@ func (h *HashObject) ToString() string {
 	var pairs []string
 
 	for _, key := range h.sortedKeys() {
-		// TODO: Improve this conditional statement
-		if _, isString := h.Pairs[key].(*StringObject); isString {
-			pairs = append(pairs, fmt.Sprintf("%s: \"%s\"", key, h.Pairs[key].ToString()))
-		} else {
-			pairs = append(pairs, fmt.Sprintf("%s: %s", key, h.Pairs[key].ToString()))
-		}
+		pairs = append(pairs, fmt.Sprintf("%s: %s", key, h.Pairs[key].Inspect()))
 	}
 
 	out.WriteString("{ ")

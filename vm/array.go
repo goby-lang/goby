@@ -1387,12 +1387,7 @@ func (a *ArrayObject) ToString() string {
 
 	elements := []string{}
 	for _, e := range a.Elements {
-		_, isString := e.(*StringObject)
-		if isString {
-			elements = append(elements, "\""+e.Inspect()+"\"")
-		} else {
-			elements = append(elements, e.Inspect())
-		}
+		elements = append(elements, e.Inspect())
 	}
 
 	out.WriteString("[")

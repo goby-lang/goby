@@ -1653,7 +1653,7 @@ func (s *StringObject) ToString() string {
 }
 
 func (s *StringObject) Inspect() string {
-	return s.ToString()
+	return "\"" + s.ToString() + "\""
 }
 
 // ToJSON just delegates to ToString
