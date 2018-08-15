@@ -1,9 +1,9 @@
 package ripper
 
 import (
-	"testing"
 	"github.com/goby-lang/goby/vm"
 	"strings"
+	"testing"
 )
 
 type errorTestCase struct {
@@ -21,7 +21,7 @@ func TestRipperClassSuperclass(t *testing.T) {
 		{`require 'ripper'; Ripper.superclass.name`, "Object"},
 		{`require 'ripper'; Ripper.ancestors.to_s`, "[Ripper, Object]"},
 	}
-	
+
 	for i, tt := range tests {
 		evaluated := vm.ExecAndReturn(t, tt.input)
 		vm.VerifyExpected(t, i, evaluated, tt.expected)
@@ -104,7 +104,7 @@ func TestRipperParse(t *testing.T) {
 	end
 "`, "def bar(block) {\n(block.call() + get_block.call())\n}def foo() {\nself.bar(get_block) do\n20\nend\n}self.foo() do\n10\nend"},
 	}
-	
+
 	for i, tt := range tests {
 		evaluated := vm.ExecAndReturn(t, tt.input)
 		vm.VerifyExpected(t, i, evaluated, tt.expected)
@@ -191,7 +191,7 @@ func TestRipperTokenize(t *testing.T) {
 	end
 ").to_s`, `["def", "bar", "(", "block", ")", "block", ".", "call", "+", "get_block", ".", "call", "end", "def", "foo", "bar", "(", "get_block", ")", "do", "20", "end", "end", "foo", "do", "10", "end", "EOF"]`},
 	}
-	
+
 	for i, tt := range tests {
 		evaluated := vm.ExecAndReturn(t, tt.input)
 		vm.VerifyExpected(t, i, evaluated, tt.expected)
@@ -278,7 +278,7 @@ func TestRipperLex(t *testing.T) {
 	end
 ").to_s`, `[[1, "on_def", "def"], [1, "on_ident", "bar"], [1, "on_lparen", "("], [1, "on_ident", "block"], [1, "on_rparen", ")"], [2, "on_ident", "block"], [2, "on_dot", "."], [2, "on_ident", "call"], [2, "on_plus", "+"], [2, "on_get_block", "get_block"], [2, "on_dot", "."], [2, "on_ident", "call"], [3, "on_end", "end"], [5, "on_def", "def"], [5, "on_ident", "foo"], [6, "on_ident", "bar"], [6, "on_lparen", "("], [6, "on_get_block", "get_block"], [6, "on_rparen", ")"], [6, "on_do", "do"], [7, "on_int", "20"], [8, "on_end", "end"], [9, "on_end", "end"], [11, "on_ident", "foo"], [11, "on_do", "do"], [12, "on_int", "10"], [13, "on_end", "end"], [14, "on_eof", ""]]`},
 	}
-	
+
 	for i, tt := range tests {
 		evaluated := vm.ExecAndReturn(t, tt.input)
 		vm.VerifyExpected(t, i, evaluated, tt.expected)
@@ -293,7 +293,7 @@ func TestRipperLexFail(t *testing.T) {
 		{`require 'ripper'; Ripper.lex(["puts", "123"])`, "TypeError: Expect argument to be String. got: Array", 1},
 		{`require 'ripper'; Ripper.lex({key: 1})`, "TypeError: Expect argument to be String. got: Hash", 1},
 	}
-	
+
 	for i, tt := range testsFail {
 		evaluated := vm.ExecAndReturn(t, tt.input)
 		checkErrorMsg(t, i, evaluated, tt.expected)
@@ -371,7 +371,6 @@ func TestRipperInstruction(t *testing.T) {
 	}
 }
 
-
 // Error test helper methods
 
 type Error struct {
@@ -388,7 +387,7 @@ func checkErrorMsg(t *testing.T, index int, evaluated Object, expectedErrMsg str
 	if !ok {
 		t.Fatalf("At test case %d: Expect Error. got=%T (%+v)", index, evaluated, evaluated)
 	}
-	
+
 	message := strings.Split(err.Message(), "\n")
 	if message[0] != expectedErrMsg {
 		t.Fatalf("At test case %d: Expect error message to be:\n  %s. got: \n%s", index, expectedErrMsg, err.Message())

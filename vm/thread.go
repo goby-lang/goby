@@ -183,7 +183,6 @@ func (t *Thread) reportErrorAndStop(e interface{}) {
 		cf.stopExecution()
 	}
 
-
 	top := t.Stack.top().Target
 	switch err := top.(type) {
 	// If we can get an error object it means it's an Goby error
