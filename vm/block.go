@@ -156,6 +156,7 @@ func (bo *BlockObject) ToString() string {
 	return fmt.Sprintf("<Block: %s>", bo.instructionSet.filename)
 }
 
+// Inspect delegates to ToString
 func (bo *BlockObject) Inspect() string {
 	return bo.ToString()
 }

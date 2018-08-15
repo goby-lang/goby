@@ -171,6 +171,7 @@ func (p *PluginObject) ToString() string {
 	return "<Plugin: " + p.fn + ">"
 }
 
+// Inspect delegates to ToString
 func (p *PluginObject) Inspect() string {
 	return p.ToString()
 }

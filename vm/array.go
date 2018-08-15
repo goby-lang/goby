@@ -1397,6 +1397,7 @@ func (a *ArrayObject) ToString() string {
 	return out.String()
 }
 
+// Inspect delegates to ToString
 func (a *ArrayObject) Inspect() string {
 	return a.ToString()
 }

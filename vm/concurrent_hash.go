@@ -347,6 +347,7 @@ func (h *ConcurrentHashObject) ToString() string {
 	return out.String()
 }
 
+// Inspect delegates to ToString
 func (h *ConcurrentHashObject) Inspect() string {
 	return h.ToString()
 }

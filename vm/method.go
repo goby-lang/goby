@@ -34,6 +34,7 @@ func (m *MethodObject) ToString() string {
 	return out.String()
 }
 
+// Inspect delegates to ToString
 func (m *MethodObject) Inspect() string {
 	return m.ToString()
 }
@@ -102,6 +103,7 @@ func (bim *BuiltinMethodObject) ToString() string {
 	return "<BuiltinMethod: " + bim.Name + ">"
 }
 
+// Inspect delegates to ToString
 func (bim *BuiltinMethodObject) Inspect() string {
 	return bim.ToString()
 }

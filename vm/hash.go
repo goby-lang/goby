@@ -1216,6 +1216,7 @@ func (h *HashObject) ToString() string {
 	return out.String()
 }
 
+// Inspect delegates to ToString
 func (h *HashObject) Inspect() string {
 	return h.ToString()
 }

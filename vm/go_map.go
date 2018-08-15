@@ -153,6 +153,7 @@ func (m *GoMap) ToString() string {
 	return fmt.Sprintf("<GoMap: %p>", m)
 }
 
+// Inspect delegates to ToString
 func (m *GoMap) Inspect() string {
 	return m.ToString()
 }

@@ -539,6 +539,7 @@ func (ro *RangeObject) ToString() string {
 	return fmt.Sprintf("(%d..%d)", ro.Start, ro.End)
 }
 
+// Inspect delegates to ToString
 func (ro *RangeObject) Inspect() string {
 	return ro.ToString()
 }

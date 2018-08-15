@@ -429,6 +429,7 @@ func (f *FloatObject) ToString() string {
 	return strconv.FormatFloat(f.value, 'f', -1, 64) // fmt.Sprintf("%f", f.value)
 }
 
+// Inspect delegates to ToString
 func (f *FloatObject) Inspect() string {
 	return f.ToString()
 }

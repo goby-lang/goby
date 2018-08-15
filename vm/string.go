@@ -1652,6 +1652,7 @@ func (s *StringObject) ToString() string {
 	return s.value
 }
 
+// Inspect wraps ToString with double quotes
 func (s *StringObject) Inspect() string {
 	return "\"" + s.ToString() + "\""
 }

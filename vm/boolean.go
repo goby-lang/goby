@@ -72,6 +72,7 @@ func (b *BooleanObject) ToString() string {
 	return fmt.Sprintf("%t", b.value)
 }
 
+// Inspect delegates to ToString
 func (b *BooleanObject) Inspect() string {
 	return b.ToString()
 }

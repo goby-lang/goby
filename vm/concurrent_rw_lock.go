@@ -254,6 +254,7 @@ func (lock *ConcurrentRWLockObject) ToString() string {
 	return "<Instance of: " + lock.class.Name + ">"
 }
 
+// Inspect delegates to ToString
 func (lock *ConcurrentRWLockObject) Inspect() string {
 	return lock.ToString()
 }

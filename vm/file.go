@@ -352,6 +352,7 @@ func (f *FileObject) ToString() string {
 	return "<File: " + f.File.Name() + ">"
 }
 
+// Inspect delegates to ToString
 func (f *FileObject) Inspect() string {
 	return f.ToString()
 }

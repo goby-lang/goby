@@ -74,6 +74,7 @@ func (e *Error) ToString() string {
 	return e.message
 }
 
+// Inspect delegates to ToString
 func (e *Error) Inspect() string {
 	return e.ToString()
 }

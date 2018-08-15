@@ -174,6 +174,7 @@ func (r *RegexpObject) ToString() string {
 	return r.regexp.String()
 }
 
+// Inspect delegates to ToString
 func (r *RegexpObject) Inspect() string {
 	return r.ToString()
 }

@@ -35,6 +35,7 @@ func (r *Result) ToString() string {
 	return fmt.Sprintf("<Result %s>", r.ToString())
 }
 
+// Inspect delegates to ToString
 func (r *Result) Inspect() string {
 	return r.ToString()
 }

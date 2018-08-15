@@ -144,6 +144,7 @@ func (ro *RObject) ToString() string {
 	return "<Instance of: " + ro.class.Name + ">"
 }
 
+// Inspect delegates to ToString
 func (ro *RObject) Inspect() string {
 	return ro.ToString()
 }

@@ -193,6 +193,7 @@ func (m *MatchDataObject) ToString() string {
 	return result
 }
 
+// Inspect delegates to ToString
 func (m *MatchDataObject) Inspect() string {
 	return m.ToString()
 }

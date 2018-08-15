@@ -1590,6 +1590,7 @@ func (c *RClass) ToString() string {
 	return c.Name
 }
 
+// Inspect delegates to ToString
 func (c *RClass) Inspect() string {
 	return c.ToString()
 }

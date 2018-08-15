@@ -132,6 +132,7 @@ func (cac *ConcurrentArrayObject) ToString() string {
 	return cac.InternalArray.Inspect()
 }
 
+// Inspect delegates to ToString
 func (cac *ConcurrentArrayObject) Inspect() string {
 	return cac.ToString()
 }

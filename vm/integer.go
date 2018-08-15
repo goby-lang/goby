@@ -763,6 +763,7 @@ func (i *IntegerObject) ToString() string {
 	return strconv.Itoa(i.value)
 }
 
+// Inspect delegates to ToString
 func (i *IntegerObject) Inspect() string {
 	return i.ToString()
 }

@@ -172,6 +172,7 @@ func (n *NullObject) ToJSON(t *Thread) string {
 	return "null"
 }
 
+// Inspect returns string "nil" instead of "" like ToString
 func (n *NullObject) Inspect() string {
 	return "nil"
 }

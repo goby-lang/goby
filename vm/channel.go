@@ -259,6 +259,7 @@ func (co *ChannelObject) ToString() string {
 	return fmt.Sprintf("<Channel: %p>", co.Chan)
 }
 
+// Inspect delegates to ToString
 func (co *ChannelObject) Inspect() string {
 	return co.ToString()
 }
