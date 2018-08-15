@@ -168,19 +168,19 @@ func run(receiver Object, sourceLine int, t *Thread, args []Object) Object {
 // 			//
 // 			// # Assume that there is a User table with name and age column
 // 			//
-// 			// # Create Action
+// 			// # Create Opcode
 // 			// db = DB.open("postgres", "user=postgres dbname=goby_doc sslmode=disable")
 // 			// id = db.exec("INSERT INTO users (name, age) VALUES ('Stan', 23)")
 // 			// puts id # => 1
 // 			//
-// 			// # Update Action
+// 			// # Update Opcode
 // 			//
 // 			// id2 = db.exec("INSERT INTO users (name, age) VALUES ('Maxwell', 21)")
 // 			// puts id2 # => 2
 // 			// id3 = db.exec("UPDATE users SET age=18 WHERE id = $1", id)
 // 			// puts id3 # => 2
 // 			//
-// 			// # Delete Action
+// 			// # Delete Opcode
 // 			// id4 = db.exec("DELETE FROM users WHERE id = $1", id3)
 // 			// puts id4 # => 2
 // 			//

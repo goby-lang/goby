@@ -13,17 +13,17 @@ func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, sc
 	sourceLine := exp.Line()
 	switch exp := exp.(type) {
 	case *ast.Constant:
-		is.define(GetConstant, sourceLine, exp.Value, fmt.Sprint(exp.IsNamespace))
+		is.define(GetConstant, sourceLine, exp.Value, exp.IsNamespace)
 	case *ast.InstanceVariable:
 		is.define(GetInstanceVariable, sourceLine, exp.Value)
 	case *ast.IntegerLiteral:
-		is.define(PutObject, sourceLine, fmt.Sprint(exp.Value))
+		is.define(PutObject, sourceLine, exp.Value)
 	case *ast.FloatLiteral:
-		is.define(PutFloat, sourceLine, fmt.Sprint(exp.Value))
+		is.define(PutFloat, sourceLine, exp.Value)
 	case *ast.StringLiteral:
 		is.define(PutString, sourceLine, exp.Value)
 	case *ast.BooleanExpression:
-		is.define(PutBoolean, sourceLine, fmt.Sprint(exp.Value))
+		is.define(PutBoolean, sourceLine, exp.Value)
 	case *ast.NilExpression:
 		is.define(PutNull, sourceLine)
 	case *ast.RangeExpression:
@@ -74,7 +74,7 @@ func (g *Generator) compileIdentifier(is *InstructionSet, exp *ast.Identifier, s
 
 	// otherwise it's a method call
 	is.define(PutSelf, exp.Line())
-	is.define(Send, exp.Line(), exp.Value, 0, "")
+	is.define(Send, exp.Line(), exp.Value, 0, "", &ArgSet{})
 }
 
 func (g *Generator) compileYieldExpression(is *InstructionSet, exp *ast.YieldExpression, scope *scope, table *localTable) {
@@ -95,7 +95,7 @@ func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpre
 	var blockInfo string
 	argSet := &ArgSet{
 		names: make([]string, len(exp.Arguments)),
-		types: make([]int, len(exp.Arguments)),
+		types: make([]uint8, len(exp.Arguments)),
 	}
 
 	// Compile receiver
@@ -140,8 +140,7 @@ func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpre
 		g.compileBlockArgExpression(blockIndex, exp, scope, newTable)
 	}
 
-	i := is.define(Send, exp.Line(), exp.Method, len(exp.Arguments), blockInfo)
-	i.ArgSet = argSet
+	is.define(Send, exp.Line(), exp.Method, len(exp.Arguments), blockInfo, argSet)
 }
 
 func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.AssignExpression, scope *scope, table *localTable) {
@@ -206,7 +205,8 @@ func (g *Generator) compileIfExpression(is *InstructionSet, exp *ast.IfExpressio
 		anchorConditional := &anchor{}
 
 		g.compileExpression(is, c.Condition, scope, table)
-		is.define(BranchUnless, exp.Line(), anchorConditional)
+		bu := is.define(BranchUnless, exp.Line(), anchorConditional)
+		g.instructionsWithAnchor = append(g.instructionsWithAnchor, bu)
 
 		if c.Consequence.IsEmpty() {
 			is.define(PutNull, exp.Line())
@@ -215,7 +215,8 @@ func (g *Generator) compileIfExpression(is *InstructionSet, exp *ast.IfExpressio
 		}
 
 		anchorConditional.line = is.count + 1
-		is.define(Jump, exp.Line(), anchorLast)
+		jp := is.define(Jump, exp.Line(), anchorLast)
+		g.instructionsWithAnchor = append(g.instructionsWithAnchor, jp)
 	}
 
 	if exp.Alternative == nil {
@@ -235,14 +236,14 @@ func (g *Generator) compilePrefixExpression(is *InstructionSet, exp *ast.PrefixE
 	switch exp.Operator {
 	case "!":
 		g.compileExpression(is, exp.Right, scope, table)
-		is.define(Send, exp.Line(), exp.Operator, 0, "")
+		is.define(Send, exp.Line(), exp.Operator, 0, "", &ArgSet{})
 	case "*":
 		g.compileExpression(is, exp.Right, scope, table)
 		is.define(SplatArray, exp.Line())
 	case "-":
 		is.define(PutObject, exp.Line(), 0)
 		g.compileExpression(is, exp.Right, scope, table)
-		is.define(Send, exp.Line(), exp.Operator, 1, "")
+		is.define(Send, exp.Line(), exp.Operator, 1, "", &ArgSet{})
 	}
 }
 
@@ -256,7 +257,8 @@ func (g *Generator) compileInfixExpression(is *InstructionSet, node *ast.InfixEx
 
 		g.compileExpression(is, node.Left, scope, table)
 		is.define(Dup, node.Line())
-		is.define(BranchUnless, node.Line(), andAnchor)
+		bu := is.define(BranchUnless, node.Line(), andAnchor)
+		g.instructionsWithAnchor = append(g.instructionsWithAnchor, bu)
 		is.define(Pop, node.Line())
 		g.compileExpression(is, node.Right, scope, table)
 		andAnchor.line = len(is.Instructions)
@@ -266,7 +268,8 @@ func (g *Generator) compileInfixExpression(is *InstructionSet, node *ast.InfixEx
 
 		g.compileExpression(is, node.Left, scope, table)
 		is.define(Dup, node.Line())
-		is.define(BranchIf, node.Line(), andAnchor)
+		bi := is.define(BranchIf, node.Line(), andAnchor)
+		g.instructionsWithAnchor = append(g.instructionsWithAnchor, bi)
 		is.define(Pop, node.Line())
 		g.compileExpression(is, node.Right, scope, table)
 		andAnchor.line = len(is.Instructions)
@@ -274,6 +277,6 @@ func (g *Generator) compileInfixExpression(is *InstructionSet, node *ast.InfixEx
 	default:
 		g.compileExpression(is, node.Left, scope, table)
 		g.compileExpression(is, node.Right, scope, table)
-		is.define(Send, node.Line(), node.Operator, "1", "")
+		is.define(Send, node.Line(), node.Operator, 1, "", &ArgSet{})
 	}
 }

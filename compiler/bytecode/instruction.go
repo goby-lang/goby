@@ -1,7 +1,6 @@
 package bytecode
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 )
@@ -16,55 +15,104 @@ const (
 
 // instruction actions
 const (
-	GetLocal            = "getlocal"
-	GetConstant         = "getconstant"
-	GetInstanceVariable = "getinstancevariable"
-	SetLocal            = "setlocal"
-	SetConstant         = "setconstant"
-	SetInstanceVariable = "setinstancevariable"
-	PutBoolean          = "putboolean"
-	PutString           = "putstring"
-	PutFloat            = "putfloat"
-	PutSelf             = "putself"
-	PutObject           = "putobject"
-	PutNull             = "putnil"
-	NewArray            = "newarray"
-	ExpandArray         = "expand_array"
-	SplatArray          = "splat_array"
-	NewHash             = "newhash"
-	NewRange            = "newrange"
-	BranchUnless        = "branchunless"
-	BranchIf            = "branchif"
-	Jump                = "jump"
-	Break               = "break"
-	DefMethod           = "def_method"
-	DefSingletonMethod  = "def_singleton_method"
-	DefClass            = "def_class"
-	Send                = "send"
-	InvokeBlock         = "invokeblock"
-	GetBlock            = "getblock"
-	Pop                 = "pop"
-	Dup                 = "dup"
-	Leave               = "leave"
+	GetLocal            uint8 = iota
+	GetConstant
+	GetInstanceVariable
+	SetLocal
+	SetConstant
+	SetInstanceVariable
+	PutBoolean
+	PutString
+	PutFloat
+	PutSelf
+	PutObject
+	PutNull
+	NewArray
+	ExpandArray
+	SplatArray
+	NewHash
+	NewRange
+	BranchUnless
+	BranchIf
+	Jump
+	Break
+	DefMethod
+	DefSingletonMethod
+	DefClass
+	Send
+	InvokeBlock
+	GetBlock
+	Pop
+	Dup
+	Leave
 )
+
+
+// InstructionNameTable is the table the maps instruction's op code with its readable name
+var InstructionNameTable = []string{
+	GetLocal:            "getlocal",
+	GetConstant:         "getconstant",
+	GetInstanceVariable: "getinstancevariable",
+	SetLocal:            "setlocal",
+	SetConstant:         "setconstant",
+	SetInstanceVariable: "setinstancevariable",
+	PutBoolean:          "putboolean",
+	PutString:           "putstring",
+	PutFloat:            "putfloat",
+	PutSelf:             "putself",
+	PutObject:           "putobject",
+	PutNull:             "putnil",
+	NewArray:            "newarray",
+	ExpandArray:         "expand_array",
+	SplatArray:          "splat_array",
+	NewHash:             "newhash",
+	NewRange:            "newrange",
+	BranchUnless:        "branchunless",
+	BranchIf:            "branchif",
+	Jump:                "jump",
+	Break:               "break",
+	DefMethod:           "def_method",
+	DefSingletonMethod:  "def_singleton_method",
+	DefClass:            "def_class",
+	Send:                "send",
+	InvokeBlock:         "invokeblock",
+	GetBlock:            "getblock",
+	Pop:                 "pop",
+	Dup:                 "dup",
+	Leave:               "leave",
+}
 
 // Instruction represents compiled bytecode instruction
 type Instruction struct {
-	Action     string
-	Params     []string
+	Opcode     uint8
+	Params     []interface{}
 	line       int
 	anchor     *anchor
 	sourceLine int
-	ArgSet     *ArgSet
+}
+
+// Inspect is for inspecting the instruction's content
+func (i *Instruction) Inspect() string {
+	var params []string
+
+	for _, param := range i.Params {
+		params = append(params, fmt.Sprint(param))
+	}
+	return fmt.Sprintf("%s: %s. source line: %d", i.ActionName(), strings.Join(params, ", "), i.sourceLine)
+}
+
+// ActionName returns the human readable name of the instruction
+func (i *Instruction) ActionName() string {
+	return InstructionNameTable[i.Opcode]
 }
 
 // AnchorLine returns instruction anchor's line number if it has an anchor
-func (i *Instruction) AnchorLine() (int, error) {
+func (i *Instruction) AnchorLine() int {
 	if i.anchor != nil {
-		return i.anchor.line, nil
+		return i.anchor.line
 	}
 
-	return 0, fmt.Errorf("Can't find anchor on action %s", i.Action)
+	panic("you are calling AnchorLine on an instruction without anchors")
 }
 
 // Line returns instruction's line number
@@ -75,25 +123,6 @@ func (i *Instruction) Line() int {
 // SourceLine returns instruction's source line number
 func (i *Instruction) SourceLine() int {
 	return i.sourceLine
-}
-
-func (i *Instruction) compile() string {
-	if i.anchor != nil {
-		return fmt.Sprintf("%d %s %d\n", i.line, i.Action, i.anchor.line)
-	}
-	if len(i.Params) > 0 {
-		lastParam := i.Params[len(i.Params)-1]
-
-		// If the send action doesn't have a block (block info), we'll have a trailing space after join.
-		// So we need to remove that empty string element
-		if i.Action == Send && len(lastParam) == 0 {
-			return fmt.Sprintf("%d %s %s\n", i.line, i.Action, strings.Join(i.Params[:len(i.Params)-1], " "))
-		}
-
-		return fmt.Sprintf("%d %s %s\n", i.line, i.Action, strings.Join(i.Params, " "))
-	}
-
-	return fmt.Sprintf("%d %s\n", i.line, i.Action)
 }
 
 type anchor struct {
@@ -112,11 +141,11 @@ type InstructionSet struct {
 // ArgSet stores the metadata of a method definition's parameters.
 type ArgSet struct {
 	names []string
-	types []int
+	types []uint8
 }
 
 // Types are the getter method of *ArgSet's types attribute
-func (as *ArgSet) Types() []int {
+func (as *ArgSet) Types() []uint8 {
 	return as.types
 }
 
@@ -135,7 +164,7 @@ func (as *ArgSet) FindIndex(name string) int {
 	return -1
 }
 
-func (as *ArgSet) setArg(index int, name string, argType int) {
+func (as *ArgSet) setArg(index int, name string, argType uint8) {
 	as.names[index] = name
 	as.types[index] = argType
 }
@@ -155,42 +184,17 @@ func (is *InstructionSet) Type() string {
 	return is.isType
 }
 
-func (is *InstructionSet) define(action string, sourceLine int, params ...interface{}) *Instruction {
-	ps := []string{}
-	i := &Instruction{Action: action, Params: ps, line: is.count, sourceLine: sourceLine}
+func (is *InstructionSet) define(action uint8, sourceLine int, params ...interface{}) *Instruction {
+	i := &Instruction{Opcode: action, Params: params, line: is.count, sourceLine: sourceLine+1}
 	for _, param := range params {
-		switch p := param.(type) {
-		case string:
-			ps = append(ps, p)
-		case *anchor:
-			i.anchor = p
-		case int:
-			ps = append(ps, fmt.Sprint(p))
-		case bool:
-			ps = append(ps, fmt.Sprint(p))
-		}
-	}
+		a, ok := param.(*anchor)
 
-	if len(ps) > 0 {
-		i.Params = ps
+		if ok {
+			i.anchor = a
+		}
 	}
 
 	is.Instructions = append(is.Instructions, i)
 	is.count++
 	return i
-}
-
-func (is *InstructionSet) compile() string {
-	var out bytes.Buffer
-	if is.isType == Program {
-		out.WriteString(fmt.Sprintf("<%s>\n", is.isType))
-	} else {
-		out.WriteString(fmt.Sprintf("<%s:%s>\n", is.isType, is.name))
-	}
-
-	for _, i := range is.Instructions {
-		out.WriteString(i.compile())
-	}
-
-	return out.String()
 }

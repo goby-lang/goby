@@ -8,20 +8,11 @@ import (
 
 // Polymorphic helper functions for inspecting internal info.
 
-func (i *instruction) inspect() string {
-	var params []string
-
-	for _, param := range i.Params {
-		params = append(params, fmt.Sprint(param))
-	}
-	return fmt.Sprintf("%s: %s. source line: %d", i.action.name, strings.Join(params, ", "), i.sourceLine)
-}
-
 func (is *instructionSet) inspect() string {
 	var out bytes.Buffer
 
 	for _, i := range is.instructions {
-		out.WriteString(i.inspect())
+		out.WriteString(i.Inspect())
 		out.WriteString("\n")
 	}
 
