@@ -1,8 +1,6 @@
 package vm
 
 import (
-	"fmt"
-
 	"github.com/goby-lang/goby/compiler/bytecode"
 )
 
@@ -47,10 +45,11 @@ func (vm *VM) REPLExec(sets []*bytecode.InstructionSet) {
 	vm.mainThread.callFrameStack.push(cf)
 
 	defer func() {
-		_, ok := recover().(*Error)
+		e := recover()
 
-		if !ok && recover() != nil {
-			fmt.Printf("%v\n", recover())
+		switch err := e.(type) {
+		case error:
+			panic(err)
 		}
 	}()
 

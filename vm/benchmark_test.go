@@ -55,7 +55,6 @@ func BenchmarkBasicMath(b *testing.B) {
 	})
 }
 
-
 func BenchmarkConcurrency(b *testing.B) {
 	b.Run("concurrency", func(b *testing.B) {
 		script := `
