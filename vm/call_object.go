@@ -37,7 +37,7 @@ func (co *callObject) instructionSet() *instructionSet {
 	return co.method.instructionSet
 }
 
-func (co *callObject) paramTypes() []int {
+func (co *callObject) paramTypes() []uint8 {
 	return co.instructionSet().paramTypes.Types()
 }
 
@@ -49,9 +49,9 @@ func (co *callObject) methodName() string {
 	return co.method.Name
 }
 
-func (co *callObject) argTypes() []int {
+func (co *callObject) argTypes() []uint8 {
 	if co.argSet == nil {
-		return []int{}
+		return []uint8{}
 	}
 
 	return co.argSet.Types()

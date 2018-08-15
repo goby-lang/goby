@@ -183,7 +183,6 @@ func (t *Thread) reportErrorAndStop(e interface{}) {
 		cf.stopExecution()
 	}
 
-
 	top := t.Stack.top().Target
 	switch err := top.(type) {
 	// If we can get an error object it means it's an Goby error
@@ -217,12 +216,13 @@ func (t *Thread) reportErrorAndStop(e interface{}) {
 	}
 }
 
-func (t *Thread) execInstruction(cf *normalCallFrame, i *instruction) {
+func (t *Thread) execInstruction(cf *normalCallFrame, i *bytecode.Instruction) {
 	cf.pc++
 
 	//fmt.Println(t.callFrameStack.inspect())
 	//fmt.Println(i.inspect())
-	i.action.operation(t, i.sourceLine, cf, i.Params...)
+	ins := operations[i.Opcode]
+	ins(t, i.SourceLine(), cf, i.Params...)
 	//fmt.Println("============================")
 	//fmt.Println(t.callFrameStack.inspect())
 }
@@ -466,7 +466,7 @@ func (t *Thread) setErrorObject(receiverPtr, sp int, errorType string, sourceLin
 
 // blockIsEmpty returns true if the block is empty
 func blockIsEmpty(blockFrame *normalCallFrame) bool {
-	if blockFrame.instructionSet.instructions[0].action.name == bytecode.Leave {
+	if blockFrame.instructionSet.instructions[0].ActionName() == "leave" {
 		return true
 	}
 	return false

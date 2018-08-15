@@ -8,7 +8,7 @@ import (
 	These constants are enums that represent argument's types
 */
 const (
-	NormalArg int = iota
+	NormalArg uint8 = iota
 	OptionedArg
 	SplatArg
 	RequiredKeywordArg
@@ -32,7 +32,6 @@ func (g *Generator) compileStatements(stmts []ast.Statement, scope *scope, table
 }
 
 func (g *Generator) compileStatement(is *InstructionSet, statement ast.Statement, scope *scope, table *localTable) {
-	scope.line++
 	switch stmt := statement.(type) {
 	case *ast.ExpressionStatement:
 		if !g.REPL && stmt.Expression.IsStmt() {
@@ -77,7 +76,8 @@ func (g *Generator) compileWhileStmt(is *InstructionSet, stmt *ast.WhileStatemen
 	anchor1 := &anchor{}
 	breakAnchor := &anchor{}
 
-	is.define(Jump, stmt.Line(), anchor1)
+	jp := is.define(Jump, stmt.Line(), anchor1)
+	g.instructionsWithAnchor = append(g.instructionsWithAnchor, jp)
 
 	anchor2 := &anchor{is.count}
 
@@ -90,13 +90,15 @@ func (g *Generator) compileWhileStmt(is *InstructionSet, stmt *ast.WhileStatemen
 
 	g.compileExpression(is, stmt.Condition, scope, table)
 
-	is.define(BranchIf, stmt.Line(), anchor2)
+	bi := is.define(BranchIf, stmt.Line(), anchor2)
+	g.instructionsWithAnchor = append(g.instructionsWithAnchor, bi)
 
 	breakAnchor.line = is.count
 }
 
 func (g *Generator) compileNextStatement(is *InstructionSet, stmt ast.Statement, scope *scope) {
-	is.define(Jump, stmt.Line(), scope.anchors["next"])
+	jp := is.define(Jump, stmt.Line(), scope.anchors["next"])
+	g.instructionsWithAnchor = append(g.instructionsWithAnchor, jp)
 }
 
 func (g *Generator) compileBreakStatement(is *InstructionSet, stmt ast.Statement, scope *scope) {
@@ -121,7 +123,8 @@ func (g *Generator) compileBreakStatement(is *InstructionSet, stmt ast.Statement
 		if is.isType == Block {
 			is.define(Break, stmt.Line())
 		}
-		is.define(Jump, stmt.Line(), scope.anchors["break"])
+		jp := is.define(Jump, stmt.Line(), scope.anchors["break"])
+		g.instructionsWithAnchor = append(g.instructionsWithAnchor, jp)
 	} else {
 		is.define(Break, stmt.Line())
 	}
@@ -139,7 +142,7 @@ func (g *Generator) compileClassStmt(is *InstructionSet, stmt *ast.ClassStatemen
 
 	is.define(Pop, stmt.Line())
 
-	scope = newScope(stmt)
+	scope = newScope()
 
 	// compile class's content
 	newIS := &InstructionSet{}
@@ -156,7 +159,7 @@ func (g *Generator) compileModuleStmt(is *InstructionSet, stmt *ast.ModuleStatem
 	is.define(DefClass, stmt.Line(), "module:"+stmt.Name.Value)
 	is.define(Pop, stmt.Line())
 
-	scope = newScope(stmt)
+	scope = newScope()
 	newIS := &InstructionSet{}
 	newIS.name = stmt.Name.Value
 	newIS.isType = ClassDef
@@ -178,7 +181,7 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 		is.define(DefSingletonMethod, stmt.Line(), len(stmt.Parameters))
 	}
 
-	scope = newScope(stmt)
+	scope = newScope()
 
 	// compile method definition's content
 	newIS := &InstructionSet{
@@ -186,7 +189,7 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 		isType: MethodDef,
 		argTypes: &ArgSet{
 			names: make([]string, len(stmt.Parameters)),
-			types: make([]int, len(stmt.Parameters)),
+			types: make([]uint8, len(stmt.Parameters)),
 		},
 	}
 

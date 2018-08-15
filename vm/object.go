@@ -149,7 +149,7 @@ func (ro *RObject) ToJSON(t *Thread) string {
 
 	if customToJSONMethod != nil {
 		t.Stack.Push(&Pointer{Target: ro})
-		callObj := newCallObject(ro, customToJSONMethod, t.Stack.pointer, 0, &bytecode.ArgSet{}, nil, customToJSONMethod.instructionSet.instructions[0].sourceLine)
+		callObj := newCallObject(ro, customToJSONMethod, t.Stack.pointer, 0, &bytecode.ArgSet{}, nil, customToJSONMethod.instructionSet.instructions[0].SourceLine())
 		t.evalMethodObject(callObj)
 		result := t.Stack.Pop().Target
 		return result.ToString()
