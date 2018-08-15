@@ -1,6 +1,9 @@
 package vm
 
-import "testing"
+import (
+	"runtime"
+	"testing"
+)
 
 func TestHTTPClientObject(t *testing.T) {
 
@@ -79,6 +82,13 @@ func TestHTTPClientObject(t *testing.T) {
 }
 
 func TestHTTPClientObjectFail(t *testing.T) {
+	// error message differs on OSX
+	var refuseConnectMsg string
+	if runtime.GOOS == "darwin" {
+		refuseConnectMsg = "getsockopt: connection refused"
+	} else {
+		refuseConnectMsg = "connect: connection refused"
+	}
 
 	testsFail := []errorTestCase{
 		{`
@@ -89,7 +99,7 @@ func TestHTTPClientObjectFail(t *testing.T) {
 		end
 
 		res
-		`, "HTTPError: Could not complete request, Get http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: connect: connection refused", 4},
+		`, "HTTPError: Could not complete request, Get http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: " + refuseConnectMsg, 4},
 	}
 
 	for i, tt := range testsFail {

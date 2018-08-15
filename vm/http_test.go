@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"runtime"
 )
 
 func TestHTTPRequest(t *testing.T) {
@@ -59,6 +60,14 @@ func TestHTTPRequestFail(t *testing.T) {
 	//server to test off of
 	go startTestServer(c)
 
+	// error message differs on OSX
+	var refuseConnectMsg string
+	if runtime.GOOS == "darwin" {
+		refuseConnectMsg = "getsockopt: connection refused"
+	} else {
+		refuseConnectMsg = "connect: connection refused"
+	}
+
 	testsFail := []errorTestCase{
 		//HTTPErrors for get()
 		{`
@@ -70,7 +79,7 @@ func TestHTTPRequestFail(t *testing.T) {
 		require "net/http"
 
 		Net::HTTP.get("http://127.0.0.1:3001")
-		`, "HTTPError: Could not complete request, Get http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: connect: connection refused", 1},
+		`, "HTTPError: Could not complete request, Get http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: " + refuseConnectMsg, 1},
 		//Argument errors for get()
 		{`
 		require "net/http"
@@ -92,7 +101,7 @@ func TestHTTPRequestFail(t *testing.T) {
 		require "net/http"
 
 		Net::HTTP.post("http://127.0.0.1:3001", "text/plain", "Let me down")
-		`, "HTTPError: Could not complete request, Post http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: connect: connection refused", 1},
+		`, "HTTPError: Could not complete request, Post http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: " + refuseConnectMsg, 1},
 		//Argument errors for post()
 		{`
 		require "net/http"
@@ -114,7 +123,7 @@ func TestHTTPRequestFail(t *testing.T) {
 		require "net/http"
 
 		Net::HTTP.head("http://127.0.0.1:3001")
-		`, "HTTPError: Could not complete request, Head http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: connect: connection refused", 1},
+		`, "HTTPError: Could not complete request, Head http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: " + refuseConnectMsg, 1},
 		//Argument errors for head()
 		{`
 		require "net/http"
