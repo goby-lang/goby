@@ -1590,9 +1590,24 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			Name: "to_s",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
-				str := receiver.(*StringObject).value
+				str := receiver.(*StringObject)
+				return t.vm.InitStringObject(str.ToString())
+			},
+		},
+		{
+			// Returns a new String which would evaluate to self value
+			//
+			// ```ruby
+			// "string".inspect # => "\"string\""
+			// ```
+			//
+			// @return [String]
+			Name: "inspect",
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
-				return t.vm.InitStringObject(str)
+				str := receiver.(*StringObject)
+
+				return t.vm.InitStringObject(str.Inspect())
 			},
 		},
 		{
@@ -1649,12 +1664,22 @@ func (s *StringObject) Value() interface{} {
 
 // ToString returns the object's name as the string format
 func (s *StringObject) ToString() string {
-	return s.value
+	return fmt.Sprintf(`%s`, s.value)
 }
 
 // Inspect wraps ToString with double quotes
 func (s *StringObject) Inspect() string {
-	return "\"" + s.ToString() + "\""
+	return fmt.Sprintf(`"%s"`, escapeSpecialChars(escapeBackslash(s.ToString())))
+}
+
+func escapeSpecialChars(s string) string {
+	s = strings.Replace(s, "\n", `\n`, -1)
+	s = strings.Replace(s, `"`, `\"`, -1)
+	return s
+}
+
+func escapeBackslash(s string) string {
+	return strings.Replace(s, `\`, `\\`, -1)
 }
 
 // ToJSON just delegates to ToString
