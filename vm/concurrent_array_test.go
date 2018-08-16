@@ -1331,7 +1331,7 @@ func TestConcurrentArrayReduceMethodFail(t *testing.T) {
 		a.reduce(1, 2) do |prev, n|
 			prev + n
 		end
-		`, "ArgumentError: Expect 0 or 1 argument. got=2", 1},
+		`, "ArgumentError: Expect 1 or less argument(s). got: 2", 1},
 	}
 
 	for i, tt := range testsFail {

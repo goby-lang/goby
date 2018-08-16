@@ -35,8 +35,8 @@ const (
 	CantYieldWithoutBlockFormat = "Can't yield without a block"
 	DividedByZero               = "Divided by 0"
 	ChannelIsClosed             = "The channel is already closed."
-	SmallIndexValue             = "Index value %d too small for array. minimum: %d"
+	TooSmallIndexValue          = "Index value %d too small for array. minimum: %d"
 	NegativeValue               = "Expect argument to be positive value. got: %d"
-	NegativeSecondValue         = "Expect second argument greater than or equal 0. got: %d"
+	NegativeSecondValue         = "Expect second argument to be positive value. got: %d"
 	UndefinedMethod             = "Undefined Method '%+v' for %+v"
 )
