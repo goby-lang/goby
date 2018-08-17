@@ -138,8 +138,8 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 			// @return [Null]
 			Name: "close",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+				if e, aLen := 0, len(args); e != aLen {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
 				}
 				c := receiver.(*ChannelObject)
 
@@ -179,8 +179,8 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 			// @return [Object]
 			Name: "deliver",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 1 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
+				if e, aLen := 1, len(args); e != aLen {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
 				}
 				c := receiver.(*ChannelObject)
 
@@ -217,10 +217,8 @@ func builtinChannelInstanceMethods() []*BuiltinMethodObject {
 			// @return [Object]
 			Name: "receive",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					if len(args) != 0 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
-					}
+				if e, aLen := 0, len(args); e != aLen {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
 				}
 				c := receiver.(*ChannelObject)
 

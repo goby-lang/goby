@@ -5,9 +5,8 @@ import (
 	"net/http"
 	"net/url"
 	"path"
-	"strconv"
 	"strings"
-
+	
 	"github.com/goby-lang/goby/vm/errors"
 )
 
@@ -67,8 +66,8 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 			// Sends a POST request to the target with type header and body. Returns the HTTP response as a string. Will error on non-200 responses, for more control over http requests look at the `start` method.
 			Name: "post",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 3 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 3, len(args))
+				if e, aLen := 3, len(args); e != aLen {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
 				}
 
 				arg0, ok := args[0].(*StringObject)
@@ -153,9 +152,8 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 			// Starts an HTTP client. This method requires a block which takes a Net::HTTP::Client object. The return value of this method is the last evaluated value of the provided block.
 			Name: "start",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 arguments. got=%v", strconv.Itoa(len(args)))
+				if e, aLen := 0, len(args); e != aLen {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
 				}
 
 				gobyClient := httpClientClass.initializeInstance()

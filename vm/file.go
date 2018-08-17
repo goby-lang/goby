@@ -145,38 +145,36 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 			// @return [File]
 			Name: "new",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				var fn string
-				var mode int
-				var perm os.FileMode
-
-				if len(args) < 1 {
+				aLen := len(args)
+				if aLen == 0 {
 					return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Expect at least a filename to open file")
 				}
 
-				if len(args) >= 1 {
-					fn = args[0].(*StringObject).value
-					mode = syscall.O_RDONLY
+				var fn string
+				var mode int
+				var perm os.FileMode
+				fn = args[0].(*StringObject).value
+				mode = syscall.O_RDONLY
+				perm = os.FileMode(0755)
+				
+				if aLen >= 2 {
+					m := args[1].(*StringObject).value
+					md, ok := fileModeTable[m]
+					
+					if !ok {
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Unknown file mode: %s", m)
+					}
+					
+					if md == syscall.O_RDWR || md == syscall.O_WRONLY {
+						os.Create(fn)
+					}
+					
+					mode = md
 					perm = os.FileMode(0755)
-
-					if len(args) >= 2 {
-						m := args[1].(*StringObject).value
-						md, ok := fileModeTable[m]
-
-						if !ok {
-							return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Unknown file mode: %s", m)
-						}
-
-						if md == syscall.O_RDWR || md == syscall.O_WRONLY {
-							os.Create(fn)
-						}
-
-						mode = md
-						perm = os.FileMode(0755)
-
-						if len(args) == 3 {
-							p := args[2].(*IntegerObject).value
-							perm = os.FileMode(p)
-						}
+					
+					if aLen == 3 {
+						p := args[2].(*IntegerObject).value
+						perm = os.FileMode(p)
 					}
 				}
 

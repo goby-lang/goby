@@ -54,9 +54,10 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "captures",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+				if e, aLen := 0, len(args); e != aLen {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
 				}
+				
 				offset := 1
 
 				g := receiver.(*MatchDataObject).match
@@ -84,8 +85,8 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "to_a",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+				if e, aLen := 0, len(args); e != aLen {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
 				}
 
 				g := receiver.(*MatchDataObject).match
@@ -115,8 +116,8 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 			// @return [Hash]
 			Name: "to_h",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+				if e, aLen := 0, len(args); e != aLen {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
 				}
 
 				groups := receiver.(*MatchDataObject).match
@@ -139,8 +140,8 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			Name: "length",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+				if e, aLen := 0, len(args); e != aLen {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
 				}
 
 				m := receiver.(*MatchDataObject).match

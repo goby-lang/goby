@@ -318,10 +318,6 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			Name: "to_d",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%v", strconv.Itoa(len(args)))
-				}
-
 				fl := receiver.(*FloatObject).value
 				fs := strconv.FormatFloat(fl, 'f', -1, 64)
 				de, err := new(Decimal).SetString(fs)

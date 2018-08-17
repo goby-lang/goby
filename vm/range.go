@@ -342,16 +342,15 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "map",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				r := receiver.(*RangeObject)
-
+				if e, aLen := 0, len(args); e != aLen {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				}
+				
 				if blockFrame == nil {
 					return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 				}
 
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
-				}
-
+				r := receiver.(*RangeObject)
 				var elements []Object
 
 				r.each(func(i int) error {
@@ -423,12 +422,11 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			// @return [Range]
 			Name: "step",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				ran := receiver.(*RangeObject)
-
 				if blockFrame == nil {
 					return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 				}
 
+				ran := receiver.(*RangeObject)
 				stepValue := args[0].(*IntegerObject).value
 				if stepValue == 0 {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Step can't be 0")

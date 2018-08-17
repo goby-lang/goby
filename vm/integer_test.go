@@ -357,7 +357,7 @@ func TestIntegerTimesMethod(t *testing.T) {
 
 func TestIntegerTimesMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`(-2).times`, "InternalError: Expect integer greater than or equal 0. got: -2", 1},
+		{`(-2).times`, "InternalError: Expect integer to be positive value. got: -2", 1},
 		{`2.times`, "InternalError: Can't yield without a block", 1},
 	}
 

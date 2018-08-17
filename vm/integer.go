@@ -512,7 +512,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 				n := receiver.(*IntegerObject)
 
 				if n.value < 0 {
-					return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Expect integer greater than or equal 0. got: %d", n.value)
+					return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Expect integer to be positive value. got: %d", n.value)
 				}
 
 				if blockFrame == nil {

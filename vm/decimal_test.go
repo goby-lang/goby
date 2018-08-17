@@ -338,14 +338,14 @@ func TestDecimalToStringMethod(t *testing.T) {
 
 func TestDecimalToStringFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`'1.1.1'.to_d`, "ArgumentError: Invalid numeric string. got=1.1.1", 1},
-		{`'1/1/1'.to_d`, "ArgumentError: Invalid numeric string. got=1/1/1", 1},
-		{`'1.1/1'.to_d`, "ArgumentError: Invalid numeric string. got=1.1/1", 1},
-		{`'1/1.1'.to_d`, "ArgumentError: Invalid numeric string. got=1/1.1", 1},
-		{`'1..1'.to_d`, "ArgumentError: Invalid numeric string. got=1..1", 1},
-		{`'..1'.to_d`, "ArgumentError: Invalid numeric string. got=..1", 1},
-		{`'1//1'.to_d`, "ArgumentError: Invalid numeric string. got=1//1", 1},
-		{`'abc'.to_d`, "ArgumentError: Invalid numeric string. got=abc", 1},
+		{`'1.1.1'.to_d`, "ArgumentError: Invalid numeric string. got: 1.1.1", 1},
+		{`'1/1/1'.to_d`, "ArgumentError: Invalid numeric string. got: 1/1/1", 1},
+		{`'1.1/1'.to_d`, "ArgumentError: Invalid numeric string. got: 1.1/1", 1},
+		{`'1/1.1'.to_d`, "ArgumentError: Invalid numeric string. got: 1/1.1", 1},
+		{`'1..1'.to_d`, "ArgumentError: Invalid numeric string. got: 1..1", 1},
+		{`'..1'.to_d`, "ArgumentError: Invalid numeric string. got: ..1", 1},
+		{`'1//1'.to_d`, "ArgumentError: Invalid numeric string. got: 1//1", 1},
+		{`'abc'.to_d`, "ArgumentError: Invalid numeric string. got: abc", 1},
 	}
 
 	for i, tt := range testsFail {
