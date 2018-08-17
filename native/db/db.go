@@ -60,7 +60,7 @@ func init() {
 //
 func getConnection(receiver vm.Object, sourceLine int, t *vm.Thread, args []vm.Object) vm.Object {
 	if len(args) != 2 {
-		return t.VM().InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 2, len(args))
+		return t.VM().InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 2, len(args))
 	}
 
 	driverName, ok := args[0].(*vm.StringObject)

@@ -22,7 +22,7 @@ func TestChannelClassSuperclass(t *testing.T) {
 
 func TestChannelCloseFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`c = Channel.new; c.close(1)`, "ArgumentError: Expect 0 arguments. got: 1", 1},
+		{`c = Channel.new; c.close(1)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
 		{`c = Channel.new; c.close;c.close`, "ChannelCloseError: The channel is already closed.", 1},
 	}
 
@@ -37,7 +37,7 @@ func TestChannelCloseFail(t *testing.T) {
 
 func TestChannelReceiveFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`c = Channel.new; c.receive(1)`, "ArgumentError: Expect 0 arguments. got: 1", 1},
+		{`c = Channel.new; c.receive(1)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
 		{`c = Channel.new; c.close; c.receive`, "ChannelCloseError: The channel is already closed.", 1},
 	}
 
@@ -52,8 +52,8 @@ func TestChannelReceiveFail(t *testing.T) {
 
 func TestChannelDeliverFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`c = Channel.new; c.deliver`, "ArgumentError: Expect 1 arguments. got: 0", 1},
-		{`c = Channel.new; c.deliver 1, 2`, "ArgumentError: Expect 1 arguments. got: 2", 1},
+		{`c = Channel.new; c.deliver`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+		{`c = Channel.new; c.deliver 1, 2`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
 		{`c = Channel.new; c.close; c.deliver 1`, "ChannelCloseError: The channel is already closed.", 1},
 	}
 
