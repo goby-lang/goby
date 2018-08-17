@@ -22,7 +22,7 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 			Name: "get",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				if len(args) != 1 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 1, len(args))
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
 				u, ok := args[0].(*StringObject)
@@ -48,7 +48,7 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 			Name: "post",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				if len(args) != 3 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 3, len(args))
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 3, len(args))
 				}
 
 				u, ok := args[0].(*StringObject)
@@ -86,7 +86,7 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 			Name: "head",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				if len(args) != 1 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 1, len(args))
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
 				u, ok := args[0].(*StringObject)
@@ -119,7 +119,7 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 			Name: "exec",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				if len(args) != 1 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 1, len(args))
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
 				if args[0].Class().Name != httpRequestClass.Name {

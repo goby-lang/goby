@@ -30,7 +30,7 @@ var staticResult = new(Result)
 func bindingResultNew(receiver vm.Object, line int, t *vm.Thread, args []vm.Object) vm.Object {
 	r := staticResult
 	if len(args) != 2 {
-		return t.VM().InitErrorObject(errors.ArgumentError, line, errors.WrongNumberOfArgumentFormat, 2, len(args))
+		return t.VM().InitErrorObject(errors.ArgumentError, line, errors.WrongNumberOfArgument, 2, len(args))
 	}
 	arg0, ok := args[0].(Object)
 	if !ok {
@@ -49,7 +49,7 @@ func bindingResultNew(receiver vm.Object, line int, t *vm.Thread, args []vm.Obje
 func bindingResultEmpty(receiver vm.Object, line int, t *vm.Thread, args []vm.Object) vm.Object {
 	r := staticResult
 	if len(args) != 0 {
-		return t.VM().InitErrorObject(errors.ArgumentError, line, errors.WrongNumberOfArgumentFormat, 0, len(args))
+		return t.VM().InitErrorObject(errors.ArgumentError, line, errors.WrongNumberOfArgument, 0, len(args))
 	}
 	return r.Empty(t)
 }
@@ -61,7 +61,7 @@ func bindingResultMethodMissing(receiver vm.Object, line int, t *vm.Thread, args
 		panic(fmt.Sprintf("Impossible receiver type. Wanted Result got %s", receiver))
 	}
 	if len(args) != 1 {
-		return t.VM().InitErrorObject(errors.ArgumentError, line, errors.WrongNumberOfArgumentFormat, 1, len(args))
+		return t.VM().InitErrorObject(errors.ArgumentError, line, errors.WrongNumberOfArgument, 1, len(args))
 	}
 	arg0, ok := args[0].(Object)
 	if !ok {
@@ -78,7 +78,7 @@ func bindingResultOr(receiver vm.Object, line int, t *vm.Thread, args []vm.Objec
 		panic(fmt.Sprintf("Impossible receiver type. Wanted Result got %s", receiver))
 	}
 	if len(args) != 0 {
-		return t.VM().InitErrorObject(errors.ArgumentError, line, errors.WrongNumberOfArgumentFormat, 0, len(args))
+		return t.VM().InitErrorObject(errors.ArgumentError, line, errors.WrongNumberOfArgument, 0, len(args))
 	}
 	return r.Or(t)
 }

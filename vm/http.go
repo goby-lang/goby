@@ -68,7 +68,7 @@ func builtinHTTPClassMethods() []*BuiltinMethodObject {
 			Name: "post",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				if len(args) != 3 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentFormat, 3, len(args))
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 3, len(args))
 				}
 
 				arg0, ok := args[0].(*StringObject)

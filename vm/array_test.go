@@ -12,7 +12,7 @@ func TestArrayClassSuperclass(t *testing.T) {
 		{`Array.class.name`, "Class"},
 		{`Array.superclass.name`, "Object"},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -26,16 +26,16 @@ func TestArrayEvaluation(t *testing.T) {
 	input := `
 	[1, "234", true]
 	`
-
+	
 	vm := initTestVM()
 	evaluated := vm.testEval(t, input, getFilename())
 	vm.checkCFP(t, 0, 0)
-
+	
 	arr, ok := evaluated.(*ArrayObject)
 	if !ok {
 		t.Fatalf("Expect evaluated value to be an array. got=%T", evaluated)
 	}
-
+	
 	VerifyExpected(t, 0, arr.Elements[0], 1)
 	VerifyExpected(t, 0, arr.Elements[1], "234")
 	VerifyExpected(t, 0, arr.Elements[2], true)
@@ -73,7 +73,7 @@ func TestArrayComparison(t *testing.T) {
 		{`[1, { a: 1, b: 2 }, "Goby" ] != [1, { a: 2, b: 2, a: 1 }, "Goby"]`, false}, // Array of hash key will be overwritten if duplicated
 		{`[1, "String", true, 2..5] != Integer`, true},
 	}
-
+	
 	for i, tt := range tests {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input, getFilename())
@@ -146,7 +146,7 @@ func TestArrayIndex(t *testing.T) {
 			code.to_s
 		`, `[nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "Continue", "Switching Protocols", "Processing", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "OK"]`},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -166,7 +166,7 @@ func TestArrayIndexFail(t *testing.T) {
 		    [1, "a", 10, "b"][-5]
 		`, "ArgumentError: Index value -5 too small for array. minimum: -4", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -338,7 +338,7 @@ func TestArrayIndexWithSuccessiveValues(t *testing.T) {
 			a
 		`, []interface{}{1, 2, 3, 4, 5, nil, nil, nil, nil, nil, "@Maxwell-Alexius is solving issue #403 which have tons of feature"}},
 	}
-
+	
 	for i, tt := range tests {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input, getFilename())
@@ -358,7 +358,7 @@ func TestArrayIndexWithSuccessiveValuesNullCases(t *testing.T) {
 			a[6, 5] # Range exceeded
 		`, nil},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -381,15 +381,15 @@ func TestArrayIndexWithSuccessiveValuesFail(t *testing.T) {
 		{`
 			a = [1, 2, 3, 4, 5]
 			a[1, 3, 5]
-		`, "ArgumentError: Expect 1..2 arguments. got=3", 1},
+		`, "ArgumentError: Expect 1 to 2 argument(s). got: 3", 1},
 		{`
 			a = [1, 2, 3, 4, 5]
 			a[1, 3, 5, 7, 9]
-		`, "ArgumentError: Expect 1..2 arguments. got=5", 1},
+		`, "ArgumentError: Expect 1 to 2 argument(s). got: 5", 1},
 		{`
 			a = [1, 2, 3, 4, 5]
 			a[]
-		`, "ArgumentError: Expect 1..2 arguments. got=0", 1},
+		`, "ArgumentError: Expect 1 to 2 argument(s). got: 0", 1},
 		{`
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[1, "5"] = 6
@@ -397,7 +397,7 @@ func TestArrayIndexWithSuccessiveValuesFail(t *testing.T) {
 		{`
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[1, "5", 6] = 123
-		`, "ArgumentError: Expect 2..3 arguments. got=4", 1},
+		`, "ArgumentError: Expect 2 to 3 argument(s). got: 4", 1},
 		{`
 			a = [1, 2, 3, 4, 5]
 			a[-6, 5]
@@ -405,15 +405,15 @@ func TestArrayIndexWithSuccessiveValuesFail(t *testing.T) {
 		{`
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[1, -3] = [1, 2, 3, 4, 5]
-		`, "ArgumentError: Expect second argument greater than or equal 0. got: -3", 1},
+		`, "ArgumentError: Expect second argument to be positive value. got: -3", 1},
 		{`
 			a = [1, 2, 3, 4, 5]
 			a[-1, -1] = 555
-		`, "ArgumentError: Expect second argument greater than or equal 0. got: -1", 1},
+		`, "ArgumentError: Expect second argument to be positive value. got: -1", 1},
 		{`
 			a = [1, 2, 3, 4, 5]
 			a[6, -1] = 555
-		`, "ArgumentError: Expect second argument greater than or equal 0. got: -1", 1},
+		`, "ArgumentError: Expect second argument to be positive value. got: -1", 1},
 		{`
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[-11, 2] = [1, 2, 3, 4, 5]
@@ -421,13 +421,13 @@ func TestArrayIndexWithSuccessiveValuesFail(t *testing.T) {
 		{`
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[3, -1]
-		`, "ArgumentError: Expect second argument greater than or equal 0. got: -1", 1},
+		`, "ArgumentError: Expect second argument to be positive value. got: -1", 1},
 		{`
 			a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 			a[-1, -4] # Both negative case
-		`, "ArgumentError: Expect second argument greater than or equal 0. got: -4", 1},
+		`, "ArgumentError: Expect second argument to be positive value. got: -4", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -481,7 +481,7 @@ func TestArrayAnyMethod(t *testing.T) {
 			[].any? do |i| end
 		`, false},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -495,7 +495,7 @@ func TestArrayAnyMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`[].any?`, "InternalError: Can't yield without a block", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -540,7 +540,7 @@ func TestArrayAtMethod(t *testing.T) {
 			a.at(0)
 		`, 55},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -552,13 +552,13 @@ func TestArrayAtMethod(t *testing.T) {
 
 func TestArrayAtMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2, 3].at`, "ArgumentError: Expect 1 arguments. got=0", 1},
-		{`[1, 2, 3].at(2, 3)`, "ArgumentError: Expect 1 arguments. got=2", 1},
+		{`[1, 2, 3].at`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+		{`[1, 2, 3].at(2, 3)`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
 		{`[1, 2, 3].at(true)`, "TypeError: Expect argument to be Integer. got: Boolean", 1},
 		{`[1, 2, 3].at(1..3)`, "TypeError: Expect argument to be Integer. got: Range", 1},
 		{`[1, "a", 10, 5].at(-5)`, "ArgumentError: Index value -5 too small for array. minimum: -4", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -582,7 +582,7 @@ func TestArrayClearMethod(t *testing.T) {
 		a.clear
 		`, []interface{}{}},
 	}
-
+	
 	for i, tt := range tests {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input, getFilename())
@@ -594,10 +594,10 @@ func TestArrayClearMethod(t *testing.T) {
 
 func TestArrayClearMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`['Maxwell', 'Alexius'].clear(123)`, "ArgumentError: Expect 0 argument. got=1", 1},
-		{`['Taipei', 101].clear(1, 0, 1)`, "ArgumentError: Expect 0 argument. got=3", 1},
+		{`['Maxwell', 'Alexius'].clear(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		{`['Taipei', 101].clear(1, 0, 1)`, "ArgumentError: Expect 0 argument(s). got: 3", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -625,7 +625,7 @@ func TestArrayConcatMethod(t *testing.T) {
 		a.concat()
 		`, []interface{}{1, 2}},
 	}
-
+	
 	for i, tt := range tests {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input, getFilename())
@@ -644,7 +644,7 @@ func TestArrayConcatMethodFail(t *testing.T) {
 		a.concat("a")
 		`, "TypeError: Expect argument to be Array. got: String", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -714,7 +714,7 @@ func TestArrayCountMethod(t *testing.T) {
 		end
 		`, 0},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -729,9 +729,9 @@ func TestArrayCountMethodFail(t *testing.T) {
 		{
 			`a = [1, 2]
 		a.count(3, 3)
-		`, "ArgumentError: Expect 1 argument, got=2", 1},
+		`, "ArgumentError: Expect 1 or less argument(s). got: 2", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -765,7 +765,7 @@ func TestArrayDeleteAtMethod(t *testing.T) {
 			[1, "a", 10, 5].delete_at(-5)
 		`, nil},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -773,7 +773,7 @@ func TestArrayDeleteAtMethod(t *testing.T) {
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
-
+	
 	testsArray := []struct {
 		input    string
 		expected []interface{}
@@ -800,7 +800,7 @@ func TestArrayDeleteAtMethod(t *testing.T) {
 			a
 		`, []interface{}{1, "a", 10, 5}},
 	}
-
+	
 	for i, tt := range testsArray {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input, getFilename())
@@ -812,12 +812,12 @@ func TestArrayDeleteAtMethod(t *testing.T) {
 
 func TestArrayDeleteAtMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2, 3].delete_at`, "ArgumentError: Expect 1 argument. got=0", 1},
-		{`[1, 2, 3].delete_at(2, 3)`, "ArgumentError: Expect 1 argument. got=2", 1},
+		{`[1, 2, 3].delete_at`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+		{`[1, 2, 3].delete_at(2, 3)`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
 		{`[1, 2, 3].delete_at(true)`, "TypeError: Expect argument to be Integer. got: Boolean", 1},
 		{`[1, 2, 3].delete_at(1..3)`, "TypeError: Expect argument to be Integer. got: Range", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -846,7 +846,7 @@ func TestArrayDigMethod(t *testing.T) {
 		`, nil},
 		{`[[1, 2, [3, [8, [9]]]], 4, 5].dig(0, 2, 1, 1, 0)`, 9},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -858,10 +858,10 @@ func TestArrayDigMethod(t *testing.T) {
 
 func TestArrayDigMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2].dig`, "ArgumentError: Expected 1+ arguments, got 0", 1},
+		{`[1, 2].dig`, "ArgumentError: Expect 1 or more argument(s). got: 0", 1},
 		{`[1, 2].dig(0, 1)`, "TypeError: Expect target to be Diggable, got Integer", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -912,7 +912,7 @@ func TestArrayEachMethod(t *testing.T) {
 		a.length
 		`, 0},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -929,9 +929,9 @@ func TestArrayEachMethodFail(t *testing.T) {
 		['T', 'A', 'I', 'P', 'E', 'I'].each(101) do |char|
 		  puts char
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 1},
+		`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -982,7 +982,7 @@ func TestArrayEachIndexMethod(t *testing.T) {
 		a.length
 		`, 0},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -999,9 +999,9 @@ func TestArrayEachIndexMethodFail(t *testing.T) {
 		['T', 'A', 'I', 'P', 'E', 'I'].each_index(101) do |char|
 		  puts char
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 1},
+		`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1034,7 +1034,7 @@ func TestArrayEmptyMethod(t *testing.T) {
 			a.empty?
 			`, false},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1046,10 +1046,10 @@ func TestArrayEmptyMethod(t *testing.T) {
 
 func TestArrayEmptyMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2, 3].empty?(123)`, "ArgumentError: Expect 0 argument. got=1", 1},
-		{`['T', 'A', 'I', 'P', 'E', 'I'].empty?(1, 0, 1)`, "ArgumentError: Expect 0 argument. got=3", 1},
+		{`[1, 2, 3].empty?(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		{`['T', 'A', 'I', 'P', 'E', 'I'].empty?(1, 0, 1)`, "ArgumentError: Expect 0 argument(s). got: 3", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1073,14 +1073,14 @@ func TestArrayFirstMethod(t *testing.T) {
 			"apple",
 		},
 	}
-
+	
 	for i, tt := range testsInt {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 	}
-
+	
 	testsArray := []struct {
 		input    string
 		expected []interface{}
@@ -1100,7 +1100,7 @@ func TestArrayFirstMethod(t *testing.T) {
 		a = ["M", "A", "X", "W", "E", "L", "L"]
 		a.first(11)`, []interface{}{"M", "A", "X", "W", "E", "L", "L"}},
 	}
-
+	
 	for i, tt := range testsArray {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1120,7 +1120,7 @@ func TestArrayFirstMethodNullCases(t *testing.T) {
 			a.first # Empty Array Case
 		`, nil},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1137,12 +1137,12 @@ func TestArrayFirstMethodFail(t *testing.T) {
 		`, "TypeError: Expect argument to be Integer. got: String", 1},
 		{`a = [1, 2]
 		a.first(1, 2, 3)
-		`, "ArgumentError: Expect 0..1 argument. got=3", 1},
+		`, "ArgumentError: Expect 1 or less argument(s). got: 3", 1},
 		{`a = [1, 2]
 		a.first(-1)
 		`, "ArgumentError: Expect argument to be positive value. got: -1", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1170,7 +1170,7 @@ func TestArrayFlattenMethod(t *testing.T) {
 		[[[1, 2], [[[3, 4]], [5, 6]]]].flatten
 		`, []interface{}{1, 2, 3, 4, 5, 6}},
 	}
-
+	
 	for i, tt := range testsArray {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input, getFilename())
@@ -1184,9 +1184,9 @@ func TestArrayFlattenMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = [1, 2]
 		a.flatten(1)
-		`, "ArgumentError: Expect 0 argument. got=1", 1},
+		`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1208,7 +1208,7 @@ func TestArrayIncludeMethod(t *testing.T) {
 			a.include?("d")
 		`, false},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1238,7 +1238,7 @@ func TestArrayJoinMethod(t *testing.T) {
 		{`[[:h, :e, :l], [[:l], :o]].join`, "hello"},
 		{`[[:hello],{k: :v}].join `, `hello{ k: "v" }`},
 	}
-
+	
 	for i, tt := range testsInt {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1252,12 +1252,12 @@ func TestArrayJoinMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = [1, 2]
 		a.join(",", "-")
-		`, "ArgumentError: Expect 0 or 1 argument. got=2", 1},
+		`, "ArgumentError: Expect 0 to 1 argument(s). got: 2", 1},
 		{`a = [1, 2]
 		a.join(1)
 		`, "TypeError: Expect argument to be String. got: Integer", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1289,7 +1289,7 @@ func TestArrayLastMethod(t *testing.T) {
 		a.last(10)
 		`, []interface{}{"M", "A", "X", "W", "E", "L", "L"}},
 	}
-
+	
 	for i, tt := range testsArray {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input, getFilename())
@@ -1306,12 +1306,12 @@ func TestArrayLastMethodFail(t *testing.T) {
 		`, "TypeError: Expect argument to be Integer. got: String", 1},
 		{`a = [1, 2]
 		a.last(1, 2, 3)
-		`, "ArgumentError: Expect 0..1 argument. got=3", 1},
+		`, "ArgumentError: Expect 1 or less argument(s). got: 3", 1},
 		{`a = [1, 2]
 		a.last(-1)
 		`, "ArgumentError: Expect argument to be positive value. got: -1", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1344,7 +1344,7 @@ func TestArrayLengthMethod(t *testing.T) {
 			a.length
 			`, 6},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1356,9 +1356,9 @@ func TestArrayLengthMethod(t *testing.T) {
 
 func TestArrayLengthMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2, 3].length(10)`, "ArgumentError: Expect 0 argument. got=1", 1},
+		{`[1, 2, 3].length(10)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1417,7 +1417,7 @@ func TestArrayMapMethod(t *testing.T) {
 		i + "s"
  		end`, []interface{}{"apples", "oranges", "lemons", "grapes"}},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1447,7 +1447,7 @@ func TestArrayPlusOperator(t *testing.T) {
 			a + b
 		`, []interface{}{}},
 	}
-
+	
 	for i, tt := range tests {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input, getFilename())
@@ -1461,7 +1461,7 @@ func TestArrayPlusOperatorFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`[1, 2] + true`, "TypeError: Expect argument to be Array. got: Boolean", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1492,7 +1492,7 @@ func TestArrayPopMethod(t *testing.T) {
 			[].pop
 		`, nil},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1504,10 +1504,10 @@ func TestArrayPopMethod(t *testing.T) {
 
 func TestArrayPopMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2, 3, 4, 5].pop(123)`, "ArgumentError: Expect 0 argument. got=1", 1},
-		{`[1, 2, 3, 4, 5].pop("Hello", "World")`, "ArgumentError: Expect 0 argument. got=2", 1},
+		{`[1, 2, 3, 4, 5].pop(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		{`[1, 2, 3, 4, 5].pop("Hello", "World")`, "ArgumentError: Expect 0 argument(s). got: 2", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1555,7 +1555,7 @@ func TestArrayPushMethod(t *testing.T) {
 			[].push(nil, "", '').to_s
 	`, `[nil, "", ""]`},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1633,7 +1633,7 @@ func TestArrayReduceMethod(t *testing.T) {
 		a.nil?
 		`, true},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1652,9 +1652,9 @@ func TestArrayReduceMethodFail(t *testing.T) {
 		a.reduce(1, 2) do |prev, n|
 			prev + n
 		end
-		`, "ArgumentError: Expect 0 or 1 argument. got=2", 1},
+		`, "ArgumentError: Expect 1 or less argument(s). got: 2", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1678,7 +1678,7 @@ func TestArrayReverseMethod(t *testing.T) {
 		a.reverse
 		`, []interface{}{}},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1690,10 +1690,10 @@ func TestArrayReverseMethod(t *testing.T) {
 
 func TestArrayReverseMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2, 3, 4, 5].reverse(123)`, "ArgumentError: Expect 0 argument. got=1", 1},
-		{`[1, 2, 3, 4, 5].reverse("Hello", "World")`, "ArgumentError: Expect 0 argument. got=2", 1},
+		{`[1, 2, 3, 4, 5].reverse(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		{`[1, 2, 3, 4, 5].reverse("Hello", "World")`, "ArgumentError: Expect 0 argument(s). got: 2", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1740,7 +1740,7 @@ func TestArrayReverseEachMethod(t *testing.T) {
 		a.to_s
 		`, `[]`},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1757,9 +1757,9 @@ func TestArrayReverseEachMethodFail(t *testing.T) {
 		['T', 'A'].reverse_each(101) do |char|
 		  puts char
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 1},
+		`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1791,7 +1791,7 @@ func TestArrayRotateMethod(t *testing.T) {
 		a.rotate(-1)
 		`, []interface{}{4, 1, 2, 3}},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1807,9 +1807,9 @@ func TestArrayRotateMethodFail(t *testing.T) {
 		a.rotate("a")
 		`, "TypeError: Expect argument to be Integer. got: String", 1},
 		{`a = [1, 2]
-		a.rotate(1, 2, 3)`, "ArgumentError: Expect 0..1 argument. got=3", 1},
+		a.rotate(1, 2, 3)`, "ArgumentError: Expect 1 or less argument(s). got: 3", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1861,7 +1861,7 @@ func TestArraySelectMethod(t *testing.T) {
 		[].select do |i|; end
 		`, []interface{}{}},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1873,10 +1873,10 @@ func TestArraySelectMethod(t *testing.T) {
 
 func TestArraySelectMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`[1, 2].select(1)`, "ArgumentError: Expect 0 argument. got=1", 1},
+		{`[1, 2].select(1)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
 		{`[1, 2, 3, 4, 5].select`, "InternalError: Can't yield without a block", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1907,7 +1907,7 @@ func TestArrayShiftMethod(t *testing.T) {
 				[].shift
 			`, nil},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1921,6 +1921,54 @@ func TestArrayShiftMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`a = [1, 2]
 		a.shift(3, 3, 4, 5)
+		`,
+			"ArgumentError: Expect 0 argument(s). got: 4", 1},
+	}
+	
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArraySortMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+		[5,4,3,2,1].sort
+		`, []interface{}{1, 2, 3, 4, 5}},
+		{`
+		[5,4,1,2,3].sort
+		`, []interface{}{1, 2, 3, 4, 5}},
+		{`
+		[5,4.5,1.6,2.2,3].sort
+		`, []interface{}{1.6, 2.2, 3, 4.5, 5}},
+		{`
+		["efg", "abc"].sort
+		`, []interface{}{"abc", "efg"}},
+		{`
+		["abc", "aaaaaa"].sort
+		`, []interface{}{"aaaaaa", "abc"}},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		verifyArrayObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArraySortMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`a = [1, 2]
+		a.sort(3, 3, 4, 5)
 		`,
 			"ArgumentError: Expect 0 argument. got=4", 1},
 	}
@@ -1958,7 +2006,7 @@ func TestArrayStarMethod(t *testing.T) {
 			a * 2
 		`, []interface{}{}},
 	}
-
+	
 	for i, tt := range tests {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input, getFilename())
@@ -1972,7 +2020,7 @@ func TestArrayStarMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`[1, 2] * nil`, "TypeError: Expect argument to be Integer. got: Null", 1},
 	}
-
+	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1994,9 +2042,9 @@ func TestArrayToEnumMethod(t *testing.T) {
 
 	iterated_values
 	`
-
+	
 	expected := []interface{}{1, 2, 4}
-
+	
 	v := initTestVM()
 	evaluated := v.testEval(t, input, getFilename())
 	verifyArrayObject(t, i, evaluated, expected)
@@ -2049,7 +2097,7 @@ func TestArrayUnshiftMethod(t *testing.T) {
 			a[2]
 			`, "foo"},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -2085,7 +2133,7 @@ func TestArrayValuesAtMethod(t *testing.T) {
 			a.values_at(1, -1)
 			`, []interface{}{nil, nil}},
 	}
-
+	
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -2115,4 +2163,20 @@ func TestArrayInspectCallsChildElementToString(t *testing.T) {
 	VerifyExpected(t, i, evaluated, expected)
 	vm.checkCFP(t, i, 0)
 	vm.checkSP(t, i, 1)
+}
+
+func TestArrayValuesAtMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`a = ["a", "b", "c"]
+			a.values_at("-")
+		`, "TypeError: Expect argument to be Integer. got: String", 1},
+	}
+	
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
 }

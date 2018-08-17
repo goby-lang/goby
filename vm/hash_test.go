@@ -1045,8 +1045,8 @@ func TestHashKeysMethod(t *testing.T) {
 	arr, ok := evaluated.(*ArrayObject)
 	if !ok {
 		t.Fatalf("Expect evaluated value to be Array. got: %T", evaluated)
-	} else if arr.length() != 3 {
-		t.Fatalf("Expect evaluated array length to be 3. got: %d", arr.length())
+	} else if arr.Len() != 3 {
+		t.Fatalf("Expect evaluated array length to be 3. got: %d", arr.Len())
 	}
 
 	var evaluatedArr []string
@@ -1391,8 +1391,8 @@ func TestHashToArrayMethod(t *testing.T) {
 	arr, ok := evaluated.(*ArrayObject)
 	if !ok {
 		t.Fatalf("Expect evaluated value to be Array. got: %T", evaluated)
-	} else if arr.length() != 4 {
-		t.Fatalf("Expect evaluated array length to be 4. got: %d", arr.length())
+	} else if arr.Len() != 4 {
+		t.Fatalf("Expect evaluated array length to be 4. got: %d", arr.Len())
 	}
 
 	evaluatedArr := make(map[string]Object)
@@ -1811,8 +1811,8 @@ func TestHashValuesMethod(t *testing.T) {
 	arr, ok := evaluated.(*ArrayObject)
 	if !ok {
 		t.Fatalf("Expect evaluated value to be Array. got: %T", evaluated)
-	} else if arr.length() != 4 {
-		t.Fatalf("Expect evaluated array length to be 4. got: %d", arr.length())
+	} else if arr.Len() != 4 {
+		t.Fatalf("Expect evaluated array length to be 4. got: %d", arr.Len())
 	}
 
 	for _, v := range arr.Elements {

@@ -98,7 +98,7 @@ func TestHTTPRequestFail(t *testing.T) {
 		require "net/http"
 
 		Net::HTTP.post("http://127.0.0.1:3001", "text/plain", "Let me down", "again")
-		`, "ArgumentError: Expect 3 arguments. got: 4", 1},
+		`, "ArgumentError: Expect 3 argument(s). got: 4", 1},
 		{`
 		require "net/http"
 
