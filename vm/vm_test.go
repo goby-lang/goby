@@ -217,6 +217,26 @@ func TestVM_REPLExecFail(t *testing.T) {
 	}
 }
 
+func TestAutoIncrementLocalVariable(t *testing.T) {
+	input := `
+		a1 = 1
+		a2 = 1
+		a3 = 1
+		a4 = 1
+		a5 = 1
+		# defaults to 5 variables, auto increment must work to set 6th
+		a6 = 10
+		(a1 + a2 + a3 + a4 + a5 + a6).to_s
+	`
+	expected := `15`
+
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input, getFilename())
+	VerifyExpected(t, i, evaluated, expected)
+	vm.checkCFP(t, i, 0)
+	vm.checkSP(t, i, 1)
+}
+
 func TestLoadingGobyLibraryFail(t *testing.T) {
 	vm := initTestVM()
 
