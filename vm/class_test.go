@@ -1604,3 +1604,14 @@ func TestObjectIdMethod(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
+func TestClassInspectCallsToString(t *testing.T) {
+	input := `c = Class.new; c.to_s == c.inspect`
+	expected := true
+
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input, getFilename())
+	VerifyExpected(t, i, evaluated, expected)
+	vm.checkCFP(t, i, 0)
+	vm.checkSP(t, i, 1)
+}

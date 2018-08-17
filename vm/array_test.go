@@ -2095,18 +2095,24 @@ func TestArrayValuesAtMethod(t *testing.T) {
 	}
 }
 
-func TestArrayValuesAtMethodFail(t *testing.T) {
-	testsFail := []errorTestCase{
-		{`a = ["a", "b", "c"]
-			a.values_at("-")
-		`, "TypeError: Expect argument to be Integer. got: String", 1},
-	}
+func TestArrayInspectCallsToString(t *testing.T) {
+	input := `[1, "234", true, nil].to_s == [1, "234", true, nil].inspect`
+	expected := true
 
-	for i, tt := range testsFail {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkErrorMsg(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
-	}
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input, getFilename())
+	VerifyExpected(t, i, evaluated, expected)
+	vm.checkCFP(t, i, 0)
+	vm.checkSP(t, i, 1)
+}
+
+func TestArrayInspectCallsChildElementToString(t *testing.T) {
+	input := `[1, "234", true, nil].inspect`
+	expected := `[1, "234", true, nil]`
+
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input, getFilename())
+	VerifyExpected(t, i, evaluated, expected)
+	vm.checkCFP(t, i, 0)
+	vm.checkSP(t, i, 1)
 }

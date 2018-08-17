@@ -1440,7 +1440,15 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 			Name: "to_s",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				return t.vm.InitStringObject(receiver.ToString())
-
+			},
+		},
+		{
+			// Returns object's inspect representation.
+			// @param n/a []
+			// @return [String] Object's inspect representation.
+			Name: "inspect",
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				return t.vm.InitStringObject(receiver.Inspect())
 			},
 		},
 	}

@@ -1406,7 +1406,7 @@ func TestToStringInspect(t *testing.T) {
 	}
 }
 
-func TestEvalInspectIsCyclical(t *testing.T) {
+func TestStringInspectEvaluatesToOriginalString(t *testing.T) {
 	tests := []struct {
 		input string
 	}{
@@ -1430,9 +1430,9 @@ func TestEvalInspectIsCyclical(t *testing.T) {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		evaluatedInspect := v.testEval(t, fmt.Sprintf("%s.inspect", tt.input), getFilename())
-		evaluatedInspectEvaluetedToString := v.testEval(t, evaluatedInspect.ToString(), getFilename())
+		evaluatedInspectEvaluated := v.testEval(t, evaluatedInspect.ToString(), getFilename())
 		// evaluated string equals evaluated-inspected-evaluated string
-		VerifyExpected(t, i, evaluated, evaluatedInspectEvaluetedToString.ToString())
+		VerifyExpected(t, i, evaluated, evaluatedInspectEvaluated.ToString())
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 3)
 	}
