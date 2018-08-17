@@ -6,6 +6,7 @@ import (
 
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
+	"sort"
 )
 
 // ArrayObject represents an instance from Array class.
@@ -246,7 +247,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					// Negative index value too small
 					if indexValue < 0 {
 						if arr.normalizeIndex(index) == -1 {
-							return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.TooSmallIndexValue, indexValue, -arr.length())
+							return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.TooSmallIndexValue, indexValue, -arr.Len())
 						}
 						indexValue = arr.normalizeIndex(index)
 					}
@@ -269,9 +270,9 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					assignedValue, isArray := a.(*ArrayObject)
 
 					// Expand the array with nil; the second index is unnecessary in the case
-					if indexValue >= arr.length() {
+					if indexValue >= arr.Len() {
 
-						for arr.length() < indexValue {
+						for arr.Len() < indexValue {
 							arr.Elements = append(arr.Elements, NULL)
 						}
 
@@ -285,8 +286,8 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 
 					endValue := indexValue + countValue
 					// the case the addition of index and count is too large
-					if endValue > arr.length() {
-						endValue = arr.length()
+					if endValue > arr.Len() {
+						endValue = arr.Len()
 					}
 
 					arr.Elements = append(arr.Elements[:indexValue], arr.Elements[endValue:]...)
@@ -308,7 +309,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 				// Negative index value condition
 				if indexValue < 0 {
 					if len(arr.Elements) < -indexValue {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.TooSmallIndexValue, indexValue, -arr.length())
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.TooSmallIndexValue, indexValue, -arr.Len())
 					}
 					arr.Elements[len(arr.Elements)+indexValue] = args[1]
 					return arr.Elements[len(arr.Elements)+indexValue]
@@ -735,7 +736,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 				
 				arr := receiver.(*ArrayObject)
 
-				if arr.length() == 0 {
+				if arr.Len() == 0 {
 					return TRUE
 				}
 
@@ -919,7 +920,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 				}
 				
 				arr := receiver.(*ArrayObject)
-				return t.vm.InitIntegerObject(arr.length())
+				return t.vm.InitIntegerObject(arr.Len())
 
 			},
 		},
@@ -1297,6 +1298,28 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Return a sorted array
+			//
+			// ```ruby
+			// a = [3, 2, 1]
+			// a.sort #=> [1, 2, 3]
+			// ```
+			//
+			// @return [Object]
+			Name: "sort",
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+				}
+
+				arr := receiver.(*ArrayObject)
+				newArr := arr.copy().(*ArrayObject)
+				sort.Sort(newArr)
+				return newArr
+
+			},
+		},
+		{
 			// A destructive method.
 			// Inserts one or more arguments at the first position of the array, and then returns the self.
 			//
@@ -1478,7 +1501,7 @@ func (a *ArrayObject) index(t *Thread, args []Object, sourceLine int) Object {
 	
 	i := args[0]
 	index, ok := i.(*IntegerObject)
-	arrLength := a.length()
+	arrLength := a.Len()
 
 	if !ok {
 		return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
@@ -1546,9 +1569,33 @@ func (a *ArrayObject) flatten() []Object {
 	return result
 }
 
-// length returns the length of array's elements
-func (a *ArrayObject) length() int {
+// Len returns the length of array's elements
+func (a *ArrayObject) Len() int {
 	return len(a.Elements)
+}
+
+// Swap is one of the required method to fulfill sortable interface
+func (a *ArrayObject) Swap(i, j int) {
+	a.Elements[i], a.Elements[j] = a.Elements[j], a.Elements[i]
+}
+
+// Less is one of the required method to fulfill sortable interface
+func (a *ArrayObject) Less(i, j int) bool {
+	leftObj, rightObj := a.Elements[i], a.Elements[j]
+	switch leftObj := leftObj.(type) {
+	case Numeric:
+		return leftObj.lessThan(rightObj)
+	case *StringObject:
+		right, ok := rightObj.(*StringObject)
+
+		if ok {
+			return leftObj.value < right.value
+		}
+
+		return false
+	default:
+		return false
+	}
 }
 
 // normalizes the index to the Ruby-style:

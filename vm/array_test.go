@@ -1934,6 +1934,54 @@ func TestArrayShiftMethodFail(t *testing.T) {
 	}
 }
 
+func TestArraySortMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+		[5,4,3,2,1].sort
+		`, []interface{}{1, 2, 3, 4, 5}},
+		{`
+		[5,4,1,2,3].sort
+		`, []interface{}{1, 2, 3, 4, 5}},
+		{`
+		[5,4.5,1.6,2.2,3].sort
+		`, []interface{}{1.6, 2.2, 3, 4.5, 5}},
+		{`
+		["efg", "abc"].sort
+		`, []interface{}{"abc", "efg"}},
+		{`
+		["abc", "aaaaaa"].sort
+		`, []interface{}{"aaaaaa", "abc"}},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		verifyArrayObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArraySortMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`a = [1, 2]
+		a.sort(3, 3, 4, 5)
+		`,
+			"ArgumentError: Expect 0 argument. got=4", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayStarMethod(t *testing.T) {
 	tests := []struct {
 		input    string

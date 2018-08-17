@@ -197,8 +197,12 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 					return leftValue > rightValue
 				}
 
-				return receiver.(*IntegerObject).numericComparison(t, args[0], intComparison, floatComparison, sourceLine)
-
+				switch arg := args[0].(type) {
+				case *IntegerObject, *FloatObject:
+					return toBooleanObject(receiver.(*IntegerObject).numericComparison(args[0], intComparison, floatComparison))
+				default:
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", arg.Class().Name)
+				}
 			},
 		},
 		{
@@ -218,7 +222,12 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 					return leftValue >= rightValue
 				}
 
-				return receiver.(*IntegerObject).numericComparison(t, args[0], intComparison, floatComparison, sourceLine)
+				switch arg := args[0].(type) {
+				case *IntegerObject, *FloatObject:
+					return toBooleanObject(receiver.(*IntegerObject).numericComparison(args[0], intComparison, floatComparison))
+				default:
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", arg.Class().Name)
+				}
 
 			},
 		},
@@ -239,7 +248,12 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 					return leftValue < rightValue
 				}
 
-				return receiver.(*IntegerObject).numericComparison(t, args[0], intComparison, floatComparison, sourceLine)
+				switch arg := args[0].(type) {
+				case *IntegerObject, *FloatObject:
+					return toBooleanObject(receiver.(*IntegerObject).numericComparison(args[0], intComparison, floatComparison))
+				default:
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", arg.Class().Name)
+				}
 
 			},
 		},
@@ -260,7 +274,12 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 					return leftValue <= rightValue
 				}
 
-				return receiver.(*IntegerObject).numericComparison(t, args[0], intComparison, floatComparison, sourceLine)
+				switch arg := args[0].(type) {
+				case *IntegerObject, *FloatObject:
+					return toBooleanObject(receiver.(*IntegerObject).numericComparison(args[0], intComparison, floatComparison))
+				default:
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", arg.Class().Name)
+				}
 
 			},
 		},
@@ -732,12 +751,10 @@ func (i *IntegerObject) equalityTest(rightObject Object) bool {
 // 64-bit floats cover all the 32-bit integers, but since int is defined
 // as *at least* 32 bit, we use two separate functions for safety.
 func (i *IntegerObject) numericComparison(
-	t *Thread,
 	rightObject Object,
 	intComparison func(leftValue int, rightValue int) bool,
 	floatComparison func(leftValue float64, rightValue float64) bool,
-	sourceLine int,
-) Object {
+) bool {
 	switch rightObject.(type) {
 	case *IntegerObject:
 		leftValue := i.value
@@ -745,16 +762,16 @@ func (i *IntegerObject) numericComparison(
 
 		result := intComparison(leftValue, rightValue)
 
-		return toBooleanObject(result)
+		return result
 	case *FloatObject:
 		leftValue := i.floatValue()
 		rightValue := rightObject.(*FloatObject).value
 
 		result := floatComparison(leftValue, rightValue)
 
-		return toBooleanObject(result)
+		return result
 	default:
-		return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
+		return false
 	}
 }
 
@@ -771,4 +788,15 @@ func (i *IntegerObject) ToJSON(t *Thread) string {
 // equal checks if the integer values between receiver and argument are equal
 func (i *IntegerObject) equal(e *IntegerObject) bool {
 	return i.value == e.value
+}
+
+func (i *IntegerObject) lessThan(arg Object) bool {
+	intComparison := func(leftValue int, rightValue int) bool {
+		return leftValue < rightValue
+	}
+	floatComparison := func(leftValue float64, rightValue float64) bool {
+		return leftValue < rightValue
+	}
+
+	return i.numericComparison(arg, intComparison, floatComparison)
 }
