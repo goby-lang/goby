@@ -247,7 +247,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					// Negative index value too small
 					if indexValue < 0 {
 						if arr.normalizeIndex(index) == -1 {
-							return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.TooSmallIndexValue, indexValue, -arr.length())
+							return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.TooSmallIndexValue, indexValue, -arr.Len())
 						}
 						indexValue = arr.normalizeIndex(index)
 					}
@@ -309,7 +309,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 				// Negative index value condition
 				if indexValue < 0 {
 					if len(arr.Elements) < -indexValue {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.TooSmallIndexValue, indexValue, -arr.length())
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.TooSmallIndexValue, indexValue, -arr.Len())
 					}
 					arr.Elements[len(arr.Elements)+indexValue] = args[1]
 					return arr.Elements[len(arr.Elements)+indexValue]
