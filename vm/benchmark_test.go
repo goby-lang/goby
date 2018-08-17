@@ -54,3 +54,25 @@ func BenchmarkBasicMath(b *testing.B) {
 		`)
 	})
 }
+
+func BenchmarkConcurrency(b *testing.B) {
+	b.Run("concurrency", func(b *testing.B) {
+		script := `
+		c = Channel.new
+
+		1001.times do |i| # i start from 0 to 1000
+		  thread do
+		  	c.deliver(i)
+		  end
+		end
+
+		r = 0
+		1001.times do
+		  r = r + c.receive
+		end
+
+		r
+`
+		runBench(b, script)
+	})
+}

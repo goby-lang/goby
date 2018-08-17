@@ -10,6 +10,7 @@ import (
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
 	"strings"
+	"fmt"
 )
 
 // Ripper is a loadable library and has abilities to parse/lex/tokenize/get instructions of Goby codes from String.
@@ -217,20 +218,20 @@ func convertToTuple(instSet []*bytecode.InstructionSet, v *VM) *ArrayObject {
 		arrayInst := []Object{}
 		for _, ins := range instruction.Instructions {
 			hashInstLevel2 := make(map[string]Object)
-			hashInstLevel2["action"] = v.InitStringObject(ins.Action)
+			hashInstLevel2["action"] = v.InitStringObject(ins.ActionName())
 			hashInstLevel2["line"] = v.InitIntegerObject(ins.Line())
 			hashInstLevel2["source_line"] = v.InitIntegerObject(ins.SourceLine())
-			anchor, _ := ins.AnchorLine()
+			anchor := ins.AnchorLine()
 			hashInstLevel2["anchor"] = v.InitIntegerObject(anchor)
 			
 			arrayParams := []Object{}
 			for _, param := range ins.Params {
-				arrayParams = append(arrayParams, v.InitStringObject(param))
+				arrayParams = append(arrayParams, v.InitStringObject(covertTypesToString(param)))
 			}
 			hashInstLevel2["params"] = v.InitArrayObject(arrayParams)
 			
-			if ins.ArgSet != nil {
-				hashInstLevel1["arg_set"] = getArgNameType(ins.ArgSet, v)
+			if ins.Opcode == bytecode.Send {
+				hashInstLevel1["arg_set"] = getArgNameType(ins.Params[3].(*bytecode.ArgSet), v)
 			}
 			
 			arrayInst = append(arrayInst, v.InitHashObject(hashInstLevel2))
@@ -253,7 +254,7 @@ func getArgNameType(argSet *bytecode.ArgSet, v *VM) *HashObject {
 	
 	aType := []Object{}
 	for _, argtype := range argSet.Types() {
-		aType = append(aType, v.InitIntegerObject(argtype))
+		aType = append(aType, v.InitIntegerObject(int(argtype)))
 	}
 	
 	h["types"] = v.InitArrayObject(aType)
@@ -337,4 +338,8 @@ func convertLex(t token.Type) string {
 	}
 	
 	return "on_" + s
+}
+
+func covertTypesToString(v interface{}) string {
+	return fmt.Sprint(v)
 }
