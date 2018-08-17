@@ -32,6 +32,7 @@ const (
 	WrongNumberOfArgumentLess   = "Expect %d or less argument(s). got: %d"
 	WrongNumberOfArgumentRange  = "Expect %d to %d argument(s). got: %d"
 	WrongArgumentTypeFormat     = "Expect argument to be %s. got: %s"
+	WrongArgumentTypeFormatNum     = "Expect argument #%d to be %s. got: %s"
 	CantYieldWithoutBlockFormat = "Can't yield without a block"
 	DividedByZero               = "Divided by 0"
 	ChannelIsClosed             = "The channel is already closed."

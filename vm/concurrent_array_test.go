@@ -117,6 +117,10 @@ func TestConcurrentArrayIndexFail(t *testing.T) {
 		require 'concurrent/array'
 		Concurrent::Array.new([1, "a", 10, "b"])[-5]
 		`, "ArgumentError: Index value -5 too small for array. minimum: -4", 1},
+		{`
+		require 'concurrent/array'
+		Concurrent::Array.new([1, "a", 10, "b"], 1)[-5]
+		`, "ArgumentError: Expect 1 or less argument(s). got: 2", 1},
 	}
 
 	for i, tt := range testsFail {

@@ -51,6 +51,10 @@ func builtinNullInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_i",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if e, aLen := 0, len(args); e != aLen {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				}
+				
 				return t.vm.InitIntegerObject(0)
 
 			},
@@ -59,8 +63,8 @@ func builtinNullInstanceMethods() []*BuiltinMethodObject {
 			Name: "to_s",
 
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
+				if e, aLen := 0, len(args); e != aLen {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
 				}
 
 				n := receiver.(*NullObject)

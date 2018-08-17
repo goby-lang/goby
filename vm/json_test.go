@@ -34,6 +34,22 @@ func TestJSONValidateMethod(t *testing.T) {
 	}
 }
 
+func TestJSONValidateFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`require "json";JSON.validate`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+		{`require "json";JSON.validate('{"Name": "Stan"}', '{"Name": "hachi8833"}')`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
+		{`require "json";JSON.validate(1)`, "TypeError: Expect argument to be String. got: Integer", 1},
+	}
+	
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestJSONObjectParsing(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -75,6 +91,22 @@ func TestJSONObjectParsing(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestJSONParseFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`require "json";JSON.parse`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+		{`require "json";JSON.parse('{"Name": "Stan"}', '{"Name": "hachi8833"}')`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
+		{`require "json";JSON.parse(1)`, "TypeError: Expect argument to be String. got: Integer", 1},
+	}
+	
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -127,3 +159,4 @@ func TestJSONObjectArrayParsing(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+

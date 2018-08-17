@@ -567,7 +567,7 @@ func TestRangeMapMethodFail(t *testing.T) {
 		{
 			`
 			(1..10).map(1) do |x| x * x; end
-		`, "ArgumentError: Expect 0 argument. got=1", 2},
+		`, "ArgumentError: Expect 0 argument(s). got: 1", 2},
 	}
 
 	for i, tt := range testsFail {

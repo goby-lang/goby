@@ -492,7 +492,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			Name: "count",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				aLen := len(args)
-				if 	u := 1; u < aLen {
+				if u := 1; u < aLen {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentLess, u, aLen)
 				}
 
@@ -611,7 +611,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			// @return [Object]
 			Name: "dig",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if 	l, aLen := 1, len(args); l > aLen {
+				if l, aLen := 1, len(args); l > aLen {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentMore, l, aLen)
 				}
 				
@@ -759,7 +759,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			Name: "first",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				aLen := len(args)
-				if 	u := 1; u < aLen {
+				if u := 1; u < aLen {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentLess, u, aLen)
 				}
 				
@@ -876,7 +876,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			Name: "last",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				aLen := len(args)
-				if 	u := 1; u < aLen {
+				if u := 1; u < aLen {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentLess, u, aLen)
 				}
 
@@ -1059,7 +1059,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			Name: "reduce",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				aLen := len(args)
-				if 	u := 1; u < aLen {
+				if u := 1; u < aLen {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentLess, u, aLen)
 				}
 				if blockFrame == nil {
@@ -1192,7 +1192,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			Name: "rotate",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				aLen := len(args)
-				if 	u := 1; u < aLen {
+				if u := 1; u < aLen {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentLess, u, aLen)
 				}
 				

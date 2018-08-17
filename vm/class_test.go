@@ -171,35 +171,35 @@ func TestClassInstanceVariableFail(t *testing.T) {
 		end
 
 		Bar.instance_variable_get
-		`, "ArgumentError: Expect 1 arguments. got: 0", 1},
+		`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
 		{`
 		class Bar
 		  @foo = 1
 		end
 
 		Bar.instance_variable_get("@foo", 2)
-		`, "ArgumentError: Expect 1 arguments. got: 2", 1},
+		`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
 		{`
 		class Bar
 		  @foo = 1
 		end
 
 		Bar.instance_variable_set
-				`, "ArgumentError: Expect 2 arguments. got: 0", 1},
+				`, "ArgumentError: Expect 2 argument(s). got: 0", 1},
 		{`
 		class Bar
 		  @foo = 1
 		end
 
 		Bar.instance_variable_set("@bar")
-				`, "ArgumentError: Expect 2 arguments. got: 1", 1},
+				`, "ArgumentError: Expect 2 argument(s). got: 1", 1},
 		{`
 		class Bar
 		  @foo = 1
 		end
 
 		Bar.instance_variable_set("@bar", 2, 3)
-				`, "ArgumentError: Expect 2 arguments. got: 3", 1},
+				`, "ArgumentError: Expect 2 argument(s). got: 3", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1132,8 +1132,8 @@ func TestRequireMethod(t *testing.T) {
 func TestRequireMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`require "bar"`, `InternalError: Can't require "bar"`, 1},
-		{`require "db", "json"`, `ArgumentError: Expect 1 argument. got: 2`, 1},
-		{`require_relative "db", "json"`, `ArgumentError: Expect 1 argument. got: 2`, 1},
+		{`require "db", "json"`, `ArgumentError: Expect 1 argument(s). got: 2`, 1},
+		{`require_relative "db", "json"`, `ArgumentError: Expect 1 argument(s). got: 2`, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1186,7 +1186,7 @@ func TestRaiseMethodFail(t *testing.T) {
 		{`raise "Foo", "Bar"`, "ArgumentError: Expect error class, got: String", 1},
 		{`
 		class BarError; end
-		raise BarError, "Foo", "Bar"`, "ArgumentError: Expect at most 2 arguments. got: 3", 1},
+		raise BarError, "Foo", "Bar"`, "ArgumentError: Expect 2 or less argument(s). got: 3", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1198,7 +1198,7 @@ func TestRaiseMethodFail(t *testing.T) {
 	}
 }
 
-func TestResponseToMethod(t *testing.T) {
+func TestRespondToMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected bool
@@ -1228,11 +1228,25 @@ func TestResponseToMethod(t *testing.T) {
 	}
 }
 
+func TestRespondToMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`1.respond_to?`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+	}
+	
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 // With the current framework, only exit() failures can be tested.
 func TestExitMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`exit("abc")`, "TypeError: Expect argument to be Integer. got: String", 1},
-		{`exit(1, 2)`, "ArgumentError: Expected at most 1 argument; got: 2", 1},
+		{`exit(1, 2)`, "ArgumentError: Expect 1 or less argument(s). got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1293,10 +1307,10 @@ func TestGeneralIsAMethod(t *testing.T) {
 
 func TestGeneralIsAMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`123.is_a?`, "ArgumentError: Expect 1 argument. got: 0", 1},
-		{`Class.is_a?`, "ArgumentError: Expect 1 argument. got: 0", 1},
-		{`123.is_a?(123, 456)`, "ArgumentError: Expect 1 argument. got: 2", 1},
-		{`123.is_a?(Integer, String)`, "ArgumentError: Expect 1 argument. got: 2", 1},
+		{`123.is_a?`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+		{`Class.is_a?`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+		{`123.is_a?(123, 456)`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
+		{`123.is_a?(Integer, String)`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
 		{`123.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1},
 		{`Class.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1},
 	}
@@ -1336,11 +1350,11 @@ func TestGeneralIsNilMethod(t *testing.T) {
 
 func TestGeneralIsNilMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`123.nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`"Fail".nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`[1, 2, 3].nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`{ a: 1, b: 2, c: 3 }.nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`(1..10).nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`123.nil?("Hello")`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		{`"Fail".nil?("Hello")`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		{`[1, 2, 3].nil?("Hello")`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		{`{ a: 1, b: 2, c: 3 }.nil?("Hello")`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		{`(1..10).nil?("Hello")`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1381,8 +1395,8 @@ func TestClassNameClassMethodFail(t *testing.T) {
 		{`"Taipei".name`, "NoMethodError: Undefined Method 'name' for Taipei", 1},
 		{`123.name`, "NoMethodError: Undefined Method 'name' for 123", 1},
 		{`true.name`, "NoMethodError: Undefined Method 'name' for true", 1},
-		{`Integer.name(Integer)`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`String.name(Hash, Array)`, "ArgumentError: Expect 0 argument. got: 2", 1},
+		{`Integer.name(Integer)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		{`String.name(Hash, Array)`, "ArgumentError: Expect 0 argument(s). got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1433,8 +1447,8 @@ func TestClassSuperclassClassMethodFail(t *testing.T) {
 		{`"Taipei".superclass`, "NoMethodError: Undefined Method 'superclass' for Taipei", 1},
 		{`123.superclass`, "NoMethodError: Undefined Method 'superclass' for 123", 1},
 		{`true.superclass`, "NoMethodError: Undefined Method 'superclass' for true", 1},
-		{`Integer.superclass(Integer)`, "ArgumentError: Expect 0 argument. got: 1", 1},
-		{`String.superclass(Hash, Array)`, "ArgumentError: Expect 0 argument. got: 2", 1},
+		{`Integer.superclass(Integer)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		{`String.superclass(Hash, Array)`, "ArgumentError: Expect 0 argument(s). got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1550,7 +1564,7 @@ func TestInstanceEvalMethod(t *testing.T) {
 
 func TestInstanceEvalMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"s".instance_eval(1, 1)`, "ArgumentError: Expect at most 1 arguments. got: 2", 1},
+		{`"s".instance_eval(1, 1)`, "ArgumentError: Expect 1 or less argument(s). got: 2", 1},
 		{`"s".instance_eval(true)`, "TypeError: Expect argument to be Block. got: Boolean", 1},
 	}
 
