@@ -128,9 +128,13 @@ func (b *baseFrame) getLCL(index, depth int) (p *Pointer) {
 
 	if depth == 0 {
 		b.RLock()
-		if index < len(b.locals) {
-			p = b.locals[index]
+
+		if index >= len(b.locals) {
+			b.RUnlock()
+			return
 		}
+		p = b.locals[index]
+
 		b.RUnlock()
 		return
 	}
