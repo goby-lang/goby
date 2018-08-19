@@ -28,194 +28,190 @@ type ConcurrentRWLockObject struct {
 }
 
 // Class methods --------------------------------------------------------
-func builtinConcurrentRWLockClassMethods() []*BuiltinMethodObject {
-	return []*BuiltinMethodObject{
-		{
-			Name: "new",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
-				}
+var builtinConcurrentRWLockClassMethods = []*BuiltinMethodObject{
+	{
+		Name: "new",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
+			}
 
-				return t.vm.initConcurrentRWLockObject()
+			return t.vm.initConcurrentRWLockObject()
 
-			},
 		},
-	}
+	},
 }
 
 // Instance methods -----------------------------------------------------
-func builtinConcurrentRWLockInstanceMethods() []*BuiltinMethodObject {
-	return []*BuiltinMethodObject{
-		{
-			// Acquires a read lock.
-			//
-			// ```Ruby
-			// lock = Concurrent::RWLock.new
-			// lock.acquire_read_lock
-			// # critical section
-			// lock.release_read_lock
-			//
-			// @return [nil]
-			// ```
-			Name: "acquire_read_lock",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
-				}
+var builtinConcurrentRWLockInstanceMethods = []*BuiltinMethodObject{
+	{
+		// Acquires a read lock.
+		//
+		// ```Ruby
+		// lock = Concurrent::RWLock.new
+		// lock.acquire_read_lock
+		// # critical section
+		// lock.release_read_lock
+		//
+		// @return [nil]
+		// ```
+		Name: "acquire_read_lock",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
+			}
 
-				lockObject := receiver.(*ConcurrentRWLockObject)
+			lockObject := receiver.(*ConcurrentRWLockObject)
 
-				lockObject.mutex.RLock()
+			lockObject.mutex.RLock()
 
-				return NULL
+			return NULL
 
-			},
 		},
-		{
-			// Acquires a write lock.
-			//
-			// ```Ruby
-			// lock = Concurrent::RWLock.new
-			// lock.acquire_write_lock
-			// # critical section
-			// lock.release_write_lock
-			//
-			// @return [nil]
-			// ```
-			Name: "acquire_write_lock",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
-				}
+	},
+	{
+		// Acquires a write lock.
+		//
+		// ```Ruby
+		// lock = Concurrent::RWLock.new
+		// lock.acquire_write_lock
+		// # critical section
+		// lock.release_write_lock
+		//
+		// @return [nil]
+		// ```
+		Name: "acquire_write_lock",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
+			}
 
-				lockObject := receiver.(*ConcurrentRWLockObject)
+			lockObject := receiver.(*ConcurrentRWLockObject)
 
-				lockObject.mutex.Lock()
+			lockObject.mutex.Lock()
 
-				return NULL
+			return NULL
 
-			},
 		},
-		{
-			// Releases a read lock.
-			//
-			// ```Ruby
-			// lock = Concurrent::RWLock.new
-			// lock.acquire_read_lock
-			// # critical section
-			// lock.release_read_lock
-			//
-			// @return [nil]
-			// ```
-			Name: "release_read_lock",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
-				}
+	},
+	{
+		// Releases a read lock.
+		//
+		// ```Ruby
+		// lock = Concurrent::RWLock.new
+		// lock.acquire_read_lock
+		// # critical section
+		// lock.release_read_lock
+		//
+		// @return [nil]
+		// ```
+		Name: "release_read_lock",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
+			}
 
-				lockObject := receiver.(*ConcurrentRWLockObject)
+			lockObject := receiver.(*ConcurrentRWLockObject)
 
-				lockObject.mutex.RUnlock()
+			lockObject.mutex.RUnlock()
 
-				return NULL
+			return NULL
 
-			},
 		},
-		{
-			// Releases a write lock.
-			//
-			// ```Ruby
-			// lock = Concurrent::RWLock.new
-			// lock.acquire_write_lock
-			// # critical section
-			// lock.release_write_lock
-			//
-			// @return [nil]
-			// ```
-			Name: "release_write_lock",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
-				}
+	},
+	{
+		// Releases a write lock.
+		//
+		// ```Ruby
+		// lock = Concurrent::RWLock.new
+		// lock.acquire_write_lock
+		// # critical section
+		// lock.release_write_lock
+		//
+		// @return [nil]
+		// ```
+		Name: "release_write_lock",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
+			}
 
-				lockObject := receiver.(*ConcurrentRWLockObject)
+			lockObject := receiver.(*ConcurrentRWLockObject)
 
-				lockObject.mutex.Unlock()
+			lockObject.mutex.Unlock()
 
-				return NULL
+			return NULL
 
-			},
 		},
-		{
-			// Executes the block with a read lock.
-			// The lock is freed upon exiting the block.
-			//
-			// ```Ruby
-			// lock = Concurrent::RWLock.new
-			// lock.with_read_lock do
-			//   # critical section
-			// end
-			//
-			// @return [Object] the yielded value of the block.
-			// ```
-			Name: "with_read_lock",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if blockFrame == nil {
-					return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
-				}
+	},
+	{
+		// Executes the block with a read lock.
+		// The lock is freed upon exiting the block.
+		//
+		// ```Ruby
+		// lock = Concurrent::RWLock.new
+		// lock.with_read_lock do
+		//   # critical section
+		// end
+		//
+		// @return [Object] the yielded value of the block.
+		// ```
+		Name: "with_read_lock",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if blockFrame == nil {
+				return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+			}
 
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
-				}
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
+			}
 
-				lockObject := receiver.(*ConcurrentRWLockObject)
+			lockObject := receiver.(*ConcurrentRWLockObject)
 
-				lockObject.mutex.RLock()
+			lockObject.mutex.RLock()
 
-				blockReturnValue := t.builtinMethodYield(blockFrame).Target
+			blockReturnValue := t.builtinMethodYield(blockFrame).Target
 
-				lockObject.mutex.RUnlock()
+			lockObject.mutex.RUnlock()
 
-				return blockReturnValue
+			return blockReturnValue
 
-			},
 		},
-		{
-			// Executes the block with a write lock.
-			// The lock is freed upon exiting the block.
-			//
-			// ```Ruby
-			// lock = Concurrent::RWLock.new
-			// lock.with_write_lock do
-			//   # critical section
-			// end
-			//
-			// @return [Object] the yielded value of the block.
-			// ```
-			Name: "with_write_lock",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if blockFrame == nil {
-					return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
-				}
+	},
+	{
+		// Executes the block with a write lock.
+		// The lock is freed upon exiting the block.
+		//
+		// ```Ruby
+		// lock = Concurrent::RWLock.new
+		// lock.with_write_lock do
+		//   # critical section
+		// end
+		//
+		// @return [Object] the yielded value of the block.
+		// ```
+		Name: "with_write_lock",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if blockFrame == nil {
+				return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+			}
 
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
-				}
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expected 0 arguments, got %d", len(args))
+			}
 
-				lockObject := receiver.(*ConcurrentRWLockObject)
+			lockObject := receiver.(*ConcurrentRWLockObject)
 
-				lockObject.mutex.Lock()
+			lockObject.mutex.Lock()
 
-				blockReturnValue := t.builtinMethodYield(blockFrame).Target
+			blockReturnValue := t.builtinMethodYield(blockFrame).Target
 
-				lockObject.mutex.Unlock()
+			lockObject.mutex.Unlock()
 
-				return blockReturnValue
+			return blockReturnValue
 
-			},
 		},
-	}
+	},
 }
 
 // Internal functions ===================================================
@@ -236,8 +232,8 @@ func initConcurrentRWLockClass(vm *VM) {
 	concurrentModule := vm.loadConstant("Concurrent", true)
 	lockClass := vm.initializeClass("RWLock")
 
-	lockClass.setBuiltinMethods(builtinConcurrentRWLockInstanceMethods(), false)
-	lockClass.setBuiltinMethods(builtinConcurrentRWLockClassMethods(), true)
+	lockClass.setBuiltinMethods(builtinConcurrentRWLockInstanceMethods, false)
+	lockClass.setBuiltinMethods(builtinConcurrentRWLockClassMethods, true)
 
 	concurrentModule.setClassConstant(lockClass)
 }

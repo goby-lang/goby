@@ -26,15 +26,13 @@ var (
 )
 
 // Class methods --------------------------------------------------------
-func builtinBooleanClassMethods() []*BuiltinMethodObject {
-	return []*BuiltinMethodObject{
-		{
-			Name: "new",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				return t.vm.InitNoMethodError(sourceLine, "new", receiver)
-			},
+var builtinBooleanClassMethods = []*BuiltinMethodObject{
+	{
+		Name: "new",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			return t.vm.InitNoMethodError(sourceLine, "new", receiver)
 		},
-	}
+	},
 }
 
 // Internal functions ===================================================
@@ -43,7 +41,7 @@ func builtinBooleanClassMethods() []*BuiltinMethodObject {
 
 func (vm *VM) initBoolClass() *RClass {
 	b := vm.initializeClass(classes.BooleanClass)
-	b.setBuiltinMethods(builtinBooleanClassMethods(), true)
+	b.setBuiltinMethods(builtinBooleanClassMethods, true)
 
 	TRUE = &BooleanObject{value: true, BaseObj: &BaseObj{class: b}}
 	FALSE = &BooleanObject{value: false, BaseObj: &BaseObj{class: b}}
