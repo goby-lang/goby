@@ -69,7 +69,7 @@ func (co *callObject) argPosition() int {
 func (co *callObject) assignNormalArguments(stack []*Pointer) {
 	for i, paramType := range co.paramTypes() {
 		if paramType == bytecode.NormalArg {
-			co.callFrame.insertLCL(i, 0, stack[co.argPosition()].Target)
+			co.callFrame.insertLCL(uint8(i), 0, stack[co.argPosition()].Target)
 			co.argIndex++
 		}
 	}
@@ -92,7 +92,7 @@ func (co *callObject) assignNormalAndOptionedArguments(paramIndex int, stack []*
 	*/
 	for argIndex, at := range co.argTypes() {
 		if co.lastArgIndex < argIndex && (at == bytecode.NormalArg || at == bytecode.OptionedArg) {
-			co.callFrame.insertLCL(paramIndex, 0, stack[co.argPtr()+argIndex].Target)
+			co.callFrame.insertLCL(uint8(paramIndex), 0, stack[co.argPtr()+argIndex].Target)
 
 			// Store latest index value (and compare them to current argument index)
 			// This is to make sure we won't get same argument's index twice.
@@ -109,7 +109,7 @@ func (co *callObject) assignKeywordArguments(stack []*Pointer) (err error) {
 			paramIndex, ok := co.hasKeywordParam(argName)
 
 			if ok {
-				co.callFrame.insertLCL(paramIndex, 0, stack[co.argPtr()+argIndex].Target)
+				co.callFrame.insertLCL(uint8(paramIndex), 0, stack[co.argPtr()+argIndex].Target)
 			} else {
 				err = fmt.Errorf("unknown key %s for method %s", argName, co.methodName())
 			}
@@ -127,7 +127,7 @@ func (co *callObject) assignSplatArgument(stack []*Pointer, arr *ArrayObject) {
 		co.argIndex++
 	}
 
-	co.callFrame.insertLCL(index, 0, arr)
+	co.callFrame.insertLCL(uint8(index), 0, arr)
 }
 
 func (co *callObject) hasKeywordParam(name string) (index int, result bool) {

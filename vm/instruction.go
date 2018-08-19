@@ -59,8 +59,8 @@ func init() {
 			t.Stack.Push(c)
 		},
 		bytecode.GetLocal: func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
-			depth := args[0].(int)
-			index := args[1].(int)
+			depth := args[0].(uint8)
+			index := args[1].(uint8)
 
 			p := cf.getLCL(index, depth)
 
@@ -105,8 +105,8 @@ func init() {
 		bytecode.SetLocal: func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			var optioned bool
 			p := t.Stack.Pop()
-			depth := args[0].(int)
-			index := args[1].(int)
+			depth := args[0].(uint8)
+			index := args[1].(uint8)
 
 			if len(args) > 2 && args[2].(int) == 1 {
 				optioned = true

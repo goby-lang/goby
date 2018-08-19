@@ -246,7 +246,7 @@ func (t *Thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object)
 	c.isBlock = true
 
 	for i := 0; i < len(args); i++ {
-		c.insertLCL(i, 0, args[i])
+		c.insertLCL(uint8(i), 0, args[i])
 	}
 
 	t.callFrameStack.push(c)

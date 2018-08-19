@@ -15,7 +15,7 @@ type baseFrame struct {
 	self   Object
 	locals []*Pointer
 	// local pointer
-	lPr           int
+	lPr           uint8
 	isBlock       bool
 	isSourceBlock bool
 	// for helping stop the frame execution
@@ -36,12 +36,12 @@ type callFrame interface {
 	setAsRemoved()
 	EP() *normalCallFrame
 	Locals() []*Pointer
-	LocalPtr() int
+	LocalPtr() uint8
 	SourceLine() int
 	FileName() string
 
-	getLCL(index, depth int) *Pointer
-	insertLCL(index, depth int, value Object)
+	getLCL(index, depth uint8) *Pointer
+	insertLCL(index, depth uint8, value Object)
 	storeConstant(constName string, constant interface{}) *Pointer
 	lookupConstantUnderAllScope(constName string) *Pointer
 	lookupConstantUnderCurrentScope(constName string) *Pointer
@@ -108,7 +108,7 @@ func (b *baseFrame) Locals() []*Pointer {
 	return b.locals
 }
 
-func (b *baseFrame) LocalPtr() int {
+func (b *baseFrame) LocalPtr() uint8 {
 	return b.lPr
 }
 
@@ -124,12 +124,12 @@ func (b *baseFrame) FileName() string {
 // The main scenario is when multiple threads want to access local variables outside it's block
 // Since they share same block frame, they will all access to that frame's locals.
 // TODO: Find a better way to fix this, or prevent thread from accessing outside locals.
-func (b *baseFrame) getLCL(index, depth int) (p *Pointer) {
+func (b *baseFrame) getLCL(index, depth uint8) (p *Pointer) {
 
 	if depth == 0 {
 		b.RLock()
 
-		if index >= len(b.locals) {
+		if int(index) >= len(b.locals) {
 			b.RUnlock()
 			return
 		}
@@ -142,7 +142,7 @@ func (b *baseFrame) getLCL(index, depth int) (p *Pointer) {
 	return b.blockFrame.ep.getLCL(index, depth-1)
 }
 
-func (b *baseFrame) insertLCL(index, depth int, value Object) {
+func (b *baseFrame) insertLCL(index, depth uint8, value Object) {
 	existedLCL := b.getLCL(index, depth)
 
 	if existedLCL != nil {
@@ -152,7 +152,7 @@ func (b *baseFrame) insertLCL(index, depth int, value Object) {
 
 	b.Lock()
 
-	if index >= len(b.locals) {
+	if int(index) >= len(b.locals) {
 		b.locals = append(b.locals, nil)
 		copy(b.locals[index:], b.locals[index:])
 	}
