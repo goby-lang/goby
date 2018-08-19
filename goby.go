@@ -22,7 +22,8 @@ import (
 const Version string = vm.Version
 
 func main() {
-	profileOptionPtr := flag.Bool("p", false, "Profile program execution")
+	profileCPUOptionPtr := flag.Bool("profile-cpu", false, "Profile cpu usage")
+	profileMemOptionPtr := flag.Bool("profile-mem", false, "Profile memory allocation")
 	versionOptionPtr := flag.Bool("v", false, "Show current Goby version")
 	interactiveOptionPtr := flag.Bool("i", false, "Run interactive goby")
 	issueOptionPtr := flag.Bool("e", false, "Generate reporting format")
@@ -34,8 +35,12 @@ func main() {
 		os.Exit(0)
 	}
 
-	if *profileOptionPtr {
+	if *profileCPUOptionPtr {
 		defer profile.Start().Stop()
+	}
+
+	if *profileMemOptionPtr {
+		defer profile.Start(profile.MemProfile).Stop()
 	}
 
 	if *versionOptionPtr {
