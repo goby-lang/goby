@@ -122,11 +122,6 @@ func (t *Thread) execFile(fpath string) (err error) {
 }
 
 func (t *Thread) startFromTopFrame() {
-	defer func() {
-		if r := recover(); r != nil {
-			t.reportErrorAndStop(r)
-		}
-	}()
 	cf := t.callFrameStack.top()
 	t.evalCallFrame(cf)
 }
@@ -242,7 +237,8 @@ func (t *Thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object)
 		return &Pointer{Target: NULL}
 	}
 
-	c := newNormalCallFrame(blockFrame.instructionSet, blockFrame.FileName(), blockFrame.sourceLine)
+	c := newNormalCallFrame(blockFrame.FileName(), blockFrame.sourceLine)
+	c.instructionSet = blockFrame.instructionSet
 	c.blockFrame = blockFrame
 	c.ep = blockFrame.ep
 	c.self = blockFrame.self
@@ -275,7 +271,8 @@ func (t *Thread) retrieveBlock(fileName, blockFlag string, sourceLine int) (bloc
 	if hasBlock {
 		block := t.getBlock(blockName, fileName)
 
-		c := newNormalCallFrame(block, fileName, sourceLine)
+		c := newNormalCallFrame(fileName, sourceLine)
+		c.instructionSet = block
 		c.isSourceBlock = true
 		c.isBlock = true
 		blockFrame = c

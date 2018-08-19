@@ -943,7 +943,8 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 			case 1:
 				if args[0].Class().Name == classes.BlockClass {
 					blockObj := args[0].(*BlockObject)
-					blockFrame = newNormalCallFrame(blockObj.instructionSet, blockObj.instructionSet.filename, sourceLine)
+					blockFrame = newNormalCallFrame(blockObj.instructionSet.filename, sourceLine)
+					blockFrame.instructionSet = blockObj.instructionSet
 					blockFrame.ep = blockObj.ep
 					blockFrame.self = receiver
 					blockFrame.isBlock = true

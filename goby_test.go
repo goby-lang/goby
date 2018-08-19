@@ -113,15 +113,15 @@ func TestArgV(t *testing.T) {
 
 func TestArgP(t *testing.T) {
 
-	_, out := execGoby(t, "-p", "samples/one_thousand_threads.gb")
+	_, out := execGoby(t, "-p", "samples/stack.gb")
 
 	byt, err := ioutil.ReadAll(out)
 	if err != nil {
 		t.Fatalf("Couldn't read from pipe: %s", err.Error())
 	}
 
-	if string(byt) != "500500\n" {
-		t.Fatalf("Test failed, excpected 500500, got %s", string(byt))
+	if string(byt) != "10\n4\n" {
+		t.Fatalf("Test failed, excpected 10, got %s", string(byt))
 	}
 }
 

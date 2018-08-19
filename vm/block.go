@@ -110,7 +110,8 @@ var builtinBlockInstanceMethods = []*BuiltinMethodObject{
 		Name: "call",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 			block := receiver.(*BlockObject)
-			c := newNormalCallFrame(block.instructionSet, block.instructionSet.filename, sourceLine)
+			c := newNormalCallFrame(block.instructionSet.filename, sourceLine)
+			c.instructionSet = block.instructionSet
 			c.ep = block.ep
 			c.self = block.self
 			c.isBlock = true

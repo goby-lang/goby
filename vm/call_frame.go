@@ -271,8 +271,8 @@ func (cfs *callFrameStack) top() callFrame {
 	return nil
 }
 
-func newNormalCallFrame(is *instructionSet, filename string, sourceLine int) *normalCallFrame {
-	return &normalCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 5), lPr: 0, fileName: filename, sourceLine: sourceLine}, instructionSet: is, pc: 0}
+func newNormalCallFrame(filename string, sourceLine int) *normalCallFrame {
+	return &normalCallFrame{baseFrame: &baseFrame{locals: make([]*Pointer, 5), lPr: 0, fileName: filename, sourceLine: sourceLine}, pc: 0}
 }
 
 func newGoMethodCallFrame(m builtinMethodBody, receiver Object, argCount, argPtr int, n, filename string, sourceLine int, blockFrame *normalCallFrame) *goMethodCallFrame {

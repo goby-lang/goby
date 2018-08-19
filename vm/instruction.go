@@ -382,7 +382,8 @@ func init() {
 			is := t.getClassIS(subjectName, cf.FileName())
 
 			t.Stack.Pop()
-			c := newNormalCallFrame(is, cf.FileName(), sourceLine)
+			c := newNormalCallFrame(cf.FileName(), sourceLine)
+			c.instructionSet = is
 			c.self = classPtr.Target
 			t.callFrameStack.push(c)
 			t.startFromTopFrame()
@@ -506,7 +507,8 @@ func init() {
 				blockFrame = cf.blockFrame.ep.blockFrame
 			}
 
-			c := newNormalCallFrame(blockFrame.instructionSet, blockFrame.instructionSet.filename, sourceLine)
+			c := newNormalCallFrame(blockFrame.instructionSet.filename, sourceLine)
+			c.instructionSet = blockFrame.instructionSet
 			c.blockFrame = blockFrame
 			c.ep = blockFrame.ep
 			c.self = receiver
