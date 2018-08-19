@@ -111,9 +111,22 @@ func TestArgV(t *testing.T) {
 	}
 }
 
-func TestArgP(t *testing.T) {
+func TestArgProfileCPU(t *testing.T) {
+	_, out := execGoby(t, "-profile-cpu", "samples/stack.gb")
 
-	_, out := execGoby(t, "-p", "samples/stack.gb")
+	byt, err := ioutil.ReadAll(out)
+	if err != nil {
+		t.Fatalf("Couldn't read from pipe: %s", err.Error())
+	}
+
+	if string(byt) != "10\n4\n" {
+		t.Fatalf("Test failed, excpected 10, got %s", string(byt))
+	}
+}
+
+func TestArgProfileMem(t *testing.T) {
+	_, out := execGoby(t, "-profile-mem", "samples/stack.gb")
+
 
 	byt, err := ioutil.ReadAll(out)
 	if err != nil {
