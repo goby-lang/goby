@@ -14,8 +14,8 @@ func builtinJSONClassMethods() []*BuiltinMethodObject {
 		{
 			Name: "parse",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 1, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
 				j, ok := args[0].(*StringObject)
@@ -54,8 +54,8 @@ func builtinJSONClassMethods() []*BuiltinMethodObject {
 		{
 			Name: "validate",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 1, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
 				j, ok := args[0].(*StringObject)

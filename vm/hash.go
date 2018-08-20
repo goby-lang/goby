@@ -86,8 +86,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// @return [Object]
 			Name: "[]",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 1, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
 				i := args[0]
@@ -130,8 +130,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				// First arg is index
 				// Second arg is assigned value
-				if e, aLen := 2, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 2 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 2, len(args))
 				}
 				k := args[0]
 				key, ok := k.(*StringObject)
@@ -175,8 +175,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			Name: "any?",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 0, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 
 				if blockFrame == nil {
@@ -233,8 +233,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "clear",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 0, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 
 				h := receiver.(*HashObject)
@@ -258,8 +258,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// @return [Object]
 			Name: "default",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 0, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 
 				hash := receiver.(*HashObject)
@@ -287,8 +287,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// @return [Object]
 			Name: "default=",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 1, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
 				// Arrays and Hashes are generally a mistake, since a single instance would be used for all the accesses
@@ -318,8 +318,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// @return [Hash]
 			Name: "delete",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 1, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
 				h := receiver.(*HashObject)
@@ -354,10 +354,10 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// @return [Hash]
 			Name: "delete_if",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 0, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
-
+				
 				if blockFrame == nil {
 					return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 				}
@@ -406,8 +406,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// @return [Object]
 			Name: "dig",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if l, aLen := 1, len(args); l > aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentMore, l, aLen)
+				if len(args) < 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentMore, 1, len(args))
 				}
 
 				hash := receiver.(*HashObject)
@@ -434,8 +434,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// @return [Hash]
 			Name: "each",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 0, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 
 				if blockFrame == nil {
@@ -479,8 +479,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "each_key",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 0, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 
 				if blockFrame == nil {
@@ -523,8 +523,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//
 			Name: "each_value",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 0, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 
 				if blockFrame == nil {
@@ -561,8 +561,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "empty?",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 0, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 
 				h := receiver.(*HashObject)
@@ -583,8 +583,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "eql?",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 1, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
 				h := receiver.(*HashObject)
@@ -616,9 +616,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			Name: "fetch",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				aLen := len(args)
-				l, u := 1, 2
-				if aLen < l || aLen > u {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentRange, l, u, aLen)
+				if aLen < 1 || aLen > 2 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentRange, 1, 2, aLen)
 				}
 				
 				key, ok := args[0].(*StringObject)
@@ -626,7 +625,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, key.Class().Name)
 				}
 				
-				if aLen == u {
+				if aLen == 2 {
 					if blockFrame != nil {
 						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "The default argument can't be passed along with a block")
 					}
@@ -666,8 +665,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			Name: "fetch_values",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				aLen := len(args)
-				if l := 1; l > aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentMore, l, aLen)
+				if aLen <1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentMore, 1, aLen)
 				}
 
 				values := make([]Object, aLen)
@@ -720,8 +719,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "has_key?",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 1, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
 				h := receiver.(*HashObject)
@@ -754,8 +753,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "has_value?",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 1, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
 				h := receiver.(*HashObject)
@@ -780,8 +779,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "keys",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 0, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 
 				h := receiver.(*HashObject)
@@ -804,8 +803,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			Name: "length",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 0, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 
 				h := receiver.(*HashObject)
@@ -829,8 +828,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "map_values",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 0, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 
 				if blockFrame == nil {
@@ -867,8 +866,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// @return [Hash]
 			Name: "merge",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if l, aLen := 1, len(args); l > aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentMore, l, aLen)
+				if len(args) < 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentMore, 1, len(args))
 				}
 
 				h := receiver.(*HashObject)
@@ -913,8 +912,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			Name: "select",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 0, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 
 				if blockFrame == nil {
@@ -962,8 +961,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "sorted_keys",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 0, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 
 				h := receiver.(*HashObject)
@@ -995,8 +994,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			Name: "to_a",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				aLen := len(args)
-				if u := 1; aLen > 1 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentLess, u, aLen)
+				if aLen > 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentLess, 1, aLen)
 				}
 
 				var sorted bool
@@ -1044,8 +1043,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "to_json",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 0, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 
 				r := receiver.(*HashObject)
@@ -1065,8 +1064,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "to_s",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 0, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 
 				h := receiver.(*HashObject)
@@ -1091,8 +1090,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "transform_values",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 0, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 
 				if blockFrame == nil {
@@ -1125,8 +1124,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "values",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 0, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 				
 				h := receiver.(*HashObject)

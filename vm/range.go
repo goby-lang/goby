@@ -342,8 +342,8 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "map",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 0, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 				
 				if blockFrame == nil {

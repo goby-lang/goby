@@ -21,8 +21,8 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 			// Sends a GET request to the target and returns a `Net::HTTP::Response` object.
 			Name: "get",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 1, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
 				u, ok := args[0].(*StringObject)
@@ -47,8 +47,8 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 			// Sends a POST request to the target and returns a `Net::HTTP::Response` object.
 			Name: "post",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 3, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 3 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 3, len(args))
 				}
 
 				u, ok := args[0].(*StringObject)
@@ -85,8 +85,8 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 			// Sends a HEAD request to the target and returns a `Net::HTTP::Response` object.
 			Name: "head",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 1, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
 				u, ok := args[0].(*StringObject)
@@ -118,8 +118,8 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 			// Sends a passed `Net::HTTP::Request` object and returns a `Net::HTTP::Response` object
 			Name: "exec",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 1, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
 				if args[0].Class().Name != httpRequestClass.Name {

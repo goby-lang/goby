@@ -53,8 +53,8 @@ func builtinGoMapInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "get",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 1, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
 				key, ok := args[0].(*StringObject)
@@ -84,8 +84,8 @@ func builtinGoMapInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "set",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 2, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 2 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 2, len(args))
 				}
 
 				key, ok := args[0].(*StringObject)
@@ -105,8 +105,8 @@ func builtinGoMapInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_hash",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if e, aLen := 0, len(args); e != aLen {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, e, aLen)
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 				
 				m := receiver.(*GoMap)
