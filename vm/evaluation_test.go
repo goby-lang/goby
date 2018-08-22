@@ -369,6 +369,16 @@ func TestCaseExpressionEvaluation(t *testing.T) {
 			`,
 			3,
 		},
+		{
+			`
+			case
+			when 1 > 2
+				-1
+			when 1 < 2
+				1
+			end
+`, 1,
+		},
 	}
 
 	for i, tt := range tests {
