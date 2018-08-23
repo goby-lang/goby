@@ -57,6 +57,11 @@ func (e *Error) IsUnexpectedWhen() bool {
 	return e.ErrType == UnexpectedTokenError && len(e.Message) >= 21 && e.Message[0:21] == "unexpected when Line:"
 }
 
+// IsUnexpectedEmptyLine checks if error is unexpected 'end' with empty line
+func (e *Error) IsUnexpectedEmptyLine(len int) bool {
+	return e.IsUnexpectedEnd() && len == 0
+}
+
 // InitError is a helper function for easily initializing error object
 func InitError(msg string, errType int) *Error {
 	return &Error{Message: msg, ErrType: errType}

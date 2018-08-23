@@ -205,7 +205,7 @@ reset:
 				igb.tokenErr = true
 				continue
 			// To handle empty line
-			case pErr.IsUnexpectedEnd() && len(igb.cmds) == 0:
+			case pErr.IsUnexpectedEmptyLine(len(igb.cmds)):
 				// If igb.cmds is empty, it means that user just typed 'end' without corresponding statement/expression
 				println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
 				igb.indents = 0
