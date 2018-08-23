@@ -49,7 +49,7 @@ type iGb struct {
 	lines     string
 	cmds      []string
 	indents   int
-	tokenErr  bool
+	caseBlock bool
 	firstWhen bool
 }
 
@@ -128,7 +128,7 @@ reset:
 				igb.rl.SetPrompt(prompt1)
 				igb.sm.Event(waitExited)
 				igb.cmds = nil
-				igb.tokenErr = false
+				igb.caseBlock = false
 				igb.firstWhen = false
 				println(" -- block cleared")
 				continue
@@ -161,6 +161,7 @@ reset:
 		// Parse error handling
 		if pErr != nil {
 			switch {
+
 			// To handle beginning of a block
 			case pErr.IsEOF():
 				if !igb.sm.Is(Waiting) {
@@ -171,15 +172,17 @@ reset:
 				igb.rl.SetPrompt(prompt(igb.indents) + indent(igb.indents))
 				igb.cmds = append(igb.cmds, igb.lines)
 				continue
+
 			// To handle 'case'
 			case pErr.IsUnexpectedCase():
 				println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
 				igb.sm.Event(Waiting)
 				igb.rl.SetPrompt(prompt2 + indent(igb.indents))
 				igb.cmds = append(igb.cmds, igb.lines)
-				igb.tokenErr = true
+				igb.caseBlock = true
 				igb.firstWhen = true
 				continue
+
 			// To handle 'when'
 			case pErr.IsUnexpectedWhen():
 				if igb.firstWhen {
@@ -192,8 +195,9 @@ reset:
 				igb.sm.Event(Waiting)
 				igb.rl.SetPrompt(prompt2 + indent(igb.indents))
 				igb.cmds = append(igb.cmds, igb.lines)
-				igb.tokenErr = true
+				igb.caseBlock = true
 				continue
+
 			// To handle such as 'else' or 'elsif'
 			case pErr.IsUnexpectedToken():
 				igb.indents--
@@ -202,56 +206,65 @@ reset:
 				igb.sm.Event(Waiting)
 				igb.rl.SetPrompt(prompt2 + indent(igb.indents))
 				igb.cmds = append(igb.cmds, igb.lines)
-				igb.tokenErr = true
 				continue
+
 			// To handle empty line
 			case pErr.IsUnexpectedEmptyLine(len(igb.cmds)):
 				// If igb.cmds is empty, it means that user just typed 'end' without corresponding statement/expression
+				println("exceptEmptyLine")
 				println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
 				igb.indents = 0
 				igb.rl.SetPrompt(prompt1)
 				fmt.Println(pErr.Message)
 				igb.cmds = nil
 				continue
+
 			// To handle 'end'
 			case pErr.IsUnexpectedEnd():
 				if igb.indents > 1 {
 					igb.indents--
 					println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
-					if igb.tokenErr {
+					if igb.caseBlock {
 						igb.indents++
 					}
 					igb.sm.Event(Waiting)
 					igb.rl.SetPrompt(prompt(igb.indents) + indent(igb.indents))
 					igb.cmds = append(igb.cmds, igb.lines)
-					igb.tokenErr = false
+					igb.caseBlock = false
 					igb.firstWhen = false
 					continue
 				}
+
+				// Exiting error handling
 				igb.indents = 0
 				igb.sm.Event(waitEnded)
 				igb.rl.SetPrompt(prompt(igb.indents) + indent(igb.indents))
 				igb.cmds = append(igb.cmds, igb.lines)
-				igb.tokenErr = false
+				igb.caseBlock = false
 				igb.firstWhen = false
 			}
 		}
 
-		if igb.sm.Is(Waiting) && igb.tokenErr {
-			igb.tokenErr = false
-			println(prompt2 + indent(igb.indents) + igb.lines)
-			igb.rl.SetPrompt(prompt2 + indent(igb.indents))
-			igb.cmds = append(igb.cmds, igb.lines)
-			continue
+		if igb.sm.Is(Waiting) {
+			// Indent = 0 but not ended
+			if igb.caseBlock {
+				igb.caseBlock = false
+				println(prompt2 + indent(igb.indents) + igb.lines)
+				igb.rl.SetPrompt(prompt2 + indent(igb.indents))
+				igb.cmds = append(igb.cmds, igb.lines)
+				continue
+			}
+
+			// Still indented
+			if igb.indents > 0 {
+				println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
+				igb.rl.SetPrompt(prompt(igb.indents) + indent(igb.indents))
+				igb.cmds = append(igb.cmds, igb.lines)
+				continue
+			}
 		}
 
-		if igb.sm.Is(Waiting) && igb.indents > 0 {
-			println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
-			igb.rl.SetPrompt(prompt(igb.indents) + indent(igb.indents))
-			igb.cmds = append(igb.cmds, igb.lines)
-			continue
-		}
-
+		// Ending the block and prepare execution
 		if igb.sm.Is(waitEnded) {
 			ivm.p.Lexer = lexer.New(string(strings.Join(igb.cmds, "\n")))
 
@@ -260,8 +273,10 @@ reset:
 
 			if pErr != nil {
 				handleParserError(pErr, igb)
-				igb.cmds = nil
 				igb.sm.Event(readyToExec)
+				igb.cmds = nil
+				igb.caseBlock = false
+				igb.firstWhen = false
 				continue
 			}
 
@@ -270,6 +285,7 @@ reset:
 			igb.sm.Event(readyToExec)
 		}
 
+		// Execute the lines
 		if igb.sm.Is(readyToExec) {
 			println(prompt(igb.indents) + igb.lines)
 
@@ -331,7 +347,7 @@ func newIgb() *iGb {
 			readline.PcItem(help),
 			readline.PcItem(reset),
 		),
-		tokenErr:  false,
+		caseBlock: false,
 		firstWhen: false,
 	}
 }
