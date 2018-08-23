@@ -47,17 +47,17 @@ func (e *Error) IsUnexpectedToken() bool {
 	return e.ErrType == UnexpectedTokenError
 }
 
-// IsUnexpectedCase checks if error is unexpected token error for 'case'atement
+// IsUnexpectedCase checks if error is a token error for 'case' statement
 func (e *Error) IsUnexpectedCase() bool {
 	return e.ErrType == UnexpectedTokenError && len(e.Message) >= 49 && e.Message[0:49] == "expected next token to be WHEN, got EOF() instead"
 }
 
-// IsUnexpectedWhen checks if error is unexpected token error for 'case'atement
+// IsUnexpectedWhen checks if error is a token error for 'case'atement
 func (e *Error) IsUnexpectedWhen() bool {
 	return e.ErrType == UnexpectedTokenError && len(e.Message) >= 21 && e.Message[0:21] == "unexpected when Line:"
 }
 
-// IsUnexpectedEmptyLine checks if error is unexpected 'end' with empty line
+// IsUnexpectedEmptyLine checks if error is an 'end' with empty line
 func (e *Error) IsUnexpectedEmptyLine(len int) bool {
 	return e.IsUnexpectedEnd() && len == 0
 }
