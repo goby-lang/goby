@@ -399,7 +399,7 @@ func (t *Thread) evalMethodObject(call *callObject) {
 	for paramIndex, paramType := range paramTypes {
 		switch paramType {
 		case bytecode.RequiredKeywordArg:
-			paramName := call.paramNames()[paramIndex]
+			paramName := call.method.instructionSet.paramTypes.Names[paramIndex]
 			if _, ok := call.hasKeywordArgument(paramName); !ok {
 				t.setErrorObject(call.receiverPtr, call.argPtr(), errors.ArgumentError, sourceLine, "Method %s requires key argument %s", call.method.Name, paramName)
 			}

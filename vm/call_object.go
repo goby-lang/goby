@@ -34,10 +34,6 @@ func newCallObject(receiver Object, method *MethodObject, receiverPtr, argCount 
 	}
 }
 
-func (co *callObject) paramNames() []string {
-	return co.method.instructionSet.paramTypes.Names
-}
-
 func (co *callObject) argTypes() []uint8 {
 	if co.argSet == nil {
 		return []uint8{}
@@ -120,7 +116,7 @@ func (co *callObject) assignSplatArgument(stack []*Pointer, arr *ArrayObject) {
 
 func (co *callObject) hasKeywordParam(name string) (index int, result bool) {
 	for paramIndex, paramType := range co.method.instructionSet.paramTypes.Types {
-		paramName := co.paramNames()[paramIndex]
+		paramName := co.method.instructionSet.paramTypes.Names[paramIndex]
 
 		if paramName == name && (paramType == bytecode.RequiredKeywordArg || paramType == bytecode.OptionalKeywordArg) {
 			index = paramIndex
