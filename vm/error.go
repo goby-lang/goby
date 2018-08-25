@@ -37,7 +37,7 @@ func (vm *VM) InitNoMethodError(sourceLine int, methodName string, receiver Obje
 func (vm *VM) InitErrorObject(errorType string, sourceLine int, format string, args ...interface{}) *Error {
 	errClass := vm.objectClass.getClassConstant(errorType)
 
-	t := vm.mainThread
+	t := &vm.mainThread
 	cf := t.callFrameStack.top()
 
 	switch cf := cf.(type) {

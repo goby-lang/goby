@@ -36,7 +36,7 @@ func PrintError(v *VM) {
 	fmt.Printf("### GOPATH\n%s\n", os.Getenv("GOPATH"))
 	fmt.Printf("### Operating system\n%s\n", runtime.GOOS)
 
-	t := v.mainThread
+	t := &v.mainThread
 	cf := t.callFrameStack.top()
 
 	file := cf.FileName()
