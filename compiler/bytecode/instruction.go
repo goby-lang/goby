@@ -1,5 +1,8 @@
 package bytecode
 
+//go:generate stringer -type=InstructionAction
+// CAUTION: when you change the file, be sure to perform `make generate` for regeneration.
+
 import (
 	"fmt"
 	"strings"
@@ -13,9 +16,12 @@ const (
 	Program   = "ProgramStart"
 )
 
+// InstructionAction represents the instruction actions
+type InstructionAction uint8
+
 // instruction actions
 const (
-	GetLocal            uint8 = iota
+	GetLocal InstructionAction = iota + 1
 	GetConstant
 	GetInstanceVariable
 	SetLocal
@@ -47,44 +53,9 @@ const (
 	Leave
 )
 
-
-// InstructionNameTable is the table the maps instruction's op code with its readable name
-var InstructionNameTable = []string{
-	GetLocal:            "getlocal",
-	GetConstant:         "getconstant",
-	GetInstanceVariable: "getinstancevariable",
-	SetLocal:            "setlocal",
-	SetConstant:         "setconstant",
-	SetInstanceVariable: "setinstancevariable",
-	PutBoolean:          "putboolean",
-	PutString:           "putstring",
-	PutFloat:            "putfloat",
-	PutSelf:             "putself",
-	PutObject:           "putobject",
-	PutNull:             "putnil",
-	NewArray:            "newarray",
-	ExpandArray:         "expand_array",
-	SplatArray:          "splat_array",
-	NewHash:             "newhash",
-	NewRange:            "newrange",
-	BranchUnless:        "branchunless",
-	BranchIf:            "branchif",
-	Jump:                "jump",
-	Break:               "break",
-	DefMethod:           "def_method",
-	DefSingletonMethod:  "def_singleton_method",
-	DefClass:            "def_class",
-	Send:                "send",
-	InvokeBlock:         "invokeblock",
-	GetBlock:            "getblock",
-	Pop:                 "pop",
-	Dup:                 "dup",
-	Leave:               "leave",
-}
-
 // Instruction represents compiled bytecode instruction
 type Instruction struct {
-	Opcode     uint8
+	Opcode     InstructionAction
 	Params     []interface{}
 	line       int
 	anchor     *anchor
@@ -98,12 +69,7 @@ func (i *Instruction) Inspect() string {
 	for _, param := range i.Params {
 		params = append(params, fmt.Sprint(param))
 	}
-	return fmt.Sprintf("%s: %s. source line: %d", i.ActionName(), strings.Join(params, ", "), i.sourceLine)
-}
-
-// ActionName returns the human readable name of the instruction
-func (i *Instruction) ActionName() string {
-	return InstructionNameTable[i.Opcode]
+	return fmt.Sprintf("%s: %s. source line: %d", i.Opcode.String(), strings.Join(params, ", "), i.sourceLine)
 }
 
 // AnchorLine returns instruction anchor's line number if it has an anchor
@@ -184,8 +150,8 @@ func (is *InstructionSet) Type() string {
 	return is.isType
 }
 
-func (is *InstructionSet) define(action uint8, sourceLine int, params ...interface{}) *Instruction {
-	i := &Instruction{Opcode: action, Params: params, line: is.count, sourceLine: sourceLine+1}
+func (is *InstructionSet) define(action InstructionAction, sourceLine int, params ...interface{}) *Instruction {
+	i := &Instruction{Opcode: action, Params: params, line: is.count, sourceLine: sourceLine + 1}
 	for _, param := range params {
 		a, ok := param.(*anchor)
 

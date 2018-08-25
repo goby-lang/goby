@@ -11,7 +11,7 @@ import (
 
 type operation func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{})
 
-type operationType = uint8
+type operationType = bytecode.InstructionAction
 
 type setType = string
 
