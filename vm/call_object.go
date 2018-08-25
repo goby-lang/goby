@@ -34,16 +34,12 @@ func newCallObject(receiver Object, method *MethodObject, receiverPtr, argCount 
 	}
 }
 
-func (co *callObject) instructionSet() *instructionSet {
-	return co.method.instructionSet
-}
-
 func (co *callObject) paramTypes() []uint8 {
-	return co.instructionSet().paramTypes.Types
+	return co.method.instructionSet.paramTypes.Types
 }
 
 func (co *callObject) paramNames() []string {
-	return co.instructionSet().paramTypes.Names
+	return co.method.instructionSet.paramTypes.Names
 }
 
 func (co *callObject) methodName() string {
