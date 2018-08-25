@@ -382,8 +382,8 @@ func (t *Thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 // TODO: Move instruction into call object
 func (t *Thread) evalMethodObject(call *callObject) {
 	normalParamsCount := call.normalParamsCount()
-	paramTypes := call.method.instructionSet.paramTypes.Types
-	paramsCount := len(call.method.instructionSet.paramTypes.Types)
+	paramTypes := call.method.instructionSet.ArgSet.Types
+	paramsCount := len(call.method.instructionSet.ArgSet.Types)
 	stack := t.Stack.data
 	sourceLine := call.sourceLine
 
@@ -399,7 +399,7 @@ func (t *Thread) evalMethodObject(call *callObject) {
 	for paramIndex, paramType := range paramTypes {
 		switch paramType {
 		case bytecode.RequiredKeywordArg:
-			paramName := call.method.instructionSet.paramTypes.Names[paramIndex]
+			paramName := call.method.instructionSet.ArgSet.Names[paramIndex]
 			if _, ok := call.hasKeywordArgument(paramName); !ok {
 				t.setErrorObject(call.receiverPtr, call.argPtr(), errors.ArgumentError, sourceLine, "Method %s requires key argument %s", call.method.Name, paramName)
 			}

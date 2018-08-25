@@ -45,7 +45,7 @@ func (it *instructionTranslator) transferInstructionSets(sets []*bytecode.Instru
 	for _, set := range sets {
 		is := &instructionSet{filename: it.filename}
 		is.instructions = set.Instructions
-		is.paramTypes = set.ArgSet
+		is.ArgSet = set.ArgSet
 		it.setMetadata(is, set)
 	}
 }
