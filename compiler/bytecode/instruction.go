@@ -134,11 +134,11 @@ type ArgSet arguments.ArgSet
 
 // InstructionSet contains a set of Instructions and some metadata
 type InstructionSet struct {
-	name         string
-	isType       string
+	Name         string
+	InstType     string
 	Instructions []*Instruction
 	count        int
-	argTypes     *ArgSet
+	ArgSet       *ArgSet
 }
 
 func (as *ArgSet) FindIndex(name string) int {
@@ -154,21 +154,6 @@ func (as *ArgSet) FindIndex(name string) int {
 func (as *ArgSet) setArg(index int, name string, argType uint8) {
 	as.Names[index] = name
 	as.Types[index] = argType
-}
-
-// ArgTypes returns enums that represents each argument's type
-func (is *InstructionSet) ArgTypes() *ArgSet {
-	return is.argTypes
-}
-
-// Name returns instruction set's name
-func (is *InstructionSet) Name() string {
-	return is.name
-}
-
-// SetType returns instruction's type
-func (is *InstructionSet) Type() string {
-	return is.isType
 }
 
 func (is *InstructionSet) define(action uint8, sourceLine int, params ...interface{}) *Instruction {

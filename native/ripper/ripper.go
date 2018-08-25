@@ -209,10 +209,10 @@ func convertToTuple(instSet []*bytecode.InstructionSet, v *VM) *ArrayObject {
 	ary := []Object{}
 	for _, instruction := range instSet {
 		hashInstLevel1 := make(map[string]Object)
-		hashInstLevel1["name"] = v.InitStringObject(instruction.Name())
-		hashInstLevel1["type"] = v.InitStringObject(instruction.Type())
-		if instruction.ArgTypes() != nil {
-			hashInstLevel1["arg_types"] = getArgNameType(instruction.ArgTypes(), v)
+		hashInstLevel1["name"] = v.InitStringObject(instruction.Name)
+		hashInstLevel1["type"] = v.InitStringObject(instruction.InstType)
+		if instruction.ArgSet != nil {
+			hashInstLevel1["arg_types"] = getArgNameType(instruction.ArgSet, v)
 		}
 		ary = append(ary, v.InitHashObject(hashInstLevel1))
 
