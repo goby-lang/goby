@@ -34,16 +34,8 @@ func newCallObject(receiver Object, method *MethodObject, receiverPtr, argCount 
 	}
 }
 
-func (co *callObject) paramTypes() []uint8 {
-	return co.method.instructionSet.paramTypes.Types
-}
-
 func (co *callObject) paramNames() []string {
 	return co.method.instructionSet.paramTypes.Names
-}
-
-func (co *callObject) methodName() string {
-	return co.method.Name
 }
 
 func (co *callObject) argTypes() []uint8 {
@@ -63,7 +55,7 @@ func (co *callObject) argPosition() int {
 }
 
 func (co *callObject) assignNormalArguments(stack []*Pointer) {
-	for i, paramType := range co.paramTypes() {
+	for i, paramType := range co.method.instructionSet.paramTypes.Types {
 		if paramType == bytecode.NormalArg {
 			co.callFrame.insertLCL(i, 0, stack[co.argPosition()].Target)
 			co.argIndex++
@@ -107,7 +99,7 @@ func (co *callObject) assignKeywordArguments(stack []*Pointer) (err error) {
 			if ok {
 				co.callFrame.insertLCL(paramIndex, 0, stack[co.argPtr()+argIndex].Target)
 			} else {
-				err = fmt.Errorf("unknown key %s for method %s", argName, co.methodName())
+				err = fmt.Errorf("unknown key %s for method %s", argName, co.method.Name)
 			}
 		}
 	}
@@ -116,7 +108,7 @@ func (co *callObject) assignKeywordArguments(stack []*Pointer) (err error) {
 }
 
 func (co *callObject) assignSplatArgument(stack []*Pointer, arr *ArrayObject) {
-	index := len(co.paramTypes()) - 1
+	index := len(co.method.instructionSet.paramTypes.Types) - 1
 
 	for co.argIndex < co.argCount {
 		arr.Elements = append(arr.Elements, stack[co.argPosition()].Target)
@@ -127,7 +119,7 @@ func (co *callObject) assignSplatArgument(stack []*Pointer, arr *ArrayObject) {
 }
 
 func (co *callObject) hasKeywordParam(name string) (index int, result bool) {
-	for paramIndex, paramType := range co.paramTypes() {
+	for paramIndex, paramType := range co.method.instructionSet.paramTypes.Types {
 		paramName := co.paramNames()[paramIndex]
 
 		if paramName == name && (paramType == bytecode.RequiredKeywordArg || paramType == bytecode.OptionalKeywordArg) {
@@ -155,7 +147,7 @@ func (co *callObject) hasKeywordArgument(name string) (index int, result bool) {
 }
 
 func (co *callObject) normalParamsCount() (n int) {
-	for _, at := range co.paramTypes() {
+	for _, at := range co.method.instructionSet.paramTypes.Types {
 		if at == bytecode.NormalArg {
 			n++
 		}
