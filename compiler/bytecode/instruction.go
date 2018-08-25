@@ -130,6 +130,7 @@ type anchor struct {
 	line int
 }
 
+// ArgSet struct comes from arguments package.
 type ArgSet arguments.ArgSet
 
 // InstructionSet contains a set of Instructions and some metadata
