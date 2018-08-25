@@ -202,15 +202,14 @@ func (t *Thread) reportErrorAndStop(e interface{}) {
 			err.storedTraces = true
 		}
 
-		panic(err)
-
 		if t.vm.mode == NormalMode {
 
 			if t.isMainThread() {
 				os.Exit(1)
 			}
 		}
-	// Otherwise it's a Go panic that needs to be raise
+		panic(err)
+		// Otherwise it's a Go panic that needs to be raise
 	default:
 		panic(e)
 	}
