@@ -2,6 +2,7 @@ package bytecode
 
 import (
 	"fmt"
+
 	"github.com/goby-lang/goby/compiler/ast"
 )
 
@@ -94,8 +95,8 @@ func (g *Generator) compileGetBlockExpression(is *InstructionSet, exp *ast.GetBl
 func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpression, scope *scope, table *localTable) {
 	var blockInfo string
 	argSet := &ArgSet{
-		names: make([]string, len(exp.Arguments)),
-		types: make([]uint8, len(exp.Arguments)),
+		Names: make([]string, len(exp.Arguments)),
+		Types: make([]uint8, len(exp.Arguments)),
 	}
 
 	// Compile receiver

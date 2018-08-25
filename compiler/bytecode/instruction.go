@@ -3,6 +3,8 @@ package bytecode
 import (
 	"fmt"
 	"strings"
+
+	"github.com/goby-lang/goby/compiler/parser/arguments"
 )
 
 // instruction set types
@@ -15,7 +17,7 @@ const (
 
 // instruction actions
 const (
-	GetLocal            uint8 = iota
+	GetLocal uint8 = iota
 	GetConstant
 	GetInstanceVariable
 	SetLocal
@@ -46,7 +48,6 @@ const (
 	Dup
 	Leave
 )
-
 
 // InstructionNameTable is the table the maps instruction's op code with its readable name
 var InstructionNameTable = []string{
@@ -129,6 +130,8 @@ type anchor struct {
 	line int
 }
 
+type ArgSet arguments.ArgSet
+
 // InstructionSet contains a set of Instructions and some metadata
 type InstructionSet struct {
 	name         string
@@ -138,24 +141,8 @@ type InstructionSet struct {
 	argTypes     *ArgSet
 }
 
-// ArgSet stores the metadata of a method definition's parameters.
-type ArgSet struct {
-	names []string
-	types []uint8
-}
-
-// Types are the getter method of *ArgSet's types attribute
-func (as *ArgSet) Types() []uint8 {
-	return as.types
-}
-
-// Names are the getter method of *ArgSet's names attribute
-func (as *ArgSet) Names() []string {
-	return as.names
-}
-
 func (as *ArgSet) FindIndex(name string) int {
-	for i, n := range as.names {
+	for i, n := range as.Names {
 		if n == name {
 			return i
 		}
@@ -165,8 +152,8 @@ func (as *ArgSet) FindIndex(name string) int {
 }
 
 func (as *ArgSet) setArg(index int, name string, argType uint8) {
-	as.names[index] = name
-	as.types[index] = argType
+	as.Names[index] = name
+	as.Types[index] = argType
 }
 
 // ArgTypes returns enums that represents each argument's type
@@ -185,7 +172,7 @@ func (is *InstructionSet) Type() string {
 }
 
 func (is *InstructionSet) define(action uint8, sourceLine int, params ...interface{}) *Instruction {
-	i := &Instruction{Opcode: action, Params: params, line: is.count, sourceLine: sourceLine+1}
+	i := &Instruction{Opcode: action, Params: params, line: is.count, sourceLine: sourceLine + 1}
 	for _, param := range params {
 		a, ok := param.(*anchor)
 

@@ -188,8 +188,8 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 		name:   stmt.Name.Value,
 		isType: MethodDef,
 		argTypes: &ArgSet{
-			names: make([]string, len(stmt.Parameters)),
-			types: make([]uint8, len(stmt.Parameters)),
+			Names: make([]string, len(stmt.Parameters)),
+			Types: make([]uint8, len(stmt.Parameters)),
 		},
 	}
 

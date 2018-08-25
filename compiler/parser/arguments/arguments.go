@@ -20,6 +20,12 @@ var Types = map[int]string{
 	SplatArg:           "Splat argument",
 }
 
+// ArgSet stores the metadata of a method definition's parameters.
+type ArgSet struct {
+	Names []string
+	Types []uint8
+}
+
 // Tokens marks token types that can be used as method call arguments
 var Tokens = map[token.Type]bool{
 	token.Int:              true,

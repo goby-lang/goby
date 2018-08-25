@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+
 	"github.com/goby-lang/goby/compiler/bytecode"
 )
 
@@ -38,11 +39,11 @@ func (co *callObject) instructionSet() *instructionSet {
 }
 
 func (co *callObject) paramTypes() []uint8 {
-	return co.instructionSet().paramTypes.Types()
+	return co.instructionSet().paramTypes.Types
 }
 
 func (co *callObject) paramNames() []string {
-	return co.instructionSet().paramTypes.Names()
+	return co.instructionSet().paramTypes.Names
 }
 
 func (co *callObject) methodName() string {
@@ -54,7 +55,7 @@ func (co *callObject) argTypes() []uint8 {
 		return []uint8{}
 	}
 
-	return co.argSet.Types()
+	return co.argSet.Types
 }
 
 func (co *callObject) argPtr() int {
@@ -104,7 +105,7 @@ func (co *callObject) assignNormalAndOptionedArguments(paramIndex int, stack []*
 func (co *callObject) assignKeywordArguments(stack []*Pointer) (err error) {
 	for argIndex, argType := range co.argTypes() {
 		if argType == bytecode.RequiredKeywordArg || argType == bytecode.OptionalKeywordArg {
-			argName := co.argSet.Names()[argIndex]
+			argName := co.argSet.Names[argIndex]
 			paramIndex, ok := co.hasKeywordParam(argName)
 
 			if ok {
@@ -145,7 +146,7 @@ func (co *callObject) hasKeywordParam(name string) (index int, result bool) {
 
 func (co *callObject) hasKeywordArgument(name string) (index int, result bool) {
 	for argIndex, argType := range co.argTypes() {
-		argName := co.argSet.Names()[argIndex]
+		argName := co.argSet.Names[argIndex]
 
 		if argName == name && (argType == bytecode.RequiredKeywordArg || argType == bytecode.OptionalKeywordArg) {
 			index = argIndex
