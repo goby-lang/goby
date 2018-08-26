@@ -3,6 +3,8 @@ package compiler
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/goby-lang/goby/compiler/parser"
 )
 
@@ -35,10 +37,6 @@ end`, parser.NormalMode)
 		t.Fatalf("Expect `%d` for first instruction first param. got: %d", e, a)
 	}
 
-	if e, a := 99, ci[0].Instructions[0].Params[1]; e != a {
-		t.Fatalf("Expect `%d` for first instruction first param. got: %d", e, a)
-	}
-
 	// TODO: change the following simple public functions to public variables
 	if e, a := "bar", ci[0].Name(); e != a {
 		t.Fatalf("Expect `%s` for instruction set name. got: %s", e, a)
@@ -61,18 +59,13 @@ end`, parser.NormalMode)
 	}
 }
 
-//func TestCompileToInstructionsNormalModeFail(t *testing.T) {
-//
-//	ci, err := CompileToInstructions(`
-//def bar
-//  99
-//end `, parser.NormalMode)
-//
-//	if err != nil {
-//		t.Fatal(err.Error())
-//	}
-//
-//	if e, a := 1, ci[0].Instructions[0].AnchorLine(); e != a {
-//		t.Fatalf("Expect `%d` for first instruction inspect. got: %d", e, a)
-//	}
-//}
+func TestCompileToInstructionsNormalModePanic(t *testing.T) {
+	assert.Panics(t, func() {
+		ci, err := CompileToInstructions(`99`, parser.NormalMode)
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+
+		ci[0].Instructions[0].AnchorLine()
+	}, "The code did not panic")
+}
