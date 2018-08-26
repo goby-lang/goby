@@ -2,6 +2,7 @@ package vm
 
 import (
 	"github.com/goby-lang/goby/compiler/bytecode"
+	"github.com/goby-lang/goby/compiler/parser"
 )
 
 // InitForREPL does following things:
@@ -15,7 +16,7 @@ func (vm *VM) InitForREPL() {
 	// REPL should maintain a base call frame so that the whole program won't exit
 	cf := newNormalCallFrame(&instructionSet{name: "REPL base"}, "REPL", 1)
 	cf.self = vm.mainObj
-	vm.mode = REPLMode
+	vm.mode = parser.REPLMode
 	vm.mainThread.callFrameStack.push(cf)
 }
 

@@ -32,6 +32,7 @@ type Parser struct {
 	Mode        ParserMode
 }
 
+// ParserMode determines the running mode. These are the enums for marking parser's mode, which decides whether it should pop unused values.
 type ParserMode int
 
 // These are the enums for marking parser's mode, which decides whether it should pop unused values.
