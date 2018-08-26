@@ -70,6 +70,47 @@ func TestCompileToInstructionsNormalModePanic(t *testing.T) {
 	}, "The code did not panic")
 }
 
+func TestCompileToInstructionsTESTMode(t *testing.T) {
+
+	ci, err := CompileToInstructions(`
+module Foo
+end
+`, parser.TestMode)
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if e, a := uint8(29), ci[0].Instructions[0].Opcode; e != a {
+		t.Fatalf("Expect `%d` for first instruction opcode. got: %d", e, a)
+	}
+
+	if e, a := "leave: . source line: 2", ci[0].Instructions[0].Inspect(); e != a {
+		t.Fatalf("Expect `%s` for first instruction inspect. got: %s", e, a)
+	}
+
+	// TODO: change the following simple public functions to public variables
+	if e, a := "Foo", ci[0].Name(); e != a {
+		t.Fatalf("Expect `%s` for instruction set name. got: %s", e, a)
+	}
+
+	if e, a := "DefClass", ci[0].Type(); e != a {
+		t.Fatalf("Expect `%s` for instruction set type. got: %s", e, a)
+	}
+
+	if e, a := "leave", ci[0].Instructions[0].ActionName(); e != a {
+		t.Fatalf("Expect `%s` for first instruction action name. got: %s", e, a)
+	}
+
+	if e, a := 0, ci[0].Instructions[0].Line(); e != a {
+		t.Fatalf("Expect `%d` for first instruction line. got: %d", e, a)
+	}
+
+	if e, a := 2, ci[0].Instructions[0].SourceLine(); e != a {
+		t.Fatalf("Expect `%d` for first instruction source line. got: %d", e, a)
+	}
+}
+
 func TestCompileToInstructionsREPLMode(t *testing.T) {
 
 	ci, err := CompileToInstructions(`
@@ -114,7 +155,7 @@ end
 	}
 }
 
-// The tests are related to igb/repl.go
+// TODO: The tests needs to be updated with igb/repl.go
 func TestCompileToInstructionsREPLModeFail(t *testing.T) {
 	tests := []struct {
 		input    string
