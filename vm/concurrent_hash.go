@@ -29,7 +29,7 @@ import (
 //
 type ConcurrentHashObject struct {
 	*BaseObj
-	internalMap sync.Map
+	internalMap *sync.Map
 }
 
 // Class methods --------------------------------------------------------
@@ -306,7 +306,7 @@ func (vm *VM) initConcurrentHashObject(pairs map[string]Object) *ConcurrentHashO
 
 	return &ConcurrentHashObject{
 		BaseObj:     &BaseObj{class: hash},
-		internalMap: internalMap,
+		internalMap: &internalMap,
 	}
 }
 

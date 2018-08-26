@@ -24,7 +24,7 @@ import (
 //
 type ConcurrentRWLockObject struct {
 	*BaseObj
-	mutex sync.RWMutex
+	mutex *sync.RWMutex
 }
 
 // Class methods --------------------------------------------------------
@@ -228,7 +228,7 @@ func (vm *VM) initConcurrentRWLockObject() *ConcurrentRWLockObject {
 
 	return &ConcurrentRWLockObject{
 		BaseObj: &BaseObj{class: lockClass},
-		mutex:   sync.RWMutex{},
+		mutex:   &sync.RWMutex{},
 	}
 }
 
