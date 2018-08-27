@@ -3,8 +3,6 @@ package compiler
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/goby-lang/goby/compiler/parser"
 )
 
@@ -57,17 +55,6 @@ end`, parser.NormalMode)
 	if e, a := 3, ci[0].Instructions[0].SourceLine(); e != a {
 		t.Fatalf("Expect `%d` for first instruction source line. got: %d", e, a)
 	}
-}
-
-func TestCompileToInstructionsNormalModePanic(t *testing.T) {
-	assert.Panics(t, func() {
-		ci, err := CompileToInstructions(`99`, parser.NormalMode)
-		if err != nil {
-			t.Fatal(err.Error())
-		}
-
-		ci[0].Instructions[0].AnchorLine()
-	}, "The code did not panic")
 }
 
 func TestCompileToInstructionsTESTMode(t *testing.T) {
