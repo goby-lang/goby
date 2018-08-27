@@ -446,7 +446,8 @@ func (f *FloatObject) lessThan(arg Object) bool {
 // exponential format (straight number, without exponent `E<exp>`).
 func (f *FloatObject) ToString() string {
 	s := strconv.FormatFloat(f.value, 'f', -1, 64)
-	if strings.IndexAny(s, ".") == -1 {
+	// Add ".0" to represent a float number
+	if !strings.Contains(s, ".") {
 		return s + ".0"
 	}
 	return s
