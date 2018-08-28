@@ -3,12 +3,28 @@ package compiler
 import (
 	"testing"
 
+	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/compiler/parser"
 )
 
+type testInstruction struct {
+	actionName string
+	opCode     uint8
+	sourceLine int
+	paramsLen  int
+}
+
+func verifyInstructions(i *bytecode.Instruction, e testInstruction, t *testing.T) {
+	if i.ActionName() != e.actionName || i.Opcode != e.opCode || i.SourceLine() != e.sourceLine || len(i.Params) != e.paramsLen {
+		t.Fatalf("Line %d: expect ActionName: `%s`, opCode: %d, SourceLine: %d, paramsLen: %d. got: ActionName: `%s`, opCode: %d, SourceLine: %d, paramsLen: %d", i.Line(),
+			e.actionName, e.opCode, e.sourceLine, e.paramsLen,
+			i.ActionName(), i.Opcode, i.SourceLine(), len(i.Params))
+	}
+}
+
 func TestCompileToInstructionsNormalMode(t *testing.T) {
 
-	ci, err := CompileToInstructions(`
+	is, err := CompileToInstructions(`
 def bar(a)
   99 + a
 end
@@ -19,47 +35,36 @@ end`, parser.NormalMode)
 		t.Fatal(err.Error())
 	}
 
-	if e, a := uint8(10), ci[0].Instructions[0].Opcode; e != a {
-		t.Fatalf("Expect `%d` for first instruction opcode. got: %d", e, a)
+	tests := []struct {
+		line     int
+		expected testInstruction
+	}{
+		{
+			0,
+			testInstruction{actionName: "putobject", opCode: 10, sourceLine: 3, paramsLen: 1},
+		},
+		{
+			1,
+			testInstruction{actionName: "getlocal", opCode: 0, sourceLine: 3, paramsLen: 2},
+		},
+		{
+			2,
+			testInstruction{actionName: "send", opCode: 24, sourceLine: 3, paramsLen: 4},
+		},
+		{
+			3,
+			testInstruction{actionName: "leave", opCode: 29, sourceLine: 2, paramsLen: 0},
+		},
 	}
-
-	if e, a := "putobject: 99. source line: 3", ci[0].Instructions[0].Inspect(); e != a {
-		t.Fatalf("Expect `%s` for first instruction inspect. got: %s", e, a)
-	}
-
-	if e, a := 4, ci[1].Instructions[3].AnchorLine(); e != a {
-		t.Fatalf("Expect `%d` for first instruction inspect. got: %d", e, a)
-	}
-
-	if e, a := 99, ci[0].Instructions[0].Params[0]; e != a {
-		t.Fatalf("Expect `%d` for first instruction first param. got: %d", e, a)
-	}
-
-	// TODO: change the following simple public functions to public variables
-	if e, a := "bar", ci[0].Name(); e != a {
-		t.Fatalf("Expect `%s` for instruction set name. got: %s", e, a)
-	}
-
-	if e, a := "Def", ci[0].Type(); e != a {
-		t.Fatalf("Expect `%s` for instruction set type. got: %s", e, a)
-	}
-
-	if e, a := "putobject", ci[0].Instructions[0].ActionName(); e != a {
-		t.Fatalf("Expect `%s` for first instruction action name. got: %s", e, a)
-	}
-
-	if e, a := 0, ci[0].Instructions[0].Line(); e != a {
-		t.Fatalf("Expect `%d` for first instruction line. got: %d", e, a)
-	}
-
-	if e, a := 3, ci[0].Instructions[0].SourceLine(); e != a {
-		t.Fatalf("Expect `%d` for first instruction source line. got: %d", e, a)
+	for _, tt := range tests {
+		i := is[0].Instructions[tt.line]
+		verifyInstructions(i, tt.expected, t)
 	}
 }
 
 func TestCompileToInstructionsTESTMode(t *testing.T) {
 
-	ci, err := CompileToInstructions(`
+	is, err := CompileToInstructions(`
 module Foo
 end
 `, parser.TestMode)
@@ -68,39 +73,24 @@ end
 		t.Fatal(err.Error())
 	}
 
-	if e, a := uint8(29), ci[0].Instructions[0].Opcode; e != a {
-		t.Fatalf("Expect `%d` for first instruction opcode. got: %d", e, a)
+	tests := []struct {
+		line     int
+		expected testInstruction
+	}{
+		{
+			0,
+			testInstruction{actionName: "leave", opCode: 29, sourceLine: 2, paramsLen: 0},
+		},
 	}
-
-	if e, a := "leave: . source line: 2", ci[0].Instructions[0].Inspect(); e != a {
-		t.Fatalf("Expect `%s` for first instruction inspect. got: %s", e, a)
-	}
-
-	// TODO: change the following simple public functions to public variables
-	if e, a := "Foo", ci[0].Name(); e != a {
-		t.Fatalf("Expect `%s` for instruction set name. got: %s", e, a)
-	}
-
-	if e, a := "DefClass", ci[0].Type(); e != a {
-		t.Fatalf("Expect `%s` for instruction set type. got: %s", e, a)
-	}
-
-	if e, a := "leave", ci[0].Instructions[0].ActionName(); e != a {
-		t.Fatalf("Expect `%s` for first instruction action name. got: %s", e, a)
-	}
-
-	if e, a := 0, ci[0].Instructions[0].Line(); e != a {
-		t.Fatalf("Expect `%d` for first instruction line. got: %d", e, a)
-	}
-
-	if e, a := 2, ci[0].Instructions[0].SourceLine(); e != a {
-		t.Fatalf("Expect `%d` for first instruction source line. got: %d", e, a)
+	for _, tt := range tests {
+		i := is[0].Instructions[tt.line]
+		verifyInstructions(i, tt.expected, t)
 	}
 }
 
 func TestCompileToInstructionsREPLMode(t *testing.T) {
 
-	ci, err := CompileToInstructions(`
+	is, err := CompileToInstructions(`
 def bar(a)
   99 + a
 end
@@ -112,33 +102,30 @@ end
 		t.Fatal(err.Error())
 	}
 
-	if e, a := uint8(10), ci[0].Instructions[0].Opcode; e != a {
-		t.Fatalf("Expect `%d` for first instruction opcode. got: %d", e, a)
+	tests := []struct {
+		line     int
+		expected testInstruction
+	}{
+		{
+			0,
+			testInstruction{actionName: "putobject", opCode: 10, sourceLine: 3, paramsLen: 1},
+		},
+		{
+			1,
+			testInstruction{actionName: "getlocal", opCode: 0, sourceLine: 3, paramsLen: 2},
+		},
+		{
+			2,
+			testInstruction{actionName: "send", opCode: 24, sourceLine: 3, paramsLen: 4},
+		},
+		{
+			3,
+			testInstruction{actionName: "leave", opCode: 29, sourceLine: 2, paramsLen: 0},
+		},
 	}
-
-	if e, a := "putobject: 99. source line: 3", ci[0].Instructions[0].Inspect(); e != a {
-		t.Fatalf("Expect `%s` for first instruction inspect. got: %s", e, a)
-	}
-
-	// TODO: change the following simple public functions to public variables
-	if e, a := "bar", ci[0].Name(); e != a {
-		t.Fatalf("Expect `%s` for instruction set name. got: %s", e, a)
-	}
-
-	if e, a := "Def", ci[0].Type(); e != a {
-		t.Fatalf("Expect `%s` for instruction set type. got: %s", e, a)
-	}
-
-	if e, a := "putobject", ci[0].Instructions[0].ActionName(); e != a {
-		t.Fatalf("Expect `%s` for first instruction action name. got: %s", e, a)
-	}
-
-	if e, a := 0, ci[0].Instructions[0].Line(); e != a {
-		t.Fatalf("Expect `%d` for first instruction line. got: %d", e, a)
-	}
-
-	if e, a := 3, ci[0].Instructions[0].SourceLine(); e != a {
-		t.Fatalf("Expect `%d` for first instruction source line. got: %d", e, a)
+	for _, tt := range tests {
+		i := is[0].Instructions[tt.line]
+		verifyInstructions(i, tt.expected, t)
 	}
 }
 
