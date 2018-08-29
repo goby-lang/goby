@@ -202,7 +202,7 @@ func (t *Thread) reportErrorAndStop(e interface{}) {
 			err.storedTraces = true
 		}
 
-		if t.vm.mode == NormalMode {
+		if t.vm.mode == parser.NormalMode {
 
 			if t.isMainThread() {
 				os.Exit(1)
