@@ -114,14 +114,14 @@ func (i *Instruction) AnchorLine() int {
 	panic("you are calling AnchorLine on an instruction without anchors")
 }
 
-// TODO: needs to change the func to simple public variable
 // Line returns instruction's line number
+// TODO: needs to change the func to simple public variable
 func (i *Instruction) Line() int {
 	return i.line
 }
 
-// TODO: needs to change the func to simple public variable
 // SourceLine returns instruction's source line number
+// TODO: needs to change the func to simple public variable
 func (i *Instruction) SourceLine() int {
 	return i.sourceLine
 }
@@ -145,14 +145,14 @@ type ArgSet struct {
 	types []uint8
 }
 
-// TODO: needs to change the func to simple public variable
 // Types are the getter method of *ArgSet's types attribute
+// TODO: needs to change the func to simple public variable
 func (as *ArgSet) Types() []uint8 {
 	return as.types
 }
 
-// TODO: needs to change the func to simple public variable
 // Names are the getter method of *ArgSet's names attribute
+// TODO: needs to change the func to simple public variable
 func (as *ArgSet) Names() []string {
 	return as.names
 }
@@ -172,20 +172,20 @@ func (as *ArgSet) setArg(index int, name string, argType uint8) {
 	as.types[index] = argType
 }
 
-// TODO: needs to change the func to simple public variable
 // ArgTypes returns enums that represents each argument's type
+// TODO: needs to change the func to simple public variable
 func (is *InstructionSet) ArgTypes() *ArgSet {
 	return is.argTypes
 }
 
-// TODO: needs to change the func to simple public variable
 // Name returns instruction set's name
+// TODO: needs to change the func to simple public variable
 func (is *InstructionSet) Name() string {
 	return is.name
 }
 
-// TODO: needs to change the func to simple public variable
 // SetType returns instruction's type
+// TODO: needs to change the func to simple public variable
 func (is *InstructionSet) Type() string {
 	return is.isType
 }
