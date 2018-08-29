@@ -129,14 +129,6 @@
   revision = "0405a10ef6ad0c60ffd715d3bcdfdc1555741ac7"
 
 [[projects]]
-  digest = "1:18752d0b95816a1b777505a97f71c7467a8445b8ffb55631a7bf779f6ba4fa83"
-  name = "github.com/stretchr/testify"
-  packages = ["assert"]
-  pruneopts = "UT"
-  revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
-  version = "v1.2.2"
-
-[[projects]]
   digest = "1:15f3bd7ec88a9093cc01c63933f9860ee8d371f1169aeacb58ab0473ebd0bb69"
   name = "golang.org/x/sys"
   packages = ["unix"]
@@ -159,7 +151,6 @@
     "github.com/mattn/go-colorable",
     "github.com/pkg/profile",
     "github.com/st0012/metago",
-    "github.com/stretchr/testify/assert",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
