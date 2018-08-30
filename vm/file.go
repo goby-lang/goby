@@ -156,22 +156,22 @@ func builtinFileClassMethods() []*BuiltinMethodObject {
 				fn = args[0].(*StringObject).value
 				mode = syscall.O_RDONLY
 				perm = os.FileMode(0755)
-				
+
 				if aLen >= 2 {
 					m := args[1].(*StringObject).value
 					md, ok := fileModeTable[m]
-					
+
 					if !ok {
 						return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Unknown file mode: %s", m)
 					}
-					
+
 					if md == syscall.O_RDWR || md == syscall.O_WRONLY {
 						os.Create(fn)
 					}
-					
+
 					mode = md
 					perm = os.FileMode(0755)
-					
+
 					if aLen == 3 {
 						p := args[2].(*IntegerObject).value
 						perm = os.FileMode(p)
