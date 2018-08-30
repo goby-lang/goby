@@ -13,16 +13,7 @@ import (
 	"github.com/goby-lang/goby/vm"
 )
 
-func TestMain(m *testing.M) {
-	setup()
-	ret := m.Run()
-	//if ret == 0 {
-	//	teardown()
-	//}
-	os.Exit(ret)
-}
-
-func setup() {
+func init() {
 	_, err := os.Stat("./goby")
 	if err != nil {
 		fmt.Println("Goby binary not found, building")
@@ -37,10 +28,8 @@ func setup() {
 	} else {
 		fmt.Println("Using existing Goby binary. Testing ./goby")
 	}
-}
 
-//func teardown() {
-//}
+}
 
 func execGoby(t *testing.T, args ...string) (in io.WriteCloser, out io.ReadCloser) {
 	exec.Command("rm ./goby")
