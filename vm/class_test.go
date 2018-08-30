@@ -1013,6 +1013,167 @@ func TestInheritsMethodMissingMethod(t *testing.T) {
 	}
 }
 
+func TestRaiseMethod(t *testing.T) {
+	testsFail := []struct {
+		input       string
+		expected    string
+		expectedCFP int
+		expectedSP  int
+	}{
+		{`raise`, "InternalError: ", 1, 1},
+		{`raise "Foo"`, "InternalError: 'Foo'", 1, 1},
+		{`
+		class BarError; end
+		raise BarError, "Foo"`, "BarError: 'Foo'", 1, 1},
+		{`
+		class FooError; end
+
+		def raise_foo
+		  raise FooError, "Foo"
+		end
+
+		raise_foo
+		`,
+			// Expect CFP to be 2 is because the `raise_foo`'s frame is not popped
+			// Expect SP to be 2 cause the program got stopped before it replaces receiver with the return value (error)
+			// TODO: This means we need to pop error object when implementing `rescue`
+			"FooError: 'Foo'", 2, 2},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, tt.expectedSP)
+	}
+}
+
+func TestRaiseMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`raise "Foo", "Bar"`, "ArgumentError: Expect argument #2 to be a class. got: String", 1},
+		{`
+		class BarError; end
+		raise BarError, "Foo", "Bar"`, "ArgumentError: Expect 2 or less argument(s). got: 3", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestRespondToMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{`
+		1.respond_to? :to_i
+		`, true},
+		{`
+		"string".respond_to? "+"
+		`, true},
+		{`
+		1.respond_to? :numerator
+		`, false},
+		{`
+		Class.respond_to? "respond_to?"
+		`, true},
+		{`
+		Class.respond_to? :phantom
+		`, false},
+	}
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestRespondToMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`1.respond_to?`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestRequireMethod(t *testing.T) {
+	input := `
+	require "uri"
+
+	u = URI.parse("http://example.com")
+	u.scheme
+	`
+	v := initTestVM()
+	evaluated := v.testEval(t, input, getFilename())
+	VerifyExpected(t, 0, evaluated, "http")
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
+}
+
+func TestRequireMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`require "bar"`, `IOError: Can't load "bar"`, 1},
+		{`require 1`, `TypeError: Can't require "Integer": Pass a string instead`, 1},
+		{`require "db", "json"`, `ArgumentError: Expect 1 argument(s). got: 2`, 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestRequireRelativeMethod(t *testing.T) {
+	input := `
+	require_relative("../test_fixtures/require_test/foo")
+
+	fifty = Foo.bar(5)
+
+	Foo.baz do |hundred|
+	  hundred + fifty + Bar.baz
+	end
+	`
+
+	v := initTestVM()
+	evaluated := v.testEval(t, input, getFilename())
+	VerifyExpected(t, 0, evaluated, 160)
+	v.checkCFP(t, 0, 0)
+	v.checkSP(t, 0, 1)
+}
+
+func TestRequireRelativeMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`require_relative "bar"`, `IOError: Can't load "bar"`, 1},
+		{`require_relative 1`, `TypeError: Can't require "Integer": Pass a string instead`, 1},
+		{`require_relative "db", "json"`, `ArgumentError: Expect 1 argument(s). got: 2`, 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestSendMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -1097,142 +1258,12 @@ func TestSendMethod(t *testing.T) {
 	}
 }
 
-func TestRequireRelativeMethod(t *testing.T) {
-	input := `
-	require_relative("../test_fixtures/require_test/foo")
-
-	fifty = Foo.bar(5)
-
-	Foo.baz do |hundred|
-	  hundred + fifty + Bar.baz
-	end
-	`
-
-	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
-	VerifyExpected(t, 0, evaluated, 160)
-	v.checkCFP(t, 0, 0)
-	v.checkSP(t, 0, 1)
-}
-
-func TestRequireMethod(t *testing.T) {
-	input := `
-	require "uri"
-
-	u = URI.parse("http://example.com")
-	u.scheme
-	`
-	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
-	VerifyExpected(t, 0, evaluated, "http")
-	v.checkCFP(t, 0, 0)
-	v.checkSP(t, 0, 1)
-}
-
-func TestRequireMethodFail(t *testing.T) {
+func TestSendMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`require "bar"`, `InternalError: Can't require "bar"`, 1},
-		{`require "db", "json"`, `ArgumentError: Expect 1 argument(s). got: 2`, 1},
-		{`require_relative "db", "json"`, `ArgumentError: Expect 1 argument(s). got: 2`, 1},
+		{`send`, `ArgumentError: Expect 1 or more argument(s). got: 0`, 1},
+		{`send(["foo"])`, `TypeError: Expect argument to be String. got: Array`, 1},
 	}
 
-	for i, tt := range testsFail {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkErrorMsg(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestRaiseMethod(t *testing.T) {
-	testsFail := []struct {
-		input       string
-		expected    string
-		expectedCFP int
-		expectedSP  int
-	}{
-		{`raise`, "InternalError: ", 1, 1},
-		{`raise "Foo"`, "InternalError: 'Foo'", 1, 1},
-		{`
-		class BarError; end
-		raise BarError, "Foo"`, "BarError: 'Foo'", 1, 1},
-		{`
-		class FooError; end
-
-		def raise_foo
-		  raise FooError, "Foo"
-		end
-
-		raise_foo
-		`,
-			// Expect CFP to be 2 is because the `raise_foo`'s frame is not popped
-			// Expect SP to be 2 cause the program got stopped before it replaces receiver with the return value (error)
-			// TODO: This means we need to pop error object when implementing `rescue`
-			"FooError: 'Foo'", 2, 2},
-	}
-
-	for i, tt := range testsFail {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkErrorMsg(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, tt.expectedSP)
-	}
-}
-
-func TestRaiseMethodFail(t *testing.T) {
-	testsFail := []errorTestCase{
-		{`raise "Foo", "Bar"`, "ArgumentError: Expect error class, got: String", 1},
-		{`
-		class BarError; end
-		raise BarError, "Foo", "Bar"`, "ArgumentError: Expect 2 or less argument(s). got: 3", 1},
-	}
-
-	for i, tt := range testsFail {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkErrorMsg(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestRespondToMethod(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected bool
-	}{
-		{`
-		1.respond_to? :to_i
-		`, true},
-		{`
-		"string".respond_to? "+"
-		`, true},
-		{`
-		1.respond_to? :numerator
-		`, false},
-		{`
-		Class.respond_to? "respond_to?"
-		`, true},
-		{`
-		Class.respond_to? :phantom
-		`, false},
-	}
-	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		VerifyExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestRespondToMethodFail(t *testing.T) {
-	testsFail := []errorTestCase{
-		{`1.respond_to?`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
-	}
-	
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
