@@ -576,7 +576,7 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				var class *RClass
 
 				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 
 				switch r := receiver.(type) {
@@ -998,7 +998,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 				if len(args) != 1 {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
-				
+
 				arg, isStr := args[0].(*StringObject)
 
 				if !isStr {
@@ -1173,12 +1173,12 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 					errorClass, ok := args[0].(*RClass)
 
 					if !ok {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect error class, got: %s", args[0].Class().Name)
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongArgumentTypeFormatNum, 2, "a class", args[0].Class().Name)
 					}
 
 					return t.vm.InitErrorObject(errorClass.Name, sourceLine, "'%s'", args[1].ToString())
 				}
-				
+
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentLess, 2, aLen)
 
 			},
@@ -1232,7 +1232,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 				if len(args) != 1 {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
-				
+
 				switch args[0].(type) {
 				case *StringObject:
 					libName := args[0].(*StringObject).value
@@ -1245,7 +1245,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 						if !ok {
 							err := t.execGobyLib(libName + ".gb")
 							if err != nil {
-								return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Can't require \"%s\"", libName)
+								return t.vm.InitErrorObject(errors.IOError, sourceLine, errors.CantLoadFile, libName)
 							}
 						}
 						initFunc = func(v *VM) {
@@ -1259,7 +1259,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 
 					return TRUE
 				default:
-					return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Can't require \"%s\". Pass a string instead", args[0].(Object).Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.CantRequireNonString, args[0].(Object).Class().Name)
 				}
 
 			},
@@ -1281,19 +1281,21 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 				if len(args) != 1 {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
-				
+
 				switch args[0].(type) {
 				case *StringObject:
 					callerDir := path.Dir(t.vm.currentFilePath())
-					filepath := args[0].(*StringObject).value
-					filepath = path.Join(callerDir, filepath)
-					filepath = filepath + ".gb"
+					filePath := args[0].(*StringObject).value
+					filePath = path.Join(callerDir, filePath)
+					filePath = filePath + ".gb"
 
-					t.execFile(filepath)
+					if t.execFile(filePath) != nil {
+						return t.vm.InitErrorObject(errors.IOError, sourceLine, errors.CantLoadFile, args[0].(*StringObject).value)
+					}
 
 					return TRUE
 				default:
-					return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Can't require \"%s\". Pass a string instead", args[0].(Object).Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.CantRequireNonString, args[0].(Object).Class().Name)
 				}
 
 			},
@@ -1336,8 +1338,8 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "send",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) < 1 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "no method name given")
+				if len(args) == 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentMore, 1, 0)
 				}
 
 				name, ok := args[0].(*StringObject)
