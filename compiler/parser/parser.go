@@ -114,6 +114,8 @@ func New(l *lexer.Lexer) *Parser {
 // ParseProgram update program statements and return program
 func (p *Parser) ParseProgram() (program *ast.Program, err *errors.Error) {
 
+	fmt.Println("aa")
+
 	defer func() {
 		if recover() != nil {
 			err = p.error
