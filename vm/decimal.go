@@ -683,7 +683,7 @@ func (d *DecimalObject) rocketComparison(
 
 // ToString returns the object's approximate float value as the string format.
 func (d *DecimalObject) ToString() string {
-	fs := d.value.FloatString(60)
+	fs := d.value.FloatString(32)
 	fs = strings.TrimRight(fs, "0")
 	fs = strings.TrimRight(fs, ".")
 	return fs

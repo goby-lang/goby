@@ -2,6 +2,7 @@ package vm
 
 import (
 	"math"
+	"strings"
 
 	"strconv"
 
@@ -444,7 +445,12 @@ func (f *FloatObject) lessThan(arg Object) bool {
 // ToString returns the object's value as the string format, in non
 // exponential format (straight number, without exponent `E<exp>`).
 func (f *FloatObject) ToString() string {
-	return strconv.FormatFloat(f.value, 'f', -1, 64) // fmt.Sprintf("%f", f.value)
+	s := strconv.FormatFloat(f.value, 'f', -1, 64)
+	// Add ".0" to represent a float number
+	if !strings.Contains(s, ".") {
+		return s + ".0"
+	}
+	return s
 }
 
 // ToJSON just delegates to ToString

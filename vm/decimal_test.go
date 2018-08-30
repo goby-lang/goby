@@ -375,3 +375,109 @@ func TestDecimalZeroDivisionFail(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
+func TestDecimalTruncation(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`["9.0".to_d][0].to_s`, "9"},
+		{`["9.00".to_d][0].to_s`, "9"},
+		{`["1.0".to_d][0].to_s`, "1"},
+		{`["1.00".to_d][0].to_s`, "1"},
+		{`["0.0".to_d][0].to_s`, "0"},
+		{`["0.00".to_d][0].to_s`, "0"},
+		{`["0.00".to_d][0].class.to_s`, "Decimal"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestDecimalNumberOfDigit(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`"3.14".to_d.to_s`, "3.14"},
+		{`"3.141".to_d.to_s`, "3.141"},
+		{`"3.1415".to_d.to_s`, "3.1415"},
+		{`"3.14159".to_d.to_s`, "3.14159"},
+		{`"3.141592".to_d.to_s`, "3.141592"},
+		{`"3.1415926".to_d.to_s`, "3.1415926"},
+		{`"3.14159265".to_d.to_s`, "3.14159265"},
+		{`"3.141592653".to_d.to_s`, "3.141592653"},
+		{`"3.1415926535".to_d.to_s`, "3.1415926535"},
+		{`"3.14159265358".to_d.to_s`, "3.14159265358"},
+		{`"3.141592653589".to_d.to_s`, "3.141592653589"},
+		{`"3.1415926535897".to_d.to_s`, "3.1415926535897"},
+		{`"3.14159265358979".to_d.to_s`, "3.14159265358979"},
+		{`"3.141592653589793".to_d.to_s`, "3.141592653589793"},
+		{`"3.1415926535897932".to_d.to_s`, "3.1415926535897932"},
+		{`"3.1415926535897932384626".to_d.to_s`, "3.1415926535897932384626"},
+		{`"-3.14".to_d.to_s`, "-3.14"},
+		{`"-3.141".to_d.to_s`, "-3.141"},
+		{`"-3.1415".to_d.to_s`, "-3.1415"},
+		{`"-3.14159".to_d.to_s`, "-3.14159"},
+		{`"-3.141592".to_d.to_s`, "-3.141592"},
+		{`"-3.1415926".to_d.to_s`, "-3.1415926"},
+		{`"-3.14159265".to_d.to_s`, "-3.14159265"},
+		{`"-3.141592653".to_d.to_s`, "-3.141592653"},
+		{`"-3.1415926535".to_d.to_s`, "-3.1415926535"},
+		{`"-3.14159265358".to_d.to_s`, "-3.14159265358"},
+		{`"-3.141592653589".to_d.to_s`, "-3.141592653589"},
+		{`"-3.1415926535897".to_d.to_s`, "-3.1415926535897"},
+		{`"-3.14159265358979".to_d.to_s`, "-3.14159265358979"},
+		{`"-3.141592653589793".to_d.to_s`, "-3.141592653589793"},
+		{`"-3.1415926535897932".to_d.to_s`, "-3.1415926535897932"},
+		{`"-3.1415926535897932384626".to_d.to_s`, "-3.1415926535897932384626"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestDecimalMinusZero(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`"0.0".to_d.to_s`, "0"},
+		{`"-0.0".to_d.to_s`, "0"},
+
+		{`("-0.0".to_d == "0.0".to_d).to_s`, "true"},
+
+		{`("0.0".to_d + "0.0".to_d).to_s`, "0"},
+		{`("0.0".to_d + "-0.0".to_d).to_s`, "0"},
+		{`("0.0".to_d - "0.0".to_d).to_s`, "0"},
+		{`("0.0".to_d - "-0.0".to_d).to_s`, "0"},
+
+		{`("-0.0".to_d + "0.0".to_d).to_s`, "0"},
+		{`("-0.0".to_d + "-0.0".to_d).to_s`, "0"},
+		{`("-0.0".to_d - "0.0".to_d).to_s`, "0"},
+		{`("-0.0".to_d - "-0.0".to_d).to_s`, "0"},
+
+		{`("0.0".to_d * "0.0".to_d).to_s`, "0"},
+		{`("0.0".to_d * "-0.0".to_d).to_s`, "0"},
+		{`("-0.0".to_d * "0.0".to_d).to_s`, "0"},
+		{`("-0.0".to_d * "-0.0".to_d).to_s`, "0"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
