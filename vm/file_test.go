@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"os/exec"
 	"testing"
 )
 
@@ -210,4 +211,14 @@ func TestFileSplitMethod(t *testing.T) {
 	}
 }
 
-//@TODO add test for chmod form a847c8b41f29657b380c1731ec36a660dbf49bc4
+// Helper functions -----------------------------------------------------
+func setup() {
+	// initialize test directory
+	exec.Command("rm", "-rf", "/tmp/goby/*").Run()
+	exec.Command("mkdir", "/tmp/goby").Run()
+}
+
+func teardown() {
+	// initialize test directory
+	exec.Command("rm", "-rf", "/tmp/goby/*").Run()
+}
