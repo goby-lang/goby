@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+
 	"github.com/goby-lang/goby/compiler/bytecode"
 )
 
@@ -33,28 +34,12 @@ func newCallObject(receiver Object, method *MethodObject, receiverPtr, argCount 
 	}
 }
 
-func (co *callObject) instructionSet() *instructionSet {
-	return co.method.instructionSet
-}
-
-func (co *callObject) paramTypes() []uint8 {
-	return co.instructionSet().paramTypes.Types()
-}
-
-func (co *callObject) paramNames() []string {
-	return co.instructionSet().paramTypes.Names()
-}
-
-func (co *callObject) methodName() string {
-	return co.method.Name
-}
-
 func (co *callObject) argTypes() []uint8 {
 	if co.argSet == nil {
 		return []uint8{}
 	}
 
-	return co.argSet.Types()
+	return co.argSet.Types
 }
 
 func (co *callObject) argPtr() int {
@@ -66,7 +51,7 @@ func (co *callObject) argPosition() int {
 }
 
 func (co *callObject) assignNormalArguments(stack []*Pointer) {
-	for i, paramType := range co.paramTypes() {
+	for i, paramType := range co.method.instructionSet.ArgSet.Types {
 		if paramType == bytecode.NormalArg {
 			co.callFrame.insertLCL(i, 0, stack[co.argPosition()].Target)
 			co.argIndex++
@@ -104,13 +89,13 @@ func (co *callObject) assignNormalAndOptionedArguments(paramIndex int, stack []*
 func (co *callObject) assignKeywordArguments(stack []*Pointer) (err error) {
 	for argIndex, argType := range co.argTypes() {
 		if argType == bytecode.RequiredKeywordArg || argType == bytecode.OptionalKeywordArg {
-			argName := co.argSet.Names()[argIndex]
+			argName := co.argSet.Names[argIndex]
 			paramIndex, ok := co.hasKeywordParam(argName)
 
 			if ok {
 				co.callFrame.insertLCL(paramIndex, 0, stack[co.argPtr()+argIndex].Target)
 			} else {
-				err = fmt.Errorf("unknown key %s for method %s", argName, co.methodName())
+				err = fmt.Errorf("unknown key %s for method %s", argName, co.method.Name)
 			}
 		}
 	}
@@ -119,7 +104,7 @@ func (co *callObject) assignKeywordArguments(stack []*Pointer) (err error) {
 }
 
 func (co *callObject) assignSplatArgument(stack []*Pointer, arr *ArrayObject) {
-	index := len(co.paramTypes()) - 1
+	index := len(co.method.instructionSet.ArgSet.Types) - 1
 
 	for co.argIndex < co.argCount {
 		arr.Elements = append(arr.Elements, stack[co.argPosition()].Target)
@@ -130,8 +115,8 @@ func (co *callObject) assignSplatArgument(stack []*Pointer, arr *ArrayObject) {
 }
 
 func (co *callObject) hasKeywordParam(name string) (index int, result bool) {
-	for paramIndex, paramType := range co.paramTypes() {
-		paramName := co.paramNames()[paramIndex]
+	for paramIndex, paramType := range co.method.instructionSet.ArgSet.Types {
+		paramName := co.method.instructionSet.ArgSet.Names[paramIndex]
 
 		if paramName == name && (paramType == bytecode.RequiredKeywordArg || paramType == bytecode.OptionalKeywordArg) {
 			index = paramIndex
@@ -145,7 +130,7 @@ func (co *callObject) hasKeywordParam(name string) (index int, result bool) {
 
 func (co *callObject) hasKeywordArgument(name string) (index int, result bool) {
 	for argIndex, argType := range co.argTypes() {
-		argName := co.argSet.Names()[argIndex]
+		argName := co.argSet.Names[argIndex]
 
 		if argName == name && (argType == bytecode.RequiredKeywordArg || argType == bytecode.OptionalKeywordArg) {
 			index = argIndex
@@ -158,7 +143,7 @@ func (co *callObject) hasKeywordArgument(name string) (index int, result bool) {
 }
 
 func (co *callObject) normalParamsCount() (n int) {
-	for _, at := range co.paramTypes() {
+	for _, at := range co.method.instructionSet.ArgSet.Types {
 		if at == bytecode.NormalArg {
 			n++
 		}

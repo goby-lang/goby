@@ -382,26 +382,26 @@ func (t *Thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 // TODO: Move instruction into call object
 func (t *Thread) evalMethodObject(call *callObject) {
 	normalParamsCount := call.normalParamsCount()
-	paramTypes := call.paramTypes()
-	paramsCount := len(call.paramTypes())
+	paramTypes := call.method.instructionSet.ArgSet.Types
+	paramsCount := len(call.method.instructionSet.ArgSet.Types)
 	stack := t.Stack.data
 	sourceLine := call.sourceLine
 
 	if call.argCount > paramsCount && !call.method.isSplatArgIncluded() {
-		t.reportArgumentError(sourceLine, paramsCount, call.methodName(), call.argCount, call.receiverPtr)
+		t.reportArgumentError(sourceLine, paramsCount, call.method.Name, call.argCount, call.receiverPtr)
 	}
 
 	if normalParamsCount > call.argCount {
-		t.reportArgumentError(sourceLine, normalParamsCount, call.methodName(), call.argCount, call.receiverPtr)
+		t.reportArgumentError(sourceLine, normalParamsCount, call.method.Name, call.argCount, call.receiverPtr)
 	}
 
 	// Check if arguments include all the required keys before assign keyword arguments
 	for paramIndex, paramType := range paramTypes {
 		switch paramType {
 		case bytecode.RequiredKeywordArg:
-			paramName := call.paramNames()[paramIndex]
+			paramName := call.method.instructionSet.ArgSet.Names[paramIndex]
 			if _, ok := call.hasKeywordArgument(paramName); !ok {
-				t.setErrorObject(call.receiverPtr, call.argPtr(), errors.ArgumentError, sourceLine, "Method %s requires key argument %s", call.methodName(), paramName)
+				t.setErrorObject(call.receiverPtr, call.argPtr(), errors.ArgumentError, sourceLine, "Method %s requires key argument %s", call.method.Name, paramName)
 			}
 		}
 	}

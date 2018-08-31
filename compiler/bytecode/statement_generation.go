@@ -16,7 +16,7 @@ const (
 )
 
 func (g *Generator) compileStatements(stmts []ast.Statement, scope *scope, table *localTable) {
-	is := &InstructionSet{isType: Program, name: Program}
+	is := &InstructionSet{InstType: Program, Name: Program}
 
 	for _, statement := range stmts {
 		g.compileStatement(is, statement, scope, table)
@@ -120,7 +120,7 @@ func (g *Generator) compileBreakStatement(is *InstructionSet, stmt ast.Statement
 
 			y # 12
 		*/
-		if is.isType == Block {
+		if is.InstType == Block {
 			is.define(Break, stmt.Line())
 		}
 		jp := is.define(Jump, stmt.Line(), scope.anchors["break"])
@@ -146,8 +146,8 @@ func (g *Generator) compileClassStmt(is *InstructionSet, stmt *ast.ClassStatemen
 
 	// compile class's content
 	newIS := &InstructionSet{}
-	newIS.name = stmt.Name.Value
-	newIS.isType = ClassDef
+	newIS.Name = stmt.Name.Value
+	newIS.InstType = ClassDef
 
 	g.compileCodeBlock(newIS, stmt.Body, scope, scope.localTable)
 	newIS.define(Leave, stmt.Line())
@@ -161,8 +161,8 @@ func (g *Generator) compileModuleStmt(is *InstructionSet, stmt *ast.ModuleStatem
 
 	scope = newScope()
 	newIS := &InstructionSet{}
-	newIS.name = stmt.Name.Value
-	newIS.isType = ClassDef
+	newIS.Name = stmt.Name.Value
+	newIS.InstType = ClassDef
 
 	g.compileCodeBlock(newIS, stmt.Body, scope, scope.localTable)
 	newIS.define(Leave, stmt.Line())
@@ -185,11 +185,11 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 
 	// compile method definition's content
 	newIS := &InstructionSet{
-		name:   stmt.Name.Value,
-		isType: MethodDef,
-		argTypes: &ArgSet{
-			names: make([]string, len(stmt.Parameters)),
-			types: make([]uint8, len(stmt.Parameters)),
+		Name:     stmt.Name.Value,
+		InstType: MethodDef,
+		ArgSet: &ArgSet{
+			Names: make([]string, len(stmt.Parameters)),
+			Types: make([]uint8, len(stmt.Parameters)),
 		},
 	}
 
@@ -198,7 +198,7 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 		case *ast.Identifier:
 			scope.localTable.setLCL(exp.Value, scope.localTable.depth)
 
-			newIS.argTypes.setArg(i, exp.Value, NormalArg)
+			newIS.ArgSet.setArg(i, exp.Value, NormalArg)
 		case *ast.AssignExpression:
 			exp.Optioned = 1
 
@@ -206,7 +206,7 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 			varName := v.(*ast.Identifier)
 			g.compileAssignExpression(newIS, exp, scope, scope.localTable)
 
-			newIS.argTypes.setArg(i, varName.Value, OptionedArg)
+			newIS.ArgSet.setArg(i, varName.Value, OptionedArg)
 		case *ast.PrefixExpression:
 			if exp.Operator != "*" {
 				continue
@@ -219,7 +219,7 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 			newIS.define(NewArray, exp.Line(), 0)
 			newIS.define(SetLocal, exp.Line(), depth, index, 1)
 
-			newIS.argTypes.setArg(i, ident.Value, SplatArg)
+			newIS.ArgSet.setArg(i, ident.Value, SplatArg)
 		case *ast.ArgumentPairExpression:
 			key := exp.Key.(*ast.Identifier)
 			index, depth := scope.localTable.setLCL(key.Value, scope.localTable.depth)
@@ -227,9 +227,9 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 			if exp.Value != nil {
 				g.compileExpression(newIS, exp.Value, scope, scope.localTable)
 				newIS.define(SetLocal, exp.Line(), depth, index, 1)
-				newIS.argTypes.setArg(i, key.Value, OptionalKeywordArg)
+				newIS.ArgSet.setArg(i, key.Value, OptionalKeywordArg)
 			} else {
-				newIS.argTypes.setArg(i, key.Value, RequiredKeywordArg)
+				newIS.ArgSet.setArg(i, key.Value, RequiredKeywordArg)
 			}
 		}
 	}

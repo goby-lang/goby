@@ -2,6 +2,7 @@ package bytecode
 
 import (
 	"fmt"
+
 	"github.com/goby-lang/goby/compiler/ast"
 )
 
@@ -94,8 +95,8 @@ func (g *Generator) compileGetBlockExpression(is *InstructionSet, exp *ast.GetBl
 func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpression, scope *scope, table *localTable) {
 	var blockInfo string
 	argSet := &ArgSet{
-		names: make([]string, len(exp.Arguments)),
-		types: make([]uint8, len(exp.Arguments)),
+		Names: make([]string, len(exp.Arguments)),
+		Types: make([]uint8, len(exp.Arguments)),
 	}
 
 	// Compile receiver
@@ -186,8 +187,8 @@ func (g *Generator) compileAssignExpression(is *InstructionSet, exp *ast.AssignE
 
 func (g *Generator) compileBlockArgExpression(index int, exp *ast.CallExpression, scope *scope, table *localTable) {
 	is := &InstructionSet{}
-	is.name = fmt.Sprint(index)
-	is.isType = Block
+	is.Name = fmt.Sprint(index)
+	is.InstType = Block
 
 	for i := 0; i < len(exp.BlockArguments); i++ {
 		table.set(exp.BlockArguments[i].Value)

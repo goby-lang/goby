@@ -19,7 +19,7 @@ type instructionSet struct {
 	name         string
 	instructions []*bytecode.Instruction
 	filename     filename
-	paramTypes   *bytecode.ArgSet
+	ArgSet       *bytecode.ArgSet
 }
 
 var operations map[operationType]operation

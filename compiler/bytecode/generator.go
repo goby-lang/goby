@@ -57,7 +57,7 @@ func (g *Generator) compileCodeBlock(is *InstructionSet, stmt *ast.BlockStatemen
 }
 
 func (g *Generator) endInstructions(is *InstructionSet, sourceLine int) {
-	if g.REPL && is.name == Program {
+	if g.REPL && is.Name == Program {
 		return
 	}
 	is.define(Leave, sourceLine)

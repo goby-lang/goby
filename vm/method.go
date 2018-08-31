@@ -44,7 +44,7 @@ func (m *MethodObject) Value() interface{} {
 }
 
 func (m *MethodObject) paramTypes() []uint8 {
-	return m.instructionSet.paramTypes.Types()
+	return m.instructionSet.ArgSet.Types
 }
 
 func (m *MethodObject) isSplatArgIncluded() bool {

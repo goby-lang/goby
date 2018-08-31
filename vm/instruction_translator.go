@@ -26,8 +26,8 @@ func newInstructionTranslator(file filename) *instructionTranslator {
 }
 
 func (it *instructionTranslator) setMetadata(is *instructionSet, set *bytecode.InstructionSet) {
-	t := set.Type()
-	n := set.Name()
+	t := set.InstType
+	n := set.Name
 
 	is.name = n
 
@@ -45,7 +45,7 @@ func (it *instructionTranslator) transferInstructionSets(sets []*bytecode.Instru
 	for _, set := range sets {
 		is := &instructionSet{filename: it.filename}
 		is.instructions = set.Instructions
-		is.paramTypes = set.ArgTypes()
+		is.ArgSet = set.ArgSet
 		it.setMetadata(is, set)
 	}
 }
