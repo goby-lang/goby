@@ -36,6 +36,7 @@ const (
 	WrongArgumentTypeFormat     = "Expect argument to be %s. got: %s"
 	WrongArgumentTypeFormatNum  = "Expect argument #%d to be %s. got: %s"
 	InvalidChmodNumber          = "Invalid chmod number. got: %d"
+	InvalidNumericString        = "Invalid numeric string. got: %s"
 	CantLoadFile                = "Can't load \"%s\""
 	CantRequireNonString        = "Can't require \"%s\": Pass a string instead"
 	CantYieldWithoutBlockFormat = "Can't yield without a block"

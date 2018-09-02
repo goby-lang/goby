@@ -993,8 +993,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 				if len(args) != 1 {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
-
-				regexpObj, ok := args[0].(*RegexpObject)
+				
+				arg := args[0]
+				regexpObj, ok := arg.(*RegexpObject)
 
 				if !ok {
 					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.RegexpClass, args[0].Class().Name)
@@ -1035,8 +1036,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 				if len(args) != 2 {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 2, len(args))
 				}
-
-				replacement, ok := args[1].(*StringObject)
+				
+				r := args[1]
+				replacement, ok := r.(*StringObject)
 				if !ok {
 					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormatNum, 2, classes.StringClass, args[1].Class().Name)
 				}
@@ -1082,8 +1084,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 				if len(args) != 2 {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 2, len(args))
 				}
-
-				replacement, ok := args[1].(*StringObject)
+				
+				r := args[1]
+				replacement, ok := r.(*StringObject)
 				if !ok {
 					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormatNum, 2, classes.StringClass, args[1].Class().Name)
 				}
@@ -1500,11 +1503,14 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 
-				str := receiver.(*StringObject).value
-
-				de, err := new(Decimal).SetString(str)
+				str, err := receiver.(*StringObject)
 				if err == false {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Invalid numeric string. got: %s", str)
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.InvalidNumericString, str.value)
+				}
+
+				de, err := new(Decimal).SetString(str.value)
+				if err == false {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.InvalidNumericString, str.value)
 				}
 
 				return t.vm.initDecimalObject(de)

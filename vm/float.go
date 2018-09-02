@@ -319,11 +319,15 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			Name: "to_d",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
-				fl := receiver.(*FloatObject).value
-				fs := strconv.FormatFloat(fl, 'f', -1, 64)
+				fl, err := receiver.(*FloatObject)
+				if err == false {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.InvalidNumericString, fl.value)
+				}
+
+				fs := strconv.FormatFloat(fl.value, 'f', -1, 64)
 				de, err := new(Decimal).SetString(fs)
 				if err == false {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Invalid numeric string. got=%v", fs)
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.InvalidNumericString, fs)
 				}
 
 				return t.vm.initDecimalObject(de)
