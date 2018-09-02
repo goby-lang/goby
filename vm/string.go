@@ -1503,14 +1503,11 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 
-				str, err := receiver.(*StringObject)
-				if err == false {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.InvalidNumericString, str.value)
-				}
+				str := receiver.(*StringObject).value
 
-				de, err := new(Decimal).SetString(str.value)
+				de, err := new(Decimal).SetString(str)
 				if err == false {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.InvalidNumericString, str.value)
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.InvalidNumericString, str)
 				}
 
 				return t.vm.initDecimalObject(de)
@@ -1546,10 +1543,10 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					}
 				}
 
-				parsedStr, err := strconv.ParseFloat(str, 64)
+				parsedStr, ok := strconv.ParseFloat(str, 64)
 
-				if err != nil {
-					return t.vm.initFloatObject(0)
+				if ok != nil {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.InvalidNumericString, str)
 				}
 
 				return t.vm.initFloatObject(parsedStr)

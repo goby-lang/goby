@@ -1275,7 +1275,6 @@ func TestStringConversion(t *testing.T) {
 		{`".5".to_f`, 0.5},
 		{`"  123.5".to_f`, 123.5},
 		{`"3.5e2".to_f`, 350.0},
-		{`"3.5ef".to_f`, 0.0},
 		{`
 		  arr = "Goby".to_a
 		  arr[0]
@@ -1371,6 +1370,8 @@ func TestStringConversionFail(t *testing.T) {
 		{`"str".to_i(1)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
 		{`"str".to_f(1)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
 		{`"str".to_s(1)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		{`"1.1.1".to_f`, "ArgumentError: Invalid numeric string. got: 1.1.1", 1},
+		{`"3.5ef".to_f`, "ArgumentError: Invalid numeric string. got: 3.5ef", 1},
 	}
 
 	for i, tt := range testsFail {
