@@ -11,7 +11,7 @@ import (
 	"github.com/goby-lang/goby/vm/errors"
 )
 
-// HashObject represents hash instances
+// HashObject represents hash instances.
 // Hash is a collection of key-value pair, which works like a dictionary.
 // Hash literal is represented with curly brackets `{ }` like `{ key: value }`.
 // Each key of the hash is unique and cannot be duplicate within the hash.
@@ -19,21 +19,25 @@ import (
 //
 // - **Key:** an alphanumeric word that starts with alphabet, without containing space and punctuations.
 // Underscore `_` can also be used within the key.
-// String literal like "mickey mouse" cannot be used as a hash key.
-// The internal key is actually a String and **not a Symbol** for now (TBD).
-// Thus only a String object or a string literal should be used when referencing with `[ ]`.
+// In hash literals, only a symbol literals such as `symbol:` can be used as a key.
+// String literal like "mickey mouse" cannot be used as a key in hash literals.
+// (String and symbol are equivalent in Goby)
+//
+// Retrieving a value via `[]`, you can use both symbol literals or string literals as keys.
 //
 // ```ruby
 // a = { balthazar1: 100 } # valid
 // b = { 2melchior: 200 }  # invalid
+// b = { "casper": 200 }   # invalid
 // x = 'balthazar1'
 //
 // a["balthazar1"]  # => 100
+// a[balthazar1:]   # => 100
 // a[x]             # => 100
 // a[balthazar1]    # => error
 // ```
 //
-// - **value:** String literal and objects (Integer, String, Array, Hash, nil, etc) can be used.
+// - **value:** String literals and objects (Integer, String, Array, Hash, nil, etc) can be used.
 //
 // **Note:**
 // - The order of key-value pairs are **not** preserved.
@@ -83,6 +87,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// h             #=> { a: 1, d: 2 }
 			// ```
 			//
+			// @param key [String]
 			// @return [Object]
 			Name: "[]",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -125,6 +130,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// h['d'] = { k: 'v' } #=> { k: 'v' }
 			// ```
 			//
+			// @param key [String]
 			// @return [Object] The value
 			Name: "[]=",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -148,8 +154,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Passes each (key, value) pair  of the collection to the given block. The method returns
-			// true if the block ever returns a value other than false or nil.
+			// Passes each (key, value) pair of the collection to the given block.
+			// The method returns true if any of the results by the block is true.
 			//
 			// ```ruby
 			// a = { a: 1, b: 2 }
@@ -173,6 +179,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//   true
 			// end            # => false
 			// ```
+			//
+			// @return [Boolean]
 			Name: "any?",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				if len(args) != 0 {
@@ -230,7 +238,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// {}.clear                         # => {}
 			// ```
 			//
-			// @return [Boolean]
+			// @return [Hash]
 			Name: "clear",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				if len(args) != 0 {
@@ -246,7 +254,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Return the default value of this Hash.
+			// Returns the configured default value of the Hash.
+			// If no default value has been specified, nil is returned.
 			//
 			// ```Ruby
 			// h = { a: 1 }
@@ -273,8 +282,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Set the default value of this Hash.
-			// Arrays/Hashes are not accepted, since they're unsafe.
+			// Sets the default value of this Hash for the missing keys, and returns the default value.
+			// Note that Arrays/Hashes are not accepted because they're unsafe.
 			//
 			// ```Ruby
 			// h = { a: 1 }
@@ -284,6 +293,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// h.default = [] #=> ArgumentError
 			// ```
 			//
+			// @param default value [Object]
 			// @return [Object]
 			Name: "default=",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -315,6 +325,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// h.delete("b") # =>  { a: 1, c: 3 }
 			// ```
 			//
+			// @param key [String]
 			// @return [Hash]
 			Name: "delete",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -339,10 +350,9 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Deletes every key-value pair from the hash for which block evaluates to anything except
-			// false and nil.
+			// Deletes every key-value pair from the hash for which block evaluates to anything except false and nil.
 			//
-			// Returns the hash.
+			// Returns the modified hash.
 			//
 			// ```Ruby
 			// { a: 1, b: 2}.delete_if do |k, v| v == 1 end # =>  { b: 2 }
@@ -351,13 +361,14 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// { a: 1, b: 2}.delete_if do |k, v| nil end    # =>  { a: 1, b: 2}
 			// ```
 			//
+			// @param block
 			// @return [Hash]
 			Name: "delete_if",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				if len(args) != 0 {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
-				
+
 				if blockFrame == nil {
 					return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 				}
@@ -393,8 +404,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Extracts the nested value specified by the sequence of idx objects by calling `dig` at
-			// each step, returning nil if any intermediate step is nil.
+			// Extracts the nested value specified by the sequence of idx objects by calling `dig` at each step,
+			// Returns nil if any intermediate step is nil.
 			//
 			// ```Ruby
 			// { a: 1 , b: 2 }.dig(:a)         # => 1
@@ -403,6 +414,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// { a: 1, b: 2 }.dig(:a, :b)      # => TypeError: Expect target to be Diggable
 			// ```
 			//
+			// @param key [String]
 			// @return [Object]
 			Name: "dig",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -431,6 +443,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// # => b->2
 			// ```
 			//
+			// @param block
 			// @return [Hash]
 			Name: "each",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -462,8 +475,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Loop through keys of the hash with given block frame. It also returns array of
-			// keys in alphabetical order.
+			// Loops through keys of the hash with given block frame.
+			// Then returns an array of keys in alphabetical order.
 			//
 			// ```Ruby
 			// h = { a: 1, b: "2", c: [1, 2, 3], d: { k: 'v' } }
@@ -476,6 +489,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// # => d
 			// ```
 			//
+			// @param block
 			// @return [Array]
 			Name: "each_key",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -507,8 +521,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Loop through values of the hash with given block frame. It also returns array of
-			// values of the hash in the alphabetical order of its key
+			// Loops through values of the hash with given block frame.
+			// Then returns an array of values of the hash in the alphabetical order of the keys.
 			//
 			// ```Ruby
 			// h = { a: 1, b: "2", c: [1, 2, 3], d: { k: "v" } }
@@ -521,6 +535,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// # => { k: "v" }
 			// ```
 			//
+			// @param block
+			// @return [Array]
 			Name: "each_value",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				if len(args) != 0 {
@@ -580,6 +596,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// { a: "Hello", b: "World" }.eql?(1) # => false
 			// ```
 			//
+			// @param object [Object]
 			// @return [Boolean]
 			Name: "eql?",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -599,19 +616,23 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns a value from the hash for the given key. If the key can’t be found, there are several
-			// options: With no other arguments, it will raise an ArgumentError exception; if default is
-			// given, then that will be returned; if the optional code block is specified, then that will be
-			// run and its result returned.
+			// Returns a value from the hash for the given key.
+			// If the key can’t be found, there are several options:
+			//
+			// - With no other arguments, it will raise an ArgumentError.
+			// - If a default value is given as a second argument, then that will be returned.
+			// - If an optional code block is specified, then runs the block and returns the result.
+			// - If a block and a second argument is given together, it raises an ArgumentError.
 			//
 			// ```Ruby
-			// h = { "spaghetti" => "eat" }
+			// h = { spaghetti: "eat" }
 			// h.fetch("spaghetti")                     #=> "eat"
 			// h.fetch("pizza")                         #=> ArgumentError
 			// h.fetch("pizza", "not eat")              #=> "not eat"
 			// h.fetch("pizza") do |el| "eat " + el end #=> "eat pizza"
 			// ```
 			//
+			// @param key [String], default value [Object]
 			// @return [Object]
 			Name: "fetch",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -619,39 +640,39 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 				if aLen < 1 || aLen > 2 {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentRange, 1, 2, aLen)
 				}
-				
+
 				key, ok := args[0].(*StringObject)
 				if !ok {
 					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, key.Class().Name)
 				}
-				
+
 				if aLen == 2 {
 					if blockFrame != nil {
 						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "The default argument can't be passed along with a block")
 					}
 					return args[1]
 				}
-				
+
 				hash := receiver.(*HashObject)
 				value, ok := hash.Pairs[key.value]
-				
+
 				if ok {
 					if blockFrame != nil {
 						t.callFrameStack.pop()
 					}
 					return value
 				}
-				
+
 				if blockFrame != nil {
 					return t.builtinMethodYield(blockFrame, key).Target
 				}
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "The value was not found, and no block has been provided")
-				
+
 			},
 		},
 		{
-			// Returns an array containing the values associated with the given keys but also raises
-			// ArgumentError when one of keys can’t be found.
+			// Returns an array containing the values associated with the given keys.
+			// When even one of keys can’t be found, it raises an ArgumentError.
 			//
 			// ```Ruby
 			// h = { cat: "feline", dog: "canine", cow: "bovine" }
@@ -661,11 +682,12 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// h.fetch_values("cow", "bird") do |k| k.upcase end #=> ["bovine", "BIRD"]
 			// ```
 			//
+			// @param key [String]...
 			// @return [ArrayObject]
 			Name: "fetch_values",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				aLen := len(args)
-				if aLen <1 {
+				if aLen < 1 {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentMore, 1, aLen)
 				}
 
@@ -704,18 +726,19 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns true if the key exist in the hash. Currently, it can only input string
+			// Returns true if the specified key exists in the hash
+			// Currently, only string can be taken.
 			// type object.
 			//
 			// ```Ruby
 			// h = { a: 1, b: "2", c: [1, 2, 3], d: { k: "v" } }
 			// h.has_key?("a") # => true
 			// h.has_key?("e") # => false
-			// # TODO: Support Symbol Type Key Input
 			// h.has_key?(:b)  # => true
 			// h.has_key?(:f)  # => false
 			// ```
 			//
+			// @param key [String]
 			// @return [Boolean]
 			Name: "has_key?",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -750,6 +773,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// h.has_value?({ k: "v" }) # => true
 			// ```
 			//
+			// @param value [Object]
 			// @return [Boolean]
 			Name: "has_value?",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -825,6 +849,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// result # => { a: 3, b: 6, c: 9 }
 			// ```
 			//
+			// @param block
 			// @return [Boolean]
 			Name: "map_values",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -855,14 +880,19 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns the number of key-value pairs of the hash.
+			// Returns a newly merged hash. One or more hashes can be taken.
+			// If keys are duplicate between the receiver and the argument, the last ones in the argument are prioritized.
 			//
 			// ```Ruby
 			// h = { a: 1, b: "2", c: [1, 2, 3] }
 			// h.merge({ b: "Hello", d: "World" })
 			// # => { a: 1, b: "Hello", c: [1, 2, 3], d: "World" }
+			//
+			// { a: "Hello"}.merge({a: 0}, {a: 99})
+			// # => { a: 99 }
 			// ```
 			//
+			// @param hash [Hash]
 			// @return [Hash]
 			Name: "merge",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -910,6 +940,9 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			//   false
 			// end            # => { }
 			// ```
+			//
+			// @param block
+			// @return [Hash]
 			Name: "select",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				if len(args) != 0 {
@@ -958,7 +991,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// # =>  ["b", "c"]
 			// ```
 			//
-			// @return [Boolean]
+			// @return [Array]
 			Name: "sorted_keys",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				if len(args) != 0 {
@@ -990,6 +1023,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// # => [["a", 3], ["b", 1]]
 			// ```
 			//
+			// @param sorting [Boolean]
 			// @return [Array]
 			Name: "to_a",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -1075,8 +1109,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			// Returns a new hash with the results of running the block once for every value.
-			// This method does not change the keys and unlike Hash#map_values, it does not
-			// change the receiver hash values.
+			// This method does not change the keys. Unlike Hash#map_values, it does not
+			// change the receiver's hash values.
 			//
 			// ```Ruby
 			// h = { a: 1, b: 2, c: 3 }
@@ -1087,6 +1121,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// result # => { a: 3, b: 6, c: 9 }
 			// ```
 			//
+			// @param block
 			// @return [Boolean]
 			Name: "transform_values",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -1114,20 +1149,21 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns an array of values (in arbitrary order)
+			// Returns an array of values.
+			// The order of the returned values are indeterminable.
 			//
 			// ```Ruby
 			// { a: 1, b: "2", c: [3, true, "Hello"] }.keys
 			// # =>  [1, "2", [3, true, "Hello"]] or ["2", [3, true, "Hello"], 1] ... etc
 			// ```
 			//
-			// @return [Boolean]
+			// @return [Array]
 			Name: "values",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				if len(args) != 0 {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
-				
+
 				h := receiver.(*HashObject)
 				var keys []Object
 				for _, v := range h.Pairs {
@@ -1144,7 +1180,8 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			// { a: 1, b: "2" }.values_at("a", "c") # => [1, nil]
 			// ```
 			//
-			// @return [Boolean]
+			// @param key [String]...
+			// @return [Array]
 			Name: "values_at",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				hash := receiver.(*HashObject)
