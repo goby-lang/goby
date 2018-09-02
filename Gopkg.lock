@@ -2,155 +2,90 @@
 
 
 [[projects]]
-  digest = "1:4337ac9fde4c6cb6b820c61e87d33a9e5e290398b14547ea1d544231bdcc0608"
   name = "github.com/chzyer/readline"
   packages = ["."]
-  pruneopts = "UT"
   revision = "41eea22f717c616615e1e59aa06cf831f9901f35"
 
 [[projects]]
-  digest = "1:e828e4d2c1c29316d9ec86817c34f738e2354bc5bafd5052838f4e2874036ed4"
   name = "github.com/dave/jennifer"
   packages = ["jen"]
-  pruneopts = "UT"
   revision = "0264ec47f284c27fe4f52072dc0f4da5a5771c04"
   version = "v0.19.0"
 
 [[projects]]
-  digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
-  name = "github.com/davecgh/go-spew"
-  packages = ["spew"]
-  pruneopts = "UT"
-  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
-  version = "v1.1.1"
-
-[[projects]]
-  digest = "1:72dc2b6056e7097f829260e4a2ff08d32fec6017df1982a66e110ab4128486f8"
   name = "github.com/dlclark/regexp2"
   packages = [
     ".",
-    "syntax",
+    "syntax"
   ]
-  pruneopts = "UT"
   revision = "487489b64fb796de2e55f4e8a4ad1e145f80e957"
   version = "v1.1.6"
 
 [[projects]]
-  digest = "1:bbc4aacabe6880bdbce849c64cb061b7eddf39f132af4ea2853ddd32f85fbec3"
-  name = "github.com/fatih/camelcase"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "44e46d280b43ec1531bb25252440e34f1b800b65"
-  version = "v1.0.0"
-
-[[projects]]
-  digest = "1:c7a2f7f84569a6da43ce84f78486b8d29b16f00d212947495e6a6da53ccb7e2c"
   name = "github.com/fatih/structs"
   packages = ["."]
-  pruneopts = "UT"
   revision = "74a29b9fac7397d933f47e33eba94d2d83a464a2"
 
 [[projects]]
-  digest = "1:874ca00e54068a78ce555979489511ec62cd4682bf068134dc4355753827895c"
   name = "github.com/gorilla/context"
   packages = ["."]
-  pruneopts = "UT"
   revision = "215affda49addc4c8ef7e2534915df2c8c35c6cd"
 
 [[projects]]
-  digest = "1:c661dee65a46d437daf269e5f5f462bd9df6d8e7c9750ad1655fb2cafdb177a6"
   name = "github.com/gorilla/mux"
   packages = ["."]
-  pruneopts = "UT"
   revision = "e444e69cbd2e2e3e0749a2f3c717cec491552bbf"
 
 [[projects]]
-  digest = "1:2ab363a8c11bd2b5a2eb39fb16d33f35ea52b5ea84bcab8a7b85f387c21f0215"
   name = "github.com/jmoiron/sqlx"
   packages = [
     ".",
-    "reflectx",
+    "reflectx"
   ]
-  pruneopts = "UT"
   revision = "398dd5876282499cdfd4cb8ea0f31a672abe9495"
 
 [[projects]]
-  digest = "1:b03f4259168b54b49f9c16b90695d5802972a87930d1f607a8d12f9d0e06f45c"
   name = "github.com/lib/pq"
   packages = [
     ".",
-    "oid",
+    "oid"
   ]
-  pruneopts = "UT"
   revision = "3cd0097429be7d611bb644ef85b42bfb102ceea4"
 
 [[projects]]
-  digest = "1:e7a356d838aa63087cdbe9e964e6b126625ef85400512615080a1891c456eb5b"
   name = "github.com/looplab/fsm"
   packages = ["."]
-  pruneopts = "UT"
   revision = "bcc3636384ce80a109a6039432b30ff5b82476ee"
 
 [[projects]]
-  digest = "1:d31f40ed77b6b781498304c73d84de5e37b33ef836dd358023fa023d3e662d2e"
   name = "github.com/mattn/go-colorable"
   packages = ["."]
-  pruneopts = "UT"
   revision = "6df6d4d004b64986bbb0d1b25945f42b44787e90"
 
 [[projects]]
-  digest = "1:fa610f9fe6a93f4a75e64c83673dfff9bf1a34bbb21e6102021b6bc7850834a3"
   name = "github.com/mattn/go-isatty"
   packages = ["."]
-  pruneopts = "UT"
   revision = "fc9e8d8ef48496124e79ae0df75490096eccf6fe"
   version = "v0.0.2"
 
 [[projects]]
-  digest = "1:cfa0d7741863a0e1d30e0ccdd4b48a96a471cdb47892303de8b92c3713af3e77"
   name = "github.com/pkg/profile"
   packages = ["."]
-  pruneopts = "UT"
   revision = "06b906832ed0e32302a942b63b6c5f8359034d26"
 
 [[projects]]
-  digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
-  name = "github.com/pmezard/go-difflib"
-  packages = ["difflib"]
-  pruneopts = "UT"
-  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
-  version = "v1.0.0"
-
-[[projects]]
-  digest = "1:80e03b016ef47d0aefefebca76e456b26ed6c6d34c8dd497e94b0b72bee3a3ab"
   name = "github.com/st0012/metago"
   packages = ["."]
-  pruneopts = "UT"
   revision = "0405a10ef6ad0c60ffd715d3bcdfdc1555741ac7"
 
 [[projects]]
-  digest = "1:15f3bd7ec88a9093cc01c63933f9860ee8d371f1169aeacb58ab0473ebd0bb69"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  pruneopts = "UT"
   revision = "abf9c25f54453410d0c6668e519582a9e1115027"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = [
-    "github.com/chzyer/readline",
-    "github.com/dave/jennifer/jen",
-    "github.com/dlclark/regexp2",
-    "github.com/fatih/camelcase",
-    "github.com/fatih/structs",
-    "github.com/gorilla/mux",
-    "github.com/jmoiron/sqlx",
-    "github.com/lib/pq",
-    "github.com/looplab/fsm",
-    "github.com/mattn/go-colorable",
-    "github.com/pkg/profile",
-    "github.com/st0012/metago",
-  ]
+  inputs-digest = "4e716ed5f8ae86789d82e6dde2de7173294b5296f4c3a57a3d78452e78cd4fc0"
   solver-name = "gps-cdcl"
   solver-version = 1
