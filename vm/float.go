@@ -46,6 +46,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```Ruby
 			// 1.1 + 2 # => 3.1
 			// ```
+			//
 			// @return [Float]
 			Name: "+",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -63,6 +64,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```Ruby
 			// 5.5 % 2 # => 1.5
 			// ```
+			//
 			// @return [Float]
 			Name: "%",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -80,6 +82,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```Ruby
 			// 1.5 - 1 # => 0.5
 			// ```
+			//
 			// @return [Float]
 			Name: "-",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -97,6 +100,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```Ruby
 			// 2.5 * 10 # => 25.0
 			// ```
+			//
 			// @return [Float]
 			Name: "*",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -114,6 +118,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```Ruby
 			// 4.0 ** 2.5 # => 32.0
 			// ```
+			//
 			// @return [Float]
 			Name: "**",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -131,6 +136,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```Ruby
 			// 7.5 / 3 # => 2.5
 			// ```
+			//
 			// @return [Float]
 			Name: "/",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -149,6 +155,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// 10 > -1 # => true
 			// 3 > 3 # => false
 			// ```
+			//
 			// @return [Boolean]
 			Name: ">",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -172,6 +179,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// 2 >= 1 # => true
 			// 1 >= 1 # => true
 			// ```
+			//
 			// @return [Boolean]
 			Name: ">=",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -194,6 +202,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// 1 < 3 # => true
 			// 1 < 1 # => false
 			// ```
+			//
 			// @return [Boolean]
 			Name: "<",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -217,6 +226,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// 1 <= 3 # => true
 			// 1 <= 1 # => true
 			// ```
+			//
 			// @return [Boolean]
 			Name: "<=",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -242,6 +252,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// 1.0 <=> 1 # => 0
 			// 3.5 <=> 1 # => 1
 			// ```
+			//
 			// @return [Float]
 			Name: "<=>",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -275,6 +286,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// 1.0 == 1     # => true
 			// 1.0 == '1.0' # => false
 			// ```
+			//
 			// @return [Boolean]
 			Name: "==",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -294,6 +306,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// 1.0 != 1     # => false
 			// 1.0 != '1.0' # => true
 			// ```
+			//
 			// @return [Boolean]
 			Name: "!=",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -337,11 +350,12 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```Ruby
 			// 100.1.to_i # => 100
 			// ```
+			//
 			// @return [Integer]
 			Name: "to_i",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				r := receiver.(*FloatObject)
-				newInt := t.vm.InitIntegerObject(int(r.value))
+				r := receiver.(*FloatObject).value
+				newInt := t.vm.InitIntegerObject(int(r))
 				newInt.flag = i
 				return newInt
 
