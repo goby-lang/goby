@@ -570,6 +570,38 @@ func builtinModuleCommonClassMethods() []*BuiltinMethodObject {
 				return class
 			},
 		},
+		// Activates `method_missing` method in ancestor class.
+		// You need to call the method when you are trying to use a user-defined `method_missing` in one of the ancestor classes.
+		// This makes `method_missing` safer and more trackable.
+		//
+		// ```ruby
+		// class Foo
+		//   def method_missing(name)
+		//     10
+		//   end
+		// end
+		//
+		// class Bar < Foo
+		// end
+		//
+		// Bar.new.bar #=> NoMethodError
+		// ```
+		//
+		// ```ruby
+		// class Foo
+		//   def method_missing(name)
+		//     10
+		//   end
+		// end
+		//
+		// class Bar < Foo
+		//   inherits_method_missing     # needs this for activation
+		// end
+		//
+		// Bar.new.bar #=> 10
+		// ```
+		//
+		// @return [Class]
 		{
 			Name: "inherits_method_missing",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -926,6 +958,17 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 				return FALSE
 			},
 		},
+		// Checks if the class of the instance has been activated with `inherits_method_missing`.
+		//
+		// ```ruby
+		// class Bar
+		//   inherits_method_missing
+		// end
+		//
+		// Bar.new.inherits_method_missing?  #=> true
+		// ```
+		//
+		// @return [Boolean]
 		{
 			Name: "inherits_method_missing?",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -941,6 +984,39 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 
 			},
 		},
+		// Evaluates the given block or Block object.
+		// The evaluation is performed within the context of the receiver.
+		//
+		// The variable `self` in the block or the Block object is set to the receiver
+		// while the code is executing, which allows the code access to the receiver's
+		// instance variables and private methods.
+		//
+		// No other arguments can be taken.
+		//
+		// ```ruby
+		// string = "String"
+		// string.instance_eval do
+		//   def new_method
+		//		 self.reverse
+		//   end
+		// end
+		// string.new_method  #=> "gnirtS"
+		// ```
+		//
+		// ```ruby
+		// block = Block.new do
+		//   def new_method
+		//     self.reverse
+		//   end
+		// end
+		// string = "String"
+		// string.instance_eval(block)
+		//
+		// string.new_method  #=> "gnirtS"
+		// ```
+		//
+		// @param block [Block]
+		// @return [Object]
 		{
 			Name: "instance_eval",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
