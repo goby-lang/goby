@@ -39,6 +39,7 @@ const (
 	CantLoadFile                = "Can't load \"%s\""
 	CantRequireNonString        = "Can't require \"%s\": Pass a string instead"
 	CantYieldWithoutBlockFormat = "Can't yield without a block"
+	NotDiggable                 = "Expect target to be Diggable, got %s"
 	DividedByZero               = "Divided by 0"
 	ChannelIsClosed             = "The channel is already closed."
 	TooSmallIndexValue          = "Index value %d too small for array. minimum: %d"

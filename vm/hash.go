@@ -1326,7 +1326,7 @@ func (h *HashObject) dig(t *Thread, keys []Object, sourceLine int) Object {
 	diggableCurrentValue, ok := currentValue.(Diggable)
 
 	if !ok {
-		return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect target to be Diggable, got %s", currentValue.Class().Name)
+		return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.NotDiggable, currentValue.Class().Name)
 	}
 
 	return diggableCurrentValue.dig(t, nextKeys, sourceLine)
