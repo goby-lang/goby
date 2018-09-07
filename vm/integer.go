@@ -396,9 +396,6 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_d",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) > 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 arguments. got: %d", len(args))
-				}
 				r := receiver.(*IntegerObject)
 				return t.vm.initDecimalObject(intToDecimal(r))
 
@@ -512,7 +509,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 				n := receiver.(*IntegerObject)
 
 				if n.value < 0 {
-					return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Expect integer to be positive value. got: %d", n.value)
+					return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Expect the receiver to be positive integer. got: %d", n.value)
 				}
 
 				if blockFrame == nil {
