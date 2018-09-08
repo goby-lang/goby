@@ -531,7 +531,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns the integer that count the string chars as UTF-8
+			// Returns the integer that count the string chars as UTF-8.
 			//
 			// ```ruby
 			// "abcde".count          # => 5
@@ -552,7 +552,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns a string which is being partially deleted with specified values
+			// Returns a string which is being partially deleted with specified values.
 			//
 			// ```ruby
 			// "Hello hello HeLlo".delete("el")        # => "Hlo hlo HeLlo"
@@ -561,6 +561,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// "Hello hello HeLlo".delete("el", "e") # => "Hllo hllo HLlo"
 			// ```
 			//
+			// @param string [String]
 			// @return [String]
 			Name: "delete",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -568,11 +569,10 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
-				d := args[0]
-				deleteStr, ok := d.(*StringObject)
+				deleteStr, ok := args[0].(*StringObject)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, d.Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 				}
 
 				str := receiver.(*StringObject).value
