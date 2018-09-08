@@ -661,7 +661,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			Name: "each_char",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 
 				if blockFrame == nil {
@@ -1055,7 +1055,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.RegexpFailure, args[0].Class().Name)
 					}
 				default:
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormatNum, 1, "String or Regexp", args[0].Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormatNum, 1, classes.StringClass+" or "+classes.RegexpClass, args[0].Class().Name)
 				}
 
 				return t.vm.InitStringObject(result)
@@ -1102,7 +1102,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.RegexpFailure, args[0].Class().Name)
 					}
 				default:
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormatNum, 1, "String or Regexp", args[0].Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormatNum, 1, classes.StringClass+" or "+classes.RegexpClass, args[0].Class().Name)
 				}
 
 				return t.vm.InitStringObject(result)

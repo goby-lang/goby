@@ -528,7 +528,7 @@ func TestStringEachCharMethodFail(t *testing.T) {
 		"Taipei".each_char(101) do |char|
 		  puts char
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 1},
+		`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
 		{`"Taipei".each_char`, "InternalError: Can't yield without a block", 1},
 	}
 
