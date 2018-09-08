@@ -236,7 +236,7 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			//
 			// **Note:**
-			// - Only `do`-`end` block is supported for now: `{ }` block is unavailable.
+			// - Only `do`-`end` block is supported: `{ }` block is unavailable.
 			// - Three-dot range `...` is not supported yet.
 			//
 			// @return [Range]
@@ -292,9 +292,15 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			// (-2..-5).include?(-2) # => true
 			// (-3..-5).include?(-2) # => false
 			// ```
+			//
+			// @param number [Integer]
 			// @return [Boolean]
 			Name: "include?",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
+				}
+
 				ro := receiver.(*RangeObject)
 
 				value := args[0].(*IntegerObject).value
@@ -373,6 +379,7 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			// (-1..-5).size # => 5
 			// (-1..7).size  # => 9
 			// ```
+			//
 			// @return [Integer]
 			Name: "size",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -415,9 +422,14 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			// sum # => 0
 			// ```
 			//
+			// @param positive number [Integer]
 			// @return [Range]
 			Name: "step",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 1 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
+				}
+
 				if blockFrame == nil {
 					return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 				}
@@ -425,7 +437,7 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 				ro := receiver.(*RangeObject)
 				step := args[0].(*IntegerObject).value
 				if step <= 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Step can't be 0 or negative")
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.NegativeValue, step)
 				}
 
 				blockFrameUsed := false
@@ -489,6 +501,7 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			// (1..5).to_s   # "(1..5)"
 			// (-1..-3).to_s # "(-1..-3)"
 			// ```
+			//
 			// @return [String]
 			Name: "to_s",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
