@@ -213,7 +213,7 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 							end = mid - 1
 						}
 					default:
-						return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect Integer or Boolean type. got=%s", r.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect argument to be Integer or Boolean. got: %s", r.Class().Name)
 					}
 				}
 
@@ -345,7 +345,7 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 				if len(args) != 0 {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
-				
+
 				if blockFrame == nil {
 					return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 				}
