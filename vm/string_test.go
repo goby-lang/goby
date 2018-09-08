@@ -244,6 +244,8 @@ func TestStringOperationFail(t *testing.T) {
 		{`"Taipei"[1] = true`, "TypeError: Expect argument to be String. got: Boolean", 1},
 		{`"Taipei"[]`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
 		{`"Taipei"[true] = 101`, "TypeError: Expect argument to be Integer. got: Boolean", 1},
+		{`"Taipei"[20] = 101`, "ArgumentError: Index value out of range. got: 20", 1},
+		{`"Taipei"[-20] = "a"`, "ArgumentError: Index value out of range. got: -20", 1},
 	}
 
 	for i, tt := range testsFail {

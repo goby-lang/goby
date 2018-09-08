@@ -420,11 +420,10 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 2, len(args))
 				}
 
-				i := args[0]
-				index, ok := i.(*IntegerObject)
+				index, ok := args[0].(*IntegerObject)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, i.Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 				}
 
 				indexValue := index.value
@@ -432,21 +431,20 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 				strLength := utf8.RuneCountInString(str)
 
 				if strLength < indexValue {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Index value out of range. got=%v", strconv.Itoa(indexValue))
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.IndexOutOfRange, strconv.Itoa(indexValue))
 				}
 
-				r := args[1]
-				replaceStr, ok := r.(*StringObject)
+				replaceStr, ok := args[1].(*StringObject)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, r.Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[1].Class().Name)
 				}
 				replaceStrValue := replaceStr.value
 
 				// Negative Index Case
 				if indexValue < 0 {
 					if -indexValue > strLength {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Index value out of range. got=%v", strconv.Itoa(indexValue))
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.IndexOutOfRange, strconv.Itoa(indexValue))
 					}
 					// Change to positive index to replace the string
 					indexValue += strLength
