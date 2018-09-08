@@ -719,7 +719,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns true if string is empty value
+			// Returns true if string is empty value.
 			//
 			// ```ruby
 			// "".empty?      # => true
@@ -756,11 +756,10 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
-				c := args[0]
-				compareStr, ok := c.(*StringObject)
+				compareStr, ok := args[0].(*StringObject)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, c.Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 				}
 
 				compareStrValue := compareStr.value
@@ -781,14 +780,16 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns true if receiver string is equal to argument string
+			// Returns true if receiver string is equal to argument string.
 			//
 			// ```ruby
-			// "Hello".eql?("Hello")     # => true
-			// "Hello".eql?("World")     # => false
-			// "Hello😊".eql?("Hello😊") # => true
+			// "Hello".eql?("Hello")       # => true
+			// "Hello".eql?("World")       # => false
+			// "Hello😊".eql?("Hello😊")  # => true
+			// "Hello😊".eql?(1)           # => false
 			// ```
 			//
+			// @param object [Object]
 			// @return [Boolean]
 			Name: "eql?",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -809,13 +810,14 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Checks if the specified string is included in the receiver
+			// Checks if the specified string is included in the receiver.
 			//
 			// ```ruby
 			// "Hello\nWorld".include?("\n")   # => true
 			// "Hello 😊 Hello".include?("😊") # => true
 			// ```
 			//
+			// @param string [String]
 			// @return [Bool]
 			Name: "include?",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -823,11 +825,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
-				i := args[0]
-				includeStr, ok := i.(*StringObject)
-
+				includeStr, ok := args[0].(*StringObject)
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, i.Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 				}
 
 				str := receiver.(*StringObject).value
@@ -840,12 +840,12 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Insert a string input in specified index value of the receiver string
+			// Insert a string input in specified index value of the receiver string.
 			//
 			// It will raise error if index value is not an integer or index value is out
-			// of receiver string's range
+			// of receiver string's range.
 			//
-			// It will also raise error if the input string value is not type string
+			// It will also raise error if the input string value is not type string.
 			//
 			// ```ruby
 			// "Hello".insert(0, "X") # => "XHello"
@@ -855,6 +855,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// "Hello".insert(-3, "X") # => "HelXlo"
 			// ```
 			//
+			// @param index [Integer], string [String]
 			// @return [String]
 			Name: "insert",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -862,27 +863,23 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 2, len(args))
 				}
 
-				i := args[0]
-				index, ok := i.(*IntegerObject)
-
+				index, ok := args[0].(*IntegerObject)
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, i.Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormatNum, 1, classes.IntegerClass, args[0].Class().Name)
+				}
+
+				insertStr, ok := args[1].(*StringObject)
+				if !ok {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormatNum, 2, classes.StringClass, args[1].Class().Name)
 				}
 
 				indexValue := index.value
-				ins := args[1]
-				insertStr, ok := ins.(*StringObject)
-
-				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect insert string to be String. got: %s", ins.Class().Name)
-				}
-
 				str := receiver.(*StringObject).value
 				strLength := utf8.RuneCountInString(str)
 
 				if indexValue < 0 {
 					if -indexValue > strLength+1 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Index value out of range. got=%v", indexValue)
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.IndexOutOfRange, indexValue)
 					} else if -indexValue == strLength+1 {
 						return t.vm.InitStringObject(insertStr.value + str)
 					}
@@ -891,7 +888,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 				}
 
 				if strLength < indexValue {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Index value out of range. got=%v", indexValue)
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.IndexOutOfRange, indexValue)
 				}
 
 				// Support UTF-8 Encoding
@@ -900,8 +897,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns the character length of self
-			// **Note:** the length is currently byte-based, instead of charcode-based.
+			// Returns the character length of self.
 			//
 			// ```ruby
 			// "zero".length # => 4

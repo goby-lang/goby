@@ -771,10 +771,10 @@ func TestStringInsertMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`"Goby Lang".insert`, "ArgumentError: Expect 2 argument(s). got: 0", 1},
 		{`"Taipei".insert(6, " ", "101")`, "ArgumentError: Expect 2 argument(s). got: 3", 1},
-		{`"Taipei".insert("6", " 101")`, "TypeError: Expect argument to be Integer. got: String", 1},
-		{`"Taipei".insert(6, 101)`, "TypeError: Expect insert string to be String. got: Integer", 1},
-		{`"Taipei".insert(-8, "101")`, "ArgumentError: Index value out of range. got=-8", 1},
-		{`"Taipei".insert(7, "101")`, "ArgumentError: Index value out of range. got=7", 1},
+		{`"Taipei".insert("6", " 101")`, "TypeError: Expect argument #1 to be Integer. got: String", 1},
+		{`"Taipei".insert(6, 101)`, "TypeError: Expect argument #2 to be String. got: Integer", 1},
+		{`"Taipei".insert(-8, "101")`, "ArgumentError: Index value out of range. got: -8", 1},
+		{`"Taipei".insert(7, "101")`, "ArgumentError: Index value out of range. got: 7", 1},
 	}
 
 	for i, tt := range testsFail {
