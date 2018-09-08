@@ -599,7 +599,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Split and loop through the string byte
+			// Split and loop through the string byte.
 			//
 			// ```ruby
 			// "Sushi 🍣".each_byte do |byte|
@@ -621,12 +621,13 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			Name: "each_byte",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 
 				if blockFrame == nil {
 					return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 				}
+
 				str := receiver.(*StringObject).value
 				if blockIsEmpty(blockFrame) {
 					return t.vm.InitStringObject(str)
@@ -641,7 +642,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Split and loop through the string characters
+			// Split and loop through the string characters.
 			//
 			// ```ruby
 			// "Sushi 🍣".each_char do |char|
@@ -681,7 +682,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Split and loop through the string segment split by the newline escaped character
+			// Split and loop through the string segment split by the newline escaped character.
 			//
 			// ```ruby
 			// "Hello\nWorld\nGoby".each_line do |line|

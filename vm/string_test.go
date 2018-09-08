@@ -471,7 +471,7 @@ func TestStringEachByteMethodFail(t *testing.T) {
 		"Taipei".each_byte(101) do |byte|
 		  puts byte
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 1},
+		`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
 		{`"Taipei".each_byte`, "InternalError: Can't yield without a block", 1},
 	}
 
