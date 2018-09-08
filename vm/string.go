@@ -228,13 +228,14 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Matches the receiver with a Regexp
+			// Matches the receiver with a Regexp, and returns the number of matched strings.
 			//
 			// ```ruby
 			// "pizza" =~ Regex.new("zz")  # => 2
 			// "pizza" =~ Regex.new("OH!") # => nil
 			// ```
 			//
+			// @param regexp [Regexp]
 			// @return [Integer]
 			Name: "=~",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -242,18 +243,14 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
-				arg := args[0]
-
-				re, ok := arg.(*RegexpObject)
-
+				re, ok := args[0].(*RegexpObject)
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.RegexpClass, arg.Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.RegexpClass, args[0].Class().Name)
 				}
 
 				text := receiver.(*StringObject).value
 
 				match, _ := re.regexp.FindStringMatch(text)
-
 				if match == nil {
 					return NULL
 				}
@@ -265,7 +262,8 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns a Integer. If first string is less than second string returns -1, if equal to returns 0, if greater returns 1
+			// Returns a Integer.
+			// Returns -1 if the first string is less than the second string returns -1, returns 0 if equal to, or returns 1 if greater than.
 			//
 			//
 			// ```ruby
@@ -274,53 +272,49 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// "abcd" <=> "abc" # => 1
 			// ```
 			//
+			// @param string [String]
 			// @return [Integer]
 			Name: "<=>",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
-				r := args[0]
-				right, ok := r.(*StringObject)
+				right, ok := args[0].(*StringObject)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, r.Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 				}
 
-				rightValue := right.value
-
-				leftValue := receiver.(*StringObject).value
-				if leftValue < rightValue {
+				left := receiver.(*StringObject)
+				switch {
+				case left.value < right.value:
 					return t.vm.InitIntegerObject(-1)
-				}
-				if leftValue > rightValue {
+				case left.value > right.value:
 					return t.vm.InitIntegerObject(1)
+				default:
+					return t.vm.InitIntegerObject(0)
 				}
-
-				return t.vm.InitIntegerObject(0)
 
 			},
 		},
 		{
-			// Returns a Boolean of compared two strings
+			// Returns a Boolean of compared two strings.
 			//
 			// ```ruby
 			// "first" != "second" # => true
 			// "two" != "two" # => false
 			// ```
 			//
+			// @param object [Object]
 			// @return [Boolean]
 			Name: "!=",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
 				right, ok := args[0].(*StringObject)
-
 				if !ok {
 					return TRUE
 				}
 
-				rightValue := right.value
-
-				leftValue := receiver.(*StringObject).value
-				if leftValue != rightValue {
+				left := receiver.(*StringObject)
+				if left.value != right.value {
 					return TRUE
 				}
 
