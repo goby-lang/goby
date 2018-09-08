@@ -148,27 +148,24 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns a Boolean if first string greater than second string
+			// Returns a Boolean if first string greater than second string.
 			//
 			// ```ruby
 			// "a" < "b" # => true
 			// ```
 			//
+			// @param string [String]
 			// @return [Boolean]
 			Name: ">",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
-				r := args[0]
-				right, ok := r.(*StringObject)
-
+				right, ok := args[0].(*StringObject)
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, r.Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 				}
 
-				rightValue := right.value
-
-				leftValue := receiver.(*StringObject).value
-				if leftValue > rightValue {
+				left := receiver.(*StringObject)
+				if left.value > right.value {
 					return TRUE
 				}
 
@@ -177,27 +174,25 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns a Boolean if first string less than second string
+			// Returns a Boolean if first string less than second string.
 			//
 			// ```ruby
 			// "a" < "b" # => true
 			// ```
 			//
+			// @param string [String]
 			// @return [Boolean]
 			Name: "<",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
-				r := args[0]
-				right, ok := r.(*StringObject)
+				right, ok := args[0].(*StringObject)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, r.Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 				}
 
-				rightValue := right.value
-
-				leftValue := receiver.(*StringObject).value
-				if leftValue < rightValue {
+				left := receiver.(*StringObject)
+				if left.value < right.value {
 					return TRUE
 				}
 
@@ -206,28 +201,25 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns a Boolean of compared two strings
+			// Returns a Boolean of compared two strings.
 			//
 			// ```ruby
 			// "first" == "second" # => false
 			// "two" == "two" # => true
 			// ```
 			//
+			// @param string [String]
 			// @return [Boolean]
 			Name: "==",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
-				r := args[0]
-				right, ok := r.(*StringObject)
-
+				right, ok := args[0].(*StringObject)
 				if !ok {
 					return FALSE
 				}
 
-				rightValue := right.value
-
-				leftValue := receiver.(*StringObject).value
-				if leftValue == rightValue {
+				left := receiver.(*StringObject)
+				if left.value == right.value {
 					return TRUE
 				}
 
