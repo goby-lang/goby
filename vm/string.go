@@ -116,32 +116,31 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns self multiplying another Integer
+			// Returns self multiplying another Integer.
 			//
 			// ```ruby
 			// "string " * 2 # => "string string string "
 			// ```
 			//
+			// #param positive integer [Integer]
 			// @return [String]
 			Name: "*",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
-				r := args[0]
-				right, ok := r.(*IntegerObject)
-
+				right, ok := args[0].(*IntegerObject)
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, r.Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 				}
 
 				if right.value < 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Second argument must be greater than or equal to 0. got=%v", right.value)
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.NegativeSecondValue, right.value)
 				}
 
 				var result string
 
-				leftValue := receiver.(*StringObject).value
+				left := receiver.(*StringObject)
 				for i := 0; i < right.value; i++ {
-					result += leftValue
+					result += left.value
 				}
 
 				return t.vm.InitStringObject(result)

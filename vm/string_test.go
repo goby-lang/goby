@@ -38,7 +38,7 @@ func TestStringFmtMethod(t *testing.T) {
 		{` String.fmt("Hello! %s", [:array])`, `Hello! ["array"]`},
 		{` String.fmt("Hello! %s", {key: :value})`, `Hello! { key: "value" }`},
 	}
-	
+
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -55,7 +55,7 @@ func TestStringFmtMethodFail(t *testing.T) {
 		{`String.fmt("Hello! %s Lang!")`, "ArgumentError: Expect 1 additional string(s) to insert. got: 0", 1},
 		{`String.fmt("Hello! %s Lang!", "Goby", "Ruby")`, "ArgumentError: Expect 1 additional string(s) to insert. got: 2", 1},
 	}
-	
+
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -239,7 +239,7 @@ func TestStringOperationFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`"Taipei" + 101`, "TypeError: Expect argument to be String. got: Integer", 1},
 		{`"Taipei" * "101"`, "TypeError: Expect argument to be Integer. got: String", 1},
-		{`"Taipei" * (-101)`, "ArgumentError: Second argument must be greater than or equal to 0. got=-101", 1},
+		{`"Taipei" * (-101)`, "ArgumentError: Expect second argument to be positive value. got: -101", 1},
 		{`"Taipei"[1] = 1`, "TypeError: Expect argument to be String. got: Integer", 1},
 		{`"Taipei"[1] = true`, "TypeError: Expect argument to be String. got: Boolean", 1},
 		{`"Taipei"[]`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
@@ -1347,7 +1347,7 @@ func TestStringConversion(t *testing.T) {
 		 `, "'"},
 		{`"str".to_bytes.to_s.split(" ")[0]`, "<GoObject:"},
 	}
-	
+
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1365,7 +1365,7 @@ func TestStringConversionFail(t *testing.T) {
 		{`"str".to_f(1)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
 		{`"str".to_s(1)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
 	}
-	
+
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -1374,7 +1374,6 @@ func TestStringConversionFail(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
-
 
 func TestStringUpcaseMethod(t *testing.T) {
 	tests := []struct {
@@ -1414,4 +1413,3 @@ func TestStringMethodChaining(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
-
