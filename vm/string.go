@@ -917,11 +917,13 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// If input integer is greater than the length of receiver string, returns a new String of
-			// length integer with receiver string left justified and padded with default " "; otherwise,
-			// returns receiver string.
+			// Add padding strings to the right side of the string to be "left-justification" with the specified length.
+			// If the padding is omitted, one space character " " will be the default padding.
 			//
-			// It will raise error if the input string length is not integer type
+			// If the specified length is equal to or shorter than the current length, no padding will be performed, and the receiver will be returned.
+			// If the padding is performed, a new padded string will be returned.
+			//
+			// Raises an error if the input string length is not integer type.
 			//
 			// ```ruby
 			// "Hello".ljust(2)           # => "Hello"
@@ -929,7 +931,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// "Hello".ljust(10, "xo")    # => "Helloxoxox"
 			// "Hello".ljust(10, "😊🐟") # => "Hello😊🐟😊🐟😊"
 			// ```
-			//
+			// @param length [Integer], padding [String]
 			// @return [String]
 			Name: "ljust",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -938,11 +940,10 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentRange, 1, 2, aLen)
 				}
 
-				l := args[0]
-				strLength, ok := l.(*IntegerObject)
+				strLength, ok := args[0].(*IntegerObject)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect justify width to be Integer. got: %s", l.Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormatNum, 1, classes.IntegerClass, args[0].Class().Name)
 				}
 
 				strLengthValue := strLength.value
@@ -955,7 +956,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					padStr, ok := p.(*StringObject)
 
 					if !ok {
-						return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect padding string to be String. got: %s", p.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormatNum, 2, classes.StringClass, p.Class().Name)
 					}
 
 					padStrValue = padStr.value
@@ -1138,11 +1139,13 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// If input integer is greater than the length of receiver string, returns a new String of
-			// length integer with receiver string right justified and padded with default " "; otherwise,
-			// returns receiver string.
+			// Add padding strings to the left side of the string to be "right-justification" with the specified length.
+			// If the padding is omitted, one space character " " will be the default padding.
 			//
-			// It will raise error if the input string length is not integer type
+			// If the specified length is equal to or shorter than the current length, no padding will be performed, and the receiver will be returned.
+			// If the padding is performed, a new padded string will be returned.
+			//
+			// Raises an error if the input string length is not integer type.
 			//
 			// ```ruby
 			// "Hello".rjust(2)          # => "Hello"
@@ -1151,6 +1154,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// "Hello".rjust(10, "😊🐟") # => "😊🐟😊🐟😊Hello"
 			// ```
 			//
+			// @param length [Integer], padding [String]
 			// @return [String]
 			Name: "rjust",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -1159,12 +1163,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentRange, 1, 2, aLen)
 				}
 
-				str := receiver.(*StringObject).value
-				l := args[0]
-				strLength, ok := l.(*IntegerObject)
-
+				strLength, ok := args[0].(*IntegerObject)
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect justify width to be Integer. got: %s", l.Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormatNum, 1, classes.IntegerClass, args[0].Class().Name)
 				}
 
 				strLengthValue := strLength.value
@@ -1177,7 +1178,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					padStr, ok := p.(*StringObject)
 
 					if !ok {
-						return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect padding string to be String. got: %s", p.Class().Name)
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormatNum, 2, classes.StringClass, args[1].Class().Name)
 					}
 
 					padStrValue = padStr.value
@@ -1185,6 +1186,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 
 				padStrLength := utf8.RuneCountInString(padStrValue)
 
+				str := receiver.(*StringObject).value
 				if strLengthValue > len(str) {
 					origin := str
 					originStrLength := utf8.RuneCountInString(origin)

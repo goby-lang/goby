@@ -810,12 +810,12 @@ func TestStringLeftJustifyMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`"Hello".ljust`, "ArgumentError: Expect 1 to 2 argument(s). got: 0", 1},
 		{`"Hello".ljust(1, 2, 3, 4, 5)`, "ArgumentError: Expect 1 to 2 argument(s). got: 5", 1},
-		{`"Hello".ljust(true)`, "TypeError: Expect justify width to be Integer. got: Boolean", 1},
-		{`"Hello".ljust("World")`, "TypeError: Expect justify width to be Integer. got: String", 1},
-		{`"Hello".ljust(2..5)`, "TypeError: Expect justify width to be Integer. got: Range", 1},
-		{`"Hello".ljust(10, 10)`, "TypeError: Expect padding string to be String. got: Integer", 1},
-		{`"Hello".ljust(10, 2..5)`, "TypeError: Expect padding string to be String. got: Range", 1},
-		{`"Hello".ljust(10, true)`, "TypeError: Expect padding string to be String. got: Boolean", 1},
+		{`"Hello".ljust(true)`, "TypeError: Expect argument #1 to be Integer. got: Boolean", 1},
+		{`"Hello".ljust("World")`, "TypeError: Expect argument #1 to be Integer. got: String", 1},
+		{`"Hello".ljust(2..5)`, "TypeError: Expect argument #1 to be Integer. got: Range", 1},
+		{`"Hello".ljust(10, 10)`, "TypeError: Expect argument #2 to be String. got: Integer", 1},
+		{`"Hello".ljust(10, 2..5)`, "TypeError: Expect argument #2 to be String. got: Range", 1},
+		{`"Hello".ljust(10, true)`, "TypeError: Expect argument #2 to be String. got: Boolean", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -998,12 +998,12 @@ func TestStringRightJustifyFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`"Hello".rjust`, "ArgumentError: Expect 1 to 2 argument(s). got: 0", 1},
 		{`"Hello".rjust(1, 2, 3, 4, 5)`, "ArgumentError: Expect 1 to 2 argument(s). got: 5", 1},
-		{`"Hello".rjust(true)`, "TypeError: Expect justify width to be Integer. got: Boolean", 1},
-		{`"Hello".rjust("World")`, "TypeError: Expect justify width to be Integer. got: String", 1},
-		{`"Hello".rjust(2..5)`, "TypeError: Expect justify width to be Integer. got: Range", 1},
-		{`"Hello".rjust(10, 10)`, "TypeError: Expect padding string to be String. got: Integer", 1},
-		{`"Hello".rjust(10, 2..5)`, "TypeError: Expect padding string to be String. got: Range", 1},
-		{`"Hello".rjust(10, true)`, "TypeError: Expect padding string to be String. got: Boolean", 1},
+		{`"Hello".rjust(true)`, "TypeError: Expect argument #1 to be Integer. got: Boolean", 1},
+		{`"Hello".rjust("World")`, "TypeError: Expect argument #1 to be Integer. got: String", 1},
+		{`"Hello".rjust(2..5)`, "TypeError: Expect argument #1 to be Integer. got: Range", 1},
+		{`"Hello".rjust(10, 10)`, "TypeError: Expect argument #2 to be String. got: Integer", 1},
+		{`"Hello".rjust(10, 2..5)`, "TypeError: Expect argument #2 to be String. got: Range", 1},
+		{`"Hello".rjust(10, true)`, "TypeError: Expect argument #2 to be String. got: Boolean", 1},
 	}
 
 	for i, tt := range testsFail {
