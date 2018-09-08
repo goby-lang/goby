@@ -89,14 +89,12 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			Name: "!=",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
-				left := receiver.(*RangeObject)
-				r := args[0]
-				right, ok := r.(*RangeObject)
-
+				right, ok := args[0].(*RangeObject)
 				if !ok {
 					return TRUE
 				}
 
+				left := receiver.(*RangeObject)
 				if left.Start == right.Start && left.End == right.End {
 					return FALSE
 				}
@@ -274,8 +272,7 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			Name: "first",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				ro := receiver.(*RangeObject)
-				return t.vm.InitIntegerObject(ro.Start)
+				return t.vm.InitIntegerObject(receiver.(*RangeObject).Start)
 
 			},
 		},
@@ -324,8 +321,7 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			Name: "last",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				ro := receiver.(*RangeObject)
-				return t.vm.InitIntegerObject(ro.End)
+				return t.vm.InitIntegerObject(receiver.(*RangeObject).End)
 
 			},
 		},
@@ -428,10 +424,8 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 
 				ro := receiver.(*RangeObject)
 				step := args[0].(*IntegerObject).value
-				if step == 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Step can't be 0")
-				} else if step < 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Step can't be negative")
+				if step <= 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Step can't be 0 or negative")
 				}
 
 				blockFrameUsed := false
@@ -470,18 +464,16 @@ func builtinRangeInstanceMethods() []*BuiltinMethodObject {
 			// @return [Array]
 			Name: "to_a",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				ro := receiver.(*RangeObject)
-
-				el := []Object{}
-
 				var offset int
 
+				ro := receiver.(*RangeObject)
 				if ro.Start <= ro.End {
 					offset = 1
 				} else {
 					offset = -1
 				}
 
+				el := []Object{}
 				for i := ro.Start; i != (ro.End + offset); i += offset {
 					el = append(el, t.vm.InitIntegerObject(i))
 				}
