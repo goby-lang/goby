@@ -460,7 +460,8 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Return a new String with the first character converted to uppercase but the rest of string converted to lowercase.
+			// Returns a new String with the first character converted to uppercase.
+			// Non case-sensitive characters will be remained untouched.
 			//
 			// ```ruby
 			// "test".capitalize         # => "Test"
@@ -581,7 +582,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns a new String with all characters is lowercase
+			// Returns a new String with all characters is lowercase.
 			//
 			// ```ruby
 			// "erROR".downcase        # => "error"
@@ -1606,7 +1607,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns a new String with all characters is upcase
+			// Returns a new String with all characters is upcase.
 			//
 			// ```ruby
 			// "very big".upcase # => "VERY BIG"

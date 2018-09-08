@@ -272,6 +272,9 @@ func TestStringCapitalizeMethod(t *testing.T) {
 		{`"all lower".capitalize`, "All lower"},
 		{`"heLlo\nWoRLd".capitalize`, "Hello\nworld"},
 		{`"🍣HeLlO🍺".capitalize`, "🍣hello🍺"},
+		{`"🍣HeLlO🍺".capitalize`, "🍣hello🍺"},
+		{`"ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÑÒÓÔÕÖØŒŠÙÚÛÜÝŸ".capitalize`, "Àáâãäåæçèéêëìíîïñòóôõöøœšùúûüýÿ"},
+		{`"ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ".capitalize`, "Αβγδεζηθικλμνξοπρστυφχψω"},
 	}
 
 	for i, tt := range tests {
@@ -402,6 +405,8 @@ func TestStringDowncaseMethod(t *testing.T) {
 		{`"MORE wOrds".downcase`, "more words"},
 		{`"HeLlO\tWorLD".downcase`, "hello\tworld"},
 		{`"🍣HeLlO🍺".downcase`, "🍣hello🍺"},
+		{`"ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÑÒÓÔÕÖØŒŠÙÚÛÜÝŸ".downcase`, "àáâãäåæçèéêëìíîïñòóôõöøœšùúûüýÿ"},
+		{`"ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ".downcase`, "αβγδεζηθικλμνξοπρστυφχψω"},
 	}
 
 	for i, tt := range tests {
@@ -1386,6 +1391,8 @@ func TestStringUpcaseMethod(t *testing.T) {
 		{`"MORE wOrds".upcase`, "MORE WORDS"},
 		{`"Hello\nWorld".upcase`, "HELLO\nWORLD"},
 		{`"🍣Hello🍺".upcase`, "🍣HELLO🍺"},
+		{`"àáâãäåæçèéêëìíîïñòóôõöøœšùúûüýÿ".upcase`, "ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÑÒÓÔÕÖØŒŠÙÚÛÜÝŸ"},
+		{`"αβγδεζηθικλμνξοπρστυφχψω".upcase`, "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ"},
 	}
 
 	for i, tt := range tests {
