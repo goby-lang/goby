@@ -92,28 +92,26 @@ func builtinStringClassMethods() []*BuiltinMethodObject {
 // Instance methods -----------------------------------------------------
 func builtinStringInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
-
 		{
-			// Returns the concatenation of self and another String
+			// Returns the concatenation of self and another String.
 			//
 			// ```ruby
 			// "first" + "-second" # => "first-second"
 			// ```
 			//
+			// @param string [String]
 			// @return [String]
 			Name: "+",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
-				r := args[0]
-				right, ok := r.(*StringObject)
+				right, ok := args[0].(*StringObject)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, r.Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 				}
 
-				rightValue := right.value
-				leftValue := receiver.(*StringObject).value
-				return t.vm.InitStringObject(leftValue + rightValue)
+				left := receiver.(*StringObject)
+				return t.vm.InitStringObject(left.value + right.value)
 
 			},
 		},
