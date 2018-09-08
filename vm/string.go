@@ -397,11 +397,11 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Replace character of the string with input string
-			// It will raise error if the index is not Integer type or the index value is out of
+			// Replaces the receiver's string with input string. A destructive method.
+			// Raises an error if the index is not Integer type or the index value is out of
 			// range of the string length
 			//
-			// Currently only support assign string type value
+			// Currently only support assign string type value.
 			// TODO: Support to assign type which have to_s method
 			//
 			// ```ruby
@@ -412,6 +412,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// "Hello😊"[5] = "🐟" # => "Hello🐟"
 			// ```
 			//
+			// @param index [Integer]
 			// @return [String]
 			Name: "[]=",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
