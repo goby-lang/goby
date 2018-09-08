@@ -484,7 +484,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns a string with the last character chopped
+			// Returns a string with the last character chopped.
 			//
 			// ```ruby
 			// "Hello".chop         # => "Hell"
@@ -505,13 +505,14 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns a string which is concatenate with the input string or character
+			// Returns a string which is concatenate with the input string or character.
 			//
 			// ```ruby
 			// "Hello ".concat("World")   # => "Hello World"
 			// "Hello World".concat("😊") # => "Hello World😊"
 			// ```
 			//
+			// @param string [String]
 			// @return [String]
 			Name: "concat",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -519,11 +520,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
-				c := args[0]
-				concatStr, ok := c.(*StringObject)
-
+				concatStr, ok := args[0].(*StringObject)
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, c.Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 				}
 
 				str := receiver.(*StringObject).value
