@@ -11,9 +11,9 @@ import (
 	"github.com/goby-lang/goby/vm/errors"
 )
 
-// StringObject represents string instances
+// StringObject represents string instances.
 // String object holds and manipulates a sequence of characters.
-// String objects may be created using as string literals.
+// String objects may be created using as string literals or symbol literals.
 // Double or single quotations can be used for representation.
 //
 // ```ruby
@@ -22,6 +22,7 @@ import (
 // c = '漢'
 // d = 'Tiếng Việt'
 // e = "😏️️"
+// f = :symbol
 // ```
 //
 // **Note:**
@@ -128,17 +129,17 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 
 				r := args[0]
 				right, ok := r.(*IntegerObject)
-				
+
 				if !ok {
 					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, r.Class().Name)
 				}
-				
+
 				if right.value < 0 {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Second argument must be greater than or equal to 0. got=%v", right.value)
 				}
-				
+
 				var result string
-				
+
 				leftValue := receiver.(*StringObject).value
 				for i := 0; i < right.value; i++ {
 					result += leftValue
@@ -432,14 +433,14 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 				if len(args) != 2 {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 2, len(args))
 				}
-				
+
 				i := args[0]
 				index, ok := i.(*IntegerObject)
-				
+
 				if !ok {
 					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, i.Class().Name)
 				}
-				
+
 				indexValue := index.value
 				str := receiver.(*StringObject).value
 				strLength := utf8.RuneCountInString(str)
@@ -779,7 +780,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 
 				compareStrValue := compareStr.value
 				compareStrLength := utf8.RuneCountInString(compareStrValue)
-				
+
 				str := receiver.(*StringObject).value
 				strLength := utf8.RuneCountInString(str)
 
@@ -890,7 +891,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 				if !ok {
 					return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect insert string to be String. got: %s", ins.Class().Name)
 				}
-				
+
 				str := receiver.(*StringObject).value
 				strLength := utf8.RuneCountInString(str)
 
@@ -978,7 +979,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 
 					padStrValue = padStr.value
 				}
-				
+
 				str := receiver.(*StringObject).value
 				currentStrLength := utf8.RuneCountInString(str)
 				padStrLength := utf8.RuneCountInString(padStrValue)
@@ -1010,7 +1011,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 				if len(args) != 1 {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
-				
+
 				arg := args[0]
 				regexpObj, ok := arg.(*RegexpObject)
 
@@ -1053,7 +1054,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 				if len(args) != 2 {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 2, len(args))
 				}
-				
+
 				r := args[1]
 				replacement, ok := r.(*StringObject)
 				if !ok {
@@ -1101,7 +1102,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 				if len(args) != 2 {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 2, len(args))
 				}
-				
+
 				r := args[1]
 				replacement, ok := r.(*StringObject)
 				if !ok {
@@ -1401,14 +1402,14 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 
 				c := args[0]
 				compareStr, ok := c.(*StringObject)
-				
+
 				if !ok {
 					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, c.Class().Name)
 				}
-				
+
 				compareStrValue := compareStr.value
 				compareStrLength := utf8.RuneCountInString(compareStrValue)
-				
+
 				str := receiver.(*StringObject).value
 				strLength := utf8.RuneCountInString(str)
 
@@ -1537,7 +1538,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 				if len(args) != 0 {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
-				
+
 				str := receiver.(*StringObject).value
 
 				for i, char := range str {
