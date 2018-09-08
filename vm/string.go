@@ -1202,7 +1202,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns the character length of self
+			// Returns the character length of self.
 			//
 			// ```ruby
 			// "zero".size  # => 4
@@ -1346,10 +1346,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
-				s := args[0]
-				separator, ok := s.(*StringObject)
+				separator, ok := args[0].(*StringObject)
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, s.Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 				}
 
 				str := receiver.(*StringObject).value
@@ -1365,7 +1364,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns true if receiver string start with the argument string
+			// Returns true if receiver string start with the argument string.
 			//
 			// ```ruby
 			// "Hello".start_with("Hel")     # => true
@@ -1374,6 +1373,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// "😊Hello🐟".start_with("🐟") # => false
 			// ```
 			//
+			// @param string [String]
 			// @return [Boolean]
 			Name: "start_with",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -1466,6 +1466,16 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 
 			},
 		},
+		// Returns an array of byte strings, which is fo GoObject.
+		// Passing an empty string returns an empty array.
+		//
+		// ```ruby
+		// "Goby".to_a       # => ["G", "o", "b", "y"]
+		// "😊Hello🐟".to_a # => ["😊", "H", "e", "l", "l", "o", "🐟"]
+		// "".to_a           # => [ ]
+		// ```
+		//
+		// @return [String]
 		{
 			Name: "to_bytes",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
