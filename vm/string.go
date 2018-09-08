@@ -39,8 +39,8 @@ type StringObject struct {
 func builtinStringClassMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
-			// The String.fmt implements formatted I/O with functions analogous to C's printf and scanf
-			// Currently only support plain "%s" formatting
+			// The String.fmt implements formatted I/O with functions analogous to C's printf and scanf.
+			// Currently only support plain "%s" formatting.
 			// TODO: Support other kind of formatting such as %f, %v ... etc
 			//
 			// ```ruby
@@ -48,6 +48,7 @@ func builtinStringClassMethods() []*BuiltinMethodObject {
 			// String.fmt("I love to eat %s and %s!", "Sushi", "Ramen") # => "I love to eat Sushi and Ramen"
 			// ```
 			//
+			// @param string [String], insertions [String]
 			// @return [String]
 			Name: "fmt",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
