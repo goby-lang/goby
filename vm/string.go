@@ -323,8 +323,8 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns the character of the string with specified index
-			// It will raise error if the input is not an Integer type
+			// Returns the character of the string with specified index.
+			// Raises an error if the input is not an Integer type.
 			//
 			// ```ruby
 			// "Hello"[1]        # => "e"
@@ -336,6 +336,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// "Hello😊"[-1]     # => "😊"
 			// ```
 			//
+			// @param index [Integer]
 			// @return [String]
 			Name: "[]",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
