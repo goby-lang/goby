@@ -903,8 +903,8 @@ func TestStringReplaceMethodFail(t *testing.T) {
 		{`"Invalid".replace`, "ArgumentError: Expect 2 argument(s). got: 0", 1},
 		{`"Invalid".replace("string")`, "ArgumentError: Expect 2 argument(s). got: 1", 1},
 		{`"Invalid".replace("string", "replace", true)`, "ArgumentError: Expect 2 argument(s). got: 3", 1},
-		{`"Invalid".replace(true, "replacement")`, "TypeError: Expect pattern to be String or Regexp. got: Boolean", 1},
-		{`"Invalid".replace("pattern", true)`, "TypeError: Expect replacement to be String. got: Boolean", 1},
+		{`"Invalid".replace(true, "replacement")`, "TypeError: Expect argument #1 to be String or Regexp. got: Boolean", 1},
+		{`"Invalid".replace("pattern", true)`, "TypeError: Expect argument #2 to be String. got: Boolean", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -940,8 +940,8 @@ func TestStringReplaceOnceMethodFail(t *testing.T) {
 		{`"Invalid".replace_once`, "ArgumentError: Expect 2 argument(s). got: 0", 1},
 		{`"Invalid".replace_once("string")`, "ArgumentError: Expect 2 argument(s). got: 1", 1},
 		{`"Invalid".replace_once("string", "replace", true)`, "ArgumentError: Expect 2 argument(s). got: 3", 1},
-		{`"Invalid".replace_once(true, "replacement")`, "TypeError: Expect pattern to be String or Regexp. got: Boolean", 1},
-		{`"Invalid".replace_once("pattern", true)`, "TypeError: Expect replacement to be String. got: Boolean", 1},
+		{`"Invalid".replace_once(true, "replacement")`, "TypeError: Expect argument #1 to be String or Regexp. got: Boolean", 1},
+		{`"Invalid".replace_once("pattern", true)`, "TypeError: Expect argument #2 to be String. got: Boolean", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1084,8 +1084,8 @@ func TestStringSliceMethod(t *testing.T) {
 func TestStringSliceMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`"Goby Lang".slice`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
-		{`"Goby Lang".slice("Hello")`, "TypeError: Expect slice range to be Range or Integer. got: String", 1},
-		{`"Goby Lang".slice(true)`, "TypeError: Expect slice range to be Range or Integer. got: Boolean", 1},
+		{`"Goby Lang".slice("Hello")`, "TypeError: Expect argument to be Range or Integer. got: String", 1},
+		{`"Goby Lang".slice(true)`, "TypeError: Expect argument to be Range or Integer. got: Boolean", 1},
 	}
 
 	for i, tt := range testsFail {

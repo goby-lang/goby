@@ -979,14 +979,14 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns the matching data of the regex with the given string.
+			// Returns the matched data of the regex with the receiver's string.
 			//
 			// ```ruby
 			// 'pow'.match(Regexp.new("o")) # => #<MatchData "o">
 			// 'pow'.match(Regexp.new("x")) # => nil
 			// ```
 			//
-			// @param string [Regexp]
+			// @param regexp [Regexp]
 			// @return [MatchData]
 			Name: "match",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -994,11 +994,10 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
-				arg := args[0]
-				regexpObj, ok := arg.(*RegexpObject)
+				regexpObj, ok := args[0].(*RegexpObject)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.RegexpClass, arg.Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.RegexpClass, args[0].Class().Name)
 				}
 
 				re := regexpObj.regexp
@@ -1029,7 +1028,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// "Ruby Lang".replace(re, "Go")                # => "Goby Lang"
 			// ```
 			//
-			// @param [String/Regexp] the old string or regexp, [String] the new string
+			// @param pattern [Regexp/String], [String] the new string
 			// @return [String]
 			Name: "replace",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -1037,10 +1036,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 2, len(args))
 				}
 
-				r := args[1]
-				replacement, ok := r.(*StringObject)
+				replacement, ok := args[1].(*StringObject)
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect replacement to be String. got: %s", r.Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormatNum, 2, classes.StringClass, args[1].Class().Name)
 				}
 
 				var result string
@@ -1054,10 +1052,10 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					pattern := args[0].(*RegexpObject)
 					result, err = pattern.regexp.Replace(target, replacement.value, 0, -1)
 					if err != nil {
-						return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Replacement failure with the Regexp. got: %s", args[0].Class().Name)
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.RegexpFailure, args[0].Class().Name)
 					}
 				default:
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect pattern to be String or Regexp. got: %s", args[0].Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormatNum, 1, "String or Regexp", args[0].Class().Name)
 				}
 
 				return t.vm.InitStringObject(result)
@@ -1077,7 +1075,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// "Ruby Lang ruby lang".replace_once(re, "Go")                # => "Goby Lang ruby lang"
 			// ```
 			//
-			// @param [String/Regexp] the old string or regexp, [String] the new string
+			// @param pattern [Regexp/String], [String] the new string
 			// @return [String]
 			Name: "replace_once",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -1085,10 +1083,9 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 2, len(args))
 				}
 
-				r := args[1]
-				replacement, ok := r.(*StringObject)
+				replacement, ok := args[1].(*StringObject)
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect replacement to be String. got: %s", r.Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormatNum, 2, classes.StringClass, args[1].Class().Name)
 				}
 
 				var result string
@@ -1102,10 +1099,10 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					pattern := args[0].(*RegexpObject)
 					result, err = pattern.regexp.Replace(target, replacement.value, 0, 1)
 					if err != nil {
-						return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Replacement failure with the Regexp. got: %s", args[0].Class().Name)
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.RegexpFailure, args[0].Class().Name)
 					}
 				default:
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect pattern to be String or Regexp. got: %s", args[0].Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormatNum, 1, "String or Regexp", args[0].Class().Name)
 				}
 
 				return t.vm.InitStringObject(result)
@@ -1113,8 +1110,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns a new String with reverse order of self
-			// **Note:** the length is currently byte-based, instead of charcode-based.
+			// Returns a new String with reverse order of self.
 			//
 			// ```ruby
 			// "reverse".reverse           # => "esrever"
@@ -1207,7 +1203,6 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			// Returns the character length of self
-			// **Note:** the length is currently byte-based, instead of charcode-based.
 			//
 			// ```ruby
 			// "zero".size  # => 4
@@ -1227,7 +1222,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns a string sliced according to the input range
+			// Returns a string sliced according to the input range.
 			//
 			// ```ruby
 			// "Hello World".slice(1..6)    # => "ello W"
@@ -1263,6 +1258,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// "Hello 😊🐟 World".slice(14)      # => nil
 			// ```
 			//
+			// @param slicing point or range [Integer/Range]
 			// @return [String]
 			Name: "slice",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -1274,36 +1270,37 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 				strLength := utf8.RuneCountInString(str)
 
 				// All Case Support UTF-8 Encoding
-				switch args[0].(type) {
+				slice := args[0]
+				switch slice.(type) {
 				case *RangeObject:
-					ran := args[0].(*RangeObject)
+					ro := slice.(*RangeObject)
 					switch {
-					case ran.Start >= 0 && ran.End >= 0:
-						if ran.Start > strLength {
+					case ro.Start >= 0 && ro.End >= 0:
+						if ro.Start > strLength {
 							return NULL
-						} else if ran.Start > ran.End {
+						} else if ro.Start > ro.End {
 							return t.vm.InitStringObject("")
 						}
-						return t.vm.InitStringObject(string([]rune(str)[ran.Start : ran.End+1]))
-					case ran.Start < 0 && ran.End >= 0:
-						positiveStart := strLength + ran.Start
-						if -ran.Start > strLength {
+						return t.vm.InitStringObject(string([]rune(str)[ro.Start : ro.End+1]))
+					case ro.Start < 0 && ro.End >= 0:
+						positiveStart := strLength + ro.Start
+						if -ro.Start > strLength {
 							return NULL
-						} else if positiveStart > ran.End {
+						} else if positiveStart > ro.End {
 							return t.vm.InitStringObject("")
 						}
-						return t.vm.InitStringObject(string([]rune(str)[positiveStart : ran.End+1]))
-					case ran.Start >= 0 && ran.End < 0:
-						positiveEnd := strLength + ran.End
-						if ran.Start > strLength {
+						return t.vm.InitStringObject(string([]rune(str)[positiveStart : ro.End+1]))
+					case ro.Start >= 0 && ro.End < 0:
+						positiveEnd := strLength + ro.End
+						if ro.Start > strLength {
 							return NULL
-						} else if positiveEnd < 0 || ran.Start > positiveEnd {
+						} else if positiveEnd < 0 || ro.Start > positiveEnd {
 							return t.vm.InitStringObject("")
 						}
-						return t.vm.InitStringObject(string([]rune(str)[ran.Start : positiveEnd+1]))
+						return t.vm.InitStringObject(string([]rune(str)[ro.Start : positiveEnd+1]))
 					default:
-						positiveStart := strLength + ran.Start
-						positiveEnd := strLength + ran.End
+						positiveStart := strLength + ro.Start
+						positiveEnd := strLength + ro.End
 						if positiveStart < 0 {
 							return NULL
 						} else if positiveStart > positiveEnd {
@@ -1313,26 +1310,26 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					}
 
 				case *IntegerObject:
-					intValue := args[0].(*IntegerObject).value
-					if intValue < 0 {
-						if -intValue > strLength {
+					iv := slice.(*IntegerObject).value
+					if iv < 0 {
+						if -iv > strLength {
 							return NULL
 						}
-						return t.vm.InitStringObject(string([]rune(str)[strLength+intValue]))
+						return t.vm.InitStringObject(string([]rune(str)[strLength+iv]))
 					}
-					if intValue > strLength-1 {
+					if iv > strLength-1 {
 						return NULL
 					}
-					return t.vm.InitStringObject(string([]rune(str)[intValue]))
+					return t.vm.InitStringObject(string([]rune(str)[iv]))
 
 				default:
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect slice range to be Range or Integer. got: %s", args[0].Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Range or Integer", slice.Class().Name)
 				}
 
 			},
 		},
 		{
-			// Returns an array of strings separated by the given separator
+			// Returns an array of strings separated by the given delimiter.
 			//
 			// ```ruby
 			// "Hello World".split("o") # => ["Hell", " W", "rld"]
@@ -1341,6 +1338,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			// "Hello🐟World🐟Goby".split("🐟") # => ["Hello", "World", "Goby"]
 			// ```
 			//
+			// @param delimiter [String]
 			// @return [Array]
 			Name: "split",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -1383,11 +1381,10 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
-				c := args[0]
-				compareStr, ok := c.(*StringObject)
+				compareStr, ok := args[0].(*StringObject)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, c.Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 				}
 
 				compareStrValue := compareStr.value
@@ -1441,11 +1438,13 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns an array of characters converted from a string
+			// Returns an array of characters converted from a string.
+			// Passing an empty string returns an empty array.
 			//
 			// ```ruby
 			// "Goby".to_a       # => ["G", "o", "b", "y"]
 			// "😊Hello🐟".to_a # => ["😊", "H", "e", "l", "l", "o", "🐟"]
+			// "".to_a           # => [ ]
 			// ```
 			//
 			// @return [String]
@@ -1504,7 +1503,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 		},
 		{
 			// Returns the result of converting self to Float.
-			// Unexpected characters will cause a 0.0 value, except trailing whitespace,
+			// Passing a non-numerical string returns a 0.0 value, except trailing whitespace,
 			// which is ignored.
 			//
 			// ```ruby
@@ -1542,7 +1541,8 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns the result of converting self to Integer
+			// Returns the result of converting self to Integer.
+			// Passing a non-numerical string returns a 0 value.
 			//
 			// ```ruby
 			// "123".to_i       # => 123
@@ -1586,7 +1586,7 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
-			// Returns a new String with self value
+			// Returns a new String with self value.
 			//
 			// ```ruby
 			// "string".to_s # => "string"
