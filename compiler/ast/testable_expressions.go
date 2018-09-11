@@ -86,16 +86,16 @@ func (tce *TestableCallExpression) TestableReceiver() TestableExpression {
 	return tce.Receiver.(TestableExpression)
 }
 
-// ShouldHasMethodName checks if the method's name is same as we expected
-func (tce *TestableCallExpression) ShouldHasMethodName(expectedName string) {
+// ShouldHaveMethodName checks if the method's name is same as we expected
+func (tce *TestableCallExpression) ShouldHaveMethodName(expectedName string) {
 	if tce.Method != expectedName {
 		tce.t.Helper()
 		tce.t.Fatalf("expect call expression's method name to be '%s', got '%s'", expectedName, tce.Method)
 	}
 }
 
-// ShouldHasNumbersOfArguments checks if the method call's argument number is same we expected
-func (tce *TestableCallExpression) ShouldHasNumbersOfArguments(n int) {
+// ShouldHaveNumbersOfArguments checks if the method call's argument number is same we expected
+func (tce *TestableCallExpression) ShouldHaveNumbersOfArguments(n int) {
 	if len(tce.Arguments) != n {
 		tce.t.Helper()
 		tce.t.Fatalf("expect call expression to have %d arguments, got %d", n, len(tce.Arguments))
@@ -127,8 +127,8 @@ type TestableConstant struct {
 	t *testing.T
 }
 
-// ShouldHasName checks if the constant's name is same as we expected
-func (tc *TestableConstant) ShouldHasName(expectedName string) {
+// ShouldHaveName checks if the constant's name is same as we expected
+func (tc *TestableConstant) ShouldHaveName(expectedName string) {
 	if tc.Value != expectedName {
 		tc.t.Helper()
 		tc.t.Fatalf("expect current identifier to be '%s', got '%s'", expectedName, tc.Value)
@@ -157,8 +157,8 @@ type TestableIdentifier struct {
 	t *testing.T
 }
 
-// ShouldHasName checks if the identifier's name is same as we expected
-func (ti *TestableIdentifier) ShouldHasName(expectedName string) {
+// ShouldHaveName checks if the identifier's name is same as we expected
+func (ti *TestableIdentifier) ShouldHaveName(expectedName string) {
 	if ti.Value != expectedName {
 		ti.t.Helper()
 		ti.t.Fatalf("expect current identifier to be '%s', got '%s'", expectedName, ti.Value)
@@ -171,7 +171,7 @@ type TestableIfExpression struct {
 	t *testing.T
 }
 
-func (tie *TestableIfExpression) ShouldHasNumberOfConditionals(n int) {
+func (tie *TestableIfExpression) ShouldHaveNumberOfConditionals(n int) {
 	if len(tie.Conditionals) != n {
 		tie.t.Helper()
 		tie.t.Fatalf("Expect if expression to have %d conditionals, got %d", n, len(tie.Conditionals))
@@ -203,8 +203,8 @@ type TestableInfixExpression struct {
 	t *testing.T
 }
 
-// ShouldHasOperator checks if the infix expression has expected operator
-func (tie *TestableInfixExpression) ShouldHasOperator(expectedOperator string) {
+// ShouldHaveOperator checks if the infix expression has expected operator
+func (tie *TestableInfixExpression) ShouldHaveOperator(expectedOperator string) {
 	if tie.Operator != expectedOperator {
 		tie.t.Helper()
 		tie.t.Fatalf("Expect infix expression to have %s operator, got %s", expectedOperator, tie.Operator)
@@ -227,8 +227,8 @@ type TestableInstanceVariable struct {
 	t *testing.T
 }
 
-// ShouldHasName checks if the instance variable's name is same as we expected
-func (tiv *TestableInstanceVariable) ShouldHasName(expectedName string) {
+// ShouldHaveName checks if the instance variable's name is same as we expected
+func (tiv *TestableInstanceVariable) ShouldHaveName(expectedName string) {
 	if tiv.Value != expectedName {
 		tiv.t.Helper()
 		tiv.t.Fatalf("expect current instance variable to be '%s', got '%s'", expectedName, tiv.Value)

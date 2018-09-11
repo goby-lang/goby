@@ -21,24 +21,24 @@ func TestMethodChainExpression(t *testing.T) {
 
 	exp := program.FirstStmt().IsExpression(t)
 	firstCall := exp.IsCallExpression(t)
-	firstCall.ShouldHasMethodName("add")
+	firstCall.ShouldHaveMethodName("add")
 	argName := firstCall.NthArgument(1)
-	argName.IsIdentifier(t).ShouldHasName("d")
+	argName.IsIdentifier(t).ShouldHaveName("d")
 
 	secondCall := firstCall.TestableReceiver().IsCallExpression(t)
-	secondCall.ShouldHasMethodName("bar")
+	secondCall.ShouldHaveMethodName("bar")
 	argName = secondCall.NthArgument(1)
-	argName.IsIdentifier(t).ShouldHasName("c")
+	argName.IsIdentifier(t).ShouldHaveName("c")
 
 	thirdCall := secondCall.TestableReceiver().IsCallExpression(t)
-	thirdCall.ShouldHasMethodName("new")
+	thirdCall.ShouldHaveMethodName("new")
 	argName1 := thirdCall.NthArgument(1)
-	argName1.IsIdentifier(t).ShouldHasName("a")
+	argName1.IsIdentifier(t).ShouldHaveName("a")
 	argName2 := thirdCall.NthArgument(2)
-	argName2.IsIdentifier(t).ShouldHasName("b")
+	argName2.IsIdentifier(t).ShouldHaveName("b")
 
 	originalReceiver := thirdCall.TestableReceiver().IsConstant(t)
-	originalReceiver.ShouldHasName("Person")
+	originalReceiver.ShouldHaveName("Person")
 }
 
 func TestOperatorPrecedenceParsing(t *testing.T) {
