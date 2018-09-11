@@ -997,7 +997,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 		// string = "String"
 		// string.instance_eval do
 		//   def new_method
-		//		 self.reverse
+		//     self.reverse
 		//   end
 		// end
 		// string.new_method  #=> "gnirtS"
