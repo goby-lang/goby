@@ -48,6 +48,7 @@ func (tcs *TestableClassStatement) HasMethod(methodName string) (ds *TestableDef
 	return
 }
 
+// ShouldHaveName checks if current class's name matches the specified name.
 func (tcs *TestableClassStatement) ShouldHaveName(name string) {
 	if tcs.Name.Value != name {
 		tcs.t.Helper()
@@ -207,6 +208,7 @@ func (tms *TestableModuleStatement) HasMethod(t *testing.T, methodName string) (
 	return
 }
 
+// ShouldHaveName checks if current class's name matches the specified name.
 func (tms *TestableModuleStatement) ShouldHaveName(name string) {
 	if tms.Name.Value != name {
 		tms.t.Helper()
@@ -221,6 +223,7 @@ type TestableReturnStatement struct {
 	t *testing.T
 }
 
+// ShouldHaveValue checks if the current value matches the specified name.
 func (trs *TestableReturnStatement) ShouldHaveValue(value interface{}) {
 	t := trs.t
 	t.Helper()

@@ -171,6 +171,7 @@ type TestableIfExpression struct {
 	t *testing.T
 }
 
+// ShouldHaveNumberOfConditionals checks if the number of condition matches the specified one.
 func (tie *TestableIfExpression) ShouldHaveNumberOfConditionals(n int) {
 	if len(tie.Conditionals) != n {
 		tie.t.Helper()
