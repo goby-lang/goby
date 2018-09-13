@@ -48,15 +48,16 @@ func (tcs *TestableClassStatement) HasMethod(methodName string) (ds *TestableDef
 	return
 }
 
-func (tcs *TestableClassStatement) ShouldHasName(name string) {
+// ShouldHaveName checks if current class's name matches the specified name.
+func (tcs *TestableClassStatement) ShouldHaveName(name string) {
 	if tcs.Name.Value != name {
 		tcs.t.Helper()
 		tcs.t.Fatalf("Wrong class, this class is %s", tcs.Name.Value)
 	}
 }
 
-// ShouldInherits checks if current class statement inherits the target class
-func (tcs *TestableClassStatement) ShouldInherits(className string) {
+// ShouldInherit checks if current class statement inherits the target class
+func (tcs *TestableClassStatement) ShouldInherit(className string) {
 	if tcs.SuperClassName != className {
 		tcs.t.Helper()
 		tcs.t.Fatalf("Expect class %s to inherit class %s. got %s", tcs.Name, className, tcs.SuperClassName)
@@ -81,24 +82,24 @@ func (tds *TestableDefStatement) MethodBody() CodeBlock {
 	return tss
 }
 
-// ShouldHasName checks if the method's name is what we expected
-func (tds *TestableDefStatement) ShouldHasName(expectedName string) {
+// ShouldHaveName checks if the method's name is what we expected
+func (tds *TestableDefStatement) ShouldHaveName(expectedName string) {
 	if tds.Name.Value != expectedName {
 		tds.t.Helper()
 		tds.t.Fatalf("It's method %s, not %s", tds.Name.Value, expectedName)
 	}
 }
 
-// ShouldHasNoParam checks if the method has no param
-func (tds *TestableDefStatement) ShouldHasNoParam() {
+// ShouldHaveNoParam checks if the method has no param
+func (tds *TestableDefStatement) ShouldHaveNoParam() {
 	if len(tds.Parameters) != 0 {
 		tds.t.Helper()
 		tds.t.Fatalf("Expect method %s not to have any params, got: %d", tds.Name.Value, len(tds.Parameters))
 	}
 }
 
-// ShouldHasNormalParam checks if the method has expected normal argument
-func (tds *TestableDefStatement) ShouldHasNormalParam(expectedName string) {
+// ShouldHaveNormalParam checks if the method has expected normal argument
+func (tds *TestableDefStatement) ShouldHaveNormalParam(expectedName string) {
 	for _, param := range tds.Parameters {
 		p, ok := param.(*Identifier)
 
@@ -111,8 +112,8 @@ func (tds *TestableDefStatement) ShouldHasNormalParam(expectedName string) {
 	tds.t.Fatalf("Can't find normal param '%s' in method '%s'", expectedName, tds.Name.Value)
 }
 
-// ShouldHasOptionalParam checks if the method has expected optional argument
-func (tds *TestableDefStatement) ShouldHasOptionalParam(expectedName string) {
+// ShouldHaveOptionalParam checks if the method has expected optional argument
+func (tds *TestableDefStatement) ShouldHaveOptionalParam(expectedName string) {
 	for _, param := range tds.Parameters {
 		p, ok := param.(*AssignExpression)
 
@@ -128,8 +129,8 @@ func (tds *TestableDefStatement) ShouldHasOptionalParam(expectedName string) {
 	tds.t.Fatalf("Can't find optional param '%s' in method '%s'", expectedName, tds.Name.Value)
 }
 
-// ShouldHasRequiredKeywordParam checks if the method has expected keyword argument
-func (tds *TestableDefStatement) ShouldHasRequiredKeywordParam(expectedName string) {
+// ShouldHaveRequiredKeywordParam checks if the method has expected keyword argument
+func (tds *TestableDefStatement) ShouldHaveRequiredKeywordParam(expectedName string) {
 	for _, param := range tds.Parameters {
 		p, ok := param.(*ArgumentPairExpression)
 
@@ -146,8 +147,8 @@ func (tds *TestableDefStatement) ShouldHasRequiredKeywordParam(expectedName stri
 	tds.t.Fatalf("Can't find required keyword param '%s' in method '%s'", expectedName, tds.Name.Value)
 }
 
-// ShouldHasOptionalKeywordParam checks if the method has expected optional keyword argument
-func (tds *TestableDefStatement) ShouldHasOptionalKeywordParam(expectedName string) {
+// ShouldHaveOptionalKeywordParam checks if the method has expected optional keyword argument
+func (tds *TestableDefStatement) ShouldHaveOptionalKeywordParam(expectedName string) {
 	for _, param := range tds.Parameters {
 		p, ok := param.(*ArgumentPairExpression)
 
@@ -164,8 +165,8 @@ func (tds *TestableDefStatement) ShouldHasOptionalKeywordParam(expectedName stri
 	tds.t.Fatalf("Can't find optional keyword param '%s' in method '%s'", expectedName, tds.Name.Value)
 }
 
-// ShouldHasSplatParam checks if the method has expected splat argument
-func (tds *TestableDefStatement) ShouldHasSplatParam(expectedName string) {
+// ShouldHaveSplatParam checks if the method has expected splat argument
+func (tds *TestableDefStatement) ShouldHaveSplatParam(expectedName string) {
 	for _, param := range tds.Parameters {
 		p, ok := param.(*PrefixExpression)
 
@@ -207,7 +208,8 @@ func (tms *TestableModuleStatement) HasMethod(t *testing.T, methodName string) (
 	return
 }
 
-func (tms *TestableModuleStatement) ShouldHasName(name string) {
+// ShouldHaveName checks if current class's name matches the specified name.
+func (tms *TestableModuleStatement) ShouldHaveName(name string) {
 	if tms.Name.Value != name {
 		tms.t.Helper()
 		tms.t.Fatalf("Wrong class, this class is %s", tms.Name.Value)
@@ -221,7 +223,8 @@ type TestableReturnStatement struct {
 	t *testing.T
 }
 
-func (trs *TestableReturnStatement) ShouldHasValue(value interface{}) {
+// ShouldHaveValue checks if the current value matches the specified name.
+func (trs *TestableReturnStatement) ShouldHaveValue(value interface{}) {
 	t := trs.t
 	t.Helper()
 	rs := trs.ReturnStatement

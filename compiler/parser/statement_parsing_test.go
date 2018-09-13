@@ -27,7 +27,7 @@ func TestReturnStatements(t *testing.T) {
 		}
 
 		returnStmt := program.FirstStmt().IsReturnStmt(t)
-		returnStmt.ShouldHasValue(tt.expectedValue)
+		returnStmt.ShouldHaveValue(tt.expectedValue)
 	}
 }
 
@@ -49,16 +49,16 @@ func TestClassStatement(t *testing.T) {
 	}
 
 	stmt := program.FirstStmt().IsClassStmt(t)
-	stmt.ShouldHasName("Foo")
+	stmt.ShouldHaveName("Foo")
 	defStmt := stmt.HasMethod("bar")
-	defStmt.ShouldHasNormalParam("x")
-	defStmt.ShouldHasNormalParam("y")
+	defStmt.ShouldHaveNormalParam("x")
+	defStmt.ShouldHaveNormalParam("y")
 
 	methodBodyExp := defStmt.MethodBody().NthStmt(1).IsExpression(t)
 	infix := methodBodyExp.IsInfixExpression(t)
-	infix.ShouldHasOperator("+")
-	infix.TestableLeftExpression().IsIdentifier(t).ShouldHasName("x")
-	infix.TestableRightExpression().IsIdentifier(t).ShouldHasName("y")
+	infix.ShouldHaveOperator("+")
+	infix.TestableLeftExpression().IsIdentifier(t).ShouldHaveName("x")
+	infix.TestableRightExpression().IsIdentifier(t).ShouldHaveName("y")
 }
 
 func TestModuleStatement(t *testing.T) {
@@ -79,16 +79,16 @@ func TestModuleStatement(t *testing.T) {
 	}
 
 	stmt := program.FirstStmt().IsModuleStmt(t)
-	stmt.ShouldHasName("Foo")
+	stmt.ShouldHaveName("Foo")
 	defStmt := stmt.HasMethod(t, "bar")
-	defStmt.ShouldHasNormalParam("x")
-	defStmt.ShouldHasNormalParam("y")
+	defStmt.ShouldHaveNormalParam("x")
+	defStmt.ShouldHaveNormalParam("y")
 
 	methodBodyExp := defStmt.MethodBody().NthStmt(1).IsExpression(t)
 	infix := methodBodyExp.IsInfixExpression(t)
-	infix.ShouldHasOperator("+")
-	infix.TestableLeftExpression().IsIdentifier(t).ShouldHasName("x")
-	infix.TestableRightExpression().IsIdentifier(t).ShouldHasName("y")
+	infix.ShouldHaveOperator("+")
+	infix.TestableLeftExpression().IsIdentifier(t).ShouldHaveName("x")
+	infix.TestableRightExpression().IsIdentifier(t).ShouldHaveName("y")
 }
 
 func TestClassStatementWithInheritance(t *testing.T) {
@@ -109,18 +109,18 @@ func TestClassStatementWithInheritance(t *testing.T) {
 	}
 
 	classStmt := program.FirstStmt().IsClassStmt(t)
-	classStmt.ShouldHasName("Foo")
-	classStmt.ShouldInherits("Bar")
+	classStmt.ShouldHaveName("Foo")
+	classStmt.ShouldInherit("Bar")
 
 	defStmt := classStmt.HasMethod("bar")
-	defStmt.ShouldHasNormalParam("x")
-	defStmt.ShouldHasNormalParam("y")
+	defStmt.ShouldHaveNormalParam("x")
+	defStmt.ShouldHaveNormalParam("y")
 
 	methodBodyExp := defStmt.MethodBody().NthStmt(1).IsExpression(t)
 	infix := methodBodyExp.IsInfixExpression(t)
-	infix.ShouldHasOperator("+")
-	infix.TestableLeftExpression().IsIdentifier(t).ShouldHasName("x")
-	infix.TestableRightExpression().IsIdentifier(t).ShouldHasName("y")
+	infix.ShouldHaveOperator("+")
+	infix.TestableLeftExpression().IsIdentifier(t).ShouldHaveName("x")
+	infix.TestableRightExpression().IsIdentifier(t).ShouldHaveName("y")
 }
 
 func TestWhileStatement(t *testing.T) {
@@ -142,10 +142,10 @@ func TestWhileStatement(t *testing.T) {
 	whileStatement := program.FirstStmt().IsWhileStmt(t)
 
 	infix := whileStatement.ConditionExpression().IsInfixExpression(t)
-	infix.TestableLeftExpression().IsIdentifier(t).ShouldHasName("i")
-	infix.ShouldHasOperator("<")
+	infix.TestableLeftExpression().IsIdentifier(t).ShouldHaveName("i")
+	infix.ShouldHaveOperator("<")
 	callExp := infix.TestableRightExpression().IsCallExpression(t)
-	callExp.ShouldHasMethodName("length")
+	callExp.ShouldHaveMethodName("length")
 
 	if callExp.Block != nil {
 		t.Fatalf("Condition expression shouldn't have block")
@@ -155,12 +155,12 @@ func TestWhileStatement(t *testing.T) {
 	block := whileStatement.CodeBlock()
 	firstExp := block.NthStmt(1).IsExpression(t)
 	firstCall := firstExp.IsCallExpression(t)
-	firstCall.ShouldHasMethodName("puts")
-	firstCall.NthArgument(1).IsIdentifier(t).ShouldHasName("i")
+	firstCall.ShouldHaveMethodName("puts")
+	firstCall.NthArgument(1).IsIdentifier(t).ShouldHaveName("i")
 
 	secondExp := block.NthStmt(2).IsExpression(t)
 	secondCall := secondExp.IsAssignExpression(t)
-	secondCall.NthVariable(1).IsIdentifier(t).ShouldHasName("i")
+	secondCall.NthVariable(1).IsIdentifier(t).ShouldHaveName("i")
 }
 
 func TestWhileStatementWithoutDoKeywordFail(t *testing.T) {
