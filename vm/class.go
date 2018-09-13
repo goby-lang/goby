@@ -1363,7 +1363,7 @@ func builtinClassCommonInstanceMethods() []*BuiltinMethodObject {
 					callerDir := path.Dir(t.vm.currentFilePath())
 					filePath := args[0].(*StringObject).value
 					filePath = path.Join(callerDir, filePath)
-					filePath = filePath + ".gb"
+					filePath += ".gb"
 
 					if t.execFile(filePath) != nil {
 						return t.vm.InitErrorObject(errors.IOError, sourceLine, errors.CantLoadFile, args[0].(*StringObject).value)

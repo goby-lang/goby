@@ -2,7 +2,6 @@ package igb
 
 import (
 	"fmt"
-	parserErr "github.com/goby-lang/goby/compiler/parser/errors"
 	"io"
 	"log"
 	"math/rand"
@@ -11,6 +10,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	parserErr "github.com/goby-lang/goby/compiler/parser/errors"
 
 	"github.com/chzyer/readline"
 	"github.com/goby-lang/goby/compiler/bytecode"
@@ -335,7 +336,7 @@ func usage(w io.Writer, c *readline.PrefixCompleter) {
 func indent(c int) string {
 	var s string
 	for i := 0; i < c; i++ {
-		s = s + pad
+		s += pad
 	}
 	return s
 }
