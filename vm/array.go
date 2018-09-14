@@ -819,6 +819,67 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 			},
 		},
 		{
+			// Returns a new hash from the element of the receiver (array) as keys, and generates respective values of hash from the keys by using the block provided.
+			// The method can take a default value, and a block is required.
+			// `index_with` is equivalent to `receiver.map do |e| e, e._do_something end.to_h`
+			// Ref: https://github.com/rails/rails/pull/32523
+			//
+			// ```ruby
+			// ary = [:Mon, :Tue, :Wed, :Thu, :Fri, :Sat, :Sun]
+			// ary.index_with("weekday") do |d|
+			//   if d == :Sat || d == :Sun
+			//     "off day"
+			//   end
+			// end
+			// #=> {Mon: "weekday",
+			//      Tue: "weekday"
+			//      Wed: "weekday"
+			//      Thu: "weekday"
+			//      Fri: "weekday"
+			//      Sat: "off day"
+			//      Sun: "off day"
+			// }
+			// ```
+			//
+			// @param optional default value [Object], block
+			// @return [Hash]
+			Name: "index_with",
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if blockFrame == nil {
+					return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+				}
+
+				a := receiver.(*ArrayObject)
+				// If it's an empty array, pop the block's call frame
+				if len(a.Elements) == 0 {
+					t.callFrameStack.pop()
+				}
+
+				result := make(map[string]Object)
+				switch len(args) {
+				case 0:
+					for _, obj := range a.Elements {
+						result[obj.ToString()] = t.builtinMethodYield(blockFrame, obj).Target
+					}
+				case 1:
+					arg := args[0]
+					for _, obj := range a.Elements {
+						switch b := t.builtinMethodYield(blockFrame, obj).Target; b.(type) {
+						case *NullObject:
+							result[obj.ToString()] = arg
+						default:
+							result[obj.ToString()] = b
+						}
+					}
+				default:
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentLess, 1, len(args))
+				}
+
+				return t.vm.InitHashObject(result)
+
+			},
+		},
+		{
 			// Returns a string by concatenating each element to string, separated by given separator.
 			// If the array is nested, they will be flattened and then concatenated.
 			// If separator is nil, it uses empty string.
