@@ -855,27 +855,27 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					t.callFrameStack.pop()
 				}
 
-				result := make(map[string]Object)
+				hash := make(map[string]Object)
 				switch len(args) {
 				case 0:
 					for _, obj := range a.Elements {
-						result[obj.ToString()] = t.builtinMethodYield(blockFrame, obj).Target
+						hash[obj.ToString()] = t.builtinMethodYield(blockFrame, obj).Target
 					}
 				case 1:
 					arg := args[0]
 					for _, obj := range a.Elements {
 						switch b := t.builtinMethodYield(blockFrame, obj).Target; b.(type) {
 						case *NullObject:
-							result[obj.ToString()] = arg
+							hash[obj.ToString()] = arg
 						default:
-							result[obj.ToString()] = b
+							hash[obj.ToString()] = b
 						}
 					}
 				default:
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentLess, 1, len(args))
 				}
 
-				return t.vm.InitHashObject(result)
+				return t.vm.InitHashObject(hash)
 
 			},
 		},
@@ -1378,6 +1378,50 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 				newArr := arr.copy().(*ArrayObject)
 				sort.Sort(newArr)
 				return newArr
+
+			},
+		},
+		{
+			// Returns the result of interpreting ary as an array of [key value] array pairs.
+			// Note that the keys should always be String or symbol literals (using symbol literal is preferable).
+			// Each value can be any objects.
+			//
+			// ```ruby
+			// ary = [[:john, [:guitar, :harmonica]], [:paul, :base], [:george, :guitar], [:ringo, :drum]]
+			// ary.to_h
+			// #=> { john: ["guitar", "harmonica"], paul: "base", george: "guitar", ringo: "drum" }
+			// ```
+			//
+			// @return [Hash]
+			Name: "to_h",
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				ary := receiver.(*ArrayObject)
+
+				hash := make(map[string]Object)
+				if len(ary.Elements) == 0 {
+					return t.vm.InitHashObject(hash)
+				}
+
+				for i, el := range ary.Elements {
+					kv, ok := el.(*ArrayObject)
+					if !ok {
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect the Array's element #%d to be Array. got: %s", i, el.Class().Name)
+					}
+
+					if len(kv.Elements) != 2 {
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Invalid key-value pair in the element #%d. got: %s", i, kv.ToString())
+					}
+
+					k := kv.Elements[0]
+					if _, ok := k.(*StringObject); !ok {
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect the key in the Array's element #%d to be String. got: %s", i, k.Class().Name)
+					}
+
+					hash[k.ToString()] = kv.Elements[1]
+
+				}
+
+				return t.vm.InitHashObject(hash)
 
 			},
 		},
