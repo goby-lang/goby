@@ -357,7 +357,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 				if len(args) != 0 {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
-				
+
 				if blockFrame == nil {
 					return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 				}
@@ -619,34 +619,34 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 				if aLen < 1 || aLen > 2 {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentRange, 1, 2, aLen)
 				}
-				
+
 				key, ok := args[0].(*StringObject)
 				if !ok {
 					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, key.Class().Name)
 				}
-				
+
 				if aLen == 2 {
 					if blockFrame != nil {
 						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "The default argument can't be passed along with a block")
 					}
 					return args[1]
 				}
-				
+
 				hash := receiver.(*HashObject)
 				value, ok := hash.Pairs[key.value]
-				
+
 				if ok {
 					if blockFrame != nil {
 						t.callFrameStack.pop()
 					}
 					return value
 				}
-				
+
 				if blockFrame != nil {
 					return t.builtinMethodYield(blockFrame, key).Target
 				}
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "The value was not found, and no block has been provided")
-				
+
 			},
 		},
 		{
@@ -665,7 +665,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 			Name: "fetch_values",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				aLen := len(args)
-				if aLen <1 {
+				if aLen < 1 {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentMore, 1, aLen)
 				}
 
@@ -1127,7 +1127,7 @@ func builtinHashInstanceMethods() []*BuiltinMethodObject {
 				if len(args) != 0 {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
-				
+
 				h := receiver.(*HashObject)
 				var keys []Object
 				for _, v := range h.Pairs {

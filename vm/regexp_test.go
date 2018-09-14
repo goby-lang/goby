@@ -44,7 +44,7 @@ func TestRegexpNewMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`Regexp.new`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
 	}
-	
+
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
