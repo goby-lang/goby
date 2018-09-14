@@ -1409,7 +1409,7 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 					}
 
 					if len(kv.Elements) != 2 {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Invalid key-value pair in the element #%d. got: %s", i, kv.ToString())
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect element #%d to have 2 elements as a key-value pair. got: %s", i, kv.ToString())
 					}
 
 					k := kv.Elements[0]

@@ -1982,6 +1982,45 @@ func TestArraySortMethodFail(t *testing.T) {
 	}
 }
 
+func TestArrayToHashMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected map[string]interface{}
+	}{
+		{`
+   [[:john, [:guitar, :harmonica]], [:paul, :base], [:george, :guitar], [:ringo, :drum]].to_h
+		`, map[string]interface{}{"george": "guitar", "john": []interface{}{"guitar", "harmonica"}, "paul": "base", "ringo": "drum"}},
+		{`
+   [].to_h
+		`, map[string]interface{}{}},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input, getFilename())
+		verifyHashObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayToHashMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`[:john].to_h`, "TypeError: Expect the Array's element #0 to be Array. got: String", 1},
+		{`[[:john]].to_h`, `ArgumentError: Expect element #0 to have 2 elements as a key-value pair. got: ["john"]`, 1},
+		{`[[:john, :paul, :george]].to_h`, `ArgumentError: Expect element #0 to have 2 elements as a key-value pair. got: ["john", "paul", "george"]`, 1},
+		{`[[1, :paul]].to_h`, `TypeError: Expect the key in the Array's element #0 to be String. got: Integer`, 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayStarMethod(t *testing.T) {
 	tests := []struct {
 		input    string
