@@ -1196,6 +1196,32 @@ func TestArrayFlattenMethodFail(t *testing.T) {
 	}
 }
 
+func TestArrayIndexWithMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected map[string]interface{}
+	}{
+		{`
+		[:a, :b, :c, :d].index_with do |i| i * 3 end
+		`, map[string]interface{}{"a": "aaa", "b": "bbb", "c": "ccc", "d": "ddd"}},
+		{`
+		[:a, :b, :c, :d].index_with(:nothing) do |i|
+			if i == :c
+        i * 3
+      end
+    end
+		`, map[string]interface{}{"a": "nothing", "b": "nothing", "c": "ccc", "d": "nothing"}},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input, getFilename())
+		verifyHashObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayIncludeMethod(t *testing.T) {
 	tests := []struct {
 		input    string
