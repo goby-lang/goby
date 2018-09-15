@@ -40,7 +40,7 @@ func TestJSONValidateFail(t *testing.T) {
 		{`require "json";JSON.validate('{"Name": "Stan"}', '{"Name": "hachi8833"}')`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
 		{`require "json";JSON.validate(1)`, "TypeError: Expect argument to be String. got: Integer", 1},
 	}
-	
+
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -101,7 +101,7 @@ func TestJSONParseFail(t *testing.T) {
 		{`require "json";JSON.parse('{"Name": "Stan"}', '{"Name": "hachi8833"}')`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
 		{`require "json";JSON.parse(1)`, "TypeError: Expect argument to be String. got: Integer", 1},
 	}
-	
+
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -159,4 +159,3 @@ func TestJSONObjectArrayParsing(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
-

@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"path"
 	"strings"
-	
+
 	"github.com/goby-lang/goby/vm/errors"
 )
 

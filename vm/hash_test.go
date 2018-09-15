@@ -1335,7 +1335,7 @@ func TestHashSortedKeysMethod(t *testing.T) {
 		{`{ b: 1, a: 2, b: 3 }.sorted_keys`, []interface{}{"a", "b"}},
 		{`{ c: 1, a: 2, a: 3 }.sorted_keys`, []interface{}{"a", "c"}},
 	}
-	
+
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
