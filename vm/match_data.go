@@ -57,7 +57,7 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 				if len(args) != 0 {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
-				
+
 				offset := 1
 
 				g := receiver.(*MatchDataObject).match
