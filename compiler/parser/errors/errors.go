@@ -42,7 +42,7 @@ func (e *Error) IsUnexpectedEnd() bool {
 	return e.ErrType == UnexpectedEndError
 }
 
-// IsUnexpectedTok checks if error is unexpected token error
+// IsUnexpectedToken checks if error is unexpected token error
 func (e *Error) IsUnexpectedToken() bool {
 	return e.ErrType == UnexpectedTokenError
 }
