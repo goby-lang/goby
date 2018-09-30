@@ -91,9 +91,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 				intOperation := func(leftValue int, rightValue int) int {
 					return leftValue % rightValue
 				}
-				floatOperation := func(leftValue float64, rightValue float64) float64 {
-					return math.Mod(leftValue, rightValue)
-				}
+				floatOperation := math.Mod
 
 				return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine, true)
 
@@ -151,9 +149,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 				intOperation := func(leftValue int, rightValue int) int {
 					return int(math.Pow(float64(leftValue), float64(rightValue)))
 				}
-				floatOperation := func(leftValue float64, rightValue float64) float64 {
-					return math.Pow(leftValue, rightValue)
-				}
+				floatOperation := math.Pow
 
 				return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine, false)
 
