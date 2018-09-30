@@ -1044,12 +1044,10 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 				var result string
 				var err error
 				target := receiver.(*StringObject).value
-				switch args[0].(type) {
+				switch pattern := args[0].(type) {
 				case *StringObject:
-					pattern := args[0].(*StringObject)
 					result = strings.Replace(target, pattern.value, replacement.value, -1)
 				case *RegexpObject:
-					pattern := args[0].(*RegexpObject)
 					result, err = pattern.regexp.Replace(target, replacement.value, 0, -1)
 					if err != nil {
 						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.RegexpFailure, args[0].Class().Name)
@@ -1091,12 +1089,10 @@ func builtinStringInstanceMethods() []*BuiltinMethodObject {
 				var result string
 				var err error
 				target := receiver.(*StringObject).value
-				switch args[0].(type) {
+				switch pattern := args[0].(type) {
 				case *StringObject:
-					pattern := args[0].(*StringObject)
 					result = strings.Replace(target, pattern.value, replacement.value, 1)
 				case *RegexpObject:
-					pattern := args[0].(*RegexpObject)
 					result, err = pattern.regexp.Replace(target, replacement.value, 0, 1)
 					if err != nil {
 						return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.RegexpFailure, args[0].Class().Name)

@@ -528,20 +528,17 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 
 				for i := 0; i < len(arr.Elements); i++ {
 					el := arr.Elements[i]
-					switch el.(type) {
+					switch el := el.(type) {
 					case *IntegerObject:
-						elInt := el.(*IntegerObject)
-						if findIsInt && findInt.equal(elInt) {
+						if findIsInt && findInt.equal(el) {
 							count++
 						}
 					case *StringObject:
-						elString := el.(*StringObject)
-						if findIsString && findString.equal(elString) {
+						if findIsString && findString.equal(el) {
 							count++
 						}
 					case *BooleanObject:
-						elBoolean := el.(*BooleanObject)
-						if findIsBoolean && findBoolean.equal(elBoolean) {
+						if findIsBoolean && findBoolean.equal(el) {
 							count++
 						}
 					}
