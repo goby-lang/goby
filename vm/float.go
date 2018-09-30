@@ -66,10 +66,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// @return [Float]
 			Name: "%",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				operation := func(leftValue float64, rightValue float64) float64 {
-					return math.Mod(leftValue, rightValue)
-				}
-
+				operation := math.Mod
 				return receiver.(*FloatObject).arithmeticOperation(t, args[0], operation, sourceLine, true)
 
 			},
@@ -117,10 +114,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// @return [Float]
 			Name: "**",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				operation := func(leftValue float64, rightValue float64) float64 {
-					return math.Pow(leftValue, rightValue)
-				}
-
+				operation := math.Pow
 				return receiver.(*FloatObject).arithmeticOperation(t, args[0], operation, sourceLine, false)
 
 			},

@@ -968,6 +968,8 @@ func TestHashHasKeyMethod(t *testing.T) {
 	}{
 		{`{ a: "Hello", b: 123, c: true }.has_key?("a")`, true},
 		{`{ a: "Hello", b: 123, c: true }.has_key?("d")`, false},
+		{`{ a: "Hello", b: 123, c: true }.has_key?(:a)`, true},
+		{`{ a: "Hello", b: 123, c: true }.has_key?(:d)`, false},
 	}
 
 	for i, tt := range tests {
