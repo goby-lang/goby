@@ -65,7 +65,7 @@ func (p *Parser) parseCallExpressionWithReceiver(receiver ast.Expression) ast.Ex
 			p.nextToken()
 			exp.Arguments = p.parseCallArgumentsWithParens()
 		case token.Assign: // Setter method call like: p.foo = x
-			exp.Method = exp.Method + "="
+			exp.Method += "="
 			p.nextToken()
 			p.nextToken()
 			exp.Arguments = append(exp.Arguments, p.parseExpression(precedence.Normal))

@@ -290,7 +290,7 @@ func (t *Thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 		// Pop array
 		t.Stack.Pop()
 		// Can't count array self, only the number of array elements
-		argCount = argCount + len(arr.Elements)
+		argCount += len(arr.Elements)
 		for _, elem := range arr.Elements {
 			t.Stack.Push(&Pointer{Target: elem})
 		}
