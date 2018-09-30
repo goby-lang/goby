@@ -151,7 +151,7 @@ func TestMatchDataToHMethodFail(t *testing.T) {
 		{`'abcd'.match(Regexp.new('a.')).to_h(1)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
 		{`'abcd'.match(Regexp.new('a.')).to_h(1, 2)`, "ArgumentError: Expect 0 argument(s). got: 2", 1},
 	}
-	
+
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())

@@ -1,6 +1,7 @@
 package ripper
 
 import (
+	"fmt"
 	"github.com/goby-lang/goby/compiler"
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/compiler/lexer"
@@ -10,7 +11,6 @@ import (
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
 	"strings"
-	"fmt"
 )
 
 // Ripper is a loadable library and has abilities to parse/lex/tokenize/get instructions of Goby codes from String.
@@ -60,14 +60,14 @@ func instruction(receiver Object, sourceLine int, t *Thread, args []Object) Obje
 	if len(args) != 1 {
 		return t.VM().InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%d", len(args))
 	}
-	
+
 	arg, ok := args[0].(*StringObject)
 	if !ok {
 		return t.VM().InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 	}
-		
+
 	i, _ := compiler.CompileToInstructions(arg.Value().(string), parser.NormalMode)
-	
+
 	return convertToTuple(i, t.VM())
 }
 
@@ -84,16 +84,16 @@ func instruction(receiver Object, sourceLine int, t *Thread, args []Object) Obje
 //
 // @param Goby code [String]
 // @return [Array]
-func lex(receiver Object, sourceLine int, t *Thread, args []Object) Object  {
+func lex(receiver Object, sourceLine int, t *Thread, args []Object) Object {
 	if len(args) != 1 {
 		return t.VM().InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%d", len(args))
 	}
-		
+
 	arg, ok := args[0].(*StringObject)
 	if !ok {
 		return t.VM().InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 	}
-		
+
 	l := lexer.New(arg.Value().(string))
 	array := t.VM().InitArrayObject([]Object{})
 	var elements []Object
@@ -136,16 +136,16 @@ func parse(receiver Object, sourceLine int, t *Thread, args []Object) Object {
 	if len(args) != 1 {
 		return t.VM().InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%d", len(args))
 	}
-		
+
 	arg, ok := args[0].(*StringObject)
 	if !ok {
 		return t.VM().InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 	}
-		
+
 	l := lexer.New(arg.Value().(string))
 	p := parser.New(l)
 	program, _ := p.ParseProgram()
-		
+
 	return t.VM().InitStringObject(program.String())
 }
 
@@ -166,12 +166,12 @@ func tokenize(receiver Object, sourceLine int, t *Thread, args []Object) Object 
 	if len(args) != 1 {
 		return t.VM().InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%d", len(args))
 	}
-		
+
 	arg, ok := args[0].(*StringObject)
 	if !ok {
 		return t.VM().InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 	}
-		
+
 	l := lexer.New(arg.Value().(string))
 	el := []Object{}
 	var nt token.Token
@@ -193,7 +193,7 @@ func init() {
 		map[string]vm.Method{
 			"instruction": instruction,
 			"lex":         lex,
-			"new": 				 new,
+			"new":         new,
 			"parse":       parse,
 			"tokenize":    tokenize,
 		},
@@ -214,7 +214,7 @@ func convertToTuple(instSet []*bytecode.InstructionSet, v *VM) *ArrayObject {
 			hashInstLevel1["arg_types"] = getArgNameType(instruction.ArgTypes(), v)
 		}
 		ary = append(ary, v.InitHashObject(hashInstLevel1))
-		
+
 		arrayInst := []Object{}
 		for _, ins := range instruction.Instructions {
 			hashInstLevel2 := make(map[string]Object)
@@ -223,20 +223,20 @@ func convertToTuple(instSet []*bytecode.InstructionSet, v *VM) *ArrayObject {
 			hashInstLevel2["source_line"] = v.InitIntegerObject(ins.SourceLine())
 			anchor := ins.AnchorLine()
 			hashInstLevel2["anchor"] = v.InitIntegerObject(anchor)
-			
+
 			arrayParams := []Object{}
 			for _, param := range ins.Params {
 				arrayParams = append(arrayParams, v.InitStringObject(covertTypesToString(param)))
 			}
 			hashInstLevel2["params"] = v.InitArrayObject(arrayParams)
-			
+
 			if ins.Opcode == bytecode.Send {
 				hashInstLevel1["arg_set"] = getArgNameType(ins.Params[3].(*bytecode.ArgSet), v)
 			}
-			
+
 			arrayInst = append(arrayInst, v.InitHashObject(hashInstLevel2))
 		}
-		
+
 		hashInstLevel1["instructions"] = v.InitArrayObject(arrayInst)
 		ary = append(ary, v.InitHashObject(hashInstLevel1))
 	}
@@ -245,18 +245,18 @@ func convertToTuple(instSet []*bytecode.InstructionSet, v *VM) *ArrayObject {
 
 func getArgNameType(argSet *bytecode.ArgSet, v *VM) *HashObject {
 	h := make(map[string]Object)
-	
+
 	aName := []Object{}
 	for _, argname := range argSet.Names() {
 		aName = append(aName, v.InitStringObject(argname))
 	}
 	h["names"] = v.InitArrayObject(aName)
-	
+
 	aType := []Object{}
 	for _, argtype := range argSet.Types() {
 		aType = append(aType, v.InitIntegerObject(int(argtype)))
 	}
-	
+
 	h["types"] = v.InitArrayObject(aType)
 	return v.InitHashObject(h)
 }
@@ -336,7 +336,7 @@ func convertLex(t token.Type) string {
 	default:
 		s = strings.ToLower(string(t))
 	}
-	
+
 	return "on_" + s
 }
 

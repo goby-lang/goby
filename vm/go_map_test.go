@@ -76,7 +76,7 @@ func TestGoMapGetMethodFail(t *testing.T) {
 		{`m = GoMap.new;m.get`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
 		{`m = GoMap.new;m.get(1)`, "TypeError: Expect argument to be String. got: Integer", 1},
 	}
-	
+
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -113,7 +113,7 @@ func TestGoMapSetMethodFail(t *testing.T) {
 		{`m = GoMap.new;m.set("foo", "bar", "baz")`, "ArgumentError: Expect 2 argument(s). got: 3", 1},
 		{`m = GoMap.new;m.set(1, "foo")`, "TypeError: Expect argument #1 to be String. got: Integer", 1},
 	}
-	
+
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -140,7 +140,7 @@ func TestGoMapToHashMethod(t *testing.T) {
 		h[:foo]
 		`, nil},
 	}
-	
+
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
@@ -155,7 +155,7 @@ func TestGoMapToHashMethodFail(t *testing.T) {
 		{`m = GoMap.new;m.to_hash(1)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
 		{`m = GoMap.new;m.to_hash(1, 2)`, "ArgumentError: Expect 0 argument(s). got: 2", 1},
 	}
-	
+
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
