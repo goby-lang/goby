@@ -2,6 +2,7 @@ package vm
 
 import (
 	"encoding/json"
+
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
 )
@@ -35,7 +36,7 @@ func builtinJSONClassMethods() []*BuiltinMethodObject {
 					err = json.Unmarshal([]byte(jsonString), &objs)
 
 					if err != nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Can't parse string %s as json: %s", jsonString, err.Error())
+						return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Can't parse string `%s` as json: %s", jsonString, err.Error())
 					}
 
 					var objects []Object
