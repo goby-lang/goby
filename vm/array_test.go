@@ -1196,6 +1196,32 @@ func TestArrayFlattenMethodFail(t *testing.T) {
 	}
 }
 
+func TestArrayIndexWithMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected map[string]interface{}
+	}{
+		{`
+		[:a, :b, :c, :d].index_with do |i| i * 3 end
+		`, map[string]interface{}{"a": "aaa", "b": "bbb", "c": "ccc", "d": "ddd"}},
+		{`
+		[:a, :b, :c, :d].index_with(:nothing) do |i|
+			if i == :c
+        i * 3
+      end
+    end
+		`, map[string]interface{}{"a": "nothing", "b": "nothing", "c": "ccc", "d": "nothing"}},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input, getFilename())
+		verifyHashObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayIncludeMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -1971,6 +1997,45 @@ func TestArraySortMethodFail(t *testing.T) {
 		a.sort(3, 3, 4, 5)
 		`,
 			"ArgumentError: Expect 0 argument. got=4", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayToHashMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected map[string]interface{}
+	}{
+		{`
+   [[:john, [:guitar, :harmonica]], [:paul, :base], [:george, :guitar], [:ringo, :drum]].to_h
+		`, map[string]interface{}{"george": "guitar", "john": []interface{}{"guitar", "harmonica"}, "paul": "base", "ringo": "drum"}},
+		{`
+   [].to_h
+		`, map[string]interface{}{}},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input, getFilename())
+		verifyHashObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayToHashMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`[:john].to_h`, "TypeError: Expect the Array's element #0 to be Array. got: String", 1},
+		{`[[:john]].to_h`, `ArgumentError: Expect element #0 to have 2 elements as a key-value pair. got: ["john"]`, 1},
+		{`[[:john, :paul, :george]].to_h`, `ArgumentError: Expect element #0 to have 2 elements as a key-value pair. got: ["john", "paul", "george"]`, 1},
+		{`[[1, :paul]].to_h`, `TypeError: Expect the key in the Array's element #0 to be String. got: Integer`, 1},
 	}
 
 	for i, tt := range testsFail {
