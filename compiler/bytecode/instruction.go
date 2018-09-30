@@ -15,7 +15,7 @@ const (
 
 // instruction actions
 const (
-	GetLocal            uint8 = iota
+	GetLocal uint8 = iota
 	GetConstant
 	GetInstanceVariable
 	SetLocal
@@ -46,7 +46,6 @@ const (
 	Dup
 	Leave
 )
-
 
 // InstructionNameTable is the table the maps instruction's op code with its readable name
 var InstructionNameTable = []string{
@@ -185,7 +184,7 @@ func (is *InstructionSet) Type() string {
 }
 
 func (is *InstructionSet) define(action uint8, sourceLine int, params ...interface{}) *Instruction {
-	i := &Instruction{Opcode: action, Params: params, line: is.count, sourceLine: sourceLine+1}
+	i := &Instruction{Opcode: action, Params: params, line: is.count, sourceLine: sourceLine + 1}
 	for _, param := range params {
 		a, ok := param.(*anchor)
 

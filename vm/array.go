@@ -528,20 +528,17 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 
 				for i := 0; i < len(arr.Elements); i++ {
 					el := arr.Elements[i]
-					switch el.(type) {
+					switch el := el.(type) {
 					case *IntegerObject:
-						elInt := el.(*IntegerObject)
-						if findIsInt && findInt.equal(elInt) {
+						if findIsInt && findInt.equal(el) {
 							count++
 						}
 					case *StringObject:
-						elString := el.(*StringObject)
-						if findIsString && findString.equal(elString) {
+						if findIsString && findString.equal(el) {
 							count++
 						}
 					case *BooleanObject:
-						elBoolean := el.(*BooleanObject)
-						if findIsBoolean && findBoolean.equal(elBoolean) {
+						if findIsBoolean && findBoolean.equal(el) {
 							count++
 						}
 					}
@@ -815,6 +812,67 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 				newElements := arr.flatten()
 
 				return t.vm.InitArrayObject(newElements)
+
+			},
+		},
+		{
+			// Returns a new hash from the element of the receiver (array) as keys, and generates respective values of hash from the keys by using the block provided.
+			// The method can take a default value, and a block is required.
+			// `index_with` is equivalent to `receiver.map do |e| e, e._do_something end.to_h`
+			// Ref: https://github.com/rails/rails/pull/32523
+			//
+			// ```ruby
+			// ary = [:Mon, :Tue, :Wed, :Thu, :Fri, :Sat, :Sun]
+			// ary.index_with("weekday") do |d|
+			//   if d == :Sat || d == :Sun
+			//     "off day"
+			//   end
+			// end
+			// #=> {Mon: "weekday",
+			//      Tue: "weekday"
+			//      Wed: "weekday"
+			//      Thu: "weekday"
+			//      Fri: "weekday"
+			//      Sat: "off day"
+			//      Sun: "off day"
+			// }
+			// ```
+			//
+			// @param optional default value [Object], block
+			// @return [Hash]
+			Name: "index_with",
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if blockFrame == nil {
+					return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+				}
+
+				a := receiver.(*ArrayObject)
+				// If it's an empty array, pop the block's call frame
+				if len(a.Elements) == 0 {
+					t.callFrameStack.pop()
+				}
+
+				hash := make(map[string]Object)
+				switch len(args) {
+				case 0:
+					for _, obj := range a.Elements {
+						hash[obj.ToString()] = t.builtinMethodYield(blockFrame, obj).Target
+					}
+				case 1:
+					arg := args[0]
+					for _, obj := range a.Elements {
+						switch b := t.builtinMethodYield(blockFrame, obj).Target; b.(type) {
+						case *NullObject:
+							hash[obj.ToString()] = arg
+						default:
+							hash[obj.ToString()] = b
+						}
+					}
+				default:
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentLess, 1, len(args))
+				}
+
+				return t.vm.InitHashObject(hash)
 
 			},
 		},
@@ -1317,6 +1375,50 @@ func builtinArrayInstanceMethods() []*BuiltinMethodObject {
 				newArr := arr.copy().(*ArrayObject)
 				sort.Sort(newArr)
 				return newArr
+
+			},
+		},
+		{
+			// Returns the result of interpreting ary as an array of [key value] array pairs.
+			// Note that the keys should always be String or symbol literals (using symbol literal is preferable).
+			// Each value can be any objects.
+			//
+			// ```ruby
+			// ary = [[:john, [:guitar, :harmonica]], [:paul, :base], [:george, :guitar], [:ringo, :drum]]
+			// ary.to_h
+			// #=> { john: ["guitar", "harmonica"], paul: "base", george: "guitar", ringo: "drum" }
+			// ```
+			//
+			// @return [Hash]
+			Name: "to_h",
+			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				ary := receiver.(*ArrayObject)
+
+				hash := make(map[string]Object)
+				if len(ary.Elements) == 0 {
+					return t.vm.InitHashObject(hash)
+				}
+
+				for i, el := range ary.Elements {
+					kv, ok := el.(*ArrayObject)
+					if !ok {
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect the Array's element #%d to be Array. got: %s", i, el.Class().Name)
+					}
+
+					if len(kv.Elements) != 2 {
+						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect element #%d to have 2 elements as a key-value pair. got: %s", i, kv.ToString())
+					}
+
+					k := kv.Elements[0]
+					if _, ok := k.(*StringObject); !ok {
+						return t.vm.InitErrorObject(errors.TypeError, sourceLine, "Expect the key in the Array's element #%d to be String. got: %s", i, k.Class().Name)
+					}
+
+					hash[k.ToString()] = kv.Elements[1]
+
+				}
+
+				return t.vm.InitHashObject(hash)
 
 			},
 		},

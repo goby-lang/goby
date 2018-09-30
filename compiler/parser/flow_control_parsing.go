@@ -43,11 +43,16 @@ func (p *Parser) parseCaseExpression() ast.Expression {
 
 // case expression parsing helpers
 func (p *Parser) parseCaseConditionals() []*ast.ConditionalExpression {
-	p.nextToken()
-	base := p.parseExpression(precedence.Normal)
+	var ce []*ast.ConditionalExpression
+	var base ast.Expression
+	if p.peekTokenIs(token.When) {
+		base = &ast.BooleanExpression{BaseNode: &ast.BaseNode{Token: token.Token{Type: token.True, Literal: "true", Line: p.curToken.Line}}, Value: true}
+	} else {
+		p.nextToken()
+		base = p.parseExpression(precedence.Normal)
+	}
 
 	p.expectPeek(token.When)
-	ce := []*ast.ConditionalExpression{}
 
 	for p.curTokenIs(token.When) {
 		ce = append(ce, p.parseCaseConditional(base))

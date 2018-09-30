@@ -91,9 +91,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 				intOperation := func(leftValue int, rightValue int) int {
 					return leftValue % rightValue
 				}
-				floatOperation := func(leftValue float64, rightValue float64) float64 {
-					return math.Mod(leftValue, rightValue)
-				}
+				floatOperation := math.Mod
 
 				return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine, true)
 
@@ -151,9 +149,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 				intOperation := func(leftValue int, rightValue int) int {
 					return int(math.Pow(float64(leftValue), float64(rightValue)))
 				}
-				floatOperation := func(leftValue float64, rightValue float64) float64 {
-					return math.Pow(leftValue, rightValue)
-				}
+				floatOperation := math.Pow
 
 				return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine, false)
 
@@ -296,10 +292,10 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				rightObject := args[0]
 
-				switch rightObject.(type) {
+				switch rightObject := rightObject.(type) {
 				case *IntegerObject:
 					leftValue := receiver.(*IntegerObject).value
-					rightValue := rightObject.(*IntegerObject).value
+					rightValue := rightObject.value
 
 					if leftValue < rightValue {
 						return t.vm.InitIntegerObject(-1)
@@ -311,7 +307,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 					return t.vm.InitIntegerObject(0)
 				case *FloatObject:
 					leftValue := float64(receiver.(*IntegerObject).value)
-					rightValue := rightObject.(*FloatObject).value
+					rightValue := rightObject.value
 
 					if leftValue < rightValue {
 						return t.vm.InitIntegerObject(-1)
@@ -699,10 +695,10 @@ func (i *IntegerObject) arithmeticOperation(
 	sourceLine int,
 	division bool,
 ) Object {
-	switch rightObject.(type) {
+	switch rightObject := rightObject.(type) {
 	case *IntegerObject:
 		leftValue := i.value
-		rightValue := rightObject.(*IntegerObject).value
+		rightValue := rightObject.value
 		if division && rightValue == 0 {
 			return t.vm.InitErrorObject(errors.ZeroDivisionError, sourceLine, errors.DividedByZero)
 		}
@@ -712,7 +708,7 @@ func (i *IntegerObject) arithmeticOperation(
 		return t.vm.InitIntegerObject(result)
 	case *FloatObject:
 		leftValue := float64(i.value)
-		rightValue := rightObject.(*FloatObject).value
+		rightValue := rightObject.value
 
 		if division && rightValue == 0 {
 			return t.vm.InitErrorObject(errors.ZeroDivisionError, sourceLine, errors.DividedByZero)
@@ -730,15 +726,15 @@ func (i *IntegerObject) arithmeticOperation(
 // and false otherwise.
 // See comment on numericComparison().
 func (i *IntegerObject) equalityTest(rightObject Object) bool {
-	switch rightObject.(type) {
+	switch rightObject := rightObject.(type) {
 	case *IntegerObject:
 		leftValue := i.value
-		rightValue := rightObject.(*IntegerObject).value
+		rightValue := rightObject.value
 
 		return leftValue == rightValue
 	case *FloatObject:
 		leftValue := i.floatValue()
-		rightValue := rightObject.(*FloatObject).value
+		rightValue := rightObject.value
 
 		return leftValue == rightValue
 	default:
@@ -755,17 +751,17 @@ func (i *IntegerObject) numericComparison(
 	intComparison func(leftValue int, rightValue int) bool,
 	floatComparison func(leftValue float64, rightValue float64) bool,
 ) bool {
-	switch rightObject.(type) {
+	switch rightObject := rightObject.(type) {
 	case *IntegerObject:
 		leftValue := i.value
-		rightValue := rightObject.(*IntegerObject).value
+		rightValue := rightObject.value
 
 		result := intComparison(leftValue, rightValue)
 
 		return result
 	case *FloatObject:
 		leftValue := i.floatValue()
-		rightValue := rightObject.(*FloatObject).value
+		rightValue := rightObject.value
 
 		result := floatComparison(leftValue, rightValue)
 

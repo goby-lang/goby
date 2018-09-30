@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+
 	"github.com/goby-lang/goby/compiler/ast"
 	"github.com/goby-lang/goby/compiler/parser/arguments"
 	"github.com/goby-lang/goby/compiler/parser/errors"
@@ -82,7 +83,7 @@ func (p *Parser) parseDefMethodStatement() *ast.DefStatement {
 
 	// Setter method def foo=()
 	if p.peekTokenIs(token.Assign) {
-		stmt.Name.Value = stmt.Name.Value + "="
+		stmt.Name.Value += "="
 		p.nextToken()
 	}
 
