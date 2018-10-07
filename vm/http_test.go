@@ -76,12 +76,12 @@ func TestHTTPRequestFail(t *testing.T) {
 		require "net/http"
 
 		Net::HTTP.get(42)
-		`, "ArgumentError: Expect argument 0 to be string, got: Integer", 1},
+		`, "ArgumentError: Expect argument #0 to be String. got: Integer", 1},
 		{`
 		require "net/http"
 
 		Net::HTTP.get("http://127.0.0.1:3000/error", 40, 2)
-		`, "ArgumentError: Splat arguments must be a string, got: Integer for argument 0", 1},
+		`, "ArgumentError: Splat arguments must be a string, got: Integer on argument #0", 1},
 		//HTTPErrors for post()
 		{`
 		require "net/http"
@@ -103,7 +103,7 @@ func TestHTTPRequestFail(t *testing.T) {
 		require "net/http"
 
 		Net::HTTP.post(42, "text/plain", "Let me down")
-		`, "ArgumentError: Expect argument 0 to be string, got: Integer", 1},
+		`, "ArgumentError: Expect argument #0 to be String. got: Integer", 1},
 		//HTTPErrors for head()
 		{`
 		require "net/http"
@@ -120,12 +120,12 @@ func TestHTTPRequestFail(t *testing.T) {
 		require "net/http"
 
 		Net::HTTP.head(42)
-		`, "ArgumentError: Expect argument 0 to be string, got: Integer", 1},
+		`, "ArgumentError: Expect argument #0 to be String. got: Integer", 1},
 		{`
 		require "net/http"
 
 		Net::HTTP.head("http://127.0.0.1:3000/error", 40, 2)
-		`, "ArgumentError: Splat arguments must be a string, got: Integer for argument 0", 1},
+		`, "ArgumentError: Splat arguments must be a string, got: Integer on argument #0", 1},
 	}
 
 	//block until server is ready
