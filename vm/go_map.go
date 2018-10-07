@@ -108,18 +108,18 @@ func builtinGoMapInstanceMethods() []*BuiltinMethodObject {
 				if len(args) != 0 {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
-				
+
 				m := receiver.(*GoMap)
-				
+
 				pairs := map[string]Object{}
-				
+
 				for k, obj := range m.data {
 					pairs[k] = t.vm.InitObjectFromGoType(obj)
-					
+
 				}
-				
+
 				return t.vm.InitHashObject(pairs)
-				
+
 			},
 		},
 	}

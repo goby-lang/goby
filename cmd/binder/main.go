@@ -174,7 +174,7 @@ func (b *Binding) body(receiver *Statement, f *File, d *ast.FuncDecl) {
 		if i == 0 {
 			continue
 		}
-		i = i - 1
+		i--
 		c := List(Id(fmt.Sprintf("arg%d", i)), Id("ok")).Op(":=").Id("args").Index(Lit(i)).Assert(Id(a.kind))
 		c = c.Line()
 		c = c.If(Op("!").Id("ok")).Block(
