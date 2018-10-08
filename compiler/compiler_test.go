@@ -139,17 +139,6 @@ func TestCompileToInstructionsREPLModeFail(t *testing.T) {
 iff
 end
 `, "unexpected end Line: 2"},
-		{`
-case
-when 1
-  11
-when 2
-  22
-else
-  99
-end
-`, "expected next token to be WHEN, got INT(1) instead. Line: 2",
-		},
 	}
 
 	for _, tt := range tests {
