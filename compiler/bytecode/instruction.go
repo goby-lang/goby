@@ -115,7 +115,6 @@ func (i *Instruction) AnchorLine() int {
 }
 
 // Line returns instruction's line number
-// TODO: needs to change the func to simple public variable
 func (i *Instruction) Line() int {
 	return i.line
 }
