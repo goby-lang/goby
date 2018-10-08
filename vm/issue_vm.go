@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+
+	"github.com/goby-lang/goby/compiler/parser"
 )
 
 // InitIssueReportVM initializes a vm in test mode for issue reporting
 func InitIssueReportVM(dir string, args []string) (*VM, error) {
 	v, err := New(dir, args)
-	v.mode = TestMode
+	v.mode = parser.TestMode
 
 	return v, err
 }

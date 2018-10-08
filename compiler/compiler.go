@@ -2,16 +2,17 @@ package compiler
 
 import (
 	"fmt"
+
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/compiler/lexer"
 	"github.com/goby-lang/goby/compiler/parser"
 )
 
 // CompileToInstructions compiles input source code into instruction set data structures
-func CompileToInstructions(input string, parserMode int) ([]*bytecode.InstructionSet, error) {
+func CompileToInstructions(input string, pm parser.ParserMode) ([]*bytecode.InstructionSet, error) {
 	l := lexer.New(input)
 	p := parser.New(l)
-	p.Mode = parserMode
+	p.Mode = pm
 	program, err := p.ParseProgram()
 	if err != nil {
 		return nil, fmt.Errorf(err.Message)

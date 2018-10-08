@@ -120,6 +120,7 @@ func (i *Instruction) Line() int {
 }
 
 // SourceLine returns instruction's source line number
+// TODO: needs to change the func to simple public variable
 func (i *Instruction) SourceLine() int {
 	return i.sourceLine
 }
@@ -144,11 +145,13 @@ type ArgSet struct {
 }
 
 // Types are the getter method of *ArgSet's types attribute
+// TODO: needs to change the func to simple public variable
 func (as *ArgSet) Types() []uint8 {
 	return as.types
 }
 
 // Names are the getter method of *ArgSet's names attribute
+// TODO: needs to change the func to simple public variable
 func (as *ArgSet) Names() []string {
 	return as.names
 }
@@ -169,16 +172,19 @@ func (as *ArgSet) setArg(index int, name string, argType uint8) {
 }
 
 // ArgTypes returns enums that represents each argument's type
+// TODO: needs to change the func to simple public variable
 func (is *InstructionSet) ArgTypes() *ArgSet {
 	return is.argTypes
 }
 
 // Name returns instruction set's name
+// TODO: needs to change the func to simple public variable
 func (is *InstructionSet) Name() string {
 	return is.name
 }
 
 // SetType returns instruction's type
+// TODO: needs to change the func to simple public variable
 func (is *InstructionSet) Type() string {
 	return is.isType
 }

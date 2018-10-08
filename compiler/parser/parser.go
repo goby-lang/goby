@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+
 	"github.com/goby-lang/goby/compiler/ast"
 	"github.com/goby-lang/goby/compiler/lexer"
 	"github.com/goby-lang/goby/compiler/parser/errors"
@@ -28,12 +29,15 @@ type Parser struct {
 	// However, this is not a very good practice should change it in the future.
 	acceptBlock bool
 	fsm         *fsm.FSM
-	Mode        int
+	Mode        ParserMode
 }
+
+// ParserMode determines the running mode. These are the enums for marking parser's mode, which decides whether it should pop unused values.
+type ParserMode int
 
 // These are the enums for marking parser's mode, which decides whether it should pop unused values.
 const (
-	NormalMode int = iota
+	NormalMode ParserMode = iota + 1
 	REPLMode
 	TestMode
 )
