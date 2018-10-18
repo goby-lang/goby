@@ -2,7 +2,6 @@ package igb
 
 import (
 	"fmt"
-	parserErr "github.com/goby-lang/goby/compiler/parser/errors"
 	"io"
 	"log"
 	"math/rand"
@@ -11,6 +10,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	parserErr "github.com/goby-lang/goby/compiler/parser/errors"
 
 	"github.com/chzyer/readline"
 	"github.com/goby-lang/goby/compiler/bytecode"
@@ -49,6 +50,8 @@ type iGb struct {
 	lines     string
 	cmds      []string
 	indents   int
+	caseBlock bool
+	firstWhen bool
 }
 
 // iVM holds VM only for iGb.
@@ -126,6 +129,8 @@ reset:
 				igb.rl.SetPrompt(prompt1)
 				igb.sm.Event(waitExited)
 				igb.cmds = nil
+				igb.caseBlock = false
+				igb.firstWhen = false
 				println(" -- block cleared")
 				continue
 			}
@@ -152,12 +157,14 @@ reset:
 		}
 
 		ivm.p.Lexer = lexer.New(igb.lines)
-		program, perr := ivm.p.ParseProgram()
+		program, pErr := ivm.p.ParseProgram()
 
 		// Parse error handling
-		if perr != nil {
+		if pErr != nil {
 			switch {
-			case perr.IsEOF():
+
+			// To handle beginning of a block
+			case pErr.IsEOF():
 				if !igb.sm.Is(Waiting) {
 					igb.sm.Event(Waiting)
 				}
@@ -166,47 +173,111 @@ reset:
 				igb.rl.SetPrompt(prompt(igb.indents) + indent(igb.indents))
 				igb.cmds = append(igb.cmds, igb.lines)
 				continue
-			case perr.IsUnexpectedEnd() && len(igb.cmds) == 0:
+
+			// To handle 'case'
+			case pErr.IsUnexpectedCase():
+				println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
+				igb.sm.Event(Waiting)
+				igb.rl.SetPrompt(prompt2 + indent(igb.indents))
+				igb.cmds = append(igb.cmds, igb.lines)
+				igb.caseBlock = true
+				igb.firstWhen = true
+				continue
+
+			// To handle 'when'
+			case pErr.IsUnexpectedWhen():
+				if igb.firstWhen {
+					igb.firstWhen = false
+				} else {
+					igb.indents--
+				}
+				println(prompt2 + indent(igb.indents) + igb.lines)
+				igb.indents++
+				igb.sm.Event(Waiting)
+				igb.rl.SetPrompt(prompt2 + indent(igb.indents))
+				igb.cmds = append(igb.cmds, igb.lines)
+				igb.caseBlock = true
+				continue
+
+			// To handle such as 'else' or 'elsif'
+			case pErr.IsUnexpectedToken():
+				igb.indents--
+				println(prompt2 + indent(igb.indents) + igb.lines)
+				igb.indents++
+				igb.sm.Event(Waiting)
+				igb.rl.SetPrompt(prompt2 + indent(igb.indents))
+				igb.cmds = append(igb.cmds, igb.lines)
+				continue
+
+			// To handle empty line
+			case pErr.IsUnexpectedEmptyLine(len(igb.cmds)):
 				// If igb.cmds is empty, it means that user just typed 'end' without corresponding statement/expression
+				println("exceptEmptyLine")
 				println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
 				igb.indents = 0
 				igb.rl.SetPrompt(prompt1)
-				fmt.Println(perr.Message)
+				fmt.Println(pErr.Message)
 				igb.cmds = nil
 				continue
-			case perr.IsUnexpectedEnd():
+
+			// To handle 'end'
+			case pErr.IsUnexpectedEnd():
 				if igb.indents > 1 {
 					igb.indents--
 					println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
+					if igb.caseBlock {
+						igb.indents++
+					}
 					igb.sm.Event(Waiting)
 					igb.rl.SetPrompt(prompt(igb.indents) + indent(igb.indents))
 					igb.cmds = append(igb.cmds, igb.lines)
+					igb.caseBlock = false
+					igb.firstWhen = false
 					continue
 				}
+
+				// Exiting error handling
 				igb.indents = 0
 				igb.sm.Event(waitEnded)
 				igb.rl.SetPrompt(prompt(igb.indents) + indent(igb.indents))
 				igb.cmds = append(igb.cmds, igb.lines)
+				igb.caseBlock = false
+				igb.firstWhen = false
 			}
 		}
 
-		if igb.sm.Is(Waiting) && igb.indents > 0 {
-			println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
-			igb.rl.SetPrompt(prompt(igb.indents) + indent(igb.indents))
-			igb.cmds = append(igb.cmds, igb.lines)
-			continue
+		if igb.sm.Is(Waiting) {
+			// Indent = 0 but not ended
+			if igb.caseBlock {
+				igb.caseBlock = false
+				println(prompt2 + indent(igb.indents) + igb.lines)
+				igb.rl.SetPrompt(prompt2 + indent(igb.indents))
+				igb.cmds = append(igb.cmds, igb.lines)
+				continue
+			}
+
+			// Still indented
+			if igb.indents > 0 {
+				println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
+				igb.rl.SetPrompt(prompt(igb.indents) + indent(igb.indents))
+				igb.cmds = append(igb.cmds, igb.lines)
+				continue
+			}
 		}
 
+		// Ending the block and prepare execution
 		if igb.sm.Is(waitEnded) {
 			ivm.p.Lexer = lexer.New(string(strings.Join(igb.cmds, "\n")))
 
 			// Test if current input can be properly parsed.
-			program, perr = ivm.p.ParseProgram()
+			program, pErr = ivm.p.ParseProgram()
 
-			if perr != nil {
-				handleParserError(perr, igb)
-				igb.cmds = nil
+			if pErr != nil {
+				handleParserError(pErr, igb)
 				igb.sm.Event(readyToExec)
+				igb.cmds = nil
+				igb.caseBlock = false
+				igb.firstWhen = false
 				continue
 			}
 
@@ -215,11 +286,12 @@ reset:
 			igb.sm.Event(readyToExec)
 		}
 
+		// Execute the lines
 		if igb.sm.Is(readyToExec) {
 			println(prompt(igb.indents) + igb.lines)
 
-			if perr != nil {
-				handleParserError(perr, igb)
+			if pErr != nil {
+				handleParserError(pErr, igb)
 				continue
 			}
 
@@ -276,6 +348,8 @@ func newIgb() *iGb {
 			readline.PcItem(help),
 			readline.PcItem(reset),
 		),
+		caseBlock: false,
+		firstWhen: false,
 	}
 }
 
@@ -335,7 +409,7 @@ func usage(w io.Writer, c *readline.PrefixCompleter) {
 func indent(c int) string {
 	var s string
 	for i := 0; i < c; i++ {
-		s = s + pad
+		s += pad
 	}
 	return s
 }

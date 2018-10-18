@@ -23,6 +23,49 @@ func TestStringClassSuperclass(t *testing.T) {
 	}
 }
 
+func TestStringFmtMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`String.fmt("This is %s", "goby")`, "This is goby"},
+		{`String.fmt("This is %slang", "goby")`, "This is gobylang"},
+		{`String.fmt("This is %s %s", "goby", "ruby")`, "This is goby ruby"},
+		{` String.fmt("Hello! %s", 1)`, "Hello! 1"},
+		{` String.fmt("Hello! %s", 1.1)`, "Hello! 1.1"},
+		{` String.fmt("Hello! %s", "1.1".to_d)`, "Hello! 1.1"},
+		{` String.fmt("Hello! %s", "1.1".to_d.fraction)`, "Hello! 11/10"},
+		{` String.fmt("Hello! %s", :symbol)`, "Hello! symbol"},
+		{` String.fmt("Hello! %s", [:array])`, `Hello! ["array"]`},
+		{` String.fmt("Hello! %s", {key: :value})`, `Hello! { key: "value" }`},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestStringFmtMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`String.fmt()`, "ArgumentError: Expect 1 or more argument(s). got: 0", 1},
+		{`String.fmt(1)`, "TypeError: Expect argument to be String. got: Integer", 1},
+		{`String.fmt("Hello! %s Lang!")`, "ArgumentError: Expect 1 additional string(s) to insert. got: 0", 1},
+		{`String.fmt("Hello! %s Lang!", "Goby", "Ruby")`, "ArgumentError: Expect 1 additional string(s) to insert. got: 2", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestEvalStringExpression(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -36,115 +79,6 @@ func TestEvalStringExpression(t *testing.T) {
 		{`'\'Alexius\''`, "'Alexius'"},
 		{`"Maxwell\nAlexius"`, "Maxwell\nAlexius"},
 		{`'Maxwell\nAlexius'`, "Maxwell\\nAlexius"},
-	}
-
-	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		VerifyExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestStringConversion(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{`"string".to_s`, "string"},
-		{`"Maxwell\nAlexius".to_s`, "Maxwell\nAlexius"},
-		{`'Maxwell\nAlexius'.to_s`, "Maxwell\\nAlexius"},
-		{`"\"Maxwell\"".to_s`, "\"Maxwell\""},
-		{`'\"Maxwell\"'.to_s`, "\\\"Maxwell\\\""},
-		{`"\'Maxwell\'".to_s`, "'Maxwell'"},
-		{`'\'Maxwell\''.to_s`, "'Maxwell'"},
-		{`"123".to_i`, 123},
-		{`"string".to_i`, 0},
-		{`" \t123".to_i`, 123},
-		{`"123string123".to_i`, 123},
-		{`"string123".to_i`, 0},
-		{`"123.5".to_f`, 123.5},
-		{`".5".to_f`, 0.5},
-		{`"  123.5".to_f`, 123.5},
-		{`"3.5e2".to_f`, 350.0},
-		{`"3.5ef".to_f`, 0.0},
-		{`
-		  arr = "Goby".to_a
-		  arr[0]
-		`, "G"},
-		{`
-		  arr = "Goby".to_a
-		  arr[1]
-		`, "o"},
-		{`
-		  arr = "Goby".to_a
-		  arr[2]
-		`, "b"},
-		{`
-		  arr = "Goby".to_a
-		  arr[3]
-		`, "y"},
-		{`
-		  arr = "🍣Goby🍺".to_a
-		  arr[0]
-		`, "🍣"},
-		{`
-		  arr = "🍣Goby🍺".to_a
-		  arr[5]
-		`, "🍺"},
-		{`
-		  arr = "Maxwell\nAlexius".to_a
-		  arr[7]
-		 `, "\n"},
-		{`
-		  arr = 'Maxwell\nAlexius'.to_a
-		  arr[7]
-		 `, "\\"},
-		{`
-		  arr = 'Maxwell\nAlexius'.to_a
-		  arr[8]
-		 `, "n"},
-		{`
-		  arr = "\"Maxwell\"".to_a
-		  arr[0]
-		 `, "\""},
-		{`
-		  arr = "\"Maxwell\"".to_a
-		  arr[-1]
-		 `, "\""},
-		{`
-		  arr = "\'Maxwell\'".to_a
-		  arr[0]
-		 `, "'"},
-		{`
-		  arr = "\'Maxwell\'".to_a
-		  arr[-1]
-		 `, "'"},
-		{`
-		  arr = '\"Maxwell\"'.to_a
-		  arr[0]
-		 `, "\\"},
-		{`
-		  arr = '\"Maxwell\"'.to_a
-		  arr[1]
-		 `, "\""},
-		{`
-		  arr = '\"Maxwell\"'.to_a
-		  arr[-1]
-		 `, "\""},
-		{`
-		  arr = '\"Maxwell\"'.to_a
-		  arr[-2]
-		 `, "\\"},
-		{`
-		  arr = '\'Maxwell\''.to_a
-		  arr[0]
-		 `, "'"},
-		{`
-		  arr = '\'Maxwell\''.to_a
-		  arr[-1]
-		 `, "'"},
 	}
 
 	for i, tt := range tests {
@@ -238,7 +172,7 @@ func TestStringMatchOperator(t *testing.T) {
 
 func TestStringMatchOperatorFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"abc" =~ *[1, 2]`, "ArgumentError: Expect 1 argument. got=2", 1},
+		{`"abc" =~ *[1, 2]`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
 		{`"abc" =~ 'a'`, "TypeError: Expect argument to be Regexp. got: String", 1},
 	}
 	for i, tt := range testsFail {
@@ -306,11 +240,13 @@ func TestStringOperationFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`"Taipei" + 101`, "TypeError: Expect argument to be String. got: Integer", 1},
 		{`"Taipei" * "101"`, "TypeError: Expect argument to be Integer. got: String", 1},
-		{`"Taipei" * (-101)`, "ArgumentError: Second argument must be greater than or equal to 0. got=-101", 1},
+		{`"Taipei" * (-101)`, "ArgumentError: Expect second argument to be positive value. got: -101", 1},
 		{`"Taipei"[1] = 1`, "TypeError: Expect argument to be String. got: Integer", 1},
 		{`"Taipei"[1] = true`, "TypeError: Expect argument to be String. got: Boolean", 1},
-		{`"Taipei"[]`, "ArgumentError: Expect 1 argument. got=0", 1},
+		{`"Taipei"[]`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
 		{`"Taipei"[true] = 101`, "TypeError: Expect argument to be Integer. got: Boolean", 1},
+		{`"Taipei"[20] = 101`, "ArgumentError: Index value out of range. got: 20", 1},
+		{`"Taipei"[-20] = "a"`, "ArgumentError: Index value out of range. got: -20", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -337,6 +273,9 @@ func TestStringCapitalizeMethod(t *testing.T) {
 		{`"all lower".capitalize`, "All lower"},
 		{`"heLlo\nWoRLd".capitalize`, "Hello\nworld"},
 		{`"🍣HeLlO🍺".capitalize`, "🍣hello🍺"},
+		{`"🍣HeLlO🍺".capitalize`, "🍣hello🍺"},
+		{`"ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÑÒÓÔÕÖØŒŠÙÚÛÜÝŸ".capitalize`, "Àáâãäåæçèéêëìíîïñòóôõöøœšùúûüýÿ"},
+		{`"ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ".capitalize`, "Αβγδεζηθικλμνξοπρστυφχψω"},
 	}
 
 	for i, tt := range tests {
@@ -387,8 +326,8 @@ func TestStringConcatenateMethod(t *testing.T) {
 
 func TestStringConcatenateMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"a".concat`, "ArgumentError: Expect 1 argument. got=0", 1},
-		{`"a".concat("Hello", "World")`, "ArgumentError: Expect 1 argument. got=2", 1},
+		{`"a".concat`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+		{`"a".concat("Hello", "World")`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
 		{`"a".concat(1)`, "TypeError: Expect argument to be String. got: Integer", 1},
 		{`"a".concat(true)`, "TypeError: Expect argument to be String. got: Boolean", 1},
 		{`"a".concat(nil)`, "TypeError: Expect argument to be String. got: Null", 1},
@@ -443,7 +382,7 @@ func TestStringDeleteMethod(t *testing.T) {
 
 func TestStringDeleteMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Hello hello HeLlo".delete`, "ArgumentError: Expect 1 argument. got=0", 1},
+		{`"Hello hello HeLlo".delete`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
 		{`"Hello hello HeLlo".delete(1)`, "TypeError: Expect argument to be String. got: Integer", 1},
 		{`"Hello hello HeLlo".delete(true)`, "TypeError: Expect argument to be String. got: Boolean", 1},
 		{`"Hello hello HeLlo".delete(nil)`, "TypeError: Expect argument to be String. got: Null", 1},
@@ -467,6 +406,8 @@ func TestStringDowncaseMethod(t *testing.T) {
 		{`"MORE wOrds".downcase`, "more words"},
 		{`"HeLlO\tWorLD".downcase`, "hello\tworld"},
 		{`"🍣HeLlO🍺".downcase`, "🍣hello🍺"},
+		{`"ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÑÒÓÔÕÖØŒŠÙÚÛÜÝŸ".downcase`, "àáâãäåæçèéêëìíîïñòóôõöøœšùúûüýÿ"},
+		{`"ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ".downcase`, "αβγδεζηθικλμνξοπρστυφχψω"},
 	}
 
 	for i, tt := range tests {
@@ -531,7 +472,7 @@ func TestStringEachByteMethodFail(t *testing.T) {
 		"Taipei".each_byte(101) do |byte|
 		  puts byte
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 1},
+		`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
 		{`"Taipei".each_byte`, "InternalError: Can't yield without a block", 1},
 	}
 
@@ -588,7 +529,7 @@ func TestStringEachCharMethodFail(t *testing.T) {
 		"Taipei".each_char(101) do |char|
 		  puts char
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 1},
+		`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
 		{`"Taipei".each_char`, "InternalError: Can't yield without a block", 1},
 	}
 
@@ -650,7 +591,7 @@ func TestStringEachLineMethodFail(t *testing.T) {
 		"Taipei".each_line(101) do |line|
 		  puts line
 		end
-		`, "ArgumentError: Expect 0 argument. got=1", 1},
+		`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
 		{`"Taipei".each_line`, "InternalError: Can't yield without a block", 1},
 	}
 
@@ -689,7 +630,7 @@ func TestStringEndWithMethod(t *testing.T) {
 
 func TestStringEndWithMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Taipei".end_with?("1", "0", "1")`, "ArgumentError: Expect 1 argument. got=3", 1},
+		{`"Taipei".end_with?("1", "0", "1")`, "ArgumentError: Expect 1 argument(s). got: 3", 1},
 		{`"Taipei".end_with?(101)`, "TypeError: Expect argument to be String. got: Integer", 1},
 		{`"Hello".end_with?(true)`, "TypeError: Expect argument to be String. got: Boolean", 1},
 		{`"Hello".end_with?(1..5)`, "TypeError: Expect argument to be String. got: Range", 1},
@@ -747,8 +688,8 @@ func TestStringEqualMethod(t *testing.T) {
 
 func TestStringEqualMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Hello".eql?`, "ArgumentError: Expect 1 argument. got=0", 1},
-		{`"Hello".eql?("Hello", "World")`, "ArgumentError: Expect 1 argument. got=2", 1},
+		{`"Hello".eql?`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+		{`"Hello".eql?("Hello", "World")`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -785,8 +726,8 @@ func TestStringIncludeMethod(t *testing.T) {
 
 func TestStringIncludeMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Goby".include?`, "ArgumentError: Expect 1 argument. got=0", 1},
-		{`"Goby".include?("Ruby", "Lang")`, "ArgumentError: Expect 1 argument. got=2", 1},
+		{`"Goby".include?`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+		{`"Goby".include?("Ruby", "Lang")`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
 		{`"Goby".include?(2)`, "TypeError: Expect argument to be String. got: Integer", 1},
 		{`"Goby".include?(true)`, "TypeError: Expect argument to be String. got: Boolean", 1},
 		{`"Goby".include?(nil)`, "TypeError: Expect argument to be String. got: Null", 1},
@@ -829,12 +770,12 @@ func TestStringInsertMethod(t *testing.T) {
 
 func TestStringInsertMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Goby Lang".insert`, "ArgumentError: Expect 2 arguments. got=0", 1},
-		{`"Taipei".insert(6, " ", "101")`, "ArgumentError: Expect 2 arguments. got=3", 1},
-		{`"Taipei".insert("6", " 101")`, "TypeError: Expect argument to be Integer. got: String", 1},
-		{`"Taipei".insert(6, 101)`, "TypeError: Expect insert string to be String. got: Integer", 1},
-		{`"Taipei".insert(-8, "101")`, "ArgumentError: Index value out of range. got=-8", 1},
-		{`"Taipei".insert(7, "101")`, "ArgumentError: Index value out of range. got=7", 1},
+		{`"Goby Lang".insert`, "ArgumentError: Expect 2 argument(s). got: 0", 1},
+		{`"Taipei".insert(6, " ", "101")`, "ArgumentError: Expect 2 argument(s). got: 3", 1},
+		{`"Taipei".insert("6", " 101")`, "TypeError: Expect argument #1 to be Integer. got: String", 1},
+		{`"Taipei".insert(6, 101)`, "TypeError: Expect argument #2 to be String. got: Integer", 1},
+		{`"Taipei".insert(-8, "101")`, "ArgumentError: Index value out of range. got: -8", 1},
+		{`"Taipei".insert(7, "101")`, "ArgumentError: Index value out of range. got: 7", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -868,14 +809,14 @@ func TestStringLeftJustifyMethod(t *testing.T) {
 
 func TestStringLeftJustifyMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Hello".ljust`, "ArgumentError: Expect 1..2 arguments. got=0", 1},
-		{`"Hello".ljust(1, 2, 3, 4, 5)`, "ArgumentError: Expect 1..2 arguments. got=5", 1},
-		{`"Hello".ljust(true)`, "TypeError: Expect justify width to be Integer. got: Boolean", 1},
-		{`"Hello".ljust("World")`, "TypeError: Expect justify width to be Integer. got: String", 1},
-		{`"Hello".ljust(2..5)`, "TypeError: Expect justify width to be Integer. got: Range", 1},
-		{`"Hello".ljust(10, 10)`, "TypeError: Expect padding string to be String. got: Integer", 1},
-		{`"Hello".ljust(10, 2..5)`, "TypeError: Expect padding string to be String. got: Range", 1},
-		{`"Hello".ljust(10, true)`, "TypeError: Expect padding string to be String. got: Boolean", 1},
+		{`"Hello".ljust`, "ArgumentError: Expect 1 to 2 argument(s). got: 0", 1},
+		{`"Hello".ljust(1, 2, 3, 4, 5)`, "ArgumentError: Expect 1 to 2 argument(s). got: 5", 1},
+		{`"Hello".ljust(true)`, "TypeError: Expect argument #1 to be Integer. got: Boolean", 1},
+		{`"Hello".ljust("World")`, "TypeError: Expect argument #1 to be Integer. got: String", 1},
+		{`"Hello".ljust(2..5)`, "TypeError: Expect argument #1 to be Integer. got: Range", 1},
+		{`"Hello".ljust(10, 10)`, "TypeError: Expect argument #2 to be String. got: Integer", 1},
+		{`"Hello".ljust(10, 2..5)`, "TypeError: Expect argument #2 to be String. got: Range", 1},
+		{`"Hello".ljust(10, true)`, "TypeError: Expect argument #2 to be String. got: Boolean", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -926,7 +867,7 @@ func TestStringMatch(t *testing.T) {
 
 func TestStringMatchFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`'a'.match(Regexp.new("abc"), 1)`, "ArgumentError: Expect 1 argument. got=2", 1},
+		{`'a'.match(Regexp.new("abc"), 1)`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
 		{`'a'.match(1)`, "TypeError: Expect argument to be Regexp. got: Integer", 1},
 	}
 
@@ -960,11 +901,11 @@ func TestStringReplaceMethod(t *testing.T) {
 
 func TestStringReplaceMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Invalid".replace`, "ArgumentError: Expect 2 arguments. got=0", 1},
-		{`"Invalid".replace("string")`, "ArgumentError: Expect 2 arguments. got=1", 1},
-		{`"Invalid".replace("string", "replace", true)`, "ArgumentError: Expect 2 arguments. got=3", 1},
-		{`"Invalid".replace(true, "replacement")`, "TypeError: Expect pattern to be String or Regexp. got: Boolean", 1},
-		{`"Invalid".replace("pattern", true)`, "TypeError: Expect replacement to be String. got: Boolean", 1},
+		{`"Invalid".replace`, "ArgumentError: Expect 2 argument(s). got: 0", 1},
+		{`"Invalid".replace("string")`, "ArgumentError: Expect 2 argument(s). got: 1", 1},
+		{`"Invalid".replace("string", "replace", true)`, "ArgumentError: Expect 2 argument(s). got: 3", 1},
+		{`"Invalid".replace(true, "replacement")`, "TypeError: Expect argument #1 to be String or Regexp. got: Boolean", 1},
+		{`"Invalid".replace("pattern", true)`, "TypeError: Expect argument #2 to be String. got: Boolean", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -997,11 +938,11 @@ func TestStringReplaceOnceMethod(t *testing.T) {
 
 func TestStringReplaceOnceMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Invalid".replace_once`, "ArgumentError: Expect 2 arguments. got=0", 1},
-		{`"Invalid".replace_once("string")`, "ArgumentError: Expect 2 arguments. got=1", 1},
-		{`"Invalid".replace_once("string", "replace", true)`, "ArgumentError: Expect 2 arguments. got=3", 1},
-		{`"Invalid".replace_once(true, "replacement")`, "TypeError: Expect pattern to be String or Regexp. got: Boolean", 1},
-		{`"Invalid".replace_once("pattern", true)`, "TypeError: Expect replacement to be String. got: Boolean", 1},
+		{`"Invalid".replace_once`, "ArgumentError: Expect 2 argument(s). got: 0", 1},
+		{`"Invalid".replace_once("string")`, "ArgumentError: Expect 2 argument(s). got: 1", 1},
+		{`"Invalid".replace_once("string", "replace", true)`, "ArgumentError: Expect 2 argument(s). got: 3", 1},
+		{`"Invalid".replace_once(true, "replacement")`, "TypeError: Expect argument #1 to be String or Regexp. got: Boolean", 1},
+		{`"Invalid".replace_once("pattern", true)`, "TypeError: Expect argument #2 to be String. got: Boolean", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1056,14 +997,14 @@ func TestStringRightJustifyMethod(t *testing.T) {
 
 func TestStringRightJustifyFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Hello".rjust`, "ArgumentError: Expect 1..2 arguments. got=0", 1},
-		{`"Hello".rjust(1, 2, 3, 4, 5)`, "ArgumentError: Expect 1..2 arguments. got=5", 1},
-		{`"Hello".rjust(true)`, "TypeError: Expect justify width to be Integer. got: Boolean", 1},
-		{`"Hello".rjust("World")`, "TypeError: Expect justify width to be Integer. got: String", 1},
-		{`"Hello".rjust(2..5)`, "TypeError: Expect justify width to be Integer. got: Range", 1},
-		{`"Hello".rjust(10, 10)`, "TypeError: Expect padding string to be String. got: Integer", 1},
-		{`"Hello".rjust(10, 2..5)`, "TypeError: Expect padding string to be String. got: Range", 1},
-		{`"Hello".rjust(10, true)`, "TypeError: Expect padding string to be String. got: Boolean", 1},
+		{`"Hello".rjust`, "ArgumentError: Expect 1 to 2 argument(s). got: 0", 1},
+		{`"Hello".rjust(1, 2, 3, 4, 5)`, "ArgumentError: Expect 1 to 2 argument(s). got: 5", 1},
+		{`"Hello".rjust(true)`, "TypeError: Expect argument #1 to be Integer. got: Boolean", 1},
+		{`"Hello".rjust("World")`, "TypeError: Expect argument #1 to be Integer. got: String", 1},
+		{`"Hello".rjust(2..5)`, "TypeError: Expect argument #1 to be Integer. got: Range", 1},
+		{`"Hello".rjust(10, 10)`, "TypeError: Expect argument #2 to be String. got: Integer", 1},
+		{`"Hello".rjust(10, 2..5)`, "TypeError: Expect argument #2 to be String. got: Range", 1},
+		{`"Hello".rjust(10, true)`, "TypeError: Expect argument #2 to be String. got: Boolean", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1143,9 +1084,9 @@ func TestStringSliceMethod(t *testing.T) {
 
 func TestStringSliceMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Goby Lang".slice`, "ArgumentError: Expect 1 argument. got=0", 1},
-		{`"Goby Lang".slice("Hello")`, "TypeError: Expect slice range to be Range or Integer. got: String", 1},
-		{`"Goby Lang".slice(true)`, "TypeError: Expect slice range to be Range or Integer. got: Boolean", 1},
+		{`"Goby Lang".slice`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+		{`"Goby Lang".slice("Hello")`, "TypeError: Expect argument to be Range or Integer. got: String", 1},
+		{`"Goby Lang".slice(true)`, "TypeError: Expect argument to be Range or Integer. got: Boolean", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1239,7 +1180,7 @@ func TestStringSplitMethod(t *testing.T) {
 
 func TestStringSplitMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Hello World".split`, "ArgumentError: Expect 1 argument. got=0", 1},
+		{`"Hello World".split`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
 		{`"Hello World".split(true)`, "TypeError: Expect argument to be String. got: Boolean", 1},
 		{`"Hello World".split(123)`, "TypeError: Expect argument to be String. got: Integer", 1},
 		{`"Hello World".split(1..2)`, "TypeError: Expect argument to be String. got: Range", 1},
@@ -1280,7 +1221,7 @@ func TestStringStartWithMethod(t *testing.T) {
 
 func TestStringStartWithMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Taipei".start_with("1", "0", "1")`, "ArgumentError: Expect 1 argument. got=3", 1},
+		{`"Taipei".start_with("1", "0", "1")`, "ArgumentError: Expect 1 argument(s). got: 3", 1},
 		{`"Taipei".start_with(101)`, "TypeError: Expect argument to be String. got: Integer", 1},
 		{`"Hello".start_with(true)`, "TypeError: Expect argument to be String. got: Boolean", 1},
 		{`"Hello".start_with(1..5)`, "TypeError: Expect argument to be String. got: Range", 1},
@@ -1314,6 +1255,135 @@ func TestStringStripMethod(t *testing.T) {
 	}
 }
 
+func TestStringConversion(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`"string".to_s`, "string"},
+		{`"Maxwell\nAlexius".to_s`, "Maxwell\nAlexius"},
+		{`'Maxwell\nAlexius'.to_s`, "Maxwell\\nAlexius"},
+		{`"\"Maxwell\"".to_s`, "\"Maxwell\""},
+		{`'\"Maxwell\"'.to_s`, "\\\"Maxwell\\\""},
+		{`"\'Maxwell\'".to_s`, "'Maxwell'"},
+		{`'\'Maxwell\''.to_s`, "'Maxwell'"},
+		{`"123".to_i`, 123},
+		{`"string".to_i`, 0},
+		{`" \t123".to_i`, 123},
+		{`"123string123".to_i`, 123},
+		{`"string123".to_i`, 0},
+		{`"123.5".to_f`, 123.5},
+		{`".5".to_f`, 0.5},
+		{`"  123.5".to_f`, 123.5},
+		{`"3.5e2".to_f`, 350.0},
+		{`
+		  arr = "Goby".to_a
+		  arr[0]
+		`, "G"},
+		{`
+		  arr = "Goby".to_a
+		  arr[1]
+		`, "o"},
+		{`
+		  arr = "Goby".to_a
+		  arr[2]
+		`, "b"},
+		{`
+		  arr = "Goby".to_a
+		  arr[3]
+		`, "y"},
+		{`
+		  arr = "🍣Goby🍺".to_a
+		  arr[0]
+		`, "🍣"},
+		{`
+		  arr = "🍣Goby🍺".to_a
+		  arr[5]
+		`, "🍺"},
+		{`
+		  arr = "Maxwell\nAlexius".to_a
+		  arr[7]
+		 `, "\n"},
+		{`
+		  arr = 'Maxwell\nAlexius'.to_a
+		  arr[7]
+		 `, "\\"},
+		{`
+		  arr = 'Maxwell\nAlexius'.to_a
+		  arr[8]
+		 `, "n"},
+		{`
+		  arr = "\"Maxwell\"".to_a
+		  arr[0]
+		 `, "\""},
+		{`
+		  arr = "\"Maxwell\"".to_a
+		  arr[-1]
+		 `, "\""},
+		{`
+		  arr = "\'Maxwell\'".to_a
+		  arr[0]
+		 `, "'"},
+		{`
+		  arr = "\'Maxwell\'".to_a
+		  arr[-1]
+		 `, "'"},
+		{`
+		  arr = '\"Maxwell\"'.to_a
+		  arr[0]
+		 `, "\\"},
+		{`
+		  arr = '\"Maxwell\"'.to_a
+		  arr[1]
+		 `, "\""},
+		{`
+		  arr = '\"Maxwell\"'.to_a
+		  arr[-1]
+		 `, "\""},
+		{`
+		  arr = '\"Maxwell\"'.to_a
+		  arr[-2]
+		 `, "\\"},
+		{`
+		  arr = '\'Maxwell\''.to_a
+		  arr[0]
+		 `, "'"},
+		{`
+		  arr = '\'Maxwell\''.to_a
+		  arr[-1]
+		 `, "'"},
+		{`"str".to_bytes.to_s.split(" ")[0]`, "<GoObject:"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestStringConversionFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`"str".to_a(1)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		{`"str".to_d(1)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		{`"str".to_i(1)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		{`"str".to_f(1)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		{`"str".to_s(1)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		{`"1.1.1".to_f`, "ArgumentError: Invalid numeric string. got: 1.1.1", 1},
+		{`"3.5ef".to_f`, "ArgumentError: Invalid numeric string. got: 3.5ef", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestStringUpcaseMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -1323,6 +1393,8 @@ func TestStringUpcaseMethod(t *testing.T) {
 		{`"MORE wOrds".upcase`, "MORE WORDS"},
 		{`"Hello\nWorld".upcase`, "HELLO\nWORLD"},
 		{`"🍣Hello🍺".upcase`, "🍣HELLO🍺"},
+		{`"àáâãäåæçèéêëìíîïñòóôõöøœšùúûüýÿ".upcase`, "ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÑÒÓÔÕÖØŒŠÙÚÛÜÝŸ"},
+		{`"αβγδεζηθικλμνξοπρστυφχψω".upcase`, "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ"},
 	}
 
 	for i, tt := range tests {
@@ -1342,25 +1414,6 @@ func TestStringMethodChaining(t *testing.T) {
 		expected interface{}
 	}{
 		{`"More test".reverse.upcase`, "TSET EROM"},
-	}
-
-	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		VerifyExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestFormattedString(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected interface{}
-	}{
-		{`String.fmt("This is %s", "goby")`, "This is goby"},
-		{`String.fmt("This is %slang", "goby")`, "This is gobylang"},
-		{`String.fmt("This is %s %s", "goby", "ruby")`, "This is goby ruby"},
 	}
 
 	for i, tt := range tests {

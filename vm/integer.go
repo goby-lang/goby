@@ -91,9 +91,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 				intOperation := func(leftValue int, rightValue int) int {
 					return leftValue % rightValue
 				}
-				floatOperation := func(leftValue float64, rightValue float64) float64 {
-					return math.Mod(leftValue, rightValue)
-				}
+				floatOperation := math.Mod
 
 				return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine, true)
 
@@ -151,9 +149,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 				intOperation := func(leftValue int, rightValue int) int {
 					return int(math.Pow(float64(leftValue), float64(rightValue)))
 				}
-				floatOperation := func(leftValue float64, rightValue float64) float64 {
-					return math.Pow(leftValue, rightValue)
-				}
+				floatOperation := math.Pow
 
 				return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine, false)
 
@@ -296,10 +292,10 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				rightObject := args[0]
 
-				switch rightObject.(type) {
+				switch rightObject := rightObject.(type) {
 				case *IntegerObject:
 					leftValue := receiver.(*IntegerObject).value
-					rightValue := rightObject.(*IntegerObject).value
+					rightValue := rightObject.value
 
 					if leftValue < rightValue {
 						return t.vm.InitIntegerObject(-1)
@@ -311,7 +307,7 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 					return t.vm.InitIntegerObject(0)
 				case *FloatObject:
 					leftValue := float64(receiver.(*IntegerObject).value)
-					rightValue := rightObject.(*FloatObject).value
+					rightValue := rightObject.value
 
 					if leftValue < rightValue {
 						return t.vm.InitIntegerObject(-1)
@@ -375,6 +371,9 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "even?",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+				}
 
 				i := receiver.(*IntegerObject)
 				even := i.value%2 == 0
@@ -396,9 +395,10 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_d",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) > 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 arguments. got: %d", len(args))
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
+
 				r := receiver.(*IntegerObject)
 				return t.vm.initDecimalObject(intToDecimal(r))
 
@@ -413,6 +413,10 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_f",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+				}
+
 				r := receiver.(*IntegerObject)
 				newFloat := t.vm.initFloatObject(float64(r.value))
 				return newFloat
@@ -428,6 +432,10 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			Name: "to_i",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+				}
+
 				return receiver
 
 			},
@@ -441,6 +449,9 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [String]
 			Name: "to_s",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+				}
 
 				int := receiver.(*IntegerObject)
 
@@ -457,6 +468,10 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			Name: "next",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+				}
+
 				i := receiver.(*IntegerObject)
 				return t.vm.InitIntegerObject(i.value + 1)
 
@@ -472,6 +487,9 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "odd?",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+				}
 
 				i := receiver.(*IntegerObject)
 				odd := i.value%2 != 0
@@ -492,6 +510,10 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// @return [Integer]
 			Name: "pred",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+				}
+
 				i := receiver.(*IntegerObject)
 				return t.vm.InitIntegerObject(i.value - 1)
 
@@ -509,10 +531,14 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 			// ```
 			Name: "times",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+				}
+
 				n := receiver.(*IntegerObject)
 
 				if n.value < 0 {
-					return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Expect integer greater than or equal 0. got: %d", n.value)
+					return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Expect the receiver to be positive integer. got: %d", n.value)
 				}
 
 				if blockFrame == nil {
@@ -530,6 +556,10 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_int",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+				}
+
 				r := receiver.(*IntegerObject)
 				newInt := t.vm.InitIntegerObject(r.value)
 				newInt.flag = i
@@ -540,6 +570,10 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_int8",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+				}
+
 				r := receiver.(*IntegerObject)
 				newInt := t.vm.InitIntegerObject(r.value)
 				newInt.flag = i8
@@ -550,6 +584,10 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_int16",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+				}
+
 				r := receiver.(*IntegerObject)
 				newInt := t.vm.InitIntegerObject(r.value)
 				newInt.flag = i16
@@ -560,6 +598,10 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_int32",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+				}
+
 				r := receiver.(*IntegerObject)
 				newInt := t.vm.InitIntegerObject(r.value)
 				newInt.flag = i32
@@ -570,6 +612,10 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_int64",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+				}
+
 				r := receiver.(*IntegerObject)
 				newInt := t.vm.InitIntegerObject(r.value)
 				newInt.flag = i64
@@ -580,6 +626,10 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_uint",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+				}
+
 				r := receiver.(*IntegerObject)
 				newInt := t.vm.InitIntegerObject(r.value)
 				newInt.flag = ui
@@ -590,6 +640,10 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_uint8",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+				}
+
 				r := receiver.(*IntegerObject)
 				newInt := t.vm.InitIntegerObject(r.value)
 				newInt.flag = ui8
@@ -600,6 +654,10 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_uint16",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+				}
+
 				r := receiver.(*IntegerObject)
 				newInt := t.vm.InitIntegerObject(r.value)
 				newInt.flag = ui16
@@ -610,6 +668,10 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_uint32",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+				}
+
 				r := receiver.(*IntegerObject)
 				newInt := t.vm.InitIntegerObject(r.value)
 				newInt.flag = ui32
@@ -620,6 +682,10 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_uint64",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+				}
+
 				r := receiver.(*IntegerObject)
 				newInt := t.vm.InitIntegerObject(r.value)
 				newInt.flag = ui64
@@ -630,6 +696,10 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_float32",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+				}
+
 				r := receiver.(*IntegerObject)
 				newInt := t.vm.InitIntegerObject(r.value)
 				newInt.flag = f32
@@ -640,6 +710,10 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "to_float64",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+				}
+
 				r := receiver.(*IntegerObject)
 				newInt := t.vm.InitIntegerObject(r.value)
 				newInt.flag = f64
@@ -650,6 +724,10 @@ func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
 		{
 			Name: "ptr",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+				if len(args) != 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+				}
+
 				r := receiver.(*IntegerObject)
 				return t.vm.initGoObject(&r.value)
 
@@ -699,10 +777,10 @@ func (i *IntegerObject) arithmeticOperation(
 	sourceLine int,
 	division bool,
 ) Object {
-	switch rightObject.(type) {
+	switch rightObject := rightObject.(type) {
 	case *IntegerObject:
 		leftValue := i.value
-		rightValue := rightObject.(*IntegerObject).value
+		rightValue := rightObject.value
 		if division && rightValue == 0 {
 			return t.vm.InitErrorObject(errors.ZeroDivisionError, sourceLine, errors.DividedByZero)
 		}
@@ -712,7 +790,7 @@ func (i *IntegerObject) arithmeticOperation(
 		return t.vm.InitIntegerObject(result)
 	case *FloatObject:
 		leftValue := float64(i.value)
-		rightValue := rightObject.(*FloatObject).value
+		rightValue := rightObject.value
 
 		if division && rightValue == 0 {
 			return t.vm.InitErrorObject(errors.ZeroDivisionError, sourceLine, errors.DividedByZero)
@@ -730,15 +808,15 @@ func (i *IntegerObject) arithmeticOperation(
 // and false otherwise.
 // See comment on numericComparison().
 func (i *IntegerObject) equalityTest(rightObject Object) bool {
-	switch rightObject.(type) {
+	switch rightObject := rightObject.(type) {
 	case *IntegerObject:
 		leftValue := i.value
-		rightValue := rightObject.(*IntegerObject).value
+		rightValue := rightObject.value
 
 		return leftValue == rightValue
 	case *FloatObject:
 		leftValue := i.floatValue()
-		rightValue := rightObject.(*FloatObject).value
+		rightValue := rightObject.value
 
 		return leftValue == rightValue
 	default:
@@ -755,17 +833,17 @@ func (i *IntegerObject) numericComparison(
 	intComparison func(leftValue int, rightValue int) bool,
 	floatComparison func(leftValue float64, rightValue float64) bool,
 ) bool {
-	switch rightObject.(type) {
+	switch rightObject := rightObject.(type) {
 	case *IntegerObject:
 		leftValue := i.value
-		rightValue := rightObject.(*IntegerObject).value
+		rightValue := rightObject.value
 
 		result := intComparison(leftValue, rightValue)
 
 		return result
 	case *FloatObject:
 		leftValue := i.floatValue()
-		rightValue := rightObject.(*FloatObject).value
+		rightValue := rightObject.value
 
 		result := floatComparison(leftValue, rightValue)
 

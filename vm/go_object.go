@@ -23,6 +23,19 @@ func builtinGoObjectClassMethods() []*BuiltinMethodObject {
 func builtinGoObjectInstanceMethods() []*BuiltinMethodObject {
 	return []*BuiltinMethodObject{
 		{
+			// An experimental method for loading plugins (written in Golang) dynamically.
+			// Needs improvements.
+			//
+			/// ```ruby
+			/// require "plugin"
+			//
+			//	p = Plugin.use "../test_fixtures/import_test/plugin/plugin.go"
+			//	p.go_func("Foo", "!")
+			//	p.go_func("Baz")
+			// ```
+			//
+			// @param name [String]
+			// @return [Object]
 			Name: "go_func",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				s, ok := args[0].(*StringObject)

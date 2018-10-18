@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+
+	"github.com/goby-lang/goby/compiler/parser"
 )
 
 // InitIssueReportVM initializes a vm in test mode for issue reporting
 func InitIssueReportVM(dir string, args []string) (*VM, error) {
 	v, err := New(dir, args)
-	v.mode = TestMode
+	v.mode = parser.TestMode
 
 	return v, err
 }
@@ -36,7 +38,7 @@ func PrintError(v *VM) {
 	fmt.Printf("### GOPATH\n%s\n", os.Getenv("GOPATH"))
 	fmt.Printf("### Operating system\n%s\n", runtime.GOOS)
 
-	t := v.mainThread
+	t := &v.mainThread
 	cf := t.callFrameStack.top()
 
 	file := cf.FileName()

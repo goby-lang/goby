@@ -245,20 +245,6 @@ func TestIntegerConversion(t *testing.T) {
 	}
 }
 
-func TestIntegerConversonFail(t *testing.T) {
-	testsFail := []errorTestCase{
-		{`100.to_d 1`, "ArgumentError: Expect 0 arguments. got: 1", 1},
-	}
-
-	for i, tt := range testsFail {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkErrorMsg(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
-	}
-}
-
 // Method test
 
 func TestIntegerEvenMethod(t *testing.T) {
@@ -357,7 +343,7 @@ func TestIntegerTimesMethod(t *testing.T) {
 
 func TestIntegerTimesMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`(-2).times`, "InternalError: Expect integer greater than or equal 0. got: -2", 1},
+		{`(-2).times`, "InternalError: Expect the receiver to be positive integer. got: -2", 1},
 		{`2.times`, "InternalError: Can't yield without a block", 1},
 	}
 

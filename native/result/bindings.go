@@ -2,7 +2,9 @@ package result
 
 import (
 	"fmt"
+
 	vm "github.com/goby-lang/goby/vm"
+	"github.com/goby-lang/goby/vm/classes"
 	errors "github.com/goby-lang/goby/vm/errors"
 )
 
@@ -34,12 +36,12 @@ func bindingResultNew(receiver vm.Object, line int, t *vm.Thread, args []vm.Obje
 	}
 	arg0, ok := args[0].(Object)
 	if !ok {
-		return t.VM().InitErrorObject(errors.TypeError, line, errors.WrongArgumentTypeFormat, "Object", args[0].Class().Name)
+		return t.VM().InitErrorObject(errors.TypeError, line, errors.WrongArgumentTypeFormat, classes.ObjectClass, args[0].Class().Name)
 	}
 
 	arg1, ok := args[1].(Object)
 	if !ok {
-		return t.VM().InitErrorObject(errors.TypeError, line, errors.WrongArgumentTypeFormat, "Object", args[1].Class().Name)
+		return t.VM().InitErrorObject(errors.TypeError, line, errors.WrongArgumentTypeFormat, classes.ObjectClass, args[1].Class().Name)
 	}
 
 	return r.New(t, arg0, arg1)
@@ -65,7 +67,7 @@ func bindingResultMethodMissing(receiver vm.Object, line int, t *vm.Thread, args
 	}
 	arg0, ok := args[0].(Object)
 	if !ok {
-		return t.VM().InitErrorObject(errors.TypeError, line, errors.WrongArgumentTypeFormat, "Object", args[0].Class().Name)
+		return t.VM().InitErrorObject(errors.TypeError, line, errors.WrongArgumentTypeFormat, classes.ObjectClass, args[0].Class().Name)
 	}
 
 	return r.MethodMissing(t, arg0)

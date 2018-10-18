@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/vm"
 	"io"
 	"io/ioutil"
 	"os"
@@ -10,6 +9,8 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/goby-lang/goby/vm"
 )
 
 func init() {
@@ -111,9 +112,23 @@ func TestArgV(t *testing.T) {
 	}
 }
 
-func TestArgP(t *testing.T) {
+func TestArgProfileCPU(t *testing.T) {
 
-	_, out := execGoby(t, "-p", "samples/one_thousand_threads.gb")
+	_, out := execGoby(t, "-profile-cpu", "samples/one_thousand_threads.gb")
+
+	byt, err := ioutil.ReadAll(out)
+	if err != nil {
+		t.Fatalf("Couldn't read from pipe: %s", err.Error())
+	}
+
+	if string(byt) != "500500\n" {
+		t.Fatalf("Test failed, excpected 500500, got %s", string(byt))
+	}
+}
+
+func TestArgProfileMem(t *testing.T) {
+
+	_, out := execGoby(t, "-profile-mem", "samples/one_thousand_threads.gb")
 
 	byt, err := ioutil.ReadAll(out)
 	if err != nil {

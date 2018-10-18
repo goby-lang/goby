@@ -202,15 +202,14 @@ func (t *Thread) reportErrorAndStop(e interface{}) {
 			err.storedTraces = true
 		}
 
-		panic(err)
-
-		if t.vm.mode == NormalMode {
+		if t.vm.mode == parser.NormalMode {
 
 			if t.isMainThread() {
 				os.Exit(1)
 			}
 		}
-	// Otherwise it's a Go panic that needs to be raise
+		panic(err)
+		// Otherwise it's a Go panic that needs to be raise
 	default:
 		panic(e)
 	}
@@ -291,7 +290,7 @@ func (t *Thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 		// Pop array
 		t.Stack.Pop()
 		// Can't count array self, only the number of array elements
-		argCount = argCount + len(arr.Elements)
+		argCount += len(arr.Elements)
 		for _, elem := range arr.Elements {
 			t.Stack.Push(&Pointer{Target: elem})
 		}

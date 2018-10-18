@@ -368,7 +368,7 @@ func init() {
 					inheritedClass, ok := superClass.Target.(*RClass)
 
 					if !ok {
-						t.pushErrorObject(errors.InternalError, sourceLine, "Constant %s is not a class. got=%s", superClassName, string(superClass.Target.Class().ReturnName()))
+						t.pushErrorObject(errors.InternalError, sourceLine, "Constant %s is not a class. got: %s", superClassName, string(superClass.Target.Class().ReturnName()))
 					}
 
 					if inheritedClass.isModule {

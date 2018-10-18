@@ -61,7 +61,7 @@ func TestConcurrentHashInitializationFail(t *testing.T) {
 		{`
 		require 'concurrent/hash'
 		Concurrent::Hash.new(1, 2)
-		`, "ArgumentError: Expect 0 or 1 arguments, got 2", 3},
+		`, "ArgumentError: Expect 1 or less argument(s). got: 2", 3},
 	}
 
 	for i, tt := range testsFail {
@@ -199,7 +199,7 @@ func TestConcurrentHashAccessOperationFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: 2 })[]`, "ArgumentError: Expect 1 argument. got: 0", 3},
+		Concurrent::Hash.new({ a: 1, b: 2 })[]`, "ArgumentError: Expect 1 argument(s). got: 0", 3},
 		{`
 		require 'concurrent/hash'
 		Concurrent::Hash.new({ a: 1, b: 2 })[true]`, "TypeError: Expect argument to be String. got: Boolean", 3},
@@ -291,10 +291,10 @@ func TestConcurrentHashDeleteMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: "Hello", c: true }).delete`, "ArgumentError: Expect 1 argument. got: 0", 3},
+		Concurrent::Hash.new({ a: 1, b: "Hello", c: true }).delete`, "ArgumentError: Expect 1 argument(s). got: 0", 3},
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: "Hello", c: true }).delete("a", "b")`, "ArgumentError: Expect 1 argument. got: 2", 3},
+		Concurrent::Hash.new({ a: 1, b: "Hello", c: true }).delete("a", "b")`, "ArgumentError: Expect 1 argument(s). got: 2", 3},
 		{`
 		require 'concurrent/hash'
 		Concurrent::Hash.new({ a: 1, b: "Hello", c: true }).delete(123)`, "TypeError: Expect argument to be String. got: Integer", 3},
@@ -366,7 +366,7 @@ func TestConcurrentHashEachMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: 2}).each("Hello") do end`, "ArgumentError: Expect 0 arguments. got: 1", 1},
+		Concurrent::Hash.new({ a: 1, b: 2}).each("Hello") do end`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
 		{`
 		require 'concurrent/hash'
 		Concurrent::Hash.new({ a: 1, b: 2}).each`, "InternalError: Can't yield without a block", 1},
@@ -407,10 +407,10 @@ func TestConcurrentHashHasKeyMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: 2 }).has_key?`, "ArgumentError: Expect 1 argument. got: 0", 3},
+		Concurrent::Hash.new({ a: 1, b: 2 }).has_key?`, "ArgumentError: Expect 1 argument(s). got: 0", 3},
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: 2 }).has_key?(true, { hello: "World" })`, "ArgumentError: Expect 1 argument. got: 2", 3},
+		Concurrent::Hash.new({ a: 1, b: 2 }).has_key?(true, { hello: "World" })`, "ArgumentError: Expect 1 argument(s). got: 2", 3},
 		{`
 		require 'concurrent/hash'
 		Concurrent::Hash.new({ a: 1, b: 2 }).has_key?(true)`, "TypeError: Expect argument to be String. got: Boolean", 3},
@@ -592,10 +592,10 @@ func TestConcurrentHashToJSONMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: 2 }).to_json(123)`, "ArgumentError: Expect 0 argument. got: 1", 3},
+		Concurrent::Hash.new({ a: 1, b: 2 }).to_json(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 3},
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: 2 }).to_json(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 3},
+		Concurrent::Hash.new({ a: 1, b: 2 }).to_json(true, { hello: "World" })`, "ArgumentError: Expect 0 argument(s). got: 2", 3},
 	}
 
 	for i, tt := range testsFail {
@@ -633,10 +633,10 @@ func TestConcurrentHashToStringMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: 2 }).to_s(123)`, "ArgumentError: Expect 0 argument. got: 1", 3},
+		Concurrent::Hash.new({ a: 1, b: 2 }).to_s(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 3},
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: 2 }).to_s(true, { hello: "World" })`, "ArgumentError: Expect 0 argument. got: 2", 3},
+		Concurrent::Hash.new({ a: 1, b: 2 }).to_s(true, { hello: "World" })`, "ArgumentError: Expect 0 argument(s). got: 2", 3},
 	}
 
 	for i, tt := range testsFail {

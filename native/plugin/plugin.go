@@ -61,7 +61,7 @@ func newPlugin(receiver Object, sourceLine int, t *Thread, args []Object) Object
 	name, ok := args[0].(*StringObject)
 
 	if !ok {
-		return t.VM().InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "String", args[0].Class().Name)
+		return t.VM().InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 	}
 
 	return &PluginObject{fn: name.Value().(string), BaseObj: vm.NewBaseObject(t.VM(), classes.PluginClass)}

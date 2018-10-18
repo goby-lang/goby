@@ -19,13 +19,6 @@ import (
 // Version stores current Goby version
 const Version = "0.1.10"
 
-// These are the enums for marking parser's mode, which decides whether it should pop unused values.
-const (
-	NormalMode int = iota
-	REPLMode
-	TestMode
-)
-
 // DefaultLibPath is used for overriding vm.libpath build-time.
 var DefaultLibPath string
 
@@ -78,7 +71,7 @@ type VM struct {
 
 	channelObjectMap *objectMap
 
-	mode int
+	mode parser.ParserMode
 
 	libFiles []string
 
@@ -182,7 +175,7 @@ func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) {
 		case error:
 			panic(err)
 		case *Error:
-			if vm.mode == NormalMode {
+			if vm.mode == parser.NormalMode {
 				fmt.Println(err.Message())
 			}
 		}
@@ -365,7 +358,7 @@ func initTestVM() *VM {
 		panic(err)
 	}
 
-	v.mode = TestMode
+	v.mode = parser.TestMode
 	return v
 }
 

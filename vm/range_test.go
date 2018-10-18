@@ -207,7 +207,7 @@ func TestRangeBsearchMethodFail(t *testing.T) {
 		(0..4).bsearch do |i|
 			"Binary Search"
 		end
-		`, "TypeError: Expect Integer or Boolean type. got=String", 1},
+		`, "TypeError: Expect argument to be Integer or Boolean. got: String", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -273,6 +273,22 @@ func TestRangeEachMethod(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestRangeEachMethodFail(t *testing.T) {
+	v := initTestVM()
+	testsFail := []errorTestCase{
+		{`
+		(0..4).each
+		`, "InternalError: Can't yield without a block", 1},
+	}
+
+	for i, tt := range testsFail {
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
 }
@@ -354,6 +370,21 @@ func TestRangeIncludeMethod(t *testing.T) {
 	}
 }
 
+func TestRangeIncludeMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`(1..4).include?`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+		{`(1..4).include?(1, 2)`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestRangeLastMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -379,6 +410,51 @@ func TestRangeLastMethod(t *testing.T) {
 		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
+	}
+}
+
+func TestRangeMapMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+		{`
+		(1..10).map do |x| x * x; end
+		`, []interface{}{1, 4, 9, 16, 25, 36, 49, 64, 81, 100}},
+		{`
+		(-5..5).map do |x| x * x; end
+		`, []interface{}{25, 16, 9, 4, 1, 0, 1, 4, 9, 16, 25}},
+		{`
+		(1..5).map do |x| end
+		`, []interface{}{nil, nil, nil, nil, nil}},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		verifyArrayObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestRangeMapMethodFail(t *testing.T) {
+	v := initTestVM()
+	testsFail := []errorTestCase{
+		{
+			`
+			(1..10).map
+		`, "InternalError: Can't yield without a block", 1},
+		{
+			`
+			(1..10).map(1) do |x| x * x; end
+		`, "ArgumentError: Expect 0 argument(s). got: 1", 2},
+	}
+
+	for i, tt := range testsFail {
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
 	}
 }
 
@@ -470,6 +546,32 @@ func TestRangeStepMethod(t *testing.T) {
 	}
 }
 
+func TestRangeStepMethodFail(t *testing.T) {
+	v := initTestVM()
+	testsFail := []errorTestCase{
+		{
+			` (1..10).step`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+		{
+			` (1..10).step(2)`, "InternalError: Can't yield without a block", 2},
+		{
+			` (1..10).step(0) do |i|
+								i
+							end
+`, "ArgumentError: Expect argument to be positive value. got: 0", 3},
+		{
+			` (1..10).step(-1) do |i|
+								i
+							end
+`, "ArgumentError: Expect argument to be positive value. got: -1", 4},
+	}
+
+	for i, tt := range testsFail {
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+	}
+}
+
 func TestRangeToStringMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -529,51 +631,6 @@ func TestRangeToArrayMethod(t *testing.T) {
 		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
-	}
-}
-
-func TestRangeMapMethod(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected []interface{}
-	}{
-		{`
-		(1..10).map do |x| x * x; end
-		`, []interface{}{1, 4, 9, 16, 25, 36, 49, 64, 81, 100}},
-		{`
-		(-5..5).map do |x| x * x; end
-		`, []interface{}{25, 16, 9, 4, 1, 0, 1, 4, 9, 16, 25}},
-		{`
-		(1..5).map do |x| end
-		`, []interface{}{nil, nil, nil, nil, nil}},
-	}
-
-	for i, tt := range tests {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		verifyArrayObject(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
-	}
-}
-
-func TestRangeMapMethodFail(t *testing.T) {
-	v := initTestVM()
-	testsFail := []errorTestCase{
-		{
-			`
-			(1..10).map
-		`, "InternalError: Can't yield without a block", 1},
-		{
-			`
-			(1..10).map(1) do |x| x * x; end
-		`, "ArgumentError: Expect 0 argument. got=1", 2},
-	}
-
-	for i, tt := range testsFail {
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkErrorMsg(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, tt.expectedCFP)
 	}
 }
 

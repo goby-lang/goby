@@ -3,6 +3,8 @@ package errors
 const (
 	// InternalError is the default error type
 	InternalError = "InternalError"
+	// IOError is an IO error such as file error
+	IOError = "IOError"
 	// ArgumentError is for an argument-related error
 	ArgumentError = "ArgumentError"
 	// NameError is for a constant-related error
@@ -32,10 +34,18 @@ const (
 	WrongNumberOfArgumentLess   = "Expect %d or less argument(s). got: %d"
 	WrongNumberOfArgumentRange  = "Expect %d to %d argument(s). got: %d"
 	WrongArgumentTypeFormat     = "Expect argument to be %s. got: %s"
+	WrongArgumentTypeFormatNum  = "Expect argument #%d to be %s. got: %s"
+	InvalidChmodNumber          = "Invalid chmod number. got: %d"
+	InvalidNumericString        = "Invalid numeric string. got: %s"
+	CantLoadFile                = "Can't load \"%s\""
+	CantRequireNonString        = "Can't require \"%s\": Pass a string instead"
 	CantYieldWithoutBlockFormat = "Can't yield without a block"
+	NotDiggable                 = "Expect target to be Diggable, got %s"
 	DividedByZero               = "Divided by 0"
 	ChannelIsClosed             = "The channel is already closed."
 	TooSmallIndexValue          = "Index value %d too small for array. minimum: %d"
+	IndexOutOfRange             = "Index value out of range. got: %v"
+	RegexpFailure               = "Replacement failure with the Regexp. got: %s"
 	NegativeValue               = "Expect argument to be positive value. got: %d"
 	NegativeSecondValue         = "Expect second argument to be positive value. got: %d"
 	UndefinedMethod             = "Undefined Method '%+v' for %+v"

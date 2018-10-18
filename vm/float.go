@@ -2,6 +2,7 @@ package vm
 
 import (
 	"math"
+	"strings"
 
 	"strconv"
 
@@ -45,6 +46,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```Ruby
 			// 1.1 + 2 # => 3.1
 			// ```
+			//
 			// @return [Float]
 			Name: "+",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -62,13 +64,11 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```Ruby
 			// 5.5 % 2 # => 1.5
 			// ```
+			//
 			// @return [Float]
 			Name: "%",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				operation := func(leftValue float64, rightValue float64) float64 {
-					return math.Mod(leftValue, rightValue)
-				}
-
+				operation := math.Mod
 				return receiver.(*FloatObject).arithmeticOperation(t, args[0], operation, sourceLine, true)
 
 			},
@@ -79,6 +79,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```Ruby
 			// 1.5 - 1 # => 0.5
 			// ```
+			//
 			// @return [Float]
 			Name: "-",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -96,6 +97,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```Ruby
 			// 2.5 * 10 # => 25.0
 			// ```
+			//
 			// @return [Float]
 			Name: "*",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -113,13 +115,11 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```Ruby
 			// 4.0 ** 2.5 # => 32.0
 			// ```
+			//
 			// @return [Float]
 			Name: "**",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				operation := func(leftValue float64, rightValue float64) float64 {
-					return math.Pow(leftValue, rightValue)
-				}
-
+				operation := math.Pow
 				return receiver.(*FloatObject).arithmeticOperation(t, args[0], operation, sourceLine, false)
 
 			},
@@ -130,6 +130,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```Ruby
 			// 7.5 / 3 # => 2.5
 			// ```
+			//
 			// @return [Float]
 			Name: "/",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -148,6 +149,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// 10 > -1 # => true
 			// 3 > 3 # => false
 			// ```
+			//
 			// @return [Boolean]
 			Name: ">",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -171,6 +173,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// 2 >= 1 # => true
 			// 1 >= 1 # => true
 			// ```
+			//
 			// @return [Boolean]
 			Name: ">=",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -193,6 +196,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// 1 < 3 # => true
 			// 1 < 1 # => false
 			// ```
+			//
 			// @return [Boolean]
 			Name: "<",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -216,6 +220,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// 1 <= 3 # => true
 			// 1 <= 1 # => true
 			// ```
+			//
 			// @return [Boolean]
 			Name: "<=",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -241,6 +246,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// 1.0 <=> 1 # => 0
 			// 3.5 <=> 1 # => 1
 			// ```
+			//
 			// @return [Float]
 			Name: "<=>",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -274,6 +280,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// 1.0 == 1     # => true
 			// 1.0 == '1.0' # => false
 			// ```
+			//
 			// @return [Boolean]
 			Name: "==",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -293,6 +300,7 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// 1.0 != 1     # => false
 			// 1.0 != '1.0' # => true
 			// ```
+			//
 			// @return [Boolean]
 			Name: "!=",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
@@ -318,15 +326,12 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			Name: "to_d",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%v", strconv.Itoa(len(args)))
-				}
-
 				fl := receiver.(*FloatObject).value
+
 				fs := strconv.FormatFloat(fl, 'f', -1, 64)
 				de, err := new(Decimal).SetString(fs)
 				if err == false {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Invalid numeric string. got=%v", fs)
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.InvalidNumericString, fs)
 				}
 
 				return t.vm.initDecimalObject(de)
@@ -339,11 +344,12 @@ func builtinFloatInstanceMethods() []*BuiltinMethodObject {
 			// ```Ruby
 			// 100.1.to_i # => 100
 			// ```
+			//
 			// @return [Integer]
 			Name: "to_i",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				r := receiver.(*FloatObject)
-				newInt := t.vm.InitIntegerObject(int(r.value))
+				r := receiver.(*FloatObject).value
+				newInt := t.vm.InitIntegerObject(int(r))
 				newInt.flag = i
 				return newInt
 
@@ -448,7 +454,12 @@ func (f *FloatObject) lessThan(arg Object) bool {
 // ToString returns the object's value as the string format, in non
 // exponential format (straight number, without exponent `E<exp>`).
 func (f *FloatObject) ToString() string {
-	return strconv.FormatFloat(f.value, 'f', -1, 64) // fmt.Sprintf("%f", f.value)
+	s := strconv.FormatFloat(f.value, 'f', -1, 64)
+	// Add ".0" to represent a float number
+	if !strings.Contains(s, ".") {
+		return s + ".0"
+	}
+	return s
 }
 
 // Inspect delegates to ToString

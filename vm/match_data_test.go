@@ -44,8 +44,10 @@ func TestMatchDataCaptures(t *testing.T) {
 
 func TestMatchDataCapturesFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`'a1bca2'.match(1, 2)`, "ArgumentError: Expect 1 argument. got=2", 1},
+		{`'a1bca2'.match(1, 2)`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
 		{`'a1bca2'.match('a.')`, "TypeError: Expect argument to be Regexp. got: String", 1},
+		{`'a1bca2'.match(Regexp.new('a')).captures('a')`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		{`'a1bca2'.match(Regexp.new('a')).captures('a', 'b')`, "ArgumentError: Expect 0 argument(s). got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -78,7 +80,8 @@ func TestMatchDataToAMethod(t *testing.T) {
 
 func TestMatchDataToAMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`'a1bca2'.match(Regexp.new('a.')).to_a(1)`, "ArgumentError: Expect 0 argument. got=1", 1},
+		{`'a1bca2'.match(Regexp.new('a.')).to_a(1)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		{`'a1bca2'.match(Regexp.new('a.')).to_a(1, 2)`, "ArgumentError: Expect 0 argument(s). got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -111,7 +114,8 @@ func TestMatchDataLengthMethod(t *testing.T) {
 
 func TestMatchDataLengthMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`'abc'.match(Regexp.new('(a)(b)c')).length(1)`, "ArgumentError: Expect 0 argument. got=1", 1},
+		{`'abc'.match(Regexp.new('(a)(b)c')).length(1)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		{`'abc'.match(Regexp.new('(a)(b)c')).length(1, 2)`, "ArgumentError: Expect 0 argument(s). got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -139,5 +143,20 @@ func TestMatchDataToHMethod(t *testing.T) {
 		verifyHashObject(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
 		vm.checkSP(t, i, 1)
+	}
+}
+
+func TestMatchDataToHMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`'abcd'.match(Regexp.new('a.')).to_h(1)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		{`'abcd'.match(Regexp.new('a.')).to_h(1, 2)`, "ArgumentError: Expect 0 argument(s). got: 2", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
 	}
 }

@@ -369,6 +369,59 @@ func TestCaseExpressionEvaluation(t *testing.T) {
 			`,
 			3,
 		},
+		{
+			`
+			case
+			when 1 > 2
+				-1
+			when 1 < 2
+				1
+			end
+`, 1,
+		},
+		{
+			`
+    case
+    when 1
+      99
+    when 2
+      if true
+        88
+      elsif false
+        77
+      else
+       66
+      end
+    when 3
+      case
+      when 1
+        2
+      when 3
+        4
+      when 5
+        if true
+          3
+        else
+          4
+        end
+      else
+        222
+      end
+    when 99
+      88
+    else
+      0
+    end
+    case
+    when 7
+      55
+    when 8
+      44
+    else
+      33
+    end
+`, 33,
+		},
 	}
 
 	for i, tt := range tests {

@@ -47,7 +47,7 @@ func builtInRegexpClassMethods() []*BuiltinMethodObject {
 			Name: "new",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				if len(args) != 1 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%d", len(args))
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
 				arg, ok := args[0].(*StringObject)
@@ -87,9 +87,8 @@ func builtinRegexpInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "==",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-
 				if len(args) != 1 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%d", len(args))
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
 				right, ok := args[0].(*RegexpObject)
@@ -119,9 +118,8 @@ func builtinRegexpInstanceMethods() []*BuiltinMethodObject {
 			// @return [Boolean]
 			Name: "match?",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-
 				if len(args) != 1 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got=%d", len(args))
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
 				arg := args[0]

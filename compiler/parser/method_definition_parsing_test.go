@@ -29,32 +29,32 @@ func TestDefStatement(t *testing.T) {
 	}
 
 	firstStmt := program.FirstStmt().IsDefStmt(t)
-	firstStmt.ShouldHasName("add")
-	firstStmt.ShouldHasNormalParam("x")
-	firstStmt.ShouldHasNormalParam("y")
+	firstStmt.ShouldHaveName("add")
+	firstStmt.ShouldHaveNormalParam("x")
+	firstStmt.ShouldHaveNormalParam("y")
 
 	firstExpression := firstStmt.MethodBody().NthStmt(1).IsExpression(t)
 	infixExp := firstExpression.IsInfixExpression(t)
-	infixExp.ShouldHasOperator("+")
-	infixExp.TestableLeftExpression().IsIdentifier(t).ShouldHasName("x")
-	infixExp.TestableRightExpression().IsIdentifier(t).ShouldHasName("y")
+	infixExp.ShouldHaveOperator("+")
+	infixExp.TestableLeftExpression().IsIdentifier(t).ShouldHaveName("x")
+	infixExp.TestableRightExpression().IsIdentifier(t).ShouldHaveName("y")
 
 	secondStmt := program.NthStmt(2).IsDefStmt(t)
-	secondStmt.ShouldHasName("foo")
-	secondStmt.ShouldHasNoParam()
+	secondStmt.ShouldHaveName("foo")
+	secondStmt.ShouldHaveNoParam()
 
 	secondExpression := secondStmt.MethodBody().NthStmt(1).IsExpression(t)
 	secondExpression.IsIntegerLiteral(t).ShouldEqualTo(123)
 
 	thirdStmt := program.NthStmt(3).IsDefStmt(t)
-	thirdStmt.ShouldHasName("bar")
-	thirdStmt.ShouldHasOptionalParam("x")
-	thirdStmt.ShouldHasRequiredKeywordParam("y")
+	thirdStmt.ShouldHaveName("bar")
+	thirdStmt.ShouldHaveOptionalParam("x")
+	thirdStmt.ShouldHaveRequiredKeywordParam("y")
 
 	fourthStmt := program.NthStmt(4).IsDefStmt(t)
-	fourthStmt.ShouldHasName("baz")
-	fourthStmt.ShouldHasOptionalKeywordParam("z")
-	fourthStmt.ShouldHasSplatParam("s")
+	fourthStmt.ShouldHaveName("baz")
+	fourthStmt.ShouldHaveOptionalKeywordParam("z")
+	fourthStmt.ShouldHaveSplatParam("s")
 }
 
 func TestDefStatementWithYield(t *testing.T) {
@@ -78,7 +78,7 @@ func TestDefStatementWithYield(t *testing.T) {
 
 	firstYield.NthArgument(1).IsIntegerLiteral(t).ShouldEqualTo(1)
 	firstYield.NthArgument(2).IsIntegerLiteral(t).ShouldEqualTo(2)
-	firstYield.NthArgument(3).IsIdentifier(t).ShouldHasName("bar")
+	firstYield.NthArgument(3).IsIdentifier(t).ShouldHaveName("bar")
 
 	secondExp := stmt.MethodBody().NthStmt(2).IsExpression(t)
 	secondExp.IsYieldExpression(t)

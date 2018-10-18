@@ -55,8 +55,9 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 			Name: "captures",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
+
 				offset := 1
 
 				g := receiver.(*MatchDataObject).match
@@ -85,7 +86,7 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 			Name: "to_a",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 
 				g := receiver.(*MatchDataObject).match
@@ -116,7 +117,7 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 			Name: "to_h",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 
 				groups := receiver.(*MatchDataObject).match
@@ -140,7 +141,7 @@ func builtinMatchDataInstanceMethods() []*BuiltinMethodObject {
 			Name: "length",
 			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%d", len(args))
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 				}
 
 				m := receiver.(*MatchDataObject).match
