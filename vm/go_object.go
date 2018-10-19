@@ -15,50 +15,46 @@ type GoObject struct {
 }
 
 // Class methods --------------------------------------------------------
-func builtinGoObjectClassMethods() []*BuiltinMethodObject {
-	return []*BuiltinMethodObject{}
-}
+var builtinGoObjectClassMethods = []*BuiltinMethodObject{}
 
 // Instance methods -----------------------------------------------------
-func builtinGoObjectInstanceMethods() []*BuiltinMethodObject {
-	return []*BuiltinMethodObject{
-		{
-			// An experimental method for loading plugins (written in Golang) dynamically.
-			// Needs improvements.
-			//
-			/// ```ruby
-			/// require "plugin"
-			//
-			//	p = Plugin.use "../test_fixtures/import_test/plugin/plugin.go"
-			//	p.go_func("Foo", "!")
-			//	p.go_func("Baz")
-			// ```
-			//
-			// @param name [String]
-			// @return [Object]
-			Name: "go_func",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				s, ok := args[0].(*StringObject)
+var builtinGoObjectInstanceMethods = []*BuiltinMethodObject{
+	{
+		// An experimental method for loading plugins (written in Golang) dynamically.
+		// Needs improvements.
+		//
+		/// ```ruby
+		/// require "plugin"
+		//
+		//	p = Plugin.use "../test_fixtures/import_test/plugin/plugin.go"
+		//	p.go_func("Foo", "!")
+		//	p.go_func("Baz")
+		// ```
+		//
+		// @param name [String]
+		// @return [Object]
+		Name: "go_func",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			s, ok := args[0].(*StringObject)
 
-				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
-				}
+			if !ok {
+				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			}
 
-				funcName := s.value
-				r := receiver.(*GoObject)
+			funcName := s.value
+			r := receiver.(*GoObject)
 
-				funcArgs, err := ConvertToGoFuncArgs(args[1:])
+			funcArgs, err := ConvertToGoFuncArgs(args[1:])
 
-				if err != nil {
-					t.vm.InitErrorObject(errors.TypeError, sourceLine, err.Error())
-				}
+			if err != nil {
+				t.vm.InitErrorObject(errors.TypeError, sourceLine, err.Error())
+			}
 
-				result := metago.CallFunc(r.data, funcName, funcArgs...)
-				return t.vm.InitObjectFromGoType(result)
+			result := metago.CallFunc(r.data, funcName, funcArgs...)
+			return t.vm.InitObjectFromGoType(result)
 
-			},
 		},
-	}
+	},
 }
 
 // Internal functions ===================================================
@@ -71,8 +67,8 @@ func (vm *VM) initGoObject(d interface{}) *GoObject {
 
 func (vm *VM) initGoClass() *RClass {
 	sc := vm.initializeClass(classes.GoObjectClass)
-	sc.setBuiltinMethods(builtinGoObjectClassMethods(), true)
-	sc.setBuiltinMethods(builtinGoObjectInstanceMethods(), false)
+	sc.setBuiltinMethods(builtinGoObjectClassMethods, true)
+	sc.setBuiltinMethods(builtinGoObjectInstanceMethods, false)
 	vm.objectClass.setClassConstant(sc)
 	return sc
 }

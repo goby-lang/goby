@@ -41,101 +41,96 @@ type RegexpObject struct {
 }
 
 // Class methods --------------------------------------------------------
-func builtInRegexpClassMethods() []*BuiltinMethodObject {
-	return []*BuiltinMethodObject{
-		{
-			Name: "new",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 1 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
-				}
+var builtInRegexpClassMethods = []*BuiltinMethodObject{
+	{
+		Name: "new",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 1 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
+			}
 
-				arg, ok := args[0].(*StringObject)
-				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, arg.Class().Name)
-				}
+			arg, ok := args[0].(*StringObject)
+			if !ok {
+				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, arg.Class().Name)
+			}
 
-				r := t.vm.initRegexpObject(args[0].ToString())
-				if r == nil {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Invalid regexp: %v", args[0].ToString())
-				}
-				return r
+			r := t.vm.initRegexpObject(args[0].ToString())
+			if r == nil {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Invalid regexp: %v", args[0].ToString())
+			}
+			return r
 
-			},
 		},
-	}
+	},
 }
 
 // Instance methods -----------------------------------------------------
-func builtinRegexpInstanceMethods() []*BuiltinMethodObject {
-	return []*BuiltinMethodObject{
+var builtinRegexpInstanceMethods = []*BuiltinMethodObject{
+	{
+		// Returns true if the two regexp patterns are exactly the same, or returns false if not.
+		// If comparing with non Regexp class, just returns false.
+		//
+		// ```ruby
+		// r1 = Regexp.new("goby[0-9]+")
+		// r2 = Regexp.new("goby[0-9]+")
+		// r3 = Regexp.new("Goby[0-9]+")
+		//
+		// r1 == r2   # => true
+		// r1 == r2   # => false
+		// ```
+		//
+		// @param regexp [Regexp]
+		// @return [Boolean]
+		Name: "==",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 1 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
+			}
 
-		{
-			// Returns true if the two regexp patterns are exactly the same, or returns false if not.
-			// If comparing with non Regexp class, just returns false.
-			//
-			// ```ruby
-			// r1 = Regexp.new("goby[0-9]+")
-			// r2 = Regexp.new("goby[0-9]+")
-			// r3 = Regexp.new("Goby[0-9]+")
-			//
-			// r1 == r2   # => true
-			// r1 == r2   # => false
-			// ```
-			//
-			// @param regexp [Regexp]
-			// @return [Boolean]
-			Name: "==",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 1 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
-				}
-
-				right, ok := args[0].(*RegexpObject)
-				if !ok {
-					return FALSE
-				}
-
-				left := receiver.(*RegexpObject)
-
-				if left.Value() == right.Value() {
-					return TRUE
-				}
+			right, ok := args[0].(*RegexpObject)
+			if !ok {
 				return FALSE
+			}
 
-			},
+			left := receiver.(*RegexpObject)
+
+			if left.Value() == right.Value() {
+				return TRUE
+			}
+			return FALSE
+
 		},
-		{
-			// Returns boolean value to indicate the result of regexp match with the string given. The methods evaluates a String object.
-			//
-			// ```ruby
-			// r = Regexp.new("o")
-			// r.match?("pow")  # => true
-			// r.match?("gee")  # => false
-			// ```
-			//
-			// @param string [String]
-			// @return [Boolean]
-			Name: "match?",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 1 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
-				}
+	},
+	{
+		// Returns boolean value to indicate the result of regexp match with the string given. The methods evaluates a String object.
+		//
+		// ```ruby
+		// r = Regexp.new("o")
+		// r.match?("pow")  # => true
+		// r.match?("gee")  # => false
+		// ```
+		//
+		// @param string [String]
+		// @return [Boolean]
+		Name: "match?",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 1 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
+			}
 
-				arg := args[0]
-				input, ok := arg.(*StringObject)
-				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, arg.Class().Name)
-				}
+			arg := args[0]
+			input, ok := arg.(*StringObject)
+			if !ok {
+				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, arg.Class().Name)
+			}
 
-				re := receiver.(*RegexpObject).regexp
-				m, _ := re.MatchString(input.value)
+			re := receiver.(*RegexpObject).regexp
+			m, _ := re.MatchString(input.value)
 
-				return toBooleanObject(m)
+			return toBooleanObject(m)
 
-			},
 		},
-	}
+	},
 }
 
 // Internal functions ===================================================
@@ -155,8 +150,8 @@ func (vm *VM) initRegexpObject(regexp string) *RegexpObject {
 
 func (vm *VM) initRegexpClass() *RClass {
 	rc := vm.initializeClass(classes.RegexpClass)
-	rc.setBuiltinMethods(builtinRegexpInstanceMethods(), false)
-	rc.setBuiltinMethods(builtInRegexpClassMethods(), true)
+	rc.setBuiltinMethods(builtinRegexpInstanceMethods, false)
+	rc.setBuiltinMethods(builtInRegexpClassMethods, true)
 	return rc
 }
 
