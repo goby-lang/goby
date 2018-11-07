@@ -59,8 +59,8 @@ We are optimizing and expanding Goby all the time. Toward the first release, we'
 ## Major Features
 
 - Plugin system
-    - Allows to use Go libraries (packages) dynamically
-    - Allows to call Go's methods from Goby directly (only on Linux for now)
+    - Allows using Go libraries (packages) dynamically
+    - Allows calling Go's methods from Goby directly (only on Linux for now)
 - Builtin multi-threaded server and DB library
 - REPL (run `goby -i`)
 
@@ -112,7 +112,7 @@ In order to install Go, Goby and PostgreSQL on a Linux system, see the [wiki pag
 
 FYI: You can just run `brew test goby` to check Homebrew installation.
 
-**If you have any issue installing Goby, please let us know via [Github issues](https://github.com/goby-lang/goby/issues)**
+**If you have any issue installing Goby, please let us know via [GitHub issues](https://github.com/goby-lang/goby/issues)**
 
 ### Using Docker
 
