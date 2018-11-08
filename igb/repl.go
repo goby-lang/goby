@@ -39,12 +39,20 @@ const (
 	waitEnded   = "waitEnded"
 	waitExited  = "waitExited"
 
+	NoMultiLineQuote          = "NoMultiLineQuote"
+	MultiLineDoubleQuote      = "MultiLineDoubleQuote"
+	MultiLineDoubleQuoteEnded = "MultiLineDoubleQuoteEnded"
+	MultiLineSingleQuote      = "MultiLineSingleQuote"
+	MultiLineSingleQuoteEnded = "MultiLineSingleQuoteEnded"
+	MultiLineQuoteExited      = "MultiLineQuoteExited"
+
 	emojis = "😀😁😂🤣😃😄😅😆😉😊😋😎😍😘😗😙😚🙂🤗🤔😐😑😶🙄😏😮😪😴😌😛😜😝🤤🙃🤑😲😭😳🤧😇🤠🤡🤥🤓😈👿👹👺💀👻👽🤖💩😺😸😹😻😼😽"
 )
 
 // iGb holds internal states of iGb.
 type iGb struct {
 	sm        *fsm.FSM
+	qsm       *fsm.FSM
 	rl        *readline.Instance
 	completer *readline.PrefixCompleter
 	lines     string
@@ -341,6 +349,17 @@ func newIgb() *iGb {
 				{Name: waitEnded, Src: []string{Waiting}, Dst: waitEnded},
 				{Name: waitExited, Src: []string{Waiting, waitEnded}, Dst: readyToExec},
 				{Name: readyToExec, Src: []string{waitEnded, readyToExec}, Dst: readyToExec},
+			},
+			fsm.Callbacks{},
+		),
+		qsm: fsm.NewFSM(
+			NoMultiLineQuote,
+			fsm.Events{
+				{Name: MultiLineDoubleQuote, Src: []string{NoMultiLineQuote}, Dst: MultiLineDoubleQuote},
+				{Name: MultiLineDoubleQuoteEnded, Src: []string{MultiLineDoubleQuote}, Dst: MultiLineDoubleQuoteEnded},
+				{Name: MultiLineSingleQuote, Src: []string{NoMultiLineQuote}, Dst: MultiLineSingleQuote},
+				{Name: MultiLineSingleQuoteEnded, Src: []string{MultiLineSingleQuote}, Dst: MultiLineSingleQuoteEnded},
+				{Name: MultiLineQuoteExited, Src: []string{MultiLineDoubleQuoteEnded, MultiLineSingleQuoteEnded}, Dst: NoMultiLineQuote},
 			},
 			fsm.Callbacks{},
 		),
