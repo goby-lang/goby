@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dlclark/regexp2"
+
 	parserErr "github.com/goby-lang/goby/compiler/parser/errors"
 
 	"github.com/chzyer/readline"
@@ -39,12 +41,13 @@ const (
 	waitEnded   = "waitEnded"
 	waitExited  = "waitExited"
 
-	NoMultiLineQuote          = "NoMultiLineQuote"
-	MultiLineDoubleQuote      = "MultiLineDoubleQuote"
-	MultiLineDoubleQuoteEnded = "MultiLineDoubleQuoteEnded"
-	MultiLineSingleQuote      = "MultiLineSingleQuote"
-	MultiLineSingleQuoteEnded = "MultiLineSingleQuoteEnded"
-	MultiLineQuoteExited      = "MultiLineQuoteExited"
+	NoMultiLineQuote     = "NoMultiLineQuote"
+	MultiLineDoubleQuote = "MultiLineDoubleQuote"
+	MultiLineSingleQuote = "MultiLineSingleQuote"
+	MultiLineQuoteExited = "MultiLineQuoteExited"
+
+	NoNestedQuote = "NoNestedQuote"
+	NestedQuote   = "NestedQuote"
 
 	emojis = "😀😁😂🤣😃😄😅😆😉😊😋😎😍😘😗😙😚🙂🤗🤔😐😑😶🙄😏😮😪😴😌😛😜😝🤤🙃🤑😲😭😳🤧😇🤠🤡🤥🤓😈👿👹👺💀👻👽🤖💩😺😸😹😻😼😽"
 )
@@ -53,6 +56,7 @@ const (
 type iGb struct {
 	sm        *fsm.FSM
 	qsm       *fsm.FSM
+	nqsm      *fsm.FSM
 	rl        *readline.Instance
 	completer *readline.PrefixCompleter
 	lines     string
@@ -85,6 +89,11 @@ func println(s ...string) {
 
 // StartIgb starts goby's REPL.
 func StartIgb(version string) {
+	openDoubleQuote, _ := regexp2.Compile("(?<!\"[^\"]*?\")\"[^\"]+?$", 0)
+	closedDoubleQuote, _ := regexp2.Compile("^[^\"]*?\"(?!\"[^\"]*?\")", 0)
+	openSingleQuote, _ := regexp2.Compile("(?<!'[^']*?')'[^']+?$", 0)
+	closedSingleQuote, _ := regexp2.Compile("^[^']*?'(?!'[^']*?')", 0)
+
 reset:
 	var err error
 	igb := newIgb()
@@ -136,10 +145,86 @@ reset:
 				igb.indents = 0
 				igb.rl.SetPrompt(prompt1)
 				igb.sm.Event(waitExited)
+				igb.qsm.Event(MultiLineQuoteExited)
 				igb.cmds = nil
 				igb.caseBlock = false
 				igb.firstWhen = false
 				println(" -- block cleared")
+				continue
+			}
+		}
+
+		// Multi-line quotation handling
+		switch {
+		case igb.qsm.Is(NoMultiLineQuote):
+			odq, _ := openDoubleQuote.MatchString(igb.lines)
+			osq, _ := openSingleQuote.MatchString(igb.lines)
+			switch {
+			case odq: // start multi-line double quote
+				igb.qsm.Event(MultiLineDoubleQuote)
+				if igb.sm.Is(Waiting) {
+					igb.nqsm.Event(NestedQuote)
+				} else {
+					igb.sm.Event(Waiting)
+				}
+				igb.cmds = append(igb.cmds, igb.lines)
+				println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
+				igb.rl.SetPrompt(prompt2)
+				continue
+			case osq: // start multi-line single quote
+				igb.qsm.Event(MultiLineSingleQuote)
+				if igb.sm.Is(Waiting) {
+					igb.nqsm.Event(NestedQuote)
+				} else {
+					igb.sm.Event(Waiting)
+				}
+				igb.cmds = append(igb.cmds, igb.lines)
+				println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
+				igb.rl.SetPrompt(prompt2)
+				continue
+			}
+
+		case igb.qsm.Is(MultiLineDoubleQuote):
+			cdq, _ := closedDoubleQuote.MatchString(igb.lines)
+			if cdq { // end multi-line double quote
+				igb.qsm.Event(MultiLineQuoteExited)
+				igb.qsm.Event(NoMultiLineQuote)
+				if igb.nqsm.Is(NestedQuote) { // end nested-quote and continue
+					igb.cmds = append(igb.cmds, igb.lines)
+					igb.nqsm.Event(NoNestedQuote)
+					println(prompt2 + igb.lines)
+					continue
+				} else { // exit multi-line double quote
+					igb.sm.Event(waitEnded)
+					igb.cmds = append(igb.cmds, igb.lines)
+					igb.rl.SetPrompt(prompt1)
+				}
+			} else { // continue multi-line double quote
+				println(prompt2 + igb.lines)
+				igb.rl.SetPrompt(prompt2)
+				igb.cmds = append(igb.cmds, igb.lines)
+				continue
+			}
+
+		case igb.qsm.Is(MultiLineSingleQuote):
+			csq, _ := closedSingleQuote.MatchString(igb.lines)
+			if csq { // end multi-line single quote
+				igb.qsm.Event(MultiLineQuoteExited)
+				igb.qsm.Event(NoMultiLineQuote)
+				if igb.nqsm.Is(NestedQuote) { // end nested-quote and continue
+					igb.cmds = append(igb.cmds, igb.lines)
+					igb.nqsm.Event(NoNestedQuote)
+					println(prompt2 + igb.lines)
+					continue
+				} else { // exit multi-line single quote
+					igb.sm.Event(waitEnded)
+					igb.cmds = append(igb.cmds, igb.lines)
+					igb.rl.SetPrompt(prompt1)
+				}
+			} else { // continue multi-line single quote
+				println(prompt2 + igb.lines)
+				igb.cmds = append(igb.cmds, igb.lines)
+				igb.rl.SetPrompt(prompt2)
 				continue
 			}
 		}
@@ -342,6 +427,7 @@ func newIgb() *iGb {
 	return &iGb{
 		cmds:    nil,
 		indents: 0,
+		// sm is for controlling the status of REPL.
 		sm: fsm.NewFSM(
 			readyToExec,
 			fsm.Events{
@@ -352,14 +438,23 @@ func newIgb() *iGb {
 			},
 			fsm.Callbacks{},
 		),
+		// qsm is for controlling the status of multi-line quotation.
+		// Note that double and single multi-line quotations are exclusive and do not coexist.
 		qsm: fsm.NewFSM(
 			NoMultiLineQuote,
 			fsm.Events{
 				{Name: MultiLineDoubleQuote, Src: []string{NoMultiLineQuote}, Dst: MultiLineDoubleQuote},
-				{Name: MultiLineDoubleQuoteEnded, Src: []string{MultiLineDoubleQuote}, Dst: MultiLineDoubleQuoteEnded},
 				{Name: MultiLineSingleQuote, Src: []string{NoMultiLineQuote}, Dst: MultiLineSingleQuote},
-				{Name: MultiLineSingleQuoteEnded, Src: []string{MultiLineSingleQuote}, Dst: MultiLineSingleQuoteEnded},
-				{Name: MultiLineQuoteExited, Src: []string{MultiLineDoubleQuoteEnded, MultiLineSingleQuoteEnded}, Dst: NoMultiLineQuote},
+				{Name: MultiLineQuoteExited, Src: []string{MultiLineDoubleQuote, MultiLineSingleQuote}, Dst: NoMultiLineQuote},
+			},
+			fsm.Callbacks{},
+		),
+		// nqsm is for controlling the status if the multi-line quotation is nested within other "Waiting" statement.
+		nqsm: fsm.NewFSM(
+			NoNestedQuote,
+			fsm.Events{
+				{Name: NoNestedQuote, Src: []string{NestedQuote}, Dst: NoNestedQuote},
+				{Name: NestedQuote, Src: []string{NoNestedQuote}, Dst: NestedQuote},
 			},
 			fsm.Callbacks{},
 		),
