@@ -76,3 +76,63 @@ func BenchmarkConcurrency(b *testing.B) {
 		runBench(b, script)
 	})
 }
+
+func BenchmarkContextSwitch(b *testing.B) {
+	b.Run("fib", func(b *testing.B) {
+		script := `
+		def fib(n)
+			if n <= 1
+				return n
+			else
+				return fib(n - 1) + fib(n - 2)
+			end
+		end
+
+		1001.times do |i|
+			fib(0)
+		end
+`
+		runBench(b, script)
+	})
+
+	b.Run("quicksort", func(b *testing.B) {
+		script := `
+		def quicksort(arr, l, r)
+			if l >= r
+				return
+			end
+
+			pivot = arr[l]
+			i = l - 1
+			j = r + 1
+
+			while true
+				arr.any? do |e|
+					i++
+					return e < pivot
+				end
+				
+
+				arr.any? do |e|
+					j--
+					e > pivot
+				end
+
+				if i >= j
+					break
+
+				# swap
+				tmp = arr[i]
+				arr[i] = arr[j]
+				arr[j] = tmp
+			end
+
+			return quicksort(arr, l, j) + quicksort(arr, j, r)
+		end
+
+		#quicksort([1])
+		quicksort([ 0, 5, 3, 2, 5, 7, 3, 5, 6, 8, 9, 10])
+`
+		runBench(b, script)
+	})
+}

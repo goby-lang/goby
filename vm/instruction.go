@@ -27,6 +27,7 @@ var operations [bytecode.InstructionCount]operation
 // This is for avoiding initialization loop
 func init() {
 	operations = [...]operation{
+		// getlocal
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			depth := args[0].(int)
 			index := args[1].(int)
@@ -40,6 +41,7 @@ func init() {
 
 			t.Stack.Push(p)
 		},
+		// getconstant
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			constName := args[0].(string)
 			c := t.vm.lookupConstant(cf, constName)
@@ -56,6 +58,7 @@ func init() {
 
 			t.Stack.Push(c)
 		},
+		// getinstancevariable
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			variableName := args[0].(string)
 			v, ok := cf.self.InstanceVariableGet(variableName)
@@ -67,6 +70,7 @@ func init() {
 			p := &Pointer{Target: v}
 			t.Stack.Push(p)
 		},
+		// setlocal
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			var optioned bool
 			p := t.Stack.Pop()
@@ -102,6 +106,7 @@ func init() {
 
 			t.Stack.Push(&Pointer{Target: obj})
 		},
+		// setconstant
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			constName := args[0].(string)
 			c := cf.lookupConstantInCurrentScope(constName)
@@ -114,6 +119,7 @@ func init() {
 			cf.storeConstant(constName, v)
 
 		},
+		// setinstancevariable
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			variableName := args[0].(string)
 			p := t.Stack.Pop()
@@ -134,33 +140,40 @@ func init() {
 
 			t.Stack.Push(&Pointer{Target: obj})
 		},
+		// putboolean
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			object := t.vm.InitObjectFromGoType(args[0])
 			t.Stack.Push(&Pointer{Target: object})
 		},
+		// putstring
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			object := t.vm.InitObjectFromGoType(args[0])
 			t.Stack.Push(&Pointer{Target: object})
 
 		},
+		// putfloat
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			value := args[0].(float64)
 			object := t.vm.initFloatObject(value)
 			t.Stack.Push(&Pointer{Target: object})
 
 		},
+		// putself
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			t.Stack.Push(&Pointer{Target: cf.self})
 
 		},
+		// putobject
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			object := t.vm.InitObjectFromGoType(args[0])
 			t.Stack.Push(&Pointer{Target: object})
 		},
+		// putnil
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			t.Stack.Push(&Pointer{Target: NULL})
 
 		},
+		// newarray
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			var elems []Object
@@ -174,6 +187,7 @@ func init() {
 			t.Stack.Push(&Pointer{Target: arr})
 
 		},
+		// expand_array
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			arrLength := args[0].(int)
 			arr, ok := t.Stack.Pop().Target.(*ArrayObject)
@@ -200,6 +214,7 @@ func init() {
 			}
 
 		},
+		// splat_array
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			obj := t.Stack.top().Target
 			arr, ok := obj.(*ArrayObject)
@@ -211,6 +226,7 @@ func init() {
 			arr.splat = true
 
 		},
+		// newhash
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			pairs := map[string]Object{}
@@ -225,6 +241,7 @@ func init() {
 			t.Stack.Push(&Pointer{Target: hash})
 
 		},
+		// newrange
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			rangeEnd := t.Stack.Pop().Target.(*IntegerObject).value
 			rangeStart := t.Stack.Pop().Target.(*IntegerObject).value
@@ -232,6 +249,7 @@ func init() {
 			t.Stack.Push(&Pointer{Target: t.vm.initRangeObject(rangeStart, rangeEnd)})
 
 		},
+		// branchunless
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			v := t.Stack.Pop()
 			bo, isBool := v.Target.(*BooleanObject)
@@ -255,6 +273,7 @@ func init() {
 			}
 
 		},
+		// branchif
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			v := t.Stack.Pop()
 			bo, isBool := v.Target.(*BooleanObject)
@@ -274,10 +293,12 @@ func init() {
 			return
 
 		},
+		// jump
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			cf.pc = args[0].(int)
 
 		},
+		// break
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			/*
 				Normal frame. IS name: ProgramStart. is block: false. source line: 1
@@ -300,6 +321,7 @@ func init() {
 			}
 
 		},
+		// def_method
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			methodName := t.Stack.Pop().Target.(*StringObject).value
@@ -320,6 +342,7 @@ func init() {
 			}
 
 		},
+		// def_singleton_method
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			methodName := t.Stack.Pop().Target.(*StringObject).value
@@ -339,6 +362,7 @@ func init() {
 			}
 
 		},
+		// def_class
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			subject := strings.Split(args[0].(string), ":")
 			subjectType, subjectName := subject[0], subject[1]
@@ -383,6 +407,7 @@ func init() {
 			t.Stack.Push(classPtr)
 
 		},
+		// send
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			var method Object
 			var blockFlag string
@@ -461,6 +486,7 @@ func init() {
 			}
 
 		},
+		// invokeblock
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			argCount := args[0].(int)
 			argPr := t.Stack.pointer - argCount
@@ -517,6 +543,7 @@ func init() {
 			t.Stack.pointer = receiverPr + 1
 
 		},
+		// getblock
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			if cf.blockFrame == nil {
 				t.pushErrorObject(errors.InternalError, sourceLine, "Can't get block without a block argument")
@@ -533,13 +560,16 @@ func init() {
 			t.Stack.Push(&Pointer{Target: blockObject})
 
 		},
+		// pop
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			t.Stack.Pop()
 		},
+		// dup
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			obj := t.Stack.top().Target
 			t.Stack.Push(&Pointer{Target: obj})
 		},
+		// leave
 		func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			t.callFrameStack.pop()
 			cf.stopExecution()
