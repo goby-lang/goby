@@ -72,6 +72,32 @@ func TestBreakStatement(t *testing.T) {
 		a = i * 10
 		a + 100
 				`, 310},
+		{`
+		x = 0
+		y = 0
+		i = 0
+
+		while x < 10 do
+		  x = x + 1
+		  while y < 5 do
+			y = y + 1
+		  end
+
+			if y == 3
+			  break
+			end
+
+			i = i + x * y
+
+		  if x > 5
+		    break
+		  end
+
+		end
+
+		a = i * 10
+		a + 100
+				`, 1150},
 	}
 
 	for i, tt := range tests {
