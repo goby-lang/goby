@@ -39,6 +39,25 @@ func TestBreakStatement(t *testing.T) {
 		{`
 		x = [1, 2, 3]
 		y = 0
+		sum = 0
+		
+		while y < 3 do
+			x.each do |i|
+				sum += i * y
+			end
+
+			if sum > 6
+				break
+			end
+
+			y = y + 1
+		end
+		
+		sum
+		`, 18},
+		{`
+		x = [1, 2, 3]
+		y = 0
 		
 		while y < 10 do
 		  x.each do |i|
