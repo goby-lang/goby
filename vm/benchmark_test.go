@@ -106,20 +106,20 @@ func BenchmarkContextSwitch(b *testing.B) {
 			i = l - 1
 			j = r + 1
 
-			while true
-				arr.any? do |e|
-					i++
-					return e < pivot
+			while true do
+				i += 1
+				while arr[i] < pivot do
+					i += 1
 				end
-				
 
-				arr.any? do |e|
-					j--
-					e > pivot
+				j -= 1
+				while arr[j] > pivot do
+					j -= 1
 				end
 
 				if i >= j
 					break
+				end
 
 				# swap
 				tmp = arr[i]
@@ -127,11 +127,13 @@ func BenchmarkContextSwitch(b *testing.B) {
 				arr[j] = tmp
 			end
 
-			return quicksort(arr, l, j) + quicksort(arr, j, r)
+
+			quicksort(arr, l, j)
+			quicksort(arr, j + 1, r)
 		end
 
-		#quicksort([1])
-		quicksort([ 0, 5, 3, 2, 5, 7, 3, 5, 6, 8, 9, 10])
+		arr = [ 0, 5, 3, 2, 5, 7, 3, 5, 6, 9] * 10
+		quicksort(arr, 0, arr.length - 1)
 `
 		runBench(b, script)
 	})
