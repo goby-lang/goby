@@ -88,8 +88,8 @@ func BenchmarkContextSwitch(b *testing.B) {
 			end
 		end
 
-		1001.times do |i|
-			fib(0)
+		25.times do |i|
+			fib(i)
 		end
 `
 		runBench(b, script)
