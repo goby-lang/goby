@@ -44,696 +44,692 @@ const (
 )
 
 // Class methods --------------------------------------------------------
-func builtinIntegerClassMethods() []*BuiltinMethodObject {
-	return []*BuiltinMethodObject{
-		{
-			Name: "new",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				return t.vm.InitNoMethodError(sourceLine, "new", receiver)
+var builtinIntegerClassMethods = []*BuiltinMethodObject{
+	{
+		Name: "new",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			return t.vm.InitNoMethodError(sourceLine, "new", receiver)
 
-			},
 		},
-	}
+	},
 }
 
 // Instance methods -----------------------------------------------------
-func builtinIntegerInstanceMethods() []*BuiltinMethodObject {
-	return []*BuiltinMethodObject{
-		{
-			// Returns the sum of self and another Numeric.
-			//
-			// ```Ruby
-			// 1 + 2 # => 3
-			// ```
-			// @return [Numeric]
-			Name: "+",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				intOperation := func(leftValue int, rightValue int) int {
-					return leftValue + rightValue
-				}
-				floatOperation := func(leftValue float64, rightValue float64) float64 {
-					return leftValue + rightValue
-				}
-
-				return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine, false)
-
-			},
-		},
-		{
-			// Divides left hand operand by right hand operand and returns remainder.
-			//
-			// ```Ruby
-			// 5 % 2 # => 1
-			// ```
-			// @return [Numeric]
-			Name: "%",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				intOperation := func(leftValue int, rightValue int) int {
-					return leftValue % rightValue
-				}
-				floatOperation := math.Mod
-
-				return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine, true)
-
-			},
-		},
-		{
-			// Returns the subtraction of another Numeric from self.
-			//
-			// ```Ruby
-			// 1 - 1 # => 0
-			// ```
-			// @return [Numeric]
-			Name: "-",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				intOperation := func(leftValue int, rightValue int) int {
-					return leftValue - rightValue
-				}
-				floatOperation := func(leftValue float64, rightValue float64) float64 {
-					return leftValue - rightValue
-				}
-
-				return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine, false)
-
-			},
-		},
-		{
-			// Returns self multiplying another Numeric.
-			//
-			// ```Ruby
-			// 2 * 10 # => 20
-			// ```
-			// @return [Numeric]
-			Name: "*",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				intOperation := func(leftValue int, rightValue int) int {
-					return leftValue * rightValue
-				}
-				floatOperation := func(leftValue float64, rightValue float64) float64 {
-					return leftValue * rightValue
-				}
-
-				return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine, false)
-
-			},
-		},
-		{
-			// Returns self squaring another Numeric.
-			//
-			// ```Ruby
-			// 2 ** 8 # => 256
-			// ```
-			// @return [Numeric]
-			Name: "**",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				intOperation := func(leftValue int, rightValue int) int {
-					return int(math.Pow(float64(leftValue), float64(rightValue)))
-				}
-				floatOperation := math.Pow
-
-				return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine, false)
-
-			},
-		},
-		{
-			// Returns self divided by another Numeric.
-			//
-			// ```Ruby
-			// 6 / 3 # => 2
-			// ```
-			// @return [Numeric]
-			Name: "/",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-
-				intOperation := func(leftValue int, rightValue int) int {
-					return leftValue / rightValue
-				}
-				floatOperation := func(leftValue float64, rightValue float64) float64 {
-					return leftValue / rightValue
-				}
-
-				return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine, true)
-
-			},
-		},
-		{
-			// Returns if self is larger than another Numeric.
-			//
-			// ```Ruby
-			// 10 > -1 # => true
-			// 3 > 3 # => false
-			// ```
-			// @return [Boolean]
-			Name: ">",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				intComparison := func(leftValue int, rightValue int) bool {
-					return leftValue > rightValue
-				}
-				floatComparison := func(leftValue float64, rightValue float64) bool {
-					return leftValue > rightValue
-				}
-
-				switch arg := args[0].(type) {
-				case *IntegerObject, *FloatObject:
-					return toBooleanObject(receiver.(*IntegerObject).numericComparison(args[0], intComparison, floatComparison))
-				default:
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", arg.Class().Name)
-				}
-			},
-		},
-		{
-			// Returns if self is larger than or equals to another Numeric.
-			//
-			// ```Ruby
-			// 2 >= 1 # => true
-			// 1 >= 1 # => true
-			// ```
-			// @return [Boolean]
-			Name: ">=",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				intComparison := func(leftValue int, rightValue int) bool {
-					return leftValue >= rightValue
-				}
-				floatComparison := func(leftValue float64, rightValue float64) bool {
-					return leftValue >= rightValue
-				}
-
-				switch arg := args[0].(type) {
-				case *IntegerObject, *FloatObject:
-					return toBooleanObject(receiver.(*IntegerObject).numericComparison(args[0], intComparison, floatComparison))
-				default:
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", arg.Class().Name)
-				}
-
-			},
-		},
-		{
-			// Returns if self is smaller than another Numeric.
-			//
-			// ```Ruby
-			// 1 < 3 # => true
-			// 1 < 1 # => false
-			// ```
-			// @return [Boolean]
-			Name: "<",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				intComparison := func(leftValue int, rightValue int) bool {
-					return leftValue < rightValue
-				}
-				floatComparison := func(leftValue float64, rightValue float64) bool {
-					return leftValue < rightValue
-				}
-
-				switch arg := args[0].(type) {
-				case *IntegerObject, *FloatObject:
-					return toBooleanObject(receiver.(*IntegerObject).numericComparison(args[0], intComparison, floatComparison))
-				default:
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", arg.Class().Name)
-				}
-
-			},
-		},
-		{
-			// Returns if self is smaller than or equals to another Numeric.
-			//
-			// ```Ruby
-			// 1 <= 3 # => true
-			// 1 <= 1 # => true
-			// ```
-			// @return [Boolean]
-			Name: "<=",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				intComparison := func(leftValue int, rightValue int) bool {
-					return leftValue <= rightValue
-				}
-				floatComparison := func(leftValue float64, rightValue float64) bool {
-					return leftValue <= rightValue
-				}
-
-				switch arg := args[0].(type) {
-				case *IntegerObject, *FloatObject:
-					return toBooleanObject(receiver.(*IntegerObject).numericComparison(args[0], intComparison, floatComparison))
-				default:
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", arg.Class().Name)
-				}
-
-			},
-		},
-		{
-			// Returns 1 if self is larger than the incoming Numeric, -1 if smaller. Otherwise 0.
-			//
-			// ```Ruby
-			// 1 <=> 3 # => -1
-			// 1 <=> 1 # => 0
-			// 3 <=> 1 # => 1
-			// ```
-			// @return [Integer]
-			Name: "<=>",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				rightObject := args[0]
-
-				switch rightObject := rightObject.(type) {
-				case *IntegerObject:
-					leftValue := receiver.(*IntegerObject).value
-					rightValue := rightObject.value
-
-					if leftValue < rightValue {
-						return t.vm.InitIntegerObject(-1)
-					}
-					if leftValue > rightValue {
-						return t.vm.InitIntegerObject(1)
-					}
-
-					return t.vm.InitIntegerObject(0)
-				case *FloatObject:
-					leftValue := float64(receiver.(*IntegerObject).value)
-					rightValue := rightObject.value
-
-					if leftValue < rightValue {
-						return t.vm.InitIntegerObject(-1)
-					}
-					if leftValue > rightValue {
-						return t.vm.InitIntegerObject(1)
-					}
-
-					return t.vm.InitIntegerObject(0)
-				default:
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
-				}
-
-			},
-		},
-		{
-			// Returns if self is equal to an Object.
-			// If the Object is a Numeric, a comparison is performed, otherwise, the
-			// result is always false.
-			//
-			// ```Ruby
-			// 1 == 3   # => false
-			// 1 == 1   # => true
-			// 1 == '1' # => false
-			// ```
-			// @return [Boolean]
-			Name: "==",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				result := receiver.(*IntegerObject).equalityTest(args[0])
-
-				return toBooleanObject(result)
-
-			},
-		},
-		{
-			// Returns if self is not equal to an Object.
-			// If the Object is a Numeric, a comparison is performed, otherwise, the
-			// result is always true.
-			//
-			// ```Ruby
-			// 1 != 3   # => true
-			// 1 != 1   # => false
-			// 1 != '1' # => true
-			// ```
-			// @return [Boolean]
-			Name: "!=",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				result := !receiver.(*IntegerObject).equalityTest(args[0])
-
-				return toBooleanObject(result)
-
-			},
-		},
-		{
-			// Returns if self is even.
-			//
-			// ```Ruby
-			// 1.even? # => false
-			// 2.even? # => true
-			// ```
-			// @return [Boolean]
-			Name: "even?",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
-				}
-
-				i := receiver.(*IntegerObject)
-				even := i.value%2 == 0
-
-				if even {
-					return TRUE
-				}
-
-				return FALSE
-
-			},
-		},
-		// Returns the `Decimal` conversion of self.
+var builtinIntegerInstanceMethods = []*BuiltinMethodObject{
+	{
+		// Returns the sum of self and another Numeric.
 		//
 		// ```Ruby
-		// 100.to_d # => '100'.to_d
+		// 1 + 2 # => 3
 		// ```
-		// @return [Decimal]
-		{
-			Name: "to_d",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
-				}
+		// @return [Numeric]
+		Name: "+",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			intOperation := func(leftValue int, rightValue int) int {
+				return leftValue + rightValue
+			}
+			floatOperation := func(leftValue float64, rightValue float64) float64 {
+				return leftValue + rightValue
+			}
 
-				r := receiver.(*IntegerObject)
-				return t.vm.initDecimalObject(intToDecimal(r))
+			return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine, false)
 
-			},
 		},
-		// Returns the `Float` conversion of self.
+	},
+	{
+		// Divides left hand operand by right hand operand and returns remainder.
 		//
 		// ```Ruby
-		// 100.to_f # => '100.0'.to_f
+		// 5 % 2 # => 1
 		// ```
-		// @return [Float]
-		{
-			Name: "to_f",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
-				}
+		// @return [Numeric]
+		Name: "%",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			intOperation := func(leftValue int, rightValue int) int {
+				return leftValue % rightValue
+			}
+			floatOperation := math.Mod
 
-				r := receiver.(*IntegerObject)
-				newFloat := t.vm.initFloatObject(float64(r.value))
-				return newFloat
+			return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine, true)
 
-			},
 		},
-		{
-			// Returns self.
-			//
-			// ```Ruby
-			// 100.to_i # => 100
-			// ```
-			// @return [Integer]
-			Name: "to_i",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
-				}
+	},
+	{
+		// Returns the subtraction of another Numeric from self.
+		//
+		// ```Ruby
+		// 1 - 1 # => 0
+		// ```
+		// @return [Numeric]
+		Name: "-",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			intOperation := func(leftValue int, rightValue int) int {
+				return leftValue - rightValue
+			}
+			floatOperation := func(leftValue float64, rightValue float64) float64 {
+				return leftValue - rightValue
+			}
 
-				return receiver
+			return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine, false)
 
-			},
 		},
-		{
-			// Returns a `String` representation of self.
-			//
-			// ```Ruby
-			// 100.to_s # => "100"
-			// ```
-			// @return [String]
-			Name: "to_s",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
-				}
+	},
+	{
+		// Returns self multiplying another Numeric.
+		//
+		// ```Ruby
+		// 2 * 10 # => 20
+		// ```
+		// @return [Numeric]
+		Name: "*",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			intOperation := func(leftValue int, rightValue int) int {
+				return leftValue * rightValue
+			}
+			floatOperation := func(leftValue float64, rightValue float64) float64 {
+				return leftValue * rightValue
+			}
 
-				int := receiver.(*IntegerObject)
+			return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine, false)
 
-				return t.vm.InitStringObject(strconv.Itoa(int.value))
-
-			},
 		},
-		{
-			// Returns self + 1.
-			//
-			// ```ruby
-			// 100.next # => 101
-			// ```
-			// @return [Integer]
-			Name: "next",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
-				}
+	},
+	{
+		// Returns self squaring another Numeric.
+		//
+		// ```Ruby
+		// 2 ** 8 # => 256
+		// ```
+		// @return [Numeric]
+		Name: "**",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			intOperation := func(leftValue int, rightValue int) int {
+				return int(math.Pow(float64(leftValue), float64(rightValue)))
+			}
+			floatOperation := math.Pow
 
-				i := receiver.(*IntegerObject)
-				return t.vm.InitIntegerObject(i.value + 1)
+			return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine, false)
 
-			},
 		},
-		{
-			// Returns if self is odd.
-			//
-			// ```ruby
-			// 3.odd? # => true
-			// 4.odd? # => false
-			// ```
-			// @return [Boolean]
-			Name: "odd?",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
-				}
+	},
+	{
+		// Returns self divided by another Numeric.
+		//
+		// ```Ruby
+		// 6 / 3 # => 2
+		// ```
+		// @return [Numeric]
+		Name: "/",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
-				i := receiver.(*IntegerObject)
-				odd := i.value%2 != 0
-				if odd {
-					return TRUE
-				}
+			intOperation := func(leftValue int, rightValue int) int {
+				return leftValue / rightValue
+			}
+			floatOperation := func(leftValue float64, rightValue float64) float64 {
+				return leftValue / rightValue
+			}
 
-				return FALSE
+			return receiver.(*IntegerObject).arithmeticOperation(t, args[0], intOperation, floatOperation, sourceLine, true)
 
-			},
 		},
-		{
-			// Returns self - 1.
-			//
-			// ```ruby
-			// 40.pred # => 39
-			// ```
-			// @return [Integer]
-			Name: "pred",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
-				}
+	},
+	{
+		// Returns if self is larger than another Numeric.
+		//
+		// ```Ruby
+		// 10 > -1 # => true
+		// 3 > 3 # => false
+		// ```
+		// @return [Boolean]
+		Name: ">",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			intComparison := func(leftValue int, rightValue int) bool {
+				return leftValue > rightValue
+			}
+			floatComparison := func(leftValue float64, rightValue float64) bool {
+				return leftValue > rightValue
+			}
 
-				i := receiver.(*IntegerObject)
-				return t.vm.InitIntegerObject(i.value - 1)
-
-			},
+			switch arg := args[0].(type) {
+			case *IntegerObject, *FloatObject:
+				return toBooleanObject(receiver.(*IntegerObject).numericComparison(args[0], intComparison, floatComparison))
+			default:
+				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", arg.Class().Name)
+			}
 		},
-		{
-			// Yields a block a number of times equals to self.
-			//
-			// ```Ruby
-			// a = 0
-			// 3.times do
-			//    a += 1
-			// end
-			// a # => 3
-			// ```
-			Name: "times",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
-				}
+	},
+	{
+		// Returns if self is larger than or equals to another Numeric.
+		//
+		// ```Ruby
+		// 2 >= 1 # => true
+		// 1 >= 1 # => true
+		// ```
+		// @return [Boolean]
+		Name: ">=",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			intComparison := func(leftValue int, rightValue int) bool {
+				return leftValue >= rightValue
+			}
+			floatComparison := func(leftValue float64, rightValue float64) bool {
+				return leftValue >= rightValue
+			}
 
-				n := receiver.(*IntegerObject)
+			switch arg := args[0].(type) {
+			case *IntegerObject, *FloatObject:
+				return toBooleanObject(receiver.(*IntegerObject).numericComparison(args[0], intComparison, floatComparison))
+			default:
+				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", arg.Class().Name)
+			}
 
-				if n.value < 0 {
-					return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Expect the receiver to be positive integer. got: %d", n.value)
-				}
-
-				if blockFrame == nil {
-					return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
-				}
-
-				for i := 0; i < n.value; i++ {
-					t.builtinMethodYield(blockFrame, t.vm.InitIntegerObject(i))
-				}
-
-				return n
-
-			},
 		},
-		{
-			Name: "to_int",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+	},
+	{
+		// Returns if self is smaller than another Numeric.
+		//
+		// ```Ruby
+		// 1 < 3 # => true
+		// 1 < 1 # => false
+		// ```
+		// @return [Boolean]
+		Name: "<",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			intComparison := func(leftValue int, rightValue int) bool {
+				return leftValue < rightValue
+			}
+			floatComparison := func(leftValue float64, rightValue float64) bool {
+				return leftValue < rightValue
+			}
+
+			switch arg := args[0].(type) {
+			case *IntegerObject, *FloatObject:
+				return toBooleanObject(receiver.(*IntegerObject).numericComparison(args[0], intComparison, floatComparison))
+			default:
+				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", arg.Class().Name)
+			}
+
+		},
+	},
+	{
+		// Returns if self is smaller than or equals to another Numeric.
+		//
+		// ```Ruby
+		// 1 <= 3 # => true
+		// 1 <= 1 # => true
+		// ```
+		// @return [Boolean]
+		Name: "<=",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			intComparison := func(leftValue int, rightValue int) bool {
+				return leftValue <= rightValue
+			}
+			floatComparison := func(leftValue float64, rightValue float64) bool {
+				return leftValue <= rightValue
+			}
+
+			switch arg := args[0].(type) {
+			case *IntegerObject, *FloatObject:
+				return toBooleanObject(receiver.(*IntegerObject).numericComparison(args[0], intComparison, floatComparison))
+			default:
+				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", arg.Class().Name)
+			}
+
+		},
+	},
+	{
+		// Returns 1 if self is larger than the incoming Numeric, -1 if smaller. Otherwise 0.
+		//
+		// ```Ruby
+		// 1 <=> 3 # => -1
+		// 1 <=> 1 # => 0
+		// 3 <=> 1 # => 1
+		// ```
+		// @return [Integer]
+		Name: "<=>",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			rightObject := args[0]
+
+			switch rightObject := rightObject.(type) {
+			case *IntegerObject:
+				leftValue := receiver.(*IntegerObject).value
+				rightValue := rightObject.value
+
+				if leftValue < rightValue {
+					return t.vm.InitIntegerObject(-1)
+				}
+				if leftValue > rightValue {
+					return t.vm.InitIntegerObject(1)
 				}
 
-				r := receiver.(*IntegerObject)
-				newInt := t.vm.InitIntegerObject(r.value)
-				newInt.flag = i
-				return newInt
+				return t.vm.InitIntegerObject(0)
+			case *FloatObject:
+				leftValue := float64(receiver.(*IntegerObject).value)
+				rightValue := rightObject.value
 
-			},
-		},
-		{
-			Name: "to_int8",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+				if leftValue < rightValue {
+					return t.vm.InitIntegerObject(-1)
+				}
+				if leftValue > rightValue {
+					return t.vm.InitIntegerObject(1)
 				}
 
-				r := receiver.(*IntegerObject)
-				newInt := t.vm.InitIntegerObject(r.value)
-				newInt.flag = i8
-				return newInt
+				return t.vm.InitIntegerObject(0)
+			default:
+				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "Numeric", rightObject.Class().Name)
+			}
 
-			},
 		},
-		{
-			Name: "to_int16",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
-				}
+	},
+	{
+		// Returns if self is equal to an Object.
+		// If the Object is a Numeric, a comparison is performed, otherwise, the
+		// result is always false.
+		//
+		// ```Ruby
+		// 1 == 3   # => false
+		// 1 == 1   # => true
+		// 1 == '1' # => false
+		// ```
+		// @return [Boolean]
+		Name: "==",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			result := receiver.(*IntegerObject).equalityTest(args[0])
 
-				r := receiver.(*IntegerObject)
-				newInt := t.vm.InitIntegerObject(r.value)
-				newInt.flag = i16
-				return newInt
+			return toBooleanObject(result)
 
-			},
 		},
-		{
-			Name: "to_int32",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
-				}
+	},
+	{
+		// Returns if self is not equal to an Object.
+		// If the Object is a Numeric, a comparison is performed, otherwise, the
+		// result is always true.
+		//
+		// ```Ruby
+		// 1 != 3   # => true
+		// 1 != 1   # => false
+		// 1 != '1' # => true
+		// ```
+		// @return [Boolean]
+		Name: "!=",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			result := !receiver.(*IntegerObject).equalityTest(args[0])
 
-				r := receiver.(*IntegerObject)
-				newInt := t.vm.InitIntegerObject(r.value)
-				newInt.flag = i32
-				return newInt
+			return toBooleanObject(result)
 
-			},
 		},
-		{
-			Name: "to_int64",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
-				}
+	},
+	{
+		// Returns if self is even.
+		//
+		// ```Ruby
+		// 1.even? # => false
+		// 2.even? # => true
+		// ```
+		// @return [Boolean]
+		Name: "even?",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+			}
 
-				r := receiver.(*IntegerObject)
-				newInt := t.vm.InitIntegerObject(r.value)
-				newInt.flag = i64
-				return newInt
+			i := receiver.(*IntegerObject)
+			even := i.value%2 == 0
 
-			},
+			if even {
+				return TRUE
+			}
+
+			return FALSE
+
 		},
-		{
-			Name: "to_uint",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
-				}
+	},
+	// Returns the `Decimal` conversion of self.
+	//
+	// ```Ruby
+	// 100.to_d # => '100'.to_d
+	// ```
+	// @return [Decimal]
+	{
+		Name: "to_d",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+			}
 
-				r := receiver.(*IntegerObject)
-				newInt := t.vm.InitIntegerObject(r.value)
-				newInt.flag = ui
-				return newInt
+			r := receiver.(*IntegerObject)
+			return t.vm.initDecimalObject(intToDecimal(r))
 
-			},
 		},
-		{
-			Name: "to_uint8",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
-				}
+	},
+	// Returns the `Float` conversion of self.
+	//
+	// ```Ruby
+	// 100.to_f # => '100.0'.to_f
+	// ```
+	// @return [Float]
+	{
+		Name: "to_f",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+			}
 
-				r := receiver.(*IntegerObject)
-				newInt := t.vm.InitIntegerObject(r.value)
-				newInt.flag = ui8
-				return newInt
+			r := receiver.(*IntegerObject)
+			newFloat := t.vm.initFloatObject(float64(r.value))
+			return newFloat
 
-			},
 		},
-		{
-			Name: "to_uint16",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
-				}
+	},
+	{
+		// Returns self.
+		//
+		// ```Ruby
+		// 100.to_i # => 100
+		// ```
+		// @return [Integer]
+		Name: "to_i",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+			}
 
-				r := receiver.(*IntegerObject)
-				newInt := t.vm.InitIntegerObject(r.value)
-				newInt.flag = ui16
-				return newInt
+			return receiver
 
-			},
 		},
-		{
-			Name: "to_uint32",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
-				}
+	},
+	{
+		// Returns a `String` representation of self.
+		//
+		// ```Ruby
+		// 100.to_s # => "100"
+		// ```
+		// @return [String]
+		Name: "to_s",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+			}
 
-				r := receiver.(*IntegerObject)
-				newInt := t.vm.InitIntegerObject(r.value)
-				newInt.flag = ui32
-				return newInt
+			int := receiver.(*IntegerObject)
 
-			},
+			return t.vm.InitStringObject(strconv.Itoa(int.value))
+
 		},
-		{
-			Name: "to_uint64",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
-				}
+	},
+	{
+		// Returns self + 1.
+		//
+		// ```ruby
+		// 100.next # => 101
+		// ```
+		// @return [Integer]
+		Name: "next",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+			}
 
-				r := receiver.(*IntegerObject)
-				newInt := t.vm.InitIntegerObject(r.value)
-				newInt.flag = ui64
-				return newInt
+			i := receiver.(*IntegerObject)
+			return t.vm.InitIntegerObject(i.value + 1)
 
-			},
 		},
-		{
-			Name: "to_float32",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
-				}
+	},
+	{
+		// Returns if self is odd.
+		//
+		// ```ruby
+		// 3.odd? # => true
+		// 4.odd? # => false
+		// ```
+		// @return [Boolean]
+		Name: "odd?",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+			}
 
-				r := receiver.(*IntegerObject)
-				newInt := t.vm.InitIntegerObject(r.value)
-				newInt.flag = f32
-				return newInt
+			i := receiver.(*IntegerObject)
+			odd := i.value%2 != 0
+			if odd {
+				return TRUE
+			}
 
-			},
+			return FALSE
+
 		},
-		{
-			Name: "to_float64",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
-				}
+	},
+	{
+		// Returns self - 1.
+		//
+		// ```ruby
+		// 40.pred # => 39
+		// ```
+		// @return [Integer]
+		Name: "pred",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+			}
 
-				r := receiver.(*IntegerObject)
-				newInt := t.vm.InitIntegerObject(r.value)
-				newInt.flag = f64
-				return newInt
+			i := receiver.(*IntegerObject)
+			return t.vm.InitIntegerObject(i.value - 1)
 
-			},
 		},
-		{
-			Name: "ptr",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 0 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
-				}
+	},
+	{
+		// Yields a block a number of times equals to self.
+		//
+		// ```Ruby
+		// a = 0
+		// 3.times do
+		//    a += 1
+		// end
+		// a # => 3
+		// ```
+		Name: "times",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+			}
 
-				r := receiver.(*IntegerObject)
-				return t.vm.initGoObject(&r.value)
+			n := receiver.(*IntegerObject)
 
-			},
+			if n.value < 0 {
+				return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Expect the receiver to be positive integer. got: %d", n.value)
+			}
+
+			if blockFrame == nil {
+				return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+			}
+
+			for i := 0; i < n.value; i++ {
+				t.builtinMethodYield(blockFrame, t.vm.InitIntegerObject(i))
+			}
+
+			return n
+
 		},
-	}
+	},
+	{
+		Name: "to_int",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+			}
+
+			r := receiver.(*IntegerObject)
+			newInt := t.vm.InitIntegerObject(r.value)
+			newInt.flag = i
+			return newInt
+
+		},
+	},
+	{
+		Name: "to_int8",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+			}
+
+			r := receiver.(*IntegerObject)
+			newInt := t.vm.InitIntegerObject(r.value)
+			newInt.flag = i8
+			return newInt
+
+		},
+	},
+	{
+		Name: "to_int16",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+			}
+
+			r := receiver.(*IntegerObject)
+			newInt := t.vm.InitIntegerObject(r.value)
+			newInt.flag = i16
+			return newInt
+
+		},
+	},
+	{
+		Name: "to_int32",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+			}
+
+			r := receiver.(*IntegerObject)
+			newInt := t.vm.InitIntegerObject(r.value)
+			newInt.flag = i32
+			return newInt
+
+		},
+	},
+	{
+		Name: "to_int64",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+			}
+
+			r := receiver.(*IntegerObject)
+			newInt := t.vm.InitIntegerObject(r.value)
+			newInt.flag = i64
+			return newInt
+
+		},
+	},
+	{
+		Name: "to_uint",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+			}
+
+			r := receiver.(*IntegerObject)
+			newInt := t.vm.InitIntegerObject(r.value)
+			newInt.flag = ui
+			return newInt
+
+		},
+	},
+	{
+		Name: "to_uint8",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+			}
+
+			r := receiver.(*IntegerObject)
+			newInt := t.vm.InitIntegerObject(r.value)
+			newInt.flag = ui8
+			return newInt
+
+		},
+	},
+	{
+		Name: "to_uint16",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+			}
+
+			r := receiver.(*IntegerObject)
+			newInt := t.vm.InitIntegerObject(r.value)
+			newInt.flag = ui16
+			return newInt
+
+		},
+	},
+	{
+		Name: "to_uint32",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+			}
+
+			r := receiver.(*IntegerObject)
+			newInt := t.vm.InitIntegerObject(r.value)
+			newInt.flag = ui32
+			return newInt
+
+		},
+	},
+	{
+		Name: "to_uint64",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+			}
+
+			r := receiver.(*IntegerObject)
+			newInt := t.vm.InitIntegerObject(r.value)
+			newInt.flag = ui64
+			return newInt
+
+		},
+	},
+	{
+		Name: "to_float32",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+			}
+
+			r := receiver.(*IntegerObject)
+			newInt := t.vm.InitIntegerObject(r.value)
+			newInt.flag = f32
+			return newInt
+
+		},
+	},
+	{
+		Name: "to_float64",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+			}
+
+			r := receiver.(*IntegerObject)
+			newInt := t.vm.InitIntegerObject(r.value)
+			newInt.flag = f64
+			return newInt
+
+		},
+	},
+	{
+		Name: "ptr",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+			}
+
+			r := receiver.(*IntegerObject)
+			return t.vm.initGoObject(&r.value)
+
+		},
+	},
 }
 
 // Internal functions ===================================================
@@ -750,8 +746,8 @@ func (vm *VM) InitIntegerObject(value int) *IntegerObject {
 
 func (vm *VM) initIntegerClass() *RClass {
 	ic := vm.initializeClass(classes.IntegerClass)
-	ic.setBuiltinMethods(builtinIntegerInstanceMethods(), false)
-	ic.setBuiltinMethods(builtinIntegerClassMethods(), true)
+	ic.setBuiltinMethods(builtinIntegerInstanceMethods, false)
+	ic.setBuiltinMethods(builtinIntegerClassMethods, true)
 	return ic
 }
 

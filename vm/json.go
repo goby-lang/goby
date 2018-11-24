@@ -10,89 +10,85 @@ import (
 type jsonObj map[string]interface{}
 
 // Class methods --------------------------------------------------------
-func builtinJSONClassMethods() []*BuiltinMethodObject {
-	return []*BuiltinMethodObject{
-		{
-			Name: "parse",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 1 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
-				}
+var builtinJSONClassMethods = []*BuiltinMethodObject{
+	{
+		Name: "parse",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 1 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
+			}
 
-				j, ok := args[0].(*StringObject)
+			j, ok := args[0].(*StringObject)
 
-				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
-				}
+			if !ok {
+				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			}
 
-				var obj jsonObj
-				var objs []jsonObj
+			var obj jsonObj
+			var objs []jsonObj
 
-				jsonString := j.value
+			jsonString := j.value
 
-				err := json.Unmarshal([]byte(jsonString), &obj)
+			err := json.Unmarshal([]byte(jsonString), &obj)
+
+			if err != nil {
+				err = json.Unmarshal([]byte(jsonString), &objs)
 
 				if err != nil {
-					err = json.Unmarshal([]byte(jsonString), &objs)
-
-					if err != nil {
-						return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Can't parse string `%s` as json: %s", jsonString, err.Error())
-					}
-
-					var objects []Object
-
-					for _, obj := range objs {
-						objects = append(objects, t.vm.convertJSONToHashObj(obj))
-					}
-
-					return t.vm.InitArrayObject(objects)
+					return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Can't parse string `%s` as json: %s", jsonString, err.Error())
 				}
 
-				return t.vm.convertJSONToHashObj(obj)
+				var objects []Object
 
-			},
+				for _, obj := range objs {
+					objects = append(objects, t.vm.convertJSONToHashObj(obj))
+				}
+
+				return t.vm.InitArrayObject(objects)
+			}
+
+			return t.vm.convertJSONToHashObj(obj)
+
 		},
-		{
-			Name: "validate",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if len(args) != 1 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
-				}
+	},
+	{
+		Name: "validate",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 1 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
+			}
 
-				j, ok := args[0].(*StringObject)
+			j, ok := args[0].(*StringObject)
 
-				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
-				}
+			if !ok {
+				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			}
 
-				var obj jsonObj
-				var objs []jsonObj
+			var obj jsonObj
+			var objs []jsonObj
 
-				jsonString := j.value
+			jsonString := j.value
 
-				err := json.Unmarshal([]byte(jsonString), &obj)
+			err := json.Unmarshal([]byte(jsonString), &obj)
+
+			if err != nil {
+				err = json.Unmarshal([]byte(jsonString), &objs)
 
 				if err != nil {
-					err = json.Unmarshal([]byte(jsonString), &objs)
-
-					if err != nil {
-						return FALSE
-					}
-
-					return TRUE
+					return FALSE
 				}
 
 				return TRUE
+			}
 
-			},
+			return TRUE
+
 		},
-	}
+	},
 }
 
 // Instance methods -----------------------------------------------------
-func builtinJSONInstanceMethods() []*BuiltinMethodObject {
-	return []*BuiltinMethodObject{}
-}
+var builtinJSONInstanceMethods = []*BuiltinMethodObject{}
 
 // Internal functions ===================================================
 
@@ -100,8 +96,8 @@ func builtinJSONInstanceMethods() []*BuiltinMethodObject {
 
 func initJSONClass(vm *VM) {
 	class := vm.initializeClass("JSON")
-	class.setBuiltinMethods(builtinJSONClassMethods(), true)
-	class.setBuiltinMethods(builtinJSONInstanceMethods(), false)
+	class.setBuiltinMethods(builtinJSONClassMethods, true)
+	class.setBuiltinMethods(builtinJSONInstanceMethods, false)
 	vm.objectClass.setClassConstant(class)
 }
 
