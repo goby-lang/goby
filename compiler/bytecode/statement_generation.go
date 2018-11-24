@@ -81,10 +81,18 @@ func (g *Generator) compileWhileStmt(is *InstructionSet, stmt *ast.WhileStatemen
 
 	anchor2 := &anchor{is.count}
 
+	// we need to save the achors for this scope
+	outerNextAnchor := scope.anchors["next"]
+	outerBreakAnchor := scope.anchors["break"]
+
 	scope.anchors["next"] = anchor1
 	scope.anchors["break"] = breakAnchor
 
 	g.compileCodeBlock(is, stmt.Body, scope, table)
+
+	// replace
+	scope.anchors["next"] = outerNextAnchor
+	scope.anchors["break"] = outerBreakAnchor
 
 	anchor1.line = is.count
 
