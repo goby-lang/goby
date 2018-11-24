@@ -22,11 +22,11 @@ type instructionSet struct {
 	paramTypes   *bytecode.ArgSet
 }
 
-var operations map[operationType]operation
+var operations [bytecode.InstructionCount]operation
 
 // This is for avoiding initialization loop
 func init() {
-	operations = map[operationType]operation{
+	operations = [bytecode.InstructionCount]operation{
 		bytecode.Pop: func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			t.Stack.Pop()
 		},

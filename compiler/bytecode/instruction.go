@@ -45,6 +45,7 @@ const (
 	Pop
 	Dup
 	Leave
+	InstructionCount
 )
 
 // InstructionNameTable is the table the maps instruction's op code with its readable name
