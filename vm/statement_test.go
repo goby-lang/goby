@@ -39,6 +39,25 @@ func TestBreakStatement(t *testing.T) {
 		{`
 		x = [1, 2, 3]
 		y = 0
+		sum = 0
+		
+		while y < 3 do
+			x.each do |i|
+				sum += i * y
+			end
+
+			if sum > 6
+				break
+			end
+
+			y = y + 1
+		end
+		
+		sum
+		`, 18},
+		{`
+		x = [1, 2, 3]
+		y = 0
 		
 		while y < 10 do
 		  x.each do |i|
@@ -72,6 +91,32 @@ func TestBreakStatement(t *testing.T) {
 		a = i * 10
 		a + 100
 				`, 310},
+		{`
+		x = 0
+		y = 0
+		i = 0
+
+		while x < 10 do
+		  x = x + 1
+		  while y < 5 do
+			y = y + 1
+		  end
+
+			if y == 3
+			  break
+			end
+
+			i = i + x * y
+
+		  if x > 5
+		    break
+		  end
+
+		end
+
+		a = i * 10
+		a + 100
+				`, 1150},
 	}
 
 	for i, tt := range tests {
