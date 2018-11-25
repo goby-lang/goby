@@ -89,9 +89,9 @@ func println(s ...string) {
 // StartIgb starts goby's REPL.
 func StartIgb(version string) {
 	openDoubleQuote, _ := regexp2.Compile("(?<!\"[^\"]*?\")\"[^\"]+?$", 0)
-	closedDoubleQuote, _ := regexp2.Compile("^[^\"]*?\"(?!\"[^\"]*?\")", 0)
+	closedDoubleQuote, _ := regexp2.Compile("^[^\"\n]*\"([^\"\n]*\"[^\"\n]*\"[^\"\n]*)*$", 0)
 	openSingleQuote, _ := regexp2.Compile("(?<!'[^']*?')'[^']+?$", 0)
-	closedSingleQuote, _ := regexp2.Compile("^[^']*?'(?!'[^']*?')", 0)
+	closedSingleQuote, _ := regexp2.Compile("^[^'\n]*'([^'\n]*'[^'\n]*'[^'\n]*)*$", 0)
 
 reset:
 	var err error
