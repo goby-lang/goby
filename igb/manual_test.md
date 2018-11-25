@@ -49,7 +49,7 @@ Currently we are unable to perform automated tests against REPL. Follow the step
     Bye!
     ```
 
-### 2. trailing `;` feature for supressing echo back
+### 2. trailing `;` feature for suppressing echo back
 
 1. type a statement with a trailing `;`
     * expect: echo back is suppressed:
@@ -246,4 +246,37 @@ Currently we are unable to perform automated tests against REPL. Follow the step
     » x + y
     #» 19
     »
+    ```
+
+### 7. Handling multiple line quotation
+
+    * expect: treats multiple line double quotation including single quotes 
+    ```ruby
+    » if true
+    ¤   if true
+    ¤     puts "a", "a
+    ¤ b's
+    ¤ c"
+    ¤   end
+    » end
+    a
+    a
+    b
+    c
+    #»
+    ```
+
+    * expect: treats multiple line single quotation including double quotes 
+    ```ruby
+    » if true
+    ¤   if true
+    ¤     puts 'a', 'a
+    ¤ b "c"
+    ¤ c'
+    ¤   end
+    » end
+    a
+    b
+    c
+    #»
     ```
