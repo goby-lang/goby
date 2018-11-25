@@ -231,6 +231,7 @@ reset:
 				println(prompt2 + indent(igb.indents) + igb.lines)
 				igb.indents++
 				igb.cmds = append(igb.cmds, igb.lines)
+				igb.rl.SetPrompt(prompt2 + indent(igb.indents))
 				igb.sm.Event(Waiting)
 				igb.caseBlock = true
 				continue
@@ -361,10 +362,11 @@ func handleParserError(e *parserErr.Error, igb *iGb) {
 func (igb *iGb) continueMultiLineQuote(cdq bool) bool {
 	if cdq { // end multi-line double quote
 		igb.qsm.Event(NoMultiLineQuote)
-		if igb.nqsm.Is(NestedQuote) { // end nested-quote and continue
-			igb.cmds = append(igb.cmds, igb.lines)
-			println(prompt2 + igb.lines)
+		if igb.nqsm.Is(NestedQuote) { // end nested-quote
 			igb.nqsm.Event(NoNestedQuote)
+			igb.cmds = append(igb.cmds, igb.lines)
+			println(prompt(igb.indents) + igb.lines)
+			igb.rl.SetPrompt(prompt2 + indent(igb.indents))
 			return true
 		} else { // exit multi-line double quote
 			igb.cmds = append(igb.cmds, igb.lines)
