@@ -11,8 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dlclark/regexp2"
-
 	parserErr "github.com/goby-lang/goby/compiler/parser/errors"
 
 	"github.com/chzyer/readline"
@@ -88,10 +86,6 @@ func println(s ...string) {
 
 // StartIgb starts goby's REPL.
 func StartIgb(version string) {
-	openDoubleQuote, _ := regexp2.Compile("(?<!\"[^\"]*?\")\"[^\"]+?$", 0)
-	closedDoubleQuote, _ := regexp2.Compile("^[^\"\n]*\"([^\"\n]*\"[^\"\n]*\"[^\"\n]*)*$", 0)
-	openSingleQuote, _ := regexp2.Compile("(?<!'[^']*?')'[^']+?$", 0)
-	closedSingleQuote, _ := regexp2.Compile("^[^'\n]*'([^'\n]*'[^'\n]*'[^'\n]*)*$", 0)
 
 reset:
 	var err error
@@ -148,30 +142,29 @@ reset:
 		}
 
 		// Multi-line quotation handling
+		dq := checkDoubleQuoteOpen(igb.lines)
+		sq := checkSingleQuoteOpen(igb.lines)
+
 		switch {
 		case igb.qsm.Is(NoMultiLineQuote):
-			odq, _ := openDoubleQuote.MatchString(igb.lines)
-			osq, _ := openSingleQuote.MatchString(igb.lines)
 			switch {
-			case odq: // start multi-line double quote
+			case dq: // start multi-line double quote
 				igb.qsm.Event(MultiLineDoubleQuote)
 				igb.startMultiLineQuote()
 				continue
-			case osq: // start multi-line single quote
+			case sq: // start multi-line single quote
 				igb.qsm.Event(MultiLineSingleQuote)
 				igb.startMultiLineQuote()
 				continue
 			}
 
 		case igb.qsm.Is(MultiLineDoubleQuote):
-			cdq, _ := closedDoubleQuote.MatchString(igb.lines)
-			if igb.continueMultiLineQuote(cdq) {
+			if igb.continueMultiLineQuote(dq) {
 				continue
 			}
 
 		case igb.qsm.Is(MultiLineSingleQuote):
-			cdq, _ := closedSingleQuote.MatchString(igb.lines)
-			if igb.continueMultiLineQuote(cdq) {
+			if igb.continueMultiLineQuote(sq) {
 				continue
 			}
 		}
@@ -511,6 +504,24 @@ func newIVM() (ivm iVM, err error) {
 	ivm.g.REPL = true
 	ivm.g.InitTopLevelScope(program)
 	return ivm, nil
+}
+
+// Returns true if double quotation in the string is open.
+func checkDoubleQuoteOpen(s string) bool {
+	s = strings.Replace(s, "\\\"", "", -1)
+	if strings.Count(s, "\"")%2 == 1 {
+		return true
+	}
+	return false
+}
+
+// Returns true if single quotation in the string is open.
+func checkSingleQuoteOpen(s string) bool {
+	s = strings.Replace(s, "\\'", "", -1)
+	if strings.Count(s, "'")%2 == 1 {
+		return true
+	}
+	return false
 }
 
 // prompt switches prompt sign.
