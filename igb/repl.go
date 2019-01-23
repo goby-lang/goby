@@ -2,6 +2,7 @@ package igb
 
 import (
 	"fmt"
+	"github.com/dlclark/regexp2"
 	"io"
 	"log"
 	"math/rand"
@@ -508,8 +509,12 @@ func newIVM() (ivm iVM, err error) {
 
 // Returns true if double quotation in the string is open.
 func checkDoubleQuoteOpen(s string) bool {
+	openDoubleQuote, _ := regexp2.Compile(`^[^']*"`, 0)
+
 	s = strings.Replace(s, "\\\"", "", -1)
-	if strings.Count(s, "\"")%2 == 1 {
+	s = strings.Replace(s, "\\'", "", -1)
+	od, _ := openDoubleQuote.MatchString(s)
+	if strings.Count(s, "\"")%2 == 1 && od {
 		return true
 	}
 	return false
@@ -517,8 +522,12 @@ func checkDoubleQuoteOpen(s string) bool {
 
 // Returns true if single quotation in the string is open.
 func checkSingleQuoteOpen(s string) bool {
+	openSingleQuote, _ := regexp2.Compile(`^[^"]*'`, 0)
+
+	s = strings.Replace(s, "\\\"", "", -1)
 	s = strings.Replace(s, "\\'", "", -1)
-	if strings.Count(s, "'")%2 == 1 {
+	sd, _ := openSingleQuote.MatchString(s)
+	if strings.Count(s, "'")%2 == 1 && sd {
 		return true
 	}
 	return false

@@ -250,7 +250,7 @@ Currently we are unable to perform automated tests against REPL. Follow the step
 
 ### 7. Handling multiple line quotation
 
-    * expect: treats multiple line double quotation including single quotes 
+    * expect: treats multiple line double quotation including single quotes
     ```ruby
     » if true
     ¤   if true
@@ -261,12 +261,39 @@ Currently we are unable to perform automated tests against REPL. Follow the step
     » end
     a
     a
-    b
+    b's
     c
     #»
     ```
 
-    * expect: treats multiple line single quotation including double quotes 
+    * expect: treats multiple line double quotation including an open single quotes
+    ```ruby
+    » puts "a", "b'
+    ¤ c
+    ¤ d'
+    ¤ e'
+    » f"
+    a
+    b'
+    c
+    d'
+    e'
+    f
+    #»
+
+    » puts "a", "'b
+    ¤ d
+    ¤ b'
+    » e"
+    a
+    'b
+    d
+    b'
+    e
+    #»
+    ```
+
+    * expect: treats multiple line single quotation including double quotes
     ```ruby
     » if true
     ¤   if true
@@ -276,7 +303,30 @@ Currently we are unable to perform automated tests against REPL. Follow the step
     ¤   end
     » end
     a
-    b
+    a
+    b "c"
     c
+    #»
+    ```
+
+    * expect: treats multiple line single quotation including an open double quote
+    ```ruby
+    » puts 'a
+    ¤ b"
+    » c'
+    a
+    b"
+    c
+    #»
+
+    » puts 'b', '"c
+    ¤ d
+    ¤ e"
+    » d'
+    b
+    "c
+    d
+    e"
+    d
     #»
     ```
