@@ -410,8 +410,7 @@ func (igb *iGb) startMultiLineQuote() {
 
 // filterInput just ignores Ctrl-z.
 func filterInput(r rune) (rune, bool) {
-	switch r {
-	case readline.CharCtrlZ:
+	if r == readline.CharCtrlZ {
 		return r, false
 	}
 	return r, true
