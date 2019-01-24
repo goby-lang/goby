@@ -362,11 +362,6 @@ func (igb *iGb) continueMultiLineQuote(cdq bool) bool {
 			println(prompt(igb.indents) + igb.lines)
 			igb.rl.SetPrompt(prompt2 + indent(igb.indents))
 			return true
-		} else { // exit multi-line double quote
-			igb.cmds = append(igb.cmds, igb.lines)
-			igb.rl.SetPrompt(prompt1)
-			igb.sm.Event(waitEnded)
-			return false
 		}
 	} else { // continue multi-line double quote
 		println(prompt2 + igb.lines)
@@ -374,6 +369,11 @@ func (igb *iGb) continueMultiLineQuote(cdq bool) bool {
 		igb.cmds = append(igb.cmds, igb.lines)
 		return true
 	}
+	// exit multi-line double quote
+	igb.cmds = append(igb.cmds, igb.lines)
+	igb.rl.SetPrompt(prompt1)
+	igb.sm.Event(waitEnded)
+	return false
 }
 
 func (igb *iGb) eraseBuffer() {
