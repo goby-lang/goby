@@ -173,20 +173,20 @@ reset:
 		// Command handling
 		switch {
 		case strings.HasPrefix(igb.lines, "#"):
-			println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
+			println(switchPrompt(igb.indents) + indent(igb.indents) + igb.lines)
 			continue
 		case igb.lines == help:
-			println(prompt(igb.indents) + igb.lines)
+			println(switchPrompt(igb.indents) + igb.lines)
 			usage(igb.rl.Stderr(), igb.completer)
 			continue
 		case igb.lines == reset:
 			igb.rl = nil
 			igb.cmds = nil
-			println(prompt(igb.indents) + igb.lines)
+			println(switchPrompt(igb.indents) + igb.lines)
 			println("Restarting iGb...")
 			goto reset
 		case igb.lines == "":
-			println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
+			println(switchPrompt(igb.indents) + indent(igb.indents) + igb.lines)
 			continue
 		}
 
@@ -207,7 +207,7 @@ reset:
 
 			// To handle 'case'
 			case pErr.IsUnexpectedCase():
-				println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
+				println(switchPrompt(igb.indents) + indent(igb.indents) + igb.lines)
 				igb.rl.SetPrompt(prompt2 + indent(igb.indents))
 				igb.cmds = append(igb.cmds, igb.lines)
 				igb.sm.Event(waiting)
@@ -242,7 +242,7 @@ reset:
 			case pErr.IsUnexpectedEmptyLine(len(igb.cmds)):
 				// If igb.cmds is empty, it means that user just typed 'end' without corresponding statement/expression
 				println("exceptEmptyLine")
-				println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
+				println(switchPrompt(igb.indents) + indent(igb.indents) + igb.lines)
 				igb.rl.SetPrompt(prompt1)
 				fmt.Println(pErr.Message)
 				igb.eraseBuffer()
@@ -252,11 +252,11 @@ reset:
 			case pErr.IsUnexpectedEnd():
 				if igb.indents > 1 {
 					igb.indents--
-					println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
+					println(switchPrompt(igb.indents) + indent(igb.indents) + igb.lines)
 					if igb.caseBlock {
 						igb.indents++
 					}
-					igb.rl.SetPrompt(prompt(igb.indents) + indent(igb.indents))
+					igb.rl.SetPrompt(switchPrompt(igb.indents) + indent(igb.indents))
 					igb.cmds = append(igb.cmds, igb.lines)
 					igb.sm.Event(waiting)
 					igb.caseBlock = false
@@ -266,7 +266,7 @@ reset:
 
 				// Exiting error handling
 				igb.indents = 0
-				igb.rl.SetPrompt(prompt(igb.indents) + indent(igb.indents))
+				igb.rl.SetPrompt(switchPrompt(igb.indents) + indent(igb.indents))
 				igb.cmds = append(igb.cmds, igb.lines)
 				igb.sm.Event(waitEnded)
 				igb.caseBlock = false
@@ -286,8 +286,8 @@ reset:
 
 			// Still indented
 			if igb.indents > 0 {
-				println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
-				igb.rl.SetPrompt(prompt(igb.indents) + indent(igb.indents))
+				println(switchPrompt(igb.indents) + indent(igb.indents) + igb.lines)
+				igb.rl.SetPrompt(switchPrompt(igb.indents) + indent(igb.indents))
 				igb.cmds = append(igb.cmds, igb.lines)
 				continue
 			}
@@ -307,13 +307,13 @@ reset:
 			}
 
 			// If everything goes well, reset state and statements buffer
-			igb.rl.SetPrompt(prompt(igb.indents))
+			igb.rl.SetPrompt(switchPrompt(igb.indents))
 			igb.sm.Event(readyToExec)
 		}
 
 		// Execute the lines
 		if igb.sm.Is(readyToExec) {
-			println(prompt(igb.indents) + igb.lines)
+			println(switchPrompt(igb.indents) + igb.lines)
 
 			if pErr != nil {
 				handleParserError(pErr, igb)
@@ -346,7 +346,7 @@ func handleParserError(e *parserErr.Error, igb *iGb) {
 		if !e.IsEOF() {
 			fmt.Println(e.Message)
 		}
-		println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
+		println(switchPrompt(igb.indents) + indent(igb.indents) + igb.lines)
 	}
 }
 
@@ -359,7 +359,7 @@ func (igb *iGb) continueMultiLineQuote(cdq bool) bool {
 		if igb.nqsm.Is(nestedQuote) { // end nested-quote
 			igb.nqsm.Event(noNestedQuote)
 			igb.cmds = append(igb.cmds, igb.lines)
-			println(prompt(igb.indents) + igb.lines)
+			println(switchPrompt(igb.indents) + igb.lines)
 			igb.rl.SetPrompt(prompt2 + indent(igb.indents))
 			return true
 		}
@@ -388,9 +388,9 @@ func (igb *iGb) eraseBuffer() {
 
 // Prints and add an indent.
 func (igb *iGb) printLineAndIndentRight() {
-	println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
+	println(switchPrompt(igb.indents) + indent(igb.indents) + igb.lines)
 	igb.indents++
-	igb.rl.SetPrompt(prompt(igb.indents) + indent(igb.indents))
+	igb.rl.SetPrompt(switchPrompt(igb.indents) + indent(igb.indents))
 	igb.cmds = append(igb.cmds, igb.lines)
 }
 
@@ -402,7 +402,7 @@ func (igb *iGb) startMultiLineQuote() {
 		igb.sm.Event(waiting)
 	}
 	igb.cmds = append(igb.cmds, igb.lines)
-	println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
+	println(switchPrompt(igb.indents) + indent(igb.indents) + igb.lines)
 	igb.rl.SetPrompt(prompt2)
 }
 
@@ -511,8 +511,7 @@ func newIVM() (ivm iVM, err error) {
 func checkDoubleQuoteOpen(s string) bool {
 	openDoubleQuote, _ := regexp2.Compile(`^[^']*"`, 0)
 
-	s = strings.Replace(s, "\\\"", "", -1)
-	s = strings.Replace(s, "\\'", "", -1)
+	s = removeEscapedQuotes(s)
 	od, _ := openDoubleQuote.MatchString(s)
 	if strings.Count(s, "\"")%2 == 1 && od {
 		return true
@@ -524,8 +523,7 @@ func checkDoubleQuoteOpen(s string) bool {
 func checkSingleQuoteOpen(s string) bool {
 	openSingleQuote, _ := regexp2.Compile(`^[^"]*'`, 0)
 
-	s = strings.Replace(s, "\\\"", "", -1)
-	s = strings.Replace(s, "\\'", "", -1)
+	s = removeEscapedQuotes(s)
 	sd, _ := openSingleQuote.MatchString(s)
 	if strings.Count(s, "'")%2 == 1 && sd {
 		return true
@@ -533,8 +531,14 @@ func checkSingleQuoteOpen(s string) bool {
 	return false
 }
 
-// prompt switches prompt sign.
-func prompt(s int) string {
+func removeEscapedQuotes(s string) string {
+	s = strings.Replace(s, "\\\"", "", -1)
+	s = strings.Replace(s, "\\'", "", -1)
+	return s
+}
+
+// switchPrompt switches the prompt sign.
+func switchPrompt(s int) string {
 	if s > 0 {
 		return prompt2
 	}
