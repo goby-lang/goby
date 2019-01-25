@@ -231,6 +231,7 @@ reset:
 				continue
 
 			// To handle such as 'else' or 'elsif'
+			// The prompt should be `¤` even on the top level indentation when the line is `else` or `elif` or like that
 			case pErr.IsUnexpectedToken():
 				println(prompt2 + indent(igb.indents-1) + igb.lines)
 				igb.rl.SetPrompt(prompt2 + indent(igb.indents))
