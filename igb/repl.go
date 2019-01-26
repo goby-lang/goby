@@ -143,8 +143,8 @@ reset:
 		}
 
 		// Multi-line quotation handling
-		dq := checkDoubleQuoteOpen(igb.lines)
-		sq := checkSingleQuoteOpen(igb.lines)
+		dq := checkOpenQuotes(igb.lines, `"`, `'`)
+		sq := checkOpenQuotes(igb.lines, `'`, `"`)
 
 		switch {
 		case igb.qsm.Is(noMultiLineQuote):
@@ -507,34 +507,17 @@ func newIVM() (ivm iVM, err error) {
 	return ivm, nil
 }
 
-// Returns true if double quotation in the string is open.
-func checkDoubleQuoteOpen(s string) bool {
-	openDoubleQuote, _ := regexp2.Compile(`^[^']*"`, 0)
+// Returns true if the specified quotation in the string is open.
+func checkOpenQuotes(s, open, ignore string) bool {
+	s = strings.Replace(s, `\\"`, "", -1)
+	s = strings.Replace(s, `\\'`, "", -1)
 
-	s = removeEscapedQuotes(s)
-	od, _ := openDoubleQuote.MatchString(s)
-	if strings.Count(s, "\"")%2 == 1 && od {
+	rq, _ := regexp2.Compile(`^[^`+ignore+`]*`+open, 0)
+	isOpen, _ := rq.MatchString(s)
+	if strings.Count(s, open)%2 == 1 && isOpen {
 		return true
 	}
 	return false
-}
-
-// Returns true if single quotation in the string is open.
-func checkSingleQuoteOpen(s string) bool {
-	openSingleQuote, _ := regexp2.Compile(`^[^"]*'`, 0)
-
-	s = removeEscapedQuotes(s)
-	sd, _ := openSingleQuote.MatchString(s)
-	if strings.Count(s, "'")%2 == 1 && sd {
-		return true
-	}
-	return false
-}
-
-func removeEscapedQuotes(s string) string {
-	s = strings.Replace(s, "\\\"", "", -1)
-	s = strings.Replace(s, "\\'", "", -1)
-	return s
 }
 
 // switchPrompt switches the prompt sign.
