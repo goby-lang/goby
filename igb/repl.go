@@ -2,6 +2,7 @@ package igb
 
 import (
 	"fmt"
+	"github.com/dlclark/regexp2"
 	"io"
 	"log"
 	"math/rand"
@@ -35,9 +36,16 @@ const (
 	reset     = "reset"
 
 	readyToExec = "readyToExec"
-	Waiting     = "waiting"
+	waiting     = "waiting"
 	waitEnded   = "waitEnded"
 	waitExited  = "waitExited"
+
+	noMultiLineQuote     = "noMultiLineQuote"
+	multiLineDoubleQuote = "multiLineDoubleQuote"
+	multiLineSingleQuote = "multiLineSingleQuote"
+
+	noNestedQuote = "noNestedQuote"
+	nestedQuote   = "nestedQuote"
 
 	emojis = "😀😁😂🤣😃😄😅😆😉😊😋😎😍😘😗😙😚🙂🤗🤔😐😑😶🙄😏😮😪😴😌😛😜😝🤤🙃🤑😲😭😳🤧😇🤠🤡🤥🤓😈👿👹👺💀👻👽🤖💩😺😸😹😻😼😽"
 )
@@ -45,6 +53,8 @@ const (
 // iGb holds internal states of iGb.
 type iGb struct {
 	sm        *fsm.FSM
+	qsm       *fsm.FSM
+	nqsm      *fsm.FSM
 	rl        *readline.Instance
 	completer *readline.PrefixCompleter
 	lines     string
@@ -77,6 +87,7 @@ func println(s ...string) {
 
 // StartIgb starts goby's REPL.
 func StartIgb(version string) {
+
 reset:
 	var err error
 	igb := newIgb()
@@ -125,13 +136,36 @@ reset:
 					}
 				}
 				// Erasing command buffer
-				igb.indents = 0
-				igb.rl.SetPrompt(prompt1)
-				igb.sm.Event(waitExited)
-				igb.cmds = nil
-				igb.caseBlock = false
-				igb.firstWhen = false
+				igb.eraseBuffer()
 				println(" -- block cleared")
+				continue
+			}
+		}
+
+		// Multi-line quotation handling
+		dq := checkOpenQuotes(igb.lines, `"`, `'`)
+		sq := checkOpenQuotes(igb.lines, `'`, `"`)
+
+		switch {
+		case igb.qsm.Is(noMultiLineQuote):
+			switch {
+			case dq: // start multi-line double quote
+				igb.qsm.Event(multiLineDoubleQuote)
+				igb.startMultiLineQuote()
+				continue
+			case sq: // start multi-line single quote
+				igb.qsm.Event(multiLineSingleQuote)
+				igb.startMultiLineQuote()
+				continue
+			}
+
+		case igb.qsm.Is(multiLineDoubleQuote):
+			if igb.continueMultiLineQuote(dq) {
+				continue
+			}
+
+		case igb.qsm.Is(multiLineSingleQuote):
+			if igb.continueMultiLineQuote(sq) {
 				continue
 			}
 		}
@@ -139,20 +173,20 @@ reset:
 		// Command handling
 		switch {
 		case strings.HasPrefix(igb.lines, "#"):
-			println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
+			println(switchPrompt(igb.indents) + indent(igb.indents) + igb.lines)
 			continue
 		case igb.lines == help:
-			println(prompt(igb.indents) + igb.lines)
+			println(switchPrompt(igb.indents) + igb.lines)
 			usage(igb.rl.Stderr(), igb.completer)
 			continue
 		case igb.lines == reset:
 			igb.rl = nil
 			igb.cmds = nil
-			println(prompt(igb.indents) + igb.lines)
+			println(switchPrompt(igb.indents) + igb.lines)
 			println("Restarting iGb...")
 			goto reset
 		case igb.lines == "":
-			println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
+			println(switchPrompt(igb.indents) + indent(igb.indents) + igb.lines)
 			continue
 		}
 
@@ -165,21 +199,18 @@ reset:
 
 			// To handle beginning of a block
 			case pErr.IsEOF():
-				if !igb.sm.Is(Waiting) {
-					igb.sm.Event(Waiting)
+				if !igb.sm.Is(waiting) {
+					igb.sm.Event(waiting)
 				}
-				println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
-				igb.indents++
-				igb.rl.SetPrompt(prompt(igb.indents) + indent(igb.indents))
-				igb.cmds = append(igb.cmds, igb.lines)
+				igb.printLineAndIndentRight()
 				continue
 
 			// To handle 'case'
 			case pErr.IsUnexpectedCase():
-				println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
-				igb.sm.Event(Waiting)
+				println(switchPrompt(igb.indents) + indent(igb.indents) + igb.lines)
 				igb.rl.SetPrompt(prompt2 + indent(igb.indents))
 				igb.cmds = append(igb.cmds, igb.lines)
+				igb.sm.Event(waiting)
 				igb.caseBlock = true
 				igb.firstWhen = true
 				continue
@@ -193,44 +224,42 @@ reset:
 				}
 				println(prompt2 + indent(igb.indents) + igb.lines)
 				igb.indents++
-				igb.sm.Event(Waiting)
-				igb.rl.SetPrompt(prompt2 + indent(igb.indents))
 				igb.cmds = append(igb.cmds, igb.lines)
+				igb.rl.SetPrompt(prompt2 + indent(igb.indents))
+				igb.sm.Event(waiting)
 				igb.caseBlock = true
 				continue
 
 			// To handle such as 'else' or 'elsif'
+			// The prompt should be `¤` even on the top level indentation when the line is `else` or `elif` or like that
 			case pErr.IsUnexpectedToken():
-				igb.indents--
-				println(prompt2 + indent(igb.indents) + igb.lines)
-				igb.indents++
-				igb.sm.Event(Waiting)
+				println(prompt2 + indent(igb.indents-1) + igb.lines)
 				igb.rl.SetPrompt(prompt2 + indent(igb.indents))
 				igb.cmds = append(igb.cmds, igb.lines)
+				igb.sm.Event(waiting)
 				continue
 
 			// To handle empty line
 			case pErr.IsUnexpectedEmptyLine(len(igb.cmds)):
 				// If igb.cmds is empty, it means that user just typed 'end' without corresponding statement/expression
 				println("exceptEmptyLine")
-				println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
-				igb.indents = 0
+				println(switchPrompt(igb.indents) + indent(igb.indents) + igb.lines)
 				igb.rl.SetPrompt(prompt1)
 				fmt.Println(pErr.Message)
-				igb.cmds = nil
+				igb.eraseBuffer()
 				continue
 
 			// To handle 'end'
 			case pErr.IsUnexpectedEnd():
 				if igb.indents > 1 {
 					igb.indents--
-					println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
+					println(switchPrompt(igb.indents) + indent(igb.indents) + igb.lines)
 					if igb.caseBlock {
 						igb.indents++
 					}
-					igb.sm.Event(Waiting)
-					igb.rl.SetPrompt(prompt(igb.indents) + indent(igb.indents))
+					igb.rl.SetPrompt(switchPrompt(igb.indents) + indent(igb.indents))
 					igb.cmds = append(igb.cmds, igb.lines)
+					igb.sm.Event(waiting)
 					igb.caseBlock = false
 					igb.firstWhen = false
 					continue
@@ -238,15 +267,15 @@ reset:
 
 				// Exiting error handling
 				igb.indents = 0
-				igb.sm.Event(waitEnded)
-				igb.rl.SetPrompt(prompt(igb.indents) + indent(igb.indents))
+				igb.rl.SetPrompt(switchPrompt(igb.indents) + indent(igb.indents))
 				igb.cmds = append(igb.cmds, igb.lines)
+				igb.sm.Event(waitEnded)
 				igb.caseBlock = false
 				igb.firstWhen = false
 			}
 		}
 
-		if igb.sm.Is(Waiting) {
+		if igb.sm.Is(waiting) {
 			// Indent = 0 but not ended
 			if igb.caseBlock {
 				igb.caseBlock = false
@@ -258,8 +287,8 @@ reset:
 
 			// Still indented
 			if igb.indents > 0 {
-				println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
-				igb.rl.SetPrompt(prompt(igb.indents) + indent(igb.indents))
+				println(switchPrompt(igb.indents) + indent(igb.indents) + igb.lines)
+				igb.rl.SetPrompt(switchPrompt(igb.indents) + indent(igb.indents))
 				igb.cmds = append(igb.cmds, igb.lines)
 				continue
 			}
@@ -274,21 +303,18 @@ reset:
 
 			if pErr != nil {
 				handleParserError(pErr, igb)
-				igb.sm.Event(readyToExec)
-				igb.cmds = nil
-				igb.caseBlock = false
-				igb.firstWhen = false
+				igb.eraseBuffer()
 				continue
 			}
 
 			// If everything goes well, reset state and statements buffer
-			igb.rl.SetPrompt(prompt(igb.indents))
+			igb.rl.SetPrompt(switchPrompt(igb.indents))
 			igb.sm.Event(readyToExec)
 		}
 
 		// Execute the lines
 		if igb.sm.Is(readyToExec) {
-			println(prompt(igb.indents) + igb.lines)
+			println(switchPrompt(igb.indents) + igb.lines)
 
 			if pErr != nil {
 				handleParserError(pErr, igb)
@@ -321,26 +347,130 @@ func handleParserError(e *parserErr.Error, igb *iGb) {
 		if !e.IsEOF() {
 			fmt.Println(e.Message)
 		}
-		println(prompt(igb.indents) + indent(igb.indents) + igb.lines)
+		println(switchPrompt(igb.indents) + indent(igb.indents) + igb.lines)
 	}
 }
 
 // Polymorphic helper functions --------------------------------------------
 
+// Returns true if indentation continues.
+func (igb *iGb) continueMultiLineQuote(cdq bool) bool {
+	if cdq { // end multi-line double quote
+		igb.qsm.Event(noMultiLineQuote)
+		if igb.nqsm.Is(nestedQuote) { // end nested-quote
+			igb.nqsm.Event(noNestedQuote)
+			igb.cmds = append(igb.cmds, igb.lines)
+			println(switchPrompt(igb.indents) + igb.lines)
+			igb.rl.SetPrompt(prompt2 + indent(igb.indents))
+			return true
+		}
+	} else { // continue multi-line double quote
+		println(prompt2 + igb.lines)
+		igb.rl.SetPrompt(prompt2)
+		igb.cmds = append(igb.cmds, igb.lines)
+		return true
+	}
+	// exit multi-line double quote
+	igb.cmds = append(igb.cmds, igb.lines)
+	igb.rl.SetPrompt(prompt1)
+	igb.sm.Event(waitEnded)
+	return false
+}
+
+func (igb *iGb) eraseBuffer() {
+	igb.indents = 0
+	igb.rl.SetPrompt(prompt1)
+	igb.sm.Event(waitExited)
+	igb.qsm.Event(noMultiLineQuote)
+	igb.cmds = nil
+	igb.caseBlock = false
+	igb.firstWhen = false
+}
+
+// Prints and add an indent.
+func (igb *iGb) printLineAndIndentRight() {
+	println(switchPrompt(igb.indents) + indent(igb.indents) + igb.lines)
+	igb.indents++
+	igb.rl.SetPrompt(switchPrompt(igb.indents) + indent(igb.indents))
+	igb.cmds = append(igb.cmds, igb.lines)
+}
+
+// Starts multiple line quotation.
+func (igb *iGb) startMultiLineQuote() {
+	if igb.sm.Is(waiting) {
+		igb.nqsm.Event(nestedQuote)
+	} else {
+		igb.sm.Event(waiting)
+	}
+	igb.cmds = append(igb.cmds, igb.lines)
+	println(switchPrompt(igb.indents) + indent(igb.indents) + igb.lines)
+	igb.rl.SetPrompt(prompt2)
+}
+
 // Other helper functions --------------------------------------------------
+
+// filterInput just ignores Ctrl-z.
+func filterInput(r rune) (rune, bool) {
+	if r == readline.CharCtrlZ {
+		return r, false
+	}
+	return r, true
+}
+
+// fortune is just a fun item to show slot machine: receiving rep-digit would imply your fortune ;-)
+func fortune() string {
+	if runtime.GOOS == "windows" {
+		return ""
+	}
+	var randSrc = rand.NewSource(time.Now().UnixNano())
+	s := strings.Split(emojis, "")
+	l := len(s)
+	r := randSrc.Int63() % int64(l)
+	return s[r]
+}
+
+// indent performs indentation with space padding.
+func indent(c int) string {
+	var s string
+	for i := 0; i < c; i++ {
+		s += pad
+	}
+	return s
+}
 
 // newIgb initializes iGb.
 func newIgb() *iGb {
 	return &iGb{
 		cmds:    nil,
 		indents: 0,
+		// sm is for controlling the status of REPL.
 		sm: fsm.NewFSM(
 			readyToExec,
 			fsm.Events{
-				{Name: Waiting, Src: []string{waitEnded, readyToExec}, Dst: Waiting},
-				{Name: waitEnded, Src: []string{Waiting}, Dst: waitEnded},
-				{Name: waitExited, Src: []string{Waiting, waitEnded}, Dst: readyToExec},
+				{Name: waiting, Src: []string{waitEnded, readyToExec}, Dst: waiting},
+				{Name: waitEnded, Src: []string{waiting}, Dst: waitEnded},
+				{Name: waitExited, Src: []string{waiting, waitEnded}, Dst: readyToExec},
 				{Name: readyToExec, Src: []string{waitEnded, readyToExec}, Dst: readyToExec},
+			},
+			fsm.Callbacks{},
+		),
+		// qsm is for controlling the status of multi-line quotation.
+		// Note that double and single multi-line quotations are exclusive and do not coexist.
+		qsm: fsm.NewFSM(
+			noMultiLineQuote,
+			fsm.Events{
+				{Name: noMultiLineQuote, Src: []string{multiLineDoubleQuote, multiLineSingleQuote}, Dst: noMultiLineQuote},
+				{Name: multiLineDoubleQuote, Src: []string{noMultiLineQuote}, Dst: multiLineDoubleQuote},
+				{Name: multiLineSingleQuote, Src: []string{noMultiLineQuote}, Dst: multiLineSingleQuote},
+			},
+			fsm.Callbacks{},
+		),
+		// nqsm is for controlling the status if the multi-line quotation is nested within other "waiting" statement.
+		nqsm: fsm.NewFSM(
+			noNestedQuote,
+			fsm.Events{
+				{Name: noNestedQuote, Src: []string{nestedQuote}, Dst: noNestedQuote},
+				{Name: nestedQuote, Src: []string{noNestedQuote}, Dst: nestedQuote},
 			},
 			fsm.Callbacks{},
 		),
@@ -377,6 +507,27 @@ func newIVM() (ivm iVM, err error) {
 	return ivm, nil
 }
 
+// Returns true if the specified quotation in the string is open.
+func checkOpenQuotes(s, open, ignore string) bool {
+	s = strings.Replace(s, `\\"`, "", -1)
+	s = strings.Replace(s, `\\'`, "", -1)
+
+	rq, _ := regexp2.Compile(`^[^`+ignore+`]*`+open, 0)
+	isOpen, _ := rq.MatchString(s)
+	if strings.Count(s, open)%2 == 1 && isOpen {
+		return true
+	}
+	return false
+}
+
+// switchPrompt switches the prompt sign.
+func switchPrompt(s int) string {
+	if s > 0 {
+		return prompt2
+	}
+	return prompt1
+}
+
 // readIgb fetches one line from input, with helps of Readline lib.
 func readIgb(igb *iGb, err error) (*iGb, error) {
 	igb.rl.Config.UniqueEditLine = true // required to update the previous prompt
@@ -390,46 +541,8 @@ func readIgb(igb *iGb, err error) (*iGb, error) {
 	return igb, err
 }
 
-// filterInput just ignores Ctrl-z.
-func filterInput(r rune) (rune, bool) {
-	switch r {
-	case readline.CharCtrlZ:
-		return r, false
-	}
-	return r, true
-}
-
 // usage shows help lines.
 func usage(w io.Writer, c *readline.PrefixCompleter) {
 	io.WriteString(w, "commands:\n")
 	io.WriteString(w, c.Tree("   "))
-}
-
-// indent performs indentation with space padding.
-func indent(c int) string {
-	var s string
-	for i := 0; i < c; i++ {
-		s += pad
-	}
-	return s
-}
-
-// prompt switches prompt sign.
-func prompt(s int) string {
-	if s > 0 {
-		return prompt2
-	}
-	return prompt1
-}
-
-// fortune is just a fun item to show slot machine: receiving rep-digit would imply your fortune ;-)
-func fortune() string {
-	if runtime.GOOS == "windows" {
-		return ""
-	}
-	var randSrc = rand.NewSource(time.Now().UnixNano())
-	s := strings.Split(emojis, "")
-	l := len(s)
-	r := randSrc.Int63() % int64(l)
-	return s[r]
 }
