@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/dlclark/regexp2"
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
+	"github.com/gooby-lang/gooby/vm/classes"
+	"github.com/gooby-lang/gooby/vm/errors"
 )
 
 // MatchDataObject represents the match data returned by a regular expression matching operation.

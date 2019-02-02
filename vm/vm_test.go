@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/goby-lang/goby/compiler/bytecode"
-	"github.com/goby-lang/goby/compiler/lexer"
-	"github.com/goby-lang/goby/compiler/parser"
-	"github.com/goby-lang/goby/vm/errors"
+	"github.com/gooby-lang/gooby/compiler/bytecode"
+	"github.com/gooby-lang/gooby/compiler/lexer"
+	"github.com/gooby-lang/gooby/compiler/parser"
+	"github.com/gooby-lang/gooby/vm/errors"
 )
 
 func TestVM_REPLExec(t *testing.T) {
@@ -237,13 +237,13 @@ func TestAutoIncrementLocalVariable(t *testing.T) {
 	vm.checkSP(t, i, 1)
 }
 
-func TestLoadingGobyLibraryFail(t *testing.T) {
+func TestLoadingGoobyLibraryFail(t *testing.T) {
 	vm := initTestVM()
 
 	libFileFullPath := filepath.Join(vm.projectRoot, "lib/_library_not_existing.gb")
 	expectedErrorMessage := fmt.Sprintf("open %s: no such file or directory", libFileFullPath)
 
-	err := vm.mainThread.execGobyLib("_library_not_existing.gb")
+	err := vm.mainThread.execGoobyLib("_library_not_existing.gb")
 
 	if err.Error() != expectedErrorMessage {
 		t.Errorf("Unexpected error message: %s", err.Error())

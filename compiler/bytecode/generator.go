@@ -1,7 +1,7 @@
 package bytecode
 
 import (
-	"github.com/goby-lang/goby/compiler/ast"
+	"github.com/gooby-lang/gooby/compiler/ast"
 )
 
 type scope struct {

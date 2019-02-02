@@ -7,7 +7,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/goby-lang/goby/vm/errors"
+	"github.com/gooby-lang/gooby/vm/errors"
 )
 
 const (
@@ -161,9 +161,9 @@ var builtinHTTPClassMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
 			}
 
-			gobyClient := httpClientClass.initializeInstance()
+			goobyClient := httpClientClass.initializeInstance()
 
-			result := t.builtinMethodYield(blockFrame, gobyClient)
+			result := t.builtinMethodYield(blockFrame, goobyClient)
 
 			if err, ok := result.Target.(*Error); ok {
 				return err //an Error object
@@ -189,9 +189,9 @@ func initHTTPClass(vm *VM) {
 
 	net.setClassConstant(http)
 
-	// Use Goby code to extend request and response classes.
-	vm.mainThread.execGobyLib("net/http/response.gb")
-	vm.mainThread.execGobyLib("net/http/request.gb")
+	// Use Gooby code to extend request and response classes.
+	vm.mainThread.execGoobyLib("net/http/response.gb")
+	vm.mainThread.execGoobyLib("net/http/request.gb")
 }
 
 func initRequestClass(vm *VM, hc *RClass) *RClass {

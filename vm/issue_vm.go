@@ -6,7 +6,7 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/goby-lang/goby/compiler/parser"
+	"github.com/gooby-lang/gooby/compiler/parser"
 )
 
 // InitIssueReportVM initializes a vm in test mode for issue reporting
@@ -31,7 +31,7 @@ func PrintError(v *VM) {
 	fmt.Printf("# %s\n", err.Type)
 	fmt.Println(err.Message())
 
-	fmt.Printf("### Goby version\n%s\n", Version)
+	fmt.Printf("### Gooby version\n%s\n", Version)
 	fmt.Printf("### GOBY_ROOT\n%s\n", os.Getenv("GOBY_ROOT"))
 	fmt.Printf("### Go version\n%s\n", runtime.Version())
 	fmt.Printf("### GOROOT\n%s\n", os.Getenv("GOROOT"))

@@ -3,8 +3,8 @@ package vm
 import (
 	"testing"
 
-	"github.com/goby-lang/goby/compiler"
-	"github.com/goby-lang/goby/compiler/parser"
+	"github.com/gooby-lang/gooby/compiler"
+	"github.com/gooby-lang/gooby/compiler/parser"
 )
 
 func runBench(b *testing.B, input string) {

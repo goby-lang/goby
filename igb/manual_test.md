@@ -1,4 +1,4 @@
-## Steps to test Goby REPL(Igb)
+## Steps to test Gooby REPL(Igb)
 
 Currently we are unable to perform automated tests against REPL. Follow the steps to test REPL manually.
 
@@ -8,13 +8,13 @@ Currently we are unable to perform automated tests against REPL. Follow the step
 
 ### 1. Basic operations
 
-1. `goby -i` to start Igb.
+1. `gooby -i` to start Igb.
     * expect:
         * startup massage with version no. and fortune are shown
         * fortune characters are random
         * green prompt `»` are shown
     ```ruby
-    Goby 0.0.9 😽 😉 🤓
+    Gooby 0.0.9 😽 😉 🤓
     »
     ```
 2. type `help` and Return key
@@ -33,7 +33,7 @@ Currently we are unable to perform automated tests against REPL. Follow the step
     * expect: following messages are shown
     ```ruby
     Restarting Igb...
-    Goby 0.0.9 😎 😛 😪
+    Gooby 0.0.9 😎 😛 😪
     »
     ```
 5. type `r` and then type Tab key

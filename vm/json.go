@@ -3,8 +3,8 @@ package vm
 import (
 	"encoding/json"
 
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
+	"github.com/gooby-lang/gooby/vm/classes"
+	"github.com/gooby-lang/gooby/vm/errors"
 )
 
 type jsonObj map[string]interface{}

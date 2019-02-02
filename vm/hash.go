@@ -7,8 +7,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
+	"github.com/gooby-lang/gooby/vm/classes"
+	"github.com/gooby-lang/gooby/vm/errors"
 )
 
 // HashObject represents hash instances.
@@ -21,7 +21,7 @@ import (
 // Underscore `_` can also be used within the key.
 // In hash literals, only a symbol literals such as `symbol:` can be used as a key.
 // String literal like "mickey mouse" cannot be used as a key in hash literals.
-// (String and symbol are equivalent in Goby)
+// (String and symbol are equivalent in Gooby)
 //
 // Retrieving a value via `[]`, you can use both symbol literals or string literals as keys.
 //

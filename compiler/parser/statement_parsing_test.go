@@ -1,8 +1,8 @@
 package parser
 
 import (
-	"github.com/goby-lang/goby/compiler/ast"
-	"github.com/goby-lang/goby/compiler/lexer"
+	"github.com/gooby-lang/gooby/compiler/ast"
+	"github.com/gooby-lang/gooby/compiler/lexer"
 	"testing"
 )
 

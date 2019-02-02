@@ -1,6 +1,6 @@
 # binder
 
-A helper cli for generating goby class bindings for go structures.
+A helper cli for generating gooby class bindings for go structures.
 
 ## Usage
 binder -in file_name.go -type MyGoType
@@ -18,7 +18,7 @@ import _ "github.com/path/to/your/package"
 Adding a go generate comment in the file your define your go structure will allow you to automatically generate updated bindings easily by running `go generate ./...` in the root of your project.
 
 example in
-`github.com/goby-lang/native/result/result.go`
+`github.com/gooby-lang/native/result/result.go`
 ```go
 package result
 //go:generate binder -in result.go -type Result
@@ -36,7 +36,7 @@ examples.
 func (t *MyType) func MyFunc() vm.Object
 ```
 
-will generate the equivalent instance method in goby.
+will generate the equivalent instance method in gooby.
 ```ruby
 class MyType
     def my_func()
@@ -49,7 +49,7 @@ end
 func (MyType) func MyFunc() vm.Object
 ```
 
-will generate the equivalent class method in goby.
+will generate the equivalent class method in gooby.
 ```ruby
 class MyType
     def self.my_func()

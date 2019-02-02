@@ -197,7 +197,7 @@ func (ie *InfixExpression) String() string {
 	return out.String()
 }
 
-// AssignExpression represents variable assignment in Goby.
+// AssignExpression represents variable assignment in Gooby.
 type AssignExpression struct {
 	*BaseNode
 	Variables []Expression

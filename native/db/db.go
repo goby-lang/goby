@@ -3,8 +3,8 @@ package db
 import (
 	"fmt"
 
-	"github.com/goby-lang/goby/vm"
-	"github.com/goby-lang/goby/vm/errors"
+	"github.com/gooby-lang/gooby/vm"
+	"github.com/gooby-lang/gooby/vm/errors"
 	"github.com/jmoiron/sqlx"
 
 	// all packages imported by this need postgres
@@ -169,7 +169,7 @@ func run(receiver Object, sourceLine int, t *Thread, args []Object) Object {
 // 			// # Assume that there is a User table with name and age column
 // 			//
 // 			// # Create Opcode
-// 			// db = DB.open("postgres", "user=postgres dbname=goby_doc sslmode=disable")
+// 			// db = DB.open("postgres", "user=postgres dbname=gooby_doc sslmode=disable")
 // 			// id = db.exec("INSERT INTO users (name, age) VALUES ('Stan', 23)")
 // 			// puts id # => 1
 // 			//
@@ -230,7 +230,7 @@ func exec(receiver Object, sourceLine int, t *Thread, args []Object) Object {
 // 			//
 // 			// # Assume that there is a User table with name and age column
 // 			//
-// 			// db = DB.open("postgres", "user=postgres dbname=goby_doc sslmode=disable")
+// 			// db = DB.open("postgres", "user=postgres dbname=gooby_doc sslmode=disable")
 // 			// id = db.exec("INSERT INTO users (name, age) VALUES ('Stan', 23)")
 // 			// puts id # => 1
 // 			//

@@ -3,7 +3,7 @@ package vm
 import (
 	"sync"
 
-	"github.com/goby-lang/goby/vm/errors"
+	"github.com/gooby-lang/gooby/vm/errors"
 )
 
 // ConcurrentRWLockObject is a Readers-Writer Lock (readers can concurrently put a lock, while a

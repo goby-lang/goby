@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/goby-lang/goby/vm"
+	"github.com/gooby-lang/gooby/vm"
 )
 
 func TestCallingPluginFunctionNoRaceDetection(t *testing.T) {

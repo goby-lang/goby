@@ -68,17 +68,17 @@ func TestJSONObjectParsing(t *testing.T) {
 		h = JSON.parse('
 		  {
 			"Project": {
-			  "Name": "Goby"
+			  "Name": "Gooby"
 			}
 		  }
 		')
-		h["Project"]["Name"]`, "Goby"},
+		h["Project"]["Name"]`, "Gooby"},
 		{`
 		require "json"
 		h = JSON.parse('
 		  {
 			"Project": {
-			  "Name": "Goby",
+			  "Name": "Gooby",
 			  "Months": 7
 			}
 		  }
@@ -132,18 +132,18 @@ func TestJSONObjectArrayParsing(t *testing.T) {
 		a = JSON.parse('
 		  [{
 			"Projects": [{
-			  "Name": "Goby"
+			  "Name": "Gooby"
 			}]
 		  }]
 		')
 		h = a.first
-		h["Projects"][0]["Name"]`, "Goby"},
+		h["Projects"][0]["Name"]`, "Gooby"},
 		{`
 		require "json"
 		a = JSON.parse('
 		  [{
 			"Projects": [{
-			  "Name": "Goby",
+			  "Name": "Gooby",
 			  "Months": 7
 			}]
 		  }]

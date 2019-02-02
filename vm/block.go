@@ -3,12 +3,12 @@ package vm
 import (
 	"fmt"
 
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
+	"github.com/gooby-lang/gooby/vm/classes"
+	"github.com/gooby-lang/gooby/vm/errors"
 )
 
 // BlockObject represents an instance of `Block` class.
-// In Goby, block literals can be used to define an "anonymous function" by using the `Block` class.
+// In Gooby, block literals can be used to define an "anonymous function" by using the `Block` class.
 //
 // A block literal consists of `do`-`end` and code snippets between them,
 // containing optional "block parameters" surrounded by `| |`

@@ -187,7 +187,7 @@ func verifyConcurrentHashObject(t *testing.T, index int, objectResult Object, ex
 // - the test hash must have strings as keys;
 // - the error message won't mention the key - only the value.
 //
-// The second limitation is currently the only Hash format in Goby, anyway.
+// The second limitation is currently the only Hash format in Gooby, anyway.
 //
 func verifyHashObject(t *testing.T, index int, objectResult Object, expected map[string]interface{}) bool {
 	t.Helper()

@@ -14,7 +14,7 @@ import (
 	"strconv"
 
 	"github.com/fatih/structs"
-	"github.com/goby-lang/goby/vm/classes"
+	"github.com/gooby-lang/gooby/vm/classes"
 	"github.com/gorilla/mux"
 )
 
@@ -138,14 +138,14 @@ func initSimpleServerClass(vm *VM) {
 	simpleServer.setBuiltinMethods(builtinSimpleServerInstanceMethods(), false)
 	net.setClassConstant(simpleServer)
 
-	vm.mainThread.execGobyLib("net/simple_server.gb")
+	vm.mainThread.execGoobyLib("net/simple_server.gb")
 }
 
 // Other helper functions -----------------------------------------------
 
 func newHandler(t *Thread, blockFrame *normalCallFrame) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Go creates one goroutine per request, so we also need to create a new Goby thread for every request.
+		// Go creates one goroutine per request, so we also need to create a new Gooby thread for every request.
 		thread := t.vm.newThread()
 		res := httpResponseClass.initializeInstance()
 

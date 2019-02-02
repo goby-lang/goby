@@ -1,7 +1,7 @@
 package lexer
 
 import (
-	"github.com/goby-lang/goby/compiler/token"
+	"github.com/gooby-lang/gooby/compiler/token"
 	"testing"
 )
 

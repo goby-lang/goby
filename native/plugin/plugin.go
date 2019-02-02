@@ -9,9 +9,9 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/goby-lang/goby/vm"
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
+	"github.com/gooby-lang/gooby/vm"
+	"github.com/gooby-lang/gooby/vm/classes"
+	"github.com/gooby-lang/gooby/vm/errors"
 	"github.com/st0012/metago"
 )
 

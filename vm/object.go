@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/goby-lang/goby/compiler/bytecode"
+	"github.com/gooby-lang/gooby/compiler/bytecode"
 )
 
-// Object represents all objects in Goby, including Array, Integer or even Method and Error.
+// Object represents all objects in Gooby, including Array, Integer or even Method and Error.
 type Object interface {
 	Class() *RClass
 	Value() interface{}

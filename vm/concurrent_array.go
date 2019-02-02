@@ -3,8 +3,8 @@ package vm
 import (
 	"sync"
 
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
+	"github.com/gooby-lang/gooby/vm/classes"
+	"github.com/gooby-lang/gooby/vm/errors"
 )
 
 // Pseudo-constant definition of the forwarded methods, mapped to a boolean representing the

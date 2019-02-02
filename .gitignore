@@ -27,7 +27,7 @@ _testmain.go
 
 .idea
 
-goby
+gooby
 
 *.gbbc
 coverage.txt

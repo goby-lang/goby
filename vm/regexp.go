@@ -2,8 +2,8 @@ package vm
 
 import (
 	"github.com/dlclark/regexp2"
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
+	"github.com/gooby-lang/gooby/vm/classes"
+	"github.com/gooby-lang/gooby/vm/errors"
 )
 
 // RegexpObject represents regexp instances, which of the type is actually string.
@@ -32,7 +32,7 @@ import (
 // - Currently, UTF-8 encoding is assumed based upon Golang's string manipulation, but the encoding is not actually specified(TBD).
 // - `Regexp.new` is exceptionally supported.
 //
-// **To Goby maintainers**: avoid using Go's standard regexp package (slow and not rich). Consider the faster `Trim` or `Split` etc in Go's "strings" package first, or just use the dlclark/regexp2 instead.
+// **To Gooby maintainers**: avoid using Go's standard regexp package (slow and not rich). Consider the faster `Trim` or `Split` etc in Go's "strings" package first, or just use the dlclark/regexp2 instead.
 // ToDo: Regexp literals with '/.../'
 type Regexp = regexp2.Regexp
 type RegexpObject struct {
@@ -71,9 +71,9 @@ var builtinRegexpInstanceMethods = []*BuiltinMethodObject{
 		// If comparing with non Regexp class, just returns false.
 		//
 		// ```ruby
-		// r1 = Regexp.new("goby[0-9]+")
-		// r2 = Regexp.new("goby[0-9]+")
-		// r3 = Regexp.new("Goby[0-9]+")
+		// r1 = Regexp.new("gooby[0-9]+")
+		// r2 = Regexp.new("gooby[0-9]+")
+		// r3 = Regexp.new("Gooby[0-9]+")
 		//
 		// r1 == r2   # => true
 		// r1 == r2   # => false

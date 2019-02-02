@@ -6,8 +6,8 @@ import (
 
 	"strconv"
 
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
+	"github.com/gooby-lang/gooby/vm/classes"
+	"github.com/gooby-lang/gooby/vm/errors"
 )
 
 // FloatObject represents an inexact real number using the native architecture's double-precision floating point

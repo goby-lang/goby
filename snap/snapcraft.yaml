@@ -1,8 +1,8 @@
-name: goby-lang
+name: gooby-lang
 version: git
 summary: A new language helps you develop microservices
 description: |
-  Goby is an object-oriented interpreter language deeply inspired by Ruby as
+  Gooby is an object-oriented interpreter language deeply inspired by Ruby as
   well as its core implementation by 100% pure Go. Moreover, it has standard
   libraries to provide several features such as the Plugin system.
 
@@ -10,16 +10,16 @@ grade: stable
 confinement: classic
 
 apps:
-  goby:
+  gooby:
     environment:
       GOBY_ROOT: $SNAP
-    command: bin/goby
+    command: bin/gooby
 
 parts:
-  goby:
+  gooby:
     source: .
     plugin: go
-    go-importpath: github.com/goby-lang/goby
+    go-importpath: github.com/gooby-lang/gooby
     install:
       cp -R lib/ $SNAPCRAFT_PART_INSTALL
     after: [go]

@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/goby-lang/goby/compiler/bytecode"
-	"github.com/goby-lang/goby/vm/classes"
+	"github.com/gooby-lang/gooby/compiler/bytecode"
+	"github.com/gooby-lang/gooby/vm/classes"
 )
 
-// MethodObject represents methods defined using goby.
+// MethodObject represents methods defined using gooby.
 type MethodObject struct {
 	*BaseObj
 	Name           string

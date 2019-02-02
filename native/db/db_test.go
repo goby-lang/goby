@@ -3,12 +3,12 @@ package db
 import (
 	"testing"
 
-	"github.com/goby-lang/goby/vm"
+	"github.com/gooby-lang/gooby/vm"
 	"github.com/jmoiron/sqlx"
 )
 
 func setupDB(t *testing.T) *sqlx.DB {
-	db, _ := sqlx.Open("postgres", "user=postgres dbname=goby_test sslmode=disable")
+	db, _ := sqlx.Open("postgres", "user=postgres dbname=gooby_test sslmode=disable")
 	_, err := db.Exec(`
 	CREATE TABLE IF NOT EXISTS users (
 		id   serial PRIMARY KEY,
@@ -25,7 +25,7 @@ func setupDB(t *testing.T) *sqlx.DB {
 }
 
 func cleanTable() {
-	db, _ := sqlx.Open("postgres", "user=postgres dbname=goby_test sslmode=disable")
+	db, _ := sqlx.Open("postgres", "user=postgres dbname=gooby_test sslmode=disable")
 	db.Exec(`DELETE (SELECT * FROM users)`)
 }
 
@@ -85,7 +85,7 @@ func TestDBRunMethod(t *testing.T) {
 	input := `
 	require "db"
 
-	db = DB.open("postgres", "user=postgres dbname=goby_test sslmode=disable")
+	db = DB.open("postgres", "user=postgres dbname=gooby_test sslmode=disable")
 	db.run("create table if not exists test_items (
 	  id   serial primary key,
 	  title varchar(40)
@@ -114,7 +114,7 @@ func TestDBExecMethod(t *testing.T) {
 		{`
 			require "db"
 
-			db = DB.open("postgres", "user=postgres dbname=goby_test sslmode=disable")
+			db = DB.open("postgres", "user=postgres dbname=gooby_test sslmode=disable")
 			id = db.exec("INSERT INTO users (name, age) VALUES ('Stan', 23)")
 			results = db.query("SELECT * FROM users WHERE id = $1", id)
 			results.first[:name]
@@ -124,7 +124,7 @@ func TestDBExecMethod(t *testing.T) {
 		{`
 			require "db"
 
-			db = DB.open("postgres", "user=postgres dbname=goby_test sslmode=disable")
+			db = DB.open("postgres", "user=postgres dbname=gooby_test sslmode=disable")
 			id = db.exec("INSERT INTO users (name, age) VALUES ('Stan', 23)")
 			db.exec("DELETE FROM users WHERE id = $1", id)
 			results = db.query("SELECT EXISTS(SELECT * FROM users WHERE id = $1)", id)
@@ -135,7 +135,7 @@ func TestDBExecMethod(t *testing.T) {
 		{`
 			require "db"
 
-			db = DB.open("postgres", "user=postgres dbname=goby_test sslmode=disable")
+			db = DB.open("postgres", "user=postgres dbname=gooby_test sslmode=disable")
 			id = db.exec("INSERT INTO users (name, age) VALUES ('John', 20)")
 			id2 = db.exec("UPDATE users SET age=10 WHERE id = $1", id)
 			# See if update returns usable id, too

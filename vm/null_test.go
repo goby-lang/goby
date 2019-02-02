@@ -136,7 +136,7 @@ func TestNullIsNilMethod(t *testing.T) {
 		{`123.nil?`, false},
 		{`"Hello World".nil?`, false},
 		{`(2..10).nil?`, false},
-		{`{ a: 1, b: "2", c: ["Goby", 123] }.nil?`, false},
+		{`{ a: 1, b: "2", c: ["Gooby", 123] }.nil?`, false},
 		{`[1, 2, 3, 4, 5].nil?`, false},
 		{`true.nil?`, false},
 		{`String.nil?`, false},

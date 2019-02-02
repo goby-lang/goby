@@ -3,7 +3,7 @@ package plugin
 import (
 	"testing"
 
-	"github.com/goby-lang/goby/vm"
+	"github.com/gooby-lang/gooby/vm"
 )
 
 func TestPluginInitialization(t *testing.T) {

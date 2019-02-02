@@ -27,9 +27,9 @@ func TestStringFmtMethod(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`String.fmt("This is %s", "goby")`, "This is goby"},
-		{`String.fmt("This is %slang", "goby")`, "This is gobylang"},
-		{`String.fmt("This is %s %s", "goby", "ruby")`, "This is goby ruby"},
+		{`String.fmt("This is %s", "gooby")`, "This is gooby"},
+		{`String.fmt("This is %slang", "gooby")`, "This is goobylang"},
+		{`String.fmt("This is %s %s", "gooby", "ruby")`, "This is gooby ruby"},
 		{` String.fmt("Hello! %s", 1)`, "Hello! 1"},
 		{` String.fmt("Hello! %s", 1.1)`, "Hello! 1.1"},
 		{` String.fmt("Hello! %s", "1.1".to_d)`, "Hello! 1.1"},
@@ -53,7 +53,7 @@ func TestStringFmtMethodFail(t *testing.T) {
 		{`String.fmt()`, "ArgumentError: Expect 1 or more argument(s). got: 0", 1},
 		{`String.fmt(1)`, "TypeError: Expect argument to be String. got: Integer", 1},
 		{`String.fmt("Hello! %s Lang!")`, "ArgumentError: Expect 1 additional string(s) to insert. got: 0", 1},
-		{`String.fmt("Hello! %s Lang!", "Goby", "Ruby")`, "ArgumentError: Expect 1 additional string(s) to insert. got: 2", 1},
+		{`String.fmt("Hello! %s Lang!", "Gooby", "Ruby")`, "ArgumentError: Expect 1 additional string(s) to insert. got: 2", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -217,7 +217,7 @@ func TestStringOperation(t *testing.T) {
 		{`'\'Maxwell\''[0]`, "'"},
 		{`'\'Maxwell\''[-1]`, "'"},
 		{`"Ruby"[1] = "oo"`, "Rooby"},
-		{`"Go"[2] = "by"`, "Goby"},
+		{`"Go"[2] = "by"`, "Gooby"},
 		{`"Ruby"[-3] = "oo"`, "Rooby"},
 		{`"Hello"[-5] = "Tr"`, "Trello"},
 		{`"Hello\nWorld"[5] = " "`, "Hello World"},
@@ -548,11 +548,11 @@ func TestStringEachLineMethod(t *testing.T) {
 	}{
 		{`
 		arr = []
-		"Hello\nWorld\nGoby".each_line do |line|
+		"Hello\nWorld\nGooby".each_line do |line|
 		  arr.push(line)
 		end
 		arr
-		`, []interface{}{"Hello", "World", "Goby"}},
+		`, []interface{}{"Hello", "World", "Gooby"}},
 		{`
 		arr = []
 		"Max\vwell\nAlex\fius".each_line do |line|
@@ -725,11 +725,11 @@ func TestStringIncludeMethod(t *testing.T) {
 
 func TestStringIncludeMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Goby".include?`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
-		{`"Goby".include?("Ruby", "Lang")`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
-		{`"Goby".include?(2)`, "TypeError: Expect argument to be String. got: Integer", 1},
-		{`"Goby".include?(true)`, "TypeError: Expect argument to be String. got: Boolean", 1},
-		{`"Goby".include?(nil)`, "TypeError: Expect argument to be String. got: Null", 1},
+		{`"Gooby".include?`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+		{`"Gooby".include?("Ruby", "Lang")`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
+		{`"Gooby".include?(2)`, "TypeError: Expect argument to be String. got: Integer", 1},
+		{`"Gooby".include?(true)`, "TypeError: Expect argument to be String. got: Boolean", 1},
+		{`"Gooby".include?(nil)`, "TypeError: Expect argument to be String. got: Null", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -769,7 +769,7 @@ func TestStringInsertMethod(t *testing.T) {
 
 func TestStringInsertMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Goby Lang".insert`, "ArgumentError: Expect 2 argument(s). got: 0", 1},
+		{`"Gooby Lang".insert`, "ArgumentError: Expect 2 argument(s). got: 0", 1},
 		{`"Taipei".insert(6, " ", "101")`, "ArgumentError: Expect 2 argument(s). got: 3", 1},
 		{`"Taipei".insert("6", " 101")`, "TypeError: Expect argument #1 to be Integer. got: String", 1},
 		{`"Taipei".insert(6, 101)`, "TypeError: Expect argument #2 to be String. got: Integer", 1},
@@ -851,7 +851,7 @@ func TestStringMatch(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`"Goby!!".match(Regexp.new("G(o)b(y)")).to_s`, "#<MatchData 0:\"Goby\" 1:\"o\" 2:\"y\">"},
+		{`"Gooby!!".match(Regexp.new("G(o)b(y)")).to_s`, "#<MatchData 0:\"Gooby\" 1:\"o\" 2:\"y\">"},
 		{`"Ruby".match(Regexp.new("G(o)b(y)"))`, nil},
 	}
 
@@ -884,9 +884,9 @@ func TestStringReplaceMethod(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`"Ruby Lang Ruby Ruby".replace("Ru", "Go")`, "Goby Lang Goby Goby"},
-		{`"🍣Ruby🍣Lang".replace("Ru", "Go")`, "🍣Goby🍣Lang"},
-		{`re = Regexp.new("(Ru|ru)");"Ruby Lang ruby lang".replace(re, "Go")`, "Goby Lang Goby lang"},
+		{`"Ruby Lang Ruby Ruby".replace("Ru", "Go")`, "Gooby Lang Gooby Gooby"},
+		{`"🍣Ruby🍣Lang".replace("Ru", "Go")`, "🍣Gooby🍣Lang"},
+		{`re = Regexp.new("(Ru|ru)");"Ruby Lang ruby lang".replace(re, "Go")`, "Gooby Lang Gooby lang"},
 	}
 
 	for i, tt := range tests {
@@ -921,9 +921,9 @@ func TestStringReplaceOnceMethod(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`"Ruby Lang Ruby Ruby".replace_once("Ru", "Go")`, "Goby Lang Ruby Ruby"},
-		{`"🍣Ruby🍣Lang Ruby".replace_once("Ru", "Go")`, "🍣Goby🍣Lang Ruby"},
-		{`re = Regexp.new("(Ru|ru)");"Ruby Lang ruby lang".replace_once(re, "Go")`, "Goby Lang ruby lang"},
+		{`"Ruby Lang Ruby Ruby".replace_once("Ru", "Go")`, "Gooby Lang Ruby Ruby"},
+		{`"🍣Ruby🍣Lang Ruby".replace_once("Ru", "Go")`, "🍣Gooby🍣Lang Ruby"},
+		{`re = Regexp.new("(Ru|ru)");"Ruby Lang ruby lang".replace_once(re, "Go")`, "Gooby Lang ruby lang"},
 	}
 
 	for i, tt := range tests {
@@ -1083,9 +1083,9 @@ func TestStringSliceMethod(t *testing.T) {
 
 func TestStringSliceMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Goby Lang".slice`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
-		{`"Goby Lang".slice("Hello")`, "TypeError: Expect argument to be Range or Integer. got: String", 1},
-		{`"Goby Lang".slice(true)`, "TypeError: Expect argument to be Range or Integer. got: Boolean", 1},
+		{`"Gooby Lang".slice`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+		{`"Gooby Lang".slice("Hello")`, "TypeError: Expect argument to be Range or Integer. got: String", 1},
+		{`"Gooby Lang".slice(true)`, "TypeError: Expect argument to be Range or Integer. got: Boolean", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1135,37 +1135,37 @@ func TestStringSplitMethod(t *testing.T) {
 		arr[4]
 		`, "o"},
 		{`
-		arr = "Hello\nWorld\nGoby".split("\n")
+		arr = "Hello\nWorld\nGooby".split("\n")
 		arr[0]
 		`, "Hello"},
 		{`
-		arr = "Hello\nWorld\nGoby".split("\n")
+		arr = "Hello\nWorld\nGooby".split("\n")
 		arr[1]
 		`, "World"},
 		{`
-		arr = "Hello\nWorld\nGoby".split("\n")
+		arr = "Hello\nWorld\nGooby".split("\n")
 		arr[2]
-		`, "Goby"},
+		`, "Gooby"},
 		{`
-		arr = "Hello🍺World🍺Goby".split("🍺")
+		arr = "Hello🍺World🍺Gooby".split("🍺")
 		arr[0]
 		`, "Hello"},
 		{`
-		arr = "Hello🍺World🍺Goby".split("🍺")
+		arr = "Hello🍺World🍺Gooby".split("🍺")
 		arr[1]
 		`, "World"},
 		{`
-		arr = "Hello🍺World🍺Goby".split("🍺")
+		arr = "Hello🍺World🍺Gooby".split("🍺")
 		arr[2]
-		`, "Goby"},
+		`, "Gooby"},
 		{`
-		arr = "Hello🍺World🍣Goby".split("🍺")
+		arr = "Hello🍺World🍣Gooby".split("🍺")
 		arr[0]
 		`, "Hello"},
 		{`
-		arr = "Hello🍺World🍣Goby".split("🍺")
+		arr = "Hello🍺World🍣Gooby".split("🍺")
 		arr[1]
-		`, "World🍣Goby"},
+		`, "World🍣Gooby"},
 	}
 
 	for i, tt := range tests {
@@ -1240,9 +1240,9 @@ func TestStringStripMethod(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`"  Goby Lang   ".strip`, "Goby Lang"},
-		{`"\nGoby Lang\r\t".strip`, "Goby Lang"},
-		{`" \t 🍣 Goby Lang 🍺 \r\n ".strip`, "🍣 Goby Lang 🍺"},
+		{`"  Gooby Lang   ".strip`, "Gooby Lang"},
+		{`"\nGooby Lang\r\t".strip`, "Gooby Lang"},
+		{`" \t 🍣 Gooby Lang 🍺 \r\n ".strip`, "🍣 Gooby Lang 🍺"},
 	}
 
 	for i, tt := range tests {
@@ -1276,27 +1276,27 @@ func TestStringConversion(t *testing.T) {
 		{`"  123.5".to_f`, 123.5},
 		{`"3.5e2".to_f`, 350.0},
 		{`
-		  arr = "Goby".to_a
+		  arr = "Gooby".to_a
 		  arr[0]
 		`, "G"},
 		{`
-		  arr = "Goby".to_a
+		  arr = "Gooby".to_a
 		  arr[1]
 		`, "o"},
 		{`
-		  arr = "Goby".to_a
+		  arr = "Gooby".to_a
 		  arr[2]
 		`, "b"},
 		{`
-		  arr = "Goby".to_a
+		  arr = "Gooby".to_a
 		  arr[3]
 		`, "y"},
 		{`
-		  arr = "🍣Goby🍺".to_a
+		  arr = "🍣Gooby🍺".to_a
 		  arr[0]
 		`, "🍣"},
 		{`
-		  arr = "🍣Goby🍺".to_a
+		  arr = "🍣Gooby🍺".to_a
 		  arr[5]
 		`, "🍺"},
 		{`

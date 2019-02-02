@@ -5,12 +5,12 @@ import (
 
 	"strings"
 
-	"github.com/goby-lang/goby/vm/errors"
+	"github.com/gooby-lang/gooby/vm/errors"
 )
 
 // Error class is actually a special struct to hold internal error types with messages.
-// Goby developers need not to take care of the struct.
-// Goby maintainers should consider using the appropriate error type.
+// Gooby developers need not to take care of the struct.
+// Gooby maintainers should consider using the appropriate error type.
 // Cannot create instances of Error class, or inherit Error class.
 //
 // The type of internal errors:

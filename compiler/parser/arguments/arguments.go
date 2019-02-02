@@ -1,6 +1,6 @@
 package arguments
 
-import "github.com/goby-lang/goby/compiler/token"
+import "github.com/gooby-lang/gooby/compiler/token"
 
 // Enums for different kinds of arguments
 const (

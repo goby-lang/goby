@@ -77,14 +77,14 @@ func TestFileBasenameMethod(t *testing.T) {
 		expected string
 	}{
 		{`
-				File.basename("/home/goby/plugin/test.gb")
+				File.basename("/home/gooby/plugin/test.gb")
 		`, "test.gb"},
 		// tests for non-existent file/dir
 		{`
-				File.basename("/home/goby/plugin/fictitious.gb")
+				File.basename("/home/gooby/plugin/fictitious.gb")
 		`, "fictitious.gb"},
 		{`
-				File.basename("/home/goby/plugin/fictitious/")
+				File.basename("/home/gooby/plugin/fictitious/")
 		`, "fictitious"},
 	}
 
@@ -128,15 +128,15 @@ func TestFileChmodMethod(t *testing.T) {
 		expected int
 	}{
 		{`
-		path = "/tmp/goby/chmod_out.txt"
+		path = "/tmp/gooby/chmod_out.txt"
 		File.open(path, "r+", 0755)
 		File.chmod(0777, path)
 		`, 1},
 		{`
-		File.open("/tmp/goby/out1.txt", "w", 0755)
-		File.open("/tmp/goby/out2.txt", "w", 0744)
-		File.open("/tmp/goby/out3.txt", "w", 0644)
-		File.chmod(0777, "/tmp/goby/out1.txt", "/tmp/goby/out2.txt", "/tmp/goby/out3.txt")
+		File.open("/tmp/gooby/out1.txt", "w", 0755)
+		File.open("/tmp/gooby/out2.txt", "w", 0744)
+		File.open("/tmp/gooby/out3.txt", "w", 0644)
+		File.chmod(0777, "/tmp/gooby/out1.txt", "/tmp/gooby/out2.txt", "/tmp/gooby/out3.txt")
 		`, 3},
 	}
 
@@ -158,17 +158,17 @@ func TestFileChmodMethodFail(t *testing.T) {
 			`ArgumentError: Expect 2 or more argument(s). got: 0`, 1},
 		{`File.chmod(0755)`,
 			`ArgumentError: Expect 2 or more argument(s). got: 1`, 1},
-		{`File.chmod(0755, "/tmp/goby/fictitious.gb")`,
-			`IOError: chmod /tmp/goby/fictitious.gb: no such file or directory`, 1},
+		{`File.chmod(0755, "/tmp/gooby/fictitious.gb")`,
+			`IOError: chmod /tmp/gooby/fictitious.gb: no such file or directory`, 1},
 		{`
-		File.open("/tmp/goby/out_chmod.txt", "w", 0755)
-		File.chmod(0777, "/tmp/goby/out_chmod.txt", "/tmp/goby/fictitious.gb")
-		`, `IOError: chmod /tmp/goby/fictitious.gb: no such file or directory`, 1},
+		File.open("/tmp/gooby/out_chmod.txt", "w", 0755)
+		File.chmod(0777, "/tmp/gooby/out_chmod.txt", "/tmp/gooby/fictitious.gb")
+		`, `IOError: chmod /tmp/gooby/fictitious.gb: no such file or directory`, 1},
 		{`File.chmod("string", "filePath")`,
 			`TypeError: Expect argument #1 to be Integer. got: String`, 1},
 		{`
-		File.open("/tmp/goby/out_chmod.txt", "w", 0755)
-		File.chmod(-999, "/tmp/goby/out_chmod.txt")
+		File.open("/tmp/gooby/out_chmod.txt", "w", 0755)
+		File.chmod(-999, "/tmp/gooby/out_chmod.txt")
 		`, `ArgumentError: Invalid chmod number. got: -999`, 1},
 	}
 
@@ -190,16 +190,16 @@ func TestFileDeleteMethod(t *testing.T) {
 		expected interface{}
 	}{
 		{`
-		File.open("/tmp/goby/out1.txt", "w", 0755)
-		File.open("/tmp/goby/out2.txt", "w", 0755)
-		File.open("/tmp/goby/out3.txt", "w", 0755)
+		File.open("/tmp/gooby/out1.txt", "w", 0755)
+		File.open("/tmp/gooby/out2.txt", "w", 0755)
+		File.open("/tmp/gooby/out3.txt", "w", 0755)
 
-		File.delete("/tmp/goby/out1.txt", "/tmp/goby/out2.txt", "/tmp/goby/out3.txt")
+		File.delete("/tmp/gooby/out1.txt", "/tmp/gooby/out2.txt", "/tmp/gooby/out3.txt")
 		`, 3},
 		{`
-		File.open("/tmp/goby/out.txt", "w", 0755)
-		File.delete("/tmp/goby/out.txt")
-		File.exist?("/tmp/goby/out.txt")
+		File.open("/tmp/gooby/out.txt", "w", 0755)
+		File.delete("/tmp/gooby/out.txt")
+		File.exist?("/tmp/gooby/out.txt")
 		`, false},
 		{`
 		File.delete
@@ -220,11 +220,11 @@ func TestFileDeleteMethodFail(t *testing.T) {
 	defer teardown()
 
 	testsFail := []errorTestCase{
-		{`File.delete("/tmp/goby/non-existent.txt")`,
-			`IOError: remove /tmp/goby/non-existent.txt: no such file or directory`, 1},
+		{`File.delete("/tmp/gooby/non-existent.txt")`,
+			`IOError: remove /tmp/gooby/non-existent.txt: no such file or directory`, 1},
 		{`File.delete 1`,
 			`TypeError: Expect argument #1 to be String. got: Integer`, 1},
-		{`f = "/tmp/goby/out.txt"; File.open(f, "w", 0755);File.delete(f, 1)`,
+		{`f = "/tmp/gooby/out.txt"; File.open(f, "w", 0755);File.delete(f, 1)`,
 			`TypeError: Expect argument #2 to be String. got: Integer`, 1},
 	}
 
@@ -246,11 +246,11 @@ func TestFileExistMethod(t *testing.T) {
 		expected bool
 	}{
 		{`
-		File.exist?("/tmp/goby/non-existent.txt")
+		File.exist?("/tmp/gooby/non-existent.txt")
 		`, false},
 		{`
-		File.open("/tmp/goby/out1.txt", "w", 0755)
-		File.exist?("/tmp/goby/out1.txt")
+		File.open("/tmp/gooby/out1.txt", "w", 0755)
+		File.exist?("/tmp/gooby/out1.txt")
 		`, true},
 	}
 
@@ -335,8 +335,8 @@ func TestFileJoinMethod(t *testing.T) {
 		File.join("test1", "test2", "test3")
 		`, "test1/test2/test3"},
 		{`
-		File.join("goby", "plugin")
-		`, "goby/plugin"},
+		File.join("gooby", "plugin")
+		`, "gooby/plugin"},
 		{`
 		File.join("plugin")
 		`, "plugin"},
@@ -378,15 +378,15 @@ func TestFileNewMethod(t *testing.T) {
 		expected string
 	}{
 		{`
-		File.open("/tmp/goby/test.gb", "r+");a = File.new("/tmp/goby/test.gb")
+		File.open("/tmp/gooby/test.gb", "r+");a = File.new("/tmp/gooby/test.gb")
 		a.class.name
 		`, "File"},
 		{`
-		File.open("/tmp/goby/test.gb", "r+");a = File.new("/tmp/goby/test.gb", "w")
+		File.open("/tmp/gooby/test.gb", "r+");a = File.new("/tmp/gooby/test.gb", "w")
 		a.class.name
 		`, "File"},
 		{`
-		File.open("/tmp/goby/test.gb", "r+");a = File.new("/tmp/goby/test.gb", "w", 0777)
+		File.open("/tmp/gooby/test.gb", "r+");a = File.new("/tmp/gooby/test.gb", "w", 0777)
 		a.class.name
 		`, "File"},
 	}
@@ -409,22 +409,22 @@ func TestFileNewMethodFail(t *testing.T) {
 		File.new()
 		`, `ArgumentError: Expect 1 to 3 argument(s). got: 0`, 1},
 		{`
-		File.new("/tmp/goby/test.gb", "w", 0777, "a")
+		File.new("/tmp/gooby/test.gb", "w", 0777, "a")
 		`, `ArgumentError: Expect 1 to 3 argument(s). got: 4`, 1},
 		{`
 		File.new(1)
 		`, `TypeError: Expect argument #1 to be String. got: Integer`, 1},
 		{`
-		File.new("/tmp/goby/test.gb", 1, 0777)
+		File.new("/tmp/gooby/test.gb", 1, 0777)
 		`, `TypeError: Expect argument #2 to be String. got: Integer`, 1},
 		{`
-		File.new("/tmp/goby/test.gb", "p", 0777)
+		File.new("/tmp/gooby/test.gb", "p", 0777)
 		`, `ArgumentError: Unknown file mode: p`, 1},
 		{`
-		File.new("/tmp/goby/test.gb", "w", "e")
+		File.new("/tmp/gooby/test.gb", "w", "e")
 		`, `TypeError: Expect argument #3 to be Integer. got: String`, 1},
 		{`
-		File.new("/tmp/goby/test.gb", "w", -99999)
+		File.new("/tmp/gooby/test.gb", "w", -99999)
 		`, `ArgumentError: Invalid chmod number. got: -99999`, 1},
 	}
 
@@ -458,14 +458,14 @@ func TestFileSizeMethodFail(t *testing.T) {
 		File.size()
 		`, `ArgumentError: Expect 1 argument(s). got: 0`, 1},
 		{`
-		File.size("../test_fixtures/file_test/size.gb","/tmp/goby/test.gb")
+		File.size("../test_fixtures/file_test/size.gb","/tmp/gooby/test.gb")
 		`, `ArgumentError: Expect 1 argument(s). got: 2`, 1},
 		{`
 		File.size(1)
 		`, `TypeError: Expect argument to be String. got: Integer`, 1},
 		{`
-		File.size("/tmp/goby/fictitious.gb")
-		`, `IOError: stat /tmp/goby/fictitious.gb: no such file or directory`, 1},
+		File.size("/tmp/gooby/fictitious.gb")
+		`, `IOError: stat /tmp/gooby/fictitious.gb: no such file or directory`, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -483,8 +483,8 @@ func TestFileSplitMethod(t *testing.T) {
 		expected []interface{}
 	}{
 		{`
-		File.split("/home/goby/plugin/test.gb")
-		`, []interface{}{"/home/goby/plugin/", "test.gb"}},
+		File.split("/home/gooby/plugin/test.gb")
+		`, []interface{}{"/home/gooby/plugin/", "test.gb"}},
 	}
 
 	for i, tt := range tests {
@@ -502,7 +502,7 @@ func TestFileSplitMethodFail(t *testing.T) {
 		File.split()
 		`, `ArgumentError: Expect 1 argument(s). got: 0`, 1},
 		{`
-		File.split("/home/goby/plugin/test.gb", "/home/goby/plugin/test.gb")
+		File.split("/home/gooby/plugin/test.gb", "/home/gooby/plugin/test.gb")
 		`, `ArgumentError: Expect 1 argument(s). got: 2`, 1},
 		{`
 		File.split(1)
@@ -529,7 +529,7 @@ func TestFileCloseMethod(t *testing.T) {
 		expected interface{}
 	}{
 		{`
-		f = File.new("/tmp/goby/out.txt", "w", 0755)
+		f = File.new("/tmp/gooby/out.txt", "w", 0755)
 		f.close
 		f.close
 		`, nil},
@@ -554,11 +554,11 @@ func TestFileNameMethod(t *testing.T) {
 	}{
 		{`
 		l = ""
-		File.open("/tmp/goby/out.txt", "w", 0755) do |f|
+		File.open("/tmp/gooby/out.txt", "w", 0755) do |f|
 		  l = f.name
 		end
 		l
-		`, "/tmp/goby/out.txt"},
+		`, "/tmp/gooby/out.txt"},
 	}
 
 	for i, tt := range tests {
@@ -580,12 +580,12 @@ func TestFileReadMethod(t *testing.T) {
 	}{
 		{`
 		l = ""
-		File.open("/tmp/goby/out.txt", "w", 0755) do |f|
-		  f.write("Hello, Goby!")
+		File.open("/tmp/gooby/out.txt", "w", 0755) do |f|
+		  f.write("Hello, Gooby!")
 			l = f.read
 		end
 		l
-		`, "Hello, Goby!"},
+		`, "Hello, Gooby!"},
 	}
 
 	for i, tt := range tests {
@@ -623,26 +623,26 @@ func TestFileWriteMethod(t *testing.T) {
 	}{
 		{`
 		l = 0
-		File.open("/tmp/goby/out.txt", "w", 0755) do |f|
+		File.open("/tmp/gooby/out.txt", "w", 0755) do |f|
 		  l = f.write("12345")
 		end
 
 		l
 		`, 5},
 		{`
-		File.open("/tmp/goby/out.txt", "w", 0755) do |f|
-		  f.write("Goby is awesome!!!")
+		File.open("/tmp/gooby/out.txt", "w", 0755) do |f|
+		  f.write("Gooby is awesome!!!")
 		end
 
-		File.new("/tmp/goby/out.txt").read
-		`, "Goby is awesome!!!"},
+		File.new("/tmp/gooby/out.txt").read
+		`, "Gooby is awesome!!!"},
 		{`
-		File.open("/tmp/goby/out.txt", "w", 0755)
-		File.new("/tmp/goby/out.txt").size
+		File.open("/tmp/gooby/out.txt", "w", 0755)
+		File.new("/tmp/gooby/out.txt").size
 		`, 0},
 		{`
-		File.open("/tmp/goby/out.txt", "w", 0755)
-		File.exist?("/tmp/goby/out.txt")
+		File.open("/tmp/gooby/out.txt", "w", 0755)
+		File.exist?("/tmp/gooby/out.txt")
 		`, true},
 	}
 
@@ -658,11 +658,11 @@ func TestFileWriteMethod(t *testing.T) {
 // Helper functions -----------------------------------------------------
 func setup() {
 	// initialize test directory
-	exec.Command("rm", "-rf", "/tmp/goby/*").Run()
-	exec.Command("mkdir", "/tmp/goby").Run()
+	exec.Command("rm", "-rf", "/tmp/gooby/*").Run()
+	exec.Command("mkdir", "/tmp/gooby").Run()
 }
 
 func teardown() {
 	// initialize test directory
-	exec.Command("rm", "-rf", "/tmp/goby/*").Run()
+	exec.Command("rm", "-rf", "/tmp/gooby/*").Run()
 }

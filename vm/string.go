@@ -7,8 +7,8 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
+	"github.com/gooby-lang/gooby/vm/classes"
+	"github.com/gooby-lang/gooby/vm/errors"
 )
 
 // StringObject represents string instances.
@@ -43,7 +43,7 @@ var builtinStringClassMethods = []*BuiltinMethodObject{
 		// TODO: Support other kind of formatting such as %f, %v ... etc
 		//
 		// ```ruby
-		// String.fmt("Hello! %s Lang!", "Goby")                    # => "Hello! Goby Lang!"
+		// String.fmt("Hello! %s Lang!", "Gooby")                    # => "Hello! Gooby Lang!"
 		// String.fmt("I love to eat %s and %s!", "Sushi", "Ramen") # => "I love to eat Sushi and Ramen"
 		// ```
 		//
@@ -403,7 +403,7 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 		//
 		// ```ruby
 		// "Ruby"[1] = "oo" # => "Rooby"
-		// "Go"[2] = "by"   # => "Goby"
+		// "Go"[2] = "by"   # => "Gooby"
 		// "Hello\nWorld"[5] = " " # => "Hello World"
 		// "Ruby"[-3] = "oo" # => "Rooby"
 		// "Hello😊"[5] = "🐟" # => "Hello🐟"
@@ -682,12 +682,12 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 		// Split and loop through the string segment split by the newline escaped character.
 		//
 		// ```ruby
-		// "Hello\nWorld\nGoby".each_line do |line|
+		// "Hello\nWorld\nGooby".each_line do |line|
 		//   puts line
 		// end
 		// # => "Hello"
 		// # => "World"
-		// # => "Goby"
+		// # => "Gooby"
 		// ```
 		//
 		// @return [String]
@@ -1019,11 +1019,11 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 		//
 		// `#replace` is equivalent to Ruby's `gsub`.
 		// ```ruby
-		// "Ruby Lang".replace("Ru", "Go")                # => "Goby Lang"
+		// "Ruby Lang".replace("Ru", "Go")                # => "Gooby Lang"
 		// "Hello 😊 Hello 😊 Hello".replace("😊", "🐟") # => "Hello 🐟 Hello 🐟 Hello"
 		//
 		// re = Regexp.new("(Ru|ru)")
-		// "Ruby Lang".replace(re, "Go")                # => "Goby Lang"
+		// "Ruby Lang".replace(re, "Go")                # => "Gooby Lang"
 		// ```
 		//
 		// @param pattern [Regexp/String], [String] the new string
@@ -1066,10 +1066,10 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 		// match a backslash followed by ‘d’, instead of a digit.
 		//
 		// ```ruby
-		// "Ruby Lang Ruby lang".replace_once("Ru", "Go")                # => "Goby Lang Ruby Lang"
+		// "Ruby Lang Ruby lang".replace_once("Ru", "Go")                # => "Gooby Lang Ruby Lang"
 		//
 		// re = Regexp.new("(Ru|ru)")
-		// "Ruby Lang ruby lang".replace_once(re, "Go")                # => "Goby Lang ruby lang"
+		// "Ruby Lang ruby lang".replace_once(re, "Go")                # => "Gooby Lang ruby lang"
 		// ```
 		//
 		// @param pattern [Regexp/String], [String] the new string
@@ -1329,9 +1329,9 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 		//
 		// ```ruby
 		// "Hello World".split("o") # => ["Hell", " W", "rld"]
-		// "Goby".split("")         # => ["G", "o", "b", "y"]
-		// "Hello\nWorld\nGoby".split("o") # => ["Hello", "World", "Goby"]
-		// "Hello🐟World🐟Goby".split("🐟") # => ["Hello", "World", "Goby"]
+		// "Gooby".split("")         # => ["G", "o", "b", "y"]
+		// "Hello\nWorld\nGooby".split("o") # => ["Hello", "World", "Gooby"]
+		// "Hello🐟World🐟Gooby".split("🐟") # => ["Hello", "World", "Gooby"]
 		// ```
 		//
 		// @param delimiter [String]
@@ -1406,8 +1406,8 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 		// line feed, vertical tab, form feed, carriage return, space.
 		//
 		// ```ruby
-		// "  Goby Lang  ".strip   # => "Goby Lang"
-		// "\nGoby Lang\r\t".strip # => "Goby Lang"
+		// "  Gooby Lang  ".strip   # => "Gooby Lang"
+		// "\nGooby Lang\r\t".strip # => "Gooby Lang"
 		// ```
 		//
 		// @return [String]
@@ -1438,7 +1438,7 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 		// Passing an empty string returns an empty array.
 		//
 		// ```ruby
-		// "Goby".to_a       # => ["G", "o", "b", "y"]
+		// "Gooby".to_a       # => ["G", "o", "b", "y"]
 		// "😊Hello🐟".to_a # => ["😊", "H", "e", "l", "l", "o", "🐟"]
 		// "".to_a           # => [ ]
 		// ```
@@ -1466,7 +1466,7 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 	// Passing an empty string returns an empty array.
 	//
 	// ```ruby
-	// "Goby".to_a       # => ["G", "o", "b", "y"]
+	// "Gooby".to_a       # => ["G", "o", "b", "y"]
 	// "😊Hello🐟".to_a # => ["😊", "H", "e", "l", "l", "o", "🐟"]
 	// "".to_a           # => [ ]
 	// ```

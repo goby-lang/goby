@@ -44,7 +44,7 @@ class LazyEnumerator
   end
 
   def map
-    # Workaround for Goby's lack of &block support.
+    # Workaround for Gooby's lack of &block support.
     LazyEnumerator.new(self) do |value|
       yield(value)
     end

@@ -4,8 +4,8 @@ import (
 	"math"
 	"strconv"
 
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
+	"github.com/gooby-lang/gooby/vm/classes"
+	"github.com/gooby-lang/gooby/vm/errors"
 )
 
 // IntegerObject represents number objects which can bring into mathematical calculations.

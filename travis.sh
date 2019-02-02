@@ -6,7 +6,7 @@ set -e
 echo "" > coverage.txt
 
 for d in $(go list ./...); do
-    if [ $d == "github.com/goby-lang/goby/vm" ]; then
+    if [ $d == "github.com/gooby-lang/gooby/vm" ]; then
         # Test vm's code without running race detection because that breaks plugin tests.
         # This can generate full coverage report of vm package.
         # Test that need to run without race detection include NoRaceDetection in the name,
@@ -32,9 +32,9 @@ for d in $(go list ./...); do
     fi
 done
 
-# Test if libs that require built in Goby script would work.
+# Test if libs that require built in Gooby script would work.
 # TODO: Write a test for this specific case
 make install
-goby test specs
+gooby test specs
 
 ./benchmark.rb

@@ -1,6 +1,6 @@
 package precedence
 
-import "github.com/goby-lang/goby/compiler/token"
+import "github.com/gooby-lang/gooby/compiler/token"
 
 // Constants for denoting precedence
 const (

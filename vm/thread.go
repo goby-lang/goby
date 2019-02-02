@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/goby-lang/goby/compiler"
-	"github.com/goby-lang/goby/compiler/bytecode"
-	"github.com/goby-lang/goby/compiler/parser"
-	"github.com/goby-lang/goby/vm/errors"
+	"github.com/gooby-lang/gooby/compiler"
+	"github.com/gooby-lang/gooby/compiler/bytecode"
+	"github.com/gooby-lang/gooby/compiler/parser"
+	"github.com/gooby-lang/gooby/vm/errors"
 )
 
 const mainThreadID = 0
@@ -80,7 +80,7 @@ func (t *Thread) getClassIS(name string, filename filename) *instructionSet {
 	return is
 }
 
-func (t *Thread) execGobyLib(libName string) (err error) {
+func (t *Thread) execGoobyLib(libName string) (err error) {
 	libPath := filepath.Join(t.vm.libPath, libName)
 	err = t.execFile(libPath)
 	return
@@ -185,7 +185,7 @@ func (t *Thread) reportErrorAndStop(e interface{}) {
 
 	top := t.Stack.top().Target
 	switch err := top.(type) {
-	// If we can get an error object it means it's an Goby error
+	// If we can get an error object it means it's an Gooby error
 	case *Error:
 		if !err.storedTraces {
 			for i := t.callFrameStack.pointer - 1; i > 0; i-- {

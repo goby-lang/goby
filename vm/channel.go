@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
+	"github.com/gooby-lang/gooby/vm/classes"
+	"github.com/gooby-lang/gooby/vm/errors"
 )
 
-// ChannelObject represents Goby's "channel", which equips the Golang' channel and works with `thread`.
+// ChannelObject represents Gooby's "channel", which equips the Golang' channel and works with `thread`.
 // `thread` is actually a "goroutine".
 // A channel object can relay any kind of objects and guarantees thread-safe communications.
 // You should always use channel objects for safe communications between threads.
@@ -69,7 +69,7 @@ type ChannelObject struct {
 }
 
 // Channel's state.
-// To Goby language contributors: Golang's channels should be carefully handled because:
+// To Gooby language contributors: Golang's channels should be carefully handled because:
 // - You cannot write to closed channels, or got a panic.
 // - You cannot close closed channels, or got a panic.
 // - You cannot write to nil channels, or causes a deadlock.

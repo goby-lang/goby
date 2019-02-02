@@ -7,15 +7,15 @@ import (
 	"path/filepath"
 	"syscall"
 
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
+	"github.com/gooby-lang/gooby/vm/classes"
+	"github.com/gooby-lang/gooby/vm/errors"
 )
 
 // FileObject is a special type that contains file pointer so we can keep track on target file.
 // Using `File.open` with block is recommended because the instance (block variable) automatically closes.
 //
 // ```ruby
-// File.open("/tmp/goby/out.txt", "w", 0755) do |f|
+// File.open("/tmp/gooby/out.txt", "w", 0755) do |f|
 //   a = f.read
 //   f.write(a + "12345")
 // end         # f automatically closes
@@ -39,7 +39,7 @@ var builtinFileClassMethods = []*BuiltinMethodObject{
 		// Returns the last element from path.
 		//
 		// ```ruby
-		// File.basename("/home/goby/plugin/loop.gb") # => loop.gb
+		// File.basename("/home/gooby/plugin/loop.gb") # => loop.gb
 		// ```
 		// @param filePath [String]
 		// @return [String]
@@ -64,7 +64,7 @@ var builtinFileClassMethods = []*BuiltinMethodObject{
 		//
 		// ```ruby
 		// File.chmod(0755, "test.sh") # => 1
-		// File.chmod(0755, "goby", "../test.sh") # => 2
+		// File.chmod(0755, "gooby", "../test.sh") # => 2
 		// ```
 		// @param fileName [String]
 		// @return [Integer]
@@ -193,7 +193,7 @@ var builtinFileClassMethods = []*BuiltinMethodObject{
 		// Arguments can be zero.
 		//
 		// ```ruby
-		// File.join("home", "goby", "plugin") # => home/goby/plugin
+		// File.join("home", "gooby", "plugin") # => home/gooby/plugin
 		// ```
 		//
 		// @param fileName [String]
@@ -323,7 +323,7 @@ var builtinFileClassMethods = []*BuiltinMethodObject{
 		// Returns array of path and file.
 		//
 		// ```ruby
-		// File.split("/home/goby/.settings") # => ["/home/goby/", ".settings"]
+		// File.split("/home/gooby/.settings") # => ["/home/gooby/", ".settings"]
 		// ```
 		//
 		// @param filePath [String]
@@ -353,11 +353,11 @@ var builtinFileInstanceMethods = []*BuiltinMethodObject{
 		// Closes the instance of File class. Possible to close twice.
 		//
 		// ```ruby
-		// File.open("/tmp/goby/out.txt", "w", 0755) do |f|
+		// File.open("/tmp/gooby/out.txt", "w", 0755) do |f|
 		//   f.close      # redundant: instance f will automatically close
 		// end
 		//
-		// f = File.new("/tmp/goby/out.txt", "w", 0755)
+		// f = File.new("/tmp/gooby/out.txt", "w", 0755)
 		// f.close
 		// f.close
 		// ```
@@ -375,8 +375,8 @@ var builtinFileInstanceMethods = []*BuiltinMethodObject{
 	// Returns the path and the file name.
 	//
 	// ```ruby
-	// File.open("/tmp/goby/out.txt", "w", 0755) do |f|
-	//   puts f.name      #=> "/tmp/goby/out.txt"
+	// File.open("/tmp/gooby/out.txt", "w", 0755) do |f|
+	//   puts f.name      #=> "/tmp/gooby/out.txt"
 	// end
 	// ```
 	//
@@ -392,9 +392,9 @@ var builtinFileInstanceMethods = []*BuiltinMethodObject{
 	// Returns the contents of the specified file.
 	//
 	// ```ruby
-	// File.open("/tmp/goby/out.txt", "w", 0755) do |f|
-	//   f.write("Hello, Goby!")
-	//   puts f.read      #=> "Hello, Goby!"
+	// File.open("/tmp/gooby/out.txt", "w", 0755) do |f|
+	//   f.write("Hello, Gooby!")
+	//   puts f.read      #=> "Hello, Gooby!"
 	// end
 	// ```
 	//

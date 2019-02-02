@@ -29,7 +29,7 @@ func TestRegexpClassCreation(t *testing.T) {
 		expected interface{}
 	}{
 		{`Regexp.new('').to_s`, ""},
-		{`Regexp.new('🍣Goby🍺').class.name`, "Regexp"},
+		{`Regexp.new('🍣Gooby🍺').class.name`, "Regexp"},
 	}
 
 	for i, tt := range tests {
@@ -59,18 +59,18 @@ func TestRegexpComparison(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`Regexp.new('🍣Goby[0-9]+🍺') == Regexp.new('🍣Goby[0-9]+🍺')`, true},
-		{`Regexp.new('🍣Goby[0-9]+🍺') == Regexp.new('🍣Goby[a-z]+🍺')`, false},
-		{`Regexp.new('🍣Goby[0-9]+🍺') == "🍣Goby[0-9]+🍺"`, false},
-		{`Regexp.new('🍣Goby[0-9]+🍺') == "🍣Goby[0-9]🍺"`, false},
-		{`Regexp.new('🍣Goby[0-9]+🍺') == ["🍣Goby[0-9]+🍺"]`, false},
-		{`Regexp.new('🍣Goby[0-9]+🍺') == { key: "🍣Goby[0-9]+🍺" }`, false},
-		{`Regexp.new('🍣Goby[0-9]+🍺') == 1192`, false},
-		{`Regexp.new('🍣Goby[0-9]+🍺') == '3.14'.to_f`, false},
-		{`Regexp.new('🍣Goby[0-9]+🍺') == true`, false},
-		{`Regexp.new('🍣Goby[0-9]+🍺') == false`, false},
-		{`Regexp.new('🍣Goby[0-9]+🍺') == nil`, false},
-		{`"Goby[0-9]" == Regexp.new("Goby[0-9]")`, false},
+		{`Regexp.new('🍣Gooby[0-9]+🍺') == Regexp.new('🍣Gooby[0-9]+🍺')`, true},
+		{`Regexp.new('🍣Gooby[0-9]+🍺') == Regexp.new('🍣Gooby[a-z]+🍺')`, false},
+		{`Regexp.new('🍣Gooby[0-9]+🍺') == "🍣Gooby[0-9]+🍺"`, false},
+		{`Regexp.new('🍣Gooby[0-9]+🍺') == "🍣Gooby[0-9]🍺"`, false},
+		{`Regexp.new('🍣Gooby[0-9]+🍺') == ["🍣Gooby[0-9]+🍺"]`, false},
+		{`Regexp.new('🍣Gooby[0-9]+🍺') == { key: "🍣Gooby[0-9]+🍺" }`, false},
+		{`Regexp.new('🍣Gooby[0-9]+🍺') == 1192`, false},
+		{`Regexp.new('🍣Gooby[0-9]+🍺') == '3.14'.to_f`, false},
+		{`Regexp.new('🍣Gooby[0-9]+🍺') == true`, false},
+		{`Regexp.new('🍣Gooby[0-9]+🍺') == false`, false},
+		{`Regexp.new('🍣Gooby[0-9]+🍺') == nil`, false},
+		{`"Gooby[0-9]" == Regexp.new("Gooby[0-9]")`, false},
 	}
 
 	for i, tt := range tests {
@@ -86,10 +86,10 @@ func TestRegexpMatchMethod(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`Regexp.new("Goby").match?("Hello, Goby!")`, true},
-		{`Regexp.new("Python").match?("Hello, Goby!")`, false},
-		{`Regexp.new("Hello Goby!").match?("Goby")`, false},
-		{`Regexp.new("GOBY").match?("Hello, Goby!")`, false},
+		{`Regexp.new("Gooby").match?("Hello, Gooby!")`, true},
+		{`Regexp.new("Python").match?("Hello, Gooby!")`, false},
+		{`Regexp.new("Hello Gooby!").match?("Gooby")`, false},
+		{`Regexp.new("GOBY").match?("Hello, Gooby!")`, false},
 		{`Regexp.new("234").match?("Hello, 1234567890!")`, true},
 		{`Regexp.new(" 234").match?("Hello, 1234567890!")`, false},
 

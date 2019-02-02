@@ -1,7 +1,7 @@
 package vm
 
 import (
-	"github.com/goby-lang/goby/compiler/bytecode"
+	"github.com/gooby-lang/gooby/compiler/bytecode"
 )
 
 // instructionTranslator is responsible for parsing bytecodes

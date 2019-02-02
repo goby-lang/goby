@@ -1,7 +1,7 @@
 package ripper
 
 import (
-	"github.com/goby-lang/goby/vm"
+	"github.com/gooby-lang/gooby/vm"
 	"strings"
 	"testing"
 )

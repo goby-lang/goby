@@ -3,10 +3,10 @@ package vm
 import (
 	"fmt"
 
-	"github.com/goby-lang/goby/vm/classes"
+	"github.com/gooby-lang/gooby/vm/classes"
 )
 
-// BooleanObject represents boolean object in goby and no instance methods are contained within it.
+// BooleanObject represents boolean object in gooby and no instance methods are contained within it.
 // `Boolean` class is just a dummy to hold logical `true` and `false` representation and no other active usage.
 // `Boolean.new` is not supported.
 //

@@ -3,9 +3,9 @@ package compiler
 import (
 	"fmt"
 
-	"github.com/goby-lang/goby/compiler/bytecode"
-	"github.com/goby-lang/goby/compiler/lexer"
-	"github.com/goby-lang/goby/compiler/parser"
+	"github.com/gooby-lang/gooby/compiler/bytecode"
+	"github.com/gooby-lang/gooby/compiler/lexer"
+	"github.com/gooby-lang/gooby/compiler/parser"
 )
 
 // CompileToInstructions compiles input source code into instruction set data structures

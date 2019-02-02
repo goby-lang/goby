@@ -12,13 +12,13 @@ before_install:
 
 before_script:
   - ./prepare_travis_for_fork.sh
-  - psql -c 'create database goby_test;' -U postgres
+  - psql -c 'create database gooby_test;' -U postgres
 
 script:
   - ./travis.sh
 
 env:
-  - "GOBY_ROOT=$HOME/gopath/src/github.com/goby-lang/goby"
+  - "GOBY_ROOT=$HOME/gopath/src/github.com/gooby-lang/gooby"
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
@@ -26,7 +26,7 @@ after_success:
 notifications:
   slack:
     rooms:
-      - goby-lang:Ler5Uge2Vlx3O8Yt2OFcKg5W#general
+      - gooby-lang:Ler5Uge2Vlx3O8Yt2OFcKg5W#general
     on_success: always
     on_failure: always
     on_start: never

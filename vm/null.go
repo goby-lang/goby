@@ -1,11 +1,11 @@
 package vm
 
 import (
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
+	"github.com/gooby-lang/gooby/vm/classes"
+	"github.com/gooby-lang/gooby/vm/errors"
 )
 
-// NullObject (`nil`) represents the null value in Goby.
+// NullObject (`nil`) represents the null value in Gooby.
 // `nil` is convert into `null` when exported to JSON format.
 // - `Null.new` is not supported.
 type NullObject struct {
@@ -13,7 +13,7 @@ type NullObject struct {
 }
 
 var (
-	// NULL represents Goby's null objects.
+	// NULL represents Gooby's null objects.
 	NULL *NullObject
 )
 

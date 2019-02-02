@@ -8,14 +8,14 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/goby-lang/goby/compiler"
-	"github.com/goby-lang/goby/compiler/parser"
-	"github.com/goby-lang/goby/igb"
-	_ "github.com/goby-lang/goby/native/db"
-	_ "github.com/goby-lang/goby/native/plugin"
-	_ "github.com/goby-lang/goby/native/result"
-	_ "github.com/goby-lang/goby/native/ripper"
-	"github.com/goby-lang/goby/vm"
+	"github.com/gooby-lang/gooby/compiler"
+	"github.com/gooby-lang/gooby/compiler/parser"
+	"github.com/gooby-lang/gooby/igb"
+	_ "github.com/gooby-lang/gooby/native/db"
+	_ "github.com/gooby-lang/gooby/native/plugin"
+	_ "github.com/gooby-lang/gooby/native/result"
+	_ "github.com/gooby-lang/gooby/native/ripper"
+	"github.com/gooby-lang/gooby/vm"
 	"github.com/pkg/profile"
 )
 
@@ -24,8 +24,8 @@ const Version string = vm.Version
 func main() {
 	profileCPUOptionPtr := flag.Bool("profile-cpu", false, "Profile cpu usage")
 	profileMemOptionPtr := flag.Bool("profile-mem", false, "Profile memory allocation")
-	versionOptionPtr := flag.Bool("v", false, "Show current Goby version")
-	interactiveOptionPtr := flag.Bool("i", false, "Run interactive goby")
+	versionOptionPtr := flag.Bool("v", false, "Show current Gooby version")
+	interactiveOptionPtr := flag.Bool("i", false, "Run interactive gooby")
 	issueOptionPtr := flag.Bool("e", false, "Generate reporting format")
 
 	flag.Parse()

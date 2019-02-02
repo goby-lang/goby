@@ -2,13 +2,13 @@ package parser
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/compiler/ast"
-	"github.com/goby-lang/goby/compiler/parser/arguments"
-	"github.com/goby-lang/goby/compiler/parser/errors"
-	"github.com/goby-lang/goby/compiler/parser/events"
-	"github.com/goby-lang/goby/compiler/parser/precedence"
-	"github.com/goby-lang/goby/compiler/parser/states"
-	"github.com/goby-lang/goby/compiler/token"
+	"github.com/gooby-lang/gooby/compiler/ast"
+	"github.com/gooby-lang/gooby/compiler/parser/arguments"
+	"github.com/gooby-lang/gooby/compiler/parser/errors"
+	"github.com/gooby-lang/gooby/compiler/parser/events"
+	"github.com/gooby-lang/gooby/compiler/parser/precedence"
+	"github.com/gooby-lang/gooby/compiler/parser/states"
+	"github.com/gooby-lang/gooby/compiler/token"
 )
 
 type (

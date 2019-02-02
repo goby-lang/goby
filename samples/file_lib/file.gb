@@ -1,4 +1,4 @@
 puts(File.extname("test.gb"))
-puts(File.split("/home/goby/test.sh"))
-puts(File.join("home", "goby", "test.sh"))
+puts(File.split("/home/gooby/test.sh"))
+puts(File.join("home", "gooby", "test.sh"))
 puts(File.size("file.gb"))

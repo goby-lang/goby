@@ -54,10 +54,10 @@ func TestArrayComparison(t *testing.T) {
 		{`[1, "String", true, 2..5] == [1, "String", true, 2..5]`, true},
 		{`[1, "String", true, 2..5] == [1, "String", false, 2..5]`, false},
 		{`[1, "String", true, 2..5] == ["String", 1, false, 2..5]`, false}, // Array has order issue
-		{`[1, { a: 1, b: 2 }, "Goby" ] == [1, { a: 1, b: 2 }, "Goby"]`, true},
-		{`[1, { a: 1, b: 2 }, "Goby" ] == [1, { b: 2, a: 1 }, "Goby"]`, true},
-		{`[1, { a: 1, b: 2 }, "Goby" ] == [1, { a: 1, b: 2, c: 3 }, "Goby"]`, false}, // Array of hash has no order issue
-		{`[1, { a: 1, b: 2 }, "Goby" ] == [1, { a: 2, b: 2, a: 1 }, "Goby"]`, true},  // Array of hash key will be overwritten if duplicated
+		{`[1, { a: 1, b: 2 }, "Gooby" ] == [1, { a: 1, b: 2 }, "Gooby"]`, true},
+		{`[1, { a: 1, b: 2 }, "Gooby" ] == [1, { b: 2, a: 1 }, "Gooby"]`, true},
+		{`[1, { a: 1, b: 2 }, "Gooby" ] == [1, { a: 1, b: 2, c: 3 }, "Gooby"]`, false}, // Array of hash has no order issue
+		{`[1, { a: 1, b: 2 }, "Gooby" ] == [1, { a: 2, b: 2, a: 1 }, "Gooby"]`, true},  // Array of hash key will be overwritten if duplicated
 		{`[1, "String", true, 2..5] == Integer`, false},
 		{`[1, "String", true, 2..5] != 123`, true},
 		{`[1, "String", true, 2..5] != "123"`, true},
@@ -67,10 +67,10 @@ func TestArrayComparison(t *testing.T) {
 		{`[1, "String", true, 2..5] != [1, "String", true, 2..5]`, false},
 		{`[1, "String", true, 2..5] != [1, "String", false, 2..5]`, true},
 		{`[1, "String", true, 2..5] != ["String", 1, false, 2..5]`, true}, // Array has order issue
-		{`[1, { a: 1, b: 2 }, "Goby" ] != [1, { a: 1, b: 2 }, "Goby"]`, false},
-		{`[1, { a: 1, b: 2 }, "Goby" ] != [1, { b: 2, a: 1 }, "Goby"]`, false},
-		{`[1, { a: 1, b: 2 }, "Goby" ] != [1, { a: 1, b: 2, c: 3 }, "Goby"]`, true},  // Array of hash has no order issue
-		{`[1, { a: 1, b: 2 }, "Goby" ] != [1, { a: 2, b: 2, a: 1 }, "Goby"]`, false}, // Array of hash key will be overwritten if duplicated
+		{`[1, { a: 1, b: 2 }, "Gooby" ] != [1, { a: 1, b: 2 }, "Gooby"]`, false},
+		{`[1, { a: 1, b: 2 }, "Gooby" ] != [1, { b: 2, a: 1 }, "Gooby"]`, false},
+		{`[1, { a: 1, b: 2 }, "Gooby" ] != [1, { a: 1, b: 2, c: 3 }, "Gooby"]`, true},  // Array of hash has no order issue
+		{`[1, { a: 1, b: 2 }, "Gooby" ] != [1, { a: 2, b: 2, a: 1 }, "Gooby"]`, false}, // Array of hash key will be overwritten if duplicated
 		{`[1, "String", true, 2..5] != Integer`, true},
 	}
 

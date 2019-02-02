@@ -12,13 +12,13 @@ import (
 	"strings"
 	"time"
 
-	parserErr "github.com/goby-lang/goby/compiler/parser/errors"
+	parserErr "github.com/gooby-lang/gooby/compiler/parser/errors"
 
 	"github.com/chzyer/readline"
-	"github.com/goby-lang/goby/compiler/bytecode"
-	"github.com/goby-lang/goby/compiler/lexer"
-	"github.com/goby-lang/goby/compiler/parser"
-	"github.com/goby-lang/goby/vm"
+	"github.com/gooby-lang/gooby/compiler/bytecode"
+	"github.com/gooby-lang/gooby/compiler/lexer"
+	"github.com/gooby-lang/gooby/compiler/parser"
+	"github.com/gooby-lang/gooby/vm"
 	"github.com/looplab/fsm"
 	"github.com/mattn/go-colorable"
 )
@@ -85,7 +85,7 @@ func println(s ...string) {
 	out.Write([]byte(strings.Join(s, " ") + "\n"))
 }
 
-// StartIgb starts goby's REPL.
+// StartIgb starts gooby's REPL.
 func StartIgb(version string) {
 
 reset:
@@ -94,7 +94,7 @@ reset:
 
 	igb.rl, err = readline.NewEx(&readline.Config{
 		Prompt:              prompt1,
-		HistoryFile:         filepath.Join(os.TempDir(), "readline_goby.tmp"),
+		HistoryFile:         filepath.Join(os.TempDir(), "readline_gooby.tmp"),
 		AutoComplete:        igb.completer,
 		InterruptPrompt:     interrupt,
 		HistorySearchFold:   true,
@@ -109,7 +109,7 @@ reset:
 
 	log.SetOutput(igb.rl.Stderr())
 
-	println("Goby", version, fortune(), fortune(), fortune())
+	println("Gooby", version, fortune(), fortune(), fortune())
 
 	ivm, err := newIVM()
 

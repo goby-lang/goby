@@ -10,8 +10,8 @@ import (
 
 	"sort"
 
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
+	"github.com/gooby-lang/gooby/vm/classes"
+	"github.com/gooby-lang/gooby/vm/errors"
 )
 
 // RClass represents normal (not built in) class object
@@ -69,7 +69,7 @@ func ExternalClass(name, path string, classMethods, instanceMethods map[string]M
 			return nil
 		}
 
-		return v.mainThread.execGobyLib(path)
+		return v.mainThread.execGoobyLib(path)
 	}
 }
 
@@ -824,7 +824,7 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 	{
 		// Returns true if a block is given in the current context and `yield` is ready to call.
 		//
-		// **Note:** The method name does not end with '?' because the sign is unavailable in Goby for now.
+		// **Note:** The method name does not end with '?' because the sign is unavailable in Gooby for now.
 		//
 		// ```ruby
 		// class File
@@ -931,7 +931,7 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 			}
 
 			c := args[0]
-			gobyClass, ok := c.(*RClass)
+			goobyClass, ok := c.(*RClass)
 
 			if !ok {
 				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.ClassClass, c.Class().Name)
@@ -940,7 +940,7 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 			receiverClass := receiver.Class()
 
 			for {
-				if receiverClass.Name == gobyClass.Name {
+				if receiverClass.Name == goobyClass.Name {
 					return TRUE
 				}
 
@@ -1286,7 +1286,7 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 		},
 	},
 	{
-		// Loads the given Goby library name without extension (mainly for modules), returning `true`
+		// Loads the given Gooby library name without extension (mainly for modules), returning `true`
 		// if successful and `false` if the feature is already loaded.
 		//
 		// ```ruby
@@ -1314,7 +1314,7 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 					loaders, ok := externalClasses[libName]
 					externalClassLock.Unlock()
 					if !ok {
-						err := t.execGobyLib(libName + ".gb")
+						err := t.execGoobyLib(libName + ".gb")
 						if err != nil {
 							return t.vm.InitErrorObject(errors.IOError, sourceLine, errors.CantLoadFile, libName)
 						}
@@ -1336,7 +1336,7 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 		},
 	},
 	{
-		// Loads the Goby library (mainly for modules) from the given local path plus name
+		// Loads the Gooby library (mainly for modules) from the given local path plus name
 		// without extension from the current directory, returning `true` if successful,
 		// and `false` if the feature is already loaded.
 		//

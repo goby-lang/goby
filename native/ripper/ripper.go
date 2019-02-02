@@ -2,20 +2,20 @@ package ripper
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/compiler"
-	"github.com/goby-lang/goby/compiler/bytecode"
-	"github.com/goby-lang/goby/compiler/lexer"
-	"github.com/goby-lang/goby/compiler/parser"
-	"github.com/goby-lang/goby/compiler/token"
-	"github.com/goby-lang/goby/vm"
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
+	"github.com/gooby-lang/gooby/compiler"
+	"github.com/gooby-lang/gooby/compiler/bytecode"
+	"github.com/gooby-lang/gooby/compiler/lexer"
+	"github.com/gooby-lang/gooby/compiler/parser"
+	"github.com/gooby-lang/gooby/compiler/token"
+	"github.com/gooby-lang/gooby/vm"
+	"github.com/gooby-lang/gooby/vm/classes"
+	"github.com/gooby-lang/gooby/vm/errors"
 	"strings"
 )
 
-// Ripper is a loadable library and has abilities to parse/lex/tokenize/get instructions of Goby codes from String.
-// The library would be convenient for validating Goby codes when building lint tools,
-// as well as the tests for Goby's compiler.
+// Ripper is a loadable library and has abilities to parse/lex/tokenize/get instructions of Gooby codes from String.
+// The library would be convenient for validating Gooby codes when building lint tools,
+// as well as the tests for Gooby's compiler.
 // For now, Ripper is a class and has only class methods, but I think this should finally be a 'newable' module with more sophisticated instance methods.
 
 // Imported objects from vm
@@ -29,8 +29,8 @@ type ArrayObject = vm.ArrayObject
 
 // Class methods --------------------------------------------------------
 
-// Returns the list of instruction code generated from Goby code.
-// Returns `[]` when the Goby code is invalid.
+// Returns the list of instruction code generated from Gooby code.
+// Returns `[]` when the Gooby code is invalid.
 // The return value is a "tuple" style nested array:
 // - `Array`: contains an instruction set
 //   - `arg_types:` (none if `nil`)
@@ -54,7 +54,7 @@ type ArrayObject = vm.ArrayObject
 // #=> []
 // ```
 //
-// @param Goby code [String]
+// @param Gooby code [String]
 // @return [Array]
 func instruction(receiver Object, sourceLine int, t *Thread, args []Object) Object {
 	if len(args) != 1 {
@@ -72,7 +72,7 @@ func instruction(receiver Object, sourceLine int, t *Thread, args []Object) Obje
 }
 
 // Returns a nested array that contains the line #, type of the tokenize, and the literal of the tokenize.
-// Note that the class method does not return any errors even though the provided Goby code is invalid.
+// Note that the class method does not return any errors even though the provided Gooby code is invalid.
 //
 // ```ruby
 // require 'ripper'; Ripper.lex "10.times do |i| puts i end"
@@ -82,7 +82,7 @@ func instruction(receiver Object, sourceLine int, t *Thread, args []Object) Obje
 // #=> [[0, "on_int", "10"], [0, "on_dot", "."], [0, "on_ident", "times"], [0, "on_do", "do"], [0, "on_bar", "|"], [0, "on_ident", "i"], [0, "on_bar", "|"], [0, "on_ident", "puts"], [0, "on_ident", "i"], [0, "on_eof", ""]]
 // ```
 //
-// @param Goby code [String]
+// @param Gooby code [String]
 // @return [Array]
 func lex(receiver Object, sourceLine int, t *Thread, args []Object) Object {
 	if len(args) != 1 {
@@ -117,7 +117,7 @@ func new(receiver Object, sourceLine int, t *Thread, args []Object) Object {
 	return t.VM().InitNoMethodError(sourceLine, "new", receiver)
 }
 
-// Returns the parsed Goby codes as a String object.
+// Returns the parsed Gooby codes as a String object.
 // Returns an error when the code is invalid.
 //
 // ```ruby
@@ -127,10 +127,10 @@ func new(receiver Object, sourceLine int, t *Thread, args []Object) Object {
 // #=> end"
 //
 // require 'ripper'; Ripper.parse "10.times do |i| puts i" # the code is invalid
-// #=> TypeError: InternalError%!(EXTRA string=String, string=Invalid Goby code)
+// #=> TypeError: InternalError%!(EXTRA string=String, string=Invalid Gooby code)
 // ```
 //
-// @param Goby code [String]
+// @param Gooby code [String]
 // @return [String]
 func parse(receiver Object, sourceLine int, t *Thread, args []Object) Object {
 	if len(args) != 1 {
@@ -149,7 +149,7 @@ func parse(receiver Object, sourceLine int, t *Thread, args []Object) Object {
 	return t.VM().InitStringObject(program.String())
 }
 
-// Returns a tokenized Goby codes as an Array object.
+// Returns a tokenized Gooby codes as an Array object.
 // Note that this does not return any errors even though the provided code is invalid.
 //
 // ```ruby
@@ -160,7 +160,7 @@ func parse(receiver Object, sourceLine int, t *Thread, args []Object) Object {
 // #=> ["10", ".", "times", "do", "|", "i", "|", "puts", "i", "EOF"]
 // ```
 //
-// @param Goby code [String]
+// @param Gooby code [String]
 // @return [String]
 func tokenize(receiver Object, sourceLine int, t *Thread, args []Object) Object {
 	if len(args) != 1 {

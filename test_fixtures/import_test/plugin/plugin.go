@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/goby-lang/goby/test_fixtures/import_test/plugin/lib"
+	"github.com/gooby-lang/gooby/test_fixtures/import_test/plugin/lib"
 )
 
 var ReturnLibName = lib.ReturnLibName

@@ -6,8 +6,8 @@ import (
 
 	"sort"
 
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
+	"github.com/gooby-lang/gooby/vm/classes"
+	"github.com/gooby-lang/gooby/vm/errors"
 )
 
 // ArrayObject represents an instance from Array class.
@@ -63,7 +63,7 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 		//
 		// Special case 2: Second argument is negative
 		// This behaviour is different from Ruby itself, in Ruby, it returns "nil".
-		// However, in Goby, it raises error because there cannot be negative count values.
+		// However, in Gooby, it raises error because there cannot be negative count values.
 		//
 		// a[1, -1]  #=> ArgumentError: Expect second argument to be positive value. got: -1
 		// a[-4, -3] #=> ArgumentError: Expect second argument to be positive value. got: -3
@@ -1427,8 +1427,8 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 		// a = [1, 2]
 		// a.unshift(0)             #=> [0, 1, 2]
 		// a                        #=> [0, 1, 2]
-		// a.unshift(:hello, :goby) #=> ["hello", "goby", 0, 1, 2]
-		// a                        #=> ["hello", "goby", 0, 1, 2]
+		// a.unshift(:hello, :gooby) #=> ["hello", "gooby", 0, 1, 2]
+		// a                        #=> ["hello", "gooby", 0, 1, 2]
 		// ```
 		//
 		// @param element [Object]

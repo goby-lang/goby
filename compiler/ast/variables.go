@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// Variable interface represents assignable nodes in Goby, currently are Identifier, InstanceVariable and Constant
+// Variable interface represents assignable nodes in Gooby, currently are Identifier, InstanceVariable and Constant
 type Variable interface {
 	variableNode()
 	ReturnValue() string

@@ -646,26 +646,26 @@ func TestHashEachKeyMethod(t *testing.T) {
 		expected []interface{}
 	}{
 		{`
-			{ b: "Hello", c: "World", a: "Goby" }.each_key do end
+			{ b: "Hello", c: "World", a: "Gooby" }.each_key do end
 		`, []interface{}{"a", "b", "c"}},
 		{`
-			{ a: "Hello", b: "World", c: "Goby" }.each_key do |key|
+			{ a: "Hello", b: "World", c: "Gooby" }.each_key do |key|
 				# Empty Block
 			end
 		`, []interface{}{"a", "b", "c"}},
 		{`
-			{ b: "Hello", c: "World", a: "Goby" }.each_key do
+			{ b: "Hello", c: "World", a: "Gooby" }.each_key do
 				# Empty Block
 			end
 		`, []interface{}{"a", "b", "c"}},
 		{`
-			{ b: "Hello", c: "World", b: "Goby" }.each_key do |key|
+			{ b: "Hello", c: "World", b: "Gooby" }.each_key do |key|
 				# Empty Block
 			end
 		`, []interface{}{"b", "c"}},
 		{`
 			arr = []
-			{ a: "Hello", b: "World", c: "Goby" }.each_key do |key|
+			{ a: "Hello", b: "World", c: "Gooby" }.each_key do |key|
 				arr.push(key)
 			end
 			arr
@@ -764,11 +764,11 @@ func TestHashEachValueMethod(t *testing.T) {
 			`, 9},
 		{`
 			string = ""
-			{ a: "Hello", b: "World", c: "Goby", d: "Lang" }.each_value do |v|
+			{ a: "Hello", b: "World", c: "Gooby", d: "Lang" }.each_value do |v|
 				string = string + v + " "
 			end
 			string
-			`, "Hello World Goby Lang "},
+			`, "Hello World Gooby Lang "},
 		{`
 			string = ""
 			{}.each_value do |v|
@@ -852,9 +852,9 @@ func TestHashEqualMethod(t *testing.T) {
 		{`{ a: 1, b: 2 }.eql?({ a: 1, b: 2, a: 2 })`, false},
 		{`{ a: [1, 2, 3], b: { hello: "World" } }.eql?({ a: [1, 2, 3], b: { hello: "World"} })`, true},
 		{`{ a: [1, 2, 3], b: { hello: "World" } }.eql?({ a: [3, 2, 1], b: { hello: "World"} })`, false},
-		{`{ b: { hello: "World", lang: "Goby" } }.eql?({ b: { lang: "Goby", hello: "World"} })`, true},
-		{`{ number: 1, boolean: true, string: "Goby", array: [1, "2", true], hash: { hello: "World", lang: "Goby" }, range: 2..5, null: nil }.eql?({ number: 1, boolean: true, string: "Goby", array: [1, "2", true], hash: { hello: "World", lang: "Goby" }, range: 2..5, null: nil })`, true},
-		{`{ number: 1, boolean: true, string: "Goby", array: [1, "2", true], hash: { lang: "Goby", hello: "World" }, range: 2..5, null: nil }.eql?({ range: 2..5, null: nil, string: "Goby", number: 1, array: [1, "2", true], boolean: true, hash: { hello: "World", lang: "Goby" } })`, true},
+		{`{ b: { hello: "World", lang: "Gooby" } }.eql?({ b: { lang: "Gooby", hello: "World"} })`, true},
+		{`{ number: 1, boolean: true, string: "Gooby", array: [1, "2", true], hash: { hello: "World", lang: "Gooby" }, range: 2..5, null: nil }.eql?({ number: 1, boolean: true, string: "Gooby", array: [1, "2", true], hash: { hello: "World", lang: "Gooby" }, range: 2..5, null: nil })`, true},
+		{`{ number: 1, boolean: true, string: "Gooby", array: [1, "2", true], hash: { lang: "Gooby", hello: "World" }, range: 2..5, null: nil }.eql?({ range: 2..5, null: nil, string: "Gooby", number: 1, array: [1, "2", true], boolean: true, hash: { hello: "World", lang: "Gooby" } })`, true},
 	}
 
 	for i, tt := range tests {
@@ -1007,9 +1007,9 @@ func TestHashHasValueMethod(t *testing.T) {
 		{`{ a: "Hello", b: 123, c: true }.has_value?("World")`, false},
 		{`{ a: "Hello", b: 123, c: true }.has_value?(123)`, true},
 		{`{ a: "Hello", b: 123, c: true }.has_value?(false)`, false},
-		{`{ a: "Hello", b: { lang: "Goby", arr: [3, 1, 2] }, c: true }.has_value?({ lang: "Goby", arr: [3, 1, 2] })`, true},
-		{`{ a: "Hello", b: { lang: "Goby", arr: [3, 1, 2] }, c: true }.has_value?({ lang: "Goby", arr: [1, 2, 3] })`, false},
-		{`{ a: "Hello", b: { lang: "Goby", arr: [3, 1, 2] }, c: true }.has_value?({ arr: [3, 1, 2], lang: "Goby" })`, true},
+		{`{ a: "Hello", b: { lang: "Gooby", arr: [3, 1, 2] }, c: true }.has_value?({ lang: "Gooby", arr: [3, 1, 2] })`, true},
+		{`{ a: "Hello", b: { lang: "Gooby", arr: [3, 1, 2] }, c: true }.has_value?({ lang: "Gooby", arr: [1, 2, 3] })`, false},
+		{`{ a: "Hello", b: { lang: "Gooby", arr: [3, 1, 2] }, c: true }.has_value?({ arr: [3, 1, 2], lang: "Gooby" })`, true},
 	}
 
 	for i, tt := range tests {
@@ -1384,7 +1384,7 @@ func TestHashToArrayMethod(t *testing.T) {
 	}
 
 	input := `
-	{ a: 123, b: "test", c: true, d: [1, "Goby", false] }.to_a
+	{ a: 123, b: "test", c: true, d: [1, "Gooby", false] }.to_a
 	`
 
 	v := initTestVM()
@@ -1412,7 +1412,7 @@ func TestHashToArrayMethod(t *testing.T) {
 		case "c":
 			verifyBooleanObject(t, 0, v, true)
 		case "d":
-			verifyArrayObject(t, 0, v, []interface{}{1, "Goby", false})
+			verifyArrayObject(t, 0, v, []interface{}{1, "Gooby", false})
 		}
 	}
 	v.checkCFP(t, 0, 0)
@@ -1692,7 +1692,7 @@ func TestHashToStringMethod(t *testing.T) {
 	}{
 		{`{ a: 1 }.to_s`, "{ a: 1 }"},
 		{`{ a: 1, b: "Hello" }.to_s`, "{ a: 1, b: \"Hello\" }"},
-		{`{ a: 1, b: [1, true, "Hello", 1..2], c: { lang: "Goby" } }.to_s`, "{ a: 1, b: [1, true, \"Hello\", (1..2)], c: { lang: \"Goby\" } }"},
+		{`{ a: 1, b: [1, true, "Hello", 1..2], c: { lang: "Gooby" } }.to_s`, "{ a: 1, b: [1, true, \"Hello\", (1..2)], c: { lang: \"Gooby\" } }"},
 	}
 
 	for i, tt := range tests {
@@ -1804,7 +1804,7 @@ func TestHashTransformValuesMethodFail(t *testing.T) {
 
 func TestHashValuesMethod(t *testing.T) {
 	input := `
-	{ a: 123, b: "test", c: true, d: [1, "Goby", false] }.values
+	{ a: 123, b: "test", c: true, d: [1, "Gooby", false] }.values
 	`
 
 	v := initTestVM()
@@ -1826,7 +1826,7 @@ func TestHashValuesMethod(t *testing.T) {
 		case *BooleanObject:
 			verifyBooleanObject(t, 0, v, true)
 		case *ArrayObject:
-			verifyArrayObject(t, 0, v, []interface{}{1, "Goby", false})
+			verifyArrayObject(t, 0, v, []interface{}{1, "Gooby", false})
 		}
 	}
 	v.checkCFP(t, 0, 0)

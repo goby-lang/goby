@@ -6,8 +6,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/goby-lang/goby/vm/classes"
-	"github.com/goby-lang/goby/vm/errors"
+	"github.com/gooby-lang/gooby/vm/classes"
+	"github.com/gooby-lang/gooby/vm/errors"
 )
 
 // ConcurrentHashObject is an implementation of thread-safe associative arrays (Hash).

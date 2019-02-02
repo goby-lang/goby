@@ -10,13 +10,13 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/goby-lang/goby/compiler"
-	"github.com/goby-lang/goby/compiler/bytecode"
-	"github.com/goby-lang/goby/compiler/parser"
-	"github.com/goby-lang/goby/vm/classes"
+	"github.com/gooby-lang/gooby/compiler"
+	"github.com/gooby-lang/gooby/compiler/bytecode"
+	"github.com/gooby-lang/gooby/compiler/parser"
+	"github.com/gooby-lang/gooby/vm/classes"
 )
 
-// Version stores current Goby version
+// Version stores current Gooby version
 const Version = "0.1.10"
 
 // DefaultLibPath is used for overriding vm.libpath build-time.
@@ -62,10 +62,10 @@ type VM struct {
 	fileDir string
 	// args are command line arguments
 	args []string
-	// projectRoot is goby root's absolute path, which is $GOROOT/src/github.com/goby-lang/goby
+	// projectRoot is gooby root's absolute path, which is $GOROOT/src/github.com/gooby-lang/gooby
 	projectRoot string
 
-	// libPath indicates the Goby (.gb) libraries path. Defaults to `<projectRoot>/lib`, unless
+	// libPath indicates the Gooby (.gb) libraries path. Defaults to `<projectRoot>/lib`, unless
 	// DefaultLibPath is specified.
 	libPath string
 
@@ -97,16 +97,16 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 	}
 	vm.fileDir = fileDir
 
-	gobyRoot := os.Getenv("GOBY_ROOT")
+	goobyRoot := os.Getenv("GOBY_ROOT")
 
-	if len(gobyRoot) == 0 {
-		vm.projectRoot = fmt.Sprintf("/usr/local/Cellar/goby/%s", Version)
+	if len(goobyRoot) == 0 {
+		vm.projectRoot = fmt.Sprintf("/usr/local/Cellar/gooby/%s", Version)
 
 		_, err := os.Stat(vm.projectRoot)
 
 		if err != nil {
 			gp := os.Getenv("GOPATH")
-			path, _ := filepath.Abs(gp + "/src/github.com/goby-lang/goby")
+			path, _ := filepath.Abs(gp + "/src/github.com/gooby-lang/gooby")
 			_, err = os.Stat(path)
 
 			if err != nil {
@@ -117,7 +117,7 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 			vm.projectRoot = path
 		}
 	} else {
-		vm.projectRoot = gobyRoot
+		vm.projectRoot = goobyRoot
 	}
 
 	if DefaultLibPath != "" {
@@ -131,7 +131,7 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 	vm.channelObjectMap = &objectMap{store: &sync.Map{}}
 
 	for _, fn := range vm.libFiles {
-		err := vm.mainThread.execGobyLib(fn)
+		err := vm.mainThread.execGoobyLib(fn)
 		if err != nil {
 			fmt.Printf("An error occurs when loading lib file %s:\n", string(fn))
 			fmt.Println(err.Error())
