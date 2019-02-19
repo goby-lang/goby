@@ -1,8 +1,9 @@
 package parser
 
 import (
-	"github.com/goby-lang/goby/compiler/lexer"
 	"testing"
+
+	"github.com/goby-lang/goby/compiler/lexer"
 )
 
 func TestDefStatement(t *testing.T) {
@@ -14,8 +15,6 @@ func TestDefStatement(t *testing.T) {
 	def foo
 	  123;
 	end
-
-	def bar(x = 10, y: ); end
 
 	def baz(z: 100, *s); end
 	`
@@ -47,14 +46,9 @@ func TestDefStatement(t *testing.T) {
 	secondExpression.IsIntegerLiteral(t).ShouldEqualTo(123)
 
 	thirdStmt := program.NthStmt(3).IsDefStmt(t)
-	thirdStmt.ShouldHaveName("bar")
-	thirdStmt.ShouldHaveOptionalParam("x")
-	thirdStmt.ShouldHaveRequiredKeywordParam("y")
-
-	fourthStmt := program.NthStmt(4).IsDefStmt(t)
-	fourthStmt.ShouldHaveName("baz")
-	fourthStmt.ShouldHaveOptionalKeywordParam("z")
-	fourthStmt.ShouldHaveSplatParam("s")
+	thirdStmt.ShouldHaveName("baz")
+	thirdStmt.ShouldHaveOptionalKeywordParam("z")
+	thirdStmt.ShouldHaveSplatParam("s")
 }
 
 func TestDefStatementWithYield(t *testing.T) {
@@ -82,4 +76,17 @@ func TestDefStatementWithYield(t *testing.T) {
 
 	secondExp := stmt.MethodBody().NthStmt(2).IsExpression(t)
 	secondExp.IsYieldExpression(t)
+}
+
+func TestInvalidParameterWithDefaultFail(t *testing.T) {
+	input := `
+	def foo(x = 1); end`
+
+	l := lexer.New(input)
+	p := New(l)
+	_, err := p.ParseProgram()
+
+	if err.Message != "expected next token to be ), got ILLEGAL(=) instead. Line: 0" {
+		t.Fatal(err.Message)
+	}
 }
