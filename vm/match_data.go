@@ -190,6 +190,11 @@ func (m *MatchDataObject) ToString() string {
 	return result
 }
 
+// Inspect delegates to ToString
+func (m *MatchDataObject) Inspect() string {
+	return m.ToString()
+}
+
 // returns a `{ captureNumber: captureValue }` JSON-encoded string
 func (m *MatchDataObject) ToJSON(t *Thread) string {
 	result := "{"

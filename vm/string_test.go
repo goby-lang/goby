@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -1421,5 +1422,71 @@ func TestStringMethodChaining(t *testing.T) {
 		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
+	}
+}
+
+func TestToStringInspect(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		// simple string
+		{`"a".to_s`, `a`},
+		{`"a".inspect`, `"a"`},
+		{`'a'.to_s`, `a`},
+		{`'a'.inspect`, `"a"`},
+		// double quotes
+		{`'say "hello"'.to_s`, `say "hello"`},
+		{`'say "hello"'.inspect`, `"say \"hello\""`},
+		// newline
+		{`'a\nb'.to_s`, `a\nb`},
+		{`'a\nb'.inspect`, `"a\\nb"`},
+		{`"a\nb".to_s`, "a\nb"},
+		{`"a\nb".inspect`, `"a\nb"`},
+		// newline doublequotes and backslash
+		{`'\n\"\\'.to_s`, `\n\"\\`},
+		{`'\n\"\\'.inspect`, `"\\n\\\"\\\\"`},
+		{`"\n\"\\".to_s`, "\n\"\\"},
+		{`"\n\"\\".inspect`, `"\n\"\\"`},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestStringInspectEvaluatesToOriginalString(t *testing.T) {
+	tests := []struct {
+		input string
+	}{
+		{`'a'`},
+		{`"a"`},
+		{`'say "hello"'`},
+		{`"say \"hello\""`},
+		{`'a\nb'`},
+		{`"a\nb"`},
+		{`'a\\nb'`},
+		{`"a\\nb"`},
+		{`'\n\"\\'`},
+		{`"\n\"\\"`},
+		{`'\\n\\\"\\\\'`},
+		{`"\\n\\\"\\\\"`},
+		{`'\n\"\\'`},
+		{`"\n\"\\"`},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		evaluatedInspect := v.testEval(t, fmt.Sprintf("%s.inspect", tt.input), getFilename())
+		evaluatedInspectEvaluated := v.testEval(t, evaluatedInspect.ToString(), getFilename())
+		// evaluated string equals evaluated-inspected-evaluated string
+		VerifyExpected(t, i, evaluated, evaluatedInspectEvaluated.ToString())
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 3)
 	}
 }

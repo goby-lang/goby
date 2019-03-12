@@ -165,3 +165,21 @@ func TestNullIsNilMethodFail(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
+func TestNilInspect(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`nil.to_s`, ""},
+		{`nil.inspect`, "nil"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}

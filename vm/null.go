@@ -66,7 +66,18 @@ var builtinNullInstanceMethods = []*BuiltinMethodObject{
 
 			n := receiver.(*NullObject)
 			return t.vm.InitStringObject(n.ToString())
+		},
+  },
+	{
+		Name: "inspect",
 
+    Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+      if len(args) != 0 {
+        return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
+      }
+
+      n := receiver.(*NullObject)
+      return t.vm.InitStringObject(n.Inspect())
 		},
 	},
 	{
@@ -157,6 +168,11 @@ func (n *NullObject) ToString() string {
 // ToJSON just delegates to ToString
 func (n *NullObject) ToJSON(t *Thread) string {
 	return "null"
+}
+
+// Inspect returns string "nil" instead of "" like ToString
+func (n *NullObject) Inspect() string {
+	return "nil"
 }
 
 func (n *NullObject) isTruthy() bool {

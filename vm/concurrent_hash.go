@@ -329,17 +329,7 @@ func (h *ConcurrentHashObject) ToString() string {
 	var pairs []string
 
 	iterator := func(key, value interface{}) bool {
-		var template string
-
-		switch value.(type) {
-		case *StringObject:
-			template = "%s: \"%s\""
-		default:
-			template = "%s: %s"
-		}
-
-		pairs = append(pairs, fmt.Sprintf(template, key, value.(Object).ToString()))
-
+		pairs = append(pairs, fmt.Sprintf("%s: %s", key, value.(Object).Inspect()))
 		return true
 	}
 
@@ -350,6 +340,11 @@ func (h *ConcurrentHashObject) ToString() string {
 	out.WriteString(" }")
 
 	return out.String()
+}
+
+// Inspect delegates to ToString
+func (h *ConcurrentHashObject) Inspect() string {
+	return h.ToString()
 }
 
 // ToJSON returns the object's name as the JSON string format

@@ -1521,7 +1521,18 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 			return t.vm.InitStringObject(receiver.ToString())
 
 		},
+  },
+  {
+		
+		// Returns object's inspect representation.
+		// @param n/a []
+		// @return [String] Object's inspect representation.
+		Name: "inspect",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			return t.vm.InitStringObject(receiver.Inspect())
+		},
 	},
+
 }
 
 // Internal functions ===================================================
@@ -1666,6 +1677,11 @@ func (c *RClass) ReturnName() string {
 // ToString returns the object's name as the string format
 func (c *RClass) ToString() string {
 	return c.Name
+}
+
+// Inspect delegates to ToString
+func (c *RClass) Inspect() string {
+	return c.ToString()
 }
 
 // ToJSON just delegates to `ToString`

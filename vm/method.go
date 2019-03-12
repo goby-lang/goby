@@ -34,6 +34,11 @@ func (m *MethodObject) ToString() string {
 	return out.String()
 }
 
+// Inspect delegates to ToString
+func (m *MethodObject) Inspect() string {
+	return m.ToString()
+}
+
 func (m *MethodObject) ToJSON(t *Thread) string {
 	return m.ToString()
 }
@@ -96,6 +101,11 @@ type builtinMethodBody func(Object, int, *Thread, []Object, *normalCallFrame) Ob
 // ToString returns the object's name as the string format
 func (bim *BuiltinMethodObject) ToString() string {
 	return "<BuiltinMethod: " + bim.Name + ">"
+}
+
+// Inspect delegates to ToString
+func (bim *BuiltinMethodObject) Inspect() string {
+	return bim.ToString()
 }
 
 // ToJSON just delegates to `ToString`

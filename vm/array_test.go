@@ -144,7 +144,7 @@ func TestArrayIndex(t *testing.T) {
 			code[102] = 'Processing'
 			code[200] = 'OK'
 			code.to_s
-		`, `[, , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , "Continue", "Switching Protocols", "Processing", , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , "OK"]`},
+		`, `[nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "Continue", "Switching Protocols", "Processing", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "OK"]`},
 	}
 
 	for i, tt := range tests {
@@ -1579,7 +1579,7 @@ func TestArrayPushMethod(t *testing.T) {
 			`, "[1, 2, 3, 4, 5, 6, 7]"},
 		{`
 			[].push(nil, "", '').to_s
-	`, `[, "", ""]`},
+	`, `[nil, "", ""]`},
 	}
 
 	for i, tt := range tests {
@@ -2206,6 +2206,28 @@ func TestArrayValuesAtMethod(t *testing.T) {
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)
 	}
+}
+
+func TestArrayInspectCallsToString(t *testing.T) {
+	input := `[1, "234", true, nil].to_s == [1, "234", true, nil].inspect`
+	expected := true
+
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input, getFilename())
+	VerifyExpected(t, i, evaluated, expected)
+	vm.checkCFP(t, i, 0)
+	vm.checkSP(t, i, 1)
+}
+
+func TestArrayInspectCallsChildElementToString(t *testing.T) {
+	input := `[1, "234", true, nil].inspect`
+	expected := `[1, "234", true, nil]`
+
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input, getFilename())
+	VerifyExpected(t, i, evaluated, expected)
+	vm.checkCFP(t, i, 0)
+	vm.checkSP(t, i, 1)
 }
 
 func TestArrayValuesAtMethodFail(t *testing.T) {

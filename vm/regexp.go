@@ -167,6 +167,11 @@ func (r *RegexpObject) ToString() string {
 	return r.regexp.String()
 }
 
+// Inspect delegates to ToString
+func (r *RegexpObject) Inspect() string {
+	return r.ToString()
+}
+
 // ToJSON just delegates to ToString
 func (r *RegexpObject) ToJSON(t *Thread) string {
 	return "\"" + r.ToString() + "\""

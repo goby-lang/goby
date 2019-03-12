@@ -16,6 +16,7 @@ type Object interface {
 	findMethod(string) Object
 	findMethodMissing(bool) Object
 	ToString() string
+	Inspect() string
 	ToJSON(t *Thread) string
 	id() int
 	InstanceVariableGet(string) (Object, bool)
@@ -141,6 +142,11 @@ type RObject struct {
 // ToString returns the object's name as the string format
 func (ro *RObject) ToString() string {
 	return "<Instance of: " + ro.class.Name + ">"
+}
+
+// Inspect delegates to ToString
+func (ro *RObject) Inspect() string {
+	return ro.ToString()
 }
 
 // ToJSON just delegates to ToString

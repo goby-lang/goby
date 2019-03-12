@@ -31,7 +31,7 @@ type Error struct {
 
 // InitNoMethodError is to print unsupported method errors. This is exported for using from sub-packages.
 func (vm *VM) InitNoMethodError(sourceLine int, methodName string, receiver Object) *Error {
-	return vm.InitErrorObject(errors.NoMethodError, sourceLine, errors.UndefinedMethod, methodName, receiver.ToString())
+	return vm.InitErrorObject(errors.NoMethodError, sourceLine, errors.UndefinedMethod, methodName, receiver.Inspect())
 }
 
 func (vm *VM) InitErrorObject(errorType string, sourceLine int, format string, args ...interface{}) *Error {
@@ -72,6 +72,11 @@ func (vm *VM) initErrorClasses() {
 // ToString returns the object's name as the string format
 func (e *Error) ToString() string {
 	return e.message
+}
+
+// Inspect delegates to ToString
+func (e *Error) Inspect() string {
+	return e.ToString()
 }
 
 // ToJSON just delegates to `ToString`

@@ -70,6 +70,11 @@ func (b *BooleanObject) ToString() string {
 	return fmt.Sprintf("%t", b.value)
 }
 
+// Inspect delegates to ToString
+func (b *BooleanObject) Inspect() string {
+	return b.ToString()
+}
+
 // ToJSON just delegates to `ToString`
 func (b *BooleanObject) ToJSON(t *Thread) string {
 	return b.ToString()

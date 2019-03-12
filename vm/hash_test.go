@@ -1920,3 +1920,32 @@ func compareJSONResult(t *testing.T, evaluated Object, exp interface{}) {
 		t.Fatalf("Expect json:\n%s \n\n got: %s", string(expected), s)
 	}
 }
+
+func TestHashInspectCallsToString(t *testing.T) {
+	input := `{ a: 1, b: "234", c: true, d: nil, e: Class.new}.to_s == { a: 1, b: "234", c: true, d: nil, e: Class.new}.inspect`
+	expected := true
+
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input, getFilename())
+	VerifyExpected(t, i, evaluated, expected)
+	vm.checkCFP(t, i, 0)
+	vm.checkSP(t, i, 1)
+}
+
+func TestHashInspectCallsChildElementToString(t *testing.T) {
+	input := `
+		a = nil
+		b = '234'
+		c = true
+		d = Class.new
+		e = [1,2,3]
+		{ a: a, b: b, c: c, d: d, e: e }.inspect
+	`
+	expected := `{ a: nil, b: "234", c: true, d: <Instance of: Class>, e: [1, 2, 3] }`
+
+	vm := initTestVM()
+	evaluated := vm.testEval(t, input, getFilename())
+	VerifyExpected(t, i, evaluated, expected)
+	vm.checkCFP(t, i, 0)
+	vm.checkSP(t, i, 1)
+}
