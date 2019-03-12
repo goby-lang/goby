@@ -53,75 +53,71 @@ type BlockObject struct {
 }
 
 // Class methods --------------------------------------------------------
-func builtinBlockClassMethods() []*BuiltinMethodObject {
-	return []*BuiltinMethodObject{
-		{
-			// @param block literal
-			// @return [Block]
-			Name: "new",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				if blockFrame == nil {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Can't initialize block object without block argument")
-				}
+var builtinBlockClassMethods = []*BuiltinMethodObject{
+	{
+		// @param block literal
+		// @return [Block]
+		Name: "new",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if blockFrame == nil {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Can't initialize block object without block argument")
+			}
 
-				return t.vm.initBlockObject(blockFrame.instructionSet, blockFrame.ep, blockFrame.self)
-			},
+			return t.vm.initBlockObject(blockFrame.instructionSet, blockFrame.ep, blockFrame.self)
 		},
-	}
+	},
 }
 
 // Instance methods -----------------------------------------------------
-func builtinBlockInstanceMethods() []*BuiltinMethodObject {
-	return []*BuiltinMethodObject{
-		{
-			// Executes the block and returns the result.
-			// It can take arbitrary number of arguments and passes them to the block arguments of the block object,
-			// keeping the order of the arguments.
-			//
-			// ```ruby
-			// bl = Block.new do |array|
-			//   array.reduce do |sum, i|
-			//     sum + i
-			//   end
-			// end
-			// #=> <Block: REPL>
-			// bl.call([1, 2, 3, 4])     #=> 10
-			// ```
-			//
-			// TODO: should check if the following behavior is OK or not
-			// Note that the method does NOT check the number of the arguments and the number of block parameters.
-			// * if the number of the arguments exceed, the rest will just be truncated:
-			//
-			// ```ruby
-			// p = Block.new do |i, j, k|
-			//   [i, j, k]
-			// end
-			// p.call(1, 2, 3, 4, 5)     #=> [1, 2, 3]
-			// ```
-			//
-			// * if the number of the block parameters exceeds, the rest will just be filled with `nil`:
-			//
-			// ```ruby
-			// p = Block.new do |i, j, k|
-			//   [i, j, k]
-			// end
-			// p.call                    #=> [nil, nil, nil]
-			// ```
-			//
-			// @param object [Object]...
-			// @return [Object]
-			Name: "call",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				block := receiver.(*BlockObject)
-				c := newNormalCallFrame(block.instructionSet, block.instructionSet.filename, sourceLine)
-				c.ep = block.ep
-				c.self = block.self
-				c.isBlock = true
+var builtinBlockInstanceMethods = []*BuiltinMethodObject{
+	{
+		// Executes the block and returns the result.
+		// It can take arbitrary number of arguments and passes them to the block arguments of the block object,
+		// keeping the order of the arguments.
+		//
+		// ```ruby
+		// bl = Block.new do |array|
+		//   array.reduce do |sum, i|
+		//     sum + i
+		//   end
+		// end
+		// #=> <Block: REPL>
+		// bl.call([1, 2, 3, 4])     #=> 10
+		// ```
+		//
+		// TODO: should check if the following behavior is OK or not
+		// Note that the method does NOT check the number of the arguments and the number of block parameters.
+		// * if the number of the arguments exceed, the rest will just be truncated:
+		//
+		// ```ruby
+		// p = Block.new do |i, j, k|
+		//   [i, j, k]
+		// end
+		// p.call(1, 2, 3, 4, 5)     #=> [1, 2, 3]
+		// ```
+		//
+		// * if the number of the block parameters exceeds, the rest will just be filled with `nil`:
+		//
+		// ```ruby
+		// p = Block.new do |i, j, k|
+		//   [i, j, k]
+		// end
+		// p.call                    #=> [nil, nil, nil]
+		// ```
+		//
+		// @param object [Object]...
+		// @return [Object]
+		Name: "call",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			block := receiver.(*BlockObject)
+			c := newNormalCallFrame(block.instructionSet, block.instructionSet.filename, sourceLine)
+			c.ep = block.ep
+			c.self = block.self
+			c.isBlock = true
 
-				return t.builtinMethodYield(c, args...).Target
-			},
+			return t.builtinMethodYield(c, args...).Target
 		},
-	}
+	},
 }
 
 // Internal functions ===================================================
@@ -130,8 +126,8 @@ func builtinBlockInstanceMethods() []*BuiltinMethodObject {
 
 func (vm *VM) initBlockClass() *RClass {
 	class := vm.initializeClass(classes.BlockClass)
-	class.setBuiltinMethods(builtinBlockClassMethods(), true)
-	class.setBuiltinMethods(builtinBlockInstanceMethods(), false)
+	class.setBuiltinMethods(builtinBlockClassMethods, true)
+	class.setBuiltinMethods(builtinBlockInstanceMethods, false)
 	return class
 }
 

@@ -154,7 +154,6 @@ func (b *baseFrame) insertLCL(index, depth int, value Object) {
 
 	if index >= len(b.locals) {
 		b.locals = append(b.locals, nil)
-		copy(b.locals[index:], b.locals[index:])
 	}
 
 	b.locals[index] = &Pointer{Target: value}

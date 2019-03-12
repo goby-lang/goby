@@ -58,44 +58,30 @@ type ConcurrentArrayObject struct {
 }
 
 // Class methods --------------------------------------------------------
-func builtinConcurrentArrayClassMethods() []*BuiltinMethodObject {
-	return []*BuiltinMethodObject{
-		{
-			Name: "new",
-			Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-				aLen := len(args)
+var builtinConcurrentArrayClassMethods = []*BuiltinMethodObject{
+	{
+		Name: "new",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			aLen := len(args)
 
-				switch aLen {
-				case 0:
-					return t.vm.initConcurrentArrayObject([]Object{})
-				case 1:
-					arg := args[0]
-					arrayArg, ok := arg.(*ArrayObject)
+			switch aLen {
+			case 0:
+				return t.vm.initConcurrentArrayObject([]Object{})
+			case 1:
+				arg := args[0]
+				arrayArg, ok := arg.(*ArrayObject)
 
-					if !ok {
-						return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.ArrayClass, arg.Class().Name)
-					}
-
-					return t.vm.initConcurrentArrayObject(arrayArg.Elements)
-				default:
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentLess, 1, aLen)
+				if !ok {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.ArrayClass, arg.Class().Name)
 				}
 
-			},
+				return t.vm.initConcurrentArrayObject(arrayArg.Elements)
+			default:
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentLess, 1, aLen)
+			}
+
 		},
-	}
-}
-
-// Instance methods -----------------------------------------------------
-func builtinConcurrentArrayInstanceMethods() []*BuiltinMethodObject {
-	methodDefinitions := []*BuiltinMethodObject{}
-
-	for methodName, requireWriteLock := range ConcurrentArrayMethodsForwardingTable {
-		methodFunction := DefineForwardedConcurrentArrayMethod(methodName, requireWriteLock)
-		methodDefinitions = append(methodDefinitions, methodFunction)
-	}
-
-	return methodDefinitions
+	},
 }
 
 // Internal functions ===================================================
@@ -116,8 +102,15 @@ func initConcurrentArrayClass(vm *VM) {
 	concurrent := vm.loadConstant("Concurrent", true)
 	array := vm.initializeClass(classes.ArrayClass)
 
-	array.setBuiltinMethods(builtinConcurrentArrayInstanceMethods(), false)
-	array.setBuiltinMethods(builtinConcurrentArrayClassMethods(), true)
+	var arrayMethodDefinitions = []*BuiltinMethodObject{}
+
+	for methodName, requireWriteLock := range ConcurrentArrayMethodsForwardingTable {
+		methodFunction := DefineForwardedConcurrentArrayMethod(methodName, requireWriteLock)
+		arrayMethodDefinitions = append(arrayMethodDefinitions, methodFunction)
+	}
+
+	array.setBuiltinMethods(arrayMethodDefinitions, false)
+	array.setBuiltinMethods(builtinConcurrentArrayClassMethods, true)
 
 	concurrent.setClassConstant(array)
 }
