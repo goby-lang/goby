@@ -100,6 +100,8 @@ class Example
 
   def eq(expectation)
     Block.new do |n|
+      @actual = n
+      @expect = expectation
       n == expectation
     end
   end
@@ -108,6 +110,7 @@ class Example
     result_output = String.fmt("%sit \"%s\"", " " * @indentation, context_name.to_s)
     if !test_result
       result_output += " (FAILED)"
+      result_output += String.fmt("\n  expect: %s\n  actual: %s", @expect, @actual)
       Spec.instance.session_successful = false
     end
     puts(result_output)
