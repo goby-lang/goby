@@ -1,0 +1,14 @@
+require "spec"
+
+Spec.describe Integer do
+  describe "#times" do
+    it "iterates block when block is provided" do
+      a = []
+      3.times do |i|
+        a.push(i)
+      end
+
+      expect(a).to eq([0, 1, 2])
+    end
+  end
+end
