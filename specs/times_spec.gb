@@ -10,5 +10,12 @@ Spec.describe Integer do
 
       expect(a).to eq([0, 1, 2])
     end
+    it "yields enumerator when no block is given" do
+      a = 3.times.map do |i|
+        i * 2
+      end
+
+      expect(a).to eq([0, 2, 4])
+    end
   end
 end
