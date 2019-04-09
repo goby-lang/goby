@@ -14,11 +14,12 @@ matrix:
 services:
   - postgresql
 
+go_import_path: github.com/goby-lang/goby
+
 before_install:
   - sudo apt-get install apache2-utils
 
 before_script:
-  - ./prepare_travis_for_fork.sh
   - psql -c 'create database goby_test;' -U postgres
 
 script:
