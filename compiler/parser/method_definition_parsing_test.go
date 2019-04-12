@@ -79,14 +79,33 @@ func TestDefStatementWithYield(t *testing.T) {
 }
 
 func TestInvalidParameterWithDefaultFail(t *testing.T) {
-	input := `
-	def foo(x = 1); end`
+	tests := []struct {
+		input string
+		error string
+	}{
+		{`def foo(x = 1); end`, `unexpected '=' Line: 0`},
+		{`def foo(x=1); end`, `unexpected '=' Line: 0`},
+		{`def foo(x =1); end`, `unexpected '=' Line: 0`},
+		{`def foo(x= 1); end`, `unexpected '=' Line: 0`},
+		{`def foo(x=1, y=2); end`, `unexpected '=' Line: 0`},
+		{`def foo(x=1, y: 2); end`, `unexpected '=' Line: 0`},
+		{`def foo(x: 1, y=2); end`, `unexpected '=' Line: 0`},
+	}
 
-	l := lexer.New(input)
-	p := New(l)
-	_, err := p.ParseProgram()
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		_, err := p.ParseProgram()
 
-	if err.Message != "expected next token to be ), got ILLEGAL(=) instead. Line: 0" {
-		t.Fatal(err.Message)
+		if err == nil {
+			t.Fatal("expected '=' in parameters are invalid, but got no error")
+		} else {
+			if err.Message != tt.error {
+				t.Log("Expected parsing error")
+				t.Log("expect: ", tt.error)
+				t.Fatal("actual: ", err.Message)
+			}
+		}
+
 	}
 }
