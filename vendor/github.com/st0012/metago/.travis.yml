@@ -1,0 +1,23 @@
+language: go
+
+go:
+  - 1.5
+  - 1.6
+  - 1.7
+  - 1.8.x
+
+script:
+  - ./test.sh
+
+after_script:
+  - go build .
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+notifications:
+  email:
+    recipients:
+      - stan001212@gmail.com
+    on_failure: change
+    on_success: never

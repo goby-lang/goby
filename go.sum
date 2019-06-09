@@ -26,4 +26,5 @@ github.com/pkg/profile v0.0.0-20170413231811-06b906832ed0 h1:wBza4Dlm/NCQF572oSG
 github.com/pkg/profile v0.0.0-20170413231811-06b906832ed0/go.mod h1:hJw3o1OdXxsrSjjVksARp5W95eeEaEfptyVZyv6JUPA=
 github.com/st0012/metago v0.0.0-20170729114159-0405a10ef6ad h1:Q3QshZmCyIZjo4S9JND0FJ2Q3LZwuMb+TB5LybexTX4=
 github.com/st0012/metago v0.0.0-20170729114159-0405a10ef6ad/go.mod h1:Ad5ZuP0Q5pBQ7YPmgVvW+MsrpJryZs7HdOctZwj5quA=
+golang.org/x/sys v0.0.0-20170710161658-abf9c25f5445 h1:ihxcHCoeP6QVHLnvt4PXvpgB9U94enD3OVEM+UcAuVs=
 golang.org/x/sys v0.0.0-20170710161658-abf9c25f5445/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
