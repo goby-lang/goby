@@ -341,21 +341,6 @@ func TestIntegerTimesMethod(t *testing.T) {
 	}
 }
 
-func TestIntegerTimesMethodFail(t *testing.T) {
-	testsFail := []errorTestCase{
-		{`(-2).times`, "InternalError: Expect the receiver to be positive integer. got: -2", 1},
-		{`2.times`, "InternalError: Can't yield without a block", 1},
-	}
-
-	for i, tt := range testsFail {
-		v := initTestVM()
-		evaluated := v.testEval(t, tt.input, getFilename())
-		checkErrorMsg(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
-	}
-}
-
 func TestIntegerZeroDivisionFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`6 / 0`, "ZeroDivisionError: Divided by 0", 1},

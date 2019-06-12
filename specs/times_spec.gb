@@ -1,0 +1,21 @@
+require "spec"
+
+Spec.describe Integer do
+  describe "#times" do
+    it "iterates block when block is provided" do
+      a = []
+      3.times do |i|
+        a.push(i)
+      end
+
+      expect(a).to eq([0, 1, 2])
+    end
+    it "yields enumerator when no block is given" do
+      a = 3.times.map do |i|
+        i * 2
+      end
+
+      expect(a).to eq([0, 2, 4])
+    end
+  end
+end

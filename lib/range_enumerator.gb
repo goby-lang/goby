@@ -47,4 +47,19 @@ class RangeEnumerator
 
     @current_value
   end
+
+  def each
+    while has_next? do
+      next_value = self.next
+      yield next_value
+    end
+  end
+
+  def map
+    a = []
+    self.each do |value|
+      a.push(yield(value))
+    end
+    a
+  end
 end

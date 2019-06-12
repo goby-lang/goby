@@ -526,29 +526,31 @@ var builtinIntegerInstanceMethods = []*BuiltinMethodObject{
 		// end
 		// a # => 3
 		// ```
-		Name: "times",
-		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-			if len(args) != 0 {
-				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
-			}
-
-			n := receiver.(*IntegerObject)
-
-			if n.value < 0 {
-				return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Expect the receiver to be positive integer. got: %d", n.value)
-			}
-
-			if blockFrame == nil {
-				return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
-			}
-
-			for i := 0; i < n.value; i++ {
-				t.builtinMethodYield(blockFrame, t.vm.InitIntegerObject(i))
-			}
-
-			return n
-
-		},
+		// This is temporarily replaced by lib/integer.gb
+		// TODO: Write the same implementation in Go
+		//Name: "times",
+		//Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+		//	if len(args) != 0 {
+		//		return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 0, len(args))
+		//	}
+		//
+		//	n := receiver.(*IntegerObject)
+		//
+		//	if n.value < 0 {
+		//		return t.vm.InitErrorObject(errors.InternalError, sourceLine, "Expect the receiver to be positive integer. got: %d", n.value)
+		//	}
+		//
+		//	if blockFrame == nil {
+		//		return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+		//	}
+		//
+		//	for i := 0; i < n.value; i++ {
+		//		t.builtinMethodYield(blockFrame, t.vm.InitIntegerObject(i))
+		//	}
+		//
+		//	return n
+		//
+		//},
 	},
 	{
 		Name: "to_int",
@@ -748,6 +750,7 @@ func (vm *VM) initIntegerClass() *RClass {
 	ic := vm.initializeClass(classes.IntegerClass)
 	ic.setBuiltinMethods(builtinIntegerInstanceMethods, false)
 	ic.setBuiltinMethods(builtinIntegerClassMethods, true)
+	vm.libFiles = append(vm.libFiles, "integer.gb")
 	return ic
 }
 
