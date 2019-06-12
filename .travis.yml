@@ -1,17 +1,25 @@
+
 language: go
 
-go:
-  - "1.10.x"
-  - "1.11.x"
+matrix:
+  include:
+    - go: 1.10.x
+      dist: trusty
+    - go: 1.10.x
+      dist: xenial
+    - go: 1.11.x
+      # trusty builds with 1.11 are [currently broken](https://github.com/golang/go/issues/31293)
+      dist: xenial
 
 services:
   - postgresql
+
+go_import_path: github.com/goby-lang/goby
 
 before_install:
   - sudo apt-get install apache2-utils
 
 before_script:
-  - ./prepare_travis_for_fork.sh
   - psql -c 'create database goby_test;' -U postgres
 
 script:
