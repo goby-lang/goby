@@ -2,7 +2,6 @@ package ast
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 )
 
@@ -118,10 +117,10 @@ func (ape *ArgumentPairExpression) TokenLiteral() string {
 // String .....
 func (ape *ArgumentPairExpression) String() string {
 	if ape.Value == nil {
-		return fmt.Sprintf("%s:", ape.Key.String())
+		return ape.Key.String() + ":"
 	}
 
-	return fmt.Sprintf("%s: %s", ape.Key.String(), ape.Value.String())
+	return ape.Key.String() + ": " + ape.Value.String()
 }
 
 // HashExpression defines the hash expression literal which contains the node expression and its value
@@ -143,7 +142,7 @@ func (he *HashExpression) String() string {
 	var pairs []string
 
 	for key, value := range he.Data {
-		pairs = append(pairs, fmt.Sprintf("%s: %s", key, value.String()))
+		pairs = append(pairs, "%s: %s", key + ": " + value.String())
 	}
 
 	out.WriteString("{ ")
