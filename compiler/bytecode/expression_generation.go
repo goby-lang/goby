@@ -3,6 +3,7 @@ package bytecode
 import (
 	"fmt"
 	"github.com/goby-lang/goby/compiler/ast"
+	"strconv"
 )
 
 func (g *Generator) compileExpression(is *InstructionSet, exp ast.Expression, scope *scope, table *localTable) {
@@ -135,7 +136,7 @@ func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpre
 		newTable := newLocalTable(table.depth + 1)
 		newTable.upper = table
 		blockIndex := g.blockCounter
-		blockInfo = fmt.Sprintf("block:%d", blockIndex)
+		blockInfo = "block:" + strconv.Itoa(blockIndex)
 		g.blockCounter++
 		g.compileBlockArgExpression(blockIndex, exp, scope, newTable)
 	}
