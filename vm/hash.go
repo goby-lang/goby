@@ -2,7 +2,6 @@ package vm
 
 import (
 	"bytes"
-	"fmt"
 	"reflect"
 	"sort"
 	"strings"
@@ -1237,7 +1236,7 @@ func (h *HashObject) ToString() string {
 	var pairs []string
 
 	for _, key := range h.sortedKeys() {
-		pairs = append(pairs, fmt.Sprintf("%s: %s", key, h.Pairs[key].Inspect()))
+		pairs = append(pairs, key + ": " + h.Pairs[key].Inspect())
 	}
 
 	out.WriteString("{ ")
