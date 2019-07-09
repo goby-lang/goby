@@ -42,9 +42,9 @@ One of our goal is to provide web developers a sort of small and handy environme
 
 ## Demo screen and sample Goby app
 
-Click to see the demo below (powered by [asciinema](https://asciinema.org)).
+Click to see the demo below (powered by [asciinema](https://asciinema.org) and [GIPHY](https://giphy.com/)).
 
-[![asciicast](https://asciinema.org/a/sVOfdRmG3QyxQTrRMNVhjlYKo.svg)](https://asciinema.org/a/sVOfdRmG3QyxQTrRMNVhjlYKo)
+![](https://i.giphy.com/media/fZ1rdlmFKgabsaDLOQ/source.gif)
 
 **New!** Check-out our [sample app](http://sample.goby-lang.org) built with Goby. Source code is also available [here](https://github.com/goby-lang/sample-web-app).
 
