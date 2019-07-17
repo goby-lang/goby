@@ -42,7 +42,9 @@ One of our goal is to provide web developers a sort of small and handy environme
 
 ## Demo screen and sample Goby app
 
-<img src="https://i.imgur.com/1Le7nTe.gif" width="60%">
+Click to see the demo below (powered by [asciinema](https://asciinema.org) and [GIPHY](https://giphy.com/)).
+
+![](https://github.com/goby-lang/animation-gif/blob/master/goby_demo_large.gif)
 
 **New!** Check-out our [sample app](http://sample.goby-lang.org) built with Goby. Source code is also available [here](https://github.com/goby-lang/sample-web-app).
 
@@ -87,7 +89,7 @@ In the case, `$GOBY_ROOT` is automatically configured.
 
 ### B. From Source
 
-Try this if you'd like to contribute Goby! Skip 1 if you already have Golang in your environment. 
+Try this if you'd like to contribute Goby! Skip 1 if you already have Golang in your environment.
 
 1. Prepare Golang environment
     - Install Golang >= 1.12
