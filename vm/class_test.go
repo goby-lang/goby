@@ -1355,6 +1355,73 @@ func TestGeneralIsAMethodFail(t *testing.T) {
 	}
 }
 
+func TestGeneralKindOfMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{`123.kind_of?(Integer)`, true},
+		{`123.kind_of?(Object)`, true},
+		{`123.kind_of?(String)`, false},
+		{`123.kind_of?(Range)`, false},
+		{`"Hello World".kind_of?(String)`, true},
+		{`"Hello World".kind_of?(Object)`, true},
+		{`"Hello World".kind_of?(Boolean)`, false},
+		{`"Hello World".kind_of?(Array)`, false},
+		{`(2..10).kind_of?(Range)`, true},
+		{`(2..10).kind_of?(Object)`, true},
+		{`(2..10).kind_of?(Null)`, false},
+		{`(2..10).kind_of?(Hash)`, false},
+		{`{ a: 1, b: "2", c: ["Goby", 123] }.kind_of?(Hash)`, true},
+		{`{ a: 1, b: "2", c: ["Goby", 123] }.kind_of?(Object)`, true},
+		{`{ a: 1, b: "2", c: ["Goby", 123] }.kind_of?(Class)`, false},
+		{`{ a: 1, b: "2", c: ["Goby", 123] }.kind_of?(Array)`, false},
+		{`[1, 2, 3, 4, 5].kind_of?(Array)`, true},
+		{`[1, 2, 3, 4, 5].kind_of?(Object)`, true},
+		{`[1, 2, 3, 4, 5].kind_of?(Null)`, false},
+		{`[1, 2, 3, 4, 5].kind_of?(String)`, false},
+		{`true.kind_of?(Boolean)`, true},
+		{`true.kind_of?(Object)`, true},
+		{`true.kind_of?(Array)`, false},
+		{`true.kind_of?(Integer)`, false},
+		{`String.kind_of?(Class)`, true},
+		{`String.kind_of?(String)`, false},
+		{`String.kind_of?(Array)`, false},
+		{`nil.kind_of?(Null)`, true},
+		{`nil.kind_of?(Object)`, true},
+		{`nil.kind_of?(String)`, false},
+		{`nil.kind_of?(Range)`, false},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestGeneralKindOfMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`123.kind_of?`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+		{`Class.kind_of?`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+		{`123.kind_of?(123, 456)`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
+		{`123.kind_of?(Integer, String)`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
+		{`123.kind_of?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1},
+		{`Class.kind_of?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
+
 func TestGeneralIsNilMethod(t *testing.T) {
 	tests := []struct {
 		input    string
