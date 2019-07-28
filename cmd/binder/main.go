@@ -80,8 +80,8 @@ func allArgs(f *ast.FieldList) []argPair {
 // Binding holds context about a struct that represents a goby class.
 type Binding struct {
 	ClassName       string
-	ClassMethods    []*ast.FuncDecl // Any method defined without a pointer reciever is a class method func (Class) myFunc
-	InstanceMethods []*ast.FuncDecl // Any method defined with a pointer reciever is an instance method func (c *Class) myFunc
+	ClassMethods    []*ast.FuncDecl // Any method defined without a pointer receiver is a class method func (Class) myFunc
+	InstanceMethods []*ast.FuncDecl // Any method defined with a pointer receiver is an instance method func (c *Class) myFunc
 
 }
 
