@@ -953,6 +953,51 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 			return FALSE
 		},
 	},
+	{
+		// Returns true if Object class is equal to the input argument class
+		//
+		// ```ruby
+		// "Hello".kind_of?(String)            # => true
+		// 123.kind_of?(Integer)               # => true
+		// [1, true, "String"].kind_of?(Array) # => true
+		// { a: 1, b: 2 }.kind_of?(Hash)       # => true
+		// "Hello".kind_of?(Integer)           # => false
+		// 123.kind_of?(Range)                 # => false
+		// (2..4).kind_of?(Hash)               # => false
+		// nil.kind_of?(Integer)               # => false
+		// ```
+		//
+		// @param n/a []
+		// @return [Boolean]
+		Name: "kind_of?",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 1 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
+			}
+
+			c := args[0]
+			gobyClass, ok := c.(*RClass)
+
+			if !ok {
+				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.ClassClass, c.Class().Name)
+			}
+
+			receiverClass := receiver.Class()
+
+			for {
+				if receiverClass.Name == gobyClass.Name {
+					return TRUE
+				}
+
+				if receiverClass.Name == classes.ObjectClass {
+					break
+				}
+
+				receiverClass = receiverClass.superClass
+			}
+			return FALSE
+		},
+	},
 	// Checks if the class of the instance has been activated with `inherits_method_missing`.
 	//
 	// ```ruby
