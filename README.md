@@ -6,6 +6,7 @@
 [![GoDoc](https://godoc.org/github.com/goby-lang/goby?status.svg)](https://godoc.org/github.com/goby-lang/goby)
 [![Go Report Card](https://goreportcard.com/badge/github.com/goby-lang/goby)](https://goreportcard.com/report/github.com/goby-lang/goby)
 [![codecov](https://codecov.io/gh/goby-lang/goby/branch/master/graph/badge.svg)](https://codecov.io/gh/goby-lang/goby)
+[![fuzzit](https://app.fuzzit.dev/badge?org_id=goby-lang)](https://app.fuzzit.dev/orgs/goby-lang/dashboard)
 [![Readme Score](http://readme-score-api.herokuapp.com/score.svg?url=goby-lang/goby)](http://clayallsopp.github.io/readme-score?url=goby-lang/goby)
 [![Snap Status](https://build.snapcraft.io/badge/goby-lang/goby.svg)](https://build.snapcraft.io/user/goby-lang/goby)
 [![Open Source Helpers](https://www.codetriage.com/goby-lang/goby/badges/users.svg)](https://www.codetriage.com/goby-lang/goby)
