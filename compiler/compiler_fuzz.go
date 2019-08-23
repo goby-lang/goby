@@ -6,6 +6,7 @@ import (
 	"github.com/goby-lang/goby/compiler/parser"
 )
 
+// Fuzz tests compilation
 func Fuzz(input []byte) int {
 	_, err := CompileToInstructions(string(input), parser.NormalMode)
 	if err != nil {
