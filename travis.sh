@@ -17,15 +17,17 @@ for d in $(go list ./...); do
           rm profile.out
         fi
 
+        # TODO: Add -race flag back when ready
         # Then we test other tests with race detection
-        go test -race -coverprofile=profile.out -covermode=atomic $d
+        go test -coverprofile=profile.out -covermode=atomic $d
         if [ -f profile.out ]; then
           cat profile.out >> coverage.txt
           rm profile.out
         fi
         continue
     fi
-    go test -race -coverprofile=profile.out -covermode=atomic $d
+    # TODO: Add -race flag back when ready
+    go test -coverprofile=profile.out -covermode=atomic $d
     if [ -f profile.out ]; then
       cat profile.out >> coverage.txt
       rm profile.out
