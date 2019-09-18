@@ -3,12 +3,11 @@ language: go
 
 matrix:
   include:
-    - go: 1.11.x
-      # trusty builds with 1.11 are [currently broken](https://github.com/golang/go/issues/31293)
+    - go: 1.12.x
+      env: "GO111MODULE=on"
       dist: xenial
-    - go: 1.12.x
-      dist: trusty
-    - go: 1.12.x
+    - go: 1.13
+      env: "GO111MODULE=on"
       dist: xenial
 
 services:
