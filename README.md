@@ -147,6 +147,15 @@ echo 'au BufNewFile,BufRead *.gb    setf goby' >> "$HOME/.vim/filetype.vim"
 
 this will automatically apply the Goby syntax highlighting to the `.gb` files.
 
+### SpaceVim
+
+SpaceVim users can load the [`lang#goby`](https://spacevim.org/layers/lang/goby/) layer by adding following configuration:
+
+```toml
+[[layers]]
+  name = "lang#goby"
+```
+
 ## Sample codes
 
 - [Built a stack data structure using Goby](https://github.com/goby-lang/goby/blob/master/samples/stack.gb)
