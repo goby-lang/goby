@@ -1,7 +1,7 @@
 ![Goby](http://i.imgur.com/ElGAzRn.png?3)
 =========
 
-[![](https://goby-lang-slackin.herokuapp.com/badge.svg)](https://goby-lang-slackin.herokuapp.com)
+[![](https://goby-slack-invite.herokuapp.com/badge.svg)](https://goby-slack-invite.herokuapp.com)
 [![Build Status](https://travis-ci.org/goby-lang/goby.svg?branch=master)](https://travis-ci.org/goby-lang/goby)
 [![GoDoc](https://godoc.org/github.com/goby-lang/goby?status.svg)](https://godoc.org/github.com/goby-lang/goby)
 [![Go Report Card](https://goreportcard.com/badge/github.com/goby-lang/goby)](https://goreportcard.com/report/github.com/goby-lang/goby)
