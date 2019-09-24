@@ -141,7 +141,7 @@ type RObject struct {
 
 // ToString returns the object's name as the string format
 func (ro *RObject) ToString() string {
-	return "<Instance of: " + ro.class.Name + ">"
+	return "#<" + ro.class.Name + ":" + fmt.Sprint(ro.id()) + ">"
 }
 
 // Inspect delegates to ToString
