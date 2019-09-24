@@ -141,12 +141,17 @@ type RObject struct {
 
 // ToString returns the object's name as the string format
 func (ro *RObject) ToString() string {
-	return "#<" + ro.class.Name + ":" + fmt.Sprint(ro.id()) + ">"
+	return "#<" + ro.class.Name + ":" + fmt.Sprint(ro.id()) + " >"
 }
 
 // Inspect delegates to ToString
 func (ro *RObject) Inspect() string {
-	return ro.ToString()
+	var iv string
+	for _, n := range ro.InstanceVariables.names() {
+		v, _ := ro.InstanceVariableGet(n)
+		iv = iv + n + "=" + v.ToString() + " "
+	}
+	return "#<" + ro.class.Name + ":" + fmt.Sprint(ro.id()) + " " + iv + ">"
 }
 
 // ToJSON just delegates to ToString

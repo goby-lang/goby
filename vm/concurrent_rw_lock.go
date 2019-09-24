@@ -1,7 +1,6 @@
 package vm
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/goby-lang/goby/vm/errors"
@@ -248,7 +247,7 @@ func (lock *ConcurrentRWLockObject) Value() interface{} {
 
 // ToString returns the object's name as the string format
 func (lock *ConcurrentRWLockObject) ToString() string {
-	return "#<" + lock.class.Name + ":" + fmt.Sprint(lock.id()) + ">"
+	return "#<" + lock.class.Name + " >"
 }
 
 // Inspect delegates to ToString

@@ -1922,7 +1922,7 @@ func compareJSONResult(t *testing.T, evaluated Object, exp interface{}) {
 }
 
 func TestHashInspectCallsToString(t *testing.T) {
-	input := `{ a: 1, b: "234", c: true, d: nil, e: Class.new}.to_s == { a: 1, b: "234", c: true, d: nil, e: Class.new}.inspect`
+	input := `h = { a: 1, b: "234", c: true, d: nil, e: Class.new}; h.to_s == h.inspect`
 	expected := true
 
 	vm := initTestVM()
@@ -1941,7 +1941,7 @@ func TestHashInspectCallsChildElementToString(t *testing.T) {
 		e = [1,2,3]
 		{ a: a, b: b, c: c, d: d, e: e }.inspect
 	`
-	expected := `{ a: nil, b: "234", c: true, d: <Instance of: Class>, e: [1, 2, 3] }`
+	expected := `{ a: nil, b: "234", c: true, d: #<Class:##OBJECTID## >, e: [1, 2, 3] }`
 
 	vm := initTestVM()
 	evaluated := vm.testEval(t, input, getFilename())

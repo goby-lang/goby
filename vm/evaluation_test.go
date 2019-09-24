@@ -944,13 +944,13 @@ func TestUnusedKeywordFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		if true then puts 1 end
-		`, "NoMethodError: Undefined Method 'then' for <Instance of: Object>", 1},
+		`, "NoMethodError: Undefined Method 'then' for #<Object:##OBJECTID## >", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkErrorMsg(t, i, evaluated, tt.expected)
+		checkFuzzifiedErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -2196,7 +2196,7 @@ func TestMethodMissingFail(t *testing.T) {
 		end
 		
 		Foo.new.bar
-`, "NoMethodError: Undefined Method 'bar' for <Instance of: Foo>"},
+`, "NoMethodError: Undefined Method 'bar' for #<Foo:##OBJECTID## >"},
 		{`
 		module Bar
 		  def method_missing
@@ -2209,14 +2209,14 @@ func TestMethodMissingFail(t *testing.T) {
 		end
 		
 		Foo.new.bar
-`, "NoMethodError: Undefined Method 'bar' for <Instance of: Foo>"},
+`, "NoMethodError: Undefined Method 'bar' for #<Foo:##OBJECTID## >"},
 	}
 
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 
-		checkErrorMsg(t, i, evaluated, tt.expected)
+		checkFuzzifiedErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
@@ -2524,17 +2524,17 @@ func TestUnusedVariableFail(t *testing.T) {
 		{`
 		_ = 1
 		_
-		`, "NoMethodError: Undefined Method '_' for <Instance of: Object>", 1},
+		`, "NoMethodError: Undefined Method '_' for #<Object:##OBJECTID## >", 1},
 		{`
 		_, b = [1, 2]
 		_
-		`, "NoMethodError: Undefined Method '_' for <Instance of: Object>", 1},
+		`, "NoMethodError: Undefined Method '_' for #<Object:##OBJECTID## >", 1},
 	}
 
 	for i, tt := range testsFail {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkErrorMsg(t, i, evaluated, tt.expected)
+		checkFuzzifiedErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 1)
 		v.checkSP(t, i, 1)
 	}
