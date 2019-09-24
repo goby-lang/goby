@@ -1013,6 +1013,72 @@ func TestInheritsMethodMissingMethod(t *testing.T) {
 	}
 }
 
+func TestInspectMethod(t *testing.T) {
+	tests := []errorTestCase{
+		{`inspect`, "#<Object:##OBJECTID## >", 1},
+		{`Object.inspect`, "Object", 1},
+		{`Class.inspect`, "Class", 1},
+		{`String.inspect`, "String", 1},
+		{`Integer.inspect`, "Integer", 1},
+		{`Decimal.inspect`, "Decimal", 1},
+		{`Float.inspect`, "Float", 1},
+		{`Array.inspect`, "Array", 1},
+		{`Hash.inspect`, "Hash", 1},
+		{`Null.inspect`, "Null", 1},
+		{`MatchData.inspect`, "MatchData", 1},
+		{`Regexp.inspect`, "Regexp", 1},
+		{`RangeEnumerator.inspect`, "RangeEnumerator", 1},
+		{`Range.inspect`, "Range", 1},
+		{`File.inspect`, "File", 1},
+		{`GoMap.inspect`, "GoMap", 1},
+		{`Block.inspect`, "Block", 1},
+		{`Channel.inspect`, "Channel", 1},
+		{`require 'json';JSON.inspect`, "JSON", 1},
+		{`require 'net/http';Net.inspect`, "Net", 1},
+		{`require 'net/http';Net::HTTP.inspect`, "HTTP", 1},
+		{`require 'net/http';Net::HTTP::Request.inspect`, "Request", 1},
+		{`require 'concurrent/array';Concurrent::Array.inspect`, "Array", 1},
+		{`require 'concurrent/hash';Concurrent::Hash.inspect`, "Hash", 1},
+		{`require 'concurrent/rw_lock';Concurrent::RWLock.inspect`, "RWLock", 1},
+		{`require 'net/simple_server';Net::SimpleServer.inspect`, "SimpleServer", 1},
+		{`require 'spec';Spec.inspect`, "Spec", 1},
+		{`require 'uri';URI.inspect`, "URI", 1},
+		{`
+    class Foo
+    end
+    Foo.new.inspect`, "#<Foo:##OBJECTID## >", 1},
+		{`
+		class Foo
+		 attr_accessor :foo, :bar
+		end
+		Foo.new.inspect`, "#<Foo:##OBJECTID## >", 1},
+		{`
+		class Foo
+		 def self.bar
+       { k: :value }
+     end
+		end
+		Foo.bar.inspect`, `{ k: "value" }`, 1},
+		{`
+		class Foo
+		 attr_accessor :foo, :bar
+		 def initialize
+		   @foo = [42, "string", { key: :value }]
+		   @bar = { float: 2.71, decimal: 3.14.to_d }
+		 end
+		end
+		Foo.new.inspect`, `#<Foo:##OBJECTID## @bar={ decimal: 3.14, float: 2.71 } @foo=[42, "string", { key: "value" }] >`, 1},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestRaiseMethod(t *testing.T) {
 	testsFail := []struct {
 		input       string
@@ -1421,7 +1487,6 @@ func TestGeneralKindOfMethodFail(t *testing.T) {
 	}
 }
 
-
 func TestGeneralIsNilMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -1706,6 +1771,72 @@ func TestObjectIdMethod(t *testing.T) {
 		{`a = {key: 2} ;b = a; a.object_id == b.object_id`, true},
 		{`a = :symbol ;b = a; a.object_id == b.object_id`, true},
 		{`a = Regexp.new("aa") ;b = a; a.object_id == b.object_id`, true},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestToSMethod(t *testing.T) {
+	tests := []errorTestCase{
+		{`to_s`, "main", 1},
+		{`Object.to_s`, "Object", 1},
+		{`Class.to_s`, "Class", 1},
+		{`String.to_s`, "String", 1},
+		{`Integer.to_s`, "Integer", 1},
+		{`Decimal.to_s`, "Decimal", 1},
+		{`Float.to_s`, "Float", 1},
+		{`Array.to_s`, "Array", 1},
+		{`Hash.to_s`, "Hash", 1},
+		{`Null.to_s`, "Null", 1},
+		{`MatchData.to_s`, "MatchData", 1},
+		{`Regexp.to_s`, "Regexp", 1},
+		{`RangeEnumerator.to_s`, "RangeEnumerator", 1},
+		{`Range.to_s`, "Range", 1},
+		{`File.to_s`, "File", 1},
+		{`GoMap.to_s`, "GoMap", 1},
+		{`Block.to_s`, "Block", 1},
+		{`Channel.to_s`, "Channel", 1},
+		{`require 'json';JSON.to_s`, "JSON", 1},
+		{`require 'net/http';Net.to_s`, "Net", 1},
+		{`require 'net/http';Net::HTTP.to_s`, "HTTP", 1},
+		{`require 'net/http';Net::HTTP::Request.to_s`, "Request", 1},
+		{`require 'concurrent/array';Concurrent::Array.to_s`, "Array", 1},
+		{`require 'concurrent/hash';Concurrent::Hash.to_s`, "Hash", 1},
+		{`require 'concurrent/rw_lock';Concurrent::RWLock.to_s`, "RWLock", 1},
+		{`require 'net/simple_server';Net::SimpleServer.to_s`, "SimpleServer", 1},
+		{`require 'spec';Spec.to_s`, "Spec", 1},
+		{`require 'uri';URI.to_s`, "URI", 1},
+		{`
+    class Foo
+    end
+    Foo.new.to_s`, "#<Foo:##OBJECTID## >", 1},
+		{`
+		class Foo
+		 attr_accessor :foo, :bar
+		end
+		Foo.new.to_s`, "#<Foo:##OBJECTID## >", 1},
+		{`
+		class Foo
+		 def self.bar
+       { k: :value }
+     end
+		end
+		Foo.bar.to_s`, `{ k: "value" }`, 1},
+		{`
+		class Foo
+		 attr_accessor :foo, :bar
+		 def initialize
+		   @foo = [42, "string", { key: :value }]
+		   @bar = { float: 2.71, decimal: 3.14.to_d }
+		 end
+		end
+		Foo.new.to_s`, `#<Foo:##OBJECTID## >`, 1},
 	}
 
 	for i, tt := range tests {

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+
+	"github.com/dlclark/regexp2"
 )
 
 type errorTestCase struct {
@@ -159,33 +161,33 @@ func TestStackTraces(t *testing.T) {
 
 func TestNoMethodError(t *testing.T) {
 	tests := []errorTestCase{
-		{`a`, "NoMethodError: Undefined Method 'a' for <Instance of: Object>", 1},
+		{`a`, "NoMethodError: Undefined Method 'a' for #<Object:##OBJECTID## >", 1},
 		{`class Foo
 		 end
 
 		 a = Foo.new
 		 a.bar = "fuz"
-		`, "NoMethodError: Undefined Method 'bar=' for <Instance of: Foo>", 1},
+		`, "NoMethodError: Undefined Method 'bar=' for #<Foo:##OBJECTID## >", 1},
 		{`class Foo
 		   attr_reader("foo")
 		 end
 
 		 a = Foo.new
 		 a.bar = "fuz"
-		`, "NoMethodError: Undefined Method 'bar=' for <Instance of: Foo>", 1},
+		`, "NoMethodError: Undefined Method 'bar=' for #<Foo:##OBJECTID## >", 1},
 		{`class Foo
 		  attr_reader("bar")
 		end
 
 		a = Foo.new
 		a.bar = "fuz"
-		`, "NoMethodError: Undefined Method 'bar=' for <Instance of: Foo>", 1},
+		`, "NoMethodError: Undefined Method 'bar=' for #<Foo:##OBJECTID## >", 1},
 	}
 
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
-		checkErrorMsg(t, i, evaluated, tt.expected)
+		checkFuzzifiedErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
 		v.checkSP(t, i, 1)
 	}
@@ -447,4 +449,22 @@ func checkErrorTraces(t *testing.T, index int, evaluated Object, expectedTraces 
 	if joinedTraces != joinedExpectedTraces {
 		t.Fatalf("At test case %d: Expect traces to be:\n%s \n got: \n%s", index, joinedExpectedTraces, joinedTraces)
 	}
+}
+
+func checkFuzzifiedErrorMsg(t *testing.T, index int, evaluated Object, expectedErrMsg string) {
+	t.Helper()
+	err, ok := evaluated.(*Error)
+	if !ok {
+		t.Fatalf("At test case %d: Expect Error. got=%T (%+v)", index, evaluated, evaluated)
+	}
+
+	if fuzzifyMessage(err.message) != expectedErrMsg {
+		t.Fatalf("At test case %d: Expect error message to be:\n  %s. got: \n%s", index, expectedErrMsg, err.message)
+	}
+}
+
+func fuzzifyMessage(message string) string {
+	re, _ := regexp2.Compile("(?<=#<[a-zA-Z0-9_]+:)[0-9]{12}(?=[ ]>?)", 0)
+	fuzMsg, _ := re.Replace(message, "##OBJECTID##", 0, -1)
+	return fuzMsg
 }
