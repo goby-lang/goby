@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"github.com/goby-lang/goby/compiler/ast"
 )
 
@@ -60,7 +59,6 @@ func CheckNameOfVariables(variables ...ast.Expression) (isPassed bool,  errVaria
 			if !IsDigit(rune(char)) && !IsLetter(rune(char)) {
 				isPassed = false
 				errVariableIndex = index
-				fmt.Println("firstCharAt", 3)
 				return
 			}
 		}
