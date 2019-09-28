@@ -1,6 +1,10 @@
 package vm
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/dlclark/regexp2"
+)
 
 // Verification helpers
 
@@ -83,13 +87,15 @@ func verifyNullObject(t *testing.T, i int, obj Object) bool {
 
 func verifyStringObject(t *testing.T, i int, obj Object, expected string) bool {
 	t.Helper()
+	var fuzStr string
 	switch result := obj.(type) {
 	case *StringObject:
-		if result.value != expected {
+		re, _ := regexp2.Compile("(?<=#<[a-zA-Z0-9_]+:)[0-9]{12}(?=[ ]>?)", 0)
+		fuzStr, _ = re.Replace(result.value, "##OBJECTID##", 0, -1)
+		if fuzStr != expected {
 			t.Errorf("At test case %d: object has wrong value. expect=%q, got=%q", i, expected, result.value)
 			return false
 		}
-
 		return true
 	case *Error:
 		t.Errorf(result.Message())

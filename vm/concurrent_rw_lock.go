@@ -247,7 +247,7 @@ func (lock *ConcurrentRWLockObject) Value() interface{} {
 
 // ToString returns the object's name as the string format
 func (lock *ConcurrentRWLockObject) ToString() string {
-	return "<Instance of: " + lock.class.Name + ">"
+	return "#<" + lock.class.Name + " >"
 }
 
 // Inspect delegates to ToString
