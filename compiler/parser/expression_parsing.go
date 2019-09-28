@@ -9,6 +9,7 @@ import (
 	"github.com/goby-lang/goby/compiler/parser/precedence"
 	"github.com/goby-lang/goby/compiler/parser/states"
 	"github.com/goby-lang/goby/compiler/token"
+	"github.com/goby-lang/goby/compiler/utils"
 )
 
 type (
@@ -30,9 +31,24 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 
 	switch v := v.(type) {
 	case ast.Variable:
-		exp.Variables = []ast.Expression{v}
+		isPassed, _ := utils.CheckNameOfVariables(v)
+
+		if isPassed {
+			exp.Variables = []ast.Expression{v}
+		}else {
+			errMsg := fmt.Sprintf("SyntaxError: unexpected '%s', expecting end-of-input", v.String())
+			p.error = errors.InitError(errMsg, errors.InvalidAssignmentError)
+		}
+
 	case *ast.MultiVariableExpression:
-		exp.Variables = v.Variables
+		isPassed, errVariableIndex := utils.CheckNameOfVariables(v.Variables...)
+
+		if isPassed {
+			exp.Variables = v.Variables
+		}else {
+			errMsg := fmt.Sprintf("SyntaxError: unexpected '%s', expecting end-of-input", v.Variables[errVariableIndex].String())
+			p.error = errors.InitError(errMsg, errors.InvalidAssignmentError)
+		}
 	case *ast.CallExpression:
 		/*
 			for cases like: `a[i] += b`
@@ -57,6 +73,10 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 
 		errMsg := fmt.Sprintf("Can't assign value to %s. Line: %d", v.String(), p.curToken.Line)
 		p.error = errors.InitError(errMsg, errors.InvalidAssignmentError)
+
+	default:
+		errMsg := fmt.Sprintf("SyntaxError: unexpected '%s', expecting end-of-input. at line '%d'", v.String(), p.curToken.Line)
+		p.error = errors.InitError(errMsg, errors.SyntaxError)
 	}
 
 	if len(exp.Variables) == 1 {

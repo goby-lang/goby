@@ -193,49 +193,51 @@ func (l *Lexer) NextToken() token.Token {
 		tok.Type = token.EOF
 		tok.Line = l.line
 	default:
-		if isLetter(l.ch) {
+		if isLetter(l.ch) || isDigit(l.ch) {
 			if 'A' <= l.ch && l.ch <= 'Z' {
 				tok.Literal = string(l.readConstant())
 				tok.Type = token.Constant
 				tok.Line = l.line
 				l.FSM.Event("initial")
 			} else {
-				tok.Literal = string(l.readIdentifier())
-				if l.FSM.Is("method") {
-					if tok.Literal == "self" {
-						tok.Type = token.LookupIdent(tok.Literal)
-					} else {
-						tok.Type = token.Ident
-					}
-					l.FSM.Event("initial")
+				var isIdentifier, result = l.readIdentifierOrNumber();
 
-				} else if l.FSM.Is("initial") {
-					tok.Type = token.LookupIdent(tok.Literal)
-					if tok.Literal == "def" {
-						l.FSM.Event("method")
-					} else {
+				if isIdentifier {
+					tok.Literal = string(result)
+					if l.FSM.Is("method") {
+						if tok.Literal == "self" {
+							tok.Type = token.LookupIdent(tok.Literal)
+						} else {
+							tok.Type = token.Ident
+						}
 						l.FSM.Event("initial")
+
+					} else if l.FSM.Is("initial") {
+						tok.Type = token.LookupIdent(tok.Literal)
+						if tok.Literal == "def" {
+							l.FSM.Event("method")
+						} else {
+							l.FSM.Event("initial")
+						}
 					}
+					tok.Line = l.line
+				}else {
+					tok.Literal = string(result)
+
+					tok.Type = token.Int
+					tok.Line = l.line
+					return tok
 				}
-				tok.Line = l.line
 			}
 			if tok.Type == token.Ident {
 				l.FSM.Event("nosymbol")
 			}
 			return tok
 		} else if isInstanceVariable(l.ch) {
-			if isLetter(l.peekChar()) {
-				tok.Literal = string(l.readInstanceVariable())
-				tok.Type = token.InstanceVariable
-				tok.Line = l.line
-				return tok
-			}
-
-			return newToken(token.Illegal, l.ch, l.line)
-		} else if isDigit(l.ch) {
-			tok.Literal = string(l.readNumber())
-			tok.Type = token.Int
+			tok.Literal = string(l.readInstanceVariable())
+			tok.Type = token.InstanceVariable
 			tok.Line = l.line
+
 			return tok
 		}
 
@@ -262,6 +264,29 @@ func (l *Lexer) resetNosymbol() {
 
 	}
 
+}
+
+func(l *Lexer) readIdentifierOrNumber() (bool, []rune) {
+	var isIdentifier = false
+
+	position := l.position
+	for {
+		if isLetterV := isLetter(l.ch); isLetterV || isDigit(l.ch) {
+			if (isLetterV && !isIdentifier) {
+				isIdentifier = isLetterV
+			}
+
+			l.readChar()
+		}else {
+			break;
+		}
+	}
+
+	if l.ch == '?' {
+		l.readChar()
+	}
+
+	return isIdentifier, l.input[position:l.position]
 }
 
 func (l *Lexer) readNumber() []rune {
