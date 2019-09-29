@@ -57,6 +57,9 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 
 		errMsg := fmt.Sprintf("Can't assign value to %s. Line: %d", v.String(), p.curToken.Line)
 		p.error = errors.InitError(errMsg, errors.InvalidAssignmentError)
+	default:
+		errMsg := fmt.Sprintf("Can't assign value to %s. Line: %d", v.String(), p.curToken.Line)
+		p.error = errors.InitError(errMsg, errors.InvalidAssignmentError)
 	}
 
 	if len(exp.Variables) == 1 {

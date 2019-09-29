@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"github.com/goby-lang/goby/compiler/ast"
 	"github.com/goby-lang/goby/compiler/lexer"
 	"testing"
@@ -165,6 +166,30 @@ func TestAssignExpressionWithLiteralValue(t *testing.T) {
 			assignExp.TestableValue().IsStringLiteral(t).ShouldEqualTo(v)
 		case bool:
 			assignExp.TestableValue().IsBooleanExpression(t).ShouldEqualTo(v)
+		}
+	}
+}
+
+func TestAssignExpressionWithInvalidValue(t *testing.T) {
+	tests := []struct {
+		input         string
+		expectedError string
+	}{
+		{"123 = []", "Can't assign value to 123. Line: 0"},
+		{"[] = []", "Can't assign value to []. Line: 0"},
+		{"{} = []", "Can't assign value to {}. Line: 0"},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+
+		_, err := p.ParseProgram()
+
+		if err == nil {
+			t.Fatal(fmt.Sprintf("Expect %s to cause parser error", tt.input))
+		} else if err.Message != tt.expectedError {
+			t.Fatal(fmt.Sprintf("Expect error message to be '%s', got '%s'", tt.expectedError, err.Message))
 		}
 	}
 }

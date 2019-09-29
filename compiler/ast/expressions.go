@@ -146,9 +146,9 @@ func (he *HashExpression) String() string {
 		pairs = append(pairs, fmt.Sprintf("%s: %s", key, value.String()))
 	}
 
-	out.WriteString("{ ")
+	out.WriteString("{")
 	out.WriteString(strings.Join(pairs, ", "))
-	out.WriteString(" }")
+	out.WriteString("}")
 
 	return out.String()
 }
