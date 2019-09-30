@@ -195,6 +195,12 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		}
 
 		leftExp = infixFn(leftExp)
+
+		for p.peekTokenIs(token.UnderScore) {
+			p.nextToken()
+			leftExp = infixFn(leftExp)
+		}
+
 	}
 
 	if p.peekTokenIs(token.Semicolon) {

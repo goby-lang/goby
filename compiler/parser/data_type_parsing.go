@@ -23,13 +23,49 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	return lit
 }
 
+func (p *Parser) parseUnderScoreLiteral(integerPart ast.Expression) ast.Expression {
+	p.nextToken()
+
+	fmt.Println("!!!")
+
+	lit := &ast.IntegerLiteral{BaseNode: &ast.BaseNode{Token: p.curToken}}
+
+	firstValue, err := strconv.ParseInt(integerPart.String(), 0, 64)
+
+	len := len(p.curToken.Literal)
+
+	for ; len > 0; len-- {
+		firstValue *= 10
+	}
+
+	secondValue, err := strconv.ParseInt(lit.TokenLiteral(), 0, 64)
+
+	if err != nil {
+		p.error = errors.NewTypeParsingError(lit.TokenLiteral(), "integer", p.curToken.Line)
+		return nil
+	}
+
+	lit.Value = int(firstValue + secondValue)
+
+	lit.Token.Literal = strconv.Itoa(lit.Value)
+
+	return lit
+}
+
 func (p *Parser) parseFloatLiteral(integerPart ast.Expression) ast.Expression {
 	// Get the fractional part of the token
 	p.nextToken()
+	lit2 := p.parseIntegerLiteral()
+
+	for p.peekTokenIs(token.UnderScore) {
+		p.nextToken()
+
+		lit2 = p.parseUnderScoreLiteral(lit2)
+	}
 
 	floatTok := token.Token{
 		Type:    token.Float,
-		Literal: fmt.Sprintf("%s.%s", integerPart.String(), p.curToken.Literal),
+		Literal: fmt.Sprintf("%s.%s", integerPart.String(), lit2.String()),
 		Line:    p.curToken.Line,
 	}
 	lit := &ast.FloatLiteral{BaseNode: &ast.BaseNode{Token: floatTok}}
@@ -39,6 +75,7 @@ func (p *Parser) parseFloatLiteral(integerPart ast.Expression) ast.Expression {
 		return nil
 	}
 	lit.Value = float64(value)
+
 	return lit
 }
 

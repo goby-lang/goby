@@ -110,6 +110,8 @@ func (l *Lexer) NextToken() token.Token {
 		}
 	case ';':
 		tok = newToken(token.Semicolon, l.ch, l.line)
+	case '_':
+		tok = newToken(token.UnderScore, l.ch, l.line)
 	case '(':
 		tok = newToken(token.LParen, l.ch, l.line)
 	case ')':

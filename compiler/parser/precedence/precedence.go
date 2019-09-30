@@ -22,6 +22,7 @@ const (
 
 // LookupTable maps token to its corresponding precedence
 var LookupTable = map[token.Type]int{
+	token.UnderScore:         Equals,
 	token.Eq:                 Equals,
 	token.NotEq:              Equals,
 	token.Match:              Compare,
