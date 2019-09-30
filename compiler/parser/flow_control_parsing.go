@@ -88,6 +88,30 @@ func (p *Parser) parseCaseCondition(base ast.Expression) *ast.InfixExpression {
 	return infix
 }
 
+func (p *Parser) parseSingleLineIfExpression(content ast.Expression) ast.Expression {
+	p.nextToken()
+	ifExpression := &ast.IfExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
+
+	ce := &ast.ConditionalExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
+	p.nextToken()
+
+	// exmple puts 1 if true
+	//create expression stat for the code [ puts 1 ] if true
+	stmt := &ast.ExpressionStatement{BaseNode: &ast.BaseNode{Token: p.curToken}}
+	stmt.Expression = content
+
+	//parse Condition
+	ce.Condition = p.parseExpression(precedence.Normal)
+	ce.Consequence = &ast.BlockStatement{BaseNode: &ast.BaseNode{Token: p.curToken}}
+	ce.Consequence.Statements = []ast.Statement{stmt}
+	ce.Consequence.KeepLastValue()
+
+	ifExpression.Conditionals = []*ast.ConditionalExpression{ce}
+
+	return ifExpression
+}
+
+
 func (p *Parser) parseIfExpression() ast.Expression {
 	ie := &ast.IfExpression{BaseNode: &ast.BaseNode{Token: p.curToken}}
 	// parse if and elsif expressions

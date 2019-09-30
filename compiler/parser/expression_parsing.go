@@ -166,6 +166,10 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 
 	leftExp := parseFn()
 
+	if p.peekTokenIs(token.If) && p.curToken.Line == p.peekToken.Line {
+		return p.parseSingleLineIfExpression(leftExp)
+	}
+
 	/*
 		Precedence example:
 
