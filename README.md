@@ -168,7 +168,7 @@ More sample Goby codes can be found in [sample directory](https://github.com/gob
 
 ## Joining to Goby
 
-**Join us on Slack!** [![](https://goby-lang-slackin.herokuapp.com/badge.svg)](https://goby-lang-slackin.herokuapp.com)
+**Join us on Slack!** [![](https://goby-slack-invite.herokuapp.com/badge.svg)](https://goby-slack-invite.herokuapp.com)
 
 See the [guideline](https://github.com/goby-lang/goby/blob/master/CONTRIBUTING.md).
 
