@@ -1537,6 +1537,18 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 		},
 	},
 	{
+		Name: "tap",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if blockFrame == nil {
+				return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+			}
+
+			t.builtinMethodYield(blockFrame, receiver)
+
+			return receiver
+		},
+	},
+	{
 		Name: "thread",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 			if blockFrame == nil {
