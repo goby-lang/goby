@@ -21,6 +21,8 @@ type Object interface {
 	id() int
 	InstanceVariableGet(string) (Object, bool)
 	InstanceVariableSet(string, Object) Object
+	instanceVariables() *environment
+	setInstanceVariables(*environment)
 	isTruthy() bool
 }
 
@@ -73,6 +75,14 @@ func (b *BaseObj) InstanceVariableSet(name string, value Object) Object {
 	b.InstanceVariables.set(name, value)
 
 	return value
+}
+
+func (b *BaseObj) instanceVariables() *environment {
+	return b.InstanceVariables
+}
+
+func (b *BaseObj) setInstanceVariables(e *environment) {
+	b.InstanceVariables = e
 }
 
 func (b *BaseObj) findMethod(methodName string) (method Object) {

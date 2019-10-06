@@ -874,6 +874,20 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 
 		},
 	},
+	{
+		Name: "dup",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			switch receiver.(type) {
+			case *RObject:
+				newObj := receiver.Class().initializeInstance()
+				newObj.setInstanceVariables(receiver.instanceVariables().copy())
+
+				return newObj
+			default:
+				return t.vm.InitErrorObject(errors.NotImplementedError, sourceLine, errors.NativeNotImplementedErrorFormat, "dup", receiver.Class().Name)
+			}
+		},
+	},
 	// Exits from the interpreter, returning the specified exit code (if any).
 	//
 	// The method itself formally returns nil, although it's not usable.

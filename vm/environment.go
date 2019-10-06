@@ -29,3 +29,11 @@ func (e *environment) names() []string {
 	sort.Strings(keys)
 	return keys
 }
+
+func (e *environment) copy() *environment {
+	newEnv := make(map[string]Object)
+	for key, value := range e.store {
+		newEnv[key] = value
+	}
+	return &environment{store: newEnv}
+}
