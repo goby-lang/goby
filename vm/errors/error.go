@@ -23,30 +23,33 @@ const (
 	ZeroDivisionError = "ZeroDivisionError"
 	// ChannelCloseError is for accessing to the closed channel
 	ChannelCloseError = "ChannelCloseError"
+
+	NotImplementedError = "NotImplementedError"
 )
 
 /*
 	Here defines different error message formats for different types of errors
 */
 const (
-	WrongNumberOfArgument       = "Expect %d argument(s). got: %d"
-	WrongNumberOfArgumentMore   = "Expect %d or more argument(s). got: %d"
-	WrongNumberOfArgumentLess   = "Expect %d or less argument(s). got: %d"
-	WrongNumberOfArgumentRange  = "Expect %d to %d argument(s). got: %d"
-	WrongArgumentTypeFormat     = "Expect argument to be %s. got: %s"
-	WrongArgumentTypeFormatNum  = "Expect argument #%d to be %s. got: %s"
-	InvalidChmodNumber          = "Invalid chmod number. got: %d"
-	InvalidNumericString        = "Invalid numeric string. got: %s"
-	CantLoadFile                = "Can't load \"%s\""
-	CantRequireNonString        = "Can't require \"%s\": Pass a string instead"
-	CantYieldWithoutBlockFormat = "Can't yield without a block"
-	NotDiggable                 = "Expect target to be Diggable, got %s"
-	DividedByZero               = "Divided by 0"
-	ChannelIsClosed             = "The channel is already closed."
-	TooSmallIndexValue          = "Index value %d too small for array. minimum: %d"
-	IndexOutOfRange             = "Index value out of range. got: %v"
-	RegexpFailure               = "Replacement failure with the Regexp. got: %s"
-	NegativeValue               = "Expect argument to be positive value. got: %d"
-	NegativeSecondValue         = "Expect second argument to be positive value. got: %d"
-	UndefinedMethod             = "Undefined Method '%+v' for %+v"
+	WrongNumberOfArgument           = "Expect %d argument(s). got: %d"
+	WrongNumberOfArgumentMore       = "Expect %d or more argument(s). got: %d"
+	WrongNumberOfArgumentLess       = "Expect %d or less argument(s). got: %d"
+	WrongNumberOfArgumentRange      = "Expect %d to %d argument(s). got: %d"
+	WrongArgumentTypeFormat         = "Expect argument to be %s. got: %s"
+	WrongArgumentTypeFormatNum      = "Expect argument #%d to be %s. got: %s"
+	InvalidChmodNumber              = "Invalid chmod number. got: %d"
+	InvalidNumericString            = "Invalid numeric string. got: %s"
+	CantLoadFile                    = "Can't load \"%s\""
+	CantRequireNonString            = "Can't require \"%s\": Pass a string instead"
+	CantYieldWithoutBlockFormat     = "Can't yield without a block"
+	NotDiggable                     = "Expect target to be Diggable, got %s"
+	DividedByZero                   = "Divided by 0"
+	ChannelIsClosed                 = "The channel is already closed."
+	TooSmallIndexValue              = "Index value %d too small for array. minimum: %d"
+	IndexOutOfRange                 = "Index value out of range. got: %v"
+	RegexpFailure                   = "Replacement failure with the Regexp. got: %s"
+	NegativeValue                   = "Expect argument to be positive value. got: %d"
+	NegativeSecondValue             = "Expect second argument to be positive value. got: %d"
+	NativeNotImplementedErrorFormat = "'%s' should be implemented on %s but haven't be done yet. Looking forward to see your PR for it ;-)"
+	UndefinedMethod                 = "Undefined Method '%+v' for %+v"
 )
