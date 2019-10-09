@@ -1490,3 +1490,28 @@ func TestStringInspectEvaluatesToOriginalString(t *testing.T) {
 		v.checkSP(t, i, 3)
 	}
 }
+
+func TestStringDupMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			`"Stan".dup`, "Stan"},
+		{`
+s = "Stan"
+ds = "Stan".dup
+ds += " Lo"
+[s, ds]
+`, []interface{}{"Stan", "Stan Lo"}},
+	}
+
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
