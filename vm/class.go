@@ -884,7 +884,7 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 
 				return newObj
 			default:
-				return t.vm.InitErrorObject(errors.NotImplementedError, sourceLine, errors.NativeNotImplementedErrorFormat, "dup", receiver.Class().Name)
+				return receiver
 			}
 		},
 	},

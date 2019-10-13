@@ -383,12 +383,6 @@ var builtinIntegerInstanceMethods = []*BuiltinMethodObject{
 
 		},
 	},
-	{
-		Name: "dup",
-		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-			return receiver
-		},
-	},
 	// Returns the `Decimal` conversion of self.
 	//
 	// ```Ruby

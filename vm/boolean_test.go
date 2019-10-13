@@ -214,3 +214,22 @@ func TestInitializeBoolean(t *testing.T) {
 		t.Errorf("expected 'false'. got=%t", FALSE.value)
 	}
 }
+
+func TestBooleanDupMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`true.dup`, true},
+		{`false.dup`, false},
+	}
+
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
