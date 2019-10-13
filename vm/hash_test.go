@@ -1949,3 +1949,28 @@ func TestHashInspectCallsChildElementToString(t *testing.T) {
 	vm.checkCFP(t, i, 0)
 	vm.checkSP(t, i, 1)
 }
+
+func TestHashDupMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected map[string]interface{}
+	}{
+		{`{foo: "bar"}.dup`, map[string]interface{}{"foo": "bar"}},
+
+		{`
+a = {foo: "bar"}
+b = a.dup
+a["foo"] = 10
+b
+`, map[string]interface{}{"foo": "bar"}},
+	}
+
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		verifyHashObject(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}

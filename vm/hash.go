@@ -427,6 +427,12 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 		},
 	},
 	{
+		Name: "dup",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			return receiver.(*HashObject).copy()
+		},
+	},
+	{
 		// Calls block once for each key in the hash (in sorted key order), passing the
 		// key-value pair as parameters.
 		// Returns `self`.
@@ -1292,7 +1298,7 @@ func (h *HashObject) copy() Object {
 	}
 
 	newHash := &HashObject{
-		BaseObj: &BaseObj{class: h.class},
+		BaseObj: &BaseObj{class: h.class, InstanceVariables: newEnvironment()},
 		Pairs:   elems,
 	}
 
