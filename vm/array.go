@@ -618,6 +618,18 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 		},
 	},
 	{
+		Name: "dup",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			arr, _ := receiver.(*ArrayObject)
+			newArr := make([]Object, len(arr.Elements))
+			copy(newArr, arr.Elements)
+			newObj := t.vm.InitArrayObject(newArr)
+			newObj.setInstanceVariables(arr.instanceVariables().copy())
+
+			return newObj
+		},
+	},
+	{
 		// Loops through each element in the array, with the given block.
 		// Returns self.
 		// A block literal is required.
@@ -1490,7 +1502,7 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 // InitArrayObject returns a new object with the given elemnts
 func (vm *VM) InitArrayObject(elements []Object) *ArrayObject {
 	return &ArrayObject{
-		BaseObj:  &BaseObj{class: vm.TopLevelClass(classes.ArrayClass)},
+		BaseObj:  &BaseObj{class: vm.TopLevelClass(classes.ArrayClass), InstanceVariables: newEnvironment()},
 		Elements: elements,
 	}
 }

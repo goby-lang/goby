@@ -596,6 +596,16 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 		},
 	},
 	{
+		Name: "dup",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			str, _ := receiver.(*StringObject)
+			newObj := t.vm.InitStringObject(str.value)
+			newObj.setInstanceVariables(str.instanceVariables().copy())
+
+			return newObj
+		},
+	},
+	{
 		// Split and loop through the string byte.
 		//
 		// ```ruby
@@ -1651,7 +1661,7 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 
 func (vm *VM) InitStringObject(value string) *StringObject {
 	return &StringObject{
-		BaseObj: &BaseObj{class: vm.TopLevelClass(classes.StringClass)},
+		BaseObj: &BaseObj{class: vm.TopLevelClass(classes.StringClass), InstanceVariables: newEnvironment()},
 		value:   value,
 	}
 }

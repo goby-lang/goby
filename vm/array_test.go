@@ -2245,3 +2245,28 @@ func TestArrayValuesAtMethodFail(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
+func TestArrayDupMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`[1,2,3].dup`, []interface{}{1, 2, 3}},
+
+		{`
+a = [1,2,3]
+b = a.dup
+a[0] = 10
+b
+`, []interface{}{1, 2, 3}},
+	}
+
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}

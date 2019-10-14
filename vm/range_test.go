@@ -655,3 +655,20 @@ func TestRangeToEnumMethod(t *testing.T) {
 	v.checkCFP(t, i, 0)
 	v.checkSP(t, i, 1)
 }
+
+func TestRangeDupMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`(1..2).dup == (1..2)`, true},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}

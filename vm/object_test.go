@@ -66,3 +66,62 @@ func TestObjectTapMethodFail(t *testing.T) {
 	}
 }
 
+func TestObjectDupMethod(t *testing.T) {
+	setup := `
+class Student
+	attr_accessor :name
+	def initialize(name)
+		@name = name
+	end
+end
+
+class School
+	attr_accessor :name, :students
+
+	def initialize(name, students)
+		@name = name
+		@students = students
+	end
+
+	def inspect
+		String.fmt("Name: %s. Students: %s", name, students.map do |s| s.name end.join(", "))
+	end
+end
+`
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			`
+stan = Student.new("Stan")
+stan.dup.name
+`, "Stan"},
+		{
+			`
+stan = Student.new("Stan")
+dup = stan.dup
+dup.name = "Jane"
+
+[stan.name, dup.name]
+`, []interface{}{"Stan", "Jane"}},
+{
+			`
+stan = Student.new("Stan")
+jane = Student.new("Stan")
+
+s1 = School.new("S1", [stan])
+s2 = s1.dup
+s2.name = "S2"
+s2.inspect
+`, "Name: S2. Students: Stan"},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, setup + tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}

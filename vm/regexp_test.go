@@ -197,3 +197,21 @@ func TestRegexpMatchMethodFail(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
+
+func TestRegexpDupMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`Regexp.new("abc").dup == Regexp.new("abc")`, true},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
