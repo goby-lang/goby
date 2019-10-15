@@ -427,6 +427,49 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 		},
 	},
 	{
+		// Performs a 'shallow' copy of the hash and returns it.
+		// Any arguments are ignored.
+		// The object_id of the returned object is different from the one of the receiver.
+
+		// Caveat: any keys of hash ARE also copied with different object ids for now.
+		// This comes from the fact that the string objects are NOT frozen in current Goby.
+		// TBD: Perhaps the `Hash#dup` will not copy keys when we change the implementation of string objects as frozen.
+		//
+		// See also `Object#dup`, `String#dup`, `Array#dup`.
+		//
+		// ```ruby
+		// h = { k1: :key1, k2: :key2 }
+		// h.object_id           #» 824633779744
+		// h.each do |k, v|
+		//   print "key:   "
+		//   puts k.object_id
+		//   print "value: "
+		//   puts v.object_id
+		// end
+		// #» key:   824635631488
+		// #» value: 824633779648
+		// #» key:   824635632288
+		// #» value: 824633779264
+		// #» key:   824635633728
+		// #» value: 824633779456
+		//
+		// b = h.dup
+		// b.object_id           #» 824633779904
+		// b.each do |k, v|
+		//   print "key:   "
+		//   puts k.object_id
+		//   print "value: "
+		//   puts v.object_id
+		// end
+		// #» key:   824633783360
+		// #» value: 824633779648
+		// #» key:   824633784256
+		// #» value: 824633779264
+		// #» key:   824633785056
+		// #» value: 824633779456
+		// ```
+		//
+		// @return [Hash]
 		Name: "dup",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 			return receiver.(*HashObject).copy()
