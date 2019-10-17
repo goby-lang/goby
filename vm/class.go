@@ -1228,12 +1228,12 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 		},
 	},
 	{
-		// Returns object's unique id from Go's `receiver.id()`
+		// Returns object's unique id from Go's `receiver.ID()`
 		// @param n/a []
 		// @return [Integer] Object's address
 		Name: "object_id",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-			return t.vm.InitIntegerObject(receiver.id())
+			return t.vm.InitIntegerObject(receiver.ID())
 
 		},
 	},
@@ -1498,7 +1498,7 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 			r := receiver
 			if r.SingletonClass() == nil {
-				id := t.vm.InitIntegerObject(r.id())
+				id := t.vm.InitIntegerObject(r.ID())
 				singletonClass := t.vm.createRClass(fmt.Sprintf("#<Class:#<%s:%s>>", r.Class().Name, id.ToString()))
 				singletonClass.isSingleton = true
 				return singletonClass

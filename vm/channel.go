@@ -283,9 +283,9 @@ type objectMap struct {
 // storeObj stores objects into the container map
 // and update containerCount at the same time
 func (m *objectMap) storeObj(obj Object) int {
-	m.store.Store(obj.id(), obj)
+	m.store.Store(obj.ID(), obj)
 
-	return obj.id()
+	return obj.ID()
 }
 
 // retrieveObj returns the objects with the number specified

@@ -19,7 +19,7 @@ type Object interface {
 	ToString() string
 	Inspect() string
 	ToJSON(t *Thread) string
-	id() int
+	ID() int
 	InstanceVariableGet(string) (Object, bool)
 	InstanceVariableSet(string, Object) Object
 	instanceVariables() *environment
@@ -31,16 +31,26 @@ type Object interface {
 // BaseObj ==============================================================
 
 type BaseObj struct {
+	id                int
 	class             *RClass
 	singletonClass    *RClass
 	InstanceVariables *environment
 }
 
 func NewBaseObject(c *RClass) *BaseObj {
-	return &BaseObj{
+	obj := &BaseObj{
 		class:             c,
 		InstanceVariables: newEnvironment(),
 	}
+
+	id, e := strconv.ParseInt(fmt.Sprintf("%p", obj), 0, 64)
+
+	if e != nil {
+		panic(e.Error())
+	}
+
+	obj.id = int(id)
+	return obj
 }
 
 // Polymorphic helper functions -----------------------------------------
@@ -50,6 +60,7 @@ func (b *BaseObj) Class() *RClass {
 	if b.class == nil {
 		panic(fmt.Sprint("Object doesn't have class."))
 	}
+
 	return b.class
 }
 
@@ -117,12 +128,8 @@ func (b *BaseObj) findMethodMissing(searchAncestor bool) (method Object) {
 	return
 }
 
-func (b *BaseObj) id() int {
-	r, e := strconv.ParseInt(fmt.Sprintf("%p", b), 0, 64)
-	if e != nil {
-		panic(e.Error())
-	}
-	return int(r)
+func (b *BaseObj) ID() int {
+	return b.id
 }
 
 func (b *BaseObj) isTruthy() bool {
@@ -163,7 +170,7 @@ type RObject struct {
 
 // ToString returns the object's name as the string format
 func (ro *RObject) ToString() string {
-	return "#<" + ro.class.Name + ":" + fmt.Sprint(ro.id()) + " >"
+	return "#<" + ro.class.Name + ":" + fmt.Sprint(ro.ID()) + " >"
 }
 
 // Inspect delegates to ToString
@@ -173,7 +180,7 @@ func (ro *RObject) Inspect() string {
 		v, _ := ro.InstanceVariableGet(n)
 		iv = iv + n + "=" + v.ToString() + " "
 	}
-	return "#<" + ro.class.Name + ":" + fmt.Sprint(ro.id()) + " " + iv + ">"
+	return "#<" + ro.class.Name + ":" + fmt.Sprint(ro.ID()) + " " + iv + ">"
 }
 
 // ToJSON just delegates to ToString
