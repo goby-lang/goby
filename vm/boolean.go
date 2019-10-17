@@ -84,6 +84,16 @@ func (b *BooleanObject) isTruthy() bool {
 	return b.value
 }
 
+func (b *BooleanObject) equalTo(with Object) bool {
+	bool, ok := with.(*BooleanObject)
+
+	if !ok {
+		return false
+	}
+
+	return b.value == bool.value
+}
+
 // equal returns true if the Boolean values between receiver and parameter are equal
 func (b *BooleanObject) equal(e *BooleanObject) bool {
 	return b.value == e.value

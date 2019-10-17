@@ -81,27 +81,6 @@ var builtinNullInstanceMethods = []*BuiltinMethodObject{
 		},
 	},
 	{
-		// Returns true because it is nil. (See the main implementation of nil? method in vm/class.go)
-		//
-		// ```ruby
-		// a = nil
-		// a == nil
-		// # => true
-		// ```
-		Name: "==",
-		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-			if len(args) != 1 {
-				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 1 argument. got: %d", len(args))
-			}
-
-			if _, ok := args[0].(*NullObject); ok {
-				return TRUE
-			}
-			return FALSE
-
-		},
-	},
-	{
 		// Returns true: the flipped boolean value of nil object.
 		//
 		// ```ruby
@@ -177,4 +156,8 @@ func (n *NullObject) Inspect() string {
 
 func (n *NullObject) isTruthy() bool {
 	return false
+}
+
+func (n *NullObject) equalTo(compared Object) bool {
+	return n == compared
 }

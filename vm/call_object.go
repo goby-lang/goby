@@ -93,7 +93,7 @@ func (co *callObject) assignNormalAndOptionedArguments(paramIndex int, stack []*
 		if co.lastArgIndex < argIndex && (at == bytecode.NormalArg || at == bytecode.OptionedArg) {
 			co.callFrame.insertLCL(paramIndex, 0, stack[co.argPtr()+argIndex].Target)
 
-			// Store latest index value (and compare them to current argument index)
+			// Store latest index value (and equalTo them to current argument index)
 			// This is to make sure we won't get same argument's index twice.
 			co.lastArgIndex = argIndex
 			break

@@ -198,33 +198,6 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 		},
 	},
 	{
-		// Returns a Boolean of compared two strings.
-		//
-		// ```ruby
-		// "first" == "second" # => false
-		// "two" == "two" # => true
-		// ```
-		//
-		// @param string [String]
-		// @return [Boolean]
-		Name: "==",
-		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-
-			right, ok := args[0].(*StringObject)
-			if !ok {
-				return FALSE
-			}
-
-			left := receiver.(*StringObject)
-			if left.value == right.value {
-				return TRUE
-			}
-
-			return FALSE
-
-		},
-	},
-	{
 		// Matches the receiver with a Regexp, and returns the number of matched strings.
 		//
 		// ```ruby
@@ -1688,6 +1661,16 @@ func (s *StringObject) ToString() string {
 // Inspect wraps ToString with double quotes
 func (s *StringObject) Inspect() string {
 	return fmt.Sprintf(`"%s"`, escapeSpecialChars(escapeBackslash(s.ToString())))
+}
+
+func (s *StringObject) equalTo(compared Object) bool {
+	right, ok := compared.(*StringObject)
+
+	if !ok {
+		return false
+	}
+
+	return s.equal(right)
 }
 
 func escapeSpecialChars(s string) string {

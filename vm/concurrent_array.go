@@ -137,6 +137,16 @@ func (cac *ConcurrentArrayObject) Value() interface{} {
 	return cac.InternalArray.Elements
 }
 
+func (cao *ConcurrentArrayObject) equalTo(compared Object) bool {
+	 c, ok := compared.(*ConcurrentArrayObject)
+
+	 if !ok {
+	 	return false
+	 }
+
+	 return cao.InternalArray.equalTo(c.InternalArray)
+}
+
 // Helper functions -----------------------------------------------------
 
 func DefineForwardedConcurrentArrayMethod(methodName string, requireWriteLock bool) *BuiltinMethodObject {

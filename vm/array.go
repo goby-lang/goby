@@ -1796,6 +1796,26 @@ func (a *ArrayObject) copy() Object {
 	return newArr
 }
 
+func (a *ArrayObject) equalTo(compared Object) bool {
+	 c, ok := compared.(*ArrayObject)
+
+	 if !ok {
+	 	return false
+	 }
+
+	 if len(a.Elements) != len(c.Elements) {
+	 	return false
+	 }
+
+	 for i, e := range a.Elements {
+	 	if !e.equalTo(c.Elements[i]) {
+	 		return false
+		}
+	 }
+
+	 return true
+}
+
 // unshift inserts an element in the first position of the array
 func (a *ArrayObject) unshift(objs []Object) *ArrayObject {
 	a.Elements = append(objs, a.Elements...)

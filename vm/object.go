@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/goby-lang/goby/compiler/bytecode"
+	"reflect"
 )
 
 // Object represents all objects in Goby, including Array, Integer or even Method and Error.
@@ -24,6 +25,7 @@ type Object interface {
 	instanceVariables() *environment
 	setInstanceVariables(*environment)
 	isTruthy() bool
+	equalTo(Object) bool
 }
 
 // BaseObj ==============================================================
@@ -125,6 +127,16 @@ func (b *BaseObj) id() int {
 
 func (b *BaseObj) isTruthy() bool {
 	return true
+}
+
+func (b *BaseObj) equalTo(with Object) bool {
+	className := b.Class().Name
+	compareClassName := with.Class().Name
+
+	if className == compareClassName && reflect.DeepEqual(b, with) {
+		return true
+	}
+	return false
 }
 
 // Pointer ==============================================================

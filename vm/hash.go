@@ -1334,6 +1334,20 @@ func (h *HashObject) dig(t *Thread, keys []Object, sourceLine int) Object {
 	return diggableCurrentValue.dig(t, nextKeys, sourceLine)
 }
 
+func (h *HashObject) equalTo(with Object) bool {
+	w, ok := with.(*HashObject)
+
+	if !ok {
+		return false
+	}
+
+	if len(h.Pairs) != len(w.Pairs) {
+		return false
+	}
+
+	return reflect.DeepEqual(h.Pairs, w.Pairs)
+}
+
 // Other helper functions ----------------------------------------------
 
 // Return the JSON style strings of the Hash object

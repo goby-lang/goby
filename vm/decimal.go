@@ -324,66 +324,7 @@ var builtinDecimalInstanceMethods = []*BuiltinMethodObject{
 
 		},
 	},
-	{
-		// Returns if self is equal to an Object.
-		// If the second term is integer or float, they are converted into decimal and then perform calculation.
-		// If the Object is not a Numeric the result is always false.
-		//
-		// ```Ruby
-		// "1.0".to_d == 3           # => false
-		// "1.0".to_d == 1           # => true
-		// "1.0".to_d == "1".to_d    # => true
-		// "1.0".to_d == "1".to_f    # => false
-		// "1.0".to_d == "1.0".to_f  # => false
-		// "1.0".to_d == 'str'       # => false
-		// "1.0".to_d == Array       # => false
-		// ```
-		//
-		// @return [Boolean]
-		Name: "==",
-		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-			decimalOperation := func(leftValue *Decimal, rightValue *Decimal) bool {
-				if leftValue.Cmp(rightValue) == 0 {
-					return true
-				}
 
-				return false
-			}
-
-			return receiver.(*DecimalObject).equalityTest(t, args[0], decimalOperation, true, sourceLine)
-
-		},
-	},
-	{
-		// Returns if self is not equal to an Object.
-		// If the second term is integer or float, they are converted into decimal and then perform calculation.
-		// If the Object is not a Numeric the result is always false.
-		//
-		// ```Ruby
-		// "1.0".to_d != 3           # => false
-		// "1.0".to_d != 1           # => true
-		// "1.0".to_d != "1".to_d    # => true
-		// "1.0".to_d != "1".to_f    # => false
-		// "1.0".to_d != "1.0".to_f  # => false
-		// "1.0".to_d != 'str'       # => false
-		// "1.0".to_d != Array       # => false
-		// ```
-		//
-		// @return [Boolean]
-		Name: "!=",
-		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-			decimalOperation := func(leftValue *Decimal, rightValue *Decimal) bool {
-				if leftValue.Cmp(rightValue) != 0 {
-					return true
-				}
-
-				return false
-			}
-
-			return receiver.(*DecimalObject).equalityTest(t, args[0], decimalOperation, false, sourceLine)
-
-		},
-	},
 	{
 		// Returns a string with fraction format of the decimal.
 		// If the denominator is 1, '/1` is omitted.
@@ -613,28 +554,17 @@ func (d *DecimalObject) arithmeticOperation(
 	return t.vm.initDecimalObject(&result)
 }
 
-// Apply an equality test, returning true if the objects are considered equal,
-// and false otherwise.
-func (d *DecimalObject) equalityTest(
-	t *Thread,
-	rightObject Object,
-	decimalOperation func(leftValue *Decimal, rightValue *Decimal) bool,
-	nonInverse bool,
-	sourceLine int,
-) Object {
-	var rightValue *Decimal
-	var result bool
+func (d *DecimalObject) equalTo(with Object) bool {
+	w, ok := with.(*DecimalObject)
 
-	switch rightObject.(type) {
-	case *DecimalObject:
-		rightValue = rightObject.(*DecimalObject).value
-	default:
-		return toBooleanObject(nonInverse == false)
+	if !ok {
+		return false
 	}
 
-	leftValue := d.value
-	result = decimalOperation(leftValue, rightValue)
-	return toBooleanObject(result)
+	if d.value.Cmp(w.value) == 0 {
+		return true
+	}
+	return false
 }
 
 // Apply the passed numeric comparison, while performing type conversion.
