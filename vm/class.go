@@ -1641,7 +1641,7 @@ func (vm *VM) createRClass(className string) *RClass {
 		superClass:       objectClass,
 		constants:        make(map[string]*Pointer),
 		isModule:         false,
-		BaseObj:          &BaseObj{class: classClass, InstanceVariables: newEnvironment()},
+		BaseObj:          NewBaseObject(classClass),
 	}
 }
 
@@ -1658,7 +1658,7 @@ func initModuleClass(classClass *RClass) *RClass {
 		Methods:     newEnvironment(),
 		constants:   make(map[string]*Pointer),
 		isModule:    false,
-		BaseObj:     &BaseObj{class: classClass, InstanceVariables: newEnvironment()},
+		BaseObj:     NewBaseObject(classClass),
 		isSingleton: true,
 	}
 
@@ -1686,7 +1686,7 @@ func initClassClass() *RClass {
 		Methods:     newEnvironment(),
 		constants:   make(map[string]*Pointer),
 		isModule:    false,
-		BaseObj:     &BaseObj{class: classClass, InstanceVariables: newEnvironment()},
+		BaseObj:     NewBaseObject(classClass),
 		isSingleton: true,
 	}
 
@@ -1703,7 +1703,7 @@ func initObjectClass(c *RClass) *RClass {
 		Name:      classes.ObjectClass,
 		Methods:   newEnvironment(),
 		constants: make(map[string]*Pointer),
-		BaseObj:   &BaseObj{class: c},
+		BaseObj:   NewBaseObject(c),
 	}
 
 	singletonClass := &RClass{
@@ -1711,7 +1711,7 @@ func initObjectClass(c *RClass) *RClass {
 		Methods:     newEnvironment(),
 		constants:   make(map[string]*Pointer),
 		isModule:    false,
-		BaseObj:     &BaseObj{class: c, InstanceVariables: newEnvironment()},
+		BaseObj:     NewBaseObject(c),
 		isSingleton: true,
 		superClass:  c,
 	}
@@ -1867,9 +1867,7 @@ func (c *RClass) returnSuperClass() *RClass {
 }
 
 func (c *RClass) initializeInstance() *RObject {
-	instance := &RObject{BaseObj: &BaseObj{class: c, InstanceVariables: newEnvironment()}}
-
-	return instance
+	return &RObject{BaseObj: NewBaseObject(c)}
 }
 
 func (c *RClass) setAttrWriter(args interface{}) {

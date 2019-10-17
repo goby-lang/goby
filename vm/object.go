@@ -36,9 +36,9 @@ type BaseObj struct {
 	InstanceVariables *environment
 }
 
-func NewBaseObject(v *VM, class string) *BaseObj {
+func NewBaseObject(c *RClass) *BaseObj {
 	return &BaseObj{
-		class:             v.TopLevelClass(class),
+		class:             c,
 		InstanceVariables: newEnvironment(),
 	}
 }

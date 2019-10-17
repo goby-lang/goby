@@ -126,7 +126,7 @@ var builtinGoMapInstanceMethods = []*BuiltinMethodObject{
 // Functions for initialization -----------------------------------------
 
 func (vm *VM) initGoMap(d map[string]interface{}) *GoMap {
-	return &GoMap{data: d, BaseObj: &BaseObj{class: vm.TopLevelClass(classes.GoMapClass)}}
+	return &GoMap{data: d, BaseObj: NewBaseObject(vm.TopLevelClass(classes.GoMapClass))}
 }
 
 func (vm *VM) initGoMapClass() *RClass {

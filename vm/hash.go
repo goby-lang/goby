@@ -1218,7 +1218,7 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 
 func (vm *VM) InitHashObject(pairs map[string]Object) *HashObject {
 	return &HashObject{
-		BaseObj: &BaseObj{class: vm.TopLevelClass(classes.HashClass)},
+		BaseObj: NewBaseObject(vm.TopLevelClass(classes.HashClass)),
 		Pairs:   pairs,
 	}
 }
@@ -1298,7 +1298,7 @@ func (h *HashObject) copy() Object {
 	}
 
 	newHash := &HashObject{
-		BaseObj: &BaseObj{class: h.class, InstanceVariables: newEnvironment()},
+		BaseObj: NewBaseObject(h.class),
 		Pairs:   elems,
 	}
 

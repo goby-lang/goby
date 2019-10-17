@@ -316,7 +316,7 @@ func init() {
 				t.pushErrorObject(errors.InternalError, sourceLine, "Can't get method %s's instruction set.", methodName)
 			}
 
-			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, BaseObj: &BaseObj{class: t.vm.TopLevelClass(classes.MethodClass)}}
+			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, BaseObj: NewBaseObject(t.vm.TopLevelClass(classes.MethodClass))}
 
 			v := t.Stack.Pop().Target
 			switch self := v.(type) {
@@ -331,7 +331,7 @@ func init() {
 			argCount := args[0].(int)
 			methodName := t.Stack.Pop().Target.(*StringObject).value
 			is, _ := t.getMethodIS(methodName, cf.FileName())
-			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, BaseObj: &BaseObj{class: t.vm.TopLevelClass(classes.MethodClass)}}
+			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, BaseObj: NewBaseObject(t.vm.TopLevelClass(classes.MethodClass))}
 
 			v := t.Stack.Pop().Target
 

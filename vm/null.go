@@ -128,7 +128,7 @@ func (vm *VM) initNullClass() *RClass {
 	nc := vm.initializeClass(classes.NullClass)
 	nc.setBuiltinMethods(builtinNullInstanceMethods, false)
 	nc.setBuiltinMethods(builtinNullClassMethods, true)
-	NULL = &NullObject{BaseObj: &BaseObj{class: nc}}
+	NULL = &NullObject{BaseObj: NewBaseObject(nc)}
 	return nc
 }
 

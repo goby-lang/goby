@@ -1502,7 +1502,7 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 // InitArrayObject returns a new object with the given elemnts
 func (vm *VM) InitArrayObject(elements []Object) *ArrayObject {
 	return &ArrayObject{
-		BaseObj:  &BaseObj{class: vm.TopLevelClass(classes.ArrayClass), InstanceVariables: newEnvironment()},
+		BaseObj:  NewBaseObject(vm.TopLevelClass(classes.ArrayClass)),
 		Elements: elements,
 	}
 }
@@ -1763,12 +1763,10 @@ func (a *ArrayObject) reverse() *ArrayObject {
 		reversedArrElems[arrLen-i-1] = element
 	}
 
-	newArr := &ArrayObject{
-		BaseObj:  &BaseObj{class: a.class},
+	return &ArrayObject{
+		BaseObj:  NewBaseObject(a.class),
 		Elements: reversedArrElems,
 	}
-
-	return newArr
 }
 
 // shift removes the first element in the array and returns it
@@ -1788,12 +1786,10 @@ func (a *ArrayObject) copy() Object {
 
 	copy(e, a.Elements)
 
-	newArr := &ArrayObject{
-		BaseObj:  &BaseObj{class: a.class},
+	return &ArrayObject{
+		BaseObj:  NewBaseObject(a.class),
 		Elements: e,
 	}
-
-	return newArr
 }
 
 func (a *ArrayObject) equalTo(compared Object) bool {

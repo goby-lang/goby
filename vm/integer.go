@@ -702,7 +702,7 @@ var builtinIntegerInstanceMethods = []*BuiltinMethodObject{
 
 func (vm *VM) InitIntegerObject(value int) *IntegerObject {
 	return &IntegerObject{
-		BaseObj: &BaseObj{class: vm.TopLevelClass(classes.IntegerClass)},
+		BaseObj: NewBaseObject(vm.TopLevelClass(classes.IntegerClass)),
 		value:   value,
 		flag:    i,
 	}

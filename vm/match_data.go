@@ -158,7 +158,7 @@ var builtinMatchDataInstanceMethods = []*BuiltinMethodObject{
 // create an inconsistent MatchData object.
 func (vm *VM) initMatchDataObject(match *Match, pattern, text string) *MatchDataObject {
 	return &MatchDataObject{
-		BaseObj: &BaseObj{class: vm.TopLevelClass(classes.MatchDataClass)},
+		BaseObj: NewBaseObject(vm.TopLevelClass(classes.MatchDataClass)),
 		match:   match,
 	}
 }

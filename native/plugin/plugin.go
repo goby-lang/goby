@@ -64,7 +64,7 @@ func newPlugin(receiver Object, sourceLine int, t *Thread, args []Object) Object
 		return t.VM().InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 	}
 
-	return &PluginObject{fn: name.Value().(string), BaseObj: vm.NewBaseObject(t.VM(), classes.PluginClass)}
+	return &PluginObject{fn: name.Value().(string), BaseObj: vm.NewBaseObject(t.VM().TopLevelClass(classes.PluginClass))}
 }
 
 func use(receiver Object, sourceLine int, t *Thread, args []Object) Object {
@@ -79,7 +79,7 @@ func use(receiver Object, sourceLine int, t *Thread, args []Object) Object {
 		return t.VM().InitErrorObject(errors.InternalError, sourceLine, err.Error())
 	}
 
-	return &PluginObject{fn: pkgName, plugin: p, BaseObj: vm.NewBaseObject(t.VM(), classes.PluginClass)}
+	return &PluginObject{fn: pkgName, plugin: p, BaseObj: vm.NewBaseObject(t.VM().TopLevelClass(classes.PluginClass))}
 }
 func compile(receiver Object, sourceLine int, t *Thread, args []Object) Object {
 	r := receiver.(*PluginObject)

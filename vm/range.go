@@ -462,7 +462,7 @@ var builtinRangeInstanceMethods = []*BuiltinMethodObject{
 
 func (vm *VM) initRangeObject(start, end int) *RangeObject {
 	return &RangeObject{
-		BaseObj: &BaseObj{class: vm.TopLevelClass(classes.RangeClass)},
+		BaseObj: NewBaseObject(vm.TopLevelClass(classes.RangeClass)),
 		Start:   start,
 		End:     end,
 	}

@@ -50,7 +50,7 @@ func (vm *VM) InitErrorObject(errorType string, sourceLine int, format string, a
 	}
 
 	return &Error{
-		BaseObj: &BaseObj{class: errClass},
+		BaseObj: NewBaseObject(errClass),
 		// Add 1 to source line because it's zero indexed
 		message:     fmt.Sprintf(errorType+": "+format, args...),
 		stackTraces: []string{fmt.Sprintf("from %s:%d", cf.FileName(), sourceLine)},
