@@ -37,3 +37,97 @@ func TestLookupIdentTrue(t *testing.T) {
 		}
 	}
 }
+
+func TestCreateOperatorIdentFalse(t *testing.T) {
+	line := 123
+	token := CreateOperator("nonexist", line)
+	if token.Type != Ident {
+		t.Fatalf("Expect token type %s, got: %s", Ident, token.Type)
+	}
+	if token.Line != line {
+		t.Fatalf("Expect token line %v, got: %v", line, token.Line)
+	}
+}
+
+func TestCreateOperatorIdentTrue(t *testing.T) {
+	var operators = map[string]Type{
+		"=":   Assign,
+		"+":   Plus,
+		"+=":  PlusEq,
+		"-":   Minus,
+		"-=":  MinusEq,
+		"!":   Bang,
+		"*":   Asterisk,
+		"**":  Pow,
+		"/":   Slash,
+		".":   Dot,
+		"&&":  And,
+		"||":  Or,
+		"||=": OrEq,
+		"%":   Modulo,
+
+		"=~":  Match,
+		"<":   LT,
+		"<=":  LTE,
+		">":   GT,
+		">=":  GTE,
+		"<=>": COMP,
+
+		"==": Eq,
+		"!=": NotEq,
+		"..": Range,
+
+		"::": ResolutionOperator,
+	}
+
+	line := 123
+
+	for name, tokenType := range operators {
+		tok := CreateOperator(name, line)
+		if tok.Type != tokenType {
+			t.Fatalf("Expect token type %s, got: %s", tokenType, tok.Type)
+		}
+		if tok.Line != line {
+			t.Fatalf("Expect token line %v, got: %v", line, tok.Line)
+		}
+	}
+}
+
+func TestCreateSeparatorIdentFalse(t *testing.T) {
+	line := 123
+	token := CreateSeparator("nonexist", line)
+	if token.Type != Ident {
+		t.Fatalf("Expect token type %s, got: %s", Ident, token.Type)
+	}
+	if token.Line != line {
+		t.Fatalf("Expect token line %v, got: %v", line, token.Line)
+	}
+}
+
+func TestCreateSeparatorIdentTrue(t *testing.T) {
+	var separators = map[string]Type{
+		",": Comma,
+		";": Semicolon,
+		":": Colon,
+		"|": Bar,
+
+		"(": LParen,
+		")": RParen,
+		"{": LBrace,
+		"}": RBrace,
+		"[": LBracket,
+		"]": RBracket,
+	}
+
+	line := 123
+
+	for name, tokenType := range separators {
+		tok := CreateSeparator(name, line)
+		if tok.Type != tokenType {
+			t.Fatalf("Expect token type %s, got: %s", tokenType, tok.Type)
+		}
+		if tok.Line != line {
+			t.Fatalf("Expect token line %v, got: %v", line, tok.Line)
+		}
+	}
+}
