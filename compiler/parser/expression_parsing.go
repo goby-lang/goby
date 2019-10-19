@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+
 	"github.com/goby-lang/goby/compiler/ast"
 	"github.com/goby-lang/goby/compiler/parser/arguments"
 	"github.com/goby-lang/goby/compiler/parser/errors"
@@ -63,7 +64,7 @@ func (p *Parser) parseAssignExpression(v ast.Expression) ast.Expression {
 	}
 
 	if len(exp.Variables) == 1 {
-		tok = token.Token{Type: token.Assign, Literal: "=", Line: p.curToken.Line}
+		tok = token.CreateOperator("=", p.curToken.Line)
 		value = p.expandAssignmentValue(v)
 	} else {
 		tok = p.curToken
@@ -405,17 +406,15 @@ func (p *Parser) expandAssignmentValue(value ast.Expression) ast.Expression {
 		return p.parseExpression(precedence)
 	case token.MinusEq, token.PlusEq, token.OrEq:
 		// Syntax Surgar: Assignment with operator case
-		infixOperator := token.Token{Line: p.curToken.Line}
+		var infixOperator token.Token
+
 		switch p.curToken.Type {
 		case token.PlusEq:
-			infixOperator.Type = token.Plus
-			infixOperator.Literal = "+"
+			infixOperator = token.CreateOperator("+", p.curToken.Line)
 		case token.MinusEq:
-			infixOperator.Type = token.Minus
-			infixOperator.Literal = "-"
+			infixOperator = token.CreateOperator("-", p.curToken.Line)
 		case token.OrEq:
-			infixOperator.Type = token.Or
-			infixOperator.Literal = "||"
+			infixOperator = token.CreateOperator("||", p.curToken.Line)
 		}
 
 		p.nextToken()
