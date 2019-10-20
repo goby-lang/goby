@@ -108,10 +108,78 @@ var keywords = map[string]Type{
 	"get_block": GetBlock,
 }
 
+var operators = map[string]Type{
+	"=":   Assign,
+	"+":   Plus,
+	"+=":  PlusEq,
+	"-":   Minus,
+	"-=":  MinusEq,
+	"!":   Bang,
+	"*":   Asterisk,
+	"**":  Pow,
+	"/":   Slash,
+	".":   Dot,
+	"&&":  And,
+	"||":  Or,
+	"||=": OrEq,
+	"%":   Modulo,
+
+	"=~":  Match,
+	"<":   LT,
+	"<=":  LTE,
+	">":   GT,
+	">=":  GTE,
+	"<=>": COMP,
+
+	"==": Eq,
+	"!=": NotEq,
+	"..": Range,
+
+	"::": ResolutionOperator,
+}
+
+var separators = map[string]Type{
+	",": Comma,
+	";": Semicolon,
+	":": Colon,
+	"|": Bar,
+
+	"(": LParen,
+	")": RParen,
+	"{": LBrace,
+	"}": RBrace,
+	"[": LBracket,
+	"]": RBracket,
+}
+
 // LookupIdent is used for keyword identification
 func LookupIdent(ident string) Type {
 	if tok, ok := keywords[ident]; ok {
 		return tok
 	}
 	return Ident
+}
+
+func getOperatorType(literal string) Type {
+	if t, ok := operators[literal]; ok {
+		return t
+	}
+	return Ident
+}
+
+func getSeparatorType(literal string) Type {
+	if t, ok := separators[literal]; ok {
+		return t
+	}
+	return Ident
+}
+
+// CreateOperator - Factory method for creating operator types token from literal string
+func CreateOperator(literal string, line int) Token {
+	return Token{Type: getOperatorType(literal), Literal: literal, Line: line}
+}
+
+// CreateSeparator - Factory method for creating separator types token from literal string
+func CreateSeparator(literal string, line int) Token {
+	return Token{Type: getSeparatorType(literal), Literal: literal, Line: line}
 }

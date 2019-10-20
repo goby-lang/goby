@@ -52,107 +52,86 @@ func (l *Lexer) NextToken() token.Token {
 		return tok
 	case '=':
 		if l.peekChar() == '=' {
-			currentByte := l.ch
 			l.readChar()
-			tok = token.Token{Type: token.Eq, Literal: string(currentByte) + string(l.ch), Line: l.line}
+			tok = token.CreateOperator("==", l.line)
 		} else if l.peekChar() == '~' {
-			currentByte := l.ch
 			l.readChar()
-			tok = token.Token{Type: token.Match, Literal: string(currentByte) + string(l.ch), Line: l.line}
+			tok = token.CreateOperator("=~", l.line)
 		} else {
-			tok = newToken(token.Assign, l.ch, l.line)
+			tok = token.CreateOperator("=", l.line)
 		}
 	case '-':
 		if l.peekChar() == '=' {
-			tok.Literal = "-="
-			tok.Line = l.line
-			tok.Type = token.MinusEq
+			tok = token.CreateOperator("-=", l.line)
 			l.readChar()
 			l.readChar()
 			return tok
 		}
-		tok = newToken(token.Minus, l.ch, l.line)
+		tok = token.CreateOperator("-", l.line)
 	case '!':
 		if l.peekChar() == '=' {
-			currentByte := l.ch
 			l.readChar()
-			tok = token.Token{Type: token.NotEq, Literal: string(currentByte) + string(l.ch), Line: l.line}
+			tok = token.CreateOperator("!=", l.line)
 		} else {
-			tok = newToken(token.Bang, l.ch, l.line)
+			tok = token.CreateOperator("!", l.line)
 		}
 	case '/':
-		tok = newToken(token.Slash, l.ch, l.line)
+		tok = token.CreateOperator("/", l.line)
 	case '*':
 		if l.peekChar() == '*' {
 			l.readChar()
-			tok = token.Token{Type: token.Pow, Literal: "**", Line: l.line}
+			tok = token.CreateOperator("**", l.line)
 		} else {
-			tok = newToken(token.Asterisk, l.ch, l.line)
+			tok = token.CreateOperator("*", l.line)
 		}
 	case '<':
 		if l.peekChar() == '=' {
 			l.readChar()
 			if l.peekChar() == '>' {
 				l.readChar()
-				tok = token.Token{Type: token.COMP, Literal: "<=>", Line: l.line}
+				tok = token.CreateOperator("<=>", l.line)
 			} else {
-				tok = token.Token{Type: token.LTE, Literal: "<=", Line: l.line}
+				tok = token.CreateOperator("<=", l.line)
 			}
 		} else {
-			tok = newToken(token.LT, l.ch, l.line)
+			tok = token.CreateOperator("<", l.line)
 		}
 	case '>':
 		if l.peekChar() == '=' {
 			l.readChar()
-			tok = token.Token{Type: token.GTE, Literal: ">=", Line: l.line}
+			tok = token.CreateOperator(">=", l.line)
 		} else {
-			tok = newToken(token.GT, l.ch, l.line)
+			tok = token.CreateOperator(">", l.line)
 		}
-	case ';':
-		tok = newToken(token.Semicolon, l.ch, l.line)
-	case '(':
-		tok = newToken(token.LParen, l.ch, l.line)
-	case ')':
-		tok = newToken(token.RParen, l.ch, l.line)
-	case ',':
-		tok = newToken(token.Comma, l.ch, l.line)
+	case ';', ',', '(', ')', '{', '}', '[', ']':
+		tok = token.CreateSeparator(string(l.ch), l.line)
 	case '+':
 		if l.peekChar() == '=' {
-			tok.Literal = "+="
-			tok.Line = l.line
-			tok.Type = token.PlusEq
+			tok = token.CreateOperator("+=", l.line)
 			l.readChar()
 			l.readChar()
 			return tok
 		}
-		tok = newToken(token.Plus, l.ch, l.line)
-	case '{':
-		tok = newToken(token.LBrace, l.ch, l.line)
-	case '}':
-		tok = newToken(token.RBrace, l.ch, l.line)
-	case '[':
-		tok = newToken(token.LBracket, l.ch, l.line)
-	case ']':
-		tok = newToken(token.RBracket, l.ch, l.line)
+		tok = token.CreateOperator("+", l.line)
 	case '.':
 		if l.peekChar() == '.' {
-			tok = token.Token{Type: token.Range, Literal: "..", Line: l.line}
+			tok = token.CreateOperator("..", l.line)
 			l.readChar()
 			l.readChar()
 			return tok
 		}
-		tok = newToken(token.Dot, l.ch, l.line)
+		tok = token.CreateOperator(".", l.line)
 		l.FSM.Event("method")
 	case ':':
 		if l.FSM.Is("nosymbol") {
 			//e.g. {test: abc} || {test: :abc} || {test: 50}
 
-			tok = newToken(token.Colon, l.ch, l.line)
+			tok = token.CreateSeparator(":", l.line)
 
 		} else {
 			if l.peekChar() == ':' {
 				l.readChar()
-				tok = token.Token{Type: token.ResolutionOperator, Literal: "::", Line: l.line}
+				tok = token.CreateOperator("::", l.line)
 
 			} else if isLetter(l.peekChar()) {
 				tok.Literal = string(l.readSymbol())
@@ -161,7 +140,7 @@ func (l *Lexer) NextToken() token.Token {
 				return tok
 
 			} else {
-				tok = newToken(token.Colon, l.ch, l.line)
+				tok = token.CreateSeparator(":", l.line)
 			}
 		}
 	case '|':
@@ -169,20 +148,20 @@ func (l *Lexer) NextToken() token.Token {
 			l.readChar()
 			if l.peekChar() == '=' {
 				l.readChar()
-				tok = token.Token{Type: token.OrEq, Literal: "||=", Line: l.line}
+				tok = token.CreateOperator("||=", l.line)
 			} else {
-				tok = token.Token{Type: token.Or, Literal: "||", Line: l.line}
+				tok = token.CreateOperator("||", l.line)
 			}
 		} else {
-			tok = newToken(token.Bar, l.ch, l.line)
+			tok = token.CreateSeparator("|", l.line)
 		}
 	case '&':
 		if l.peekChar() == '&' {
 			l.readChar()
-			tok = token.Token{Type: token.And, Literal: "&&", Line: l.line}
+			tok = token.CreateOperator("&&", l.line)
 		}
 	case '%':
-		tok = newToken(token.Modulo, l.ch, l.line)
+		tok = token.CreateOperator("%", l.line)
 	case '#':
 		tok.Literal = string(l.absorbComment())
 		tok.Type = token.Comment
@@ -231,7 +210,7 @@ func (l *Lexer) NextToken() token.Token {
 				return tok
 			}
 
-			return newToken(token.Illegal, l.ch, l.line)
+			return token.Token{Type: token.Illegal, Literal: string(l.ch), Line: l.line}
 		} else if isDigit(l.ch) {
 			tok.Literal = string(l.readNumber())
 			tok.Type = token.Int
@@ -239,7 +218,7 @@ func (l *Lexer) NextToken() token.Token {
 			return tok
 		}
 
-		tok = newToken(token.Illegal, l.ch, l.line)
+		tok = token.Token{Type: token.Illegal, Literal: string(l.ch), Line: l.line}
 	}
 
 	l.readChar()
@@ -422,8 +401,4 @@ func escapedCharResult(quotedChar rune, peeked rune) string {
 	default:
 		return "\\" + string(peeked)
 	}
-}
-
-func newToken(tokenType token.Type, ch rune, line int) token.Token {
-	return token.Token{Type: tokenType, Literal: string(ch), Line: line}
 }
