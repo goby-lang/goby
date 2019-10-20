@@ -32,6 +32,7 @@ var LookupTable = map[token.Type]int{
 	token.COMP:               Compare,
 	token.And:                Logic,
 	token.Or:                 Logic,
+	token.TernaryOperator:    Logic,
 	token.Range:              Range,
 	token.Plus:               Sum,
 	token.Minus:              Sum,

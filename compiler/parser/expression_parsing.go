@@ -261,6 +261,10 @@ func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
 	return callExpression
 }
 
+// TODO: Add Parse Ternary Expression
+// func (p *Parser) parseTernaryExpression(cond ast.Expression) ast.Expression {
+// }
+
 func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	operator := p.curToken
 	preced := p.curPrecedence()

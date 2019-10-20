@@ -1,8 +1,9 @@
 package lexer
 
 import (
-	"github.com/goby-lang/goby/compiler/token"
 	"testing"
+
+	"github.com/goby-lang/goby/compiler/token"
 )
 
 func TestNextToken(t *testing.T) {
@@ -125,6 +126,8 @@ func TestNextToken(t *testing.T) {
 	'\"string\"'
 	"\'string\'"
 	'\'string\''
+
+	flag ? true_result : false_result
 	`
 
 	tests := []struct {
@@ -439,7 +442,13 @@ func TestNextToken(t *testing.T) {
 		{token.String, "'string'", 117},
 		{token.String, "'string'", 118},
 
-		{token.EOF, "", 119},
+		{token.Ident, "flag", 120},
+		{token.TernaryOperator, "?", 120},
+		{token.Ident, "true_result", 120},
+		{token.Colon, ":", 120},
+		{token.Ident, "false_result", 120},
+
+		{token.EOF, "", 121},
 	}
 	l := New(input)
 
