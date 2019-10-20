@@ -165,6 +165,14 @@ func (ti *TestableIdentifier) ShouldHaveName(expectedName string) {
 	}
 }
 
+// TestableTernaryExpression
+type TestableTernaryExpression struct {
+	*TernaryExpression
+	t *testing.T
+}
+
+// TODO: Test helpers
+
 // TestableIfExpression
 type TestableIfExpression struct {
 	*IfExpression
