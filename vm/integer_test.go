@@ -362,7 +362,6 @@ func TestIntegerZeroDivisionFail(t *testing.T) {
 	}
 }
 
-
 func TestIntegerDupMethod(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -370,7 +369,6 @@ func TestIntegerDupMethod(t *testing.T) {
 	}{
 		{`1.dup`, 1},
 	}
-
 
 	for i, tt := range tests {
 		v := initTestVM()

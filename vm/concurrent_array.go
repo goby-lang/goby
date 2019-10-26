@@ -138,13 +138,13 @@ func (cac *ConcurrentArrayObject) Value() interface{} {
 }
 
 func (cao *ConcurrentArrayObject) equalTo(compared Object) bool {
-	 c, ok := compared.(*ConcurrentArrayObject)
+	c, ok := compared.(*ConcurrentArrayObject)
 
-	 if !ok {
-	 	return false
-	 }
+	if !ok {
+		return false
+	}
 
-	 return cao.InternalArray.equalTo(c.InternalArray)
+	return cao.InternalArray.equalTo(c.InternalArray)
 }
 
 // Helper functions -----------------------------------------------------

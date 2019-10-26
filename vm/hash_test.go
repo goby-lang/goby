@@ -1965,7 +1965,6 @@ b
 `, map[string]interface{}{"foo": "bar"}},
 	}
 
-
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())

@@ -198,7 +198,6 @@ func TestRegexpMatchMethodFail(t *testing.T) {
 	}
 }
 
-
 func TestRegexpDupMethod(t *testing.T) {
 	tests := []struct {
 		input    string

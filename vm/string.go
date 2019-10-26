@@ -1592,22 +1592,22 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 
 			return t.vm.InitStringObject(str)
 		},
-  },
+	},
 	{
 		// Returns a new String which would evaluate to self value
-    //
-    // ```ruby
-    // "string".inspect # => "\"string\""
-    // ```
-    //
-    // @return [String]
-    Name: "inspect",
-    Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+		//
+		// ```ruby
+		// "string".inspect # => "\"string\""
+		// ```
+		//
+		// @return [String]
+		Name: "inspect",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 
-      str := receiver.(*StringObject)
+			str := receiver.(*StringObject)
 
-      return t.vm.InitStringObject(str.Inspect())
-    },
+			return t.vm.InitStringObject(str.Inspect())
+		},
 	},
 	{
 		// Returns a new String with all characters is upcase.

@@ -1506,7 +1506,6 @@ ds += " Lo"
 `, []interface{}{"Stan", "Stan Lo"}},
 	}
 
-
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())

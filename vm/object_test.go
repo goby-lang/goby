@@ -105,7 +105,7 @@ dup.name = "Jane"
 
 [stan.name, dup.name]
 `, []interface{}{"Stan", "Jane"}},
-{
+		{
 			`
 stan = Student.new("Stan")
 jane = Student.new("Stan")
@@ -119,7 +119,7 @@ s2.inspect
 
 	for i, tt := range tests {
 		v := initTestVM()
-		evaluated := v.testEval(t, setup + tt.input, getFilename())
+		evaluated := v.testEval(t, setup+tt.input, getFilename())
 		VerifyExpected(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 0)
 		v.checkSP(t, i, 1)

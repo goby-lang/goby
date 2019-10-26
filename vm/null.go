@@ -67,17 +67,17 @@ var builtinNullInstanceMethods = []*BuiltinMethodObject{
 			n := receiver.(*NullObject)
 			return t.vm.InitStringObject(n.ToString())
 		},
-  },
+	},
 	{
 		Name: "inspect",
 
-    Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-      if len(args) != 0 {
-        return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
-      }
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got: %d", len(args))
+			}
 
-      n := receiver.(*NullObject)
-      return t.vm.InitStringObject(n.Inspect())
+			n := receiver.(*NullObject)
+			return t.vm.InitStringObject(n.Inspect())
 		},
 	},
 	{
