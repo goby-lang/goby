@@ -698,7 +698,8 @@ func TestArithmeticExpressionFail(t *testing.T) {
 		input string
 		error string
 	}{
-		{`{ 1 ++ 1 }`, `unexpected + Line: 0`},
+		{`{ 1 ++ 1 }`, `expected next token to be }, got +(+) instead. Line: 0`},
+		{`{ 1 -- 1 }`, `expected next token to be }, got -(-) instead. Line: 0`},
 		{`{ 1 * * 1 }`, `unexpected * Line: 0`},
 		{`{ 1 ** [1, 2] }`, `expected next token to be }, got **(**) instead. Line: 0`},
 	}

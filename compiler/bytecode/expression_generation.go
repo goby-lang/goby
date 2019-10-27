@@ -244,6 +244,8 @@ func (g *Generator) compilePrefixExpression(is *InstructionSet, exp *ast.PrefixE
 		is.define(PutObject, exp.Line(), 0)
 		g.compileExpression(is, exp.Right, scope, table)
 		is.define(Send, exp.Line(), exp.Operator, 1, "", &ArgSet{})
+	case "+":
+		g.compileExpression(is, exp.Right, scope, table)
 	}
 }
 
