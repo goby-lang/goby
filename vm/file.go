@@ -280,7 +280,7 @@ var builtinFileClassMethods = []*BuiltinMethodObject{
 			}
 
 			// TODO: Refactor this class retrieval mess
-			fo := &FileObject{File: f, BaseObj: &BaseObj{class: t.vm.TopLevelClass(classes.FileClass)}}
+			fo := &FileObject{File: f, BaseObj: NewBaseObject(t.vm.TopLevelClass(classes.FileClass))}
 
 			return fo
 
@@ -468,7 +468,7 @@ var builtinFileInstanceMethods = []*BuiltinMethodObject{
 
 func (vm *VM) initFileObject(f *os.File) *FileObject {
 	return &FileObject{
-		BaseObj: &BaseObj{class: vm.TopLevelClass(classes.FileClass)},
+		BaseObj: NewBaseObject(vm.TopLevelClass(classes.FileClass)),
 		File:    f,
 	}
 }

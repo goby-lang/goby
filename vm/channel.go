@@ -93,7 +93,7 @@ var builtinChannelClassMethods = []*BuiltinMethodObject{
 		// @return [Channel]
 		Name: "new",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-			c := &ChannelObject{BaseObj: &BaseObj{class: t.vm.TopLevelClass(classes.ChannelClass)}, Chan: make(chan int, chOpen)}
+			c := &ChannelObject{BaseObj: NewBaseObject(t.vm.TopLevelClass(classes.ChannelClass)), Chan: make(chan int, chOpen)}
 			return c
 		},
 	},
@@ -268,7 +268,7 @@ func (co *ChannelObject) ToJSON(t *Thread) string {
 
 // copy returns the duplicate of the Array object
 func (co *ChannelObject) copy() Object {
-	newC := &ChannelObject{BaseObj: &BaseObj{class: co.class}, Chan: make(chan int)}
+	newC := &ChannelObject{BaseObj: NewBaseObject(co.class), Chan: make(chan int)}
 	return newC
 }
 
@@ -283,9 +283,9 @@ type objectMap struct {
 // storeObj stores objects into the container map
 // and update containerCount at the same time
 func (m *objectMap) storeObj(obj Object) int {
-	m.store.Store(obj.id(), obj)
+	m.store.Store(obj.ID(), obj)
 
-	return obj.id()
+	return obj.ID()
 }
 
 // retrieveObj returns the objects with the number specified

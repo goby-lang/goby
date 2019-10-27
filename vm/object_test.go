@@ -125,3 +125,31 @@ s2.inspect
 		v.checkSP(t, i, 1)
 	}
 }
+
+func TestObjectId(t *testing.T) {
+		tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`1.object_id == 1.object_id`, false},
+		{`"123".object_id == "123".object_id`, false},
+		{`a = 10; a.object_id == a.object_id`, true},
+		{
+			`
+class Student; end
+
+stan = Student.new
+jane = Student.new
+
+stan.object_id == stan.object_id && jane.object_id != stan.object_id
+`, true},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}

@@ -62,7 +62,7 @@ var builtinGoObjectInstanceMethods = []*BuiltinMethodObject{
 // Functions for initialization -----------------------------------------
 
 func (vm *VM) initGoObject(d interface{}) *GoObject {
-	return &GoObject{data: d, BaseObj: &BaseObj{class: vm.TopLevelClass(classes.GoObjectClass)}}
+	return &GoObject{data: d, BaseObj: NewBaseObject(vm.TopLevelClass(classes.GoObjectClass))}
 }
 
 func (vm *VM) initGoClass() *RClass {

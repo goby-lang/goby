@@ -133,7 +133,7 @@ func (vm *VM) initBlockClass() *RClass {
 
 func (vm *VM) initBlockObject(is *instructionSet, ep *normalCallFrame, self Object) *BlockObject {
 	return &BlockObject{
-		BaseObj:        &BaseObj{class: vm.TopLevelClass(classes.BlockClass)},
+		BaseObj:        NewBaseObject(vm.TopLevelClass(classes.BlockClass)),
 		instructionSet: is,
 		ep:             ep,
 		self:           self,
@@ -164,6 +164,10 @@ func (bo *BlockObject) ToJSON(t *Thread) string {
 
 // copy returns the duplicate of the Array object
 func (bo *BlockObject) copy() Object {
-	newC := &BlockObject{BaseObj: &BaseObj{class: bo.class}, instructionSet: bo.instructionSet}
-	return newC
+	return &BlockObject{
+		BaseObj:        NewBaseObject(bo.Class()),
+		instructionSet: bo.instructionSet,
+		ep:             bo.ep,
+		self:           bo.self,
+	}
 }

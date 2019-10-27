@@ -1634,7 +1634,7 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 
 func (vm *VM) InitStringObject(value string) *StringObject {
 	return &StringObject{
-		BaseObj: &BaseObj{class: vm.TopLevelClass(classes.StringClass), InstanceVariables: newEnvironment()},
+		BaseObj: NewBaseObject(vm.TopLevelClass(classes.StringClass)),
 		value:   value,
 	}
 }
