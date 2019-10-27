@@ -3,7 +3,6 @@ package vm
 import (
 	"bytes"
 	"fmt"
-	"reflect"
 	"sort"
 	"strings"
 
@@ -611,7 +610,7 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 			c := args[0]
 			compare, ok := c.(*HashObject)
 
-			if ok && reflect.DeepEqual(h, compare) {
+			if ok && h.equalTo(compare) {
 				return TRUE
 			}
 			return FALSE
@@ -787,7 +786,7 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 			h := receiver.(*HashObject)
 
 			for _, v := range h.Pairs {
-				if reflect.DeepEqual(v, args[0]) {
+				if v.equalTo(args[0]) {
 					return TRUE
 				}
 			}
@@ -1345,7 +1344,13 @@ func (h *HashObject) equalTo(with Object) bool {
 		return false
 	}
 
-	return reflect.DeepEqual(h.Pairs, w.Pairs)
+	for k, v := range h.Pairs {
+		if !v.equalTo(w.Pairs[k]) {
+			return false
+		}
+	}
+
+	return true
 }
 
 // Other helper functions ----------------------------------------------
