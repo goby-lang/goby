@@ -316,7 +316,7 @@ func init() {
 				t.pushErrorObject(errors.InternalError, sourceLine, "Can't get method %s's instruction set.", methodName)
 			}
 
-			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, BaseObj: &BaseObj{class: t.vm.TopLevelClass(classes.MethodClass)}}
+			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, BaseObj: NewBaseObject(t.vm.TopLevelClass(classes.MethodClass))}
 
 			v := t.Stack.Pop().Target
 			switch self := v.(type) {
@@ -331,7 +331,7 @@ func init() {
 			argCount := args[0].(int)
 			methodName := t.Stack.Pop().Target.(*StringObject).value
 			is, _ := t.getMethodIS(methodName, cf.FileName())
-			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, BaseObj: &BaseObj{class: t.vm.TopLevelClass(classes.MethodClass)}}
+			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, BaseObj: NewBaseObject(t.vm.TopLevelClass(classes.MethodClass))}
 
 			v := t.Stack.Pop().Target
 
@@ -339,7 +339,7 @@ func init() {
 			case *RClass:
 				v.SingletonClass().Methods.set(methodName, method)
 			default:
-				singletonClass := t.vm.createRClass(fmt.Sprintf("#<Class:#<%s:%d>>", v.Class().Name, v.id()))
+				singletonClass := t.vm.createRClass(fmt.Sprintf("#<Class:#<%s:%d>>", v.Class().Name, v.ID()))
 				singletonClass.Methods.set(methodName, method)
 				singletonClass.isSingleton = true
 				v.SetSingletonClass(singletonClass)

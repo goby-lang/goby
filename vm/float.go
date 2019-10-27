@@ -328,7 +328,7 @@ var builtinFloatInstanceMethods = []*BuiltinMethodObject{
 
 func (vm *VM) initFloatObject(value float64) *FloatObject {
 	return &FloatObject{
-		BaseObj: &BaseObj{class: vm.TopLevelClass(classes.FloatClass)},
+		BaseObj: NewBaseObject(vm.TopLevelClass(classes.FloatClass)),
 		value:   value,
 	}
 }

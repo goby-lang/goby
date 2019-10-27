@@ -108,7 +108,7 @@ func (vm *VM) initRegexpObject(regexp string) *RegexpObject {
 		return nil
 	}
 	return &RegexpObject{
-		BaseObj: &BaseObj{class: vm.TopLevelClass(classes.RegexpClass)},
+		BaseObj: NewBaseObject(vm.TopLevelClass(classes.RegexpClass)),
 		regexp:  r,
 	}
 }

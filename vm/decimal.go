@@ -495,7 +495,7 @@ var builtinDecimalInstanceMethods = []*BuiltinMethodObject{
 
 func (vm *VM) initDecimalObject(value *Decimal) *DecimalObject {
 	return &DecimalObject{
-		BaseObj: &BaseObj{class: vm.TopLevelClass(classes.DecimalClass)},
+		BaseObj: NewBaseObject(vm.TopLevelClass(classes.DecimalClass)),
 		value:   value,
 	}
 }

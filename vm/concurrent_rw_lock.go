@@ -223,7 +223,7 @@ func (vm *VM) initConcurrentRWLockObject() *ConcurrentRWLockObject {
 	lockClass := concurrentModule.getClassConstant("RWLock")
 
 	return &ConcurrentRWLockObject{
-		BaseObj: &BaseObj{class: lockClass},
+		BaseObj: NewBaseObject(lockClass),
 		mutex:   &sync.RWMutex{},
 	}
 }

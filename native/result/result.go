@@ -50,7 +50,7 @@ func (Result) New(t *Thread, name Object, value Object) Object {
 	r := &Result{
 		name:    name,
 		value:   value,
-		BaseObj: vm.NewBaseObject(t.VM(), "Result"),
+		BaseObj: vm.NewBaseObject(t.VM().TopLevelClass("Result")),
 	}
 	if name == vm.NULL {
 		r.empty = true
@@ -62,7 +62,7 @@ func (Result) New(t *Thread, name Object, value Object) Object {
 // Empty creats a new empty Result
 func (Result) Empty(t *Thread) Object {
 	return &Result{empty: true,
-		BaseObj: vm.NewBaseObject(t.VM(), "Result"),
+		BaseObj: vm.NewBaseObject(t.VM().TopLevelClass("Result")),
 	}
 }
 

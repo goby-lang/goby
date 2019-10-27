@@ -298,10 +298,9 @@ func (vm *VM) initConcurrentHashObject(pairs map[string]Object) *ConcurrentHashO
 	}
 
 	concurrent := vm.loadConstant("Concurrent", true)
-	hash := concurrent.getClassConstant(classes.HashClass)
 
 	return &ConcurrentHashObject{
-		BaseObj:     &BaseObj{class: hash},
+		BaseObj:     NewBaseObject(concurrent.getClassConstant(classes.HashClass)),
 		internalMap: &internalMap,
 	}
 }
