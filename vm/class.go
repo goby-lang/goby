@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"reflect"
 	"sync"
 	"time"
 
@@ -753,13 +752,41 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 		// @return [@boolean]
 		Name: "==",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-			className := receiver.Class().Name
-			compareClassName := args[0].Class().Name
-
-			if className == compareClassName && reflect.DeepEqual(receiver, args[0]) {
+			if receiver.equalTo(args[0]) {
 				return TRUE
+			} else {
+				return FALSE
 			}
-			return FALSE
+		},
+	},
+	{
+		// General method for comparing inequality of the objects
+		//
+		// ```ruby
+		// 123 != 123   # => false
+		// 123 != "123" # => true
+		//
+		// # Hash will not concern about the key-value pair order
+		// { a: 1, b: 2 } != { a: 1, b: 2 } # => false
+		// { a: 1, b: 2 } != { b: 2, a: 1 } # => false
+		//
+		// # Hash key will be override if the key duplicated
+		// { a: 1, b: 2 } != { a: 2, b: 2, a: 1 } # => false
+		// { a: 1, b: 2 } != { a: 1, b: 2, a: 2 } # => true
+		//
+		// # Array will concern about the order of the elements
+		// [1, 2, 3] != [1, 2, 3] # => false
+		// [1, 2, 3] != [3, 2, 1] # => true
+		// ```
+		//
+		// @return [Boolean]
+		Name: "!=",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if !receiver.equalTo(args[0]) {
+				return TRUE
+			} else {
+				return FALSE
+			}
 		},
 	},
 	{
@@ -787,38 +814,6 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 			}
 			return TRUE
 
-		},
-	},
-	{
-		// General method for comparing inequality of the objects
-		//
-		// ```ruby
-		// 123 != 123   # => false
-		// 123 != "123" # => true
-		//
-		// # Hash will not concern about the key-value pair order
-		// { a: 1, b: 2 } != { a: 1, b: 2 } # => false
-		// { a: 1, b: 2 } != { b: 2, a: 1 } # => false
-		//
-		// # Hash key will be override if the key duplicated
-		// { a: 1, b: 2 } != { a: 2, b: 2, a: 1 } # => false
-		// { a: 1, b: 2 } != { a: 1, b: 2, a: 2 } # => true
-		//
-		// # Array will concern about the order of the elements
-		// [1, 2, 3] != [1, 2, 3] # => false
-		// [1, 2, 3] != [3, 2, 1] # => true
-		// ```
-		//
-		// @return [Boolean]
-		Name: "!=",
-		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-			className := receiver.Class().Name
-			compareClassName := args[0].Class().Name
-
-			if className == compareClassName && reflect.DeepEqual(receiver, args[0]) {
-				return FALSE
-			}
-			return TRUE
 		},
 	},
 	{
@@ -1592,9 +1587,8 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 			return t.vm.InitStringObject(receiver.ToString())
 
 		},
-  },
-  {
-		
+	},
+	{
 		// Returns object's inspect representation.
 		// @param n/a []
 		// @return [String] Object's inspect representation.
@@ -1603,7 +1597,6 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 			return t.vm.InitStringObject(receiver.Inspect())
 		},
 	},
-
 }
 
 // Internal functions ===================================================
@@ -1928,6 +1921,16 @@ func (c *RClass) ancestors() []*RClass {
 	}
 
 	return klasses
+}
+
+func (c *RClass) equalTo(with Object) bool {
+	w, ok := with.(*RClass)
+
+	if !ok {
+		return false
+	}
+
+	return c.Name == w.Name && c.class == w.class
 }
 
 // Other helper functions -----------------------------------------------

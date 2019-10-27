@@ -224,7 +224,6 @@ func TestBooleanDupMethod(t *testing.T) {
 		{`false.dup`, false},
 	}
 
-
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())

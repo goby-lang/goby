@@ -268,46 +268,6 @@ var builtinFloatInstanceMethods = []*BuiltinMethodObject{
 		},
 	},
 	{
-		// Returns if self is equal to an Object.
-		// If the Object is a Numeric, a comparison is performed, otherwise, the
-		// result is always false.
-		//
-		// ```Ruby
-		// 1.0 == 3     # => false
-		// 1.0 == 1     # => true
-		// 1.0 == '1.0' # => false
-		// ```
-		//
-		// @return [Boolean]
-		Name: "==",
-		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-			result := receiver.(*FloatObject).equalityTest(args[0])
-
-			return toBooleanObject(result)
-
-		},
-	},
-	{
-		// Returns if self is not equal to an Object.
-		// If the Object is a Numeric, a comparison is performed, otherwise, the
-		// result is always true.
-		//
-		// ```Ruby
-		// 1.0 != 3     # => true
-		// 1.0 != 1     # => false
-		// 1.0 != '1.0' # => true
-		// ```
-		//
-		// @return [Boolean]
-		Name: "!=",
-		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-			result := !receiver.(*FloatObject).equalityTest(args[0])
-
-			return toBooleanObject(result)
-
-		},
-	},
-	{
 		// Converts the Integer object into Decimal object and returns it.
 		// Each digit of the float is literally transferred to the corresponding digit
 		// of the Decimal, via a string representation of the float.
@@ -415,17 +375,14 @@ func (f *FloatObject) arithmeticOperation(t *Thread, rightObject Object, operati
 
 // Apply an equality test, returning true if the objects are considered equal,
 // and false otherwise.
-func (f *FloatObject) equalityTest(rightObject Object) bool {
+func (f *FloatObject) equalTo(rightObject Object) bool {
 	rightNumeric, ok := rightObject.(Numeric)
 
 	if !ok {
 		return false
 	}
 
-	leftValue := f.value
-	rightValue := rightNumeric.floatValue()
-
-	return leftValue == rightValue
+	return f.value == rightNumeric.floatValue()
 }
 
 // TODO: Remove instruction argument

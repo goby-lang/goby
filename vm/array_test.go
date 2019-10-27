@@ -2261,7 +2261,6 @@ b
 `, []interface{}{1, 2, 3}},
 	}
 
-
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())

@@ -1900,7 +1900,7 @@ func JSONBytesEqual(a, b []byte) (bool, error) {
 	return reflect.DeepEqual(j2, j), nil
 }
 
-// We can't compare string directly because the key/value's order might change and we can't control it.
+// We can't equalTo string directly because the key/value's order might change and we can't control it.
 func compareJSONResult(t *testing.T, evaluated Object, exp interface{}) {
 	expected, err := json.Marshal(exp)
 
@@ -1964,7 +1964,6 @@ a["foo"] = 10
 b
 `, map[string]interface{}{"foo": "bar"}},
 	}
-
 
 	for i, tt := range tests {
 		v := initTestVM()

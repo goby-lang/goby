@@ -321,44 +321,6 @@ var builtinIntegerInstanceMethods = []*BuiltinMethodObject{
 		},
 	},
 	{
-		// Returns if self is equal to an Object.
-		// If the Object is a Numeric, a comparison is performed, otherwise, the
-		// result is always false.
-		//
-		// ```Ruby
-		// 1 == 3   # => false
-		// 1 == 1   # => true
-		// 1 == '1' # => false
-		// ```
-		// @return [Boolean]
-		Name: "==",
-		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-			result := receiver.(*IntegerObject).equalityTest(args[0])
-
-			return toBooleanObject(result)
-
-		},
-	},
-	{
-		// Returns if self is not equal to an Object.
-		// If the Object is a Numeric, a comparison is performed, otherwise, the
-		// result is always true.
-		//
-		// ```Ruby
-		// 1 != 3   # => true
-		// 1 != 1   # => false
-		// 1 != '1' # => true
-		// ```
-		// @return [Boolean]
-		Name: "!=",
-		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-			result := !receiver.(*IntegerObject).equalityTest(args[0])
-
-			return toBooleanObject(result)
-
-		},
-	},
-	{
 		// Returns if self is even.
 		//
 		// ```Ruby
@@ -806,7 +768,7 @@ func (i *IntegerObject) arithmeticOperation(
 // Apply an equality test, returning true if the objects are considered equal,
 // and false otherwise.
 // See comment on numericComparison().
-func (i *IntegerObject) equalityTest(rightObject Object) bool {
+func (i *IntegerObject) equalTo(rightObject Object) bool {
 	switch rightObject := rightObject.(type) {
 	case *IntegerObject:
 		leftValue := i.value

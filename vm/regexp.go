@@ -67,41 +67,6 @@ var builtInRegexpClassMethods = []*BuiltinMethodObject{
 // Instance methods -----------------------------------------------------
 var builtinRegexpInstanceMethods = []*BuiltinMethodObject{
 	{
-		// Returns true if the two regexp patterns are exactly the same, or returns false if not.
-		// If comparing with non Regexp class, just returns false.
-		//
-		// ```ruby
-		// r1 = Regexp.new("goby[0-9]+")
-		// r2 = Regexp.new("goby[0-9]+")
-		// r3 = Regexp.new("Goby[0-9]+")
-		//
-		// r1 == r2   # => true
-		// r1 == r2   # => false
-		// ```
-		//
-		// @param regexp [Regexp]
-		// @return [Boolean]
-		Name: "==",
-		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-			if len(args) != 1 {
-				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
-			}
-
-			right, ok := args[0].(*RegexpObject)
-			if !ok {
-				return FALSE
-			}
-
-			left := receiver.(*RegexpObject)
-
-			if left.Value() == right.Value() {
-				return TRUE
-			}
-			return FALSE
-
-		},
-	},
-	{
 		// Returns boolean value to indicate the result of regexp match with the string given. The methods evaluates a String object.
 		//
 		// ```ruby
@@ -180,4 +145,17 @@ func (r *RegexpObject) ToJSON(t *Thread) string {
 // equal checks if the string values between receiver and argument are equal
 func (r *RegexpObject) equal(e *RegexpObject) bool {
 	return r.ToString() == r.ToString()
+}
+
+func (r *RegexpObject) equalTo(with Object) bool {
+	right, ok := with.(*RegexpObject)
+	if !ok {
+		return false
+	}
+
+	if r.Value() == right.Value() {
+		return true
+	}
+
+	return false
 }
