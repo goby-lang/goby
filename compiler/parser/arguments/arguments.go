@@ -30,4 +30,5 @@ var Tokens = map[token.Type]bool{
 	token.InstanceVariable: true,
 	token.Ident:            true,
 	token.Constant:         true,
+	token.LBracket: 		true,
 }

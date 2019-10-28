@@ -402,6 +402,28 @@ func TestDefStatementWithKeywordArgument(t *testing.T) {
 	}
 }
 
+func TestIncludeFail(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`
+		class Foo
+		  include([])
+		end
+		`,
+			"TypeError: Expect argument to be a module. got: Array"},
+	}
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+
+		checkFuzzifiedErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 2)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestModuleStatement(t *testing.T) {
 	tests := []struct {
 		input    string

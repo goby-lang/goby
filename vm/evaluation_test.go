@@ -1783,6 +1783,13 @@ func TestMethodCallWithoutParens(t *testing.T) {
 		expected int
 	}{
 		{`
+		def len(x)
+		  x.count
+		end
+
+		len []
+		`, 0},
+		{`
 		def foo(x)
 		  x
 		end
