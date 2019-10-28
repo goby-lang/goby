@@ -871,8 +871,6 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 		// Performs a 'shallow' copy of the receiver object and returns it.
 		// Any arguments are just ignored.
 		// The object_id of the returned object is different from the one of the receiver.
-		// Note that `#tap` just returns self without copying if the receiver is an immutable object
-		// such as Integer, Decimal, Float or Regexp.
 		// Note that the internal statuses(instance variables) of the objects
 		// are also copied.
 		//
@@ -1576,9 +1574,8 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 	// Any arguments to the method are just ignored.
 	//
 	// ```ruby
-	// (1..10).tap do |x|
-	//   print "original: "
-	//   puts x
+	// a = (1..10)
+	// a.tap do |x|
 	// end.to_a.tap do |x|
 	//   print "array: "
 	//   puts x
@@ -1598,6 +1595,10 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 	// #» array: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 	// #» evens: [2, 4, 6, 8, 10]
 	// #» squares:[4, 16, 36, 64, 100]
+	//
+	// # original object is untouched
+	// puts(a)
+	// #» (1..10)
 	// ```
 	//
 	// @param block literal
