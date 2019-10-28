@@ -569,6 +569,20 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 		},
 	},
 	{
+		// Performs a 'shallow' copy of the string and returns it.
+		// Any arguments are ignored.
+		// The object_id of the returned object is different from the one of the receiver.
+		//
+		// See also `Object#dup`, `Array#dup`, `Hash#dup`.
+		//
+		// ```ruby
+		// a = "string"
+		// a.object_id  #» 824637261824
+		// b = a.dup
+		// b.object_id  #» 824637263168
+		// ```
+		//
+		// @return [String]
 		Name: "dup",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 			str, _ := receiver.(*StringObject)

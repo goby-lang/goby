@@ -868,6 +868,33 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 		},
 	},
 	{
+		// Performs a 'shallow' copy of the receiver object and returns it.
+		// Any arguments are just ignored.
+		// The object_id of the returned object is different from the one of the receiver.
+		// Note that `#tap` just returns self without copying if the receiver is an immutable object
+		// such as Integer, Decimal, Float or Regexp.
+		// Note that the internal statuses(instance variables) of the objects
+		// are also copied.
+		//
+		// See also `Array#dup`, `String#dup`, `Hash#dup`.
+		//
+		// ```ruby
+		// a = "string"
+		// a.object_id  #» 824637261824
+		// b = a.dup
+		// b.object_id  #» 824637263168
+		//
+		// class Foo
+		//   attr_accessor :foo
+		// end
+		// a = Foo.new     #» #<Foo:824634338592 >
+		// a.foo = 3.14
+		// a.inspect       #» #<Foo:824634338592 @foo=3.14 >
+		// b = a.dup
+		// b.inspect       #» #<Foo:824635635168 @foo=3.14 >
+		// ```
+		//
+		// @return [Object] Same type as the receiver
 		Name: "dup",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 			switch receiver.(type) {
@@ -1543,6 +1570,38 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 
 		},
 	},
+	// Just evaluates a given block with the receiver and returns the receiver.
+	// #tap method literally "taps into" the method chain and
+	// good for inspecting method chains.
+	// Any arguments to the method are just ignored.
+	//
+	// ```ruby
+	// (1..10).tap do |x|
+	//   print "original: "
+	//   puts x
+	// end.to_a.tap do |x|
+	//   print "array: "
+	//   puts x
+	// end.select do |x|
+	//   x.even?
+	// end.tap do |x|
+	//   print "evens: "
+	//   puts x
+	// end.map do |x|
+	//   x*x
+	// end.tap do |x|
+	//   print "squares:"
+	//   puts x
+	// end
+	//
+	// #» original: (1..10)
+	// #» array: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+	// #» evens: [2, 4, 6, 8, 10]
+	// #» squares:[4, 16, 36, 64, 100]
+	// ```
+	//
+	// @param block literal
+	// @return [Object] singleton class
 	{
 		Name: "tap",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
