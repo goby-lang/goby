@@ -1068,6 +1068,13 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 		},
 	},
 	{
+		// @return [Enumerator]
+		Name: "to_enum",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			return t.vm.InitEnumeratorObject(receiver, "", nil)
+		},
+	},
+	{
 		// Returns json that is corresponding to the hash.
 		// Basically just like Hash#to_json in Rails but currently doesn't support options.
 		//
@@ -1366,4 +1373,8 @@ func generateJSONFromPair(key string, v Object, t *Thread) string {
 	out.WriteString(v.ToJSON(t))
 
 	return out.String()
+}
+
+func (h *HashObject) Enumerable() bool {
+	return true
 }

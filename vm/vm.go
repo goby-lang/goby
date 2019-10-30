@@ -244,6 +244,7 @@ func (vm *VM) initConstants() {
 		vm.initMatchDataClass(),
 		vm.initGoMapClass(),
 		vm.initDecimalClass(),
+		vm.initEnumeratorClass(),
 	}
 
 	// Init error classes
