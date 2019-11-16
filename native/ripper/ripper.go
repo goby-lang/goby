@@ -2,6 +2,8 @@ package ripper
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/goby-lang/goby/compiler"
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/compiler/lexer"
@@ -10,7 +12,6 @@ import (
 	"github.com/goby-lang/goby/vm"
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
-	"strings"
 )
 
 // Ripper is a loadable library and has abilities to parse/lex/tokenize/get instructions of Goby codes from String.
@@ -299,8 +300,6 @@ func convertLex(t token.Type) string {
 		s = "lt"
 	case token.LTE:
 		s = "lte"
-	case token.Match:
-		s = "match"
 	case token.Minus:
 		s = "minus"
 	case token.MinusEq:

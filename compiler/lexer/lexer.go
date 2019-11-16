@@ -54,9 +54,6 @@ func (l *Lexer) NextToken() token.Token {
 		if l.peekChar() == '=' {
 			l.readChar()
 			tok = token.CreateOperator("==", l.line)
-		} else if l.peekChar() == '~' {
-			l.readChar()
-			tok = token.CreateOperator("=~", l.line)
 		} else {
 			tok = token.CreateOperator("=", l.line)
 		}

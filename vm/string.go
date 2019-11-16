@@ -201,13 +201,13 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 		// Matches the receiver with a Regexp, and returns the number of matched strings.
 		//
 		// ```ruby
-		// "pizza" =~ Regex.new("zz")  # => 2
-		// "pizza" =~ Regex.new("OH!") # => nil
+		// "pizza".match? Regex.new("zz")  # => 2
+		// "pizza".match? Regex.new("OH!") # => nil
 		// ```
 		//
 		// @param regexp [Regexp]
 		// @return [Integer]
-		Name: "=~",
+		Name: "match?",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 			if len(args) != 1 {
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
