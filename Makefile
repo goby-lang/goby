@@ -18,6 +18,7 @@ install:
 .PHONY: test
 test:
 	go test $(TEST_OPTIONS) ./...
+	make clean
 
 .PHONY: clean
 clean:
