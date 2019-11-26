@@ -306,6 +306,35 @@ func TestRipperInstruction(t *testing.T) {
 		input    string
 		expected string
 	}{
+		// Single method definition
+		{`require 'ripper'; Ripper.instruction("
+def foo
+  10
+end
+  ").to_s`, `[{ arg_types: { names: [], types: [] }, instructions: [{ action: "putobject", line: 0, params: ["10"], source_line: 3 }, { action: "leave", line: 1, params: [], source_line: 2 }], name: "foo", type: "Def" }, { arg_types: { names: [], types: [] }, instructions: [{ action: "putobject", line: 0, params: ["10"], source_line: 3 }, { action: "leave", line: 1, params: [], source_line: 2 }], name: "foo", type: "Def" }, { instructions: [{ action: "putself", line: 0, params: [], source_line: 2 }, { action: "putstring", line: 1, params: ["foo"], source_line: 2 }, { action: "def_method", line: 2, params: ["0"], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }, { instructions: [{ action: "putself", line: 0, params: [], source_line: 2 }, { action: "putstring", line: 1, params: ["foo"], source_line: 2 }, { action: "def_method", line: 2, params: ["0"], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }]`},
+		// Single class definition
+		{`require 'ripper'; Ripper.instruction("
+    class Foo
+		end
+		 ").to_s`, `[{ instructions: [{ action: "leave", line: 0, params: [], source_line: 2 }], name: "Foo", type: "DefClass" }, { instructions: [{ action: "leave", line: 0, params: [], source_line: 2 }], name: "Foo", type: "DefClass" }, { instructions: [{ action: "putself", line: 0, params: [], source_line: 2 }, { action: "def_class", line: 1, params: ["class:Foo"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }, { instructions: [{ action: "putself", line: 0, params: [], source_line: 2 }, { action: "def_class", line: 1, params: ["class:Foo"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }]`},
+		// Single method call
+		{`require 'ripper'; Ripper.instruction("
+    Array.methods
+		 ").to_s`, `[{ arg_set: { names: [], types: [] }, instructions: [{ action: "getconstant", line: 0, params: ["Array", "false"], source_line: 2 }, { action: "send", line: 1, params: ["methods", "0", "", "&{[] []}"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }, { arg_set: { names: [], types: [] }, instructions: [{ action: "getconstant", line: 0, params: ["Array", "false"], source_line: 2 }, { action: "send", line: 1, params: ["methods", "0", "", "&{[] []}"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }]`},
+		// Single method call with a block
+		{`require 'ripper'; Ripper.instruction("
+    10.times do |i| end
+		 ").to_s`, `[{ instructions: [{ action: "leave", line: 0, params: [], source_line: 2 }], name: "0", type: "Block" }, { instructions: [{ action: "leave", line: 0, params: [], source_line: 2 }], name: "0", type: "Block" }, { arg_set: { names: [], types: [] }, instructions: [{ action: "putobject", line: 0, params: ["10"], source_line: 2 }, { action: "send", line: 1, params: ["times", "0", "block:0", "&{[] []}"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }, { arg_set: { names: [], types: [] }, instructions: [{ action: "putobject", line: 0, params: ["10"], source_line: 2 }, { action: "send", line: 1, params: ["times", "0", "block:0", "&{[] []}"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }]`},
+		// Single module definition
+		{`require 'ripper'; Ripper.instruction("
+		module Bar
+    end
+		 ").to_s`, `[{ instructions: [{ action: "leave", line: 0, params: [], source_line: 2 }], name: "Bar", type: "DefClass" }, { instructions: [{ action: "leave", line: 0, params: [], source_line: 2 }], name: "Bar", type: "DefClass" }, { instructions: [{ action: "putself", line: 0, params: [], source_line: 2 }, { action: "def_class", line: 1, params: ["module:Bar"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }, { instructions: [{ action: "putself", line: 0, params: [], source_line: 2 }, { action: "def_class", line: 1, params: ["module:Bar"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }]`},
+		// Single assignment
+		{`require 'ripper'; Ripper.instruction("
+		 a = 1
+		 ").to_s`, `[{ instructions: [{ action: "putobject", line: 0, params: ["1"], source_line: 2 }, { action: "setlocal", line: 1, params: ["0", "0"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }, { instructions: [{ action: "putobject", line: 0, params: ["1"], source_line: 2 }, { action: "setlocal", line: 1, params: ["0", "0"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }]`},
+		// More complicated cases
 		{`require 'ripper'
 	Ripper.instruction("
 	class Bar
