@@ -2,6 +2,8 @@ package ripper
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/goby-lang/goby/compiler"
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/compiler/lexer"
@@ -10,7 +12,6 @@ import (
 	"github.com/goby-lang/goby/vm"
 	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
-	"strings"
 )
 
 // Ripper is a loadable library and has abilities to parse/lex/tokenize/get instructions of Goby codes from String.
@@ -221,8 +222,6 @@ func convertToTuple(instSet []*bytecode.InstructionSet, v *VM) *ArrayObject {
 			hashInstLevel2["action"] = v.InitStringObject(ins.ActionName())
 			hashInstLevel2["line"] = v.InitIntegerObject(ins.Line())
 			hashInstLevel2["source_line"] = v.InitIntegerObject(ins.SourceLine())
-			anchor := ins.AnchorLine()
-			hashInstLevel2["anchor"] = v.InitIntegerObject(anchor)
 
 			arrayParams := []Object{}
 			for _, param := range ins.Params {
