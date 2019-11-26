@@ -404,6 +404,20 @@ Ripper.instruction("
 	}
 }
 
+func TestRipperInstructionFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`require 'ripper'; Ripper.instruction`, "ArgumentError: Expect 1 argument. got=0", 1},
+		{`require 'ripper'; Ripper.instruction("a = 1", "a = 2")`, "ArgumentError: Expect 1 argument. got=2", 1},
+		{`require 'ripper'; Ripper.instruction(Array)`, "TypeError: Expect argument to be String. got: Class", 1},
+		{`require 'ripper'; Ripper.instruction("10.times do")`, "InternalError: invalid code: 10.times do", 1},
+	}
+
+	for i, tt := range testsFail {
+		evaluated := vm.ExecAndReturn(t, tt.input)
+		checkErrorMsg(t, i, evaluated, tt.expected)
+	}
+}
+
 // Error test helper methods
 
 type Error struct {
