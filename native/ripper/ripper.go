@@ -39,7 +39,6 @@ type ArrayObject = vm.ArrayObject
 //     - `types:` array of types (integer)
 //   - `instructions:` array of instructions
 //     - `action:` string
-//     - `anchor:` integer
 //     - `line:` integer
 //     - `params:` array of parameters (string)
 //     - `source_line:` integer
@@ -49,10 +48,10 @@ type ArrayObject = vm.ArrayObject
 //
 // ```ruby
 // require 'ripper'; Ripper.instruction "10.times do |i| puts i end"
-// #=>
+// #=> [{ arg_set: { names: ["i"], types: [0] }, instructions: [{ action: "putself", line: 0, params: [], source_line: 1 }, { action: "getlocal", line: 1, params: ["0", "0"], source_line: 1 }, { action: "send", line: 2, params: ["puts", "1", "", "&{[i] [0]}"], source_line: 1 }, { action: "leave", line: 3, params: [], source_line: 1 }], name: "0", type: "Block" }, { arg_set: { names: ["i"], types: [0] }, instructions: [{ action: "putself", line: 0, params: [], source_line: 1 }, { action: "getlocal", line: 1, params: ["0", "0"], source_line: 1 }, { action: "send", line: 2, params: ["puts", "1", "", "&{[i] [0]}"], source_line: 1 }, { action: "leave", line: 3, params: [], source_line: 1 }], name: "0", type: "Block" }, { arg_set: { names: [], types: [] }, instructions: [{ action: "putobject", line: 0, params: ["10"], source_line: 1 }, { action: "send", line: 1, params: ["times", "0", "block:0", "&{[] []}"], source_line: 1 }, { action: "pop", line: 2, params: [], source_line: 1 }, { action: "leave", line: 3, params: [], source_line: 1 }], name: "ProgramStart", type: "ProgramStart" }, { arg_set: { names: [], types: [] }, instructions: [{ action: "putobject", line: 0, params: ["10"], source_line: 1 }, { action: "send", line: 1, params: ["times", "0", "block:0", "&{[] []}"], source_line: 1 }, { action: "pop", line: 2, params: [], source_line: 1 }, { action: "leave", line: 3, params: [], source_line: 1 }], name: "ProgramStart", type: "ProgramStart" }]
 //
 // require 'ripper'; Ripper.instruction "10.times do |i| puts i" # the code is invalid
-// #=> []
+// #=> InternalError: InternalError%!(EXTRA *errors.errorString=Unexpected EOF)
 // ```
 //
 // @param Goby code [String]
