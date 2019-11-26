@@ -51,7 +51,7 @@ type ArrayObject = vm.ArrayObject
 // #=> [{ arg_set: { names: ["i"], types: [0] }, instructions: [{ action: "putself", line: 0, params: [], source_line: 1 }, { action: "getlocal", line: 1, params: ["0", "0"], source_line: 1 }, { action: "send", line: 2, params: ["puts", "1", "", "&{[i] [0]}"], source_line: 1 }, { action: "leave", line: 3, params: [], source_line: 1 }], name: "0", type: "Block" }, { arg_set: { names: ["i"], types: [0] }, instructions: [{ action: "putself", line: 0, params: [], source_line: 1 }, { action: "getlocal", line: 1, params: ["0", "0"], source_line: 1 }, { action: "send", line: 2, params: ["puts", "1", "", "&{[i] [0]}"], source_line: 1 }, { action: "leave", line: 3, params: [], source_line: 1 }], name: "0", type: "Block" }, { arg_set: { names: [], types: [] }, instructions: [{ action: "putobject", line: 0, params: ["10"], source_line: 1 }, { action: "send", line: 1, params: ["times", "0", "block:0", "&{[] []}"], source_line: 1 }, { action: "pop", line: 2, params: [], source_line: 1 }, { action: "leave", line: 3, params: [], source_line: 1 }], name: "ProgramStart", type: "ProgramStart" }, { arg_set: { names: [], types: [] }, instructions: [{ action: "putobject", line: 0, params: ["10"], source_line: 1 }, { action: "send", line: 1, params: ["times", "0", "block:0", "&{[] []}"], source_line: 1 }, { action: "pop", line: 2, params: [], source_line: 1 }, { action: "leave", line: 3, params: [], source_line: 1 }], name: "ProgramStart", type: "ProgramStart" }]
 //
 // require 'ripper'; Ripper.instruction "10.times do |i| puts i" # the code is invalid
-// #=> InternalError: InternalError%!(EXTRA *errors.errorString=Unexpected EOF)
+// #=> InternalError: invalid code: 10.times do |i| puts i
 // ```
 //
 // @param Goby code [String]
@@ -66,7 +66,10 @@ func instruction(receiver Object, sourceLine int, t *Thread, args []Object) Obje
 		return t.VM().InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
 	}
 
-	i, _ := compiler.CompileToInstructions(arg.Value().(string), parser.NormalMode)
+	i, err := compiler.CompileToInstructions(arg.Value().(string), parser.NormalMode)
+	if err != nil {
+		return t.VM().InitErrorObject(errors.InternalError, sourceLine, errors.InvalidCode, arg.ToString())
+	}
 
 	return convertToTuple(i, t.VM())
 }
