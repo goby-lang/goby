@@ -121,6 +121,9 @@ var builtinHTTPClassMethods = []*BuiltinMethodObject{
 			}
 
 			uri, err := url.Parse(arg0.value)
+			if err != nil {
+				return t.vm.InitErrorObject(errors.HTTPError, sourceLine, couldNotCompleteRequest, err)
+			}
 
 			if len(args) > 1 {
 				var arr []string
