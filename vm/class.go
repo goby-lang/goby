@@ -36,14 +36,14 @@ type RClass struct {
 var externalClasses = map[string][]ClassLoader{}
 var externalClassLock sync.Mutex
 
-// RegisterExternalClass will add the given class to the global registery of available classes
+// RegisterExternalClass will add the given class to the global registration of available classes
 func RegisterExternalClass(path string, c ...ClassLoader) {
 	externalClassLock.Lock()
 	externalClasses[path] = c
 	externalClassLock.Unlock()
 }
 
-// ClassLoader can be registerd with a vm so that it can load this library at vm creation
+// ClassLoader can be registered with a vm so that it can load this library at vm creation
 type ClassLoader = func(*VM) error
 
 func buildMethods(m map[string]Method) []*BuiltinMethodObject {
