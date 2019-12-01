@@ -8,6 +8,9 @@ import (
 	"github.com/goby-lang/goby/vm/errors"
 )
 
+// Match comes from regexp2 package
+type Match = regexp2.Match
+
 // MatchDataObject represents the match data returned by a regular expression matching operation.
 // You can use named-captures via `(?<name>)`.
 //
@@ -20,7 +23,6 @@ import (
 // ```
 //
 // - `MatchData.new` is not supported.
-type Match = regexp2.Match
 type MatchDataObject struct {
 	*BaseObj
 	match *Match
@@ -172,12 +174,12 @@ func (vm *VM) initMatchDataClass() *RClass {
 
 // Polymorphic helper functions -----------------------------------------
 
-// redirects to ToString()
+// Value just redirects to ToString()
 func (m *MatchDataObject) Value() interface{} {
 	return m.ToString()
 }
 
-// returns a string representation of the object
+// ToString returns a string representation of the object
 func (m *MatchDataObject) ToString() string {
 	result := "#<MatchData"
 
@@ -195,7 +197,7 @@ func (m *MatchDataObject) Inspect() string {
 	return m.ToString()
 }
 
-// returns a `{ captureNumber: captureValue }` JSON-encoded string
+// ToJSON returns a `{ captureNumber: captureValue }` JSON-encoded string
 func (m *MatchDataObject) ToJSON(t *Thread) string {
 	result := "{"
 

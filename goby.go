@@ -19,7 +19,7 @@ import (
 	"github.com/pkg/profile"
 )
 
-const Version string = vm.Version
+const version string = vm.Version
 
 func main() {
 	profileCPUOptionPtr := flag.Bool("profile-cpu", false, "Profile cpu usage")
@@ -31,7 +31,7 @@ func main() {
 	flag.Parse()
 
 	if *interactiveOptionPtr {
-		igb.StartIgb(Version)
+		igb.StartIgb(version)
 		os.Exit(0)
 	}
 
@@ -44,7 +44,7 @@ func main() {
 	}
 
 	if *versionOptionPtr {
-		fmt.Println(Version)
+		fmt.Println(version)
 		os.Exit(0)
 	}
 

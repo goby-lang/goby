@@ -1499,7 +1499,7 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 
 // Functions for initialization -----------------------------------------
 
-// InitArrayObject returns a new object with the given elemnts
+// InitArrayObject returns a new object with the given elements
 func (vm *VM) InitArrayObject(elements []Object) *ArrayObject {
 	return &ArrayObject{
 		BaseObj:  NewBaseObject(vm.TopLevelClass(classes.ArrayClass)),

@@ -10,9 +10,13 @@ import (
 	"github.com/goby-lang/goby/vm/errors"
 )
 
-// A type alias for representing a decimal
+// Decimal is a type alias for representing a decimal number
 type Decimal = big.Rat
+
+// Int is a type alias for representing an integer
 type Int = big.Int
+
+// Float is a type alias for representing a float number
 type Float = big.Float
 
 // (Experiment)
@@ -39,6 +43,8 @@ type Float = big.Float
 // ```
 //
 // - `Decimal.new` is not supported.
+
+// DecimalObject represents a rational-based decimal number
 type DecimalObject struct {
 	*BaseObj
 	value *Decimal
@@ -510,27 +516,27 @@ func (vm *VM) initDecimalClass() *RClass {
 // Polymorphic helper functions -----------------------------------------
 
 // Value returns the object
-func (f *DecimalObject) Value() interface{} {
-	return f.value
+func (d *DecimalObject) Value() interface{} {
+	return d.value
 }
 
-// Alias of Value()
-func (f *DecimalObject) DecimalValue() interface{} {
-	return f.Value()
+// DecimalValue is an alias of Value()
+func (d *DecimalObject) DecimalValue() interface{} {
+	return d.Value()
 }
 
-// Returns integer part of decimal
-func (f *DecimalObject) IntegerValue() int {
-	return int(f.FloatValue())
+// IntegerValue returns integer part of decimal
+func (d *DecimalObject) IntegerValue() int {
+	return int(d.FloatValue())
 }
 
-// Float interface
-func (f *DecimalObject) FloatValue() float64 {
-	x, _ := f.value.Float64()
+// FloatValue is a conversion to float number
+func (d *DecimalObject) FloatValue() float64 {
+	x, _ := d.value.Float64()
 	return x
 }
 
-// Apply the passed arithmetic operation, while performing type conversion.
+//  the passed arithmetic operation, while performing type conversion.
 func (d *DecimalObject) arithmeticOperation(
 	t *Thread,
 	rightObject Object,

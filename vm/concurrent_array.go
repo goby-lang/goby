@@ -11,7 +11,8 @@ import (
 // requirement for a write lock (true) or read lock (false)
 //
 // We don't implement dig, as it has no concurrency guarantees.
-var ConcurrentArrayMethodsForwardingTable = map[string]bool{
+
+var concurrentArrayMethodsForwardingTable = map[string]bool{
 	"[]":           false,
 	"*":            false,
 	"+":            false,
@@ -43,14 +44,14 @@ var ConcurrentArrayMethodsForwardingTable = map[string]bool{
 	"values_at":    false,
 }
 
-// ConcurrentArrayObject is a thread-safe Array, implemented as a wrapper of an ArrayObject, coupled
+// concurrentArrayObject is a thread-safe Array, implemented as a wrapper of an ArrayObject, coupled
 // with an R/W mutex.
 //
 // Arrays returned by any of the methods are in turn thread-safe.
 //
 // For implementation simplicity, methods are simple redirection, and defined via a table.
 //
-type ConcurrentArrayObject struct {
+type concurrentArrayObject struct {
 	*BaseObj
 	InternalArray *ArrayObject
 
@@ -88,10 +89,10 @@ var builtinConcurrentArrayClassMethods = []*BuiltinMethodObject{
 
 // Functions for initialization -----------------------------------------
 
-func (vm *VM) initConcurrentArrayObject(elements []Object) *ConcurrentArrayObject {
+func (vm *VM) initConcurrentArrayObject(elements []Object) *concurrentArrayObject {
 	concurrent := vm.loadConstant("Concurrent", true)
 
-	return &ConcurrentArrayObject{
+	return &concurrentArrayObject{
 		BaseObj:       NewBaseObject(concurrent.getClassConstant(classes.ArrayClass)),
 		InternalArray: vm.InitArrayObject(elements[:]),
 	}
@@ -103,8 +104,8 @@ func initConcurrentArrayClass(vm *VM) {
 
 	var arrayMethodDefinitions = []*BuiltinMethodObject{}
 
-	for methodName, requireWriteLock := range ConcurrentArrayMethodsForwardingTable {
-		methodFunction := DefineForwardedConcurrentArrayMethod(methodName, requireWriteLock)
+	for methodName, requireWriteLock := range concurrentArrayMethodsForwardingTable {
+		methodFunction := defineForwardedConcurrentArrayMethod(methodName, requireWriteLock)
 		arrayMethodDefinitions = append(arrayMethodDefinitions, methodFunction)
 	}
 
@@ -117,42 +118,42 @@ func initConcurrentArrayClass(vm *VM) {
 // Object interface functions -------------------------------------------
 
 // ToJSON returns the object's name as the JSON string format
-func (cac *ConcurrentArrayObject) ToJSON(t *Thread) string {
-	return cac.InternalArray.ToJSON(t)
+func (ca *concurrentArrayObject) ToJSON(t *Thread) string {
+	return ca.InternalArray.ToJSON(t)
 }
 
 // ToString returns the object's name as the string format
-func (cac *ConcurrentArrayObject) ToString() string {
-	return cac.InternalArray.Inspect()
+func (ca *concurrentArrayObject) ToString() string {
+	return ca.InternalArray.Inspect()
 }
 
 // Inspect delegates to ToString
-func (cac *ConcurrentArrayObject) Inspect() string {
-	return cac.ToString()
+func (ca *concurrentArrayObject) Inspect() string {
+	return ca.ToString()
 }
 
 // Value returns the object
-func (cac *ConcurrentArrayObject) Value() interface{} {
-	return cac.InternalArray.Elements
+func (ca *concurrentArrayObject) Value() interface{} {
+	return ca.InternalArray.Elements
 }
 
-func (cao *ConcurrentArrayObject) equalTo(compared Object) bool {
-	c, ok := compared.(*ConcurrentArrayObject)
+func (ca *concurrentArrayObject) equalTo(compared Object) bool {
+	c, ok := compared.(*concurrentArrayObject)
 
 	if !ok {
 		return false
 	}
 
-	return cao.InternalArray.equalTo(c.InternalArray)
+	return ca.InternalArray.equalTo(c.InternalArray)
 }
 
 // Helper functions -----------------------------------------------------
 
-func DefineForwardedConcurrentArrayMethod(methodName string, requireWriteLock bool) *BuiltinMethodObject {
+func defineForwardedConcurrentArrayMethod(methodName string, requireWriteLock bool) *BuiltinMethodObject {
 	return &BuiltinMethodObject{
 		Name: methodName,
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-			concurrentArray := receiver.(*ConcurrentArrayObject)
+			concurrentArray := receiver.(*concurrentArrayObject)
 
 			if requireWriteLock {
 				concurrentArray.Lock()

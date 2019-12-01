@@ -754,9 +754,8 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 			if receiver.equalTo(args[0]) {
 				return TRUE
-			} else {
-				return FALSE
 			}
+			return FALSE
 		},
 	},
 	{
@@ -784,9 +783,8 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 			if !receiver.equalTo(args[0]) {
 				return TRUE
-			} else {
-				return FALSE
 			}
+			return FALSE
 		},
 	},
 	{

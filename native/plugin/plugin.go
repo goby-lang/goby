@@ -16,18 +16,28 @@ import (
 )
 
 type (
-	BaseObj      = vm.BaseObj
-	GoObject     = vm.GoObject
-	ArrayObject  = vm.ArrayObject
+	// BaseObj is an imported object from vm
+	BaseObj = vm.BaseObj
+	// GoObject is an imported object from vm
+	GoObject = vm.GoObject
+	// ArrayObject is an imported object from vm
+	ArrayObject = vm.ArrayObject
+	// StringObject is an imported object from vm
 	StringObject = vm.StringObject
-	HashObject   = vm.HashObject
-	VM           = vm.VM
-	Thread       = vm.Thread
-	Method       = vm.Method
-	Object       = vm.Object
+	// HashObject is an imported object from vm
+	HashObject = vm.HashObject
+	// VM is an imported object from vm
+	VM = vm.VM
+	// Thread is an imported object from vm
+	Thread = vm.Thread
+	// Method is an imported object from vm
+	Method = vm.Method
+	// Object is an imported object from vm
+	Object = vm.Object
 )
 
 var (
+	// NULL is an imported constant from vm
 	NULL = vm.NULL
 )
 

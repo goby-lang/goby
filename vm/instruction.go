@@ -547,6 +547,7 @@ func init() {
 	}
 }
 
+// InitObjectFromGoType returns an Object based on the given Go type
 func (v *VM) InitObjectFromGoType(value interface{}) Object {
 	switch val := value.(type) {
 	case nil:

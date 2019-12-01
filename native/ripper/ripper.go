@@ -19,13 +19,25 @@ import (
 // as well as the tests for Goby's compiler.
 // For now, Ripper is a class and has only class methods, but I think this should finally be a 'newable' module with more sophisticated instance methods.
 
-// Imported objects from vm
+// Object is an imported object from vm
 type Object = vm.Object
+
+// VM is an imported object from vm
 type VM = vm.VM
+
+// Thread is an imported object from vm
 type Thread = vm.Thread
+
+// Method is an imported object from vm
 type Method = vm.Method
+
+// StringObject is an imported object from vm
 type StringObject = vm.StringObject
+
+// HashObject is an imported object from vm
 type HashObject = vm.HashObject
+
+// ArrayObject is an imported object from vm
 type ArrayObject = vm.ArrayObject
 
 // Class methods --------------------------------------------------------

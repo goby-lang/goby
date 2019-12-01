@@ -1632,6 +1632,7 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 
 // Functions for initialization -----------------------------------------
 
+// InitStringObject returns a new object with the given string
 func (vm *VM) InitStringObject(value string) *StringObject {
 	return &StringObject{
 		BaseObj: NewBaseObject(vm.TopLevelClass(classes.StringClass)),

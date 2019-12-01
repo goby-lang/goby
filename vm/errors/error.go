@@ -23,7 +23,7 @@ const (
 	ZeroDivisionError = "ZeroDivisionError"
 	// ChannelCloseError is for accessing to the closed channel
 	ChannelCloseError = "ChannelCloseError"
-
+	// NotImplementedError is for unimplemented methods
 	NotImplementedError = "NotImplementedError"
 )
 

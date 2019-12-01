@@ -6,8 +6,9 @@ import (
 	"github.com/dlclark/regexp2"
 )
 
-// Verification helpers
+// Verification helpers for tests
 
+// VerifyExpected checks if the given Object is the expected class
 func VerifyExpected(t *testing.T, i int, evaluated Object, expected interface{}) {
 	t.Helper()
 	if isError(evaluated) {
@@ -147,7 +148,7 @@ func verifyArrayObject(t *testing.T, index int, obj Object, expected []interface
 // Same as testHashObject(), but expects a ConcurrentArray.
 func verifyConcurrentArrayObject(t *testing.T, index int, obj Object, expected []interface{}) bool {
 	t.Helper()
-	result, ok := obj.(*ConcurrentArrayObject)
+	result, ok := obj.(*concurrentArrayObject)
 	if !ok {
 		t.Errorf("At test case %d: object is not ConcurrentArray. got=%s (%+v)", index, obj.Class().Name, obj)
 		return false
