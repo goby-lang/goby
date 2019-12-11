@@ -15,28 +15,30 @@ import (
 
 func init() {
 	_, err := os.Stat("./goby")
-	if err != nil {
-		fmt.Println("Goby binary not found, building")
-
-		cmd := exec.Command("go", "build", ".")
-		err = cmd.Run()
+	if err == nil {
+		err := exec.Command("rm", "./goby").Run()
 		if err != nil {
-			fmt.Println("Could not build binary\n", err.Error())
 			panic(err)
 		}
-		fmt.Println("Built. Testing ./goby")
-	} else {
-		fmt.Println("Using existing Goby binary. Testing ./goby")
 	}
 
+	fmt.Println("Building Goby binary")
+	err = exec.Command("make", "build").Run()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func execGoby(t *testing.T, args ...string) (in io.WriteCloser, out io.ReadCloser) {
-	exec.Command("rm ./goby")
-	exec.Command("make build")
-	cmd := exec.Command("./goby", args...)
+	p, err := os.Getwd()
 
-	var err error
+	if err != nil {
+		panic(err)
+	}
+
+	binLocation := fmt.Sprintf("%s/goby", p)
+	cmd := exec.Command(binLocation, args...)
+
 	in, err = cmd.StdinPipe()
 	if err != nil {
 		t.Fatalf("Error getting stdin\n%s", err.Error())
@@ -88,13 +90,15 @@ func TestArgI(t *testing.T) {
 	fmt.Fprintln(in, `puts "hello world"`)
 	fmt.Fprintln(in, `exit`)
 
+	expectedOutput := "hello world\n"
+
 	byt, err := ioutil.ReadAll(out)
 	if err != nil {
 		t.Fatalf("Couldn't read from pipe: %s", err.Error())
 	}
 
-	if strings.HasSuffix(string(byt), "hello world\nBye") {
-		t.Fatalf("Interpreter output incorect")
+	if !strings.HasSuffix(string(byt), expectedOutput) {
+		t.Fatalf("Interpreter output incorrect. Expect '%s' to contain '%s'", string(byt), expectedOutput)
 	}
 }
 
