@@ -29,17 +29,10 @@ func init() {
 	}
 }
 
-func execGoby(t *testing.T, args ...string) (in io.WriteCloser, out io.ReadCloser) {
-	p, err := os.Getwd()
+func execGoby(t *testing.T, args ...string) (in io.WriteCloser, out io.ReadCloser, e io.ReadCloser) {
+	cmd := exec.Command("./goby", args...)
 
-	if err != nil {
-		panic(err)
-	}
-
-	binLocation := fmt.Sprintf("%s/goby", p)
-	cmd := exec.Command(binLocation, args...)
-
-	in, err = cmd.StdinPipe()
+	in, err := cmd.StdinPipe()
 	if err != nil {
 		t.Fatalf("Error getting stdin\n%s", err.Error())
 	}
@@ -47,6 +40,11 @@ func execGoby(t *testing.T, args ...string) (in io.WriteCloser, out io.ReadClose
 	out, err = cmd.StdoutPipe()
 	if err != nil {
 		t.Fatalf("Error getting stdout\n%s", err.Error())
+	}
+
+	e, err = cmd.StderrPipe()
+	if err != nil {
+		t.Fatalf("Error getting stderr\n%s", err.Error())
 	}
 
 	err = cmd.Start()
@@ -71,7 +69,7 @@ func partialReport() (md string) {
 
 func TestArgE(t *testing.T) {
 
-	_, out := execGoby(t, "-e", "samples/error-report.gb")
+	_, out, _ := execGoby(t, "-e", "samples/error-report.gb")
 
 	byt, err := ioutil.ReadAll(out)
 	if err != nil {
@@ -85,7 +83,7 @@ func TestArgE(t *testing.T) {
 
 func TestArgI(t *testing.T) {
 
-	in, out := execGoby(t, "-i")
+	in, out, _ := execGoby(t, "-i")
 
 	fmt.Fprintln(in, `puts "hello world"`)
 	fmt.Fprintln(in, `exit`)
@@ -104,7 +102,7 @@ func TestArgI(t *testing.T) {
 
 func TestArgV(t *testing.T) {
 
-	_, out := execGoby(t, "-v")
+	_, out, _ := execGoby(t, "-v")
 
 	byt, err := ioutil.ReadAll(out)
 	if err != nil {
@@ -118,7 +116,7 @@ func TestArgV(t *testing.T) {
 
 func TestArgProfileCPU(t *testing.T) {
 
-	_, out := execGoby(t, "-profile-cpu", "samples/one_thousand_threads.gb")
+	_, out, _ := execGoby(t, "-profile-cpu", "samples/one_thousand_threads.gb")
 
 	byt, err := ioutil.ReadAll(out)
 	if err != nil {
@@ -132,7 +130,7 @@ func TestArgProfileCPU(t *testing.T) {
 
 func TestArgProfileMem(t *testing.T) {
 
-	_, out := execGoby(t, "-profile-mem", "samples/one_thousand_threads.gb")
+	_, out, _ := execGoby(t, "-profile-mem", "samples/one_thousand_threads.gb")
 
 	byt, err := ioutil.ReadAll(out)
 	if err != nil {
@@ -144,9 +142,21 @@ func TestArgProfileMem(t *testing.T) {
 	}
 }
 
+func TestExecFileWithError(t *testing.T) {
+	expectedError := "NoMethodError: Undefined Method 'foo' for "
+
+	_, _, stderr :=	execGoby(t, "test_fixtures/file_with_error.gb")
+
+	output, _ := ioutil.ReadAll(stderr)
+
+	if !strings.Contains(string(output), expectedError) {
+		t.Fatalf("Expect to see error: '%s'. But got: '%s' instead", expectedError, string(output))
+	}
+}
+
 func TestTestCommand(t *testing.T) {
 	// Folder name with slash
-	_, out := execGoby(t, "test", "test_fixtures/test_command_test/")
+	_, out, _ := execGoby(t, "test", "test_fixtures/test_command_test/")
 
 	byt, err := ioutil.ReadAll(out)
 	if err != nil {
@@ -158,7 +168,7 @@ func TestTestCommand(t *testing.T) {
 	}
 
 	// Folder name
-	_, out = execGoby(t, "test", "test_fixtures/test_command_test")
+	_, out, _ = execGoby(t, "test", "test_fixtures/test_command_test")
 
 	byt, err = ioutil.ReadAll(out)
 	if err != nil {
@@ -170,7 +180,7 @@ func TestTestCommand(t *testing.T) {
 	}
 
 	// File name
-	_, out = execGoby(t, "test", "test_fixtures/test_command_test/test_spec.gb")
+	_, out, _ = execGoby(t, "test", "test_fixtures/test_command_test/test_spec.gb")
 
 	byt, err = ioutil.ReadAll(out)
 	if err != nil {
