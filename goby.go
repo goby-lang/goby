@@ -62,6 +62,9 @@ func main() {
 
 		dir := extractDirFromFilePath(filePath, fileInfo)
 		v, err := vm.New(dir, args)
+		if err != nil {
+			reportErrorAndExit(err)
+		}
 
 		if fileInfo.Mode().IsDir() {
 			fileInfos, err := ioutil.ReadDir(filePath)
@@ -80,6 +83,9 @@ func main() {
 		}
 
 		instructionSets, err := compiler.CompileToInstructions("Spec.run", parser.NormalMode)
+		if err != nil {
+			reportErrorAndExit(err)
+		}
 		v.ExecInstructions(instructionSets, filePath)
 		return
 	default:
