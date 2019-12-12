@@ -12,12 +12,17 @@ import (
 )
 
 type (
-	// Imported objects from vm
-	Object       = vm.Object
-	GoObject     = vm.GoObject
-	VM           = vm.VM
-	Thread       = vm.Thread
-	Method       = vm.Method
+	// Object is an imported object from vm
+	Object = vm.Object
+	// GoObject is an imported object from vm
+	GoObject = vm.GoObject
+	// VM is an imported object from vm
+	VM = vm.VM
+	// Thread is an imported object from vm
+	Thread = vm.Thread
+	// Method is an imported object from vm
+	Method = vm.Method
+	// StringObject is an imported object from vm
 	StringObject = vm.StringObject
 )
 
