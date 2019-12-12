@@ -83,6 +83,7 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 	vm = &VM{args: args}
 	vm.mainThread.vm = vm
 	vm.threadCount++
+	vm.mode = parser.NormalMode
 
 	vm.methodISIndexTables = map[filename]*isIndexTable{
 		fileDir: newISIndexTable(),
@@ -176,7 +177,8 @@ func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) {
 			panic(err)
 		case *Error:
 			if vm.mode == parser.NormalMode {
-				fmt.Println(err.Message())
+				fmt.Fprintln(os.Stderr, err.Message())
+				os.Exit(1)
 			}
 		}
 	}()
