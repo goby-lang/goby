@@ -3,7 +3,6 @@ package vm
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -202,12 +201,6 @@ func (t *Thread) reportErrorAndStop(e interface{}) {
 			err.storedTraces = true
 		}
 
-		if t.vm.mode == parser.NormalMode {
-
-			if t.isMainThread() {
-				os.Exit(1)
-			}
-		}
 		panic(err)
 		// Otherwise it's a Go panic that needs to be raise
 	default:
