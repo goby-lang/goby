@@ -2,6 +2,7 @@ package ast
 
 import (
 	"bytes"
+
 	"github.com/goby-lang/goby/compiler/token"
 )
 
@@ -46,11 +47,13 @@ type node interface {
 	MarkAsExp()
 }
 
+// Statement satisfies "node" and statementNode
 type Statement interface {
 	node
 	statementNode()
 }
 
+// Expression satisfies "node" and expressionNode
 type Expression interface {
 	node
 	expressionNode()
@@ -61,6 +64,7 @@ type Program struct {
 	Statements []Statement
 }
 
+// TokenLiteral returns a token literal of the statement
 func (p *Program) TokenLiteral() string {
 	if len(p.Statements) > 0 {
 		return p.Statements[0].TokenLiteral()
