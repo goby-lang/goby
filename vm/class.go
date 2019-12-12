@@ -36,7 +36,7 @@ type RClass struct {
 var externalClasses = map[string][]ClassLoader{}
 var externalClassLock sync.Mutex
 
-// RegisterExternalClass will add the given class to the global registration of available classes
+// RegisterExternalClass will add the given class to the global registry of available classes
 func RegisterExternalClass(path string, c ...ClassLoader) {
 	externalClassLock.Lock()
 	externalClasses[path] = c
