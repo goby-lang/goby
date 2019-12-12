@@ -77,7 +77,7 @@ func TestArgE(t *testing.T) {
 	}
 
 	if !strings.Contains(string(byt), partialReport()) {
-		t.Fatalf("Interpreter -e output incorect:\nExpected \n`%s` in string `\n%s`", partialReport(), string(byt))
+		t.Fatalf("Interpreter -e output incorrect:\nExpected \n`%s` in string `\n%s`", partialReport(), string(byt))
 	}
 }
 
@@ -110,7 +110,7 @@ func TestArgV(t *testing.T) {
 	}
 
 	if !strings.Contains(string(byt), vm.Version) {
-		t.Fatalf("Interpreter -v output incorect:\nExpected '%s' in string '%s'.", vm.Version, string(byt))
+		t.Fatalf("Interpreter -v output incorrect:\nExpected '%s' in string '%s'.", vm.Version, string(byt))
 	}
 }
 
