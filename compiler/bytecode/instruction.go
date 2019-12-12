@@ -157,7 +157,7 @@ func (as *ArgSet) Names() []string {
 	return as.names
 }
 
-func (as *ArgSet) FindIndex(name string) int {
+func (as *ArgSet) findIndex(name string) int {
 	for i, n := range as.names {
 		if n == name {
 			return i
@@ -184,7 +184,7 @@ func (is *InstructionSet) Name() string {
 	return is.name
 }
 
-// SetType returns instruction's type
+// Type returns instruction's type
 // TODO: needs to change the func to simple public variable
 func (is *InstructionSet) Type() string {
 	return is.isType
