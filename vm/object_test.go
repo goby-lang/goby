@@ -127,7 +127,7 @@ s2.inspect
 }
 
 func TestObjectId(t *testing.T) {
-		tests := []struct {
+	tests := []struct {
 		input    string
 		expected interface{}
 	}{

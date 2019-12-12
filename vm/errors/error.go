@@ -47,6 +47,7 @@ const (
 	ChannelIsClosed                 = "The channel is already closed."
 	TooSmallIndexValue              = "Index value %d too small for array. minimum: %d"
 	IndexOutOfRange                 = "Index value out of range. got: %v"
+	InvalidCode                     = "invalid code: %s"
 	RegexpFailure                   = "Replacement failure with the Regexp. got: %s"
 	NegativeValue                   = "Expect argument to be positive value. got: %d"
 	NegativeSecondValue             = "Expect second argument to be positive value. got: %d"
