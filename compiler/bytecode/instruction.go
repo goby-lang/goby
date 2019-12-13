@@ -174,7 +174,7 @@ func (is *InstructionSet) Name() string {
 	return is.name
 }
 
-// SetType returns instruction's type
+// Type returns instruction's type
 // TODO: needs to change the func to simple public variable
 func (is *InstructionSet) Type() string {
 	return is.isType
