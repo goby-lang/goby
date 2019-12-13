@@ -14,12 +14,12 @@ type IntegerLiteral struct {
 
 func (il *IntegerLiteral) expressionNode() {}
 
-// IntegerLiteral.TokenLiteral gets the Integer type token
+// TokenLiteral is a polymorphic function to return a token literal
 func (il *IntegerLiteral) TokenLiteral() string {
 	return il.Token.Literal
 }
 
-// IntegerLiteral.String gets the string format of the Integer type token
+// String gets the string format of the Integer type token
 func (il *IntegerLiteral) String() string {
 	return il.Token.Literal
 }
@@ -32,7 +32,7 @@ type FloatLiteral struct {
 
 func (il *FloatLiteral) expressionNode() {}
 
-// FloatLiteral.TokenLiteral gets the literal of the Float type token
+// TokenLiteral is a polymorphic function to return a token literal
 func (il *FloatLiteral) TokenLiteral() string {
 	return il.Token.Literal
 }
@@ -51,12 +51,12 @@ type StringLiteral struct {
 // Define the string literal which contains the node expression and its value
 func (sl *StringLiteral) expressionNode() {}
 
-// StringLiteral.TokenLiteral gets the literal of the String type token
+// TokenLiteral is a polymorphic function to return a token literal
 func (sl *StringLiteral) TokenLiteral() string {
 	return sl.Token.Literal
 }
 
-// StringLiteral.String gets the string format of the String type token
+// TokenLiteral is a polymorphic function to return a token literal
 func (sl *StringLiteral) String() string {
 	var out bytes.Buffer
 
@@ -74,7 +74,7 @@ type ArrayExpression struct {
 
 func (ae *ArrayExpression) expressionNode() {}
 
-// ArrayExpression gets the literal of the Array type token
+// TokenLiteral is a polymorphic function to return a token literal
 func (ae *ArrayExpression) TokenLiteral() string {
 	return ae.Token.Literal
 }
@@ -101,7 +101,7 @@ func (ae *ArrayExpression) String() string {
 	return out.String()
 }
 
-// PairExpression represents a key/value pair in method parameters or arguments
+// ArgumentPairExpression represents a key/value pair in method parameters or arguments
 type ArgumentPairExpression struct {
 	*BaseNode
 	Key   Expression
@@ -110,7 +110,7 @@ type ArgumentPairExpression struct {
 
 func (ape *ArgumentPairExpression) expressionNode() {}
 
-// TokenLiteral .....
+// TokenLiteral is a polymorphic function to return a token literal
 func (ape *ArgumentPairExpression) TokenLiteral() string {
 	return ape.Token.Literal
 }
@@ -132,7 +132,7 @@ type HashExpression struct {
 
 func (he *HashExpression) expressionNode() {}
 
-// HashExpression.TokenLiteral gets the literal of the Hash type token
+// TokenLiteral is a polymorphic function to return a token literal
 func (he *HashExpression) TokenLiteral() string {
 	return he.Token.Literal
 }
@@ -153,6 +153,7 @@ func (he *HashExpression) String() string {
 	return out.String()
 }
 
+// PrefixExpression represents an expression with a prefix
 type PrefixExpression struct {
 	*BaseNode
 	Operator string
@@ -160,6 +161,8 @@ type PrefixExpression struct {
 }
 
 func (pe *PrefixExpression) expressionNode() {}
+
+// TokenLiteral is a polymorphic function to return a token literal of prefix
 func (pe *PrefixExpression) TokenLiteral() string {
 	return pe.Token.Literal
 }
@@ -172,6 +175,7 @@ func (pe *PrefixExpression) String() string {
 	return out.String()
 }
 
+// InfixExpression represents an expression with an infix
 type InfixExpression struct {
 	*BaseNode
 	Left     Expression
@@ -180,6 +184,8 @@ type InfixExpression struct {
 }
 
 func (ie *InfixExpression) expressionNode() {}
+
+// TokenLiteral is a polymorphic function to return a token literal of infix
 func (ie *InfixExpression) TokenLiteral() string {
 	return ie.Token.Literal
 }
@@ -197,7 +203,7 @@ func (ie *InfixExpression) String() string {
 	return out.String()
 }
 
-// AssignExpression represents variable assignment in Goby.
+// AssignExpression represents variable assignment in Goby
 type AssignExpression struct {
 	*BaseNode
 	Variables []Expression
@@ -209,6 +215,8 @@ type AssignExpression struct {
 }
 
 func (ae *AssignExpression) expressionNode() {}
+
+// TokenLiteral is a polymorphic function to return a token literal of assignment
 func (ae *AssignExpression) TokenLiteral() string {
 	return ae.Token.Literal
 }
@@ -235,7 +243,7 @@ type BooleanExpression struct {
 
 func (b *BooleanExpression) expressionNode() {}
 
-// BooleanExpression.TokenLiteral gets the literal of the Boolean type token
+// TokenLiteral is a polymorphic function to return a token literal "true" "false"
 func (b *BooleanExpression) TokenLiteral() string {
 	return b.Token.Literal
 }
@@ -252,7 +260,7 @@ type NilExpression struct {
 
 func (n *NilExpression) expressionNode() {}
 
-// TokenLiteral returns `nil`
+// TokenLiteral is a polymorphic function to return a token literal "nil"
 func (n *NilExpression) TokenLiteral() string {
 	return n.Token.Literal
 }
@@ -262,6 +270,7 @@ func (n *NilExpression) String() string {
 	return "nil"
 }
 
+// IfExpression represents an "if" expression
 type IfExpression struct {
 	*BaseNode
 	Conditionals []*ConditionalExpression
@@ -269,6 +278,8 @@ type IfExpression struct {
 }
 
 func (ie *IfExpression) expressionNode() {}
+
+// TokenLiteral is a polymorphic function to return a token literal "if"
 func (ie *IfExpression) TokenLiteral() string {
 	return ie.Token.Literal
 }
@@ -307,7 +318,7 @@ type ConditionalExpression struct {
 
 func (ce *ConditionalExpression) expressionNode() {}
 
-// TokenLiteral returns `if` or `elsif`
+// TokenLiteral is a polymorphic function to return a token literal `if` or `elsif`
 func (ce *ConditionalExpression) TokenLiteral() string {
 	return ce.Token.Literal
 }
@@ -322,6 +333,7 @@ func (ce *ConditionalExpression) String() string {
 	return out.String()
 }
 
+// CallExpression represents an expression for calling a method
 type CallExpression struct {
 	*BaseNode
 	Receiver       Expression
@@ -332,6 +344,8 @@ type CallExpression struct {
 }
 
 func (tce *CallExpression) expressionNode() {}
+
+// TokenLiteral is a polymorphic function to return a token literal for a call expression
 func (tce *CallExpression) TokenLiteral() string {
 	return tce.Token.Literal
 }
@@ -372,11 +386,14 @@ func (tce *CallExpression) String() string {
 	return out.String()
 }
 
+// SelfExpression represents a "self" expression
 type SelfExpression struct {
 	*BaseNode
 }
 
 func (se *SelfExpression) expressionNode() {}
+
+// TokenLiteral is a polymorphic function to return a token literal for "self"
 func (se *SelfExpression) TokenLiteral() string {
 	return se.Token.Literal
 }
@@ -384,12 +401,15 @@ func (se *SelfExpression) String() string {
 	return "self"
 }
 
+// YieldExpression represents a "yield" expression
 type YieldExpression struct {
 	*BaseNode
 	Arguments []Expression
 }
 
 func (ye *YieldExpression) expressionNode() {}
+
+// TokenLiteral is a polymorphic function to return a token literal for "yield"
 func (ye *YieldExpression) TokenLiteral() string {
 	return ye.Token.Literal
 }
@@ -416,7 +436,7 @@ type GetBlockExpression struct {
 
 func (gbe *GetBlockExpression) expressionNode() {}
 
-// TokenLiteral ...
+// TokenLiteral is a polymorphic function to return a token literal for "get_block"
 func (gbe *GetBlockExpression) TokenLiteral() string {
 	return gbe.Token.Literal
 }
@@ -435,7 +455,7 @@ type RangeExpression struct {
 
 func (re *RangeExpression) expressionNode() {}
 
-// RangeExpression.TokenLiteral gets the literal of the Range type token
+// TokenLiteral is a polymorphic function to return a token literal for Range
 func (re *RangeExpression) TokenLiteral() string {
 	return re.Token.Literal
 }
