@@ -157,16 +157,6 @@ func (as *ArgSet) Names() []string {
 	return as.names
 }
 
-func (as *ArgSet) findIndex(name string) int {
-	for i, n := range as.names {
-		if n == name {
-			return i
-		}
-	}
-
-	return -1
-}
-
 func (as *ArgSet) setArg(index int, name string, argType uint8) {
 	as.names[index] = name
 	as.types[index] = argType
