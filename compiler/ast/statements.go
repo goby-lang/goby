@@ -4,6 +4,7 @@ import (
 	"bytes"
 )
 
+// ClassStatement represents a class node in AST
 type ClassStatement struct {
 	*BaseNode
 	Name           *Constant
@@ -13,6 +14,8 @@ type ClassStatement struct {
 }
 
 func (cs *ClassStatement) statementNode() {}
+
+// TokenLiteral is a polymorphic function to return a token literal
 func (cs *ClassStatement) TokenLiteral() string {
 	return cs.Token.Literal
 }
@@ -28,7 +31,7 @@ func (cs *ClassStatement) String() string {
 	return out.String()
 }
 
-// ModuleStatement represents module node in AST
+// ModuleStatement represents a module node in AST
 type ModuleStatement struct {
 	*BaseNode
 	Name       *Constant
@@ -38,7 +41,7 @@ type ModuleStatement struct {
 
 func (ms *ModuleStatement) statementNode() {}
 
-// TokenLiteral returns token's literal
+// TokenLiteral is a polymorphic function to return a token literal
 func (ms *ModuleStatement) TokenLiteral() string {
 	return ms.Token.Literal
 }
@@ -54,12 +57,15 @@ func (ms *ModuleStatement) String() string {
 	return out.String()
 }
 
+// ReturnStatement represents an expression as a return value
 type ReturnStatement struct {
 	*BaseNode
 	ReturnValue Expression
 }
 
 func (rs *ReturnStatement) statementNode() {}
+
+// TokenLiteral is a polymorphic function to return a token literal
 func (rs *ReturnStatement) TokenLiteral() string {
 	return rs.Token.Literal
 }
@@ -77,12 +83,15 @@ func (rs *ReturnStatement) String() string {
 	return out.String()
 }
 
+// ExpressionStatement represents an expression statement
 type ExpressionStatement struct {
 	*BaseNode
 	Expression Expression
 }
 
 func (es *ExpressionStatement) statementNode() {}
+
+// TokenLiteral is a polymorphic function to return a token literal
 func (es *ExpressionStatement) TokenLiteral() string {
 	return es.Token.Literal
 }
@@ -94,6 +103,7 @@ func (es *ExpressionStatement) String() string {
 	return ""
 }
 
+// DefStatement represents a "def" keyword with  block
 type DefStatement struct {
 	*BaseNode
 	Name           *Identifier
@@ -103,6 +113,8 @@ type DefStatement struct {
 }
 
 func (tds *DefStatement) statementNode() {}
+
+// TokenLiteral is a polymorphic function to return a token literal
 func (tds *DefStatement) TokenLiteral() string {
 	return tds.Token.Literal
 }
@@ -135,7 +147,7 @@ type NextStatement struct {
 
 func (ns *NextStatement) statementNode() {}
 
-// TokenLiteral returns token's literal
+// TokenLiteral is a polymorphic function to return a token literal
 func (ns *NextStatement) TokenLiteral() string {
 	return ns.Token.Literal
 }
@@ -150,7 +162,7 @@ type BreakStatement struct {
 
 func (bs *BreakStatement) statementNode() {}
 
-// TokenLiteral returns token's literal
+// TokenLiteral is a polymorphic function to return a token literal
 func (bs *BreakStatement) TokenLiteral() string {
 	return bs.Token.Literal
 }
@@ -158,6 +170,7 @@ func (bs *BreakStatement) String() string {
 	return bs.TokenLiteral()
 }
 
+// WhileStatement represents a "while" keyword with a block
 type WhileStatement struct {
 	*BaseNode
 	Condition Expression
@@ -165,6 +178,8 @@ type WhileStatement struct {
 }
 
 func (ws *WhileStatement) statementNode() {}
+
+// TokenLiteral is a polymorphic function to return a token literal
 func (ws *WhileStatement) TokenLiteral() string {
 	return ws.Token.Literal
 }
@@ -180,12 +195,15 @@ func (ws *WhileStatement) String() string {
 	return out.String()
 }
 
+// BlockStatement represents a block statement
 type BlockStatement struct {
 	*BaseNode
 	Statements []Statement
 }
 
 func (bs *BlockStatement) statementNode() {}
+
+// TokenLiteral is a polymorphic function to return a token literal
 func (bs *BlockStatement) TokenLiteral() string {
 	return bs.Token.Literal
 }
@@ -198,6 +216,8 @@ func (bs *BlockStatement) String() string {
 
 	return out.String()
 }
+
+// IsEmpty checks if the statements in the block is empty
 func (bs *BlockStatement) IsEmpty() bool {
 	return len(bs.Statements) == 0
 }

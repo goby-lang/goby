@@ -22,6 +22,7 @@ func NewBar(name string) (*Bar, error) {
 	return &Bar{name: name}, nil
 }
 
+// GetBarName ...
 func GetBarName(b *Bar) string {
 	return b.name
 }
