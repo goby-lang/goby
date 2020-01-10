@@ -985,7 +985,7 @@ func TestInheritsMethodMissingMethod(t *testing.T) {
 		{`
 		class Bar
 		end
-		
+
 		Bar.new.inherits_method_missing?
 
 `, false},
@@ -993,7 +993,7 @@ func TestInheritsMethodMissingMethod(t *testing.T) {
 		class Bar
 		  inherits_method_missing
 		end
-		
+
 		Bar.new.inherits_method_missing?
 
 `, true},
@@ -1121,6 +1121,40 @@ func TestRaiseMethodFail(t *testing.T) {
 		{`
 		class BarError; end
 		raise BarError, "Foo", "Bar"`, "ArgumentError: Expect 2 or less argument(s). got: 3", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestRandMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`rand.class.name`, "Float"},
+		{`rand(1).class.name`, "Integer"},
+		{`rand(1, 2).class.name`, "Integer"},
+		{`(60 < rand(64, 66)).to_s`, "true"},
+		{`(70 > rand(64, 66)).to_s`, "true"},
+	}
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestRandMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`rand(1, 10, 100)`, "ArgumentError: Expect 2 argument(s). got: 3", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1651,7 +1685,7 @@ func TestClassSingletonClassMethod(t *testing.T) {
 		`, "#<Class:Bar>"},
 		{`
 		module Bar; end
-		
+
 		Bar.singleton_class.name
 		`, "#<Class:Bar>"},
 		// Check if this works on non-class objects
@@ -1663,12 +1697,12 @@ func TestClassSingletonClassMethod(t *testing.T) {
 		// Below is for testing module inheritance chain
 		{`
 		module Bar; end
-		
+
 		Bar.singleton_class.class.name
 		`, "Class"},
 		{`
 		module Bar; end
-		
+
 		Bar.singleton_class.superclass.name
 		`, "Module"},
 	}
