@@ -61,7 +61,7 @@ If you want to run Go tests, you can run:
 $ go test PKG_NAME -run TestName
 ```
 
-for example, this will run any tests in the `vm` package that matches `TestIncludeFail` with their names
+For example, this will run any tests in the `vm` package that matches `TestIncludeFail` with their names:
 
 ```
 $ go test ./vm -run TestIncludeFail
