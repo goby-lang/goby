@@ -53,7 +53,35 @@ require 'net/http'
 
 
 
+## To Run Tests
 
+If you want to run Go tests, you can run:
+
+```
+$ go test PKG_NAME -run TestName
+```
+
+For example, this will run any tests in the `vm` package that matches `TestIncludeFail` with their names:
+
+```
+$ go test ./vm -run TestIncludeFail
+```
+
+You can run `go help test` to see more options.
+
+And if you want to run Goby tests, you can use:
+
+```
+$ goby test specs
+```
+
+or if you want to test it against your latest changes in Goby source code, you can use
+
+```
+$ go run goby.go test specs
+```
+
+But we haven't support running single Goby test at the moment (contribution is welcomed 😉).
 
 
 
