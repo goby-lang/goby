@@ -1,5 +1,6 @@
 package classes
 
+// A list of native classes
 const (
 	ObjectClass    = "Object"
 	ClassClass     = "Class"
