@@ -34,6 +34,7 @@ func (vm *VM) InitNoMethodError(sourceLine int, methodName string, receiver Obje
 	return vm.InitErrorObject(errors.NoMethodError, sourceLine, errors.UndefinedMethod, methodName, receiver.Inspect())
 }
 
+// InitErrorObject initializes and returns Error object
 func (vm *VM) InitErrorObject(errorType string, sourceLine int, format string, args ...interface{}) *Error {
 	errClass := vm.objectClass.getClassConstant(errorType)
 
@@ -84,6 +85,7 @@ func (e *Error) ToJSON(t *Thread) string {
 	return e.ToString()
 }
 
+// Value is equivalent to ToString
 func (e *Error) Value() interface{} {
 	return e.message
 }
