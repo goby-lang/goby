@@ -97,6 +97,7 @@ func (s *GoObject) ToJSON(t *Thread) string {
 
 // Other helper functions -----------------------------------------------
 
+// ConvertToGoFuncArgs converts Goby's args to Go func's args
 func ConvertToGoFuncArgs(args []Object) ([]interface{}, error) {
 	funcArgs := []interface{}{}
 
