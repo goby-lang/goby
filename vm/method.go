@@ -25,6 +25,8 @@ func (vm *VM) initMethodClass() *RClass {
 }
 
 // Polymorphic helper functions -----------------------------------------
+
+// ToString returns the object's name as the string format
 func (m *MethodObject) ToString() string {
 	var out bytes.Buffer
 
@@ -39,6 +41,7 @@ func (m *MethodObject) Inspect() string {
 	return m.ToString()
 }
 
+// ToJSON just delegates to ToString
 func (m *MethodObject) ToJSON(t *Thread) string {
 	return m.ToString()
 }
