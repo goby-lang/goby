@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/goby-lang/goby/compiler/bytecode"
 	"reflect"
+
+	"github.com/goby-lang/goby/compiler/bytecode"
 )
 
 // Object represents all objects in Goby, including Array, Integer or even Method and Error.
@@ -29,7 +30,6 @@ type Object interface {
 }
 
 // BaseObj ==============================================================
-
 type BaseObj struct {
 	id                int
 	class             *RClass
@@ -37,6 +37,7 @@ type BaseObj struct {
 	InstanceVariables *environment
 }
 
+// NewBaseObject creates a BaseObj
 func NewBaseObject(c *RClass) *BaseObj {
 	obj := &BaseObj{
 		class:             c,
@@ -74,6 +75,7 @@ func (b *BaseObj) SetSingletonClass(c *RClass) {
 	b.singletonClass = c
 }
 
+// InstanceVariableGet returns an instance variable specified
 func (b *BaseObj) InstanceVariableGet(name string) (Object, bool) {
 	v, ok := b.InstanceVariables.get(name)
 
@@ -84,6 +86,7 @@ func (b *BaseObj) InstanceVariableGet(name string) (Object, bool) {
 	return v, true
 }
 
+// InstanceVariableSet sets the instance variable specified
 func (b *BaseObj) InstanceVariableSet(name string, value Object) Object {
 	b.InstanceVariables.set(name, value)
 
@@ -128,6 +131,7 @@ func (b *BaseObj) findMethodMissing(searchAncestor bool) (method Object) {
 	return
 }
 
+// ID returns the BaseObj's id
 func (b *BaseObj) ID() int {
 	return b.id
 }
