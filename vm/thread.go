@@ -31,6 +31,7 @@ type Thread struct {
 	vm *VM
 }
 
+// VM returns the vm of the thread
 func (t *Thread) VM() *VM {
 	return t.vm
 }
