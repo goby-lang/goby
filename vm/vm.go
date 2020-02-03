@@ -278,7 +278,7 @@ func (vm *VM) initConstants() {
 	vm.objectClass.constants["STDIN"] = &Pointer{Target: vm.initFileObject(os.Stdin)}
 }
 
-// TopLevelClass returns a specified class or a top level class
+// TopLevelClass returns a specified top-level class (stored under the Object constant)
 func (vm *VM) TopLevelClass(cn string) *RClass {
 	objClass := vm.objectClass
 
