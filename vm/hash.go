@@ -1215,6 +1215,7 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 
 // Functions for initialization -----------------------------------------
 
+// InitHashObject creates a HashObject
 func (vm *VM) InitHashObject(pairs map[string]Object) *HashObject {
 	return &HashObject{
 		BaseObj: NewBaseObject(vm.TopLevelClass(classes.HashClass)),

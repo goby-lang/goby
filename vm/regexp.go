@@ -6,6 +6,9 @@ import (
 	"github.com/goby-lang/goby/vm/errors"
 )
 
+// Regexp is an alias of regexp2.Regexp
+type Regexp = regexp2.Regexp
+
 // RegexpObject represents regexp instances, which of the type is actually string.
 // Regexp object holds regexp strings.
 // Powered by: github.com/dlclark/regexp2
@@ -34,7 +37,6 @@ import (
 //
 // **To Goby maintainers**: avoid using Go's standard regexp package (slow and not rich). Consider the faster `Trim` or `Split` etc in Go's "strings" package first, or just use the dlclark/regexp2 instead.
 // ToDo: Regexp literals with '/.../'
-type Regexp = regexp2.Regexp
 type RegexpObject struct {
 	*BaseObj
 	regexp *Regexp
