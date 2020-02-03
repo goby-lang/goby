@@ -7,7 +7,7 @@ import (
 	"github.com/goby-lang/goby/vm/errors"
 )
 
-// Pseudo-constant definition of the forwarded methods, mapped to a boolean representing the
+// ConcurrentArrayMethodsForwardingTable is a pseudo-constant definition of the forwarded methods, mapped to a boolean representing the
 // requirement for a write lock (true) or read lock (false)
 //
 // We don't implement dig, as it has no concurrency guarantees.
@@ -117,23 +117,23 @@ func initConcurrentArrayClass(vm *VM) {
 // Object interface functions -------------------------------------------
 
 // ToJSON returns the object's name as the JSON string format
-func (cac *ConcurrentArrayObject) ToJSON(t *Thread) string {
-	return cac.InternalArray.ToJSON(t)
+func (cao *ConcurrentArrayObject) ToJSON(t *Thread) string {
+	return cao.InternalArray.ToJSON(t)
 }
 
 // ToString returns the object's name as the string format
-func (cac *ConcurrentArrayObject) ToString() string {
-	return cac.InternalArray.Inspect()
+func (cao *ConcurrentArrayObject) ToString() string {
+	return cao.InternalArray.Inspect()
 }
 
 // Inspect delegates to ToString
-func (cac *ConcurrentArrayObject) Inspect() string {
-	return cac.ToString()
+func (cao *ConcurrentArrayObject) Inspect() string {
+	return cao.ToString()
 }
 
 // Value returns the object
-func (cac *ConcurrentArrayObject) Value() interface{} {
-	return cac.InternalArray.Elements
+func (cao *ConcurrentArrayObject) Value() interface{} {
+	return cao.InternalArray.Elements
 }
 
 func (cao *ConcurrentArrayObject) equalTo(compared Object) bool {
@@ -148,6 +148,7 @@ func (cao *ConcurrentArrayObject) equalTo(compared Object) bool {
 
 // Helper functions -----------------------------------------------------
 
+// DefineForwardedConcurrentArrayMethod defines methods for ConcurrentArrayObject
 func DefineForwardedConcurrentArrayMethod(methodName string, requireWriteLock bool) *BuiltinMethodObject {
 	return &BuiltinMethodObject{
 		Name: methodName,

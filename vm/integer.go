@@ -700,6 +700,7 @@ var builtinIntegerInstanceMethods = []*BuiltinMethodObject{
 
 // Functions for initialization -----------------------------------------
 
+// InitIntegerObject initializes IntegerObject
 func (vm *VM) InitIntegerObject(value int) *IntegerObject {
 	return &IntegerObject{
 		BaseObj: NewBaseObject(vm.TopLevelClass(classes.IntegerClass)),

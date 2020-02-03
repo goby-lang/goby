@@ -10,14 +10,17 @@ import (
 	"github.com/goby-lang/goby/vm/errors"
 )
 
-// A type alias for representing a decimal
+// Decimal is a type alias for representing a decimal
 type Decimal = big.Rat
+
+// Int is a type alias for representing a bigint
 type Int = big.Int
+
+// Float type alias for representing a bitfloat
 type Float = big.Float
 
-// (Experiment)
 // DecimalObject represents a comparable decimal number using Go's Rational representation `big.Rat` from math/big package,
-// which consists of a numerator and a denominator with arbitrary size.
+// which consists of a numerator and a denominator with arbitrary size (experimental).
 // By using Decimal you can avoid errors on float type during calculations.
 // To keep accuracy, avoid conversions until all calculations have been finished.
 // The numerator can be 0, but the denominator cannot be 0.
@@ -510,27 +513,27 @@ func (vm *VM) initDecimalClass() *RClass {
 // Polymorphic helper functions -----------------------------------------
 
 // Value returns the object
-func (f *DecimalObject) Value() interface{} {
-	return f.value
+func (d *DecimalObject) Value() interface{} {
+	return d.value
 }
 
-// Alias of Value()
-func (f *DecimalObject) DecimalValue() interface{} {
-	return f.Value()
+// DecimalValue is an alias of Value()
+func (d *DecimalObject) DecimalValue() interface{} {
+	return d.Value()
 }
 
-// Returns integer part of decimal
-func (f *DecimalObject) IntegerValue() int {
-	return int(f.FloatValue())
+// IntegerValue returns integer part of decimal
+func (d *DecimalObject) IntegerValue() int {
+	return int(d.FloatValue())
 }
 
-// Float interface
-func (f *DecimalObject) FloatValue() float64 {
-	x, _ := f.value.Float64()
+// FloatValue is a float interface
+func (d *DecimalObject) FloatValue() float64 {
+	x, _ := d.value.Float64()
 	return x
 }
 
-// Apply the passed arithmetic operation, while performing type conversion.
+// arithmeticOperation applies the passed arithmetic operation, while performing type conversion.
 func (d *DecimalObject) arithmeticOperation(
 	t *Thread,
 	rightObject Object,
