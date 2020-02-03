@@ -278,6 +278,7 @@ func (vm *VM) initConstants() {
 	vm.objectClass.constants["STDIN"] = &Pointer{Target: vm.initFileObject(os.Stdin)}
 }
 
+// TopLevelClass returns a specified top-level class (stored under the Object constant)
 func (vm *VM) TopLevelClass(cn string) *RClass {
 	objClass := vm.objectClass
 
@@ -369,13 +370,14 @@ func getFilename() string {
 	return filename
 }
 
+// ExecAndReturn is a test helper
 func ExecAndReturn(t *testing.T, src string) Object {
 	t.Helper()
 	v := initTestVM()
 	return v.testEval(t, src, getFilename())
 }
 
-func (v *VM) testEval(t *testing.T, input, filepath string) Object {
+func (vm *VM) testEval(t *testing.T, input, filepath string) Object {
 	iss, err := compiler.CompileToInstructions(input, parser.TestMode)
 
 	if err != nil {
@@ -384,7 +386,7 @@ func (v *VM) testEval(t *testing.T, input, filepath string) Object {
 		t.Fatal(err.Error())
 	}
 
-	v.ExecInstructions(iss, filepath)
+	vm.ExecInstructions(iss, filepath)
 
-	return v.mainThread.Stack.top().Target
+	return vm.mainThread.Stack.top().Target
 }

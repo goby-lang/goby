@@ -145,7 +145,7 @@ func TestArgProfileMem(t *testing.T) {
 func TestExecFileWithError(t *testing.T) {
 	expectedError := "NoMethodError: Undefined Method 'foo' for "
 
-	_, _, stderr :=	execGoby(t, "test_fixtures/file_with_error.gb")
+	_, _, stderr := execGoby(t, "test_fixtures/file_with_error.gb")
 
 	output, _ := ioutil.ReadAll(stderr)
 
