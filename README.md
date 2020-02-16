@@ -13,10 +13,9 @@
 
 **Goby** is an object-oriented interpreter language deeply inspired by **Ruby** as well as its core implementation by 100% pure **Go**. Moreover, it has standard libraries to provide several features such as the Plugin system. Note that we do not intend to reproduce whole of the honorable works of Ruby syntax/implementation/libraries.
 
-One of our goal is to provide web developers a sort of small and handy environment that mainly focusing on creating **API servers or microservices**. For this, Goby includes the following native features:
+The expected use case for Goby would be backend development. With this goal, it equips (but not limited to) the following features:
 
-- Robust thread/channel mechanism powered by Go's goroutine
-- Builtin high-performance HTTP server
+- thread/channel mechanism powered by Go's goroutine
 - Builtin database library (currently only support PostgreSQL adapter)
 - JSON support
 - [Plugin system](https://goby-lang.gitbooks.io/goby/content/plugin-system.html) that can load existing Go packages dynamically (Only for Linux and MacOS right now)
@@ -177,7 +176,6 @@ See the [guideline](https://github.com/goby-lang/goby/blob/master/CONTRIBUTING.m
 - @st0012
 - @hachi8833
 - @saveriomiroddi
-- @ear7h
 
 ## Designer
 - [steward379](https://dribbble.com/steward379)
@@ -234,13 +232,12 @@ Support us with a monthly donation and help us continue our activities. [[Become
 
 ### Powered by
 
-* JetBrains [Goland IDE](https://www.jetbrains.com/go/)
+* JetBrains [Goland IDE](https://www.jetbrains.com/go/?from=goby)
 
-[![JetBrains Goland](https://github.com/goby-lang/goby/blob/master/wiki/goland_logo-text.png)](https://www.jetbrains.com/go/)
+[![JetBrains Goland](https://github.com/goby-lang/goby/blob/master/wiki/goland_logo-text.png)](https://www.jetbrains.com/go/?from=goby)
 
 **Supporting Goby by sending your first PR! See [contribution guideline](https://github.com/goby-lang/goby/blob/master/CONTRIBUTING.md)**
 
-**Or [support us on opencollective](https://opencollective.com/goby)**
 
 ## References
 
