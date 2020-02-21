@@ -426,13 +426,12 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 		},
 	},
 	{
-		// Performs a 'shallow' copy of the hash and returns it.
+		// Performs a copy of the hash, including the keys and values, and returns it.
 		// Any arguments are ignored.
 		// The object_id of the returned object is different from the one of the receiver.
 
 		// Caveat: any keys of hash ARE also copied with different object ids for now.
 		// This comes from the fact that the string objects are NOT frozen in current Goby.
-		// TBD: Perhaps the `Hash#dup` will not copy keys when we change the implementation of string objects as frozen.
 		//
 		// See also `Object#dup`, `String#dup`, `Array#dup`.
 		//
