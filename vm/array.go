@@ -618,6 +618,35 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 		},
 	},
 	{
+		// Performs a 'shallow' copy of the array and returns it.
+		// Any arguments are ignored.
+		// The object_id of the returned object is different from the one of the receiver.
+
+		// Note that any elements of the array are NOT copied.
+		//
+		// See also `Object#dup`, `String#dup`, `Hash#dup`.
+		//
+		// ```ruby
+		// a = ["s", "t", "r"]
+		// a.object_id  #» 824635637568
+		// a.each do |i|
+		//   puts i.object_id
+		// end
+		// #» 824635637248
+		// #» 824635637344
+		// #» 824635637440
+		//
+		// b = a.dup
+		// b.each do |i|
+		//   puts i.object_id
+		// end
+		// #» 824635637248
+		// #» 824635637344
+		// #» 824635637440
+		// b.object_id  #» 824637392704
+		// ```
+		//
+		// @return [Array]
 		Name: "dup",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 			arr, _ := receiver.(*ArrayObject)
