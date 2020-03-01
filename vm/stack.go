@@ -4,7 +4,7 @@ import (
 	"sync"
 )
 
-// Stack is a basic stack implimentation
+// Stack is a basic stack implementation
 type Stack struct {
 	data    []*Pointer
 	pointer int

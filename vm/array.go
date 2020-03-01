@@ -25,7 +25,45 @@ var builtinArrayClassMethods = []*BuiltinMethodObject{
 	{
 		Name: "new",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-			return t.vm.InitNoMethodError(sourceLine, "new", receiver)
+			if len(args) > 2 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentRange, 1, 2, len(args))
+			}
+
+			if len(args) >= 1 {
+				n, ok := args[0].(*IntegerObject)
+
+				if !ok {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongArgumentTypeFormat, "Integer", args[0].Class().Name)
+				}
+
+				if n.value < 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Negative Array Size")
+				}
+
+				elems := make([]Object, n.value)
+
+				if blockFrame != nil && !blockIsEmpty(blockFrame) {
+					for i := range elems {
+						elems[i] = t.builtinMethodYield(blockFrame, t.vm.InitIntegerObject(i)).Target
+					}
+				} else {
+					var elem Object
+
+					if len(args) == 2 {
+						elem = args[1]
+					} else {
+						elem = NULL
+					}
+
+					for i := 0; i < n.value; i++ {
+						elems[i] = elem
+					}
+				}
+
+				return t.vm.InitArrayObject(elems)
+			}
+
+			return t.vm.InitArrayObject([]Object{})
 		},
 	},
 }
@@ -618,6 +656,35 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 		},
 	},
 	{
+		// Performs a 'shallow' copy of the array and returns it.
+		// Any arguments are ignored.
+		// The object_id of the returned object is different from the one of the receiver.
+
+		// Note that any elements of the array are NOT copied.
+		//
+		// See also `Object#dup`, `String#dup`, `Hash#dup`.
+		//
+		// ```ruby
+		// a = ["s", "t", "r"]
+		// a.object_id  #» 824635637568
+		// a.each do |i|
+		//   puts i.object_id
+		// end
+		// #» 824635637248
+		// #» 824635637344
+		// #» 824635637440
+		//
+		// b = a.dup
+		// b.each do |i|
+		//   puts i.object_id
+		// end
+		// #» 824635637248
+		// #» 824635637344
+		// #» 824635637440
+		// b.object_id  #» 824637392704
+		// ```
+		//
+		// @return [Array]
 		Name: "dup",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 			arr, _ := receiver.(*ArrayObject)

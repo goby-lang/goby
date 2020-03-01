@@ -199,7 +199,6 @@ func TestNoMethodErrorOnNew(t *testing.T) {
 		{`String.new`, "NoMethodError: Undefined Method 'new' for String", 1},
 		{`Integer.new`, "NoMethodError: Undefined Method 'new' for Integer", 1},
 		{`Hash.new`, "NoMethodError: Undefined Method 'new' for Hash", 1},
-		{`Array.new`, "NoMethodError: Undefined Method 'new' for Array", 1},
 		{`Boolean.new`, "NoMethodError: Undefined Method 'new' for Boolean", 1},
 		{`Null.new`, "NoMethodError: Undefined Method 'new' for Null", 1},
 	}

@@ -426,6 +426,44 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 		},
 	},
 	{
+		// Performs a copy of the hash, including the keys and values, and returns it.
+		// Any arguments are ignored.
+		// The object_id of the returned object is different from the one of the receiver.
+
+		// Caveat: any keys of hash ARE also copied with different object ids for now.
+		// This comes from the fact that the string objects are NOT frozen in current Goby.
+		//
+		// See also `Object#dup`, `String#dup`, `Array#dup`.
+		//
+		// ```ruby
+		// h = { k1: :key1, k2: :key2 }
+		// h.object_id           #» 824633779744
+		// h.each do |k, v|
+		//   print "key:   "
+		//   puts k.object_id
+		//   print "value: "
+		//   puts v.object_id
+		// end
+		// key:   824636231680
+		// value: 824635528224
+		// key:   824636232480
+		// value: 824635528448
+		//
+		// b = h.dup
+		// b.object_id           #» 824633779904
+		// b.each do |k, v|
+		//   print "key:   "
+		//   puts k.object_id
+		//   print "value: "
+		//   puts v.object_id
+		// end
+		// key:   824638121536
+		// value: 824635528224
+		// key:   824638122336
+		// value: 824635528448
+		// ```
+		//
+		// @return [Hash]
 		Name: "dup",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 			return receiver.(*HashObject).copy()
@@ -1215,6 +1253,7 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 
 // Functions for initialization -----------------------------------------
 
+// InitHashObject creates a HashObject
 func (vm *VM) InitHashObject(pairs map[string]Object) *HashObject {
 	return &HashObject{
 		BaseObj: NewBaseObject(vm.TopLevelClass(classes.HashClass)),

@@ -147,7 +147,6 @@ var builtinChannelInstanceMethods = []*BuiltinMethodObject{
 			c.ChannelState = chClosed
 
 			close(receiver.(*ChannelObject).Chan)
-			receiver = nil
 			return NULL
 		},
 	},

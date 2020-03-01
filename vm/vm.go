@@ -17,7 +17,7 @@ import (
 )
 
 // Version stores current Goby version
-const Version = "0.1.11"
+const Version = "0.1.12"
 
 // DefaultLibPath is used for overriding vm.libpath build-time.
 var DefaultLibPath string
@@ -83,6 +83,7 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 	vm = &VM{args: args}
 	vm.mainThread.vm = vm
 	vm.threadCount++
+	vm.mode = parser.NormalMode
 
 	vm.methodISIndexTables = map[filename]*isIndexTable{
 		fileDir: newISIndexTable(),
@@ -176,7 +177,8 @@ func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) {
 			panic(err)
 		case *Error:
 			if vm.mode == parser.NormalMode {
-				fmt.Println(err.Message())
+				fmt.Fprintln(os.Stderr, err.Message())
+				os.Exit(1)
 			}
 		}
 	}()
@@ -276,6 +278,7 @@ func (vm *VM) initConstants() {
 	vm.objectClass.constants["STDIN"] = &Pointer{Target: vm.initFileObject(os.Stdin)}
 }
 
+// TopLevelClass returns a specified top-level class (stored under the Object constant)
 func (vm *VM) TopLevelClass(cn string) *RClass {
 	objClass := vm.objectClass
 
@@ -367,13 +370,14 @@ func getFilename() string {
 	return filename
 }
 
+// ExecAndReturn is a test helper
 func ExecAndReturn(t *testing.T, src string) Object {
 	t.Helper()
 	v := initTestVM()
 	return v.testEval(t, src, getFilename())
 }
 
-func (v *VM) testEval(t *testing.T, input, filepath string) Object {
+func (vm *VM) testEval(t *testing.T, input, filepath string) Object {
 	iss, err := compiler.CompileToInstructions(input, parser.TestMode)
 
 	if err != nil {
@@ -382,7 +386,7 @@ func (v *VM) testEval(t *testing.T, input, filepath string) Object {
 		t.Fatal(err.Error())
 	}
 
-	v.ExecInstructions(iss, filepath)
+	vm.ExecInstructions(iss, filepath)
 
-	return v.mainThread.Stack.top().Target
+	return vm.mainThread.Stack.top().Target
 }

@@ -37,4 +37,4 @@ profile.out
 .tmp_benchmarks
 .tmp_benchmark_comparison
 
-vm/plugins
+/plugins

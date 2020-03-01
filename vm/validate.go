@@ -6,8 +6,7 @@ import (
 	"github.com/dlclark/regexp2"
 )
 
-// Verification helpers
-
+// VerifyExpected is a verification helpers for testing
 func VerifyExpected(t *testing.T, i int, evaluated Object, expected interface{}) {
 	t.Helper()
 	if isError(evaluated) {
