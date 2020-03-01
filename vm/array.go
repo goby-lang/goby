@@ -25,7 +25,45 @@ var builtinArrayClassMethods = []*BuiltinMethodObject{
 	{
 		Name: "new",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-			return t.vm.InitNoMethodError(sourceLine, "new", receiver)
+			if len(args) > 2 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentRange, 1, 2, len(args))
+			}
+
+			if len(args) >= 1 {
+				n, ok := args[0].(*IntegerObject)
+
+				if !ok {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongArgumentTypeFormat, "Integer", args[0].Class().Name)
+				}
+
+				if n.value < 0 {
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Negative Array Size")
+				}
+
+				elems := make([]Object, n.value)
+
+				if blockFrame != nil && !blockIsEmpty(blockFrame) {
+					for i := range elems {
+						elems[i] = t.builtinMethodYield(blockFrame, t.vm.InitIntegerObject(i)).Target
+					}
+				} else {
+					var elem Object
+
+					if len(args) == 2 {
+						elem = args[1]
+					} else {
+						elem = NULL
+					}
+
+					for i := 0; i < n.value; i++ {
+						elems[i] = elem
+					}
+				}
+
+				return t.vm.InitArrayObject(elems)
+			}
+
+			return t.vm.InitArrayObject([]Object{})
 		},
 	},
 }

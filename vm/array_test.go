@@ -4,6 +4,59 @@ import (
 	"testing"
 )
 
+func TestArrayInitialization(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []interface{}
+	}{
+
+		{`
+			Array.new
+		`, []interface{}{}},
+		{`
+			Array.new(3)
+		`, []interface{}{nil, nil, nil}},
+		{`
+			Array.new(3, true)
+		`, []interface{}{true, true, true}},
+		{`
+			Array.new(3) do |i|
+             i * 2
+			end
+		`, []interface{}{0, 2, 4}},
+	}
+
+	for i, tt := range tests {
+		vm := initTestVM()
+		evaluated := vm.testEval(t, tt.input, getFilename())
+		verifyArrayObject(t, i, evaluated, tt.expected)
+		vm.checkCFP(t, i, 0)
+		vm.checkSP(t, i, 1)
+	}
+}
+
+func TestArrayInitializationFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`
+			Array.new(1, 2, 3)
+		`, "ArgumentError: Expect 1 to 2 argument(s). got: 3", 1},
+		{`
+			Array.new("foo")
+		`, "ArgumentError: Expect argument to be Integer. got: String", 1},
+		{`
+			Array.new(-1)
+		`, "ArgumentError: Negative Array Size", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestArrayClassSuperclass(t *testing.T) {
 	tests := []struct {
 		input    string
