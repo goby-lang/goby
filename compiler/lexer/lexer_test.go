@@ -1,8 +1,9 @@
 package lexer
 
 import (
-	"github.com/goby-lang/goby/compiler/token"
 	"testing"
+
+	"github.com/goby-lang/goby/compiler/token"
 )
 
 func TestNextToken(t *testing.T) {
@@ -283,7 +284,6 @@ func TestNextToken(t *testing.T) {
 			},
 		}, {
 			`
-	'a' =~ 'a';
 	10 <= 10;
 	10 >= 10;
 	a = 1 <=> 2;
@@ -293,27 +293,22 @@ func TestNextToken(t *testing.T) {
 				expectedLiteral string
 				expectedLine    int
 			}{
-				{token.String, "a", 1},
-				{token.Match, "=~", 1},
-				{token.String, "a", 1},
+				{token.Int, "10", 1},
+				{token.LTE, "<=", 1},
+				{token.Int, "10", 1},
 				{token.Semicolon, ";", 1},
 
 				{token.Int, "10", 2},
-				{token.LTE, "<=", 2},
+				{token.GTE, ">=", 2},
 				{token.Int, "10", 2},
 				{token.Semicolon, ";", 2},
 
-				{token.Int, "10", 3},
-				{token.GTE, ">=", 3},
-				{token.Int, "10", 3},
+				{token.Ident, "a", 3},
+				{token.Assign, "=", 3},
+				{token.Int, "1", 3},
+				{token.COMP, "<=>", 3},
+				{token.Int, "2", 3},
 				{token.Semicolon, ";", 3},
-
-				{token.Ident, "a", 4},
-				{token.Assign, "=", 4},
-				{token.Int, "1", 4},
-				{token.COMP, "<=>", 4},
-				{token.Int, "2", 4},
-				{token.Semicolon, ";", 4},
 			},
 		}, {
 			`

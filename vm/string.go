@@ -198,40 +198,6 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 		},
 	},
 	{
-		// Matches the receiver with a Regexp, and returns the number of matched strings.
-		//
-		// ```ruby
-		// "pizza" =~ Regex.new("zz")  # => 2
-		// "pizza" =~ Regex.new("OH!") # => nil
-		// ```
-		//
-		// @param regexp [Regexp]
-		// @return [Integer]
-		Name: "=~",
-		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-			if len(args) != 1 {
-				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
-			}
-
-			re, ok := args[0].(*RegexpObject)
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.RegexpClass, args[0].Class().Name)
-			}
-
-			text := receiver.(*StringObject).value
-
-			match, _ := re.regexp.FindStringMatch(text)
-			if match == nil {
-				return NULL
-			}
-
-			position := match.Groups()[0].Captures[0].Index
-
-			return t.vm.InitIntegerObject(position)
-
-		},
-	},
-	{
 		// Returns a Integer.
 		// Returns -1 if the first string is less than the second string returns -1, returns 0 if equal to, or returns 1 if greater than.
 		//
@@ -1005,6 +971,40 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 			}
 
 			return t.vm.initMatchDataObject(match, re.String(), text)
+
+		},
+	},
+	{
+		// Matches the receiver with a Regexp, and returns the number of matched strings.
+		//
+		// ```ruby
+		// "pizza".match? Regex.new("zz")  # => 2
+		// "pizza".match? Regex.new("OH!") # => nil
+		// ```
+		//
+		// @param regexp [Regexp]
+		// @return [Integer]
+		Name: "match?",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 1 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
+			}
+
+			re, ok := args[0].(*RegexpObject)
+			if !ok {
+				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.RegexpClass, args[0].Class().Name)
+			}
+
+			text := receiver.(*StringObject).value
+
+			match, _ := re.regexp.FindStringMatch(text)
+			if match == nil {
+				return NULL
+			}
+
+			position := match.Groups()[0].Captures[0].Index
+
+			return t.vm.InitIntegerObject(position)
 
 		},
 	},

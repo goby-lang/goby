@@ -38,12 +38,11 @@ const (
 	OrEq     = "||="
 	Modulo   = "%"
 
-	Match = "=~"
-	LT    = "<"
-	LTE   = "<="
-	GT    = ">"
-	GTE   = ">="
-	COMP  = "<=>"
+	LT   = "<"
+	LTE  = "<="
+	GT   = ">"
+	GTE  = ">="
+	COMP = "<=>"
 
 	Comma     = ","
 	Semicolon = ";"
@@ -124,7 +123,6 @@ var operators = map[string]Type{
 	"||=": OrEq,
 	"%":   Modulo,
 
-	"=~":  Match,
 	"<":   LT,
 	"<=":  LTE,
 	">":   GT,

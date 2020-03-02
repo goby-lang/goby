@@ -93,7 +93,6 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.Pow, p.parseInfixExpression)
 	p.registerInfix(token.Eq, p.parseInfixExpression)
 	p.registerInfix(token.NotEq, p.parseInfixExpression)
-	p.registerInfix(token.Match, p.parseInfixExpression)
 	p.registerInfix(token.LT, p.parseInfixExpression)
 	p.registerInfix(token.LTE, p.parseInfixExpression)
 	p.registerInfix(token.GT, p.parseInfixExpression)

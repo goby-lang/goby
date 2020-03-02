@@ -66,7 +66,6 @@ func TestCreateOperatorIdentTrue(t *testing.T) {
 		"||=": OrEq,
 		"%":   Modulo,
 
-		"=~":  Match,
 		"<":   LT,
 		"<=":  LTE,
 		">":   GT,

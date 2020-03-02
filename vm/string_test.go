@@ -152,13 +152,13 @@ func TestStringComparisonFail(t *testing.T) {
 	}
 }
 
-func TestStringMatchOperator(t *testing.T) {
+func TestMatchMethod(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
 	}{
-		{`"abc" =~ Regexp.new("bc")`, 1},
-		{`"abc" =~ Regexp.new("d")`, nil},
+		{`"abc".match? Regexp.new("bc")`, 1},
+		{`"abc".match? Regexp.new("d")`, nil},
 	}
 
 	for i, tt := range tests {
@@ -170,10 +170,10 @@ func TestStringMatchOperator(t *testing.T) {
 	}
 }
 
-func TestStringMatchOperatorFail(t *testing.T) {
+func TestMatchMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"abc" =~ *[1, 2]`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
-		{`"abc" =~ 'a'`, "TypeError: Expect argument to be Regexp. got: String", 1},
+		{`"abc".match?(*[1, 2])`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
+		{`"abc".match?('a')`, "TypeError: Expect argument to be Regexp. got: String", 1},
 	}
 	for i, tt := range testsFail {
 		v := initTestVM()

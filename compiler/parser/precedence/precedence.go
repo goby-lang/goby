@@ -24,7 +24,6 @@ const (
 var LookupTable = map[token.Type]int{
 	token.Eq:                 Equals,
 	token.NotEq:              Equals,
-	token.Match:              Compare,
 	token.LT:                 Compare,
 	token.LTE:                Compare,
 	token.GT:                 Compare,

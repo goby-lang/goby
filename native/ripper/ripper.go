@@ -312,8 +312,6 @@ func convertLex(t token.Type) string {
 		s = "lt"
 	case token.LTE:
 		s = "lte"
-	case token.Match:
-		s = "match"
 	case token.Minus:
 		s = "minus"
 	case token.MinusEq:
