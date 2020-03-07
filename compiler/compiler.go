@@ -9,7 +9,7 @@ import (
 )
 
 // CompileToInstructions compiles input source code into instruction set data structures
-func CompileToInstructions(input string, pm parser.ParserMode) ([]*bytecode.InstructionSet, error) {
+func CompileToInstructions(input string, pm parser.Mode) ([]*bytecode.InstructionSet, error) {
 	l := lexer.New(input)
 	p := parser.New(l)
 	p.Mode = pm

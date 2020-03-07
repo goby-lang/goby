@@ -71,7 +71,7 @@ type VM struct {
 
 	channelObjectMap *objectMap
 
-	mode parser.ParserMode
+	mode parser.Mode
 
 	libFiles []string
 
