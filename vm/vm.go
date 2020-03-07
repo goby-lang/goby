@@ -171,11 +171,23 @@ func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) {
 	cf.self = vm.mainObj
 	vm.mainThread.callFrameStack.push(cf)
 
+	// this is the final destination of a Goby error
+	// at vm level, we don't deal with the error itself
+	// we only decide how the program should react to it
 	defer func() {
 		switch err := recover().(type) {
+		// if the error is still a Go panic until this phase,
+		// it means Goby can't handle it properly and we should just let it crash
 		case error:
 			panic(err)
+
+		// if the error is something we raise intentionally, e.g. an argument error
+		// we need to handle it depends on the type of program execution
 		case *Error:
+
+			// REPLMode: We handle the error inside the igb package, so don't need to do anything here
+			// TestMode: We should preserve the vm as it is and inspect its state via test helpers, so don't need to do anything here either
+			// NormalMode (normal file execution): we should print our the error and exit the program
 			if vm.mode == parser.NormalMode {
 				fmt.Fprintln(os.Stderr, err.Message())
 				os.Exit(1)

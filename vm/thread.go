@@ -176,6 +176,8 @@ func (t *Thread) removeUselessBlockFrame(frame callFrame) {
 	}
 }
 
+// reportErrorAndStop captures any panic happens in a given thread
+// in here, we need to check if the panic is intentionally raised by checking its type
 func (t *Thread) reportErrorAndStop(e interface{}) {
 	cf := t.callFrameStack.top()
 
@@ -185,7 +187,13 @@ func (t *Thread) reportErrorAndStop(e interface{}) {
 
 	top := t.Stack.top().Target
 	switch err := top.(type) {
-	// If we can get an error object it means it's an Goby error
+	// If we can get an Error object, the panic was raised intentionally from
+	//   1. pushErrorObject
+	//   2. setErrorObject
+	// We then need to
+	//   1. collect the stack traces from the call frame stack
+	//   2. store the stack traces inside the Error object
+	//   3. pass it to the vm level via another panic call
 	case *Error:
 		if !err.storedTraces {
 			for i := t.callFrameStack.pointer - 1; i > 0; i-- {
@@ -203,7 +211,7 @@ func (t *Thread) reportErrorAndStop(e interface{}) {
 		}
 
 		panic(err)
-		// Otherwise it's a Go panic that needs to be raise
+	// Otherwise it's a Go panic that needs to be raised
 	default:
 		panic(e)
 	}
@@ -442,12 +450,14 @@ func (t *Thread) reportArgumentError(sourceLine, idealArgNumber int, methodName 
 	t.setErrorObject(receiverPtr, receiverPtr+1, errors.ArgumentError, sourceLine, message, idealArgNumber, methodName, exactArgNumber)
 }
 
+// pushErrorObject pushes the Error object to the stack
 func (t *Thread) pushErrorObject(errorType string, sourceLine int, format string, args ...interface{}) {
 	err := t.vm.InitErrorObject(errorType, sourceLine, format, args...)
 	t.Stack.Push(&Pointer{Target: err})
 	panic(err.Message())
 }
 
+// setErrorObject replaces a certain stack element with the Error object
 func (t *Thread) setErrorObject(receiverPtr, sp int, errorType string, sourceLine int, format string, args ...interface{}) {
 	err := t.vm.InitErrorObject(errorType, sourceLine, format, args...)
 	t.Stack.Set(receiverPtr, &Pointer{Target: err})
