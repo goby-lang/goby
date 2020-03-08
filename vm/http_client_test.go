@@ -89,7 +89,7 @@ func TestHTTPClientObjectFail(t *testing.T) {
 		end
 
 		res
-		`, "HTTPError: Could not complete request, Get http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: connect: connection refused", 4},
+		`, "HTTPError: Could not complete request, Get \"http://127.0.0.1:3001\": dial tcp 127.0.0.1:3001: connect: connection refused", 4},
 	}
 
 	for i, tt := range testsFail {
