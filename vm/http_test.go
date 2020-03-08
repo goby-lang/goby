@@ -70,7 +70,7 @@ func TestHTTPRequestFail(t *testing.T) {
 		require "net/http"
 
 		Net::HTTP.get("http://127.0.0.1:3001")
-		`, "HTTPError: Could not complete request, Get http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: connect: connection refused", 1},
+		`, "HTTPError: Could not complete request, Get \"http://127.0.0.1:3001\": dial tcp 127.0.0.1:3001: connect: connection refused", 1},
 		//Argument errors for get()
 		{`
 		require "net/http"
@@ -92,7 +92,7 @@ func TestHTTPRequestFail(t *testing.T) {
 		require "net/http"
 
 		Net::HTTP.post("http://127.0.0.1:3001", "text/plain", "Let me down")
-		`, "HTTPError: Could not complete request, Post http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: connect: connection refused", 1},
+		`, "HTTPError: Could not complete request, Post \"http://127.0.0.1:3001\": dial tcp 127.0.0.1:3001: connect: connection refused", 1},
 		//Argument errors for post()
 		{`
 		require "net/http"
@@ -114,7 +114,7 @@ func TestHTTPRequestFail(t *testing.T) {
 		require "net/http"
 
 		Net::HTTP.head("http://127.0.0.1:3001")
-		`, "HTTPError: Could not complete request, Head http://127.0.0.1:3001: dial tcp 127.0.0.1:3001: connect: connection refused", 1},
+		`, "HTTPError: Could not complete request, Head \"http://127.0.0.1:3001\": dial tcp 127.0.0.1:3001: connect: connection refused", 1},
 		//Argument errors for head()
 		{`
 		require "net/http"
