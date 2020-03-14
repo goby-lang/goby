@@ -1313,6 +1313,15 @@ func TestSendMethod(t *testing.T) {
 		a = Foo.new
 		a.send(:bar, 7, 8) do |i, j| i * j; end
 		`, 56},
+		{`
+		class Foo
+		  def method_missing(name)
+		    10
+		  end
+		end
+		
+		Foo.new.send(:bar)
+		`, 10},
 	}
 
 	for i, tt := range tests {
