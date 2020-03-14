@@ -47,6 +47,7 @@ class Describe
     @context_name = context_name
     @describes = []
     @examples = []
+    @before_hooks = []
     instance_eval block
   end
 
@@ -56,6 +57,10 @@ class Describe
 
   def it(context_name)
     examples.push(Example.new(context_name, get_block, @indentation + 2))
+  end
+
+  def before
+    @before_hooks.push(get_block)
   end
 
   def run
@@ -68,6 +73,10 @@ class Describe
   def run_specs
     puts " " * @indentation + context_name.to_s
     examples.each do |example_node|
+      @before_hooks.each do |before_hook|
+        before_hook.call
+      end
+      example_node.run
       example_node.print_result
     end
   end
@@ -82,7 +91,11 @@ class Example
     @indentation = indentation
     @context_name = context_name
     @test_result = true
-    instance_eval block
+    @block = block
+  end
+
+  def run
+    instance_eval @block
   end
 
   def expect(subject)

@@ -25,4 +25,16 @@ Spec.describe Spec do
       end
     end
   end
+
+  describe "callbacks" do
+    i = 0
+
+    before do
+      i += 1
+    end
+
+    it "runs before block before the test case" do
+      expect(i).to eq(1)
+    end
+  end
 end
