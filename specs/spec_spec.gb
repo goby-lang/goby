@@ -27,14 +27,31 @@ Spec.describe Spec do
   end
 
   describe "callbacks" do
-    i = 0
+    describe "before" do
+      i = 0
 
-    before do
-      i += 1
+      before do
+        i += 1
+      end
+
+      it "runs before block before the test case" do
+        expect(i).to eq(1)
+      end
     end
+    describe "after" do
+      i = 0
 
-    it "runs before block before the test case" do
-      expect(i).to eq(1)
+      after do
+        i = 2
+      end
+
+      it "changes i" do
+        i += 5
+      end
+
+      it "i should be changed by the after block" do
+        expect(i).to eq(2)
+      end
     end
   end
 end

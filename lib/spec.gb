@@ -48,6 +48,7 @@ class Describe
     @describes = []
     @examples = []
     @before_hooks = []
+    @after_hooks = []
     instance_eval block
   end
 
@@ -63,6 +64,10 @@ class Describe
     @before_hooks.push(get_block)
   end
 
+  def after
+    @after_hooks.push(get_block)
+  end
+
   def run
     run_specs
     describes.each do |describe_node|
@@ -76,7 +81,12 @@ class Describe
       @before_hooks.each do |before_hook|
         before_hook.call
       end
+
       example_node.run
+
+      @after_hooks.each do |after_hook|
+        after_hook.call
+      end
       example_node.print_result
     end
   end
