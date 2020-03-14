@@ -2,3 +2,4 @@ ignore:
   - "**/inspection_methods.go"
   - "./test_fixtures/**"
   - "./vendor"
+  - "./lib"
