@@ -322,7 +322,7 @@ func (t *Thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 	method = receiver.findMethod(methodName)
 
 	if method == nil {
-		t.setErrorObject(receiverPr, argPr, errors.NoMethodError, sourceLine, errors.UndefinedMethod, methodName, receiver.ToString())
+		t.setErrorObject(receiverPr, argPr, errors.NoMethodError, sourceLine, errors.UndefinedMethod, methodName, receiver.Inspect())
 	}
 
 	sendCallFrame := t.callFrameStack.top()
@@ -334,7 +334,7 @@ func (t *Thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 	case *BuiltinMethodObject:
 		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, sourceLine, sendCallFrame.FileName())
 	case *Error:
-		t.pushErrorObject(errors.InternalError, sourceLine, m.ToString())
+		t.pushErrorObject(errors.InternalError, sourceLine, m.Inspect())
 	}
 }
 

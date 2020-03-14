@@ -426,7 +426,7 @@ func init() {
 				mm := receiver.findMethodMissing(receiver.Class().inheritsMethodMissing)
 
 				if mm == nil {
-					t.setErrorObject(receiverPr, argPr, errors.NoMethodError, sourceLine, errors.UndefinedMethod, methodName, receiver.ToString())
+					t.setErrorObject(receiverPr, argPr, errors.NoMethodError, sourceLine, errors.UndefinedMethod, methodName, receiver.Inspect())
 				} else {
 					// Move up args for missed method's name
 					// before: | arg 1       | arg 2 |
@@ -464,7 +464,7 @@ func init() {
 			case *BuiltinMethodObject:
 				t.evalBuiltinMethod(receiver, m, receiverPr, argCount, argSet, blockFrame, sourceLine, cf.fileName)
 			case *Error:
-				t.pushErrorObject(errors.InternalError, sourceLine, m.ToString())
+				t.pushErrorObject(errors.InternalError, sourceLine, m.Inspect())
 			}
 
 		},
