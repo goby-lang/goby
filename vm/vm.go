@@ -171,7 +171,8 @@ func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) {
 	cf.self = vm.mainObj
 	vm.mainThread.callFrameStack.push(cf)
 
-	// this is the final destination of a Goby error
+      // here is the final destination of Goby errors at the VM level, and we don't deal with them at this point.
+      // we only decide how the user program should react to them.
 	// at vm level, we don't deal with the error itself
 	// we only decide how the program should react to it
 	defer func() {
