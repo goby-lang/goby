@@ -29,15 +29,15 @@ type Parser struct {
 	// However, this is not a very good practice should change it in the future.
 	acceptBlock bool
 	fsm         *fsm.FSM
-	Mode        ParserMode
+	Mode        Mode
 }
 
-// ParserMode determines the running mode. These are the enums for marking parser's mode, which decides whether it should pop unused values.
-type ParserMode int
+// Mode determines the running mode. These are the enums for marking parser's mode, which decides whether it should pop unused values.
+type Mode int
 
 // These are the enums for marking parser's mode, which decides whether it should pop unused values.
 const (
-	NormalMode ParserMode = iota + 1
+	NormalMode Mode = iota + 1
 	REPLMode
 	TestMode
 )
