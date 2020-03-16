@@ -182,7 +182,7 @@ func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) {
 		case error:
 			panic(err)
 
-		// if the error is something we raise intentionally, e.g. an argument error
+		// if the error is one of the Goby's errors, such as argument error, we need to handle it depending on the mode of execution.
 		// we need to handle it depends on the type of program execution
 		case *Error:
 
