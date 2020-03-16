@@ -177,7 +177,7 @@ func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) {
 	// we only decide how the program should react to it
 	defer func() {
 		switch err := recover().(type) {
-		// if the error is still a Go panic until this phase,
+		// if the error is a true Go panic, Goby can't handle it properly and we should re-raise it again
 		// it means Goby can't handle it properly and we should just let it crash
 		case error:
 			panic(err)
