@@ -1316,7 +1316,13 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 			case 0:
 				return t.vm.InitErrorObject(errors.InternalError, sourceLine, "")
 			case 1:
-				return t.vm.InitErrorObject(errors.InternalError, sourceLine, "'%s'", args[0].ToString())
+				errorClass, ok := args[0].(*RClass)
+
+				if !ok {
+					return t.vm.InitErrorObject(errors.InternalError, sourceLine, "%s", args[0].Inspect())
+				}
+
+				return t.vm.InitErrorObject(errorClass.Name, sourceLine, "%s", args[0].Inspect())
 			case 2:
 				errorClass, ok := args[0].(*RClass)
 
@@ -1324,7 +1330,7 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongArgumentTypeFormatNum, 2, "a class", args[0].Class().Name)
 				}
 
-				return t.vm.InitErrorObject(errorClass.Name, sourceLine, "'%s'", args[1].ToString())
+				return t.vm.InitErrorObject(errorClass.Name, sourceLine, "%s", args[1].Inspect())
 			}
 
 			return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentLess, 2, aLen)

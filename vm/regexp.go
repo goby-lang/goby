@@ -58,7 +58,7 @@ var builtInRegexpClassMethods = []*BuiltinMethodObject{
 
 			r := t.vm.initRegexpObject(args[0].ToString())
 			if r == nil {
-				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Invalid regexp: %v", args[0].ToString())
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Invalid regexp: %v", args[0].Inspect())
 			}
 			return r
 

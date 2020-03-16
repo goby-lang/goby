@@ -1087,10 +1087,10 @@ func TestRaiseMethod(t *testing.T) {
 		expectedSP  int
 	}{
 		{`raise`, "InternalError: ", 1, 1},
-		{`raise "Foo"`, "InternalError: 'Foo'", 1, 1},
+		{`raise "Foo"`, "InternalError: \"Foo\"", 1, 1},
 		{`
 		class BarError; end
-		raise BarError, "Foo"`, "BarError: 'Foo'", 1, 1},
+		raise BarError, "Foo"`, "BarError: \"Foo\"", 1, 1},
 		{`
 		class FooError; end
 
@@ -1103,7 +1103,7 @@ func TestRaiseMethod(t *testing.T) {
 			// Expect CFP to be 2 is because the `raise_foo`'s frame is not popped
 			// Expect SP to be 2 cause the program got stopped before it replaces receiver with the return value (error)
 			// TODO: This means we need to pop error object when implementing `rescue`
-			"FooError: 'Foo'", 2, 2},
+			"FooError: \"Foo\"", 2, 2},
 	}
 
 	for i, tt := range testsFail {
@@ -1313,6 +1313,15 @@ func TestSendMethod(t *testing.T) {
 		a = Foo.new
 		a.send(:bar, 7, 8) do |i, j| i * j; end
 		`, 56},
+		{`
+		class Foo
+		  def method_missing(name)
+		    10
+		  end
+		end
+		
+		Foo.new.send(:bar)
+		`, 10},
 	}
 
 	for i, tt := range tests {
@@ -1555,7 +1564,7 @@ func TestClassNameClassMethod(t *testing.T) {
 
 func TestClassNameClassMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Taipei".name`, "NoMethodError: Undefined Method 'name' for Taipei", 1},
+		{`"Taipei".name`, "NoMethodError: Undefined Method 'name' for \"Taipei\"", 1},
 		{`123.name`, "NoMethodError: Undefined Method 'name' for 123", 1},
 		{`true.name`, "NoMethodError: Undefined Method 'name' for true", 1},
 		{`Integer.name(Integer)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
@@ -1607,7 +1616,7 @@ func TestClassSuperclassClassMethod(t *testing.T) {
 
 func TestClassSuperclassClassMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Taipei".superclass`, "NoMethodError: Undefined Method 'superclass' for Taipei", 1},
+		{`"Taipei".superclass`, "NoMethodError: Undefined Method 'superclass' for \"Taipei\"", 1},
 		{`123.superclass`, "NoMethodError: Undefined Method 'superclass' for 123", 1},
 		{`true.superclass`, "NoMethodError: Undefined Method 'superclass' for true", 1},
 		{`Integer.superclass(Integer)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
