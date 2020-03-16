@@ -8,7 +8,6 @@ import (
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/compiler/lexer"
 	"github.com/goby-lang/goby/compiler/parser"
-	"github.com/goby-lang/goby/vm/errors"
 )
 
 func TestVM_REPLExec(t *testing.T) {
@@ -160,7 +159,7 @@ func TestVM_REPLExecFail(t *testing.T) {
 			[]string{
 				`raise ArgumentError`,
 			},
-			fmt.Sprintf("InternalError: '%s'", errors.ArgumentError),
+			"ArgumentError: ArgumentError",
 		},
 		{
 			[]string{

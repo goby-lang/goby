@@ -285,9 +285,51 @@ func (t *Thread) retrieveBlock(fileName, blockFlag string, sourceLine int) (bloc
 	return
 }
 
-func (t *Thread) sendMethod(methodName string, argCount int, blockFrame *normalCallFrame, sourceLine int) {
-	var method Object
+func (t *Thread) findMethod(receiver Object, methodName string, receiverPr int, argCount int, argPr int, sourceLine int) (method Object, argC int) {
+	method = receiver.findMethod(methodName)
 
+	if method == nil {
+		mm := receiver.findMethodMissing(receiver.Class().inheritsMethodMissing)
+
+		if mm == nil {
+			t.setErrorObject(receiverPr, argPr, errors.NoMethodError, sourceLine, errors.UndefinedMethod, methodName, receiver.Inspect())
+		} else {
+			// Move up args for missed method's name
+			// before: | arg 1       | arg 2 |
+			// after:  | method name | arg 1 | arg 2 |
+			// TODO: Improve this
+			t.Stack.Push(nil)
+
+			for i := argCount - 1; i >= 0; i-- {
+				position := argPr + i
+				arg := t.Stack.data[argPr+i]
+				t.Stack.Set(position+1, arg)
+			}
+
+			t.Stack.Set(argPr, &Pointer{Target: t.vm.InitStringObject(methodName)})
+			argCount++
+
+			method = mm
+		}
+	}
+
+	return method, argCount
+}
+
+func (t *Thread) findAndCallMethod(receiver Object, methodName string, receiverPr int, argSet *bytecode.ArgSet, argCount int, argPr int, sourceLine int, blockFrame *normalCallFrame, fileName string) {
+	// argCount change if we ended up calling method_missing
+	method, argCount := t.findMethod(receiver, methodName, receiverPr, argCount, argPr, sourceLine)
+
+	switch m := method.(type) {
+	case *MethodObject:
+		callObj := newCallObject(receiver, m, receiverPr, argCount, argSet, blockFrame, sourceLine)
+		t.evalMethodObject(callObj)
+	case *BuiltinMethodObject:
+		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, argSet, blockFrame, sourceLine, fileName)
+	}
+}
+
+func (t *Thread) sendMethod(methodName string, argCount int, blockFrame *normalCallFrame, sourceLine int) {
 	if arr, ok := t.Stack.top().Target.(*ArrayObject); ok && arr.splat {
 		// Pop array
 		t.Stack.Pop()
@@ -327,23 +369,9 @@ func (t *Thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 
 	t.Stack.pointer--
 
-	method = receiver.findMethod(methodName)
-
-	if method == nil {
-		t.setErrorObject(receiverPr, argPr, errors.NoMethodError, sourceLine, errors.UndefinedMethod, methodName, receiver.ToString())
-	}
-
 	sendCallFrame := t.callFrameStack.top()
 
-	switch m := method.(type) {
-	case *MethodObject:
-		callObj := newCallObject(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, 1)
-		t.evalMethodObject(callObj)
-	case *BuiltinMethodObject:
-		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, &bytecode.ArgSet{}, blockFrame, sourceLine, sendCallFrame.FileName())
-	case *Error:
-		t.pushErrorObject(errors.InternalError, sourceLine, m.ToString())
-	}
+	t.findAndCallMethod(receiver, methodName, receiverPr, &bytecode.ArgSet{}, argCount, argPr, sourceLine, blockFrame, sendCallFrame.FileName())
 }
 
 func (t *Thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame, sourceLine int, fileName string) {

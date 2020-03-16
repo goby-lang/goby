@@ -75,7 +75,7 @@ func TestRangeEnumeratorRaiseErrorWhenNoElementsOnNext(t *testing.T) {
 			enumerator.next
 			enumerator.next
 			`,
-			"StopIteration: 'No more elements!'",
+			"StopIteration: \"No more elements!\"",
 			2,
 		},
 		{`
@@ -84,7 +84,7 @@ func TestRangeEnumeratorRaiseErrorWhenNoElementsOnNext(t *testing.T) {
 			enumerator.next
 			enumerator.next
 			`,
-			"StopIteration: 'No more elements!'",
+			"StopIteration: \"No more elements!\"",
 			2,
 		},
 	}
