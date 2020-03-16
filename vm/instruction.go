@@ -391,7 +391,6 @@ func init() {
 
 		},
 		bytecode.Send: func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
-			var method Object
 			var blockFlag string
 
 			methodName := args[0].(string)
@@ -419,34 +418,6 @@ func init() {
 			receiverPr := argPr - 1
 			receiver := t.Stack.data[receiverPr].Target
 
-			// Find Method
-			method = receiver.findMethod(methodName)
-
-			if method == nil {
-				mm := receiver.findMethodMissing(receiver.Class().inheritsMethodMissing)
-
-				if mm == nil {
-					t.setErrorObject(receiverPr, argPr, errors.NoMethodError, sourceLine, errors.UndefinedMethod, methodName, receiver.ToString())
-				} else {
-					// Move up args for missed method's name
-					// before: | arg 1       | arg 2 |
-					// after:  | method name | arg 1 | arg 2 |
-					// TODO: Improve this
-					t.Stack.Push(nil)
-
-					for i := argCount - 1; i >= 0; i-- {
-						position := argPr + i
-						arg := t.Stack.data[argPr+i]
-						t.Stack.Set(position+1, arg)
-					}
-
-					t.Stack.Set(argPr, &Pointer{Target: t.vm.InitStringObject(methodName)})
-					argCount++
-
-					method = mm
-				}
-			}
-
 			// Find Block
 			blockFrame := t.retrieveBlock(cf.FileName(), blockFlag, cf.SourceLine())
 
@@ -457,16 +428,7 @@ func init() {
 				t.callFrameStack.push(blockFrame)
 			}
 
-			switch m := method.(type) {
-			case *MethodObject:
-				callObj := newCallObject(receiver, m, receiverPr, argCount, argSet, blockFrame, sourceLine)
-				t.evalMethodObject(callObj)
-			case *BuiltinMethodObject:
-				t.evalBuiltinMethod(receiver, m, receiverPr, argCount, argSet, blockFrame, sourceLine, cf.fileName)
-			case *Error:
-				t.pushErrorObject(errors.InternalError, sourceLine, m.ToString())
-			}
-
+			t.findAndCallMethod(receiver, methodName, receiverPr, argSet, argCount, argPr, sourceLine, blockFrame, cf.fileName)
 		},
 		bytecode.InvokeBlock: func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			argCount := args[0].(int)

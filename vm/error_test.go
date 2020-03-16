@@ -119,7 +119,7 @@ func TestStackTraces(t *testing.T) {
 
 		raise_foo
 		`,
-			"FooError: 'Foo'",
+			"FooError: \"Foo\"",
 			[]string{
 				fmt.Sprintf("from %s:4", getFilename()),
 				fmt.Sprintf("from %s:7", getFilename()),

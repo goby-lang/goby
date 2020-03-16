@@ -1482,7 +1482,7 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 				}
 
 				if len(kv.Elements) != 2 {
-					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect element #%d to have 2 elements as a key-value pair. got: %s", i, kv.ToString())
+					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect element #%d to have 2 elements as a key-value pair. got: %s", i, kv.Inspect())
 				}
 
 				k := kv.Elements[0]
