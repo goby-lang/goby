@@ -1353,7 +1353,7 @@ func TestSendMethod(t *testing.T) {
 		    10
 		  end
 		end
-		
+
 		Foo.new.send(:bar)
 		`, 10},
 	}

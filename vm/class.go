@@ -1342,12 +1342,29 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 		Name: "rand",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 			aLen := len(args)
+
 			switch aLen {
 			case 0:
 				return t.vm.initFloatObject(rand.Float64())
 			case 1:
+				_, ok := args[0].(*IntegerObject)
+
+				if !ok {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+				}
 				return t.vm.InitIntegerObject(rand.Intn(args[0].Value().(int)))
 			case 2:
+				_, minOk := args[1].(*IntegerObject)
+
+				if !minOk {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+				}
+				_, maxOk := args[1].(*IntegerObject)
+
+				if !maxOk {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[1].Class().Name)
+				}
+
 				return t.vm.InitIntegerObject(rand.Intn(args[1].Value().(int)-args[0].Value().(int)+1) + args[0].Value().(int))
 			default:
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 2, aLen)
