@@ -1350,19 +1350,19 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 				_, ok := args[0].(*IntegerObject)
 
 				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 				}
 				return t.vm.InitIntegerObject(rand.Intn(args[0].Value().(int)))
 			case 2:
 				_, minOk := args[1].(*IntegerObject)
 
 				if !minOk {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
 				}
 				_, maxOk := args[1].(*IntegerObject)
 
 				if !maxOk {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[1].Class().Name)
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[1].Class().Name)
 				}
 
 				return t.vm.InitIntegerObject(rand.Intn(args[1].Value().(int)-args[0].Value().(int)+1) + args[0].Value().(int))

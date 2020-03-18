@@ -1155,6 +1155,7 @@ func TestRandMethod(t *testing.T) {
 func TestRandMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`rand(1, 10, 100)`, "ArgumentError: Expect 2 argument(s). got: 3", 1},
+		{`rand("some string")`, "TypeError: Expect argument to be Integer. got: String", 1},
 	}
 
 	for i, tt := range testsFail {
