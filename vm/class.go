@@ -1354,7 +1354,7 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 				}
 				return t.vm.InitIntegerObject(rand.Intn(args[0].Value().(int)))
 			case 2:
-				_, minOk := args[1].(*IntegerObject)
+				_, minOk := args[0].(*IntegerObject)
 
 				if !minOk {
 					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
