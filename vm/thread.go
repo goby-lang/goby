@@ -152,7 +152,18 @@ func (t *Thread) evalCallFrame(cf callFrame) {
 		t.Stack.Push(&Pointer{Target: result})
 		//fmt.Println(t.callFrameStack.inspect())
 		//fmt.Println("-----------------------")
-		t.callFrameStack.pop()
+
+		// this check is to prevent popping out a call frame that should be kept
+		// usually the top call frame would be the `cf` here
+		// but in some rare cases it could be other call frame, and if we pop it here we'll have some troubles in the later execution
+		//
+		// one example of the problem would be https://github.com/goby-lang/goby/issues/584
+		// the cause of this issue is that the "break" instruction always pops 3 call frames
+		// (this is necessary, please read the comments inside `Break` instruction for more detail)
+		// and because we already popped the `cf` during the `Break` instruction, what we pop here would be the top-level call frame, which causes the program to crash
+		if t.callFrameStack.top() == cf {
+			t.callFrameStack.pop()
+		}
 	}
 
 	t.removeUselessBlockFrame(cf)
