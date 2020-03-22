@@ -18,6 +18,24 @@ func TestVM_REPLExec(t *testing.T) {
 		{
 			[]string{
 				`
+x = [1, 2, 3]
+y = 0
+`,
+				`
+x.each do |i|
+  y += i
+  if i == 2
+    break
+  end
+end
+`,
+				`y`,
+			},
+			3,
+		},
+		{
+			[]string{
+				`
 				a, b = [3, 6]
 				a + b
 				`,
