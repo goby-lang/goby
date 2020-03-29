@@ -51,9 +51,10 @@ var builtInRegexpClassMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			arg, ok := args[0].(*StringObject)
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, arg.Class().Name)
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
+
+			if typeErr != nil {
+				return typeErr
 			}
 
 			r := t.vm.initRegexpObject(args[0].ToString())

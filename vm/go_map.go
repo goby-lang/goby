@@ -54,15 +54,13 @@ var builtinGoMapInstanceMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			key, ok := args[0].(*StringObject)
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
 
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			if typeErr != nil {
+				return typeErr
 			}
 
-			m := receiver.(*GoMap).data
-
-			result, ok := m[key.value]
+			result, ok := receiver.(*GoMap).data[args[0].Value().(string)]
 
 			if !ok {
 				return NULL
