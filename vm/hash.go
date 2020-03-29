@@ -91,16 +91,15 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			i := args[0]
-			key, ok := i.(*StringObject)
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
 
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, i.Class().Name)
+			if typeErr != nil {
+				return typeErr
 			}
 
 			h := receiver.(*HashObject)
 
-			value, ok := h.Pairs[key.value]
+			value, ok := h.Pairs[args[0].Value().(string)]
 
 			if !ok {
 				if h.Default != nil {
@@ -135,15 +134,15 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 			if len(args) != 2 {
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 2, len(args))
 			}
-			k := args[0]
-			key, ok := k.(*StringObject)
 
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, k.Class().Name)
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
+
+			if typeErr != nil {
+				return typeErr
 			}
 
 			h := receiver.(*HashObject)
-			h.Pairs[key.value] = args[1]
+			h.Pairs[args[0].Value().(string)] = args[1]
 
 			return args[1]
 
@@ -329,15 +328,16 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			h := receiver.(*HashObject)
-			d := args[0]
-			deleteKey, ok := d.(*StringObject)
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
 
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, d.Class().Name)
+			if typeErr != nil {
+				return typeErr
 			}
 
-			deleteKeyValue := deleteKey.value
+			deleteKeyValue := args[0].Value().(string)
+
+			h := receiver.(*HashObject)
+
 			if _, ok := h.Pairs[deleteKeyValue]; ok {
 				delete(h.Pairs, deleteKeyValue)
 			}
@@ -707,7 +707,6 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 				return t.builtinMethodYield(blockFrame, key).Target
 			}
 			return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "The value was not found, and no block has been provided")
-
 		},
 	},
 	{
@@ -786,15 +785,13 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			h := receiver.(*HashObject)
-			i := args[0]
-			input, ok := i.(*StringObject)
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
 
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, i.Class().Name)
+			if typeErr != nil {
+				return typeErr
 			}
 
-			if _, ok := h.Pairs[input.value]; ok {
+			if _, ok := receiver.(*HashObject).Pairs[args[0].Value().(string)]; ok {
 				return TRUE
 			}
 			return FALSE
@@ -1076,12 +1073,13 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 			if aLen == 0 {
 				sorted = false
 			} else {
-				s := args[0]
-				st, ok := s.(*BooleanObject)
-				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.BooleanClass, s.Class().Name)
+				typeErr := t.vm.checkArgTypes(args, sourceLine, classes.BooleanClass)
+
+				if typeErr != nil {
+					return typeErr
 				}
-				sorted = st.value
+
+				sorted = args[0].Value().(bool)
 			}
 
 			h := receiver.(*HashObject)
@@ -1345,15 +1343,14 @@ func (h *HashObject) copy() Object {
 
 // recursive indexed access - see ArrayObject#dig documentation.
 func (h *HashObject) dig(t *Thread, keys []Object, sourceLine int) Object {
-	currentKey := keys[0]
-	stringCurrentKey, ok := currentKey.(*StringObject)
+	typeErr := t.vm.checkArgTypes(keys, sourceLine, classes.StringClass)
 
-	if !ok {
-		return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, currentKey.Class().Name)
+	if typeErr != nil {
+		return typeErr
 	}
 
 	nextKeys := keys[1:]
-	currentValue, ok := h.Pairs[stringCurrentKey.value]
+	currentValue, ok := h.Pairs[keys[0].Value().(string)]
 
 	if !ok {
 		return NULL
