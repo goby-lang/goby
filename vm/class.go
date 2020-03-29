@@ -186,7 +186,7 @@ var builtinModuleCommonClassMethods = []*BuiltinMethodObject{
 			module, ok := args[0].(*RClass)
 
 			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "a module", args[0].Class().Name)
+				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.ModuleClass, args[0].Class().Name)
 			}
 
 			if c == module {
@@ -225,7 +225,7 @@ var builtinModuleCommonClassMethods = []*BuiltinMethodObject{
 			module, ok := args[0].(*RClass)
 
 			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "a module", args[0].Class().Name)
+				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.ModuleClass, args[0].Class().Name)
 			}
 
 			if c == module {
@@ -264,7 +264,7 @@ var builtinModuleCommonClassMethods = []*BuiltinMethodObject{
 			module, ok := args[0].(*RClass)
 
 			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "a module", args[0].Class().Name)
+				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.ModuleClass, args[0].Class().Name)
 			}
 
 			if c == module {
@@ -303,7 +303,7 @@ var builtinModuleCommonClassMethods = []*BuiltinMethodObject{
 			module, ok := args[0].(*RClass)
 
 			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "a module", args[0].Class().Name)
+				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.ModuleClass, args[0].Class().Name)
 			}
 
 			if c == module {
@@ -481,7 +481,7 @@ var builtinModuleCommonClassMethods = []*BuiltinMethodObject{
 			module, ok := args[0].(*RClass)
 
 			if !ok || !module.isModule {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "a module", args[0].Class().Name)
+				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.ModuleClass, args[0].Class().Name)
 			}
 
 			class = receiver.SingletonClass()
@@ -547,7 +547,7 @@ var builtinModuleCommonClassMethods = []*BuiltinMethodObject{
 			module, ok := args[0].(*RClass)
 
 			if !ok || !module.isModule {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "a module", args[0].Class().Name)
+				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.ModuleClass, args[0].Class().Name)
 			}
 
 			switch r := receiver.(type) {
@@ -664,13 +664,13 @@ var builtinModuleCommonClassMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			arg, ok := args[0].(*StringObject)
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, arg.Class().Name)
+			err := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
+
+			if err != nil {
+				return err
 			}
 
-			r := receiver
-			if r.findMethod(arg.value) == nil {
+			if receiver.findMethod(args[0].Value().(string)) == nil {
 				return FALSE
 			}
 			return TRUE
@@ -926,13 +926,13 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 			case 0:
 				os.Exit(0)
 			case 1:
-				exitCode, ok := args[0].(*IntegerObject)
+				err := t.vm.checkArgTypes(args, sourceLine, classes.IntegerClass)
 
-				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+				if err != nil {
+					return err
 				}
 
-				os.Exit(exitCode.value)
+				os.Exit(args[0].Value().(int))
 			default:
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentLess, 1, aLen)
 			}
@@ -1097,15 +1097,16 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 			switch aLen {
 			case 0:
 			case 1:
-				if args[0].Class().Name == classes.BlockClass {
-					blockObj := args[0].(*BlockObject)
-					blockFrame = newNormalCallFrame(blockObj.instructionSet, blockObj.instructionSet.filename, sourceLine)
-					blockFrame.ep = blockObj.ep
-					blockFrame.self = receiver
-					blockFrame.isBlock = true
-				} else {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.BlockClass, args[0].Class().Name)
+				err := t.vm.checkArgTypes(args, sourceLine, classes.BlockClass)
+
+				if err != nil {
+					return err
 				}
+				blockObj := args[0].(*BlockObject)
+				blockFrame = newNormalCallFrame(blockObj.instructionSet, blockObj.instructionSet.filename, sourceLine)
+				blockFrame.ep = blockObj.ep
+				blockFrame.self = receiver
+				blockFrame.isBlock = true
 			default:
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentLess, 1, aLen)
 			}
@@ -1148,13 +1149,13 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			arg, isStr := args[0].(*StringObject)
+			err := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
 
-			if !isStr {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			if err != nil {
+				return err
 			}
 
-			obj, ok := receiver.InstanceVariableGet(arg.value)
+			obj, ok := receiver.InstanceVariableGet(args[0].Value().(string))
 
 			if !ok {
 				return NULL
@@ -1186,14 +1187,15 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 2, len(args))
 			}
 
-			argName, isStr := args[0].(*StringObject)
-			obj := args[1]
+			err := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
 
-			if !isStr {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			if err != nil {
+				return err
 			}
 
-			receiver.InstanceVariableSet(argName.value, obj)
+			obj := args[1]
+
+			receiver.InstanceVariableSet(args[0].Value().(string), obj)
 
 			return obj
 
@@ -1347,22 +1349,19 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 			case 0:
 				return t.vm.initFloatObject(rand.Float64())
 			case 1:
-				_, ok := args[0].(*IntegerObject)
+				err := t.vm.checkArgTypes(args, sourceLine, classes.IntegerClass)
 
-				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+				if err != nil {
+					return err
 				}
+
 				return t.vm.InitIntegerObject(rand.Intn(args[0].Value().(int)))
 			case 2:
-				_, minOk := args[0].(*IntegerObject)
 
-				if !minOk {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
-				}
-				_, maxOk := args[1].(*IntegerObject)
+				err := t.vm.checkArgTypes(args, sourceLine, classes.IntegerClass, classes.IntegerClass)
 
-				if !maxOk {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[1].Class().Name)
+				if err != nil {
+					return err
 				}
 
 				return t.vm.InitIntegerObject(rand.Intn(args[1].Value().(int)-args[0].Value().(int)+1) + args[0].Value().(int))
@@ -1530,13 +1529,13 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentMore, 1, 0)
 			}
 
-			name, ok := args[0].(*StringObject)
+			err := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
 
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			if err != nil {
+				return err
 			}
 
-			t.sendMethod(name.value, len(args)-1, blockFrame, sourceLine)
+			t.sendMethod(args[0].Value().(string), len(args)-1, blockFrame, sourceLine)
 
 			return t.Stack.top().Target
 
