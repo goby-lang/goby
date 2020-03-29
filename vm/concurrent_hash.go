@@ -46,11 +46,10 @@ var builtinConcurrentHashClassMethods = []*BuiltinMethodObject{
 				return t.vm.initConcurrentHashObject(make(map[string]Object))
 			}
 
-			arg := args[0]
-			hashArg, ok := arg.(*HashObject)
+			hashArg, ok := args[0].(*HashObject)
 
 			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.HashClass, arg.Class().Name)
+				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.HashClass, args[0].Class().Name)
 			}
 
 			return t.vm.initConcurrentHashObject(hashArg.Pairs)
@@ -79,16 +78,15 @@ var builtinConcurrentHashInstanceMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			i := args[0]
-			key, ok := i.(*StringObject)
+			err := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
 
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, i.Class().Name)
+			if err != nil {
+				return err
 			}
 
 			h := receiver.(*ConcurrentHashObject)
 
-			value, ok := h.internalMap.Load(key.value)
+			value, ok := h.internalMap.Load(args[0].Value().(string))
 
 			if !ok {
 				return NULL
@@ -117,15 +115,14 @@ var builtinConcurrentHashInstanceMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 2, len(args))
 			}
 
-			k := args[0]
-			key, ok := k.(*StringObject)
+			err := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
 
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, k.Class().Name)
+			if err != nil {
+				return err
 			}
 
 			h := receiver.(*ConcurrentHashObject)
-			h.internalMap.Store(key.value, args[1])
+			h.internalMap.Store(args[0].Value().(string), args[1])
 
 			return args[1]
 
@@ -147,15 +144,13 @@ var builtinConcurrentHashInstanceMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			h := receiver.(*ConcurrentHashObject)
-			d := args[0]
-			deleteKeyObject, ok := d.(*StringObject)
+			err := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
 
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, d.Class().Name)
+			if err != nil {
+				return err
 			}
 
-			h.internalMap.Delete(deleteKeyObject.value)
+			receiver.(*ConcurrentHashObject).internalMap.Delete(args[0].Value().(string))
 
 			return NULL
 
@@ -226,15 +221,13 @@ var builtinConcurrentHashInstanceMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			h := receiver.(*ConcurrentHashObject)
-			i := args[0]
-			input, ok := i.(*StringObject)
+			err := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
 
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, i.Class().Name)
+			if err != nil {
+				return err
 			}
 
-			if _, ok := h.internalMap.Load(input.value); ok {
+			if _, ok := receiver.(*ConcurrentHashObject).internalMap.Load(args[0].Value().(string)); ok {
 				return TRUE
 			}
 
