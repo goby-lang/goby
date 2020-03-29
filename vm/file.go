@@ -49,13 +49,13 @@ var builtinFileClassMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			fn, ok := args[0].(*StringObject)
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			err := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
+
+			if err != nil {
+				return err
 			}
 
-			return t.vm.InitStringObject(filepath.Base(fn.value))
-
+			return t.vm.InitStringObject(filepath.Base(args[0].Value().(string)))
 		},
 	},
 	{
@@ -150,11 +150,13 @@ var builtinFileClassMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			fn, ok := args[0].(*StringObject)
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
+
+			if typeErr != nil {
+				return typeErr
 			}
-			_, err := os.Stat(fn.value)
+
+			_, err := os.Stat(args[0].Value().(string))
 
 			if err != nil {
 				return FALSE
@@ -179,13 +181,13 @@ var builtinFileClassMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			fn, ok := args[0].(*StringObject)
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			err := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
+
+			if err != nil {
+				return err
 			}
 
-			return t.vm.InitStringObject(filepath.Ext(fn.value))
-
+			return t.vm.InitStringObject(filepath.Ext(args[0].Value().(string)))
 		},
 	},
 	{
@@ -301,16 +303,20 @@ var builtinFileClassMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			fn, ok := args[0].(*StringObject)
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
+
+			if typeErr != nil {
+				return typeErr
 			}
 
-			if !filepath.IsAbs(fn.value) {
-				fn.value = filepath.Join(t.vm.fileDir, fn.value)
+			fn := args[0].Value().(string)
+
+			if !filepath.IsAbs(fn) {
+				fn = filepath.Join(t.vm.fileDir, fn)
 			}
 
-			fs, err := os.Stat(fn.value)
+			fs, err := os.Stat(fn)
+
 			if err != nil {
 				return t.vm.InitErrorObject(errors.IOError, sourceLine, err.Error())
 			}
@@ -334,12 +340,13 @@ var builtinFileClassMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			fn, ok := args[0].(*StringObject)
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			err := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
+
+			if err != nil {
+				return err
 			}
 
-			d, f := filepath.Split(fn.value)
+			d, f := filepath.Split(args[0].Value().(string))
 
 			return t.vm.InitArrayObject([]Object{t.vm.InitStringObject(d), t.vm.InitStringObject(f)})
 
