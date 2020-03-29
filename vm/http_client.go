@@ -25,12 +25,13 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
-				u, ok := args[0].(*StringObject)
-				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, u.Class().Name)
+				typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
+
+				if typeErr != nil {
+					return typeErr
 				}
 
-				resp, err := goClient.Get(u.value)
+				resp, err := goClient.Get(args[0].Value().(string))
 				if err != nil {
 					return t.vm.InitErrorObject(errors.HTTPError, sourceLine, couldNotCompleteRequest, err)
 				}
@@ -51,24 +52,15 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 3, len(args))
 				}
 
-				u, ok := args[0].(*StringObject)
-				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, u.Class().Name)
+				typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass, classes.StringClass, classes.StringClass)
+
+				if typeErr != nil {
+					return typeErr
 				}
 
-				contentType, ok := args[1].(*StringObject)
-				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, u.Class().Name)
-				}
+				bodyR := strings.NewReader(args[2].Value().(string))
 
-				body, ok := args[2].(*StringObject)
-				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, u.Class().Name)
-				}
-
-				bodyR := strings.NewReader(body.value)
-
-				resp, err := goClient.Post(u.value, contentType.value, bodyR)
+				resp, err := goClient.Post(args[0].Value().(string), args[1].Value().(string), bodyR)
 				if err != nil {
 					return t.vm.InitErrorObject(errors.HTTPError, sourceLine, "Could not complete request, %s", err)
 				}
@@ -89,12 +81,13 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
-				u, ok := args[0].(*StringObject)
-				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, u.Class().Name)
+				typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
+
+				if typeErr != nil {
+					return typeErr
 				}
 
-				resp, err := goClient.Head(u.value)
+				resp, err := goClient.Head(args[0].Value().(string))
 				if err != nil {
 					return t.vm.InitErrorObject(errors.HTTPError, sourceLine, couldNotCompleteRequest, err)
 				}
@@ -122,8 +115,10 @@ func builtinHTTPClientInstanceMethods() []*BuiltinMethodObject {
 					return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 				}
 
-				if args[0].Class().Name != httpRequestClass.Name {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, "HTTP Response", args[0].Class().Name)
+				typeErr := t.vm.checkArgTypes(args, sourceLine, httpRequestClass.Name)
+
+				if typeErr != nil {
+					return typeErr
 				}
 
 				goReq, err := requestGobyToGo(args[0])
