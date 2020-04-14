@@ -14,6 +14,7 @@ import (
 	"github.com/goby-lang/goby/compiler/bytecode"
 	"github.com/goby-lang/goby/compiler/parser"
 	"github.com/goby-lang/goby/vm/classes"
+	"github.com/goby-lang/goby/vm/errors"
 )
 
 // Version stores current Goby version
@@ -402,4 +403,16 @@ func (vm *VM) testEval(t *testing.T, input, filepath string) Object {
 	vm.ExecInstructions(iss, filepath)
 
 	return vm.mainThread.Stack.top().Target
+}
+
+func (vm *VM) checkArgTypes(args []Object, sourceLine int, types ...string) *Error {
+	for i, expectedType := range types {
+		className := args[i].Class().Name
+
+		if className != expectedType {
+			return vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, expectedType, className)
+		}
+	}
+
+	return nil
 }

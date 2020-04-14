@@ -144,16 +144,13 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			arr := receiver.(*ArrayObject)
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.IntegerClass)
 
-			copiesNumber, ok := args[0].(*IntegerObject)
-
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+			if typeErr != nil {
+				return typeErr
 			}
 
-			return arr.concatenateCopies(t, copiesNumber)
-
+			return receiver.(*ArrayObject).concatenateCopies(t, args[0].Value().(int))
 		},
 	},
 	{
@@ -266,14 +263,14 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentRange, 2, 3, aLen)
 			}
 
-			i := args[0]
-			index, ok := i.(*IntegerObject)
 
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.IntegerClass)
+
+			if typeErr != nil {
+				return typeErr
 			}
 
-			indexValue := index.value
+			indexValue := args[0].Value().(int)
 			arr := receiver.(*ArrayObject)
 
 			// <Three Argument Case>
@@ -282,10 +279,10 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 			if aLen == 3 {
 				// Negative index value too small
 				if indexValue < 0 {
-					if arr.normalizeIndex(index) == -1 {
+					if arr.normalizeIndex(indexValue) == -1 {
 						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.TooSmallIndexValue, indexValue, -arr.Len())
 					}
-					indexValue = arr.normalizeIndex(index)
+					indexValue = arr.normalizeIndex(indexValue)
 				}
 
 				c := args[1]
@@ -604,15 +601,14 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			i := args[0]
-			index, ok := i.(*IntegerObject)
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.IntegerClass)
 
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+			if typeErr != nil {
+				return typeErr
 			}
 
 			arr := receiver.(*ArrayObject)
-			normalizedIndex := arr.normalizeIndex(index)
+			normalizedIndex := arr.normalizeIndex(args[0].Value().(int))
 
 			if normalizedIndex == -1 {
 				return NULL
@@ -847,18 +843,20 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 				return arr.Elements[0]
 			}
 
-			arg, ok := args[0].(*IntegerObject)
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.IntegerClass)
 
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+			if typeErr != nil {
+				return typeErr
 			}
 
-			if arg.value < 1 {
-				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.NegativeValue, arg.value)
+			value := args[0].Value().(int)
+
+			if value < 1 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.NegativeValue, value)
 			}
 
-			if arrLength > arg.value {
-				return t.vm.InitArrayObject(arr.Elements[:arg.value])
+			if arrLength > value {
+				return t.vm.InitArrayObject(arr.Elements[:value])
 			}
 			return arr
 
@@ -977,13 +975,13 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 			if aLen == 0 {
 				sep = ""
 			} else {
-				arg, ok := args[0].(*StringObject)
+				typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
 
-				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+				if typeErr != nil {
+					return typeErr
 				}
 
-				sep = arg.value
+				sep = args[0].Value().(string)
 			}
 
 			arr := receiver.(*ArrayObject)
@@ -1022,18 +1020,22 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 				return arr.Elements[arrLength-1]
 			}
 
-			arg, ok := args[0].(*IntegerObject)
 
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.IntegerClass)
+
+			if typeErr != nil {
+				return typeErr
 			}
 
-			if arg.value < 1 {
-				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.NegativeValue, arg.value)
+			value := args[0].Value().(int)
+
+
+			if value < 1 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.NegativeValue, value)
 			}
 
-			if arrLength > arg.value {
-				return t.vm.InitArrayObject(arr.Elements[arrLength-arg.value : arrLength])
+			if arrLength > value {
+				return t.vm.InitArrayObject(arr.Elements[arrLength-value : arrLength])
 			}
 			return arr
 
@@ -1338,11 +1340,13 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 			if aLen == 0 {
 				rotate = 1
 			} else {
-				arg, ok := args[0].(*IntegerObject)
-				if !ok {
-					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+				typeErr := t.vm.checkArgTypes(args, sourceLine, classes.IntegerClass)
+
+				if typeErr != nil {
+					return typeErr
 				}
-				rotate = arg.value
+
+				rotate = args[0].Value().(int)
 			}
 
 			if rotate < 0 {
@@ -1628,11 +1632,11 @@ func (a *ArrayObject) ToJSON(t *Thread) string {
 }
 
 // concatenateCopies returns a array composed of N copies of the array
-func (a *ArrayObject) concatenateCopies(t *Thread, n *IntegerObject) Object {
+func (a *ArrayObject) concatenateCopies(t *Thread, n int) Object {
 	aLen := len(a.Elements)
-	result := make([]Object, 0, aLen*n.value)
+	result := make([]Object, 0, aLen*n)
 
-	for i := 0; i < n.value; i++ {
+	for i := 0; i < n; i++ {
 		result = append(result, a.Elements...)
 	}
 
@@ -1641,14 +1645,13 @@ func (a *ArrayObject) concatenateCopies(t *Thread, n *IntegerObject) Object {
 
 // recursive indexed access - see ArrayObject#dig documentation.
 func (a *ArrayObject) dig(t *Thread, keys []Object, sourceLine int) Object {
-	currentKey := keys[0]
-	intCurrentKey, ok := currentKey.(*IntegerObject)
+	typeErr := t.vm.checkArgTypes(keys, sourceLine, classes.IntegerClass)
 
-	if !ok {
-		return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, currentKey.Class().Name)
+	if typeErr != nil {
+		return typeErr
 	}
 
-	normalizedIndex := a.normalizeIndex(intCurrentKey)
+	normalizedIndex := a.normalizeIndex(keys[0].Value().(int))
 
 	if normalizedIndex == -1 {
 		return NULL
@@ -1677,16 +1680,17 @@ func (a *ArrayObject) index(t *Thread, args []Object, sourceLine int) Object {
 		return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentRange, 1, 2, aLen)
 	}
 
-	i := args[0]
-	index, ok := i.(*IntegerObject)
-	arrLength := a.Len()
+	typeErr := t.vm.checkArgTypes(args, sourceLine, classes.IntegerClass)
 
-	if !ok {
-		return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+	if typeErr != nil {
+		return typeErr
 	}
 
-	if index.value < 0 && index.value < -arrLength {
-		return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.TooSmallIndexValue, index.value, -arrLength)
+	index := args[0].Value().(int)
+	arrLength := a.Len()
+
+	if index < 0 && index < -arrLength {
+		return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.TooSmallIndexValue, index, -arrLength)
 	}
 
 	/* Validation for the second argument if exists */
@@ -1707,7 +1711,7 @@ func (a *ArrayObject) index(t *Thread, args []Object, sourceLine int) Object {
 		 *  a = [1, 2, 3, 4, 5]
 		 *  a[5, 5] #=> []
 		 */
-		if index.value > 0 && index.value == arrLength {
+		if index > 0 && index == arrLength {
 			return t.vm.InitArrayObject([]Object{})
 		}
 	}
@@ -1781,9 +1785,8 @@ func (a *ArrayObject) Less(i, j int) bool {
 // 1. if the index is between o and the index length, returns the index
 // 2. if it's a negative value (within bounds), returns the normalized positive version
 // 3. if it's out of bounds (either positive or negative), returns -1
-func (a *ArrayObject) normalizeIndex(objectIndex *IntegerObject) int {
+func (a *ArrayObject) normalizeIndex(index int) int {
 	aLength := len(a.Elements)
-	index := objectIndex.value
 
 	// out of bounds
 

@@ -35,13 +35,13 @@ var builtinGoObjectInstanceMethods = []*BuiltinMethodObject{
 		// @return [Object]
 		Name: "go_func",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-			s, ok := args[0].(*StringObject)
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
 
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			if typeErr != nil {
+				return typeErr
 			}
 
-			funcName := s.value
+			funcName := args[0].Value().(string)
 			r := receiver.(*GoObject)
 
 			funcArgs, err := ConvertToGoFuncArgs(args[1:])

@@ -55,13 +55,13 @@ var builtinStringClassMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentMore, 1, len(args))
 			}
 
-			formatObj, ok := args[0].(*StringObject)
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
 
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			if typeErr != nil {
+				return typeErr
 			}
 
-			format := formatObj.value
+			format := args[0].Value().(string)
 			arguments := []interface{}{}
 
 			for _, arg := range args[1:] {
@@ -100,16 +100,13 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 		// @return [String]
 		Name: "+",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
 
-			right, ok := args[0].(*StringObject)
-
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			if typeErr != nil {
+				return typeErr
 			}
 
-			left := receiver.(*StringObject)
-			return t.vm.InitStringObject(left.value + right.value)
-
+			return t.vm.InitStringObject(receiver.Value().(string) + args[0].Value().(string))
 		},
 	},
 	{
@@ -123,20 +120,22 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 		// @return [String]
 		Name: "*",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.IntegerClass)
 
-			right, ok := args[0].(*IntegerObject)
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+			if typeErr != nil {
+				return typeErr
 			}
 
-			if right.value < 0 {
-				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.NegativeSecondValue, right.value)
+			right := args[0].Value().(int)
+
+			if right < 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.NegativeSecondValue, right)
 			}
 
 			var result string
 
 			left := receiver.(*StringObject)
-			for i := 0; i < right.value; i++ {
+			for i := 0; i < right; i++ {
 				result += left.value
 			}
 
@@ -155,14 +154,14 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 		// @return [Boolean]
 		Name: ">",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
 
-			right, ok := args[0].(*StringObject)
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			if typeErr != nil {
+				return typeErr
 			}
 
 			left := receiver.(*StringObject)
-			if left.value > right.value {
+			if left.value > args[0].Value().(string) {
 				return TRUE
 			}
 
@@ -181,15 +180,14 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 		// @return [Boolean]
 		Name: "<",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
 
-			right, ok := args[0].(*StringObject)
-
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			if typeErr != nil {
+				return typeErr
 			}
 
 			left := receiver.(*StringObject)
-			if left.value < right.value {
+			if left.value < args[0].Value().(string) {
 				return TRUE
 			}
 
@@ -212,18 +210,18 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 		// @return [Integer]
 		Name: "<=>",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
 
-			right, ok := args[0].(*StringObject)
-
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			if typeErr != nil {
+				return typeErr
 			}
 
+			right := args[0].Value().(string)
 			left := receiver.(*StringObject)
 			switch {
-			case left.value < right.value:
+			case left.value < right:
 				return t.vm.InitIntegerObject(-1)
-			case left.value > right.value:
+			case left.value > right:
 				return t.vm.InitIntegerObject(1)
 			default:
 				return t.vm.InitIntegerObject(0)
@@ -355,27 +353,21 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 			if len(args) != 2 {
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 2, len(args))
 			}
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.IntegerClass, classes.StringClass)
 
-			index, ok := args[0].(*IntegerObject)
-
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+			if typeErr != nil {
+				return typeErr
 			}
 
-			indexValue := index.value
+			indexValue := args[0].Value().(int)
+			replaceStrValue := args[1].Value().(string)
+
 			str := receiver.(*StringObject).value
 			strLength := utf8.RuneCountInString(str)
 
 			if strLength < indexValue {
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.IndexOutOfRange, strconv.Itoa(indexValue))
 			}
-
-			replaceStr, ok := args[1].(*StringObject)
-
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[1].Class().Name)
-			}
-			replaceStrValue := replaceStr.value
 
 			// Negative Index Case
 			if indexValue < 0 {
@@ -456,13 +448,14 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			concatStr, ok := args[0].(*StringObject)
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
+
+			if typeErr != nil {
+				return typeErr
 			}
 
 			str := receiver.(*StringObject).value
-			return t.vm.InitStringObject(str + concatStr.value)
+			return t.vm.InitStringObject(str + args[0].Value().(string))
 
 		},
 	},
@@ -505,15 +498,14 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			deleteStr, ok := args[0].(*StringObject)
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
 
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			if typeErr != nil {
+				return typeErr
 			}
 
 			str := receiver.(*StringObject).value
-			return t.vm.InitStringObject(strings.Replace(str, deleteStr.value, "", -1))
-
+			return t.vm.InitStringObject(strings.Replace(str, args[0].Value().(string), "", -1))
 		},
 	},
 	{
@@ -716,13 +708,13 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			compareStr, ok := args[0].(*StringObject)
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
 
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			if typeErr != nil {
+				return typeErr
 			}
 
-			compareStrValue := compareStr.value
+			compareStrValue := args[0].Value().(string)
 			compareStrLength := utf8.RuneCountInString(compareStrValue)
 
 			str := receiver.(*StringObject).value
@@ -785,13 +777,14 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			includeStr, ok := args[0].(*StringObject)
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
+
+			if typeErr != nil {
+				return typeErr
 			}
 
 			str := receiver.(*StringObject).value
-			if strings.Contains(str, includeStr.value) {
+			if strings.Contains(str, args[0].Value().(string)) {
 				return TRUE
 			}
 
@@ -1339,13 +1332,14 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			separator, ok := args[0].(*StringObject)
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
+
+			if typeErr != nil {
+				return typeErr
 			}
 
 			str := receiver.(*StringObject).value
-			arr := strings.Split(str, separator.value)
+			arr := strings.Split(str, args[0].Value().(string))
 
 			var elements []Object
 			for i := 0; i < len(arr); i++ {
@@ -1374,13 +1368,13 @@ var builtinStringInstanceMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			compareStr, ok := args[0].(*StringObject)
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
 
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			if typeErr != nil {
+				return typeErr
 			}
 
-			compareStrValue := compareStr.value
+			compareStrValue := args[0].Value().(string)
 			compareStrLength := utf8.RuneCountInString(compareStrValue)
 
 			str := receiver.(*StringObject).value

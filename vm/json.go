@@ -18,16 +18,16 @@ var builtinJSONClassMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			j, ok := args[0].(*StringObject)
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
 
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			if typeErr != nil {
+				return typeErr
 			}
+
+			jsonString := args[0].Value().(string)
 
 			var obj jsonObj
 			var objs []jsonObj
-
-			jsonString := j.value
 
 			err := json.Unmarshal([]byte(jsonString), &obj)
 
@@ -58,16 +58,16 @@ var builtinJSONClassMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
 
-			j, ok := args[0].(*StringObject)
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
 
-			if !ok {
-				return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.StringClass, args[0].Class().Name)
+			if typeErr != nil {
+				return typeErr
 			}
+
+			jsonString := args[0].Value().(string)
 
 			var obj jsonObj
 			var objs []jsonObj
-
-			jsonString := j.value
 
 			err := json.Unmarshal([]byte(jsonString), &obj)
 
