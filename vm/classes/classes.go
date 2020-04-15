@@ -15,7 +15,6 @@ const (
 	ChannelClass   = "Channel"
 	RangeClass     = "Range"
 	MethodClass    = "Method"
-	PluginClass    = "Plugin"
 	GoObjectClass  = "GoObject"
 	FileClass      = "File"
 	RegexpClass    = "Regexp"
