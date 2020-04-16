@@ -590,6 +590,68 @@ end
 
 // Method tests
 
+func TestDefineMethod(t *testing.T) {
+		tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		class C
+ 		  ["hi", "hola"].each do |method_name|
+				define_method method_name do
+				end
+			end
+		end
+		C.new.methods.first(2) == ["hi", "hola"]
+		`, true},
+		{`
+		class C
+		  define_method :ten do
+				10
+		  end
+		end
+		C.new.ten
+		`, 10},
+		{`
+		class C
+		  define_method :plus_1 do |num|
+				num + 1
+		  end
+		end
+		C.new.plus_1(1)
+		`, 2},
+				{`
+		Object.define_method :plus_1 do |num|
+			num + 1
+		end
+		plus_1(1)
+		`, 2},
+	}
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+
+func TestDefineMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`Object.define_method`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+		{`Object.define_method :foo`, "ArgumentError: can't define a method without a block", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
 func TestMethodsMethod(t *testing.T) {
 	tests := []struct {
 		input    string
