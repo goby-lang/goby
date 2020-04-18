@@ -323,9 +323,20 @@ func init() {
 			case *RClass:
 				self.Methods.set(methodName, method)
 			default:
-				self.Class().Methods.set(methodName, method)
-			}
+				if self.Class().Name == classes.ObjectClass {
+					self.Class().Methods.set(methodName, method)
+				} else {
+					singletonClass := v.SingletonClass()
 
+					if singletonClass == nil {
+						singletonClass = t.vm.createRClass(fmt.Sprintf("#<Class:#<%s:%d>>", v.Class().Name, v.ID()))
+						singletonClass.isSingleton = true
+						v.SetSingletonClass(singletonClass)
+					}
+
+					singletonClass.Methods.set(methodName, method)
+				}
+			}
 		},
 		bytecode.DefSingletonMethod: func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			argCount := args[0].(int)

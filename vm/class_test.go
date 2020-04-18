@@ -1798,15 +1798,25 @@ func TestInstanceEvalMethod(t *testing.T) {
 		  @secret
 		end
 `, 99},
+    // below 2 cases test 'def' statement with instance_eval
 		{`
 		string = "String"
 		string.instance_eval do
-		  def new_method
-			self.reverse
+		  def reverse
+				self
 		  end
 		end
-		string.new_method
-`, "gnirtS"},
+		string.reverse
+`, "String"},
+		{`
+		string = "String"
+		string.instance_eval do
+		  def reverse
+				self
+		  end
+		end
+		"Foo".reverse
+`, "ooF"},
 		{`"a".instance_eval`, "a"},
 		{`"a".instance_eval do end`, "a"},
 		{`
