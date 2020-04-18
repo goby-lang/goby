@@ -591,7 +591,7 @@ end
 // Method tests
 
 func TestDefineMethod(t *testing.T) {
-		tests := []struct {
+	tests := []struct {
 		input    string
 		expected interface{}
 	}{
@@ -620,7 +620,7 @@ func TestDefineMethod(t *testing.T) {
 		end
 		C.new.plus_1(1)
 		`, 2},
-				{`
+		{`
 		Object.define_method :plus_1 do |num|
 			num + 1
 		end
@@ -636,11 +636,67 @@ func TestDefineMethod(t *testing.T) {
 	}
 }
 
-
 func TestDefineMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`Object.define_method`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
 		{`Object.define_method :foo`, "ArgumentError: can't define a method without a block", 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestDefineSingletonMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		class C
+		end
+		
+		C.define_singleton_method :ten do
+			10
+        end
+		C.ten
+		`, 10},
+		{`
+		s1 = "String"
+		s2 = s1.dup
+		s1.define_singleton_method :ten do
+			10
+		end
+		s2.define_singleton_method :ten do
+			20
+		end
+		s1.ten
+		`, 10},
+		{`
+		class C; end
+		C.define_singleton_method :plus_1 do |num|
+			num + 1
+		end
+		C.plus_1(1)
+		`, 2},
+	}
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestDefineSingletonMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`Object.define_singleton_method`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+		{`Object.define_singleton_method :foo`, "ArgumentError: can't define a method without a block", 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1798,7 +1854,7 @@ func TestInstanceEvalMethod(t *testing.T) {
 		  @secret
 		end
 `, 99},
-    // below 2 cases test 'def' statement with instance_eval
+		// below 2 cases test 'def' statement with instance_eval
 		{`
 		string = "String"
 		string.instance_eval do

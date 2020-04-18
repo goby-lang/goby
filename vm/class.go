@@ -727,6 +727,7 @@ var builtinModuleCommonClassMethods = []*BuiltinMethodObject{
 		},
 	},
 	{
+		// Defines an instance method in the receiver.
 		Name: "define_method",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 			if len(args) != 1 {
@@ -890,6 +891,31 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 			return receiver.Class()
 
+		},
+	},
+	{
+		// Defines a singleton method in the receiver.
+		Name: "define_singleton_method",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 1 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
+			}
+
+			err := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
+
+			if err != nil {
+				return err
+			}
+
+			if blockFrame == nil {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "can't define a method without a block")
+			}
+
+			method := &MethodObject{Name: args[0].Value().(string), argc: len(blockFrame.locals), instructionSet: blockFrame.instructionSet, BaseObj: NewBaseObject(t.vm.TopLevelClass(classes.MethodClass))}
+
+			t.vm.defineSingletonMethodOn(receiver, method)
+
+			return args[0]
 		},
 	},
 	{
