@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/goby-lang/goby/vm"
+	"regexp"
 )
 
 type errorTestCase struct {
@@ -311,29 +312,194 @@ func TestRipperInstruction(t *testing.T) {
 def foo
   10
 end
-  ").to_s`, `[{ arg_types: { names: ["i"], types: [0] }, instructions: [{ action: "leave", line: 0, params: [], source_line: 2 }], name: "0", type: "Block" }, { arg_types: { names: ["i"], types: [0] }, instructions: [{ action: "leave", line: 0, params: [], source_line: 2 }], name: "0", type: "Block" }, { arg_set: { names: [], types: [] }, instructions: [{ action: "putobject", line: 0, params: ["10"], source_line: 2 }, { action: "send", line: 1, params: ["times", "0", "block:0", "&{[] []}"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }, { arg_set: { names: [], types: [] }, instructions: [{ action: "putobject", line: 0, params: ["10"], source_line: 2 }, { action: "send", line: 1, params: ["times", "0", "block:0", "&{[] []}"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }]`},
+  ").to_s`, `
+[
+  { 
+    arg_types: { names: [], types: [] }, 
+    instructions: [
+      { action: "putobject", line: 0, params: ["10"], source_line: 3 }, 
+      { action: "leave", line: 1, params: [], source_line: 2 }
+    ], 
+    name: "foo", 
+    type: "Def" 
+  }, 
+  {
+     arg_types: { names: [], types: [] }, 
+     instructions: [
+       { action: "putobject", line: 0, params: ["10"], source_line: 3 }, 
+       { action: "leave", line: 1, params: [], source_line: 2 }
+     ], 
+     name: "foo", 
+     type: "Def" 
+  }, 
+  { 
+     instructions: [
+       { action: "putself", line: 0, params: [], source_line: 2 }, 
+       { action: "putstring", line: 1, params: ["foo"], source_line: 2 }, 
+       { action: "def_method", line: 2, params: ["0"], source_line: 2 }, 
+       { action: "leave", line: 3, params: [], source_line: 2 }
+     ], 
+     name: "ProgramStart", 
+     type: "ProgramStart" 
+  }, 
+  { 
+    instructions: [
+      { action: "putself", line: 0, params: [], source_line: 2 }, 
+      { action: "putstring", line: 1, params: ["foo"], source_line: 2 }, 
+      { action: "def_method", line: 2, params: ["0"], source_line: 2 }, 
+      { action: "leave", line: 3, params: [], source_line: 2 }
+    ], 
+    name: "ProgramStart", 
+    type: "ProgramStart" 
+  }
+]
+`,
+	},
 		// Single class definition
 		{`require 'ripper'; Ripper.instruction("
     class Foo
 		end
-		 ").to_s`, `[{ instructions: [{ action: "leave", line: 0, params: [], source_line: 2 }], name: "Foo", type: "DefClass" }, { instructions: [{ action: "leave", line: 0, params: [], source_line: 2 }], name: "Foo", type: "DefClass" }, { instructions: [{ action: "putself", line: 0, params: [], source_line: 2 }, { action: "def_class", line: 1, params: ["class:Foo"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }, { instructions: [{ action: "putself", line: 0, params: [], source_line: 2 }, { action: "def_class", line: 1, params: ["class:Foo"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }]`},
+		 ").to_s`, `
+[
+  { 
+     instructions: [
+       { action: "leave", line: 0, params: [], source_line: 2 }
+     ], 
+     name: "Foo", 
+     type: "DefClass" 
+  }, 
+  { 
+     instructions: [
+       { action: "leave", line: 0, params: [], source_line: 2 }
+     ], 
+     name: "Foo", 
+     type: "DefClass" 
+  }, 
+  { 
+     instructions: [
+       { action: "putself", line: 0, params: [], source_line: 2 }, 
+       { action: "def_class", line: 1, params: ["class:Foo"], source_line: 2 }, 
+       { action: "pop", line: 2, params: [], source_line: 2 }, 
+       { action: "leave", line: 3, params: [], source_line: 2 }
+     ], name: "ProgramStart", type: "ProgramStart" 
+  },
+  { 
+     instructions: [
+       { action: "putself", line: 0, params: [], source_line: 2 }, 
+       { action: "def_class", line: 1, params: ["class:Foo"], source_line: 2 }, 
+       { action: "pop", line: 2, params: [], source_line: 2 }, 
+       { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" 
+  }
+]
+`},
 		// Single method call
 		{`require 'ripper'; Ripper.instruction("
     Array.methods
-		 ").to_s`, `[{ arg_set: { names: [], types: [] }, instructions: [{ action: "getconstant", line: 0, params: ["Array", "false"], source_line: 2 }, { action: "send", line: 1, params: ["methods", "0", "", "&{[] []}"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }, { arg_set: { names: [], types: [] }, instructions: [{ action: "getconstant", line: 0, params: ["Array", "false"], source_line: 2 }, { action: "send", line: 1, params: ["methods", "0", "", "&{[] []}"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }]`},
+		 ").to_s`, `
+[
+  { 
+    arg_set: { names: [], types: [] }, 
+    instructions: [
+      { action: "getconstant", line: 0, params: ["Array", "false"], source_line: 2 }, 
+      { action: "send", line: 1, params: ["methods", "0", "", "&{[] []}"], source_line: 2 }, 
+      { action: "pop", line: 2, params: [], source_line: 2 }, 
+      { action: "leave", line: 3, params: [], source_line: 2 }
+    ], 
+    name: "ProgramStart", 
+    type: "ProgramStart" 
+  }, 
+  { 
+    arg_set: { names: [], types: [] }, 
+    instructions: [
+      { action: "getconstant", line: 0, params: ["Array", "false"], source_line: 2 }, 
+      { action: "send", line: 1, params: ["methods", "0", "", "&{[] []}"], source_line: 2 }, 
+      { action: "pop", line: 2, params: [], source_line: 2 }, 
+      { action: "leave", line: 3, params: [], source_line: 2 }
+    ],
+    name: "ProgramStart", 
+    type: "ProgramStart" 
+  }
+]`},
 		// Single method call with a block
 		{`require 'ripper'; Ripper.instruction("
     10.times do |i| end
-		 ").to_s`, `[{ instructions: [{ action: "leave", line: 0, params: [], source_line: 2 }], name: "0", type: "Block" }, { instructions: [{ action: "leave", line: 0, params: [], source_line: 2 }], name: "0", type: "Block" }, { arg_set: { names: [], types: [] }, instructions: [{ action: "putobject", line: 0, params: ["10"], source_line: 2 }, { action: "send", line: 1, params: ["times", "0", "block:0", "&{[] []}"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }, { arg_set: { names: [], types: [] }, instructions: [{ action: "putobject", line: 0, params: ["10"], source_line: 2 }, { action: "send", line: 1, params: ["times", "0", "block:0", "&{[] []}"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }]`},
+		 ").to_s`, `
+[
+  { 
+		arg_types:{names:["i"],types:[0]},
+    instructions: [
+      { action: "leave", line: 0, params: [], source_line: 2 }
+    ], 
+    name: "0", 
+    type: "Block" 
+  }, 
+  {
+		arg_types:{names:["i"],types:[0]},
+		instructions: [
+		 { action: "leave", line: 0, params: [], source_line: 2 }
+		], 
+		name: "0", 
+		type: "Block" 
+  }, 
+  { 
+     arg_set: { names: [], types: [] }, 
+     instructions: [
+       { action: "putobject", line: 0, params: ["10"], source_line: 2 }, 
+       { action: "send", line: 1, params: ["times", "0", "block:0", "&{[] []}"], source_line: 2 }, 
+       { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }
+     ],
+     name: "ProgramStart", 
+     type: "ProgramStart" 
+  }, 
+  { 
+    arg_set: { names: [], types: [] }, 
+    instructions: [
+      { action: "putobject", line: 0, params: ["10"], source_line: 2 }, 
+      { action: "send", line: 1, params: ["times", "0", "block:0", "&{[] []}"], source_line: 2 }, 
+      { action: "pop", line: 2, params: [], source_line: 2 }, 
+      { action: "leave", line: 3, params: [], source_line: 2 }
+    ], 
+    name: "ProgramStart", 
+    type: "ProgramStart" 
+  }
+]`},
 		// Single module definition
 		{`require 'ripper'; Ripper.instruction("
 		module Bar
     end
-		 ").to_s`, `[{ instructions: [{ action: "leave", line: 0, params: [], source_line: 2 }], name: "Bar", type: "DefClass" }, { instructions: [{ action: "leave", line: 0, params: [], source_line: 2 }], name: "Bar", type: "DefClass" }, { instructions: [{ action: "putself", line: 0, params: [], source_line: 2 }, { action: "def_class", line: 1, params: ["module:Bar"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }, { instructions: [{ action: "putself", line: 0, params: [], source_line: 2 }, { action: "def_class", line: 1, params: ["module:Bar"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }]`},
+		 ").to_s`, `
+[
+  { instructions: [{ action: "leave", line: 0, params: [], source_line: 2 }], name: "Bar", type: "DefClass" }, 
+  { instructions: [{ action: "leave", line: 0, params: [], source_line: 2 }], name: "Bar", type: "DefClass" }, 
+  { 
+    instructions: [
+      { action: "putself", line: 0, params: [], source_line: 2 }, 
+      { action: "def_class", line: 1, params: ["module:Bar"], source_line: 2 }, 
+      { action: "pop", line: 2, params: [], source_line: 2 }, 
+      { action: "leave", line: 3, params: [], source_line: 2 }
+    ], 
+    name: "ProgramStart", 
+    type: "ProgramStart" 
+  },
+  { 
+    instructions: [
+      { action: "putself", line: 0, params: [], source_line: 2 }, 
+      { action: "def_class", line: 1, params: ["module:Bar"], source_line: 2 }, 
+      { action: "pop", line: 2, params: [], source_line: 2 }, 
+      { action: "leave", line: 3, params: [], source_line: 2 }
+    ], 
+    name: "ProgramStart", 
+    type: "ProgramStart" 
+  }
+]`},
 		// Single assignment
 		{`require 'ripper'; Ripper.instruction("
 		 a = 1
-		 ").to_s`, `[{ instructions: [{ action: "putobject", line: 0, params: ["1"], source_line: 2 }, { action: "setlocal", line: 1, params: ["0", "0"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }, { instructions: [{ action: "putobject", line: 0, params: ["1"], source_line: 2 }, { action: "setlocal", line: 1, params: ["0", "0"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }]`},
+		 ").to_s`, `
+[
+  { instructions: [{ action: "putobject", line: 0, params: ["1"], source_line: 2 }, { action: "setlocal", line: 1, params: ["0", "0"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }, 
+  { instructions: [{ action: "putobject", line: 0, params: ["1"], source_line: 2 }, { action: "setlocal", line: 1, params: ["0", "0"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "ProgramStart", type: "ProgramStart" }
+]`},
 		// More complicated cases
 		{`require 'ripper'
 	Ripper.instruction("
@@ -345,7 +511,106 @@ end
 	class Foo < Bar; end
 	class FooBar < Foo; end
 	FooBar.foo
-  ").to_s`, `[{ arg_types: { names: [], types: [] }, instructions: [{ action: "putobject", line: 0, params: ["10"], source_line: 4 }, { action: "leave", line: 1, params: [], source_line: 3 }], name: "foo", type: "Def" }, { arg_types: { names: [], types: [] }, instructions: [{ action: "putobject", line: 0, params: ["10"], source_line: 4 }, { action: "leave", line: 1, params: [], source_line: 3 }], name: "foo", type: "Def" }, { instructions: [{ action: "putself", line: 0, params: [], source_line: 3 }, { action: "putstring", line: 1, params: ["foo"], source_line: 3 }, { action: "def_singleton_method", line: 2, params: ["0"], source_line: 3 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "Bar", type: "DefClass" }, { instructions: [{ action: "putself", line: 0, params: [], source_line: 3 }, { action: "putstring", line: 1, params: ["foo"], source_line: 3 }, { action: "def_singleton_method", line: 2, params: ["0"], source_line: 3 }, { action: "leave", line: 3, params: [], source_line: 2 }], name: "Bar", type: "DefClass" }, { instructions: [{ action: "leave", line: 0, params: [], source_line: 7 }], name: "Foo", type: "DefClass" }, { instructions: [{ action: "leave", line: 0, params: [], source_line: 7 }], name: "Foo", type: "DefClass" }, { instructions: [{ action: "leave", line: 0, params: [], source_line: 8 }], name: "FooBar", type: "DefClass" }, { instructions: [{ action: "leave", line: 0, params: [], source_line: 8 }], name: "FooBar", type: "DefClass" }, { arg_set: { names: [], types: [] }, instructions: [{ action: "putself", line: 0, params: [], source_line: 2 }, { action: "def_class", line: 1, params: ["class:Bar"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "putself", line: 3, params: [], source_line: 7 }, { action: "getconstant", line: 4, params: ["Bar", "false"], source_line: 7 }, { action: "def_class", line: 5, params: ["class:Foo", "Bar"], source_line: 7 }, { action: "pop", line: 6, params: [], source_line: 7 }, { action: "pop", line: 7, params: [], source_line: 7 }, { action: "putself", line: 8, params: [], source_line: 8 }, { action: "getconstant", line: 9, params: ["Foo", "false"], source_line: 8 }, { action: "def_class", line: 10, params: ["class:FooBar", "Foo"], source_line: 8 }, { action: "pop", line: 11, params: [], source_line: 8 }, { action: "pop", line: 12, params: [], source_line: 8 }, { action: "getconstant", line: 13, params: ["FooBar", "false"], source_line: 9 }, { action: "send", line: 14, params: ["foo", "0", "", "&{[] []}"], source_line: 9 }, { action: "pop", line: 15, params: [], source_line: 9 }, { action: "leave", line: 16, params: [], source_line: 9 }], name: "ProgramStart", type: "ProgramStart" }, { arg_set: { names: [], types: [] }, instructions: [{ action: "putself", line: 0, params: [], source_line: 2 }, { action: "def_class", line: 1, params: ["class:Bar"], source_line: 2 }, { action: "pop", line: 2, params: [], source_line: 2 }, { action: "putself", line: 3, params: [], source_line: 7 }, { action: "getconstant", line: 4, params: ["Bar", "false"], source_line: 7 }, { action: "def_class", line: 5, params: ["class:Foo", "Bar"], source_line: 7 }, { action: "pop", line: 6, params: [], source_line: 7 }, { action: "pop", line: 7, params: [], source_line: 7 }, { action: "putself", line: 8, params: [], source_line: 8 }, { action: "getconstant", line: 9, params: ["Foo", "false"], source_line: 8 }, { action: "def_class", line: 10, params: ["class:FooBar", "Foo"], source_line: 8 }, { action: "pop", line: 11, params: [], source_line: 8 }, { action: "pop", line: 12, params: [], source_line: 8 }, { action: "getconstant", line: 13, params: ["FooBar", "false"], source_line: 9 }, { action: "send", line: 14, params: ["foo", "0", "", "&{[] []}"], source_line: 9 }, { action: "pop", line: 15, params: [], source_line: 9 }, { action: "leave", line: 16, params: [], source_line: 9 }], name: "ProgramStart", type: "ProgramStart" }]`},
+  ").to_s`, `
+[
+  { 
+    arg_types: { names: [], types: [] }, 
+    instructions: [
+      { action: "putobject", line: 0, params: ["10"], source_line: 4 }, 
+      { action: "leave", line: 1, params: [], source_line: 3 }
+    ], 
+    name: "foo", 
+    type: "Def" 
+  }, 
+  { 
+    arg_types: { names: [], types: [] }, 
+    instructions: [
+      { action: "putobject", line: 0, params: ["10"], source_line: 4 }, 
+      { action: "leave", line: 1, params: [], source_line: 3 }
+    ], 
+    name: "foo", 
+    type: "Def" 
+  }, 
+  { 
+    instructions: [
+      { action: "putself", line: 0, params: [], source_line: 3 }, 
+      { action: "putstring", line: 1, params: ["foo"], source_line: 3 }, 
+      { action: "def_singleton_method", line: 2, params: ["0"], source_line: 3 }, 
+      { action: "leave", line: 3, params: [], source_line: 2 }
+    ], 
+    name: "Bar", 
+    type: "DefClass" 
+  }, 
+  { 
+    instructions: [
+      { action: "putself", line: 0, params: [], source_line: 3 }, 
+      { action: "putstring", line: 1, params: ["foo"], source_line: 3 }, 
+      { action: "def_singleton_method", line: 2, params: ["0"], source_line: 3 }, 
+      { action: "leave", line: 3, params: [], source_line: 2 }
+    ], 
+    name: "Bar", 
+    type: "DefClass" 
+  }, 
+  { 
+    instructions: [{ action: "leave", line: 0, params: [], source_line: 7 }], name: "Foo", type: "DefClass" 
+  }, 
+  { 
+    instructions: [{ action: "leave", line: 0, params: [], source_line: 7 }], name: "Foo", type: "DefClass" 
+  }, 
+  { 
+    instructions: [{ action: "leave", line: 0, params: [], source_line: 8 }], name: "FooBar", type: "DefClass" 
+  }, 
+  { 
+    instructions: [{ action: "leave", line: 0, params: [], source_line: 8 }], name: "FooBar", type: "DefClass" 
+  }, 
+  { 
+    arg_set: { names: [], types: [] }, 
+    instructions: [
+      { action: "putself", line: 0, params: [], source_line: 2 }, 
+      { action: "def_class", line: 1, params: ["class:Bar"], source_line: 2 }, 
+      { action: "pop", line: 2, params: [], source_line: 2 }, 
+      { action: "putself", line: 3, params: [], source_line: 7 }, 
+      { action: "getconstant", line: 4, params: ["Bar", "false"], source_line: 7 }, 
+      { action: "def_class", line: 5, params: ["class:Foo", "Bar"], source_line: 7 }, 
+      { action: "pop", line: 6, params: [], source_line: 7 }, 
+      { action: "pop", line: 7, params: [], source_line: 7 }, 
+      { action: "putself", line: 8, params: [], source_line: 8 }, 
+      { action: "getconstant", line: 9, params: ["Foo", "false"], source_line: 8 }, 
+      { action: "def_class", line: 10, params: ["class:FooBar", "Foo"], source_line: 8 }, 
+      { action: "pop", line: 11, params: [], source_line: 8 }, { action: "pop", line: 12, params: [], source_line: 8 }, 
+      { action: "getconstant", line: 13, params: ["FooBar", "false"], source_line: 9 }, 
+      { action: "send", line: 14, params: ["foo", "0", "", "&{[] []}"], source_line: 9 }, 
+      { action: "pop", line: 15, params: [], source_line: 9 }, 
+      { action: "leave", line: 16, params: [], source_line: 9 }
+    ], 
+    name: "ProgramStart", 
+    type: "ProgramStart" 
+  }, 
+  { 
+    arg_set: { names: [], types: [] }, 
+    instructions: [
+      { action: "putself", line: 0, params: [], source_line: 2 }, 
+      { action: "def_class", line: 1, params: ["class:Bar"], source_line: 2 }, 
+      { action: "pop", line: 2, params: [], source_line: 2 }, 
+      { action: "putself", line: 3, params: [], source_line: 7 }, 
+      { action: "getconstant", line: 4, params: ["Bar", "false"], source_line: 7 }, 
+      { action: "def_class", line: 5, params: ["class:Foo", "Bar"], source_line: 7 }, 
+      { action: "pop", line: 6, params: [], source_line: 7 }, 
+      { action: "pop", line: 7, params: [], source_line: 7 }, 
+      { action: "putself", line: 8, params: [], source_line: 8 }, 
+      { action: "getconstant", line: 9, params: ["Foo", "false"], source_line: 8 }, 
+      { action: "def_class", line: 10, params: ["class:FooBar", "Foo"], source_line: 8 }, 
+      { action: "pop", line: 11, params: [], source_line: 8 }, 
+      { action: "pop", line: 12, params: [], source_line: 8 }, 
+      { action: "getconstant", line: 13, params: ["FooBar", "false"], source_line: 9 }, 
+      { action: "send", line: 14, params: ["foo", "0", "", "&{[] []}"], source_line: 9 }, 
+      { action: "pop", line: 15, params: [], source_line: 9 }, 
+	  { action: "leave", line: 16, params: [], source_line: 9 }
+    ],
+	name: "ProgramStart", 
+	type: "ProgramStart" 
+}
+]`},
 		{`require 'ripper'
 Ripper.instruction("
 	def foo(x)
@@ -380,7 +645,979 @@ Ripper.instruction("
 	  end
 	end
 	Baz::Bar.new.bar + a
-").to_s`, `[{ arg_set: { names: [], types: [] }, arg_types: { names: ["x"], types: [0] }, instructions: [{ action: "putself", line: 0, params: [], source_line: 3 }, { action: "getlocal", line: 1, params: ["0", "0"], source_line: 3 }, { action: "putobject", line: 2, params: ["10"], source_line: 3 }, { action: "send", line: 3, params: ["+", "1", "", "&{[] []}"], source_line: 3 }, { action: "invokeblock", line: 4, params: ["1"], source_line: 3 }, { action: "leave", line: 5, params: [], source_line: 2 }], name: "foo", type: "Def" }, { arg_set: { names: [], types: [] }, arg_types: { names: ["x"], types: [0] }, instructions: [{ action: "putself", line: 0, params: [], source_line: 3 }, { action: "getlocal", line: 1, params: ["0", "0"], source_line: 3 }, { action: "putobject", line: 2, params: ["10"], source_line: 3 }, { action: "send", line: 3, params: ["+", "1", "", "&{[] []}"], source_line: 3 }, { action: "invokeblock", line: 4, params: ["1"], source_line: 3 }, { action: "leave", line: 5, params: [], source_line: 2 }], name: "foo", type: "Def" }, { instructions: [{ action: "putself", line: 0, params: [], source_line: 7 }, { action: "getlocal", line: 1, params: ["0", "0"], source_line: 7 }, { action: "invokeblock", line: 2, params: ["1"], source_line: 7 }, { action: "leave", line: 3, params: [], source_line: 6 }], name: "0", type: "Block" }, { instructions: [{ action: "putself", line: 0, params: [], source_line: 7 }, { action: "getlocal", line: 1, params: ["0", "0"], source_line: 7 }, { action: "invokeblock", line: 2, params: ["1"], source_line: 7 }, { action: "leave", line: 3, params: [], source_line: 6 }], name: "0", type: "Block" }, { arg_set: { names: ["y"], types: [0] }, arg_types: { names: ["y"], types: [0] }, instructions: [{ action: "putself", line: 0, params: [], source_line: 6 }, { action: "getlocal", line: 1, params: ["0", "0"], source_line: 6 }, { action: "send", line: 2, params: ["foo", "1", "block:0", "&{[y] [0]}"], source_line: 6 }, { action: "leave", line: 3, params: [], source_line: 5 }], name: "bar", type: "Def" }, { arg_set: { names: ["y"], types: [0] }, arg_types: { names: ["y"], types: [0] }, instructions: [{ action: "putself", line: 0, params: [], source_line: 6 }, { action: "getlocal", line: 1, params: ["0", "0"], source_line: 6 }, { action: "send", line: 2, params: ["foo", "1", "block:0", "&{[y] [0]}"], source_line: 6 }, { action: "leave", line: 3, params: [], source_line: 5 }], name: "bar", type: "Def" }, { instructions: [{ action: "putself", line: 0, params: [], source_line: 12 }, { action: "getlocal", line: 1, params: ["0", "0"], source_line: 12 }, { action: "invokeblock", line: 2, params: ["1"], source_line: 12 }, { action: "leave", line: 3, params: [], source_line: 11 }], name: "1", type: "Block" }, { instructions: [{ action: "putself", line: 0, params: [], source_line: 12 }, { action: "getlocal", line: 1, params: ["0", "0"], source_line: 12 }, { action: "invokeblock", line: 2, params: ["1"], source_line: 12 }, { action: "leave", line: 3, params: [], source_line: 11 }], name: "1", type: "Block" }, { arg_set: { names: [""], types: [0] }, arg_types: { names: ["z"], types: [0] }, instructions: [{ action: "putself", line: 0, params: [], source_line: 11 }, { action: "getlocal", line: 1, params: ["0", "0"], source_line: 11 }, { action: "putobject", line: 2, params: ["100"], source_line: 11 }, { action: "send", line: 3, params: ["+", "1", "", "&{[] []}"], source_line: 11 }, { action: "send", line: 4, params: ["bar", "1", "block:1", "&{[] [0]}"], source_line: 11 }, { action: "leave", line: 5, params: [], source_line: 10 }], name: "baz", type: "Def" }, { arg_set: { names: [""], types: [0] }, arg_types: { names: ["z"], types: [0] }, instructions: [{ action: "putself", line: 0, params: [], source_line: 11 }, { action: "getlocal", line: 1, params: ["0", "0"], source_line: 11 }, { action: "putobject", line: 2, params: ["100"], source_line: 11 }, { action: "send", line: 3, params: ["+", "1", "", "&{[] []}"], source_line: 11 }, { action: "send", line: 4, params: ["bar", "1", "block:1", "&{[] [0]}"], source_line: 11 }, { action: "leave", line: 5, params: [], source_line: 10 }], name: "baz", type: "Def" }, { instructions: [{ action: "getlocal", line: 0, params: ["0", "0"], source_line: 17 }, { action: "setlocal", line: 1, params: ["1", "0"], source_line: 17 }, { action: "leave", line: 2, params: [], source_line: 16 }], name: "2", type: "Block" }, { instructions: [{ action: "getlocal", line: 0, params: ["0", "0"], source_line: 17 }, { action: "setlocal", line: 1, params: ["1", "0"], source_line: 17 }, { action: "leave", line: 2, params: [], source_line: 16 }], name: "2", type: "Block" }, { arg_types: { names: [], types: [] }, instructions: [{ action: "putobject", line: 0, params: ["100"], source_line: 23 }, { action: "leave", line: 1, params: [], source_line: 22 }], name: "bar", type: "Def" }, { arg_types: { names: [], types: [] }, instructions: [{ action: "putobject", line: 0, params: ["100"], source_line: 23 }, { action: "leave", line: 1, params: [], source_line: 22 }], name: "bar", type: "Def" }, { instructions: [{ action: "putself", line: 0, params: [], source_line: 22 }, { action: "putstring", line: 1, params: ["bar"], source_line: 22 }, { action: "def_method", line: 2, params: ["0"], source_line: 22 }, { action: "leave", line: 3, params: [], source_line: 21 }], name: "Foo", type: "DefClass" }, { instructions: [{ action: "putself", line: 0, params: [], source_line: 22 }, { action: "putstring", line: 1, params: ["bar"], source_line: 22 }, { action: "def_method", line: 2, params: ["0"], source_line: 22 }, { action: "leave", line: 3, params: [], source_line: 21 }], name: "Foo", type: "DefClass" }, { arg_set: { names: [], types: [] }, arg_types: { names: [], types: [] }, instructions: [{ action: "getconstant", line: 0, params: ["Foo", "false"], source_line: 29 }, { action: "send", line: 1, params: ["new", "0", "", "&{[] []}"], source_line: 29 }, { action: "send", line: 2, params: ["bar", "0", "", "&{[] []}"], source_line: 29 }, { action: "leave", line: 3, params: [], source_line: 28 }], name: "bar", type: "Def" }, { arg_set: { names: [], types: [] }, arg_types: { names: [], types: [] }, instructions: [{ action: "getconstant", line: 0, params: ["Foo", "false"], source_line: 29 }, { action: "send", line: 1, params: ["new", "0", "", "&{[] []}"], source_line: 29 }, { action: "send", line: 2, params: ["bar", "0", "", "&{[] []}"], source_line: 29 }, { action: "leave", line: 3, params: [], source_line: 28 }], name: "bar", type: "Def" }, { instructions: [{ action: "putself", line: 0, params: [], source_line: 28 }, { action: "putstring", line: 1, params: ["bar"], source_line: 28 }, { action: "def_method", line: 2, params: ["0"], source_line: 28 }, { action: "leave", line: 3, params: [], source_line: 27 }], name: "Bar", type: "DefClass" }, { instructions: [{ action: "putself", line: 0, params: [], source_line: 28 }, { action: "putstring", line: 1, params: ["bar"], source_line: 28 }, { action: "def_method", line: 2, params: ["0"], source_line: 28 }, { action: "leave", line: 3, params: [], source_line: 27 }], name: "Bar", type: "DefClass" }, { instructions: [{ action: "putself", line: 0, params: [], source_line: 27 }, { action: "def_class", line: 1, params: ["class:Bar"], source_line: 27 }, { action: "pop", line: 2, params: [], source_line: 27 }, { action: "leave", line: 3, params: [], source_line: 26 }], name: "Baz", type: "DefClass" }, { instructions: [{ action: "putself", line: 0, params: [], source_line: 27 }, { action: "def_class", line: 1, params: ["class:Bar"], source_line: 27 }, { action: "pop", line: 2, params: [], source_line: 27 }, { action: "leave", line: 3, params: [], source_line: 26 }], name: "Baz", type: "DefClass" }, { arg_set: { names: [], types: [] }, instructions: [{ action: "putself", line: 0, params: [], source_line: 2 }, { action: "putstring", line: 1, params: ["foo"], source_line: 2 }, { action: "def_method", line: 2, params: ["1"], source_line: 2 }, { action: "putself", line: 3, params: [], source_line: 5 }, { action: "putstring", line: 4, params: ["bar"], source_line: 5 }, { action: "def_method", line: 5, params: ["1"], source_line: 5 }, { action: "putself", line: 6, params: [], source_line: 10 }, { action: "putstring", line: 7, params: ["baz"], source_line: 10 }, { action: "def_method", line: 8, params: ["1"], source_line: 10 }, { action: "putobject", line: 9, params: ["0"], source_line: 15 }, { action: "setlocal", line: 10, params: ["0", "0"], source_line: 15 }, { action: "pop", line: 11, params: [], source_line: 15 }, { action: "putself", line: 12, params: [], source_line: 16 }, { action: "putobject", line: 13, params: ["100"], source_line: 16 }, { action: "send", line: 14, params: ["baz", "1", "block:2", "&{[] [0]}"], source_line: 16 }, { action: "pop", line: 15, params: [], source_line: 16 }, { action: "getlocal", line: 16, params: ["0", "0"], source_line: 19 }, { action: "pop", line: 17, params: [], source_line: 19 }, { action: "putself", line: 18, params: [], source_line: 21 }, { action: "def_class", line: 19, params: ["class:Foo"], source_line: 21 }, { action: "pop", line: 20, params: [], source_line: 21 }, { action: "putself", line: 21, params: [], source_line: 26 }, { action: "def_class", line: 22, params: ["module:Baz"], source_line: 26 }, { action: "pop", line: 23, params: [], source_line: 26 }, { action: "getconstant", line: 24, params: ["Baz", "true"], source_line: 33 }, { action: "getconstant", line: 25, params: ["Bar", "false"], source_line: 33 }, { action: "send", line: 26, params: ["new", "0", "", "&{[] []}"], source_line: 33 }, { action: "send", line: 27, params: ["bar", "0", "", "&{[] []}"], source_line: 33 }, { action: "getlocal", line: 28, params: ["0", "0"], source_line: 33 }, { action: "send", line: 29, params: ["+", "1", "", "&{[] []}"], source_line: 33 }, { action: "pop", line: 30, params: [], source_line: 33 }, { action: "leave", line: 31, params: [], source_line: 33 }], name: "ProgramStart", type: "ProgramStart" }, { arg_set: { names: [], types: [] }, instructions: [{ action: "putself", line: 0, params: [], source_line: 2 }, { action: "putstring", line: 1, params: ["foo"], source_line: 2 }, { action: "def_method", line: 2, params: ["1"], source_line: 2 }, { action: "putself", line: 3, params: [], source_line: 5 }, { action: "putstring", line: 4, params: ["bar"], source_line: 5 }, { action: "def_method", line: 5, params: ["1"], source_line: 5 }, { action: "putself", line: 6, params: [], source_line: 10 }, { action: "putstring", line: 7, params: ["baz"], source_line: 10 }, { action: "def_method", line: 8, params: ["1"], source_line: 10 }, { action: "putobject", line: 9, params: ["0"], source_line: 15 }, { action: "setlocal", line: 10, params: ["0", "0"], source_line: 15 }, { action: "pop", line: 11, params: [], source_line: 15 }, { action: "putself", line: 12, params: [], source_line: 16 }, { action: "putobject", line: 13, params: ["100"], source_line: 16 }, { action: "send", line: 14, params: ["baz", "1", "block:2", "&{[] [0]}"], source_line: 16 }, { action: "pop", line: 15, params: [], source_line: 16 }, { action: "getlocal", line: 16, params: ["0", "0"], source_line: 19 }, { action: "pop", line: 17, params: [], source_line: 19 }, { action: "putself", line: 18, params: [], source_line: 21 }, { action: "def_class", line: 19, params: ["class:Foo"], source_line: 21 }, { action: "pop", line: 20, params: [], source_line: 21 }, { action: "putself", line: 21, params: [], source_line: 26 }, { action: "def_class", line: 22, params: ["module:Baz"], source_line: 26 }, { action: "pop", line: 23, params: [], source_line: 26 }, { action: "getconstant", line: 24, params: ["Baz", "true"], source_line: 33 }, { action: "getconstant", line: 25, params: ["Bar", "false"], source_line: 33 }, { action: "send", line: 26, params: ["new", "0", "", "&{[] []}"], source_line: 33 }, { action: "send", line: 27, params: ["bar", "0", "", "&{[] []}"], source_line: 33 }, { action: "getlocal", line: 28, params: ["0", "0"], source_line: 33 }, { action: "send", line: 29, params: ["+", "1", "", "&{[] []}"], source_line: 33 }, { action: "pop", line: 30, params: [], source_line: 33 }, { action: "leave", line: 31, params: [], source_line: 33 }], name: "ProgramStart", type: "ProgramStart" }]`},
+").to_s`, `
+[{
+  arg_set: {
+    names: [],
+    types: []
+  },
+  arg_types: {
+    names: ["x"],
+    types: [0]
+  },
+  instructions: [{
+    action: "putself",
+    line: 0,
+    params: [],
+    source_line: 3
+  }, {
+    action: "getlocal",
+    line: 1,
+    params: ["0", "0"],
+    source_line: 3
+  }, {
+    action: "putobject",
+    line: 2,
+    params: ["10"],
+    source_line: 3
+  }, {
+    action: "send",
+    line: 3,
+    params: ["+", "1", "", "&{[][]}"],
+    source_line: 3
+  }, {
+    action: "invokeblock",
+    line: 4,
+    params: ["1"],
+    source_line: 3
+  }, {
+    action: "leave",
+    line: 5,
+    params: [],
+    source_line: 2
+  }],
+  name: "foo",
+  type: "Def"
+}, {
+  arg_set: {
+    names: [],
+    types: []
+  },
+  arg_types: {
+    names: ["x"],
+    types: [0]
+  },
+  instructions: [{
+    action: "putself",
+    line: 0,
+    params: [],
+    source_line: 3
+  }, {
+    action: "getlocal",
+    line: 1,
+    params: ["0", "0"],
+    source_line: 3
+  }, {
+    action: "putobject",
+    line: 2,
+    params: ["10"],
+    source_line: 3
+  }, {
+    action: "send",
+    line: 3,
+    params: ["+", "1", "", "&{[][]}"],
+    source_line: 3
+  }, {
+    action: "invokeblock",
+    line: 4,
+    params: ["1"],
+    source_line: 3
+  }, {
+    action: "leave",
+    line: 5,
+    params: [],
+    source_line: 2
+  }],
+  name: "foo",
+  type: "Def"
+}, {
+  arg_types: {
+    names: ["f"],
+    types: [0]
+  },
+  instructions: [{
+    action: "putself",
+    line: 0,
+    params: [],
+    source_line: 7
+  }, {
+    action: "getlocal",
+    line: 1,
+    params: ["0", "0"],
+    source_line: 7
+  }, {
+    action: "invokeblock",
+    line: 2,
+    params: ["1"],
+    source_line: 7
+  }, {
+    action: "leave",
+    line: 3,
+    params: [],
+    source_line: 6
+  }],
+  name: "0",
+  type: "Block"
+}, {
+  arg_types: {
+    names: ["f"],
+    types: [0]
+  },
+  instructions: [{
+    action: "putself",
+    line: 0,
+    params: [],
+    source_line: 7
+  }, {
+    action: "getlocal",
+    line: 1,
+    params: ["0", "0"],
+    source_line: 7
+  }, {
+    action: "invokeblock",
+    line: 2,
+    params: ["1"],
+    source_line: 7
+  }, {
+    action: "leave",
+    line: 3,
+    params: [],
+    source_line: 6
+  }],
+  name: "0",
+  type: "Block"
+}, {
+  arg_set: {
+    names: ["y"],
+    types: [0]
+  },
+  arg_types: {
+    names: ["y"],
+    types: [0]
+  },
+  instructions: [{
+    action: "putself",
+    line: 0,
+    params: [],
+    source_line: 6
+  }, {
+    action: "getlocal",
+    line: 1,
+    params: ["0", "0"],
+    source_line: 6
+  }, {
+    action: "send",
+    line: 2,
+    params: ["foo", "1", "block:0", "&{[y][0]}"],
+    source_line: 6
+  }, {
+    action: "leave",
+    line: 3,
+    params: [],
+    source_line: 5
+  }],
+  name: "bar",
+  type: "Def"
+}, {
+  arg_set: {
+    names: ["y"],
+    types: [0]
+  },
+  arg_types: {
+    names: ["y"],
+    types: [0]
+  },
+  instructions: [{
+    action: "putself",
+    line: 0,
+    params: [],
+    source_line: 6
+  }, {
+    action: "getlocal",
+    line: 1,
+    params: ["0", "0"],
+    source_line: 6
+  }, {
+    action: "send",
+    line: 2,
+    params: ["foo", "1", "block:0", "&{[y][0]}"],
+    source_line: 6
+  }, {
+    action: "leave",
+    line: 3,
+    params: [],
+    source_line: 5
+  }],
+  name: "bar",
+  type: "Def"
+}, {
+  arg_types: {
+    names: ["b"],
+    types: [0]
+  },
+  instructions: [{
+    action: "putself",
+    line: 0,
+    params: [],
+    source_line: 12
+  }, {
+    action: "getlocal",
+    line: 1,
+    params: ["0", "0"],
+    source_line: 12
+  }, {
+    action: "invokeblock",
+    line: 2,
+    params: ["1"],
+    source_line: 12
+  }, {
+    action: "leave",
+    line: 3,
+    params: [],
+    source_line: 11
+  }],
+  name: "1",
+  type: "Block"
+}, {
+  arg_types: {
+    names: ["b"],
+    types: [0]
+  },
+  instructions: [{
+    action: "putself",
+    line: 0,
+    params: [],
+    source_line: 12
+  }, {
+    action: "getlocal",
+    line: 1,
+    params: ["0", "0"],
+    source_line: 12
+  }, {
+    action: "invokeblock",
+    line: 2,
+    params: ["1"],
+    source_line: 12
+  }, {
+    action: "leave",
+    line: 3,
+    params: [],
+    source_line: 11
+  }],
+  name: "1",
+  type: "Block"
+}, {
+  arg_set: {
+    names: [""],
+    types: [0]
+  },
+  arg_types: {
+    names: ["z"],
+    types: [0]
+  },
+  instructions: [{
+    action: "putself",
+    line: 0,
+    params: [],
+    source_line: 11
+  }, {
+    action: "getlocal",
+    line: 1,
+    params: ["0", "0"],
+    source_line: 11
+  }, {
+    action: "putobject",
+    line: 2,
+    params: ["100"],
+    source_line: 11
+  }, {
+    action: "send",
+    line: 3,
+    params: ["+", "1", "", "&{[][]}"],
+    source_line: 11
+  }, {
+    action: "send",
+    line: 4,
+    params: ["bar", "1", "block:1", "&{[][0]}"],
+    source_line: 11
+  }, {
+    action: "leave",
+    line: 5,
+    params: [],
+    source_line: 10
+  }],
+  name: "baz",
+  type: "Def"
+}, {
+  arg_set: {
+    names: [""],
+    types: [0]
+  },
+  arg_types: {
+    names: ["z"],
+    types: [0]
+  },
+  instructions: [{
+    action: "putself",
+    line: 0,
+    params: [],
+    source_line: 11
+  }, {
+    action: "getlocal",
+    line: 1,
+    params: ["0", "0"],
+    source_line: 11
+  }, {
+    action: "putobject",
+    line: 2,
+    params: ["100"],
+    source_line: 11
+  }, {
+    action: "send",
+    line: 3,
+    params: ["+", "1", "", "&{[][]}"],
+    source_line: 11
+  }, {
+    action: "send",
+    line: 4,
+    params: ["bar", "1", "block:1", "&{[][0]}"],
+    source_line: 11
+  }, {
+    action: "leave",
+    line: 5,
+    params: [],
+    source_line: 10
+  }],
+  name: "baz",
+  type: "Def"
+}, {
+  arg_types: {
+    names: ["b"],
+    types: [0]
+  },
+  instructions: [{
+    action: "getlocal",
+    line: 0,
+    params: ["0", "0"],
+    source_line: 17
+  }, {
+    action: "setlocal",
+    line: 1,
+    params: ["1", "0"],
+    source_line: 17
+  }, {
+    action: "leave",
+    line: 2,
+    params: [],
+    source_line: 16
+  }],
+  name: "2",
+  type: "Block"
+}, {
+  arg_types: {
+    names: ["b"],
+    types: [0]
+  },
+  instructions: [{
+    action: "getlocal",
+    line: 0,
+    params: ["0", "0"],
+    source_line: 17
+  }, {
+    action: "setlocal",
+    line: 1,
+    params: ["1", "0"],
+    source_line: 17
+  }, {
+    action: "leave",
+    line: 2,
+    params: [],
+    source_line: 16
+  }],
+  name: "2",
+  type: "Block"
+}, {
+  arg_types: {
+    names: [],
+    types: []
+  },
+  instructions: [{
+    action: "putobject",
+    line: 0,
+    params: ["100"],
+    source_line: 23
+  }, {
+    action: "leave",
+    line: 1,
+    params: [],
+    source_line: 22
+  }],
+  name: "bar",
+  type: "Def"
+}, {
+  arg_types: {
+    names: [],
+    types: []
+  },
+  instructions: [{
+    action: "putobject",
+    line: 0,
+    params: ["100"],
+    source_line: 23
+  }, {
+    action: "leave",
+    line: 1,
+    params: [],
+    source_line: 22
+  }],
+  name: "bar",
+  type: "Def"
+}, {
+  instructions: [{
+    action: "putself",
+    line: 0,
+    params: [],
+    source_line: 22
+  }, {
+    action: "putstring",
+    line: 1,
+    params: ["bar"],
+    source_line: 22
+  }, {
+    action: "def_method",
+    line: 2,
+    params: ["0"],
+    source_line: 22
+  }, {
+    action: "leave",
+    line: 3,
+    params: [],
+    source_line: 21
+  }],
+  name: "Foo",
+  type: "DefClass"
+}, {
+  instructions: [{
+    action: "putself",
+    line: 0,
+    params: [],
+    source_line: 22
+  }, {
+    action: "putstring",
+    line: 1,
+    params: ["bar"],
+    source_line: 22
+  }, {
+    action: "def_method",
+    line: 2,
+    params: ["0"],
+    source_line: 22
+  }, {
+    action: "leave",
+    line: 3,
+    params: [],
+    source_line: 21
+  }],
+  name: "Foo",
+  type: "DefClass"
+}, {
+  arg_set: {
+    names: [],
+    types: []
+  },
+  arg_types: {
+    names: [],
+    types: []
+  },
+  instructions: [{
+    action: "getconstant",
+    line: 0,
+    params: ["Foo", "false"],
+    source_line: 29
+  }, {
+    action: "send",
+    line: 1,
+    params: ["new", "0", "", "&{[][]}"],
+    source_line: 29
+  }, {
+    action: "send",
+    line: 2,
+    params: ["bar", "0", "", "&{[][]}"],
+    source_line: 29
+  }, {
+    action: "leave",
+    line: 3,
+    params: [],
+    source_line: 28
+  }],
+  name: "bar",
+  type: "Def"
+}, {
+  arg_set: {
+    names: [],
+    types: []
+  },
+  arg_types: {
+    names: [],
+    types: []
+  },
+  instructions: [{
+    action: "getconstant",
+    line: 0,
+    params: ["Foo", "false"],
+    source_line: 29
+  }, {
+    action: "send",
+    line: 1,
+    params: ["new", "0", "", "&{[][]}"],
+    source_line: 29
+  }, {
+    action: "send",
+    line: 2,
+    params: ["bar", "0", "", "&{[][]}"],
+    source_line: 29
+  }, {
+    action: "leave",
+    line: 3,
+    params: [],
+    source_line: 28
+  }],
+  name: "bar",
+  type: "Def"
+}, {
+  instructions: [{
+    action: "putself",
+    line: 0,
+    params: [],
+    source_line: 28
+  }, {
+    action: "putstring",
+    line: 1,
+    params: ["bar"],
+    source_line: 28
+  }, {
+    action: "def_method",
+    line: 2,
+    params: ["0"],
+    source_line: 28
+  }, {
+    action: "leave",
+    line: 3,
+    params: [],
+    source_line: 27
+  }],
+  name: "Bar",
+  type: "DefClass"
+}, {
+  instructions: [{
+    action: "putself",
+    line: 0,
+    params: [],
+    source_line: 28
+  }, {
+    action: "putstring",
+    line: 1,
+    params: ["bar"],
+    source_line: 28
+  }, {
+    action: "def_method",
+    line: 2,
+    params: ["0"],
+    source_line: 28
+  }, {
+    action: "leave",
+    line: 3,
+    params: [],
+    source_line: 27
+  }],
+  name: "Bar",
+  type: "DefClass"
+}, {
+  instructions: [{
+    action: "putself",
+    line: 0,
+    params: [],
+    source_line: 27
+  }, {
+    action: "def_class",
+    line: 1,
+    params: ["class:Bar"],
+    source_line: 27
+  }, {
+    action: "pop",
+    line: 2,
+    params: [],
+    source_line: 27
+  }, {
+    action: "leave",
+    line: 3,
+    params: [],
+    source_line: 26
+  }],
+  name: "Baz",
+  type: "DefClass"
+}, {
+  instructions: [{
+    action: "putself",
+    line: 0,
+    params: [],
+    source_line: 27
+  }, {
+    action: "def_class",
+    line: 1,
+    params: ["class:Bar"],
+    source_line: 27
+  }, {
+    action: "pop",
+    line: 2,
+    params: [],
+    source_line: 27
+  }, {
+    action: "leave",
+    line: 3,
+    params: [],
+    source_line: 26
+  }],
+  name: "Baz",
+  type: "DefClass"
+}, {
+  arg_set: {
+    names: [],
+    types: []
+  },
+  instructions: [{
+    action: "putself",
+    line: 0,
+    params: [],
+    source_line: 2
+  }, {
+    action: "putstring",
+    line: 1,
+    params: ["foo"],
+    source_line: 2
+  }, {
+    action: "def_method",
+    line: 2,
+    params: ["1"],
+    source_line: 2
+  }, {
+    action: "putself",
+    line: 3,
+    params: [],
+    source_line: 5
+  }, {
+    action: "putstring",
+    line: 4,
+    params: ["bar"],
+    source_line: 5
+  }, {
+    action: "def_method",
+    line: 5,
+    params: ["1"],
+    source_line: 5
+  }, {
+    action: "putself",
+    line: 6,
+    params: [],
+    source_line: 10
+  }, {
+    action: "putstring",
+    line: 7,
+    params: ["baz"],
+    source_line: 10
+  }, {
+    action: "def_method",
+    line: 8,
+    params: ["1"],
+    source_line: 10
+  }, {
+    action: "putobject",
+    line: 9,
+    params: ["0"],
+    source_line: 15
+  }, {
+    action: "setlocal",
+    line: 10,
+    params: ["0", "0"],
+    source_line: 15
+  }, {
+    action: "pop",
+    line: 11,
+    params: [],
+    source_line: 15
+  }, {
+    action: "putself",
+    line: 12,
+    params: [],
+    source_line: 16
+  }, {
+    action: "putobject",
+    line: 13,
+    params: ["100"],
+    source_line: 16
+  }, {
+    action: "send",
+    line: 14,
+    params: ["baz", "1", "block:2", "&{[][0]}"],
+    source_line: 16
+  }, {
+    action: "pop",
+    line: 15,
+    params: [],
+    source_line: 16
+  }, {
+    action: "getlocal",
+    line: 16,
+    params: ["0", "0"],
+    source_line: 19
+  }, {
+    action: "pop",
+    line: 17,
+    params: [],
+    source_line: 19
+  }, {
+    action: "putself",
+    line: 18,
+    params: [],
+    source_line: 21
+  }, {
+    action: "def_class",
+    line: 19,
+    params: ["class:Foo"],
+    source_line: 21
+  }, {
+    action: "pop",
+    line: 20,
+    params: [],
+    source_line: 21
+  }, {
+    action: "putself",
+    line: 21,
+    params: [],
+    source_line: 26
+  }, {
+    action: "def_class",
+    line: 22,
+    params: ["module:Baz"],
+    source_line: 26
+  }, {
+    action: "pop",
+    line: 23,
+    params: [],
+    source_line: 26
+  }, {
+    action: "getconstant",
+    line: 24,
+    params: ["Baz", "true"],
+    source_line: 33
+  }, {
+    action: "getconstant",
+    line: 25,
+    params: ["Bar", "false"],
+    source_line: 33
+  }, {
+    action: "send",
+    line: 26,
+    params: ["new", "0", "", "&{[][]}"],
+    source_line: 33
+  }, {
+    action: "send",
+    line: 27,
+    params: ["bar", "0", "", "&{[][]}"],
+    source_line: 33
+  }, {
+    action: "getlocal",
+    line: 28,
+    params: ["0", "0"],
+    source_line: 33
+  }, {
+    action: "send",
+    line: 29,
+    params: ["+", "1", "", "&{[][]}"],
+    source_line: 33
+  }, {
+    action: "pop",
+    line: 30,
+    params: [],
+    source_line: 33
+  }, {
+    action: "leave",
+    line: 31,
+    params: [],
+    source_line: 33
+  }],
+  name: "ProgramStart",
+  type: "ProgramStart"
+}, {
+  arg_set: {
+    names: [],
+    types: []
+  },
+  instructions: [{
+    action: "putself",
+    line: 0,
+    params: [],
+    source_line: 2
+  }, {
+    action: "putstring",
+    line: 1,
+    params: ["foo"],
+    source_line: 2
+  }, {
+    action: "def_method",
+    line: 2,
+    params: ["1"],
+    source_line: 2
+  }, {
+    action: "putself",
+    line: 3,
+    params: [],
+    source_line: 5
+  }, {
+    action: "putstring",
+    line: 4,
+    params: ["bar"],
+    source_line: 5
+  }, {
+    action: "def_method",
+    line: 5,
+    params: ["1"],
+    source_line: 5
+  }, {
+    action: "putself",
+    line: 6,
+    params: [],
+    source_line: 10
+  }, {
+    action: "putstring",
+    line: 7,
+    params: ["baz"],
+    source_line: 10
+  }, {
+    action: "def_method",
+    line: 8,
+    params: ["1"],
+    source_line: 10
+  }, {
+    action: "putobject",
+    line: 9,
+    params: ["0"],
+    source_line: 15
+  }, {
+    action: "setlocal",
+    line: 10,
+    params: ["0", "0"],
+    source_line: 15
+  }, {
+    action: "pop",
+    line: 11,
+    params: [],
+    source_line: 15
+  }, {
+    action: "putself",
+    line: 12,
+    params: [],
+    source_line: 16
+  }, {
+    action: "putobject",
+    line: 13,
+    params: ["100"],
+    source_line: 16
+  }, {
+    action: "send",
+    line: 14,
+    params: ["baz", "1", "block:2", "&{[][0]}"],
+    source_line: 16
+  }, {
+    action: "pop",
+    line: 15,
+    params: [],
+    source_line: 16
+  }, {
+    action: "getlocal",
+    line: 16,
+    params: ["0", "0"],
+    source_line: 19
+  }, {
+    action: "pop",
+    line: 17,
+    params: [],
+    source_line: 19
+  }, {
+    action: "putself",
+    line: 18,
+    params: [],
+    source_line: 21
+  }, {
+    action: "def_class",
+    line: 19,
+    params: ["class:Foo"],
+    source_line: 21
+  }, {
+    action: "pop",
+    line: 20,
+    params: [],
+    source_line: 21
+  }, {
+    action: "putself",
+    line: 21,
+    params: [],
+    source_line: 26
+  }, {
+    action: "def_class",
+    line: 22,
+    params: ["module:Baz"],
+    source_line: 26
+  }, {
+    action: "pop",
+    line: 23,
+    params: [],
+    source_line: 26
+  }, {
+    action: "getconstant",
+    line: 24,
+    params: ["Baz", "true"],
+    source_line: 33
+  }, {
+    action: "getconstant",
+    line: 25,
+    params: ["Bar", "false"],
+    source_line: 33
+  }, {
+    action: "send",
+    line: 26,
+    params: ["new", "0", "", "&{[][]}"],
+    source_line: 33
+  }, {
+    action: "send",
+    line: 27,
+    params: ["bar", "0", "", "&{[][]}"],
+    source_line: 33
+  }, {
+    action: "getlocal",
+    line: 28,
+    params: ["0", "0"],
+    source_line: 33
+  }, {
+    action: "send",
+    line: 29,
+    params: ["+", "1", "", "&{[][]}"],
+    source_line: 33
+  }, {
+    action: "pop",
+    line: 30,
+    params: [],
+    source_line: 33
+  }, {
+    action: "leave",
+    line: 31,
+    params: [],
+    source_line: 33
+  }],
+  name: "ProgramStart",
+  type: "ProgramStart"
+}]`},
+
 		{`require 'ripper'
 Ripper.instruction("
 	def bar(block)
@@ -396,11 +1633,354 @@ Ripper.instruction("
 	foo do
 		10
 	end
-").to_s`, `[{ arg_set: { names: [], types: [] }, arg_types: { names: ["block"], types: [0] }, instructions: [{ action: "getlocal", line: 0, params: ["0", "0"], source_line: 3 }, { action: "send", line: 1, params: ["call", "0", "", "&{[] []}"], source_line: 3 }, { action: "getblock", line: 2, params: [], source_line: 3 }, { action: "send", line: 3, params: ["call", "0", "", "&{[] []}"], source_line: 3 }, { action: "send", line: 4, params: ["+", "1", "", "&{[] []}"], source_line: 3 }, { action: "leave", line: 5, params: [], source_line: 2 }], name: "bar", type: "Def" }, { arg_set: { names: [], types: [] }, arg_types: { names: ["block"], types: [0] }, instructions: [{ action: "getlocal", line: 0, params: ["0", "0"], source_line: 3 }, { action: "send", line: 1, params: ["call", "0", "", "&{[] []}"], source_line: 3 }, { action: "getblock", line: 2, params: [], source_line: 3 }, { action: "send", line: 3, params: ["call", "0", "", "&{[] []}"], source_line: 3 }, { action: "send", line: 4, params: ["+", "1", "", "&{[] []}"], source_line: 3 }, { action: "leave", line: 5, params: [], source_line: 2 }], name: "bar", type: "Def" }, { instructions: [{ action: "putobject", line: 0, params: ["20"], source_line: 8 }, { action: "leave", line: 1, params: [], source_line: 7 }], name: "0", type: "Block" }, { instructions: [{ action: "putobject", line: 0, params: ["20"], source_line: 8 }, { action: "leave", line: 1, params: [], source_line: 7 }], name: "0", type: "Block" }, { arg_set: { names: [""], types: [0] }, arg_types: { names: [], types: [] }, instructions: [{ action: "putself", line: 0, params: [], source_line: 7 }, { action: "getblock", line: 1, params: [], source_line: 7 }, { action: "send", line: 2, params: ["bar", "1", "block:0", "&{[] [0]}"], source_line: 7 }, { action: "leave", line: 3, params: [], source_line: 6 }], name: "foo", type: "Def" }, { arg_set: { names: [""], types: [0] }, arg_types: { names: [], types: [] }, instructions: [{ action: "putself", line: 0, params: [], source_line: 7 }, { action: "getblock", line: 1, params: [], source_line: 7 }, { action: "send", line: 2, params: ["bar", "1", "block:0", "&{[] [0]}"], source_line: 7 }, { action: "leave", line: 3, params: [], source_line: 6 }], name: "foo", type: "Def" }, { instructions: [{ action: "putobject", line: 0, params: ["10"], source_line: 13 }, { action: "leave", line: 1, params: [], source_line: 12 }], name: "1", type: "Block" }, { instructions: [{ action: "putobject", line: 0, params: ["10"], source_line: 13 }, { action: "leave", line: 1, params: [], source_line: 12 }], name: "1", type: "Block" }, { arg_set: { names: [], types: [] }, instructions: [{ action: "putself", line: 0, params: [], source_line: 2 }, { action: "putstring", line: 1, params: ["bar"], source_line: 2 }, { action: "def_method", line: 2, params: ["1"], source_line: 2 }, { action: "putself", line: 3, params: [], source_line: 6 }, { action: "putstring", line: 4, params: ["foo"], source_line: 6 }, { action: "def_method", line: 5, params: ["0"], source_line: 6 }, { action: "putself", line: 6, params: [], source_line: 12 }, { action: "send", line: 7, params: ["foo", "0", "block:1", "&{[] []}"], source_line: 12 }, { action: "pop", line: 8, params: [], source_line: 12 }, { action: "leave", line: 9, params: [], source_line: 12 }], name: "ProgramStart", type: "ProgramStart" }, { arg_set: { names: [], types: [] }, instructions: [{ action: "putself", line: 0, params: [], source_line: 2 }, { action: "putstring", line: 1, params: ["bar"], source_line: 2 }, { action: "def_method", line: 2, params: ["1"], source_line: 2 }, { action: "putself", line: 3, params: [], source_line: 6 }, { action: "putstring", line: 4, params: ["foo"], source_line: 6 }, { action: "def_method", line: 5, params: ["0"], source_line: 6 }, { action: "putself", line: 6, params: [], source_line: 12 }, { action: "send", line: 7, params: ["foo", "0", "block:1", "&{[] []}"], source_line: 12 }, { action: "pop", line: 8, params: [], source_line: 12 }, { action: "leave", line: 9, params: [], source_line: 12 }], name: "ProgramStart", type: "ProgramStart" }]`},
+").to_s`, `
+[{
+  arg_set: {
+    names: [],
+    types: []
+  },
+  arg_types: {
+    names: ["block"],
+    types: [0]
+  },
+  instructions: [{
+    action: "getlocal",
+    line: 0,
+    params: ["0", "0"],
+    source_line: 3
+  }, {
+    action: "send",
+    line: 1,
+    params: ["call", "0", "", "&{[][]}"],
+    source_line: 3
+  }, {
+    action: "getblock",
+    line: 2,
+    params: [],
+    source_line: 3
+  }, {
+    action: "send",
+    line: 3,
+    params: ["call", "0", "", "&{[][]}"],
+    source_line: 3
+  }, {
+    action: "send",
+    line: 4,
+    params: ["+", "1", "", "&{[][]}"],
+    source_line: 3
+  }, {
+    action: "leave",
+    line: 5,
+    params: [],
+    source_line: 2
+  }],
+  name: "bar",
+  type: "Def"
+}, {
+  arg_set: {
+    names: [],
+    types: []
+  },
+  arg_types: {
+    names: ["block"],
+    types: [0]
+  },
+  instructions: [{
+    action: "getlocal",
+    line: 0,
+    params: ["0", "0"],
+    source_line: 3
+  }, {
+    action: "send",
+    line: 1,
+    params: ["call", "0", "", "&{[][]}"],
+    source_line: 3
+  }, {
+    action: "getblock",
+    line: 2,
+    params: [],
+    source_line: 3
+  }, {
+    action: "send",
+    line: 3,
+    params: ["call", "0", "", "&{[][]}"],
+    source_line: 3
+  }, {
+    action: "send",
+    line: 4,
+    params: ["+", "1", "", "&{[][]}"],
+    source_line: 3
+  }, {
+    action: "leave",
+    line: 5,
+    params: [],
+    source_line: 2
+  }],
+  name: "bar",
+  type: "Def"
+}, {
+  arg_types: {
+    names: [],
+    types: []
+  },
+  instructions: [{
+    action: "putobject",
+    line: 0,
+    params: ["20"],
+    source_line: 8
+  }, {
+    action: "leave",
+    line: 1,
+    params: [],
+    source_line: 7
+  }],
+  name: "0",
+  type: "Block"
+}, {
+  arg_types: {
+    names: [],
+    types: []
+  },
+  instructions: [{
+    action: "putobject",
+    line: 0,
+    params: ["20"],
+    source_line: 8
+  }, {
+    action: "leave",
+    line: 1,
+    params: [],
+    source_line: 7
+  }],
+  name: "0",
+  type: "Block"
+}, {
+  arg_set: {
+    names: [""],
+    types: [0]
+  },
+  arg_types: {
+    names: [],
+    types: []
+  },
+  instructions: [{
+    action: "putself",
+    line: 0,
+    params: [],
+    source_line: 7
+  }, {
+    action: "getblock",
+    line: 1,
+    params: [],
+    source_line: 7
+  }, {
+    action: "send",
+    line: 2,
+    params: ["bar", "1", "block:0", "&{[][0]}"],
+    source_line: 7
+  }, {
+    action: "leave",
+    line: 3,
+    params: [],
+    source_line: 6
+  }],
+  name: "foo",
+  type: "Def"
+}, {
+  arg_set: {
+    names: [""],
+    types: [0]
+  },
+  arg_types: {
+    names: [],
+    types: []
+  },
+  instructions: [{
+    action: "putself",
+    line: 0,
+    params: [],
+    source_line: 7
+  }, {
+    action: "getblock",
+    line: 1,
+    params: [],
+    source_line: 7
+  }, {
+    action: "send",
+    line: 2,
+    params: ["bar", "1", "block:0", "&{[][0]}"],
+    source_line: 7
+  }, {
+    action: "leave",
+    line: 3,
+    params: [],
+    source_line: 6
+  }],
+  name: "foo",
+  type: "Def"
+}, {
+  arg_types: {
+    names: [],
+    types: []
+  },
+  instructions: [{
+    action: "putobject",
+    line: 0,
+    params: ["10"],
+    source_line: 13
+  }, {
+    action: "leave",
+    line: 1,
+    params: [],
+    source_line: 12
+  }],
+  name: "1",
+  type: "Block"
+}, {
+  arg_types: {
+    names: [],
+    types: []
+  },
+  instructions: [{
+    action: "putobject",
+    line: 0,
+    params: ["10"],
+    source_line: 13
+  }, {
+    action: "leave",
+    line: 1,
+    params: [],
+    source_line: 12
+  }],
+  name: "1",
+  type: "Block"
+}, {
+  arg_set: {
+    names: [],
+    types: []
+  },
+  instructions: [{
+    action: "putself",
+    line: 0,
+    params: [],
+    source_line: 2
+  }, {
+    action: "putstring",
+    line: 1,
+    params: ["bar"],
+    source_line: 2
+  }, {
+    action: "def_method",
+    line: 2,
+    params: ["1"],
+    source_line: 2
+  }, {
+    action: "putself",
+    line: 3,
+    params: [],
+    source_line: 6
+  }, {
+    action: "putstring",
+    line: 4,
+    params: ["foo"],
+    source_line: 6
+  }, {
+    action: "def_method",
+    line: 5,
+    params: ["0"],
+    source_line: 6
+  }, {
+    action: "putself",
+    line: 6,
+    params: [],
+    source_line: 12
+  }, {
+    action: "send",
+    line: 7,
+    params: ["foo", "0", "block:1", "&{[][]}"],
+    source_line: 12
+  }, {
+    action: "pop",
+    line: 8,
+    params: [],
+    source_line: 12
+  }, {
+    action: "leave",
+    line: 9,
+    params: [],
+    source_line: 12
+  }],
+  name: "ProgramStart",
+  type: "ProgramStart"
+}, {
+  arg_set: {
+    names: [],
+    types: []
+  },
+  instructions: [{
+    action: "putself",
+    line: 0,
+    params: [],
+    source_line: 2
+  }, {
+    action: "putstring",
+    line: 1,
+    params: ["bar"],
+    source_line: 2
+  }, {
+    action: "def_method",
+    line: 2,
+    params: ["1"],
+    source_line: 2
+  }, {
+    action: "putself",
+    line: 3,
+    params: [],
+    source_line: 6
+  }, {
+    action: "putstring",
+    line: 4,
+    params: ["foo"],
+    source_line: 6
+  }, {
+    action: "def_method",
+    line: 5,
+    params: ["0"],
+    source_line: 6
+  }, {
+    action: "putself",
+    line: 6,
+    params: [],
+    source_line: 12
+  }, {
+    action: "send",
+    line: 7,
+    params: ["foo", "0", "block:1", "&{[][]}"],
+    source_line: 12
+  }, {
+    action: "pop",
+    line: 8,
+    params: [],
+    source_line: 12
+  }, {
+    action: "leave",
+    line: 9,
+    params: [],
+    source_line: 12
+  }],
+  name: "ProgramStart",
+  type: "ProgramStart"
+}]`},
 	}
 	for i, tt := range tests {
 		evaluated := vm.ExecAndReturn(t, tt.input)
-		vm.VerifyExpected(t, i, evaluated, tt.expected)
+
+		result := removeRedundantSpaces(evaluated.Value().(string))
+		expected := removeRedundantSpaces(tt.expected)
+
+		if result != expected {
+			t.Fatalf("Expect:\n%s. Got:\n%s\nAt case %d", expected, result, i)
+		}
 	}
 }
 
@@ -439,4 +2019,11 @@ func checkErrorMsg(t *testing.T, index int, evaluated Object, expectedErrMsg str
 	if message[0] != expectedErrMsg {
 		t.Fatalf("At test case %d: Expect error message to be:\n  %s. got: \n%s", index, expectedErrMsg, err.Message())
 	}
+}
+
+func removeRedundantSpaces(str string) string {
+	space := regexp.MustCompile(`\s`)
+	newline := regexp.MustCompile(`\n`)
+	str = space.ReplaceAllString(str, "")
+	return newline.ReplaceAllString(str, "")
 }
