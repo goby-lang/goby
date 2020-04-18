@@ -745,14 +745,9 @@ var builtinModuleCommonClassMethods = []*BuiltinMethodObject{
 
 			method := &MethodObject{Name: args[0].Value().(string), argc: len(blockFrame.locals), instructionSet: blockFrame.instructionSet, BaseObj: NewBaseObject(t.vm.TopLevelClass(classes.MethodClass))}
 
-			switch self := receiver.(type) {
-			case *RClass:
-				self.Methods.set(method.Name, method)
-			default:
-				self.Class().Methods.set(method.Name, method)
-			}
+			t.vm.defineMethodOn(receiver, method)
 
-			return t.vm.InitStringObject(method.Name)
+			return args[0]
 		},
 	},
 }
@@ -1769,6 +1764,40 @@ func (vm *VM) createRClass(className string) *RClass {
 		isModule:         false,
 		BaseObj:          NewBaseObject(classClass),
 	}
+}
+
+func (vm *VM) defineMethodOn(obj Object, method *MethodObject) {
+	switch obj := obj.(type) {
+	case *RClass:
+		obj.Methods.set(method.Name, method)
+	default:
+		if obj.Class().Name == classes.ObjectClass {
+			obj.Class().Methods.set(method.Name, method)
+		} else {
+			vm.findOrCreateSingletonClass(obj).Methods.set(method.Name, method)
+		}
+	}
+}
+
+func (vm *VM) defineSingletonMethodOn(obj Object, method *MethodObject) {
+	switch obj := obj.(type) {
+	case *RClass:
+		obj.SingletonClass().Methods.set(method.Name, method)
+	default:
+		vm.findOrCreateSingletonClass(obj).Methods.set(method.Name, method)
+	}
+}
+
+func (vm *VM) findOrCreateSingletonClass(obj Object) (singletonClass *RClass) {
+	singletonClass = obj.SingletonClass()
+
+	if singletonClass == nil {
+		singletonClass = vm.createRClass(fmt.Sprintf("#<Class:#<%s:%d>>", obj.Class().Name, obj.ID()))
+		singletonClass.isSingleton = true
+		obj.SetSingletonClass(singletonClass)
+	}
+
+	return
 }
 
 func initModuleClass(classClass *RClass) *RClass {
