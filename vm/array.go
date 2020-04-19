@@ -44,7 +44,13 @@ var builtinArrayClassMethods = []*BuiltinMethodObject{
 
 				if blockFrame != nil && !blockIsEmpty(blockFrame) {
 					for i := range elems {
-						elems[i] = t.builtinMethodYield(blockFrame, t.vm.InitIntegerObject(i)).Target
+						result, err := t.builtinMethodYield(blockFrame, t.vm.InitIntegerObject(i))
+
+						if err != nil {
+							return err
+						}
+
+						elems[i] = result.Target
 					}
 				} else {
 					var elem Object
@@ -263,7 +269,6 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentRange, 2, 3, aLen)
 			}
 
-
 			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.IntegerClass)
 
 			if typeErr != nil {
@@ -411,7 +416,11 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 			}
 
 			for _, obj := range arr.Elements {
-				result := t.builtinMethodYield(blockFrame, obj)
+				result, err := t.builtinMethodYield(blockFrame, obj)
+
+				if err != nil {
+					return err
+				}
 
 				if result.Target.isTruthy() {
 					return TRUE
@@ -540,7 +549,11 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 				}
 
 				for _, obj := range arr.Elements {
-					result := t.builtinMethodYield(blockFrame, obj)
+					result, err := t.builtinMethodYield(blockFrame, obj)
+
+					if err != nil {
+						return err
+					}
 					if result.Target.isTruthy() {
 						count++
 					}
@@ -733,7 +746,11 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 			}
 
 			for _, obj := range arr.Elements {
-				t.builtinMethodYield(blockFrame, obj)
+				_, err := t.builtinMethodYield(blockFrame, obj)
+
+				if err != nil {
+					return err
+				}
 			}
 			return arr
 
@@ -781,7 +798,11 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 			}
 
 			for i := range arr.Elements {
-				t.builtinMethodYield(blockFrame, t.vm.InitIntegerObject(i))
+				_, err := t.builtinMethodYield(blockFrame, t.vm.InitIntegerObject(i))
+
+				if err != nil {
+					return err
+				}
 			}
 			return arr
 
@@ -930,12 +951,22 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 			switch len(args) {
 			case 0:
 				for _, obj := range a.Elements {
-					hash[obj.ToString()] = t.builtinMethodYield(blockFrame, obj).Target
+					result, err := t.builtinMethodYield(blockFrame, obj)
+
+					if err != nil {
+						return err
+					}
+					hash[obj.ToString()] = result.Target
 				}
 			case 1:
 				arg := args[0]
 				for _, obj := range a.Elements {
-					switch b := t.builtinMethodYield(blockFrame, obj).Target; b.(type) {
+					result, err := t.builtinMethodYield(blockFrame, obj)
+
+					if err != nil {
+						return err
+					}
+					switch b := result.Target; b.(type) {
 					case *NullObject:
 						hash[obj.ToString()] = arg
 					default:
@@ -1020,7 +1051,6 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 				return arr.Elements[arrLength-1]
 			}
 
-
 			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.IntegerClass)
 
 			if typeErr != nil {
@@ -1028,7 +1058,6 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 			}
 
 			value := args[0].Value().(int)
-
 
 			if value < 1 {
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.NegativeValue, value)
@@ -1104,7 +1133,11 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 				}
 			} else {
 				for i, obj := range arr.Elements {
-					result := t.builtinMethodYield(blockFrame, obj)
+					result, err := t.builtinMethodYield(blockFrame, obj)
+
+					if err != nil {
+						return err
+					}
 					elements[i] = result.Target
 				}
 			}
@@ -1225,7 +1258,11 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 			}
 
 			for i := start; i < len(arr.Elements); i++ {
-				result := t.builtinMethodYield(blockFrame, prev, arr.Elements[i])
+				result, err := t.builtinMethodYield(blockFrame, prev, arr.Elements[i])
+
+				if err != nil {
+					return err
+				}
 				prev = result.Target
 			}
 
@@ -1295,7 +1332,11 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 			reversedArr := arr.reverse()
 
 			for _, obj := range reversedArr.Elements {
-				t.builtinMethodYield(blockFrame, obj)
+				_, err := t.builtinMethodYield(blockFrame, obj)
+
+				if err != nil {
+					return err
+				}
 			}
 
 			return reversedArr
@@ -1404,7 +1445,11 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 			}
 
 			for _, obj := range arr.Elements {
-				result := t.builtinMethodYield(blockFrame, obj)
+				result, err := t.builtinMethodYield(blockFrame, obj)
+
+				if err != nil {
+					return err
+				}
 				if result.Target.isTruthy() {
 					elements = append(elements, obj)
 				}

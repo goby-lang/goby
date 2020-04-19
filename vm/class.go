@@ -1120,7 +1120,12 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 			}
 
 			blockFrame.self = receiver
-			result := t.builtinMethodYield(blockFrame)
+
+			result, err := t.builtinMethodYield(blockFrame)
+
+			if err != nil {
+				return err
+			}
 
 			return result.Target
 
@@ -1667,6 +1672,7 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 
 			newT := t.vm.newThread()
 
+			// TODO: this yield won't be able to send back error obj
 			go func() {
 				newT.builtinMethodYield(blockFrame, args...)
 			}()

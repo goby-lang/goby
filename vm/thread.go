@@ -233,7 +233,7 @@ func (t *Thread) execInstruction(cf *normalCallFrame, i *bytecode.Instruction) (
 }
 
 // Yield to a call frame
-func (t *Thread) Yield(args ...Object) *Pointer {
+func (t *Thread) Yield(args ...Object) (*Pointer, *Error) {
 	return t.builtinMethodYield(t.currentFrame.BlockFrame(), args...)
 }
 
@@ -405,7 +405,7 @@ func (t *Thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 
 	t.callFrameStack.push(cf)
 
-	err := t.startFromTopFrame()
+	err = t.startFromTopFrame()
 
 	if err != nil {
 		return err

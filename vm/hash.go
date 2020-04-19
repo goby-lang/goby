@@ -197,7 +197,11 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 
 			for stringKey, value := range hash.Pairs {
 				objectKey := t.vm.InitStringObject(stringKey)
-				result := t.builtinMethodYield(blockFrame, objectKey, value)
+				result, err := t.builtinMethodYield(blockFrame, objectKey, value)
+
+				if err != nil {
+					return err
+				}
 
 				/*
 					TODO: Discuss this behavior
@@ -382,7 +386,11 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 			// it's safe to delete elements from a Map, while iterating it.
 			for stringKey, value := range hash.Pairs {
 				objectKey := t.vm.InitStringObject(stringKey)
-				result := t.builtinMethodYield(blockFrame, objectKey, value)
+				result, err := t.builtinMethodYield(blockFrame, objectKey, value)
+
+				if err != nil {
+					return err
+				}
 
 				booleanResult, isResultBoolean := result.Target.(*BooleanObject)
 
@@ -506,7 +514,11 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 					v := h.Pairs[k]
 					strK := t.vm.InitStringObject(k)
 
-					t.builtinMethodYield(blockFrame, strK, v)
+					_, err := t.builtinMethodYield(blockFrame, strK, v)
+
+					if err != nil {
+						return err
+					}
 				}
 			}
 
@@ -553,7 +565,11 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 			for _, k := range keys {
 				obj := t.vm.InitStringObject(k)
 				arrOfKeys = append(arrOfKeys, obj)
-				t.builtinMethodYield(blockFrame, obj)
+				_, err := t.builtinMethodYield(blockFrame, obj)
+
+				if err != nil {
+					return err
+				}
 			}
 
 			return t.vm.InitArrayObject(arrOfKeys)
@@ -599,7 +615,11 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 			for _, k := range keys {
 				value := h.Pairs[k]
 				arrOfValues = append(arrOfValues, value)
-				t.builtinMethodYield(blockFrame, value)
+				_, err := t.builtinMethodYield(blockFrame, value)
+
+				if err != nil {
+					return err
+				}
 			}
 
 			return t.vm.InitArrayObject(arrOfValues)
@@ -704,7 +724,13 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 			}
 
 			if blockFrame != nil {
-				return t.builtinMethodYield(blockFrame, key).Target
+				result, err := t.builtinMethodYield(blockFrame, key, value)
+
+				if err != nil {
+					return err
+				}
+
+				return result.Target
 			}
 			return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "The value was not found, and no block has been provided")
 		},
@@ -746,7 +772,11 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 
 				if !ok {
 					if blockFrame != nil {
-						value = t.builtinMethodYield(blockFrame, objectKey).Target
+						result, err := t.builtinMethodYield(blockFrame, objectKey)
+						if err != nil {
+							return err
+						}
+						value = result.Target
 						blockFramePopped = true
 					} else {
 						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "There is no value for the key `%s`, and no block has been provided", stringKey.value)
@@ -910,7 +940,12 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 			}
 
 			for k, v := range h.Pairs {
-				result[k] = t.builtinMethodYield(blockFrame, v).Target
+				r, err := t.builtinMethodYield(blockFrame, v)
+
+				if err != nil {
+					return err
+				}
+				result[k] = r.Target
 			}
 			return t.vm.InitHashObject(result)
 
@@ -1003,7 +1038,11 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 
 			for stringKey, value := range sourceHash.Pairs {
 				objectKey := t.vm.InitStringObject(stringKey)
-				result := t.builtinMethodYield(blockFrame, objectKey, value)
+				result, err := t.builtinMethodYield(blockFrame, objectKey, value)
+
+				if err != nil {
+					return err
+				}
 
 				if result.Target.isTruthy() {
 					destinationPairs[stringKey] = value
@@ -1179,7 +1218,11 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 
 			resultHash := make(map[string]Object)
 			for k, v := range h.Pairs {
-				result := t.builtinMethodYield(blockFrame, v)
+				result, err := t.builtinMethodYield(blockFrame, v)
+
+				if err != nil {
+					return err
+				}
 				resultHash[k] = result.Target
 			}
 			return t.vm.InitHashObject(resultHash)

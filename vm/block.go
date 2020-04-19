@@ -115,7 +115,13 @@ var builtinBlockInstanceMethods = []*BuiltinMethodObject{
 			c.self = block.self
 			c.isBlock = true
 
-			return t.builtinMethodYield(c, args...).Target
+			result, err := t.builtinMethodYield(c, args...)
+
+			if err != nil {
+				return err
+			}
+
+			return result.Target
 		},
 	},
 }

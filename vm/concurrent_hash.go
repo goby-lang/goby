@@ -185,6 +185,7 @@ var builtinConcurrentHashInstanceMethods = []*BuiltinMethodObject{
 			hash := receiver.(*ConcurrentHashObject)
 			framePopped := false
 
+			// TODO: this yielding can't return error object
 			iterator := func(key, value interface{}) bool {
 				keyObject := t.vm.InitStringObject(key.(string))
 

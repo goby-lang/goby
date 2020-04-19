@@ -166,7 +166,11 @@ var builtinHTTPClassMethods = []*BuiltinMethodObject{
 
 			gobyClient := httpClientClass.initializeInstance()
 
-			result := t.builtinMethodYield(blockFrame, gobyClient)
+			result, err := t.builtinMethodYield(blockFrame, gobyClient)
+
+			if err != nil {
+				return err
+			}
 
 			if err, ok := result.Target.(*Error); ok {
 				return err //an Error object

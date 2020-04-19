@@ -117,7 +117,11 @@ var builtinRangeInstanceMethods = []*BuiltinMethodObject{
 					mid++
 				}
 
-				result := t.builtinMethodYield(blockFrame, t.vm.InitIntegerObject(mid))
+				result, err := t.builtinMethodYield(blockFrame, t.vm.InitIntegerObject(mid))
+
+				if err != nil {
+					return err
+				}
 
 				switch r := result.Target.(type) {
 				case *BooleanObject:
@@ -191,9 +195,13 @@ var builtinRangeInstanceMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 			}
 
-			ro.each(func(i int) error {
+			ro.each(func(i int) *Error {
 				obj := t.vm.InitIntegerObject(i)
-				t.builtinMethodYield(blockFrame, obj)
+				_, err := t.builtinMethodYield(blockFrame, obj)
+
+				if err != nil {
+					return err
+				}
 
 				return nil
 			})
@@ -298,12 +306,17 @@ var builtinRangeInstanceMethods = []*BuiltinMethodObject{
 			ro := receiver.(*RangeObject)
 			var el []Object
 
-			ro.each(func(i int) error {
+			ro.each(func(i int) *Error {
 				if blockIsEmpty(blockFrame) {
 					el = append(el, NULL)
 				} else {
 					obj := t.vm.InitIntegerObject(i)
-					el = append(el, t.builtinMethodYield(blockFrame, obj).Target)
+					result, err := t.builtinMethodYield(blockFrame, obj)
+
+					if err != nil {
+						return err
+					}
+					el = append(el, result.Target)
 				}
 
 				return nil
@@ -385,13 +398,18 @@ var builtinRangeInstanceMethods = []*BuiltinMethodObject{
 
 			blockFrameUsed := false
 
-			ro.each(func(i int) error {
+			ro.each(func(i int) *Error {
 				if (i-ro.Start)%step != 0 {
 					return nil
 				}
 
 				obj := t.vm.InitIntegerObject(i)
-				t.builtinMethodYield(blockFrame, obj)
+				_, err := t.builtinMethodYield(blockFrame, obj)
+
+				if err != nil {
+					return err
+				}
+
 				blockFrameUsed = true
 
 				return nil
@@ -499,7 +517,7 @@ func (ro *RangeObject) Value() interface{} {
 	return ro.ToString()
 }
 
-func (ro *RangeObject) each(f func(int) error) (err error) {
+func (ro *RangeObject) each(f func(int) *Error) (err *Error) {
 	var inc int
 	if ro.End-ro.Start >= 0 {
 		inc = 1
