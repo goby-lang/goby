@@ -173,6 +173,10 @@ func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) (err 
 	vm.mainThread.callFrameStack.push(cf)
 	err = vm.mainThread.startFromTopFrame()
 
+	if err != nil {
+		return err
+	}
+
 	if err != nil && vm.mode == parser.NormalMode {
 		fmt.Fprintln(os.Stderr, err.Message())
 		os.Exit(1)

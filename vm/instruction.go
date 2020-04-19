@@ -183,7 +183,11 @@ func invokeBlock(t *Thread, sourceLine int, cf *normalCallFrame, args ...interfa
 	}
 
 	t.callFrameStack.push(c)
-	t.startFromTopFrame()
+	err = t.startFromTopFrame()
+
+	if err != nil {
+		return err
+	}
 
 	t.Stack.Set(receiverPr, t.Stack.top())
 	t.Stack.pointer = receiverPr + 1
@@ -236,7 +240,11 @@ func send(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) (
 	}
 
 	err = t.findAndCallMethod(receiver, methodName, receiverPr, argSet, argCount, argPr, sourceLine, blockFrame, cf.fileName)
-	return
+
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func defClass(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) (err *Error) {
@@ -278,7 +286,12 @@ func defClass(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{
 	c := newNormalCallFrame(is, cf.FileName(), sourceLine)
 	c.self = classPtr.Target
 	t.callFrameStack.push(c)
-	t.startFromTopFrame()
+
+	err = t.startFromTopFrame()
+
+	if err != nil {
+		return err
+	}
 
 	t.Stack.Push(classPtr)
 	return

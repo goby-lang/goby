@@ -145,6 +145,8 @@ func (t *Thread) startFromTopFrame() (err *Error) {
 
 			err.storedTraces = true
 		}
+
+		return err
 	}
 
 	return
@@ -172,6 +174,12 @@ func (t *Thread) evalCallFrame(cf callFrame) (err *Error) {
 		//fmt.Println("-----------------------")
 		//fmt.Println(t.callFrameStack.inspect())
 		result := cf.method(cf.receiver, cf.sourceLine, t, args, cf.blockFrame)
+		err, ok := result.(*Error)
+
+		if ok {
+			return err
+		}
+
 		t.Stack.Push(&Pointer{Target: result})
 		//fmt.Println(t.callFrameStack.inspect())
 		//fmt.Println("-----------------------")
@@ -234,9 +242,9 @@ func (t *Thread) BlockGiven() bool {
 	return t.currentFrame.BlockFrame() != nil
 }
 
-func (t *Thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object) *Pointer {
+func (t *Thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object) (p *Pointer, err *Error) {
 	if blockFrame.IsRemoved() {
-		return &Pointer{Target: NULL}
+		return &Pointer{Target: NULL}, nil
 	}
 
 	c := newNormalCallFrame(blockFrame.instructionSet, blockFrame.FileName(), blockFrame.sourceLine)
@@ -251,13 +259,17 @@ func (t *Thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object)
 	}
 
 	t.callFrameStack.push(c)
-	t.startFromTopFrame()
+	err = t.startFromTopFrame()
 
-	if blockFrame.IsRemoved() {
-		return &Pointer{Target: NULL}
+	if err != nil {
+		return nil, err
 	}
 
-	return t.Stack.top()
+	if blockFrame.IsRemoved() {
+		return &Pointer{Target: NULL}, nil
+	}
+
+	return t.Stack.top(), nil
 }
 
 func (t *Thread) retrieveBlock(fileName, blockFlag string, sourceLine int) (blockFrame *normalCallFrame) {
@@ -392,7 +404,12 @@ func (t *Thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 	)
 
 	t.callFrameStack.push(cf)
-	t.startFromTopFrame()
+
+	err := t.startFromTopFrame()
+
+	if err != nil {
+		return err
+	}
 	evaluated := t.Stack.top()
 
 	_, ok := receiver.(*RClass)
@@ -465,7 +482,11 @@ func (t *Thread) evalMethodObject(call *callObject) (err *Error) {
 	}
 
 	t.callFrameStack.push(call.callFrame)
-	t.startFromTopFrame()
+	err = t.startFromTopFrame()
+
+	if err != nil {
+		return err
+	}
 
 	t.Stack.Set(call.receiverPtr, t.Stack.top())
 	t.Stack.pointer = call.argPtr()
