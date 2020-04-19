@@ -57,11 +57,11 @@ func TestConcurrentHashInitializationFail(t *testing.T) {
 		{`
 		require 'concurrent/hash'
 		Concurrent::Hash.new(true)
-		`, "TypeError: Expect argument to be Hash. got: Boolean", 3},
+		`, "TypeError: Expect argument to be Hash. got: Boolean", 3, 1},
 		{`
 		require 'concurrent/hash'
 		Concurrent::Hash.new(1, 2)
-		`, "ArgumentError: Expect 1 or less argument(s). got: 2", 3},
+		`, "ArgumentError: Expect 1 or less argument(s). got: 2", 3, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -199,13 +199,13 @@ func TestConcurrentHashAccessOperationFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: 2 })[]`, "ArgumentError: Expect 1 argument(s). got: 0", 3},
+		Concurrent::Hash.new({ a: 1, b: 2 })[]`, "ArgumentError: Expect 1 argument(s). got: 0", 3, 1},
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: 2 })[true]`, "TypeError: Expect argument to be String. got: Boolean", 3},
+		Concurrent::Hash.new({ a: 1, b: 2 })[true]`, "TypeError: Expect argument to be String. got: Boolean", 3, 1},
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: 2 })[true] = 1`, "TypeError: Expect argument to be String. got: Boolean", 3},
+		Concurrent::Hash.new({ a: 1, b: 2 })[true] = 1`, "TypeError: Expect argument to be String. got: Boolean", 3, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -291,16 +291,16 @@ func TestConcurrentHashDeleteMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: "Hello", c: true }).delete`, "ArgumentError: Expect 1 argument(s). got: 0", 3},
+		Concurrent::Hash.new({ a: 1, b: "Hello", c: true }).delete`, "ArgumentError: Expect 1 argument(s). got: 0", 3, 1},
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: "Hello", c: true }).delete("a", "b")`, "ArgumentError: Expect 1 argument(s). got: 2", 3},
+		Concurrent::Hash.new({ a: 1, b: "Hello", c: true }).delete("a", "b")`, "ArgumentError: Expect 1 argument(s). got: 2", 3, 1},
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: "Hello", c: true }).delete(123)`, "TypeError: Expect argument to be String. got: Integer", 3},
+		Concurrent::Hash.new({ a: 1, b: "Hello", c: true }).delete(123)`, "TypeError: Expect argument to be String. got: Integer", 3, 1},
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: "Hello", c: true }).delete(true)`, "TypeError: Expect argument to be String. got: Boolean", 3},
+		Concurrent::Hash.new({ a: 1, b: "Hello", c: true }).delete(true)`, "TypeError: Expect argument to be String. got: Boolean", 3, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -366,10 +366,10 @@ func TestConcurrentHashEachMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: 2}).each("Hello") do end`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		Concurrent::Hash.new({ a: 1, b: 2}).each("Hello") do end`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: 2}).each`, "InternalError: Can't yield without a block", 1},
+		Concurrent::Hash.new({ a: 1, b: 2}).each`, "InternalError: Can't yield without a block", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -407,16 +407,16 @@ func TestConcurrentHashHasKeyMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: 2 }).has_key?`, "ArgumentError: Expect 1 argument(s). got: 0", 3},
+		Concurrent::Hash.new({ a: 1, b: 2 }).has_key?`, "ArgumentError: Expect 1 argument(s). got: 0", 3, 1},
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: 2 }).has_key?(true, { hello: "World" })`, "ArgumentError: Expect 1 argument(s). got: 2", 3},
+		Concurrent::Hash.new({ a: 1, b: 2 }).has_key?(true, { hello: "World" })`, "ArgumentError: Expect 1 argument(s). got: 2", 3, 1},
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: 2 }).has_key?(true)`, "TypeError: Expect argument to be String. got: Boolean", 3},
+		Concurrent::Hash.new({ a: 1, b: 2 }).has_key?(true)`, "TypeError: Expect argument to be String. got: Boolean", 3, 1},
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: 2 }).has_key?(123)`, "TypeError: Expect argument to be String. got: Integer", 3},
+		Concurrent::Hash.new({ a: 1, b: 2 }).has_key?(123)`, "TypeError: Expect argument to be String. got: Integer", 3, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -592,10 +592,10 @@ func TestConcurrentHashToJSONMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: 2 }).to_json(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 3},
+		Concurrent::Hash.new({ a: 1, b: 2 }).to_json(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 3, 1},
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: 2 }).to_json(true, { hello: "World" })`, "ArgumentError: Expect 0 argument(s). got: 2", 3},
+		Concurrent::Hash.new({ a: 1, b: 2 }).to_json(true, { hello: "World" })`, "ArgumentError: Expect 0 argument(s). got: 2", 3, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -633,10 +633,10 @@ func TestConcurrentHashToStringMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: 2 }).to_s(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 3},
+		Concurrent::Hash.new({ a: 1, b: 2 }).to_s(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 3, 1},
 		{`
 		require 'concurrent/hash'
-		Concurrent::Hash.new({ a: 1, b: 2 }).to_s(true, { hello: "World" })`, "ArgumentError: Expect 0 argument(s). got: 2", 3},
+		Concurrent::Hash.new({ a: 1, b: 2 }).to_s(true, { hello: "World" })`, "ArgumentError: Expect 0 argument(s). got: 2", 3, 1},
 	}
 
 	for i, tt := range testsFail {

@@ -90,10 +90,10 @@ func TestIntegerArithmeticOperationsPriority(t *testing.T) {
 
 func TestIntegerArithmeticOperationFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`1 + "p"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`1 - "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`1 ** "p"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`1 / "t"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`1 + "p"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
+		{`1 - "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
+		{`1 ** "p"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
+		{`1 / "t"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -169,11 +169,11 @@ func TestIntegerComparisonWithFloat(t *testing.T) {
 
 func TestIntegerComparisonFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`1 > "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`1 >= "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`1 < "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`1 <= "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`1 <=> "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`1 > "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
+		{`1 >= "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
+		{`1 < "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
+		{`1 <= "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
+		{`1 <=> "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -343,14 +343,14 @@ func TestIntegerTimesMethod(t *testing.T) {
 
 func TestIntegerZeroDivisionFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`6 / 0`, "ZeroDivisionError: Divided by 0", 1},
-		{`6 / -0`, "ZeroDivisionError: Divided by 0", 1},
-		{`6 / 0.0`, "ZeroDivisionError: Divided by 0", 1},
-		{`6 / -0.0`, "ZeroDivisionError: Divided by 0", 1},
-		{`6 % 0`, "ZeroDivisionError: Divided by 0", 1},
-		{`6 % -0`, "ZeroDivisionError: Divided by 0", 1},
-		{`6 % 0.0`, "ZeroDivisionError: Divided by 0", 1},
-		{`6 % -0.0`, "ZeroDivisionError: Divided by 0", 1},
+		{`6 / 0`, "ZeroDivisionError: Divided by 0", 1, 1},
+		{`6 / -0`, "ZeroDivisionError: Divided by 0", 1, 1},
+		{`6 / 0.0`, "ZeroDivisionError: Divided by 0", 1, 1},
+		{`6 / -0.0`, "ZeroDivisionError: Divided by 0", 1, 1},
+		{`6 % 0`, "ZeroDivisionError: Divided by 0", 1, 1},
+		{`6 % -0`, "ZeroDivisionError: Divided by 0", 1, 1},
+		{`6 % 0.0`, "ZeroDivisionError: Divided by 0", 1, 1},
+		{`6 % -0.0`, "ZeroDivisionError: Divided by 0", 1, 1},
 	}
 
 	for i, tt := range testsFail {

@@ -53,9 +53,9 @@ func TestFileObjectFail(t *testing.T) {
 
 	testsFail := []errorTestCase{
 		{`f = File.new("fictitious.gb")`,
-			`IOError: open fictitious.gb: no such file or directory`, 1},
+			`IOError: open fictitious.gb: no such file or directory`, 1, 1},
 		{`f = File.new("fictitious/")`,
-			`IOError: open fictitious/: no such file or directory`, 1},
+			`IOError: open fictitious/: no such file or directory`, 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -63,7 +63,7 @@ func TestFileObjectFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
+		v.checkSP(t, i, tt.expectedSP)
 	}
 }
 
@@ -103,11 +103,11 @@ func TestFileBasenameMethodFail(t *testing.T) {
 
 	testsFail := []errorTestCase{
 		{`File.basename`,
-			`ArgumentError: Expect 1 argument(s). got: 0`, 1},
+			`ArgumentError: Expect 1 argument(s). got: 0`, 1, 1},
 		{`File.basename("test1.txt", "test2.txt")`,
-			`ArgumentError: Expect 1 argument(s). got: 2`, 1},
+			`ArgumentError: Expect 1 argument(s). got: 2`, 1, 1},
 		{`File.basename(1)`,
-			`TypeError: Expect argument to be String. got: Integer`, 1},
+			`TypeError: Expect argument to be String. got: Integer`, 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -115,7 +115,7 @@ func TestFileBasenameMethodFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
+		v.checkSP(t, i, tt.expectedSP)
 	}
 }
 
@@ -155,21 +155,21 @@ func TestFileChmodMethodFail(t *testing.T) {
 
 	testsFail := []errorTestCase{
 		{`File.chmod`,
-			`ArgumentError: Expect 2 or more argument(s). got: 0`, 1},
+			`ArgumentError: Expect 2 or more argument(s). got: 0`, 1, 1},
 		{`File.chmod(0755)`,
-			`ArgumentError: Expect 2 or more argument(s). got: 1`, 1},
+			`ArgumentError: Expect 2 or more argument(s). got: 1`, 1, 1},
 		{`File.chmod(0755, "/tmp/goby/fictitious.gb")`,
-			`IOError: chmod /tmp/goby/fictitious.gb: no such file or directory`, 1},
+			`IOError: chmod /tmp/goby/fictitious.gb: no such file or directory`, 1, 1},
 		{`
 		File.open("/tmp/goby/out_chmod.txt", "w", 0755)
 		File.chmod(0777, "/tmp/goby/out_chmod.txt", "/tmp/goby/fictitious.gb")
-		`, `IOError: chmod /tmp/goby/fictitious.gb: no such file or directory`, 1},
+		`, `IOError: chmod /tmp/goby/fictitious.gb: no such file or directory`, 1, 1},
 		{`File.chmod("string", "filePath")`,
-			`TypeError: Expect argument #1 to be Integer. got: String`, 1},
+			`TypeError: Expect argument #1 to be Integer. got: String`, 1, 1},
 		{`
 		File.open("/tmp/goby/out_chmod.txt", "w", 0755)
 		File.chmod(-999, "/tmp/goby/out_chmod.txt")
-		`, `ArgumentError: Invalid chmod number. got: -999`, 1},
+		`, `ArgumentError: Invalid chmod number. got: -999`, 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -177,7 +177,7 @@ func TestFileChmodMethodFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
+		v.checkSP(t, i, tt.expectedSP)
 	}
 }
 
@@ -221,11 +221,11 @@ func TestFileDeleteMethodFail(t *testing.T) {
 
 	testsFail := []errorTestCase{
 		{`File.delete("/tmp/goby/non-existent.txt")`,
-			`IOError: remove /tmp/goby/non-existent.txt: no such file or directory`, 1},
+			`IOError: remove /tmp/goby/non-existent.txt: no such file or directory`, 1, 1},
 		{`File.delete 1`,
-			`TypeError: Expect argument #1 to be String. got: Integer`, 1},
+			`TypeError: Expect argument #1 to be String. got: Integer`, 1, 1},
 		{`f = "/tmp/goby/out.txt"; File.open(f, "w", 0755);File.delete(f, 1)`,
-			`TypeError: Expect argument #2 to be String. got: Integer`, 1},
+			`TypeError: Expect argument #2 to be String. got: Integer`, 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -233,7 +233,7 @@ func TestFileDeleteMethodFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
+		v.checkSP(t, i, tt.expectedSP)
 	}
 }
 
@@ -269,11 +269,11 @@ func TestFileExistMethodFail(t *testing.T) {
 
 	testsFail := []errorTestCase{
 		{`File.exist?`,
-			`ArgumentError: Expect 1 argument(s). got: 0`, 1},
+			`ArgumentError: Expect 1 argument(s). got: 0`, 1, 1},
 		{`File.exist?("test1.txt", "test2.txt")`,
-			`ArgumentError: Expect 1 argument(s). got: 2`, 1},
+			`ArgumentError: Expect 1 argument(s). got: 2`, 1, 1},
 		{`File.exist? 1`,
-			`TypeError: Expect argument to be String. got: Integer`, 1},
+			`TypeError: Expect argument to be String. got: Integer`, 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -281,7 +281,7 @@ func TestFileExistMethodFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
+		v.checkSP(t, i, tt.expectedSP)
 	}
 }
 
@@ -310,11 +310,11 @@ func TestFileExtnameMethod(t *testing.T) {
 func TestFileExtnameMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`File.extname`,
-			`ArgumentError: Expect 1 argument(s). got: 0`, 1},
+			`ArgumentError: Expect 1 argument(s). got: 0`, 1, 1},
 		{`File.extname("test1.txt", "test2.txt")`,
-			`ArgumentError: Expect 1 argument(s). got: 2`, 1},
+			`ArgumentError: Expect 1 argument(s). got: 2`, 1, 1},
 		{`File.extname 1`,
-			`TypeError: Expect argument to be String. got: Integer`, 1},
+			`TypeError: Expect argument to be String. got: Integer`, 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -322,7 +322,7 @@ func TestFileExtnameMethodFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
+		v.checkSP(t, i, tt.expectedSP)
 	}
 }
 
@@ -357,7 +357,7 @@ func TestFileJoinMethod(t *testing.T) {
 func TestFileJoinMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`File.join(1)`,
-			`TypeError: Expect argument to be String. got: Integer`, 1},
+			`TypeError: Expect argument to be String. got: Integer`, 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -365,7 +365,7 @@ func TestFileJoinMethodFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
+		v.checkSP(t, i, tt.expectedSP)
 	}
 }
 
@@ -407,25 +407,25 @@ func TestFileNewMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		File.new()
-		`, `ArgumentError: Expect 1 to 3 argument(s). got: 0`, 1},
+		`, `ArgumentError: Expect 1 to 3 argument(s). got: 0`, 1, 1},
 		{`
 		File.new("/tmp/goby/test.gb", "w", 0777, "a")
-		`, `ArgumentError: Expect 1 to 3 argument(s). got: 4`, 1},
+		`, `ArgumentError: Expect 1 to 3 argument(s). got: 4`, 1, 1},
 		{`
 		File.new(1)
-		`, `TypeError: Expect argument #1 to be String. got: Integer`, 1},
+		`, `TypeError: Expect argument #1 to be String. got: Integer`, 1, 1},
 		{`
 		File.new("/tmp/goby/test.gb", 1, 0777)
-		`, `TypeError: Expect argument #2 to be String. got: Integer`, 1},
+		`, `TypeError: Expect argument #2 to be String. got: Integer`, 1, 1},
 		{`
 		File.new("/tmp/goby/test.gb", "p", 0777)
-		`, `ArgumentError: Unknown file mode: p`, 1},
+		`, `ArgumentError: Unknown file mode: p`, 1, 1},
 		{`
 		File.new("/tmp/goby/test.gb", "w", "e")
-		`, `TypeError: Expect argument #3 to be Integer. got: String`, 1},
+		`, `TypeError: Expect argument #3 to be Integer. got: String`, 1, 1},
 		{`
 		File.new("/tmp/goby/test.gb", "w", -99999)
-		`, `ArgumentError: Invalid chmod number. got: -99999`, 1},
+		`, `ArgumentError: Invalid chmod number. got: -99999`, 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -433,7 +433,7 @@ func TestFileNewMethodFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
+		v.checkSP(t, i, tt.expectedSP)
 	}
 }
 
@@ -456,16 +456,16 @@ func TestFileSizeMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		File.size()
-		`, `ArgumentError: Expect 1 argument(s). got: 0`, 1},
+		`, `ArgumentError: Expect 1 argument(s). got: 0`, 1, 1},
 		{`
 		File.size("../test_fixtures/file_test/size.gb","/tmp/goby/test.gb")
-		`, `ArgumentError: Expect 1 argument(s). got: 2`, 1},
+		`, `ArgumentError: Expect 1 argument(s). got: 2`, 1, 1},
 		{`
 		File.size(1)
-		`, `TypeError: Expect argument to be String. got: Integer`, 1},
+		`, `TypeError: Expect argument to be String. got: Integer`, 1, 1},
 		{`
 		File.size("/tmp/goby/fictitious.gb")
-		`, `IOError: stat /tmp/goby/fictitious.gb: no such file or directory`, 1},
+		`, `IOError: stat /tmp/goby/fictitious.gb: no such file or directory`, 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -473,7 +473,7 @@ func TestFileSizeMethodFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
+		v.checkSP(t, i, tt.expectedSP)
 	}
 }
 
@@ -500,13 +500,13 @@ func TestFileSplitMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		File.split()
-		`, `ArgumentError: Expect 1 argument(s). got: 0`, 1},
+		`, `ArgumentError: Expect 1 argument(s). got: 0`, 1, 1},
 		{`
 		File.split("/home/goby/plugin/test.gb", "/home/goby/plugin/test.gb")
-		`, `ArgumentError: Expect 1 argument(s). got: 2`, 1},
+		`, `ArgumentError: Expect 1 argument(s). got: 2`, 1, 1},
 		{`
 		File.split(1)
-		`, `TypeError: Expect argument to be String. got: Integer`, 1},
+		`, `TypeError: Expect argument to be String. got: Integer`, 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -514,7 +514,7 @@ func TestFileSplitMethodFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
+		v.checkSP(t, i, tt.expectedSP)
 	}
 }
 

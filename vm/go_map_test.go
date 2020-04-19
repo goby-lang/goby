@@ -72,9 +72,9 @@ func TestGoMapGetMethod(t *testing.T) {
 
 func TestGoMapGetMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`m = GoMap.new;m.get("foo", 1)`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
-		{`m = GoMap.new;m.get`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
-		{`m = GoMap.new;m.get(1)`, "TypeError: Expect argument to be String. got: Integer", 1},
+		{`m = GoMap.new;m.get("foo", 1)`, "ArgumentError: Expect 1 argument(s). got: 2", 1, 1},
+		{`m = GoMap.new;m.get`, "ArgumentError: Expect 1 argument(s). got: 0", 1, 1},
+		{`m = GoMap.new;m.get(1)`, "TypeError: Expect argument to be String. got: Integer", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -109,9 +109,9 @@ func TestGoMapSetMethod(t *testing.T) {
 
 func TestGoMapSetMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`m = GoMap.new;m.set("foo")`, "ArgumentError: Expect 2 argument(s). got: 1", 1},
-		{`m = GoMap.new;m.set("foo", "bar", "baz")`, "ArgumentError: Expect 2 argument(s). got: 3", 1},
-		{`m = GoMap.new;m.set(1, "foo")`, "TypeError: Expect argument #1 to be String. got: Integer", 1},
+		{`m = GoMap.new;m.set("foo")`, "ArgumentError: Expect 2 argument(s). got: 1", 1, 1},
+		{`m = GoMap.new;m.set("foo", "bar", "baz")`, "ArgumentError: Expect 2 argument(s). got: 3", 1, 1},
+		{`m = GoMap.new;m.set(1, "foo")`, "TypeError: Expect argument #1 to be String. got: Integer", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -152,8 +152,8 @@ func TestGoMapToHashMethod(t *testing.T) {
 
 func TestGoMapToHashMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`m = GoMap.new;m.to_hash(1)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
-		{`m = GoMap.new;m.to_hash(1, 2)`, "ArgumentError: Expect 0 argument(s). got: 2", 1},
+		{`m = GoMap.new;m.to_hash(1)`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
+		{`m = GoMap.new;m.to_hash(1, 2)`, "ArgumentError: Expect 0 argument(s). got: 2", 1, 1},
 	}
 
 	for i, tt := range testsFail {

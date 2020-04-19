@@ -181,11 +181,11 @@ func TestHashAccessWithDefaultOperation(t *testing.T) {
 
 func TestHashAccessOperationFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ a: 1, b: 2 }[]`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
-		{`{ a: 1, b: 2 }[true]`, "TypeError: Expect argument to be String. got: Boolean", 1},
-		{`{ a: 1, b: 2 }[true] = 1`, "TypeError: Expect argument to be String. got: Boolean", 1},
-		{`{ a: 1, b: 2 }["a", "b"]`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
-		{`{ a: 1, b: 2 }["a", "b"] = 123`, "ArgumentError: Expect 2 argument(s). got: 3", 1},
+		{`{ a: 1, b: 2 }[]`, "ArgumentError: Expect 1 argument(s). got: 0", 1, 1},
+		{`{ a: 1, b: 2 }[true]`, "TypeError: Expect argument to be String. got: Boolean", 1, 1},
+		{`{ a: 1, b: 2 }[true] = 1`, "TypeError: Expect argument to be String. got: Boolean", 1, 1},
+		{`{ a: 1, b: 2 }["a", "b"]`, "ArgumentError: Expect 1 argument(s). got: 2", 1, 1},
+		{`{ a: 1, b: 2 }["a", "b"] = 123`, "ArgumentError: Expect 2 argument(s). got: 3", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -305,8 +305,8 @@ func TestHashAnyMethod(t *testing.T) {
 
 func TestHashAnyMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{  }.any?(123) do end`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
-		{`{  }.any?`, "InternalError: Can't yield without a block", 1},
+		{`{  }.any?(123) do end`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
+		{`{  }.any?`, "InternalError: Can't yield without a block", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -347,8 +347,8 @@ func TestHashClearMethod(t *testing.T) {
 
 func TestHashClearMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ a: 1, b: 2 }.clear(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
-		{`{ a: 1, b: 2 }.clear(true, { hello: "World" })`, "ArgumentError: Expect 0 argument(s). got: 2", 1},
+		{`{ a: 1, b: 2 }.clear(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
+		{`{ a: 1, b: 2 }.clear(true, { hello: "World" })`, "ArgumentError: Expect 0 argument(s). got: 2", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -387,9 +387,9 @@ func TestHashDefaultOperation(t *testing.T) {
 
 func TestHashDefaultSetOperationFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ }.default = *[1, 2]`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
-		{`{ }.default = []`, "ArgumentError: Arrays and Hashes are not accepted as default values", 1},
-		{`{ }.default = {}`, "ArgumentError: Arrays and Hashes are not accepted as default values", 1},
+		{`{ }.default = *[1, 2]`, "ArgumentError: Expect 1 argument(s). got: 2", 1, 1},
+		{`{ }.default = []`, "ArgumentError: Arrays and Hashes are not accepted as default values", 1, 1},
+		{`{ }.default = {}`, "ArgumentError: Arrays and Hashes are not accepted as default values", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -455,10 +455,10 @@ func TestHashDeleteMethod(t *testing.T) {
 
 func TestHashDeleteMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ a: 1, b: "Hello", c: true }.delete`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
-		{`{ a: 1, b: "Hello", c: true }.delete("a", "b")`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
-		{`{ a: 1, b: "Hello", c: true }.delete(123)`, "TypeError: Expect argument to be String. got: Integer", 1},
-		{`{ a: 1, b: "Hello", c: true }.delete(true)`, "TypeError: Expect argument to be String. got: Boolean", 1},
+		{`{ a: 1, b: "Hello", c: true }.delete`, "ArgumentError: Expect 1 argument(s). got: 0", 1, 1},
+		{`{ a: 1, b: "Hello", c: true }.delete("a", "b")`, "ArgumentError: Expect 1 argument(s). got: 2", 1, 1},
+		{`{ a: 1, b: "Hello", c: true }.delete(123)`, "TypeError: Expect argument to be String. got: Integer", 1, 1},
+		{`{ a: 1, b: "Hello", c: true }.delete(true)`, "TypeError: Expect argument to be String. got: Boolean", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -524,8 +524,8 @@ func TestHashDeleteIfMethod(t *testing.T) {
 
 func TestHashDeleteIfMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ }.delete_if(123) do end`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
-		{`{ }.delete_if`, "InternalError: Can't yield without a block", 1},
+		{`{ }.delete_if(123) do end`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
+		{`{ }.delete_if`, "InternalError: Can't yield without a block", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -564,8 +564,8 @@ func TestHashDigMethod(t *testing.T) {
 
 func TestHashDigMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ a: [], b: 2 }.dig`, "ArgumentError: Expect 1 or more argument(s). got: 0", 1},
-		{`{ a: 1, b: 2 }.dig(:a, :b)`, "TypeError: Expect target to be Diggable, got Integer", 1},
+		{`{ a: [], b: 2 }.dig`, "ArgumentError: Expect 1 or more argument(s). got: 0", 1, 1},
+		{`{ a: 1, b: 2 }.dig(:a, :b)`, "TypeError: Expect target to be Diggable, got Integer", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -627,8 +627,8 @@ func TestHashEachMethod(t *testing.T) {
 func TestHashEachMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`{ a: 1, b: 2}.each("Hello") do end
-		`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
-		{`{ a: 1, b: 2}.each`, "InternalError: Can't yield without a block", 1},
+		`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
+		{`{ a: 1, b: 2}.each`, "InternalError: Can't yield without a block", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -693,8 +693,8 @@ func TestHashEachKeyMethodFail(t *testing.T) {
 		{`{ a: 1, b: 2, c: 3 }.each_key("Hello") do |key|
 			puts key
 		end
-		`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
-		{`{ a: 1, b: 2, c: 3 }.each_key`, "InternalError: Can't yield without a block", 1},
+		`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
+		{`{ a: 1, b: 2, c: 3 }.each_key`, "InternalError: Can't yield without a block", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -792,8 +792,8 @@ func TestHashEachValueMethodFail(t *testing.T) {
 		{`{ a: 1, b: 2, c: 3 }.each_value("Hello") do |value|
 			puts value
 		end
-		`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
-		{`{ a: 1, b: 2, c: 3 }.each_value`, "InternalError: Can't yield without a block", 1},
+		`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
+		{`{ a: 1, b: 2, c: 3 }.each_value`, "InternalError: Can't yield without a block", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -825,8 +825,8 @@ func TestHashEmptyMethod(t *testing.T) {
 
 func TestHashEmptyMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ a: 1, b: 2 }.empty?(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
-		{`{ a: 1, b: 2 }.empty?(true, { hello: "World" })`, "ArgumentError: Expect 0 argument(s). got: 2", 1},
+		{`{ a: 1, b: 2 }.empty?(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
+		{`{ a: 1, b: 2 }.empty?(true, { hello: "World" })`, "ArgumentError: Expect 0 argument(s). got: 2", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -868,8 +868,8 @@ func TestHashEqualMethod(t *testing.T) {
 
 func TestHashEqualMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ a: 1, b: 2 }.eql?`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
-		{`{ a: 1, b: 2 }.eql?(true, { hello: "World" })`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
+		{`{ a: 1, b: 2 }.eql?`, "ArgumentError: Expect 1 argument(s). got: 0", 1, 1},
+		{`{ a: 1, b: 2 }.eql?(true, { hello: "World" })`, "ArgumentError: Expect 1 argument(s). got: 2", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -908,10 +908,10 @@ func TestHashFetchMethod(t *testing.T) {
 
 func TestHashFetchMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ spaghetti: "eat" }.fetch()`, "ArgumentError: Expect 1 to 2 argument(s). got: 0", 1},
-		{`{ spaghetti: "eat" }.fetch("a", "b", "c")`, "ArgumentError: Expect 1 to 2 argument(s). got: 3", 1},
-		{`{ spaghetti: "eat" }.fetch("a", "b") do end`, "ArgumentError: The default argument can't be passed along with a block", 1},
-		{`{ spaghetti: "eat" }.fetch("pizza")`, "ArgumentError: The value was not found, and no block has been provided", 1},
+		{`{ spaghetti: "eat" }.fetch()`, "ArgumentError: Expect 1 to 2 argument(s). got: 0", 1, 1},
+		{`{ spaghetti: "eat" }.fetch("a", "b", "c")`, "ArgumentError: Expect 1 to 2 argument(s). got: 3", 1, 1},
+		{`{ spaghetti: "eat" }.fetch("a", "b") do end`, "ArgumentError: The default argument can't be passed along with a block", 1, 1},
+		{`{ spaghetti: "eat" }.fetch("pizza")`, "ArgumentError: The value was not found, and no block has been provided", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -947,9 +947,9 @@ func TestHashFetchValuesMethod(t *testing.T) {
 
 func TestHashFetchValuesMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ cat: "feline" }.fetch_values()`, "ArgumentError: Expect 1 or more argument(s). got: 0", 1},
-		{`{ cat: "feline" }.fetch_values(1)`, "TypeError: Expect argument to be String. got: Integer", 1},
-		{`{ cat: "feline" }.fetch_values("dog")`, "ArgumentError: There is no value for the key `dog`, and no block has been provided", 1},
+		{`{ cat: "feline" }.fetch_values()`, "ArgumentError: Expect 1 or more argument(s). got: 0", 1, 1},
+		{`{ cat: "feline" }.fetch_values(1)`, "TypeError: Expect argument to be String. got: Integer", 1, 1},
+		{`{ cat: "feline" }.fetch_values("dog")`, "ArgumentError: There is no value for the key `dog`, and no block has been provided", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -983,10 +983,10 @@ func TestHashHasKeyMethod(t *testing.T) {
 
 func TestHashHasKeyMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ a: 1, b: 2 }.has_key?`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
-		{`{ a: 1, b: 2 }.has_key?(true, { hello: "World" })`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
-		{`{ a: 1, b: 2 }.has_key?(true)`, "TypeError: Expect argument to be String. got: Boolean", 1},
-		{`{ a: 1, b: 2 }.has_key?(123)`, "TypeError: Expect argument to be String. got: Integer", 1},
+		{`{ a: 1, b: 2 }.has_key?`, "ArgumentError: Expect 1 argument(s). got: 0", 1, 1},
+		{`{ a: 1, b: 2 }.has_key?(true, { hello: "World" })`, "ArgumentError: Expect 1 argument(s). got: 2", 1, 1},
+		{`{ a: 1, b: 2 }.has_key?(true)`, "TypeError: Expect argument to be String. got: Boolean", 1, 1},
+		{`{ a: 1, b: 2 }.has_key?(123)`, "TypeError: Expect argument to be String. got: Integer", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1023,8 +1023,8 @@ func TestHashHasValueMethod(t *testing.T) {
 
 func TestHashHasValueMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ a: 1, b: 2 }.has_value?`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
-		{`{ a: 1, b: 2 }.has_value?(true, { hello: "World" })`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
+		{`{ a: 1, b: 2 }.has_value?`, "ArgumentError: Expect 1 argument(s). got: 0", 1, 1},
+		{`{ a: 1, b: 2 }.has_value?(true, { hello: "World" })`, "ArgumentError: Expect 1 argument(s). got: 2", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1066,8 +1066,8 @@ func TestHashKeysMethod(t *testing.T) {
 
 func TestHashKeysMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ a: 1, b: 2 }.keys(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
-		{`{ a: 1, b: 2 }.keys(true, { hello: "World" })`, "ArgumentError: Expect 0 argument(s). got: 2", 1},
+		{`{ a: 1, b: 2 }.keys(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
+		{`{ a: 1, b: 2 }.keys(true, { hello: "World" })`, "ArgumentError: Expect 0 argument(s). got: 2", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1103,8 +1103,8 @@ func TestHashLengthMethod(t *testing.T) {
 
 func TestHashLengthMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ a: 1, b: 2 }.length(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
-		{`{ a: 1, b: 2 }.length(true, { hello: "World" })`, "ArgumentError: Expect 0 argument(s). got: 2", 1},
+		{`{ a: 1, b: 2 }.length(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
+		{`{ a: 1, b: 2 }.length(true, { hello: "World" })`, "ArgumentError: Expect 0 argument(s). got: 2", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1194,8 +1194,8 @@ func TestHashMapValuesMethodFail(t *testing.T) {
 		{`{ a: 1, b: 2, c: 3 }.map_values("Hello") do |value|
 			value * 3
 		end
-		`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
-		{`{ a: 1, b: 2, c: 3 }.map_values`, "InternalError: Can't yield without a block", 1},
+		`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
+		{`{ a: 1, b: 2, c: 3 }.map_values`, "InternalError: Can't yield without a block", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1242,9 +1242,9 @@ func TestHashMergeMethod(t *testing.T) {
 
 func TestHashMergeMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ a: 1, b: 2 }.merge`, "ArgumentError: Expect 1 or more argument(s). got: 0", 1},
-		{`{ a: 1, b: 2 }.merge(true, { hello: "World" })`, "TypeError: Expect argument to be Hash. got: Boolean", 1},
-		{`{ a: 1, b: 2 }.merge({ hello: "World" }, 123, "Hello")`, "TypeError: Expect argument to be Hash. got: Integer", 1},
+		{`{ a: 1, b: 2 }.merge`, "ArgumentError: Expect 1 or more argument(s). got: 0", 1, 1},
+		{`{ a: 1, b: 2 }.merge(true, { hello: "World" })`, "TypeError: Expect argument to be Hash. got: Boolean", 1, 1},
+		{`{ a: 1, b: 2 }.merge({ hello: "World" }, 123, "Hello")`, "TypeError: Expect argument to be Hash. got: Integer", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1313,8 +1313,8 @@ func TestHashSelectMethod(t *testing.T) {
 
 func TestHashSelectMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ }.select(123) do end`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
-		{`{ }.select`, "InternalError: Can't yield without a block", 1},
+		{`{ }.select(123) do end`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
+		{`{ }.select`, "InternalError: Can't yield without a block", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1349,8 +1349,8 @@ func TestHashSortedKeysMethod(t *testing.T) {
 
 func TestHashSortedKeysMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ a: 1, b: 2 }.sorted_keys(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
-		{`{ a: 1, b: 2 }.sorted_keys(true, { hello: "World" })`, "ArgumentError: Expect 0 argument(s). got: 2", 1},
+		{`{ a: 1, b: 2 }.sorted_keys(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
+		{`{ a: 1, b: 2 }.sorted_keys(true, { hello: "World" })`, "ArgumentError: Expect 0 argument(s). got: 2", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1420,8 +1420,8 @@ func TestHashToArrayMethod(t *testing.T) {
 
 func TestHashToArrayMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ a: 1, b: 2 }.to_a(true, { hello: "World" })`, "ArgumentError: Expect 1 or less argument(s). got: 2", 1},
-		{`{ a: 1, b: 2 }.to_a(123)`, "TypeError: Expect argument to be Boolean. got: Integer", 1},
+		{`{ a: 1, b: 2 }.to_a(true, { hello: "World" })`, "ArgumentError: Expect 1 or less argument(s). got: 2", 1, 1},
+		{`{ a: 1, b: 2 }.to_a(123)`, "TypeError: Expect argument to be Boolean. got: Integer", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1672,8 +1672,8 @@ func TestHashToJSONMethodWithBasicTypes(t *testing.T) {
 
 func TestHashToJSONMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ a: 1, b: 2 }.to_json(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
-		{`{ a: 1, b: 2 }.to_json(true, { hello: "World" })`, "ArgumentError: Expect 0 argument(s). got: 2", 1},
+		{`{ a: 1, b: 2 }.to_json(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
+		{`{ a: 1, b: 2 }.to_json(true, { hello: "World" })`, "ArgumentError: Expect 0 argument(s). got: 2", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1706,8 +1706,8 @@ func TestHashToStringMethod(t *testing.T) {
 
 func TestHashToStringMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ a: 1, b: 2 }.to_s(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
-		{`{ a: 1, b: 2 }.to_s(true, { hello: "World" })`, "ArgumentError: Expect 0 argument(s). got: 2", 1},
+		{`{ a: 1, b: 2 }.to_s(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
+		{`{ a: 1, b: 2 }.to_s(true, { hello: "World" })`, "ArgumentError: Expect 0 argument(s). got: 2", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1789,8 +1789,8 @@ func TestHashTransformValuesMethodFail(t *testing.T) {
 		{`{ a: 1, b: 2, c: 3 }.transform_values("Hello") do |value|
 			value * 3
 		end
-		`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
-		{`{ a: 1, b: 2, c: 3 }.transform_values`, "InternalError: Can't yield without a block", 1},
+		`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
+		{`{ a: 1, b: 2, c: 3 }.transform_values`, "InternalError: Can't yield without a block", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1835,8 +1835,8 @@ func TestHashValuesMethod(t *testing.T) {
 
 func TestHashValuesMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ a: 1, b: 2 }.values(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
-		{`{ a: 1, b: 2 }.values(true, { hello: "World" })`, "ArgumentError: Expect 0 argument(s). got: 2", 1},
+		{`{ a: 1, b: 2 }.values(123)`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
+		{`{ a: 1, b: 2 }.values(true, { hello: "World" })`, "ArgumentError: Expect 0 argument(s). got: 2", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1875,7 +1875,7 @@ func TestHashValuesAtMethod(t *testing.T) {
 
 func TestHashValuesAtMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`{ a: 1, b: 2 }.values_at(123)`, "TypeError: Expect argument to be String. got: Integer", 1},
+		{`{ a: 1, b: 2 }.values_at(123)`, "TypeError: Expect argument to be String. got: Integer", 1, 1},
 	}
 
 	for i, tt := range testsFail {

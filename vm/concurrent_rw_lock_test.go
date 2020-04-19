@@ -12,7 +12,7 @@ func TestRWLockNewMethodFail(t *testing.T) {
 		{`
 		require 'concurrent/rw_lock'
 		Concurrent::RWLock.new(5)
-		`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -29,7 +29,7 @@ func TestRWLockAcquireReadLockMethodFail(t *testing.T) {
 		{`
 		require 'concurrent/rw_lock'
 		Concurrent::RWLock.new.acquire_read_lock(5)
-		`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -46,7 +46,7 @@ func TestRWLockReleaseReadLockMethodFail(t *testing.T) {
 		{`
 		require 'concurrent/rw_lock'
 		Concurrent::RWLock.new.release_read_lock(5)
-		`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -63,7 +63,7 @@ func TestRWLockAcquireWriteLockMethodFail(t *testing.T) {
 		{`
 		require 'concurrent/rw_lock'
 		Concurrent::RWLock.new.acquire_write_lock(5)
-		`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -80,7 +80,7 @@ func TestRWLockReleaseWriteLockMethodFail(t *testing.T) {
 		{`
 		require 'concurrent/rw_lock'
 		Concurrent::RWLock.new.release_write_lock(5)
-		`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -97,11 +97,11 @@ func TestRWLockWithReadLockMethodFail(t *testing.T) {
 		{`
 		require 'concurrent/rw_lock'
 		Concurrent::RWLock.new.with_read_lock
-		`, "InternalError: Can't yield without a block", 1},
+		`, "InternalError: Can't yield without a block", 1, 1},
 		{`
 		require 'concurrent/rw_lock'
 		Concurrent::RWLock.new.with_read_lock(5) do end
-		`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -118,11 +118,11 @@ func TestRWLockWithWriteLockMethodFail(t *testing.T) {
 		{`
 		require 'concurrent/rw_lock'
 		Concurrent::RWLock.new.with_write_lock
-		`, "InternalError: Can't yield without a block", 1},
+		`, "InternalError: Can't yield without a block", 1, 1},
 		{`
 		require 'concurrent/rw_lock'
 		Concurrent::RWLock.new.with_write_lock(5) do end
-		`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
 	}
 
 	for i, tt := range testsFail {

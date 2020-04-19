@@ -76,7 +76,7 @@ func TestRangeEnumeratorRaiseErrorWhenNoElementsOnNext(t *testing.T) {
 			enumerator.next
 			`,
 			"StopIteration: \"No more elements!\"",
-			2,
+			1, 1,
 		},
 		{`
 			enumerator = RangeEnumerator.new((1..0))
@@ -85,7 +85,7 @@ func TestRangeEnumeratorRaiseErrorWhenNoElementsOnNext(t *testing.T) {
 			enumerator.next
 			`,
 			"StopIteration: \"No more elements!\"",
-			2,
+			1, 1,
 		},
 	}
 
@@ -94,7 +94,7 @@ func TestRangeEnumeratorRaiseErrorWhenNoElementsOnNext(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 2)
+		v.checkSP(t, i, tt.expectedSP)
 
 	}
 

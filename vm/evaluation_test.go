@@ -944,7 +944,7 @@ func TestUnusedKeywordFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		if true then puts 1 end
-		`, "NoMethodError: Undefined Method 'then' for #<Object:##OBJECTID## >", 1},
+		`, "NoMethodError: Undefined Method 'then' for #<Object:##OBJECTID## >", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -952,7 +952,7 @@ func TestUnusedKeywordFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkFuzzifiedErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, 1)
-		v.checkSP(t, i, 1)
+		v.checkSP(t, i, 2)
 	}
 }
 
@@ -2172,10 +2172,7 @@ func TestInheritableMethodMissing(t *testing.T) {
 }
 
 func TestMethodMissingFail(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected string
-	}{
+	tests := []errorTestCase{
 		{`
 		class Foo
 		  def method_missing
@@ -2184,7 +2181,7 @@ func TestMethodMissingFail(t *testing.T) {
 		end
 		
 		Foo.new.bar
-`, "ArgumentError: Expect at most 0 args for method 'method_missing'. got: 1"},
+`, "ArgumentError: Expect at most 0 args for method 'method_missing'. got: 1", 1, 2},
 		{`
 		class Bar
 		  def method_missing
@@ -2196,7 +2193,7 @@ func TestMethodMissingFail(t *testing.T) {
 		end
 		
 		Foo.new.bar
-`, "NoMethodError: Undefined Method 'bar' for #<Foo:##OBJECTID## >"},
+`, "NoMethodError: Undefined Method 'bar' for #<Foo:##OBJECTID## >", 1, 1},
 		{`
 		module Bar
 		  def method_missing
@@ -2209,7 +2206,7 @@ func TestMethodMissingFail(t *testing.T) {
 		end
 		
 		Foo.new.bar
-`, "NoMethodError: Undefined Method 'bar' for #<Foo:##OBJECTID## >"},
+`, "NoMethodError: Undefined Method 'bar' for #<Foo:##OBJECTID## >", 1, 1},
 	}
 
 	for i, tt := range tests {
@@ -2217,8 +2214,8 @@ func TestMethodMissingFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 
 		checkFuzzifiedErrorMsg(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 1)
-		v.checkSP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, tt.expectedSP)
 	}
 }
 
@@ -2544,11 +2541,11 @@ func TestUnusedVariableFail(t *testing.T) {
 		{`
 		_ = 1
 		_
-		`, "NoMethodError: Undefined Method '_' for #<Object:##OBJECTID## >", 1},
+		`, "NoMethodError: Undefined Method '_' for #<Object:##OBJECTID## >", 1, 1},
 		{`
 		_, b = [1, 2]
 		_
-		`, "NoMethodError: Undefined Method '_' for #<Object:##OBJECTID## >", 1},
+		`, "NoMethodError: Undefined Method '_' for #<Object:##OBJECTID## >", 1, 1},
 	}
 
 	for i, tt := range testsFail {

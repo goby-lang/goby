@@ -100,8 +100,8 @@ func TestNullTypeConversion(t *testing.T) {
 
 func TestNullTypeConversionFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`nil.to_i(1)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
-		{`nil.to_s(1)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		{`nil.to_i(1)`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
+		{`nil.to_s(1)`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -154,7 +154,7 @@ func TestNullIsNilMethod(t *testing.T) {
 
 func TestNullIsNilMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`nil.nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1},
+		{`nil.nil?("Hello")`, "ArgumentError: Expect 0 argument. got: 1", 1, 1},
 	}
 
 	for i, tt := range testsFail {

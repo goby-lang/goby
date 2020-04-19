@@ -42,7 +42,7 @@ func TestRegexpClassCreation(t *testing.T) {
 
 func TestRegexpNewMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`Regexp.new`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+		{`Regexp.new`, "ArgumentError: Expect 1 argument(s). got: 0", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -185,8 +185,8 @@ func TestRegexpMatchMethod(t *testing.T) {
 
 func TestRegexpMatchMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`Regexp.new("abc").match?('a', 'b')`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
-		{`Regexp.new("abc").match?(1)`, "TypeError: Expect argument to be String. got: Integer", 1},
+		{`Regexp.new("abc").match?('a', 'b')`, "ArgumentError: Expect 1 argument(s). got: 2", 1, 1},
+		{`Regexp.new("abc").match?(1)`, "TypeError: Expect argument to be String. got: Integer", 1, 1},
 	}
 
 	for i, tt := range testsFail {

@@ -89,7 +89,7 @@ func TestHTTPClientObjectFail(t *testing.T) {
 		end
 
 		res
-		`, "HTTPError: Could not complete request, Get \"http://127.0.0.1:3001\": dial tcp 127.0.0.1:3001: connect: connection refused", 4},
+		`, "HTTPError: Could not complete request, Get \"http://127.0.0.1:3001\": dial tcp 127.0.0.1:3001: connect: connection refused", 4, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -97,6 +97,6 @@ func TestHTTPClientObjectFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 2)
+		v.checkSP(t, i, tt.expectedSP)
 	}
 }

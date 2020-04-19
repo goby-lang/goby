@@ -31,7 +31,7 @@ func TestRipperClassSuperclass(t *testing.T) {
 
 func TestRipperClassCreationFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`require 'ripper'; Ripper.new`, "NoMethodError: Undefined Method 'new' for Ripper", 1},
+		{`require 'ripper'; Ripper.new`, "NoMethodError: Undefined Method 'new' for Ripper", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -114,11 +114,11 @@ func TestRipperParse(t *testing.T) {
 
 func TestRipperParseFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`require 'ripper'; Ripper.parse`, "ArgumentError: Expect 1 argument. got=0", 1},
-		{`require 'ripper'; Ripper.parse(1)`, "TypeError: Expect argument to be String. got: Integer", 1},
-		{`require 'ripper'; Ripper.parse(1.2)`, "TypeError: Expect argument to be String. got: Float", 1},
-		{`require 'ripper'; Ripper.parse(["puts", "123"])`, "TypeError: Expect argument to be String. got: Array", 1},
-		{`require 'ripper'; Ripper.parse({key: 1})`, "TypeError: Expect argument to be String. got: Hash", 1},
+		{`require 'ripper'; Ripper.parse`, "ArgumentError: Expect 1 argument. got=0", 1, 1},
+		{`require 'ripper'; Ripper.parse(1)`, "TypeError: Expect argument to be String. got: Integer", 1, 1},
+		{`require 'ripper'; Ripper.parse(1.2)`, "TypeError: Expect argument to be String. got: Float", 1, 1},
+		{`require 'ripper'; Ripper.parse(["puts", "123"])`, "TypeError: Expect argument to be String. got: Array", 1, 1},
+		{`require 'ripper'; Ripper.parse({key: 1})`, "TypeError: Expect argument to be String. got: Hash", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -201,11 +201,11 @@ func TestRipperTokenize(t *testing.T) {
 
 func TestRipperTokenFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`require 'ripper'; Ripper.tokenize`, "ArgumentError: Expect 1 argument. got=0", 1},
-		{`require 'ripper'; Ripper.tokenize(1)`, "TypeError: Expect argument to be String. got: Integer", 1},
-		{`require 'ripper'; Ripper.tokenize(1.2)`, "TypeError: Expect argument to be String. got: Float", 1},
-		{`require 'ripper'; Ripper.tokenize(["puts", "123"])`, "TypeError: Expect argument to be String. got: Array", 1},
-		{`require 'ripper'; Ripper.tokenize({key: 1})`, "TypeError: Expect argument to be String. got: Hash", 1},
+		{`require 'ripper'; Ripper.tokenize`, "ArgumentError: Expect 1 argument. got=0", 1, 1},
+		{`require 'ripper'; Ripper.tokenize(1)`, "TypeError: Expect argument to be String. got: Integer", 1, 1},
+		{`require 'ripper'; Ripper.tokenize(1.2)`, "TypeError: Expect argument to be String. got: Float", 1, 1},
+		{`require 'ripper'; Ripper.tokenize(["puts", "123"])`, "TypeError: Expect argument to be String. got: Array", 1, 1},
+		{`require 'ripper'; Ripper.tokenize({key: 1})`, "TypeError: Expect argument to be String. got: Hash", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -288,11 +288,11 @@ func TestRipperLex(t *testing.T) {
 
 func TestRipperLexFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`require 'ripper'; Ripper.lex`, "ArgumentError: Expect 1 argument. got=0", 1},
-		{`require 'ripper'; Ripper.lex(1)`, "TypeError: Expect argument to be String. got: Integer", 1},
-		{`require 'ripper'; Ripper.lex(1.2)`, "TypeError: Expect argument to be String. got: Float", 1},
-		{`require 'ripper'; Ripper.lex(["puts", "123"])`, "TypeError: Expect argument to be String. got: Array", 1},
-		{`require 'ripper'; Ripper.lex({key: 1})`, "TypeError: Expect argument to be String. got: Hash", 1},
+		{`require 'ripper'; Ripper.lex`, "ArgumentError: Expect 1 argument. got=0", 1, 1},
+		{`require 'ripper'; Ripper.lex(1)`, "TypeError: Expect argument to be String. got: Integer", 1, 1},
+		{`require 'ripper'; Ripper.lex(1.2)`, "TypeError: Expect argument to be String. got: Float", 1, 1},
+		{`require 'ripper'; Ripper.lex(["puts", "123"])`, "TypeError: Expect argument to be String. got: Array", 1, 1},
+		{`require 'ripper'; Ripper.lex({key: 1})`, "TypeError: Expect argument to be String. got: Hash", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -406,10 +406,10 @@ Ripper.instruction("
 
 func TestRipperInstructionFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`require 'ripper'; Ripper.instruction`, "ArgumentError: Expect 1 argument. got=0", 1},
-		{`require 'ripper'; Ripper.instruction("a = 1", "a = 2")`, "ArgumentError: Expect 1 argument. got=2", 1},
-		{`require 'ripper'; Ripper.instruction(Array)`, "TypeError: Expect argument to be String. got: Class", 1},
-		{`require 'ripper'; Ripper.instruction("10.times do")`, "InternalError: invalid code: 10.times do", 1},
+		{`require 'ripper'; Ripper.instruction`, "ArgumentError: Expect 1 argument. got=0", 1, 1},
+		{`require 'ripper'; Ripper.instruction("a = 1", "a = 2")`, "ArgumentError: Expect 1 argument. got=2", 1, 1},
+		{`require 'ripper'; Ripper.instruction(Array)`, "TypeError: Expect argument to be String. got: Class", 1, 1},
+		{`require 'ripper'; Ripper.instruction("10.times do")`, "InternalError: invalid code: 10.times do", 1, 1},
 	}
 
 	for i, tt := range testsFail {

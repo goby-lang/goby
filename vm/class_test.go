@@ -112,7 +112,7 @@ a = Bar.new()
 	evaluated := v.testEval(t, input, getFilename())
 	checkErrorMsg(t, i, evaluated, expected)
 	v.checkCFP(t, 0, 1)
-	v.checkSP(t, 0, 3)
+	v.checkSP(t, 0, 2)
 }
 
 func TestModuleInitializeError(t *testing.T) {
@@ -171,35 +171,35 @@ func TestClassInstanceVariableFail(t *testing.T) {
 		end
 
 		Bar.instance_variable_get
-		`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+		`, "ArgumentError: Expect 1 argument(s). got: 0", 1, 1},
 		{`
 		class Bar
 		  @foo = 1
 		end
 
 		Bar.instance_variable_get("@foo", 2)
-		`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
+		`, "ArgumentError: Expect 1 argument(s). got: 2", 1, 1},
 		{`
 		class Bar
 		  @foo = 1
 		end
 
 		Bar.instance_variable_set
-				`, "ArgumentError: Expect 2 argument(s). got: 0", 1},
+				`, "ArgumentError: Expect 2 argument(s). got: 0", 1, 1},
 		{`
 		class Bar
 		  @foo = 1
 		end
 
 		Bar.instance_variable_set("@bar")
-				`, "ArgumentError: Expect 2 argument(s). got: 1", 1},
+				`, "ArgumentError: Expect 2 argument(s). got: 1", 1, 1},
 		{`
 		class Bar
 		  @foo = 1
 		end
 
 		Bar.instance_variable_set("@bar", 2, 3)
-				`, "ArgumentError: Expect 2 argument(s). got: 3", 1},
+				`, "ArgumentError: Expect 2 argument(s). got: 3", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -207,7 +207,7 @@ func TestClassInstanceVariableFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
+		v.checkSP(t, i, tt.expectedSP)
 	}
 }
 
@@ -567,7 +567,7 @@ end
 	v := initTestVM()
 	evaluated := v.testEval(t, input, getFilename())
 	checkErrorMsg(t, i, evaluated, expected)
-	v.checkCFP(t, 0, 2)
+	v.checkCFP(t, 0, 1)
 	v.checkSP(t, 0, 1)
 }
 
@@ -584,7 +584,7 @@ end
 	v := initTestVM()
 	evaluated := v.testEval(t, input, getFilename())
 	checkErrorMsg(t, i, evaluated, expected)
-	v.checkCFP(t, 0, 2)
+	v.checkCFP(t, 0, 1)
 	v.checkSP(t, 0, 1)
 }
 
@@ -739,7 +739,7 @@ func TestClassGreaterThanMethod(t *testing.T) {
 
 func TestClassGreaterThanMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`Array > 1`, "TypeError: Expect argument to be Module. got: Integer", 1},
+		{`Array > 1`, "TypeError: Expect argument to be Module. got: Integer", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -799,7 +799,7 @@ func TestClassGreaterThanOrEqualMethod(t *testing.T) {
 
 func TestClassGreaterThanOrEqualMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`Array >= 1`, "TypeError: Expect argument to be Module. got: Integer", 1},
+		{`Array >= 1`, "TypeError: Expect argument to be Module. got: Integer", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -859,7 +859,7 @@ func TestClassLesserThanMethod(t *testing.T) {
 
 func TestClassLesserThanMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`Array < 1`, "TypeError: Expect argument to be Module. got: Integer", 1},
+		{`Array < 1`, "TypeError: Expect argument to be Module. got: Integer", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -919,7 +919,7 @@ func TestClassLesserThanOrEqualMethod(t *testing.T) {
 
 func TestClassLesserThanOrEqualMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`Array <= 1`, "TypeError: Expect argument to be Module. got: Integer", 1},
+		{`Array <= 1`, "TypeError: Expect argument to be Module. got: Integer", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1015,50 +1015,50 @@ func TestInheritsMethodMissingMethod(t *testing.T) {
 
 func TestInspectMethod(t *testing.T) {
 	tests := []errorTestCase{
-		{`inspect`, "#<Object:##OBJECTID## >", 1},
-		{`Object.inspect`, "Object", 1},
-		{`Class.inspect`, "Class", 1},
-		{`String.inspect`, "String", 1},
-		{`Integer.inspect`, "Integer", 1},
-		{`Decimal.inspect`, "Decimal", 1},
-		{`Float.inspect`, "Float", 1},
-		{`Array.inspect`, "Array", 1},
-		{`Hash.inspect`, "Hash", 1},
-		{`Null.inspect`, "Null", 1},
-		{`MatchData.inspect`, "MatchData", 1},
-		{`Regexp.inspect`, "Regexp", 1},
-		{`RangeEnumerator.inspect`, "RangeEnumerator", 1},
-		{`Range.inspect`, "Range", 1},
-		{`File.inspect`, "File", 1},
-		{`GoMap.inspect`, "GoMap", 1},
-		{`Block.inspect`, "Block", 1},
-		{`Channel.inspect`, "Channel", 1},
-		{`require 'json';JSON.inspect`, "JSON", 1},
-		{`require 'net/http';Net.inspect`, "Net", 1},
-		{`require 'net/http';Net::HTTP.inspect`, "HTTP", 1},
-		{`require 'net/http';Net::HTTP::Request.inspect`, "Request", 1},
-		{`require 'concurrent/array';Concurrent::Array.inspect`, "Array", 1},
-		{`require 'concurrent/hash';Concurrent::Hash.inspect`, "Hash", 1},
-		{`require 'concurrent/rw_lock';Concurrent::RWLock.inspect`, "RWLock", 1},
-		{`require 'net/simple_server';Net::SimpleServer.inspect`, "SimpleServer", 1},
-		{`require 'spec';Spec.inspect`, "Spec", 1},
-		{`require 'uri';URI.inspect`, "URI", 1},
+		{`inspect`, "#<Object:##OBJECTID## >", 1, 1},
+		{`Object.inspect`, "Object", 1, 1},
+		{`Class.inspect`, "Class", 1, 1},
+		{`String.inspect`, "String", 1, 1},
+		{`Integer.inspect`, "Integer", 1, 1},
+		{`Decimal.inspect`, "Decimal", 1, 1},
+		{`Float.inspect`, "Float", 1, 1},
+		{`Array.inspect`, "Array", 1, 1},
+		{`Hash.inspect`, "Hash", 1, 1},
+		{`Null.inspect`, "Null", 1, 1},
+		{`MatchData.inspect`, "MatchData", 1, 1},
+		{`Regexp.inspect`, "Regexp", 1, 1},
+		{`RangeEnumerator.inspect`, "RangeEnumerator", 1, 1},
+		{`Range.inspect`, "Range", 1, 1},
+		{`File.inspect`, "File", 1, 1},
+		{`GoMap.inspect`, "GoMap", 1, 1},
+		{`Block.inspect`, "Block", 1, 1},
+		{`Channel.inspect`, "Channel", 1, 1},
+		{`require 'json';JSON.inspect`, "JSON", 1, 1},
+		{`require 'net/http';Net.inspect`, "Net", 1, 1},
+		{`require 'net/http';Net::HTTP.inspect`, "HTTP", 1, 1},
+		{`require 'net/http';Net::HTTP::Request.inspect`, "Request", 1, 1},
+		{`require 'concurrent/array';Concurrent::Array.inspect`, "Array", 1, 1},
+		{`require 'concurrent/hash';Concurrent::Hash.inspect`, "Hash", 1, 1},
+		{`require 'concurrent/rw_lock';Concurrent::RWLock.inspect`, "RWLock", 1, 1},
+		{`require 'net/simple_server';Net::SimpleServer.inspect`, "SimpleServer", 1, 1},
+		{`require 'spec';Spec.inspect`, "Spec", 1, 1},
+		{`require 'uri';URI.inspect`, "URI", 1, 1},
 		{`
     class Foo
     end
-    Foo.new.inspect`, "#<Foo:##OBJECTID## >", 1},
+    Foo.new.inspect`, "#<Foo:##OBJECTID## >", 1, 1},
 		{`
 		class Foo
 		 attr_accessor :foo, :bar
 		end
-		Foo.new.inspect`, "#<Foo:##OBJECTID## >", 1},
+		Foo.new.inspect`, "#<Foo:##OBJECTID## >", 1, 1},
 		{`
 		class Foo
 		 def self.bar
        { k: :value }
      end
 		end
-		Foo.bar.inspect`, `{ k: "value" }`, 1},
+		Foo.bar.inspect`, `{ k: "value" }`, 1, 1},
 		{`
 		class Foo
 		 attr_accessor :foo, :bar
@@ -1067,15 +1067,15 @@ func TestInspectMethod(t *testing.T) {
 		   @bar = { float: 2.71, decimal: 3.14.to_d }
 		 end
 		end
-		Foo.new.inspect`, `#<Foo:##OBJECTID## @bar={ decimal: 3.14, float: 2.71 } @foo=[42, "string", { key: "value" }] >`, 1},
+		Foo.new.inspect`, `#<Foo:##OBJECTID## @bar={ decimal: 3.14, float: 2.71 } @foo=[42, "string", { key: "value" }] >`, 1, 1},
 	}
 
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		VerifyExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, tt.expectedSP)
 	}
 }
 
@@ -1117,10 +1117,10 @@ func TestRaiseMethod(t *testing.T) {
 
 func TestRaiseMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`raise "Foo", "Bar"`, "ArgumentError: Expect argument #2 to be a class. got: String", 1},
+		{`raise "Foo", "Bar"`, "ArgumentError: Expect argument #2 to be a class. got: String", 1, 1},
 		{`
 		class BarError; end
-		raise BarError, "Foo", "Bar"`, "ArgumentError: Expect 2 or less argument(s). got: 3", 1},
+		raise BarError, "Foo", "Bar"`, "ArgumentError: Expect 2 or less argument(s). got: 3", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1128,7 +1128,7 @@ func TestRaiseMethodFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
+		v.checkSP(t, i, tt.expectedSP)
 	}
 }
 
@@ -1154,10 +1154,10 @@ func TestRandMethod(t *testing.T) {
 
 func TestRandMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`rand(1, 10, 100)`, "ArgumentError: Expect 2 argument(s). got: 3", 1},
-		{`rand("some string")`, "TypeError: Expect argument to be Integer. got: String", 1},
-		{`rand("some string", "some other string")`, "TypeError: Expect argument to be Integer. got: String", 1},
-		{`rand(10, "some other string")`, "TypeError: Expect argument to be Integer. got: String", 1},
+		{`rand(1, 10, 100)`, "ArgumentError: Expect 2 argument(s). got: 3", 1, 1},
+		{`rand("some string")`, "TypeError: Expect argument to be Integer. got: String", 1, 1},
+		{`rand("some string", "some other string")`, "TypeError: Expect argument to be Integer. got: String", 1, 1},
+		{`rand(10, "some other string")`, "TypeError: Expect argument to be Integer. got: String", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1201,7 +1201,7 @@ func TestRespondToMethod(t *testing.T) {
 
 func TestRespondToMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`1.respond_to?`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+		{`1.respond_to?`, "ArgumentError: Expect 1 argument(s). got: 0", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1229,9 +1229,9 @@ func TestRequireMethod(t *testing.T) {
 
 func TestRequireMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`require "bar"`, `IOError: Can't load "bar"`, 1},
-		{`require 1`, `TypeError: Can't require "Integer": Pass a string instead`, 1},
-		{`require "db", "json"`, `ArgumentError: Expect 1 argument(s). got: 2`, 1},
+		{`require "bar"`, `IOError: Can't load "bar"`, 1, 1},
+		{`require 1`, `TypeError: Can't require "Integer": Pass a string instead`, 1, 1},
+		{`require "db", "json"`, `ArgumentError: Expect 1 argument(s). got: 2`, 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1239,7 +1239,7 @@ func TestRequireMethodFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
+		v.checkSP(t, i, tt.expectedSP)
 	}
 }
 
@@ -1263,9 +1263,9 @@ func TestRequireRelativeMethod(t *testing.T) {
 
 func TestRequireRelativeMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`require_relative "bar"`, `IOError: Can't load "bar"`, 1},
-		{`require_relative 1`, `TypeError: Can't require "Integer": Pass a string instead`, 1},
-		{`require_relative "db", "json"`, `ArgumentError: Expect 1 argument(s). got: 2`, 1},
+		{`require_relative "bar"`, `IOError: Can't load "bar"`, 1, 1},
+		{`require_relative 1`, `TypeError: Can't require "Integer": Pass a string instead`, 1, 1},
+		{`require_relative "db", "json"`, `ArgumentError: Expect 1 argument(s). got: 2`, 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1273,7 +1273,7 @@ func TestRequireRelativeMethodFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
+		v.checkSP(t, i, tt.expectedSP)
 	}
 }
 
@@ -1372,8 +1372,8 @@ func TestSendMethod(t *testing.T) {
 
 func TestSendMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`send`, `ArgumentError: Expect 1 or more argument(s). got: 0`, 1},
-		{`send(["foo"])`, `TypeError: Expect argument to be String. got: Array`, 1},
+		{`send`, `ArgumentError: Expect 1 or more argument(s). got: 0`, 1, 1},
+		{`send(["foo"])`, `TypeError: Expect argument to be String. got: Array`, 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1381,15 +1381,15 @@ func TestSendMethodFail(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
+		v.checkSP(t, i, tt.expectedSP)
 	}
 }
 
 // With the current framework, only exit() failures can be tested.
 func TestExitMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`exit("abc")`, "TypeError: Expect argument to be Integer. got: String", 1},
-		{`exit(1, 2)`, "ArgumentError: Expect 1 or less argument(s). got: 2", 1},
+		{`exit("abc")`, "TypeError: Expect argument to be Integer. got: String", 1, 1},
+		{`exit(1, 2)`, "ArgumentError: Expect 1 or less argument(s). got: 2", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1450,12 +1450,12 @@ func TestGeneralIsAMethod(t *testing.T) {
 
 func TestGeneralIsAMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`123.is_a?`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
-		{`Class.is_a?`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
-		{`123.is_a?(123, 456)`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
-		{`123.is_a?(Integer, String)`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
-		{`123.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1},
-		{`Class.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1},
+		{`123.is_a?`, "ArgumentError: Expect 1 argument(s). got: 0", 1, 1},
+		{`Class.is_a?`, "ArgumentError: Expect 1 argument(s). got: 0", 1, 1},
+		{`123.is_a?(123, 456)`, "ArgumentError: Expect 1 argument(s). got: 2", 1, 1},
+		{`123.is_a?(Integer, String)`, "ArgumentError: Expect 1 argument(s). got: 2", 1, 1},
+		{`123.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1, 1},
+		{`Class.is_a?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1516,12 +1516,12 @@ func TestGeneralKindOfMethod(t *testing.T) {
 
 func TestGeneralKindOfMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`123.kind_of?`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
-		{`Class.kind_of?`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
-		{`123.kind_of?(123, 456)`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
-		{`123.kind_of?(Integer, String)`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
-		{`123.kind_of?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1},
-		{`Class.kind_of?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1},
+		{`123.kind_of?`, "ArgumentError: Expect 1 argument(s). got: 0", 1, 1},
+		{`Class.kind_of?`, "ArgumentError: Expect 1 argument(s). got: 0", 1, 1},
+		{`123.kind_of?(123, 456)`, "ArgumentError: Expect 1 argument(s). got: 2", 1, 1},
+		{`123.kind_of?(Integer, String)`, "ArgumentError: Expect 1 argument(s). got: 2", 1, 1},
+		{`123.kind_of?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1, 1},
+		{`Class.kind_of?(true)`, "TypeError: Expect argument to be Class. got: Boolean", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1559,11 +1559,11 @@ func TestGeneralIsNilMethod(t *testing.T) {
 
 func TestGeneralIsNilMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`123.nil?("Hello")`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
-		{`"Fail".nil?("Hello")`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
-		{`[1, 2, 3].nil?("Hello")`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
-		{`{ a: 1, b: 2, c: 3 }.nil?("Hello")`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
-		{`(1..10).nil?("Hello")`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
+		{`123.nil?("Hello")`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
+		{`"Fail".nil?("Hello")`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
+		{`[1, 2, 3].nil?("Hello")`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
+		{`{ a: 1, b: 2, c: 3 }.nil?("Hello")`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
+		{`(1..10).nil?("Hello")`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1601,11 +1601,11 @@ func TestClassNameClassMethod(t *testing.T) {
 
 func TestClassNameClassMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Taipei".name`, "NoMethodError: Undefined Method 'name' for \"Taipei\"", 1},
-		{`123.name`, "NoMethodError: Undefined Method 'name' for 123", 1},
-		{`true.name`, "NoMethodError: Undefined Method 'name' for true", 1},
-		{`Integer.name(Integer)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
-		{`String.name(Hash, Array)`, "ArgumentError: Expect 0 argument(s). got: 2", 1},
+		{`"Taipei".name`, "NoMethodError: Undefined Method 'name' for \"Taipei\"", 1, 1},
+		{`123.name`, "NoMethodError: Undefined Method 'name' for 123", 1, 1},
+		{`true.name`, "NoMethodError: Undefined Method 'name' for true", 1, 1},
+		{`Integer.name(Integer)`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
+		{`String.name(Hash, Array)`, "ArgumentError: Expect 0 argument(s). got: 2", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1653,11 +1653,11 @@ func TestClassSuperclassClassMethod(t *testing.T) {
 
 func TestClassSuperclassClassMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"Taipei".superclass`, "NoMethodError: Undefined Method 'superclass' for \"Taipei\"", 1},
-		{`123.superclass`, "NoMethodError: Undefined Method 'superclass' for 123", 1},
-		{`true.superclass`, "NoMethodError: Undefined Method 'superclass' for true", 1},
-		{`Integer.superclass(Integer)`, "ArgumentError: Expect 0 argument(s). got: 1", 1},
-		{`String.superclass(Hash, Array)`, "ArgumentError: Expect 0 argument(s). got: 2", 1},
+		{`"Taipei".superclass`, "NoMethodError: Undefined Method 'superclass' for \"Taipei\"", 1, 1},
+		{`123.superclass`, "NoMethodError: Undefined Method 'superclass' for 123", 1, 1},
+		{`true.superclass`, "NoMethodError: Undefined Method 'superclass' for true", 1, 1},
+		{`Integer.superclass(Integer)`, "ArgumentError: Expect 0 argument(s). got: 1", 1, 1},
+		{`String.superclass(Hash, Array)`, "ArgumentError: Expect 0 argument(s). got: 2", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1773,8 +1773,8 @@ func TestInstanceEvalMethod(t *testing.T) {
 
 func TestInstanceEvalMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`"s".instance_eval(1, 1)`, "ArgumentError: Expect 1 or less argument(s). got: 2", 1},
-		{`"s".instance_eval(true)`, "TypeError: Expect argument to be Block. got: Boolean", 1},
+		{`"s".instance_eval(1, 1)`, "ArgumentError: Expect 1 or less argument(s). got: 2", 1, 1},
+		{`"s".instance_eval(true)`, "TypeError: Expect argument to be Block. got: Boolean", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -1830,50 +1830,50 @@ func TestObjectIdMethod(t *testing.T) {
 
 func TestToSMethod(t *testing.T) {
 	tests := []errorTestCase{
-		{`to_s`, "main", 1},
-		{`Object.to_s`, "Object", 1},
-		{`Class.to_s`, "Class", 1},
-		{`String.to_s`, "String", 1},
-		{`Integer.to_s`, "Integer", 1},
-		{`Decimal.to_s`, "Decimal", 1},
-		{`Float.to_s`, "Float", 1},
-		{`Array.to_s`, "Array", 1},
-		{`Hash.to_s`, "Hash", 1},
-		{`Null.to_s`, "Null", 1},
-		{`MatchData.to_s`, "MatchData", 1},
-		{`Regexp.to_s`, "Regexp", 1},
-		{`RangeEnumerator.to_s`, "RangeEnumerator", 1},
-		{`Range.to_s`, "Range", 1},
-		{`File.to_s`, "File", 1},
-		{`GoMap.to_s`, "GoMap", 1},
-		{`Block.to_s`, "Block", 1},
-		{`Channel.to_s`, "Channel", 1},
-		{`require 'json';JSON.to_s`, "JSON", 1},
-		{`require 'net/http';Net.to_s`, "Net", 1},
-		{`require 'net/http';Net::HTTP.to_s`, "HTTP", 1},
-		{`require 'net/http';Net::HTTP::Request.to_s`, "Request", 1},
-		{`require 'concurrent/array';Concurrent::Array.to_s`, "Array", 1},
-		{`require 'concurrent/hash';Concurrent::Hash.to_s`, "Hash", 1},
-		{`require 'concurrent/rw_lock';Concurrent::RWLock.to_s`, "RWLock", 1},
-		{`require 'net/simple_server';Net::SimpleServer.to_s`, "SimpleServer", 1},
-		{`require 'spec';Spec.to_s`, "Spec", 1},
-		{`require 'uri';URI.to_s`, "URI", 1},
+		{`to_s`, "main", 1, 1},
+		{`Object.to_s`, "Object", 1, 1},
+		{`Class.to_s`, "Class", 1, 1},
+		{`String.to_s`, "String", 1, 1},
+		{`Integer.to_s`, "Integer", 1, 1},
+		{`Decimal.to_s`, "Decimal", 1, 1},
+		{`Float.to_s`, "Float", 1, 1},
+		{`Array.to_s`, "Array", 1, 1},
+		{`Hash.to_s`, "Hash", 1, 1},
+		{`Null.to_s`, "Null", 1, 1},
+		{`MatchData.to_s`, "MatchData", 1, 1},
+		{`Regexp.to_s`, "Regexp", 1, 1},
+		{`RangeEnumerator.to_s`, "RangeEnumerator", 1, 1},
+		{`Range.to_s`, "Range", 1, 1},
+		{`File.to_s`, "File", 1, 1},
+		{`GoMap.to_s`, "GoMap", 1, 1},
+		{`Block.to_s`, "Block", 1, 1},
+		{`Channel.to_s`, "Channel", 1, 1},
+		{`require 'json';JSON.to_s`, "JSON", 1, 1},
+		{`require 'net/http';Net.to_s`, "Net", 1, 1},
+		{`require 'net/http';Net::HTTP.to_s`, "HTTP", 1, 1},
+		{`require 'net/http';Net::HTTP::Request.to_s`, "Request", 1, 1},
+		{`require 'concurrent/array';Concurrent::Array.to_s`, "Array", 1, 1},
+		{`require 'concurrent/hash';Concurrent::Hash.to_s`, "Hash", 1, 1},
+		{`require 'concurrent/rw_lock';Concurrent::RWLock.to_s`, "RWLock", 1, 1},
+		{`require 'net/simple_server';Net::SimpleServer.to_s`, "SimpleServer", 1, 1},
+		{`require 'spec';Spec.to_s`, "Spec", 1, 1},
+		{`require 'uri';URI.to_s`, "URI", 1, 1},
 		{`
     class Foo
     end
-    Foo.new.to_s`, "#<Foo:##OBJECTID## >", 1},
+    Foo.new.to_s`, "#<Foo:##OBJECTID## >", 1, 1},
 		{`
 		class Foo
 		 attr_accessor :foo, :bar
 		end
-		Foo.new.to_s`, "#<Foo:##OBJECTID## >", 1},
+		Foo.new.to_s`, "#<Foo:##OBJECTID## >", 1, 1},
 		{`
 		class Foo
 		 def self.bar
        { k: :value }
      end
 		end
-		Foo.bar.to_s`, `{ k: "value" }`, 1},
+		Foo.bar.to_s`, `{ k: "value" }`, 1, 1},
 		{`
 		class Foo
 		 attr_accessor :foo, :bar
@@ -1882,15 +1882,15 @@ func TestToSMethod(t *testing.T) {
 		   @bar = { float: 2.71, decimal: 3.14.to_d }
 		 end
 		end
-		Foo.new.to_s`, `#<Foo:##OBJECTID## >`, 1},
+		Foo.new.to_s`, `#<Foo:##OBJECTID## >`, 1, 1},
 	}
 
 	for i, tt := range tests {
 		v := initTestVM()
 		evaluated := v.testEval(t, tt.input, getFilename())
 		VerifyExpected(t, i, evaluated, tt.expected)
-		v.checkCFP(t, i, 0)
-		v.checkSP(t, i, 1)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, tt.expectedSP)
 	}
 }
 

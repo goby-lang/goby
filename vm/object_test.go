@@ -54,7 +54,7 @@ func TestObjectTapMethod(t *testing.T) {
 
 func TestObjectTapMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`Object.new.tap`, "InternalError: Can't yield without a block", 1},
+		{`Object.new.tap`, "InternalError: Can't yield without a block", 1, 1},
 	}
 
 	for i, tt := range testsFail {

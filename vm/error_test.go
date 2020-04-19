@@ -12,6 +12,7 @@ type errorTestCase struct {
 	input       string
 	expected    string
 	expectedCFP int
+	expectedSP  int
 }
 
 // Error mechanism test
@@ -161,27 +162,27 @@ func TestStackTraces(t *testing.T) {
 
 func TestNoMethodError(t *testing.T) {
 	tests := []errorTestCase{
-		{`a`, "NoMethodError: Undefined Method 'a' for #<Object:##OBJECTID## >", 1},
+		{`a`, "NoMethodError: Undefined Method 'a' for #<Object:##OBJECTID## >", 1, 1},
 		{`class Foo
 		 end
 
 		 a = Foo.new
 		 a.bar = "fuz"
-		`, "NoMethodError: Undefined Method 'bar=' for #<Foo:##OBJECTID## >", 1},
+		`, "NoMethodError: Undefined Method 'bar=' for #<Foo:##OBJECTID## >", 1, 2},
 		{`class Foo
 		   attr_reader("foo")
 		 end
 
 		 a = Foo.new
 		 a.bar = "fuz"
-		`, "NoMethodError: Undefined Method 'bar=' for #<Foo:##OBJECTID## >", 1},
+		`, "NoMethodError: Undefined Method 'bar=' for #<Foo:##OBJECTID## >", 1, 2},
 		{`class Foo
 		  attr_reader("bar")
 		end
 
 		a = Foo.new
 		a.bar = "fuz"
-		`, "NoMethodError: Undefined Method 'bar=' for #<Foo:##OBJECTID## >", 1},
+		`, "NoMethodError: Undefined Method 'bar=' for #<Foo:##OBJECTID## >", 1, 2},
 	}
 
 	for i, tt := range tests {
@@ -189,18 +190,18 @@ func TestNoMethodError(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkFuzzifiedErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
+		v.checkSP(t, i, tt.expectedSP)
 	}
 
 }
 
 func TestNoMethodErrorOnNew(t *testing.T) {
 	tests := []errorTestCase{
-		{`String.new`, "NoMethodError: Undefined Method 'new' for String", 1},
-		{`Integer.new`, "NoMethodError: Undefined Method 'new' for Integer", 1},
-		{`Hash.new`, "NoMethodError: Undefined Method 'new' for Hash", 1},
-		{`Boolean.new`, "NoMethodError: Undefined Method 'new' for Boolean", 1},
-		{`Null.new`, "NoMethodError: Undefined Method 'new' for Null", 1},
+		{`String.new`, "NoMethodError: Undefined Method 'new' for String", 1, 1},
+		{`Integer.new`, "NoMethodError: Undefined Method 'new' for Integer", 1, 1},
+		{`Hash.new`, "NoMethodError: Undefined Method 'new' for Hash", 1, 1},
+		{`Boolean.new`, "NoMethodError: Undefined Method 'new' for Boolean", 1, 1},
+		{`Null.new`, "NoMethodError: Undefined Method 'new' for Null", 1, 1},
 	}
 
 	for i, tt := range tests {
@@ -208,7 +209,7 @@ func TestNoMethodErrorOnNew(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
+		v.checkSP(t, i, tt.expectedSP)
 	}
 }
 
@@ -233,21 +234,21 @@ func TestArgumentError(t *testing.T) {
 		foo(1, 2)
 		`,
 			"ArgumentError: Expect at most 1 args for method 'foo'. got: 2",
-			4, 1, 1},
+			4, 1, 3},
 		{`def foo(x = 10)
 		end
 
 		foo(1, 2)
 		`,
 			"ArgumentError: Expect at most 1 args for method 'foo'. got: 2",
-			4, 1, 1},
+			4, 1, 3},
 		{`def foo(x, y = 10)
 		end
 
 		foo(1, 2, 3)
 		`,
 			"ArgumentError: Expect at most 2 args for method 'foo'. got: 3",
-			4, 1, 1},
+			4, 1, 4},
 		{`"1234567890".include? "123", Class`,
 			"ArgumentError: Expect 1 argument(s). got: 2",
 			1, 1, 1},
@@ -345,49 +346,49 @@ func TestKeywordArgumentError(t *testing.T) {
 
 		foo
 		`,
-			"ArgumentError: Method foo requires key argument x", 1},
+			"ArgumentError: Method foo requires key argument x", 1, 1},
 		{`def foo
 		  10
 		end
 
 		foo(y: 1)
 		`,
-			"ArgumentError: Expect at most 0 args for method 'foo'. got: 1", 1},
+			"ArgumentError: Expect at most 0 args for method 'foo'. got: 1", 1, 2},
 		{`def foo(x)
 		  x
 		end
 
 		foo(y: 1)
 		`,
-			"ArgumentError: unknown key y for method foo", 1},
+			"ArgumentError: unknown key y for method foo", 1, 2},
 		{`def foo(x = 10)
 		  x
 		end
 
 		foo(y: 1)
 		`,
-			"ArgumentError: unknown key y for method foo", 1},
+			"ArgumentError: unknown key y for method foo", 1, 2},
 		{`def foo(x:)
 		  x
 		end
 
 		foo(y: 1)
 		`,
-			"ArgumentError: Method foo requires key argument x", 1},
+			"ArgumentError: Method foo requires key argument x", 1, 2},
 		{`def foo(x: 10)
 		  x
 		end
 
 		foo(y: 1)
 		`,
-			"ArgumentError: unknown key y for method foo", 1},
+			"ArgumentError: unknown key y for method foo", 1, 2},
 		{`def foo(x: 10)
 		  x
 		end
 
 		foo(y: 1, x: 100)
 		`,
-			"ArgumentError: Expect at most 1 args for method 'foo'. got: 2", 1},
+			"ArgumentError: Expect at most 1 args for method 'foo'. got: 2", 1, 3},
 	}
 
 	for i, tt := range tests {
@@ -395,7 +396,7 @@ func TestKeywordArgumentError(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
+		v.checkSP(t, i, tt.expectedSP)
 	}
 }
 
@@ -403,13 +404,13 @@ func TestConstantAlreadyInitializedError(t *testing.T) {
 	tests := []errorTestCase{
 		{`Foo = 10
 		Foo = 100
-		`, "ConstantAlreadyInitializedError: Constant Foo already been initialized. Can't assign value to a constant twice.", 1},
+		`, "ConstantAlreadyInitializedError: Constant Foo already been initialized. Can't assign value to a constant twice.", 1, 0},
 		{`class Foo; end
 		Foo = 100
-		`, "ConstantAlreadyInitializedError: Constant Foo already been initialized. Can't assign value to a constant twice.", 1},
+		`, "ConstantAlreadyInitializedError: Constant Foo already been initialized. Can't assign value to a constant twice.", 1, 0},
 		{`module Foo; end
 		Foo = 100
-		`, "ConstantAlreadyInitializedError: Constant Foo already been initialized. Can't assign value to a constant twice.", 1},
+		`, "ConstantAlreadyInitializedError: Constant Foo already been initialized. Can't assign value to a constant twice.", 1, 0},
 	}
 
 	for i, tt := range tests {
@@ -417,7 +418,7 @@ func TestConstantAlreadyInitializedError(t *testing.T) {
 		evaluated := v.testEval(t, tt.input, getFilename())
 		checkErrorMsg(t, i, evaluated, tt.expected)
 		v.checkCFP(t, i, tt.expectedCFP)
-		v.checkSP(t, i, 1)
+		v.checkSP(t, i, tt.expectedSP)
 	}
 }
 

@@ -65,67 +65,67 @@ func TestHTTPRequestFail(t *testing.T) {
 		require "net/http"
 
 		Net::HTTP.get("http://127.0.0.1:3000/error")
-		`, "HTTPError: Non-200 response, 404 Not Found (404)", 1},
+		`, "HTTPError: Non-200 response, 404 Not Found (404)", 1, 1},
 		{`
 		require "net/http"
 
 		Net::HTTP.get("http://127.0.0.1:3001")
-		`, "HTTPError: Could not complete request, Get \"http://127.0.0.1:3001\": dial tcp 127.0.0.1:3001: connect: connection refused", 1},
+		`, "HTTPError: Could not complete request, Get \"http://127.0.0.1:3001\": dial tcp 127.0.0.1:3001: connect: connection refused", 1, 1},
 		//Argument errors for get()
 		{`
 		require "net/http"
 
 		Net::HTTP.get(42)
-		`, "ArgumentError: Expect argument #0 to be String. got: Integer", 1},
+		`, "ArgumentError: Expect argument #0 to be String. got: Integer", 1, 1},
 		{`
 		require "net/http"
 
 		Net::HTTP.get("http://127.0.0.1:3000/error", 40, 2)
-		`, "ArgumentError: Splat arguments must be a string, got: Integer on argument #0", 1},
+		`, "ArgumentError: Splat arguments must be a string, got: Integer on argument #0", 1, 1},
 		//HTTPErrors for post()
 		{`
 		require "net/http"
 
 		Net::HTTP.post("http://127.0.0.1:3000/error", "text/plain", "Let me down")
-		`, "HTTPError: Non-200 response, 404 Not Found (404)", 1},
+		`, "HTTPError: Non-200 response, 404 Not Found (404)", 1, 1},
 		{`
 		require "net/http"
 
 		Net::HTTP.post("http://127.0.0.1:3001", "text/plain", "Let me down")
-		`, "HTTPError: Could not complete request, Post \"http://127.0.0.1:3001\": dial tcp 127.0.0.1:3001: connect: connection refused", 1},
+		`, "HTTPError: Could not complete request, Post \"http://127.0.0.1:3001\": dial tcp 127.0.0.1:3001: connect: connection refused", 1, 1},
 		//Argument errors for post()
 		{`
 		require "net/http"
 
 		Net::HTTP.post("http://127.0.0.1:3001", "text/plain", "Let me down", "again")
-		`, "ArgumentError: Expect 3 argument(s). got: 4", 1},
+		`, "ArgumentError: Expect 3 argument(s). got: 4", 1, 1},
 		{`
 		require "net/http"
 
 		Net::HTTP.post(42, "text/plain", "Let me down")
-		`, "ArgumentError: Expect argument #0 to be String. got: Integer", 1},
+		`, "ArgumentError: Expect argument #0 to be String. got: Integer", 1, 1},
 		//HTTPErrors for head()
 		{`
 		require "net/http"
 
 		Net::HTTP.head("http://127.0.0.1:3000/error")
-		`, "HTTPError: Non-200 response, 404 Not Found (404)", 1},
+		`, "HTTPError: Non-200 response, 404 Not Found (404)", 1, 1},
 		{`
 		require "net/http"
 
 		Net::HTTP.head("http://127.0.0.1:3001")
-		`, "HTTPError: Could not complete request, Head \"http://127.0.0.1:3001\": dial tcp 127.0.0.1:3001: connect: connection refused", 1},
+		`, "HTTPError: Could not complete request, Head \"http://127.0.0.1:3001\": dial tcp 127.0.0.1:3001: connect: connection refused", 1, 1},
 		//Argument errors for head()
 		{`
 		require "net/http"
 
 		Net::HTTP.head(42)
-		`, "ArgumentError: Expect argument #0 to be String. got: Integer", 1},
+		`, "ArgumentError: Expect argument #0 to be String. got: Integer", 1, 1},
 		{`
 		require "net/http"
 
 		Net::HTTP.head("http://127.0.0.1:3000/error", 40, 2)
-		`, "ArgumentError: Splat arguments must be a string, got: Integer on argument #0", 1},
+		`, "ArgumentError: Splat arguments must be a string, got: Integer on argument #0", 1, 1},
 	}
 
 	//block until server is ready

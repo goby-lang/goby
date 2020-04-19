@@ -207,7 +207,7 @@ func TestRangeBsearchMethodFail(t *testing.T) {
 		(0..4).bsearch do |i|
 			"Binary Search"
 		end
-		`, "TypeError: Expect argument to be Integer or Boolean. got: String", 1},
+		`, "TypeError: Expect argument to be Integer or Boolean. got: String", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -282,7 +282,7 @@ func TestRangeEachMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
 		{`
 		(0..4).each
-		`, "InternalError: Can't yield without a block", 1},
+		`, "InternalError: Can't yield without a block", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -372,8 +372,8 @@ func TestRangeIncludeMethod(t *testing.T) {
 
 func TestRangeIncludeMethodFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`(1..4).include?`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
-		{`(1..4).include?(1, 2)`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
+		{`(1..4).include?`, "ArgumentError: Expect 1 argument(s). got: 0", 1, 1},
+		{`(1..4).include?(1, 2)`, "ArgumentError: Expect 1 argument(s). got: 2", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -444,11 +444,11 @@ func TestRangeMapMethodFail(t *testing.T) {
 		{
 			`
 			(1..10).map
-		`, "InternalError: Can't yield without a block", 1},
+		`, "InternalError: Can't yield without a block", 1, 1},
 		{
 			`
 			(1..10).map(1) do |x| x * x; end
-		`, "ArgumentError: Expect 0 argument(s). got: 1", 2},
+		`, "ArgumentError: Expect 0 argument(s). got: 1", 2, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -550,19 +550,19 @@ func TestRangeStepMethodFail(t *testing.T) {
 	v := initTestVM()
 	testsFail := []errorTestCase{
 		{
-			` (1..10).step`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+			` (1..10).step`, "ArgumentError: Expect 1 argument(s). got: 0", 1, 1},
 		{
-			` (1..10).step(2)`, "InternalError: Can't yield without a block", 2},
+			` (1..10).step(2)`, "InternalError: Can't yield without a block", 2, 1},
 		{
 			` (1..10).step(0) do |i|
 								i
 							end
-`, "ArgumentError: Expect argument to be positive value. got: 0", 3},
+`, "ArgumentError: Expect argument to be positive value. got: 0", 3, 1},
 		{
 			` (1..10).step(-1) do |i|
 								i
 							end
-`, "ArgumentError: Expect argument to be positive value. got: -1", 4},
+`, "ArgumentError: Expect argument to be positive value. got: -1", 4, 1},
 	}
 
 	for i, tt := range testsFail {

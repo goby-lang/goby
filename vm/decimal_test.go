@@ -93,9 +93,9 @@ func TestDecimalArithmeticOperationWithFloat(t *testing.T) {
 
 func TestDecimalArithmeticOperationFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`'1'.to_d + "p"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`'1'.to_d - "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`'1'.to_d / "t"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`'1'.to_d + "p"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
+		{`'1'.to_d - "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
+		{`'1'.to_d / "t"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -171,11 +171,11 @@ func TestDecimalComparisonWithInteger(t *testing.T) {
 
 func TestDecimalComparisonFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`'1'.to_d > "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`'1'.to_d >= "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`'1'.to_d < "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`'1'.to_d <= "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
-		{`'1'.to_d <=> "m"`, "TypeError: Expect argument to be Numeric. got: String", 1},
+		{`'1'.to_d > "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
+		{`'1'.to_d >= "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
+		{`'1'.to_d < "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
+		{`'1'.to_d <= "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
+		{`'1'.to_d <=> "m"`, "TypeError: Expect argument to be Numeric. got: String", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -338,14 +338,14 @@ func TestDecimalToStringMethod(t *testing.T) {
 
 func TestDecimalToStringFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`'1.1.1'.to_d`, "ArgumentError: Invalid numeric string. got: 1.1.1", 1},
-		{`'1/1/1'.to_d`, "ArgumentError: Invalid numeric string. got: 1/1/1", 1},
-		{`'1.1/1'.to_d`, "ArgumentError: Invalid numeric string. got: 1.1/1", 1},
-		{`'1/1.1'.to_d`, "ArgumentError: Invalid numeric string. got: 1/1.1", 1},
-		{`'1..1'.to_d`, "ArgumentError: Invalid numeric string. got: 1..1", 1},
-		{`'..1'.to_d`, "ArgumentError: Invalid numeric string. got: ..1", 1},
-		{`'1//1'.to_d`, "ArgumentError: Invalid numeric string. got: 1//1", 1},
-		{`'abc'.to_d`, "ArgumentError: Invalid numeric string. got: abc", 1},
+		{`'1.1.1'.to_d`, "ArgumentError: Invalid numeric string. got: 1.1.1", 1, 1},
+		{`'1/1/1'.to_d`, "ArgumentError: Invalid numeric string. got: 1/1/1", 1, 1},
+		{`'1.1/1'.to_d`, "ArgumentError: Invalid numeric string. got: 1.1/1", 1, 1},
+		{`'1/1.1'.to_d`, "ArgumentError: Invalid numeric string. got: 1/1.1", 1, 1},
+		{`'1..1'.to_d`, "ArgumentError: Invalid numeric string. got: 1..1", 1, 1},
+		{`'..1'.to_d`, "ArgumentError: Invalid numeric string. got: ..1", 1, 1},
+		{`'1//1'.to_d`, "ArgumentError: Invalid numeric string. got: 1//1", 1, 1},
+		{`'abc'.to_d`, "ArgumentError: Invalid numeric string. got: abc", 1, 1},
 	}
 
 	for i, tt := range testsFail {
@@ -359,12 +359,12 @@ func TestDecimalToStringFail(t *testing.T) {
 
 func TestDecimalZeroDivisionFail(t *testing.T) {
 	testsFail := []errorTestCase{
-		{`(6.0).to_d / 0`, "ZeroDivisionError: Divided by 0", 1},
-		{`(6.0).to_d / -0`, "ZeroDivisionError: Divided by 0", 1},
-		{`(6.0).to_d / "0".to_d`, "ZeroDivisionError: Divided by 0", 1},
-		{`(6.0).to_d / "-0".to_d`, "ZeroDivisionError: Divided by 0", 1},
-		{`(6.0).to_d / "0".to_f`, "ZeroDivisionError: Divided by 0", 1},
-		{`(6.0).to_d / "-0".to_f`, "ZeroDivisionError: Divided by 0", 1},
+		{`(6.0).to_d / 0`, "ZeroDivisionError: Divided by 0", 1, 1},
+		{`(6.0).to_d / -0`, "ZeroDivisionError: Divided by 0", 1, 1},
+		{`(6.0).to_d / "0".to_d`, "ZeroDivisionError: Divided by 0", 1, 1},
+		{`(6.0).to_d / "-0".to_d`, "ZeroDivisionError: Divided by 0", 1, 1},
+		{`(6.0).to_d / "0".to_f`, "ZeroDivisionError: Divided by 0", 1, 1},
+		{`(6.0).to_d / "-0".to_f`, "ZeroDivisionError: Divided by 0", 1, 1},
 	}
 
 	for i, tt := range testsFail {
