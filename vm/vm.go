@@ -151,7 +151,7 @@ func (vm *VM) newThread() (t Thread) {
 }
 
 // ExecInstructions accepts a sequence of bytecodes and use vm to evaluate them.
-func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) {
+func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) (err *Error) {
 	translator := newInstructionTranslator(fn)
 	translator.vm = vm
 	translator.transferInstructionSets(sets)
@@ -171,33 +171,13 @@ func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) {
 	cf := newNormalCallFrame(translator.program, translator.filename, 1)
 	cf.self = vm.mainObj
 	vm.mainThread.callFrameStack.push(cf)
+	err = vm.mainThread.startFromTopFrame()
 
-      // here is the final destination of Goby errors at the VM level, and we don't deal with them at this point.
-      // we only decide how the user program should react to them.
-	// at vm level, we don't deal with the error itself
-	// we only decide how the program should react to it
-	defer func() {
-		switch err := recover().(type) {
-		// if the error is a true Go panic, Goby can't handle it properly and we should re-raise it again
-		// it means Goby can't handle it properly and we should just let it crash
-		case error:
-			panic(err)
-
-		// if the error is one of the Goby's errors, such as argument error, we need to handle it depending on the mode of execution.
-		// we need to handle it depends on the type of program execution
-		case *Error:
-
-			// REPLMode: We handle the error inside the igb package, so don't need to do anything here
-			// TestMode: We should preserve the vm as it is and inspect its state via test helpers, so don't need to do anything here either
-			// NormalMode (normal file execution): we should print our the error and exit the program
-			if vm.mode == parser.NormalMode {
-				fmt.Fprintln(os.Stderr, err.Message())
-				os.Exit(1)
-			}
-		}
-	}()
-
-	vm.mainThread.startFromTopFrame()
+	if err != nil && vm.mode == parser.NormalMode {
+		fmt.Fprintln(os.Stderr, err.Message())
+		os.Exit(1)
+	}
+	return
 }
 
 // SetClassISIndexTable adds new instruction set's index table to vm.classISIndexTables
@@ -400,7 +380,11 @@ func (vm *VM) testEval(t *testing.T, input, filepath string) Object {
 		t.Fatal(err.Error())
 	}
 
-	vm.ExecInstructions(iss, filepath)
+	errObj := vm.ExecInstructions(iss, filepath)
+
+	if errObj != nil {
+		return errObj
+	}
 
 	return vm.mainThread.Stack.top().Target
 }

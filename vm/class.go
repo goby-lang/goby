@@ -1535,7 +1535,11 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 				return err
 			}
 
-			t.sendMethod(args[0].Value().(string), len(args)-1, blockFrame, sourceLine)
+			err = t.sendMethod(args[0].Value().(string), len(args)-1, blockFrame, sourceLine)
+
+			if err != nil {
+				return err
+			}
 
 			return t.Stack.top().Target
 

@@ -54,7 +54,10 @@ func (vm *VM) REPLExec(sets []*bytecode.InstructionSet) {
 		}
 	}()
 
-	vm.mainThread.startFromTopFrame()
+	err := vm.mainThread.startFromTopFrame()
+	if err != nil {
+		vm.mainThread.Stack.Push(&Pointer{Target: err})
+	}
 }
 
 // GetExecResult returns stack's top most value. Normally it's used in tests.

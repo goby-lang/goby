@@ -121,21 +121,36 @@ func (t *Thread) execFile(fpath string) (err error) {
 	return
 }
 
-func (t *Thread) startFromTopFrame() {
-	defer func() {
-		if r := recover(); r != nil {
-			t.reportErrorAndStop(r)
-		}
-	}()
+func (t *Thread) startFromTopFrame() (err *Error) {
 	cf := t.callFrameStack.top()
-	err := t.evalCallFrame(cf)
+	err = t.evalCallFrame(cf)
 
 	if err != nil {
-		t.reportErrorAndStop(err)
+		cf := t.callFrameStack.top()
+
+		if cf != nil {
+			cf.stopExecution()
+		}
+		if !err.storedTraces {
+			for i := t.callFrameStack.pointer - 1; i > 0; i-- {
+				frame := t.callFrameStack.callFrames[i]
+
+				if frame.IsBlock() {
+					continue
+				}
+
+				msg := fmt.Sprintf("from %s:%d", frame.FileName(), frame.SourceLine())
+				err.stackTraces = append(err.stackTraces, msg)
+			}
+
+			err.storedTraces = true
+		}
 	}
+
+	return
 }
 
-func (t *Thread) evalCallFrame(cf callFrame) (err *Error){
+func (t *Thread) evalCallFrame(cf callFrame) (err *Error) {
 	t.currentFrame = cf
 
 	switch cf := cf.(type) {
@@ -194,47 +209,6 @@ func (t *Thread) removeUselessBlockFrame(frame callFrame) {
 
 	if topFrame != nil && topFrame.IsSourceBlock() {
 		t.callFrameStack.pop().stopExecution()
-	}
-}
-
-// reportErrorAndStop captures any panic happens in a given thread
-// in here, we need to check if the panic is intentionally raised by checking its type
-func (t *Thread) reportErrorAndStop(e interface{}) {
-	cf := t.callFrameStack.top()
-
-	if cf != nil {
-		cf.stopExecution()
-	}
-
-	top := t.Stack.top().Target
-	switch err := top.(type) {
-	// If we can get an Error object, the panic was raised intentionally from
-	//   1. pushErrorObject
-	//   2. setErrorObject
-	// We then need to
-	//   1. collect the stack traces from the call frame stack
-	//   2. store the stack traces inside the Error object
-	//   3. pass it to the vm level via another panic call
-	case *Error:
-		if !err.storedTraces {
-			for i := t.callFrameStack.pointer - 1; i > 0; i-- {
-				frame := t.callFrameStack.callFrames[i]
-
-				if frame.IsBlock() {
-					continue
-				}
-
-				msg := fmt.Sprintf("from %s:%d", frame.FileName(), frame.SourceLine())
-				err.stackTraces = append(err.stackTraces, msg)
-			}
-
-			err.storedTraces = true
-		}
-
-		panic(err)
-	// Otherwise it's a Go panic that needs to be raised
-	default:
-		panic(e)
 	}
 }
 
@@ -307,14 +281,15 @@ func (t *Thread) retrieveBlock(fileName, blockFlag string, sourceLine int) (bloc
 	return
 }
 
-func (t *Thread) findMethod(receiver Object, methodName string, receiverPr int, argCount int, argPr int, sourceLine int) (method Object, argC int) {
+func (t *Thread) findMethod(receiver Object, methodName string, receiverPr int, argCount int, argPr int, sourceLine int) (method Object, argC int, err *Error) {
 	method = receiver.findMethod(methodName)
 
 	if method == nil {
 		mm := receiver.findMethodMissing(receiver.Class().inheritsMethodMissing)
 
 		if mm == nil {
-			t.setErrorObject(receiverPr, argPr, errors.NoMethodError, sourceLine, errors.UndefinedMethod, methodName, receiver.Inspect())
+			err = t.setErrorObject(receiverPr, argPr, errors.NoMethodError, sourceLine, errors.UndefinedMethod, methodName, receiver.Inspect())
+			return
 		} else {
 			// Move up args for missed method's name
 			// before: | arg 1       | arg 2 |
@@ -335,23 +310,29 @@ func (t *Thread) findMethod(receiver Object, methodName string, receiverPr int, 
 		}
 	}
 
-	return method, argCount
+	return method, argCount, nil
 }
 
-func (t *Thread) findAndCallMethod(receiver Object, methodName string, receiverPr int, argSet *bytecode.ArgSet, argCount int, argPr int, sourceLine int, blockFrame *normalCallFrame, fileName string) {
+func (t *Thread) findAndCallMethod(receiver Object, methodName string, receiverPr int, argSet *bytecode.ArgSet, argCount int, argPr int, sourceLine int, blockFrame *normalCallFrame, fileName string) (err *Error) {
 	// argCount change if we ended up calling method_missing
-	method, argCount := t.findMethod(receiver, methodName, receiverPr, argCount, argPr, sourceLine)
+	method, argCount, err := t.findMethod(receiver, methodName, receiverPr, argCount, argPr, sourceLine)
+
+	if err != nil {
+		return err
+	}
 
 	switch m := method.(type) {
 	case *MethodObject:
 		callObj := newCallObject(receiver, m, receiverPr, argCount, argSet, blockFrame, sourceLine)
-		t.evalMethodObject(callObj)
+		err = t.evalMethodObject(callObj)
 	case *BuiltinMethodObject:
-		t.evalBuiltinMethod(receiver, m, receiverPr, argCount, argSet, blockFrame, sourceLine, fileName)
+		err = t.evalBuiltinMethod(receiver, m, receiverPr, argCount, argSet, blockFrame, sourceLine, fileName)
 	}
+
+	return
 }
 
-func (t *Thread) sendMethod(methodName string, argCount int, blockFrame *normalCallFrame, sourceLine int) {
+func (t *Thread) sendMethod(methodName string, argCount int, blockFrame *normalCallFrame, sourceLine int) (err *Error) {
 	if arr, ok := t.Stack.top().Target.(*ArrayObject); ok && arr.splat {
 		// Pop array
 		t.Stack.Pop()
@@ -393,10 +374,10 @@ func (t *Thread) sendMethod(methodName string, argCount int, blockFrame *normalC
 
 	sendCallFrame := t.callFrameStack.top()
 
-	t.findAndCallMethod(receiver, methodName, receiverPr, &bytecode.ArgSet{}, argCount, argPr, sourceLine, blockFrame, sendCallFrame.FileName())
+	return t.findAndCallMethod(receiver, methodName, receiverPr, &bytecode.ArgSet{}, argCount, argPr, sourceLine, blockFrame, sendCallFrame.FileName())
 }
 
-func (t *Thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame, sourceLine int, fileName string) {
+func (t *Thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject, receiverPtr, argCount int, argSet *bytecode.ArgSet, blockFrame *normalCallFrame, sourceLine int, fileName string) (err *Error) {
 	argPtr := receiverPtr + 1
 
 	cf := newGoMethodCallFrame(
@@ -427,12 +408,14 @@ func (t *Thread) evalBuiltinMethod(receiver Object, method *BuiltinMethodObject,
 	t.Stack.pointer = cf.argPtr
 
 	if err, ok := evaluated.Target.(*Error); ok {
-		panic(err.Message())
+		return err
 	}
+
+	return nil
 }
 
 // TODO: Move instruction into call object
-func (t *Thread) evalMethodObject(call *callObject) {
+func (t *Thread) evalMethodObject(call *callObject) (err *Error) {
 	normalParamsCount := call.normalParamsCount()
 	paramTypes := call.paramTypes()
 	paramsCount := len(call.paramTypes())
@@ -440,11 +423,11 @@ func (t *Thread) evalMethodObject(call *callObject) {
 	sourceLine := call.sourceLine
 
 	if call.argCount > paramsCount && !call.method.isSplatArgIncluded() {
-		t.reportArgumentError(sourceLine, paramsCount, call.methodName(), call.argCount, call.receiverPtr)
+		return t.reportArgumentError(sourceLine, paramsCount, call.methodName(), call.argCount, call.receiverPtr)
 	}
 
 	if normalParamsCount > call.argCount {
-		t.reportArgumentError(sourceLine, normalParamsCount, call.methodName(), call.argCount, call.receiverPtr)
+		return t.reportArgumentError(sourceLine, normalParamsCount, call.methodName(), call.argCount, call.receiverPtr)
 	}
 
 	// Check if arguments include all the required keys before assign keyword arguments
@@ -453,15 +436,15 @@ func (t *Thread) evalMethodObject(call *callObject) {
 		case bytecode.RequiredKeywordArg:
 			paramName := call.paramNames()[paramIndex]
 			if _, ok := call.hasKeywordArgument(paramName); !ok {
-				t.setErrorObject(call.receiverPtr, call.argPtr(), errors.ArgumentError, sourceLine, "Method %s requires key argument %s", call.methodName(), paramName)
+				return t.setErrorObject(call.receiverPtr, call.argPtr(), errors.ArgumentError, sourceLine, "Method %s requires key argument %s", call.methodName(), paramName)
 			}
 		}
 	}
 
-	err := call.assignKeywordArguments(stack)
+	e := call.assignKeywordArguments(stack)
 
-	if err != nil {
-		t.setErrorObject(call.receiverPtr, call.argPtr(), errors.ArgumentError, sourceLine, err.Error())
+	if e != nil {
+		return t.setErrorObject(call.receiverPtr, call.argPtr(), errors.ArgumentError, sourceLine, e.Error())
 	}
 
 	// If given arguments is more than the normal arguments.
@@ -486,9 +469,11 @@ func (t *Thread) evalMethodObject(call *callObject) {
 
 	t.Stack.Set(call.receiverPtr, t.Stack.top())
 	t.Stack.pointer = call.argPtr()
+
+	return nil
 }
 
-func (t *Thread) reportArgumentError(sourceLine, idealArgNumber int, methodName string, exactArgNumber int, receiverPtr int) {
+func (t *Thread) reportArgumentError(sourceLine, idealArgNumber int, methodName string, exactArgNumber int, receiverPtr int) (err *Error) {
 	var message string
 
 	if idealArgNumber > exactArgNumber {
@@ -497,22 +482,17 @@ func (t *Thread) reportArgumentError(sourceLine, idealArgNumber int, methodName 
 		message = "Expect at most %d args for method '%s'. got: %d"
 	}
 
-	t.setErrorObject(receiverPtr, receiverPtr+1, errors.ArgumentError, sourceLine, message, idealArgNumber, methodName, exactArgNumber)
+	return t.setErrorObject(receiverPtr, receiverPtr+1, errors.ArgumentError, sourceLine, message, idealArgNumber, methodName, exactArgNumber)
 }
 
 // pushErrorObject pushes the Error object to the stack
-func (t *Thread) pushErrorObject(errorType string, sourceLine int, format string, args ...interface{}) {
-	err := t.vm.InitErrorObject(errorType, sourceLine, format, args...)
-	t.Stack.Push(&Pointer{Target: err})
-	panic(err.Message())
+func (t *Thread) pushErrorObject(errorType string, sourceLine int, format string, args ...interface{}) (err *Error) {
+	return t.vm.InitErrorObject(errorType, sourceLine, format, args...)
 }
 
 // setErrorObject replaces a certain stack element with the Error object
-func (t *Thread) setErrorObject(receiverPtr, sp int, errorType string, sourceLine int, format string, args ...interface{}) {
-	err := t.vm.InitErrorObject(errorType, sourceLine, format, args...)
-	t.Stack.Set(receiverPtr, &Pointer{Target: err})
-	t.Stack.pointer = sp
-	panic(err.Message())
+func (t *Thread) setErrorObject(receiverPtr, sp int, errorType string, sourceLine int, format string, args ...interface{}) (err *Error) {
+	return t.vm.InitErrorObject(errorType, sourceLine, format, args...)
 }
 
 // Other helper functions  ----------------------------------------------

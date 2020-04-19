@@ -118,7 +118,7 @@ func dup(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) (e
 
 func getBlock(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) (err *Error) {
 	if cf.blockFrame == nil {
-		t.pushErrorObject(errors.InternalError, sourceLine, "Can't get block without a block argument")
+		return t.pushErrorObject(errors.InternalError, sourceLine, "Can't get block without a block argument")
 	}
 
 	blockFrame := cf.blockFrame
@@ -141,7 +141,7 @@ func invokeBlock(t *Thread, sourceLine int, cf *normalCallFrame, args ...interfa
 	receiver := t.Stack.data[receiverPr].Target
 
 	if cf.blockFrame == nil {
-		t.pushErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
+		return t.pushErrorObject(errors.InternalError, sourceLine, errors.CantYieldWithoutBlockFormat)
 	}
 
 	blockFrame := cf.blockFrame
@@ -235,7 +235,7 @@ func send(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) (
 		t.callFrameStack.push(blockFrame)
 	}
 
-	t.findAndCallMethod(receiver, methodName, receiverPr, argSet, argCount, argPr, sourceLine, blockFrame, cf.fileName)
+	err = t.findAndCallMethod(receiver, methodName, receiverPr, argSet, argCount, argPr, sourceLine, blockFrame, cf.fileName)
 	return
 }
 
@@ -261,11 +261,11 @@ func defClass(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{
 			inheritedClass, ok := superClass.Target.(*RClass)
 
 			if !ok {
-				t.pushErrorObject(errors.InternalError, sourceLine, "Constant %s is not a class. got: %s", superClassName, string(superClass.Target.Class().ReturnName()))
+				return t.pushErrorObject(errors.InternalError, sourceLine, "Constant %s is not a class. got: %s", superClassName, string(superClass.Target.Class().ReturnName()))
 			}
 
 			if inheritedClass.isModule {
-				t.pushErrorObject(errors.InternalError, sourceLine, "Module inheritance is not supported: %s", inheritedClass.Name)
+				return t.pushErrorObject(errors.InternalError, sourceLine, "Module inheritance is not supported: %s", inheritedClass.Name)
 			}
 
 			class.inherits(inheritedClass)
@@ -310,7 +310,7 @@ func defMethod(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface
 	is, ok := t.getMethodIS(methodName, cf.FileName())
 
 	if !ok {
-		t.pushErrorObject(errors.InternalError, sourceLine, "Can't get method %s's instruction set.", methodName)
+		return t.pushErrorObject(errors.InternalError, sourceLine, "Can't get method %s's instruction set.", methodName)
 	}
 
 	method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, BaseObj: NewBaseObject(t.vm.TopLevelClass(classes.MethodClass))}
@@ -462,7 +462,7 @@ func expandArray(t *Thread, sourceLine int, cf *normalCallFrame, args ...interfa
 	arr, ok := t.Stack.Pop().Target.(*ArrayObject)
 
 	if !ok {
-		t.pushErrorObject(errors.TypeError, sourceLine, "Expect stack top's value to be an Array when executing 'expandarray' instruction.")
+		return t.pushErrorObject(errors.TypeError, sourceLine, "Expect stack top's value to be an Array when executing 'expandarray' instruction.")
 	}
 
 	var elems []Object
@@ -515,7 +515,7 @@ func setConstant(t *Thread, sourceLine int, cf *normalCallFrame, args ...interfa
 	v := t.Stack.Pop()
 
 	if c != nil {
-		t.pushErrorObject(errors.ConstantAlreadyInitializedError, sourceLine, "Constant %s already been initialized. Can't assign value to a constant twice.", constName)
+		return t.pushErrorObject(errors.ConstantAlreadyInitializedError, sourceLine, "Constant %s already been initialized. Can't assign value to a constant twice.", constName)
 	}
 
 	cf.storeConstant(constName, v)
@@ -615,7 +615,7 @@ func getConstant(t *Thread, sourceLine int, cf *normalCallFrame, args ...interfa
 	c := t.vm.lookupConstant(cf, constName)
 
 	if c == nil {
-		t.pushErrorObject(errors.NameError, sourceLine, "uninitialized constant %s", constName)
+		return t.pushErrorObject(errors.NameError, sourceLine, "uninitialized constant %s", constName)
 	}
 
 	c.isNamespace = args[1].(bool)
