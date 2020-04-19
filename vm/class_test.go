@@ -554,40 +554,6 @@ func TestGeneralAssignmentByOperation(t *testing.T) {
 	}
 }
 
-func TestForbiddenInclusionWithClass(t *testing.T) {
-	input := `class Foo
-end
-
-class Bar
-  include Foo
-end
-	`
-	expected := `TypeError: Expect argument to be Module. got: Class`
-
-	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
-	checkErrorMsg(t, i, evaluated, expected)
-	v.checkCFP(t, 0, 2)
-	v.checkSP(t, 0, 1)
-}
-
-func TestForbiddenExtensionWithClass(t *testing.T) {
-	input := `class Foo
-end
-
-class Bar
-  extend Foo
-end
-	`
-	expected := `TypeError: Expect argument to be Module. got: Class`
-
-	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
-	checkErrorMsg(t, i, evaluated, expected)
-	v.checkCFP(t, 0, 2)
-	v.checkSP(t, 0, 1)
-}
-
 // Method tests
 
 func TestMethodsMethod(t *testing.T) {
@@ -1903,4 +1869,30 @@ func TestClassInspectCallsToString(t *testing.T) {
 	VerifyExpected(t, i, evaluated, expected)
 	vm.checkCFP(t, i, 0)
 	vm.checkSP(t, i, 1)
+}
+
+func TestModuleInclusionFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`
+class Foo
+  include []
+end
+`, "ArgumentError: Expect 1 argument(s). got: 0", 2},
+		{`
+class Foo
+  include
+end`, "ArgumentError: Expect 1 argument(s). got: 0", 2},
+		{`
+class Foo
+  include "123"
+end`, "TypeError: Expect argument to be Module. got: String", 2},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
 }

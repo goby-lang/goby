@@ -543,6 +543,10 @@ var builtinModuleCommonClassMethods = []*BuiltinMethodObject{
 		// @return [Null]
 		Name: "include",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 1 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
+			}
+
 			var class *RClass
 			module, ok := args[0].(*RClass)
 
