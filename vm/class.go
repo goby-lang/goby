@@ -57,19 +57,19 @@ func buildMethods(m map[string]Method) []*BuiltinMethodObject {
 	return out
 }
 
-// ExternalClass helps define external go classes
-func ExternalClass(name, path string, classMethods, instanceMethods map[string]Method) ClassLoader {
+// NewExternalClassLoader helps define external go classes by generating a class loader function
+func NewExternalClassLoader(className, libPath string, classMethods, instanceMethods map[string]Method) ClassLoader {
 	return func(v *VM) error {
-		pg := v.initializeClass(name)
+		pg := v.initializeClass(className)
 		pg.setBuiltinMethods(buildMethods(classMethods), true)
 		pg.setBuiltinMethods(buildMethods(instanceMethods), false)
 		v.objectClass.setClassConstant(pg)
 
-		if path == "" {
+		if libPath == "" {
 			return nil
 		}
 
-		return v.mainThread.execGobyLib(path)
+		return v.mainThread.execGobyLib(libPath)
 	}
 }
 
