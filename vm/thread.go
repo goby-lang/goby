@@ -128,17 +128,25 @@ func (t *Thread) startFromTopFrame() {
 		}
 	}()
 	cf := t.callFrameStack.top()
-	t.evalCallFrame(cf)
+	err := t.evalCallFrame(cf)
+
+	if err != nil {
+		t.reportErrorAndStop(err)
+	}
 }
 
-func (t *Thread) evalCallFrame(cf callFrame) {
+func (t *Thread) evalCallFrame(cf callFrame) (err *Error){
 	t.currentFrame = cf
 
 	switch cf := cf.(type) {
 	case *normalCallFrame:
 		for cf.pc < cf.instructionsCount() {
 			i := cf.instructionSet.instructions[cf.pc]
-			t.execInstruction(cf, i)
+			err = t.execInstruction(cf, i)
+
+			if err != nil {
+				return
+			}
 		}
 	case *goMethodCallFrame:
 		args := []Object{}
@@ -167,6 +175,8 @@ func (t *Thread) evalCallFrame(cf callFrame) {
 	}
 
 	t.removeUselessBlockFrame(cf)
+
+	return
 }
 
 /*
@@ -228,15 +238,16 @@ func (t *Thread) reportErrorAndStop(e interface{}) {
 	}
 }
 
-func (t *Thread) execInstruction(cf *normalCallFrame, i *bytecode.Instruction) {
+func (t *Thread) execInstruction(cf *normalCallFrame, i *bytecode.Instruction) (err *Error) {
 	cf.pc++
 
 	//fmt.Println(t.callFrameStack.inspect())
 	//fmt.Println(i.inspect())
 	ins := operations[i.Opcode]
-	ins(t, i.SourceLine(), cf, i.Params...)
+	err = ins(t, i.SourceLine(), cf, i.Params...)
 	//fmt.Println("============================")
 	//fmt.Println(t.callFrameStack.inspect())
+	return
 }
 
 // Yield to a call frame
