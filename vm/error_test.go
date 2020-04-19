@@ -223,28 +223,28 @@ func TestArgumentError(t *testing.T) {
 	}{
 		{`def foo(x)
 		end
-
+		
 		foo
 		`,
 			"ArgumentError: Expect at least 1 args for method 'foo'. got: 0",
 			4, 1, 1},
 		{`def foo(x)
 		end
-
+		
 		foo(1, 2)
 		`,
 			"ArgumentError: Expect at most 1 args for method 'foo'. got: 2",
 			4, 1, 3},
 		{`def foo(x = 10)
 		end
-
+		
 		foo(1, 2)
 		`,
 			"ArgumentError: Expect at most 1 args for method 'foo'. got: 2",
 			4, 1, 3},
 		{`def foo(x, y = 10)
 		end
-
+		
 		foo(1, 2, 3)
 		`,
 			"ArgumentError: Expect at most 2 args for method 'foo'. got: 3",
@@ -257,31 +257,31 @@ func TestArgumentError(t *testing.T) {
 			1, 1, 1},
 		{`def foo(a, *b)
 		end
-
+		
 		foo
 		`, "ArgumentError: Expect at least 1 args for method 'foo'. got: 0",
 			4, 1, 1},
 		{`def foo(a, b, *c)
 		end
-
+		
 		foo(10)
 		`, "ArgumentError: Expect at least 2 args for method 'foo'. got: 1",
-			4, 1, 1},
+			4, 1, 2},
 		{`def foo(a, b = 10, *c)
 		end
-
+		
 		foo
 		`, "ArgumentError: Expect at least 1 args for method 'foo'. got: 0",
 			4, 1, 1},
 		{`def foo(a, b, c)
-		  a + b + c
+		 a + b + c
 		end
-
+		
 		arr = [1, 2, 3, 5]
 		foo(*arr)
 		`,
 			"ArgumentError: Expect at most 3 args for method 'foo'. got: 4",
-			6, 1, 1},
+			6, 1, 5},
 		{`def foo(a, b, c)
 		  a + b + c
 		end
@@ -297,7 +297,7 @@ func TestArgumentError(t *testing.T) {
 			// The two objects on the stack would be:
 			// - the receiver of bar, because that call haven't been finished
 			// - the error object
-			6, 2, 2},
+			6, 2, 6},
 		{`def foo(a, b, c)
 		  a + b + c
 		end
@@ -318,7 +318,7 @@ func TestArgumentError(t *testing.T) {
 			// - the receiver of baz, because that call haven't been finished
 			// - the receiver of bar, because that call haven't been finished
 			// - the error object
-			6, 3, 3},
+			6, 3, 7},
 		{`def foo
           (x=1)
 		end
@@ -326,7 +326,7 @@ func TestArgumentError(t *testing.T) {
 		`,
 			"ArgumentError: Expect at most 0 args for method 'foo'. got: 1",
 
-			4, 1, 1},
+			4, 1, 2},
 	}
 
 	for i, tt := range tests {
