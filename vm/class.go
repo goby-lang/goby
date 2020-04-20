@@ -735,6 +735,31 @@ var builtinModuleCommonClassMethods = []*BuiltinMethodObject{
 // Instance methods -----------------------------------------------------
 var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 	{
+		// eql? compares the if the 2 objects have the same value and the same type
+		//
+		// ```ruby
+		// 10.eql?(10) # => true
+		// 10.0.eql?(10) # => false
+		// ```
+		//
+		// ```ruby
+		// [10, 10].eql?([10, 10]) # => true
+		// [10.0, 10].eql?([10, 10]) # => false
+		// ```
+		//
+		// @return [@boolean]
+		Name: "eql?",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 1 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
+			}
+			if receiver.Class() == args[0].Class() && receiver.equalTo(args[0]) {
+				return TRUE
+			}
+			return FALSE
+		},
+	},
+	{
 		// General method for comparing equalty of the objects
 		//
 		// ```ruby
