@@ -203,7 +203,7 @@ func tokenize(receiver Object, sourceLine int, t *Thread, args []Object) Object 
 
 // Internal functions ===================================================
 func init() {
-	vm.RegisterExternalClass("ripper", vm.ExternalClass("Ripper", "ripper.gb",
+	vm.RegisterExternalClass("ripper", vm.NewExternalClassLoader("Ripper", "ripper.gb",
 		// class methods
 		map[string]vm.Method{
 			"instruction": instruction,

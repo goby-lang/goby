@@ -63,11 +63,12 @@ type VM struct {
 	fileDir string
 	// args are command line arguments
 	args []string
-	// projectRoot is goby root's absolute path, which is $GOROOT/src/github.com/goby-lang/goby
-	projectRoot string
 
-	// libPath indicates the Goby (.gb) libraries path. Defaults to `<projectRoot>/lib`, unless
-	// DefaultLibPath is specified.
+	// Goby vm uses libPath to find standard libraries written in Goby
+	// the fallback order is:
+	// 1. $GOBY_ROOT/lib
+	// 2. /usr/local/Cellar/goby/VERSION/lib - installed via homebrew
+	// 3. $GOPATH/src/github.com/goby-lang/goby/lib - development environment
 	libPath string
 
 	channelObjectMap *objectMap
@@ -99,33 +100,10 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 	}
 	vm.fileDir = fileDir
 
-	gobyRoot := os.Getenv("GOBY_ROOT")
+	err := vm.assignLibPath()
 
-	if len(gobyRoot) == 0 {
-		vm.projectRoot = fmt.Sprintf("/usr/local/Cellar/goby/%s", Version)
-
-		_, err := os.Stat(vm.projectRoot)
-
-		if err != nil {
-			gp := os.Getenv("GOPATH")
-			path, _ := filepath.Abs(gp + "/src/github.com/goby-lang/goby")
-			_, err = os.Stat(path)
-
-			if err != nil {
-				e = fmt.Errorf("You haven't set $GOBY_ROOT properly")
-				return nil, e
-			}
-
-			vm.projectRoot = path
-		}
-	} else {
-		vm.projectRoot = gobyRoot
-	}
-
-	if DefaultLibPath != "" {
-		vm.libPath = DefaultLibPath
-	} else {
-		vm.libPath = filepath.Join(vm.projectRoot, "lib")
+	if err != nil {
+		return nil, err
 	}
 
 	vm.initConstants()
@@ -147,6 +125,37 @@ func New(fileDir string, args []string) (vm *VM, e error) {
 func (vm *VM) newThread() (t Thread) {
 	t.vm = vm
 	t.id = atomic.AddInt64(&vm.threadCount, 1)
+	return
+}
+
+// vm.assignLibPath looks up and assigns vm.libPath
+func (vm *VM) assignLibPath() (err error) {
+	if DefaultLibPath != "" {
+		vm.libPath = DefaultLibPath
+		return
+	}
+
+	gobyRoot := os.Getenv("GOBY_ROOT")
+
+	if len(gobyRoot) == 0 {
+		// if GOBY_ROOT is not set, fallback to homebrew's path
+		gobyRoot = fmt.Sprintf("/usr/local/Cellar/goby/%s", Version)
+
+
+		// if it's not installed via homebrew, assume it's in development env and Goby's source is under GOPATH
+		if _, err := os.Stat(gobyRoot); err != nil {
+			path, _ := filepath.Abs(os.Getenv("GOPATH") + "/src/github.com/goby-lang/goby")
+
+			if _, err = os.Stat(path); err != nil {
+				return fmt.Errorf("You haven't set $GOBY_ROOT properly")
+			}
+
+			gobyRoot = path
+		}
+	}
+
+	vm.libPath = filepath.Join(gobyRoot, "lib")
+
 	return
 }
 
@@ -172,8 +181,8 @@ func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) {
 	cf.self = vm.mainObj
 	vm.mainThread.callFrameStack.push(cf)
 
-      // here is the final destination of Goby errors at the VM level, and we don't deal with them at this point.
-      // we only decide how the user program should react to them.
+	// here is the final destination of Goby errors at the VM level, and we don't deal with them at this point.
+	// we only decide how the user program should react to them.
 	// at vm level, we don't deal with the error itself
 	// we only decide how the program should react to it
 	defer func() {
@@ -183,8 +192,8 @@ func (vm *VM) ExecInstructions(sets []*bytecode.InstructionSet, fn string) {
 		case error:
 			panic(err)
 
-		// if the error is one of the Goby's errors, such as argument error, we need to handle it depending on the mode of execution.
-		// we need to handle it depends on the type of program execution
+			// if the error is one of the Goby's errors, such as argument error, we need to handle it depending on the mode of execution.
+			// we need to handle it depends on the type of program execution
 		case *Error:
 
 			// REPLMode: We handle the error inside the igb package, so don't need to do anything here
