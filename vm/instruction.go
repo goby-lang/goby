@@ -1,7 +1,6 @@
 package vm
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/goby-lang/goby/compiler/bytecode"
@@ -318,14 +317,7 @@ func init() {
 
 			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, BaseObj: NewBaseObject(t.vm.TopLevelClass(classes.MethodClass))}
 
-			v := t.Stack.Pop().Target
-			switch self := v.(type) {
-			case *RClass:
-				self.Methods.set(methodName, method)
-			default:
-				self.Class().Methods.set(methodName, method)
-			}
-
+			t.vm.defineMethodOn(t.Stack.Pop().Target, method)
 		},
 		bytecode.DefSingletonMethod: func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			argCount := args[0].(int)
@@ -333,18 +325,7 @@ func init() {
 			is, _ := t.getMethodIS(methodName, cf.FileName())
 			method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, BaseObj: NewBaseObject(t.vm.TopLevelClass(classes.MethodClass))}
 
-			v := t.Stack.Pop().Target
-
-			switch v := v.(type) {
-			case *RClass:
-				v.SingletonClass().Methods.set(methodName, method)
-			default:
-				singletonClass := t.vm.createRClass(fmt.Sprintf("#<Class:#<%s:%d>>", v.Class().Name, v.ID()))
-				singletonClass.Methods.set(methodName, method)
-				singletonClass.isSingleton = true
-				v.SetSingletonClass(singletonClass)
-			}
-
+			t.vm.defineSingletonMethodOn(t.Stack.Pop().Target, method)
 		},
 		bytecode.DefClass: func(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface{}) {
 			subject := strings.Split(args[0].(string), ":")

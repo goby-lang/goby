@@ -74,7 +74,7 @@ func (g *Generator) compileIdentifier(is *InstructionSet, exp *ast.Identifier, s
 
 	// otherwise it's a method call
 	is.define(PutSelf, exp.Line())
-	is.define(Send, exp.Line(), exp.Value, 0, "", &ArgSet{})
+	is.define(Send, exp.Line(), exp.Value, 0, "", initArgSet(0))
 }
 
 func (g *Generator) compileYieldExpression(is *InstructionSet, exp *ast.YieldExpression, scope *scope, table *localTable) {
@@ -93,10 +93,7 @@ func (g *Generator) compileGetBlockExpression(is *InstructionSet, exp *ast.GetBl
 
 func (g *Generator) compileCallExpression(is *InstructionSet, exp *ast.CallExpression, scope *scope, table *localTable) {
 	var blockInfo string
-	argSet := &ArgSet{
-		names: make([]string, len(exp.Arguments)),
-		types: make([]uint8, len(exp.Arguments)),
-	}
+	argSet := initArgSet(len(exp.Arguments))
 
 	// Compile receiver
 	g.compileExpression(is, exp.Receiver, scope, table)
@@ -189,10 +186,14 @@ func (g *Generator) compileBlockArgExpression(index int, exp *ast.CallExpression
 	is.name = fmt.Sprint(index)
 	is.isType = Block
 
-	for i := 0; i < len(exp.BlockArguments); i++ {
-		table.set(exp.BlockArguments[i].Value)
+	argSet := initArgSet(len(exp.BlockArguments))
+
+	for i, arg := range exp.BlockArguments {
+		argSet.setArg(i, arg.Value, NormalArg)
+		table.set(arg.Value)
 	}
 
+	is.argTypes = argSet
 	g.compileCodeBlock(is, exp.Block, scope, table)
 	g.endInstructions(is, exp.Line())
 	g.instructionSets = append(g.instructionSets, is)
@@ -236,14 +237,14 @@ func (g *Generator) compilePrefixExpression(is *InstructionSet, exp *ast.PrefixE
 	switch exp.Operator {
 	case "!":
 		g.compileExpression(is, exp.Right, scope, table)
-		is.define(Send, exp.Line(), exp.Operator, 0, "", &ArgSet{})
+		is.define(Send, exp.Line(), exp.Operator, 0, "", initArgSet(0))
 	case "*":
 		g.compileExpression(is, exp.Right, scope, table)
 		is.define(SplatArray, exp.Line())
 	case "-":
 		is.define(PutObject, exp.Line(), 0)
 		g.compileExpression(is, exp.Right, scope, table)
-		is.define(Send, exp.Line(), exp.Operator, 1, "", &ArgSet{})
+		is.define(Send, exp.Line(), exp.Operator, 1, "", initArgSet(0))
 	case "+":
 		g.compileExpression(is, exp.Right, scope, table)
 	}
