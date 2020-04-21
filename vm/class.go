@@ -38,9 +38,9 @@ var externalClasses = map[string][]ClassLoader{}
 var externalClassLock sync.Mutex
 
 // RegisterExternalClass will add the given class to the global registry of available classes
-func RegisterExternalClass(path string, c ...ClassLoader) {
+func RegisterExternalClass(name string, c ...ClassLoader) {
 	externalClassLock.Lock()
-	externalClasses[path] = c
+	externalClasses[name] = c
 	externalClassLock.Unlock()
 }
 
@@ -57,19 +57,19 @@ func buildMethods(m map[string]Method) []*BuiltinMethodObject {
 	return out
 }
 
-// ExternalClass helps define external go classes
-func ExternalClass(name, path string, classMethods, instanceMethods map[string]Method) ClassLoader {
+// NewExternalClassLoader helps define external go classes by generating a class loader function
+func NewExternalClassLoader(className, libPath string, classMethods, instanceMethods map[string]Method) ClassLoader {
 	return func(v *VM) error {
-		pg := v.initializeClass(name)
+		pg := v.initializeClass(className)
 		pg.setBuiltinMethods(buildMethods(classMethods), true)
 		pg.setBuiltinMethods(buildMethods(instanceMethods), false)
 		v.objectClass.setClassConstant(pg)
 
-		if path == "" {
+		if libPath == "" {
 			return nil
 		}
 
-		return v.mainThread.execGobyLib(path)
+		return v.mainThread.execGobyLib(libPath)
 	}
 }
 
@@ -543,6 +543,10 @@ var builtinModuleCommonClassMethods = []*BuiltinMethodObject{
 		// @return [Null]
 		Name: "include",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 1 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
+			}
+
 			var class *RClass
 			module, ok := args[0].(*RClass)
 
@@ -755,6 +759,31 @@ var builtinModuleCommonClassMethods = []*BuiltinMethodObject{
 
 // Instance methods -----------------------------------------------------
 var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
+	{
+		// eql? compares the if the 2 objects have the same value and the same type
+		//
+		// ```ruby
+		// 10.eql?(10) # => true
+		// 10.0.eql?(10) # => false
+		// ```
+		//
+		// ```ruby
+		// [10, 10].eql?([10, 10]) # => true
+		// [10.0, 10].eql?([10, 10]) # => false
+		// ```
+		//
+		// @return [@boolean]
+		Name: "eql?",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 1 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
+			}
+			if receiver.Class() == args[0].Class() && receiver.equalTo(args[0]) {
+				return TRUE
+			}
+			return FALSE
+		},
+	},
 	{
 		// General method for comparing equalty of the objects
 		//
