@@ -27,7 +27,7 @@ type (
 )
 
 func init() {
-	vm.RegisterExternalClass("db", vm.ExternalClass("DB", "db.gb",
+	vm.RegisterExternalClass("db", vm.NewExternalClassLoader("DB", "db.gb",
 		// class methods
 		map[string]vm.Method{
 			"get_connection": getConnection,

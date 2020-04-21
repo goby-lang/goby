@@ -13,7 +13,7 @@ import (
 
 func init() {
 	vm.RegisterExternalClass(
-		"result", vm.ExternalClass(
+		"result", vm.NewExternalClassLoader(
 			"Result",
 			"result.gb",
 			map[string]vm.Method{

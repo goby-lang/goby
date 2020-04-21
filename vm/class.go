@@ -38,9 +38,9 @@ var externalClasses = map[string][]ClassLoader{}
 var externalClassLock sync.Mutex
 
 // RegisterExternalClass will add the given class to the global registry of available classes
-func RegisterExternalClass(path string, c ...ClassLoader) {
+func RegisterExternalClass(name string, c ...ClassLoader) {
 	externalClassLock.Lock()
-	externalClasses[path] = c
+	externalClasses[name] = c
 	externalClassLock.Unlock()
 }
 
@@ -57,19 +57,19 @@ func buildMethods(m map[string]Method) []*BuiltinMethodObject {
 	return out
 }
 
-// ExternalClass helps define external go classes
-func ExternalClass(name, path string, classMethods, instanceMethods map[string]Method) ClassLoader {
+// NewExternalClassLoader helps define external go classes by generating a class loader function
+func NewExternalClassLoader(className, libPath string, classMethods, instanceMethods map[string]Method) ClassLoader {
 	return func(v *VM) error {
-		pg := v.initializeClass(name)
+		pg := v.initializeClass(className)
 		pg.setBuiltinMethods(buildMethods(classMethods), true)
 		pg.setBuiltinMethods(buildMethods(instanceMethods), false)
 		v.objectClass.setClassConstant(pg)
 
-		if path == "" {
+		if libPath == "" {
 			return nil
 		}
 
-		return v.mainThread.execGobyLib(path)
+		return v.mainThread.execGobyLib(libPath)
 	}
 }
 
