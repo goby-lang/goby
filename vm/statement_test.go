@@ -135,70 +135,87 @@ func TestDefStatement(t *testing.T) {
 	}{
 		{`
 		def foo
-		  10
+		 10
 		end
-
+		
 		foo
 		`, 10},
 		{`
 		def foo(x)
-		  x + 10
+		 x + 10
 		end
-
+		
 		foo(10)
 		`, 20},
 		{`
 		def foo(x = 100, y=10)
-		  x + y
+		 x + y
 		end
-
+		
 		foo
 		`, 110},
 		{`
 		def foo(x = 100, y=10)
-		  x + y
+		 x + y
 		end
-
+		
 		foo(20)
 		`, 30},
 		{`
 		def foo(x, y=10)
-		  x + y
+		 x + y
 		end
-
+		
 		foo(100)
 		`, 110},
 		{`
 		def foo(x=10, y=11, z=12)
-		  x + y + z
+		 x + y + z
 		end
-
+		
 		foo(10, 20)
 		`, 42},
 		{`
 		class Foo; end
-
+		
 		def Foo.foo
-		  10
+		 10
 		end
-
+		
 		Foo.foo
 		`, 10},
 		{`
 		class Foo
-		  def ten
-		    10
-		  end
+		 def ten
+		   10
+		 end
 		end
-
+		
 		f1 = Foo.new
 		f2 = Foo.new
-
+		
 		def f1.ten
-		  20
+		 20
+		end
+		
+		f2.ten + f1.ten
+		`, 30},
+		{`
+		class Foo
 		end
 
-		f2.ten + f1.ten
+		f = Foo.new
+
+		def f.ten
+		  10
+		end
+
+		def f.twenty
+			20
+		end
+
+		f.ten + f.twenty
+
 		`, 30},
 		{`
 		a = 1

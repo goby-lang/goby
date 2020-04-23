@@ -257,7 +257,7 @@ func TestAutoIncrementLocalVariable(t *testing.T) {
 func TestLoadingGobyLibraryFail(t *testing.T) {
 	vm := initTestVM()
 
-	libFileFullPath := filepath.Join(vm.projectRoot, "lib/_library_not_existing.gb")
+	libFileFullPath := filepath.Join(vm.libPath, "_library_not_existing.gb")
 	expectedErrorMessage := fmt.Sprintf("open %s: no such file or directory", libFileFullPath)
 
 	err := vm.mainThread.execGobyLib("_library_not_existing.gb")

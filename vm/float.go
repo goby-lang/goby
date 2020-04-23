@@ -317,7 +317,157 @@ var builtinFloatInstanceMethods = []*BuiltinMethodObject{
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
 			r := receiver.(*FloatObject)
 			return t.vm.initGoObject(&r.value)
+		},
+	},
+	{
+		// Returns the Float as a positive value.
+		//
+		// ```Ruby
+		// -34.56.abs # => 34.56
+		// 34.56.abs # => 34.56
+		// ```
+		// @return [Float]
+		Name: "abs",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%v", strconv.Itoa(len(args)))
+			}
+			r := receiver.(*FloatObject)
+			result := math.Abs(r.value)
+			return t.vm.initFloatObject(result)
+		},
+	},
+	{
+		// Returns the smallest Integer greater than or equal to self.
+		//
+		// ```Ruby
+		// 1.2.ceil  # => 2
+		// 2.ceil    # => 2
+		// -1.2.ceil # => -1
+		// -2.ceil   # => -2
+		// ```
+		// @return [Integer]
+		Name: "ceil",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			// TODO: Make ceil accept arguments
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%v", strconv.Itoa(len(args)))
+			}
+			r := receiver.(*FloatObject)
+			result := math.Ceil(r.value)
+			newInt := t.vm.InitIntegerObject(int(result))
+			newInt.flag = i
+			return newInt
+		},
+	},
+	{
+		// Returns the largest Integer less than or equal to self.
+		//
+		// ```Ruby
+		// 1.2.floor  # => 1
+		// 2.0.floor  # => 2
+		// -1.2.floor # => -2
+		// -2.0.floor # => -2
+		// ```
+		// @return [Integer]
+		Name: "floor",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			// TODO: Make floor accept arguments
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%v", strconv.Itoa(len(args)))
+			}
+			r := receiver.(*FloatObject)
+			result := math.Floor(r.value)
+			newInt := t.vm.InitIntegerObject(int(result))
+			newInt.flag = i
+			return newInt
+		},
+	},
+	{
+		// Returns true if Float is equal to 0.0
+		//
+		// ```Ruby
+		// 0.0.zero? # => true
+		// 1.0.zero? # => false
+		// ```
+		// @return [Boolean]
+		Name: "zero?",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%v", strconv.Itoa(len(args)))
+			}
+			r := receiver.(*FloatObject)
+			return toBooleanObject(r.value == 0.0)
+		},
+	},
+	{
+		// Returns true if Float is larger than 0.0
+		//
+		// ```Ruby
+		// -1.0.positive? # => false
+		// 0.0.positive?  # => false
+		// 1.0.positive?  # => true
+		// ```
+		// @return [Boolean]
+		Name: "positive?",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%v", strconv.Itoa(len(args)))
+			}
+			r := receiver.(*FloatObject)
+			return toBooleanObject(r.value > 0.0)
+		},
+	},
+	{
+		// Returns true if Float is less than 0.0
+		//
+		// ```Ruby
+		// -1.0.negative? # => true
+		// 0.0.negative?  # => false
+		// 1.0.negative?  # => false
+		// ```
+		// @return [Boolean]
+		Name: "negative?",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 0 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 argument. got=%v", strconv.Itoa(len(args)))
+			}
+			r := receiver.(*FloatObject)
+			return toBooleanObject(r.value < 0.0)
+		},
+	},
+	{
+		//  Rounds float to a given precision in decimal digits (default 0 digits)
+		//
+		// ```Ruby
+		// 1.115.round  # => 1
+		// 1.115.round(1)  # => 1.1
+		// 1.115.round(2)  # => 1.12
+		// -1.115.round  # => -1
+		// -1.115.round(1)  # => -1.1
+		// -1.115.round(2)  # => -1.12
+		// ```
+		// @return [Integer]
+		Name: "round",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			var precision int
 
+			if len(args) > 1 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "Expect 0 or 1 argument. got=%v", strconv.Itoa(len(args)))
+			} else if len(args) == 1 {
+				int, ok := args[0].(*IntegerObject)
+
+				if !ok {
+					return t.vm.InitErrorObject(errors.TypeError, sourceLine, errors.WrongArgumentTypeFormat, classes.IntegerClass, args[0].Class().Name)
+				}
+
+				precision = int.value
+			}
+
+			f := receiver.(*FloatObject).floatValue()
+			n := math.Pow10(precision)
+
+			return t.vm.initFloatObject(math.Round(f*n) / n)
 		},
 	},
 }
