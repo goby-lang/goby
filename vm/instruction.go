@@ -1,7 +1,6 @@
 package vm
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/goby-lang/goby/compiler/bytecode"
@@ -27,25 +26,25 @@ var operations [bytecode.InstructionCount]operation
 // This is for avoiding initialization loop
 func init() {
 	operations = [bytecode.InstructionCount]operation{
-		bytecode.Pop:                 pop,
-		bytecode.Dup:                 dup,
+		bytecode.Pop: pop,
+		bytecode.Dup: dup,
 
-		bytecode.PutSelf:             putSelf,
-		bytecode.PutBoolean:          putBoolean,
-		bytecode.PutString:           putString,
-		bytecode.PutFloat:            putFloat,
-		bytecode.PutNull:             putNull,
-		bytecode.PutObject:           putObject,
+		bytecode.PutSelf:    putSelf,
+		bytecode.PutBoolean: putBoolean,
+		bytecode.PutString:  putString,
+		bytecode.PutFloat:   putFloat,
+		bytecode.PutNull:    putNull,
+		bytecode.PutObject:  putObject,
 
-		bytecode.NewRange:            newRange,
-		bytecode.NewHash:             newHash,
-		bytecode.NewArray:            newArray,
-		bytecode.ExpandArray:         expandArray,
-		bytecode.SplatArray:          splatArray,
+		bytecode.NewRange:    newRange,
+		bytecode.NewHash:     newHash,
+		bytecode.NewArray:    newArray,
+		bytecode.ExpandArray: expandArray,
+		bytecode.SplatArray:  splatArray,
 
-		bytecode.DefMethod:           defMethod,
-		bytecode.DefSingletonMethod:  defSingletonMethod,
-		bytecode.DefClass:            defClass,
+		bytecode.DefMethod:          defMethod,
+		bytecode.DefSingletonMethod: defSingletonMethod,
+		bytecode.DefClass:           defClass,
 
 		bytecode.SetConstant:         setConstant,
 		bytecode.GetConstant:         getConstant,
@@ -54,10 +53,10 @@ func init() {
 		bytecode.SetInstanceVariable: setInstanceVariable,
 		bytecode.GetInstanceVariable: getInstanceVariable,
 
-		bytecode.Send:         send,
+		bytecode.Send: send,
 
-		bytecode.InvokeBlock:  invokeBlock,
-		bytecode.GetBlock:     getBlock,
+		bytecode.InvokeBlock: invokeBlock,
+		bytecode.GetBlock:    getBlock,
 
 		bytecode.BranchIf:     branchIf,
 		bytecode.BranchUnless: branchUnless,
@@ -303,17 +302,7 @@ func defSingletonMethod(t *Thread, sourceLine int, cf *normalCallFrame, args ...
 	is, _ := t.getMethodIS(methodName, cf.FileName())
 	method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, BaseObj: NewBaseObject(t.vm.TopLevelClass(classes.MethodClass))}
 
-	v := t.Stack.Pop().Target
-
-	switch v := v.(type) {
-	case *RClass:
-		v.SingletonClass().Methods.set(methodName, method)
-	default:
-		singletonClass := t.vm.createRClass(fmt.Sprintf("#<Class:#<%s:%d>>", v.Class().Name, v.ID()))
-		singletonClass.Methods.set(methodName, method)
-		singletonClass.isSingleton = true
-		v.SetSingletonClass(singletonClass)
-	}
+	t.vm.defineSingletonMethodOn(t.Stack.Pop().Target, method)
 	return
 }
 
@@ -328,13 +317,7 @@ func defMethod(t *Thread, sourceLine int, cf *normalCallFrame, args ...interface
 
 	method := &MethodObject{Name: methodName, argc: argCount, instructionSet: is, BaseObj: NewBaseObject(t.vm.TopLevelClass(classes.MethodClass))}
 
-	v := t.Stack.Pop().Target
-	switch self := v.(type) {
-	case *RClass:
-		self.Methods.set(methodName, method)
-	default:
-		self.Class().Methods.set(methodName, method)
-	}
+	t.vm.defineMethodOn(t.Stack.Pop().Target, method)
 
 	return
 }

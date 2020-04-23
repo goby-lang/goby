@@ -42,7 +42,7 @@ var (
 )
 
 func init() {
-	vm.RegisterExternalClass("plugin", vm.ExternalClass("Plugin", "plugin.gb",
+	vm.RegisterExternalClass("plugin", vm.NewExternalClassLoader("Plugin", "plugin.gb",
 		// class methods
 		map[string]Method{
 			"new": newPlugin,

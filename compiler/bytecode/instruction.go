@@ -145,6 +145,13 @@ type ArgSet struct {
 	types []uint8
 }
 
+func initArgSet(argCount int) *ArgSet {
+	return &ArgSet{
+		names: make([]string, argCount),
+		types: make([]uint8, argCount),
+	}
+}
+
 // Types are the getter method of *ArgSet's types attribute
 // TODO: needs to change the func to simple public variable
 func (as *ArgSet) Types() []uint8 {

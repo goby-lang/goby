@@ -554,41 +554,125 @@ func TestGeneralAssignmentByOperation(t *testing.T) {
 	}
 }
 
-func TestForbiddenInclusionWithClass(t *testing.T) {
-	input := `class Foo
-end
-
-class Bar
-  include Foo
-end
-	`
-	expected := `TypeError: Expect argument to be Module. got: Class`
-
-	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
-	checkErrorMsg(t, i, evaluated, expected)
-	v.checkCFP(t, 0, 1)
-	v.checkSP(t, 0, 1)
-}
-
-func TestForbiddenExtensionWithClass(t *testing.T) {
-	input := `class Foo
-end
-
-class Bar
-  extend Foo
-end
-	`
-	expected := `TypeError: Expect argument to be Module. got: Class`
-
-	v := initTestVM()
-	evaluated := v.testEval(t, input, getFilename())
-	checkErrorMsg(t, i, evaluated, expected)
-	v.checkCFP(t, 0, 1)
-	v.checkSP(t, 0, 1)
-}
-
 // Method tests
+
+func TestDefineMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		class C
+ 		  ["hi", "hola"].each do |method_name|
+				define_method method_name do
+				end
+			end
+		end
+		C.new.methods.first(2) == ["hi", "hola"]
+		`, true},
+		{`
+		class C
+		  define_method :ten do
+				10
+		  end
+		end
+		C.new.ten
+		`, 10},
+		{`
+		class C
+		  define_method :plus_1 do |num|
+				num + 1
+		  end
+		end
+		C.new.plus_1(1)
+		`, 2},
+		{`
+		Object.define_method :plus_1 do |num|
+			num + 1
+		end
+		plus_1(1)
+		`, 2},
+	}
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestDefineMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`Object.define_method`, "ArgumentError: Expect 1 argument(s). got: 0", 1, 1},
+		{`Object.define_method :foo`, "ArgumentError: can't define a method without a block", 1, 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, tt.expectedSP)
+	}
+}
+
+func TestDefineSingletonMethod(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`
+		class C
+		end
+		
+		C.define_singleton_method :ten do
+			10
+        end
+		C.ten
+		`, 10},
+		{`
+		s1 = "String"
+		s2 = s1.dup
+		s1.define_singleton_method :ten do
+			10
+		end
+		s2.define_singleton_method :ten do
+			20
+		end
+		s1.ten
+		`, 10},
+		{`
+		class C; end
+		C.define_singleton_method :plus_1 do |num|
+			num + 1
+		end
+		C.plus_1(1)
+		`, 2},
+	}
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestDefineSingletonMethodFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`Object.define_singleton_method`, "ArgumentError: Expect 1 argument(s). got: 0", 1, 1},
+		{`Object.define_singleton_method :foo`, "ArgumentError: can't define a method without a block", 1, 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, tt.expectedSP)
+	}
+}
 
 func TestMethodsMethod(t *testing.T) {
 	tests := []struct {
@@ -1736,15 +1820,25 @@ func TestInstanceEvalMethod(t *testing.T) {
 		  @secret
 		end
 `, 99},
+		// below 2 cases test 'def' statement with instance_eval
 		{`
 		string = "String"
 		string.instance_eval do
-		  def new_method
-			self.reverse
+		  def reverse
+				self
 		  end
 		end
-		string.new_method
-`, "gnirtS"},
+		string.reverse
+`, "String"},
+		{`
+		string = "String"
+		string.instance_eval do
+		  def reverse
+				self
+		  end
+		end
+		"Foo".reverse
+`, "ooF"},
 		{`"a".instance_eval`, "a"},
 		{`"a".instance_eval do end`, "a"},
 		{`
@@ -1903,4 +1997,30 @@ func TestClassInspectCallsToString(t *testing.T) {
 	VerifyExpected(t, i, evaluated, expected)
 	vm.checkCFP(t, i, 0)
 	vm.checkSP(t, i, 1)
+}
+
+func TestModuleInclusionFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		{`
+class Foo
+  include []
+end
+`, "ArgumentError: Expect 1 argument(s). got: 0", 2, 1},
+		{`
+class Foo
+  include
+end`, "ArgumentError: Expect 1 argument(s). got: 0", 2, 1},
+		{`
+class Foo
+  include "123"
+end`, "TypeError: Expect argument to be Module. got: String", 2, 1},
+	}
+
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, tt.expectedSP)
+	}
 }

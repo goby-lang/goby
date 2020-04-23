@@ -2556,3 +2556,41 @@ func TestUnusedVariableFail(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
+func TestEqlComparisonOperation(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`10.eql? 10`, true},
+		{`10.0.eql? 10`, false},
+		{`10.eql? 10.0`, false},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		VerifyExpected(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, 0)
+		v.checkSP(t, i, 1)
+	}
+}
+
+func TestEqlComparisonOperationFail(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+		expectedCFP int
+	}{
+		{`10.eql?`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+		{`10.0.eql? 10, 10`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
+	}
+
+	for i, tt := range tests {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}
