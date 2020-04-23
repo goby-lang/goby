@@ -18,4 +18,5 @@ require (
 	github.com/pkg/profile v1.3.0
 	github.com/st0012/metago v0.0.0-20170803060228-9a814882b21a
 	golang.org/x/sys v0.0.0-20191029155521-f43be2a4598c // indirect
+	golang.org/x/tools v0.0.0-20200417140056-c07e33ef3290 // indirect
 )
