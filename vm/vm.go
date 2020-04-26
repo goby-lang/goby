@@ -18,7 +18,7 @@ import (
 )
 
 // Version stores current Goby version
-const Version = "0.1.12"
+const Version = "0.1.13"
 
 // DefaultLibPath is used for overriding vm.libpath build-time.
 var DefaultLibPath string
