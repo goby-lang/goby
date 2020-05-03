@@ -44,7 +44,7 @@ var builtinArrayClassMethods = []*BuiltinMethodObject{
 
 				if blockFrame != nil && !blockIsEmpty(blockFrame) {
 					for i := range elems {
-						elems[i] = t.builtinMethodYield(blockFrame, t.vm.InitIntegerObject(i)).Target
+						elems[i] = t.builtinMethodYield(blockFrame, t.vm.InitIntegerObject(i))
 					}
 				} else {
 					var elem Object
@@ -413,7 +413,7 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 			for _, obj := range arr.Elements {
 				result := t.builtinMethodYield(blockFrame, obj)
 
-				if result.Target.isTruthy() {
+				if result.isTruthy() {
 					return TRUE
 				}
 			}
@@ -541,7 +541,7 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 
 				for _, obj := range arr.Elements {
 					result := t.builtinMethodYield(blockFrame, obj)
-					if result.Target.isTruthy() {
+					if result.isTruthy() {
 						count++
 					}
 				}
@@ -930,12 +930,12 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 			switch len(args) {
 			case 0:
 				for _, obj := range a.Elements {
-					hash[obj.ToString()] = t.builtinMethodYield(blockFrame, obj).Target
+					hash[obj.ToString()] = t.builtinMethodYield(blockFrame, obj)
 				}
 			case 1:
 				arg := args[0]
 				for _, obj := range a.Elements {
-					switch b := t.builtinMethodYield(blockFrame, obj).Target; b.(type) {
+					switch b := t.builtinMethodYield(blockFrame, obj); b.(type) {
 					case *NullObject:
 						hash[obj.ToString()] = arg
 					default:
@@ -1104,8 +1104,7 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 				}
 			} else {
 				for i, obj := range arr.Elements {
-					result := t.builtinMethodYield(blockFrame, obj)
-					elements[i] = result.Target
+					elements[i] = t.builtinMethodYield(blockFrame, obj)
 				}
 			}
 
@@ -1225,8 +1224,7 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 			}
 
 			for i := start; i < len(arr.Elements); i++ {
-				result := t.builtinMethodYield(blockFrame, prev, arr.Elements[i])
-				prev = result.Target
+				prev = t.builtinMethodYield(blockFrame, prev, arr.Elements[i])
 			}
 
 			return prev
@@ -1405,7 +1403,7 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 
 			for _, obj := range arr.Elements {
 				result := t.builtinMethodYield(blockFrame, obj)
-				if result.Target.isTruthy() {
+				if result.isTruthy() {
 					elements = append(elements, obj)
 				}
 			}

@@ -152,7 +152,7 @@ func newHandler(t *Thread, blockFrame *normalCallFrame) func(http.ResponseWriter
 		req := initRequest(t, w, r)
 		result := thread.builtinMethodYield(blockFrame, req, res)
 
-		if err, ok := result.Target.(*Error); ok {
+		if err, ok := result.(*Error); ok {
 			log.Printf("Error: %s", err.message)
 			res.InstanceVariableSet("@status", t.vm.InitIntegerObject(500))
 		}

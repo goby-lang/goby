@@ -119,7 +119,7 @@ var builtinRangeInstanceMethods = []*BuiltinMethodObject{
 
 				result := t.builtinMethodYield(blockFrame, t.vm.InitIntegerObject(mid))
 
-				switch r := result.Target.(type) {
+				switch r := result.(type) {
 				case *BooleanObject:
 					if r.value {
 						pivot = mid
@@ -303,7 +303,7 @@ var builtinRangeInstanceMethods = []*BuiltinMethodObject{
 					el = append(el, NULL)
 				} else {
 					obj := t.vm.InitIntegerObject(i)
-					el = append(el, t.builtinMethodYield(blockFrame, obj).Target)
+					el = append(el, t.builtinMethodYield(blockFrame, obj))
 				}
 
 				return nil
