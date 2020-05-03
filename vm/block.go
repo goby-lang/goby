@@ -115,7 +115,7 @@ var builtinBlockInstanceMethods = []*BuiltinMethodObject{
 			c.self = block.self
 			c.isBlock = true
 
-			return t.builtinMethodYield(c, args...).Target
+			return t.builtinMethodYield(c, args...)
 		},
 	},
 }

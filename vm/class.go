@@ -1199,9 +1199,8 @@ var builtinClassCommonInstanceMethods = []*BuiltinMethodObject{
 			}
 
 			blockFrame.self = receiver
-			result := t.builtinMethodYield(blockFrame)
 
-			return result.Target
+			return t.builtinMethodYield(blockFrame)
 
 		},
 	},

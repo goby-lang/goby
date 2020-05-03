@@ -168,11 +168,11 @@ var builtinHTTPClassMethods = []*BuiltinMethodObject{
 
 			result := t.builtinMethodYield(blockFrame, gobyClient)
 
-			if err, ok := result.Target.(*Error); ok {
+			if err, ok := result.(*Error); ok {
 				return err //an Error object
 			}
 
-			return result.Target
+			return result
 
 		},
 	},

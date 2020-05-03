@@ -170,7 +170,7 @@ var builtinConcurrentRWLockInstanceMethods = []*BuiltinMethodObject{
 
 			lockObject.mutex.RLock()
 
-			blockReturnValue := t.builtinMethodYield(blockFrame).Target
+			blockReturnValue := t.builtinMethodYield(blockFrame)
 
 			lockObject.mutex.RUnlock()
 
@@ -204,7 +204,7 @@ var builtinConcurrentRWLockInstanceMethods = []*BuiltinMethodObject{
 
 			lockObject.mutex.Lock()
 
-			blockReturnValue := t.builtinMethodYield(blockFrame).Target
+			blockReturnValue := t.builtinMethodYield(blockFrame)
 
 			lockObject.mutex.Unlock()
 

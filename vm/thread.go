@@ -240,7 +240,7 @@ func (t *Thread) execInstruction(cf *normalCallFrame, i *bytecode.Instruction) {
 }
 
 // Yield to a call frame
-func (t *Thread) Yield(args ...Object) *Pointer {
+func (t *Thread) Yield(args ...Object) Object {
 	return t.builtinMethodYield(t.currentFrame.BlockFrame(), args...)
 }
 
@@ -249,9 +249,9 @@ func (t *Thread) BlockGiven() bool {
 	return t.currentFrame.BlockFrame() != nil
 }
 
-func (t *Thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object) *Pointer {
+func (t *Thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object) Object {
 	if blockFrame.IsRemoved() {
-		return &Pointer{Target: NULL}
+		return NULL
 	}
 
 	c := newNormalCallFrame(blockFrame.instructionSet, blockFrame.FileName(), blockFrame.sourceLine)
@@ -269,10 +269,10 @@ func (t *Thread) builtinMethodYield(blockFrame *normalCallFrame, args ...Object)
 	t.startFromTopFrame()
 
 	if blockFrame.IsRemoved() {
-		return &Pointer{Target: NULL}
+		return NULL
 	}
 
-	return t.Stack.top()
+	return t.Stack.top().Target
 }
 
 func (t *Thread) retrieveBlock(fileName, blockFlag string, sourceLine int) (blockFrame *normalCallFrame) {

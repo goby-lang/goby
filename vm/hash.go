@@ -216,7 +216,7 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 					return NULL
 				}
 
-				if result.Target.isTruthy() {
+				if result.isTruthy() {
 					return TRUE
 				}
 			}
@@ -384,13 +384,13 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 				objectKey := t.vm.InitStringObject(stringKey)
 				result := t.builtinMethodYield(blockFrame, objectKey, value)
 
-				booleanResult, isResultBoolean := result.Target.(*BooleanObject)
+				booleanResult, isResultBoolean := result.(*BooleanObject)
 
 				if isResultBoolean {
 					if booleanResult.value {
 						delete(hash.Pairs, stringKey)
 					}
-				} else if result.Target != NULL {
+				} else if result != NULL {
 					delete(hash.Pairs, stringKey)
 				}
 			}
@@ -704,7 +704,7 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 			}
 
 			if blockFrame != nil {
-				return t.builtinMethodYield(blockFrame, key).Target
+				return t.builtinMethodYield(blockFrame, key)
 			}
 			return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "The value was not found, and no block has been provided")
 		},
@@ -746,7 +746,7 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 
 				if !ok {
 					if blockFrame != nil {
-						value = t.builtinMethodYield(blockFrame, objectKey).Target
+						value = t.builtinMethodYield(blockFrame, objectKey)
 						blockFramePopped = true
 					} else {
 						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, "There is no value for the key `%s`, and no block has been provided", stringKey.value)
@@ -910,7 +910,7 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 			}
 
 			for k, v := range h.Pairs {
-				result[k] = t.builtinMethodYield(blockFrame, v).Target
+				result[k] = t.builtinMethodYield(blockFrame, v)
 			}
 			return t.vm.InitHashObject(result)
 
@@ -1005,7 +1005,7 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 				objectKey := t.vm.InitStringObject(stringKey)
 				result := t.builtinMethodYield(blockFrame, objectKey, value)
 
-				if result.Target.isTruthy() {
+				if result.isTruthy() {
 					destinationPairs[stringKey] = value
 				}
 			}
@@ -1179,8 +1179,7 @@ var builtinHashInstanceMethods = []*BuiltinMethodObject{
 
 			resultHash := make(map[string]Object)
 			for k, v := range h.Pairs {
-				result := t.builtinMethodYield(blockFrame, v)
-				resultHash[k] = result.Target
+				resultHash[k] = t.builtinMethodYield(blockFrame, v)
 			}
 			return t.vm.InitHashObject(resultHash)
 
