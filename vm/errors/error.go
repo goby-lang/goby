@@ -1,31 +1,75 @@
 package errors
 
+import "fmt"
+
+// ErrorType is the enum representation for built-in error types
+type ErrorType int8
+
 const (
 	// InternalError is the default error type
-	InternalError = "InternalError"
+	InternalError ErrorType = iota
 	// IOError is an IO error such as file error
-	IOError = "IOError"
+	IOError
 	// ArgumentError is for an argument-related error
-	ArgumentError = "ArgumentError"
+	ArgumentError
 	// NameError is for a constant-related error
-	NameError = "NameError"
+	NameError
 	// StopIteration is raised when there are no more elements in an iterator
-	StopIteration = "StopIteration"
+	StopIteration
 	// TypeError is for a type-related error
-	TypeError = "TypeError"
+	TypeError
 	// NoMethodError is for an intentionally unsupported-method error
-	NoMethodError = "NoMethodError"
+	NoMethodError
 	// ConstantAlreadyInitializedError means user re-declares twice
-	ConstantAlreadyInitializedError = "ConstantAlreadyInitializedError"
+	ConstantAlreadyInitializedError
 	// HTTPError is returned when when a request fails to return a proper response
-	HTTPError = "HTTPError"
+	HTTPError
 	// ZeroDivisionError is for zero-division by Integer/Float/Decimal value
-	ZeroDivisionError = "ZeroDivisionError"
+	ZeroDivisionError
 	// ChannelCloseError is for accessing to the closed channel
-	ChannelCloseError = "ChannelCloseError"
+	ChannelCloseError
 	// NotImplementedError means the method is missing
-	NotImplementedError = "NotImplementedError"
+	NotImplementedError
+
+	// EndOfErrorTypeConst is an anchor for getting all error types' enum values, see AllErrorTypes
+	EndOfErrorTypeConst
 )
+
+var errorTypesMap = map[ErrorType]string{
+	InternalError: "InternalError",
+	IOError: "IOError",
+	ArgumentError: "ArgumentError",
+	NameError: "NameError",
+	StopIteration: "StopIteration",
+	TypeError: "TypeError",
+	NoMethodError: "NoMethodError",
+	ConstantAlreadyInitializedError: "ConstantAlreadyInitializedError",
+	HTTPError: "HTTPError",
+	ZeroDivisionError: "ZeroDivisionError",
+	ChannelCloseError: "ChannelCloseError",
+	NotImplementedError: "NotImplementedError",
+}
+
+
+// AllErrorTypes returns all error types defined in this package in their enum format.
+func AllErrorTypes() []ErrorType {
+	ts := make([]ErrorType, EndOfErrorTypeConst)
+	for i := 0; i < int(EndOfErrorTypeConst); i++ {
+		ts[i] = ErrorType(i)
+	}
+	return ts
+}
+
+// GetErrorName receives an ErrorType enum and returns the corresponding error name.
+func GetErrorName(t ErrorType) string {
+	v, ok := errorTypesMap[t]
+
+	if ok {
+		return v
+	}
+
+	panic(fmt.Errorf("expect to find ErrorType %d's name", t))
+}
 
 /*
 	Here defines different error message formats for different types of errors

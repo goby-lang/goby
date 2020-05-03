@@ -490,14 +490,14 @@ func (t *Thread) reportArgumentError(sourceLine, idealArgNumber int, methodName 
 }
 
 // pushErrorObject pushes the Error object to the stack
-func (t *Thread) pushErrorObject(errorType string, sourceLine int, format string, args ...interface{}) {
+func (t *Thread) pushErrorObject(errorType errors.ErrorType, sourceLine int, format string, args ...interface{}) {
 	err := t.vm.InitErrorObject(errorType, sourceLine, format, args...)
 	t.Stack.Push(&Pointer{Target: err})
 	panic(err.Message())
 }
 
 // setErrorObject replaces a certain stack element with the Error object
-func (t *Thread) setErrorObject(receiverPtr, sp int, errorType string, sourceLine int, format string, args ...interface{}) {
+func (t *Thread) setErrorObject(receiverPtr, sp int, errorType errors.ErrorType, sourceLine int, format string, args ...interface{}) {
 	err := t.vm.InitErrorObject(errorType, sourceLine, format, args...)
 	t.Stack.Set(receiverPtr, &Pointer{Target: err})
 	t.Stack.pointer = sp

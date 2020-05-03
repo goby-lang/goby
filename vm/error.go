@@ -22,7 +22,6 @@ type Error struct {
 	message      string
 	stackTraces  []string
 	storedTraces bool
-	Type         string
 }
 
 // Internal functions ===================================================
@@ -35,9 +34,7 @@ func (vm *VM) InitNoMethodError(sourceLine int, methodName string, receiver Obje
 }
 
 // InitErrorObject initializes and returns Error object
-func (vm *VM) InitErrorObject(errorType string, sourceLine int, format string, args ...interface{}) *Error {
-	errClass := vm.objectClass.getClassConstant(errorType)
-
+func (vm *VM) InitErrorObjectFromClass(errClass *RClass, sourceLine int, format string, args ...interface{}) *Error {
 	t := &vm.mainThread
 	cf := t.callFrameStack.top()
 
@@ -53,17 +50,22 @@ func (vm *VM) InitErrorObject(errorType string, sourceLine int, format string, a
 	return &Error{
 		BaseObj: NewBaseObject(errClass),
 		// Add 1 to source line because it's zero indexed
-		message:     fmt.Sprintf(errorType+": "+format, args...),
+		message:     fmt.Sprintf(errClass.Name+": "+format, args...),
 		stackTraces: []string{fmt.Sprintf("from %s:%d", cf.FileName(), sourceLine)},
-		Type:        errorType,
 	}
 }
 
-func (vm *VM) initErrorClasses() {
-	errTypes := []string{errors.InternalError, errors.IOError, errors.ArgumentError, errors.NameError, errors.StopIteration, errors.TypeError, errors.NoMethodError, errors.ConstantAlreadyInitializedError, errors.HTTPError, errors.ZeroDivisionError, errors.ChannelCloseError, errors.NotImplementedError}
+// InitErrorObject initializes and returns Error object
+func (vm *VM) InitErrorObject(errorType errors.ErrorType, sourceLine int, format string, args ...interface{}) *Error {
+	en := errors.GetErrorName(errorType)
+	errClass := vm.objectClass.getClassConstant(en)
+	return vm.InitErrorObjectFromClass(errClass, sourceLine, format, args...)
+}
 
-	for _, errType := range errTypes {
-		c := vm.initializeClass(errType)
+func (vm *VM) initErrorClasses() {
+	for _, et := range errors.AllErrorTypes() {
+		en := errors.GetErrorName(et)
+		c := vm.initializeClass(en)
 		vm.objectClass.setClassConstant(c)
 	}
 }
