@@ -35,7 +35,7 @@ The expected use case for Goby would be backend development. With this goal, it 
 - [Documentation](https://goby-lang.org/docs/introduction.html)
 - [Joining to Goby](#joining-to-goby)
 - [Maintainers](#maintainers)
-- [Support us](#support-us)
+- [Supporters](#supporters)
 - [References](#references)
 
 ## Demo screen and sample Goby app
@@ -170,11 +170,7 @@ See the [guideline](https://github.com/goby-lang/goby/blob/master/CONTRIBUTING.m
 ## Designer
 - [steward379](https://dribbble.com/steward379)
 
-## Support Us
-
-### Donations
-
-Support us with a monthly donation and help us continue our activities. [[Become a backer](https://opencollective.com/goby#backer)]
+## Supporters
 
 <a href="https://opencollective.com/goby/backer/0/website" target="_blank"><img src="https://opencollective.com/goby/backer/0/avatar.svg"></a>
 <a href="https://opencollective.com/goby/backer/1/website" target="_blank"><img src="https://opencollective.com/goby/backer/1/avatar.svg"></a>
