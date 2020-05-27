@@ -26,14 +26,14 @@ The expected use case for Goby would be backend development. With this goal, it 
 
 ## Table of contents
 
-- [Demo and sample Goby app](#demo_and_sample_app)
+- [Demo screen and sample Goby app](#demo-screen-and-sample-goby-app)
 - [Structure](#structure)
 - [Aspects](#aspects)
 - [Features](#major-features)
-- [Current roadmap](#current_roadmap)
+- [Current roadmap](#current-roadmap)
 - [Installation](#installation)
-- [Usage](#usage)
-- [Sample codes](#sample_codes)
+- [Usage](#verifying-goby-installation)
+- [Sample codes](#sample-codes)
 - [Documentation](https://goby-lang.org/docs/introduction.html)
 - [Joining to Goby](#joining-to-goby)
 - [Maintainers](#maintainers)
