@@ -8,7 +8,7 @@ If you are very interested in `Goby` or planning contribute `Goby` frequently, p
 
 - Any issues you see, and if you think the ticket is confusing, please open an issue or ask me on [slack](https://goby-slack-invite.herokuapp.com/).
 - Any grammar error in readme, wiki, and code comments...etc.
-- Any issues listed in goby's [codeclimate](https://codeclimate.com/github/goby-lang/api.doc/issues).
+- Any issues listed in goby's [Go Report Card](https://goreportcard.com/report/github.com/goby-lang/goby).
 - Play around goby and report any bug you find.
 - Write benchmarks for goby (we really need this and really haven't had time to do it yet 😢)
 - Help us document built in class and libraries' api, see the [guideline](https://github.com/goby-lang/goby/wiki/Documenting-Goby-Code)
