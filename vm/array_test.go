@@ -1356,6 +1356,14 @@ func TestArrayLastMethod(t *testing.T) {
 		a.last
 		`, nil},
 		{`
+		a = [2, 9, 7, 1, 8]
+		a.last
+		`, 8},
+		{`
+		a = [2, 9, 7, 1, 8]
+		a.last(1)
+		`, []interface{}{8}},
+		{`
 		a = [3, 4, 5, 1, 6]
 		a.last(3)
 		`, []interface{}{5, 1, 6}},
