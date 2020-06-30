@@ -1017,6 +1017,10 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 			arrLength := len(arr.Elements)
 
 			if aLen == 0 {
+				if arrLength == 0 {
+					return NULL
+				}
+
 				return arr.Elements[arrLength-1]
 			}
 
