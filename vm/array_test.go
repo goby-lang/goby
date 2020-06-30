@@ -1349,8 +1349,20 @@ func TestArrayJoinMethodFail(t *testing.T) {
 func TestArrayLastMethod(t *testing.T) {
 	testsArray := []struct {
 		input    string
-		expected []interface{}
+		expected interface{}
 	}{
+		{`
+		a = []
+		a.last
+		`, nil},
+		{`
+		a = [2, 9, 7, 1, 8]
+		a.last
+		`, 8},
+		{`
+		a = [2, 9, 7, 1, 8]
+		a.last(1)
+		`, []interface{}{8}},
 		{`
 		a = [3, 4, 5, 1, 6]
 		a.last(3)
@@ -1372,7 +1384,7 @@ func TestArrayLastMethod(t *testing.T) {
 	for i, tt := range testsArray {
 		vm := initTestVM()
 		evaluated := vm.testEval(t, tt.input, getFilename())
-		verifyArrayObject(t, i, evaluated, tt.expected)
+		VerifyExpected(t, i, evaluated, tt.expected)
 		vm.checkCFP(t, i, 0)
 		vm.checkSP(t, i, 1)
 	}
