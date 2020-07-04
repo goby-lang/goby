@@ -30,6 +30,8 @@ func init() {
 }
 
 func execGoby(t *testing.T, args ...string) (in io.WriteCloser, out io.ReadCloser, e io.ReadCloser) {
+	t.Helper()
+
 	cmd := exec.Command("./goby", args...)
 
 	in, err := cmd.StdinPipe()
