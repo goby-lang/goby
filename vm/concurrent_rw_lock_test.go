@@ -303,6 +303,7 @@ func TestRWLockWithReadLockReadBlocksWriteNoRaceDetection(t *testing.T) {
 }
 
 func skipRWLockTestIfRaceDetectionEnabled(t *testing.T) {
+	t.Helper()
 	if os.Getenv("NO_RACE_DETECTION") == "" {
 		t.Skip("skipping RW lock related tests")
 	}
