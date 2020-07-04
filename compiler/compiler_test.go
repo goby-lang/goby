@@ -15,6 +15,7 @@ type testInstruction struct {
 }
 
 func verifyInstructions(i *bytecode.Instruction, e testInstruction, t *testing.T) {
+	t.Helper()
 	if i.ActionName() != e.actionName || i.Opcode != e.opCode || i.SourceLine() != e.sourceLine || len(i.Params) != e.paramsLen {
 		t.Fatalf("Line %d: expect ActionName: `%s`, opCode: %d, SourceLine: %d, paramsLen: %d. got: ActionName: `%s`, opCode: %d, SourceLine: %d, paramsLen: %d", i.Line(),
 			e.actionName, e.opCode, e.sourceLine, e.paramsLen,
