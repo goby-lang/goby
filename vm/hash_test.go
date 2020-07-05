@@ -1534,12 +1534,12 @@ func TestHashToJSONMethodWithCustomType(t *testing.T) {
 			@name = name
 			@age = age
 		  end
-		
+
 		  def to_json
 			{ name: @name, age: @age }.to_json
 		  end
 		end
-		
+
 		stan = Person.new("Stan", 23)
 		h = { a: 1, person: stan }.to_json
 		`, struct {
@@ -1563,19 +1563,19 @@ func TestHashToJSONMethodWithCustomType(t *testing.T) {
 		  def initialize(name)
 			@name = name
 		  end
-		
+
 		  def to_json
 			{ title: @name }.to_json
 		  end
 		end
-		
+
 		class Person
 		  def initialize(name, age)
 			@name = name
 			@age = age
 			@job = JobTitle.new("software engineer")
 		  end
-		
+
 		  def to_json
 			{ name: @name, age: @age, job: @job }.to_json
 		  end
@@ -1902,6 +1902,7 @@ func JSONBytesEqual(a, b []byte) (bool, error) {
 
 // We can't equalTo string directly because the key/value's order might change and we can't control it.
 func compareJSONResult(t *testing.T, evaluated Object, exp interface{}) {
+	t.Helper()
 	expected, err := json.Marshal(exp)
 
 	if err != nil {
