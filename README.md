@@ -28,16 +28,14 @@ The expected use case for Goby would be backend development. With this goal, it 
 
 - [Demo screen and sample Goby app](#demo-screen-and-sample-goby-app)
 - [Structure](#structure)
-- [Aspects](#aspects)
 - [Features](#major-features)
-- [Current roadmap](#current-roadmap)
 - [Installation](#installation)
 - [Usage](#verifying-goby-installation)
 - [Sample codes](#sample-codes)
 - [Documentation](https://goby-lang.org/docs/introduction.html)
 - [Joining to Goby](#joining-to-goby)
 - [Maintainers](#maintainers)
-- [Support us](#support-us)
+- [Supporters](#supporters)
 - [References](#references)
 
 ## Demo screen and sample Goby app
@@ -52,11 +50,6 @@ Click to see the demo below (powered by [asciinema](https://asciinema.org) and [
 
 ![](https://github.com/goby-lang/goby/blob/master/wiki/goby_structure.png)
 
-## Aspects
-
-Goby has several aspects: language specification, design of compiler and vm, implementation (just one for now), library, and the whole of them. [See more](https://github.com/goby-lang/goby/wiki/Aspects)
-
-We are optimizing and expanding Goby all the time. Toward the first release, we've been focusing on implementing Goby first.
 
 ## Major Features
 
@@ -67,10 +60,6 @@ We are optimizing and expanding Goby all the time. Toward the first release, we'
 - REPL (run `goby -i`)
 
 Here's a [complete list](https://github.com/goby-lang/goby/wiki/Features) of all the features.
-
-## Current roadmap
-
-See wiki: [Current roadmap](https://github.com/goby-lang/goby/wiki/Current-Roadmap)
 
 ## Installation
 
@@ -181,11 +170,7 @@ See the [guideline](https://github.com/goby-lang/goby/blob/master/CONTRIBUTING.m
 ## Designer
 - [steward379](https://dribbble.com/steward379)
 
-## Support Us
-
-### Donations
-
-Support us with a monthly donation and help us continue our activities. [[Become a backer](https://opencollective.com/goby#backer)]
+## Supporters
 
 <a href="https://opencollective.com/goby/backer/0/website" target="_blank"><img src="https://opencollective.com/goby/backer/0/avatar.svg"></a>
 <a href="https://opencollective.com/goby/backer/1/website" target="_blank"><img src="https://opencollective.com/goby/backer/1/avatar.svg"></a>
