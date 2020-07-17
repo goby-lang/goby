@@ -28,6 +28,7 @@ The expected use case for Goby would be backend development. With this goal, it 
 
 - [Demo screen and sample Goby app](#demo-screen-and-sample-goby-app)
 - [Structure](#structure)
+- [3D Visualization](#3d-visualization)
 - [Features](#major-features)
 - [Installation](#installation)
 - [Usage](#verifying-goby-installation)
@@ -50,6 +51,11 @@ Click to see the demo below (powered by [asciinema](https://asciinema.org) and [
 
 ![](https://github.com/goby-lang/goby/blob/master/wiki/goby_structure.png)
 
+## 3D Visualization
+
+A 3D visualization of Goby codebase, powered by [GoCity](https://go-city.github.io/)
+
+[![Goby 3D Visualization](https://github.com/goby-lang/goby/blob/master/wiki/goby_codebase_gocity-min.png)](https://go-city.github.io/#/github.com/goby-lang/goby)
 
 ## Major Features
 
