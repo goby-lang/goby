@@ -26,18 +26,30 @@ The expected use case for Goby would be backend development. With this goal, it 
 
 ## Table of contents
 
-- [Demo screen and sample Goby app](#demo-screen-and-sample-goby-app)
-- [Structure](#structure)
-- [3D Visualization](#3d-visualization)
-- [Features](#major-features)
-- [Installation](#installation)
-- [Usage](#verifying-goby-installation)
-- [Sample codes](#sample-codes)
-- [Documentation](https://goby-lang.org/docs/introduction.html)
-- [Joining to Goby](#joining-to-goby)
-- [Maintainers](#maintainers)
-- [Supporters](#supporters)
-- [References](#references)
+- [!Goby](#img-srchttpiimgurcomelgazrnpng3-altgoby)
+  - [Table of contents](#table-of-contents)
+  - [Demo screen and sample Goby app](#demo-screen-and-sample-goby-app)
+  - [Structure](#structure)
+  - [3D Visualization](#3d-visualization)
+  - [Major Features](#major-features)
+  - [Installation](#installation)
+    - [A. Via Homebrew (binary installation for Mac OS)](#a-via-homebrew-binary-installation-for-mac-os)
+    - [B. From Source](#b-from-source)
+    - [C. Installation on a Linux system](#c-installation-on-a-linux-system)
+    - [Verifying Goby installation](#verifying-goby-installation)
+    - [Using Docker](#using-docker)
+  - [Syntax highlighting](#syntax-highlighting)
+    - [Sublime Text 3](#sublime-text-3)
+    - [Vim](#vim)
+    - [SpaceVim](#spacevim)
+  - [Sample codes](#sample-codes)
+  - [Joining to Goby](#joining-to-goby)
+  - [Maintainers](#maintainers)
+  - [Designer](#designer)
+  - [Supporters](#supporters)
+    - [Sponsors](#sponsors)
+    - [Powered by](#powered-by)
+  - [References](#references)
 
 ## Demo screen and sample Goby app
 
@@ -87,7 +99,7 @@ In the case, `$GOBY_ROOT` is automatically configured.
 Try this if you'd like to contribute Goby! Skip 1 if you already have Golang in your environment.
 
 1. Prepare Golang environment
-    - Install Golang >= 1.12
+    - Install Golang >= 1.14
     - Make sure `$GOPATH` in your shell's config file( like .bashrc) is correct
     - Add your `$GOPATH/bin` to `$PATH`
     - Add `export GO111MODULE=on` to your shell profile
