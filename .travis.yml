@@ -4,7 +4,8 @@ language: go
 matrix:
   include:
     - go: 1.14
-      env: "GO111MODULE=on"
+      dist: xenial
+    - go: 1.15
       dist: xenial
 
 services:
