@@ -25,7 +25,9 @@ var builtinURIClassMethods = []*BuiltinMethodObject{
 			if len(args) != 1 {
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
 			}
+
 			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
+
 			if typeErr != nil {
 				return typeErr
 			}
