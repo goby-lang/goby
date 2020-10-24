@@ -90,3 +90,30 @@ func TestURIParsing(t *testing.T) {
 		v.checkSP(t, i, 1)
 	}
 }
+
+func TestURIParsingFail(t *testing.T) {
+	testsFail := []errorTestCase{
+		// No argument
+		{`
+		require "uri"
+		URI.parse
+		`, "ArgumentError: Expect 1 argument(s). got: 0", 1},
+		// Unexcpeted arguments
+		{`
+		require "uri"
+		URI.parse("foo", "bar")
+		`, "ArgumentError: Expect 1 argument(s). got: 2", 1},
+		// Invalid argument type
+		{`
+		require "uri"
+		URI.parse 1
+		`, "TypeError: Expect argument to be String. got: Integer", 1},
+	}
+	for i, tt := range testsFail {
+		v := initTestVM()
+		evaluated := v.testEval(t, tt.input, getFilename())
+		checkErrorMsg(t, i, evaluated, tt.expected)
+		v.checkCFP(t, i, tt.expectedCFP)
+		v.checkSP(t, i, 1)
+	}
+}

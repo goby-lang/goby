@@ -4,6 +4,7 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/goby-lang/goby/vm/classes"
 	"github.com/goby-lang/goby/vm/errors"
 )
 
@@ -21,6 +22,16 @@ var builtinURIClassMethods = []*BuiltinMethodObject{
 		// ```
 		Name: "parse",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) != 1 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgument, 1, len(args))
+			}
+
+			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.StringClass)
+
+			if typeErr != nil {
+				return typeErr
+			}
+
 			uri := args[0].(*StringObject).value
 			uriModule := t.vm.TopLevelClass("URI")
 			u, err := url.Parse(uri)
