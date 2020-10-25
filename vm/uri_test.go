@@ -80,6 +80,12 @@ func TestURIParsing(t *testing.T) {
 		u = URI.parse("https://example.com")
 		u.password
 		`, nil},
+		// Fragment
+		{`
+		require "uri"
+		u = URI.parse("https://example.com#id1")
+		u.fragment
+		`, "id1"},
 	}
 
 	for i, tt := range tests {
