@@ -45,6 +45,7 @@ var builtinURIClassMethods = []*BuiltinMethodObject{
 				"@password": NULL,
 				"@query":    NULL,
 				"@path":     t.vm.InitStringObject("/"),
+				"@fragment": NULL,
 			}
 
 			// Scheme
@@ -92,6 +93,11 @@ var builtinURIClassMethods = []*BuiltinMethodObject{
 				}
 			}
 
+			// Fragment
+			if u.Fragment != "" {
+				uriAttrs["@fragment"] = t.vm.InitStringObject(u.Fragment)
+			}
+
 			var c *RClass
 
 			if u.Scheme == "https" {
@@ -134,6 +140,7 @@ func initURIClass(vm *VM) {
 		vm.InitStringObject("scheme"),
 		vm.InitStringObject("user"),
 		vm.InitStringObject("password"),
+		vm.InitStringObject("fragment"),
 	}
 
 	http.setAttrReader(attrs)
