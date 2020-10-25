@@ -2581,8 +2581,8 @@ func TestEqlComparisonOperation(t *testing.T) {
 
 func TestEqlComparisonOperationFail(t *testing.T) {
 	tests := []struct {
-		input    string
-		expected string
+		input       string
+		expected    string
 		expectedCFP int
 	}{
 		{`10.eql?`, "ArgumentError: Expect 1 argument(s). got: 0", 1},

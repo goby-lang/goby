@@ -354,7 +354,7 @@ end
   }
 ]
 `,
-	},
+		},
 		// Single class definition
 		{`require 'ripper'; Ripper.instruction("
     class Foo
