@@ -28,6 +28,10 @@ var builtinHTTPClassMethods = []*BuiltinMethodObject{
 		// Sends a GET request to the target and returns the HTTP response as a string. Will error on non-200 responses, for more control over http requests look at the `start` method.
 		Name: "get",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) < 1 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentMore, 1, len(args))
+			}
+
 			arg0, ok := args[0].(*StringObject)
 			if !ok {
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongArgumentTypeFormatNum, 0, "String", args[0].Class().Name)
@@ -115,6 +119,10 @@ var builtinHTTPClassMethods = []*BuiltinMethodObject{
 		// Sends a HEAD request to the target with type header and body. Returns the HTTP headers as a map[string]string. Will error on non-200 responses, for more control over http requests look at the `start` method.
 		Name: "head",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			if len(args) < 1 {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentMore, 1, len(args))
+			}
+
 			arg0, ok := args[0].(*StringObject)
 			if !ok {
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongArgumentTypeFormatNum, 0, "String", args[0].Class().Name)
