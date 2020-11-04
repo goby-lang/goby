@@ -38,6 +38,9 @@ var builtinHTTPClassMethods = []*BuiltinMethodObject{
 			}
 
 			uri, err := url.Parse(arg0.value)
+			if err != nil {
+				return t.vm.InitErrorObject(errors.HTTPError, sourceLine, couldNotCompleteRequest, err)
+			}
 
 			if len(args) > 1 {
 				var arr []string
@@ -119,156 +122,19 @@ var builtinHTTPClassMethods = []*BuiltinMethodObject{
 		// Sends a HEAD request to the target with type header and body. Returns the HTTP headers as a map[string]string. Will error on non-200 responses, for more control over http requests look at the `start` method.
 		Name: "head",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-			if len(args) < 1 {
-				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentMore, 1, len(args))
-			}
-
-			arg0, ok := args[0].(*StringObject)
-			if !ok {
-				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongArgumentTypeFormatNum, 0, "String", args[0].Class().Name)
-			}
-
-			uri, err := url.Parse(arg0.value)
-			if err != nil {
-				return t.vm.InitErrorObject(errors.HTTPError, sourceLine, couldNotCompleteRequest, err)
-			}
-
-			if len(args) > 1 {
-				var arr []string
-
-				for i, v := range args[1:] {
-					argn, ok := v.(*StringObject)
-					if !ok {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, invalidSplatArgument, v.Class().Name, i)
-					}
-					arr = append(arr, argn.value)
-				}
-
-				uri.Path = path.Join(arr...)
-			}
-
-			resp, err := http.Head(uri.String())
-			if err != nil {
-				return t.vm.InitErrorObject(errors.HTTPError, sourceLine, couldNotCompleteRequest, err)
-			}
-			if resp.StatusCode != http.StatusOK {
-				return t.vm.InitErrorObject(errors.HTTPError, sourceLine, non200Response, resp.Status, resp.StatusCode)
-			}
-
-			ret := t.vm.InitHashObject(map[string]Object{})
-
-			for k, v := range resp.Header {
-				ret.Pairs[k] = t.vm.InitStringObject(strings.Join(v, " "))
-			}
-
-			return ret
-
+			return httpMethodWithoutBody("HEAD", receiver, sourceLine, t, args, blockFrame)
 		},
 	}, {
 		// Sends a DELETE request to the target with type header and body. Returns the HTTP headers as a map[string]string. Will error on non-200 responses, for more control over http requests look at the `start` method.
 		Name: "delete",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-			if len(args) < 1 {
-				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentMore, 1, len(args))
-			}
-
-			arg0, ok := args[0].(*StringObject)
-			if !ok {
-				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongArgumentTypeFormatNum, 0, "String", args[0].Class().Name)
-			}
-
-			uri, err := url.Parse(arg0.value)
-			if err != nil {
-				return t.vm.InitErrorObject(errors.HTTPError, sourceLine, couldNotCompleteRequest, err)
-			}
-
-			if len(args) > 1 {
-				var arr []string
-
-				for i, v := range args[1:] {
-					argn, ok := v.(*StringObject)
-					if !ok {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, invalidSplatArgument, v.Class().Name, i)
-					}
-					arr = append(arr, argn.value)
-				}
-
-				uri.Path = path.Join(arr...)
-			}
-
-			req, err := http.NewRequest("DELETE", uri.String(), nil)
-			if err != nil {
-				return t.vm.InitErrorObject(errors.HTTPError, sourceLine, couldNotCompleteRequest, err)
-			}
-			resp, err := http.DefaultClient.Do(req)
-			if err != nil {
-				return t.vm.InitErrorObject(errors.HTTPError, sourceLine, couldNotCompleteRequest, err)
-			}
-			if resp.StatusCode != http.StatusOK {
-				return t.vm.InitErrorObject(errors.HTTPError, sourceLine, non200Response, resp.Status, resp.StatusCode)
-			}
-
-			ret := t.vm.InitHashObject(map[string]Object{})
-
-			for k, v := range resp.Header {
-				ret.Pairs[k] = t.vm.InitStringObject(strings.Join(v, " "))
-			}
-
-			return ret
-
+			return httpMethodWithoutBody("DELETE", receiver, sourceLine, t, args, blockFrame)
 		},
 	}, {
 		// Sends a OPTIONS request to the target with type header and body. Returns the HTTP headers as a map[string]string. Will error on non-200 responses, for more control over http requests look at the `start` method.
 		Name: "options",
 		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
-			if len(args) < 1 {
-				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentMore, 1, len(args))
-			}
-
-			arg0, ok := args[0].(*StringObject)
-			if !ok {
-				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongArgumentTypeFormatNum, 0, "String", args[0].Class().Name)
-			}
-
-			uri, err := url.Parse(arg0.value)
-			if err != nil {
-				return t.vm.InitErrorObject(errors.HTTPError, sourceLine, couldNotCompleteRequest, err)
-			}
-
-			if len(args) > 1 {
-				var arr []string
-
-				for i, v := range args[1:] {
-					argn, ok := v.(*StringObject)
-					if !ok {
-						return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, invalidSplatArgument, v.Class().Name, i)
-					}
-					arr = append(arr, argn.value)
-				}
-
-				uri.Path = path.Join(arr...)
-			}
-
-			req, err := http.NewRequest("OPTIONS", uri.String(), nil)
-			if err != nil {
-				return t.vm.InitErrorObject(errors.HTTPError, sourceLine, couldNotCompleteRequest, err)
-			}
-			resp, err := http.DefaultClient.Do(req)
-			if err != nil {
-				return t.vm.InitErrorObject(errors.HTTPError, sourceLine, couldNotCompleteRequest, err)
-			}
-			if resp.StatusCode != http.StatusOK {
-				return t.vm.InitErrorObject(errors.HTTPError, sourceLine, non200Response, resp.Status, resp.StatusCode)
-			}
-
-			ret := t.vm.InitHashObject(map[string]Object{})
-
-			for k, v := range resp.Header {
-				ret.Pairs[k] = t.vm.InitStringObject(strings.Join(v, " "))
-			}
-
-			return ret
-
+			return httpMethodWithoutBody("OPTIONS", receiver, sourceLine, t, args, blockFrame)
 		},
 	}, {
 		// Starts an HTTP client. This method requires a block which takes a Net::HTTP::Client object. The return value of this method is the last evaluated value of the provided block.
@@ -293,6 +159,55 @@ var builtinHTTPClassMethods = []*BuiltinMethodObject{
 }
 
 // Internal functions ===================================================
+func httpMethodWithoutBody(method string, receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+	if len(args) < 1 {
+		return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentMore, 1, len(args))
+	}
+
+	arg0, ok := args[0].(*StringObject)
+	if !ok {
+		return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongArgumentTypeFormatNum, 0, "String", args[0].Class().Name)
+	}
+
+	uri, err := url.Parse(arg0.value)
+	if err != nil {
+		return t.vm.InitErrorObject(errors.HTTPError, sourceLine, couldNotCompleteRequest, err)
+	}
+
+	if len(args) > 1 {
+		var arr []string
+
+		for i, v := range args[1:] {
+			argn, ok := v.(*StringObject)
+			if !ok {
+				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, invalidSplatArgument, v.Class().Name, i)
+			}
+			arr = append(arr, argn.value)
+		}
+
+		uri.Path = path.Join(arr...)
+	}
+
+	req, err := http.NewRequest(method, uri.String(), nil)
+	if err != nil {
+		return t.vm.InitErrorObject(errors.HTTPError, sourceLine, couldNotCompleteRequest, err)
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return t.vm.InitErrorObject(errors.HTTPError, sourceLine, couldNotCompleteRequest, err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return t.vm.InitErrorObject(errors.HTTPError, sourceLine, non200Response, resp.Status, resp.StatusCode)
+	}
+
+	ret := t.vm.InitHashObject(map[string]Object{})
+
+	for k, v := range resp.Header {
+		ret.Pairs[k] = t.vm.InitStringObject(strings.Join(v, " "))
+	}
+
+	return ret
+}
 
 // Functions for initialization -----------------------------------------
 
