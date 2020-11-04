@@ -37,7 +37,19 @@ func TestHTTPRequest(t *testing.T) {
 
 		res = Net::HTTP.head("http://127.0.0.1:3000/index")
 		res["Content-Length"]
-		`, "15"},
+		`, "16"},
+		{`
+		require "net/http"
+
+		res = Net::HTTP.delete("http://127.0.0.1:3000/index")
+		res["Content-Length"]
+		`, "18"},
+		{`
+		require "net/http"
+
+		res = Net::HTTP.options("http://127.0.0.1:3000/index")
+		res["Content-Length"]
+		`, "19"},
 	}
 
 	//block until server is ready
@@ -168,7 +180,7 @@ func startTestServer(c chan bool) {
 			}
 			fmt.Fprintf(w, "POST %s", b)
 		} else {
-			fmt.Fprint(w, "GET Hello World")
+			fmt.Fprintf(w, "%s Hello World", r.Method)
 		}
 
 	})
