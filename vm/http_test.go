@@ -77,6 +77,18 @@ func TestHTTPRequestFail(t *testing.T) {
 
 		Net::HTTP.get(42)
 		`, "ArgumentError: Expect argument #0 to be String. got: Integer", 1},
+		//Zero argument for get()
+		{`
+		require "net/http"
+
+		Net::HTTP.get
+		`, "ArgumentError: Expect 1 or more argument(s). got: 0", 1},
+		//Zero argument for head()
+		{`
+		require "net/http"
+
+		Net::HTTP.head
+		`, "ArgumentError: Expect 1 or more argument(s). got: 0", 1},
 		{`
 		require "net/http"
 
