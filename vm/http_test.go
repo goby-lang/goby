@@ -36,8 +36,20 @@ func TestHTTPRequest(t *testing.T) {
 		require "net/http"
 
 		res = Net::HTTP.head("http://127.0.0.1:3000/index")
-		res["Content-Length"]
-		`, "15"},
+		res["X-Request-Method"]
+		`, "HEAD"},
+		{`
+		require "net/http"
+
+		res = Net::HTTP.delete("http://127.0.0.1:3000/index")
+		res["X-Request-Method"]
+		`, "DELETE"},
+		{`
+		require "net/http"
+
+		res = Net::HTTP.options("http://127.0.0.1:3000/index")
+		res["X-Request-Method"]
+		`, "OPTIONS"},
 	}
 
 	//block until server is ready
@@ -159,6 +171,7 @@ func startTestServer(c chan bool) {
 	m := http.NewServeMux()
 
 	m.HandleFunc("/index", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-Request-Method", r.Method)
 		w.WriteHeader(http.StatusOK)
 
 		if r.Method == http.MethodPost {
@@ -168,7 +181,7 @@ func startTestServer(c chan bool) {
 			}
 			fmt.Fprintf(w, "POST %s", b)
 		} else {
-			fmt.Fprint(w, "GET Hello World")
+			fmt.Fprintf(w, "%s Hello World", r.Method)
 		}
 
 	})
