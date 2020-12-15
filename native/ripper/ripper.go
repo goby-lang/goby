@@ -345,7 +345,7 @@ func convertLex(t token.Type) string {
 	case token.Slash:
 		s = "slash"
 	default:
-		s = strings.ToLower(string(t))
+		s = strings.ToLower(t.String())
 	}
 
 	return "on_" + s
