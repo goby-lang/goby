@@ -2,7 +2,6 @@
 =========
 
 [![](https://goby-slack-invite.herokuapp.com/badge.svg)](https://goby-slack-invite.herokuapp.com)
-[![Discord](https://img.shields.io/discord/678892628955103232?label=discord)](https://discord.gg/SS5HbYN)
 [![Build Status](https://travis-ci.com/goby-lang/goby.svg?branch=master)](https://travis-ci.com/goby-lang/goby)
 [![GoDoc](https://godoc.org/github.com/goby-lang/goby?status.svg)](https://godoc.org/github.com/goby-lang/goby)
 [![Go Report Card](https://goreportcard.com/badge/github.com/goby-lang/goby)](https://goreportcard.com/report/github.com/goby-lang/goby)
