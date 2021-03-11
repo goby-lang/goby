@@ -1,7 +1,7 @@
 package token
 
 // Type is used to determine token type
-type Type string
+type Type uint8
 
 // Token is structure for identifying input stream of characters
 type Token struct {
@@ -12,77 +12,154 @@ type Token struct {
 
 // Literals
 const (
-	Illegal = "ILLEGAL"
-	EOF     = "EOF"
+	Illegal Type = iota
+	EOF
 
-	Constant         = "CONSTANT"
-	Ident            = "IDENT"
-	InstanceVariable = "INSTANCE_VAR"
-	Int              = "INT"
-	Float            = "FLOAT"
-	String           = "STRING"
-	Comment          = "COMMENT"
+	Constant
+	Ident
+	InstanceVariable
+	Int
+	Float
+	String
+	Comment
 
-	Assign   = "="
-	Plus     = "+"
-	PlusEq   = "+="
-	Minus    = "-"
-	MinusEq  = "-="
-	Bang     = "!"
-	Asterisk = "*"
-	Pow      = "**"
-	Slash    = "/"
-	Dot      = "."
-	And      = "&&"
-	Or       = "||"
-	OrEq     = "||="
-	Modulo   = "%"
+	Assign
+	Plus
+	PlusEq
+	Minus
+	MinusEq
+	Bang
+	Asterisk
+	Pow
+	Slash
+	Dot
+	And
+	Or
+	OrEq
+	Modulo
 
-	LT   = "<"
-	LTE  = "<="
-	GT   = ">"
-	GTE  = ">="
-	COMP = "<=>"
+	LT
+	LTE
+	GT
+	GTE
+	COMP
 
-	Comma     = ","
-	Semicolon = ";"
-	Colon     = ":"
-	Bar       = "|"
+	Comma
+	Semicolon
+	Colon
+	Bar
 
-	LParen   = "("
-	RParen   = ")"
-	LBrace   = "{"
-	RBrace   = "}"
-	LBracket = "["
-	RBracket = "]"
+	LParen
+	RParen
+	LBrace
+	RBrace
+	LBracket
+	RBracket
 
-	Eq    = "=="
-	NotEq = "!="
-	Range = ".."
+	Eq
+	NotEq
+	Range
 
-	True     = "TRUE"
-	False    = "FALSE"
-	Null     = "Null"
-	If       = "IF"
-	ElsIf    = "ELSIF"
-	Else     = "ELSE"
-	Case     = "CASE"
-	When     = "WHEN"
-	Return   = "RETURN"
-	Next     = "NEXT"
-	Break    = "BREAK"
-	Def      = "DEF"
-	Self     = "SELF"
-	End      = "END"
-	While    = "WHILE"
-	Do       = "DO"
-	Yield    = "YIELD"
-	GetBlock = "GET_BLOCK"
-	Class    = "CLASS"
-	Module   = "MODULE"
+	True
+	False
+	Null
+	If
+	ElsIf
+	Else
+	Case
+	When
+	Return
+	Next
+	Break
+	Def
+	Self
+	End
+	While
+	Do
+	Yield
+	GetBlock
+	Class
+	Module
 
-	ResolutionOperator = "::"
+	ResolutionOperator
 )
+
+var tokenMap = map[Type]string{
+	Illegal: "ILLEGAL",
+	EOF:     "EOF",
+
+	Constant:         "CONSTANT",
+	Ident:            "IDENT",
+	InstanceVariable: "INSTANCE_VAR",
+	Int:              "INT",
+	Float:            "FLOAT",
+	String:           "STRING",
+	Comment:          "COMMENT",
+
+	Assign:   "=",
+	Plus:     "+",
+	PlusEq:   "+=",
+	Minus:    "-",
+	MinusEq:  "-=",
+	Bang:     "!",
+	Asterisk: "*",
+	Pow:      "**",
+	Slash:    "/",
+	Dot:      ".",
+	And:      "&&",
+	Or:       "||",
+	OrEq:     "||=",
+	Modulo:   "%",
+
+	LT:   "<",
+	LTE:  "<=",
+	GT:   ">",
+	GTE:  ">=",
+	COMP: "<=>",
+
+	Comma:     ",",
+	Semicolon: ";",
+	Colon:     ":",
+	Bar:       "|",
+
+	LParen:   "(",
+	RParen:   ")",
+	LBrace:   "{",
+	RBrace:   "}",
+	LBracket: "[",
+	RBracket: "]",
+
+	Eq:    "==",
+	NotEq: "!=",
+	Range: "..",
+
+	True:     "TRUE",
+	False:    "FALSE",
+	Null:     "Null",
+	If:       "IF",
+	ElsIf:    "ELSIF",
+	Else:     "ELSE",
+	Case:     "CASE",
+	When:     "WHEN",
+	Return:   "RETURN",
+	Next:     "NEXT",
+	Break:    "BREAK",
+	Def:      "DEF",
+	Self:     "SELF",
+	End:      "END",
+	While:    "WHILE",
+	Do:       "DO",
+	Yield:    "YIELD",
+	GetBlock: "GET_BLOCK",
+	Class:    "CLASS",
+	Module:   "MODULE",
+
+	ResolutionOperator: "::",
+}
+
+func (typ Type) String() string {
+	return tokenMap[typ]
+}
 
 var keywords = map[string]Type{
 	"def":       Def,

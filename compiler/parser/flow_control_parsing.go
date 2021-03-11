@@ -74,15 +74,15 @@ func (p *Parser) parseCaseConditional(base ast.Expression) *ast.ConditionalExpre
 
 func (p *Parser) parseCaseCondition(base ast.Expression) *ast.InfixExpression {
 	first := p.parseExpression(precedence.Normal)
-	infix := newInfixExpression(base, token.Token{Type: token.Eq, Literal: token.Eq}, first)
+	infix := newInfixExpression(base, token.Token{Type: token.Eq, Literal: token.Eq.String()}, first)
 
 	for p.peekTokenIs(token.Comma) {
 		p.nextToken()
 		p.nextToken()
 
 		right := p.parseExpression(precedence.Normal)
-		rightInfix := newInfixExpression(base, token.Token{Type: token.Eq, Literal: token.Eq}, right)
-		infix = newInfixExpression(infix, token.Token{Type: token.Or, Literal: token.Or}, rightInfix)
+		rightInfix := newInfixExpression(base, token.Token{Type: token.Eq, Literal: token.Eq.String()}, right)
+		infix = newInfixExpression(infix, token.Token{Type: token.Or, Literal: token.Or.String()}, rightInfix)
 	}
 
 	return infix
