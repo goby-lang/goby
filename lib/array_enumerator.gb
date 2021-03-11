@@ -1,4 +1,4 @@
-# Minimail implementation of an array enumerator.
+# Minimum implementation of an array enumerator.
 #
 # Assumes that the Enumerator interface has two methods: #has_next? and #next.
 #

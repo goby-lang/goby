@@ -5,10 +5,6 @@ class Array
     end
   end
 
-  def to_enum
-    ArrayEnumerator.new(self)
-  end
-
   # Return a lazy iterator for self.
   #
   def lazy

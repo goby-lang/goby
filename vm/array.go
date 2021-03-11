@@ -1461,6 +1461,13 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 		},
 	},
 	{
+		// @return [Enumerator]
+		Name: "to_enum",
+		Fn: func(receiver Object, sourceLine int, t *Thread, args []Object, blockFrame *normalCallFrame) Object {
+			return t.vm.InitEnumeratorObject(receiver, "", nil)
+		},
+	},
+	{
 		// Returns the result of interpreting ary as an array of [key value] array pairs.
 		// Note that the keys should always be String or symbol literals (using symbol literal is preferable).
 		// Each value can be any objects.
@@ -1501,7 +1508,6 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 			}
 
 			return t.vm.InitHashObject(hash)
-
 		},
 	},
 	{
@@ -1888,4 +1894,8 @@ func (a *ArrayObject) equalTo(compared Object) bool {
 func (a *ArrayObject) unshift(objs []Object) *ArrayObject {
 	a.Elements = append(objs, a.Elements...)
 	return a
+}
+
+func (a *ArrayObject) Enumerable() bool {
+	return true
 }
