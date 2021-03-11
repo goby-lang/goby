@@ -20,6 +20,7 @@ before_script:
   - psql -c 'create database goby_test;' -U postgres
 
 script:
+  - diff -u <(echo -n) <(gofmt -d ./)
   - ./travis.sh
 
 env:

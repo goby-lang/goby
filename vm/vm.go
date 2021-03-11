@@ -141,7 +141,6 @@ func (vm *VM) assignLibPath() (err error) {
 		// if GOBY_ROOT is not set, fallback to homebrew's path
 		gobyRoot = fmt.Sprintf("/usr/local/Cellar/goby/%s", Version)
 
-
 		// if it's not installed via homebrew, assume it's in development env and Goby's source is under GOPATH
 		if _, err := os.Stat(gobyRoot); err != nil {
 			path, _ := filepath.Abs(os.Getenv("GOPATH") + "/src/github.com/goby-lang/goby")

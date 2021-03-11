@@ -263,7 +263,6 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.WrongNumberOfArgumentRange, 2, 3, aLen)
 			}
 
-
 			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.IntegerClass)
 
 			if typeErr != nil {
@@ -1024,7 +1023,6 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 				return arr.Elements[arrLength-1]
 			}
 
-
 			typeErr := t.vm.checkArgTypes(args, sourceLine, classes.IntegerClass)
 
 			if typeErr != nil {
@@ -1032,7 +1030,6 @@ var builtinArrayInstanceMethods = []*BuiltinMethodObject{
 			}
 
 			value := args[0].Value().(int)
-
 
 			if value < 1 {
 				return t.vm.InitErrorObject(errors.ArgumentError, sourceLine, errors.NegativeValue, value)

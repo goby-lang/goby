@@ -193,8 +193,8 @@ func (g *Generator) compileDefStmt(is *InstructionSet, stmt *ast.DefStatement, s
 
 	// compile method definition's content
 	newIS := &InstructionSet{
-		name:   stmt.Name.Value,
-		isType: MethodDef,
+		name:     stmt.Name.Value,
+		isType:   MethodDef,
 		argTypes: initArgSet(len(stmt.Parameters)),
 	}
 
