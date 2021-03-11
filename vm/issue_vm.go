@@ -28,7 +28,7 @@ func PrintError(v *VM) {
 	if !ok {
 		fmt.Println("No error detected")
 	}
-	fmt.Printf("# %s\n", err.Type)
+	fmt.Printf("# %s\n", err.Class().Name)
 	fmt.Println(err.Message())
 
 	fmt.Printf("### Goby version\n%s\n", Version)
