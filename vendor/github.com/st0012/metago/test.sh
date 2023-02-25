@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
-SLEEP=0.5
-
 set -e
+
 echo "" > coverage.txt
 
 for d in $(go list ./... | grep -v vendor); do

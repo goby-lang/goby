@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/st0012/metago.svg?branch=master)](https://travis-ci.org/st0012/metago)
 [![codecov](https://codecov.io/gh/st0012/metago/branch/master/graph/badge.svg)](https://codecov.io/gh/st0012/metago)
+[![GoDoc](https://godoc.org/github.com/st0012/metago?status.svg)](https://godoc.org/github.com/st0012/metago)
 
 `metago` is trying to provide Ruby-like meta-programming features to Go. Mostly just for fun.
 

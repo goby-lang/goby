@@ -2,6 +2,7 @@ package sqlx
 
 import (
 	"bytes"
+	"database/sql/driver"
 	"errors"
 	"reflect"
 	"strconv"
@@ -16,19 +17,22 @@ const (
 	QUESTION
 	DOLLAR
 	NAMED
+	AT
 )
 
 // BindType returns the bindtype for a given database given a drivername.
 func BindType(driverName string) int {
 	switch driverName {
-	case "postgres", "pgx":
+	case "postgres", "pgx", "pq-timeouts", "cloudsqlpostgres":
 		return DOLLAR
 	case "mysql":
 		return QUESTION
 	case "sqlite3":
 		return QUESTION
-	case "oci8":
+	case "oci8", "ora", "goracle":
 		return NAMED
+	case "sqlserver":
+		return AT
 	}
 	return UNKNOWN
 }
@@ -43,27 +47,30 @@ func Rebind(bindType int, query string) string {
 		return query
 	}
 
-	qb := []byte(query)
 	// Add space enough for 10 params before we have to allocate
-	rqb := make([]byte, 0, len(qb)+10)
-	j := 1
-	for _, b := range qb {
-		if b == '?' {
-			switch bindType {
-			case DOLLAR:
-				rqb = append(rqb, '$')
-			case NAMED:
-				rqb = append(rqb, ':', 'a', 'r', 'g')
-			}
-			for _, b := range strconv.Itoa(j) {
-				rqb = append(rqb, byte(b))
-			}
-			j++
-		} else {
-			rqb = append(rqb, b)
+	rqb := make([]byte, 0, len(query)+10)
+
+	var i, j int
+
+	for i = strings.Index(query, "?"); i != -1; i = strings.Index(query, "?") {
+		rqb = append(rqb, query[:i]...)
+
+		switch bindType {
+		case DOLLAR:
+			rqb = append(rqb, '$')
+		case NAMED:
+			rqb = append(rqb, ':', 'a', 'r', 'g')
+		case AT:
+			rqb = append(rqb, '@', 'p')
 		}
+
+		j++
+		rqb = strconv.AppendInt(rqb, int64(j), 10)
+
+		query = query[i+1:]
 	}
-	return string(rqb)
+
+	return string(append(rqb, query...))
 }
 
 // Experimental implementation of Rebind which uses a bytes.Buffer.  The code is
@@ -109,10 +116,14 @@ func In(query string, args ...interface{}) (string, []interface{}, error) {
 	meta := make([]argMeta, len(args))
 
 	for i, arg := range args {
+		if a, ok := arg.(driver.Valuer); ok {
+			arg, _ = a.Value()
+		}
 		v := reflect.ValueOf(arg)
 		t := reflectx.Deref(v.Type())
 
-		if t.Kind() == reflect.Slice {
+		// []byte is a driver.Value type so it should not be expanded
+		if t.Kind() == reflect.Slice && t != reflect.TypeOf([]byte{}) {
 			meta[i].length = v.Len()
 			meta[i].v = v
 
@@ -135,9 +146,9 @@ func In(query string, args ...interface{}) (string, []interface{}, error) {
 	}
 
 	newArgs := make([]interface{}, 0, flatArgsCount)
+	buf := make([]byte, 0, len(query)+len(", ?")*flatArgsCount)
 
 	var arg, offset int
-	var buf bytes.Buffer
 
 	for i := strings.IndexByte(query[offset:], '?'); i != -1; i = strings.IndexByte(query[offset:], '?') {
 		if arg >= len(meta) {
@@ -161,14 +172,13 @@ func In(query string, args ...interface{}) (string, []interface{}, error) {
 		}
 
 		// write everything up to and including our ? character
-		buf.WriteString(query[:offset+i+1])
-
-		newArgs = append(newArgs, argMeta.v.Index(0).Interface())
+		buf = append(buf, query[:offset+i+1]...)
 
 		for si := 1; si < argMeta.length; si++ {
-			buf.WriteString(", ?")
-			newArgs = append(newArgs, argMeta.v.Index(si).Interface())
+			buf = append(buf, ", ?"...)
 		}
+
+		newArgs = appendReflectSlice(newArgs, argMeta.v, argMeta.length)
 
 		// slice the query and reset the offset. this avoids some bookkeeping for
 		// the write after the loop
@@ -176,11 +186,32 @@ func In(query string, args ...interface{}) (string, []interface{}, error) {
 		offset = 0
 	}
 
-	buf.WriteString(query)
+	buf = append(buf, query...)
 
 	if arg < len(meta) {
 		return "", nil, errors.New("number of bindVars less than number arguments")
 	}
 
-	return buf.String(), newArgs, nil
+	return string(buf), newArgs, nil
+}
+
+func appendReflectSlice(args []interface{}, v reflect.Value, vlen int) []interface{} {
+	switch val := v.Interface().(type) {
+	case []interface{}:
+		args = append(args, val...)
+	case []int:
+		for i := range val {
+			args = append(args, val[i])
+		}
+	case []string:
+		for i := range val {
+			args = append(args, val[i])
+		}
+	default:
+		for si := 0; si < vlen; si++ {
+			args = append(args, v.Index(si).Interface())
+		}
+	}
+
+	return args
 }
