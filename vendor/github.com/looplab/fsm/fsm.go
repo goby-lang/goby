@@ -212,12 +212,35 @@ func (f *FSM) Is(state string) bool {
 	return state == f.current
 }
 
+// SetState allows the user to move to the given state from current state.
+// The call does not trigger any callbacks, if defined.
+func (f *FSM) SetState(state string) {
+	f.stateMu.Lock()
+	defer f.stateMu.Unlock()
+	f.current = state
+	return
+}
+
 // Can returns true if event can occur in the current state.
 func (f *FSM) Can(event string) bool {
 	f.stateMu.RLock()
 	defer f.stateMu.RUnlock()
 	_, ok := f.transitions[eKey{event, f.current}]
 	return ok && (f.transition == nil)
+}
+
+// AvailableTransitions returns a list of transitions avilable in the
+// current state.
+func (f *FSM) AvailableTransitions() []string {
+	f.stateMu.RLock()
+	defer f.stateMu.RUnlock()
+	var transitions []string
+	for key := range f.transitions {
+		if key.src == f.current {
+			transitions = append(transitions, key.event)
+		}
+	}
+	return transitions
 }
 
 // Cannot returns true if event can not occure in the current state.

@@ -1,8 +1,7 @@
-[![wercker status](https://app.wercker.com/status/517d98fe7a8da9bf9a6060e7906c0d17/s "wercker status")](https://app.wercker.com/project/bykey/517d98fe7a8da9bf9a6060e7906c0d17)
+[![Build Status](https://travis-ci.com/looplab/fsm.svg?branch=master)](https://travis-ci.com/looplab/fsm)
 [![Coverage Status](https://img.shields.io/coveralls/looplab/fsm.svg)](https://coveralls.io/r/looplab/fsm)
 [![GoDoc](https://godoc.org/github.com/looplab/fsm?status.svg)](https://godoc.org/github.com/looplab/fsm)
 [![Go Report Card](https://goreportcard.com/badge/looplab/fsm)](https://goreportcard.com/report/looplab/fsm)
-
 
 # FSM for Go
 
@@ -15,7 +14,6 @@ It is heavily based on two FSM implementations:
 - Fysom for Python, https://github.com/oxplot/fysom (forked at https://github.com/mriehl/fysom)
 
 For API docs and examples see http://godoc.org/github.com/looplab/fsm
-
 
 # Basic Example
 
@@ -56,7 +54,6 @@ func main() {
     fmt.Println(fsm.Current())
 }
 ```
-
 
 # Usage as a struct field
 
@@ -112,7 +109,6 @@ func main() {
     }
 }
 ```
-
 
 # License
 
